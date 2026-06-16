@@ -1,52 +1,16 @@
 {
   "active_task": {
-    "id": "20260616-1743-69o-promotion-rollback-execution",
-    "title": "69O Promotion Rollback Execution"
+    "id": "20260616-2328-69p-execution-chain-traceability-and-status-layer",
+    "title": "69P Execution Chain Traceability and Status Layer"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69O Promotion Rollback Execution",
+  "current_objective": "69P Execution Chain Traceability and Status Layer",
   "git": {
     "branch": "main",
     "changed_files": [
       {
-        "path": ".pcae/strategic-lineage.json",
-        "status": " M"
-      },
-      {
         "path": "CHANGELOG.md",
-        "status": " M"
-      },
-      {
-        "path": "PROJECT_STATUS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/CAPABILITY_INVENTORY.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/COMMANDS.md",
-        "status": " M"
-      },
-      {
-        "path": "docs/ROADMAP_REGISTRY.md",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/cli.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/commands/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/agent.py",
-        "status": " M"
-      },
-      {
-        "path": "src/pcae/core/docs.py",
         "status": " M"
       },
       {
@@ -54,30 +18,22 @@
         "status": " M"
       },
       {
-        "path": "tasks/active/20260616-1501-69n-write-promotion-execution-design.md",
+        "path": "tasks/active/20260616-1743-69o-promotion-rollback-execution.md",
         "status": " D"
       },
       {
-        "path": "tests/test_agent.py",
-        "status": " M"
-      },
-      {
-        "path": "tests/test_strategic_lineage.py",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260616-1743-69o-promotion-rollback-execution.md",
+        "path": "tasks/active/20260616-2328-69p-execution-chain-traceability-and-status-layer.md",
         "status": "??"
       },
       {
-        "path": "tasks/done/20260616-1501-69n-write-promotion-execution-design.md",
+        "path": "tasks/done/20260616-1743-69o-promotion-rollback-execution.md",
         "status": "??"
       }
     ],
-    "status_summary": "16 changed files"
+    "status_summary": "5 changed files"
   },
-  "last_completed_step": "Completed task 20260616-1501-69n-write-promotion-execution-design: 69N Write Promotion Execution Design",
-  "next_recommended_step": "Continue active task 20260616-1743-69o-promotion-rollback-execution.",
-  "timestamp": "2026-06-16T15:43:16.134764+00:00",
+  "last_completed_step": "Completed task 20260616-1743-69o-promotion-rollback-execution: 69O Promotion Rollback Execution",
+  "next_recommended_step": "Continue active task 20260616-2328-69p-execution-chain-traceability-and-status-layer.",
+  "timestamp": "2026-06-16T21:28:03.905532+00:00",
   "warnings": []
 }

@@ -39,6 +39,7 @@ ACTIVATION_TIMESTAMP_69L = "2026-06-15T19:13:00+00:00"
 ACTIVATION_TIMESTAMP_69M = "2026-06-16T13:35:00+00:00"
 ACTIVATION_TIMESTAMP_69N = "2026-06-16T15:01:00+00:00"
 ACTIVATION_TIMESTAMP_69O = "2026-06-16T16:30:00+00:00"
+ACTIVATION_TIMESTAMP_69P = "2026-06-16T23:28:00+00:00"
 
 
 def _valid_record() -> dict:
@@ -960,6 +961,43 @@ def _valid_69o_record() -> dict:
     }
 
 
+
+def _valid_69p_record() -> dict:
+    return {
+        "lineage_id": "SLR-69P-TEST",
+        "lineage_timestamp": ACTIVATION_TIMESTAMP_69P,
+        "lineage_status": "approved",
+        "decided_by": "human-user",
+        "decision_basis": "roadmap_gap",
+        "source_phase_id": "69O",
+        "predecessor_phase_id": "69O",
+        "activated_phase_id": "69P",
+        "selected_branch_id": "BR-005",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "rationale": (
+            "Implements Execution Chain Traceability and Status Layer: read-only aggregation "
+            "of the full APA->ARA->EAR->ERR->ERRA->ECP->EPR->PER->RER chain by prompt_id; "
+            "`exec status` computes chain_status spanning no_record through rolled_back; "
+            "`doctor execution-chain` detects dangling references and interrupted/partial states; "
+            "no artifact created, modified, or deleted; SLR-69P-001 documents the accepted scope."
+        ),
+        "review_ids": ["SRR-66B-001"],
+        "finding_snapshot_hash": strategic_review_snapshot_hash(["SRR-66B-001"]),
+        "recommendation": "approve",
+        "considered_alternatives": [],
+        "rejected_alternatives": [],
+        "deferred_alternatives": [],
+        "roadmap_debt": [
+            "SLR-69P-001: exec status and doctor execution-chain are read-only; no mutation allowed",
+        ],
+        "supersedes_lineage_id": "SLR-69O-TEST",
+        "human_approved": True,
+        "execution_allowed": False,
+        "activation_event_id": ACTIVATION_TIMESTAMP_69P,
+        "activation_validation_status": "validated",
+    }
+
+
 def _post_65i_records() -> list[dict]:
     return [
         _valid_66c_record(),
@@ -987,6 +1025,7 @@ def _post_65i_records() -> list[dict]:
         _valid_69m_record(),
         _valid_69n_record(),
         _valid_69o_record(),
+        _valid_69p_record(),
     ]
 
 
@@ -1202,6 +1241,14 @@ def _provenance_events(include_65i: bool = True) -> list[dict]:
             "summary": "Human-approved activation of Phase 69O",
             "timestamp": ACTIVATION_TIMESTAMP_69O,
         },
+        {
+            "active_task": None,
+            "agent_id": "claude-local",
+            "event_type": "phase_activated",
+            "git_branch": "main",
+            "summary": "Human-approved activation of Phase 69P",
+            "timestamp": ACTIVATION_TIMESTAMP_69P,
+        },
     ])
     return events
 
@@ -1237,7 +1284,7 @@ def test_65j_valid_lineage_passes_with_provenance(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69O-TEST"
+    assert result.current_lineage_id == "SLR-69P-TEST"
 
 
 def test_65j_historical_approved_lineage_can_be_superseded_by_reference(
@@ -1272,7 +1319,7 @@ def test_65j_current_approved_lineage_must_match_live_branch_phase(
     _write_registry(tmp_path, records)
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert any(
-        "SLR-69O-TEST: activated phase does not match branch current_phase." == error
+        "SLR-69P-TEST: activated phase does not match branch current_phase." == error
         for error in result.errors
     )
 
@@ -1373,7 +1420,7 @@ def test_65j_explicit_65i_migration_exemption_passes(tmp_path: Path) -> None:
     )
     result = validate_strategic_lineage(HarnessPath(tmp_path))
     assert result.valid is True
-    assert result.current_lineage_id == "SLR-69O-TEST"
+    assert result.current_lineage_id == "SLR-69P-TEST"
 
 
 def test_65j_migration_exemption_cannot_claim_provenance_event(
@@ -1428,9 +1475,9 @@ def test_65j_continuity_commands_are_read_only(
     }
     monkeypatch.chdir(tmp_path)
     assert main(["strategic-continuity", "show", "current", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69O-TEST"
+    assert json.loads(capsys.readouterr().out)["current"]["lineage_id"] == "SLR-69P-TEST"
     assert main(["strategic-continuity", "history", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out)["record_count"] == 26
+    assert json.loads(capsys.readouterr().out)["record_count"] == 27
     assert main(["strategic-continuity", "validate", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["valid"] is True
     after = {

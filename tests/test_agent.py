@@ -47523,7 +47523,7 @@ def test_roadmap_intelligence_current_phase_active(tmp_path, monkeypatch) -> Non
     from pcae.core.paths import HarnessPath
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -47622,7 +47622,7 @@ def test_roadmap_intelligence_roadmap_current_json(tmp_path, monkeypatch, capsys
     main(["roadmap", "current", "--json"])
     data = json.loads(capsys.readouterr().out)
     assert "current_phase" in data
-    assert data["current_phase"]["phase_id"] == "69O"
+    assert data["current_phase"]["phase_id"] == "69P"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47737,7 +47737,7 @@ def test_roadmap_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> 
     from pcae.core.paths import HarnessPath
     data = build_roadmap_recommendation_hardening(HarnessPath.cwd())
     assert data["current_phase"] is not None
-    assert data["current_phase"]["phase_id"] == "69O"
+    assert data["current_phase"]["phase_id"] == "69P"
     assert data["current_phase"]["status"] == "active"
 
 
@@ -47858,7 +47858,7 @@ def test_roadmap_recommendation_command_json(tmp_path, monkeypatch, capsys) -> N
     assert "recommendations" in data
     assert "assessment" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69O"
+    assert data["current_phase"]["phase_id"] == "69P"
 
 
 def test_roadmap_next_hardened_uses_registry(tmp_path, monkeypatch, capsys) -> None:
@@ -47876,7 +47876,7 @@ def test_roadmap_next_hardened_json(tmp_path, monkeypatch, capsys) -> None:
     assert "current_phase" in data
     assert "current_track" in data
     assert data["current_track"] == "execution_governance_activation"
-    assert data["current_phase"]["phase_id"] == "69O"
+    assert data["current_phase"]["phase_id"] == "69P"
     assert "41C" not in data.get("recommended_phase", "")
 
 
@@ -47971,7 +47971,7 @@ def test_prompt_recommendation_current_phase_is_64b4(tmp_path, monkeypatch) -> N
     from pcae.core.paths import HarnessPath
 
     data = build_prompt_recommendation_hardening(HarnessPath.cwd())
-    assert data["current_phase"]["phase_id"] == "69O"
+    assert data["current_phase"]["phase_id"] == "69P"
     assert data["current_track"] == "execution_governance_activation"
 
 
@@ -48866,7 +48866,7 @@ def test_prompt_rendering_skill_64b6a_active_in_roadmap(tmp_path, monkeypatch) -
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -49082,7 +49082,7 @@ def test_64b_6b_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
     phase_64b6a = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6A"), None)
     assert phase_64b6a is not None
@@ -49313,7 +49313,7 @@ def test_64b_6c_active_in_roadmap(tmp_path, monkeypatch) -> None:
 
     data = build_capability_roadmap_intelligence(HarnessPath.cwd())
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
     phase_64b6b = next((r for r in data["roadmap_registry"] if r["phase_id"] == "64B.6B"), None)
     assert phase_64b6b is not None
@@ -50053,7 +50053,7 @@ def test_64c_1_64f_active_in_roadmap(tmp_path, monkeypatch) -> None:
     assert phase_64g["track_name"] == "capability_intelligence"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -50146,7 +50146,7 @@ def test_64c_1_roadmap_current_shows_64e(tmp_path, monkeypatch, capsys) -> None:
     rc = main(["roadmap", "current"])
     assert rc == 0
     output = capsys.readouterr().out
-    assert "69N" in output
+    assert "69P" in output
 
 
 def test_64c_1_roadmap_next_shows_64d(tmp_path, monkeypatch, capsys) -> None:
@@ -51299,7 +51299,7 @@ def test_64g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["track_name"] == "strategic_governance"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -51575,7 +51575,7 @@ def test_65a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65a["successor"] == "65B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -51640,7 +51640,7 @@ def test_65b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65b["successor"] == "65C"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -51978,7 +51978,7 @@ def test_65c_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65c["successor"] == "65D"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -52413,7 +52413,7 @@ def test_65d_phase_registered_as_active(tmp_path, monkeypatch) -> None:
     assert phase_65d["successor"] == "65E"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -52758,7 +52758,7 @@ def test_65e_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65e["successor"] == "65F"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -53061,7 +53061,7 @@ def test_65f_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65f["successor"] == "65G"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -53334,7 +53334,7 @@ def test_65g_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65g["successor"] == "65H"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -53657,7 +53657,7 @@ def test_65h_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_65h["successor"] == "65I"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -54060,7 +54060,7 @@ def test_66a_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66a["successor"] == "66B"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -54387,7 +54387,7 @@ def test_66b_phase_registered_as_completed(tmp_path, monkeypatch) -> None:
     assert phase_66b["predecessor"] == "66A"
 
     current = data["current_phase"]
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
 
 
@@ -54590,7 +54590,7 @@ def test_66b_state_drift_lists_active_phase_change(tmp_path) -> None:
     active_drift = [d for d in drift if d.startswith("active:")]
     assert len(active_drift) == 1
     assert "66A" in active_drift[0]
-    assert "69O" in active_drift[0]
+    assert "69P" in active_drift[0]
 
 
 def test_66b_current_assessment_structure(tmp_path) -> None:
@@ -54710,7 +54710,7 @@ def test_65j_is_implemented_without_roadmap_activation(tmp_path, monkeypatch) ->
     assert phase_65i["successor"] == "65J"
     assert phase_65j["status"] == "completed"
     assert phase_65j["predecessor"] == "65I"
-    assert data["current_phase"]["phase_id"] == "69O"
+    assert data["current_phase"]["phase_id"] == "69P"
     assert branch["current_phase"] == "65J"
 
 
@@ -56683,7 +56683,7 @@ def test_68a_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -56943,7 +56943,7 @@ def test_68b_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -57255,7 +57255,7 @@ def test_68d_roadmap_registered_as_active(tmp_path, monkeypatch) -> None:
     data = build_capability_roadmap_intelligence()
     current = data["current_phase"]
     assert current is not None
-    assert current["phase_id"] == "69O"
+    assert current["phase_id"] == "69P"
     assert current["status"] == "active"
     assert current["track_name"] == "execution_governance_activation"
 
@@ -59697,7 +59697,7 @@ def test_69g_current_phase_in_roadmap(tmp_path, monkeypatch) -> None:
     from pcae.core.paths import HarnessPath
 
     data = build_capability_roadmap_intelligence(HarnessPath(tmp_path))
-    assert data["current_phase"]["phase_id"] == "69O"
+    assert data["current_phase"]["phase_id"] == "69P"
 
 
 # ── Phase 69H: Execution Result Governance ───────────────────────────────────
@@ -61392,8 +61392,8 @@ def test_69k_69j_is_completed_in_roadmap(tmp_path) -> None:
 
 def test_69k_map_count_is_67(tmp_path) -> None:
     from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
-    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 71, (
-        f"Expected 71 map entries after 69O, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
+    assert len(_SRG_CAPABILITY_OBJECTIVE_MAP) == 72, (
+        f"Expected 72 map entries after 69P, got {len(_SRG_CAPABILITY_OBJECTIVE_MAP)}"
     )
     entry = next(
         (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "automatic_snapshot_integration"),
@@ -62289,7 +62289,7 @@ def test_69m_in_capability_map(tmp_path) -> None:
 def test_69m_branch_registry_current_phase(tmp_path) -> None:
     from pcae.core.agent import _SRG_BRANCH_REGISTRY
     branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
-    assert branch["current_phase"] == "69O"
+    assert branch["current_phase"] == "69P"
 
 
 def test_69m_prompt_profiles_recommended(tmp_path) -> None:
@@ -63126,7 +63126,7 @@ def test_69n_in_capability_map(tmp_path) -> None:
 def test_69n_branch_registry_current_phase(tmp_path) -> None:
     from pcae.core.agent import _SRG_BRANCH_REGISTRY
     branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
-    assert branch["current_phase"] == "69O"
+    assert branch["current_phase"] == "69P"
 
 
 def test_69n_prompt_profiles_recommended(tmp_path) -> None:
@@ -64095,7 +64095,7 @@ def test_69o_phase_registered_in_roadmap(tmp_path) -> None:
     from pcae.core.agent import _CRI_KNOWN_PHASES
     phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69O"), None)
     assert phase is not None, "69O must be registered in _CRI_KNOWN_PHASES"
-    assert phase["status"] == "active"
+    assert phase["status"] == "completed"
     assert phase["predecessor"] == "69N"
     assert phase["track_name"] == "execution_governance_activation"
 
@@ -64141,14 +64141,14 @@ def test_69o_in_capability_map(tmp_path) -> None:
 def test_69o_branch_registry_current_phase(tmp_path) -> None:
     from pcae.core.agent import _SRG_BRANCH_REGISTRY
     branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
-    assert branch["current_phase"] == "69O"
+    assert branch["current_phase"] == "69P"
 
 
 def test_69o_prompt_profiles_recommended(tmp_path) -> None:
     from pcae.core.agent import _PRH_PROMPT_PROFILES
     profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69O"]
     assert len(profiles) == 3
-    assert all(p["prompt_status"] == "recommended" for p in profiles)
+    assert all(p["prompt_status"] == "historical" for p in profiles)
 
 
 def test_69o_69n_prompt_profiles_historical(tmp_path) -> None:
@@ -64958,3 +64958,712 @@ def test_69o_ten_slr_entries_present(tmp_path) -> None:
     assert len(debt) == 10, f"SLR-69O-001 must have 10 roadmap_debt entries, got {len(debt)}"
     for i in range(1, 11):
         assert any(f"SLR-69O-{i:03d}" in d for d in debt), f"SLR-69O-{i:03d} missing from roadmap_debt"
+
+
+# ===========================================================================
+# Phase 69P — Execution Chain Traceability and Status Layer
+# ===========================================================================
+
+# --- Registry registration --------------------------------------------------
+
+def test_69p_phase_registered_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69P"), None)
+    assert phase is not None, "69P must be registered in _CRI_KNOWN_PHASES"
+    assert phase["status"] == "active"
+    assert phase["predecessor"] == "69O"
+    assert phase["track_name"] == "execution_governance_activation"
+
+
+def test_69p_69o_is_completed_in_roadmap(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_PHASES
+    phase = next((p for p in _CRI_KNOWN_PHASES if p["phase_id"] == "69O"), None)
+    assert phase is not None
+    assert phase["status"] == "completed"
+    assert phase["successor"] == "69P"
+
+
+def test_69p_capability_registered_in_ci(tmp_path) -> None:
+    from pcae.core.agent import _CI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69P"), None,
+    )
+    assert cap is not None, "69P capability must be in _CI_KNOWN_CAPABILITIES"
+    assert cap["capability_name"] == "Execution Chain Traceability and Status Layer"
+    assert cap["capability_domain"] == "execution_governance"
+
+
+def test_69p_capability_registered_in_cri(tmp_path) -> None:
+    from pcae.core.agent import _CRI_KNOWN_CAPABILITIES
+    cap = next(
+        (c for c in _CRI_KNOWN_CAPABILITIES if c.get("implemented_phase") == "69P"), None,
+    )
+    assert cap is not None, "69P capability must be in _CRI_KNOWN_CAPABILITIES"
+    assert "SLR-69P-001" in cap["contribution"]
+
+
+def test_69p_in_capability_map(tmp_path) -> None:
+    from pcae.core.agent import _SRG_CAPABILITY_OBJECTIVE_MAP
+    entry = next(
+        (e for e in _SRG_CAPABILITY_OBJECTIVE_MAP if e["capability_id"] == "execution_chain_traceability_and_status_layer"),
+        None,
+    )
+    assert entry is not None
+    assert "OBJ-002" in entry["objective_ids"]
+    assert "OBJ-003" in entry["objective_ids"]
+
+
+def test_69p_branch_registry_current_phase(tmp_path) -> None:
+    from pcae.core.agent import _SRG_BRANCH_REGISTRY
+    branch = next(b for b in _SRG_BRANCH_REGISTRY if b["branch_id"] == "BR-005")
+    assert branch["current_phase"] == "69P"
+
+
+def test_69p_prompt_profiles_recommended(tmp_path) -> None:
+    from pcae.core.agent import _PRH_PROMPT_PROFILES
+    profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69P"]
+    assert len(profiles) == 3
+    assert all(p["prompt_status"] == "recommended" for p in profiles)
+
+
+def test_69p_69o_prompt_profiles_historical(tmp_path) -> None:
+    from pcae.core.agent import _PRH_PROMPT_PROFILES
+    profiles = [p for p in _PRH_PROMPT_PROFILES if p["phase_id"] == "69O"]
+    assert len(profiles) == 3
+    assert all(p["prompt_status"] == "historical" for p in profiles)
+
+
+# --- Governance boundaries --------------------------------------------------
+
+def test_69p_governance_boundaries_complete(tmp_path) -> None:
+    from pcae.core.agent import _ECT_GOVERNANCE_BOUNDARIES
+    required = [
+        "execution_allowed", "root_mutation_allowed", "approval_allowed",
+        "authorization_allowed", "promotion_allowed", "rollback_allowed",
+        "git_commit_forbidden", "git_push_forbidden",
+        "artifact_creation_allowed", "artifact_deletion_allowed",
+        "artifact_mutation_allowed", "status_aggregation_is_read_only",
+        "doctor_findings_are_advisory_only", "no_caching_of_store_contents",
+    ]
+    for key in required:
+        assert key in _ECT_GOVERNANCE_BOUNDARIES, f"missing boundary: {key}"
+    assert _ECT_GOVERNANCE_BOUNDARIES["execution_allowed"] is False
+    assert _ECT_GOVERNANCE_BOUNDARIES["root_mutation_allowed"] is False
+    assert _ECT_GOVERNANCE_BOUNDARIES["artifact_creation_allowed"] is False
+    assert _ECT_GOVERNANCE_BOUNDARIES["status_aggregation_is_read_only"] is True
+    assert _ECT_GOVERNANCE_BOUNDARIES["doctor_findings_are_advisory_only"] is True
+    assert _ECT_GOVERNANCE_BOUNDARIES["no_caching_of_store_contents"] is True
+
+
+def test_69p_advisories_present(tmp_path) -> None:
+    from pcae.core.agent import EXECUTION_CHAIN_STATUS_ADVISORY, EXECUTION_CHAIN_DOCTOR_ADVISORY
+    assert "read-only" in EXECUTION_CHAIN_STATUS_ADVISORY
+    assert "execution_allowed=False" in EXECUTION_CHAIN_STATUS_ADVISORY
+    assert "read-only" in EXECUTION_CHAIN_DOCTOR_ADVISORY
+    assert "execution_allowed=False" in EXECUTION_CHAIN_DOCTOR_ADVISORY
+    assert "advisory only" in EXECUTION_CHAIN_DOCTOR_ADVISORY
+
+
+# --- list_* prompt_id filter ------------------------------------------------
+
+def test_69p_list_promotion_reviews_prompt_id_filter(tmp_path) -> None:
+    import json
+    from pcae.core.agent import list_promotion_reviews
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    store = root_dir / ".pcae" / "promotion-reviews"
+    store.mkdir(parents=True)
+    for pid, eid in [("pA", "epr-pA"), ("pB", "epr-pB")]:
+        rec = {"epr_id": eid, "ecp_id": f"ecp-{pid}", "prompt_id": pid,
+               "created_at": "2026-01-01T00:00:00+00:00", "review_state": "approved"}
+        (store / f"{eid}-20260101T000000.json").write_text(json.dumps(rec))
+    root = HarnessPath(root_dir)
+    results = list_promotion_reviews(root, prompt_id="pA")
+    assert len(results) == 1
+    assert results[0]["prompt_id"] == "pA"
+    all_results = list_promotion_reviews(root)
+    assert len(all_results) == 2
+
+
+def test_69p_list_promotion_execution_records_prompt_id_filter(tmp_path) -> None:
+    import json
+    from pcae.core.agent import list_promotion_execution_records
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    store = root_dir / ".pcae" / "promotion-executions"
+    store.mkdir(parents=True)
+    for pid, per_id in [("pA", "per-pA"), ("pB", "per-pB")]:
+        rec = {"per_id": per_id, "epr_id": f"epr-{pid}", "ecp_id": f"ecp-{pid}",
+               "prompt_id": pid, "started_at": "2026-01-01T00:00:00+00:00",
+               "status": "completed", "rollback_executed": False, "execution_allowed": False,
+               "file_results": []}
+        (store / f"{per_id}.json").write_text(json.dumps(rec))
+    root = HarnessPath(root_dir)
+    results = list_promotion_execution_records(root, prompt_id="pA")
+    assert len(results) == 1
+    assert results[0]["prompt_id"] == "pA"
+    all_results = list_promotion_execution_records(root)
+    assert len(all_results) == 2
+
+
+def test_69p_list_rollback_execution_records_prompt_id_filter(tmp_path) -> None:
+    import json
+    from pcae.core.agent import list_rollback_execution_records
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    store = root_dir / ".pcae" / "rollback-executions"
+    store.mkdir(parents=True)
+    for pid, rer_id in [("pA", "rer-pA"), ("pB", "rer-pB")]:
+        rec = {"rer_id": rer_id, "per_id": f"per-{pid}", "ecp_id": f"ecp-{pid}",
+               "prompt_id": pid, "started_at": "2026-01-01T00:00:00+00:00",
+               "status": "completed", "execution_allowed": False, "file_results": []}
+        (store / f"{rer_id}.json").write_text(json.dumps(rec))
+    root = HarnessPath(root_dir)
+    results = list_rollback_execution_records(root, prompt_id="pA")
+    assert len(results) == 1
+    assert results[0]["prompt_id"] == "pA"
+
+
+# --- list_approved_prompt_artifacts / list_authorization_artifacts ----------
+
+def test_69p_list_approved_prompt_artifacts_empty(tmp_path) -> None:
+    from pcae.core.agent import list_approved_prompt_artifacts
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    assert list_approved_prompt_artifacts(root) == []
+
+
+def test_69p_list_approved_prompt_artifacts_reads_store(tmp_path) -> None:
+    import json
+    from pcae.core.agent import list_approved_prompt_artifacts, store_approved_prompt_artifact
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    artifact = {
+        "prompt_id": "pid-001",
+        "approval_state": "approved",
+        "approved_by": "human",
+        "approved_at": "2026-01-01T00:00:00+00:00",
+        "approved_agents": ["claude-local"],
+        "validation_snapshot": {"s": 1},
+        "governance_snapshot": {"g": 1},
+    }
+    store_approved_prompt_artifact(root, artifact)
+    records = list_approved_prompt_artifacts(root)
+    assert len(records) == 1
+    assert records[0]["prompt_id"] == "pid-001"
+
+
+def test_69p_list_authorization_artifacts_empty(tmp_path) -> None:
+    from pcae.core.agent import list_authorization_artifacts
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    assert list_authorization_artifacts(root) == []
+
+
+def test_69p_list_authorization_artifacts_reads_store(tmp_path) -> None:
+    import json
+    from pcae.core.agent import list_authorization_artifacts, store_authorization_artifact
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    artifact = {
+        "authorization_id": "auth-001",
+        "authorization_state": "authorized",
+        "prompt_id": "pid-001",
+        "selected_agents": ["claude-local"],
+        "authorized_by": "human",
+        "authorized_at": "2026-01-01T00:00:00+00:00",
+        "pathway_id": "pathway-001",
+        "gate_snapshot": [{"gate_id": "g1", "status": "satisfied"}],
+        "execution_allowed": False,
+    }
+    store_authorization_artifact(root, artifact)
+    records = list_authorization_artifacts(root)
+    assert len(records) == 1
+    assert records[0]["prompt_id"] == "pid-001"
+
+
+# --- build_execution_chain_status -------------------------------------------
+
+def test_69p_chain_status_no_record(tmp_path) -> None:
+    from pcae.core.agent import build_execution_chain_status
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    result = build_execution_chain_status(HarnessPath(root_dir), "pid-none")
+    assert result["chain_status"] == "no_record"
+    assert result["approval"] is None
+    assert result["authorization"] is None
+    assert result["execution_allowed"] is False
+    assert result["counts"]["audit_records"] == 0
+
+
+def test_69p_chain_status_approved_only(tmp_path) -> None:
+    from pcae.core.agent import build_execution_chain_status, store_approved_prompt_artifact
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    artifact = {
+        "prompt_id": "pid-001",
+        "approval_state": "approved",
+        "approved_by": "human",
+        "approved_at": "2026-01-01T00:00:00+00:00",
+        "approved_agents": ["claude-local"],
+        "validation_snapshot": {"s": 1},
+        "governance_snapshot": {"g": 1},
+    }
+    store_approved_prompt_artifact(root, artifact)
+    result = build_execution_chain_status(root, "pid-001")
+    assert result["chain_status"] == "approved_only"
+    assert result["approval"] is not None
+    assert result["authorization"] is None
+
+
+def test_69p_chain_status_promoted(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_status
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    pid = "pid-promoted"
+    per_store = root_dir / ".pcae" / "promotion-executions"
+    per_store.mkdir(parents=True)
+    per_rec = {
+        "per_id": "per-001", "epr_id": "epr-001", "ecp_id": "ecp-001",
+        "prompt_id": pid, "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "completed", "rollback_executed": False, "execution_allowed": False,
+        "file_results": [],
+    }
+    (per_store / "per-001.json").write_text(json.dumps(per_rec))
+    result = build_execution_chain_status(root, pid)
+    assert result["chain_status"] == "promoted"
+    assert result["counts"]["promotion_executions"] == 1
+
+
+def test_69p_chain_status_rolled_back(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_status
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    pid = "pid-rolled-back"
+    rer_store = root_dir / ".pcae" / "rollback-executions"
+    rer_store.mkdir(parents=True)
+    rer_rec = {
+        "rer_id": "rer-001", "per_id": "per-001", "ecp_id": "ecp-001",
+        "prompt_id": pid, "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "completed", "execution_allowed": False, "file_results": [],
+    }
+    (rer_store / "rer-001.json").write_text(json.dumps(rer_rec))
+    result = build_execution_chain_status(root, pid)
+    assert result["chain_status"] == "rolled_back"
+
+
+def test_69p_chain_status_partial_promotes_as_promoted(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_status
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    pid = "pid-partial"
+    per_store = root_dir / ".pcae" / "promotion-executions"
+    per_store.mkdir(parents=True)
+    per_rec = {
+        "per_id": "per-partial", "epr_id": "epr-001", "ecp_id": "ecp-001",
+        "prompt_id": pid, "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "partial", "rollback_executed": False, "execution_allowed": False,
+        "file_results": [],
+    }
+    (per_store / "per-partial.json").write_text(json.dumps(per_rec))
+    result = build_execution_chain_status(root, pid)
+    assert result["chain_status"] == "promoted"
+
+
+def test_69p_chain_status_governance_boundaries(tmp_path) -> None:
+    from pcae.core.agent import build_execution_chain_status
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    result = build_execution_chain_status(HarnessPath(root_dir), "any")
+    assert result["execution_allowed"] is False
+    gb = result["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["root_mutation_allowed"] is False
+    assert gb["status_aggregation_is_read_only"] is True
+
+
+def test_69p_chain_status_no_caching(tmp_path) -> None:
+    from pcae.core.agent import build_execution_chain_status, store_approved_prompt_artifact
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    r1 = build_execution_chain_status(root, "pid-001")
+    assert r1["chain_status"] == "no_record"
+    artifact = {
+        "prompt_id": "pid-001",
+        "approval_state": "approved",
+        "approved_by": "human",
+        "approved_at": "2026-01-01T00:00:00+00:00",
+        "approved_agents": ["claude-local"],
+        "validation_snapshot": {"s": 1},
+        "governance_snapshot": {"g": 1},
+    }
+    store_approved_prompt_artifact(root, artifact)
+    r2 = build_execution_chain_status(root, "pid-001")
+    assert r2["chain_status"] == "approved_only", "must re-read store on each call (no caching)"
+
+
+# --- build_execution_chain_doctor -------------------------------------------
+
+def test_69p_doctor_ok_empty_stores(tmp_path) -> None:
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    result = build_execution_chain_doctor(HarnessPath(root_dir))
+    assert result["overall_status"] == "ok"
+    assert result["error_count"] == 0
+    assert result["warning_count"] == 0
+    assert result["execution_allowed"] is False
+
+
+def test_69p_doctor_interrupted_per_warning(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    per_store = root_dir / ".pcae" / "promotion-executions"
+    per_store.mkdir(parents=True)
+    per_rec = {
+        "per_id": "per-stuck", "epr_id": "", "ecp_id": "ecp-001",
+        "prompt_id": "pid-001", "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "in_progress", "rollback_executed": False, "execution_allowed": False,
+        "file_results": [],
+    }
+    (per_store / "per-stuck.json").write_text(json.dumps(per_rec))
+    result = build_execution_chain_doctor(root)
+    assert result["overall_status"] == "warning"
+    assert result["warning_count"] >= 1
+    types = [i["issue_type"] for i in result["issues"]]
+    assert "interrupted_per" in types
+
+
+def test_69p_doctor_interrupted_rer_warning(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    rer_store = root_dir / ".pcae" / "rollback-executions"
+    rer_store.mkdir(parents=True)
+    rer_rec = {
+        "rer_id": "rer-stuck", "per_id": "", "ecp_id": "ecp-001",
+        "prompt_id": "pid-001", "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "in_progress", "execution_allowed": False, "file_results": [],
+    }
+    (rer_store / "rer-stuck.json").write_text(json.dumps(rer_rec))
+    result = build_execution_chain_doctor(root)
+    assert result["overall_status"] == "warning"
+    types = [i["issue_type"] for i in result["issues"]]
+    assert "interrupted_rer" in types
+
+
+def test_69p_doctor_partial_per_warning(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    per_store = root_dir / ".pcae" / "promotion-executions"
+    per_store.mkdir(parents=True)
+    per_rec = {
+        "per_id": "per-partial", "epr_id": "", "ecp_id": "ecp-001",
+        "prompt_id": "pid-001", "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "partial", "rollback_executed": False, "execution_allowed": False,
+        "file_results": [],
+    }
+    (per_store / "per-partial.json").write_text(json.dumps(per_rec))
+    result = build_execution_chain_doctor(root)
+    assert result["overall_status"] == "warning"
+    types = [i["issue_type"] for i in result["issues"]]
+    assert "partial_per" in types
+
+
+def test_69p_doctor_dangling_per_epr_error(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    per_store = root_dir / ".pcae" / "promotion-executions"
+    per_store.mkdir(parents=True)
+    per_rec = {
+        "per_id": "per-orphan", "epr_id": "epr-nonexistent", "ecp_id": "ecp-001",
+        "prompt_id": "pid-001", "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "completed", "rollback_executed": False, "execution_allowed": False,
+        "file_results": [],
+    }
+    (per_store / "per-orphan.json").write_text(json.dumps(per_rec))
+    result = build_execution_chain_doctor(root)
+    assert result["overall_status"] == "error"
+    assert result["error_count"] >= 1
+    types = [i["issue_type"] for i in result["issues"]]
+    assert "dangling_per_epr" in types
+
+
+def test_69p_doctor_dangling_rer_per_error(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    rer_store = root_dir / ".pcae" / "rollback-executions"
+    rer_store.mkdir(parents=True)
+    rer_rec = {
+        "rer_id": "rer-orphan", "per_id": "per-nonexistent", "ecp_id": "ecp-001",
+        "prompt_id": "pid-001", "started_at": "2026-01-01T00:00:00+00:00",
+        "status": "completed", "execution_allowed": False, "file_results": [],
+    }
+    (rer_store / "rer-orphan.json").write_text(json.dumps(rer_rec))
+    result = build_execution_chain_doctor(root)
+    assert result["overall_status"] == "error"
+    types = [i["issue_type"] for i in result["issues"]]
+    assert "dangling_rer_per" in types
+
+
+def test_69p_doctor_prompt_id_filter_scopes_scan(tmp_path) -> None:
+    import json
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    root = HarnessPath(root_dir)
+    per_store = root_dir / ".pcae" / "promotion-executions"
+    per_store.mkdir(parents=True)
+    for pid, per_id in [("pA", "per-pA"), ("pB", "per-pB")]:
+        rec = {
+            "per_id": per_id, "epr_id": f"epr-{pid}", "ecp_id": f"ecp-{pid}",
+            "prompt_id": pid, "started_at": "2026-01-01T00:00:00+00:00",
+            "status": "in_progress", "rollback_executed": False, "execution_allowed": False,
+            "file_results": [],
+        }
+        (per_store / f"{per_id}.json").write_text(json.dumps(rec))
+    result_all = build_execution_chain_doctor(root)
+    assert result_all["scanned"]["per_count"] == 2
+    result_filtered = build_execution_chain_doctor(root, prompt_id="pA")
+    assert result_filtered["scanned"]["per_count"] == 1
+    assert result_filtered["scope"] == "prompt_id_filtered"
+
+
+def test_69p_doctor_governance_boundaries(tmp_path) -> None:
+    from pcae.core.agent import build_execution_chain_doctor
+    from pcae.core.paths import HarnessPath
+    root_dir = tmp_path / "root"
+    root_dir.mkdir()
+    result = build_execution_chain_doctor(HarnessPath(root_dir))
+    assert result["execution_allowed"] is False
+    gb = result["governance_boundaries"]
+    assert gb["execution_allowed"] is False
+    assert gb["doctor_findings_are_advisory_only"] is True
+    assert gb["artifact_mutation_allowed"] is False
+
+
+# --- Static guard: 69P commands do not call mutating build functions ---------
+
+def test_69p_static_guard_exec_status_no_mutation(tmp_path) -> None:
+    import ast, pathlib
+    src = (pathlib.Path(__file__).parent.parent / "src" / "pcae" / "commands" / "agent.py").read_text()
+    tree = ast.parse(src)
+    mutating = {
+        "build_promotion_execution", "build_rollback_execution",
+        "store_approved_prompt_artifact", "store_authorization_artifact",
+        "store_execution_audit_record", "store_promotion_execution_record",
+        "store_rollback_execution_record", "mark_promotion_execution_interrupted",
+        "mark_rollback_execution_interrupted", "authorize_execution_candidate",
+    }
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name in (
+            "run_exec_status", "run_doctor_execution_chain",
+            "run_approval_store_show", "run_approval_store_list",
+            "run_authorization_store_show", "run_authorization_store_list",
+        ):
+            for child in ast.walk(node):
+                if isinstance(child, ast.Call):
+                    func = child.func
+                    name = None
+                    if isinstance(func, ast.Name):
+                        name = func.id
+                    elif isinstance(func, ast.Attribute):
+                        name = func.attr
+                    assert name not in mutating, (
+                        f"{node.name} must not call mutating function {name!r}"
+                    )
+
+
+# --- Regression: promote/rollback behavior unchanged -----------------------
+
+def test_69p_regression_build_promotion_execution_signature_unchanged(tmp_path) -> None:
+    import inspect
+    from pcae.core.agent import build_promotion_execution
+    sig = inspect.signature(build_promotion_execution)
+    assert "root" in sig.parameters
+    assert "epr_id" in sig.parameters
+    assert "dry_run" in sig.parameters
+
+
+def test_69p_regression_build_rollback_execution_signature_unchanged(tmp_path) -> None:
+    import inspect
+    from pcae.core.agent import build_rollback_execution
+    sig = inspect.signature(build_rollback_execution)
+    assert "root" in sig.parameters
+    assert "per_id" in sig.parameters
+    assert "dry_run" in sig.parameters
+    assert "rer_id" not in sig.parameters
+
+
+def test_69p_regression_list_functions_accept_old_kwargs(tmp_path) -> None:
+    import inspect
+    from pcae.core.agent import (
+        list_promotion_reviews, list_promotion_execution_records, list_rollback_execution_records
+    )
+    assert "ecp_id" in inspect.signature(list_promotion_reviews).parameters
+    assert "prompt_id" in inspect.signature(list_promotion_reviews).parameters
+    assert "epr_id" in inspect.signature(list_promotion_execution_records).parameters
+    assert "prompt_id" in inspect.signature(list_promotion_execution_records).parameters
+    assert "per_id" in inspect.signature(list_rollback_execution_records).parameters
+    assert "prompt_id" in inspect.signature(list_rollback_execution_records).parameters
+
+
+# --- CLI smoke tests --------------------------------------------------------
+
+def test_69p_cli_exec_status_no_record(tmp_path, monkeypatch, capsys) -> None:
+    import sys
+    from pcae.cli import main
+    from pcae.core.paths import HarnessPath
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    (tmp_path / ".pcae" / "session.json").write_text('{"active_task_id": ""}')
+    result = main(["exec", "status", "--prompt-id", "pid-none"])
+    out = capsys.readouterr().out
+    assert "no_record" in out
+    assert "execution_allowed" in out
+
+
+def test_69p_cli_exec_status_json(tmp_path, monkeypatch, capsys) -> None:
+    import json, sys
+    from pcae.cli import main
+    from pcae.core.paths import HarnessPath
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    (tmp_path / ".pcae" / "session.json").write_text('{"active_task_id": ""}')
+    result = main(["exec", "status", "--prompt-id", "pid-none", "--json"])
+    out = capsys.readouterr().out
+    data = json.loads(out)
+    assert data["chain_status"] == "no_record"
+    assert data["execution_allowed"] is False
+
+
+def test_69p_cli_doctor_execution_chain_ok(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    (tmp_path / ".pcae" / "session.json").write_text('{"active_task_id": ""}')
+    result = main(["doctor", "execution-chain"])
+    out = capsys.readouterr().out
+    assert "OK" in out
+    assert result == 0
+
+
+def test_69p_cli_doctor_execution_chain_json(tmp_path, monkeypatch, capsys) -> None:
+    import json
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    (tmp_path / ".pcae" / "session.json").write_text('{"active_task_id": ""}')
+    result = main(["doctor", "execution-chain", "--json"])
+    out = capsys.readouterr().out
+    data = json.loads(out)
+    assert data["overall_status"] == "ok"
+    assert data["execution_allowed"] is False
+
+
+def test_69p_cli_approval_store_list_empty(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    result = main(["approval-store", "list"])
+    out = capsys.readouterr().out
+    assert "0" in out or "none" in out.lower()
+
+
+def test_69p_cli_authorization_store_list_empty(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    result = main(["authorization-store", "list"])
+    out = capsys.readouterr().out
+    assert "0" in out or "none" in out.lower()
+
+
+def test_69p_cli_promotion_review_list_prompt_id_filter(tmp_path, monkeypatch, capsys) -> None:
+    import json
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    main(["promotion-review", "list", "--prompt-id", "test-pid"])
+    out = capsys.readouterr().out
+    assert "0" in out or "none" in out.lower()
+
+
+def test_69p_cli_promotion_execution_list_prompt_id_filter(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    main(["promotion-execution", "list", "--prompt-id", "test-pid"])
+    out = capsys.readouterr().out
+    assert "0" in out or "none" in out.lower()
+
+
+def test_69p_cli_rollback_execution_list_prompt_id_filter(tmp_path, monkeypatch, capsys) -> None:
+    from pcae.cli import main
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    main(["rollback-execution", "list", "--prompt-id", "test-pid"])
+    out = capsys.readouterr().out
+    assert "0" in out or "none" in out.lower()
+
+
+# --- Strategic lineage -------------------------------------------------------
+
+def test_69p_strategic_lineage_has_slr_69p_001(tmp_path) -> None:
+    import json
+    lineage_path = __import__("pathlib").Path(".") / ".pcae" / "strategic-lineage.json"
+    if not lineage_path.exists():
+        import pytest
+        pytest.skip("strategic-lineage.json not in cwd")
+    records = json.loads(lineage_path.read_text())
+    ids = [r.get("lineage_id", "") for r in records]
+    assert "SLR-69P-001" in ids, "SLR-69P-001 must be in strategic-lineage.json"
+    slr = next(r for r in records if r["lineage_id"] == "SLR-69P-001")
+    assert slr["supersedes_lineage_id"] == "SLR-69O-001"

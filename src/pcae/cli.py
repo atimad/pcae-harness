@@ -96,6 +96,12 @@ from pcae.commands.agent import (
     run_rollback_execution_show,
     run_rollback_execution_list,
     run_rollback_execution_mark_interrupted,
+    run_approval_store_show,
+    run_approval_store_list,
+    run_authorization_store_show,
+    run_authorization_store_list,
+    run_exec_status,
+    run_doctor_execution_chain,
     run_invocation_contract_validation,
     run_execution_pathway_integration,
     run_live_execution_readiness,
@@ -1986,6 +1992,27 @@ def build_parser() -> argparse.ArgumentParser:
     )
     approval_store_write_parser.set_defaults(handler=run_approval_store_write)
 
+    approval_store_show_parser = approval_store_subparsers.add_parser(
+        "show",
+        help="Show an ApprovedPromptArtifact by prompt_id.",
+    )
+    approval_store_show_parser.add_argument(
+        "--prompt-id", required=True, help="Prompt identifier to look up."
+    )
+    approval_store_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    approval_store_show_parser.set_defaults(handler=run_approval_store_show)
+
+    approval_store_list_parser = approval_store_subparsers.add_parser(
+        "list",
+        help="List all ApprovedPromptArtifacts in the store.",
+    )
+    approval_store_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    approval_store_list_parser.set_defaults(handler=run_approval_store_list)
+
     authorization_store_parser = subparsers.add_parser(
         "authorization-store",
         help="Manage AuthorizationArtifact persistent storage (Phase 69E).",
@@ -2020,6 +2047,27 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     authorization_store_write_parser.set_defaults(handler=run_authorization_store_write)
+
+    authorization_store_show_parser = authorization_store_subparsers.add_parser(
+        "show",
+        help="Show an AuthorizationArtifact by prompt_id.",
+    )
+    authorization_store_show_parser.add_argument(
+        "--prompt-id", required=True, help="Prompt identifier to look up."
+    )
+    authorization_store_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    authorization_store_show_parser.set_defaults(handler=run_authorization_store_show)
+
+    authorization_store_list_parser = authorization_store_subparsers.add_parser(
+        "list",
+        help="List all AuthorizationArtifacts in the store.",
+    )
+    authorization_store_list_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    authorization_store_list_parser.set_defaults(handler=run_authorization_store_list)
 
     audit_record_parser = subparsers.add_parser(
         "audit-record",
@@ -2443,10 +2491,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     epr_list_parser = promotion_review_subparsers.add_parser(
         "list",
-        help="List EPRs, optionally filtered by ECP.",
+        help="List EPRs, optionally filtered by ECP or prompt.",
     )
     epr_list_parser.add_argument(
         "--ecp-id", default=None, help="Filter by ECP identifier (optional)."
+    )
+    epr_list_parser.add_argument(
+        "--prompt-id", default=None, help="Filter by prompt identifier (optional, Phase 69P)."
     )
     epr_list_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."
@@ -2498,10 +2549,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     per_list_parser = promotion_execution_subparsers.add_parser(
         "list",
-        help="List PromotionExecutionRecords, optionally filtered by EPR.",
+        help="List PromotionExecutionRecords, optionally filtered by EPR or prompt.",
     )
     per_list_parser.add_argument(
         "--epr-id", default=None, help="Filter by EPR identifier (optional)."
+    )
+    per_list_parser.add_argument(
+        "--prompt-id", default=None, help="Filter by prompt identifier (optional, Phase 69P)."
     )
     per_list_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."
@@ -2566,10 +2620,13 @@ def build_parser() -> argparse.ArgumentParser:
 
     rer_list_parser = rollback_execution_subparsers.add_parser(
         "list",
-        help="List RollbackExecutionRecords, optionally filtered by PER.",
+        help="List RollbackExecutionRecords, optionally filtered by PER or prompt.",
     )
     rer_list_parser.add_argument(
         "--per-id", default=None, help="Filter by PER identifier (optional)."
+    )
+    rer_list_parser.add_argument(
+        "--prompt-id", default=None, help="Filter by prompt identifier (optional, Phase 69P)."
     )
     rer_list_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."
@@ -5764,6 +5821,45 @@ def build_parser() -> argparse.ArgumentParser:
     )
     skill_invoke_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
     skill_invoke_parser.set_defaults(handler=run_skill_invoke)
+
+    # Phase 69P — Execution Chain Traceability and Status Layer
+    exec_parser = subparsers.add_parser(
+        "exec",
+        help="Execution chain commands: read-only status aggregation (Phase 69P).",
+    )
+    exec_subparsers = exec_parser.add_subparsers(dest="exec_command", required=True)
+
+    exec_status_parser = exec_subparsers.add_parser(
+        "status",
+        help="Show the aggregated execution chain status for a prompt_id.",
+    )
+    exec_status_parser.add_argument(
+        "--prompt-id", required=True, help="Prompt identifier to aggregate chain status for."
+    )
+    exec_status_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    exec_status_parser.set_defaults(handler=run_exec_status)
+
+    doctor_parser = subparsers.add_parser(
+        "doctor",
+        help="Execution chain diagnostics: dangling references, interrupted and partial states (Phase 69P).",
+    )
+    doctor_subparsers = doctor_parser.add_subparsers(dest="doctor_command", required=True)
+
+    doctor_chain_parser = doctor_subparsers.add_parser(
+        "execution-chain",
+        help="Scan the execution chain stores for dangling references and interrupted states.",
+    )
+    doctor_chain_parser.add_argument(
+        "--prompt-id",
+        default=None,
+        help="Restrict diagnostics to a single prompt_id (optional).",
+    )
+    doctor_chain_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    doctor_chain_parser.set_defaults(handler=run_doctor_execution_chain)
 
     return parser
 

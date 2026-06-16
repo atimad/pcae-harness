@@ -11,7 +11,7 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Orchestration](#orchestration) — orchestration, context
 - [Design and Prototype Scaffolds](#design-and-prototype-scaffolds) — early design phases
 - [Roadmap and Prompt Governance](#roadmap-and-prompt-governance) — roadmap generation, prompt governance
-- [Execution Governance Activation (69A–69O)](#execution-governance-activation-69a69o) — approval, authorization, audit, activation, sandboxing, change capture, promotion, rollback
+- [Execution Governance Activation (69A–69P)](#execution-governance-activation-69a69p) — approval, authorization, audit, activation, sandboxing, change capture, promotion, rollback, traceability
 - [Invocation Governance Scaffolds (Pre-Activation Design)](#invocation-governance-scaffolds-pre-activation-design) — pre-69A invocation lifecycle scaffolds
 - [Runtime and Invocation Governance](#runtime-and-invocation-governance) — runtime trust, read-only invocation, multi-agent pilots
 - [Governance State and Invariants](#governance-state-and-invariants) — governance state audit, invariants, drift, lock governance
@@ -482,7 +482,7 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 ---
 
-# Execution Governance Activation (69A–69O)
+# Execution Governance Activation (69A–69P)
 
 The governed execution chain implemented end to end: approval, authorization,
 audit, activation, result classification, sandboxed execution, change
@@ -499,6 +499,10 @@ AI-driven invocation.
 
 - `pcae approval-store write --prompt-id <id> --approved-by <human> --approved-agent <id>`
 - `pcae approval-store write --prompt-id <id> --approved-by <human> --approved-agent <id> --json`
+- `pcae approval-store show --prompt-id <id>`
+- `pcae approval-store show --prompt-id <id> --json`
+- `pcae approval-store list`
+- `pcae approval-store list --json`
 
 ## invocation-contract-validation
 
@@ -514,6 +518,10 @@ AI-driven invocation.
 
 - `pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id>`
 - `pcae authorization-store write --prompt-id <id> --authorized-by <human> --selected-agent <id> --json`
+- `pcae authorization-store show --prompt-id <id>`
+- `pcae authorization-store show --prompt-id <id> --json`
+- `pcae authorization-store list`
+- `pcae authorization-store list --json`
 
 ## audit-record
 
@@ -590,6 +598,8 @@ AI-driven invocation.
 - `pcae promotion-review show --epr-id <id> --json`
 - `pcae promotion-review list --ecp-id <id>`
 - `pcae promotion-review list --ecp-id <id> --json`
+- `pcae promotion-review list --prompt-id <id>`
+- `pcae promotion-review list --prompt-id <id> --json`
 
 ## promote
 
@@ -603,6 +613,8 @@ AI-driven invocation.
 - `pcae promotion-execution show --per-id <id> --json`
 - `pcae promotion-execution list --epr-id <id>`
 - `pcae promotion-execution list --epr-id <id> --json`
+- `pcae promotion-execution list --prompt-id <id>`
+- `pcae promotion-execution list --prompt-id <id> --json`
 - `pcae promotion-execution mark-interrupted --per-id <id>`
 - `pcae promotion-execution mark-interrupted --per-id <id> --json`
 
@@ -618,8 +630,22 @@ AI-driven invocation.
 - `pcae rollback-execution show --rer-id <id> --json`
 - `pcae rollback-execution list --per-id <id>`
 - `pcae rollback-execution list --per-id <id> --json`
+- `pcae rollback-execution list --prompt-id <id>`
+- `pcae rollback-execution list --prompt-id <id> --json`
 - `pcae rollback-execution mark-interrupted --rer-id <id>`
 - `pcae rollback-execution mark-interrupted --rer-id <id> --json`
+
+## exec
+
+- `pcae exec status --prompt-id <id>`
+- `pcae exec status --prompt-id <id> --json`
+
+## doctor
+
+- `pcae doctor execution-chain`
+- `pcae doctor execution-chain --json`
+- `pcae doctor execution-chain --prompt-id <id>`
+- `pcae doctor execution-chain --prompt-id <id> --json`
 
 ---
 

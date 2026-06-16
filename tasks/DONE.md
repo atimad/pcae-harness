@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 69O Promotion Rollback Execution (20260616-1743-69o-promotion-rollback-execution)
 - 69N Write Promotion Execution Design (20260616-1501-69n-write-promotion-execution-design)
 - 69M Write Governance Design (20260616-1335-69m-write-governance-design)
 - 69L Execution Sandboxing Architecture (20260615-1913-69l-execution-sandboxing-architecture)

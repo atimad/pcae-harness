@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 69O: Promotion Rollback Execution (BR-005 Execution Governance Activation).
+Phase 69P: Execution Chain Traceability and Status Layer (BR-005 Execution Governance Activation).
+
+## Milestone: Execution Chain Traceability Complete
+
+PCAE can now answer, for any prompt_id, what stage its execution chain has reached
+and why. `pcae exec status --prompt-id <id>` aggregates the full
+APA→ARA→EAR→ERR→ERRA→ECP→EPR→PER→RER artifact chain and returns a single
+`chain_status` spanning `no_record` through `rolled_back`. `pcae doctor
+execution-chain` detects dangling references (artifacts that reference predecessors
+not present in the store) and interrupted or partial states (in-progress artifacts
+with no terminal successor). No artifact is created, modified, or deleted; Phase
+69P is a read-only observability layer over the stores that 69A–69O built.
 
 ## Milestone: Governed Rollback Achieved
 

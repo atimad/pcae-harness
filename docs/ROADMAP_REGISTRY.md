@@ -1,8 +1,8 @@
 # PCAE Roadmap Registry
 
-Generated: 2026-06-16T18:21:32.201938+00:00
+Generated: 2026-06-16T22:07:20.938269+00:00
 Phase: 64B.1 — Capability and Roadmap Intelligence
-Total phases: 75
+Total phases: 76
 Tracks: 9
 Superseded: 1
 Roadmap gaps: 0
@@ -115,7 +115,8 @@ Assessment status: intelligence_available
 | 69L | Execution Sandboxing Architecture | completed | 69K | 69M |
 | 69M | Write Governance Design | completed | 69L | 69N |
 | 69N | Write Promotion Execution | completed | 69M | 69O |
-| 69O | Promotion Rollback Execution | active | 69N | — |
+| 69O | Promotion Rollback Execution | completed | 69N | 69P |
+| 69P | Execution Chain Traceability and Status Layer | active | 69O | — |
 
 ## Track: roadmap_intelligence
 
@@ -143,4 +144,4 @@ Assessment status: intelligence_available
 - Roadmap evolution is tracked.
 - Superseded phases are tracked.
 - No runtime behavior changes occur.
-- BR-005 (execution_governance_activation track) is capability-complete through 69O: approval, authorization, audit, activation, result governance, sandboxing, change capture, promotion, and rollback are all implemented. 69O is shown as 'active' above because the authoritative phase registry requires exactly one active phase and no successor has been activated; this is a pending phase-activation decision, not unfinished implementation.
+- BR-005 (execution_governance_activation track) is active at 69P (Execution Chain Traceability and Status Layer). Phases 69A through 69O are completed: approval, authorization, audit, activation, result governance, sandboxing, change capture, promotion, and rollback are all implemented. 69P adds read-only chain status aggregation and doctor diagnostics.

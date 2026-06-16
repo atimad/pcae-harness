@@ -14734,6 +14734,20 @@ def lookup_approved_prompt_artifact(root: HarnessPath, prompt_id: str) -> dict |
     return None
 
 
+def list_approved_prompt_artifacts(root: HarnessPath) -> list[dict]:
+    store_dir = root.path / _APA_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for path in sorted(store_dir.glob("*.json"), reverse=True):
+        try:
+            with path.open(encoding="utf-8") as fh:
+                records.append(json.load(fh))
+        except Exception:
+            continue
+    return records
+
+
 # ---------------------------------------------------------------------------
 # Phase 69C — Invocation Contract Validation
 # ---------------------------------------------------------------------------
@@ -70208,6 +70222,24 @@ _CI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
         ],
         "introduced_commands": ["rollback", "rollback-execution"],
         "dependencies": ["write_promotion_execution"],
+        "successor_capabilities": ["execution_chain_traceability"],
+    },
+    {
+        "capability_domain": "execution_governance",
+        "capability_name": "Execution Chain Traceability and Status Layer",
+        "implemented_phase": "69P",
+        "status": "implemented",
+        "commands": [
+            "exec",
+            "doctor",
+            "approval-store",
+            "authorization-store",
+            "promotion-review",
+            "promotion-execution",
+            "rollback-execution",
+        ],
+        "introduced_commands": ["exec", "doctor"],
+        "dependencies": ["promotion_rollback_execution"],
         "successor_capabilities": [],
     },
 )
@@ -71280,8 +71312,17 @@ _CRI_KNOWN_PHASES: tuple[dict, ...] = (
         "track_name": "execution_governance_activation",
         "phase_id": "69O",
         "phase_title": "Promotion Rollback Execution",
-        "status": "active",
+        "status": "completed",
         "predecessor": "69N",
+        "successor": "69P",
+        "superseded_by": "",
+    },
+    {
+        "track_name": "execution_governance_activation",
+        "phase_id": "69P",
+        "phase_title": "Execution Chain Traceability and Status Layer",
+        "status": "active",
+        "predecessor": "69O",
         "successor": "",
         "superseded_by": "",
     },
@@ -72682,6 +72723,44 @@ _CRI_KNOWN_CAPABILITIES: tuple[dict, ...] = (
             "automatic rollback, no override-divergence support, no multi-PER batch rollback; "
             "SLR-69O-001 documents the accepted scope"
         ),
+        "successors": ["execution_chain_traceability"],
+    },
+    {
+        "capability_name": "Execution Chain Traceability and Status Layer",
+        "capability_domain": "execution_governance",
+        "implemented_phase": "69P",
+        "status": "implemented",
+        "commands": [
+            "pcae exec status --prompt-id <id> [--json]",
+            "pcae doctor execution-chain [--prompt-id <id>] [--json]",
+            "pcae approval-store show --prompt-id <id> [--json]",
+            "pcae approval-store list [--json]",
+            "pcae authorization-store show --prompt-id <id> [--json]",
+            "pcae authorization-store list [--json]",
+            "pcae promotion-review list --prompt-id <id> [--json]",
+            "pcae promotion-execution list --prompt-id <id> [--json]",
+            "pcae rollback-execution list --prompt-id <id> [--json]",
+        ],
+        "dependencies": [
+            "promotion_rollback_execution",
+        ],
+        "successors": [],
+        "aliases": [],
+        "contribution": (
+            "introduces read-only aggregation and diagnostic layer over the full "
+            "execution chain (APA→ARA→EAR→ERR→ERRA→ECP→EPR→PER→RER) by prompt_id; "
+            "`pcae exec status` computes chain_status spanning no_record through "
+            "rolled_back by walking store precedence from terminal state backward; "
+            "`pcae doctor execution-chain` detects dangling references (PER→EPR, "
+            "EPR→ECP, RER→PER), interrupted states (in_progress PER/RER), and partial "
+            "states (partial PER/RER), reporting each issue with severity error/warning; "
+            "approval-store show/list and authorization-store show/list expose existing "
+            "APA and ARA stores for inspection; --prompt-id filters added to "
+            "promotion-review list, promotion-execution list, and rollback-execution list; "
+            "no artifact is created, modified, or deleted; no root mutation, no approval, "
+            "no authorization, no promotion, no rollback; no caching of store contents; "
+            "SLR-69P-001 documents the accepted scope"
+        ),
     },
     {
         "capability_name": "Capability Inventory",
@@ -73115,10 +73194,10 @@ def render_capability_inventory_markdown(root: HarnessPath | None = None) -> str
             "- 64B.0 does not modify task lifecycle behavior.",
             "- 64B.0 does not modify runtime behavior.",
             "- 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.",
-            "- BR-005 (execution_governance_activation track, phases 69A-69O) is "
-            "capability-complete: every planned capability through Promotion Rollback "
-            "Execution (69O) is implemented. The phase-level registry still shows 69O as "
-            "the active phase because no successor phase has been activated yet -- the "
+            "- BR-005 (execution_governance_activation track, phases 69A-69P) is "
+            "active: 69P (Execution Chain Traceability and Status Layer) is the current "
+            "phase. Capabilities through 69O (Promotion Rollback Execution) are "
+            "implemented; 69P adds read-only chain aggregation and diagnostics. The "
             "single-active-phase invariant means that flag does not change until an "
             "explicit human-approved phase activation decision designates a successor.",
             "",
@@ -73579,12 +73658,11 @@ def render_roadmap_registry_markdown(root: HarnessPath | None = None) -> str:
             "- Roadmap evolution is tracked.",
             "- Superseded phases are tracked.",
             "- No runtime behavior changes occur.",
-            "- BR-005 (execution_governance_activation track) is capability-complete "
-            "through 69O: approval, authorization, audit, activation, result governance, "
+            "- BR-005 (execution_governance_activation track) is active at 69P "
+            "(Execution Chain Traceability and Status Layer). Phases 69A through 69O "
+            "are completed: approval, authorization, audit, activation, result governance, "
             "sandboxing, change capture, promotion, and rollback are all implemented. "
-            "69O is shown as 'active' above because the authoritative phase registry "
-            "requires exactly one active phase and no successor has been activated; this "
-            "is a pending phase-activation decision, not unfinished implementation.",
+            "69P adds read-only chain status aggregation and doctor diagnostics.",
         ]
     )
     return "\n".join(lines) + "\n"
@@ -75253,7 +75331,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69O",
         "prompt_type": "implementation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69O-implementation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69O",
@@ -75261,7 +75339,7 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69O",
         "prompt_type": "validation",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69O-validation-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69O",
@@ -75269,10 +75347,34 @@ _PRH_PROMPT_PROFILES: tuple[dict, ...] = (
     {
         "phase_id": "69O",
         "prompt_type": "agent",
-        "prompt_status": "recommended",
+        "prompt_status": "historical",
         "prompt_version": "69O-agent-v1",
         "prompt_source": "roadmap_registry+capability_registry+skill_registry",
         "capability_phase": "69O",
+    },
+    {
+        "phase_id": "69P",
+        "prompt_type": "implementation",
+        "prompt_status": "recommended",
+        "prompt_version": "69P-implementation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69P",
+    },
+    {
+        "phase_id": "69P",
+        "prompt_type": "validation",
+        "prompt_status": "recommended",
+        "prompt_version": "69P-validation-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69P",
+    },
+    {
+        "phase_id": "69P",
+        "prompt_type": "agent",
+        "prompt_status": "recommended",
+        "prompt_version": "69P-agent-v1",
+        "prompt_source": "roadmap_registry+capability_registry+skill_registry",
+        "capability_phase": "69P",
     },
 )
 
@@ -81135,7 +81237,7 @@ _SRG_BRANCH_REGISTRY: tuple[dict, ...] = (
         "child_branches": [],
         "serving_objectives": ["OBJ-001", "OBJ-002", "OBJ-003"],
         "entry_phase": "69A",
-        "current_phase": "69O",
+        "current_phase": "69P",
         "approved_by": "",
         "approved_at": "",
     },
@@ -81957,6 +82059,23 @@ _SRG_CAPABILITY_OBJECTIVE_MAP: tuple[dict, ...] = (
             "this field is dynamically True; no rollback-of-rollback (no rer_id-accepting entry "
             "point exists), no git commit/push, no automatic rollback, no override-divergence "
             "support; SLR-69O-001 documents the accepted scope"
+        ),
+        "decision_id": "",
+        "recommendation_id": "",
+    },
+    {
+        "capability_id": "execution_chain_traceability_and_status_layer",
+        "objective_ids": ["OBJ-002", "OBJ-003"],
+        "contribution_type": "primary",
+        "contribution_description": (
+            "read-only aggregation and diagnostic layer for the full execution chain "
+            "(APA→ARA→EAR→ERR→ERRA→ECP→EPR→PER→RER); `exec status` computes chain_status "
+            "spanning no_record through rolled_back; `doctor execution-chain` detects dangling "
+            "references and interrupted/partial states; approval-store show/list and "
+            "authorization-store show/list expose existing APA and ARA stores; --prompt-id "
+            "filters added to promotion-review list, promotion-execution list, and "
+            "rollback-execution list; no artifact created/modified/deleted; "
+            "SLR-69P-001 documents the accepted scope"
         ),
         "decision_id": "",
         "recommendation_id": "",
@@ -89421,6 +89540,20 @@ def lookup_authorization_artifact(root: "HarnessPath", prompt_id: str) -> dict |
     return None
 
 
+def list_authorization_artifacts(root: "HarnessPath") -> list[dict]:
+    store_dir = root.path / _ARA_STORE_DIR
+    if not store_dir.exists():
+        return []
+    records: list[dict] = []
+    for path in sorted(store_dir.glob("*.json"), reverse=True):
+        try:
+            with path.open(encoding="utf-8") as fh:
+                records.append(json.load(fh))
+        except Exception:
+            continue
+    return records
+
+
 def authorize_execution_candidate(
     root: "HarnessPath",
     prompt_id: str,
@@ -92583,7 +92716,11 @@ def lookup_promotion_review(root: "HarnessPath", epr_id: str) -> dict | None:
     return None
 
 
-def list_promotion_reviews(root: "HarnessPath", ecp_id: str | None = None) -> list[dict]:
+def list_promotion_reviews(
+    root: "HarnessPath",
+    ecp_id: str | None = None,
+    prompt_id: str | None = None,
+) -> list[dict]:
     store_dir = root.path / _EPR_STORE_DIR
     if not store_dir.exists():
         return []
@@ -92591,8 +92728,11 @@ def list_promotion_reviews(root: "HarnessPath", ecp_id: str | None = None) -> li
     for path in sorted(store_dir.glob("epr-*.json"), reverse=True):
         try:
             record = json.loads(path.read_text())
-            if ecp_id is None or record.get("ecp_id") == ecp_id:
-                records.append(record)
+            if ecp_id is not None and record.get("ecp_id") != ecp_id:
+                continue
+            if prompt_id is not None and record.get("prompt_id") != prompt_id:
+                continue
+            records.append(record)
         except Exception:
             continue
     return records
@@ -92912,7 +93052,11 @@ def lookup_promotion_execution_record(root: "HarnessPath", per_id: str) -> dict 
         return None
 
 
-def list_promotion_execution_records(root: "HarnessPath", epr_id: str | None = None) -> list[dict]:
+def list_promotion_execution_records(
+    root: "HarnessPath",
+    epr_id: str | None = None,
+    prompt_id: str | None = None,
+) -> list[dict]:
     store_dir = root.path / _PXR_STORE_DIR
     if not store_dir.exists():
         return []
@@ -92920,8 +93064,11 @@ def list_promotion_execution_records(root: "HarnessPath", epr_id: str | None = N
     for path in sorted(store_dir.glob("per-*.json"), reverse=True):
         try:
             record = json.loads(path.read_text())
-            if epr_id is None or record.get("epr_id") == epr_id:
-                records.append(record)
+            if epr_id is not None and record.get("epr_id") != epr_id:
+                continue
+            if prompt_id is not None and record.get("prompt_id") != prompt_id:
+                continue
+            records.append(record)
         except Exception:
             continue
     return records
@@ -93345,7 +93492,11 @@ def lookup_rollback_execution_record(root: "HarnessPath", rer_id: str) -> dict |
         return None
 
 
-def list_rollback_execution_records(root: "HarnessPath", per_id: str | None = None) -> list[dict]:
+def list_rollback_execution_records(
+    root: "HarnessPath",
+    per_id: str | None = None,
+    prompt_id: str | None = None,
+) -> list[dict]:
     store_dir = root.path / _RER_STORE_DIR
     if not store_dir.exists():
         return []
@@ -93353,8 +93504,11 @@ def list_rollback_execution_records(root: "HarnessPath", per_id: str | None = No
     for path in sorted(store_dir.glob("rer-*.json"), reverse=True):
         try:
             record = json.loads(path.read_text())
-            if per_id is None or record.get("per_id") == per_id:
-                records.append(record)
+            if per_id is not None and record.get("per_id") != per_id:
+                continue
+            if prompt_id is not None and record.get("prompt_id") != prompt_id:
+                continue
+            records.append(record)
         except Exception:
             continue
     return records
@@ -93578,4 +93732,264 @@ def mark_rollback_execution_interrupted(root: "HarnessPath", rer_id: str) -> dic
         "errors": stored.get("errors", []),
         "governance_boundaries": dict(_RER_GOVERNANCE_BOUNDARIES),
         "advisory": EXECUTION_ROLLBACK_RECORD_ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase 69P — Execution Chain Traceability and Status Layer
+# ---------------------------------------------------------------------------
+
+EXECUTION_CHAIN_STATUS_ADVISORY: str = (
+    "Execution chain status is read-only aggregation over existing stores. "
+    "No artifact is created, modified, or deleted. execution_allowed=False. "
+    "No root mutation, no promotion, no rollback, no authorization, no approval."
+)
+
+EXECUTION_CHAIN_DOCTOR_ADVISORY: str = (
+    "Execution chain doctor is read-only diagnostics over existing stores. "
+    "Findings are advisory only; no artifact is created, modified, or deleted. "
+    "execution_allowed=False. Dangling reference and interrupted-state checks "
+    "never trigger any repair, rollback, or re-execution."
+)
+
+_ECT_PHASE_ID: str = "69P"
+
+_ECT_GOVERNANCE_BOUNDARIES: dict = {
+    "execution_allowed": False,
+    "root_mutation_allowed": False,
+    "approval_allowed": False,
+    "authorization_allowed": False,
+    "promotion_allowed": False,
+    "rollback_allowed": False,
+    "git_commit_forbidden": True,
+    "git_push_forbidden": True,
+    "artifact_creation_allowed": False,
+    "artifact_deletion_allowed": False,
+    "artifact_mutation_allowed": False,
+    "status_aggregation_is_read_only": True,
+    "doctor_findings_are_advisory_only": True,
+    "no_caching_of_store_contents": True,
+}
+
+_ECT_CHAIN_STATUSES: tuple[str, ...] = (
+    "no_record",
+    "approved_only",
+    "authorized",
+    "audited",
+    "executed",
+    "packaged",
+    "reviewed",
+    "promoted",
+    "rolled_back",
+)
+
+_ECT_DOCTOR_ISSUE_SEVERITIES: frozenset[str] = frozenset({"ok", "warning", "error"})
+
+
+def _ect_derive_chain_status(
+    approval: "dict | None",
+    authorization: "dict | None",
+    audit_records: "list[dict]",
+    execution_results: "list[dict]",
+    execution_packages: "list[dict]",
+    promotion_reviews: "list[dict]",
+    promotion_executions: "list[dict]",
+    rollback_executions: "list[dict]",
+) -> str:
+    if any(r.get("status") in ("completed", "partial") for r in rollback_executions):
+        return "rolled_back"
+    if any(r.get("status") in ("completed", "partial") for r in promotion_executions):
+        return "promoted"
+    if promotion_reviews:
+        return "reviewed"
+    if execution_packages:
+        return "packaged"
+    if execution_results:
+        return "executed"
+    if audit_records:
+        return "audited"
+    if authorization is not None:
+        return "authorized"
+    if approval is not None:
+        return "approved_only"
+    return "no_record"
+
+
+def build_execution_chain_status(root: "HarnessPath", prompt_id: str) -> dict:
+    approval = lookup_approved_prompt_artifact(root, prompt_id)
+    authorization = lookup_authorization_artifact(root, prompt_id)
+    audit_records = lookup_execution_audits_for_prompt(root, prompt_id)
+    execution_results = lookup_execution_results_for_prompt(root, prompt_id)
+    execution_packages = list_execution_change_packages(root, prompt_id=prompt_id)
+    promotion_reviews = list_promotion_reviews(root, prompt_id=prompt_id)
+    promotion_executions = list_promotion_execution_records(root, prompt_id=prompt_id)
+    rollback_executions = list_rollback_execution_records(root, prompt_id=prompt_id)
+
+    chain_status = _ect_derive_chain_status(
+        approval, authorization, audit_records, execution_results,
+        execution_packages, promotion_reviews, promotion_executions,
+        rollback_executions,
+    )
+
+    return {
+        "prompt_id": prompt_id,
+        "chain_status": chain_status,
+        "approval": approval,
+        "authorization": authorization,
+        "audit_records": audit_records,
+        "execution_results": execution_results,
+        "execution_packages": execution_packages,
+        "promotion_reviews": promotion_reviews,
+        "promotion_executions": promotion_executions,
+        "rollback_executions": rollback_executions,
+        "counts": {
+            "audit_records": len(audit_records),
+            "execution_results": len(execution_results),
+            "execution_packages": len(execution_packages),
+            "promotion_reviews": len(promotion_reviews),
+            "promotion_executions": len(promotion_executions),
+            "rollback_executions": len(rollback_executions),
+        },
+        "execution_allowed": False,
+        "governance_boundaries": dict(_ECT_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_CHAIN_STATUS_ADVISORY,
+    }
+
+
+def _ect_check_dangling_per_epr(
+    root: "HarnessPath", per_records: "list[dict]"
+) -> "list[dict]":
+    issues: list[dict] = []
+    for per in per_records:
+        epr_id = per.get("epr_id", "")
+        if epr_id and lookup_promotion_review(root, epr_id) is None:
+            issues.append({
+                "issue_type": "dangling_per_epr",
+                "severity": "error",
+                "per_id": per.get("per_id"),
+                "missing_epr_id": epr_id,
+                "message": f"PER {per.get('per_id')!r} references EPR {epr_id!r} which does not exist",
+            })
+    return issues
+
+
+def _ect_check_dangling_epr_ecp(
+    root: "HarnessPath", epr_records: "list[dict]"
+) -> "list[dict]":
+    issues: list[dict] = []
+    for epr in epr_records:
+        ecp_id = epr.get("ecp_id", "")
+        if ecp_id and lookup_execution_change_package(root, ecp_id) is None:
+            issues.append({
+                "issue_type": "dangling_epr_ecp",
+                "severity": "error",
+                "epr_id": epr.get("epr_id"),
+                "missing_ecp_id": ecp_id,
+                "message": f"EPR {epr.get('epr_id')!r} references ECP {ecp_id!r} which does not exist",
+            })
+    return issues
+
+
+def _ect_check_dangling_rer_per(
+    root: "HarnessPath", rer_records: "list[dict]"
+) -> "list[dict]":
+    issues: list[dict] = []
+    for rer in rer_records:
+        per_id = rer.get("per_id", "")
+        if per_id and lookup_promotion_execution_record(root, per_id) is None:
+            issues.append({
+                "issue_type": "dangling_rer_per",
+                "severity": "error",
+                "rer_id": rer.get("rer_id"),
+                "missing_per_id": per_id,
+                "message": f"RER {rer.get('rer_id')!r} references PER {per_id!r} which does not exist",
+            })
+    return issues
+
+
+def _ect_check_interrupted_states(
+    per_records: "list[dict]", rer_records: "list[dict]"
+) -> "list[dict]":
+    issues: list[dict] = []
+    for per in per_records:
+        if per.get("status") == "in_progress":
+            issues.append({
+                "issue_type": "interrupted_per",
+                "severity": "warning",
+                "per_id": per.get("per_id"),
+                "message": f"PER {per.get('per_id')!r} has status=in_progress (interrupted run not yet marked)",
+            })
+    for rer in rer_records:
+        if rer.get("status") == "in_progress":
+            issues.append({
+                "issue_type": "interrupted_rer",
+                "severity": "warning",
+                "rer_id": rer.get("rer_id"),
+                "message": f"RER {rer.get('rer_id')!r} has status=in_progress (interrupted run not yet marked)",
+            })
+    return issues
+
+
+def _ect_check_partial_states(
+    per_records: "list[dict]", rer_records: "list[dict]"
+) -> "list[dict]":
+    issues: list[dict] = []
+    for per in per_records:
+        if per.get("status") == "partial":
+            issues.append({
+                "issue_type": "partial_per",
+                "severity": "warning",
+                "per_id": per.get("per_id"),
+                "message": f"PER {per.get('per_id')!r} has status=partial (promotion did not complete)",
+            })
+    for rer in rer_records:
+        if rer.get("status") == "partial":
+            issues.append({
+                "issue_type": "partial_rer",
+                "severity": "warning",
+                "rer_id": rer.get("rer_id"),
+                "message": f"RER {rer.get('rer_id')!r} has status=partial (rollback did not complete)",
+            })
+    return issues
+
+
+def build_execution_chain_doctor(
+    root: "HarnessPath", prompt_id: "str | None" = None
+) -> dict:
+    if prompt_id is not None:
+        per_records = list_promotion_execution_records(root, prompt_id=prompt_id)
+        rer_records = list_rollback_execution_records(root, prompt_id=prompt_id)
+        epr_records = list_promotion_reviews(root, prompt_id=prompt_id)
+    else:
+        per_records = list_promotion_execution_records(root)
+        rer_records = list_rollback_execution_records(root)
+        epr_records = list_promotion_reviews(root)
+
+    issues: list[dict] = []
+    issues.extend(_ect_check_dangling_per_epr(root, per_records))
+    issues.extend(_ect_check_dangling_epr_ecp(root, epr_records))
+    issues.extend(_ect_check_dangling_rer_per(root, rer_records))
+    issues.extend(_ect_check_interrupted_states(per_records, rer_records))
+    issues.extend(_ect_check_partial_states(per_records, rer_records))
+
+    error_count = sum(1 for i in issues if i["severity"] == "error")
+    warning_count = sum(1 for i in issues if i["severity"] == "warning")
+    overall_status = "ok" if not issues else ("error" if error_count > 0 else "warning")
+
+    return {
+        "prompt_id": prompt_id,
+        "scope": "prompt_id_filtered" if prompt_id is not None else "all",
+        "overall_status": overall_status,
+        "error_count": error_count,
+        "warning_count": warning_count,
+        "issue_count": len(issues),
+        "issues": issues,
+        "scanned": {
+            "per_count": len(per_records),
+            "rer_count": len(rer_records),
+            "epr_count": len(epr_records),
+        },
+        "execution_allowed": False,
+        "governance_boundaries": dict(_ECT_GOVERNANCE_BOUNDARIES),
+        "advisory": EXECUTION_CHAIN_DOCTOR_ADVISORY,
     }

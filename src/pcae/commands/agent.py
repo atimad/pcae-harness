@@ -155,6 +155,12 @@ from pcae.core.agent import (
     list_rollback_execution_records,
     mark_rollback_execution_interrupted,
     EXECUTION_ROLLBACK_RECORD_ADVISORY,
+    list_approved_prompt_artifacts,
+    list_authorization_artifacts,
+    build_execution_chain_status,
+    build_execution_chain_doctor,
+    EXECUTION_CHAIN_STATUS_ADVISORY,
+    EXECUTION_CHAIN_DOCTOR_ADVISORY,
     build_live_execution_readiness,
     LIVE_EXECUTION_READINESS_ADVISORY,
     build_execution_audit_design,
@@ -15779,15 +15785,17 @@ def run_promotion_review_show(args: argparse.Namespace) -> int:
 
 def run_promotion_review_list(args: argparse.Namespace) -> int:
     ecp_id = getattr(args, "ecp_id", None)
-    records = list_promotion_reviews(HarnessPath.cwd(), ecp_id)
+    prompt_id = getattr(args, "prompt_id", None)
+    records = list_promotion_reviews(HarnessPath.cwd(), ecp_id=ecp_id, prompt_id=prompt_id)
     if args.json:
         print(json.dumps(
-            {"ecp_id": ecp_id, "reviews": records, "count": len(records)},
+            {"ecp_id": ecp_id, "prompt_id": prompt_id, "reviews": records, "count": len(records)},
             indent=2, sort_keys=True,
         ))
         return 0
 
-    label = f" for {ecp_id}" if ecp_id else ""
+    parts = [f" for ecp={ecp_id}" if ecp_id else "", f" for prompt={prompt_id}" if prompt_id else ""]
+    label = "".join(parts)
     print(f"ExecutionPromotionReviews{label}: {len(records)}")
     if not records:
         print("  (none)")
@@ -15871,15 +15879,17 @@ def run_promotion_execution_show(args: argparse.Namespace) -> int:
 
 def run_promotion_execution_list(args: argparse.Namespace) -> int:
     epr_id = getattr(args, "epr_id", None)
-    records = list_promotion_execution_records(HarnessPath.cwd(), epr_id)
+    prompt_id = getattr(args, "prompt_id", None)
+    records = list_promotion_execution_records(HarnessPath.cwd(), epr_id=epr_id, prompt_id=prompt_id)
     if args.json:
         print(json.dumps(
-            {"epr_id": epr_id, "executions": records, "count": len(records)},
+            {"epr_id": epr_id, "prompt_id": prompt_id, "executions": records, "count": len(records)},
             indent=2, sort_keys=True,
         ))
         return 0
 
-    label = f" for {epr_id}" if epr_id else ""
+    parts = [f" for epr={epr_id}" if epr_id else "", f" for prompt={prompt_id}" if prompt_id else ""]
+    label = "".join(parts)
     print(f"PromotionExecutionRecords{label}: {len(records)}")
     if not records:
         print("  (none)")
@@ -15980,15 +15990,17 @@ def run_rollback_execution_show(args: argparse.Namespace) -> int:
 
 def run_rollback_execution_list(args: argparse.Namespace) -> int:
     per_id = getattr(args, "per_id", None)
-    records = list_rollback_execution_records(HarnessPath.cwd(), per_id)
+    prompt_id = getattr(args, "prompt_id", None)
+    records = list_rollback_execution_records(HarnessPath.cwd(), per_id=per_id, prompt_id=prompt_id)
     if args.json:
         print(json.dumps(
-            {"per_id": per_id, "executions": records, "count": len(records)},
+            {"per_id": per_id, "prompt_id": prompt_id, "executions": records, "count": len(records)},
             indent=2, sort_keys=True,
         ))
         return 0
 
-    label = f" for {per_id}" if per_id else ""
+    parts = [f" for per={per_id}" if per_id else "", f" for prompt={prompt_id}" if prompt_id else ""]
+    label = "".join(parts)
     print(f"RollbackExecutionRecords{label}: {len(records)}")
     if not records:
         print("  (none)")
@@ -16015,3 +16027,127 @@ def run_rollback_execution_mark_interrupted(args: argparse.Namespace) -> int:
     print()
     print(EXECUTION_ROLLBACK_RECORD_ADVISORY)
     return 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 69P — Execution Chain Traceability and Status Layer runners
+# ---------------------------------------------------------------------------
+
+def run_approval_store_show(args: argparse.Namespace) -> int:
+    from pcae.core.agent import lookup_approved_prompt_artifact
+    from pcae.core.paths import HarnessPath
+    record = lookup_approved_prompt_artifact(HarnessPath.cwd(), args.prompt_id)
+    if args.json:
+        print(json.dumps(record if record is not None else {
+            "error": "not_found", "prompt_id": args.prompt_id
+        }, indent=2, sort_keys=True))
+        return 0 if record is not None else 1
+    if record is None:
+        print(f"ApprovedPromptArtifact: NOT FOUND — {args.prompt_id}")
+        return 1
+    print("ApprovedPromptArtifact")
+    print(f"  prompt_id:      {record.get('prompt_id')}")
+    print(f"  approval_state: {record.get('approval_state')}")
+    print(f"  approved_by:    {record.get('approved_by')}")
+    print(f"  approved_at:    {record.get('approved_at')}")
+    print(f"  stored_at:      {record.get('stored_at')}")
+    return 0
+
+
+def run_approval_store_list(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+    records = list_approved_prompt_artifacts(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps({"approvals": records, "count": len(records)}, indent=2, sort_keys=True))
+        return 0
+    print(f"ApprovedPromptArtifacts: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r.get('prompt_id')}  state={r.get('approval_state')}  by={r.get('approved_by')}")
+    return 0
+
+
+def run_authorization_store_show(args: argparse.Namespace) -> int:
+    from pcae.core.agent import lookup_authorization_artifact
+    from pcae.core.paths import HarnessPath
+    record = lookup_authorization_artifact(HarnessPath.cwd(), args.prompt_id)
+    if args.json:
+        print(json.dumps(record if record is not None else {
+            "error": "not_found", "prompt_id": args.prompt_id
+        }, indent=2, sort_keys=True))
+        return 0 if record is not None else 1
+    if record is None:
+        print(f"AuthorizationArtifact: NOT FOUND — {args.prompt_id}")
+        return 1
+    print("AuthorizationArtifact")
+    print(f"  prompt_id:           {record.get('prompt_id')}")
+    print(f"  authorization_state: {record.get('authorization_state')}")
+    print(f"  authorization_id:    {record.get('authorization_id')}")
+    print(f"  authorized_by:       {record.get('authorized_by')}")
+    print(f"  authorized_at:       {record.get('authorized_at')}")
+    print(f"  stored_at:           {record.get('stored_at')}")
+    return 0
+
+
+def run_authorization_store_list(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+    records = list_authorization_artifacts(HarnessPath.cwd())
+    if args.json:
+        print(json.dumps({"authorizations": records, "count": len(records)}, indent=2, sort_keys=True))
+        return 0
+    print(f"AuthorizationArtifacts: {len(records)}")
+    if not records:
+        print("  (none)")
+        return 0
+    for r in records:
+        print(f"  {r.get('prompt_id')}  state={r.get('authorization_state')}  by={r.get('authorized_by')}")
+    return 0
+
+
+def run_exec_status(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+    data = build_execution_chain_status(HarnessPath.cwd(), args.prompt_id)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+    print(f"Execution chain status: {data['chain_status']}")
+    print(f"  prompt_id:           {data['prompt_id']}")
+    print(f"  approval:            {'yes' if data['approval'] else 'no'}")
+    print(f"  authorization:       {'yes' if data['authorization'] else 'no'}")
+    print(f"  audit_records:       {data['counts']['audit_records']}")
+    print(f"  execution_results:   {data['counts']['execution_results']}")
+    print(f"  execution_packages:  {data['counts']['execution_packages']}")
+    print(f"  promotion_reviews:   {data['counts']['promotion_reviews']}")
+    print(f"  promotion_executions:{data['counts']['promotion_executions']}")
+    print(f"  rollback_executions: {data['counts']['rollback_executions']}")
+    print()
+    print(f"  execution_allowed:   {data['execution_allowed']}")
+    print()
+    print(EXECUTION_CHAIN_STATUS_ADVISORY)
+    return 0
+
+
+def run_doctor_execution_chain(args: argparse.Namespace) -> int:
+    from pcae.core.paths import HarnessPath
+    prompt_id = getattr(args, "prompt_id", None)
+    data = build_execution_chain_doctor(HarnessPath.cwd(), prompt_id=prompt_id)
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0 if data["overall_status"] != "error" else 1
+    scope_label = f" (prompt_id={prompt_id})" if prompt_id else " (all)"
+    print(f"Execution chain doctor{scope_label}: {data['overall_status'].upper()}")
+    print(f"  errors:   {data['error_count']}")
+    print(f"  warnings: {data['warning_count']}")
+    print(f"  scanned:  {data['scanned']['per_count']} PER, {data['scanned']['rer_count']} RER, {data['scanned']['epr_count']} EPR")
+    if data["issues"]:
+        print()
+        print("Issues:")
+        for issue in data["issues"]:
+            print(f"  [{issue['severity'].upper()}] {issue['message']}")
+    else:
+        print("  No issues found.")
+    print()
+    print(EXECUTION_CHAIN_DOCTOR_ADVISORY)
+    return 0 if data["overall_status"] != "error" else 1
