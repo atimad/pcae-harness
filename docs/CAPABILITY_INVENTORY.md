@@ -1,6 +1,6 @@
 # PCAE Capability Inventory
 
-Generated: 2026-06-16T15:23:04.580576+00:00
+Generated: 2026-06-16T18:21:20.342165+00:00
 Phase: 64B.0 — Capability Inventory
 Total capabilities: 79
 Implemented: 77
@@ -105,5 +105,6 @@ Assessment status: inventory_complete
 - 64B.0 does not modify task lifecycle behavior.
 - 64B.0 does not modify runtime behavior.
 - 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.
+- BR-005 (execution_governance_activation track, phases 69A-69O) is capability-complete: every planned capability through Promotion Rollback Execution (69O) is implemented. The phase-level registry still shows 69O as the active phase because no successor phase has been activated yet -- the single-active-phase invariant means that flag does not change until an explicit human-approved phase activation decision designates a successor.
 
 *Phase 64B.0 creates an authoritative inventory of all PCAE capabilities. Discovery and governance only; no behavior modified. capability_count=79. implemented_count=77. dormant_count=1. superseded_count=1. roadmap_gap_count=0. duplicate_count=0. prompt_capability_count=2. assessment_status=inventory_complete. Prerequisite for 64B.1 Capability and Roadmap Intelligence.*

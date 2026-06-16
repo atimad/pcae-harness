@@ -28,6 +28,19 @@ governed promotion (69N PER) → governed rollback (69O RER), each step gated
 on an explicit human authorization and each step leaving a durable,
 never-silent record.
 
+**Deferred capabilities (intentional, not gaps to be filled next):** no
+automatic promotion or rollback; no rollback-of-rollback (no entry point
+accepts an `rer_id` as a rollback target); no multi-PER batch rollback; no
+divergence-override consumption; no container/OS-level sandbox providers
+(workspace isolation via `git worktree` only); no forensic retention of
+sandbox directories; no atomic staged-rename writes; no git commit or push
+automation anywhere in the chain; real AI runtime invocation remains
+disabled throughout (`execution_allowed=False`, including for `pcae promote`
+and `pcae rollback`, which write only content a human already reviewed and
+authorized). See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#current-limitations)
+for the full list and rationale, including the unresolved Phase Activation
+Governance gap.
+
 ## Milestone: Governed Root Mutation Achieved
 
 As of Phase 69N, PCAE can:
@@ -77,6 +90,15 @@ execution remains disabled. Real write execution remains disabled. Failure
 injection remains disabled. Corruption simulation remains disabled. Recovery
 execution remains disabled. Human review remains required for all
 invocation-related commands.
+
+*This execution status describes the Post-52Q checkpoint specifically and is
+historical.* As of Phase 69N/69O (see the "Governed Root Mutation Achieved"
+and "Governed Rollback Achieved" milestones above), `pcae promote` and
+`pcae rollback` do perform real, human-authorized writes to root — the only
+two commands in PCAE's history that do. Real AI runtime invocation, real
+prompt execution, failure injection, corruption simulation, and recovery
+execution remain disabled exactly as described here; only the write/rollback
+status above has changed since this checkpoint.
 
 ### Architecture Layers
 

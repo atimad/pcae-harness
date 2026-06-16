@@ -11,7 +11,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Orchestration](#orchestration) — orchestration, context
 - [Design and Prototype Scaffolds](#design-and-prototype-scaffolds) — early design phases
 - [Roadmap and Prompt Governance](#roadmap-and-prompt-governance) — roadmap generation, prompt governance
-- [Invocation Governance Scaffolds](#invocation-governance-scaffolds) — invocation lifecycle scaffolds
+- [Execution Governance Activation (69A–69O)](#execution-governance-activation-69a69o) — approval, authorization, audit, activation, sandboxing, change capture, promotion, rollback
+- [Invocation Governance Scaffolds (Pre-Activation Design)](#invocation-governance-scaffolds-pre-activation-design) — pre-69A invocation lifecycle scaffolds
 - [Runtime and Invocation Governance](#runtime-and-invocation-governance) — runtime trust, read-only invocation, multi-agent pilots
 - [Governance State and Invariants](#governance-state-and-invariants) — governance state audit, invariants, drift, lock governance
 - [Controlled Write Governance (50A–50K)](#controlled-write-governance-50a50k) — write authorization chain
@@ -21,10 +22,17 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Concurrency and Multi-Agent Coordination (52J–52M)](#concurrency-and-multi-agent-coordination-52j52m) — concurrency safety, coordination, conflict resolution
 - [Chaos Engineering and Resilience (52N–52Q)](#chaos-engineering-and-resilience-52n52q) — chaos testing, failure injection, corruption simulation, recovery validation
 - [Runtime Integration (54A+)](#runtime-integration-54a) — runtime integration readiness
+- [Capability and Roadmap Intelligence (64B Series)](#capability-and-roadmap-intelligence-64b-series) — capability inventory, roadmap/prompt/skill intelligence
+- [Strategic Governance and Independent Review (65A–68D)](#strategic-governance-and-independent-review-65a68d) — strategic roadmap governance, write-invocation approval gateway, independent review, IRG challenge
 
 ---
 
 # Core Governance
+
+## init
+
+- `pcae init --dry-run`
+- `pcae init --force`
 
 ## health
 
@@ -121,6 +129,12 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae orchestration policy --json`
 - `pcae orchestration agents`
 - `pcae orchestration agents --json`
+- `pcae orchestration capabilities`
+- `pcae orchestration capabilities --json`
+- `pcae orchestration select <task_type>`
+- `pcae orchestration select <task_type> --json`
+- `pcae orchestration explain <task_type>`
+- `pcae orchestration explain <task_type> --json`
 - `pcae orchestration recommend --work-type <type>`
 - `pcae orchestration recommend --work-type <type> --json`
 - `pcae orchestration plan --workflow <name>`
@@ -252,6 +266,17 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae docs glossary --dry-run`
 - `pcae docs glossary --force`
 
+## hooks
+
+- `pcae hooks install`
+
+## remote
+
+- `pcae remote status`
+- `pcae remote status --json`
+- `pcae remote adapters`
+- `pcae remote adapters --json`
+
 ---
 
 # Design and Prototype Scaffolds
@@ -341,6 +366,36 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae adapter-registry-design`
 - `pcae adapter-registry-design --json`
 
+## collaboration-design
+
+- `pcae collaboration-design`
+- `pcae collaboration-design --json`
+
+## orchestration-design
+
+- `pcae orchestration-design`
+- `pcae orchestration-design --json`
+
+## coordinator-design
+
+- `pcae coordinator-design`
+- `pcae coordinator-design --json`
+
+## parallel-execution-design
+
+- `pcae parallel-execution-design`
+- `pcae parallel-execution-design --json`
+
+## planning-prototype-design
+
+- `pcae planning-prototype-design`
+- `pcae planning-prototype-design --json`
+
+## planning-dry-run
+
+- `pcae planning-dry-run`
+- `pcae planning-dry-run --json`
+
 ---
 
 # Roadmap and Prompt Governance
@@ -427,17 +482,18 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 ---
 
-# Invocation Governance Scaffolds
+# Execution Governance Activation (69A–69O)
 
-## human-agent-execution-design
-
-- `pcae human-agent-execution-design`
-- `pcae human-agent-execution-design --json`
-
-## governed-execution-pilot
-
-- `pcae governed-execution-pilot`
-- `pcae governed-execution-pilot --json`
+The governed execution chain implemented end to end: approval, authorization,
+audit, activation, result classification, sandboxed execution, change
+capture, human promotion review, governed promotion to root, and governed
+rollback. `execution_allowed` remains `False` throughout this entire chain,
+including for `pcae promote` and `pcae rollback`. Those two commands are the
+only ones in PCAE's history that mutate the root repository, and they do so
+only through explicit human invocation gated on prior human-reviewed
+evidence (an EPR with `promotion_authorized=True` for promotion; a PER with
+`rollback_payload_available=True` for rollback) — never through automatic or
+AI-driven invocation.
 
 ## approval-store
 
@@ -565,6 +621,24 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae rollback-execution mark-interrupted --rer-id <id>`
 - `pcae rollback-execution mark-interrupted --rer-id <id> --json`
 
+---
+
+# Invocation Governance Scaffolds (Pre-Activation Design)
+
+Earlier scaffold and pilot commands that predate the 69A–69O execution
+activation chain above. These remain advisory readiness/design reports;
+none of them invoke a runtime or write files.
+
+## human-agent-execution-design
+
+- `pcae human-agent-execution-design`
+- `pcae human-agent-execution-design --json`
+
+## governed-execution-pilot
+
+- `pcae governed-execution-pilot`
+- `pcae governed-execution-pilot --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`
@@ -674,6 +748,30 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae decision-record`
 - `pcae decision-record --json`
+
+## capability-registry
+
+- `pcae capability-registry`
+- `pcae capability-registry --json`
+
+## capability-discovery
+
+- `pcae capability-discovery`
+- `pcae capability-discovery --json`
+
+## capability-validation
+
+- `pcae capability-validation`
+- `pcae capability-validation --json`
+
+## collaboration
+
+- `pcae collaboration workflows`
+- `pcae collaboration workflows --json`
+- `pcae collaboration handoffs`
+- `pcae collaboration handoffs --json`
+- `pcae collaboration reviews`
+- `pcae collaboration reviews --json`
 
 ## write-result-review-design
 
@@ -1251,6 +1349,10 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae orchestration-readiness-gate`
 - `pcae orchestration-readiness-gate --json`
 
+---
+
+# Capability and Roadmap Intelligence (64B Series)
+
 ## capability-inventory
 
 - `pcae capability-inventory`
@@ -1320,6 +1422,10 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae skill invoke <skill_id>`
 - `pcae skill invoke <skill_id> --json`
+
+---
+
+# Strategic Governance and Independent Review (65A–68D)
 
 ## roadmap-recommendation-hardening
 

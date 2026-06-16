@@ -95,9 +95,9 @@ def test_docs_architecture_dry_run_prints_overview(
     assert exit_code == 0
     assert "Would write docs/ARCHITECTURE.md:" in output
     assert "# PCAE Architecture Overview" in output
-    assert "## Governance Runtime" in output
-    assert "## CI Integration Layer" in output
-    assert "health / CI / daemon / pipeline" in output
+    assert "## Motivation" in output
+    assert "## Artifact Model" in output
+    assert "APA -> ARA -> EAR -> ESA -> ERR/ECR -> ECP -> EPR -> PER -> RER" in output
     assert not architecture_path(tmp_path).exists()
 
 
@@ -115,16 +115,17 @@ def test_docs_architecture_writes_overview_when_missing(
     assert exit_code == 0
     assert "Created: docs/ARCHITECTURE.md" in output
     assert "# PCAE Architecture Overview" in content
-    assert "## Governance Runtime" in content
-    assert "## Orchestration Layer" in content
-    assert "## Analytics Layer" in content
-    assert "## Fleet Layer" in content
-    assert "## Agent Coordination Layer" in content
-    assert "## CI Integration Layer" in content
-    assert "## Daemon Monitoring Layer" in content
-    assert "## Operational Artifact Hygiene" in content
-    assert "policy.toml + task contract" in content
-    assert "pcae ci generate github" in content
+    assert "## Motivation" in content
+    assert "## Governance Principles" in content
+    assert "## Artifact Model" in content
+    assert "## Execution Lifecycle" in content
+    assert "## Promotion Lifecycle" in content
+    assert "## Rollback Lifecycle" in content
+    assert "## Strategic Lineage Philosophy" in content
+    assert "## Current Limitations" in content
+    assert "## Deferred Capabilities" in content
+    assert "APA -> ARA -> EAR -> ESA -> ERR/ECR -> ECP -> EPR -> PER -> RER" in content
+    assert "pcae promote" in content
 
 
 def test_docs_architecture_does_not_overwrite_without_force(
@@ -162,7 +163,7 @@ def test_docs_architecture_force_overwrites_existing(
     assert exit_code == 0
     assert "Overwritten: docs/ARCHITECTURE.md" in output
     assert "custom architecture" not in content
-    assert "## Operational Artifact Hygiene" in content
+    assert "## Deferred Capabilities" in content
 
 
 def test_docs_glossary_dry_run_prints_glossary(

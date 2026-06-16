@@ -73115,6 +73115,12 @@ def render_capability_inventory_markdown(root: HarnessPath | None = None) -> str
             "- 64B.0 does not modify task lifecycle behavior.",
             "- 64B.0 does not modify runtime behavior.",
             "- 64B.0 is prerequisite for 64B.1 Capability and Roadmap Intelligence.",
+            "- BR-005 (execution_governance_activation track, phases 69A-69O) is "
+            "capability-complete: every planned capability through Promotion Rollback "
+            "Execution (69O) is implemented. The phase-level registry still shows 69O as "
+            "the active phase because no successor phase has been activated yet -- the "
+            "single-active-phase invariant means that flag does not change until an "
+            "explicit human-approved phase activation decision designates a successor.",
             "",
             f"*{overview['summary']}*",
         ]
@@ -73573,6 +73579,12 @@ def render_roadmap_registry_markdown(root: HarnessPath | None = None) -> str:
             "- Roadmap evolution is tracked.",
             "- Superseded phases are tracked.",
             "- No runtime behavior changes occur.",
+            "- BR-005 (execution_governance_activation track) is capability-complete "
+            "through 69O: approval, authorization, audit, activation, result governance, "
+            "sandboxing, change capture, promotion, and rollback are all implemented. "
+            "69O is shown as 'active' above because the authoritative phase registry "
+            "requires exactly one active phase and no successor has been activated; this "
+            "is a pending phase-activation decision, not unfinished implementation.",
         ]
     )
     return "\n".join(lines) + "\n"

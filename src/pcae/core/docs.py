@@ -32,7 +32,8 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Orchestration](#orchestration) — orchestration, context
 - [Design and Prototype Scaffolds](#design-and-prototype-scaffolds) — early design phases
 - [Roadmap and Prompt Governance](#roadmap-and-prompt-governance) — roadmap generation, prompt governance
-- [Invocation Governance Scaffolds](#invocation-governance-scaffolds) — invocation lifecycle scaffolds
+- [Execution Governance Activation (69A–69O)](#execution-governance-activation-69a69o) — approval, authorization, audit, activation, sandboxing, change capture, promotion, rollback
+- [Invocation Governance Scaffolds (Pre-Activation Design)](#invocation-governance-scaffolds-pre-activation-design) — pre-69A invocation lifecycle scaffolds
 - [Runtime and Invocation Governance](#runtime-and-invocation-governance) — runtime trust, read-only invocation, multi-agent pilots
 - [Governance State and Invariants](#governance-state-and-invariants) — governance state audit, invariants, drift, lock governance
 - [Controlled Write Governance (50A–50K)](#controlled-write-governance-50a50k) — write authorization chain
@@ -42,10 +43,17 @@ Commands are organized by capability area. All commands that have a `--json` var
 - [Concurrency and Multi-Agent Coordination (52J–52M)](#concurrency-and-multi-agent-coordination-52j52m) — concurrency safety, coordination, conflict resolution
 - [Chaos Engineering and Resilience (52N–52Q)](#chaos-engineering-and-resilience-52n52q) — chaos testing, failure injection, corruption simulation, recovery validation
 - [Runtime Integration (54A+)](#runtime-integration-54a) — runtime integration readiness
+- [Capability and Roadmap Intelligence (64B Series)](#capability-and-roadmap-intelligence-64b-series) — capability inventory, roadmap/prompt/skill intelligence
+- [Strategic Governance and Independent Review (65A–68D)](#strategic-governance-and-independent-review-65a68d) — strategic roadmap governance, write-invocation approval gateway, independent review, IRG challenge
 
 ---
 
 # Core Governance
+
+## init
+
+- `pcae init --dry-run`
+- `pcae init --force`
 
 ## health
 
@@ -142,6 +150,12 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae orchestration policy --json`
 - `pcae orchestration agents`
 - `pcae orchestration agents --json`
+- `pcae orchestration capabilities`
+- `pcae orchestration capabilities --json`
+- `pcae orchestration select <task_type>`
+- `pcae orchestration select <task_type> --json`
+- `pcae orchestration explain <task_type>`
+- `pcae orchestration explain <task_type> --json`
 - `pcae orchestration recommend --work-type <type>`
 - `pcae orchestration recommend --work-type <type> --json`
 - `pcae orchestration plan --workflow <name>`
@@ -273,6 +287,17 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae docs glossary --dry-run`
 - `pcae docs glossary --force`
 
+## hooks
+
+- `pcae hooks install`
+
+## remote
+
+- `pcae remote status`
+- `pcae remote status --json`
+- `pcae remote adapters`
+- `pcae remote adapters --json`
+
 ---
 
 # Design and Prototype Scaffolds
@@ -362,6 +387,36 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae adapter-registry-design`
 - `pcae adapter-registry-design --json`
 
+## collaboration-design
+
+- `pcae collaboration-design`
+- `pcae collaboration-design --json`
+
+## orchestration-design
+
+- `pcae orchestration-design`
+- `pcae orchestration-design --json`
+
+## coordinator-design
+
+- `pcae coordinator-design`
+- `pcae coordinator-design --json`
+
+## parallel-execution-design
+
+- `pcae parallel-execution-design`
+- `pcae parallel-execution-design --json`
+
+## planning-prototype-design
+
+- `pcae planning-prototype-design`
+- `pcae planning-prototype-design --json`
+
+## planning-dry-run
+
+- `pcae planning-dry-run`
+- `pcae planning-dry-run --json`
+
 ---
 
 # Roadmap and Prompt Governance
@@ -448,17 +503,18 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 ---
 
-# Invocation Governance Scaffolds
+# Execution Governance Activation (69A–69O)
 
-## human-agent-execution-design
-
-- `pcae human-agent-execution-design`
-- `pcae human-agent-execution-design --json`
-
-## governed-execution-pilot
-
-- `pcae governed-execution-pilot`
-- `pcae governed-execution-pilot --json`
+The governed execution chain implemented end to end: approval, authorization,
+audit, activation, result classification, sandboxed execution, change
+capture, human promotion review, governed promotion to root, and governed
+rollback. `execution_allowed` remains `False` throughout this entire chain,
+including for `pcae promote` and `pcae rollback`. Those two commands are the
+only ones in PCAE's history that mutate the root repository, and they do so
+only through explicit human invocation gated on prior human-reviewed
+evidence (an EPR with `promotion_authorized=True` for promotion; a PER with
+`rollback_payload_available=True` for rollback) — never through automatic or
+AI-driven invocation.
 
 ## approval-store
 
@@ -586,6 +642,24 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae rollback-execution mark-interrupted --rer-id <id>`
 - `pcae rollback-execution mark-interrupted --rer-id <id> --json`
 
+---
+
+# Invocation Governance Scaffolds (Pre-Activation Design)
+
+Earlier scaffold and pilot commands that predate the 69A–69O execution
+activation chain above. These remain advisory readiness/design reports;
+none of them invoke a runtime or write files.
+
+## human-agent-execution-design
+
+- `pcae human-agent-execution-design`
+- `pcae human-agent-execution-design --json`
+
+## governed-execution-pilot
+
+- `pcae governed-execution-pilot`
+- `pcae governed-execution-pilot --json`
+
 ## live-execution-readiness
 
 - `pcae live-execution-readiness`
@@ -695,6 +769,30 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae decision-record`
 - `pcae decision-record --json`
+
+## capability-registry
+
+- `pcae capability-registry`
+- `pcae capability-registry --json`
+
+## capability-discovery
+
+- `pcae capability-discovery`
+- `pcae capability-discovery --json`
+
+## capability-validation
+
+- `pcae capability-validation`
+- `pcae capability-validation --json`
+
+## collaboration
+
+- `pcae collaboration workflows`
+- `pcae collaboration workflows --json`
+- `pcae collaboration handoffs`
+- `pcae collaboration handoffs --json`
+- `pcae collaboration reviews`
+- `pcae collaboration reviews --json`
 
 ## write-result-review-design
 
@@ -1272,6 +1370,10 @@ Commands are organized by capability area. All commands that have a `--json` var
 - `pcae orchestration-readiness-gate`
 - `pcae orchestration-readiness-gate --json`
 
+---
+
+# Capability and Roadmap Intelligence (64B Series)
+
 ## capability-inventory
 
 - `pcae capability-inventory`
@@ -1341,6 +1443,10 @@ Commands are organized by capability area. All commands that have a `--json` var
 
 - `pcae skill invoke <skill_id>`
 - `pcae skill invoke <skill_id> --json`
+
+---
+
+# Strategic Governance and Independent Review (65A–68D)
 
 ## roadmap-recommendation-hardening
 
@@ -1426,150 +1532,118 @@ def generate_commands_reference(
 def render_architecture_overview() -> str:
     return """# PCAE Architecture Overview
 
-## Governance Runtime
+## Motivation
 
-PCAE centers governance around local repository state: policy, task contracts, session snapshots, architecture history, and generated reports.
+AI coding agents can produce real changes to real repositories — commits, pushes, file rewrites — with no approval gate, no audit trail, and no rollback plan. A single unconstrained invocation can leave a codebase in an inconsistent state with no recorded path back to a known-good one.
 
-```
-policy.toml + task contract
-        |
-        v
-    pcae check
-        |
-        v
-health / CI / daemon / pipeline
-```
+PCAE exists to put a governed, evidence-producing boundary around that process: every step from "a human approved this prompt" to "this content was written to root" to "this write was reversed" is a structured, append-only artifact, not an unrecorded side effect. The system does not make AI execution safe by trusting the agent; it makes it governable by recording what was authorized, what was attempted, what changed, who reviewed it, and what was actually written or reverted — and by refusing to proceed when that evidence is missing.
 
-Major command groups:
+## Governance Principles
 
-- `pcae check` validates task scope, policy, session continuity, and architecture rules.
-- `pcae health` summarizes readiness for humans, CI, and agents.
-- `pcae inspect` reports harness installation and policy status.
+- **Human approval is authoritative.** No prompt is invoked, no content is promoted to root, and no promotion is rolled back without an explicit human decision recorded in an artifact.
+- **Evidence before action.** Every stage in the chain is gated on the prior stage's artifact existing and being in an eligible state. A missing or ineligible artifact blocks outright; it is never inferred or assumed.
+- **Failure is never silent.** Where a post-execution step (such as evidence capture) can fail, the failure itself is recorded as a stored, inspectable artifact rather than discarded.
+- **Mutation is the exception, not the default.** Of PCAE's entire command surface, exactly two commands mutate the root repository — `pcae promote` and `pcae rollback` — and both require prior human-reviewed evidence (an EPR or a PER) before they will act.
+- **Idempotency over retry magic.** Promotion and rollback are safe to re-run against the same evidence: already-applied or already-reverted paths are skipped and recorded as such, never re-written, with no separate `--resume` flag.
+- **Divergence blocks, it does not guess.** If root has changed since the evidence was captured, the entire promotion or rollback attempt is aborted before any file is touched. There is no automatic conflict resolution.
+- **Approval, activation, commit, and push are distinct decisions.** Implementing a capability does not make it active; activating a phase does not authorize a commit; authorizing a commit does not authorize a push. Each is a separate human decision (see [Current Limitations](#current-limitations)).
+- **No silent roadmap advancement.** The roadmap's authoritative phase registry (`_CRI_KNOWN_PHASES`) requires exactly one active phase at all times; this is enforced as a blocking `pcae check` condition, not a convention.
 
-## Orchestration Layer
+## Artifact Model
 
-The orchestration layer combines existing checks and reports into repeatable workflows.
+PCAE's execution governance is a chain of structured artifacts. Each one gates the next; none of them invoke an AI runtime or write to root except where stated.
 
-```
-health -> check -> analytics -> exports -> session end
-              |
-              v
-        pipeline result
-```
+| Artifact | Name | Phase | Store | Role |
+|---|---|---|---|---|
+| **APA** | Approved Prompt Artifact | 69B | `.pcae/approvals/` | Records that a specific prompt + agent combination has been explicitly human-approved before any invocation is considered. |
+| **ARA** | Authorization Record | 69E | `.pcae/authorizations/` | Records that an approved, contract-validated invocation has been explicitly authorized to proceed. |
+| **EAR** | Execution Audit Record | 69F | `.pcae/audit/` | Append-only audit trail entry created for every invocation attempt, regardless of outcome. |
+| **ESA** | Execution Snapshot Artifact | 69J | `.pcae/execution-snapshots/` | Captures git working-tree state at a point in time, used as the before/after reference for change detection. |
+| **ERR** | Execution Result Record | 69G | `.pcae/results/` | The structured outcome of an invocation attempt (technical status, captured output), classified by `pcae execution-result-governance`. |
+| **ECR** | Execution Change Record | 69J | `.pcae/execution-changes/` | The set of file-level changes detected between two ESAs, classified by severity and rollback-candidacy. Captures which paths changed, not their content. |
+| **ECP** | Execution Change Package | 69M | `.pcae/execution-packages/` | Full evidentiary capture of sandbox-produced content: per-file diffs, before/after content, and SHA-256 hashes, captured immediately before the sandbox is destroyed. Closes the gap left by ECR capturing paths but not content. |
+| **EPR** | Execution Promotion Review | 69M | `.pcae/promotion-reviews/` | A human's explicit content-level review of a specific ECP, with partial-path approval support and a separate `promotion_authorized` flag. |
+| **PER** | Promotion Execution Record | 69N | `.pcae/promotion-executions/` | Durable record of an actual write to the root repository, created before the first file write and persisted after every file. The first artifact where root mutation actually occurs. |
+| **RER** | Rollback Execution Record | 69O | `.pcae/rollback-executions/` | Durable record of an actual reversal of a PER's writes, using the originating ECP's before-content and hashes as evidence. The first artifact whose subject is reversing a root mutation. |
 
-Major command groups:
-
-- `pcae pipeline` runs or previews predefined governance workflows.
-- `pcae session` starts, updates, reads, and ends governed work sessions.
-- `pcae docs` generates human-readable project references.
-
-## Analytics Layer
-
-Analytics read architecture history and current governance state to summarize trends and risk.
+The canonical chain, in the order evidence is produced for a single governed invocation:
 
 ```
-architecture-history.json
-        |
-        v
-analytics trends / analytics risk / architecture metrics
+APA -> ARA -> EAR -> ESA -> ERR/ECR -> ECP -> EPR -> PER -> RER
 ```
 
-Major command groups:
+A companion artifact, **ERRA** (Execution Result Review Artifact, Phase 69I, `.pcae/result-reviews/`), records a human's disposition on an ERR's outcome (e.g. `acceptable_for_context`, `needs_follow_up`). It is distinct from EPR: ERRA reviews whether an execution's outcome was acceptable; EPR reviews whether specific captured content should be promoted to root. Neither ERRA's review nor any disposition on it authorizes execution, retry, rollback, commit, or push — those boundaries are stated explicitly in `_ERRA_GOVERNANCE_BOUNDARIES`.
 
-- `pcae analytics trends` summarizes governance evolution.
-- `pcae analytics risk` computes current governance risk.
-- `pcae architecture metrics` reports architecture drift metrics.
+## Execution Lifecycle
 
-## Fleet Layer
+The path from an approved prompt to a classified result, run inside an isolated workspace:
 
-Fleet commands coordinate governance state across locally registered repositories.
+1. **Approval** (69B) — a human approves a specific prompt/agent pair, producing an APA.
+2. **Contract and pathway validation** (69C–69D) — invocation contracts and runtime contracts for the selected agent are validated; all required gates are evaluated together into a single `authorization_status`.
+3. **Authorization** (69E) — an ARA is recorded for the specific invocation.
+4. **Audit** (69F) — an EAR is created for the attempt before it proceeds.
+5. **Activation** (69G) — `pcae execution-activation invoke` runs the invocation inside a sandboxed workspace (Phase 69L: a `git worktree` + `rsync` overlay, not the root checkout), producing an ERR.
+6. **Result governance** (69H) — the ERR is classified along technical status, governance attention, and severity axes.
+7. **Snapshot and change detection** (69J–69K) — ESAs taken before and after the attempt are diffed into an ECR, with automatic snapshot integration removing the need for a manual snapshot step.
+8. **Result review** (69I) — a human records a disposition on the ERR as an ERRA.
 
-```
-.pcae/fleet.json
-       |
-       v
-fleet health / inspect / drift / apply / export
-```
+At every one of these steps, `execution_allowed` is hard-coded `False`. No command in this lifecycle invokes a real AI runtime against the live root checkout, and none of them write to root.
 
-Major command groups:
+## Promotion Lifecycle
 
-- `pcae fleet add`, `list`, and `remove` maintain the registry.
-- `pcae fleet health`, `inspect`, and `drift` aggregate readiness.
-- `pcae fleet apply` previews or applies governance files across repos.
+Promotion is what turns sandboxed, reviewed content into a root-repository write:
 
-## Agent Coordination Layer
+1. **Change capture** (69M) — immediately before the sandbox is destroyed, an ECP captures every changed file's diff, before/after content, and hashes. Hard exclusions (`.git/`, `.pcae/`, external symlink escapes) can never be overridden; default exclusions (toolchain artifacts, gitignored files, oversized binaries) can be reviewed per-path.
+2. **Promotion review** (69M) — a human reviews the ECP and records an EPR: a disposition (`approved`/`rejected`/`deferred`/`escalated`/`cancelled`), optionally a partial set of `approved_paths`, and a separate `promotion_authorized` flag that nothing before 69N consumes.
+3. **Promotion execution** (69N) — `pcae promote --epr-id <id>` is the first command in PCAE's history that mutates root. It is gated strictly on `EPR.promotion_authorized=True`, never on an ECP alone. For each eligible path it performs a three-way divergence check against the current root content (`pending` / `already_applied` / `conflict`); any conflict aborts the entire attempt before any file is touched. A PER is created with `status="in_progress"` before the first write and persisted after every file, so an interrupted promotion is always a stored, inspectable record, and a second `pcae promote` against the same EPR resumes safely (`already_applied` paths are skipped, not re-written).
 
-Agent leasing protects a governed repo from accidental concurrent agent work.
+`execution_allowed` remains `False` through promotion. `pcae promote` does not invoke a runtime; it writes content that a human already reviewed and authorized in the EPR.
 
-```
-agent acquire
-     |
-     v
-.pcae/agent-lock.json
-     |
-     v
-agent status / release / force-stale
-```
+## Rollback Lifecycle
 
-Major command groups:
+Rollback is the mirror image of promotion, reversing a specific promotion's writes using evidence captured during that promotion — never user-specified paths, never a range of PERs:
 
-- `pcae agent acquire` creates a local lease.
-- `pcae agent status` reports freshness and holder.
-- `pcae agent release` releases matching or stale leases.
+1. **Eligibility gate** — `pcae rollback --per-id <id>` is refused outright unless the target PER has `status` in `{completed, partial}` and `rollback_payload_available=True`. No RER is created on refusal.
+2. **Plan derivation** — the rollback's file plan is derived strictly from `PER.file_results` where `outcome="success"`; `already_applied` entries from the original promotion are excluded, since those paths were never written by the PER being rolled back.
+3. **Divergence check (inverted from promotion)** — a path whose current root hash matches the PER's `after_hash` is `pending` (still promoted, needs reverting); a path matching `before_hash` is `already_reverted` and is skipped without error; a path matching neither is a `conflict` that aborts the entire attempt before any file is touched.
+4. **Restore** — for each file actually reverted, `before_exists=True` restores the original `before_content`; `before_exists=False` removes the file. An RER is created with `status="in_progress"` before the first restore and persisted after every file.
+5. **Resumability, not retry** — re-running `pcae rollback` against the same PER resumes a partial rollback via the `already_reverted` skip; there is no `--resume` flag. `pcae rollback-execution mark-interrupted` transitions an interrupted RER from `in_progress` to `partial` as pure bookkeeping — it never writes a file.
 
-## CI Integration Layer
+There is no mechanism to target an RER for reversal: the rollback build function accepts only a `per_id`, never an `rer_id`. Rollback-of-rollback is forbidden by construction, not by a runtime check that could be bypassed.
 
-CI integration generates and validates a GitHub Actions governance workflow.
+## Strategic Lineage Philosophy
 
-```
-pcae ci generate github
-          |
-          v
-.github/workflows/pcae-governance.yml
-          |
-          v
-ci status / drift / repair
-```
+PCAE distinguishes three kinds of record that are easy to conflate:
 
-Major command groups:
+- **Roadmap state** (`_CRI_KNOWN_PHASES` in `src/pcae/core/agent.py`) — which phase is active, completed, or superseded. Mutable in the sense that statuses advance, but only one phase may be active at a time, enforced as a blocking check.
+- **Activation evidence** (provenance events) — a timestamped record that a phase was activated.
+- **Strategic decision lineage** (`.pcae/strategic-lineage.json`, Phase 65J) — an append-only record of *why* a human made a given strategic decision: the rationale, the alternatives considered and deferred, and the Strategic Lineage Record (SLR) entries documenting accepted scope. This file is authoritative only for human strategic decisions and their rationale. It does not own roadmap state, does not own activation evidence, and a later phase's lineage record superseding an earlier one (`supersedes_lineage_id`) never mutates or deletes the earlier record — supersession is reference-derived, not a status flip.
 
-- `pcae ci generate github` writes the expected workflow.
-- `pcae ci status` inspects workflow completeness.
-- `pcae ci drift` and `pcae ci repair` detect and repair workflow drift.
+Sitting alongside lineage is the **Independent Review Governance (IRG) Challenge** (Phases 66E–68D): an automated, advisory-only mechanism that surfaces assumptions, blind spots, counterfactuals, and uncertainty about a strategic decision for human attention. It is deliberately *not* an approval authority — it never recommends approval or rejection, never prescribes implementation, and never gates a command's outcome. Its findings are surfaced at session bootstrap, phase handoff, and phase completion, with full detail available on demand (`pcae irg-challenge`).
 
-## Daemon Monitoring Layer
+The underlying principle, stated explicitly in this project's accepted decisions: **implementation approval does not imply activation approval, commit approval, or push approval.** A capability can be fully coded and tested and still not be the thing a human has authorized as "the current active phase," let alone authorized to commit or push. PCAE's own roadmap registry has carried this distinction since Phase 65I/65J, and it applies recursively to PCAE's own development process, not just to the code it governs.
 
-Daemon commands preview future always-on governance monitoring without running a loop.
+## Current Limitations
 
-```
-daemon status
-      |
-      v
-daemon run --dry-run -> planned monitoring checks
-daemon watch --dry-run -> future continuous plan
-```
+- **No real AI runtime invocation.** `execution_allowed=False` everywhere, including inside the sandboxed execution lifecycle and through `pcae promote`/`pcae rollback`. Promotion and rollback write content a human already authorized; they do not invoke an agent.
+- **Workspace isolation is not OS-level containment.** The Phase 69L sandbox is a `git worktree` + `rsync` overlay with the subprocess `cwd` pointed at the sandbox directory — it isolates *relative* working-tree changes, not absolute-path filesystem access, process isolation, or network isolation. `production_containment_ready=False` is asserted explicitly and cannot be auto-asserted true.
+- **The sandbox shares git's object store with root.** A git commit made inside the sandbox lands in the same object database as the root checkout (Phase 69L, SLR-69L-006).
+- **No commit or push automation anywhere.** Every governed write path stops at a file-level write or reversal; `git commit` and `git push` remain exclusively human actions.
+- **Phase Activation Governance is unresolved roadmap debt.** PCAE has no first-class mechanism that separates "implementation approved" from "activation approved" from "commit approved" from "push approved" as distinct, independently-recorded human decisions — today this distinction is enforced by convention and by the single-active-phase invariant, not by a dedicated artifact.
+- **Single active phase, no designated successor for 69O.** The roadmap registry's "exactly one active phase" invariant means a phase cannot be marked `completed` without a successor phase taking over `active` status. As of this writing, Phase 69O is BR-005's last implemented phase and remains the formally active phase pending a future, explicitly human-approved phase activation decision — even though the BR-005 capability set described above is fully implemented end to end (see [PROJECT_STATUS.md](../PROJECT_STATUS.md)).
 
-Major command groups:
+## Deferred Capabilities
 
-- `pcae daemon run --dry-run` simulates one monitoring cycle.
-- `pcae daemon status` reports daemon capability state.
-- `pcae daemon watch --dry-run` previews future watch behavior.
+Explicitly out of scope for the BR-005 execution governance chain as implemented through Phase 69O:
 
-## Operational Artifact Hygiene
-
-Generated runtime artifacts are separated from durable project memory.
-
-```
-durable memory: tasks/ .pcae/policy.toml docs/
-runtime state:  .pcae/session.json .pcae/architecture-history.json
-local exports:  .pcae/exports/ .pcae/fleet-exports/
-```
-
-Responsibilities:
-
-- Durable governance files are tracked and reviewed.
-- Runtime/session artifacts are local operational state.
-- Export bundles are portable handoff artifacts and ignored by default.
+- Automatic promotion or automatic rollback — both require an explicit human-invoked command every time.
+- Rollback-of-rollback — no entry point accepts an `rer_id` as a rollback target.
+- Multi-PER batch rollback — `pcae rollback` takes exactly one `--per-id`.
+- Divergence override consumption — EPR's `override_divergence` field is recorded but not consumed by `pcae promote`; a conflict always aborts the attempt.
+- Container-based or OS-level sandbox providers — `docker_dependency_forbidden=True` and `sandbox_exec_dependency_forbidden=True` are explicit constraints; only `git worktree` workspace isolation exists.
+- Forensic retention of sandbox directories — sandbox directories are ephemeral and destroyed after evidence capture; no separate forensic copy is retained.
+- Atomic, staged-rename file writes for promotion — promotion and rollback write sequentially per file with incremental PER/RER persistence, not as a single atomic transaction.
+- Any git commit or push step inside the governed write/rollback chain.
 """
 
 

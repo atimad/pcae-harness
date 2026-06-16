@@ -1,8 +1,8 @@
 # PCAE — Policy Controlled Autonomous Execution
 
-PCAE is a governance-first framework for controlled AI-assisted engineering. It is a cross-platform Python CLI injected into Git repositories to make AI coding agent execution safe, resumable, auditable, and human-authoritative.
+PCAE is a governance harness for AI-assisted software development: a cross-platform Python CLI injected into Git repositories to make AI coding agent activity safe, resumable, auditable, and human-authoritative. It does not make agents trustworthy by assumption — it makes their work governable by requiring evidence at every step and refusing to proceed when that evidence is missing.
 
-For the project vision and long-term direction, see [VISION.md](VISION.md). For the authoritative governance reference, see the [Governance Handbook](docs/governance/GOVERNANCE_HANDBOOK.md). For test execution profiles and parallel validation guidance, see the [Test Execution Guide](docs/testing/TEST_EXECUTION.md). For a detailed technical description of the architecture, governance model, and design philosophy, see the [PCAE Architecture White Paper](docs/whitepaper/PCAE_WHITEPAPER.md).
+For the project vision and long-term direction, see [VISION.md](VISION.md). For the authoritative architecture reference, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). For the governance handbook, see the [Governance Handbook](docs/governance/GOVERNANCE_HANDBOOK.md). For test execution profiles, see the [Test Execution Guide](docs/testing/TEST_EXECUTION.md). For the BR-005 execution governance retrospective, see [docs/RETROSPECTIVE_BR005.md](docs/RETROSPECTIVE_BR005.md). For a detailed technical description of the architecture, governance model, and design philosophy, see the [PCAE Architecture White Paper](docs/whitepaper/PCAE_WHITEPAPER.md).
 
 ### Architecture Diagrams
 
@@ -29,13 +29,36 @@ PCAE was built to address this directly:
 
 ## Core Principles
 
-- **Human approval remains authoritative.** No execution proceeds without explicit human sign-off.
-- **Read-only before write.** Invocation starts with read-only pilots; write execution requires a separately governed gate.
-- **Evidence before execution.** Authorization, preflight, audit, capture, and review records must exist before any invocation is eligible.
+- **Human approval remains authoritative.** No execution, promotion, or rollback proceeds without explicit human sign-off recorded in an artifact.
+- **Read-only before write.** Invocation starts with read-only pilots; write execution requires a separately governed gate (`pcae promote`), and reversal requires its own (`pcae rollback`).
+- **Evidence before execution.** Authorization, preflight, audit, capture, and review records must exist before any invocation or write is eligible.
 - **Audit everything.** Every invocation attempt produces a structured audit trail regardless of outcome.
-- **Rollback must be planned.** Rollback strategies are declared and validated before any write execution begins.
+- **Rollback must be planned.** Rollback evidence (before-content and hashes) is captured at promotion time, not improvised after the fact.
 - **Runtime trust must be verified.** Runtime contract enforcement is evaluated independently for each runtime target.
 - **No automatic commit, push, or rollback.** These operations require human confirmation and are never triggered automatically by agents.
+
+## Artifact Lifecycle
+
+PCAE's execution governance is a chain of structured, append-only artifacts. Each one gates the next; only two commands in PCAE's entire history mutate the root repository, and both require prior human-reviewed evidence.
+
+```
+APA → ARA → EAR → ESA → ERR/ECR → ECP → EPR → PER → RER
+```
+
+| Artifact | Name | Role |
+|---|---|---|
+| **APA** | Approved Prompt Artifact | A human approves a specific prompt + agent pair before any invocation is considered. |
+| **ARA** | Authorization Record | The approved, contract-validated invocation is explicitly authorized to proceed. |
+| **EAR** | Execution Audit Record | An append-only audit entry is created for every invocation attempt, regardless of outcome. |
+| **ESA** | Execution Snapshot Artifact | Git working-tree state is captured before and after the attempt. |
+| **ERR** | Execution Result Record | The structured outcome of the invocation, classified by technical status and governance attention. |
+| **ECR** | Execution Change Record | The file-level changes detected between two ESAs (paths, not content). |
+| **ECP** | Execution Change Package | Full evidentiary capture of sandbox content — diffs, before/after content, SHA-256 hashes — taken just before the sandbox is destroyed. |
+| **EPR** | Execution Promotion Review | A human's explicit content-level review of an ECP, with partial-path approval and a separate `promotion_authorized` flag. |
+| **PER** | Promotion Execution Record | `pcae promote` writes reviewed content to root, gated on `EPR.promotion_authorized=True`. The first artifact where root mutation actually occurs. |
+| **RER** | Rollback Execution Record | `pcae rollback` reverses a PER's writes using the originating ECP's before-content and hashes. The first artifact whose subject is reversing a root mutation. |
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#artifact-model) for full field-level detail, store locations, and the execution/promotion/rollback lifecycles built on top of this chain.
 
 ## Architecture Overview
 
@@ -53,7 +76,7 @@ PCAE governs AI-assisted engineering across seven domains:
 
 Each domain produces structured, machine-readable artifacts that gate the next step. No step executes without its upstream gate passing.
 
-The implementation is organized into six architecture layers:
+The implementation is organized into the following architecture layers:
 
 | Layer | Phases | Description |
 |---|---|---|
@@ -63,6 +86,10 @@ The implementation is organized into six architecture layers:
 | **Runtime Hardening Layer** | 52F–52I | Contract hardening, sandbox isolation, timeout governance, output integrity |
 | **Concurrency Layer** | 52J–52M | Concurrency safety, parallel coordination, state consistency, conflict resolution |
 | **Resilience Layer** | 52N–52Q | Chaos testing, failure injection planning, corruption simulation, recovery validation |
+| **Runtime Governance Layer** | 55A–64H | Runtime registry, trust modeling, multi-runtime selection, arbitration, audit, and orchestration |
+| **Capability Intelligence Layer** | 64B Series | Capability inventory, roadmap/prompt/skill intelligence and recommendation hardening |
+| **Strategic Governance Layer** | 65A–68D | Strategic decision lineage, independent review governance, IRG challenge |
+| **Execution Governance Activation Layer** | 69A–69O | Approval, authorization, audit, activation, sandboxing, change capture, governed promotion, and governed rollback |
 
 ## Current Capabilities
 
@@ -71,63 +98,37 @@ The implementation is organized into six architecture layers:
 - **Policy checks** (`pcae check`) validate that every source change is accompanied by documentation updates and that architecture zone rules are respected.
 - **Session continuity** verifies that the active task matches the current working state on every check.
 
-### Change and Rollback Governance
+### Prompt, Skill, and Capability Intelligence
+- **Capability and roadmap intelligence** (`pcae capability list/show/dependencies`, `pcae roadmap current/tracks/evolution`) reports the authoritative capability and phase registries.
+- **Prompt recommendation** (`pcae prompt next/phase/validate`) recommends governed prompts sourced from the roadmap and capability registries.
+- **Skill system** (`pcae skill list/show/validate/invoke`) treats skills as first-class governed packages under `.pcae/skills`.
+
+### Strategic Governance and Independent Review
+- **Strategic decision lineage** (`pcae strategic-continuity show/history/validate`) is an append-only record of human strategic decisions and rationale, distinct from roadmap state and activation evidence.
+- **Independent Review Governance (IRG) Challenge** (`pcae irg-challenge`) surfaces assumptions, blind spots, and uncertainty about strategic decisions for human attention — advisory only, never gating a command's outcome.
+- **Write invocation approval gateway** (`pcae write-invocation-approval-gateway`) and **mapping review governance** (`pcae mapping-review-governance`) govern strategic-to-objective mapping decisions.
+
+### Execution Governance Activation (BR-005, Phases 69A–69O)
+- **Approval and authorization** (`pcae approval-store`, `pcae authorization-store`, `pcae invocation-contract-validation`, `pcae execution-pathway-integration`) record human approval and authorization before any invocation.
+- **Audit and activation** (`pcae audit-record`, `pcae execution-activation`) create an append-only audit record and run the invocation inside an isolated sandbox (`git worktree` + `rsync` overlay).
+- **Result governance and review** (`pcae execution-result-governance`, `pcae result-review`) classify outcomes and record human disposition.
+- **Change capture and promotion review** (`pcae execution-change-package`, `pcae promotion-review`) capture full evidentiary content from the sandbox and record a human's promotion decision.
+- **Governed promotion** (`pcae promote`) and **governed rollback** (`pcae rollback`) are the only two commands in PCAE's history that mutate the root repository — both gated on prior human-reviewed evidence, both idempotent, both refusing to proceed on divergence.
+
+### Change and Rollback Governance (Design Scaffolds)
 - **Controlled modification design** models the full lifecycle of a governed write: pre-modification snapshot, targeted change, verification, and rollback trigger.
 - **Controlled commit, push, and rollback governance** produces structured scaffolds defining the approval and rollback plan before any mutation occurs.
 
-### Prompt Governance
-- **Prompt generation and rendering** (`pcae prompt-render`) produces governed, parameterized prompts for agent invocation, with preflight validation before submission.
-
-### Execution Readiness and Pilot Scaffolds
-- **Controlled read-only invocation scaffold** (`pcae readonly-invocation`) defines the request, preflight, and result models for a sandboxed read-only agent run.
-- **Controlled read-only runtime invocation pilot** (`pcae readonly-runtime-pilot`) evaluates an 8-step lifecycle readiness gate across all configured runtimes.
-- **Invocation audit trail** (`pcae invocation-audit`) scaffolds the audit record linked to every invocation attempt.
-- **Invocation result review** (`pcae invocation-result-review`) scaffolds the review workflow for captured invocation output.
-- **Invocation evidence model** (`pcae invocation-evidence`) links all upstream artifacts — request, authorization, audit, capture, and review — into a single evidence record.
-
 ### Runtime Governance
 - **Runtime trust assessment** (`pcae runtime-trust`) evaluates each configured runtime for trust level, sandbox compliance, and contract verification.
-- **Runtime contract enforcement** (`pcae runtime-contract-enforcement`) evaluates blocking enforcement checks before any invocation is eligible.
-- **Invocation authorization enforcement** (`pcae invocation-authorization-enforcement`) evaluates an 8-step authorization chain covering authorization artifacts, preflight state, contract enforcement, and human approval.
+- **Multi-runtime registry, selection, arbitration, and audit** (Phases 63A–63F) govern selection among multiple registered runtimes with full audit chain and quarantine on failure.
+- **Orchestration readiness gate** (Phase 64F) evaluates approval/audit/recovery/quarantine readiness without authorizing execution.
 
-### Controlled Write Governance (50A–50K)
-- **Write authorization chain** (`pcae write-authorization` through `pcae write-recommendation`) implements the complete 10-step governed write lifecycle: authorization, review, decision, lifecycle, planning, readiness, evidence, audit, rollback verification, governance audit, and recommendation.
-- All write-related commands are advisory and read-only. No write execution occurs. `authorization_allowed=False` and `execution_allowed=False` for all commands.
+### Controlled Write Governance (50A–50K) and Execution Orchestration (51A–51K)
+- Full 10/11-step advisory chains (authorization, review, decision, lifecycle, planning, readiness, evidence, audit, rollback verification, governance audit, recommendation) that predate and inform the 69-series activation chain above. All commands remain advisory and read-only.
 
-### Controlled Execution Orchestration (51A–51K)
-- **Execution orchestration chain** (`pcae execution-request` through `pcae execution-recommendation`) implements the complete 11-step governed execution lifecycle: request, review, decision, lifecycle, plan, readiness assessment, evidence, audit, rollback verification, governance audit, and recommendation.
-- All execution-related commands are advisory and read-only. No execution occurs. `execution_allowed=False` for all commands.
-
-### Recovery Planning (52A–52E)
-- **Task lifecycle hardening** (`pcae task-lifecycle-hardening`) detects stale, inconsistent, or ambiguous task state before it contaminates sessions or handoffs.
-- **Session recovery** (`pcae session-recovery`) defines recovery planning for stale, missing, or orphaned session state.
-- **Governance state recovery** (`pcae governance-state-recovery`) defines recovery planning for inconsistent or corrupted governance records.
-- **Agent lock recovery** (`pcae agent-lock-recovery`) defines recovery planning for stale, conflicting, or orphaned agent lock state.
-- **Corruption recovery** (`pcae corruption-recovery`) defines recovery planning for corrupted project state artifacts.
-- All recovery commands are advisory. `recovery_allowed=False` and `human_review_required=True` for all commands.
-
-### Runtime Hardening (52F–52I)
-- **Runtime contract hardening** (`pcae runtime-contract-hardening`) validates runtime contracts for determinism, governability, and completeness.
-- **Sandbox hardening** (`pcae sandbox-hardening`) validates sandbox isolation boundaries: filesystem, process, network, and environment.
-- **Timeout hardening** (`pcae timeout-hardening`) validates timeout governance for bounded, recoverable, runaway-resistant execution.
-- **Output integrity verification** (`pcae output-integrity-verification`) validates that future runtime outputs will be deterministic, attributable, complete, and tamper-resistant.
-
-### Concurrency and Multi-Agent Coordination (52J–52M)
-- **Concurrency safety** (`pcae concurrency-safety`) validates safety requirements for simultaneous agents, sessions, and governance workflows.
-- **Parallel agent coordination** (`pcae parallel-agent-coordination`) validates coordination requirements for agents operating in parallel.
-- **Multi-agent state consistency** (`pcae multi-agent-state-consistency`) validates consistency requirements for shared state across coordinated agents.
-- **Conflict resolution engine** (`pcae conflict-resolution-engine`) defines conflict detection, severity classification, escalation, and advisory resolution planning for multi-agent workflows.
-
-### Chaos Engineering and Resilience (52N–52Q)
-- **Chaos testing** (`pcae chaos-testing`) defines chaos scenarios for governance, recovery, hardening, concurrency, and conflict-resolution workflows. Scenarios are defined but not executed.
-- **Failure injection planning** (`pcae failure-injection`) defines controlled failure-injection scenarios for validating PCAE detection and recovery planning. No failures are injected.
-- **Corruption simulation** (`pcae corruption-simulation`) defines controlled corruption scenarios for validating PCAE corruption detection and recovery planning. No files are corrupted.
-- **Recovery validation** (`pcae recovery-validation`) validates that recovery plans, chaos scenarios, failure-injection scenarios, and corruption-simulation scenarios have complete, governed, human-reviewed recovery paths.
-
-### Capability and Roadmap
-- **Capability discovery** (`pcae orchestration capabilities`) exposes the current governed capability matrix for agent orchestration.
-- **Roadmap evidence** (`pcae roadmap-evidence`) reports structured evidence of completed phases to keep roadmap and provenance coherent.
-- **Governance audit** (`pcae governance audit`) validates all governance artifacts for drift and consistency.
+### Recovery, Hardening, Concurrency, and Resilience (52A–52Q)
+- Task lifecycle hardening, session/governance/lock/corruption recovery planning, runtime contract/sandbox/timeout hardening, output integrity verification, concurrency safety, parallel agent coordination, multi-agent state consistency, conflict resolution, chaos testing, failure injection planning, corruption simulation, and recovery validation. All commands are advisory; none inject failures, corrupt files, or execute recovery automatically.
 
 ## CLI Examples
 
@@ -141,37 +142,52 @@ pcae check
 # Inspect repo readiness in detail
 pcae inspect
 
-# Report roadmap evidence
-pcae roadmap-evidence
+# Show the current roadmap phase and capability registry
+pcae roadmap current
+pcae capability list
 
-# Render a governed prompt
-pcae prompt-render
+# Promote reviewed sandbox content to root (human-authorized only)
+pcae promote --epr-id <id> --dry-run
+pcae promote --epr-id <id>
 
-# Audit governance artifacts
-pcae governance audit
+# Reverse a promotion using its captured evidence
+pcae rollback --per-id <id> --dry-run
+pcae rollback --per-id <id>
+
+# Surface independent review challenge context for a strategic decision
+pcae irg-challenge
 
 # Assess runtime trust
 pcae runtime-trust
-
-# Report invocation evidence readiness
-pcae invocation-evidence
 ```
+
+## Capability Maturity
+
+| Status | Count | Examples |
+|---|---|---|
+| **Implemented** | 77 of 79 capabilities | Task contracts, write/execution orchestration chains, recovery planning, runtime hardening, multi-runtime registry, capability/roadmap intelligence, skill system, strategic lineage, IRG challenge, full 69A–69O execution governance activation chain |
+| **Dormant** | 1 | Controlled Runtime Execution Pilot (Phase 62A) — superseded in practice by the read-only runtime invocation governance it depends on; not removed, not currently exercised |
+| **Superseded** | 1 | Invocation Pilot (Legacy, Phase 46A–46J) — replaced by the Multi-Runtime Registry (Phase 63A) |
+| **Roadmap gaps** | 0 | No registered phase is missing an implementation |
+
+Run `pcae capability-inventory` for the live, regenerated inventory (`docs/CAPABILITY_INVENTORY.md`).
 
 ## Current Safety Status
 
-PCAE has completed governance scaffolding through Phase 52Q. The project is at the **Post-52Q Architecture Checkpoint**, with 4201 passing tests and governance infrastructure complete across all six architecture layers. Runtime integration has not yet begun.
+PCAE has completed BR-005 (Execution Governance Activation) through Phase 69O. The full chain from human approval to governed root promotion to governed rollback is implemented and tested.
 
 | Capability | Status |
 |---|---|
-| Runtime execution | **Disabled** — `execution_allowed=False` for all runtimes |
-| Prompt execution | **Disabled** — no prompt is submitted in any current phase |
-| Write execution | **Disabled** — `authorization_allowed=False` and `execution_allowed=False` for all write commands |
-| Failure injection | **Disabled** — `injection_allowed=False` for all failure injection commands |
-| Corruption simulation | **Disabled** — `simulation_allowed=False` for all corruption simulation commands |
+| Real AI runtime invocation | **Disabled** — `execution_allowed=False` for every command, including `pcae promote` and `pcae rollback` |
+| Governed write to root | **Enabled, human-gated** — `pcae promote` writes only content already captured in an ECP and explicitly authorized in an EPR (`promotion_authorized=True`) |
+| Governed rollback of a promotion | **Enabled, human-gated** — `pcae rollback` reverses only a specific PER's writes, gated on `rollback_payload_available=True` |
+| Rollback-of-rollback | **Forbidden by construction** — no command accepts an `rer_id` as a rollback target |
+| Git commit / push automation | **Disabled** — every governed path stops at a file-level write or reversal; commit and push remain human actions |
+| Failure injection / corruption simulation | **Disabled** — `injection_allowed=False` / `simulation_allowed=False` for all such commands |
 | Recovery execution | **Disabled** — `recovery_allowed=False` and `recovery_execution_allowed=False` for all recovery commands |
-| Human review | **Required** — `human_review_required=True` for all invocation-related commands |
+| Human review | **Required** — for every invocation, promotion, and rollback decision |
 
-No PCAE command currently invokes a runtime, submits a prompt, or modifies repository files as part of agent execution. All invocation-related commands are scaffolds that evaluate readiness and report blockers.
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#current-limitations) for the full, current list of limitations and deferred capabilities, including the unresolved Phase Activation Governance gap (implementation approval does not imply activation, commit, or push approval).
 
 ## Roadmap Snapshot
 
@@ -188,18 +204,14 @@ No PCAE command currently invokes a runtime, submits a prompt, or modifies repos
 | Runtime hardening | Complete — Phase 52F–52I; contract, sandbox, timeout, output integrity |
 | Concurrency and multi-agent coordination | Complete — Phase 52J–52M; concurrency safety, parallel coordination, state consistency, conflict resolution |
 | Chaos engineering and resilience | Complete — Phase 52N–52Q; chaos testing, failure injection, corruption simulation, recovery validation |
+| Multi-runtime governance | Complete — Phase 55A–64H; runtime registry, trust, selection, arbitration, audit, quarantine, orchestration readiness |
+| Capability and roadmap intelligence | Complete — Phase 64B Series; capability inventory, roadmap/prompt/skill intelligence |
+| Strategic governance and independent review | Complete — Phase 65A–68D; strategic lineage, IRG challenge |
+| **Execution governance activation (BR-005)** | **Complete — Phase 69A–69O; full approval → authorization → audit → activation → sandboxing → change capture → promotion → rollback chain** |
 
 ### Next
 
-| Phase | Track | Description |
-|---|---|---|
-| 54A | Runtime integration | Runtime Integration Readiness |
-| 55A | Runtime integration | Controlled Read-Only Runtime Invocation |
-| 56A | Runtime integration | Runtime Output Capture Persistence |
-| 57A | Runtime integration | Human Review of Runtime Output |
-| 58A | Multi-agent execution | Multi-Agent Read-Only Execution Pilot |
-| 59A | Write execution | Controlled Write Dry-Run |
-| 60A | Write execution | First Controlled Single-File Write Pilot |
+There is no currently active successor phase. Phase 69O remains the formally active phase in the authoritative roadmap registry (`_CRI_KNOWN_PHASES` requires exactly one active phase) pending an explicit, human-approved phase activation decision — this is intentional governance behavior, not an oversight (see [Phase Activation Governance](docs/ARCHITECTURE.md#current-limitations) in the architecture doc and the open item in [tasks/TODO.md](tasks/TODO.md)).
 
 ## Contributing
 

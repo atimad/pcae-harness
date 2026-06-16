@@ -34,12 +34,16 @@ implementation
 - docs/CAPABILITY_INVENTORY.md
 - docs/COMMANDS.md
 - docs/ROADMAP_REGISTRY.md
+- docs/ARCHITECTURE.md
+- docs/RETROSPECTIVE_BR005.md
+- README.md
 - src/pcae/cli.py
 - src/pcae/commands/agent.py
 - src/pcae/core/agent.py
 - src/pcae/core/docs.py
 - tests/test_agent.py
 - tests/test_strategic_lineage.py
+- tests/test_docs.py
 
 ## Forbidden Files
 
