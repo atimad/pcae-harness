@@ -11,6 +11,7 @@ from pcae.core.status import check_project_status_coherence
 from pcae.core.policy import load_policy
 from pcae.core.tasks import (
     ActiveTask,
+    TaskFinishResult,
     TaskTransitionRecord,
     TaskUpdate,
     close_active_task_by_identifier,
@@ -18,7 +19,9 @@ from pcae.core.tasks import (
     complete_latest_active_task,
     create_task_contract,
     find_latest_active_task,
+    finish_active_task,
     transition_active_task,
+    validate_task_finish,
     validate_task_transition,
     pause_latest_active_task,
     read_task_summaries,
@@ -119,6 +122,76 @@ def run_task_complete(args: argparse.Namespace) -> int:
     print(f"Completed task: {completed_task.task_id}")
     print(f"Title: {completed_task.title}")
     print(f"Moved to: {completed_task.destination_path.relative_to(root.path).as_posix()}")
+    return 0
+
+
+def run_task_finish(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    skip_checks = getattr(args, "skip_checks", False)
+
+    validation = validate_task_finish(root, skip_checks=skip_checks)
+    if not validation.safe_to_finish:
+        if args.json:
+            print(
+                json.dumps(
+                    {
+                        "blockers": list(validation.blockers),
+                        "finished": False,
+                        "task_id": (
+                            validation.active_task.task_id
+                            if validation.active_task
+                            else None
+                        ),
+                        "warnings": list(validation.warnings),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                )
+            )
+        else:
+            print("Task finish blocked.")
+            for blocker in validation.blockers:
+                print(f"  - {blocker}")
+        return 1
+
+    try:
+        result = finish_active_task(root, skip_checks=skip_checks)
+    except ValueError as error:
+        print(str(error))
+        return 1
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "finished": True,
+                    "task_id": result.completed_task.task_id,
+                    "title": result.completed_task.title,
+                    "moved_to": result.completed_task.destination_path.relative_to(
+                        root.path
+                    ).as_posix(),
+                    "updated_files": [p.as_posix() for p in result.updated_files],
+                    "warnings": list(result.warnings),
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        print(f"Finished task: {result.completed_task.task_id}")
+        print(f"Title: {result.completed_task.title}")
+        print(
+            f"Moved to: {result.completed_task.destination_path.relative_to(root.path).as_posix()}"
+        )
+        if result.updated_files:
+            print("Updated files:")
+            for path in result.updated_files:
+                print(f"  - {path.as_posix()}")
+        if result.warnings:
+            print("Warnings:")
+            for warning in result.warnings:
+                print(f"  - {warning}")
+
     return 0
 
 

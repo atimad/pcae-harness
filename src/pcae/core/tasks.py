@@ -80,6 +80,24 @@ class TaskTransitionValidation:
 
 
 @dataclass(frozen=True)
+class TaskFinishValidation:
+    active_task: ActiveTask | None
+    blockers: tuple[str, ...]
+    warnings: tuple[str, ...]
+
+    @property
+    def safe_to_finish(self) -> bool:
+        return not self.blockers
+
+
+@dataclass(frozen=True)
+class TaskFinishResult:
+    completed_task: ClosedTask
+    updated_files: tuple[Path, ...]
+    warnings: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class TaskTransitionRecord:
     completed_task: ClosedTask
     next_task: TaskContract
@@ -209,6 +227,94 @@ def complete_latest_active_task(root: HarnessPath) -> ClosedTask | None:
     if active_task is None:
         return None
     return close_active_task(active_task)
+
+
+def validate_task_finish(root: HarnessPath, skip_checks: bool = False) -> TaskFinishValidation:
+    blockers: list[str] = []
+    warnings: list[str] = []
+    active_task = find_latest_active_task_with_status(root, "active")
+
+    if active_task is None:
+        blockers.append("No active task contract found to finish.")
+        return TaskFinishValidation(
+            active_task=None,
+            blockers=tuple(blockers),
+            warnings=tuple(warnings),
+        )
+
+    done_path = root.join(Path("tasks") / "done" / active_task.path.name)
+    if done_path.exists():
+        blockers.append(
+            f"Done task already exists for {active_task.task_id} at "
+            f"{done_path.relative_to(root.path).as_posix()}."
+        )
+
+    if not skip_checks:
+        from pcae.core.check import run_checks
+        from pcae.core.health import build_health_data
+        from pcae.core.status import check_project_status_coherence
+
+        health = build_health_data(root)
+        if health.get("overall_status") != "healthy":
+            blockers.append("pcae health is unhealthy. Fix health issues before finishing.")
+
+        check_result = run_checks(root)
+        if not check_result.passed:
+            blockers.append("pcae check has violations. Fix check violations before finishing.")
+
+        coherence = check_project_status_coherence(root)
+        if not coherence.coherent:
+            warnings.append("pcae status coherence failed — PROJECT_STATUS.md may be stale.")
+
+    return TaskFinishValidation(
+        active_task=active_task,
+        blockers=tuple(blockers),
+        warnings=tuple(warnings),
+    )
+
+
+def finish_active_task(root: HarnessPath, skip_checks: bool = False) -> TaskFinishResult:
+    validation = validate_task_finish(root, skip_checks=skip_checks)
+    if not validation.safe_to_finish or validation.active_task is None:
+        raise ValueError(
+            validation.blockers[0] if validation.blockers else "Task finish is blocked."
+        )
+
+    active_task = validation.active_task
+    completed_task = close_active_task(active_task)
+
+    updated_files: list[Path] = [
+        completed_task.destination_path.relative_to(root.path),
+    ]
+
+    if update_done_memory(root, completed_task):
+        updated_files.append(DONE_RELATIVE_PATH)
+    if update_todo_memory_for_finish(root, active_task.title):
+        updated_files.append(TODO_RELATIVE_PATH)
+
+    from pcae.core.session import write_session_snapshot
+
+    write_session_snapshot(root)
+    updated_files.append(TRANSITION_SESSION_RELATIVE_PATH)
+
+    return TaskFinishResult(
+        completed_task=completed_task,
+        updated_files=tuple(_unique_paths(updated_files)),
+        warnings=validation.warnings,
+    )
+
+
+def update_todo_memory_for_finish(root: HarnessPath, finished_title: str) -> bool:
+    path = root.join(TODO_RELATIVE_PATH)
+    if not path.is_file():
+        return False
+    original = path.read_text(encoding="utf-8")
+    updated = remove_exact_bullets(original, {finished_title})
+    if updated == original:
+        return False
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(updated)
+    return True
 
 
 def close_active_task_by_identifier(

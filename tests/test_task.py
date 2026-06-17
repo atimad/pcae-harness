@@ -20,8 +20,10 @@ from pcae.core.tasks import (
     close_latest_active_task,
     create_task_contract,
     find_latest_active_task,
+    finish_active_task,
     read_task_summaries,
     slugify_title,
+    validate_task_finish,
 )
 
 
@@ -1629,3 +1631,205 @@ def test_61i_cli_handoff_state_refresh_json_exits_zero(
     assert "summary_model" in parsed
     assert "bootstrap_modernization" in parsed
     assert parsed["handoff_state_refresh_overview"]["phase"] == "61I"
+
+
+# --- Phase 70A: pcae task finish ---
+
+
+def test_70a_task_finish_moves_task_and_updates_memory(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n## Pending\n\n- Finish target\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Finish target",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task: 20260617-2000-finish-target" in output
+    assert "Moved to: tasks/done/20260617-2000-finish-target.md" in output
+    done_path = tmp_path / "tasks" / "done" / "20260617-2000-finish-target.md"
+    assert done_path.is_file()
+    assert "## Status\n\ndone" in done_path.read_text(encoding="utf-8")
+    assert not (tmp_path / "tasks" / "active" / "20260617-2000-finish-target.md").exists()
+    done_md = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    assert "Finish target (20260617-2000-finish-target)" in done_md
+    todo_md = (tmp_path / "tasks" / "TODO.md").read_text(encoding="utf-8")
+    assert "Finish target" not in todo_md
+    session = read_session_snapshot(HarnessPath(tmp_path))
+    assert session is not None
+
+
+def test_70a_task_finish_refuses_when_no_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True)
+
+    exit_code = main(["task", "finish"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Task finish blocked." in output
+    assert "No active task contract found to finish." in output
+
+
+def test_70a_task_finish_refuses_when_checks_fail(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Blocked task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Task finish blocked." in output
+
+
+def test_70a_task_finish_skip_checks_bypasses_validation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Skip checks task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--skip-checks"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task: 20260617-2000-skip-checks-task" in output
+    assert (tmp_path / "tasks" / "done" / "20260617-2000-skip-checks-task.md").is_file()
+
+
+def test_70a_task_finish_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON output task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["finished"] is True
+    assert parsed["task_id"] == "20260617-2000-json-output-task"
+    assert parsed["title"] == "JSON output task"
+    assert "tasks/done/20260617-2000-json-output-task.md" in parsed["moved_to"]
+    assert isinstance(parsed["updated_files"], list)
+    assert isinstance(parsed["warnings"], list)
+
+
+def test_70a_task_finish_json_output_on_refusal(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True)
+
+    exit_code = main(["task", "finish", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    parsed = json.loads(output)
+    assert parsed["finished"] is False
+    assert len(parsed["blockers"]) > 0
+    assert parsed["task_id"] is None
+
+
+def test_70a_task_finish_session_refresh(
+    tmp_path: Path, monkeypatch
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Session refresh task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+
+    result = finish_active_task(root, skip_checks=True)
+
+    assert result.completed_task.task_id == "20260617-2000-session-refresh-task"
+    session = read_session_snapshot(root)
+    assert session is not None
+    assert Path(".pcae/session.json") in result.updated_files
+
+
+def test_70a_validate_task_finish_blocks_duplicate_done(
+    tmp_path: Path, monkeypatch
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Duplicate done",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    done_dir = tmp_path / "tasks" / "done"
+    done_dir.mkdir(parents=True, exist_ok=True)
+    (done_dir / "20260617-2000-duplicate-done.md").write_text(
+        "# already done", encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+    root = HarnessPath(tmp_path)
+
+    validation = validate_task_finish(root, skip_checks=True)
+
+    assert not validation.safe_to_finish
+    assert any("already exists" in b for b in validation.blockers)
+
+
+def test_70a_task_complete_backward_compatibility(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Backward compat",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "complete"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Completed task: 20260617-2000-backward-compat" in output
+    assert (tmp_path / "tasks" / "done" / "20260617-2000-backward-compat.md").is_file()
+    assert not (tmp_path / "tasks" / "DONE.md").exists()

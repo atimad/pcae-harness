@@ -414,6 +414,7 @@ from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase
 from pcae.commands.task import (
     run_task_close,
     run_task_complete,
+    run_task_finish,
     run_task_list,
     run_task_new,
     run_task_pause,
@@ -4241,6 +4242,22 @@ def build_parser() -> argparse.ArgumentParser:
         help="Complete the latest active task contract.",
     )
     task_complete_parser.set_defaults(handler=run_task_complete)
+
+    task_finish_parser = task_subparsers.add_parser(
+        "finish",
+        help="Finish the active task with validation, memory updates, and session refresh.",
+    )
+    task_finish_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    task_finish_parser.add_argument(
+        "--skip-checks",
+        action="store_true",
+        help="Skip health/check validation (explicit human override).",
+    )
+    task_finish_parser.set_defaults(handler=run_task_finish)
 
     task_list_parser = task_subparsers.add_parser(
         "list",
