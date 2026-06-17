@@ -1,5 +1,7 @@
 # PCAE Architecture Overview
 
+For step-by-step setup instructions, see [docs/INSTALLATION.md](INSTALLATION.md).
+
 ## Motivation
 
 AI coding agents can produce real changes to real repositories — commits, pushes, file rewrites — with no approval gate, no audit trail, and no rollback plan. A single unconstrained invocation can leave a codebase in an inconsistent state with no recorded path back to a known-good one.

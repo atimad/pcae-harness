@@ -22,24 +22,9 @@ implementation
 
 ## Allowed Files
 
-- .pcae/session.json
-- .pcae/strategic-lineage.json
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- src/pcae/core/agent.py
-- src/pcae/core/docs.py
-- src/pcae/commands/agent.py
-- src/pcae/cli.py
-- tests/test_agent.py
-- tests/test_strategic_lineage.py
-- docs/COMMANDS.md
-- docs/ROADMAP_REGISTRY.md
-- docs/CAPABILITY_INVENTORY.md
+- docs/INSTALLATION.md
+- docs/ARCHITECTURE.md
+- README.md
 
 ## Forbidden Files
 
