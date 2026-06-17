@@ -1,39 +1,27 @@
 {
   "active_task": {
-    "id": "20260616-2328-69p-execution-chain-traceability-and-status-layer",
-    "title": "69P Execution Chain Traceability and Status Layer"
+    "id": "20260607-1317-post-60a-roadmap-checkpoint",
+    "title": "Post-60A roadmap checkpoint"
   },
   "architectural_notes": [],
   "blockers": [],
-  "current_objective": "69P Execution Chain Traceability and Status Layer",
+  "current_objective": "",
   "git": {
     "branch": "main",
     "changed_files": [
       {
-        "path": "CHANGELOG.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/DONE.md",
-        "status": " M"
-      },
-      {
-        "path": "tasks/active/20260616-1743-69o-promotion-rollback-execution.md",
+        "path": "tasks/active/20260616-2328-69p-execution-chain-traceability-and-status-layer.md",
         "status": " D"
       },
       {
-        "path": "tasks/active/20260616-2328-69p-execution-chain-traceability-and-status-layer.md",
-        "status": "??"
-      },
-      {
-        "path": "tasks/done/20260616-1743-69o-promotion-rollback-execution.md",
+        "path": "tasks/done/20260616-2328-69p-execution-chain-traceability-and-status-layer.md",
         "status": "??"
       }
     ],
-    "status_summary": "5 changed files"
+    "status_summary": "2 changed files"
   },
-  "last_completed_step": "Completed task 20260616-1743-69o-promotion-rollback-execution: 69O Promotion Rollback Execution",
-  "next_recommended_step": "Continue active task 20260616-2328-69p-execution-chain-traceability-and-status-layer.",
-  "timestamp": "2026-06-16T21:28:03.905532+00:00",
+  "last_completed_step": "",
+  "next_recommended_step": "",
+  "timestamp": "2026-06-17T20:04:20.432439+00:00",
   "warnings": []
 }
