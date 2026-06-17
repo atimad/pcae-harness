@@ -89,8 +89,8 @@ def test_export_bundle_handles_missing_session_and_history(
     assert bundle.data["architecture_metrics"] is None
     assert bundle.data["latest_architecture_history_summary"] is None
     assert bundle.data["check_summary"]["session_continuity"] == "missing"
-    assert bundle.data["check_summary"]["status"] == "failed"
-    assert bundle.data["health_summary"]["overall_status"] == "unhealthy"
+    assert bundle.data["check_summary"]["status"] == "passed"
+    assert bundle.data["health_summary"]["overall_status"] == "healthy"
 
 
 def init_ready_repo(root: Path) -> None:

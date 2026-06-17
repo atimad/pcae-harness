@@ -91,6 +91,19 @@ Before ending a session:
 5. Run available checks.
 """,
     Path(".pcae/policy.toml"): render_default_policy(),
+    Path(".pcae/.gitignore"): """session.json
+agent-lock.json
+provenance-history.json
+architecture-history.json
+provenance-exports/
+runtime-snapshots/
+context-packs/
+continuity-packs/
+governance-exports/
+architecture/
+architecture-exports/
+remote/
+""",
     Path(".pcae/exports/.gitignore"): """governance-bundle-*.json
 """,
     Path(".githooks/pre-commit"): """#!/usr/bin/env sh

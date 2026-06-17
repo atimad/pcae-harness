@@ -23,13 +23,14 @@ Implement pcae doctor task-memory for detecting task-memory inconsistencies. Unt
 ## Allowed Files
 
 - src/pcae/cli.py
-- src/pcae/commands/doctor.py
+- src/pcae/commands/check.py
 - src/pcae/commands/task.py
-- src/pcae/core/tasks.py
+- src/pcae/core/architecture.py
 - src/pcae/core/check.py
+- src/pcae/core/export.py
+- src/pcae/core/health.py
+- src/pcae/core/tasks.py
 - src/pcae/core/templates.py
-- tests/test_task.py
-- tests/test_checks.py
 - .pcae/.gitignore
 - .pcae/session.json
 - docs/COMMANDS.md
@@ -37,6 +38,13 @@ Implement pcae doctor task-memory for detecting task-memory inconsistencies. Unt
 - PROJECT_STATUS.md
 - tasks/active/**
 - tasks/done/**
+- tests/test_task.py
+- tests/test_check.py
+- tests/test_agent.py
+- tests/test_export.py
+- tests/test_health.py
+- tests/test_session.py
+- tests/test_architecture.py
 
 ## Forbidden Files
 

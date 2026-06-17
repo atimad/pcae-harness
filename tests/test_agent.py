@@ -53693,8 +53693,8 @@ def test_65h_capability_in_ci_registry(tmp_path) -> None:
     assert "Commit Session Continuity Guard" in cap_names
 
 
-def test_65h_missing_session_is_violation(tmp_path) -> None:
-    """An absent session.json must produce a violation, not a warning."""
+def test_65h_missing_session_is_warning(tmp_path) -> None:
+    """An absent session.json must produce a warning, not a violation (70B: runtime separation)."""
     from pcae.core.check import check_session_continuity
     from pcae.core.tasks import ActiveTask
 
@@ -53721,13 +53721,11 @@ def test_65h_missing_session_is_violation(tmp_path) -> None:
     infos: list = []
     violations = check_session_continuity(root, active_task, warnings, infos)
 
-    assert len(violations) == 1, (
-        f"Expected 1 violation for missing session, got {len(violations)}: {violations}"
+    assert len(violations) == 0
+    assert len(warnings) == 1, (
+        f"Expected 1 warning for missing session, got {len(warnings)}: {warnings}"
     )
-    assert "Session snapshot missing" in violations[0].text
-    assert len(warnings) == 0, (
-        f"Missing session must be a violation, not a warning; got warnings: {warnings}"
-    )
+    assert "Session snapshot missing" in warnings[0].text
 
 
 def test_65h_missing_session_message_instructs_session_write(tmp_path) -> None:
@@ -53742,8 +53740,10 @@ def test_65h_missing_session_message_instructs_session_write(tmp_path) -> None:
         enforcement_mode="advisory", acceptance_checks=(), documentation_requirements=(),
         path=tmp_path / "tasks" / "active" / "t1.md",
     )
-    violations = check_session_continuity(root, active_task, [], [])
-    assert any("pcae session write" in v.text for v in violations)
+    warnings: list = []
+    violations = check_session_continuity(root, active_task, warnings, [])
+    assert not violations
+    assert any("pcae session write" in w.text for w in warnings)
 
 
 def test_65h_task_id_mismatch_is_violation(tmp_path) -> None:
@@ -53939,16 +53939,13 @@ def test_65h_missing_session_blocks_check_end_to_end(tmp_path, monkeypatch) -> N
 
     result = run_checks(HarnessPath.cwd())
 
-    assert not result.passed, (
-        "run_checks() must fail when session.json is absent"
-    )
-    session_violations = [
-        v for v in result.violations if "Session snapshot missing" in v.text
+    session_warnings = [
+        w for w in result.warnings if "Session snapshot missing" in w.text
     ]
-    assert len(session_violations) == 1, (
-        f"Expected exactly 1 session-missing violation; all violations: {[v.text for v in result.violations]}"
+    assert len(session_warnings) == 1, (
+        f"Expected exactly 1 session-missing warning; all warnings: {[w.text for w in result.warnings]}"
     )
-    assert "pcae session write" in session_violations[0].text
+    assert "pcae session write" in session_warnings[0].text
 
 
 def test_65h_auto_refresh_allowed_is_false() -> None:

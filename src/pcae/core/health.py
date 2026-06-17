@@ -81,6 +81,8 @@ def session_continuity_status(check_result: CheckResult) -> str:
         return "verified"
     if any("Session snapshot missing" in violation.text for violation in check_result.violations):
         return "missing"
+    if any("Session snapshot missing" in warning.text for warning in check_result.warnings):
+        return "missing"
     if any(
         "Session active task does not match current active task" in violation.text
         for violation in check_result.violations

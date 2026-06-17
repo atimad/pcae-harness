@@ -12,12 +12,14 @@ from pcae.core.policy import load_policy
 from pcae.core.tasks import (
     ActiveTask,
     TaskFinishResult,
+    TaskMemoryDiagnostics,
     TaskTransitionRecord,
     TaskUpdate,
     close_active_task_by_identifier,
     close_latest_active_task,
     complete_latest_active_task,
     create_task_contract,
+    diagnose_task_memory,
     find_latest_active_task,
     finish_active_task,
     transition_active_task,
@@ -445,3 +447,37 @@ def task_transition_json(
         "updated_files": [path.as_posix() for path in transition.updated_files],
         "warnings": list(transition.warnings),
     }
+
+
+def run_doctor_task_memory(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    diagnostics = diagnose_task_memory(root)
+
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "clean": diagnostics.clean,
+                    "findings": [
+                        {
+                            "check": f.check,
+                            "severity": f.severity,
+                            "message": f.message,
+                        }
+                        for f in diagnostics.findings
+                    ],
+                },
+                indent=2,
+                sort_keys=True,
+            )
+        )
+    else:
+        if diagnostics.clean:
+            print("Task memory: clean")
+            print("No inconsistencies detected.")
+        else:
+            print("Task memory: issues detected")
+            for finding in diagnostics.findings:
+                print(f"  [{finding.severity}] {finding.message}")
+
+    return 1 if diagnostics.has_errors else 0

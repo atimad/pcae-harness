@@ -357,7 +357,7 @@ def test_session_end_writes_snapshot_and_architecture_history(
     assert "Session end complete." in output
     assert "Active task: 20260523-0730-end-session" in output
     assert "Title: End session" in output
-    assert "Git status: 1 changed file" in output
+    assert "Git status: clean" in output
     assert "Architecture history entries: 1" in output
     assert "Next recommended step: none" in output
     assert session_data["active_task"] == {
@@ -441,9 +441,9 @@ def test_session_start_reports_missing_session_and_history(
     exit_code = main(["session", "start"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Session start stopped: pcae check failed." in output
-    assert "Session snapshot missing at .pcae/session.json." in output
+    assert exit_code == 0
+    assert "Session start summary." in output
+    assert "No session snapshot found at .pcae/session.json." in output
 
 
 def test_session_start_prints_resume_summary(

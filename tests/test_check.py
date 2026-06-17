@@ -227,7 +227,7 @@ def test_check_json_command_reports_failed_result(
         "src/other.py: Changed file is outside active task scope" in violation
         for violation in data["violations"]
     )
-    assert any("Session snapshot missing" in violation for violation in data["violations"])
+    assert any("Session snapshot missing" in w for w in data["warnings"])
 
 
 def test_check_detects_missing_required_files(tmp_path: Path) -> None:
@@ -632,8 +632,8 @@ def test_check_warns_when_session_snapshot_is_missing(tmp_path: Path) -> None:
 
     result = run_checks(HarnessPath(tmp_path))
 
-    assert not result.passed
-    assert has_violation(result, "Session snapshot missing at .pcae/session.json.")
+    assert result.passed
+    assert has_warning(result, "Session snapshot missing at .pcae/session.json.")
 
 
 def test_check_passes_when_session_active_task_matches(tmp_path: Path) -> None:
@@ -719,9 +719,8 @@ def test_check_command_prints_missing_session_warning(
     exit_code = main(["check"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
+    assert exit_code == 0
     assert "Session snapshot missing at .pcae/session.json." in output
-    assert "PCAE check found violations:" in output
 
 
 def test_check_command_prints_session_continuity_info(
@@ -804,12 +803,10 @@ def test_check_classifies_common_project_files_without_unclassified(
             "scripts/check-docs-updated.sh",
             ".githooks/pre-commit",
             "pyproject.toml",
-            ".pcae/session.json",
             ".pcae/policy.toml",
         ],
         override_protected_files=[
             "pyproject.toml",
-            ".pcae/session.json",
             ".pcae/policy.toml",
         ],
     )
@@ -817,14 +814,12 @@ def test_check_classifies_common_project_files_without_unclassified(
     write_file(tmp_path / "scripts" / "check-docs-updated.sh", "old\n")
     write_file(tmp_path / ".githooks" / "pre-commit", "old\n")
     write_file(tmp_path / "pyproject.toml", "[project]\nname = 'old'\n")
-    write_file(tmp_path / ".pcae" / "session.json", "{}\n")
     commit_baseline(tmp_path)
 
     write_file(tmp_path / "src" / "pcae" / "cli.py", "print('new')\n")
     write_file(tmp_path / "scripts" / "check-docs-updated.sh", "new\n")
     write_file(tmp_path / ".githooks" / "pre-commit", "new\n")
     write_file(tmp_path / "pyproject.toml", "[project]\nname = 'new'\n")
-    write_file(tmp_path / ".pcae" / "session.json", '{"updated": true}\n')
     write_file(
         tmp_path / ".pcae" / "policy.toml",
         default_policy_text() + "# changed for zone classification\n",
@@ -838,7 +833,6 @@ def test_check_classifies_common_project_files_without_unclassified(
     assert counts["scripts"] == 1
     assert counts["hooks"] == 1
     assert counts["package"] == 1
-    assert counts["session"] == 1
     assert counts["policy"] == 1
 
 

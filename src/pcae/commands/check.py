@@ -97,6 +97,8 @@ def session_continuity_status(result: CheckResult) -> str:
         return "verified"
     if any("Session snapshot missing" in violation.text for violation in result.violations):
         return "missing"
+    if any("Session snapshot missing" in warning.text for warning in result.warnings):
+        return "missing"
     if any("Invalid session JSON" in violation.text for violation in result.violations):
         return "invalid"
     if any(

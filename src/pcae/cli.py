@@ -412,6 +412,7 @@ from pcae.commands.session import (
 )
 from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_start
 from pcae.commands.task import (
+    run_doctor_task_memory,
     run_task_close,
     run_task_complete,
     run_task_finish,
@@ -5880,6 +5881,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     doctor_chain_parser.set_defaults(handler=run_doctor_execution_chain)
+
+    doctor_task_memory_parser = doctor_subparsers.add_parser(
+        "task-memory",
+        help="Detect task-memory inconsistencies: stale active tasks, missing DONE.md entries, status mismatches.",
+    )
+    doctor_task_memory_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    doctor_task_memory_parser.set_defaults(handler=run_doctor_task_memory)
 
     return parser
 

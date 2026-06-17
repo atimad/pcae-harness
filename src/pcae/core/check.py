@@ -354,15 +354,16 @@ def check_session_continuity(
         )
 
     if snapshot is None:
-        return (
+        warnings.append(
             CheckMessage(
                 reason=(
                     "Session snapshot missing at .pcae/session.json. "
                     "Run `pcae session write`."
                 ),
                 path=Path(".pcae/session.json"),
-            ),
+            )
         )
+        return ()
 
     session_task = snapshot.data.get("active_task")
     current_task = None

@@ -1221,7 +1221,7 @@ def test_61h_task_transition_command_creates_next_task_and_refreshes_session(
     assert active_task is not None
     assert active_task.title == "61I: Session Bootstrap Automation"
     assert active_task.enforcement_mode == "strict"
-    assert ".pcae/session.json" in active_task.allowed_files
+    assert ".pcae/session.json" not in active_task.allowed_files
     assert "tasks/active/**" in active_task.allowed_files
     assert "tasks/done/**" in active_task.allowed_files
     assert session is not None
@@ -1833,3 +1833,182 @@ def test_70a_task_complete_backward_compatibility(
     assert "Completed task: 20260617-2000-backward-compat" in output
     assert (tmp_path / "tasks" / "done" / "20260617-2000-backward-compat.md").is_file()
     assert not (tmp_path / "tasks" / "DONE.md").exists()
+
+
+# --- Phase 70B: pcae doctor task-memory ---
+
+
+def test_70b_doctor_task_memory_clean(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n- My task (20260617-2000-my-task)\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "My task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Task memory: clean" in output
+
+
+def test_70b_doctor_task_memory_detects_multiple_active_tasks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "First task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Second task",
+        created_at=datetime(2026, 6, 17, 21, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Found 2 active task files" in output
+
+
+def test_70b_doctor_task_memory_detects_session_mismatch(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Current task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    session_path = tmp_path / ".pcae" / "session.json"
+    session_path.parent.mkdir(parents=True, exist_ok=True)
+    session_path.write_text(
+        json.dumps({"active_task": {"id": "old-task-id", "title": "Old task"}}),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Session references task 'old-task-id'" in output
+
+
+def test_70b_doctor_task_memory_detects_missing_done_md_entries(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Completed task",
+        created_at=datetime(2026, 6, 17, 20, 0, tzinfo=timezone.utc),
+    )
+    from pcae.core.tasks import close_active_task, read_active_task
+
+    active_path = tmp_path / "tasks" / "active" / "20260617-2000-completed-task.md"
+    close_active_task(read_active_task(active_path))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "not listed in tasks/DONE.md" in output
+
+
+def test_70b_doctor_task_memory_detects_todo_references_completed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n## Pending\n\n- Already done task\n", encoding="utf-8"
+    )
+    done_path = tmp_path / "tasks" / "done" / "20260617-2000-already-done-task.md"
+    done_path.write_text(
+        "# Task Contract\n\n## Task ID\n\n20260617-2000-already-done-task\n\n"
+        "## Title\n\nAlready done task\n\n## Status\n\ndone\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "TODO.md still references completed task" in output
+
+
+def test_70b_doctor_task_memory_detects_done_status_in_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260617-2000-stuck-task.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260617-2000-stuck-task\n\n"
+        "## Title\n\nStuck task\n\n## Status\n\ndone\n\n## Mode\n\nimplementation\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "has status 'done' but is still in tasks/active/" in output
+
+
+def test_70b_doctor_task_memory_detects_active_status_in_done(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    done_dir = tmp_path / "tasks" / "done"
+    done_dir.mkdir(parents=True, exist_ok=True)
+    (done_dir / "20260617-2000-wrong-folder.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260617-2000-wrong-folder\n\n"
+        "## Title\n\nWrong folder task\n\n## Status\n\nactive\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "has status 'active' but is in tasks/done/" in output
+
+
+def test_70b_doctor_task_memory_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "active").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "active" / "20260617-2000-task-a.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260617-2000-task-a\n\n"
+        "## Title\n\nTask A\n\n## Status\n\ndone\n\n## Mode\n\nimplementation\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    parsed = json.loads(output)
+    assert parsed["clean"] is False
+    assert len(parsed["findings"]) >= 1
+    assert parsed["findings"][0]["severity"] == "error"
+    assert parsed["findings"][0]["check"] == "done_status_in_active_folder"

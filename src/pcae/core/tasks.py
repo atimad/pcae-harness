@@ -107,7 +107,6 @@ class TaskTransitionRecord:
 
 
 TRANSITION_ALLOWED_FILES: tuple[str, ...] = (
-    ".pcae/session.json",
     "tasks/active/**",
     "tasks/done/**",
     "tasks/TODO.md",
@@ -829,8 +828,7 @@ def changed_paths_for_transition(root: HarnessPath) -> tuple[str, ...]:
 def is_transition_documentation_path(path: Path) -> bool:
     path_text = path.as_posix()
     return (
-        path_text == ".pcae/session.json"
-        or path_text == "tasks/TODO.md"
+        path_text == "tasks/TODO.md"
         or path_text == "tasks/DONE.md"
         or path_text == "tasks/DECISIONS.md"
         or path_text == "PROJECT_STATUS.md"
@@ -1115,3 +1113,131 @@ def replace_task_section(
     replacement = ["", *replacement_lines, ""]
     updated_lines = lines[: start_index + 1] + replacement + lines[end_index:]
     return "\n".join(updated_lines).rstrip() + "\n"
+
+
+# --- Task-memory doctor diagnostics ---
+
+
+@dataclass(frozen=True)
+class TaskMemoryFinding:
+    check: str
+    severity: str
+    message: str
+
+
+@dataclass(frozen=True)
+class TaskMemoryDiagnostics:
+    findings: tuple[TaskMemoryFinding, ...]
+
+    @property
+    def has_errors(self) -> bool:
+        return any(f.severity == "error" for f in self.findings)
+
+    @property
+    def has_warnings(self) -> bool:
+        return any(f.severity == "warning" for f in self.findings)
+
+    @property
+    def clean(self) -> bool:
+        return not self.findings
+
+
+def diagnose_task_memory(root: HarnessPath) -> TaskMemoryDiagnostics:
+    findings: list[TaskMemoryFinding] = []
+
+    active_dir = root.join(Path("tasks") / "active")
+    done_dir = root.join(Path("tasks") / "done")
+
+    active_files = sorted(active_dir.glob("*.md")) if active_dir.is_dir() else []
+    done_files = sorted(done_dir.glob("*.md")) if done_dir.is_dir() else []
+
+    # Check 1: multiple active tasks
+    if len(active_files) > 1:
+        findings.append(TaskMemoryFinding(
+            check="multiple_active_tasks",
+            severity="warning",
+            message=f"Found {len(active_files)} active task files; expected at most 1.",
+        ))
+
+    # Check 2: active task matches session
+    session_path = root.join(Path(".pcae") / "session.json")
+    if active_files and session_path.is_file():
+        try:
+            session_data = json.loads(session_path.read_text(encoding="utf-8"))
+            session_task = session_data.get("active_task", {})
+            session_task_id = session_task.get("id") if isinstance(session_task, dict) else None
+            latest_active = read_active_task(active_files[-1])
+            if session_task_id and session_task_id != latest_active.task_id:
+                findings.append(TaskMemoryFinding(
+                    check="session_task_mismatch",
+                    severity="error",
+                    message=(
+                        f"Session references task '{session_task_id}' but latest active "
+                        f"task is '{latest_active.task_id}'."
+                    ),
+                ))
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    # Check 3: done files missing from tasks/DONE.md
+    done_md_path = root.join(DONE_RELATIVE_PATH)
+    if done_files and done_md_path.is_file():
+        done_md_content = done_md_path.read_text(encoding="utf-8")
+        for done_file in done_files:
+            task_id = done_file.stem
+            if task_id not in done_md_content:
+                task = read_task_summary(done_file, "done")
+                if task.title not in done_md_content:
+                    findings.append(TaskMemoryFinding(
+                        check="done_file_missing_from_done_md",
+                        severity="warning",
+                        message=(
+                            f"Task '{task.task_id}' ({task.title}) is in tasks/done/ "
+                            "but not listed in tasks/DONE.md."
+                        ),
+                    ))
+
+    # Check 4: TODO.md entries referring to completed tasks
+    todo_path = root.join(TODO_RELATIVE_PATH)
+    if done_files and todo_path.is_file():
+        todo_content = todo_path.read_text(encoding="utf-8")
+        done_titles = set()
+        for done_file in done_files:
+            task = read_task_summary(done_file, "done")
+            done_titles.add(task.title)
+        for title in done_titles:
+            if title in todo_content:
+                findings.append(TaskMemoryFinding(
+                    check="todo_references_completed_task",
+                    severity="warning",
+                    message=f"tasks/TODO.md still references completed task: '{title}'.",
+                ))
+
+    # Check 5: done-status task files in tasks/active
+    for active_file in active_files:
+        task = read_active_task(active_file)
+        if task.status == "done":
+            findings.append(TaskMemoryFinding(
+                check="done_status_in_active_folder",
+                severity="error",
+                message=(
+                    f"Task '{task.task_id}' has status 'done' but is still in "
+                    "tasks/active/."
+                ),
+            ))
+
+    # Check 6: active-status task files in tasks/done
+    for done_file in done_files:
+        content = done_file.read_text(encoding="utf-8")
+        status = read_task_section_text(content, "Status")
+        if status == "active":
+            task_id = read_task_section_text(content, "Task ID") or done_file.stem
+            findings.append(TaskMemoryFinding(
+                check="active_status_in_done_folder",
+                severity="error",
+                message=(
+                    f"Task '{task_id}' has status 'active' but is in tasks/done/."
+                ),
+            ))
+
+    return TaskMemoryDiagnostics(findings=tuple(findings))
