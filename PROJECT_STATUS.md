@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 70A: Lifecycle Automation Foundation.
+Phase 70B: Task Health and Runtime Hygiene.
 
 ## Milestone: Execution Chain Traceability Complete
 
