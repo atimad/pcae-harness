@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 70B Task Health and Runtime Hygiene (20260617-2340-70b-task-health-and-runtime-hygiene)
 - 70A Lifecycle Automation Foundation (20260617-2218-70a-lifecycle-automation-foundation)
 - 69O Promotion Rollback Execution (20260616-1743-69o-promotion-rollback-execution)
 - 69N Write Promotion Execution Design (20260616-1501-69n-write-promotion-execution-design)
