@@ -2497,3 +2497,160 @@ def test_70l_governed_lifecycle_end_to_end(
 
     diagnostics = diagnose_task_memory(HarnessPath(tmp_path))
     assert diagnostics.clean
+
+
+# --- Phase 70O: acceptance check enforcement ---
+
+
+def test_70o_finish_runs_passing_acceptance_checks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Acceptance pass task",
+        created_at=datetime(2026, 6, 18, 8, 0, tzinfo=timezone.utc),
+        acceptance_checks=("true",),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task:" in output
+
+
+def test_70o_finish_refuses_failing_acceptance_check(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Acceptance fail task",
+        created_at=datetime(2026, 6, 18, 8, 0, tzinfo=timezone.utc),
+        acceptance_checks=("false",),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Acceptance check failed: false" in output
+
+
+def test_70o_finish_skip_checks_bypasses_acceptance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Skip acceptance task",
+        created_at=datetime(2026, 6, 18, 8, 0, tzinfo=timezone.utc),
+        acceptance_checks=("false",),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--skip-checks"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task:" in output
+
+
+def test_70o_finish_json_includes_acceptance_results(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON acceptance task",
+        created_at=datetime(2026, 6, 18, 8, 0, tzinfo=timezone.utc),
+        acceptance_checks=("true",),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert "acceptance_checks" in parsed
+    assert len(parsed["acceptance_checks"]) == 1
+    assert parsed["acceptance_checks"][0]["passed"] is True
+
+
+def test_70o_finish_json_refusal_includes_acceptance_results(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON fail task",
+        created_at=datetime(2026, 6, 18, 8, 0, tzinfo=timezone.utc),
+        acceptance_checks=("false",),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    parsed = json.loads(output)
+    assert parsed["finished"] is False
+    assert any("Acceptance check failed" in b for b in parsed["blockers"])
+    assert parsed["acceptance_checks"][0]["passed"] is False
+
+
+def test_70o_finish_commit_refuses_on_acceptance_failure(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Commit fail task",
+        created_at=datetime(2026, 6, 18, 8, 0, tzinfo=timezone.utc),
+        acceptance_checks=("false",),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--commit", "Should not commit"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Acceptance check failed" in output
+    assert find_latest_active_task(HarnessPath(tmp_path)) is not None
+
+
+def test_70o_task_complete_does_not_run_checks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Complete no checks",
+        created_at=datetime(2026, 6, 18, 8, 0, tzinfo=timezone.utc),
+        acceptance_checks=("false",),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "complete"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Completed task:" in output

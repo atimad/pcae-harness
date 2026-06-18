@@ -173,23 +173,22 @@ def run_task_finish(args: argparse.Namespace) -> int:
     validation = validate_task_finish(root, skip_checks=skip_checks)
     if not validation.safe_to_finish:
         if args.json:
-            print(
-                json.dumps(
-                    {
-                        "blockers": list(validation.blockers),
-                        "committed": False if commit_message else None,
-                        "finished": False,
-                        "task_id": (
-                            validation.active_task.task_id
-                            if validation.active_task
-                            else None
-                        ),
-                        "warnings": list(validation.warnings),
-                    },
-                    indent=2,
-                    sort_keys=True,
-                )
-            )
+            data = {
+                "acceptance_checks": [
+                    {"check": r.check, "exit_code": r.exit_code, "passed": r.passed}
+                    for r in validation.acceptance_results
+                ],
+                "blockers": list(validation.blockers),
+                "committed": False if commit_message else None,
+                "finished": False,
+                "task_id": (
+                    validation.active_task.task_id
+                    if validation.active_task
+                    else None
+                ),
+                "warnings": list(validation.warnings),
+            }
+            print(json.dumps(data, indent=2, sort_keys=True))
         else:
             print("Task finish blocked.")
             for blocker in validation.blockers:
@@ -255,6 +254,10 @@ def run_task_finish(args: argparse.Namespace) -> int:
 
     if args.json:
         data = {
+            "acceptance_checks": [
+                {"check": r.check, "exit_code": r.exit_code, "passed": r.passed}
+                for r in result.acceptance_results
+            ],
             "finished": True,
             "task_id": result.completed_task.task_id,
             "title": result.completed_task.title,

@@ -80,10 +80,19 @@ class TaskTransitionValidation:
 
 
 @dataclass(frozen=True)
+class AcceptanceCheckResult:
+    check: str
+    passed: bool
+    exit_code: int
+    output: str
+
+
+@dataclass(frozen=True)
 class TaskFinishValidation:
     active_task: ActiveTask | None
     blockers: tuple[str, ...]
     warnings: tuple[str, ...]
+    acceptance_results: tuple[AcceptanceCheckResult, ...]
 
     @property
     def safe_to_finish(self) -> bool:
@@ -95,6 +104,7 @@ class TaskFinishResult:
     completed_task: ClosedTask
     updated_files: tuple[Path, ...]
     warnings: tuple[str, ...]
+    acceptance_results: tuple[AcceptanceCheckResult, ...]
 
 
 @dataclass(frozen=True)
@@ -231,6 +241,7 @@ def complete_latest_active_task(root: HarnessPath) -> ClosedTask | None:
 def validate_task_finish(root: HarnessPath, skip_checks: bool = False) -> TaskFinishValidation:
     blockers: list[str] = []
     warnings: list[str] = []
+    acceptance_results: list[AcceptanceCheckResult] = []
     active_task = find_latest_active_task_with_status(root, "active")
 
     if active_task is None:
@@ -239,6 +250,7 @@ def validate_task_finish(root: HarnessPath, skip_checks: bool = False) -> TaskFi
             active_task=None,
             blockers=tuple(blockers),
             warnings=tuple(warnings),
+            acceptance_results=(),
         )
 
     done_path = root.join(Path("tasks") / "done" / active_task.path.name)
@@ -267,11 +279,66 @@ def validate_task_finish(root: HarnessPath, skip_checks: bool = False) -> TaskFi
         if not coherence.coherent:
             warnings.append("pcae status coherence failed — PROJECT_STATUS.md may be stale.")
 
+        acceptance_results = run_acceptance_checks(root, active_task.acceptance_checks)
+        failed = [r for r in acceptance_results if not r.passed]
+        if failed:
+            for result in failed:
+                blockers.append(f"Acceptance check failed: {result.check}")
+
     return TaskFinishValidation(
         active_task=active_task,
         blockers=tuple(blockers),
         warnings=tuple(warnings),
+        acceptance_results=tuple(acceptance_results),
     )
+
+
+def run_acceptance_checks(
+    root: HarnessPath, checks: tuple[str, ...],
+) -> list[AcceptanceCheckResult]:
+    import shlex
+    import subprocess
+
+    results: list[AcceptanceCheckResult] = []
+    for check in checks:
+        if not check or check == "TBD":
+            continue
+        try:
+            args = shlex.split(check)
+        except ValueError:
+            results.append(AcceptanceCheckResult(
+                check=check, passed=False, exit_code=-1, output=f"Invalid command: {check}",
+            ))
+            continue
+
+        if not args:
+            continue
+
+        try:
+            completed = subprocess.run(
+                args,
+                cwd=root.path,
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
+            results.append(AcceptanceCheckResult(
+                check=check,
+                passed=completed.returncode == 0,
+                exit_code=completed.returncode,
+                output=(completed.stdout + completed.stderr).strip()[:500],
+            ))
+        except FileNotFoundError:
+            results.append(AcceptanceCheckResult(
+                check=check, passed=False, exit_code=-1,
+                output=f"Command not found: {args[0]}",
+            ))
+        except subprocess.TimeoutExpired:
+            results.append(AcceptanceCheckResult(
+                check=check, passed=False, exit_code=-1, output="Timed out after 120s",
+            ))
+
+    return results
 
 
 def finish_active_task(root: HarnessPath, skip_checks: bool = False) -> TaskFinishResult:
@@ -302,6 +369,7 @@ def finish_active_task(root: HarnessPath, skip_checks: bool = False) -> TaskFini
         completed_task=completed_task,
         updated_files=tuple(_unique_paths(updated_files)),
         warnings=validation.warnings,
+        acceptance_results=validation.acceptance_results,
     )
 
 
