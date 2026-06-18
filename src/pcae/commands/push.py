@@ -35,7 +35,9 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
     diagnostics = diagnose_task_memory(root)
 
     clean = not changes
-    health_ok = health["overall_status"].startswith("healthy")
+    from pcae.core.health import is_healthy
+
+    health_ok = is_healthy(health)
     idle = health.get("idle", False)
     check_ok = check_result.passed
     doctor_ok = not diagnostics.has_errors

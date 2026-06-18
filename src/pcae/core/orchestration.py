@@ -383,7 +383,9 @@ def build_workflow_readiness(root: HarnessPath, workflow: str) -> dict:
         step["agent_exists"] for step in validation["validated_steps"]
     )
     governance_checkpoints_exist = bool(validation["governance_checkpoints"])
-    health_is_healthy = health["overall_status"] == "healthy"
+    from pcae.core.health import is_healthy as _is_healthy
+
+    health_is_healthy = _is_healthy(health)
     check_passes = not health["violations"]
     session_continuity = health.get("session_continuity", "unknown")
     agent_lock = health.get("agent_lock") or {}

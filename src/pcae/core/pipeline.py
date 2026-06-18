@@ -93,8 +93,10 @@ def run_default_pipeline(
     timestamp = generated_at or datetime.now(timezone.utc)
     steps: list[PipelineStepResult] = []
 
+    from pcae.core.health import is_healthy
+
     health = build_health_data(root)
-    if health["overall_status"] != "healthy":
+    if not is_healthy(health):
         steps.append(
             PipelineStepResult(
                 name="pcae health",

@@ -332,10 +332,12 @@ def fleet_repo_health(repo: str) -> dict:
             "status": "unhealthy",
         }
 
+    from pcae.core.health import is_healthy
+
     health = build_health_data(HarnessPath(path))
     return {
         "active_task": health["active_task"],
-        "details": "ok" if health["overall_status"] == "healthy" else "check failed",
+        "details": "ok" if is_healthy(health) else "check failed",
         "latest_dependency_warnings": health["latest_dependency_warnings"],
         "latest_enforcement_mode": health["latest_enforcement_mode"],
         "path": repo,

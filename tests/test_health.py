@@ -8,6 +8,7 @@ import subprocess
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.agent import acquire_agent_lock
+from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.session import write_session_snapshot
 from pcae.core.tasks import create_task_contract
@@ -313,3 +314,54 @@ def test_70j_health_unhealthy_no_task_dirty_tree(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "unhealthy" in output
+
+
+# --- Phase 70K: structured health status ---
+
+
+def test_70k_health_data_has_structured_status() -> None:
+    from pcae.core.health import HEALTH_ACTIVE, HEALTH_IDLE, HEALTH_UNHEALTHY
+
+    assert HEALTH_ACTIVE == "healthy_active"
+    assert HEALTH_IDLE == "healthy_idle"
+    assert HEALTH_UNHEALTHY == "unhealthy"
+
+
+def test_70k_is_healthy_accepts_active_and_idle() -> None:
+    from pcae.core.health import is_healthy, HEALTH_ACTIVE, HEALTH_IDLE, HEALTH_UNHEALTHY
+
+    assert is_healthy({"health_status": HEALTH_ACTIVE}) is True
+    assert is_healthy({"health_status": HEALTH_IDLE}) is True
+    assert is_healthy({"health_status": HEALTH_UNHEALTHY}) is False
+    assert is_healthy({}) is False
+
+
+def test_70k_no_startswith_healthy_in_source() -> None:
+    import ast
+    from pathlib import Path
+
+    src = Path("src/pcae")
+    violations = []
+    for py_file in src.rglob("*.py"):
+        source = py_file.read_text(encoding="utf-8")
+        if 'startswith("healthy")' in source:
+            violations.append(str(py_file))
+
+    assert violations == [], (
+        f"Found startswith('healthy') in: {violations}"
+    )
+
+
+def test_70k_health_data_overall_status_display(
+    tmp_path: Path, monkeypatch
+) -> None:
+    init_ready_repo(tmp_path)
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    data = build_health_data(HarnessPath(tmp_path))
+
+    assert data["health_status"] == "healthy_active"
+    assert data["overall_status"] == "healthy"
+    assert data["idle"] is False

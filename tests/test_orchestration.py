@@ -1607,7 +1607,7 @@ def test_cli_orchestration_readiness_json(tmp_path: Path, monkeypatch, capsys) -
     assert data["fallback_used"] is False
 
 
-def test_cli_orchestration_readiness_returns_nonzero_when_not_ready(
+def test_cli_orchestration_readiness_idle_state(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
@@ -1616,8 +1616,7 @@ def test_cli_orchestration_readiness_returns_nonzero_when_not_ready(
     monkeypatch.chdir(tmp_path)
     exit_code = main(["orchestration", "readiness", "--workflow", "documentation"])
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Readiness status: not ready" in output
+    assert exit_code == 0
 
 
 # ---------------------------------------------------------------------------

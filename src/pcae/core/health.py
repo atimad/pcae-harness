@@ -8,6 +8,20 @@ from pcae.core.inspect import InspectionResult, inspect_harness
 from pcae.core.paths import HarnessPath
 from pcae.core.session import session_continuity_status, summarize_git_changes
 
+HEALTH_ACTIVE = "healthy_active"
+HEALTH_IDLE = "healthy_idle"
+HEALTH_UNHEALTHY = "unhealthy"
+
+HEALTH_DISPLAY = {
+    HEALTH_ACTIVE: "healthy",
+    HEALTH_IDLE: "healthy (idle)",
+    HEALTH_UNHEALTHY: "unhealthy",
+}
+
+
+def is_healthy(health_data: dict) -> bool:
+    return health_data.get("health_status") in (HEALTH_ACTIVE, HEALTH_IDLE)
+
 
 def build_health_data(root: HarnessPath) -> dict:
     inspection = inspect_harness(root)
@@ -35,22 +49,23 @@ def build_health_data(root: HarnessPath) -> dict:
         latest_enforcement_mode = latest.get("enforcement_mode", "unknown")
         latest_dependency_warnings = latest.get("dependency_warnings_count")
 
-    idle = check_result.active_task_id is None and check_result.passed
-    status = "healthy"
     if not check_result.passed:
-        status = "unhealthy"
-    elif idle:
-        status = "healthy (idle)"
+        health_status = HEALTH_UNHEALTHY
+    elif check_result.active_task_id is None:
+        health_status = HEALTH_IDLE
+    else:
+        health_status = HEALTH_ACTIVE
 
     return {
         "active_task": active_task_data(check_result),
         "agent_lock": build_agent_lock_state(root),
         "architecture_history_entries": architecture_history_entries,
         "git_status": summarize_git_changes(changes),
-        "idle": idle,
+        "health_status": health_status,
+        "idle": health_status == HEALTH_IDLE,
         "latest_dependency_warnings": latest_dependency_warnings,
         "latest_enforcement_mode": latest_enforcement_mode,
-        "overall_status": status,
+        "overall_status": HEALTH_DISPLAY[health_status],
         "policy_source": inspection.policy.source,
         "policy_validation": "valid" if inspection.policy.valid else "invalid",
         "required_files_status": required_file_status(inspection),

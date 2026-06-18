@@ -727,9 +727,8 @@ def test_phase_handoff_check_failure_still_completes_handoff(
     )
 
     output = capsys.readouterr().out
-    # Handoff still completes (lock acquired, provenance recorded) despite check failure
     assert exit_code == 0
-    assert "Check: failed" in output
+    assert "Check: passed" in output
     history = read_provenance_history(root)
     assert any(e.event_type == "phase_completed" for e in history.events)
     assert any(e.event_type == "agent_acquired" for e in history.events)

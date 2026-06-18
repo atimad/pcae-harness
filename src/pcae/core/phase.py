@@ -79,9 +79,11 @@ def handoff_phase(
     append_provenance_event(root, "phase_completed", summary)
 
     # Run governance validation (health + check semantics) before releasing.
+    from pcae.core.health import is_healthy
+
     health_data = build_health_data(root)
     health_status: str = health_data["overall_status"]
-    check_passed = health_status == "healthy"
+    check_passed = is_healthy(health_data)
     violations = tuple(health_data["violations"])
 
     # Release current lock and record agent_released.

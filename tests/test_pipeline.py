@@ -279,7 +279,7 @@ def test_pipeline_stops_on_failed_check(
     init_pipeline_repo(tmp_path)
     monkeypatch.setattr(
         "pcae.core.pipeline.build_health_data",
-        lambda root: {"overall_status": "healthy"},
+        lambda root: {"overall_status": "healthy", "health_status": "healthy_active"},
     )
     monkeypatch.setattr(
         "pcae.core.pipeline.run_checks",

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 70J: Idle State Health Semantics.
+Phase 70K: Structured Health Status.
 
 ## Milestone: Execution Chain Traceability Complete
 

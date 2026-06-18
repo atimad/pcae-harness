@@ -253,8 +253,10 @@ def validate_task_finish(root: HarnessPath, skip_checks: bool = False) -> TaskFi
         from pcae.core.health import build_health_data
         from pcae.core.status import check_project_status_coherence
 
+        from pcae.core.health import is_healthy
+
         health = build_health_data(root)
-        if health.get("overall_status") != "healthy":
+        if not is_healthy(health):
             blockers.append("pcae health is unhealthy. Fix health issues before finishing.")
 
         check_result = run_checks(root)

@@ -14,7 +14,9 @@ def run_health(args: argparse.Namespace) -> int:
     else:
         print_health(data)
 
-    return 0 if data["overall_status"].startswith("healthy") else 1
+    from pcae.core.health import is_healthy
+
+    return 0 if is_healthy(data) else 1
 
 
 def print_health(data: dict) -> None:
