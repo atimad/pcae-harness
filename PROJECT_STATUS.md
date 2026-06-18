@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 70D: Task Contract Ergonomics.
+Phase 70E: Task Finish Commit Automation.
 
 ## Milestone: Execution Chain Traceability Complete
 

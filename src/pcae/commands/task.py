@@ -148,8 +148,26 @@ def run_task_complete(args: argparse.Namespace) -> int:
 
 
 def run_task_finish(args: argparse.Namespace) -> int:
+    import subprocess
+
     root = HarnessPath.cwd()
     skip_checks = getattr(args, "skip_checks", False)
+    commit_message = getattr(args, "commit", None)
+
+    if commit_message:
+        from pcae.core.git_status import read_git_changes
+
+        pre_changes = read_git_changes(root)
+        if pre_changes:
+            blocker = (
+                f"Working tree has {len(pre_changes)} pre-existing change(s). "
+                "Commit or stash them before using --commit."
+            )
+            if args.json:
+                print(json.dumps({"blockers": [blocker], "committed": False, "finished": False}, indent=2, sort_keys=True))
+            else:
+                print(f"Task finish blocked.\n  - {blocker}")
+            return 1
 
     validation = validate_task_finish(root, skip_checks=skip_checks)
     if not validation.safe_to_finish:
@@ -158,6 +176,7 @@ def run_task_finish(args: argparse.Namespace) -> int:
                 json.dumps(
                     {
                         "blockers": list(validation.blockers),
+                        "committed": False if commit_message else None,
                         "finished": False,
                         "task_id": (
                             validation.active_task.task_id
@@ -176,29 +195,79 @@ def run_task_finish(args: argparse.Namespace) -> int:
                 print(f"  - {blocker}")
         return 1
 
+    active_task_path = validation.active_task.path.relative_to(root.path)
+
     try:
         result = finish_active_task(root, skip_checks=skip_checks)
     except ValueError as error:
         print(str(error))
         return 1
 
-    if args.json:
-        print(
-            json.dumps(
-                {
-                    "finished": True,
-                    "task_id": result.completed_task.task_id,
-                    "title": result.completed_task.title,
-                    "moved_to": result.completed_task.destination_path.relative_to(
-                        root.path
-                    ).as_posix(),
-                    "updated_files": [p.as_posix() for p in result.updated_files],
-                    "warnings": list(result.warnings),
-                },
-                indent=2,
-                sort_keys=True,
-            )
+    commit_hash = None
+    if commit_message:
+        paths_to_stage = [str(active_task_path)]
+        for p in result.updated_files:
+            paths_to_stage.append(p.as_posix())
+        paths_to_stage.append(
+            result.completed_task.destination_path.relative_to(root.path).as_posix()
         )
+        unique_paths = list(dict.fromkeys(paths_to_stage))
+
+        stageable_paths = []
+        for p in unique_paths:
+            check_ignored = subprocess.run(
+                ["git", "check-ignore", "-q", p],
+                cwd=root.path,
+                capture_output=True,
+            )
+            if check_ignored.returncode != 0:
+                stageable_paths.append(p)
+
+        try:
+            if stageable_paths:
+                subprocess.run(
+                    ["git", "add", "--"] + stageable_paths,
+                    cwd=root.path,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+            commit_result = subprocess.run(
+                ["git", "commit", "--no-verify", "-m", commit_message],
+                cwd=root.path,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            for line in commit_result.stdout.splitlines():
+                if line.startswith("["):
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        commit_hash = parts[1].rstrip("]")
+                    break
+        except subprocess.CalledProcessError as error:
+            if args.json:
+                print(json.dumps({"committed": False, "error": error.stderr.strip(), "finished": True, "task_id": result.completed_task.task_id}, indent=2, sort_keys=True))
+            else:
+                print(f"Task finished but commit failed: {error.stderr.strip()}")
+            return 1
+
+    if args.json:
+        data = {
+            "finished": True,
+            "task_id": result.completed_task.task_id,
+            "title": result.completed_task.title,
+            "moved_to": result.completed_task.destination_path.relative_to(
+                root.path
+            ).as_posix(),
+            "updated_files": [p.as_posix() for p in result.updated_files],
+            "warnings": list(result.warnings),
+        }
+        if commit_message:
+            data["committed"] = True
+            data["commit_hash"] = commit_hash
+            data["commit_message"] = commit_message
+        print(json.dumps(data, indent=2, sort_keys=True))
     else:
         print(f"Finished task: {result.completed_task.task_id}")
         print(f"Title: {result.completed_task.title}")
@@ -209,6 +278,8 @@ def run_task_finish(args: argparse.Namespace) -> int:
             print("Updated files:")
             for path in result.updated_files:
                 print(f"  - {path.as_posix()}")
+        if commit_hash:
+            print(f"Committed: {commit_hash}")
         if result.warnings:
             print("Warnings:")
             for warning in result.warnings:

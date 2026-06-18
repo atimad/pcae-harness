@@ -4264,6 +4264,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip health/check validation (explicit human override).",
     )
+    task_finish_parser.add_argument(
+        "--commit",
+        metavar="MESSAGE",
+        help="Stage finish changes and create a git commit with the given message.",
+    )
     task_finish_parser.set_defaults(handler=run_task_finish)
 
     task_list_parser = task_subparsers.add_parser(

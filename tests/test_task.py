@@ -2106,3 +2106,139 @@ def test_70d_task_update_unchanged(tmp_path: Path, monkeypatch, capsys) -> None:
     assert active_task is not None
     assert active_task.goal == "Updated goal"
     assert "new_file.py" in active_task.allowed_files
+
+
+# --- Phase 70E: pcae task finish --commit ---
+
+
+def test_70e_task_finish_commit_creates_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Commit test task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--skip-checks", "--commit", "Complete the commit test task"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task: 20260618-0500-commit-test-task" in output
+    assert "Committed:" in output
+    result = subprocess.run(
+        ["git", "log", "--oneline", "-1"],
+        cwd=tmp_path, capture_output=True, text=True, check=True,
+    )
+    assert "Complete the commit test task" in result.stdout
+    result = subprocess.run(
+        ["git", "status", "--porcelain=v1"],
+        cwd=tmp_path, capture_output=True, text=True, check=True,
+    )
+    assert result.stdout.strip() == ""
+
+
+def test_70e_task_finish_commit_refuses_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Dirty tree task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    (tmp_path / "unrelated.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--commit", "Should not commit"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "pre-existing change" in output
+    assert find_latest_active_task(HarnessPath(tmp_path)) is not None
+
+
+def test_70e_task_finish_commit_json_includes_hash(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON commit task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--skip-checks", "--commit", "JSON commit", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["finished"] is True
+    assert parsed["committed"] is True
+    assert parsed["commit_hash"] is not None
+    assert parsed["commit_message"] == "JSON commit"
+
+
+def test_70e_task_finish_without_commit_unchanged(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "No commit task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--skip-checks"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task:" in output
+    assert "Committed:" not in output
+
+
+def test_70e_task_finish_commit_dirty_tree_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON dirty task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    (tmp_path / "extra.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "--commit", "Nope", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    parsed = json.loads(output)
+    assert parsed["finished"] is False
+    assert parsed["committed"] is False
+    assert len(parsed["blockers"]) > 0
