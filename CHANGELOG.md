@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Bootstrap Handoff Freshness (Phase 71A): compact bootstrap now shows "Last handoff:" with summary, timestamp, latest commit, task state, review status, and next action when `.pcae/handoffs/latest.json` exists. The stale `PROJECT_STATUS.md` phase is demoted to "Phase (from PROJECT_STATUS.md):" when a handoff artifact provides newer context. Bootstrap without handoff artifact preserves existing behavior. `build_bootstrap_prompt` gains optional `handoff` parameter. 4 new tests.
 - Governed Multi-Phase Runner Design (Phase 70Z): design document added to `docs/ARCHITECTURE.md`. Proposes `pcae phase run-queue` with governed one-phase-at-a-time execution, mandatory stop conditions (test failure, health/check failure, scope drift, review enforcement), audit artifacts at `.pcae/phase-runs/`, and external-agent-driven architecture. No implementation — design only.
 - Phase Queue Planning Command (Phase 70Y): adds `pcae phase queue add/list/show/clear` for advisory phase queue planning. Queue stored in `.pcae/phase-queue.json` (gitignored). Does not execute queued phases or create task contracts. All subcommands support `--json`. 10 new tests.
 - Handoff Artifact Hygiene (Phase 70X): adds `pcae phase handoff-prune` to inspect and prune old timestamped handoff artifacts. `--keep N` specifies how many recent artifacts to retain (default: 20). `--dry-run` reports candidates without deleting. `--json` for machine-readable output. `latest.json` is never deleted. 7 new tests.

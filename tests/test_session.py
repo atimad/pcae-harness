@@ -1749,3 +1749,87 @@ def test_70w_bootstrap_does_not_mutate_handoff(
     capsys.readouterr()
     after = (tmp_path / ".pcae" / "handoffs" / "latest.json").read_text(encoding="utf-8")
     assert before == after
+
+
+# ---------------------------------------------------------------------------
+# Phase 71A: bootstrap handoff freshness and stale phase fix
+# ---------------------------------------------------------------------------
+
+
+def test_71a_compact_bootstrap_shows_handoff_over_stale_phase(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    handoff = _sample_handoff()
+    handoff["summary"] = "Phase handoff: task=idle, latest_commit=Complete Phase 70Z"
+    handoff["latest_commit"] = "Complete Phase 70Z"
+    _write_handoff_artifact(tmp_path, handoff)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Last handoff:" in output
+    assert "Complete Phase 70Z" in output
+    assert "Phase (from PROJECT_STATUS.md):" in output
+
+
+def test_71a_compact_bootstrap_no_handoff_shows_plain_phase(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase:" in output
+    assert "Phase (from PROJECT_STATUS.md):" not in output
+
+
+def test_71a_compact_bootstrap_json_includes_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    handoff = _sample_handoff()
+    handoff["latest_commit"] = "Complete Phase 70Z"
+    _write_handoff_artifact(tmp_path, handoff)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["latest_handoff"] is not None
+    assert data["latest_handoff"]["latest_commit"] == "Complete Phase 70Z"
+    assert "Last handoff:" in data["bootstrap_prompt"]
+
+
+def test_71a_compact_bootstrap_prompt_text_contains_handoff_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    handoff = _sample_handoff()
+    handoff["summary"] = "Phase handoff: branch=main, task=idle"
+    handoff["task_state"] = "idle"
+    handoff["recommended_next_action"] = "pcae session bootstrap --agent-id claude-local"
+    _write_handoff_artifact(tmp_path, handoff)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Task: idle" in output
+    assert "Next action:" in output

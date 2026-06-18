@@ -144,7 +144,11 @@ _STALE_CONTEXT_RULE = (
 )
 
 
-def build_bootstrap_prompt(pack: ContextPack, profile: WorkModeProfile) -> str:
+def build_bootstrap_prompt(
+    pack: ContextPack,
+    profile: WorkModeProfile,
+    handoff: dict | None = None,
+) -> str:
     """Return a compact governed bootstrap prompt string."""
     lines: list[str] = []
 
@@ -172,7 +176,18 @@ def build_bootstrap_prompt(pack: ContextPack, profile: WorkModeProfile) -> str:
     )
 
     rs = pack.roadmap_summary
-    lines.append(f"Phase: {rs['current_phase']}")
+    if handoff is not None:
+        lines.append(f"Last handoff: {handoff.get('summary', 'unknown')}")
+        lines.append(f"  Handoff at: {handoff.get('created_at', 'unknown')}")
+        lines.append(f"  Latest commit: {handoff.get('latest_commit', 'unknown')}")
+        lines.append(f"  Task: {handoff.get('task_state', 'unknown')}")
+        handoff_review = handoff.get("lifecycle_review")
+        if handoff_review:
+            lines.append(f"  Review: {handoff_review}")
+        lines.append(f"  Next action: {handoff.get('recommended_next_action', 'unknown')}")
+        lines.append(f"Phase (from PROJECT_STATUS.md): {rs['current_phase']}")
+    else:
+        lines.append(f"Phase: {rs['current_phase']}")
     lines.append(f"Emphasized: {', '.join(profile.emphasized_sections)}")
 
     continuity = pack.strategic_continuity

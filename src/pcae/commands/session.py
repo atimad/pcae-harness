@@ -243,7 +243,7 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     handoff = _load_latest_handoff(root)
     profile_name: str | None = getattr(args, "profile", None)
     profile, is_unknown = resolve_profile(profile_name)
-    prompt = build_bootstrap_prompt(pack, profile)
+    prompt = build_bootstrap_prompt(pack, profile, handoff=handoff)
 
     if args.json:
         print(
