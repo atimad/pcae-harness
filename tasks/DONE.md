@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Governed Multi-Phase Runner Design (20260619-0114-governed-multi-phase-runner-design)
 - Phase Queue Planning Command (20260619-0109-phase-queue-planning-command)
 - Handoff Artifact Hygiene (20260619-0105-handoff-artifact-hygiene)
 - Handoff Bootstrap Consumption (20260619-0059-handoff-bootstrap-consumption)
