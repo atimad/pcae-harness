@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Handoff Artifact Hygiene (20260619-0105-handoff-artifact-hygiene)
 - Handoff Bootstrap Consumption (20260619-0059-handoff-bootstrap-consumption)
 - Handoff Artifact Persistence (20260619-0039-handoff-artifact-persistence)
 - Phase Handoff Inspection and Auto-Summary Design (20260619-0026-phase-handoff-inspection-and-auto-summary-design)
