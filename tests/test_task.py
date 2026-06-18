@@ -2242,3 +2242,195 @@ def test_70e_task_finish_commit_dirty_tree_json(
     assert parsed["finished"] is False
     assert parsed["committed"] is False
     assert len(parsed["blockers"]) > 0
+
+
+# --- Phase 70I: pcae doctor task-memory --fix ---
+
+
+def test_70i_fix_repairs_done_file_missing_from_done_md(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    (tmp_path / "tasks" / "done" / "20260618-0500-missing-task.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-missing-task\n\n"
+        "## Title\n\nMissing task\n\n## Status\n\ndone\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory", "--fix"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "appended_to_done_md" in output
+    done_md = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    assert "Missing task (20260618-0500-missing-task)" in done_md
+
+
+def test_70i_fix_repairs_todo_references_completed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n- Stale task (20260618-0500-stale)\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "TODO.md").write_text(
+        "# TODO\n\n## Pending\n\n- Stale task\n- Other task\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "tasks" / "done" / "20260618-0500-stale.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-stale\n\n"
+        "## Title\n\nStale task\n\n## Status\n\ndone\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory", "--fix"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "removed_from_todo_md" in output
+    todo_md = (tmp_path / "tasks" / "TODO.md").read_text(encoding="utf-8")
+    assert "Stale task" not in todo_md
+    assert "Other task" in todo_md
+
+
+def test_70i_fix_repairs_done_status_in_active(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260618-0500-stuck.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-stuck\n\n"
+        "## Title\n\nStuck task\n\n## Status\n\ndone\n\n## Mode\n\nimplementation\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory", "--fix"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "moved_to_done" in output
+    assert not (active_dir / "20260618-0500-stuck.md").exists()
+    assert (tmp_path / "tasks" / "done" / "20260618-0500-stuck.md").is_file()
+
+
+def test_70i_fix_dry_run_does_not_mutate(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    (tmp_path / "tasks" / "done" / "20260618-0500-dry-task.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-dry-task\n\n"
+        "## Title\n\nDry task\n\n## Status\n\ndone\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory", "--fix", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "would_repair" in output
+    done_md = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    assert "Dry task" not in done_md
+
+
+def test_70i_fix_skips_unrepairable_findings(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "done" / "20260618-0500-wrong.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-wrong\n\n"
+        "## Title\n\nWrong folder\n\n## Status\n\nactive\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory", "--fix"])
+
+    output = capsys.readouterr().out
+    assert "Skipped (requires human action):" in output
+    assert "status 'active' but is in tasks/done/" in output
+
+
+def test_70i_fix_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    (tmp_path / "tasks" / "done" / "20260618-0500-json-fix.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-json-fix\n\n"
+        "## Title\n\nJSON fix task\n\n## Status\n\ndone\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory", "--fix", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert "pre_findings" in parsed
+    assert "repairs" in parsed
+    assert "skipped" in parsed
+    assert "post_findings" in parsed
+    assert len(parsed["repairs"]) == 1
+    assert parsed["repairs"][0]["action"] == "appended_to_done_md"
+    assert len(parsed["post_findings"]) == 0
+
+
+def test_70i_fix_is_idempotent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    (tmp_path / "tasks" / "done" / "20260618-0500-idem.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-idem\n\n"
+        "## Title\n\nIdempotent task\n\n## Status\n\ndone\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    main(["doctor", "task-memory", "--fix"])
+    capsys.readouterr()
+
+    exit_code = main(["doctor", "task-memory", "--fix"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Post-fix: clean" in output
+
+
+def test_70i_doctor_without_fix_unchanged(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    (tmp_path / "tasks" / "done").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    (tmp_path / "tasks" / "done" / "20260618-0500-noop.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260618-0500-noop\n\n"
+        "## Title\n\nNoop task\n\n## Status\n\ndone\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "task-memory"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "issues detected" in output
+    done_md = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    assert "Noop task" not in done_md

@@ -22,6 +22,7 @@ from pcae.core.tasks import (
     diagnose_task_memory,
     find_latest_active_task,
     finish_active_task,
+    repair_task_memory,
     transition_active_task,
     validate_task_finish,
     validate_task_transition,
@@ -542,6 +543,52 @@ def task_transition_json(
 
 def run_doctor_task_memory(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
+    fix = getattr(args, "fix", False)
+    dry_run = getattr(args, "dry_run", False)
+
+    if fix:
+        result = repair_task_memory(root, dry_run=dry_run)
+        if args.json:
+            print(json.dumps({
+                "dry_run": dry_run,
+                "post_findings": [
+                    {"check": f.check, "message": f.message, "severity": f.severity}
+                    for f in result.post_findings
+                ],
+                "pre_findings": [
+                    {"check": f.check, "message": f.message, "severity": f.severity}
+                    for f in result.pre_findings
+                ],
+                "repairs": [
+                    {"action": r.action, "check": r.check, "path": r.path}
+                    for r in result.repairs
+                ],
+                "skipped": [
+                    {"check": f.check, "message": f.message, "severity": f.severity}
+                    for f in result.skipped
+                ],
+            }, indent=2, sort_keys=True))
+        else:
+            if dry_run:
+                print("Task memory repair (dry run)")
+            else:
+                print("Task memory repair")
+            if result.repairs:
+                print("Repairs:" if not dry_run else "Would repair:")
+                for repair in result.repairs:
+                    print(f"  [{repair.check}] {repair.action} → {repair.path}")
+            if result.skipped:
+                print("Skipped (requires human action):")
+                for finding in result.skipped:
+                    print(f"  [{finding.severity}] {finding.message}")
+            if not dry_run:
+                post_count = len(result.post_findings)
+                if post_count == 0:
+                    print("Post-fix: clean")
+                else:
+                    print(f"Post-fix: {post_count} finding(s) remaining")
+        return 0
+
     diagnostics = diagnose_task_memory(root)
 
     if args.json:

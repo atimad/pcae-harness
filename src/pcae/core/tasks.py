@@ -1241,3 +1241,152 @@ def diagnose_task_memory(root: HarnessPath) -> TaskMemoryDiagnostics:
             ))
 
     return TaskMemoryDiagnostics(findings=tuple(findings))
+
+
+REPAIRABLE_CHECKS: frozenset[str] = frozenset({
+    "done_file_missing_from_done_md",
+    "todo_references_completed_task",
+    "done_status_in_active_folder",
+})
+
+
+@dataclass(frozen=True)
+class TaskMemoryRepair:
+    check: str
+    action: str
+    path: str
+
+
+@dataclass(frozen=True)
+class TaskMemoryRepairResult:
+    pre_findings: tuple[TaskMemoryFinding, ...]
+    repairs: tuple[TaskMemoryRepair, ...]
+    skipped: tuple[TaskMemoryFinding, ...]
+    post_findings: tuple[TaskMemoryFinding, ...]
+
+
+def repair_task_memory(root: HarnessPath, dry_run: bool = False) -> TaskMemoryRepairResult:
+    pre = diagnose_task_memory(root)
+    repairs: list[TaskMemoryRepair] = []
+    skipped: list[TaskMemoryFinding] = []
+
+    for finding in pre.findings:
+        if finding.check not in REPAIRABLE_CHECKS:
+            skipped.append(finding)
+            continue
+
+        if dry_run:
+            repairs.append(TaskMemoryRepair(
+                check=finding.check,
+                action="would_repair",
+                path=_repair_path_for_finding(root, finding),
+            ))
+            continue
+
+        repair = _apply_repair(root, finding)
+        if repair is not None:
+            repairs.append(repair)
+        else:
+            skipped.append(finding)
+
+    post = pre if dry_run else diagnose_task_memory(root)
+
+    return TaskMemoryRepairResult(
+        pre_findings=pre.findings,
+        repairs=tuple(repairs),
+        skipped=tuple(skipped),
+        post_findings=post.findings,
+    )
+
+
+def _repair_path_for_finding(root: HarnessPath, finding: TaskMemoryFinding) -> str:
+    if finding.check == "done_file_missing_from_done_md":
+        return DONE_RELATIVE_PATH.as_posix()
+    if finding.check == "todo_references_completed_task":
+        return TODO_RELATIVE_PATH.as_posix()
+    if finding.check == "done_status_in_active_folder":
+        task_id = _extract_task_id_from_message(finding.message)
+        if task_id:
+            return f"tasks/done/{task_id}.md"
+    return ""
+
+
+def _apply_repair(root: HarnessPath, finding: TaskMemoryFinding) -> TaskMemoryRepair | None:
+    if finding.check == "done_file_missing_from_done_md":
+        return _repair_done_file_missing(root, finding)
+    if finding.check == "todo_references_completed_task":
+        return _repair_todo_references_completed(root, finding)
+    if finding.check == "done_status_in_active_folder":
+        return _repair_done_status_in_active(root, finding)
+    return None
+
+
+def _repair_done_file_missing(root: HarnessPath, finding: TaskMemoryFinding) -> TaskMemoryRepair | None:
+    task_id = _extract_task_id_from_message(finding.message)
+    title = _extract_title_from_message(finding.message)
+    if not task_id or not title:
+        return None
+    line = f"- {title} ({task_id})"
+    ensure_bullet_in_section(
+        root.join(DONE_RELATIVE_PATH),
+        "Done",
+        "Completed",
+        line,
+    )
+    return TaskMemoryRepair(
+        check="done_file_missing_from_done_md",
+        action="appended_to_done_md",
+        path=DONE_RELATIVE_PATH.as_posix(),
+    )
+
+
+def _repair_todo_references_completed(root: HarnessPath, finding: TaskMemoryFinding) -> TaskMemoryRepair | None:
+    title = _extract_todo_title_from_message(finding.message)
+    if not title:
+        return None
+    path = root.join(TODO_RELATIVE_PATH)
+    if not path.is_file():
+        return None
+    original = path.read_text(encoding="utf-8")
+    updated = remove_exact_bullets(original, {title})
+    if updated == original:
+        return None
+    with path.open("w", encoding="utf-8", newline="\n") as fh:
+        fh.write(updated)
+    return TaskMemoryRepair(
+        check="todo_references_completed_task",
+        action="removed_from_todo_md",
+        path=TODO_RELATIVE_PATH.as_posix(),
+    )
+
+
+def _repair_done_status_in_active(root: HarnessPath, finding: TaskMemoryFinding) -> TaskMemoryRepair | None:
+    task_id = _extract_task_id_from_message(finding.message)
+    if not task_id:
+        return None
+    active_path = root.join(Path("tasks") / "active" / f"{task_id}.md")
+    if not active_path.is_file():
+        return None
+    done_path = root.join(Path("tasks") / "done" / f"{task_id}.md")
+    done_path.parent.mkdir(parents=True, exist_ok=True)
+    active_path.replace(done_path)
+    return TaskMemoryRepair(
+        check="done_status_in_active_folder",
+        action="moved_to_done",
+        path=f"tasks/done/{task_id}.md",
+    )
+
+
+def _extract_task_id_from_message(message: str) -> str | None:
+    match = re.search(r"Task '([^']+)'", message)
+    return match.group(1) if match else None
+
+
+def _extract_title_from_message(message: str) -> str | None:
+    match = re.search(r"\(([^)]+)\) is in tasks/done/", message)
+    return match.group(1) if match else None
+
+
+def _extract_todo_title_from_message(message: str) -> str | None:
+    match = re.search(r"completed task: '([^']+)'", message)
+    return match.group(1) if match else None

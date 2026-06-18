@@ -5901,6 +5901,12 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_task_memory_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
+    doctor_task_memory_parser.add_argument(
+        "--fix", action="store_true", help="Repair deterministic inconsistencies."
+    )
+    doctor_task_memory_parser.add_argument(
+        "--dry-run", action="store_true", help="Show intended repairs without mutating files."
+    )
     doctor_task_memory_parser.set_defaults(handler=run_doctor_task_memory)
 
     push_parser = subparsers.add_parser(

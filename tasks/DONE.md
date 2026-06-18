@@ -2,6 +2,19 @@
 
 ## Completed
 
+- 70H Governed Push Execution (20260618-0605-70h-governed-push-execution)
+- 69P Execution Chain Traceability and Status Layer (20260616-2328-69p-execution-chain-traceability-and-status-layer)
+- Write Invocation Approval Gateway Design (20260610-2037-write-invocation-approval-gateway-design)
+- 64F Orchestration Readiness Gate (20260609-1937-64f-orchestration-readiness-gate)
+- Post-60A roadmap checkpoint (20260607-1317-post-60a-roadmap-checkpoint)
+- Read-Only Runtime Invocation (20260607-0241-55a)
+- Runtime Integration Readiness (20260606-2341-runtime-integration-readiness)
+- Documentation refresh and release checkpoint (20260606-2117-documentation-refresh-and-release-checkpoint)
+- Multi-agent governance audit (20260605-1052-multi-agent-governance-audit)
+- Plan multi-agent governance next phase (20260605-1043-plan-multi-agent-governance-next-phase)
+- Plan multi-agent governance next phase (20260605-1042-plan-multi-agent-governance-next-phase)
+- Implement global policy configuration (20260523-0731-implement-global-policy-configuration)
+- Test task contract (20260522-2113-test-task-contract)
 - 70G Post-Finish Push Readiness (20260618-0551-70g-post-finish-push-readiness)
 - 70F Pre-Push Governance (20260618-0535-70f-pre-push-governance)
 - 70E Task Finish Commit Automation (20260618-0516-70e-task-finish-commit-automation)
