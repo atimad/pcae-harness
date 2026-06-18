@@ -411,6 +411,7 @@ from pcae.commands.session import (
     run_session_write,
 )
 from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_start
+from pcae.commands.push import run_push_check
 from pcae.commands.task import (
     run_doctor_task_memory,
     run_task_close,
@@ -5901,6 +5902,21 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     doctor_task_memory_parser.set_defaults(handler=run_doctor_task_memory)
+
+    push_parser = subparsers.add_parser(
+        "push",
+        help="Pre-push governance commands.",
+    )
+    push_subparsers = push_parser.add_subparsers(dest="push_command", required=True)
+
+    push_check_parser = push_subparsers.add_parser(
+        "check",
+        help="Check whether the repository is ready to push.",
+    )
+    push_check_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    push_check_parser.set_defaults(handler=run_push_check)
 
     return parser
 
