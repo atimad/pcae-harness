@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 70P Acceptance Criteria vs Executable Checks (20260618-2129-70p-acceptance-criteria-vs-executable-checks)
 - 70O Acceptance Check Enforcement (20260618-2119-70o-acceptance-check-enforcement)
 - 70N Review Gate Discovery (20260618-2115-70n-review-gate-discovery)
 - 70M Generated Commands Docs Sync (20260618-2110-70m-generated-commands-docs-sync)
