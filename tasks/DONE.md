@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Policy-Controlled Lifecycle Review Enforcement (20260619-0006-policy-controlled-lifecycle-review-enforcement)
 - 70S Lifecycle Review Status in Push Check (20260618-2237-70s-lifecycle-review-status-in-push-check)
 - 70R Lifecycle Review Records (20260618-2227-70r-lifecycle-review-records)
 - 70Q Lifecycle Review Gate Design (20260618-2221-70q-lifecycle-review-gate-design)
