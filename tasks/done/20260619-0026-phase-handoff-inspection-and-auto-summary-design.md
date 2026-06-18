@@ -10,7 +10,7 @@ Phase Handoff Inspection and Auto-Summary Design
 
 ## Status
 
-active
+done
 
 ## Mode
 
