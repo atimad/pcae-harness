@@ -750,3 +750,123 @@ def test_70t_mixed_review_blocks_when_required(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "conflicting dispositions" in output
+
+
+# --- Phase 71B: push readiness no-op semantics ---
+
+
+def test_71b_nothing_to_push_json_noop_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Noop fields task",
+        created_at=datetime(2026, 6, 19, 2, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    remote_path = tmp_path.parent / "remote_noop.git"
+    subprocess.run(["git", "clone", "--bare", str(tmp_path), str(remote_path)],
+                   capture_output=True, check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(remote_path)],
+                   cwd=tmp_path, capture_output=True, check=True)
+    subprocess.run(["git", "fetch", "origin"], cwd=tmp_path, capture_output=True, check=True)
+    subprocess.run(["git", "branch", "--set-upstream-to=origin/main", "main"],
+                   cwd=tmp_path, capture_output=True, check=True)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["mode"] == "nothing_to_push"
+    assert parsed["push_noop"] is True
+    assert parsed["push_blocked"] is False
+    assert parsed["push_action_required"] is False
+    assert parsed["push_reason"] == "no unpushed commits"
+    assert parsed["ready"] is False
+
+
+def test_71b_ready_json_push_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Ready fields task",
+        created_at=datetime(2026, 6, 19, 2, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["ready"] is True
+    assert parsed["push_noop"] is False
+    assert parsed["push_blocked"] is False
+    assert parsed["push_action_required"] is False
+    assert parsed["push_reason"] == "push can proceed"
+
+
+def test_71b_blocked_json_push_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Blocked fields task",
+        created_at=datetime(2026, 6, 19, 2, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    parsed = json.loads(output)
+    assert parsed["ready"] is False
+    assert parsed["push_noop"] is False
+    assert parsed["push_blocked"] is True
+    assert parsed["push_action_required"] is True
+    assert parsed["push_reason"] == "push blocked by validation failure"
+
+
+def test_71b_post_finish_closure_not_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Closure fields task",
+        created_at=datetime(2026, 6, 19, 2, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+
+    active = find_latest_active_task(HarnessPath(tmp_path))
+    close_active_task(active)
+    commit_all(tmp_path, "Close task")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["mode"] == "post_finish_closure"
+    assert parsed["push_blocked"] is False
+    assert parsed["push_noop"] is False
+    assert parsed["push_reason"] == "push can proceed"

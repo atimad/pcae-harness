@@ -163,6 +163,16 @@ def run_push(args: argparse.Namespace) -> int:
 
 
 def _readiness_dict(readiness: PushReadiness) -> dict:
+    noop = readiness.mode == "nothing_to_push"
+    blocked = readiness.mode == "not_ready"
+
+    if readiness.ready:
+        reason = "push can proceed"
+    elif noop:
+        reason = "no unpushed commits"
+    else:
+        reason = "push blocked by validation failure"
+
     return {
         "branch": readiness.branch,
         "check_passed": readiness.check_ok,
@@ -174,6 +184,10 @@ def _readiness_dict(readiness: PushReadiness) -> dict:
         "lifecycle_review_reason": readiness.lifecycle_review_reason,
         "lifecycle_review_required": readiness.lifecycle_review_required,
         "mode": readiness.mode,
+        "push_action_required": blocked,
+        "push_blocked": blocked,
+        "push_noop": noop,
+        "push_reason": reason,
         "ready": readiness.ready,
         "unpushed_commits": readiness.unpushed,
         "working_tree_clean": readiness.clean,
