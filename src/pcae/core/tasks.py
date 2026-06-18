@@ -51,6 +51,7 @@ class ActiveTask:
     allowed_dependencies: tuple[str, ...]
     forbidden_dependencies: tuple[str, ...]
     enforcement_mode: str | None
+    acceptance_criteria: tuple[str, ...]
     acceptance_checks: tuple[str, ...]
     documentation_requirements: tuple[str, ...]
 
@@ -64,6 +65,7 @@ class TaskUpdate:
     allowed_zones: tuple[str, ...] | None = None
     forbidden_zones: tuple[str, ...] | None = None
     enforcement_mode: str | None = None
+    acceptance_criteria: tuple[str, ...] | None = None
     acceptance_checks: tuple[str, ...] | None = None
 
 
@@ -170,6 +172,7 @@ def create_task_contract(
     forbidden_dependencies: tuple[str, ...] = (),
     enforcement_mode: str = "TBD",
     forbidden_changes: tuple[str, ...] = ("TBD",),
+    acceptance_criteria: tuple[str, ...] = (),
     acceptance_checks: tuple[str, ...] = (),
     documentation_requirements: tuple[str, ...] = TRANSITION_DOCUMENTATION_REQUIREMENTS,
 ) -> TaskContract:
@@ -192,6 +195,7 @@ def create_task_contract(
         forbidden_dependencies=forbidden_dependencies,
         enforcement_mode=enforcement_mode,
         forbidden_changes=forbidden_changes,
+        acceptance_criteria=acceptance_criteria,
         acceptance_checks=acceptance_checks,
         documentation_requirements=documentation_requirements,
     )
@@ -488,6 +492,12 @@ def update_latest_active_task(root: HarnessPath, update: TaskUpdate) -> ActiveTa
             "Enforcement Mode",
             update.enforcement_mode,
         )
+    if update.acceptance_criteria is not None:
+        content = replace_task_section_items(
+            content,
+            "Acceptance Criteria",
+            update.acceptance_criteria,
+        )
     if update.acceptance_checks is not None:
         content = replace_task_section_items(
             content,
@@ -535,6 +545,7 @@ def render_task_contract(
     forbidden_dependencies: tuple[str, ...] = (),
     enforcement_mode: str = "TBD",
     forbidden_changes: tuple[str, ...] = ("TBD",),
+    acceptance_criteria: tuple[str, ...] = (),
     acceptance_checks: tuple[str, ...] = (),
     documentation_requirements: tuple[str, ...] = TRANSITION_DOCUMENTATION_REQUIREMENTS,
 ) -> str:
@@ -598,6 +609,10 @@ active
 ## Forbidden Changes
 
 {render_task_items(forbidden_changes)}
+
+## Acceptance Criteria
+
+{render_task_items(acceptance_criteria)}
 
 ## Acceptance Checks
 
@@ -790,6 +805,10 @@ def read_active_task(task_path: Path) -> ActiveTask:
             "Forbidden Dependencies",
         ),
         enforcement_mode=read_task_section_text(content, "Enforcement Mode"),
+        acceptance_criteria=read_task_section_items_from_text(
+            content,
+            "Acceptance Criteria",
+        ),
         acceptance_checks=read_task_section_items_from_text(
             content,
             "Acceptance Checks",

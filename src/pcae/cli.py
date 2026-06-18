@@ -4223,6 +4223,7 @@ def build_parser() -> argparse.ArgumentParser:
     task_new_parser.add_argument("--allowed-zone", action="append", default=[])
     task_new_parser.add_argument("--forbidden-zone", action="append", default=[])
     task_new_parser.add_argument("--enforcement-mode")
+    task_new_parser.add_argument("--acceptance-criterion", action="append")
     task_new_parser.add_argument("--acceptance-check", action="append")
     task_new_parser.set_defaults(handler=run_task_new)
 
@@ -4295,6 +4296,7 @@ def build_parser() -> argparse.ArgumentParser:
     task_update_parser.add_argument("--allowed-zone", action="append")
     task_update_parser.add_argument("--forbidden-zone", action="append")
     task_update_parser.add_argument("--enforcement-mode")
+    task_update_parser.add_argument("--acceptance-criterion", action="append")
     task_update_parser.add_argument("--acceptance-check", action="append")
     task_update_parser.set_defaults(handler=run_task_update)
 

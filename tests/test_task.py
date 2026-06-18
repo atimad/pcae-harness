@@ -2654,3 +2654,112 @@ def test_70o_task_complete_does_not_run_checks(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Completed task:" in output
+
+
+# --- Phase 70P: acceptance criteria vs executable checks ---
+
+
+def test_70p_task_new_with_criteria_and_checks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "task", "new", "Criteria test",
+        "--acceptance-criterion", "Code is reviewed",
+        "--acceptance-criterion", "Tests cover edge cases",
+        "--acceptance-check", "true",
+    ])
+
+    assert exit_code == 0
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert active_task is not None
+    assert "Code is reviewed" in active_task.acceptance_criteria
+    assert "Tests cover edge cases" in active_task.acceptance_criteria
+    assert "true" in active_task.acceptance_checks
+
+
+def test_70p_finish_ignores_criteria_executes_checks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Criteria ignored task",
+        created_at=datetime(2026, 6, 18, 9, 0, tzinfo=timezone.utc),
+        acceptance_criteria=("This is descriptive and not executable",),
+        acceptance_checks=("true",),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task:" in output
+
+
+def test_70p_finish_fails_on_check_not_criterion(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Check fails task",
+        created_at=datetime(2026, 6, 18, 9, 0, tzinfo=timezone.utc),
+        acceptance_criteria=("This descriptive criterion should not block",),
+        acceptance_checks=("false",),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Acceptance check failed: false" in output
+
+
+def test_70p_contract_renders_both_sections(tmp_path: Path) -> None:
+    contract = create_task_contract(
+        HarnessPath(tmp_path),
+        "Both sections task",
+        created_at=datetime(2026, 6, 18, 9, 0, tzinfo=timezone.utc),
+        acceptance_criteria=("Human reviews the diff",),
+        acceptance_checks=("pcae health",),
+    )
+    content = (tmp_path / contract.relative_path).read_text(encoding="utf-8")
+    assert "## Acceptance Criteria" in content
+    assert "- Human reviews the diff" in content
+    assert "## Acceptance Checks" in content
+    assert "- pcae health" in content
+
+
+def test_70p_task_update_acceptance_criterion(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update criterion task",
+        created_at=datetime(2026, 6, 18, 9, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "task", "update",
+        "--acceptance-criterion", "Reviewed by human",
+        "--acceptance-check", "pcae check",
+    ])
+
+    assert exit_code == 0
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert "Reviewed by human" in active_task.acceptance_criteria
+    assert "pcae check" in active_task.acceptance_checks

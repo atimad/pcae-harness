@@ -45,6 +45,7 @@ def run_task_new(args: argparse.Namespace) -> int:
 
     allowed_files = tuple(args.allowed_file) if args.allowed_file else ()
     forbidden_files = tuple(args.forbidden_file) if args.forbidden_file else ()
+    acceptance_criteria = tuple(args.acceptance_criterion) if getattr(args, "acceptance_criterion", None) else ()
     acceptance_checks = tuple(args.acceptance_check) if args.acceptance_check else ()
     goal = args.goal if args.goal else "TBD"
     mode = args.mode if args.mode else "implementation"
@@ -60,6 +61,7 @@ def run_task_new(args: argparse.Namespace) -> int:
         allowed_zones=allowed_zones,
         forbidden_zones=forbidden_zones,
         enforcement_mode=enforcement_mode,
+        acceptance_criteria=acceptance_criteria,
         acceptance_checks=acceptance_checks,
     )
 
@@ -365,6 +367,11 @@ def run_task_update(args: argparse.Namespace) -> int:
                 else None
             ),
             enforcement_mode=args.enforcement_mode,
+            acceptance_criteria=(
+                tuple(args.acceptance_criterion)
+                if getattr(args, "acceptance_criterion", None) is not None
+                else None
+            ),
             acceptance_checks=(
                 tuple(args.acceptance_check)
                 if args.acceptance_check is not None
@@ -471,6 +478,8 @@ def format_active_task(active_task: ActiveTask) -> str:
         "Forbidden dependencies:",
         *format_items(active_task.forbidden_dependencies),
         f"Enforcement mode: {active_task.enforcement_mode or 'TBD'}",
+        "Acceptance criteria:",
+        *format_items(active_task.acceptance_criteria),
         "Acceptance checks:",
         *format_items(active_task.acceptance_checks),
         "Documentation requirements:",

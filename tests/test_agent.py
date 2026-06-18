@@ -53713,6 +53713,7 @@ def test_65h_missing_session_is_warning(tmp_path) -> None:
         forbidden_dependencies=(),
         override_protected_files=(),
         enforcement_mode="advisory",
+        acceptance_criteria=(),
         acceptance_checks=(),
         documentation_requirements=(),
         path=tmp_path / "tasks" / "active" / "20260610-9999-test-65h.md",
@@ -53737,7 +53738,7 @@ def test_65h_missing_session_message_instructs_session_write(tmp_path) -> None:
         task_id="t1", title="T1", status="active", mode="implementation", goal=None,
         allowed_files=(), forbidden_files=(), allowed_zones=(), forbidden_zones=(),
         allowed_dependencies=(), forbidden_dependencies=(), override_protected_files=(),
-        enforcement_mode="advisory", acceptance_checks=(), documentation_requirements=(),
+        enforcement_mode="advisory", acceptance_criteria=(), acceptance_checks=(), documentation_requirements=(),
         path=tmp_path / "tasks" / "active" / "t1.md",
     )
     warnings: list = []
@@ -53768,7 +53769,7 @@ def test_65h_task_id_mismatch_is_violation(tmp_path) -> None:
         goal=None, allowed_files=(), forbidden_files=(), allowed_zones=(),
         forbidden_zones=(), allowed_dependencies=(), forbidden_dependencies=(),
         override_protected_files=(), enforcement_mode="advisory",
-        acceptance_checks=(), documentation_requirements=(),
+        acceptance_criteria=(), acceptance_checks=(), documentation_requirements=(),
         path=tmp_path / "tasks" / "active" / "new-task-id.md",
     )
     violations = check_session_continuity(root, active_task, [], [])
@@ -53799,7 +53800,7 @@ def test_65h_task_title_mismatch_is_violation(tmp_path) -> None:
         mode="implementation", goal=None, allowed_files=(), forbidden_files=(),
         allowed_zones=(), forbidden_zones=(), allowed_dependencies=(),
         forbidden_dependencies=(), override_protected_files=(),
-        enforcement_mode="advisory", acceptance_checks=(), documentation_requirements=(),
+        enforcement_mode="advisory", acceptance_criteria=(), acceptance_checks=(), documentation_requirements=(),
         path=tmp_path / "tasks" / "active" / "20260610-9999-test-65h.md",
     )
     violations = check_session_continuity(root, active_task, [], [])
@@ -53829,7 +53830,7 @@ def test_65h_null_session_task_with_active_task_is_violation(tmp_path) -> None:
         goal=None, allowed_files=(), forbidden_files=(), allowed_zones=(),
         forbidden_zones=(), allowed_dependencies=(), forbidden_dependencies=(),
         override_protected_files=(), enforcement_mode="advisory",
-        acceptance_checks=(), documentation_requirements=(),
+        acceptance_criteria=(), acceptance_checks=(), documentation_requirements=(),
         path=tmp_path / "tasks" / "active" / "some-task.md",
     )
     violations = check_session_continuity(root, active_task, [], [])
@@ -53848,7 +53849,7 @@ def test_65h_valid_session_is_not_violation(tmp_path) -> None:
         mode="implementation", goal=None, allowed_files=(), forbidden_files=(),
         allowed_zones=(), forbidden_zones=(), allowed_dependencies=(),
         forbidden_dependencies=(), override_protected_files=(),
-        enforcement_mode="advisory", acceptance_checks=(), documentation_requirements=(),
+        enforcement_mode="advisory", acceptance_criteria=(), acceptance_checks=(), documentation_requirements=(),
         path=tmp_path / "tasks" / "active" / "20260610-9999-test-65h.md",
     )
     warnings: list = []
