@@ -14,7 +14,7 @@ def run_health(args: argparse.Namespace) -> int:
     else:
         print_health(data)
 
-    return 0 if data["overall_status"] == "healthy" else 1
+    return 0 if data["overall_status"].startswith("healthy") else 1
 
 
 def print_health(data: dict) -> None:

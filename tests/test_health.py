@@ -175,7 +175,7 @@ def test_health_json_command_reports_warnings_without_failing(
     )
 
 
-def test_health_command_returns_nonzero_when_check_fails(
+def test_health_command_reports_idle_when_no_active_task_clean_tree(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
@@ -186,13 +186,11 @@ def test_health_command_returns_nonzero_when_check_fails(
     exit_code = main(["health"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Overall status: unhealthy" in output
-    assert "Health check failed:" in output
-    assert "No active task contract found in tasks/active/." in output
+    assert exit_code == 0
+    assert "Overall status: healthy (idle)" in output
 
 
-def test_health_json_command_returns_nonzero_when_check_fails(
+def test_health_json_command_reports_idle_when_no_active_task_clean_tree(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
@@ -204,10 +202,10 @@ def test_health_json_command_returns_nonzero_when_check_fails(
 
     output = capsys.readouterr().out
     data = json.loads(output)
-    assert exit_code == 1
-    assert data["overall_status"] == "unhealthy"
+    assert exit_code == 0
+    assert data["overall_status"] == "healthy (idle)"
+    assert data["idle"] is True
     assert data["active_task"] is None
-    assert "No active task contract found in tasks/active/." in data["violations"]
 
 
 def test_health_command_is_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -294,3 +292,24 @@ def text_file_snapshot(root: Path) -> dict[str, str]:
         for path in root.rglob("*")
         if path.is_file() and ".git" not in path.relative_to(root).parts
     }
+
+
+# --- Phase 70J: idle state health semantics ---
+
+
+def test_70j_health_unhealthy_no_task_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_ready_repo(tmp_path)
+    commit_baseline(tmp_path)
+    (tmp_path / "tasks" / "active").mkdir(parents=True, exist_ok=True)
+    for f in (tmp_path / "tasks" / "active").glob("*.md"):
+        f.unlink()
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["health"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "unhealthy" in output

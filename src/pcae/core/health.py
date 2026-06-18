@@ -35,14 +35,22 @@ def build_health_data(root: HarnessPath) -> dict:
         latest_enforcement_mode = latest.get("enforcement_mode", "unknown")
         latest_dependency_warnings = latest.get("dependency_warnings_count")
 
+    idle = check_result.active_task_id is None and check_result.passed
+    status = "healthy"
+    if not check_result.passed:
+        status = "unhealthy"
+    elif idle:
+        status = "healthy (idle)"
+
     return {
         "active_task": active_task_data(check_result),
         "agent_lock": build_agent_lock_state(root),
         "architecture_history_entries": architecture_history_entries,
         "git_status": summarize_git_changes(changes),
+        "idle": idle,
         "latest_dependency_warnings": latest_dependency_warnings,
         "latest_enforcement_mode": latest_enforcement_mode,
-        "overall_status": "healthy" if check_result.passed else "unhealthy",
+        "overall_status": status,
         "policy_source": inspection.policy.source,
         "policy_validation": "valid" if inspection.policy.valid else "invalid",
         "required_files_status": required_file_status(inspection),

@@ -3,6 +3,8 @@
 ## Pending
 
 - Design explicit Phase Activation Governance that separates implementation approval, activation approval, commit approval, and push approval so implemented capabilities cannot be made active by inference.
+- 70K — Structured Health Status: replace string-based health checks (startswith("healthy")) with a canonical structured status model (healthy_active, healthy_idle, unhealthy). Callers should use structured status instead of string-prefix checks. Tests should prove no startswith("healthy") health-gating remains.
+
 ## Future Explorations (from Phase 32C/32D/32E/32F/32G)
 
 - Automatic low-context detection triggering handoff.

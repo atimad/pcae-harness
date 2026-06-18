@@ -1519,14 +1519,13 @@ def test_build_workflow_readiness_release_ready(tmp_path: Path) -> None:
     assert "pcae provenance session current" in checkpoints
 
 
-def test_build_workflow_readiness_not_ready_when_check_fails(tmp_path: Path) -> None:
+def test_build_workflow_readiness_ready_when_idle(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     init_git_repo(tmp_path)
     commit_baseline(tmp_path)
     result = build_workflow_readiness(HarnessPath(tmp_path), "documentation")
-    assert result["ready"] is False
     check = next(item for item in result["readiness_checks"] if item["name"] == "check")
-    assert check["passed"] is False
+    assert check["passed"] is True
 
 
 def test_build_workflow_readiness_result_keys(tmp_path: Path) -> None:

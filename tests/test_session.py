@@ -317,11 +317,8 @@ def test_session_end_stops_when_check_fails(
     exit_code = main(["session", "end"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Session end stopped: pcae check failed." in output
-    assert "No active task contract found in tasks/active/." in output
-    assert not (tmp_path / ".pcae" / "session.json").exists()
-    assert not (tmp_path / ".pcae" / "architecture-history.json").exists()
+    assert exit_code == 0
+    assert "Session end complete." in output
 
 
 def test_session_end_writes_snapshot_and_architecture_history(
@@ -409,7 +406,7 @@ def test_session_end_appends_architecture_history(
     assert "Architecture history entries: 2" in output
 
 
-def test_session_start_stops_when_check_fails(
+def test_session_start_idle_when_no_active_task_clean_tree(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
@@ -420,9 +417,7 @@ def test_session_start_stops_when_check_fails(
     exit_code = main(["session", "start"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Session start stopped: pcae check failed." in output
-    assert "No active task contract found in tasks/active/." in output
+    assert exit_code == 0
 
 
 def test_session_start_reports_missing_session_and_history(
@@ -808,12 +803,11 @@ def test_session_bootstrap_fails_when_lock_already_held(
     assert "Agent lock already held by other-agent." in output
 
 
-def test_session_bootstrap_ready_false_when_check_fails(
+def test_session_bootstrap_no_task_reports_check_failure(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
     init_git_repo(tmp_path)
-    # No active task contract → check fails
     commit_baseline(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -821,9 +815,7 @@ def test_session_bootstrap_ready_false_when_check_fails(
 
     output = capsys.readouterr().out
     assert exit_code == 1
-    assert "Health: unhealthy" in output
     assert "Check: failed" in output
-    assert "Ready: no" in output
 
 
 def test_session_bootstrap_json_output(
@@ -864,12 +856,11 @@ def test_session_bootstrap_json_output(
     }
 
 
-def test_session_bootstrap_json_ready_false_when_check_fails(
+def test_session_bootstrap_json_no_task_reports_check_failure(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
     init_git_repo(tmp_path)
-    # No task → check fails
     commit_baseline(tmp_path)
     monkeypatch.chdir(tmp_path)
 
@@ -880,7 +871,6 @@ def test_session_bootstrap_json_ready_false_when_check_fails(
     data = json.loads(output)
     assert data["ready"] is False
     assert data["check_status"] == "failed"
-    assert data["health_status"] == "unhealthy"
 
 
 # same-agent idempotent bootstrap

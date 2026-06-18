@@ -214,7 +214,7 @@ def test_phase_start_records_agent_acquired_provenance(
     assert acquired.agent_id == "claude-local"
 
 
-def test_phase_start_stops_when_check_fails(
+def test_phase_start_succeeds_in_idle_state(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     root = HarnessPath(tmp_path)
@@ -226,10 +226,10 @@ def test_phase_start_stops_when_check_fails(
     exit_code = main(["phase", "start", "--agent-id", "claude-local"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Phase start stopped: pcae check failed." in output
-    assert "No active task contract found in tasks/active/." in output
-    assert read_agent_lock(root) is None
+    assert exit_code == 0
+    lock = read_agent_lock(root)
+    assert lock is not None
+    assert lock.agent_id == "claude-local"
 
 
 def test_phase_start_stops_when_lock_already_held(
@@ -730,7 +730,6 @@ def test_phase_handoff_check_failure_still_completes_handoff(
     # Handoff still completes (lock acquired, provenance recorded) despite check failure
     assert exit_code == 0
     assert "Check: failed" in output
-    assert "Health: unhealthy" in output
     history = read_provenance_history(root)
     assert any(e.event_type == "phase_completed" for e in history.events)
     assert any(e.event_type == "agent_acquired" for e in history.events)

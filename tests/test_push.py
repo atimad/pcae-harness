@@ -229,7 +229,7 @@ def test_70g_push_check_no_task_dirty_tree_not_ready(
     assert "Not ready to push:" in output
 
 
-def test_70g_push_check_no_task_no_closure_commit_not_ready(
+def test_70g_push_check_no_task_clean_tree_is_idle_ready(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_git_repo(tmp_path)
@@ -241,8 +241,8 @@ def test_70g_push_check_no_task_no_closure_commit_not_ready(
     exit_code = main(["push", "check"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Not ready to push:" in output
+    assert exit_code == 0
+    assert "Ready to push." in output
 
 
 def test_70g_push_check_mode_active_task(

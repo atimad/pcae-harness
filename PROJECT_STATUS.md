@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 70I: Task Memory Repair.
+Phase 70J: Idle State Health Semantics.
 
 ## Milestone: Execution Chain Traceability Complete
 

@@ -35,13 +35,15 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
     diagnostics = diagnose_task_memory(root)
 
     clean = not changes
-    health_ok = health["overall_status"] == "healthy"
+    health_ok = health["overall_status"].startswith("healthy")
+    idle = health.get("idle", False)
     check_ok = check_result.passed
     doctor_ok = not diagnostics.has_errors
 
     mode = _determine_mode(
         clean=clean,
         health_ok=health_ok,
+        idle=idle,
         check_ok=check_ok,
         doctor_ok=doctor_ok,
         unpushed=unpushed,
@@ -186,6 +188,7 @@ def _determine_mode(
     *,
     clean: bool,
     health_ok: bool,
+    idle: bool,
     check_ok: bool,
     doctor_ok: bool,
     unpushed: int,
@@ -195,8 +198,11 @@ def _determine_mode(
     if unpushed == 0:
         return "nothing_to_push"
 
-    if clean and health_ok and check_ok and doctor_ok:
+    if clean and health_ok and check_ok and doctor_ok and not idle:
         return "active_task"
+
+    if clean and idle and check_ok and doctor_ok:
+        return "post_finish_closure"
 
     if (
         clean

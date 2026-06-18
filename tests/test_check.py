@@ -11,14 +11,14 @@ from pcae.core.check import run_checks
 from pcae.core.paths import HarnessPath
 
 
-def test_check_detects_missing_active_task(tmp_path: Path) -> None:
+def test_check_reports_idle_when_no_active_task_clean_tree(tmp_path: Path) -> None:
     init_harness(HarnessPath(tmp_path))
     commit_baseline(tmp_path)
 
     result = run_checks(HarnessPath(tmp_path))
 
-    assert not result.passed
-    assert has_violation(result, "No active task contract found")
+    assert result.passed
+    assert has_info(result, "No active task. Repository is idle.")
 
 
 def test_check_detects_out_of_scope_file_changes(tmp_path: Path) -> None:
@@ -2060,3 +2060,31 @@ def test_62e_check_integrated_in_run_checks(tmp_path: Path) -> None:
     commit_baseline(tmp_path)
     result = run_checks(HarnessPath(tmp_path))
     assert has_violation(result, "does not match PROJECT_STATUS.md current phase")
+
+
+# --- Phase 70J: idle state check semantics ---
+
+
+def test_70j_check_exits_zero_when_idle_clean_tree(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Repository is idle" in output
+
+
+def test_70j_check_exits_one_when_no_task_dirty_tree(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    commit_baseline(tmp_path)
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No active task contract found" in output

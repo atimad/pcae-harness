@@ -90,14 +90,19 @@ def run_checks(root: HarnessPath) -> CheckResult:
             )
 
     active_task = find_latest_active_task(root)
-    if active_task is None:
-        violations.append(
-            CheckMessage("No active task contract found in tasks/active/.")
-        )
-    violations.extend(check_session_continuity(root, active_task, warnings, infos))
-
     changes = read_git_changes(root)
     changed_paths = tuple(change.path for change in changes)
+
+    if active_task is None:
+        if changes:
+            violations.append(
+                CheckMessage("No active task contract found in tasks/active/.")
+            )
+        else:
+            infos.append(
+                CheckMessage("No active task. Repository is idle.")
+            )
+    violations.extend(check_session_continuity(root, active_task, warnings, infos))
     policy = load_policy(root)
     if not policy.valid:
         violations.append(
