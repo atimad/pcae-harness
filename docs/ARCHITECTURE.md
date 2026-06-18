@@ -114,3 +114,106 @@ Explicitly out of scope for the BR-005 execution governance chain as implemented
 - Forensic retention of sandbox directories — sandbox directories are ephemeral and destroyed after evidence capture; no separate forensic copy is retained.
 - Atomic, staged-rename file writes for promotion — promotion and rollback write sequentially per file with incremental PER/RER persistence, not as a single atomic transaction.
 - Any git commit or push step inside the governed write/rollback chain.
+
+## Lifecycle Review Gate Design (Phase 70Q)
+
+### Problem
+
+PCAE has two distinct review domains:
+
+1. **Execution review (69-series)** — governs AI runtime invocations. Artifacts: ERRA (ExecutionResultReviewArtifact), EPR (ExecutionPromotionReview). These review sandbox outputs before promotion to root. Stored in `.pcae/` artifact stores.
+
+2. **Lifecycle review (70-series)** — governs developer task implementation. No review artifacts exist today. `pcae task finish` enforces health/check/acceptance but has no concept of "reviewed."
+
+These are fundamentally different: execution review asks "should this AI output be promoted?" while lifecycle review asks "has this implementation been reviewed before closure?"
+
+### Lifecycle Review Record (LRR) — Proposed Design
+
+A Lifecycle Review Record captures evidence that implementation changes were reviewed before task closure.
+
+#### Artifact Shape
+
+```
+.pcae/lifecycle-reviews/{task_id}-{timestamp}.json
+```
+
+```json
+{
+  "lrr_id": "lrr-{task_id}-{timestamp}",
+  "task_id": "20260618-2129-70p-acceptance-criteria-vs-executable-checks",
+  "reviewer": "human",
+  "disposition": "approved",
+  "commit_range": "e9bf3a2..d4484f90",
+  "reviewed_files": ["src/pcae/core/tasks.py", "src/pcae/commands/task.py"],
+  "notes": "Acceptance criteria/checks separation looks correct.",
+  "created_at": "2026-06-18T21:30:00+02:00"
+}
+```
+
+#### Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `lrr_id` | string | Unique identifier |
+| `task_id` | string | Active task at review time |
+| `reviewer` | string | Who reviewed (default: "human") |
+| `disposition` | enum | `approved`, `changes_requested`, `informational` |
+| `commit_range` | string | Git commit range reviewed |
+| `reviewed_files` | list | Files explicitly reviewed |
+| `notes` | string | Free-text review notes |
+| `created_at` | ISO timestamp | When the review was recorded |
+
+#### Dispositions
+
+- **approved** — implementation is reviewed and acceptable
+- **changes_requested** — reviewer identified issues; task should not close
+- **informational** — review is recorded but does not gate closure
+
+### Proposed Command Shape
+
+```bash
+# Record a lifecycle review
+pcae review lifecycle --disposition approved --notes "Looks good"
+pcae review lifecycle --disposition approved --json
+
+# Show reviews for the current task
+pcae review lifecycle show
+pcae review lifecycle list --task-id <id>
+```
+
+### Integration Points
+
+| Command | Current behavior | With lifecycle review |
+|---------|-----------------|---------------------|
+| `pcae task finish` | Runs health + check + acceptance checks | Additionally checks for LRR if `require_lifecycle_review` policy is enabled |
+| `pcae task finish --commit` | Same as above + commit | Same gate before commit |
+| `pcae push check` | Checks health/check/doctor/git | Could report review status as informational |
+| `pcae push` | Runs push check + push | Same as push check |
+| `pcae health` | Reports overall health | Could include review coverage as informational |
+| `pcae check` | Validates scope/zones/docs | No change — check is about source validity, not review |
+
+### Policy Configuration
+
+```toml
+[lifecycle_review]
+require_lifecycle_review = false  # advisory-first default
+```
+
+When `false` (default): LRR is informational. `pcae task finish` works without review.
+When `true`: `pcae task finish` requires at least one LRR with `disposition=approved` for the current task.
+
+### Rollout Recommendation: Advisory-First
+
+1. **Phase 1 (advisory)**: Add `pcae review lifecycle` command. Record reviews optionally. `pcae task finish` shows review status but does not gate on it. `pcae push check` reports review coverage.
+
+2. **Phase 2 (warning)**: `pcae task finish` warns when no review exists but does not block. `pcae health` includes review coverage in output.
+
+3. **Phase 3 (blocking)**: Policy option `require_lifecycle_review = true` makes review a blocker for `pcae task finish`.
+
+### What This Does NOT Change
+
+- 69-series execution review (ERRA, EPR) is unchanged
+- `pcae promote` and `pcae rollback` gate on execution review, not lifecycle review
+- `pcae task complete` remains a bare primitive with no gates
+- `--skip-checks` continues to bypass all gates including lifecycle review
+- No automatic review approval — review requires explicit human action
