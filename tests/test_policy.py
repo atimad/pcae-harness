@@ -14,6 +14,7 @@ from pcae.core.policy import (
     POLICY_SOURCE_DEFAULTS,
     POLICY_SOURCE_REPO,
     load_policy,
+    parse_lifecycle_review_require_approved,
     parse_policy,
     parse_protected_patterns,
     render_default_policy,
@@ -844,6 +845,65 @@ def test_rendered_default_policy_includes_agent_registry(tmp_path: Path) -> None
     assert "codex-local" in ids
     assert "pcae-native" in ids
     assert len(policy.agent_registry) == len(DEFAULT_AGENT_REGISTRY)
+
+
+# --- Phase 70T: lifecycle review policy ---
+
+
+def test_parse_lifecycle_review_require_approved_true() -> None:
+    content = """[protected]
+patterns = [".env"]
+
+[lifecycle_review]
+require_approved = true
+"""
+    assert parse_lifecycle_review_require_approved(content) is True
+
+
+def test_parse_lifecycle_review_require_approved_false() -> None:
+    content = """[protected]
+patterns = [".env"]
+
+[lifecycle_review]
+require_approved = false
+"""
+    assert parse_lifecycle_review_require_approved(content) is False
+
+
+def test_parse_lifecycle_review_absent_defaults_false() -> None:
+    content = """[protected]
+patterns = [".env"]
+"""
+    assert parse_lifecycle_review_require_approved(content) is False
+
+
+def test_parse_lifecycle_review_invalid_value() -> None:
+    content = """[protected]
+patterns = [".env"]
+
+[lifecycle_review]
+require_approved = "yes"
+"""
+    import pytest
+    with pytest.raises(ValueError, match="must be true or false"):
+        parse_lifecycle_review_require_approved(content)
+
+
+def test_load_policy_with_lifecycle_review_required(tmp_path: Path) -> None:
+    write_policy(tmp_path, render_default_policy() + "\n[lifecycle_review]\nrequire_approved = true\n")
+    policy = load_policy(HarnessPath(tmp_path))
+    assert policy.lifecycle_review_require_approved is True
+
+
+def test_load_policy_default_lifecycle_review_false(tmp_path: Path) -> None:
+    policy = load_policy(HarnessPath(tmp_path))
+    assert policy.lifecycle_review_require_approved is False
+
+
+def test_parse_policy_includes_lifecycle_review_field() -> None:
+    content = render_default_policy() + "\n[lifecycle_review]\nrequire_approved = true\n"
+    parsed = parse_policy(content)
+    assert parsed.lifecycle_review_require_approved is True
 
 
 def write_policy(root: Path, content: str) -> None:

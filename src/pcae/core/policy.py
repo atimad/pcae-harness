@@ -141,6 +141,7 @@ class Policy:
     daemon_watch_interval_seconds: int
     orchestration: OrchestrationPolicy
     agent_registry: tuple[AgentRegistryEntry, ...]
+    lifecycle_review_require_approved: bool
     source: str
     path: Path
     file_exists: bool
@@ -160,6 +161,7 @@ def load_policy(root: HarnessPath) -> Policy:
             daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
             orchestration=DEFAULT_ORCHESTRATION_POLICY,
             agent_registry=DEFAULT_AGENT_REGISTRY,
+            lifecycle_review_require_approved=False,
             source=POLICY_SOURCE_DEFAULTS,
             path=policy_path,
             file_exists=False,
@@ -178,6 +180,7 @@ def load_policy(root: HarnessPath) -> Policy:
             daemon_watch_interval_seconds=DEFAULT_DAEMON_WATCH_INTERVAL_SECONDS,
             orchestration=DEFAULT_ORCHESTRATION_POLICY,
             agent_registry=DEFAULT_AGENT_REGISTRY,
+            lifecycle_review_require_approved=False,
             source=POLICY_SOURCE_REPO,
             path=policy_path,
             file_exists=True,
@@ -194,6 +197,7 @@ def load_policy(root: HarnessPath) -> Policy:
         daemon_watch_interval_seconds=parsed.daemon_watch_interval_seconds,
         orchestration=parsed.orchestration,
         agent_registry=parsed.agent_registry,
+        lifecycle_review_require_approved=parsed.lifecycle_review_require_approved,
         source=POLICY_SOURCE_REPO,
         path=policy_path,
         file_exists=True,
@@ -211,6 +215,7 @@ class ParsedPolicy:
     daemon_watch_interval_seconds: int
     orchestration: OrchestrationPolicy
     agent_registry: tuple[AgentRegistryEntry, ...]
+    lifecycle_review_require_approved: bool
 
 
 def parse_policy(content: str) -> ParsedPolicy:
@@ -224,6 +229,7 @@ def parse_policy(content: str) -> ParsedPolicy:
         daemon_watch_interval_seconds=parse_daemon_watch_interval_seconds(content),
         orchestration=parse_orchestration_policy(content),
         agent_registry=parse_agent_registry(content),
+        lifecycle_review_require_approved=parse_lifecycle_review_require_approved(content),
     )
 
 
@@ -709,6 +715,44 @@ def parse_agent_registry(content: str) -> tuple[AgentRegistryEntry, ...]:
     _finalize_agent()
 
     return tuple(entries) if entries else DEFAULT_AGENT_REGISTRY
+
+
+def parse_lifecycle_review_require_approved(content: str) -> bool:
+    lines = content.splitlines()
+    in_section = False
+    require_approved: bool | None = None
+
+    for line in lines:
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if stripped.startswith("["):
+            if not stripped.endswith("]"):
+                raise ValueError("Invalid TOML: malformed table header.")
+            in_section = stripped == "[lifecycle_review]"
+            continue
+
+        if not in_section:
+            continue
+
+        if not stripped.startswith("require_approved"):
+            continue
+        if "=" not in stripped:
+            raise ValueError(
+                "Invalid policy: lifecycle_review.require_approved must be assigned."
+            )
+        value = stripped.split("=", 1)[1].strip()
+        if value == "true":
+            require_approved = True
+        elif value == "false":
+            require_approved = False
+        else:
+            raise ValueError(
+                "Invalid policy: lifecycle_review.require_approved must be true or false."
+            )
+
+    return require_approved if require_approved is not None else False
 
 
 def parse_agent_role_values(line: str) -> tuple[str, ...]:

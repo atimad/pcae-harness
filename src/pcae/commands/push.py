@@ -9,6 +9,7 @@ from pcae.core.check import run_checks
 from pcae.core.git_status import read_git_branch, read_git_changes
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
+from pcae.core.policy import load_policy
 from pcae.core.tasks import diagnose_task_memory
 
 
@@ -25,6 +26,9 @@ class PushReadiness:
     ready: bool
     change_count: int
     review_status: str
+    lifecycle_review_required: bool
+    lifecycle_review_passed: bool
+    lifecycle_review_reason: str
 
 
 def assess_push_readiness(root: HarnessPath) -> PushReadiness:
@@ -63,6 +67,16 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
     task_id = active_task.task_id if active_task else None
     review = lifecycle_review_status(root, task_id)
 
+    policy = load_policy(root)
+    review_required = policy.lifecycle_review_require_approved
+    review_passed, review_reason = _evaluate_lifecycle_review(
+        review, review_required,
+    )
+
+    if review_required and not review_passed and ready:
+        ready = False
+        mode = "not_ready"
+
     return PushReadiness(
         branch=branch,
         clean=clean,
@@ -75,6 +89,9 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
         ready=ready,
         change_count=len(changes),
         review_status=review,
+        lifecycle_review_required=review_required,
+        lifecycle_review_passed=review_passed,
+        lifecycle_review_reason=review_reason,
     )
 
 
@@ -153,6 +170,9 @@ def _readiness_dict(readiness: PushReadiness) -> dict:
         "doctor_warnings": readiness.doctor_warnings,
         "health_status": "healthy" if readiness.health_ok else "unhealthy",
         "lifecycle_review": readiness.review_status,
+        "lifecycle_review_passed": readiness.lifecycle_review_passed,
+        "lifecycle_review_reason": readiness.lifecycle_review_reason,
+        "lifecycle_review_required": readiness.lifecycle_review_required,
         "mode": readiness.mode,
         "ready": readiness.ready,
         "unpushed_commits": readiness.unpushed,
@@ -173,7 +193,11 @@ def _print_readiness(readiness: PushReadiness, json_mode: bool) -> None:
     print(f"  Check: {'passed' if readiness.check_ok else 'failed'}")
     doctor_status = "clean" if readiness.doctor_ok and not readiness.doctor_warnings else "errors" if not readiness.doctor_ok else "warnings"
     print(f"  Task memory: {doctor_status}")
-    print(f"  Lifecycle review: {readiness.review_status}")
+    review_line = f"  Lifecycle review: {readiness.review_status}"
+    if readiness.lifecycle_review_required:
+        enforcement = "passed" if readiness.lifecycle_review_passed else "failed"
+        review_line += f" (required, {enforcement})"
+    print(review_line)
     print(f"  Mode: {readiness.mode}")
     print()
     if readiness.ready:
@@ -192,9 +216,32 @@ def _print_readiness(readiness: PushReadiness, json_mode: bool) -> None:
             reasons.append("check has violations")
         if not readiness.doctor_ok:
             reasons.append("task memory has errors")
+        if readiness.lifecycle_review_required and not readiness.lifecycle_review_passed:
+            reasons.append(readiness.lifecycle_review_reason)
         print("Not ready to push:")
         for reason in reasons:
             print(f"  - {reason}")
+
+
+def _evaluate_lifecycle_review(
+    review_status: str,
+    required: bool,
+) -> tuple[bool, str]:
+    if not required:
+        return True, "lifecycle review is advisory (not required by policy)"
+
+    passing = {"approved", "not_applicable"}
+    if review_status in passing:
+        return True, f"lifecycle review {review_status}"
+
+    reasons = {
+        "missing": "lifecycle review is missing (required by policy)",
+        "changes_requested": "lifecycle review has changes requested",
+        "informational_only": "lifecycle review is informational only (approval required by policy)",
+        "mixed": "lifecycle review has conflicting dispositions (changes requested)",
+        "unknown": "lifecycle review status is unknown",
+    }
+    return False, reasons.get(review_status, f"lifecycle review status: {review_status}")
 
 
 def _determine_mode(

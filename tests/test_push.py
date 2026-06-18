@@ -495,3 +495,258 @@ def test_70s_idle_review_not_applicable(
     output = capsys.readouterr().out
     parsed = json.loads(output)
     assert parsed["lifecycle_review"] == "not_applicable"
+
+
+# --- Phase 70T: policy-controlled lifecycle review enforcement ---
+
+
+def _write_policy_with_review_required(tmp_path: Path) -> None:
+    policy_path = tmp_path / ".pcae" / "policy.toml"
+    content = policy_path.read_text(encoding="utf-8")
+    content += "\n[lifecycle_review]\nrequire_approved = true\n"
+    policy_path.write_text(content, encoding="utf-8")
+
+
+def test_70t_default_policy_missing_review_does_not_block(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Default policy task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Ready to push." in output
+
+
+def test_70t_required_policy_approved_review_passes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.review import create_lifecycle_review
+
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Approved enforced task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    create_lifecycle_review(HarnessPath(tmp_path), disposition="approved")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Ready to push." in output
+    assert "(required, passed)" in output
+
+
+def test_70t_required_policy_missing_review_blocks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Missing enforced task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Not ready to push:" in output
+    assert "lifecycle review is missing (required by policy)" in output
+    assert "(required, failed)" in output
+
+
+def test_70t_required_policy_changes_requested_blocks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.review import create_lifecycle_review
+
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Changes requested task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    create_lifecycle_review(HarnessPath(tmp_path), disposition="changes_requested")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Not ready to push:" in output
+    assert "lifecycle review has changes requested" in output
+
+
+def test_70t_required_policy_informational_only_blocks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.review import create_lifecycle_review
+
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Informational only task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    create_lifecycle_review(HarnessPath(tmp_path), disposition="informational")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Not ready to push:" in output
+    assert "informational only" in output
+
+
+def test_70t_required_policy_json_includes_enforcement_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON enforcement task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check", "--json"])
+
+    output = capsys.readouterr().out
+    parsed = json.loads(output)
+    assert parsed["lifecycle_review"] == "missing"
+    assert parsed["lifecycle_review_required"] is True
+    assert parsed["lifecycle_review_passed"] is False
+    assert "required by policy" in parsed["lifecycle_review_reason"]
+    assert parsed["ready"] is False
+
+
+def test_70t_default_policy_json_includes_advisory_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON advisory task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check", "--json"])
+
+    output = capsys.readouterr().out
+    parsed = json.loads(output)
+    assert parsed["lifecycle_review_required"] is False
+    assert parsed["lifecycle_review_passed"] is True
+    assert "advisory" in parsed["lifecycle_review_reason"]
+
+
+def test_70t_push_refuses_when_review_required_and_missing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Push refuse task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Not ready to push:" in output
+
+
+def test_70t_push_dry_run_succeeds_when_review_approved(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.review import create_lifecycle_review
+
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Push approved task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    create_lifecycle_review(HarnessPath(tmp_path), disposition="approved")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Dry run: push skipped." in output
+
+
+def test_70t_mixed_review_blocks_when_required(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    from pcae.core.review import create_lifecycle_review
+
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Mixed review task",
+        created_at=datetime(2026, 6, 19, 1, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    _write_policy_with_review_required(tmp_path)
+    commit_all(tmp_path, "init")
+    create_lifecycle_review(HarnessPath(tmp_path), disposition="approved")
+    create_lifecycle_review(HarnessPath(tmp_path), disposition="changes_requested")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "conflicting dispositions" in output

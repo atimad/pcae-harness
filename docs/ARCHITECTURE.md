@@ -185,10 +185,10 @@ pcae review lifecycle list --task-id <id>
 
 | Command | Current behavior | With lifecycle review |
 |---------|-----------------|---------------------|
-| `pcae task finish` | Runs health + check + acceptance checks | Additionally checks for LRR if `require_lifecycle_review` policy is enabled |
+| `pcae task finish` | Runs health + check + acceptance checks | Additionally checks for LRR if `require_approved` policy is enabled |
 | `pcae task finish --commit` | Same as above + commit | Same gate before commit |
-| `pcae push check` | Checks health/check/doctor/git | Could report review status as informational |
-| `pcae push` | Runs push check + push | Same as push check |
+| `pcae push check` | Checks health/check/doctor/git | Reports review status; blocks when `require_approved = true` and review is not approved |
+| `pcae push` | Runs push check + push | Refuses push when policy-required review fails |
 | `pcae health` | Reports overall health | Could include review coverage as informational |
 | `pcae check` | Validates scope/zones/docs | No change — check is about source validity, not review |
 
@@ -196,19 +196,21 @@ pcae review lifecycle list --task-id <id>
 
 ```toml
 [lifecycle_review]
-require_lifecycle_review = false  # advisory-first default
+require_approved = false  # advisory-first default
 ```
 
-When `false` (default): LRR is informational. `pcae task finish` works without review.
-When `true`: `pcae task finish` requires at least one LRR with `disposition=approved` for the current task.
+When `false` (default): LRR is informational. `pcae push check` shows review status but does not gate on it.
+When `true`: `pcae push check` requires review status `approved` or `not_applicable` to pass. Statuses `missing`, `changes_requested`, `informational_only`, `mixed`, and `unknown` block push readiness.
+
+JSON output includes `lifecycle_review_required`, `lifecycle_review_passed`, and `lifecycle_review_reason` fields.
 
 ### Rollout Recommendation: Advisory-First
 
-1. **Phase 1 (advisory)**: Add `pcae review lifecycle` command. Record reviews optionally. `pcae task finish` shows review status but does not gate on it. `pcae push check` reports review coverage.
+1. **Phase 1 (advisory, 70R)**: Add `pcae review lifecycle` command. Record reviews optionally. `pcae push check` reports review coverage.
 
-2. **Phase 2 (warning)**: `pcae task finish` warns when no review exists but does not block. `pcae health` includes review coverage in output.
+2. **Phase 2 (visibility, 70S)**: `pcae push check` shows lifecycle review status in human and JSON output.
 
-3. **Phase 3 (blocking)**: Policy option `require_lifecycle_review = true` makes review a blocker for `pcae task finish`.
+3. **Phase 3 (enforcement, 70T)**: Policy option `require_approved = true` makes review a blocker for `pcae push check` and `pcae push`.
 
 ### What This Does NOT Change
 
