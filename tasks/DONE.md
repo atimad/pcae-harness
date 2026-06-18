@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 70G Post-Finish Push Readiness (20260618-0551-70g-post-finish-push-readiness)
 - 70F Pre-Push Governance (20260618-0535-70f-pre-push-governance)
 - 70E Task Finish Commit Automation (20260618-0516-70e-task-finish-commit-automation)
 - 70D Task Contract Ergonomics (20260618-0502-70d-task-contract-ergonomics)
