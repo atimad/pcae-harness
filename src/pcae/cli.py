@@ -4215,8 +4215,14 @@ def build_parser() -> argparse.ArgumentParser:
         help="Create a structured task contract.",
     )
     task_new_parser.add_argument("title")
+    task_new_parser.add_argument("--goal")
+    task_new_parser.add_argument("--mode")
+    task_new_parser.add_argument("--allowed-file", action="append")
+    task_new_parser.add_argument("--forbidden-file", action="append")
     task_new_parser.add_argument("--allowed-zone", action="append", default=[])
     task_new_parser.add_argument("--forbidden-zone", action="append", default=[])
+    task_new_parser.add_argument("--enforcement-mode")
+    task_new_parser.add_argument("--acceptance-check", action="append")
     task_new_parser.set_defaults(handler=run_task_new)
 
     task_close_parser = task_subparsers.add_parser(

@@ -2012,3 +2012,97 @@ def test_70b_doctor_task_memory_json_output(
     assert len(parsed["findings"]) >= 1
     assert parsed["findings"][0]["severity"] == "error"
     assert parsed["findings"][0]["check"] == "done_status_in_active_folder"
+
+
+# --- Phase 70D: pcae task new ergonomics ---
+
+
+def test_70d_task_new_with_all_flags(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "task", "new", "Full contract task",
+        "--goal", "Implement the feature",
+        "--mode", "implementation",
+        "--allowed-file", "src/app.py",
+        "--allowed-file", "tests/test_app.py",
+        "--forbidden-file", "secrets.env",
+        "--enforcement-mode", "advisory",
+        "--acceptance-check", "pcae health passes",
+        "--acceptance-check", "python -m pytest passes",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Created task contract:" in output
+
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert active_task is not None
+    assert active_task.title == "Full contract task"
+    assert active_task.goal == "Implement the feature"
+    assert active_task.mode == "implementation"
+    assert "src/app.py" in active_task.allowed_files
+    assert "tests/test_app.py" in active_task.allowed_files
+    assert "secrets.env" in active_task.forbidden_files
+    assert active_task.enforcement_mode == "advisory"
+    assert "pcae health passes" in active_task.acceptance_checks
+    assert "python -m pytest passes" in active_task.acceptance_checks
+
+
+def test_70d_task_new_without_flags_preserves_defaults(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "new", "Simple task"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Created task contract:" in output
+
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert active_task is not None
+    assert active_task.title == "Simple task"
+    assert active_task.goal == "TBD"
+    assert active_task.mode == "implementation"
+    assert active_task.enforcement_mode == "TBD"
+
+
+def test_70d_task_new_refreshes_session(tmp_path: Path, monkeypatch) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    main(["task", "new", "Session refresh task", "--goal", "Test session"])
+
+    session = read_session_snapshot(HarnessPath(tmp_path))
+    assert session is not None
+    assert session.data["active_task"]["title"] == "Session refresh task"
+
+
+def test_70d_task_update_unchanged(tmp_path: Path, monkeypatch, capsys) -> None:
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Update target",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "task", "update",
+        "--goal", "Updated goal",
+        "--allowed-file", "new_file.py",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Updated task:" in output
+
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert active_task is not None
+    assert active_task.goal == "Updated goal"
+    assert "new_file.py" in active_task.allowed_files

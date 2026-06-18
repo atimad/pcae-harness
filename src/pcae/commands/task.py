@@ -42,12 +42,32 @@ def run_task_new(args: argparse.Namespace) -> int:
         print(validation_error)
         return 1
 
+    allowed_files = tuple(args.allowed_file) if args.allowed_file else ()
+    forbidden_files = tuple(args.forbidden_file) if args.forbidden_file else ()
+    acceptance_checks = tuple(args.acceptance_check) if args.acceptance_check else ()
+    goal = args.goal if args.goal else "TBD"
+    mode = args.mode if args.mode else "implementation"
+    enforcement_mode = args.enforcement_mode if args.enforcement_mode else "TBD"
+
     contract = create_task_contract(
         root,
         args.title,
+        goal=goal,
+        mode=mode,
+        allowed_files=allowed_files,
+        forbidden_files=forbidden_files,
         allowed_zones=allowed_zones,
         forbidden_zones=forbidden_zones,
+        enforcement_mode=enforcement_mode,
+        acceptance_checks=acceptance_checks,
     )
+
+    from pcae.core.session import write_session_snapshot
+
+    try:
+        write_session_snapshot(root)
+    except Exception:
+        pass
 
     print(f"Created task contract: {contract.relative_path.as_posix()}")
     return 0
