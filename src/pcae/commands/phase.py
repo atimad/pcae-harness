@@ -451,6 +451,56 @@ def run_phase_handoff_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_phase_handoff_prune(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    handoffs_dir = root.join(HANDOFFS_DIR)
+    keep: int = args.keep
+    dry_run: bool = args.dry_run
+
+    if not handoffs_dir.is_dir():
+        if args.json:
+            print(json.dumps({"pruned": [], "kept": 0, "total": 0}, indent=2))
+        else:
+            print("No handoff artifacts found.")
+        return 0
+
+    timestamped = sorted(
+        (f for f in handoffs_dir.iterdir() if f.name.startswith("handoff-") and f.name.endswith(".json")),
+        key=lambda f: f.name,
+    )
+
+    total = len(timestamped)
+    to_prune = timestamped[:-keep] if keep < total else []
+
+    if args.json:
+        result = {
+            "dry_run": dry_run,
+            "kept": total - len(to_prune),
+            "pruned": [f.name for f in to_prune],
+            "total": total,
+        }
+        if not dry_run:
+            for f in to_prune:
+                f.unlink()
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    if not to_prune:
+        print(f"No handoff artifacts to prune ({total} total, keeping {keep}).")
+        return 0
+
+    if dry_run:
+        print(f"Dry run: would prune {len(to_prune)} of {total} handoff artifacts (keeping {keep}):")
+        for f in to_prune:
+            print(f"  - {f.name}")
+    else:
+        for f in to_prune:
+            f.unlink()
+        print(f"Pruned {len(to_prune)} of {total} handoff artifacts (kept {keep}).")
+
+    return 0
+
+
 def _build_manual_steps(next_agent: str) -> list[str]:
     return [
         "Close or reset the current AI session if needed.",

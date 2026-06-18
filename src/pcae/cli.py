@@ -410,7 +410,7 @@ from pcae.commands.session import (
     run_session_update,
     run_session_write,
 )
-from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_handoff_show, run_phase_start
+from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_handoff_prune, run_phase_handoff_show, run_phase_start
 from pcae.commands.push import run_push, run_push_check
 from pcae.commands.review import (
     run_lifecycle_review_create,
@@ -4631,6 +4631,28 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_handoff_show_parser.set_defaults(handler=run_phase_handoff_show)
+
+    phase_handoff_prune_parser = phase_subparsers.add_parser(
+        "handoff-prune",
+        help="Prune old timestamped handoff artifacts.",
+    )
+    phase_handoff_prune_parser.add_argument(
+        "--keep",
+        type=int,
+        default=20,
+        help="Number of most recent timestamped handoff artifacts to keep (default: 20).",
+    )
+    phase_handoff_prune_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="List candidates without deleting.",
+    )
+    phase_handoff_prune_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_handoff_prune_parser.set_defaults(handler=run_phase_handoff_prune)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",

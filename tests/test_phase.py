@@ -1895,6 +1895,162 @@ def test_70v_handoff_latest_updates_on_second_handoff(
 
 
 # ---------------------------------------------------------------------------
+# Phase 70X: handoff artifact hygiene
+# ---------------------------------------------------------------------------
+
+
+def _create_fake_handoff(tmp_path: Path, name: str) -> None:
+    import json as _json
+
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+    data = {"handoff_id": name, "summary": f"fake {name}"}
+    (handoffs_dir / f"{name}.json").write_text(
+        _json.dumps(data), encoding="utf-8",
+    )
+
+
+def test_70x_prune_dry_run_reports_without_deleting(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for i in range(5):
+        _create_fake_handoff(tmp_path, f"handoff-2026061{i}T000000-000000-idle")
+
+    exit_code = main(["phase", "handoff-prune", "--keep", "2", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Dry run" in output
+    assert "would prune 3" in output
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    assert len(list(handoffs_dir.glob("handoff-*.json"))) == 5
+
+
+def test_70x_prune_apply_deletes_old_artifacts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for i in range(5):
+        _create_fake_handoff(tmp_path, f"handoff-2026061{i}T000000-000000-idle")
+
+    exit_code = main(["phase", "handoff-prune", "--keep", "2"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Pruned 3" in output
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    remaining = sorted(f.name for f in handoffs_dir.glob("handoff-*.json"))
+    assert len(remaining) == 2
+    assert remaining[0] == "handoff-20260613T000000-000000-idle.json"
+    assert remaining[1] == "handoff-20260614T000000-000000-idle.json"
+
+
+def test_70x_prune_preserves_latest_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+    (handoffs_dir / "latest.json").write_text('{"summary":"latest"}', encoding="utf-8")
+    for i in range(3):
+        _create_fake_handoff(tmp_path, f"handoff-2026061{i}T000000-000000-idle")
+
+    exit_code = main(["phase", "handoff-prune", "--keep", "1"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    assert (handoffs_dir / "latest.json").is_file()
+
+
+def test_70x_prune_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for i in range(4):
+        _create_fake_handoff(tmp_path, f"handoff-2026061{i}T000000-000000-idle")
+
+    exit_code = main(["phase", "handoff-prune", "--keep", "2", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["total"] == 4
+    assert data["kept"] == 2
+    assert len(data["pruned"]) == 2
+    assert data["dry_run"] is False
+
+
+def test_70x_prune_nothing_to_prune(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for i in range(2):
+        _create_fake_handoff(tmp_path, f"handoff-2026061{i}T000000-000000-idle")
+
+    exit_code = main(["phase", "handoff-prune", "--keep", "5"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No handoff artifacts to prune" in output
+
+
+def test_70x_prune_no_handoffs_dir(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff-prune"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No handoff artifacts found" in output
+
+
+def test_70x_prune_dry_run_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    for i in range(3):
+        _create_fake_handoff(tmp_path, f"handoff-2026061{i}T000000-000000-idle")
+
+    exit_code = main(["phase", "handoff-prune", "--keep", "1", "--dry-run", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["dry_run"] is True
+    assert len(data["pruned"]) == 2
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    assert len(list(handoffs_dir.glob("handoff-*.json"))) == 3
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 
