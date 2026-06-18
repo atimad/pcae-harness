@@ -4594,8 +4594,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_handoff_parser.add_argument(
         "--summary",
-        required=True,
-        help="Summary of the completed phase.",
+        default=None,
+        help="Summary of the completed phase. Auto-generated from repo state when omitted.",
     )
     phase_handoff_parser.add_argument(
         "--next-agent",

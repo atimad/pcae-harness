@@ -3,16 +3,17 @@ from __future__ import annotations
 import argparse
 import json
 
+from pcae.core.agent import (
+    build_challenge_attention_assessment,
+    build_irg_challenge_context,
+    read_agent_lock,
+    render_irg_challenge_compact_lines_with_allocation,
+)
 from pcae.core.check import run_checks
 from pcae.core.orchestration import (
     build_workflow_simulation,
     build_workflow_validation,
     recommend_agent,
-)
-from pcae.core.agent import (
-    build_challenge_attention_assessment,
-    build_irg_challenge_context,
-    render_irg_challenge_compact_lines_with_allocation,
 )
 from pcae.core.paths import HarnessPath
 from pcae.core.phase import complete_phase, handoff_phase, start_phase
@@ -59,6 +60,9 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     _refresh_session_snapshot_for_governed_flow(root)
     strategic_continuity = strategic_continuity_summary(root)
 
+    auto_summary = args.summary is None
+    summary = args.summary if args.summary is not None else _build_auto_summary(root)
+
     # Compute recommendation when work_type is provided.
     rec: dict | None = None
     suggested_workflow: dict | None = None
@@ -88,10 +92,15 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
         next_agent = rec["recommended_agent"]
         recommendation_used = True
     else:
-        print("Please specify the next agent with --next-agent <agent-id>.")
-        return 1
+        lock = read_agent_lock(root)
+        if lock is not None:
+            next_agent = lock.agent_id
+            recommendation_used = False
+        else:
+            print("Please specify the next agent with --next-agent <agent-id>.")
+            return 1
 
-    result = handoff_phase(root, args.summary, next_agent)
+    result = handoff_phase(root, summary, next_agent)
 
     manual_steps = _build_manual_steps(next_agent)
     bootstrap_prompt = _build_bootstrap_prompt(next_agent)
@@ -101,6 +110,7 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
         print(
             json.dumps(
                 {
+                    "auto_summary": auto_summary,
                     "check_status": "passed" if result.check_passed else "failed",
                     "explicit_next_agent": explicit_next_agent,
                     "health_status": result.health_status,
@@ -222,6 +232,78 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
             print(line)
 
     return 0 if result.next_lock_acquired else 1
+
+
+def _build_auto_summary(root: HarnessPath) -> str:
+    import subprocess
+
+    from pcae.core.git_status import read_git_branch, read_git_changes
+    from pcae.core.health import build_health_data, is_healthy
+    from pcae.core.review import lifecycle_review_status
+
+    parts: list[str] = []
+
+    branch = read_git_branch(root)
+    parts.append(f"branch={branch}")
+
+    changes = read_git_changes(root)
+    parts.append("tree=clean" if not changes else f"tree={len(changes)} changed")
+
+    active_task = find_latest_active_task(root)
+    if active_task:
+        parts.append(f"task={active_task.task_id} ({active_task.title})")
+    else:
+        parts.append("task=idle")
+
+    health_data = build_health_data(root)
+    health_ok = is_healthy(health_data)
+    parts.append(f"health={'healthy' if health_ok else 'unhealthy'}")
+
+    check_result = run_checks(root)
+    parts.append(f"check={'passed' if check_result.passed else 'failed'}")
+
+    try:
+        result = subprocess.run(
+            ["git", "rev-list", "--count", "@{u}..HEAD"],
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        unpushed = int(result.stdout.strip())
+    except (subprocess.CalledProcessError, ValueError):
+        try:
+            result = subprocess.run(
+                ["git", "rev-list", "--count", "HEAD"],
+                cwd=root.path,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            unpushed = int(result.stdout.strip())
+        except (subprocess.CalledProcessError, ValueError):
+            unpushed = 0
+    parts.append(f"unpushed={unpushed}")
+
+    task_id = active_task.task_id if active_task else None
+    review = lifecycle_review_status(root, task_id)
+    parts.append(f"review={review}")
+
+    try:
+        result = subprocess.run(
+            ["git", "log", "--oneline", "-1", "--format=%s"],
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        latest_commit = result.stdout.strip()
+        if latest_commit:
+            parts.append(f"latest_commit={latest_commit}")
+    except (subprocess.CalledProcessError, OSError):
+        pass
+
+    return "Phase handoff: " + ", ".join(parts)
 
 
 def _build_manual_steps(next_agent: str) -> list[str]:

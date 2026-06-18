@@ -627,6 +627,7 @@ def test_phase_handoff_json_output(
     assert isinstance(data["restart_workflows"], list)
     assert len(data["restart_workflows"]) == 3
     assert set(data.keys()) == {
+        "auto_summary",
         "check_status",
         "explicit_next_agent",
         "health_status",
@@ -648,6 +649,7 @@ def test_phase_handoff_json_output(
         "governance_checkpoints",
         "work_type",
     }
+    assert data["auto_summary"] is False
     # no --work-type: recommendation fields are null/false
     assert data["work_type"] is None
     assert data["recommended_agent"] is None
@@ -975,25 +977,23 @@ def test_phase_handoff_json_restart_workflows_structure(
     assert any("<agent-id>" in s for s in generic["steps"])
 
 
-def test_phase_handoff_missing_next_agent_does_not_mutate_state(
+def test_phase_handoff_missing_next_agent_with_lock_defaults_to_holder(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
-    from pcae.core.provenance import read_provenance_history
-
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
     acquire_agent_lock(root, "claude-local")
     monkeypatch.chdir(tmp_path)
 
-    main(["phase", "handoff", "--summary", "No mutation"])
+    exit_code = main(["phase", "handoff", "--summary", "Self handoff"])
 
-    capsys.readouterr()
-    # Lock still held, no provenance events recorded
-    from pcae.core.agent import read_agent_lock
-    assert read_agent_lock(root) is not None
-    history = read_provenance_history(root)
-    assert len(history.events) == 0
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Next agent: claude-local" in output
+    lock = read_agent_lock(root)
+    assert lock is not None
+    assert lock.agent_id == "claude-local"
 
 
 # ---------------------------------------------------------------------------
@@ -1385,6 +1385,214 @@ def test_phase_handoff_workflow_with_explicit_override_remains_authoritative(
     assert "User override: explicit --next-agent is being used" in output
     assert "Next agent: codex-local" in output
     assert "Workflow validation:" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 70U: auto-summary and zero-argument handoff
+# ---------------------------------------------------------------------------
+
+
+def test_70u_handoff_without_summary_generates_auto_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Auto summary task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase handoff." in output
+    assert "Summary: Phase handoff:" in output
+    assert "branch=" in output
+    assert "health=" in output
+    assert "task=" in output
+
+
+def test_70u_handoff_with_summary_uses_verbatim(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Verbatim summary task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "My custom summary", "--next-agent", "claude-next"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Summary: My custom summary" in output
+    assert "Phase handoff:" not in output.split("Summary: ")[1].split("\n")[0]
+
+
+def test_70u_handoff_zero_arguments_uses_current_lock_holder(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Zero args task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Next agent: claude-local" in output
+    assert "Agent lock: acquired by claude-local" in output
+
+
+def test_70u_handoff_no_lock_no_next_agent_prints_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Please specify the next agent with --next-agent <agent-id>." in output
+
+
+def test_70u_handoff_json_auto_summary_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "JSON auto task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["auto_summary"] is True
+    assert "Phase handoff:" in data["summary"]
+    assert "branch=" in data["summary"]
+
+
+def test_70u_handoff_json_auto_summary_false_with_manual(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "JSON manual task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "Manual text", "--next-agent", "claude-next", "--json"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["auto_summary"] is False
+    assert data["summary"] == "Manual text"
+
+
+def test_70u_auto_summary_includes_review_status(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Review summary task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "review=" in output
+
+
+def test_70u_auto_summary_includes_latest_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Commit summary task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "latest_commit=baseline" in output
+
+
+def test_70u_auto_summary_idle_state(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "task=idle" in output
+
+
+def test_70u_handoff_default_next_agent_does_not_override_work_type(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Work type priority task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--work-type", "implementation"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Next agent: codex-local" in output
 
 
 # ---------------------------------------------------------------------------
