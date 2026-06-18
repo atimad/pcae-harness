@@ -2434,3 +2434,66 @@ def test_70i_doctor_without_fix_unchanged(
     assert "issues detected" in output
     done_md = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
     assert "Noop task" not in done_md
+
+
+# --- Phase 70L: governed lifecycle end-to-end ---
+
+
+def test_70l_governed_lifecycle_end_to_end(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    # Step 1: create task with structured flags
+    exit_code = main([
+        "task", "new", "Lifecycle test task",
+        "--goal", "Test the governed lifecycle",
+        "--mode", "implementation",
+        "--allowed-file", "src/app.py",
+        "--enforcement-mode", "advisory",
+        "--acceptance-check", "pcae health passes",
+    ])
+    assert exit_code == 0
+    capsys.readouterr()
+
+    active_task = find_latest_active_task(HarnessPath(tmp_path))
+    assert active_task is not None
+    assert active_task.title == "Lifecycle test task"
+    assert active_task.goal == "Test the governed lifecycle"
+
+    # Step 2: simulate implementation + commit
+    commit_all(tmp_path, "Implement lifecycle test")
+
+    # Step 3: finish + commit in one command
+    exit_code = main([
+        "task", "finish", "--skip-checks",
+        "--commit", "Complete lifecycle test task",
+    ])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Finished task:" in output
+    assert "Committed:" in output
+
+    # Verify task is done
+    assert find_latest_active_task(HarnessPath(tmp_path)) is None
+    done_md = (tmp_path / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    assert "Lifecycle test task" in done_md
+
+    # Verify clean working tree
+    result = subprocess.run(
+        ["git", "status", "--porcelain=v1"],
+        cwd=tmp_path, capture_output=True, text=True, check=True,
+    )
+    assert result.stdout.strip() == ""
+
+    # Verify doctor is clean
+    from pcae.core.tasks import diagnose_task_memory
+
+    diagnostics = diagnose_task_memory(HarnessPath(tmp_path))
+    assert diagnostics.clean

@@ -56,16 +56,29 @@ Commands are organized by capability area. All commands that have a `--json` var
 ## task
 
 - `pcae task new "<title>"`
+- `pcae task new "<title>" --goal "<goal>" --mode implementation --allowed-file "<path>" --forbidden-file "<path>" --enforcement-mode advisory --acceptance-check "<check>"`
 - `pcae task list`
 - `pcae task show`
-- `pcae task update`
+- `pcae task update --goal "<goal>" --allowed-file "<path>" --enforcement-mode advisory --acceptance-check "<check>"`
 - `pcae task pause`
 - `pcae task resume`
 - `pcae task complete`
+- `pcae task finish`
+- `pcae task finish --skip-checks`
+- `pcae task finish --commit "<message>"`
+- `pcae task finish --commit "<message>" --json`
 - `pcae task close [task-id]`
 - `pcae task transition`
 - `pcae task transition --next "<task title>"`
 - `pcae task transition --json`
+
+## push
+
+- `pcae push` — validate readiness and push to tracking branch
+- `pcae push --dry-run` — validate without pushing
+- `pcae push --json` — structured output with push metadata
+- `pcae push check` — check readiness only (no push)
+- `pcae push check --json`
 
 ## session
 
@@ -648,6 +661,11 @@ AI-driven invocation.
 - `pcae doctor execution-chain --json`
 - `pcae doctor execution-chain --prompt-id <id>`
 - `pcae doctor execution-chain --prompt-id <id> --json`
+- `pcae doctor task-memory` — detect task-memory inconsistencies
+- `pcae doctor task-memory --json`
+- `pcae doctor task-memory --fix` — repair deterministic inconsistencies
+- `pcae doctor task-memory --fix --dry-run` — show repairs without mutating
+- `pcae doctor task-memory --fix --json`
 
 ---
 

@@ -130,6 +130,47 @@ The implementation is organized into the following architecture layers:
 ### Recovery, Hardening, Concurrency, and Resilience (52A–52Q)
 - Task lifecycle hardening, session/governance/lock/corruption recovery planning, runtime contract/sandbox/timeout hardening, output integrity verification, concurrency safety, parallel agent coordination, multi-agent state consistency, conflict resolution, chaos testing, failure injection planning, corruption simulation, and recovery validation. All commands are advisory; none inject failures, corrupt files, or execute recovery automatically.
 
+## Governed Lifecycle
+
+PCAE provides a governed lifecycle for task-based development. Every phase follows the same pattern:
+
+```bash
+# 1. Create a task contract with structured scope
+pcae task new "70L Lifecycle Consolidation" \
+  --goal "Document the governed lifecycle" \
+  --mode implementation \
+  --allowed-file "docs/COMMANDS.md" \
+  --allowed-file "README.md" \
+  --enforcement-mode advisory \
+  --acceptance-check "pcae health passes"
+
+# 2. Implement, then commit normally
+git add <files>
+git commit -m "Implement Phase 70L lifecycle consolidation"
+
+# 3. Finish the task and commit closure in one governed command
+pcae task finish --commit "Complete Phase 70L lifecycle consolidation"
+
+# 4. Push with governed readiness validation
+pcae push
+```
+
+After task closure, the repo enters a **healthy idle** state — no active task, clean working tree, all checks pass. This is a valid resting state, not a governance failure.
+
+Key lifecycle commands:
+
+| Command | Purpose |
+|---------|---------|
+| `pcae task new` | Create a task contract with goal, scope, and acceptance criteria |
+| `pcae task finish` | Validate, close task, update memory files, refresh session |
+| `pcae task finish --commit` | Finish and commit closure in one step |
+| `pcae push` | Validate readiness and push to tracking branch |
+| `pcae push check` | Check push readiness without pushing |
+| `pcae doctor task-memory` | Detect task-memory inconsistencies |
+| `pcae doctor task-memory --fix` | Repair deterministic inconsistencies |
+| `pcae health` | Check overall governance health |
+| `pcae check` | Validate source changes against policy |
+
 ## CLI Examples
 
 ```
