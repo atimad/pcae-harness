@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Handoff Artifact Persistence (20260619-0039-handoff-artifact-persistence)
 - Phase Handoff Inspection and Auto-Summary Design (20260619-0026-phase-handoff-inspection-and-auto-summary-design)
 - Policy-Controlled Lifecycle Review Enforcement (20260619-0006-policy-controlled-lifecycle-review-enforcement)
 - 70S Lifecycle Review Status in Push Check (20260618-2237-70s-lifecycle-review-status-in-push-check)
