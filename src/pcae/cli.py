@@ -412,6 +412,11 @@ from pcae.commands.session import (
 )
 from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_start
 from pcae.commands.push import run_push, run_push_check
+from pcae.commands.review import (
+    run_lifecycle_review_create,
+    run_lifecycle_review_list,
+    run_lifecycle_review_show,
+)
 from pcae.commands.task import (
     run_doctor_task_memory,
     run_task_close,
@@ -2158,6 +2163,43 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     egr_parser.set_defaults(handler=run_execution_governance_readiness_review)
+
+    lifecycle_parser = review_subparsers.add_parser(
+        "lifecycle",
+        help="Lifecycle review records for developer task changes (Phase 70R).",
+    )
+    lifecycle_subparsers = lifecycle_parser.add_subparsers(
+        dest="lifecycle_command", required=True,
+    )
+
+    lrc_create_parser = lifecycle_subparsers.add_parser(
+        "create", help="Record a lifecycle review for the current task.",
+    )
+    lrc_create_parser.add_argument(
+        "--disposition", required=True,
+        help="Review disposition: approved, changes_requested, or informational.",
+    )
+    lrc_create_parser.add_argument("--notes", help="Review notes.")
+    lrc_create_parser.add_argument("--reviewer", help="Reviewer identity (default: human).")
+    lrc_create_parser.add_argument("--task", help="Task ID (default: current active task).")
+    lrc_create_parser.add_argument("--commit-range", help="Git commit range reviewed.")
+    lrc_create_parser.add_argument("--json", action="store_true", help="Print JSON output.")
+    lrc_create_parser.set_defaults(handler=run_lifecycle_review_create)
+
+    lrc_show_parser = lifecycle_subparsers.add_parser(
+        "show", help="Show a lifecycle review record.",
+    )
+    lrc_show_parser.add_argument("lrr_id", help="Lifecycle review record ID.")
+    lrc_show_parser.add_argument("--json", action="store_true", help="Print JSON output.")
+    lrc_show_parser.set_defaults(handler=run_lifecycle_review_show)
+
+    lrc_list_parser = lifecycle_subparsers.add_parser(
+        "list", help="List lifecycle review records.",
+    )
+    lrc_list_parser.add_argument("--task", help="Filter by task ID.")
+    lrc_list_parser.add_argument("--open", action="store_true", help="Show only open (changes_requested) reviews.")
+    lrc_list_parser.add_argument("--json", action="store_true", help="Print JSON output.")
+    lrc_list_parser.set_defaults(handler=run_lifecycle_review_list)
 
     execution_activation_parser = subparsers.add_parser(
         "execution-activation",
