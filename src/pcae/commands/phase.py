@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timezone
+from pathlib import Path
 
 from pcae.core.agent import (
     build_challenge_attention_assessment,
@@ -106,50 +108,50 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     bootstrap_prompt = _build_bootstrap_prompt(next_agent)
     restart_workflows = _build_restart_workflows_data()
 
+    handoff_artifact = _build_handoff_artifact(
+        root=root,
+        result=result,
+        auto_summary=auto_summary,
+        next_agent=next_agent,
+    )
+    _persist_handoff_artifact(root, handoff_artifact)
+
     if args.json:
-        print(
-            json.dumps(
-                {
-                    "auto_summary": auto_summary,
-                    "check_status": "passed" if result.check_passed else "failed",
-                    "explicit_next_agent": explicit_next_agent,
-                    "health_status": result.health_status,
-                    "manual_steps": manual_steps,
-                    "next_agent": result.next_agent,
-                    "provenance_event_count": result.provenance_event_count,
-                    "recommendation_note": (
-                        "Recommendations are advisory; the user may override them."
-                    ),
-                    "recommendation_reason": rec["reason"] if rec else None,
-                    "recommendation_used": recommendation_used,
-                    "recommended_agent": rec["recommended_agent"] if rec else None,
-                    "released_agent": result.released_agent,
-                    "restart_workflows": restart_workflows,
-                    "summary": result.summary,
-                    "strategic_continuity": strategic_continuity,
-                    "suggested_workflow": _workflow_json_summary(suggested_workflow),
-                    "workflow": workflow,
-                    "workflow_valid": (
-                        workflow_validation["valid"]
-                        if workflow_validation is not None
-                        else None
-                    ),
-                    "workflow_warnings": (
-                        workflow_validation["warnings"]
-                        if workflow_validation is not None
-                        else []
-                    ),
-                    "governance_checkpoints": (
-                        workflow_validation["governance_checkpoints"]
-                        if workflow_validation is not None
-                        else []
-                    ),
-                    "work_type": work_type,
-                },
-                indent=2,
-                sort_keys=True,
-            )
-        )
+        full_json = {
+            **handoff_artifact,
+            "check_status": "passed" if result.check_passed else "failed",
+            "explicit_next_agent": explicit_next_agent,
+            "manual_steps": manual_steps,
+            "provenance_event_count": result.provenance_event_count,
+            "recommendation_note": (
+                "Recommendations are advisory; the user may override them."
+            ),
+            "recommendation_reason": rec["reason"] if rec else None,
+            "recommendation_used": recommendation_used,
+            "recommended_agent": rec["recommended_agent"] if rec else None,
+            "released_agent": result.released_agent,
+            "restart_workflows": restart_workflows,
+            "strategic_continuity": strategic_continuity,
+            "suggested_workflow": _workflow_json_summary(suggested_workflow),
+            "workflow": workflow,
+            "workflow_valid": (
+                workflow_validation["valid"]
+                if workflow_validation is not None
+                else None
+            ),
+            "workflow_warnings": (
+                workflow_validation["warnings"]
+                if workflow_validation is not None
+                else []
+            ),
+            "governance_checkpoints": (
+                workflow_validation["governance_checkpoints"]
+                if workflow_validation is not None
+                else []
+            ),
+            "work_type": work_type,
+        }
+        print(json.dumps(full_json, indent=2, sort_keys=True))
         return 0 if result.next_lock_acquired else 1
 
     print("Phase handoff.")
@@ -304,6 +306,149 @@ def _build_auto_summary(root: HarnessPath) -> str:
         pass
 
     return "Phase handoff: " + ", ".join(parts)
+
+
+HANDOFFS_DIR = Path(".pcae") / "handoffs"
+
+
+def _build_handoff_artifact(
+    *,
+    root: HarnessPath,
+    result,
+    auto_summary: bool,
+    next_agent: str,
+) -> dict:
+    import subprocess
+
+    from pcae.core.git_status import read_git_branch, read_git_changes
+    from pcae.core.review import lifecycle_review_status
+    from pcae.core.tasks import diagnose_task_memory
+
+    branch = read_git_branch(root)
+    changes = read_git_changes(root)
+    active_task = find_latest_active_task(root)
+    diagnostics = diagnose_task_memory(root)
+
+    task_id = active_task.task_id if active_task else None
+    review = lifecycle_review_status(root, task_id)
+
+    try:
+        count_result = subprocess.run(
+            ["git", "rev-list", "--count", "@{u}..HEAD"],
+            cwd=root.path, check=True, capture_output=True, text=True,
+        )
+        unpushed = int(count_result.stdout.strip())
+    except (subprocess.CalledProcessError, ValueError):
+        try:
+            count_result = subprocess.run(
+                ["git", "rev-list", "--count", "HEAD"],
+                cwd=root.path, check=True, capture_output=True, text=True,
+            )
+            unpushed = int(count_result.stdout.strip())
+        except (subprocess.CalledProcessError, ValueError):
+            unpushed = 0
+
+    latest_commit = ""
+    recent_commits: list[str] = []
+    try:
+        log_result = subprocess.run(
+            ["git", "log", "--oneline", "-5", "--format=%s"],
+            cwd=root.path, check=True, capture_output=True, text=True,
+        )
+        lines = [line.strip() for line in log_result.stdout.splitlines() if line.strip()]
+        if lines:
+            latest_commit = lines[0]
+            recent_commits = lines
+    except (subprocess.CalledProcessError, OSError):
+        pass
+
+    from pcae.commands.push import assess_push_readiness
+
+    push = assess_push_readiness(root)
+
+    now = datetime.now(timezone.utc)
+    task_suffix = task_id if task_id else "idle"
+    handoff_id = f"handoff-{now:%Y%m%dT%H%M%S}-{now.microsecond:06d}-{task_suffix}"
+
+    return {
+        "active_task_id": task_id,
+        "active_task_title": active_task.title if active_task else None,
+        "auto_summary": auto_summary,
+        "bootstrap_command": f"pcae session bootstrap --agent-id {next_agent}",
+        "branch": branch,
+        "check_passed": result.check_passed,
+        "created_at": now.isoformat(),
+        "handoff_id": handoff_id,
+        "health_status": result.health_status,
+        "latest_commit": latest_commit,
+        "lifecycle_review": review,
+        "next_agent": next_agent,
+        "push_mode": push.mode,
+        "push_ready": push.ready,
+        "recent_commits": recent_commits,
+        "recommended_next_action": f"pcae session bootstrap --agent-id {next_agent}",
+        "summary": result.summary,
+        "task_memory_status": "clean" if not diagnostics.has_errors and not diagnostics.has_warnings else "errors" if diagnostics.has_errors else "warnings",
+        "task_state": "active" if active_task else "idle",
+        "unpushed_commits": unpushed,
+        "working_tree": "clean" if not changes else f"{len(changes)} changed",
+    }
+
+
+def _persist_handoff_artifact(root: HarnessPath, artifact: dict) -> None:
+    handoffs_dir = root.join(HANDOFFS_DIR)
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+
+    content = json.dumps(artifact, indent=2, sort_keys=True) + "\n"
+
+    latest_path = handoffs_dir / "latest.json"
+    latest_path.write_text(content, encoding="utf-8")
+
+    timestamped_path = handoffs_dir / f"{artifact['handoff_id']}.json"
+    timestamped_path.write_text(content, encoding="utf-8")
+
+
+def run_phase_handoff_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    latest_path = root.join(HANDOFFS_DIR / "latest.json")
+
+    if not latest_path.is_file():
+        if args.json:
+            print(json.dumps({"error": "no handoff artifact found"}, indent=2))
+        else:
+            print("No handoff artifact found. Run pcae phase handoff first.")
+        return 1
+
+    content = latest_path.read_text(encoding="utf-8")
+
+    if args.json:
+        print(content.rstrip())
+    else:
+        data = json.loads(content)
+        print("Latest handoff artifact")
+        print(f"  Handoff ID: {data['handoff_id']}")
+        print(f"  Created: {data['created_at']}")
+        print(f"  Branch: {data['branch']}")
+        print(f"  Working tree: {data['working_tree']}")
+        print(f"  Task: {data['task_state']}", end="")
+        if data.get("active_task_id"):
+            print(f" ({data['active_task_id']})")
+        else:
+            print()
+        print(f"  Health: {data['health_status']}")
+        print(f"  Check: {'passed' if data['check_passed'] else 'failed'}")
+        print(f"  Task memory: {data['task_memory_status']}")
+        print(f"  Push: {'ready' if data['push_ready'] else 'not ready'} ({data['push_mode']})")
+        print(f"  Lifecycle review: {data['lifecycle_review']}")
+        print(f"  Unpushed commits: {data['unpushed_commits']}")
+        print(f"  Latest commit: {data['latest_commit']}")
+        print(f"  Next agent: {data['next_agent']}")
+        print(f"  Auto-summary: {data['auto_summary']}")
+        print(f"  Summary: {data['summary']}")
+        print()
+        print(f"  Bootstrap: {data['bootstrap_command']}")
+
+    return 0
 
 
 def _build_manual_steps(next_agent: str) -> list[str]:

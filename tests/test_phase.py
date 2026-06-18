@@ -626,29 +626,47 @@ def test_phase_handoff_json_output(
     assert any("pcae session bootstrap --agent-id claude-next" in s for s in data["manual_steps"])
     assert isinstance(data["restart_workflows"], list)
     assert len(data["restart_workflows"]) == 3
-    assert set(data.keys()) == {
+    expected_keys = {
+        "active_task_id",
+        "active_task_title",
         "auto_summary",
+        "bootstrap_command",
+        "branch",
+        "check_passed",
         "check_status",
+        "created_at",
         "explicit_next_agent",
+        "governance_checkpoints",
+        "handoff_id",
         "health_status",
+        "latest_commit",
+        "lifecycle_review",
         "manual_steps",
         "next_agent",
         "provenance_event_count",
+        "push_mode",
+        "push_ready",
+        "recent_commits",
         "recommendation_note",
         "recommendation_reason",
         "recommendation_used",
         "recommended_agent",
+        "recommended_next_action",
         "released_agent",
         "restart_workflows",
         "strategic_continuity",
         "summary",
         "suggested_workflow",
+        "task_memory_status",
+        "task_state",
+        "unpushed_commits",
         "workflow",
         "workflow_valid",
         "workflow_warnings",
-        "governance_checkpoints",
         "work_type",
+        "working_tree",
     }
+    assert set(data.keys()) == expected_keys
     assert data["auto_summary"] is False
     # no --work-type: recommendation fields are null/false
     assert data["work_type"] is None
@@ -1576,6 +1594,26 @@ def test_70u_auto_summary_idle_state(
     assert "task=idle" in output
 
 
+def test_70u_handoff_zero_arguments_persists_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Persist artifact task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    latest = tmp_path / ".pcae" / "handoffs" / "latest.json"
+    assert latest.is_file()
+
+
 def test_70u_handoff_default_next_agent_does_not_override_work_type(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
@@ -1593,6 +1631,267 @@ def test_70u_handoff_default_next_agent_does_not_override_work_type(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Next agent: codex-local" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 70V: handoff artifact persistence
+# ---------------------------------------------------------------------------
+
+
+def test_70v_handoff_writes_latest_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Latest artifact task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    latest = tmp_path / ".pcae" / "handoffs" / "latest.json"
+    assert latest.is_file()
+    data = _json.loads(latest.read_text(encoding="utf-8"))
+    assert data["auto_summary"] is True
+    assert "handoff_id" in data
+    assert data["next_agent"] == "claude-next"
+
+
+def test_70v_handoff_writes_timestamped_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Timestamped artifact task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    timestamped_files = [f for f in handoffs_dir.iterdir() if f.name.startswith("handoff-")]
+    assert len(timestamped_files) == 1
+
+
+def test_70v_handoff_artifact_includes_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Fields artifact task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    latest = tmp_path / ".pcae" / "handoffs" / "latest.json"
+    data = _json.loads(latest.read_text(encoding="utf-8"))
+    required_fields = {
+        "handoff_id", "created_at", "branch", "working_tree",
+        "unpushed_commits", "task_state", "active_task_id",
+        "active_task_title", "health_status", "check_passed",
+        "task_memory_status", "push_ready", "push_mode",
+        "lifecycle_review", "latest_commit", "recent_commits",
+        "summary", "auto_summary", "next_agent",
+        "bootstrap_command", "recommended_next_action",
+    }
+    assert required_fields.issubset(set(data.keys()))
+
+
+def test_70v_handoff_manual_summary_persists_auto_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Manual persist task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--summary", "My manual summary", "--next-agent", "claude-next"]
+    )
+
+    capsys.readouterr()
+    assert exit_code == 0
+    latest = tmp_path / ".pcae" / "handoffs" / "latest.json"
+    data = _json.loads(latest.read_text(encoding="utf-8"))
+    assert data["auto_summary"] is False
+    assert data["summary"] == "My manual summary"
+
+
+def test_70v_handoff_json_consistent_with_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "JSON consistent task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(
+        ["phase", "handoff", "--next-agent", "claude-next", "--json"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    json_output = _json.loads(output)
+    latest = tmp_path / ".pcae" / "handoffs" / "latest.json"
+    artifact = _json.loads(latest.read_text(encoding="utf-8"))
+    assert json_output["handoff_id"] == artifact["handoff_id"]
+    assert json_output["summary"] == artifact["summary"]
+    assert json_output["auto_summary"] == artifact["auto_summary"]
+
+
+def test_70v_handoff_show_displays_latest(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Show latest task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Latest handoff artifact" in output
+    assert "Handoff ID:" in output
+    assert "Branch:" in output
+    assert "Health:" in output
+    assert "Bootstrap:" in output
+
+
+def test_70v_handoff_show_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Show JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert "handoff_id" in data
+    assert "summary" in data
+
+
+def test_70v_handoff_show_no_artifact_reports_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No handoff artifact found" in output
+
+
+def test_70v_handoff_show_no_artifact_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff-show", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    data = _json.loads(output)
+    assert "error" in data
+
+
+def test_70v_gitignore_template_includes_handoffs(
+    tmp_path: Path,
+) -> None:
+    from pcae.core.templates import INIT_TEMPLATES
+
+    gitignore_content = INIT_TEMPLATES[Path(".pcae/.gitignore")]
+    assert "handoffs/" in gitignore_content
+
+
+def test_70v_handoff_latest_updates_on_second_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Double handoff task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--summary", "First handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    main(["phase", "handoff", "--summary", "Second handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    latest = tmp_path / ".pcae" / "handoffs" / "latest.json"
+    data = _json.loads(latest.read_text(encoding="utf-8"))
+    assert data["summary"] == "Second handoff"
+
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    timestamped_files = [f for f in handoffs_dir.iterdir() if f.name.startswith("handoff-")]
+    assert len(timestamped_files) == 2
 
 
 # ---------------------------------------------------------------------------

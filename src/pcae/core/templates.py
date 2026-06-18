@@ -104,6 +104,7 @@ architecture/
 architecture-exports/
 remote/
 lifecycle-reviews/
+handoffs/
 """,
     Path(".pcae/exports/.gitignore"): """governance-bundle-*.json
 """,

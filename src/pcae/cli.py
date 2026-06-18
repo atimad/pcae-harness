@@ -410,7 +410,7 @@ from pcae.commands.session import (
     run_session_update,
     run_session_write,
 )
-from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_start
+from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_handoff_show, run_phase_start
 from pcae.commands.push import run_push, run_push_check
 from pcae.commands.review import (
     run_lifecycle_review_create,
@@ -4620,6 +4620,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON handoff result.",
     )
     phase_handoff_parser.set_defaults(handler=run_phase_handoff)
+
+    phase_handoff_show_parser = phase_subparsers.add_parser(
+        "handoff-show",
+        help="Show the latest persisted handoff artifact.",
+    )
+    phase_handoff_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_handoff_show_parser.set_defaults(handler=run_phase_handoff_show)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",
