@@ -264,3 +264,128 @@ def test_70g_push_check_mode_active_task(
     output = capsys.readouterr().out
     parsed = json.loads(output)
     assert parsed["mode"] == "active_task"
+
+
+# --- Phase 70H: pcae push (governed push execution) ---
+
+
+def test_70h_push_run_dry_run_does_not_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Dry run task",
+        created_at=datetime(2026, 6, 18, 7, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Dry run: push skipped." in output
+    assert "Ready to push." in output
+
+
+def test_70h_push_run_refuses_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Dirty run task",
+        created_at=datetime(2026, 6, 18, 7, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Not ready to push:" in output
+
+
+def test_70h_push_run_dry_run_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "JSON dry run task",
+        created_at=datetime(2026, 6, 18, 7, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "--dry-run", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    parsed = json.loads(output)
+    assert parsed["ready"] is True
+    assert parsed["dry_run"] is True
+    assert parsed["pushed"] is False
+
+
+def test_70h_push_run_nothing_to_push(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Nothing task",
+        created_at=datetime(2026, 6, 18, 7, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    # Create a fake remote so unpushed count = 0
+    remote_path = tmp_path.parent / "remote.git"
+    subprocess.run(["git", "clone", "--bare", str(tmp_path), str(remote_path)],
+                   capture_output=True, check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(remote_path)],
+                   cwd=tmp_path, capture_output=True, check=True)
+    subprocess.run(["git", "fetch", "origin"], cwd=tmp_path, capture_output=True, check=True)
+    subprocess.run(["git", "branch", "--set-upstream-to=origin/main", "main"],
+                   cwd=tmp_path, capture_output=True, check=True)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Nothing to push." in output
+
+
+def test_70h_push_run_json_refuses_not_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Not ready task",
+        created_at=datetime(2026, 6, 18, 7, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["push", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    parsed = json.loads(output)
+    assert parsed["pushed"] is False
+    assert parsed["ready"] is False
