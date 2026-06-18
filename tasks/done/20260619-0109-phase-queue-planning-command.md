@@ -10,7 +10,7 @@ Phase Queue Planning Command
 
 ## Status
 
-active
+done
 
 ## Mode
 

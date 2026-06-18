@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase Queue Planning Command (20260619-0109-phase-queue-planning-command)
 - Handoff Artifact Hygiene (20260619-0105-handoff-artifact-hygiene)
 - Handoff Bootstrap Consumption (20260619-0059-handoff-bootstrap-consumption)
 - Handoff Artifact Persistence (20260619-0039-handoff-artifact-persistence)
