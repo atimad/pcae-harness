@@ -1895,6 +1895,190 @@ def test_70v_handoff_latest_updates_on_second_handoff(
 
 
 # ---------------------------------------------------------------------------
+# Phase 70Y: phase queue planning command
+# ---------------------------------------------------------------------------
+
+
+def test_70y_queue_add(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "add", "70Z — Governed Multi-Phase Runner Design"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Added to phase queue (position 1)" in output
+    assert "70Z" in output
+
+
+def test_70y_queue_list(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase A"])
+    main(["phase", "queue", "add", "Phase B"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue (2 entries):" in output
+    assert "1. Phase A" in output
+    assert "2. Phase B" in output
+
+
+def test_70y_queue_list_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue is empty." in output
+
+
+def test_70y_queue_show_is_alias_for_list(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase X"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue (1 entries):" in output
+    assert "Phase X" in output
+
+
+def test_70y_queue_clear(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase A"])
+    main(["phase", "queue", "add", "Phase B"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "clear"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Cleared 2 entries" in output
+
+    exit_code2 = main(["phase", "queue", "list"])
+    output2 = capsys.readouterr().out
+    assert "Phase queue is empty." in output2
+
+
+def test_70y_queue_add_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "add", "Phase J", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["added"] == "Phase J"
+    assert data["position"] == 1
+    assert data["queue_length"] == 1
+
+
+def test_70y_queue_list_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase A"])
+    main(["phase", "queue", "add", "Phase B"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "list", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["queue_length"] == 2
+    assert data["queue"] == ["Phase A", "Phase B"]
+
+
+def test_70y_queue_clear_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase A"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "clear", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["cleared"] == 1
+
+
+def test_70y_queue_show_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase S"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "show", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["queue"] == ["Phase S"]
+
+
+def test_70y_gitignore_template_includes_phase_queue(
+    tmp_path: Path,
+) -> None:
+    from pcae.core.templates import INIT_TEMPLATES
+
+    gitignore_content = INIT_TEMPLATES[Path(".pcae/.gitignore")]
+    assert "phase-queue.json" in gitignore_content
+
+
+# ---------------------------------------------------------------------------
 # Phase 70X: handoff artifact hygiene
 # ---------------------------------------------------------------------------
 

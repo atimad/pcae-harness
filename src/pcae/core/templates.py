@@ -105,6 +105,7 @@ architecture-exports/
 remote/
 lifecycle-reviews/
 handoffs/
+phase-queue.json
 """,
     Path(".pcae/exports/.gitignore"): """governance-bundle-*.json
 """,

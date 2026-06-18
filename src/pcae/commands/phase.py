@@ -309,6 +309,7 @@ def _build_auto_summary(root: HarnessPath) -> str:
 
 
 HANDOFFS_DIR = Path(".pcae") / "handoffs"
+PHASE_QUEUE_PATH = Path(".pcae") / "phase-queue.json"
 
 
 def _build_handoff_artifact(
@@ -498,6 +499,73 @@ def run_phase_handoff_prune(args: argparse.Namespace) -> int:
             f.unlink()
         print(f"Pruned {len(to_prune)} of {total} handoff artifacts (kept {keep}).")
 
+    return 0
+
+
+def _read_phase_queue(root: HarnessPath) -> list[str]:
+    queue_path = root.join(PHASE_QUEUE_PATH)
+    if not queue_path.is_file():
+        return []
+    try:
+        data = json.loads(queue_path.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def _write_phase_queue(root: HarnessPath, queue: list[str]) -> None:
+    queue_path = root.join(PHASE_QUEUE_PATH)
+    queue_path.parent.mkdir(parents=True, exist_ok=True)
+    with queue_path.open("w", encoding="utf-8", newline="\n") as f:
+        json.dump(queue, f, indent=2)
+        f.write("\n")
+
+
+def run_phase_queue_add(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    queue = _read_phase_queue(root)
+    queue.append(args.description)
+    _write_phase_queue(root, queue)
+
+    if args.json:
+        print(json.dumps({"added": args.description, "position": len(queue), "queue_length": len(queue)}, indent=2, sort_keys=True))
+    else:
+        print(f"Added to phase queue (position {len(queue)}): {args.description}")
+    return 0
+
+
+def run_phase_queue_list(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    queue = _read_phase_queue(root)
+
+    if args.json:
+        print(json.dumps({"queue": queue, "queue_length": len(queue)}, indent=2, sort_keys=True))
+        return 0
+
+    if not queue:
+        print("Phase queue is empty.")
+        return 0
+
+    print(f"Phase queue ({len(queue)} entries):")
+    for i, entry in enumerate(queue, 1):
+        print(f"  {i}. {entry}")
+    return 0
+
+
+def run_phase_queue_show(args: argparse.Namespace) -> int:
+    return run_phase_queue_list(args)
+
+
+def run_phase_queue_clear(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    queue = _read_phase_queue(root)
+    count = len(queue)
+    _write_phase_queue(root, [])
+
+    if args.json:
+        print(json.dumps({"cleared": count}, indent=2, sort_keys=True))
+    else:
+        print(f"Cleared {count} entries from phase queue.")
     return 0
 
 

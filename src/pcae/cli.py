@@ -410,7 +410,17 @@ from pcae.commands.session import (
     run_session_update,
     run_session_write,
 )
-from pcae.commands.phase import run_phase_complete, run_phase_handoff, run_phase_handoff_prune, run_phase_handoff_show, run_phase_start
+from pcae.commands.phase import (
+    run_phase_complete,
+    run_phase_handoff,
+    run_phase_handoff_prune,
+    run_phase_handoff_show,
+    run_phase_queue_add,
+    run_phase_queue_clear,
+    run_phase_queue_list,
+    run_phase_queue_show,
+    run_phase_start,
+)
 from pcae.commands.push import run_push, run_push_check
 from pcae.commands.review import (
     run_lifecycle_review_create,
@@ -4653,6 +4663,63 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_handoff_prune_parser.set_defaults(handler=run_phase_handoff_prune)
+
+    phase_queue_parser = phase_subparsers.add_parser(
+        "queue",
+        help="Manage the advisory phase queue.",
+    )
+    phase_queue_subparsers = phase_queue_parser.add_subparsers(
+        dest="queue_command",
+        required=True,
+    )
+
+    phase_queue_add_parser = phase_queue_subparsers.add_parser(
+        "add",
+        help="Add an entry to the phase queue.",
+    )
+    phase_queue_add_parser.add_argument(
+        "description",
+        help="Phase description to add to the queue.",
+    )
+    phase_queue_add_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_add_parser.set_defaults(handler=run_phase_queue_add)
+
+    phase_queue_list_parser = phase_queue_subparsers.add_parser(
+        "list",
+        help="List all entries in the phase queue.",
+    )
+    phase_queue_list_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_list_parser.set_defaults(handler=run_phase_queue_list)
+
+    phase_queue_show_parser = phase_queue_subparsers.add_parser(
+        "show",
+        help="Show the phase queue (alias for list).",
+    )
+    phase_queue_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_show_parser.set_defaults(handler=run_phase_queue_show)
+
+    phase_queue_clear_parser = phase_queue_subparsers.add_parser(
+        "clear",
+        help="Clear all entries from the phase queue.",
+    )
+    phase_queue_clear_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_clear_parser.set_defaults(handler=run_phase_queue_clear)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",
