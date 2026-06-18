@@ -10,7 +10,7 @@ Handoff Bootstrap Consumption
 
 ## Status
 
-active
+done
 
 ## Mode
 

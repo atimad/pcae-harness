@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Handoff Bootstrap Consumption (20260619-0059-handoff-bootstrap-consumption)
 - Handoff Artifact Persistence (20260619-0039-handoff-artifact-persistence)
 - Phase Handoff Inspection and Auto-Summary Design (20260619-0026-phase-handoff-inspection-and-auto-summary-design)
 - Policy-Controlled Lifecycle Review Enforcement (20260619-0006-policy-controlled-lifecycle-review-enforcement)
