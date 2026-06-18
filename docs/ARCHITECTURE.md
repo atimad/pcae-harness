@@ -219,3 +219,106 @@ JSON output includes `lifecycle_review_required`, `lifecycle_review_passed`, and
 - `pcae task complete` remains a bare primitive with no gates
 - `--skip-checks` continues to bypass all gates including lifecycle review
 - No automatic review approval — review requires explicit human action
+
+## Governed Multi-Phase Runner Design (Phase 70Z)
+
+### Problem
+
+PCAE supports governed lifecycle automation: task creation, commit, finish, push, handoff, and phase queue planning. An agent can execute these one phase at a time with human supervision. Direct autonomous multi-phase execution without governance would risk undetected scope drift, cascading failures, silent state corruption, and ungoverned mutations.
+
+### Why Autonomous Multi-Phase Execution is Risky
+
+1. **Cascading failures**: a broken commit in phase N poisons phases N+1 through N+K before detection.
+2. **Scope drift**: without per-phase human review, implementation can silently expand beyond the phase spec.
+3. **Silent state corruption**: governance artifacts (provenance, session, agent lock) can become inconsistent if a phase fails mid-mutation.
+4. **Ungoverned mutations**: push, commit, and task-finish are root mutations — unattended execution removes the human gate.
+5. **Test blindness**: tests verify code correctness, not feature correctness — a passing test suite does not guarantee the right thing was built.
+6. **Review bypass**: lifecycle review enforcement exists precisely to gate push readiness — autonomous execution without review defeats the purpose.
+
+### Proposed Design: Governed One-Phase-at-a-Time Execution
+
+The multi-phase runner should execute exactly one phase per iteration, validate governance between phases, and stop on any anomaly. It does not batch, parallelize, or skip governance gates.
+
+#### Command Shape
+
+```
+pcae phase run-queue [--max-phases N] [--stop-on-warning] [--dry-run] [--json]
+```
+
+- `--max-phases N`: execute at most N phases from the queue (default: 1).
+- `--stop-on-warning`: stop on warnings, not just errors.
+- `--dry-run`: validate the queue and report what would execute without running anything.
+- Default behavior: execute one phase, validate, stop.
+
+#### Execution Loop (per phase)
+
+1. Read next entry from `.pcae/phase-queue.json`.
+2. Create task contract via `pcae task new`.
+3. Agent implements the phase (external agent or PCAE-native).
+4. Run `pcae check`, `python -m pytest -n auto`.
+5. Commit implementation.
+6. Run `pcae task finish --commit`.
+7. Run `pcae push`.
+8. Run `pcae phase handoff`.
+9. Validate stop conditions.
+10. If clean, remove completed entry from queue, continue to next.
+11. If stop condition triggered, halt and report.
+
+#### Mandatory Stop Conditions
+
+| Condition | Severity | Action |
+|-----------|----------|--------|
+| Test failure (`pytest` exit != 0) | error | halt immediately |
+| `pcae health` unhealthy | error | halt immediately |
+| `pcae check` failed | error | halt immediately |
+| Dirty working tree after commit | error | halt immediately |
+| `pcae push check` not ready | error | halt immediately |
+| Lifecycle review required but not approved | error | halt immediately |
+| `pcae doctor task-memory` has errors | error | halt immediately |
+| Files changed outside task scope | error | halt immediately |
+| `pcae push` fails | error | halt immediately |
+| `pcae doctor task-memory` has warnings | warning | halt if `--stop-on-warning` |
+| Unexpected untracked files | warning | halt if `--stop-on-warning` |
+
+#### Audit Artifact
+
+Each phase execution produces an audit artifact at `.pcae/phase-runs/<run-id>.json`:
+
+```json
+{
+  "run_id": "run-20260619T010000-70W",
+  "phase_description": "70W — Handoff Bootstrap Consumption",
+  "started_at": "2026-06-19T01:00:00+00:00",
+  "completed_at": "2026-06-19T01:05:00+00:00",
+  "status": "completed | failed | stopped",
+  "stop_reason": null,
+  "task_id": "20260619-0100-handoff-bootstrap-consumption",
+  "commit_hash": "abc123",
+  "push_result": "success | failed | skipped",
+  "health_passed": true,
+  "check_passed": true,
+  "tests_passed": true,
+  "doctor_clean": true,
+  "files_changed": ["src/pcae/commands/session.py", "tests/test_session.py"],
+  "test_count": 5907,
+  "duration_seconds": 300
+}
+```
+
+#### External-Agent-Driven vs PCAE-Native
+
+The runner should be **external-agent-driven**, not PCAE-native:
+
+- **External-agent-driven**: an AI agent (Claude, Codex) reads the queue, implements each phase, and calls PCAE governance commands. PCAE validates but does not drive implementation. The agent is the executor; PCAE is the governance layer.
+- **PCAE-native**: PCAE itself drives implementation by invoking an agent runtime. This couples execution to governance, which violates separation of concerns and requires PCAE to manage agent sessions, prompts, and context windows.
+
+The external-agent-driven model preserves PCAE's role as a governance harness. The runner command (`pcae phase run-queue`) would orchestrate the governance loop (create task, validate, finish, push, handoff) while delegating implementation to the agent.
+
+#### What This Design Does NOT Include
+
+- No implementation in Phase 70Z — design only.
+- No automatic review approval — lifecycle review still requires explicit human action.
+- No parallel phase execution — one phase at a time.
+- No retry on failure — failed phases require human investigation.
+- No branch/remote management — uses current branch.
+- No prompt generation — phase descriptions are human-authored in the queue.

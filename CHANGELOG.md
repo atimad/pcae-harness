@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Governed Multi-Phase Runner Design (Phase 70Z): design document added to `docs/ARCHITECTURE.md`. Proposes `pcae phase run-queue` with governed one-phase-at-a-time execution, mandatory stop conditions (test failure, health/check failure, scope drift, review enforcement), audit artifacts at `.pcae/phase-runs/`, and external-agent-driven architecture. No implementation — design only.
 - Phase Queue Planning Command (Phase 70Y): adds `pcae phase queue add/list/show/clear` for advisory phase queue planning. Queue stored in `.pcae/phase-queue.json` (gitignored). Does not execute queued phases or create task contracts. All subcommands support `--json`. 10 new tests.
 - Handoff Artifact Hygiene (Phase 70X): adds `pcae phase handoff-prune` to inspect and prune old timestamped handoff artifacts. `--keep N` specifies how many recent artifacts to retain (default: 20). `--dry-run` reports candidates without deleting. `--json` for machine-readable output. `latest.json` is never deleted. 7 new tests.
 - Handoff Bootstrap Consumption (Phase 70W): `pcae session bootstrap` now reads and surfaces the latest handoff artifact from `.pcae/handoffs/latest.json` when available. Human output shows "Last handoff:" section with summary, branch, task state, health, check, push, review, latest commit, and next action. JSON output includes `latest_handoff` field (null when no artifact exists). Compact bootstrap `--json` also includes handoff data. Bootstrap does not mutate handoff artifacts. 6 new tests; existing bootstrap behavior preserved when no handoff exists.
