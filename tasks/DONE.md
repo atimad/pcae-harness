@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 70M Generated Commands Docs Sync (20260618-2110-70m-generated-commands-docs-sync)
 - 70L Lifecycle Automation Consolidation (20260618-2059-70l-lifecycle-automation-consolidation)
 - 70K Structured Health Status (20260618-2028-70k-structured-health-status)
 - 70J Idle State Health Semantics (20260618-2005-70j-idle-state-health-semantics)
