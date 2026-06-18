@@ -850,10 +850,12 @@ def test_session_bootstrap_json_output(
         "current_session",
         "health_status",
         "latest_event",
+        "latest_handoff",
         "lock_acquired",
         "provenance_event_count",
         "ready",
     }
+    assert data["latest_handoff"] is None
 
 
 def test_session_bootstrap_json_no_task_reports_check_failure(
@@ -1036,6 +1038,7 @@ def test_session_bootstrap_same_agent_json_lock_acquired_false(
         "current_session",
         "health_status",
         "latest_event",
+        "latest_handoff",
         "lock_acquired",
         "provenance_event_count",
         "ready",
@@ -1593,3 +1596,156 @@ def test_70c_no_duplicate_definitions_remain() -> None:
     assert definitions == ["src/pcae/core/session.py"], (
         f"Expected exactly 1 definition in session.py, found: {definitions}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Phase 70W: handoff bootstrap consumption
+# ---------------------------------------------------------------------------
+
+
+def _write_handoff_artifact(tmp_path: Path, data: dict) -> None:
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+    (handoffs_dir / "latest.json").write_text(
+        json.dumps(data, indent=2, sort_keys=True), encoding="utf-8",
+    )
+
+
+def _sample_handoff() -> dict:
+    return {
+        "active_task_id": None,
+        "active_task_title": None,
+        "auto_summary": True,
+        "bootstrap_command": "pcae session bootstrap --agent-id claude-local",
+        "branch": "main",
+        "check_passed": True,
+        "created_at": "2026-06-19T00:00:00+00:00",
+        "handoff_id": "handoff-20260619T000000-000000-idle",
+        "health_status": "healthy (idle)",
+        "latest_commit": "Complete Phase 70V",
+        "lifecycle_review": "not_applicable",
+        "next_agent": "claude-local",
+        "push_mode": "nothing_to_push",
+        "push_ready": False,
+        "recent_commits": ["Complete Phase 70V"],
+        "recommended_next_action": "pcae session bootstrap --agent-id claude-local",
+        "summary": "Phase handoff: branch=main, task=idle",
+        "task_memory_status": "clean",
+        "task_state": "idle",
+        "unpushed_commits": 0,
+        "working_tree": "clean",
+    }
+
+
+def test_70w_bootstrap_shows_handoff_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Handoff bootstrap task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Last handoff:" in output
+    assert "Phase handoff: branch=main, task=idle" in output
+    assert "Complete Phase 70V" in output
+
+
+def test_70w_bootstrap_no_handoff_still_works(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "No handoff task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Last handoff:" not in output
+
+
+def test_70w_bootstrap_json_includes_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "JSON handoff bootstrap task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["latest_handoff"] is not None
+    assert data["latest_handoff"]["handoff_id"] == "handoff-20260619T000000-000000-idle"
+    assert data["latest_handoff"]["summary"] == "Phase handoff: branch=main, task=idle"
+
+
+def test_70w_bootstrap_json_null_handoff_when_missing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "No handoff JSON task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["latest_handoff"] is None
+
+
+def test_70w_compact_bootstrap_json_includes_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["latest_handoff"] is not None
+    assert data["latest_handoff"]["branch"] == "main"
+
+
+def test_70w_bootstrap_does_not_mutate_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "No mutate task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    handoff_data = _sample_handoff()
+    _write_handoff_artifact(tmp_path, handoff_data)
+    before = (tmp_path / ".pcae" / "handoffs" / "latest.json").read_text(encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    capsys.readouterr()
+    after = (tmp_path / ".pcae" / "handoffs" / "latest.json").read_text(encoding="utf-8")
+    assert before == after

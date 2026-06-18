@@ -38,7 +38,19 @@ from pcae.core.session import (
     update_session_snapshot,
     write_session_snapshot,
 )
+
+from pcae.commands.phase import HANDOFFS_DIR
 from pcae.core.tasks import find_latest_active_task
+
+
+def _load_latest_handoff(root: HarnessPath) -> dict | None:
+    latest_path = root.join(HANDOFFS_DIR / "latest.json")
+    if not latest_path.is_file():
+        return None
+    try:
+        return json.loads(latest_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
 
 
 def _refresh_session_snapshot_for_governed_flow(root: HarnessPath) -> None:
@@ -147,6 +159,8 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     latest_event = timeline.latest_event
     ready = check_passed
 
+    handoff = _load_latest_handoff(root)
+
     if args.json:
         print(
             json.dumps(
@@ -157,6 +171,7 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
                     "current_session": _session_summary(current_session),
                     "health_status": health_status,
                     "latest_event": _event_summary(latest_event),
+                    "latest_handoff": handoff,
                     "lock_acquired": not already_held,
                     "provenance_event_count": timeline.event_count,
                     "ready": ready,
@@ -192,6 +207,23 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     else:
         print("Latest event: none")
     print(f"Ready: {'yes' if ready else 'no'}")
+    if handoff is not None:
+        print()
+        print("Last handoff:")
+        print(f"  Summary: {handoff.get('summary', 'unknown')}")
+        print(f"  Created: {handoff.get('created_at', 'unknown')}")
+        print(f"  Branch: {handoff.get('branch', 'unknown')}")
+        task_state = handoff.get("task_state", "unknown")
+        task_id = handoff.get("active_task_id")
+        print(f"  Task: {task_state}" + (f" ({task_id})" if task_id else ""))
+        print(f"  Health: {handoff.get('health_status', 'unknown')}")
+        print(f"  Check: {'passed' if handoff.get('check_passed') else 'failed'}")
+        push_ready = handoff.get("push_ready", False)
+        push_mode = handoff.get("push_mode", "unknown")
+        print(f"  Push: {'ready' if push_ready else 'not ready'} ({push_mode})")
+        print(f"  Review: {handoff.get('lifecycle_review', 'unknown')}")
+        print(f"  Latest commit: {handoff.get('latest_commit', 'unknown')}")
+        print(f"  Next action: {handoff.get('recommended_next_action', 'unknown')}")
     challenge = build_irg_challenge_context(root)
     assessment = build_challenge_attention_assessment(root, surface="bootstrap", challenge_data=challenge)
     lines = render_irg_challenge_compact_lines_with_allocation(
@@ -208,6 +240,7 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     pack = build_context_pack(root)
     challenge = build_irg_challenge_context(root)
+    handoff = _load_latest_handoff(root)
     profile_name: str | None = getattr(args, "profile", None)
     profile, is_unknown = resolve_profile(profile_name)
     prompt = build_bootstrap_prompt(pack, profile)
@@ -220,6 +253,7 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
                     "bootstrap_prompt": prompt,
                     "governance_state": pack.governance_state,
                     "independent_challenge_context": challenge,
+                    "latest_handoff": handoff,
                     "operational_rules": list(pack.operational_rules),
                     "orchestration_state": pack.orchestration_state,
                     "profile_type": profile.profile_type,
