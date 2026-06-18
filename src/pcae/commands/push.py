@@ -24,6 +24,7 @@ class PushReadiness:
     mode: str
     ready: bool
     change_count: int
+    review_status: str
 
 
 def assess_push_readiness(root: HarnessPath) -> PushReadiness:
@@ -55,6 +56,13 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
 
     ready = mode in ("active_task", "post_finish_closure")
 
+    from pcae.core.review import lifecycle_review_status
+    from pcae.core.tasks import find_latest_active_task
+
+    active_task = find_latest_active_task(root)
+    task_id = active_task.task_id if active_task else None
+    review = lifecycle_review_status(root, task_id)
+
     return PushReadiness(
         branch=branch,
         clean=clean,
@@ -66,6 +74,7 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
         mode=mode,
         ready=ready,
         change_count=len(changes),
+        review_status=review,
     )
 
 
@@ -143,6 +152,7 @@ def _readiness_dict(readiness: PushReadiness) -> dict:
         "doctor_errors": not readiness.doctor_ok,
         "doctor_warnings": readiness.doctor_warnings,
         "health_status": "healthy" if readiness.health_ok else "unhealthy",
+        "lifecycle_review": readiness.review_status,
         "mode": readiness.mode,
         "ready": readiness.ready,
         "unpushed_commits": readiness.unpushed,
@@ -163,6 +173,7 @@ def _print_readiness(readiness: PushReadiness, json_mode: bool) -> None:
     print(f"  Check: {'passed' if readiness.check_ok else 'failed'}")
     doctor_status = "clean" if readiness.doctor_ok and not readiness.doctor_warnings else "errors" if not readiness.doctor_ok else "warnings"
     print(f"  Task memory: {doctor_status}")
+    print(f"  Lifecycle review: {readiness.review_status}")
     print(f"  Mode: {readiness.mode}")
     print()
     if readiness.ready:

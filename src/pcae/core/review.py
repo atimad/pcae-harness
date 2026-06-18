@@ -111,6 +111,24 @@ def list_lifecycle_reviews(
     return tuple(records)
 
 
+def lifecycle_review_status(root: HarnessPath, task_id: str | None) -> str:
+    if task_id is None:
+        return "not_applicable"
+
+    records = list_lifecycle_reviews(root, task_id=task_id)
+    if not records:
+        return "missing"
+
+    dispositions = {r.disposition for r in records}
+    if "approved" in dispositions and "changes_requested" in dispositions:
+        return "mixed"
+    if "approved" in dispositions:
+        return "approved"
+    if "changes_requested" in dispositions:
+        return "changes_requested"
+    return "informational_only"
+
+
 def _read_lrr(path: Path) -> LifecycleReviewRecord | None:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))

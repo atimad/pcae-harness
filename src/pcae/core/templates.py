@@ -103,6 +103,7 @@ governance-exports/
 architecture/
 architecture-exports/
 remote/
+lifecycle-reviews/
 """,
     Path(".pcae/exports/.gitignore"): """governance-bundle-*.json
 """,
