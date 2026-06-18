@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 70J Idle State Health Semantics (20260618-2005-70j-idle-state-health-semantics)
 - 70I Task Memory Repair (20260618-1947-70i-task-memory-repair)
 - 70H Governed Push Execution (20260618-0605-70h-governed-push-execution)
 - 69P Execution Chain Traceability and Status Layer (20260616-2328-69p-execution-chain-traceability-and-status-layer)
