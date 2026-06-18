@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 70C: Session Continuity Deduplication.
+Phase 70D: Task Contract Ergonomics.
 
 ## Milestone: Execution Chain Traceability Complete
 
