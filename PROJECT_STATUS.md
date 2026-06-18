@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 70M: Generated Commands Docs Sync.
+Phase 70N: Review Gate Discovery.
 
 ## Milestone: Execution Chain Traceability Complete
 
