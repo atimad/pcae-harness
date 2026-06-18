@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 70I Task Memory Repair (20260618-1947-70i-task-memory-repair)
 - 70H Governed Push Execution (20260618-0605-70h-governed-push-execution)
 - 69P Execution Chain Traceability and Status Layer (20260616-2328-69p-execution-chain-traceability-and-status-layer)
 - Write Invocation Approval Gateway Design (20260610-2037-write-invocation-approval-gateway-design)
