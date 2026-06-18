@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Push Readiness No-Op Semantics (20260619-0139-push-readiness-no-op-semantics)
 - Bootstrap Handoff Freshness and Stale Phase Fix (20260619-0120-bootstrap-handoff-freshness-and-stale-phase-fix)
 - Governed Multi-Phase Runner Design (20260619-0114-governed-multi-phase-runner-design)
 - Phase Queue Planning Command (20260619-0109-phase-queue-planning-command)
