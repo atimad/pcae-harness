@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 70Q Lifecycle Review Gate Design (20260618-2221-70q-lifecycle-review-gate-design)
 - 70P Acceptance Criteria vs Executable Checks (20260618-2129-70p-acceptance-criteria-vs-executable-checks)
 - 70O Acceptance Check Enforcement (20260618-2119-70o-acceptance-check-enforcement)
 - 70N Review Gate Discovery (20260618-2115-70n-review-gate-discovery)
