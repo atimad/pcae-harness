@@ -7,6 +7,7 @@ from pcae.core.agent import build_agent_lock_state
 from pcae.core.check import CheckResult, run_checks
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.paths import HarnessPath
+from pcae.core.session import session_continuity_status
 
 
 def run_check(args: argparse.Namespace) -> int:
@@ -92,18 +93,3 @@ def git_status_data(changes: tuple[GitChange, ...]) -> dict[str, object]:
     }
 
 
-def session_continuity_status(result: CheckResult) -> str:
-    if any("Session continuity verified." in info.text for info in result.infos):
-        return "verified"
-    if any("Session snapshot missing" in violation.text for violation in result.violations):
-        return "missing"
-    if any("Session snapshot missing" in warning.text for warning in result.warnings):
-        return "missing"
-    if any("Invalid session JSON" in violation.text for violation in result.violations):
-        return "invalid"
-    if any(
-        "Session active task does not match current active task" in violation.text
-        for violation in result.violations
-    ):
-        return "mismatched"
-    return "unknown"

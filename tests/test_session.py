@@ -1482,3 +1482,124 @@ def text_file_snapshot(root: Path) -> dict[str, str]:
         for path in root.rglob("*")
         if path.is_file() and ".git" not in path.relative_to(root).parts
     }
+
+
+# --- Phase 70C: session_continuity_status deduplication ---
+
+
+def test_70c_session_continuity_status_is_canonical() -> None:
+    import importlib
+    import pcae.core.session
+    import pcae.core.health
+    import pcae.core.export
+    import pcae.core.architecture
+    import pcae.commands.check
+
+    canonical = pcae.core.session.session_continuity_status
+    assert pcae.core.health.session_continuity_status is canonical
+    assert pcae.commands.check.session_continuity_status is canonical
+    assert pcae.core.architecture.session_continuity_status is canonical
+    assert pcae.core.export.session_continuity_status is canonical
+
+
+def test_70c_session_continuity_status_returns_verified() -> None:
+    from pcae.core.session import session_continuity_status
+    from dataclasses import dataclass
+
+    @dataclass
+    class FakeResult:
+        infos: tuple
+        violations: tuple
+        warnings: tuple
+
+    result = FakeResult(
+        infos=(type("M", (), {"text": "Session continuity verified."})(),),
+        violations=(),
+        warnings=(),
+    )
+    assert session_continuity_status(result) == "verified"
+
+
+def test_70c_session_continuity_status_returns_missing_from_warning() -> None:
+    from pcae.core.session import session_continuity_status
+    from dataclasses import dataclass
+
+    @dataclass
+    class FakeResult:
+        infos: tuple
+        violations: tuple
+        warnings: tuple
+
+    result = FakeResult(
+        infos=(),
+        violations=(),
+        warnings=(type("M", (), {"text": "Session snapshot missing at .pcae/session.json."})(),),
+    )
+    assert session_continuity_status(result) == "missing"
+
+
+def test_70c_session_continuity_status_returns_mismatch() -> None:
+    from pcae.core.session import session_continuity_status
+    from dataclasses import dataclass
+
+    @dataclass
+    class FakeResult:
+        infos: tuple
+        violations: tuple
+        warnings: tuple
+
+    result = FakeResult(
+        infos=(),
+        violations=(type("M", (), {"text": "Session active task does not match current active task."})(),),
+        warnings=(),
+    )
+    assert session_continuity_status(result) == "mismatch"
+
+
+def test_70c_session_continuity_status_returns_invalid() -> None:
+    from pcae.core.session import session_continuity_status
+    from dataclasses import dataclass
+
+    @dataclass
+    class FakeResult:
+        infos: tuple
+        violations: tuple
+        warnings: tuple
+
+    result = FakeResult(
+        infos=(),
+        violations=(type("M", (), {"text": "Invalid session JSON: expecting value."})(),),
+        warnings=(),
+    )
+    assert session_continuity_status(result) == "invalid"
+
+
+def test_70c_session_continuity_status_returns_unknown() -> None:
+    from pcae.core.session import session_continuity_status
+    from dataclasses import dataclass
+
+    @dataclass
+    class FakeResult:
+        infos: tuple
+        violations: tuple
+        warnings: tuple
+
+    result = FakeResult(infos=(), violations=(), warnings=())
+    assert session_continuity_status(result) == "unknown"
+
+
+def test_70c_no_duplicate_definitions_remain() -> None:
+    import ast
+    from pathlib import Path
+
+    src = Path("src/pcae")
+    definitions = []
+    for py_file in src.rglob("*.py"):
+        tree = ast.parse(py_file.read_text(encoding="utf-8"), filename=str(py_file))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef) and node.name == "session_continuity_status":
+                definitions.append(str(py_file))
+
+    assert definitions == ["src/pcae/core/session.py"], (
+        f"Expected exactly 1 definition in session.py, found: {definitions}"
+    )

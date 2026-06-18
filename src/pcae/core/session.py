@@ -131,3 +131,20 @@ def summarize_git_changes(changes: tuple[GitChange, ...]) -> str:
     if len(changes) == 1:
         return "1 changed file"
     return f"{len(changes)} changed files"
+
+
+def session_continuity_status(check_result) -> str:
+    if any("Session continuity verified." in info.text for info in check_result.infos):
+        return "verified"
+    if any("Session snapshot missing" in v.text for v in check_result.violations):
+        return "missing"
+    if any("Session snapshot missing" in w.text for w in check_result.warnings):
+        return "missing"
+    if any(
+        "Session active task does not match current active task" in v.text
+        for v in check_result.violations
+    ):
+        return "mismatch"
+    if any("Invalid session JSON" in v.text for v in check_result.violations):
+        return "invalid"
+    return "unknown"

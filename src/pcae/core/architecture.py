@@ -11,6 +11,7 @@ import subprocess
 
 from pcae.core.git_status import GitChange, read_git_branch, read_git_changes
 from pcae.core.paths import HarnessPath
+from pcae.core.session import session_continuity_status
 
 
 _PROVENANCE_HISTORY_PATH = Path(".pcae") / "provenance-history.json"
@@ -240,29 +241,6 @@ def integer_value(value) -> int:
 def string_value(value) -> str:
     if isinstance(value, str) and value:
         return value
-    return "unknown"
-
-
-def session_continuity_status(check_result) -> str:
-    if any("Session continuity verified." in info.text for info in check_result.infos):
-        return "verified"
-    if any(
-        "Session snapshot missing" in violation.text
-        for violation in check_result.violations
-    ):
-        return "missing"
-    if any(
-        "Session snapshot missing" in warning.text
-        for warning in check_result.warnings
-    ):
-        return "missing"
-    if any(
-        "Session active task does not match current active task" in violation.text
-        for violation in check_result.violations
-    ):
-        return "mismatch"
-    if any("Invalid session JSON" in violation.text for violation in check_result.violations):
-        return "invalid"
     return "unknown"
 
 

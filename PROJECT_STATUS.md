@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 70B: Task Health and Runtime Hygiene.
+Phase 70C: Session Continuity Deduplication.
 
 ## Milestone: Execution Chain Traceability Complete
 
