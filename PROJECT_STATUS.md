@@ -2,7 +2,13 @@
 
 ## Current Phase
 
-Phase 71P: Phase Prompt Queue Bridge Implementation.
+Phase 71Q: Phase Prompt Queue Metadata Preservation.
+
+Phase 71Q preserves source metadata for prompt-enqueued phase queue items while
+keeping existing string-only queue entries compatible. The phase queue remains
+planning-only: no prompt execution, task creation from prompts, queue
+execution, phase runner implementation, or lifecycle/push behavior change is
+introduced.
 
 ## Milestone: Execution Chain Traceability Complete
 

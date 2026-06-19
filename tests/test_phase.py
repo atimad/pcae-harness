@@ -3984,7 +3984,11 @@ def test_71p_prompt_enqueue_latest(tmp_path: Path, monkeypatch, capsys) -> None:
     queue = json.loads(
         (tmp_path / ".pcae" / "phase-queue.json").read_text(encoding="utf-8")
     )
-    assert "72A — Feature X" in queue
+    assert queue[0]["title"] == "72A — Feature X"
+    assert queue[0]["source_type"] == "captured_prompt"
+    assert queue[0]["source_prompt_path"] == ".pcae/phase-prompts/latest.md"
+    assert queue[0]["source_prompt_created_at"] is not None
+    assert queue[0]["created_at"] is not None
 
 
 def test_71p_prompt_enqueue_dry_run(tmp_path: Path, monkeypatch, capsys) -> None:
@@ -4068,7 +4072,7 @@ def test_71p_prompt_enqueue_title_override(
     queue = json.loads(
         (tmp_path / ".pcae" / "phase-queue.json").read_text(encoding="utf-8")
     )
-    assert "Custom Queue Title" in queue
+    assert queue[0]["title"] == "Custom Queue Title"
 
 
 def test_71p_prompt_enqueue_by_file(
@@ -4144,3 +4148,144 @@ def test_71p_prompt_enqueue_does_not_execute(
     assert (tmp_path / ".pcae" / "phase-prompts" / "latest.md").read_text(
         encoding="utf-8"
     ) == "Do not execute me."
+
+
+# ---------------------------------------------------------------------------
+# Phase 71Q: phase prompt queue metadata preservation
+# ---------------------------------------------------------------------------
+
+
+def test_71q_queue_list_json_supports_mixed_entries(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(
+        json.dumps([
+            "Phase 72A: manual",
+            {
+                "title": "Phase 72B: captured",
+                "source_type": "captured_prompt",
+                "source_prompt_path": ".pcae/phase-prompts/latest.md",
+                "source_prompt_created_at": "2026-06-19T12:00:00+00:00",
+                "created_at": "2026-06-19T12:01:00+00:00",
+            },
+        ], indent=2) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 2
+    assert data["queue"][0] == "Phase 72A: manual"
+    assert data["entries"][0]["title"] == "Phase 72A: manual"
+    assert data["entries"][0]["source_type"] == "manual"
+    assert data["entries"][0]["structured"] is False
+    assert data["entries"][1]["title"] == "Phase 72B: captured"
+    assert data["entries"][1]["source_type"] == "captured_prompt"
+    assert data["entries"][1]["source_prompt_path"] == ".pcae/phase-prompts/latest.md"
+
+
+def test_71q_queue_list_human_supports_structured_entries(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(
+        json.dumps([{
+            "title": "Phase 72C: structured",
+            "source_type": "captured_prompt",
+            "source_prompt_path": ".pcae/phase-prompts/latest.md",
+            "source_prompt_created_at": "2026-06-19T12:00:00+00:00",
+            "created_at": "2026-06-19T12:01:00+00:00",
+        }]) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "1. Phase 72C: structured" in output
+    assert "source: .pcae/phase-prompts/latest.md" in output
+
+
+def test_71q_queue_check_json_reports_structured_next_metadata(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(
+        json.dumps([{
+            "title": "Phase 72D: ready",
+            "source_type": "captured_prompt",
+            "source_prompt_path": ".pcae/phase-prompts/latest.md",
+            "source_prompt_created_at": "2026-06-19T12:00:00+00:00",
+            "created_at": "2026-06-19T12:01:00+00:00",
+        }]) + "\n",
+        encoding="utf-8",
+    )
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["next_queued"] == "Phase 72D: ready"
+    assert data["next_queued_entry"]["source_type"] == "captured_prompt"
+    assert data["entries"][0]["source_prompt_created_at"] == "2026-06-19T12:00:00+00:00"
+
+
+def test_71q_queue_hygiene_detects_structured_placeholder(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(
+        json.dumps([
+            {
+                "title": "Phase 72E: placeholder",
+                "source_type": "captured_prompt",
+                "source_prompt_path": ".pcae/phase-prompts/latest.md",
+                "source_prompt_created_at": "2026-06-19T12:00:00+00:00",
+                "created_at": "2026-06-19T12:01:00+00:00",
+            },
+            "Phase 72F: real work",
+        ]) + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "hygiene", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["has_issues"] is True
+    assert data["findings"][0]["entry"] == "Phase 72E: placeholder"
+
+
+def test_71q_prompt_enqueue_duplicate_detection_matches_structured_title(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72G — Structured Duplicate", "Dup test.")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "prompt-enqueue"])
+    capsys.readouterr()
+    exit_code = main(["phase", "prompt-enqueue"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "already contains" in output

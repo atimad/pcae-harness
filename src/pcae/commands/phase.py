@@ -419,7 +419,7 @@ def _build_handoff_artifact(
         "lifecycle_review": review,
         "next_agent": next_agent,
         "phase_queue_count": len(queue),
-        "phase_queue_next": queue[0] if queue else None,
+        "phase_queue_next": _phase_queue_entry_title(queue[0]) if queue else None,
         "phase_queue_present": len(queue) > 0,
         "prompt_summary": prompt_summary,
         "push_mode": push.mode,
@@ -549,7 +549,7 @@ def run_phase_handoff_prune(args: argparse.Namespace) -> int:
     return 0
 
 
-def _read_phase_queue(root: HarnessPath) -> list[str]:
+def _read_phase_queue(root: HarnessPath) -> list:
     queue_path = root.join(PHASE_QUEUE_PATH)
     if not queue_path.is_file():
         return []
@@ -560,12 +560,43 @@ def _read_phase_queue(root: HarnessPath) -> list[str]:
         return []
 
 
-def _write_phase_queue(root: HarnessPath, queue: list[str]) -> None:
+def _write_phase_queue(root: HarnessPath, queue: list) -> None:
     queue_path = root.join(PHASE_QUEUE_PATH)
     queue_path.parent.mkdir(parents=True, exist_ok=True)
     with queue_path.open("w", encoding="utf-8", newline="\n") as f:
         json.dump(queue, f, indent=2)
         f.write("\n")
+
+
+def _phase_queue_entry_title(entry) -> str:
+    if isinstance(entry, str):
+        return entry
+    if isinstance(entry, dict):
+        title = entry.get("title")
+        if isinstance(title, str):
+            return title
+    return str(entry)
+
+
+def _phase_queue_entry_details(entry) -> dict:
+    title = _phase_queue_entry_title(entry)
+    if isinstance(entry, dict):
+        return {
+            "title": title,
+            "source_type": entry.get("source_type", "manual"),
+            "source_prompt_path": entry.get("source_prompt_path"),
+            "source_prompt_created_at": entry.get("source_prompt_created_at"),
+            "created_at": entry.get("created_at"),
+            "structured": True,
+        }
+    return {
+        "title": title,
+        "source_type": "manual",
+        "source_prompt_path": None,
+        "source_prompt_created_at": None,
+        "created_at": None,
+        "structured": False,
+    }
 
 
 def run_phase_queue_add(args: argparse.Namespace) -> int:
@@ -584,9 +615,14 @@ def run_phase_queue_add(args: argparse.Namespace) -> int:
 def run_phase_queue_list(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     queue = _read_phase_queue(root)
+    entries = [_phase_queue_entry_details(entry) for entry in queue]
 
     if args.json:
-        print(json.dumps({"queue": queue, "queue_length": len(queue)}, indent=2, sort_keys=True))
+        print(json.dumps({
+            "queue": queue,
+            "entries": entries,
+            "queue_length": len(queue),
+        }, indent=2, sort_keys=True))
         return 0
 
     if not queue:
@@ -594,8 +630,10 @@ def run_phase_queue_list(args: argparse.Namespace) -> int:
         return 0
 
     print(f"Phase queue ({len(queue)} entries):")
-    for i, entry in enumerate(queue, 1):
-        print(f"  {i}. {entry}")
+    for i, entry in enumerate(entries, 1):
+        print(f"  {i}. {entry['title']}")
+        if entry["structured"] and entry["source_type"] == "captured_prompt":
+            print(f"     source: {entry['source_prompt_path']}")
     return 0
 
 
@@ -663,7 +701,9 @@ def run_phase_queue_check(args: argparse.Namespace) -> int:
         "ready": ready,
         "queue_length": len(queue),
         "queue_present": len(queue) > 0,
-        "next_queued": queue[0] if queue else None,
+        "next_queued": _phase_queue_entry_title(queue[0]) if queue else None,
+        "next_queued_entry": _phase_queue_entry_details(queue[0]) if queue else None,
+        "entries": [_phase_queue_entry_details(entry) for entry in queue],
         "working_tree": "clean" if not changes else f"{len(changes)} changed",
         "health_passed": is_healthy(health_data),
         "check_passed": check_result.passed,
@@ -686,7 +726,7 @@ def run_phase_queue_check(args: argparse.Namespace) -> int:
     if ready:
         print("Phase queue readiness: ready")
         print(f"  Queue: {len(queue)} entries")
-        print(f"  Next: {queue[0]}")
+        print(f"  Next: {_phase_queue_entry_title(queue[0])}")
         print("  Working tree: clean")
         print("  Health: passed")
         print("  Check: passed")
@@ -704,8 +744,8 @@ def run_phase_queue_check(args: argparse.Namespace) -> int:
     return 1
 
 
-def _is_placeholder(entry: str) -> bool:
-    lower = entry.lower().strip()
+def _is_placeholder(entry) -> bool:
+    lower = _phase_queue_entry_title(entry).lower().strip()
     return any(pattern in lower for pattern in PLACEHOLDER_PATTERNS)
 
 
@@ -718,9 +758,10 @@ def run_phase_queue_hygiene(args: argparse.Namespace) -> int:
 
     for i, entry in enumerate(queue):
         if _is_placeholder(entry):
+            title = _phase_queue_entry_title(entry)
             findings.append({
                 "position": i + 1,
-                "entry": entry,
+                "entry": title,
                 "reason": "matches placeholder pattern",
             })
             clearable_indices.append(i)
@@ -1560,7 +1601,7 @@ def run_phase_prompt_enqueue(args: argparse.Namespace) -> int:
         source_created = metadata.get("created_at")
 
     queue = _read_phase_queue(root)
-    if title in queue:
+    if title in [_phase_queue_entry_title(entry) for entry in queue]:
         if args.json:
             print(json.dumps({
                 "error": "duplicate",
@@ -1591,7 +1632,13 @@ def run_phase_prompt_enqueue(args: argparse.Namespace) -> int:
             print(f"  Position: {len(queue) + 1}")
         return 0
 
-    queue.append(title)
+    queue.append({
+        "title": title,
+        "source_type": "captured_prompt",
+        "source_prompt_path": source_path,
+        "source_prompt_created_at": source_created,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
     _write_phase_queue(root, queue)
 
     if args.json:
