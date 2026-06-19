@@ -1229,6 +1229,17 @@ def run_phase_audit(args: argparse.Namespace) -> int:
     return 0
 
 
+def _current_handoff_summary(root: HarnessPath) -> tuple[str | None, str | None]:
+    handoff_path = root.join(HANDOFFS_DIR / "latest.json")
+    if not handoff_path.is_file():
+        return None, None
+    try:
+        data = json.loads(handoff_path.read_text(encoding="utf-8"))
+        return data.get("summary"), data.get("created_at")
+    except (json.JSONDecodeError, OSError):
+        return None, None
+
+
 def run_phase_audit_show(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     audit = _read_latest_audit(root)
@@ -1237,8 +1248,20 @@ def run_phase_audit_show(args: argparse.Namespace) -> int:
         print("No saved audit artifact found.", file=__import__("sys").stderr)
         return 1
 
+    current_summary, current_created_at = _current_handoff_summary(root)
+    audit_summary = audit.get("latest_handoff_summary")
+    is_stale = (
+        current_summary is not None
+        and audit_summary is not None
+        and current_summary != audit_summary
+    )
+
     if args.json:
-        print(json.dumps(audit, indent=2, sort_keys=True))
+        output = {**audit}
+        output["current_handoff_summary"] = current_summary
+        output["current_handoff_created_at"] = current_created_at
+        output["handoff_summary_stale"] = is_stale
+        print(json.dumps(output, indent=2, sort_keys=True))
         return 0
 
     print("Saved Phase Audit")
@@ -1252,6 +1275,11 @@ def run_phase_audit_show(args: argparse.Namespace) -> int:
             print(f"  {phase['phase_id']}: {phase['description']} [{status}]")
     print(f"  Health: {audit['health_status']}")
     print(f"  Healthy idle: {'yes' if audit['healthy_idle'] else 'no'}")
+    if is_stale:
+        print(f"  Handoff summary (at audit): {audit_summary}")
+        print(f"  Handoff summary (current): {current_summary}")
+    elif audit_summary:
+        print(f"  Latest handoff: {audit_summary}")
     if audit.get("warnings"):
         print(f"  Warnings: {len(audit['warnings'])}")
         for w in audit["warnings"]:

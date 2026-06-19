@@ -2,15 +2,15 @@
 
 ## Current Phase
 
-Phase 71V: Strategic Continuity Pointer Refresh.
+Phase 71W: Audit Handoff Summary Freshness.
 
-Phase 71V improves bootstrap/handoff continuity wording so stale strategic
-lineage does not confuse the current continuation phase. Bootstrap now shows
-"Latest completed phase: <id>" derived from audit or handoff data. When the
-latest completed phase differs from the strategic lineage's activated phase,
-the strategic section is relabeled as "Historical strategic decision" to avoid
-implying it is the current next phase. Historical lineage remains visible for
-context. No phase execution, queue, or task behavior changes.
+Phase 71W improves `pcae phase audit-show` freshness semantics so stale
+handoff summaries captured at audit creation time are clearly distinguished
+from the current latest handoff summary. JSON output includes
+`current_handoff_summary`, `current_handoff_created_at`, and
+`handoff_summary_stale` fields. Human output shows both "at audit" and
+"current" values when stale. Existing `latest_handoff_summary` field is
+preserved for backward compatibility.
 
 ## Milestone: Execution Chain Traceability Complete
 

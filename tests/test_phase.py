@@ -3368,6 +3368,134 @@ def test_71h_audit_show_missing_json(
     assert "No saved audit artifact found" in output
 
 
+# Phase 71W — Audit Handoff Summary Freshness
+# ---------------------------------------------------------------------------
+
+
+def test_71w_audit_show_json_includes_freshness_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "audit-show", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "current_handoff_summary" in data
+    assert "current_handoff_created_at" in data
+    assert "handoff_summary_stale" in data
+
+
+def test_71w_audit_show_detects_stale_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+    old_handoff = {"summary": "Old handoff", "created_at": "2026-01-01T00:00:00Z"}
+    (handoffs_dir / "latest.json").write_text(
+        _json.dumps(old_handoff), encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4", "--save"])
+    capsys.readouterr()
+
+    new_handoff = {"summary": "New handoff", "created_at": "2026-06-19T00:00:00Z"}
+    (handoffs_dir / "latest.json").write_text(
+        _json.dumps(new_handoff), encoding="utf-8"
+    )
+
+    exit_code = main(["phase", "audit-show", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["latest_handoff_summary"] == "Old handoff"
+    assert data["current_handoff_summary"] == "New handoff"
+    assert data["handoff_summary_stale"] is True
+
+
+def test_71w_audit_show_not_stale_when_matching(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+    handoff = {"summary": "Same handoff", "created_at": "2026-06-19T00:00:00Z"}
+    (handoffs_dir / "latest.json").write_text(
+        _json.dumps(handoff), encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "audit-show", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["latest_handoff_summary"] == "Same handoff"
+    assert data["current_handoff_summary"] == "Same handoff"
+    assert data["handoff_summary_stale"] is False
+
+
+def test_71w_audit_show_human_stale_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+    old_handoff = {"summary": "Old summary", "created_at": "2026-01-01T00:00:00Z"}
+    (handoffs_dir / "latest.json").write_text(
+        _json.dumps(old_handoff), encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4", "--save"])
+    capsys.readouterr()
+
+    new_handoff = {"summary": "New summary", "created_at": "2026-06-19T00:00:00Z"}
+    (handoffs_dir / "latest.json").write_text(
+        _json.dumps(new_handoff), encoding="utf-8"
+    )
+
+    exit_code = main(["phase", "audit-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "at audit" in output
+    assert "current" in output
+    assert "Old summary" in output
+    assert "New summary" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
