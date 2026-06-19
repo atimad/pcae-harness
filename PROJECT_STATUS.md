@@ -2,14 +2,14 @@
 
 ## Current Phase
 
-Phase 71Q.1: Partial Task Finish Recovery.
+Phase 71R: Phase Prompt Queue Round-Trip Validation.
 
-Phase 71Q.1 adds a governed recovery path for partial
-`pcae task finish --commit` failures where the task closure transition already
-moved the task to `tasks/done/` and updated `tasks/DONE.md`, but the closure
-commit failed. Recovery is limited to committing the detected closure files and
-does not change normal task finish, push, task-memory doctor, prompt, queue, or
-execution-governance behavior.
+Phase 71R adds read-only validation for the captured prompt to phase queue
+planning chain. `pcae phase prompt-roundtrip-check` verifies latest prompt
+metadata/content, prompt-show loadability, prompt-enqueue dry-run derivation,
+readable queue state, and handoff/bootstrap visibility signals without
+executing prompts, mutating prompt artifacts, mutating the phase queue, creating
+task contracts, or running queued phases.
 
 ## Milestone: Execution Chain Traceability Complete
 

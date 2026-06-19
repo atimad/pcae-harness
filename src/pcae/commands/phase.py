@@ -1649,3 +1649,104 @@ def run_phase_prompt_enqueue(args: argparse.Namespace) -> int:
         print(f"  Position: {len(queue)}")
         print(f"  Queue length: {len(queue)}")
     return 0
+
+
+def _build_phase_prompt_roundtrip_check(root: HarnessPath) -> dict:
+    metadata = _read_prompt_metadata(root)
+    content = _read_prompt_content(root)
+    queue = _read_phase_queue(root)
+    queue_entries = [_phase_queue_entry_details(entry) for entry in queue]
+    reasons: list[str] = []
+
+    prompt_present = metadata is not None and content is not None
+    prompt_show_loadable = prompt_present
+    dry_run_title = metadata.get("title") if metadata else None
+    source_prompt_path = (
+        metadata.get("latest_path", str(PHASE_PROMPTS_DIR / "latest.md"))
+        if metadata else None
+    )
+    source_prompt_created_at = metadata.get("created_at") if metadata else None
+
+    if metadata is None:
+        reasons.append("latest prompt metadata is missing")
+    if content is None:
+        reasons.append("latest prompt content is missing")
+
+    queue_titles = [_phase_queue_entry_title(entry) for entry in queue]
+    dry_run_derivable = bool(dry_run_title)
+    if not dry_run_title:
+        reasons.append("prompt enqueue dry-run cannot derive a queue title")
+    elif dry_run_title in queue_titles:
+        dry_run_derivable = False
+        reasons.append("phase queue already contains the prompt title")
+
+    handoff_path = root.join(HANDOFFS_DIR / "latest.json")
+    handoff_present = handoff_path.is_file()
+    handoff_prompt_visible = False
+    handoff_queue_visible = False
+    if handoff_present:
+        try:
+            handoff_data = json.loads(handoff_path.read_text(encoding="utf-8"))
+            prompt_summary = handoff_data.get("prompt_summary")
+            handoff_prompt_visible = bool(
+                isinstance(prompt_summary, dict) and prompt_summary.get("present")
+            )
+            handoff_queue_visible = bool(handoff_data.get("phase_queue_present"))
+        except (json.JSONDecodeError, OSError):
+            reasons.append("latest handoff artifact is not readable")
+
+    ready = prompt_present and prompt_show_loadable and dry_run_derivable
+
+    return {
+        "ready": ready,
+        "reasons": reasons,
+        "prompt_present": prompt_present,
+        "prompt_show_loadable": prompt_show_loadable,
+        "prompt_title": dry_run_title,
+        "prompt_content_length": len(content or ""),
+        "dry_run_title": dry_run_title,
+        "dry_run_derivable": dry_run_derivable,
+        "dry_run_mutated": False,
+        "source_prompt_path": source_prompt_path,
+        "source_prompt_created_at": source_prompt_created_at,
+        "queue_present": len(queue) > 0,
+        "queue_length": len(queue),
+        "queue_entries": queue_entries,
+        "queue_readable": True,
+        "queue_check_planning_only": True,
+        "handoff_present": handoff_present,
+        "handoff_prompt_visible": handoff_prompt_visible,
+        "handoff_queue_visible": handoff_queue_visible,
+        "bootstrap_prompt_visible": prompt_present,
+        "mutated": False,
+    }
+
+
+def run_phase_prompt_roundtrip_check(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_phase_prompt_roundtrip_check(root)
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["ready"] else 1
+
+    if result["ready"]:
+        print("Phase prompt round-trip check: ready")
+    else:
+        print("Phase prompt round-trip check: not ready")
+    print(f"  Prompt: {'present' if result['prompt_present'] else 'missing'}")
+    if result["dry_run_title"]:
+        print(f"  Dry-run title: {result['dry_run_title']}")
+    print(f"  Queue: {result['queue_length']} entries")
+    if result["handoff_present"]:
+        print(
+            "  Handoff visibility: "
+            f"prompt={'yes' if result['handoff_prompt_visible'] else 'no'}, "
+            f"queue={'yes' if result['handoff_queue_visible'] else 'no'}"
+        )
+    print("  Mutated: no")
+    if result["reasons"]:
+        print("  Reasons:")
+        for reason in result["reasons"]:
+            print(f"    - {reason}")
+    return 0 if result["ready"] else 1

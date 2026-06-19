@@ -4289,3 +4289,111 @@ def test_71q_prompt_enqueue_duplicate_detection_matches_structured_title(
     output = capsys.readouterr().out
     assert exit_code == 1
     assert "already contains" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 71R: pcae phase prompt-roundtrip-check
+# ---------------------------------------------------------------------------
+
+
+def test_71r_prompt_roundtrip_check_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72H — Round Trip", "Round-trip prompt.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-roundtrip-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase prompt round-trip check: ready" in output
+    assert "Dry-run title: 72H — Round Trip" in output
+    assert "Mutated: no" in output
+    assert not (tmp_path / ".pcae" / "phase-queue.json").exists()
+
+
+def test_71r_prompt_roundtrip_check_missing_prompt_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-roundtrip-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["ready"] is False
+    assert data["prompt_present"] is False
+    assert data["queue_present"] is False
+    assert data["dry_run_title"] is None
+    assert data["reasons"]
+
+
+def test_71r_prompt_roundtrip_check_existing_queue_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72I — Existing Queue", "Prompt with queue.")
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(
+        json.dumps([
+            "Phase 72J: manual",
+            {
+                "title": "Phase 72K: captured",
+                "source_type": "captured_prompt",
+                "source_prompt_path": ".pcae/phase-prompts/latest.md",
+                "source_prompt_created_at": "2026-06-19T12:00:00+00:00",
+                "created_at": "2026-06-19T12:01:00+00:00",
+            },
+        ], indent=2) + "\n",
+        encoding="utf-8",
+    )
+    before = queue_path.read_text(encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-roundtrip-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["ready"] is True
+    assert data["prompt_present"] is True
+    assert data["queue_present"] is True
+    assert data["queue_length"] == 2
+    assert data["dry_run_title"] == "72I — Existing Queue"
+    assert data["queue_entries"][0]["title"] == "Phase 72J: manual"
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_71r_prompt_roundtrip_check_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72L — Read Only", "Do not mutate.")
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    before_prompt_files = {
+        path.name: path.read_text(encoding="utf-8")
+        for path in sorted(prompts_dir.iterdir())
+        if path.is_file()
+    }
+    before_tasks = list((tmp_path / "tasks" / "active").glob("*.md"))
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-roundtrip-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    after_prompt_files = {
+        path.name: path.read_text(encoding="utf-8")
+        for path in sorted(prompts_dir.iterdir())
+        if path.is_file()
+    }
+    assert exit_code == 0
+    assert data["mutated"] is False
+    assert data["dry_run_mutated"] is False
+    assert before_prompt_files == after_prompt_files
+    assert not (tmp_path / ".pcae" / "phase-queue.json").exists()
+    assert list((tmp_path / "tasks" / "active").glob("*.md")) == before_tasks

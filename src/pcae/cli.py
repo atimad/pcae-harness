@@ -423,6 +423,7 @@ from pcae.commands.phase import (
     run_phase_prompt_hygiene,
     run_phase_prompt_list,
     run_phase_prompt_prune,
+    run_phase_prompt_roundtrip_check,
     run_phase_prompt_show,
     run_phase_queue_add,
     run_phase_queue_check,
@@ -4959,6 +4960,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_prompt_enqueue_parser.set_defaults(handler=run_phase_prompt_enqueue)
+
+    phase_prompt_roundtrip_check_parser = phase_subparsers.add_parser(
+        "prompt-roundtrip-check",
+        help="Validate captured prompt to phase queue planning round-trip readiness.",
+    )
+    phase_prompt_roundtrip_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_prompt_roundtrip_check_parser.set_defaults(
+        handler=run_phase_prompt_roundtrip_check
+    )
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",
