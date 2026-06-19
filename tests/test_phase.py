@@ -6029,3 +6029,290 @@ def test_71r_prompt_roundtrip_check_is_read_only(
     assert before_prompt_files == after_prompt_files
     assert not (tmp_path / ".pcae" / "phase-queue.json").exists()
     assert list((tmp_path / "tasks" / "active").glob("*.md")) == before_tasks
+
+
+# ---------------------------------------------------------------------------
+# Phase 72L: queue validation
+# ---------------------------------------------------------------------------
+
+
+def test_72l_queue_validate_empty_queue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text("[]", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Valid: yes" in output
+    assert "Queue ready: no" in output
+    assert "Entry count: 0" in output
+
+
+def test_72l_queue_validate_empty_queue_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text("[]", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["queue_ready"] is False
+    assert data["queue_entry_count"] == 0
+    assert data["mutated"] is False
+
+
+def test_72l_queue_validate_no_file(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["queue_file_present"] is False
+    assert data["queue_readable"] is False
+    assert data["queue_ready"] is False
+    assert data["issues"] == []  # absent queue file is valid, not an issue
+
+
+def test_72l_queue_validate_legacy_string_entries(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        "Phase 72A: First phase",
+        "Phase 72B: Second phase",
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["queue_entry_count"] == 2
+    assert data["queue_ready"] is True
+    assert len(data["entries"]) == 2
+    assert data["entries"][0]["title"] == "Phase 72A: First phase"
+    assert data["entries"][1]["title"] == "Phase 72B: Second phase"
+    for e in data["entries"]:
+        assert e.get("status") == "ok"
+
+
+def test_72l_queue_validate_structured_entries(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        {
+            "title": "Phase 72C: captured",
+            "source_type": "captured_prompt",
+            "source_prompt_path": ".pcae/phase-prompts/latest.md",
+            "source_prompt_created_at": "2026-06-19T12:00:00+00:00",
+            "created_at": "2026-06-19T12:01:00+00:00",
+        },
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["queue_entry_count"] == 1
+    assert data["entries"][0]["status"] == "ok"
+
+
+def test_72l_queue_validate_placeholder_detected(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        "Phase 72A: real phase",
+        "test phase for something",
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert "matches placeholder pattern" in str(data["issues"])
+
+
+def test_72l_queue_validate_duplicate_detected(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        "Phase 72A: same title",
+        "Phase 72A: same title",
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert "duplicate title" in str(data["issues"])
+
+
+def test_72l_queue_validate_unsupported_source_type(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        {
+            "title": "Bad source",
+            "source_type": "unknown_type",
+        },
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert "unsupported source_type" in str(data["issues"])
+
+
+def test_72l_queue_validate_captured_prompt_missing_path(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        {
+            "title": "Missing path",
+            "source_type": "captured_prompt",
+        },
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert "missing source_prompt_path" in str(data["issues"])
+
+
+def test_72l_queue_validate_forbidden_execution_field(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        {
+            "title": "Authorized entry",
+            "source_type": "manual",
+            "execution_authorized": True,
+        },
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert "forbidden field" in str(data["issues"])
+
+
+def test_72l_queue_validate_read_only(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps([
+        "Phase 72A: real phase title",
+        {"title": "Phase 72B: structured", "source_type": "manual"},
+    ], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    before_stat = queue_path.stat()
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["mutated"] is False
+    assert queue_path.read_text(encoding="utf-8") == before
+    assert queue_path.stat().st_mtime == before_stat.st_mtime
+
+
+def test_72l_queue_validate_invalid_phase_id(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        {
+            "title": "Bad phase id",
+            "source_type": "manual",
+            "phase_id": "not-a-valid-phase",
+        },
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert "invalid phase_id" in str(data["issues"])
+
+
+def test_72l_queue_validate_human_output_no_execution_note(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps(["Phase 72A: test"]), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No execution performed" in output
+    assert "read-only" in output.lower()
+
+
+def test_72l_queue_validate_unreadable_queue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text("not valid json {{{", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert data["queue_readable"] is False
+    assert "not readable" in str(data["issues"])
+
+
+def test_72l_queue_validate_not_array(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps({"not": "an array"}), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["valid"] is False
+    assert "not a JSON array" in str(data["issues"])

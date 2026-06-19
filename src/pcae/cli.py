@@ -442,6 +442,7 @@ from pcae.commands.phase import (
     run_phase_queue_hygiene,
     run_phase_queue_list,
     run_phase_queue_show,
+    run_phase_queue_validate,
     run_phase_start,
 )
 from pcae.commands.push import run_push, run_push_check
@@ -4809,6 +4810,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Confirm clearing placeholder entries (required with --clear-placeholders).",
     )
     phase_queue_hygiene_parser.set_defaults(handler=run_phase_queue_hygiene)
+
+    phase_queue_validate_parser = phase_queue_subparsers.add_parser(
+        "validate",
+        help="Validate phase queue entries without executing them.",
+    )
+    phase_queue_validate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_validate_parser.set_defaults(handler=run_phase_queue_validate)
 
     phase_audit_parser = phase_subparsers.add_parser(
         "audit",

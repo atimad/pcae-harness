@@ -834,6 +834,156 @@ def run_phase_queue_hygiene(args: argparse.Namespace) -> int:
     return 0
 
 
+_SUPPORTED_SOURCE_TYPES = {"manual", "captured_prompt", "simulation"}
+
+_VALID_PHASE_ID_RE = re.compile(r"^\d+[A-Z](?:\.\d+)?$")
+
+
+def _build_queue_validate(root: HarnessPath) -> dict:
+    queue_path = root.join(PHASE_QUEUE_PATH)
+    queue_file_present = queue_path.is_file()
+
+    if not queue_file_present:
+        return {
+            "valid": True,
+            "queue_file_present": False,
+            "queue_readable": False,
+            "queue_entry_count": 0,
+            "queue_ready": False,
+            "issues": [],
+            "entries": [],
+            "mutated": False,
+            "note": "No execution performed. This is a read-only validation.",
+        }
+
+    try:
+        queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError) as exc:
+        return {
+            "valid": False,
+            "queue_file_present": True,
+            "queue_readable": False,
+            "queue_entry_count": 0,
+            "queue_ready": False,
+            "issues": [f"queue not readable: {exc}"],
+            "entries": [],
+            "mutated": False,
+            "note": "No execution performed. This is a read-only validation.",
+        }
+
+    if not isinstance(queue, list):
+        return {
+            "valid": False,
+            "queue_file_present": True,
+            "queue_readable": True,
+            "queue_entry_count": 0,
+            "queue_ready": False,
+            "issues": ["queue is not a JSON array"],
+            "entries": [],
+            "mutated": False,
+            "note": "No execution performed. This is a read-only validation.",
+        }
+
+    entry_count = len(queue)
+    entries: list[dict] = []
+    all_issues: list[str] = []
+    titles_seen: set[str] = set()
+
+    for i, entry in enumerate(queue):
+        position = i + 1
+        title = _phase_queue_entry_title(entry)
+        entry_result: dict = {"position": position, "title": title}
+        entry_issues: list[str] = []
+
+        if _is_placeholder(entry):
+            entry_issues.append("matches placeholder pattern")
+
+        if isinstance(entry, dict):
+            source_type = entry.get("source_type", "manual")
+            if source_type not in _SUPPORTED_SOURCE_TYPES:
+                entry_issues.append(f"unsupported source_type: {source_type}")
+
+            if source_type == "captured_prompt" and not entry.get("source_prompt_path"):
+                entry_issues.append("captured_prompt entry missing source_prompt_path")
+
+            forbidden_fields = {"execution_authorized", "execution_allowed"}
+            for field in forbidden_fields:
+                if field in entry:
+                    entry_issues.append(f"contains forbidden field: {field}")
+
+            phase_id = entry.get("phase_id")
+            if phase_id is not None:
+                if not isinstance(phase_id, str) or not _VALID_PHASE_ID_RE.match(phase_id):
+                    entry_issues.append(f"invalid phase_id: {phase_id}")
+
+        if title in titles_seen:
+            entry_issues.append("duplicate title")
+        titles_seen.add(title)
+
+        if entry_issues:
+            entry_result["issues"] = entry_issues
+        else:
+            entry_result["status"] = "ok"
+
+        entries.append(entry_result)
+
+    for e in entries:
+        if "issues" in e:
+            for issue in e["issues"]:
+                all_issues.append(f"position {e['position']}: {issue}")
+
+    valid = len(all_issues) == 0
+
+    return {
+        "valid": valid,
+        "queue_file_present": True,
+        "queue_readable": True,
+        "queue_entry_count": entry_count,
+        "queue_ready": entry_count > 0,
+        "issues": all_issues,
+        "entries": entries,
+        "mutated": False,
+        "note": "No execution performed. This is a read-only validation.",
+    }
+
+
+def run_phase_queue_validate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_queue_validate(root)
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["valid"] else 1
+
+    print("Phase Queue Validation")
+    print("=" * 40)
+    print(f"  Queue file present: {'yes' if result['queue_file_present'] else 'no'}")
+    print(f"  Queue readable: {'yes' if result['queue_readable'] else 'no'}")
+    print(f"  Entry count: {result['queue_entry_count']}")
+    print(f"  Queue ready: {'yes' if result['queue_ready'] else 'no'}")
+    print(f"  Valid: {'yes' if result['valid'] else 'NO'}")
+
+    if result["queue_readable"] and result["entries"]:
+        print()
+        for e in result["entries"]:
+            if "issues" in e:
+                print(f"  {e['position']}. {e['title']} — {len(e['issues'])} issue(s)")
+                for issue in e["issues"]:
+                    print(f"     - {issue}")
+            else:
+                print(f"  {e['position']}. {e['title']} — ok")
+
+    if result["issues"]:
+        print()
+        print(f"  Issues ({len(result['issues'])}):")
+        for issue in result["issues"]:
+            print(f"    - {issue}")
+
+    print()
+    print(f"  {result['note']}")
+    return 0 if result["valid"] else 1
+
+
 def _build_manual_steps(next_agent: str) -> list[str]:
     return [
         "Close or reset the current AI session if needed.",

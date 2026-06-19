@@ -2,14 +2,14 @@
 
 ## Current Phase
 
-Phase 72K: Execution Authorization Negative Gate.
+Phase 72L: Real Queue Item Validation.
 
-Phase 72K adds `pcae phase runner-execution-authorize`, `--json`, and
-`--dry-run` as an explicit negative gate. The command always refuses
-execution authorization, reporting `authorization_available=false`,
-`authorized=false`, and `mutation_performed=false`. Tests prove no
-approval, simulation, or preflight path can produce
-`execution_authorized=true`. Human authority is noted.
+Phase 72L adds `pcae phase queue validate` and `--json` for read-only validation
+of real phase queue entries. It checks queue readability, entry titles, supported
+source_type, source_prompt_path for captured_prompt entries, placeholder/dummy
+detection, duplicate title detection, invalid phase_id patterns, and forbidden
+execution-authorizing fields. Empty queue is valid but reports `queue_ready=false`.
+No queue mutation, no task creation, no execution.
 
 ## Milestone: Execution Chain Traceability Complete
 
