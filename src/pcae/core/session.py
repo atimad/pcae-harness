@@ -152,6 +152,10 @@ class ContinuityReport:
     audit_healthy_idle: bool | None
     phase_queue_present: bool
     phase_queue_count: int
+    prompt_present: bool
+    prompt_title: str | None
+    prompt_created_at: str | None
+    prompt_path: str | None
     push_mode: str
     task_memory_status: str
     suitable_for_continuation: bool
@@ -164,6 +168,7 @@ def build_continuity_report(
     handoff_data: dict | None = None,
     audit_data: dict | None = None,
     queue: list[str] | None = None,
+    prompt_data: dict | None = None,
 ) -> ContinuityReport:
     from pcae.core.git_status import read_git_branch, read_git_changes
     from pcae.core.health import build_health_data, is_healthy
@@ -203,6 +208,11 @@ def build_continuity_report(
     phase_queue_present = len(queue) > 0
     phase_queue_count = len(queue)
 
+    prompt_present = prompt_data is not None
+    prompt_title = prompt_data.get("title") if prompt_data else None
+    prompt_created_at = prompt_data.get("created_at") if prompt_data else None
+    prompt_path = prompt_data.get("latest_path") if prompt_data else None
+
     push_mode = "nothing_to_push"
     if changes:
         push_mode = "dirty_tree"
@@ -241,6 +251,10 @@ def build_continuity_report(
         audit_healthy_idle=audit_healthy_idle,
         phase_queue_present=phase_queue_present,
         phase_queue_count=phase_queue_count,
+        prompt_present=prompt_present,
+        prompt_title=prompt_title,
+        prompt_created_at=prompt_created_at,
+        prompt_path=prompt_path,
         push_mode=push_mode,
         task_memory_status=task_memory_status,
         suitable_for_continuation=suitable,

@@ -2225,3 +2225,122 @@ def test_71j_continuity_check_with_active_task(
     assert exit_code == 0
     assert "Task state: active" in output
     assert "Active task:" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 71M: prompt visibility in bootstrap and continuity-check
+# ---------------------------------------------------------------------------
+
+
+def _write_prompt_artifact(root: Path, title: str, text: str) -> None:
+    from pcae.commands.phase import PHASE_PROMPTS_DIR, _slugify
+    from datetime import datetime, timezone
+
+    prompts_dir = root / PHASE_PROMPTS_DIR
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    slug = _slugify(title)
+    ts_str = now.strftime("%Y%m%dT%H%M%SZ")
+    ts_filename = f"{slug}-{ts_str}.md"
+    (prompts_dir / ts_filename).write_text(text, encoding="utf-8")
+    (prompts_dir / "latest.md").write_text(text, encoding="utf-8")
+    metadata = {
+        "title": title,
+        "created_at": now.isoformat(),
+        "slug": slug,
+        "timestamped_path": str(PHASE_PROMPTS_DIR / ts_filename),
+        "latest_path": str(PHASE_PROMPTS_DIR / "latest.md"),
+    }
+    (prompts_dir / "latest.json").write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8",
+    )
+
+
+def test_71m_compact_bootstrap_shows_prompt_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_prompt_artifact(tmp_path, "71M Bootstrap", "Bootstrap prompt.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Latest prompt: 71M Bootstrap" in output
+
+
+def test_71m_compact_bootstrap_clean_when_no_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Latest prompt:" not in output
+
+
+def test_71m_continuity_check_json_includes_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T100000Z",
+        "phases_detected": 5,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    _write_prompt_artifact(tmp_path, "71M Continuity", "Continuity prompt.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["prompt_present"] is True
+    assert data["prompt_title"] == "71M Continuity"
+    assert data["prompt_path"] == ".pcae/phase-prompts/latest.md"
+
+
+def test_71m_continuity_check_json_no_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["prompt_present"] is False
+    assert data["prompt_title"] is None
+
+
+def test_71m_continuity_check_human_shows_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    _write_prompt_artifact(tmp_path, "71M Human", "Human prompt.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Latest prompt: 71M Human" in output

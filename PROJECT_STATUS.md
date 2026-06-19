@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 71L: Phase Prompt Show.
+Phase 71M: Phase Prompt Visibility in Bootstrap and Handoff.
 
 ## Milestone: Execution Chain Traceability Complete
 

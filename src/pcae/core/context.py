@@ -149,6 +149,7 @@ def build_bootstrap_prompt(
     profile: WorkModeProfile,
     handoff: dict | None = None,
     audit: dict | None = None,
+    prompt: dict | None = None,
 ) -> str:
     """Return a compact governed bootstrap prompt string."""
     lines: list[str] = []
@@ -199,6 +200,11 @@ def build_bootstrap_prompt(
         healthy_idle = audit.get("healthy_idle", False)
         idle_str = ", repo returned to healthy idle" if healthy_idle else ""
         lines.append(f"Last audit: {phases_detected} phases, {warning_count} warnings, created {created_at}{idle_str}")
+
+    if prompt is not None:
+        prompt_title = prompt.get("title", "Untitled")
+        prompt_created = prompt.get("created_at", "unknown")
+        lines.append(f"Latest prompt: {prompt_title} (created {prompt_created})")
 
     lines.append(f"Emphasized: {', '.join(profile.emphasized_sections)}")
 

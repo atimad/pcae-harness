@@ -41,7 +41,12 @@ from pcae.core.session import (
     write_session_snapshot,
 )
 
-from pcae.commands.phase import HANDOFFS_DIR, _read_latest_audit, _read_phase_queue
+from pcae.commands.phase import (
+    HANDOFFS_DIR,
+    _read_latest_audit,
+    _read_phase_queue,
+    _read_prompt_metadata,
+)
 from pcae.core.tasks import find_latest_active_task
 
 
@@ -247,9 +252,12 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     challenge = build_irg_challenge_context(root)
     handoff = _load_latest_handoff(root)
     audit = _read_latest_audit(root)
+    prompt_meta = _read_prompt_metadata(root)
     profile_name: str | None = getattr(args, "profile", None)
     profile, is_unknown = resolve_profile(profile_name)
-    prompt = build_bootstrap_prompt(pack, profile, handoff=handoff, audit=audit)
+    prompt = build_bootstrap_prompt(
+        pack, profile, handoff=handoff, audit=audit, prompt=prompt_meta,
+    )
 
     if args.json:
         print(
@@ -413,9 +421,11 @@ def run_session_continuity_check(args: argparse.Namespace) -> int:
     handoff = _load_latest_handoff(root)
     audit = _read_latest_audit(root)
     queue = _read_phase_queue(root)
+    prompt_meta = _read_prompt_metadata(root)
 
     report = build_continuity_report(
         root, handoff_data=handoff, audit_data=audit, queue=queue,
+        prompt_data=prompt_meta,
     )
 
     if args.json:
@@ -451,6 +461,8 @@ def run_session_continuity_check(args: argparse.Namespace) -> int:
         print(f"  Phase queue: {report.phase_queue_count} entries")
     else:
         print("  Phase queue: empty")
+    if report.prompt_present:
+        print(f"  Latest prompt: {report.prompt_title} (created {report.prompt_created_at})")
     print()
     if report.issues:
         print("  Issues:")
@@ -482,6 +494,10 @@ def _continuity_report_to_dict(report: ContinuityReport) -> dict:
         "issues": list(report.issues),
         "phase_queue_count": report.phase_queue_count,
         "phase_queue_present": report.phase_queue_present,
+        "prompt_created_at": report.prompt_created_at,
+        "prompt_path": report.prompt_path,
+        "prompt_present": report.prompt_present,
+        "prompt_title": report.prompt_title,
         "push_mode": report.push_mode,
         "suitable_for_continuation": report.suitable_for_continuation,
         "task_memory_status": report.task_memory_status,

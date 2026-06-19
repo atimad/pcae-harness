@@ -648,6 +648,7 @@ def test_phase_handoff_json_output(
         "phase_queue_count",
         "phase_queue_next",
         "phase_queue_present",
+        "prompt_summary",
         "provenance_event_count",
         "push_mode",
         "push_ready",
@@ -3683,3 +3684,96 @@ def test_71l_prompt_show_is_read_only(
     capsys.readouterr()
     after = text_snapshot(tmp_path)
     assert after == before
+
+
+# ---------------------------------------------------------------------------
+# Phase 71M: prompt visibility in handoff and handoff-show
+# ---------------------------------------------------------------------------
+
+
+def test_71m_handoff_artifact_includes_prompt_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Prompt handoff task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    _capture_prompt(tmp_path, "71M Handoff", "Prompt for handoff.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["prompt_summary"]["present"] is True
+    assert data["prompt_summary"]["title"] == "71M Handoff"
+    assert data["prompt_summary"]["path"] == ".pcae/phase-prompts/latest.md"
+
+
+def test_71m_handoff_artifact_prompt_absent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "No prompt handoff task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = json.loads(output)
+    assert data["prompt_summary"] is None
+
+
+def test_71m_handoff_show_displays_prompt_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff show prompt task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    _capture_prompt(tmp_path, "71M Show", "Show prompt in handoff.")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Latest prompt: 71M Show" in output
+
+
+def test_71m_handoff_show_silent_when_no_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff show no prompt task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Latest prompt:" not in output

@@ -390,6 +390,16 @@ def _build_handoff_artifact(
             "healthy_idle": audit.get("healthy_idle", False),
         }
 
+    prompt_meta = _read_prompt_metadata(root)
+    prompt_summary: dict | None = None
+    if prompt_meta is not None:
+        prompt_summary = {
+            "present": True,
+            "title": prompt_meta.get("title"),
+            "created_at": prompt_meta.get("created_at"),
+            "path": prompt_meta.get("latest_path"),
+        }
+
     now = datetime.now(timezone.utc)
     task_suffix = task_id if task_id else "idle"
     handoff_id = f"handoff-{now:%Y%m%dT%H%M%S}-{now.microsecond:06d}-{task_suffix}"
@@ -411,6 +421,7 @@ def _build_handoff_artifact(
         "phase_queue_count": len(queue),
         "phase_queue_next": queue[0] if queue else None,
         "phase_queue_present": len(queue) > 0,
+        "prompt_summary": prompt_summary,
         "push_mode": push.mode,
         "push_ready": push.ready,
         "recent_commits": recent_commits,
@@ -479,6 +490,9 @@ def run_phase_handoff_show(args: argparse.Namespace) -> int:
         audit_s = data.get("audit_summary")
         if audit_s and audit_s.get("present"):
             print(f"  Audit: {audit_s['phases_detected']} phases, {audit_s['warning_count']} warnings, created {audit_s['created_at']}")
+        prompt_s = data.get("prompt_summary")
+        if prompt_s and prompt_s.get("present"):
+            print(f"  Latest prompt: {prompt_s['title']} (created {prompt_s['created_at']})")
         print()
         print(f"  Bootstrap: {data['bootstrap_command']}")
 
