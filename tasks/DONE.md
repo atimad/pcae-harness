@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 71N phase prompt hygiene (20260619-1319-phase-71n-phase-prompt-hygiene)
 - Phase 71M phase prompt visibility in bootstrap and handoff (20260619-1305-phase-71m-phase-prompt-visibility-in-bootstrap-and-handoff)
 - Phase 71L phase prompt show (20260619-1249-phase-71l-phase-prompt-show)
 - Phase 71K phase prompt capture (20260619-1239-phase-71k-phase-prompt-capture)
