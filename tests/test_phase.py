@@ -6966,3 +6966,141 @@ def test_72p_approval_check_no_execution(
     assert exit_code == 0
     assert "No execution performed" in output
     assert "read-only" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 72Q: queue preflight positive non-execution path
+# ---------------------------------------------------------------------------
+
+
+def test_72q_preflight_queue_requirements_met_with_fixture(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "72Q test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_validation_present"] is True
+    assert data["queue_valid"] is True
+    assert data["queue_approval_present"] is True
+    assert data["queue_approval_matches_current_queue"] is True
+    assert data["queue_approval_execution_authorized"] is False
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72q_preflight_stays_design_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "72Q status test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["preflight_status"] == "design_only"
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72q_preflight_queue_unmet_when_cleared(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "72Q revert test"])
+    capsys.readouterr()
+    main(["phase", "queue", "clear"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_approval_present"] is True
+    assert data["queue_approval_matches_current_queue"] is False
+    assert "queue non-empty" in data["unmet_requirements"]
+    assert "queue approval matches current queue" in data["unmet_requirements"]
+
+
+def test_72q_preflight_requirements_list_includes_queue_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "72Q req test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    req_keys = {r["check"] for r in data["requirements"]}
+    assert "queue_validation_present" in req_keys
+    assert "queue_valid" in req_keys
+    assert "queue_approval_present" in req_keys
+    assert "queue_approval_matches" in req_keys
+    assert "queue_approval_not_authorized" in req_keys
+
+
+def test_72q_preflight_human_output_states_no_execution(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "72Q human test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution available: no" in output
+    assert "Execution authorized: no" in output
+    assert "design only" in output.lower()
+    assert "not implemented and not authorized" in output.lower()
+
+
+def test_72q_preflight_no_fixture_leftovers(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "72Q cleanup test"])
+    capsys.readouterr()
+
+    main(["phase", "queue", "fixture-clear"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_entry_count"] == 0
+    assert data["fixture_count"] == 0

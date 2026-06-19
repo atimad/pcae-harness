@@ -2,11 +2,12 @@
 
 ## Current Phase
 
-Phase 72P: Queue Approval Matching With Non-Empty Queue.
+Phase 72Q: Queue Preflight Positive Non-Execution Path.
 
-Phase 72P adds `pcae phase queue approval-check` for a focused pass/fail check of
-queue approval state (queue presence, validity, approval presence, digest match,
-execution_authorized=false). Hardens approval matching using fixture queues from 72O.
+Phase 72Q proves the positive non-execution path: a valid fixture queue with matching
+approval correctly satisfies all queue-related preflight requirements while execution
+remains `execution_available=false`, `execution_authorized=false`, and
+`preflight_status=design_only`. Tests cover cleared queue revert and fixture cleanup.
 No execution, no task creation.
 
 ## Milestone: Execution Chain Traceability Complete
