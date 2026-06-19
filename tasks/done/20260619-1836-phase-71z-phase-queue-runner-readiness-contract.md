@@ -10,7 +10,7 @@ Phase 71Z: Phase Queue Runner Readiness Contract
 
 ## Status
 
-active
+done
 
 ## Mode
 
