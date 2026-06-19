@@ -10,7 +10,7 @@ Phase 71Y: Autonomy Comparison Run Summary Artifact
 
 ## Status
 
-active
+done
 
 ## Mode
 
