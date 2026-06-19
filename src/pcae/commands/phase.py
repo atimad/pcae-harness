@@ -379,6 +379,17 @@ def _build_handoff_artifact(
 
     queue = _read_phase_queue(root)
 
+    audit = _read_latest_audit(root)
+    audit_summary: dict | None = None
+    if audit is not None:
+        audit_summary = {
+            "present": True,
+            "created_at": audit.get("created_at"),
+            "phases_detected": audit.get("phases_detected", 0),
+            "warning_count": len(audit.get("warnings", [])),
+            "healthy_idle": audit.get("healthy_idle", False),
+        }
+
     now = datetime.now(timezone.utc)
     task_suffix = task_id if task_id else "idle"
     handoff_id = f"handoff-{now:%Y%m%dT%H%M%S}-{now.microsecond:06d}-{task_suffix}"
@@ -386,6 +397,7 @@ def _build_handoff_artifact(
     return {
         "active_task_id": task_id,
         "active_task_title": active_task.title if active_task else None,
+        "audit_summary": audit_summary,
         "auto_summary": auto_summary,
         "bootstrap_command": f"pcae session bootstrap --agent-id {next_agent}",
         "branch": branch,
@@ -464,6 +476,9 @@ def run_phase_handoff_show(args: argparse.Namespace) -> int:
         if data.get("phase_queue_present"):
             print(f"  Phase queue: {data['phase_queue_count']} entries")
             print(f"  Next queued: {data['phase_queue_next']}")
+        audit_s = data.get("audit_summary")
+        if audit_s and audit_s.get("present"):
+            print(f"  Audit: {audit_s['phases_detected']} phases, {audit_s['warning_count']} warnings, created {audit_s['created_at']}")
         print()
         print(f"  Bootstrap: {data['bootstrap_command']}")
 

@@ -629,6 +629,7 @@ def test_phase_handoff_json_output(
     expected_keys = {
         "active_task_id",
         "active_task_title",
+        "audit_summary",
         "auto_summary",
         "bootstrap_command",
         "branch",
@@ -2981,6 +2982,127 @@ def test_71g_hygiene_real_entries_not_cleared(
     assert exit_code == 0
     assert data["queue_length"] == 2
     assert data["queue"] == ["Phase 72A: implement auth", "Phase 72C: add logging"]
+
+
+# ---------------------------------------------------------------------------
+# Autonomy audit visibility in handoff (Phase 71I)
+# ---------------------------------------------------------------------------
+
+
+def _write_audit_artifact(root: Path, audit: dict) -> None:
+    import json as _json
+
+    audit_dir = root / ".pcae" / "phase-audits"
+    audit_dir.mkdir(parents=True, exist_ok=True)
+    (audit_dir / "latest.json").write_text(
+        _json.dumps(audit, indent=2, sort_keys=True), encoding="utf-8",
+    )
+
+
+def test_71i_handoff_artifact_includes_audit_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Audit handoff task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T060000Z",
+        "phases_detected": 4,
+        "warnings": ["Phase 71X: missing completion commit"],
+        "healthy_idle": True,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["audit_summary"]["present"] is True
+    assert data["audit_summary"]["phases_detected"] == 4
+    assert data["audit_summary"]["warning_count"] == 1
+    assert data["audit_summary"]["healthy_idle"] is True
+    assert data["audit_summary"]["created_at"] == "20260619T060000Z"
+
+
+def test_71i_handoff_artifact_audit_absent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "No audit handoff task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["audit_summary"] is None
+
+
+def test_71i_handoff_show_displays_audit_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff show audit task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T070000Z",
+        "phases_detected": 3,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Audit:" in output
+    assert "3 phases" in output
+    assert "0 warnings" in output
+
+
+def test_71i_handoff_show_no_audit_line_when_absent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff show no audit task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Audit:" not in output
 
 
 # ---------------------------------------------------------------------------

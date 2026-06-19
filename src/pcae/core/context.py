@@ -148,6 +148,7 @@ def build_bootstrap_prompt(
     pack: ContextPack,
     profile: WorkModeProfile,
     handoff: dict | None = None,
+    audit: dict | None = None,
 ) -> str:
     """Return a compact governed bootstrap prompt string."""
     lines: list[str] = []
@@ -190,6 +191,15 @@ def build_bootstrap_prompt(
         lines.append(f"Phase (from PROJECT_STATUS.md): {rs['current_phase']}")
     else:
         lines.append(f"Phase: {rs['current_phase']}")
+
+    if audit is not None:
+        phases_detected = audit.get("phases_detected", 0)
+        warning_count = len(audit.get("warnings", []))
+        created_at = audit.get("created_at", "unknown")
+        healthy_idle = audit.get("healthy_idle", False)
+        idle_str = ", repo returned to healthy idle" if healthy_idle else ""
+        lines.append(f"Last audit: {phases_detected} phases, {warning_count} warnings, created {created_at}{idle_str}")
+
     lines.append(f"Emphasized: {', '.join(profile.emphasized_sections)}")
 
     continuity = pack.strategic_continuity

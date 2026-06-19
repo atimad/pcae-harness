@@ -39,7 +39,7 @@ from pcae.core.session import (
     write_session_snapshot,
 )
 
-from pcae.commands.phase import HANDOFFS_DIR
+from pcae.commands.phase import HANDOFFS_DIR, _read_latest_audit
 from pcae.core.tasks import find_latest_active_task
 
 
@@ -244,9 +244,10 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     pack = build_context_pack(root)
     challenge = build_irg_challenge_context(root)
     handoff = _load_latest_handoff(root)
+    audit = _read_latest_audit(root)
     profile_name: str | None = getattr(args, "profile", None)
     profile, is_unknown = resolve_profile(profile_name)
-    prompt = build_bootstrap_prompt(pack, profile, handoff=handoff)
+    prompt = build_bootstrap_prompt(pack, profile, handoff=handoff, audit=audit)
 
     if args.json:
         print(

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 71H: Autonomy Audit Artifact Persistence.
+Phase 71I: Autonomy Audit Visibility in Handoff and Bootstrap.
 
 ## Milestone: Execution Chain Traceability Complete
 

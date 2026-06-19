@@ -1916,3 +1916,100 @@ def test_71d_compact_bootstrap_silent_when_no_queue(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Phase queue" not in output
+
+
+# ---------------------------------------------------------------------------
+# Autonomy audit visibility in bootstrap (Phase 71I)
+# ---------------------------------------------------------------------------
+
+
+def _write_audit_artifact(root: Path, audit: dict) -> None:
+    audit_dir = root / ".pcae" / "phase-audits"
+    audit_dir.mkdir(parents=True, exist_ok=True)
+    (audit_dir / "latest.json").write_text(
+        json.dumps(audit, indent=2, sort_keys=True), encoding="utf-8",
+    )
+
+
+def test_71i_compact_bootstrap_shows_audit_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T060000Z",
+        "phases_detected": 4,
+        "warnings": ["Phase 71X: missing completion commit"],
+        "healthy_idle": True,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Last audit:" in output
+    assert "4 phases" in output
+    assert "1 warnings" in output
+    assert "healthy idle" in output
+
+
+def test_71i_compact_bootstrap_clean_when_no_audit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Last audit:" not in output
+
+
+def test_71i_compact_bootstrap_audit_no_warnings(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T070000Z",
+        "phases_detected": 2,
+        "warnings": [],
+        "healthy_idle": False,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Last audit:" in output
+    assert "2 phases" in output
+    assert "0 warnings" in output
+    assert "healthy idle" not in output
+
+
+def test_71i_compact_bootstrap_json_includes_audit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T080000Z",
+        "phases_detected": 5,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "Last audit:" in data["bootstrap_prompt"]
