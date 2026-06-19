@@ -2335,8 +2335,72 @@ def _save_runner_simulation(root: HarnessPath, trace: dict) -> Path:
     return latest_path
 
 
+_RUNNER_SCENARIOS: dict[str, dict] = {
+    "dirty-tree": {
+        "simulated_condition": "Working tree has uncommitted changes",
+        "policy_category": "hard_stop",
+        "runner_would_continue": False,
+        "suggested_action": "Commit or stash changes before starting a phase.",
+    },
+    "active-task": {
+        "simulated_condition": "An active task contract exists",
+        "policy_category": "hard_stop",
+        "runner_would_continue": False,
+        "suggested_action": "Finish or close the active task before starting a new phase.",
+    },
+    "audit-warning": {
+        "simulated_condition": "Phase audit has warnings (e.g., missing commit pairs)",
+        "policy_category": "advisory_warning",
+        "runner_would_continue": True,
+        "suggested_action": "Investigate audit warnings. They may indicate incomplete phase commits.",
+    },
+    "git-lock": {
+        "simulated_condition": ".git/index.lock exists or permission denied",
+        "policy_category": "recoverable_stop",
+        "runner_would_continue": False,
+        "suggested_action": "Run pcae doctor git-lock for diagnosis and next steps.",
+    },
+    "queue-empty": {
+        "simulated_condition": "Phase queue is empty",
+        "policy_category": "continue_allowed",
+        "runner_would_continue": True,
+        "suggested_action": "Environment is ready. No queued phases to execute.",
+    },
+}
+
+
 def run_phase_runner_simulate(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
+    scenario_name: str | None = getattr(args, "scenario", None)
+
+    if scenario_name is not None:
+        if scenario_name not in _RUNNER_SCENARIOS:
+            available = ", ".join(sorted(_RUNNER_SCENARIOS.keys()))
+            print(f"Unknown scenario: {scenario_name}. Available: {available}")
+            return 1
+
+        scenario = _RUNNER_SCENARIOS[scenario_name]
+        result = {
+            "scenario": scenario_name,
+            **scenario,
+            "note": "Simulated failure only. No repository state was mutated.",
+        }
+
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+
+        print("Runner Simulation — Failure Scenario")
+        print("=" * 40)
+        print(f"  Scenario: {scenario_name}")
+        print(f"  Condition: {scenario['simulated_condition']}")
+        print(f"  Policy category: {scenario['policy_category']}")
+        print(f"  Runner would continue: {'yes' if scenario['runner_would_continue'] else 'NO'}")
+        print(f"  Suggested action: {scenario['suggested_action']}")
+        print()
+        print(f"  {result['note']}")
+        return 0
+
     count = min(max(getattr(args, "count", 3), 1), _SIM_FIXTURE_MAX)
     trace = _build_runner_simulation(root, count)
 

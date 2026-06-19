@@ -2,13 +2,13 @@
 
 ## Current Phase
 
-Phase 72D: Runner Simulation Trace Artifact.
+Phase 72E: Runner Simulation Failure Cases.
 
-Phase 72D adds `pcae phase runner-simulate`, `--json`, `--save`, and
-`--count N` for dry-run simulation traces. Combines readiness snapshot,
-planned phases (from simulated fixtures), stop conditions, and policy
-summary into a single trace. `--save` persists to
-`.pcae/runner-simulations/latest.json`. No execution performed.
+Phase 72E extends `pcae phase runner-simulate` with `--scenario` for
+failure case simulation using the 72B policy matrix. Supports 5 scenarios:
+`dirty-tree` (hard stop), `active-task` (hard stop), `git-lock`
+(recoverable stop), `audit-warning` (advisory warning), and `queue-empty`
+(continue allowed). No repository state is mutated. Simulated failure only.
 
 ## Milestone: Execution Chain Traceability Complete
 

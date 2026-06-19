@@ -4198,6 +4198,166 @@ def test_72d_runner_simulate_does_not_mutate_queue(
     assert data["queue_length"] == 0
 
 
+# Phase 72E — Runner Simulation Failure Cases
+# ---------------------------------------------------------------------------
+
+
+def test_72e_scenario_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--scenario", "dirty-tree", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["scenario"] == "dirty-tree"
+    assert data["policy_category"] == "hard_stop"
+    assert data["runner_would_continue"] is False
+
+
+def test_72e_scenario_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--scenario", "active-task", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["policy_category"] == "hard_stop"
+    assert data["runner_would_continue"] is False
+
+
+def test_72e_scenario_git_lock(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--scenario", "git-lock", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["policy_category"] == "recoverable_stop"
+    assert data["runner_would_continue"] is False
+    assert "doctor git-lock" in data["suggested_action"]
+
+
+def test_72e_scenario_audit_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--scenario", "audit-warning", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["policy_category"] == "advisory_warning"
+    assert data["runner_would_continue"] is True
+
+
+def test_72e_scenario_queue_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--scenario", "queue-empty", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["policy_category"] == "continue_allowed"
+    assert data["runner_would_continue"] is True
+
+
+def test_72e_scenario_unknown(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--scenario", "nonexistent"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Unknown scenario" in output
+
+
+def test_72e_scenario_does_not_mutate_repo(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    for scenario in ["dirty-tree", "active-task", "git-lock", "audit-warning", "queue-empty"]:
+        main(["phase", "runner-simulate", "--scenario", scenario, "--json"])
+        capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "list", "--json"])
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 0
+
+    lock_path = tmp_path / ".git" / "index.lock"
+    assert not lock_path.exists()
+
+
+def test_72e_scenario_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--scenario", "dirty-tree"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Failure Scenario" in output
+    assert "hard_stop" in output
+    assert "Runner would continue: NO" in output
+    assert "Simulated failure only" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

@@ -5051,6 +5051,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--count", type=int, default=3,
         help="Number of simulated entries (default: 3, max: 10).",
     )
+    phase_runner_simulate_parser.add_argument(
+        "--scenario",
+        default=None,
+        help="Simulate a specific failure scenario (dirty-tree, active-task, audit-warning, git-lock, queue-empty).",
+    )
     phase_runner_simulate_parser.set_defaults(handler=run_phase_runner_simulate)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
