@@ -2,13 +2,14 @@
 
 ## Current Phase
 
-Phase 71Q: Phase Prompt Queue Metadata Preservation.
+Phase 71Q.1: Partial Task Finish Recovery.
 
-Phase 71Q preserves source metadata for prompt-enqueued phase queue items while
-keeping existing string-only queue entries compatible. The phase queue remains
-planning-only: no prompt execution, task creation from prompts, queue
-execution, phase runner implementation, or lifecycle/push behavior change is
-introduced.
+Phase 71Q.1 adds a governed recovery path for partial
+`pcae task finish --commit` failures where the task closure transition already
+moved the task to `tasks/done/` and updated `tasks/DONE.md`, but the closure
+commit failed. Recovery is limited to committing the detected closure files and
+does not change normal task finish, push, task-memory doctor, prompt, queue, or
+execution-governance behavior.
 
 ## Milestone: Execution Chain Traceability Complete
 

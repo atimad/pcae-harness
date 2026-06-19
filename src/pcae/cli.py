@@ -443,6 +443,7 @@ from pcae.commands.task import (
     run_task_close,
     run_task_complete,
     run_task_finish,
+    run_task_finish_recover,
     run_task_list,
     run_task_new,
     run_task_pause,
@@ -4334,6 +4335,27 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="MESSAGE",
         help="Stage finish changes and create a git commit with the given message.",
     )
+    task_finish_subparsers = task_finish_parser.add_subparsers(dest="finish_command")
+    task_finish_recover_parser = task_finish_subparsers.add_parser(
+        "recover",
+        help="Recover a partial task finish closure after the closure commit failed.",
+    )
+    task_finish_recover_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Report the detected recovery plan without staging or committing.",
+    )
+    task_finish_recover_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    task_finish_recover_parser.add_argument(
+        "--message",
+        metavar="MESSAGE",
+        help="Commit message for the recovery commit.",
+    )
+    task_finish_recover_parser.set_defaults(handler=run_task_finish_recover)
     task_finish_parser.set_defaults(handler=run_task_finish)
 
     task_list_parser = task_subparsers.add_parser(

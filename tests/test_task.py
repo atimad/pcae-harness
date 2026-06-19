@@ -17,12 +17,14 @@ from pcae.core.session import read_session_snapshot, write_session_snapshot
 from pcae.core.status import check_project_status_coherence
 from pcae.core.tasks import (
     close_active_task_by_identifier,
+    close_active_task,
     close_latest_active_task,
     create_task_contract,
     find_latest_active_task,
     finish_active_task,
     read_task_summaries,
     slugify_title,
+    update_done_memory,
     validate_task_finish,
 )
 
@@ -2242,6 +2244,211 @@ def test_70e_task_finish_commit_dirty_tree_json(
     assert parsed["finished"] is False
     assert parsed["committed"] is False
     assert len(parsed["blockers"]) > 0
+
+
+# --- Phase 71Q.1: pcae task finish recover ---
+
+
+def make_partial_finish_state(
+    tmp_path: Path,
+    title: str = "Recovery target task",
+    created_at: datetime = datetime(2026, 6, 19, 14, 0, tzinfo=timezone.utc),
+) -> str:
+    root = HarnessPath(tmp_path)
+    init_git_repo(tmp_path)
+    init_harness(root)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(root, title, created_at=created_at)
+    write_session_snapshot(root)
+    commit_all(tmp_path, "init")
+    active = find_latest_active_task(root)
+    assert active is not None
+    completed = close_active_task(active)
+    update_done_memory(root, completed)
+    return completed.task_id
+
+
+def changed_paths_for_head(tmp_path: Path) -> set[str]:
+    result = subprocess.run(
+        ["git", "diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return {line.strip() for line in result.stdout.splitlines() if line.strip()}
+
+
+def test_71q1_task_finish_recover_dry_run(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    task_id = make_partial_finish_state(tmp_path)
+    before = subprocess.run(
+        ["git", "status", "--porcelain=v1"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "recover", "--dry-run"])
+
+    output = capsys.readouterr().out
+    after = subprocess.run(
+        ["git", "status", "--porcelain=v1"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout
+    assert exit_code == 0
+    assert "Task finish recovery dry-run." in output
+    assert task_id in output
+    assert "tasks/DONE.md" in output
+    assert before == after
+
+
+def test_71q1_task_finish_recover_json_dry_run(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    task_id = make_partial_finish_state(tmp_path, title="JSON recovery task")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "recover", "--dry-run", "--json"])
+
+    parsed = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert parsed["dry_run"] is True
+    assert parsed["recoverable"] is True
+    assert parsed["recovered"] is False
+    assert parsed["detected_task_id"] == task_id
+    assert parsed["commit_message"] == "Complete JSON recovery task"
+    assert "tasks/DONE.md" in parsed["closure_files"]
+
+
+def test_71q1_task_finish_recover_commits_only_closure_files(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    task_id = make_partial_finish_state(tmp_path, title="Commit recovery task")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "task", "finish", "recover",
+        "--message", "Complete recovery closure",
+    ])
+
+    output = capsys.readouterr().out
+    status = subprocess.run(
+        ["git", "status", "--porcelain=v1"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    log = subprocess.run(
+        ["git", "log", "--oneline", "-1"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert exit_code == 0
+    assert f"Recovered task finish: {task_id}" in output
+    assert status.stdout.strip() == ""
+    assert "Complete recovery closure" in log.stdout
+    assert changed_paths_for_head(tmp_path) == {
+        "tasks/DONE.md",
+        f"tasks/active/{task_id}.md",
+        f"tasks/done/{task_id}.md",
+    }
+
+
+def test_71q1_task_finish_recover_default_message(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    make_partial_finish_state(tmp_path, title="Default message task")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "recover", "--json"])
+
+    parsed = json.loads(capsys.readouterr().out)
+    log = subprocess.run(
+        ["git", "log", "--oneline", "-1"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert exit_code == 0
+    assert parsed["recovered"] is True
+    assert parsed["commit_message"] == "Complete Default message task"
+    assert "Complete Default message task" in log.stdout
+
+
+def test_71q1_task_finish_recover_refuses_unrelated_dirty_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    make_partial_finish_state(tmp_path)
+    (tmp_path / "unrelated.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "recover", "--json"])
+
+    parsed = json.loads(capsys.readouterr().out)
+    log = subprocess.run(
+        ["git", "log", "--oneline", "-1"],
+        cwd=tmp_path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    assert exit_code == 1
+    assert parsed["recoverable"] is False
+    assert parsed["recovered"] is False
+    assert "non-closure files" in parsed["refusal_reason"]
+    assert "init" in log.stdout
+
+
+def test_71q1_task_finish_recover_refuses_ambiguous_transitions(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_git_repo(tmp_path)
+    init_harness(root)
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        root,
+        "First ambiguous task",
+        created_at=datetime(2026, 6, 19, 14, 0, tzinfo=timezone.utc),
+    )
+    create_task_contract(
+        root,
+        "Second ambiguous task",
+        created_at=datetime(2026, 6, 19, 14, 1, tzinfo=timezone.utc),
+    )
+    commit_all(tmp_path, "init")
+    for active_file in sorted((tmp_path / "tasks" / "active").glob("*.md")):
+        completed = close_active_task(read_active_task_for_test(active_file))
+        update_done_memory(root, completed)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["task", "finish", "recover", "--json"])
+
+    parsed = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert parsed["recoverable"] is False
+    assert "ambiguous" in parsed["refusal_reason"]
+
+
+def read_active_task_for_test(path: Path):
+    from pcae.core.tasks import read_active_task
+
+    return read_active_task(path)
 
 
 # --- Phase 70I: pcae doctor task-memory --fix ---

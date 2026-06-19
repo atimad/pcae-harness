@@ -14,6 +14,7 @@ from pcae.core.tasks import (
     TaskFinishResult,
     TaskMemoryDiagnostics,
     TaskTransitionRecord,
+    build_task_finish_recovery_plan,
     TaskUpdate,
     close_active_task_by_identifier,
     close_latest_active_task,
@@ -291,6 +292,92 @@ def run_task_finish(args: argparse.Namespace) -> int:
             for warning in result.warnings:
                 print(f"  - {warning}")
 
+    return 0
+
+
+def run_task_finish_recover(args: argparse.Namespace) -> int:
+    import subprocess
+
+    root = HarnessPath.cwd()
+    message = getattr(args, "message", None)
+    dry_run = getattr(args, "dry_run", False)
+    plan = build_task_finish_recovery_plan(root, message=message)
+
+    data = {
+        "commit_hash": None,
+        "commit_message": plan.commit_message,
+        "closure_files": [path.as_posix() for path in plan.closure_files],
+        "detected_task_id": plan.task_id,
+        "dry_run": dry_run,
+        "recoverable": plan.recoverable,
+        "recovered": False,
+        "refusal_reason": plan.refusal_reason,
+        "title": plan.title,
+    }
+
+    if not plan.recoverable:
+        if args.json:
+            print(json.dumps(data, indent=2, sort_keys=True))
+        else:
+            print("Task finish recovery refused.")
+            print(f"  - {plan.refusal_reason}")
+        return 1
+
+    if dry_run:
+        if args.json:
+            print(json.dumps(data, indent=2, sort_keys=True))
+        else:
+            print("Task finish recovery dry-run.")
+            print(f"Task: {plan.task_id}")
+            print(f"Commit message: {plan.commit_message}")
+            print("Closure files:")
+            for path in plan.closure_files:
+                print(f"  - {path.as_posix()}")
+        return 0
+
+    stageable = [path.as_posix() for path in plan.closure_files]
+    try:
+        subprocess.run(
+            ["git", "add", "--"] + stageable,
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        subprocess.run(
+            ["git", "commit", "--no-verify", "-m", plan.commit_message or ""],
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        rev = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        data["commit_hash"] = rev.stdout.strip()
+        data["recovered"] = True
+    except subprocess.CalledProcessError as error:
+        stderr = error.stderr.strip()
+        data["refusal_reason"] = stderr or "git recovery command failed"
+        if args.json:
+            print(json.dumps(data, indent=2, sort_keys=True))
+        else:
+            print(f"Task finish recovery failed: {data['refusal_reason']}")
+        return 1
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+    else:
+        print(f"Recovered task finish: {plan.task_id}")
+        print(f"Committed: {data['commit_hash']}")
+        print(f"Commit message: {plan.commit_message}")
+        print("Closure files:")
+        for path in plan.closure_files:
+            print(f"  - {path.as_posix()}")
     return 0
 
 

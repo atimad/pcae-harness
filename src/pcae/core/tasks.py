@@ -110,6 +110,16 @@ class TaskFinishResult:
 
 
 @dataclass(frozen=True)
+class TaskFinishRecoveryPlan:
+    recoverable: bool
+    task_id: str | None
+    title: str | None
+    closure_files: tuple[Path, ...]
+    commit_message: str | None
+    refusal_reason: str | None
+
+
+@dataclass(frozen=True)
 class TaskTransitionRecord:
     completed_task: ClosedTask
     next_task: TaskContract
@@ -375,6 +385,159 @@ def finish_active_task(root: HarnessPath, skip_checks: bool = False) -> TaskFini
         warnings=validation.warnings,
         acceptance_results=validation.acceptance_results,
     )
+
+
+def build_task_finish_recovery_plan(
+    root: HarnessPath,
+    message: str | None = None,
+) -> TaskFinishRecoveryPlan:
+    import subprocess
+
+    if find_latest_active_task(root) is not None:
+        return TaskFinishRecoveryPlan(
+            recoverable=False,
+            task_id=None,
+            title=None,
+            closure_files=(),
+            commit_message=message,
+            refusal_reason="active task exists; recovery is only for already-moved task finish state",
+        )
+
+    status = subprocess.run(
+        ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+        cwd=root.path,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    entries = _parse_git_porcelain_status(status.stdout)
+    if not entries:
+        return TaskFinishRecoveryPlan(
+            recoverable=False,
+            task_id=None,
+            title=None,
+            closure_files=(),
+            commit_message=message,
+            refusal_reason="working tree is clean; no partial task finish closure detected",
+        )
+
+    done_modified = any(
+        path == DONE_RELATIVE_PATH and _status_has_modification(code)
+        for code, path in entries
+    )
+    deleted_active = sorted(
+        path for code, path in entries
+        if path.parts[:2] == ("tasks", "active")
+        and path.suffix == ".md"
+        and _status_has_deletion(code)
+    )
+    added_done = sorted(
+        path for code, path in entries
+        if path.parts[:2] == ("tasks", "done")
+        and path.suffix == ".md"
+        and _status_has_addition(code)
+    )
+
+    expected_paths = {DONE_RELATIVE_PATH, *deleted_active, *added_done}
+    unrelated = [path for _, path in entries if path not in expected_paths]
+    if unrelated:
+        return TaskFinishRecoveryPlan(
+            recoverable=False,
+            task_id=None,
+            title=None,
+            closure_files=tuple(sorted(expected_paths)),
+            commit_message=message,
+            refusal_reason=(
+                "dirty tree contains non-closure files: "
+                + ", ".join(path.as_posix() for path in unrelated)
+            ),
+        )
+
+    if not done_modified:
+        return TaskFinishRecoveryPlan(
+            recoverable=False,
+            task_id=None,
+            title=None,
+            closure_files=tuple(sorted(expected_paths)),
+            commit_message=message,
+            refusal_reason="tasks/DONE.md is not modified",
+        )
+    if len(deleted_active) != 1 or len(added_done) != 1:
+        return TaskFinishRecoveryPlan(
+            recoverable=False,
+            task_id=None,
+            title=None,
+            closure_files=tuple(sorted(expected_paths)),
+            commit_message=message,
+            refusal_reason="ambiguous task closure transition",
+        )
+    if deleted_active[0].name != added_done[0].name:
+        return TaskFinishRecoveryPlan(
+            recoverable=False,
+            task_id=None,
+            title=None,
+            closure_files=tuple(sorted(expected_paths)),
+            commit_message=message,
+            refusal_reason="active and done task filenames do not match",
+        )
+
+    done_path = root.join(added_done[0])
+    title: str | None = None
+    task_id = added_done[0].stem
+    if done_path.is_file():
+        summary = read_task_summary(done_path, "done")
+        title = summary.title
+        task_id = summary.task_id
+
+    commit_message = message
+    if commit_message is None and title:
+        commit_message = f"Complete {title}"
+    if commit_message is None:
+        return TaskFinishRecoveryPlan(
+            recoverable=False,
+            task_id=task_id,
+            title=title,
+            closure_files=(DONE_RELATIVE_PATH, deleted_active[0], added_done[0]),
+            commit_message=None,
+            refusal_reason="commit message is required because task title could not be read",
+        )
+
+    return TaskFinishRecoveryPlan(
+        recoverable=True,
+        task_id=task_id,
+        title=title,
+        closure_files=(DONE_RELATIVE_PATH, deleted_active[0], added_done[0]),
+        commit_message=commit_message,
+        refusal_reason=None,
+    )
+
+
+def _parse_git_porcelain_status(output: str) -> tuple[tuple[str, Path], ...]:
+    entries: list[tuple[str, Path]] = []
+    for line in output.splitlines():
+        if not line:
+            continue
+        code = line[:2]
+        raw_path = line[3:]
+        if " -> " in raw_path:
+            old_path, new_path = raw_path.split(" -> ", 1)
+            entries.append((" D", Path(old_path)))
+            entries.append(("A ", Path(new_path)))
+            continue
+        entries.append((code, Path(raw_path)))
+    return tuple(entries)
+
+
+def _status_has_modification(code: str) -> bool:
+    return any(ch in {"M", "A"} for ch in code)
+
+
+def _status_has_deletion(code: str) -> bool:
+    return "D" in code
+
+
+def _status_has_addition(code: str) -> bool:
+    return "A" in code or code == "??"
 
 
 def update_todo_memory_for_finish(root: HarnessPath, finished_title: str) -> bool:
