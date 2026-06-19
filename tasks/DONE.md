@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 72E: Runner Simulation Failure Cases (20260619-1922-phase-72e-runner-simulation-failure-cases)
 - Phase 72D: Runner Simulation Trace Artifact (20260619-1917-phase-72d-runner-simulation-trace-artifact)
 - Phase 72C: Runner Simulation Fixture Queue (20260619-1913-phase-72c-runner-simulation-fixture-queue)
 - Phase 72B: Runner Stop-Condition Policy Matrix (20260619-1845-phase-72b-runner-stop-condition-policy-matrix)
