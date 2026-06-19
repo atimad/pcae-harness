@@ -2,13 +2,13 @@
 
 ## Current Phase
 
-Phase 72C: Runner Simulation Fixture Queue.
+Phase 72D: Runner Simulation Trace Artifact.
 
-Phase 72C adds `pcae phase runner-sim-fixture`, `--json`, and `--count N`
-for generating deterministic simulated queue entries (SIM-001 through
-SIM-010) for runner planning tests. Entries are in-memory only; the real
-phase queue is never mutated. No queue execution, prompt execution, or
-task creation.
+Phase 72D adds `pcae phase runner-simulate`, `--json`, `--save`, and
+`--count N` for dry-run simulation traces. Combines readiness snapshot,
+planned phases (from simulated fixtures), stop conditions, and policy
+summary into a single trace. `--save` persists to
+`.pcae/runner-simulations/latest.json`. No execution performed.
 
 ## Milestone: Execution Chain Traceability Complete
 

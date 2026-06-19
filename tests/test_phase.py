@@ -4086,6 +4086,118 @@ def test_72c_sim_fixture_human_output(
     assert "Real queue mutated: no" in output
 
 
+# Phase 72D — Runner Simulation Trace Artifact
+# ---------------------------------------------------------------------------
+
+
+def test_72d_runner_simulate_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["would_execute"] is False
+    assert data["mutation_performed"] is False
+    assert len(data["simulated_entries"]) == 3
+    assert "readiness" in data
+    assert "policy_summary" in data
+    assert "stop_conditions_considered" in data
+    assert data["readiness"]["environment_ready"] is True
+    assert len(data["planned_phases"]) == 3
+
+
+def test_72d_runner_simulate_save(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--save"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "saved" in output.lower()
+
+    latest = tmp_path / ".pcae" / "runner-simulations" / "latest.json"
+    assert latest.exists()
+    data = _json.loads(latest.read_text(encoding="utf-8"))
+    assert "created_at" in data
+    assert data["would_execute"] is False
+
+
+def test_72d_runner_simulate_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["readiness"]["environment_ready"] is False
+    assert data["planned_phases"] == []
+    assert data["first_planned_phase"] is None
+
+
+def test_72d_runner_simulate_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-simulate"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "dry-run" in output.lower()
+    assert "Would execute: no" in output
+    assert "Mutation performed: no" in output
+
+
+def test_72d_runner_simulate_does_not_mutate_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--json"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "list", "--json"])
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 0
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

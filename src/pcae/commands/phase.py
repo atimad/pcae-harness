@@ -2288,3 +2288,87 @@ def run_phase_runner_sim_fixture(args: argparse.Namespace) -> int:
     print(f"  Real queue mutated: no")
     print(f"  Note: {result['note']}")
     return 0
+
+
+RUNNER_SIMULATIONS_DIR = Path(".pcae") / "runner-simulations"
+
+
+def _build_runner_simulation(root: HarnessPath, count: int) -> dict:
+    readiness = _build_runner_readiness(root)
+    sim_entries = _build_sim_fixture(count)
+
+    planned = sim_entries[:min(count, _RUNNER_MAX_PHASES_LIMIT)] if readiness["environment_ready"] else []
+
+    return {
+        "would_execute": False,
+        "mutation_performed": False,
+        "simulated_entries": sim_entries,
+        "readiness": readiness,
+        "planned_phases": planned,
+        "first_planned_phase": planned[0]["title"] if planned else None,
+        "max_phases": min(count, _RUNNER_MAX_PHASES_LIMIT),
+        "stop_conditions_considered": list(_RUNNER_STOP_CONDITIONS),
+        "policy_summary": {
+            "hard_stop_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "hard_stop"]),
+            "recoverable_stop_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "recoverable_stop"]),
+            "advisory_warning_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "advisory_warning"]),
+            "continue_allowed_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "continue_allowed"]),
+            "human_authority_note": _RUNNER_POLICY_NOTE,
+        },
+        "note": "No execution performed. This is a dry-run simulation only.",
+    }
+
+
+def _save_runner_simulation(root: HarnessPath, trace: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    trace_with_ts = {**trace, "created_at": ts}
+    sim_dir = root.join(RUNNER_SIMULATIONS_DIR)
+    sim_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = sim_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = sim_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(trace_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_simulate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    count = min(max(getattr(args, "count", 3), 1), _SIM_FIXTURE_MAX)
+    trace = _build_runner_simulation(root, count)
+
+    if getattr(args, "save", False):
+        saved_path = _save_runner_simulation(root, trace)
+        if not args.json:
+            print(f"Simulation trace saved: {saved_path}")
+
+    if args.json:
+        print(json.dumps(trace, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Simulation Trace (dry-run)")
+    print("=" * 40)
+    print(f"  Would execute: no")
+    print(f"  Mutation performed: no")
+    print(f"  Simulated entries: {len(trace['simulated_entries'])}")
+    print(f"  Environment ready: {'yes' if trace['readiness']['environment_ready'] else 'NO'}")
+    print(f"  Planned phases: {len(trace['planned_phases'])}")
+    if trace["first_planned_phase"]:
+        print(f"  First planned: {trace['first_planned_phase']}")
+
+    if trace["readiness"]["blocking_reasons"]:
+        print()
+        print("  Blockers:")
+        for b in trace["readiness"]["blocking_reasons"]:
+            print(f"    - {b}")
+
+    print()
+    print(f"  Stop conditions: {len(trace['stop_conditions_considered'])}")
+    ps = trace["policy_summary"]
+    print(f"  Policy: {ps['hard_stop_count']} hard, {ps['recoverable_stop_count']} recoverable, {ps['advisory_warning_count']} advisory, {ps['continue_allowed_count']} continue")
+    print()
+    print(f"  {trace['note']}")
+    return 0
