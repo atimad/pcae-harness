@@ -322,3 +322,145 @@ The external-agent-driven model preserves PCAE's role as a governance harness. T
 - No retry on failure — failed phases require human investigation.
 - No branch/remote management — uses current branch.
 - No prompt generation — phase descriptions are human-authored in the queue.
+
+## Governed Phase Queue Runner Design (Phase 71F)
+
+### Problem
+
+Phase 70Z proposed a governed multi-phase runner. Phases 71C–71E implemented the supporting infrastructure: `pcae phase audit` (batch audit reports from commit history), phase queue visibility in handoff and bootstrap, and `pcae phase queue check` (readiness validation). This design refines the 70Z proposal into a concrete, implementable specification.
+
+### Why Direct Unattended Execution is Risky
+
+All risks from the 70Z design remain:
+
+1. **Cascading failures**: a broken phase poisons all subsequent phases before detection.
+2. **Scope drift**: without per-phase review, implementation can silently expand beyond the spec.
+3. **Silent state corruption**: governance artifacts become inconsistent if a phase fails mid-mutation.
+4. **Ungoverned mutations**: commit, push, and task-finish are root mutations — unattended execution removes the human gate.
+5. **Test blindness**: passing tests do not guarantee the correct feature was built.
+6. **Review bypass**: lifecycle review enforcement exists to gate push readiness — autonomous execution must not bypass it.
+
+The governed runner addresses these by enforcing mandatory stop conditions between every phase, producing audit artifacts for every attempt, and never skipping a governance gate.
+
+### Proposed Command Shape
+
+```
+pcae phase queue run [--max-phases N] [--stop-on-warning] [--dry-run] [--json]
+```
+
+- `--max-phases N`: execute at most N phases from the queue (default: 1).
+- `--stop-on-warning`: also stop on warnings, not just errors.
+- `--dry-run`: run `pcae phase queue check` and report what would execute without running anything.
+- Default behavior: execute one phase, validate all gates, stop.
+
+### Governed One-Phase-at-a-Time Execution
+
+Each phase iteration follows this exact sequence:
+
+1. Run `pcae phase queue check`. If not ready, halt before any work.
+2. Pop the next entry from `.pcae/phase-queue.json`.
+3. Create task contract via `pcae task new`.
+4. Agent implements the phase (external agent only — PCAE does not drive implementation).
+5. Run targeted tests for the phase scope.
+6. Run `python -m pytest -n auto` (full test suite).
+7. Run `pcae health`.
+8. Run `pcae check`.
+9. Run `pcae doctor task-memory`.
+10. Run `pcae push check`.
+11. Commit implementation.
+12. Run `pcae task finish --commit "Complete Phase <id> <description>"`.
+13. Run `pcae push`.
+14. Verify clean healthy idle state: `pcae health` shows `healthy (idle)`, `git status` is clean, no active task.
+15. Record audit artifact.
+16. If `--max-phases` not reached and queue is non-empty, loop to step 1.
+
+### Mandatory Stop Conditions
+
+| Condition | Severity | Action |
+|-----------|----------|--------|
+| `pcae phase queue check` not ready | error | halt before phase |
+| Test failure (`pytest` exit != 0) | error | halt immediately |
+| `pcae health` unhealthy | error | halt immediately |
+| `pcae check` failed | error | halt immediately |
+| Dirty working tree after commit | error | halt immediately |
+| `pcae push check` blocked | error | halt immediately |
+| Lifecycle review required but not approved | error | halt immediately |
+| `pcae doctor task-memory` has errors | error | halt immediately |
+| Files changed outside task scope | error | halt immediately |
+| `pcae push` fails | error | halt immediately |
+| No clean healthy idle after phase | error | halt immediately |
+| `pcae doctor task-memory` has warnings | warning | halt if `--stop-on-warning` |
+| Unexpected untracked files | warning | halt if `--stop-on-warning` |
+| Ambiguity in phase description | error | halt immediately |
+| Command behavior differs from assumptions | error | halt immediately |
+
+### Queue-Run Audit Artifact
+
+Each queue-run attempt produces an audit artifact at `.pcae/phase-runs/<run-id>.json`:
+
+```json
+{
+  "run_id": "run-20260619T060000",
+  "started_at": "2026-06-19T06:00:00+00:00",
+  "completed_at": "2026-06-19T06:30:00+00:00",
+  "max_phases": 4,
+  "phases_attempted": 4,
+  "phases_completed": 4,
+  "phases_failed": 0,
+  "status": "completed",
+  "stop_reason": null,
+  "phases": [
+    {
+      "phase_description": "Phase 71C: Autonomy Batch Audit Report",
+      "status": "completed",
+      "task_id": "20260619-0600-phase-71c-...",
+      "implementation_commit": "abc123",
+      "completion_commit": "def456",
+      "push_result": "success",
+      "health_passed": true,
+      "check_passed": true,
+      "tests_passed": true,
+      "test_count": 5942,
+      "doctor_clean": true,
+      "duration_seconds": 420
+    }
+  ],
+  "final_state": {
+    "health": "healthy (idle)",
+    "working_tree": "clean",
+    "active_task": null,
+    "unpushed_commits": 0
+  }
+}
+```
+
+### External-Agent-Driven vs PCAE-Native
+
+The runner must be **external-agent-driven**:
+
+- **External-agent-driven**: an AI agent reads the queue, implements each phase, and calls PCAE governance commands. PCAE validates but does not drive implementation. The agent is the executor; PCAE is the governance layer. This is the model used in the 70W–71B autonomy experiment and the 71C–71F batch.
+- **PCAE-native**: PCAE itself drives implementation by invoking an agent runtime. This couples execution to governance, violates separation of concerns, and requires PCAE to manage agent sessions, prompts, and context windows.
+
+The external-agent-driven model preserves PCAE's role as a governance harness. The `pcae phase queue run` command would validate the governance loop (check readiness, verify post-phase state, record audit) while delegating implementation entirely to the agent.
+
+### How It Uses Existing Lifecycle Commands
+
+The runner orchestrates these existing commands in sequence:
+
+- `pcae phase queue check` — pre-flight readiness (Phase 71E)
+- `pcae task new` — create task contract
+- `pcae health` / `pcae check` / `pcae doctor task-memory` — governance validation
+- `pcae task finish --commit` — task lifecycle closure
+- `pcae push` / `pcae push check` — push governance
+- `pcae phase audit` — post-run batch audit (Phase 71C)
+- `pcae phase handoff` — session handoff
+
+### What This Design Does NOT Include
+
+- No implementation in Phase 71F — design only.
+- No automatic review approval — lifecycle review still requires explicit human action.
+- No parallel phase execution — one phase at a time.
+- No retry on failure — failed phases require human investigation.
+- No branch/remote management — uses current branch.
+- No prompt generation — phase descriptions are human-authored in the queue.
+- No PCAE-native agent invocation — the agent drives implementation, not PCAE.
