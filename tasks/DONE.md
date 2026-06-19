@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 72F: Runner Simulation Review Artifact (20260619-2011-phase-72f-runner-simulation-review-artifact)
 - Phase 72E: Runner Simulation Failure Cases (20260619-1922-phase-72e-runner-simulation-failure-cases)
 - Phase 72D: Runner Simulation Trace Artifact (20260619-1917-phase-72d-runner-simulation-trace-artifact)
 - Phase 72C: Runner Simulation Fixture Queue (20260619-1913-phase-72c-runner-simulation-fixture-queue)
