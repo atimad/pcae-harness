@@ -411,6 +411,7 @@ from pcae.commands.session import (
     run_session_write,
 )
 from pcae.commands.phase import (
+    run_phase_audit,
     run_phase_complete,
     run_phase_handoff,
     run_phase_handoff_prune,
@@ -4720,6 +4721,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_queue_clear_parser.set_defaults(handler=run_phase_queue_clear)
+
+    phase_audit_parser = phase_subparsers.add_parser(
+        "audit",
+        help="Generate a read-only audit report for recent phase batches.",
+    )
+    phase_audit_parser.add_argument(
+        "--last",
+        type=int,
+        default=8,
+        help="Number of most recent phases to include (default: 8).",
+    )
+    phase_audit_parser.add_argument(
+        "--since",
+        default=None,
+        metavar="PHASE_ID",
+        help="Include phases with ID >= PHASE_ID.",
+    )
+    phase_audit_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON audit report.",
+    )
+    phase_audit_parser.set_defaults(handler=run_phase_audit)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -730,5 +732,194 @@ def run_phase_start(args: argparse.Namespace) -> int:
         print(f"Latest event: {timeline.latest_event.summary}")
     else:
         print("Latest event: none")
+
+    return 0
+
+
+_PHASE_COMMIT_RE = re.compile(
+    r"^(Implement|Complete) Phase (\S+)\s+(.+)$"
+)
+
+
+def _git_log_lines(root: HarnessPath, last: int) -> list[str]:
+    try:
+        result = subprocess.run(
+            ["git", "log", f"--max-count={last * 4}", "--format=%H %s"],
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+    except (subprocess.CalledProcessError, OSError):
+        return []
+
+
+def _detect_phase_commits(
+    log_lines: list[str], last: int, since: str | None
+) -> list[dict]:
+    impl_map: dict[str, dict] = {}
+    comp_map: dict[str, dict] = {}
+
+    for line in log_lines:
+        parts = line.split(" ", 1)
+        if len(parts) != 2:
+            continue
+        commit_hash, subject = parts
+        m = _PHASE_COMMIT_RE.match(subject)
+        if not m:
+            continue
+        kind, phase_id, description = m.group(1), m.group(2), m.group(3)
+        entry = {
+            "commit": commit_hash[:12],
+            "phase_id": phase_id,
+            "description": description,
+            "subject": subject,
+        }
+        if kind == "Implement":
+            impl_map.setdefault(phase_id, entry)
+        else:
+            comp_map.setdefault(phase_id, entry)
+
+    all_phase_ids = list(dict.fromkeys(
+        list(comp_map.keys()) + list(impl_map.keys())
+    ))
+
+    if since:
+        all_phase_ids = [p for p in all_phase_ids if p >= since]
+
+    if last > 0:
+        all_phase_ids = all_phase_ids[:last]
+
+    phases: list[dict] = []
+    for phase_id in all_phase_ids:
+        impl = impl_map.get(phase_id)
+        comp = comp_map.get(phase_id)
+        phases.append({
+            "phase_id": phase_id,
+            "description": (comp or impl or {}).get("description", ""),
+            "implementation_commit": impl["commit"] if impl else None,
+            "completion_commit": comp["commit"] if comp else None,
+            "commit_pair_complete": impl is not None and comp is not None,
+        })
+
+    return phases
+
+
+def _build_audit_report(root: HarnessPath, last: int, since: str | None) -> dict:
+    from pcae.core.git_status import read_git_branch, read_git_changes
+    from pcae.core.health import build_health_data, is_healthy
+    from pcae.core.tasks import diagnose_task_memory
+
+    from pcae.commands.push import assess_push_readiness
+
+    log_lines = _git_log_lines(root, max(last, 20))
+    phases = _detect_phase_commits(log_lines, last, since)
+
+    health_data = build_health_data(root)
+    healthy = is_healthy(health_data)
+    check_result = run_checks(root)
+    diagnostics = diagnose_task_memory(root)
+    push = assess_push_readiness(root)
+    branch = read_git_branch(root)
+    changes = read_git_changes(root)
+    active_task = find_latest_active_task(root)
+
+    handoff_path = root.join(HANDOFFS_DIR / "latest.json")
+    handoff_summary: str | None = None
+    if handoff_path.is_file():
+        try:
+            handoff_data = json.loads(handoff_path.read_text(encoding="utf-8"))
+            handoff_summary = handoff_data.get("summary")
+        except (json.JSONDecodeError, OSError):
+            pass
+
+    warnings: list[str] = []
+    for phase in phases:
+        if not phase["commit_pair_complete"]:
+            missing = []
+            if phase["implementation_commit"] is None:
+                missing.append("implementation")
+            if phase["completion_commit"] is None:
+                missing.append("completion")
+            warnings.append(
+                f"Phase {phase['phase_id']}: missing {', '.join(missing)} commit"
+            )
+
+    healthy_idle = healthy and not active_task and not changes
+
+    return {
+        "phases_detected": len(phases),
+        "phases": phases,
+        "health_status": "healthy" if healthy else "unhealthy",
+        "check_passed": check_result.passed,
+        "task_memory_status": (
+            "clean" if not diagnostics.has_errors and not diagnostics.has_warnings
+            else "errors" if diagnostics.has_errors else "warnings"
+        ),
+        "push_mode": push.mode,
+        "push_ready": push.ready,
+        "branch": branch,
+        "working_tree": "clean" if not changes else f"{len(changes)} changed",
+        "active_task": active_task.task_id if active_task else None,
+        "latest_handoff_summary": handoff_summary,
+        "healthy_idle": healthy_idle,
+        "warnings": warnings,
+    }
+
+
+def run_phase_audit(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    last: int = args.last
+    since: str | None = args.since
+
+    report = _build_audit_report(root, last, since)
+
+    if args.json:
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0
+
+    print("Phase Audit Report")
+    print("=" * 40)
+    print(f"Phases detected: {report['phases_detected']}")
+    print()
+
+    if report["phases"]:
+        for phase in report["phases"]:
+            status = "complete" if phase["commit_pair_complete"] else "INCOMPLETE"
+            print(f"  {phase['phase_id']}: {phase['description']} [{status}]")
+            if phase["implementation_commit"]:
+                print(f"    implementation: {phase['implementation_commit']}")
+            else:
+                print("    implementation: MISSING")
+            if phase["completion_commit"]:
+                print(f"    completion:     {phase['completion_commit']}")
+            else:
+                print("    completion:     MISSING")
+    else:
+        print("  No phase commits found.")
+
+    print()
+    print("Current State")
+    print("-" * 40)
+    print(f"  Branch: {report['branch']}")
+    print(f"  Working tree: {report['working_tree']}")
+    print(f"  Active task: {report['active_task'] or 'none'}")
+    print(f"  Health: {report['health_status']}")
+    print(f"  Check: {'passed' if report['check_passed'] else 'failed'}")
+    print(f"  Task memory: {report['task_memory_status']}")
+    print(f"  Push: {'ready' if report['push_ready'] else 'not ready'} ({report['push_mode']})")
+    print(f"  Healthy idle: {'yes' if report['healthy_idle'] else 'no'}")
+
+    if report["latest_handoff_summary"]:
+        print()
+        print(f"  Latest handoff: {report['latest_handoff_summary']}")
+
+    if report["warnings"]:
+        print()
+        print("Warnings")
+        print("-" * 40)
+        for w in report["warnings"]:
+            print(f"  - {w}")
 
     return 0

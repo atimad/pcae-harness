@@ -2235,6 +2235,247 @@ def test_70x_prune_dry_run_json(
 
 
 # ---------------------------------------------------------------------------
+# pcae phase audit (Phase 71C)
+# ---------------------------------------------------------------------------
+
+
+def _create_phase_commits(root: Path, phase_id: str, description: str) -> None:
+    dummy = root / "dummy.txt"
+    dummy.write_text(f"impl {phase_id}", encoding="utf-8")
+    run_git(root, "add", "dummy.txt")
+    run_git(root, "commit", "-m", f"Implement Phase {phase_id} {description}")
+    dummy.write_text(f"comp {phase_id}", encoding="utf-8")
+    run_git(root, "add", "dummy.txt")
+    run_git(root, "commit", "-m", f"Complete Phase {phase_id} {description}")
+
+
+def test_71c_audit_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_commits(tmp_path, "70A", "test feature alpha")
+    _create_phase_commits(tmp_path, "70B", "test feature beta")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase Audit Report" in output
+    assert "70A" in output
+    assert "70B" in output
+    assert "test feature alpha" in output
+    assert "test feature beta" in output
+    assert "complete" in output.lower()
+    assert "Current State" in output
+
+
+def test_71c_audit_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_commits(tmp_path, "70A", "test feature alpha")
+    _create_phase_commits(tmp_path, "70B", "test feature beta")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["phases_detected"] == 2
+    assert isinstance(data["phases"], list)
+    assert data["health_status"] in ("healthy", "unhealthy")
+    assert "check_passed" in data
+    assert "push_mode" in data
+    assert "healthy_idle" in data
+    assert "warnings" in data
+
+
+def test_71c_audit_commit_pair_detection(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_commits(tmp_path, "70A", "test feature alpha")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase = data["phases"][0]
+    assert phase["phase_id"] == "70A"
+    assert phase["implementation_commit"] is not None
+    assert phase["completion_commit"] is not None
+    assert phase["commit_pair_complete"] is True
+
+
+def test_71c_audit_missing_pair_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    dummy = tmp_path / "dummy.txt"
+    dummy.write_text("impl only", encoding="utf-8")
+    run_git(tmp_path, "add", "dummy.txt")
+    run_git(tmp_path, "commit", "-m", "Implement Phase 70X test incomplete")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase = data["phases"][0]
+    assert phase["phase_id"] == "70X"
+    assert phase["implementation_commit"] is not None
+    assert phase["completion_commit"] is None
+    assert phase["commit_pair_complete"] is False
+    assert any("70X" in w and "completion" in w for w in data["warnings"])
+
+
+def test_71c_audit_missing_pair_human_warning(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    dummy = tmp_path / "dummy.txt"
+    dummy.write_text("impl only", encoding="utf-8")
+    run_git(tmp_path, "add", "dummy.txt")
+    run_git(tmp_path, "commit", "-m", "Implement Phase 70X test incomplete")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "INCOMPLETE" in output
+    assert "MISSING" in output
+    assert "Warnings" in output
+
+
+def test_71c_audit_last_flag(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_commits(tmp_path, "70A", "alpha")
+    _create_phase_commits(tmp_path, "70B", "beta")
+    _create_phase_commits(tmp_path, "70C", "gamma")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "2", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["phases_detected"] == 2
+
+
+def test_71c_audit_since_flag(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_commits(tmp_path, "70A", "alpha")
+    _create_phase_commits(tmp_path, "70B", "beta")
+    _create_phase_commits(tmp_path, "70C", "gamma")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--since", "70B", "--last", "100", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase_ids = [p["phase_id"] for p in data["phases"]]
+    assert "70A" not in phase_ids
+    assert "70B" in phase_ids
+    assert "70C" in phase_ids
+
+
+def test_71c_audit_no_phase_commits(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phases detected: 0" in output
+    assert "No phase commits found" in output
+
+
+def test_71c_audit_handoff_summary(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    handoffs_dir = tmp_path / ".pcae" / "handoffs"
+    handoffs_dir.mkdir(parents=True, exist_ok=True)
+    (handoffs_dir / "latest.json").write_text(
+        _json.dumps({"summary": "test handoff summary"}), encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["latest_handoff_summary"] == "test handoff summary"
+
+
+def test_71c_audit_no_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["latest_handoff_summary"] is None
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 
