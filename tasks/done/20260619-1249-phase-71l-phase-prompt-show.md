@@ -10,7 +10,7 @@ Phase 71L phase prompt show
 
 ## Status
 
-active
+done
 
 ## Mode
 

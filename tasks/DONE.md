@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 71L phase prompt show (20260619-1249-phase-71l-phase-prompt-show)
 - Phase 71K phase prompt capture (20260619-1239-phase-71k-phase-prompt-capture)
 - Phase 71J post-clear continuity validation (20260619-1222-phase-71j-post-clear-continuity-validation)
 - 71I Autonomy Audit Visibility in Handoff and Bootstrap (20260619-0903-71i-autonomy-audit-visibility-in-handoff-and-bootstrap)
