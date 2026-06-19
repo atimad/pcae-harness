@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 72A: Bounded Phase Runner Dry-Run Planner (20260619-1840-phase-72a-bounded-phase-runner-dry-run-planner)
 - Phase 71Z: Phase Queue Runner Readiness Contract (20260619-1836-phase-71z-phase-queue-runner-readiness-contract)
 - Phase 71Y: Autonomy Comparison Run Summary Artifact (20260619-1802-phase-71y-autonomy-comparison-run-summary-artifact)
 - Phase 71X: Git Lock Diagnostic Visibility in Task Finish Failure (20260619-1758-phase-71x-git-lock-diagnostic-visibility-in-task-finish-failure)

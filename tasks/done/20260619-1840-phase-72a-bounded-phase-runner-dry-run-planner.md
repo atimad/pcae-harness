@@ -10,7 +10,7 @@ Phase 72A: Bounded Phase Runner Dry-Run Planner
 
 ## Status
 
-active
+done
 
 ## Mode
 
