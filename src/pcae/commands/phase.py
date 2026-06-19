@@ -1372,3 +1372,157 @@ def run_phase_prompt_list(args: argparse.Namespace) -> int:
     for f in prompt_files:
         print(f"  {f.name}")
     return 0
+
+
+PROMPT_PLACEHOLDER_PATTERNS = [
+    "test prompt",
+    "placeholder",
+    "dummy",
+    "next step",
+    "todo",
+]
+
+
+def _is_prompt_placeholder(title: str, content: str) -> bool:
+    combined = (title + " " + content).lower()
+    return any(pattern in combined for pattern in PROMPT_PLACEHOLDER_PATTERNS)
+
+
+def _list_timestamped_prompts(root: HarnessPath) -> list[Path]:
+    prompts_dir = root.join(PHASE_PROMPTS_DIR)
+    if not prompts_dir.is_dir():
+        return []
+    return sorted(
+        [f for f in prompts_dir.iterdir()
+         if f.is_file() and f.suffix == ".md" and f.name != "latest.md"],
+    )
+
+
+def run_phase_prompt_hygiene(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    ts_files = _list_timestamped_prompts(root)
+
+    findings: list[dict] = []
+    clearable_files: list[Path] = []
+
+    for f in ts_files:
+        content = f.read_text(encoding="utf-8")
+        title = f.stem.rsplit("-", 1)[0] if "-" in f.stem else f.stem
+        if _is_prompt_placeholder(title, content):
+            findings.append({
+                "filename": f.name,
+                "reason": "matches placeholder pattern",
+            })
+            clearable_files.append(f)
+
+    if args.clear_placeholders:
+        if not args.confirm:
+            if args.json:
+                print(json.dumps({
+                    "error": "--clear-placeholders requires --confirm",
+                    "findings": findings,
+                    "clearable_count": len(clearable_files),
+                }, indent=2, sort_keys=True))
+            else:
+                print("Error: --clear-placeholders requires --confirm flag.")
+                if findings:
+                    print(f"  {len(findings)} placeholder(s) found. Re-run with --confirm to clear.")
+            return 1
+
+        if not findings:
+            if args.json:
+                print(json.dumps({
+                    "cleared": 0,
+                    "findings": [],
+                }, indent=2, sort_keys=True))
+            else:
+                print("No placeholder prompts to clear.")
+            return 0
+
+        for f in clearable_files:
+            f.unlink()
+
+        if args.json:
+            print(json.dumps({
+                "cleared": len(clearable_files),
+                "findings": findings,
+            }, indent=2, sort_keys=True))
+        else:
+            print(f"Cleared {len(clearable_files)} placeholder prompt(s).")
+            for finding in findings:
+                print(f"  - removed: {finding['filename']}")
+        return 0
+
+    if args.json:
+        print(json.dumps({
+            "total_prompts": len(ts_files),
+            "has_issues": len(findings) > 0,
+            "findings": findings,
+            "clearable_count": len(clearable_files),
+        }, indent=2, sort_keys=True))
+        return 0
+
+    if not ts_files:
+        print("Prompt hygiene: clean (no prompts)")
+        return 0
+
+    if not findings:
+        print(f"Prompt hygiene: clean ({len(ts_files)} prompts, no placeholders)")
+        return 0
+
+    print(f"Prompt hygiene: {len(findings)} placeholder(s) found")
+    for finding in findings:
+        print(f"  - {finding['filename']} — {finding['reason']}")
+    return 0
+
+
+def run_phase_prompt_prune(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    keep: int = args.keep
+    ts_files = _list_timestamped_prompts(root)
+    total = len(ts_files)
+
+    if total <= keep:
+        if args.json:
+            print(json.dumps({
+                "total": total,
+                "keep": keep,
+                "prunable": 0,
+                "pruned": 0,
+            }, indent=2, sort_keys=True))
+        else:
+            print(f"Prompt prune: {total} prompts, keeping {keep}. Nothing to prune.")
+        return 0
+
+    to_prune = ts_files[:total - keep]
+
+    if args.dry_run:
+        if args.json:
+            print(json.dumps({
+                "total": total,
+                "keep": keep,
+                "prunable": len(to_prune),
+                "pruned": 0,
+                "dry_run": True,
+                "candidates": [f.name for f in to_prune],
+            }, indent=2, sort_keys=True))
+        else:
+            print(f"Prompt prune dry-run: {len(to_prune)} of {total} would be pruned (kept {keep}).")
+            for f in to_prune:
+                print(f"  - {f.name}")
+        return 0
+
+    for f in to_prune:
+        f.unlink()
+
+    if args.json:
+        print(json.dumps({
+            "total": total,
+            "keep": keep,
+            "prunable": len(to_prune),
+            "pruned": len(to_prune),
+        }, indent=2, sort_keys=True))
+    else:
+        print(f"Pruned {len(to_prune)} of {total} prompt artifacts (kept {keep}).")
+
+    return 0

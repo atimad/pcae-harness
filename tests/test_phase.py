@@ -3777,3 +3777,189 @@ def test_71m_handoff_show_silent_when_no_prompt(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Latest prompt:" not in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 71N: prompt-hygiene and prompt-prune
+# ---------------------------------------------------------------------------
+
+
+def test_71n_prompt_hygiene_empty(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-hygiene"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "clean (no prompts)" in output
+
+
+def test_71n_prompt_hygiene_no_placeholders(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "Real Phase 72A", "Implement feature X.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-hygiene"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "clean" in output
+    assert "no placeholders" in output
+
+
+def test_71n_prompt_hygiene_detects_placeholder(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "Test Prompt", "This is a test prompt only.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-hygiene"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "1 placeholder(s) found" in output
+
+
+def test_71n_prompt_hygiene_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "Placeholder Prompt", "placeholder content")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-hygiene", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["has_issues"] is True
+    assert data["clearable_count"] >= 1
+
+
+def test_71n_prompt_hygiene_clear_requires_confirm(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "Test Prompt", "test prompt content")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-hygiene", "--clear-placeholders"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "--confirm" in output
+
+
+def test_71n_prompt_hygiene_clear_with_confirm(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "Test Prompt Dummy", "dummy test prompt")
+    _capture_prompt(tmp_path, "Real Phase 72B", "Implement real work.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-hygiene", "--clear-placeholders", "--confirm",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Cleared" in output
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    remaining = [
+        f for f in prompts_dir.iterdir()
+        if f.is_file() and f.suffix == ".md" and f.name != "latest.md"
+    ]
+    assert len(remaining) >= 1
+    assert all("dummy" not in f.name for f in remaining)
+
+
+def test_71n_prompt_prune_nothing_to_prune(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "One", "First.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-prune", "--keep", "5", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Nothing to prune" in output
+
+
+def test_71n_prompt_prune_dry_run(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    for i in range(5):
+        (prompts_dir / f"phase-{i}-20260619T10000{i}Z.md").write_text(
+            f"Prompt {i}", encoding="utf-8",
+        )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-prune", "--keep", "2", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "3 of 5 would be pruned" in output
+    assert len(list(prompts_dir.glob("phase-*.md"))) == 5
+
+
+def test_71n_prompt_prune_confirm(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    for i in range(5):
+        (prompts_dir / f"phase-{i}-20260619T10000{i}Z.md").write_text(
+            f"Prompt {i}", encoding="utf-8",
+        )
+    (prompts_dir / "latest.md").write_text("Latest", encoding="utf-8")
+    (prompts_dir / "latest.json").write_text("{}", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-prune", "--keep", "2"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Pruned 3 of 5" in output
+    assert len(list(prompts_dir.glob("phase-*.md"))) == 2
+    assert (prompts_dir / "latest.md").is_file()
+    assert (prompts_dir / "latest.json").is_file()
+
+
+def test_71n_prompt_prune_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    for i in range(4):
+        (prompts_dir / f"phase-{i}-20260619T10000{i}Z.md").write_text(
+            f"Prompt {i}", encoding="utf-8",
+        )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-prune", "--keep", "2", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["pruned"] == 2
+    assert data["keep"] == 2

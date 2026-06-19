@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 71M: Phase Prompt Visibility in Bootstrap and Handoff.
+Phase 71N: Phase Prompt Hygiene.
 
 ## Milestone: Execution Chain Traceability Complete
 
