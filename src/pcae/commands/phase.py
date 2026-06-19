@@ -2003,3 +2003,126 @@ def run_phase_runner_readiness(args: argparse.Namespace) -> int:
             print(f"    - {r}")
 
     return 0
+
+
+_RUNNER_MAX_PHASES_LIMIT = 3
+
+_RUNNER_STOP_CONDITIONS = [
+    "test failure (python -m pytest -n auto)",
+    "pcae health failure",
+    "pcae check failure",
+    "task-memory inconsistency (pcae doctor task-memory)",
+    "push check blocked",
+    "scope drift required",
+    "ambiguity detected",
+    "lifecycle review enforcement block",
+    "task finish partial failure",
+    "git index lock / permission failure",
+]
+
+_RUNNER_VALIDATION_SEQUENCE = [
+    "python -m pytest -n auto",
+    "pcae health",
+    "pcae check",
+    "pcae doctor task-memory",
+    "pcae push check",
+]
+
+_RUNNER_COMMIT_PUSH_SEQUENCE = [
+    "git add <scoped files>",
+    "git commit -m 'Implement Phase <id> <description>'",
+    "pcae task finish --commit 'Complete Phase <id> <description>'",
+    "pcae push",
+]
+
+_RUNNER_RECOVERY_PATH = [
+    "pcae doctor git-lock",
+    "pcae task finish recover --dry-run",
+    "pcae task finish recover --message 'Complete Phase <id> <description>'",
+]
+
+
+def _build_runner_plan(root: HarnessPath, max_phases: int) -> dict:
+    readiness = _build_runner_readiness(root)
+    queue = _read_phase_queue(root)
+
+    clamped = min(max(max_phases, 1), _RUNNER_MAX_PHASES_LIMIT)
+
+    if not readiness["environment_ready"]:
+        return {
+            "executable": False,
+            "blockers": readiness["blocking_reasons"],
+            "planned_phases": [],
+            "max_phases": clamped,
+            "stop_conditions": list(_RUNNER_STOP_CONDITIONS),
+            "validation_sequence": list(_RUNNER_VALIDATION_SEQUENCE),
+            "commit_push_sequence": list(_RUNNER_COMMIT_PUSH_SEQUENCE),
+            "recovery_path": list(_RUNNER_RECOVERY_PATH),
+            "note": "No execution performed. This is a dry-run plan only.",
+        }
+
+    planned = []
+    for entry in queue[:clamped]:
+        planned.append(_phase_queue_entry_details(entry))
+
+    return {
+        "executable": len(planned) > 0,
+        "blockers": [],
+        "planned_phases": planned,
+        "max_phases": clamped,
+        "stop_conditions": list(_RUNNER_STOP_CONDITIONS),
+        "validation_sequence": list(_RUNNER_VALIDATION_SEQUENCE),
+        "commit_push_sequence": list(_RUNNER_COMMIT_PUSH_SEQUENCE),
+        "recovery_path": list(_RUNNER_RECOVERY_PATH),
+        "note": "No execution performed. This is a dry-run plan only.",
+    }
+
+
+def run_phase_runner_plan(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    max_phases = min(max(getattr(args, "max_phases", 1), 1), _RUNNER_MAX_PHASES_LIMIT)
+    plan = _build_runner_plan(root, max_phases)
+
+    if args.json:
+        print(json.dumps(plan, indent=2, sort_keys=True))
+        return 0
+
+    print("Phase Runner Plan (dry-run)")
+    print("=" * 40)
+    print(f"  Executable: {'yes' if plan['executable'] else 'no'}")
+    print(f"  Max phases: {plan['max_phases']}")
+
+    if plan["blockers"]:
+        print()
+        print("  Blockers:")
+        for b in plan["blockers"]:
+            print(f"    - {b}")
+
+    if plan["planned_phases"]:
+        print()
+        print("  Planned phases:")
+        for i, phase in enumerate(plan["planned_phases"], 1):
+            print(f"    {i}. {phase['title']}")
+    else:
+        print()
+        print("  No phases planned.")
+
+    print()
+    print("  Stop conditions:")
+    for sc in plan["stop_conditions"]:
+        print(f"    - {sc}")
+    print()
+    print("  Validation sequence:")
+    for vs in plan["validation_sequence"]:
+        print(f"    - {vs}")
+    print()
+    print("  Commit/push sequence:")
+    for cs in plan["commit_push_sequence"]:
+        print(f"    - {cs}")
+    print()
+    print("  Recovery path:")
+    for rp in plan["recovery_path"]:
+        print(f"    - {rp}")
+    print()
+    print(f"  {plan['note']}")
+    return 0

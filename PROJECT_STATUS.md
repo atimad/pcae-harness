@@ -2,14 +2,13 @@
 
 ## Current Phase
 
-Phase 71Z: Phase Queue Runner Readiness Contract.
+Phase 72A: Bounded Phase Runner Dry-Run Planner.
 
-Phase 71Z adds `pcae phase runner-readiness` and `--json` for read-only
-three-tier readiness assessment: environment ready (clean tree, healthy,
-check passed, no active task, task memory clean), queue ready (queue present
-and non-empty), and runner ready (both environment and queue ready). Reports
-blocking reasons, advisory reasons, and full governance state. Does not
-execute queue items, create tasks, or mutate state.
+Phase 72A adds `pcae phase runner-plan`, `--json`, and `--max-phases N` for
+planning-only bounded runner computation. Shows planned phases from queue
+(capped at 3), stop conditions, validation sequence, commit/push sequence,
+and recovery path. Does not execute queue items, mutate queue, create tasks,
+or make commits.
 
 ## Milestone: Execution Chain Traceability Complete
 

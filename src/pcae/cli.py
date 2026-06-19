@@ -415,6 +415,7 @@ from pcae.commands.phase import (
     run_phase_audit,
     run_phase_audit_show,
     run_phase_autonomy_summary,
+    run_phase_runner_plan,
     run_phase_runner_readiness,
     run_phase_complete,
     run_phase_handoff,
@@ -4997,6 +4998,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     phase_runner_readiness_parser.set_defaults(handler=run_phase_runner_readiness)
+
+    phase_runner_plan_parser = phase_subparsers.add_parser(
+        "runner-plan",
+        help="Compute a dry-run plan for bounded phase queue execution (no execution performed).",
+    )
+    phase_runner_plan_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_plan_parser.add_argument(
+        "--max-phases", type=int, default=1,
+        help="Maximum phases to plan (default: 1, max: 3).",
+    )
+    phase_runner_plan_parser.set_defaults(handler=run_phase_runner_plan)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",

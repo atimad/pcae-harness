@@ -3726,6 +3726,171 @@ def test_71z_runner_readiness_human_output(
     assert "Runner ready:" in output
 
 
+# Phase 72A — Bounded Phase Runner Dry-Run Planner
+# ---------------------------------------------------------------------------
+
+
+def test_72a_runner_plan_empty_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-plan", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["executable"] is False
+    assert data["planned_phases"] == []
+    assert data["max_phases"] == 1
+    assert "stop_conditions" in data
+    assert "validation_sequence" in data
+    assert "recovery_path" in data
+    assert "No execution" in data["note"]
+
+
+def test_72a_runner_plan_with_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase alpha"])
+    main(["phase", "queue", "add", "Phase beta"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-plan", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["executable"] is True
+    assert len(data["planned_phases"]) == 1
+    assert data["planned_phases"][0]["title"] == "Phase alpha"
+
+
+def test_72a_runner_plan_max_phases(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase A"])
+    main(["phase", "queue", "add", "Phase B"])
+    main(["phase", "queue", "add", "Phase C"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-plan", "--max-phases", "2", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["max_phases"] == 2
+    assert len(data["planned_phases"]) == 2
+
+
+def test_72a_runner_plan_max_clamped(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    for i in range(5):
+        main(["phase", "queue", "add", f"Phase {i}"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-plan", "--max-phases", "10", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["max_phases"] == 3
+    assert len(data["planned_phases"]) <= 3
+
+
+def test_72a_runner_plan_not_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase blocked"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-plan", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["executable"] is False
+    assert len(data["blockers"]) > 0
+    assert data["planned_phases"] == []
+
+
+def test_72a_runner_plan_does_not_mutate_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Immutable phase"])
+    capsys.readouterr()
+
+    main(["phase", "runner-plan", "--json"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "list", "--json"])
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 1
+
+
+def test_72a_runner_plan_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-plan"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "dry-run" in output.lower()
+    assert "No execution performed" in output
+    assert "Stop conditions:" in output
+    assert "Recovery path:" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
