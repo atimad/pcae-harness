@@ -4358,6 +4358,97 @@ def test_72e_scenario_human_output(
     assert "Simulated failure only" in output
 
 
+# Phase 72F — Runner Simulation Review Artifact
+# ---------------------------------------------------------------------------
+
+
+def test_72f_sim_review_missing_simulation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-review", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["review_status"] == "missing_simulation"
+    assert data["simulation_present"] is False
+    assert any("runner-simulate --save" in r for r in data["review_reasons"])
+
+
+def test_72f_sim_review_with_simulation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-sim-review", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["review_status"] == "ready_for_approval"
+    assert data["simulation_present"] is True
+    assert data["would_execute"] is False
+    assert data["mutation_performed"] is False
+
+
+def test_72f_sim_review_save(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-sim-review", "--save"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "saved" in output.lower()
+
+    latest = tmp_path / ".pcae" / "runner-simulation-reviews" / "latest.json"
+    assert latest.exists()
+    data = _json.loads(latest.read_text(encoding="utf-8"))
+    assert "reviewed_at" in data
+
+
+def test_72f_sim_review_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-review"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Review status:" in output
+    assert "missing_simulation" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

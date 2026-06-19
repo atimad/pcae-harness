@@ -2436,3 +2436,97 @@ def run_phase_runner_simulate(args: argparse.Namespace) -> int:
     print()
     print(f"  {trace['note']}")
     return 0
+
+
+RUNNER_SIMULATION_REVIEWS_DIR = Path(".pcae") / "runner-simulation-reviews"
+
+
+def _read_latest_simulation(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_SIMULATIONS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _build_sim_review(root: HarnessPath) -> dict:
+    sim = _read_latest_simulation(root)
+    if sim is None:
+        return {
+            "review_status": "missing_simulation",
+            "review_reasons": ["No simulation artifact found. Run: pcae phase runner-simulate --save"],
+            "simulation_present": False,
+        }
+
+    blocked_reasons: list[str] = []
+    readiness = sim.get("readiness") or {}
+    if not readiness.get("environment_ready", False):
+        blocked_reasons.append("simulation environment was not ready")
+    if sim.get("would_execute", True):
+        blocked_reasons.append("simulation would_execute is true (unexpected)")
+    if sim.get("mutation_performed", True):
+        blocked_reasons.append("simulation mutation_performed is true (unexpected)")
+
+    status = "blocked" if blocked_reasons else "ready_for_approval"
+
+    return {
+        "review_status": status,
+        "review_reasons": blocked_reasons or ["Simulation is clean and ready for approval review."],
+        "simulation_present": True,
+        "simulation_created_at": sim.get("created_at"),
+        "would_execute": sim.get("would_execute", False),
+        "mutation_performed": sim.get("mutation_performed", False),
+        "simulated_entries_count": len(sim.get("simulated_entries", [])),
+        "planned_phases_count": len(sim.get("planned_phases", [])),
+        "readiness_environment_ready": readiness.get("environment_ready"),
+        "stop_conditions_count": len(sim.get("stop_conditions_considered", [])),
+        "policy_summary": sim.get("policy_summary"),
+    }
+
+
+def _save_sim_review(root: HarnessPath, review: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    review_with_ts = {**review, "reviewed_at": ts}
+    review_dir = root.join(RUNNER_SIMULATION_REVIEWS_DIR)
+    review_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = review_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = review_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(review_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_sim_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    review = _build_sim_review(root)
+
+    if getattr(args, "save", False):
+        saved_path = _save_sim_review(root, review)
+        if not args.json:
+            print(f"Review saved: {saved_path}")
+
+    if args.json:
+        print(json.dumps(review, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Simulation Review")
+    print("=" * 40)
+    print(f"  Review status: {review['review_status']}")
+    print(f"  Simulation present: {'yes' if review['simulation_present'] else 'no'}")
+    if review["simulation_present"]:
+        print(f"  Simulation created: {review.get('simulation_created_at', 'unknown')}")
+        print(f"  Would execute: {'no' if not review['would_execute'] else 'YES'}")
+        print(f"  Mutation performed: {'no' if not review['mutation_performed'] else 'YES'}")
+        print(f"  Simulated entries: {review['simulated_entries_count']}")
+        print(f"  Planned phases: {review['planned_phases_count']}")
+    print()
+    print("  Reasons:")
+    for r in review["review_reasons"]:
+        print(f"    - {r}")
+    return 0

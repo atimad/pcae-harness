@@ -2,13 +2,13 @@
 
 ## Current Phase
 
-Phase 72E: Runner Simulation Failure Cases.
+Phase 72F: Runner Simulation Review Artifact.
 
-Phase 72E extends `pcae phase runner-simulate` with `--scenario` for
-failure case simulation using the 72B policy matrix. Supports 5 scenarios:
-`dirty-tree` (hard stop), `active-task` (hard stop), `git-lock`
-(recoverable stop), `audit-warning` (advisory warning), and `queue-empty`
-(continue allowed). No repository state is mutated. Simulated failure only.
+Phase 72F adds `pcae phase runner-sim-review`, `--json`, and `--save` for
+reviewing the latest runner simulation artifact. Reports review status as
+`ready_for_approval`, `blocked`, or `missing_simulation`. Includes
+simulation metadata, readiness summary, and policy summary. Does not
+approve or execute anything.
 
 ## Milestone: Execution Chain Traceability Complete
 
