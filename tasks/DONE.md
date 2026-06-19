@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 72H: Runner Execution Preflight Design (20260619-2019-phase-72h-runner-execution-preflight-design)
 - Phase 72G: Runner Simulation Approval Gate (20260619-2015-phase-72g-runner-simulation-approval-gate)
 - Phase 72F: Runner Simulation Review Artifact (20260619-2011-phase-72f-runner-simulation-review-artifact)
 - Phase 72E: Runner Simulation Failure Cases (20260619-1922-phase-72e-runner-simulation-failure-cases)
