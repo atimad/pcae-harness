@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 72Q Queue Preflight Positive Non-Execution Path (20260619-2209-72q-queue-preflight-positive-non-execution-path)
 - 72P Queue Approval Matching With Non-Empty Queue (20260619-2204-72p-queue-approval-matching-with-non-empty-queue)
 - 72O Safe Queue Fixture Lifecycle (20260619-2159-72o-safe-queue-fixture-lifecycle)
 - 72N Queue-to-Runner Preflight Bridge (20260619-2150-72n-queue-to-runner-preflight-bridge)
