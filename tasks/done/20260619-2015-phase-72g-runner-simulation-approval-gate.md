@@ -10,7 +10,7 @@ Phase 72G: Runner Simulation Approval Gate
 
 ## Status
 
-active
+done
 
 ## Mode
 
