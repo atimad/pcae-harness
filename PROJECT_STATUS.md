@@ -2,12 +2,14 @@
 
 ## Current Phase
 
-Phase 72J: Runner Simulation Approval Persistence Check.
+Phase 72K: Execution Authorization Negative Gate.
 
-Phase 72J adds `pcae phase runner-sim-approval-show` and `--json` for
-inspecting the latest persisted simulation approval. Preflight correctly
-recognizes persisted approval as present/matching and detects mismatches
-when simulation is updated after approval. Execution remains unauthorized.
+Phase 72K adds `pcae phase runner-execution-authorize`, `--json`, and
+`--dry-run` as an explicit negative gate. The command always refuses
+execution authorization, reporting `authorization_available=false`,
+`authorized=false`, and `mutation_performed=false`. Tests prove no
+approval, simulation, or preflight path can produce
+`execution_authorized=true`. Human authority is noted.
 
 ## Milestone: Execution Chain Traceability Complete
 

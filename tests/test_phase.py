@@ -4798,6 +4798,122 @@ def test_72j_approval_show_human_output(
     assert "No approval artifact found" in output
 
 
+# Phase 72K — Execution Authorization Negative Gate
+# ---------------------------------------------------------------------------
+
+
+def test_72k_execution_authorize_always_refuses(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-authorize", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["authorization_available"] is False
+    assert data["authorized"] is False
+    assert data["mutation_performed"] is False
+    assert "not implemented" in data["refusal_reason"]
+
+
+def test_72k_execution_authorize_dry_run_still_refuses(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["authorized"] is False
+    assert data["dry_run"] is True
+
+
+def test_72k_execution_authorize_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-authorize"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Authorization available: no" in output
+    assert "Authorized: no" in output
+    assert "not implemented" in output
+
+
+def test_72k_no_path_produces_execution_authorized_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Test phase"])
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-review", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-approve", "--message", "Full approval"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-sim-approval-show", "--json"])
+    approval = _json.loads(capsys.readouterr().out)
+    assert approval["execution_authorized"] is False
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+    preflight = _json.loads(capsys.readouterr().out)
+    assert preflight["execution_authorized"] is False
+    assert preflight["execution_available"] is False
+
+    exit_code = main(["phase", "runner-execution-authorize", "--json"])
+    auth = _json.loads(capsys.readouterr().out)
+    assert auth["authorized"] is False
+    assert auth["authorization_available"] is False
+
+
+def test_72k_preflight_still_design_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["preflight_status"] == "design_only"
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

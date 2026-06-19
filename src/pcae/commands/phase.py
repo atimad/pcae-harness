@@ -2770,3 +2770,34 @@ def run_phase_runner_execution_preflight(args: argparse.Namespace) -> int:
     print(f"  {preflight['note']}")
     print(f"  {preflight['human_authority_note']}")
     return 0
+
+
+_EXECUTION_AUTHORIZATION_REFUSAL = (
+    "Execution authorization is not implemented. "
+    "A future explicit execution-authorization phase is required before "
+    "machine-mediated runner execution can be authorized. "
+    "Human authority remains absolute."
+)
+
+
+def run_phase_runner_execution_authorize(args: argparse.Namespace) -> int:
+    result = {
+        "authorization_available": False,
+        "authorized": False,
+        "refusal_reason": _EXECUTION_AUTHORIZATION_REFUSAL,
+        "mutation_performed": False,
+        "dry_run": getattr(args, "dry_run", False),
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 1
+
+    print("Runner Execution Authorization")
+    print("=" * 40)
+    print(f"  Authorization available: no")
+    print(f"  Authorized: no")
+    print(f"  Mutation performed: no")
+    print()
+    print(f"  {_EXECUTION_AUTHORIZATION_REFUSAL}")
+    return 1

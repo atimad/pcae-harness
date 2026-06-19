@@ -418,6 +418,7 @@ from pcae.commands.phase import (
     run_phase_runner_plan,
     run_phase_runner_policy,
     run_phase_runner_readiness,
+    run_phase_runner_execution_authorize,
     run_phase_runner_execution_preflight,
     run_phase_runner_sim_approve,
     run_phase_runner_sim_approval_show,
@@ -5040,6 +5041,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Number of simulated entries to generate (default: 3, max: 10).",
     )
     phase_runner_sim_fixture_parser.set_defaults(handler=run_phase_runner_sim_fixture)
+
+    phase_runner_execution_authorize_parser = phase_subparsers.add_parser(
+        "runner-execution-authorize",
+        help="Execution authorization gate (always refuses — not implemented).",
+    )
+    phase_runner_execution_authorize_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_authorize_parser.add_argument(
+        "--dry-run", action="store_true", help="Dry-run mode (still refuses)."
+    )
+    phase_runner_execution_authorize_parser.set_defaults(
+        handler=run_phase_runner_execution_authorize
+    )
 
     phase_runner_execution_preflight_parser = phase_subparsers.add_parser(
         "runner-execution-preflight",
