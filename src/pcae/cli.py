@@ -440,6 +440,7 @@ from pcae.commands.review import (
     run_lifecycle_review_show,
 )
 from pcae.commands.task import (
+    run_doctor_git_lock,
     run_doctor_task_memory,
     run_task_close,
     run_task_complete,
@@ -6305,6 +6306,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--dry-run", action="store_true", help="Show intended repairs without mutating files."
     )
     doctor_task_memory_parser.set_defaults(handler=run_doctor_task_memory)
+
+    doctor_git_lock_parser = doctor_subparsers.add_parser(
+        "git-lock",
+        help="Diagnose .git/index.lock issues: stale lock, active process, or permission problems.",
+    )
+    doctor_git_lock_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    doctor_git_lock_parser.set_defaults(handler=run_doctor_git_lock)
 
     push_parser = subparsers.add_parser(
         "push",

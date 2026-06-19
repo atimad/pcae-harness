@@ -2016,6 +2016,96 @@ def test_70b_doctor_task_memory_json_output(
     assert parsed["findings"][0]["check"] == "done_status_in_active_folder"
 
 
+# --- Phase 71U: pcae doctor git-lock ---
+
+
+def test_71u_git_lock_no_issue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "git-lock"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "ok" in output
+    assert "Lock exists: False" in output
+
+
+def test_71u_git_lock_no_issue_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "git-lock", "--json"])
+
+    parsed = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert parsed["lock_exists"] is False
+    assert parsed["git_dir_writable"] is True
+    assert parsed["index_writable"] is True
+    assert parsed["status"] == "ok"
+    assert "reason" in parsed
+    assert "suggested_action" in parsed
+
+
+def test_71u_git_lock_lock_present(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    (tmp_path / ".git" / "index.lock").write_text("", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "git-lock", "--json"])
+
+    parsed = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert parsed["lock_exists"] is True
+    assert parsed["status"] in ("lock_present_stale", "lock_present_active_process")
+    assert "suggested_action" in parsed
+
+
+def test_71u_git_lock_permission_denied(tmp_path: Path, monkeypatch, capsys) -> None:
+    import os
+
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    git_dir = tmp_path / ".git"
+    original_mode = git_dir.stat().st_mode
+    monkeypatch.chdir(tmp_path)
+
+    try:
+        os.chmod(git_dir, 0o555)
+        exit_code = main(["doctor", "git-lock", "--json"])
+        parsed = json.loads(capsys.readouterr().out)
+        assert exit_code == 1
+        assert parsed["git_dir_writable"] is False
+        assert parsed["status"] == "permission_denied"
+        assert "permission" in parsed["suggested_action"].lower()
+    finally:
+        os.chmod(git_dir, original_mode)
+
+
+def test_71u_git_lock_human_output_lock_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    (tmp_path / ".git" / "index.lock").write_text("", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["doctor", "git-lock"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Lock exists: True" in output
+    assert "Suggested action:" in output
+
+
 # --- Phase 70D: pcae task new ergonomics ---
 
 

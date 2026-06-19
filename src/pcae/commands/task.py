@@ -718,3 +718,101 @@ def run_doctor_task_memory(args: argparse.Namespace) -> int:
                 print(f"  [{finding.severity}] {finding.message}")
 
     return 1 if diagnostics.has_errors else 0
+
+
+def _diagnose_git_lock(root: HarnessPath) -> dict:
+    import os
+    import subprocess as _sp
+
+    git_dir = root.path / ".git"
+    index_path = git_dir / "index"
+    lock_path = git_dir / "index.lock"
+
+    result: dict = {
+        "lock_exists": False,
+        "git_dir_writable": False,
+        "index_writable": False,
+        "status": "ok",
+        "reason": "No lock file present and Git metadata is writable.",
+        "suggested_action": "None required.",
+    }
+
+    if not git_dir.is_dir():
+        result["status"] = "error"
+        result["reason"] = ".git directory not found."
+        result["suggested_action"] = "Verify this is a Git repository."
+        return result
+
+    result["git_dir_writable"] = os.access(git_dir, os.W_OK)
+    result["index_writable"] = os.access(index_path, os.W_OK) if index_path.exists() else result["git_dir_writable"]
+
+    if lock_path.exists():
+        result["lock_exists"] = True
+        git_running = False
+        try:
+            ps = _sp.run(
+                ["pgrep", "-f", "git"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
+            git_running = ps.returncode == 0 and ps.stdout.strip() != ""
+        except (OSError, _sp.TimeoutExpired):
+            pass
+
+        if git_running:
+            result["status"] = "lock_present_active_process"
+            result["reason"] = (
+                ".git/index.lock exists and a Git process appears to be running."
+            )
+            result["suggested_action"] = (
+                "Wait for the Git process to finish. "
+                "If it is stuck, terminate it and then remove .git/index.lock manually."
+            )
+        else:
+            result["status"] = "lock_present_stale"
+            result["reason"] = (
+                ".git/index.lock exists but no Git process appears to be running."
+            )
+            result["suggested_action"] = (
+                "Remove .git/index.lock manually: rm .git/index.lock"
+            )
+        return result
+
+    if not result["git_dir_writable"]:
+        result["status"] = "permission_denied"
+        result["reason"] = ".git directory is not writable."
+        result["suggested_action"] = (
+            "Fix file ownership or permissions on .git directory, "
+            "or request elevated filesystem permissions."
+        )
+        return result
+
+    if not result["index_writable"]:
+        result["status"] = "permission_denied"
+        result["reason"] = ".git/index is not writable."
+        result["suggested_action"] = (
+            "Fix file ownership or permissions on .git/index, "
+            "or request elevated filesystem permissions."
+        )
+        return result
+
+    return result
+
+
+def run_doctor_git_lock(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    diag = _diagnose_git_lock(root)
+
+    if args.json:
+        print(json.dumps(diag, indent=2, sort_keys=True))
+    else:
+        print("Git lock diagnostic")
+        print(f"  Lock exists: {diag['lock_exists']}")
+        print(f"  .git writable: {diag['git_dir_writable']}")
+        print(f"  index writable: {diag['index_writable']}")
+        print(f"  Status: {diag['status']}")
+        print(f"  Reason: {diag['reason']}")
+        print(f"  Suggested action: {diag['suggested_action']}")
+
+    return 1 if diag["status"] not in ("ok",) else 0

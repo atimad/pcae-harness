@@ -2,15 +2,14 @@
 
 ## Current Phase
 
-Phase 71T: Audit Commit Pair Classification Flexibility.
+Phase 71U: Git Index Lock Permission Diagnostics.
 
-Phase 71T expands phase audit commit-pair recognition to accept `Document`,
-`Design`, `Add`, and `Refine` verbs as valid implementation commit prefixes
-alongside `Implement`. Classification is now phase-id based: any recognized
-verb followed by `Phase <id>` is treated as implementation unless the verb is
-`Complete`. This resolves false warnings for documentation-only or design-only
-phases (e.g., Phase 71S) while preserving warnings for genuinely missing
-implementation commits.
+Phase 71U adds `pcae doctor git-lock` and `--json` for read-only diagnosis of
+`.git/index.lock` issues. The command reports lock file existence, `.git` and
+`.git/index` writability, and classifies the situation as `ok`,
+`lock_present_stale`, `lock_present_active_process`, or `permission_denied`.
+Each status includes a reason and suggested next action. No lock files are
+deleted or created. No repository mutation.
 
 ## Milestone: Execution Chain Traceability Complete
 
