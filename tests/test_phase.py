@@ -3514,3 +3514,172 @@ def test_71k_prompt_capture_template_includes_phase_prompts(
     init_harness(HarnessPath(tmp_path))
     gitignore = (tmp_path / ".pcae" / ".gitignore").read_text(encoding="utf-8")
     assert "phase-prompts/" in gitignore
+
+
+# ---------------------------------------------------------------------------
+# Phase 71L: pcae phase prompt-show / prompt-list
+# ---------------------------------------------------------------------------
+
+
+def _capture_prompt(tmp_path: Path, title: str, text: str) -> None:
+    from pcae.commands.phase import PHASE_PROMPTS_DIR, _slugify
+    from datetime import datetime, timezone
+
+    prompts_dir = tmp_path / PHASE_PROMPTS_DIR
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc)
+    slug = _slugify(title)
+    ts_str = now.strftime("%Y%m%dT%H%M%SZ")
+    ts_filename = f"{slug}-{ts_str}.md"
+    (prompts_dir / ts_filename).write_text(text, encoding="utf-8")
+    (prompts_dir / "latest.md").write_text(text, encoding="utf-8")
+    metadata = {
+        "title": title,
+        "created_at": now.isoformat(),
+        "slug": slug,
+        "timestamped_path": str(PHASE_PROMPTS_DIR / ts_filename),
+        "latest_path": str(PHASE_PROMPTS_DIR / "latest.md"),
+    }
+    (prompts_dir / "latest.json").write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8",
+    )
+
+
+def test_71l_prompt_show_displays_latest(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "71L Test", "Show me this prompt.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase prompt: 71L Test" in output
+    assert "Show me this prompt." in output
+    assert "Created:" in output
+
+
+def test_71l_prompt_show_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "71L JSON", "JSON prompt content.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-show", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["title"] == "71L JSON"
+    assert data["content"] == "JSON prompt content."
+    assert "created_at" in data
+    assert "latest_path" in data
+
+
+def test_71l_prompt_show_missing_returns_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-show"])
+
+    output = capsys.readouterr().err
+    assert exit_code == 1
+    assert "No captured phase prompt found" in output
+
+
+def test_71l_prompt_list_with_prompts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "First", "First prompt.")
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    (prompts_dir / "second-20260619T120000Z.md").write_text(
+        "Second prompt.", encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Captured phase prompts (2):" in output
+
+
+def test_71l_prompt_list_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-list"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No captured phase prompts found" in output
+
+
+def test_71l_prompt_list_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "Listed", "Listed prompt.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["count"] >= 1
+    assert isinstance(data["prompts"], list)
+    assert all("filename" in p and "path" in p for p in data["prompts"])
+
+
+def test_71l_prompt_list_json_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-list", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["count"] == 0
+    assert data["prompts"] == []
+
+
+def test_71l_prompt_show_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "ReadOnly", "Read-only test.")
+    commit_baseline(tmp_path)
+
+    def text_snapshot(root: Path) -> dict[str, str]:
+        return {
+            p.relative_to(root).as_posix(): p.read_text(encoding="utf-8")
+            for p in root.rglob("*")
+            if p.is_file() and ".git" not in p.relative_to(root).parts
+        }
+
+    before = text_snapshot(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "prompt-show"])
+    main(["phase", "prompt-list"])
+
+    capsys.readouterr()
+    after = text_snapshot(tmp_path)
+    assert after == before

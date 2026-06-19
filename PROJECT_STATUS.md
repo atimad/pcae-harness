@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 71K: Phase Prompt Capture.
+Phase 71L: Phase Prompt Show.
 
 ## Milestone: Execution Chain Traceability Complete
 

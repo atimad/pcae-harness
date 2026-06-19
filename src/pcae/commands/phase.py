@@ -1280,3 +1280,81 @@ def run_phase_prompt_capture(args: argparse.Namespace) -> int:
     print(f"  Latest: {PHASE_PROMPTS_DIR / 'latest.md'}")
     print(f"  Created: {now.isoformat()}")
     return 0
+
+
+def _read_prompt_metadata(root: HarnessPath) -> dict | None:
+    metadata_path = root.join(PHASE_PROMPTS_DIR / "latest.json")
+    if not metadata_path.is_file():
+        return None
+    try:
+        return json.loads(metadata_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _read_prompt_content(root: HarnessPath) -> str | None:
+    latest_path = root.join(PHASE_PROMPTS_DIR / "latest.md")
+    if not latest_path.is_file():
+        return None
+    try:
+        return latest_path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+
+def run_phase_prompt_show(args: argparse.Namespace) -> int:
+    import sys
+
+    root = HarnessPath.cwd()
+    metadata = _read_prompt_metadata(root)
+    content = _read_prompt_content(root)
+
+    if metadata is None and content is None:
+        print("No captured phase prompt found.", file=sys.stderr)
+        return 1
+
+    if args.json:
+        result = dict(metadata) if metadata else {}
+        result["content"] = content or ""
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    if metadata:
+        print(f"Phase prompt: {metadata.get('title', 'Untitled')}")
+        print(f"  Created: {metadata.get('created_at', 'unknown')}")
+        print(f"  Path: {metadata.get('latest_path', 'unknown')}")
+        print()
+    print(content or "")
+    return 0
+
+
+def run_phase_prompt_list(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    prompts_dir = root.join(PHASE_PROMPTS_DIR)
+
+    if not prompts_dir.is_dir():
+        if args.json:
+            print(json.dumps({"prompts": [], "count": 0}, indent=2, sort_keys=True))
+        else:
+            print("No captured phase prompts found.")
+        return 0
+
+    prompt_files = sorted(
+        [f for f in prompts_dir.iterdir()
+         if f.is_file() and f.suffix == ".md" and f.name != "latest.md"],
+        reverse=True,
+    )
+
+    if args.json:
+        entries = [{"filename": f.name, "path": str(PHASE_PROMPTS_DIR / f.name)} for f in prompt_files]
+        print(json.dumps({"prompts": entries, "count": len(entries)}, indent=2, sort_keys=True))
+        return 0
+
+    if not prompt_files:
+        print("No captured phase prompts found.")
+        return 0
+
+    print(f"Captured phase prompts ({len(prompt_files)}):")
+    for f in prompt_files:
+        print(f"  {f.name}")
+    return 0
