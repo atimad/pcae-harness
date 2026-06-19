@@ -10,7 +10,7 @@ Phase 71W: Audit Handoff Summary Freshness
 
 ## Status
 
-active
+done
 
 ## Mode
 
