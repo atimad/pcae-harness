@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 71Q.1 Partial Task Finish Recovery (20260619-1431-phase-71q-1-partial-task-finish-recovery)
 - Phase 71Q Phase Prompt Queue Metadata Preservation (20260619-1408-phase-71q-phase-prompt-queue-metadata-preservation)
 - Phase 71P phase prompt queue bridge implementation (20260619-1343-phase-71p-phase-prompt-queue-bridge-implementation)
 - Phase 71O phase prompt queue bridge design (20260619-1330-phase-71o-phase-prompt-queue-bridge-design)
