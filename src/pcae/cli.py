@@ -418,6 +418,7 @@ from pcae.commands.phase import (
     run_phase_runner_plan,
     run_phase_runner_policy,
     run_phase_runner_readiness,
+    run_phase_runner_sim_fixture,
     run_phase_complete,
     run_phase_handoff,
     run_phase_handoff_prune,
@@ -5021,6 +5022,19 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     phase_runner_policy_parser.set_defaults(handler=run_phase_runner_policy)
+
+    phase_runner_sim_fixture_parser = phase_subparsers.add_parser(
+        "runner-sim-fixture",
+        help="Generate deterministic simulated queue entries for runner planning tests.",
+    )
+    phase_runner_sim_fixture_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_sim_fixture_parser.add_argument(
+        "--count", type=int, default=3,
+        help="Number of simulated entries to generate (default: 3, max: 10).",
+    )
+    phase_runner_sim_fixture_parser.set_defaults(handler=run_phase_runner_sim_fixture)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",

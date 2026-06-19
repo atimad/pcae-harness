@@ -3986,6 +3986,106 @@ def test_72b_runner_policy_matrix_entries_have_required_fields(
         assert entry["category"] in data["categories"]
 
 
+# Phase 72C — Runner Simulation Fixture Queue
+# ---------------------------------------------------------------------------
+
+
+def test_72c_sim_fixture_default_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-fixture", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["count"] == 3
+    assert len(data["entries"]) == 3
+    assert data["real_queue_mutated"] is False
+    assert data["entries"][0]["phase_id"] == "SIM-001"
+    assert data["entries"][0]["simulated"] is True
+
+
+def test_72c_sim_fixture_custom_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-fixture", "--count", "5", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["count"] == 5
+    assert data["entries"][-1]["phase_id"] == "SIM-005"
+
+
+def test_72c_sim_fixture_clamped(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-fixture", "--count", "50", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["count"] == 10
+
+
+def test_72c_sim_fixture_does_not_mutate_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-sim-fixture", "--json"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "list", "--json"])
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 0
+
+
+def test_72c_sim_fixture_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-fixture"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "SIM-001" in output
+    assert "Real queue mutated: no" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

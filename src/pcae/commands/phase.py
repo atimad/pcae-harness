@@ -2246,3 +2246,45 @@ def run_phase_runner_policy(args: argparse.Namespace) -> int:
 
     print(f"\n  Note: {_RUNNER_POLICY_NOTE}")
     return 0
+
+
+_SIM_FIXTURE_MAX = 10
+
+
+def _build_sim_fixture(count: int) -> list[dict]:
+    clamped = min(max(count, 1), _SIM_FIXTURE_MAX)
+    entries = []
+    for i in range(1, clamped + 1):
+        entries.append({
+            "title": f"SIM-{i:03d} Simulated phase {i}",
+            "phase_id": f"SIM-{i:03d}",
+            "source_type": "simulation",
+            "simulated": True,
+        })
+    return entries
+
+
+def run_phase_runner_sim_fixture(args: argparse.Namespace) -> int:
+    count = min(max(getattr(args, "count", 3), 1), _SIM_FIXTURE_MAX)
+    entries = _build_sim_fixture(count)
+
+    result = {
+        "count": len(entries),
+        "entries": entries,
+        "real_queue_mutated": False,
+        "note": "Simulated fixture entries only. Real phase queue is unchanged.",
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Simulation Fixture")
+    print("=" * 40)
+    print(f"  Simulated entries: {len(entries)}")
+    for e in entries:
+        print(f"    - {e['title']}")
+    print()
+    print(f"  Real queue mutated: no")
+    print(f"  Note: {result['note']}")
+    return 0

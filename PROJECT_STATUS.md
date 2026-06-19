@@ -2,15 +2,13 @@
 
 ## Current Phase
 
-Phase 72B: Runner Stop-Condition Policy Matrix.
+Phase 72C: Runner Simulation Fixture Queue.
 
-Phase 72B adds `pcae phase runner-policy` and `--json` exposing a documented
-stop-condition policy matrix for bounded runner behavior. Defines 16
-conditions across 4 categories: hard stop (10), recoverable stop (2),
-advisory warning (3), and continue allowed (1). Task finish partial failure
-references `pcae task finish recover`. Git lock issues reference `pcae doctor
-git-lock`. Human authority is explicitly stated as absolute. The policy is
-advisory only and does not execute or enforce behavior.
+Phase 72C adds `pcae phase runner-sim-fixture`, `--json`, and `--count N`
+for generating deterministic simulated queue entries (SIM-001 through
+SIM-010) for runner planning tests. Entries are in-memory only; the real
+phase queue is never mutated. No queue execution, prompt execution, or
+task creation.
 
 ## Milestone: Execution Chain Traceability Complete
 
