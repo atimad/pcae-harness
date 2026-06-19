@@ -6687,3 +6687,154 @@ def test_72n_preflight_human_output_states_no_execution(
     assert "Execution available: no" in output
     assert "Execution authorized: no" in output
     assert "design only" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 72O: safe queue fixture lifecycle
+# ---------------------------------------------------------------------------
+
+
+def test_72o_fixture_add_creates_entries(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "fixture-add", "--count", "2", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["added"] == 2
+    assert len(data["entries"]) == 2
+    assert data["entries"][0]["title"] == "QUEUE-FIXTURE-001"
+    assert data["entries"][0]["fixture"] is True
+    assert data["entries"][0]["execution_authorized"] is False
+    assert data["entries"][0]["source_type"] == "fixture"
+    assert data["entries"][1]["title"] == "QUEUE-FIXTURE-002"
+    assert data["queue_length"] == 2
+    assert "No execution performed" in data["note"]
+
+
+def test_72o_fixture_add_default_count(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "fixture-add", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["added"] == 1
+    assert data["count"] == 1
+    assert data["entries"][0]["title"] == "QUEUE-FIXTURE-001"
+
+
+def test_72o_fixture_validation_reports_valid_and_fixture_count(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "2"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "validate", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["valid"] is True
+    assert data["queue_ready"] is True
+    assert data["fixture_count"] == 2
+    assert data["queue_entry_count"] == 2
+
+
+def test_72o_fixture_clear_removes_only_fixtures(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        "Phase 72A: real entry",
+        {
+            "title": "QUEUE-FIXTURE-001",
+            "source_type": "fixture",
+            "fixture": True,
+            "execution_authorized": False,
+        },
+        "Phase 72B: another real entry",
+        {
+            "title": "QUEUE-FIXTURE-002",
+            "source_type": "fixture",
+            "fixture": True,
+            "execution_authorized": False,
+        },
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "fixture-clear", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["cleared"] == 2
+    assert data["remaining"] == 2
+
+    queue = json.loads(queue_path.read_text(encoding="utf-8"))
+    assert queue == ["Phase 72A: real entry", "Phase 72B: another real entry"]
+
+
+def test_72o_fixture_clear_on_empty_queue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text("[]", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "fixture-clear", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["cleared"] == 0
+    assert data["remaining"] == 0
+
+
+def test_72o_fixture_clear_no_fixtures(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(
+        json.dumps(["Phase 72A: real", "Phase 72B: also real"]), encoding="utf-8"
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "fixture-clear", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["cleared"] == 0
+    assert data["remaining"] == 2
+
+
+def test_72o_fixture_no_task_created(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    before_tasks = list((tmp_path / "tasks" / "active").glob("*.md"))
+
+    main(["phase", "queue", "fixture-add", "--count", "2"])
+    capsys.readouterr()
+
+    after_tasks = list((tmp_path / "tasks" / "active").glob("*.md"))
+    assert after_tasks == before_tasks
+
+
+def test_72o_fixture_human_output_no_execution(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "fixture-add", "--count", "1"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No execution performed" in output

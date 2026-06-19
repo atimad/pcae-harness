@@ -835,7 +835,11 @@ def run_phase_queue_hygiene(args: argparse.Namespace) -> int:
     return 0
 
 
-_SUPPORTED_SOURCE_TYPES = {"manual", "captured_prompt", "simulation"}
+_SUPPORTED_SOURCE_TYPES = {"manual", "captured_prompt", "simulation", "fixture"}
+
+_QUEUE_FIXTURE_MAX = 3
+
+_QUEUE_FIXTURE_TITLE_PREFIX = "QUEUE-FIXTURE-"
 
 _VALID_PHASE_ID_RE = re.compile(r"^\d+[A-Z](?:\.\d+)?$")
 
@@ -851,6 +855,7 @@ def _build_queue_validate(root: HarnessPath) -> dict:
             "queue_readable": False,
             "queue_entry_count": 0,
             "queue_ready": False,
+            "fixture_count": 0,
             "issues": [],
             "entries": [],
             "mutated": False,
@@ -866,6 +871,7 @@ def _build_queue_validate(root: HarnessPath) -> dict:
             "queue_readable": False,
             "queue_entry_count": 0,
             "queue_ready": False,
+            "fixture_count": 0,
             "issues": [f"queue not readable: {exc}"],
             "entries": [],
             "mutated": False,
@@ -879,6 +885,7 @@ def _build_queue_validate(root: HarnessPath) -> dict:
             "queue_readable": True,
             "queue_entry_count": 0,
             "queue_ready": False,
+            "fixture_count": 0,
             "issues": ["queue is not a JSON array"],
             "entries": [],
             "mutated": False,
@@ -889,6 +896,7 @@ def _build_queue_validate(root: HarnessPath) -> dict:
     entries: list[dict] = []
     all_issues: list[str] = []
     titles_seen: set[str] = set()
+    fixture_count = 0
 
     for i, entry in enumerate(queue):
         position = i + 1
@@ -909,13 +917,18 @@ def _build_queue_validate(root: HarnessPath) -> dict:
 
             forbidden_fields = {"execution_authorized", "execution_allowed"}
             for field in forbidden_fields:
-                if field in entry:
-                    entry_issues.append(f"contains forbidden field: {field}")
+                val = entry.get(field)
+                if val is True:
+                    entry_issues.append(f"contains forbidden field: {field}=true")
 
             phase_id = entry.get("phase_id")
             if phase_id is not None:
                 if not isinstance(phase_id, str) or not _VALID_PHASE_ID_RE.match(phase_id):
                     entry_issues.append(f"invalid phase_id: {phase_id}")
+
+            if source_type == "fixture" or entry.get("fixture") is True:
+                entry_result["fixture"] = True
+                fixture_count += 1
 
         if title in titles_seen:
             entry_issues.append("duplicate title")
@@ -941,11 +954,85 @@ def _build_queue_validate(root: HarnessPath) -> dict:
         "queue_readable": True,
         "queue_entry_count": entry_count,
         "queue_ready": entry_count > 0,
+        "fixture_count": fixture_count,
         "issues": all_issues,
         "entries": entries,
         "mutated": False,
         "note": "No execution performed. This is a read-only validation.",
     }
+
+
+def _build_queue_fixture_entries(count: int) -> list[dict]:
+    clamped = min(max(count, 1), _QUEUE_FIXTURE_MAX)
+    entries = []
+    for i in range(1, clamped + 1):
+        entries.append({
+            "title": f"{_QUEUE_FIXTURE_TITLE_PREFIX}{i:03d}",
+            "source_type": "fixture",
+            "fixture": True,
+            "execution_authorized": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+        })
+    return entries
+
+
+def run_phase_queue_fixture_add(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    count = min(max(getattr(args, "count", 1), 1), _QUEUE_FIXTURE_MAX)
+    entries = _build_queue_fixture_entries(count)
+    queue = _read_phase_queue(root)
+    queue.extend(entries)
+    _write_phase_queue(root, queue)
+
+    if args.json:
+        print(json.dumps({
+            "added": len(entries),
+            "count": count,
+            "entries": entries,
+            "queue_length": len(queue),
+            "mutated": True,
+            "note": "Fixture entries added for testing. No execution performed.",
+        }, indent=2, sort_keys=True))
+        return 0
+
+    print(f"Added {len(entries)} queue fixture entry/ies:")
+    for e in entries:
+        print(f"  - {e['title']}")
+    print(f"Queue length: {len(queue)}")
+    print("No execution performed.")
+    return 0
+
+
+def run_phase_queue_fixture_clear(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    queue = _read_phase_queue(root)
+    fixture_titles = set()
+    fixture_indices = []
+
+    for i, entry in enumerate(queue):
+        if isinstance(entry, dict) and (entry.get("source_type") == "fixture" or entry.get("fixture") is True):
+            fixture_titles.add(_phase_queue_entry_title(entry))
+            fixture_indices.append(i)
+
+    kept = [e for i, e in enumerate(queue) if i not in fixture_indices]
+    _write_phase_queue(root, kept)
+
+    if args.json:
+        print(json.dumps({
+            "cleared": len(fixture_indices),
+            "cleared_titles": sorted(fixture_titles),
+            "remaining": len(kept),
+            "mutated": True,
+            "note": "Only fixture entries removed. No execution performed.",
+        }, indent=2, sort_keys=True))
+        return 0
+
+    print(f"Cleared {len(fixture_indices)} fixture entry/ies.")
+    for title in sorted(fixture_titles):
+        print(f"  - {title}")
+    print(f"{len(kept)} non-fixture entries remain.")
+    print("No execution performed.")
+    return 0
 
 
 def run_phase_queue_validate(args: argparse.Namespace) -> int:

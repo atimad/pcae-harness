@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72N: Queue-to-Runner Preflight Bridge.
+Phase 72O: Safe Queue Fixture Lifecycle.
 
-Phase 72N extends `pcae phase runner-execution-preflight` to include real queue
-validation and queue approval status, bridging queue governance into the runner
-preflight gate. Execution remains `execution_available=false` and
-`execution_authorized=false`. No queue mutation, no task creation, no execution.
+Phase 72O adds `pcae phase queue fixture-add` and `fixture-clear` for creating and
+safely removing non-executable test fixture entries. Fixtures are explicitly marked
+`source_type=fixture`, `fixture=true`, `execution_authorized=false`. Queue validation
+recognizes fixtures as valid and reports `fixture_count`. No execution, no task creation.
 
 ## Milestone: Execution Chain Traceability Complete
 

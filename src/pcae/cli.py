@@ -441,6 +441,8 @@ from pcae.commands.phase import (
     run_phase_queue_approve,
     run_phase_queue_check,
     run_phase_queue_clear,
+    run_phase_queue_fixture_add,
+    run_phase_queue_fixture_clear,
     run_phase_queue_hygiene,
     run_phase_queue_list,
     run_phase_queue_show,
@@ -4812,6 +4814,34 @@ def build_parser() -> argparse.ArgumentParser:
         help="Confirm clearing placeholder entries (required with --clear-placeholders).",
     )
     phase_queue_hygiene_parser.set_defaults(handler=run_phase_queue_hygiene)
+
+    phase_queue_fixture_add_parser = phase_queue_subparsers.add_parser(
+        "fixture-add",
+        help="Add safe, non-executable fixture entries to the phase queue for testing.",
+    )
+    phase_queue_fixture_add_parser.add_argument(
+        "--count",
+        type=int,
+        default=1,
+        help="Number of fixture entries to add (default: 1, max: 3).",
+    )
+    phase_queue_fixture_add_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_fixture_add_parser.set_defaults(handler=run_phase_queue_fixture_add)
+
+    phase_queue_fixture_clear_parser = phase_queue_subparsers.add_parser(
+        "fixture-clear",
+        help="Remove only fixture entries from the phase queue, preserving non-fixture entries.",
+    )
+    phase_queue_fixture_clear_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_fixture_clear_parser.set_defaults(handler=run_phase_queue_fixture_clear)
 
     phase_queue_validate_parser = phase_queue_subparsers.add_parser(
         "validate",
