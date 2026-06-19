@@ -1526,3 +1526,79 @@ def run_phase_prompt_prune(args: argparse.Namespace) -> int:
         print(f"Pruned {len(to_prune)} of {total} prompt artifacts (kept {keep}).")
 
     return 0
+
+
+def run_phase_prompt_enqueue(args: argparse.Namespace) -> int:
+    import sys
+
+    root = HarnessPath.cwd()
+    file_arg: str | None = getattr(args, "file", None)
+    title_override: str | None = getattr(args, "title", None)
+    dry_run: bool = getattr(args, "dry_run", False)
+
+    if file_arg is not None:
+        prompt_path = root.join(PHASE_PROMPTS_DIR / file_arg)
+        if not prompt_path.is_file():
+            print(f"Error: prompt file not found: {file_arg}", file=sys.stderr)
+            return 1
+        metadata = _read_prompt_metadata(root)
+        if metadata and metadata.get("timestamped_path", "").endswith(file_arg):
+            source_path = metadata.get("timestamped_path", str(PHASE_PROMPTS_DIR / file_arg))
+            title = title_override or metadata.get("title", file_arg)
+            source_created = metadata.get("created_at")
+        else:
+            source_path = str(PHASE_PROMPTS_DIR / file_arg)
+            title = title_override or file_arg
+            source_created = None
+    else:
+        metadata = _read_prompt_metadata(root)
+        if metadata is None:
+            print("Error: no captured phase prompt found. Run pcae phase prompt-capture first.", file=sys.stderr)
+            return 1
+        title = title_override or metadata.get("title", "Untitled prompt")
+        source_path = metadata.get("latest_path", str(PHASE_PROMPTS_DIR / "latest.md"))
+        source_created = metadata.get("created_at")
+
+    queue = _read_phase_queue(root)
+    if title in queue:
+        if args.json:
+            print(json.dumps({
+                "error": "duplicate",
+                "title": title,
+                "queue_length": len(queue),
+                "mutated": False,
+            }, indent=2, sort_keys=True))
+        else:
+            print(f"Error: queue already contains: {title}")
+        return 1
+
+    result = {
+        "title": title,
+        "source_prompt_path": source_path,
+        "source_prompt_created_at": source_created,
+        "queue_length": len(queue) + 1,
+        "position": len(queue) + 1,
+        "mutated": not dry_run,
+        "dry_run": dry_run,
+    }
+
+    if dry_run:
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print(f"Dry run: would enqueue: {title}")
+            print(f"  Source: {source_path}")
+            print(f"  Position: {len(queue) + 1}")
+        return 0
+
+    queue.append(title)
+    _write_phase_queue(root, queue)
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print(f"Enqueued from prompt: {title}")
+        print(f"  Source: {source_path}")
+        print(f"  Position: {len(queue)}")
+        print(f"  Queue length: {len(queue)}")
+    return 0

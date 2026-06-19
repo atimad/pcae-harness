@@ -419,6 +419,7 @@ from pcae.commands.phase import (
     run_phase_handoff_prune,
     run_phase_handoff_show,
     run_phase_prompt_capture,
+    run_phase_prompt_enqueue,
     run_phase_prompt_hygiene,
     run_phase_prompt_list,
     run_phase_prompt_prune,
@@ -4909,6 +4910,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_prompt_prune_parser.set_defaults(handler=run_phase_prompt_prune)
+
+    phase_prompt_enqueue_parser = phase_subparsers.add_parser(
+        "prompt-enqueue",
+        help="Enqueue a captured phase prompt as a planning item.",
+    )
+    phase_prompt_enqueue_parser.add_argument(
+        "--file",
+        default=None,
+        metavar="FILENAME",
+        help="Specific timestamped prompt filename to enqueue (default: latest).",
+    )
+    phase_prompt_enqueue_parser.add_argument(
+        "--title",
+        default=None,
+        help="Override the queue item title (default: prompt title).",
+    )
+    phase_prompt_enqueue_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Report what would be enqueued without modifying the queue.",
+    )
+    phase_prompt_enqueue_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_prompt_enqueue_parser.set_defaults(handler=run_phase_prompt_enqueue)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",

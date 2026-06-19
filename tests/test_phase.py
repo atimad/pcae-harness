@@ -3963,3 +3963,184 @@ def test_71n_prompt_prune_json(
     assert exit_code == 0
     assert data["pruned"] == 2
     assert data["keep"] == 2
+
+
+# ---------------------------------------------------------------------------
+# Phase 71P: pcae phase prompt-enqueue
+# ---------------------------------------------------------------------------
+
+
+def test_71p_prompt_enqueue_latest(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72A — Feature X", "Implement feature X.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-enqueue"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Enqueued from prompt: 72A — Feature X" in output
+    queue = json.loads(
+        (tmp_path / ".pcae" / "phase-queue.json").read_text(encoding="utf-8")
+    )
+    assert "72A — Feature X" in queue
+
+
+def test_71p_prompt_enqueue_dry_run(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72B — Dry Run", "Dry run test.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-enqueue", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Dry run: would enqueue: 72B — Dry Run" in output
+    assert not (tmp_path / ".pcae" / "phase-queue.json").exists()
+
+
+def test_71p_prompt_enqueue_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72C — JSON", "JSON test.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-enqueue", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["title"] == "72C — JSON"
+    assert data["mutated"] is True
+    assert data["queue_length"] == 1
+    assert "source_prompt_path" in data
+    assert "source_prompt_created_at" in data
+
+
+def test_71p_prompt_enqueue_duplicate_detection(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72D — Duplicate", "Dup test.")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "prompt-enqueue"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "prompt-enqueue"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "already contains" in output
+
+
+def test_71p_prompt_enqueue_missing_prompt(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-enqueue"])
+
+    output = capsys.readouterr().err
+    assert exit_code == 1
+    assert "no captured phase prompt found" in output
+
+
+def test_71p_prompt_enqueue_title_override(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72E — Original", "Original.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-enqueue", "--title", "Custom Queue Title",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Custom Queue Title" in output
+    queue = json.loads(
+        (tmp_path / ".pcae" / "phase-queue.json").read_text(encoding="utf-8")
+    )
+    assert "Custom Queue Title" in queue
+
+
+def test_71p_prompt_enqueue_by_file(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+    (prompts_dir / "specific-20260619T120000Z.md").write_text(
+        "Specific prompt.", encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-enqueue",
+        "--file", "specific-20260619T120000Z.md",
+        "--title", "Specific Phase",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Specific Phase" in output
+
+
+def test_71p_prompt_enqueue_file_not_found(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-enqueue",
+        "--file", "nonexistent-20260619T000000Z.md",
+    ])
+
+    output = capsys.readouterr().err
+    assert exit_code == 1
+    assert "not found" in output
+
+
+def test_71p_prompt_enqueue_dry_run_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72F — DryJSON", "Dry JSON.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-enqueue", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["dry_run"] is True
+    assert data["mutated"] is False
+    assert data["title"] == "72F — DryJSON"
+
+
+def test_71p_prompt_enqueue_does_not_execute(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    _capture_prompt(tmp_path, "72G — No Execute", "Do not execute me.")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "prompt-enqueue"])
+
+    capsys.readouterr()
+    assert exit_code == 0
+    assert not list((tmp_path / "tasks" / "active").glob("*72g*"))
+    assert (tmp_path / ".pcae" / "phase-prompts" / "latest.md").read_text(
+        encoding="utf-8"
+    ) == "Do not execute me."
