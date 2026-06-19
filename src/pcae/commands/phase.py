@@ -579,6 +579,94 @@ def run_phase_queue_clear(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_phase_queue_check(args: argparse.Namespace) -> int:
+    from pcae.core.git_status import read_git_changes
+    from pcae.core.health import build_health_data, is_healthy
+    from pcae.core.tasks import diagnose_task_memory
+
+    from pcae.commands.push import assess_push_readiness
+
+    root = HarnessPath.cwd()
+    queue = _read_phase_queue(root)
+    reasons: list[str] = []
+
+    if not queue:
+        reasons.append("phase queue is empty or absent")
+
+    changes = read_git_changes(root)
+    if changes:
+        reasons.append("working tree is dirty")
+
+    health_data = build_health_data(root)
+    if not is_healthy(health_data):
+        reasons.append("health check failed")
+
+    check_result = run_checks(root)
+    if not check_result.passed:
+        reasons.append("pcae check failed")
+
+    active_task = find_latest_active_task(root)
+    if active_task is not None:
+        reasons.append(f"active task exists: {active_task.task_id}")
+
+    diagnostics = diagnose_task_memory(root)
+    if diagnostics.has_errors or diagnostics.has_warnings:
+        reasons.append("task memory has inconsistencies")
+
+    push = assess_push_readiness(root)
+    if push.mode == "not_ready":
+        reasons.append(f"push check is blocked: {push.mode}")
+
+    handoff_path = root.join(HANDOFFS_DIR / "latest.json")
+    has_handoff = handoff_path.is_file()
+
+    ready = len(reasons) == 0 and len(queue) > 0
+
+    result = {
+        "ready": ready,
+        "queue_length": len(queue),
+        "queue_present": len(queue) > 0,
+        "next_queued": queue[0] if queue else None,
+        "working_tree": "clean" if not changes else f"{len(changes)} changed",
+        "health_passed": is_healthy(health_data),
+        "check_passed": check_result.passed,
+        "active_task": active_task.task_id if active_task else None,
+        "task_memory_clean": not diagnostics.has_errors and not diagnostics.has_warnings,
+        "push_mode": push.mode,
+        "latest_handoff_available": has_handoff,
+        "reasons": reasons,
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if ready else 1
+
+    if not queue:
+        print("Phase queue readiness: no queue")
+        print("  Phase queue is empty or absent.")
+        return 1
+
+    if ready:
+        print("Phase queue readiness: ready")
+        print(f"  Queue: {len(queue)} entries")
+        print(f"  Next: {queue[0]}")
+        print("  Working tree: clean")
+        print("  Health: passed")
+        print("  Check: passed")
+        print("  Active task: none")
+        print("  Task memory: clean")
+        print(f"  Push: {push.mode}")
+        if has_handoff:
+            print("  Latest handoff: available")
+        return 0
+
+    print("Phase queue readiness: not ready")
+    print(f"  Queue: {len(queue)} entries")
+    for reason in reasons:
+        print(f"  - {reason}")
+    return 1
+
+
 def _build_manual_steps(next_agent: str) -> list[str]:
     return [
         "Close or reset the current AI session if needed.",

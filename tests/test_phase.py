@@ -2238,6 +2238,159 @@ def test_70x_prune_dry_run_json(
 
 
 # ---------------------------------------------------------------------------
+# Phase queue readiness check (Phase 71E)
+# ---------------------------------------------------------------------------
+
+
+def test_71e_queue_check_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "add", "Phase 72A: test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "ready" in output.lower()
+    assert "Queue: 1 entries" in output
+
+
+def test_71e_queue_check_no_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "no queue" in output.lower()
+
+
+def test_71e_queue_check_empty_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.parent.mkdir(parents=True, exist_ok=True)
+    queue_path.write_text("[]", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "empty" in output.lower() or "no queue" in output.lower()
+
+
+def test_71e_queue_check_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Blocking task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "add", "Phase 72A: test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "active task exists" in output
+
+
+def test_71e_queue_check_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "add", "Phase 72A: test"])
+    capsys.readouterr()
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+
+    exit_code = main(["phase", "queue", "check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "dirty" in output.lower()
+
+
+def test_71e_queue_check_json_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "add", "Phase 72A: test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "check", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["ready"] is True
+    assert data["queue_present"] is True
+    assert data["queue_length"] == 1
+    assert data["next_queued"] == "Phase 72A: test"
+    assert data["health_passed"] is True
+    assert data["check_passed"] is True
+    assert data["active_task"] is None
+    assert data["task_memory_clean"] is True
+    assert data["reasons"] == []
+
+
+def test_71e_queue_check_json_not_ready(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Blocking task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "add", "Phase 72A: test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "check", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    data = _json.loads(output)
+    assert data["ready"] is False
+    assert len(data["reasons"]) > 0
+
+
+# ---------------------------------------------------------------------------
 # Phase queue visibility in handoff (Phase 71D)
 # ---------------------------------------------------------------------------
 

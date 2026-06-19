@@ -417,6 +417,7 @@ from pcae.commands.phase import (
     run_phase_handoff_prune,
     run_phase_handoff_show,
     run_phase_queue_add,
+    run_phase_queue_check,
     run_phase_queue_clear,
     run_phase_queue_list,
     run_phase_queue_show,
@@ -4721,6 +4722,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_queue_clear_parser.set_defaults(handler=run_phase_queue_clear)
+
+    phase_queue_check_parser = phase_queue_subparsers.add_parser(
+        "check",
+        help="Check readiness to start executing queued phases.",
+    )
+    phase_queue_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON readiness check.",
+    )
+    phase_queue_check_parser.set_defaults(handler=run_phase_queue_check)
 
     phase_audit_parser = phase_subparsers.add_parser(
         "audit",
