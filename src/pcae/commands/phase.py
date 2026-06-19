@@ -1879,3 +1879,127 @@ def run_phase_autonomy_summary(args: argparse.Namespace) -> int:
     print()
     print(f"  Note: {summary['agent_neutral_note']}")
     return 0
+
+
+def _build_runner_readiness(root: HarnessPath) -> dict:
+    from pcae.core.git_status import read_git_changes
+    from pcae.core.health import build_health_data, is_healthy
+    from pcae.core.tasks import diagnose_task_memory
+
+    from pcae.commands.push import assess_push_readiness
+
+    blocking: list[str] = []
+    advisory: list[str] = []
+
+    changes = read_git_changes(root)
+    if changes:
+        blocking.append("working tree is dirty")
+
+    health_data = build_health_data(root)
+    healthy = is_healthy(health_data)
+    if not healthy:
+        blocking.append("health check failed")
+
+    check_result = run_checks(root)
+    if not check_result.passed:
+        blocking.append("pcae check failed")
+
+    active_task = find_latest_active_task(root)
+    if active_task is not None:
+        blocking.append(f"active task exists: {active_task.task_id}")
+
+    diagnostics = diagnose_task_memory(root)
+    task_memory_clean = not diagnostics.has_errors and not diagnostics.has_warnings
+    if not task_memory_clean:
+        blocking.append("task memory has inconsistencies")
+
+    push = assess_push_readiness(root)
+    unpushed = push.mode != "nothing_to_push" and push.mode != "post_finish_closure"
+    if push.mode == "not_ready":
+        blocking.append("push check is blocked")
+    elif unpushed:
+        advisory.append(f"unpushed commits present ({push.mode})")
+
+    queue = _read_phase_queue(root)
+    queue_present = len(queue) > 0
+
+    audit = _read_latest_audit(root)
+    audit_available = audit is not None
+    audit_warning_count = len(audit.get("warnings", [])) if audit else 0
+    if audit_warning_count > 0:
+        advisory.append(f"audit has {audit_warning_count} warning(s)")
+
+    handoff_path = root.join(HANDOFFS_DIR / "latest.json")
+    handoff_available = handoff_path.is_file()
+    if not handoff_available:
+        advisory.append("no handoff artifact available")
+
+    autonomy_path = root.join(AUTONOMY_SUMMARIES_DIR / "latest.json")
+    autonomy_available = autonomy_path.is_file()
+
+    environment_ready = len(blocking) == 0
+    queue_ready = queue_present
+    runner_ready = environment_ready and queue_ready
+
+    return {
+        "environment_ready": environment_ready,
+        "queue_ready": queue_ready,
+        "runner_ready": runner_ready,
+        "blocking_reasons": blocking,
+        "advisory_reasons": advisory,
+        "active_task": active_task.task_id if active_task else None,
+        "working_tree": "clean" if not changes else f"{len(changes)} changed",
+        "health_status": "healthy" if healthy else "unhealthy",
+        "check_passed": check_result.passed,
+        "task_memory_status": "clean" if task_memory_clean else "issues",
+        "push_state": push.mode,
+        "queue_length": len(queue),
+        "audit_available": audit_available,
+        "audit_warning_count": audit_warning_count,
+        "latest_handoff_present": handoff_available,
+        "autonomy_summary_present": autonomy_available,
+    }
+
+
+def run_phase_runner_readiness(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_runner_readiness(root)
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Phase Runner Readiness")
+    print("=" * 40)
+    print(f"  Environment ready: {'yes' if result['environment_ready'] else 'NO'}")
+    print(f"  Queue ready: {'yes' if result['queue_ready'] else 'no (empty)'}")
+    print(f"  Runner ready: {'yes' if result['runner_ready'] else 'NO'}")
+    print()
+    print("  Environment state:")
+    print(f"    Working tree: {result['working_tree']}")
+    print(f"    Health: {result['health_status']}")
+    print(f"    Check: {'passed' if result['check_passed'] else 'FAILED'}")
+    print(f"    Task memory: {result['task_memory_status']}")
+    print(f"    Push state: {result['push_state']}")
+    print(f"    Active task: {result['active_task'] or 'none'}")
+    print()
+    print("  Queue state:")
+    print(f"    Queue entries: {result['queue_length']}")
+    print(f"    Audit available: {'yes' if result['audit_available'] else 'no'}")
+    print(f"    Audit warnings: {result['audit_warning_count']}")
+    print(f"    Handoff present: {'yes' if result['latest_handoff_present'] else 'no'}")
+    print(f"    Autonomy summary: {'yes' if result['autonomy_summary_present'] else 'no'}")
+
+    if result["blocking_reasons"]:
+        print()
+        print("  Blocking reasons:")
+        for r in result["blocking_reasons"]:
+            print(f"    - {r}")
+
+    if result["advisory_reasons"]:
+        print()
+        print("  Advisory:")
+        for r in result["advisory_reasons"]:
+            print(f"    - {r}")
+
+    return 0

@@ -3611,6 +3611,121 @@ def test_71y_autonomy_summary_with_audit(
     assert data["latest_completed_phase"] == "80A"
 
 
+# Phase 71Z — Phase Queue Runner Readiness Contract
+# ---------------------------------------------------------------------------
+
+
+def test_71z_runner_readiness_clean_idle(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-readiness", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["environment_ready"] is True
+    assert data["queue_ready"] is False
+    assert data["runner_ready"] is False
+    assert data["blocking_reasons"] == []
+    assert data["working_tree"] == "clean"
+    assert data["health_status"] == "healthy"
+    assert data["check_passed"] is True
+    assert data["task_memory_status"] == "clean"
+    assert data["active_task"] is None
+
+
+def test_71z_runner_readiness_with_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Test phase item"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-readiness", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["environment_ready"] is True
+    assert data["queue_ready"] is True
+    assert data["runner_ready"] is True
+    assert data["queue_length"] >= 1
+
+
+def test_71z_runner_readiness_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    (tmp_path / "dirty.txt").write_text("dirty", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-readiness", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["environment_ready"] is False
+    assert data["runner_ready"] is False
+    assert any("dirty" in r for r in data["blocking_reasons"])
+
+
+def test_71z_runner_readiness_active_task_blocks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Blocking task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-readiness", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["environment_ready"] is False
+    assert data["active_task"] is not None
+    assert any("active task" in r for r in data["blocking_reasons"])
+
+
+def test_71z_runner_readiness_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-readiness"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Environment ready:" in output
+    assert "Queue ready:" in output
+    assert "Runner ready:" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

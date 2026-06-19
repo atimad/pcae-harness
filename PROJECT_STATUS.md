@@ -2,16 +2,14 @@
 
 ## Current Phase
 
-Phase 71Y: Autonomy Comparison Run Summary Artifact.
+Phase 71Z: Phase Queue Runner Readiness Contract.
 
-Phase 71Y adds `pcae phase autonomy-summary`, `--json`, and `--save` for
-read-only governance fact summaries useful for agent autonomy comparisons.
-Reports phases detected, warning count, latest completed phase, recovery
-command observations, active task, working tree, health, push status, latest
-handoff summary, and an agent-neutral note. `--save` persists to
-`.pcae/autonomy-summaries/latest.json`. Missing audit or handoff artifacts
-are handled gracefully. No phase execution, queue mutation, or subjective
-agent ranking.
+Phase 71Z adds `pcae phase runner-readiness` and `--json` for read-only
+three-tier readiness assessment: environment ready (clean tree, healthy,
+check passed, no active task, task memory clean), queue ready (queue present
+and non-empty), and runner ready (both environment and queue ready). Reports
+blocking reasons, advisory reasons, and full governance state. Does not
+execute queue items, create tasks, or mutate state.
 
 ## Milestone: Execution Chain Traceability Complete
 

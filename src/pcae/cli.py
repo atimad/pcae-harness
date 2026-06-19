@@ -415,6 +415,7 @@ from pcae.commands.phase import (
     run_phase_audit,
     run_phase_audit_show,
     run_phase_autonomy_summary,
+    run_phase_runner_readiness,
     run_phase_complete,
     run_phase_handoff,
     run_phase_handoff_prune,
@@ -4987,6 +4988,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--save", action="store_true", help="Save summary artifact to .pcae/autonomy-summaries/."
     )
     phase_autonomy_summary_parser.set_defaults(handler=run_phase_autonomy_summary)
+
+    phase_runner_readiness_parser = phase_subparsers.add_parser(
+        "runner-readiness",
+        help="Check environment, queue, and runner readiness for bounded phase execution.",
+    )
+    phase_runner_readiness_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_readiness_parser.set_defaults(handler=run_phase_runner_readiness)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",
