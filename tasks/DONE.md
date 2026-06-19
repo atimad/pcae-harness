@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 71S Codex Autonomy Comparison Handoff Note (20260619-1518-phase-71s-codex-autonomy-comparison-handoff-note)
 - Phase 71R Phase Prompt Queue Round-Trip Validation (20260619-1457-phase-71r-phase-prompt-queue-round-trip-validation)
 - Phase 71Q.1 Partial Task Finish Recovery (20260619-1431-phase-71q-1-partial-task-finish-recovery)
 - Phase 71Q Phase Prompt Queue Metadata Preservation (20260619-1408-phase-71q-phase-prompt-queue-metadata-preservation)

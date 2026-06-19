@@ -10,7 +10,7 @@ Phase 71S Codex Autonomy Comparison Handoff Note
 
 ## Status
 
-active
+done
 
 ## Mode
 
