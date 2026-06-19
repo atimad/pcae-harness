@@ -1203,3 +1203,80 @@ def run_phase_audit_show(args: argparse.Namespace) -> int:
             print(f"    - {w}")
 
     return 0
+
+
+PHASE_PROMPTS_DIR = Path(".pcae") / "phase-prompts"
+
+
+def _slugify(title: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
+    return slug[:80] if slug else "untitled"
+
+
+def run_phase_prompt_capture(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+
+    text: str | None = getattr(args, "text", None)
+    file_path: str | None = getattr(args, "file", None)
+    use_stdin: bool = getattr(args, "stdin", False)
+
+    sources = sum([text is not None, file_path is not None, use_stdin])
+    if sources == 0:
+        print("Error: one of --text, --file, or --stdin is required.")
+        return 1
+    if sources > 1:
+        print("Error: only one of --text, --file, or --stdin may be specified.")
+        return 1
+
+    if text is not None:
+        content = text
+    elif file_path is not None:
+        import os
+        resolved = Path(file_path)
+        if not resolved.is_absolute():
+            resolved = Path(os.getcwd()) / resolved
+        if not resolved.is_file():
+            print(f"Error: file not found: {file_path}")
+            return 1
+        content = resolved.read_text(encoding="utf-8")
+    else:
+        import sys
+        content = sys.stdin.read()
+
+    title: str = args.title
+    now = datetime.now(timezone.utc)
+    slug = _slugify(title)
+    ts_str = now.strftime("%Y%m%dT%H%M%SZ")
+    ts_filename = f"{slug}-{ts_str}.md"
+
+    prompts_dir = root.join(PHASE_PROMPTS_DIR)
+    prompts_dir.mkdir(parents=True, exist_ok=True)
+
+    ts_path = prompts_dir / ts_filename
+    ts_path.write_text(content, encoding="utf-8")
+
+    latest_path = prompts_dir / "latest.md"
+    latest_path.write_text(content, encoding="utf-8")
+
+    metadata = {
+        "title": title,
+        "created_at": now.isoformat(),
+        "slug": slug,
+        "timestamped_path": str(PHASE_PROMPTS_DIR / ts_filename),
+        "latest_path": str(PHASE_PROMPTS_DIR / "latest.md"),
+    }
+
+    metadata_path = prompts_dir / "latest.json"
+    with metadata_path.open("w", encoding="utf-8", newline="\n") as f:
+        json.dump(metadata, f, indent=2, sort_keys=True)
+        f.write("\n")
+
+    if args.json:
+        print(json.dumps(metadata, indent=2, sort_keys=True))
+        return 0
+
+    print(f"Captured phase prompt: {title}")
+    print(f"  Timestamped: {PHASE_PROMPTS_DIR / ts_filename}")
+    print(f"  Latest: {PHASE_PROMPTS_DIR / 'latest.md'}")
+    print(f"  Created: {now.isoformat()}")
+    return 0

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import subprocess
 
@@ -3317,3 +3318,199 @@ def run_git(root: Path, *args: str) -> None:
         capture_output=True,
         text=True,
     )
+
+
+def write_file(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+
+
+# ---------------------------------------------------------------------------
+# Phase 71K: pcae phase prompt-capture
+# ---------------------------------------------------------------------------
+
+
+def test_71k_prompt_capture_text(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-capture",
+        "--title", "71L — Phase Prompt Show",
+        "--text", "Implement prompt show command.",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Captured phase prompt: 71L — Phase Prompt Show" in output
+    assert (tmp_path / ".pcae" / "phase-prompts" / "latest.md").is_file()
+    assert (tmp_path / ".pcae" / "phase-prompts" / "latest.md").read_text(
+        encoding="utf-8"
+    ) == "Implement prompt show command."
+
+
+def test_71k_prompt_capture_file(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    prompt_file = tmp_path / "my-prompt.md"
+    prompt_file.write_text("File-based prompt content.\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-capture",
+        "--title", "71K File Test",
+        "--file", str(prompt_file),
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Captured phase prompt: 71K File Test" in output
+    assert (tmp_path / ".pcae" / "phase-prompts" / "latest.md").read_text(
+        encoding="utf-8"
+    ) == "File-based prompt content.\n"
+
+
+def test_71k_prompt_capture_stdin(tmp_path: Path, monkeypatch, capsys) -> None:
+    import io
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("sys.stdin", io.StringIO("Stdin prompt content."))
+
+    exit_code = main([
+        "phase", "prompt-capture",
+        "--title", "71K Stdin Test",
+        "--stdin",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Captured phase prompt: 71K Stdin Test" in output
+    assert (tmp_path / ".pcae" / "phase-prompts" / "latest.md").read_text(
+        encoding="utf-8"
+    ) == "Stdin prompt content."
+
+
+def test_71k_prompt_capture_creates_timestamped_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main([
+        "phase", "prompt-capture",
+        "--title", "Timestamped Test",
+        "--text", "Timestamped content.",
+    ])
+
+    capsys.readouterr()
+    prompts_dir = tmp_path / ".pcae" / "phase-prompts"
+    ts_files = [f for f in prompts_dir.iterdir() if f.name.startswith("timestamped-test-")]
+    assert len(ts_files) == 1
+    assert ts_files[0].read_text(encoding="utf-8") == "Timestamped content."
+
+
+def test_71k_prompt_capture_updates_latest(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "prompt-capture", "--title", "First", "--text", "First prompt."])
+    capsys.readouterr()
+    main(["phase", "prompt-capture", "--title", "Second", "--text", "Second prompt."])
+    capsys.readouterr()
+
+    latest = (tmp_path / ".pcae" / "phase-prompts" / "latest.md").read_text(encoding="utf-8")
+    assert latest == "Second prompt."
+    metadata = json.loads(
+        (tmp_path / ".pcae" / "phase-prompts" / "latest.json").read_text(encoding="utf-8")
+    )
+    assert metadata["title"] == "Second"
+
+
+def test_71k_prompt_capture_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-capture",
+        "--title", "JSON Output Test",
+        "--text", "JSON prompt.",
+        "--json",
+    ])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["title"] == "JSON Output Test"
+    assert "created_at" in data
+    assert data["latest_path"] == ".pcae/phase-prompts/latest.md"
+    assert "timestamped_path" in data
+
+
+def test_71k_prompt_capture_gitignored(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "prompt-capture", "--title", "Git Test", "--text", "git test."])
+    capsys.readouterr()
+
+    result = subprocess.run(
+        ["git", "status", "--porcelain", ".pcae/phase-prompts/"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.stdout.strip() == ""
+
+
+def test_71k_prompt_capture_no_source_error(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-capture",
+        "--title", "No Source",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "one of --text, --file, or --stdin is required" in output
+
+
+def test_71k_prompt_capture_file_not_found(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main([
+        "phase", "prompt-capture",
+        "--title", "Missing File",
+        "--file", "/nonexistent/file.md",
+    ])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "file not found" in output
+
+
+def test_71k_prompt_capture_template_includes_phase_prompts(
+    tmp_path: Path,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    gitignore = (tmp_path / ".pcae" / ".gitignore").read_text(encoding="utf-8")
+    assert "phase-prompts/" in gitignore

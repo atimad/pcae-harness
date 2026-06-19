@@ -107,6 +107,7 @@ lifecycle-reviews/
 handoffs/
 phase-queue.json
 phase-audits/
+phase-prompts/
 """,
     Path(".pcae/exports/.gitignore"): """governance-bundle-*.json
 """,

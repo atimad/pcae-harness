@@ -418,6 +418,7 @@ from pcae.commands.phase import (
     run_phase_handoff,
     run_phase_handoff_prune,
     run_phase_handoff_show,
+    run_phase_prompt_capture,
     run_phase_queue_add,
     run_phase_queue_check,
     run_phase_queue_clear,
@@ -4807,6 +4808,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_audit_show_parser.set_defaults(handler=run_phase_audit_show)
+
+    phase_prompt_capture_parser = phase_subparsers.add_parser(
+        "prompt-capture",
+        help="Capture a phase prompt as a local runtime artifact.",
+    )
+    phase_prompt_capture_parser.add_argument(
+        "--title",
+        required=True,
+        help="Title for the captured phase prompt.",
+    )
+    phase_prompt_capture_parser.add_argument(
+        "--text",
+        default=None,
+        help="Prompt text to capture.",
+    )
+    phase_prompt_capture_parser.add_argument(
+        "--file",
+        default=None,
+        help="Path to a file containing the prompt text.",
+    )
+    phase_prompt_capture_parser.add_argument(
+        "--stdin",
+        action="store_true",
+        default=False,
+        help="Read prompt text from stdin.",
+    )
+    phase_prompt_capture_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_prompt_capture_parser.set_defaults(handler=run_phase_prompt_capture)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",

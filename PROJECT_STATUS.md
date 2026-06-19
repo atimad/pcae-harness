@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 71J: Post-Clear Continuity Validation.
+Phase 71K: Phase Prompt Capture.
 
 ## Milestone: Execution Chain Traceability Complete
 
