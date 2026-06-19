@@ -10,7 +10,7 @@ Phase 71K phase prompt capture
 
 ## Status
 
-active
+done
 
 ## Mode
 
