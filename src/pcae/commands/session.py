@@ -33,13 +33,15 @@ from pcae.core.provenance import (
     find_active_session,
 )
 from pcae.core.session import (
+    ContinuityReport,
     SessionUpdate,
+    build_continuity_report,
     read_session_snapshot,
     update_session_snapshot,
     write_session_snapshot,
 )
 
-from pcae.commands.phase import HANDOFFS_DIR, _read_latest_audit
+from pcae.commands.phase import HANDOFFS_DIR, _read_latest_audit, _read_phase_queue
 from pcae.core.tasks import find_latest_active_task
 
 
@@ -404,6 +406,88 @@ def print_session_snapshot(data: dict) -> None:
     print_list("Blockers", data.get("blockers", []))
     print_list("Warnings", data.get("warnings", []))
     print_list("Architectural notes", data.get("architectural_notes", []))
+
+
+def run_session_continuity_check(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    handoff = _load_latest_handoff(root)
+    audit = _read_latest_audit(root)
+    queue = _read_phase_queue(root)
+
+    report = build_continuity_report(
+        root, handoff_data=handoff, audit_data=audit, queue=queue,
+    )
+
+    if args.json:
+        print(json.dumps(_continuity_report_to_dict(report), indent=2, sort_keys=True))
+        return 0 if report.suitable_for_continuation else 1
+
+    print("Continuity check")
+    print(f"  Branch: {report.branch}")
+    print(f"  Working tree: {report.working_tree}")
+    print(f"  Health: {report.health_status}")
+    print(f"  Check: {'passed' if report.check_passed else 'failed'}")
+    print(f"  Task state: {report.task_state}")
+    if report.active_task_id:
+        print(f"  Active task: {report.active_task_id}")
+    print(f"  Task memory: {report.task_memory_status}")
+    print(f"  Push: {report.push_mode}")
+    print()
+    if report.handoff_present:
+        print(f"  Handoff: present (created {report.handoff_created_at})")
+        print(f"  Handoff summary: {report.handoff_summary}")
+    else:
+        print("  Handoff: missing")
+    if report.audit_present:
+        idle_note = ", healthy idle" if report.audit_healthy_idle else ""
+        print(
+            f"  Audit: {report.audit_phases_detected} phases, "
+            f"{report.audit_warning_count} warnings"
+            f"{idle_note} (created {report.audit_created_at})"
+        )
+    else:
+        print("  Audit: missing")
+    if report.phase_queue_present:
+        print(f"  Phase queue: {report.phase_queue_count} entries")
+    else:
+        print("  Phase queue: empty")
+    print()
+    if report.issues:
+        print("  Issues:")
+        for issue in report.issues:
+            print(f"    - {issue}")
+        print()
+    print(
+        f"  Suitable for continuation: "
+        f"{'yes' if report.suitable_for_continuation else 'no'}"
+    )
+    return 0 if report.suitable_for_continuation else 1
+
+
+def _continuity_report_to_dict(report: ContinuityReport) -> dict:
+    return {
+        "active_task_id": report.active_task_id,
+        "active_task_title": report.active_task_title,
+        "audit_created_at": report.audit_created_at,
+        "audit_healthy_idle": report.audit_healthy_idle,
+        "audit_phases_detected": report.audit_phases_detected,
+        "audit_present": report.audit_present,
+        "audit_warning_count": report.audit_warning_count,
+        "branch": report.branch,
+        "check_passed": report.check_passed,
+        "handoff_created_at": report.handoff_created_at,
+        "handoff_present": report.handoff_present,
+        "handoff_summary": report.handoff_summary,
+        "health_status": report.health_status,
+        "issues": list(report.issues),
+        "phase_queue_count": report.phase_queue_count,
+        "phase_queue_present": report.phase_queue_present,
+        "push_mode": report.push_mode,
+        "suitable_for_continuation": report.suitable_for_continuation,
+        "task_memory_status": report.task_memory_status,
+        "task_state": report.task_state,
+        "working_tree": report.working_tree,
+    }
 
 
 def print_list(title: str, values: list[Any]) -> None:

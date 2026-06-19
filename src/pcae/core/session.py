@@ -133,6 +133,121 @@ def summarize_git_changes(changes: tuple[GitChange, ...]) -> str:
     return f"{len(changes)} changed files"
 
 
+@dataclass(frozen=True)
+class ContinuityReport:
+    branch: str
+    working_tree: str
+    health_status: str
+    check_passed: bool
+    task_state: str
+    active_task_id: str | None
+    active_task_title: str | None
+    handoff_present: bool
+    handoff_summary: str | None
+    handoff_created_at: str | None
+    audit_present: bool
+    audit_phases_detected: int | None
+    audit_warning_count: int | None
+    audit_created_at: str | None
+    audit_healthy_idle: bool | None
+    phase_queue_present: bool
+    phase_queue_count: int
+    push_mode: str
+    task_memory_status: str
+    suitable_for_continuation: bool
+    issues: tuple[str, ...]
+
+
+def build_continuity_report(
+    root: HarnessPath,
+    *,
+    handoff_data: dict | None = None,
+    audit_data: dict | None = None,
+    queue: list[str] | None = None,
+) -> ContinuityReport:
+    from pcae.core.git_status import read_git_branch, read_git_changes
+    from pcae.core.health import build_health_data, is_healthy
+    from pcae.core.check import run_checks
+    from pcae.core.tasks import diagnose_task_memory
+
+    branch = read_git_branch(root)
+    changes = read_git_changes(root)
+    working_tree = "clean" if not changes else f"{len(changes)} changed files"
+
+    health_data = build_health_data(root)
+    health_status: str = health_data["overall_status"]
+    health_ok = is_healthy(health_data)
+
+    check_result = run_checks(root)
+    check_passed = check_result.passed
+
+    active_task = find_latest_active_task(root)
+    task_state = "active" if active_task else "idle"
+    task_id = active_task.task_id if active_task else None
+    task_title = active_task.title if active_task else None
+
+    diagnostics = diagnose_task_memory(root)
+    task_memory_status = "clean" if not diagnostics.has_errors else "inconsistent"
+
+    handoff_present = handoff_data is not None
+    handoff_summary = handoff_data.get("summary") if handoff_data else None
+    handoff_created_at = handoff_data.get("created_at") if handoff_data else None
+
+    audit_present = audit_data is not None
+    audit_phases = audit_data.get("phases_detected") if audit_data else None
+    audit_warnings = len(audit_data.get("warnings", [])) if audit_data else None
+    audit_created_at = audit_data.get("created_at") if audit_data else None
+    audit_healthy_idle = audit_data.get("healthy_idle") if audit_data else None
+
+    queue = queue or []
+    phase_queue_present = len(queue) > 0
+    phase_queue_count = len(queue)
+
+    push_mode = "nothing_to_push"
+    if changes:
+        push_mode = "dirty_tree"
+
+    issues: list[str] = []
+    if not health_ok:
+        issues.append(f"Health is not healthy: {health_status}")
+    if not check_passed:
+        issues.append("Check did not pass")
+    if not handoff_present:
+        issues.append("No handoff artifact found")
+    if not audit_present:
+        issues.append("No audit artifact found")
+    if changes:
+        issues.append("Working tree is not clean")
+    if task_memory_status != "clean":
+        issues.append("Task memory has inconsistencies")
+
+    suitable = health_ok and check_passed and not changes
+
+    return ContinuityReport(
+        branch=branch,
+        working_tree=working_tree,
+        health_status=health_status,
+        check_passed=check_passed,
+        task_state=task_state,
+        active_task_id=task_id,
+        active_task_title=task_title,
+        handoff_present=handoff_present,
+        handoff_summary=handoff_summary,
+        handoff_created_at=handoff_created_at,
+        audit_present=audit_present,
+        audit_phases_detected=audit_phases,
+        audit_warning_count=audit_warnings,
+        audit_created_at=audit_created_at,
+        audit_healthy_idle=audit_healthy_idle,
+        phase_queue_present=phase_queue_present,
+        phase_queue_count=phase_queue_count,
+        push_mode=push_mode,
+        task_memory_status=task_memory_status,
+        suitable_for_continuation=suitable,
+        issues=tuple(issues),
+    )
+
+
 def session_continuity_status(check_result) -> str:
     if any("Session continuity verified." in info.text for info in check_result.infos):
         return "verified"

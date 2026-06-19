@@ -404,6 +404,7 @@ from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.session import (
     run_session_bootstrap,
+    run_session_continuity_check,
     run_session_end,
     run_session_read,
     run_session_start,
@@ -4466,6 +4467,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON bootstrap result.",
     )
     session_bootstrap_parser.set_defaults(handler=run_session_bootstrap)
+
+    session_continuity_check_parser = session_subparsers.add_parser(
+        "continuity-check",
+        help="Validate post-clear/session-reset continuity state (read-only).",
+    )
+    session_continuity_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON continuity check output.",
+    )
+    session_continuity_check_parser.set_defaults(handler=run_session_continuity_check)
 
     provenance_parser = subparsers.add_parser(
         "provenance",

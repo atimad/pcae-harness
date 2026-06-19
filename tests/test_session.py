@@ -2013,3 +2013,215 @@ def test_71i_compact_bootstrap_json_includes_audit(
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     assert "Last audit:" in data["bootstrap_prompt"]
+
+
+# ---------------------------------------------------------------------------
+# Phase 71J: pcae session continuity-check
+# ---------------------------------------------------------------------------
+
+
+def test_71j_continuity_check_healthy_idle(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T100000Z",
+        "phases_detected": 5,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Continuity check" in output
+    assert "Suitable for continuation: yes" in output
+    assert "Handoff: present" in output
+    assert "Audit: 5 phases" in output
+    assert "Phase queue: empty" in output
+    assert "Task state: idle" in output
+    assert "Issues:" not in output
+
+
+def test_71j_continuity_check_json_healthy(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T100000Z",
+        "phases_detected": 5,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["suitable_for_continuation"] is True
+    assert data["handoff_present"] is True
+    assert data["audit_present"] is True
+    assert data["check_passed"] is True
+    assert data["task_state"] == "idle"
+    assert data["phase_queue_count"] == 0
+    assert data["issues"] == []
+    assert data["working_tree"] == "clean"
+
+
+def test_71j_continuity_check_missing_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T100000Z",
+        "phases_detected": 3,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Handoff: missing" in output
+    assert "No handoff artifact found" in output
+
+
+def test_71j_continuity_check_missing_audit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Audit: missing" in output
+    assert "No audit artifact found" in output
+
+
+def test_71j_continuity_check_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T100000Z",
+        "phases_detected": 3,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    write_file(tmp_path / "dirty.txt", "uncommitted\n")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "Suitable for continuation: no" in output
+    assert "Working tree is not clean" in output
+
+
+def test_71j_continuity_check_non_empty_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T100000Z",
+        "phases_detected": 3,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(
+        json.dumps(["Phase 72A: next item", "Phase 72B: another"]),
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue: 2 entries" in output
+
+
+def test_71j_continuity_check_json_missing_both(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["handoff_present"] is False
+    assert data["audit_present"] is False
+    assert "No handoff artifact found" in data["issues"]
+    assert "No audit artifact found" in data["issues"]
+
+
+def test_71j_continuity_check_is_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    _write_audit_artifact(tmp_path, {
+        "created_at": "20260619T100000Z",
+        "phases_detected": 3,
+        "warnings": [],
+        "healthy_idle": True,
+    })
+    before = text_file_snapshot(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["session", "continuity-check"])
+
+    capsys.readouterr()
+    after = text_file_snapshot(tmp_path)
+    assert after == before
+
+
+def test_71j_continuity_check_with_active_task(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Active continuity task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "continuity-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Task state: active" in output
+    assert "Active task:" in output
