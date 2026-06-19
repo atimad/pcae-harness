@@ -312,6 +312,7 @@ def _build_auto_summary(root: HarnessPath) -> str:
 
 HANDOFFS_DIR = Path(".pcae") / "handoffs"
 PHASE_QUEUE_PATH = Path(".pcae") / "phase-queue.json"
+PHASE_AUDITS_DIR = Path(".pcae") / "phase-audits"
 
 PLACEHOLDER_PATTERNS = [
     "test phase",
@@ -1060,12 +1061,53 @@ def _build_audit_report(root: HarnessPath, last: int, since: str | None) -> dict
     }
 
 
+def _save_audit_artifact(root: HarnessPath, report: dict) -> tuple[Path, Path]:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    report_with_ts = {**report, "created_at": ts}
+    audit_dir = root.join(PHASE_AUDITS_DIR)
+    audit_dir.mkdir(parents=True, exist_ok=True)
+
+    latest_path = audit_dir / "latest.json"
+    timestamped_path = audit_dir / f"audit-{ts}.json"
+
+    payload = json.dumps(report_with_ts, indent=2, sort_keys=True) + "\n"
+    with latest_path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(payload)
+    with timestamped_path.open("w", encoding="utf-8", newline="\n") as f:
+        f.write(payload)
+
+    return latest_path, timestamped_path
+
+
+def _read_latest_audit(root: HarnessPath) -> dict | None:
+    latest_path = root.join(PHASE_AUDITS_DIR / "latest.json")
+    if not latest_path.is_file():
+        return None
+    try:
+        return json.loads(latest_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
 def run_phase_audit(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     last: int = args.last
     since: str | None = args.since
 
     report = _build_audit_report(root, last, since)
+
+    if args.save:
+        latest_path, ts_path = _save_audit_artifact(root, report)
+        if args.json:
+            print(json.dumps({
+                **report,
+                "saved": True,
+                "latest_path": str(latest_path),
+                "timestamped_path": str(ts_path),
+            }, indent=2, sort_keys=True))
+            return 0
+        print(f"Audit saved: {latest_path}")
+        print(f"Timestamped: {ts_path}")
 
     if args.json:
         print(json.dumps(report, indent=2, sort_keys=True))
@@ -1113,5 +1155,36 @@ def run_phase_audit(args: argparse.Namespace) -> int:
         print("-" * 40)
         for w in report["warnings"]:
             print(f"  - {w}")
+
+    return 0
+
+
+def run_phase_audit_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    audit = _read_latest_audit(root)
+
+    if audit is None:
+        print("No saved audit artifact found.", file=__import__("sys").stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(audit, indent=2, sort_keys=True))
+        return 0
+
+    print("Saved Phase Audit")
+    print("=" * 40)
+    if "created_at" in audit:
+        print(f"  Created: {audit['created_at']}")
+    print(f"  Phases detected: {audit['phases_detected']}")
+    if audit.get("phases"):
+        for phase in audit["phases"]:
+            status = "complete" if phase["commit_pair_complete"] else "INCOMPLETE"
+            print(f"  {phase['phase_id']}: {phase['description']} [{status}]")
+    print(f"  Health: {audit['health_status']}")
+    print(f"  Healthy idle: {'yes' if audit['healthy_idle'] else 'no'}")
+    if audit.get("warnings"):
+        print(f"  Warnings: {len(audit['warnings'])}")
+        for w in audit["warnings"]:
+            print(f"    - {w}")
 
     return 0

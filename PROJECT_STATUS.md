@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 71G: Phase Queue Residue Hygiene.
+Phase 71H: Autonomy Audit Artifact Persistence.
 
 ## Milestone: Execution Chain Traceability Complete
 

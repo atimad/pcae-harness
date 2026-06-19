@@ -2984,6 +2984,181 @@ def test_71g_hygiene_real_entries_not_cleared(
 
 
 # ---------------------------------------------------------------------------
+# Autonomy audit artifact persistence (Phase 71H)
+# ---------------------------------------------------------------------------
+
+
+def test_71h_audit_save_creates_artifacts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "4", "--save"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Audit saved:" in output
+    assert "Timestamped:" in output
+
+    latest = tmp_path / ".pcae" / "phase-audits" / "latest.json"
+    assert latest.is_file()
+
+    import json as _json
+
+    data = _json.loads(latest.read_text(encoding="utf-8"))
+    assert "created_at" in data
+    assert "phases_detected" in data
+
+    audit_files = list((tmp_path / ".pcae" / "phase-audits").glob("audit-*.json"))
+    assert len(audit_files) == 1
+
+
+def test_71h_audit_save_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "4", "--save", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["saved"] is True
+    assert "latest_path" in data
+    assert "timestamped_path" in data
+
+
+def test_71h_audit_save_timestamped_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "2", "--save"])
+    capsys.readouterr()
+
+    audit_dir = tmp_path / ".pcae" / "phase-audits"
+    ts_files = sorted(audit_dir.glob("audit-*.json"))
+    assert len(ts_files) == 1
+
+    data = _json.loads(ts_files[0].read_text(encoding="utf-8"))
+    assert "created_at" in data
+    assert data["created_at"] in ts_files[0].name
+
+
+def test_71h_audit_show_human(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "audit-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Saved Phase Audit" in output
+    assert "Created:" in output
+    assert "Phases detected:" in output
+
+
+def test_71h_audit_show_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "audit-show", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "created_at" in data
+    assert "phases_detected" in data
+
+
+def test_71h_audit_show_missing_artifact(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit-show"])
+
+    output = capsys.readouterr().err
+    assert exit_code == 1
+    assert "No saved audit artifact found" in output
+
+
+def test_71h_audit_without_save_does_not_persist(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4"])
+    capsys.readouterr()
+
+    audit_dir = tmp_path / ".pcae" / "phase-audits"
+    assert not audit_dir.exists() or not (audit_dir / "latest.json").exists()
+
+
+def test_71h_gitignore_includes_phase_audits(
+    tmp_path: Path, monkeypatch,
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    monkeypatch.chdir(tmp_path)
+
+    gitignore_content = (tmp_path / ".pcae" / ".gitignore").read_text(encoding="utf-8")
+    assert "phase-audits/" in gitignore_content
+
+
+def test_71h_gitignore_template_includes_phase_audits() -> None:
+    from pcae.core.templates import INIT_TEMPLATES
+
+    gitignore_template = INIT_TEMPLATES[Path(".pcae/.gitignore")]
+    assert "phase-audits/" in gitignore_template
+
+
+def test_71h_audit_show_missing_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit-show", "--json"])
+
+    output = capsys.readouterr().err
+    assert exit_code == 1
+    assert "No saved audit artifact found" in output
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 

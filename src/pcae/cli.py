@@ -412,6 +412,7 @@ from pcae.commands.session import (
 )
 from pcae.commands.phase import (
     run_phase_audit,
+    run_phase_audit_show,
     run_phase_complete,
     run_phase_handoff,
     run_phase_handoff_prune,
@@ -4777,7 +4778,23 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON audit report.",
     )
+    phase_audit_parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Save audit report as a local artifact.",
+    )
     phase_audit_parser.set_defaults(handler=run_phase_audit)
+
+    phase_audit_show_parser = phase_subparsers.add_parser(
+        "audit-show",
+        help="Show the latest saved phase audit artifact.",
+    )
+    phase_audit_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_audit_show_parser.set_defaults(handler=run_phase_audit_show)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",
