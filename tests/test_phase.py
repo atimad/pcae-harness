@@ -4670,6 +4670,134 @@ def test_72h_preflight_requirements_have_met_field(
         assert isinstance(req["met"], bool)
 
 
+# Phase 72J — Runner Simulation Approval Persistence Check
+# ---------------------------------------------------------------------------
+
+
+def test_72j_approval_show_missing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-approval-show", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["present"] is False
+
+
+def test_72j_approval_show_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-review", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-approve", "--message", "Persist test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-sim-approval-show", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["present"] is True
+    assert data["approved"] is True
+    assert data["execution_authorized"] is False
+    assert data["message"] == "Persist test"
+
+
+def test_72j_preflight_recognizes_persisted_approval(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Test phase"])
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-review", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-approve", "--message", "Approved"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    reqs = {r["check"]: r["met"] for r in data["requirements"]}
+    assert reqs["approval_present"] is True
+    assert reqs["approval_matches"] is True
+    assert reqs["execution_authorized"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72j_preflight_approval_mismatch(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-review", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-approve", "--message", "Old approval"])
+    capsys.readouterr()
+
+    sim_path = tmp_path / ".pcae" / "runner-simulations" / "latest.json"
+    sim_data = _json.loads(sim_path.read_text(encoding="utf-8"))
+    sim_data["created_at"] = "20990101T000000Z"
+    sim_path.write_text(_json.dumps(sim_data, indent=2), encoding="utf-8")
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    reqs = {r["check"]: r["met"] for r in data["requirements"]}
+    assert reqs["approval_present"] is True
+    assert reqs["approval_matches"] is False
+
+
+def test_72j_approval_show_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-approval-show"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "No approval artifact found" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

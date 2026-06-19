@@ -2,13 +2,12 @@
 
 ## Current Phase
 
-Phase 72I: Compact Historical Continuity Summary.
+Phase 72J: Runner Simulation Approval Persistence Check.
 
-Phase 72I makes compact bootstrap summarize historical strategic continuity
-in a single line with decision ID, activation phase, decision basis, and
-first sentence of rationale, instead of printing the full multi-paragraph
-body. Current (non-historical) decisions still show full details. No
-strategic continuity data is removed or altered.
+Phase 72J adds `pcae phase runner-sim-approval-show` and `--json` for
+inspecting the latest persisted simulation approval. Preflight correctly
+recognizes persisted approval as present/matching and detects mismatches
+when simulation is updated after approval. Execution remains unauthorized.
 
 ## Milestone: Execution Chain Traceability Complete
 

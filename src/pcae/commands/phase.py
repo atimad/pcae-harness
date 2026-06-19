@@ -2619,6 +2619,45 @@ def run_phase_runner_sim_approve(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_phase_runner_sim_approval_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    approval = _read_latest_sim_approval(root)
+
+    if approval is None:
+        if args.json:
+            print(json.dumps({"present": False, "reason": "No approval artifact found."}, indent=2, sort_keys=True))
+        else:
+            print("No approval artifact found.")
+            print("Run: pcae phase runner-sim-approve --message '...'")
+        return 1
+
+    result = {
+        "present": True,
+        "approved": approval.get("approved", False),
+        "approved_at": approval.get("approved_at"),
+        "approved_simulation_created_at": approval.get("approved_simulation_created_at"),
+        "reviewed_at": approval.get("reviewed_at"),
+        "message": approval.get("message"),
+        "approver_source": approval.get("approver_source"),
+        "execution_authorized": approval.get("execution_authorized", False),
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Simulation Approval (persisted)")
+    print("=" * 40)
+    print(f"  Present: yes")
+    print(f"  Approved: {'yes' if result['approved'] else 'no'}")
+    print(f"  Approved at: {result['approved_at'] or 'unknown'}")
+    print(f"  Simulation created: {result['approved_simulation_created_at'] or 'unknown'}")
+    print(f"  Message: {result['message'] or 'none'}")
+    print(f"  Approver: {result['approver_source'] or 'unknown'}")
+    print(f"  Execution authorized: {'yes' if result['execution_authorized'] else 'no'}")
+    return 0
+
+
 _PREFLIGHT_REQUIREMENTS = [
     {"requirement": "clean working tree", "check": "working_tree_clean"},
     {"requirement": "healthy idle", "check": "health_idle"},

@@ -420,6 +420,7 @@ from pcae.commands.phase import (
     run_phase_runner_readiness,
     run_phase_runner_execution_preflight,
     run_phase_runner_sim_approve,
+    run_phase_runner_sim_approval_show,
     run_phase_runner_sim_fixture,
     run_phase_runner_sim_review,
     run_phase_runner_simulate,
@@ -5065,6 +5066,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--dry-run", action="store_true", help="Report proposed approval without writing."
     )
     phase_runner_sim_approve_parser.set_defaults(handler=run_phase_runner_sim_approve)
+
+    phase_runner_sim_approval_show_parser = phase_subparsers.add_parser(
+        "runner-sim-approval-show",
+        help="Show the latest persisted runner simulation approval artifact.",
+    )
+    phase_runner_sim_approval_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_sim_approval_show_parser.set_defaults(
+        handler=run_phase_runner_sim_approval_show
+    )
 
     phase_runner_sim_review_parser = phase_subparsers.add_parser(
         "runner-sim-review",
