@@ -414,6 +414,7 @@ from pcae.commands.session import (
 from pcae.commands.phase import (
     run_phase_audit,
     run_phase_audit_show,
+    run_phase_autonomy_summary,
     run_phase_complete,
     run_phase_handoff,
     run_phase_handoff_prune,
@@ -4974,6 +4975,18 @@ def build_parser() -> argparse.ArgumentParser:
     phase_prompt_roundtrip_check_parser.set_defaults(
         handler=run_phase_prompt_roundtrip_check
     )
+
+    phase_autonomy_summary_parser = phase_subparsers.add_parser(
+        "autonomy-summary",
+        help="Generate a read-only autonomy run summary from existing governance artifacts.",
+    )
+    phase_autonomy_summary_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_autonomy_summary_parser.add_argument(
+        "--save", action="store_true", help="Save summary artifact to .pcae/autonomy-summaries/."
+    )
+    phase_autonomy_summary_parser.set_defaults(handler=run_phase_autonomy_summary)
 
     multi_agent_governance_audit_parser = subparsers.add_parser(
         "multi-agent-governance-audit",

@@ -1778,3 +1778,104 @@ def run_phase_prompt_roundtrip_check(args: argparse.Namespace) -> int:
         for reason in result["reasons"]:
             print(f"    - {reason}")
     return 0 if result["ready"] else 1
+
+
+AUTONOMY_SUMMARIES_DIR = Path(".pcae") / "autonomy-summaries"
+
+
+def _build_autonomy_summary(root: HarnessPath) -> dict:
+    from pcae.core.git_status import read_git_branch, read_git_changes
+    from pcae.core.health import build_health_data, is_healthy
+    from pcae.core.tasks import find_latest_active_task
+
+    from pcae.commands.push import assess_push_readiness
+
+    audit = _read_latest_audit(root)
+    handoff_summary, handoff_created_at = _current_handoff_summary(root)
+    health_data = build_health_data(root)
+    healthy = is_healthy(health_data)
+    changes = read_git_changes(root)
+    active_task = find_latest_active_task(root)
+    push = assess_push_readiness(root)
+
+    phases_detected = 0
+    warning_count = 0
+    latest_completed_phase: str | None = None
+    if audit:
+        phases_detected = audit.get("phases_detected", 0)
+        warning_count = len(audit.get("warnings", []))
+        phases = audit.get("phases") or []
+        if phases:
+            latest_completed_phase = phases[0].get("phase_id")
+
+    recovery_observed = "unknown"
+    if audit:
+        for phase in audit.get("phases", []):
+            desc = phase.get("description", "")
+            if "recover" in desc.lower():
+                recovery_observed = "yes"
+                break
+        if recovery_observed == "unknown":
+            recovery_observed = "none detected"
+
+    return {
+        "phases_detected": phases_detected,
+        "warning_count": warning_count,
+        "latest_completed_phase": latest_completed_phase,
+        "recovery_commands_observed": recovery_observed,
+        "active_task": active_task.task_id if active_task else None,
+        "working_tree": "clean" if not changes else f"{len(changes)} changed",
+        "health_status": "healthy" if healthy else "unhealthy",
+        "push_status": push.mode,
+        "latest_handoff_summary": handoff_summary,
+        "latest_handoff_created_at": handoff_created_at,
+        "agent_neutral_note": (
+            "This summary reports observable governance facts only. "
+            "It does not rank or compare agents."
+        ),
+    }
+
+
+def _save_autonomy_summary(root: HarnessPath, summary: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    summary_with_ts = {**summary, "created_at": ts}
+    summary_dir = root.join(AUTONOMY_SUMMARIES_DIR)
+    summary_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = summary_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = summary_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(summary_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_autonomy_summary(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    summary = _build_autonomy_summary(root)
+
+    if getattr(args, "save", False):
+        saved_path = _save_autonomy_summary(root, summary)
+        if not args.json:
+            print(f"Autonomy summary saved: {saved_path}")
+
+    if args.json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+
+    print("Autonomy Run Summary")
+    print("=" * 40)
+    print(f"  Phases detected: {summary['phases_detected']}")
+    print(f"  Warning count: {summary['warning_count']}")
+    print(f"  Latest completed phase: {summary['latest_completed_phase'] or 'none'}")
+    print(f"  Recovery commands observed: {summary['recovery_commands_observed']}")
+    print(f"  Active task: {summary['active_task'] or 'none'}")
+    print(f"  Working tree: {summary['working_tree']}")
+    print(f"  Health: {summary['health_status']}")
+    print(f"  Push status: {summary['push_status']}")
+    print(f"  Latest handoff: {summary['latest_handoff_summary'] or 'none'}")
+    print()
+    print(f"  Note: {summary['agent_neutral_note']}")
+    return 0

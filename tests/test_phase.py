@@ -3496,6 +3496,121 @@ def test_71w_audit_show_human_stale_handoff(
     assert "New summary" in output
 
 
+# Phase 71Y — Autonomy Comparison Run Summary Artifact
+# ---------------------------------------------------------------------------
+
+
+def test_71y_autonomy_summary_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "autonomy-summary"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Autonomy Run Summary" in output
+    assert "Phases detected:" in output
+    assert "agent" in output.lower() or "Note:" in output
+
+
+def test_71y_autonomy_summary_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "autonomy-summary", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "phases_detected" in data
+    assert "warning_count" in data
+    assert "health_status" in data
+    assert "push_status" in data
+    assert "agent_neutral_note" in data
+    assert "recovery_commands_observed" in data
+    assert "working_tree" in data
+
+
+def test_71y_autonomy_summary_save(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "autonomy-summary", "--save"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "saved" in output.lower()
+
+    latest_path = tmp_path / ".pcae" / "autonomy-summaries" / "latest.json"
+    assert latest_path.exists()
+    data = _json.loads(latest_path.read_text(encoding="utf-8"))
+    assert "created_at" in data
+    assert "phases_detected" in data
+
+    gitignore = tmp_path / ".pcae" / "autonomy-summaries" / ".gitignore"
+    assert gitignore.exists()
+
+
+def test_71y_autonomy_summary_missing_artifacts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "autonomy-summary", "--json"])
+
+    import json as _json
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["phases_detected"] == 0
+    assert data["latest_completed_phase"] is None
+    assert data["latest_handoff_summary"] is None
+
+
+def test_71y_autonomy_summary_with_audit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_commits(tmp_path, "80A", "test feature alpha")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "audit", "--last", "4", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "autonomy-summary", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["phases_detected"] >= 1
+    assert data["latest_completed_phase"] == "80A"
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

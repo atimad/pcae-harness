@@ -2,15 +2,16 @@
 
 ## Current Phase
 
-Phase 71X: Git Lock Diagnostic Visibility in Task Finish Failure.
+Phase 71Y: Autonomy Comparison Run Summary Artifact.
 
-Phase 71X improves failure guidance when `pcae task finish --commit` fails
-during the closure commit due to `.git/index.lock` or `Operation not permitted`
-errors. The output now includes actionable next steps: run `pcae doctor
-git-lock`, then `pcae task finish recover --dry-run`, then `pcae task finish
-recover --message "..."`. JSON output includes a `guidance` array. Normal
-commit failures without lock/permission errors remain unchanged. No automatic
-recovery or lock deletion.
+Phase 71Y adds `pcae phase autonomy-summary`, `--json`, and `--save` for
+read-only governance fact summaries useful for agent autonomy comparisons.
+Reports phases detected, warning count, latest completed phase, recovery
+command observations, active task, working tree, health, push status, latest
+handoff summary, and an agent-neutral note. `--save` persists to
+`.pcae/autonomy-summaries/latest.json`. Missing audit or handoff artifacts
+are handled gracefully. No phase execution, queue mutation, or subjective
+agent ranking.
 
 ## Milestone: Execution Chain Traceability Complete
 
