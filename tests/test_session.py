@@ -2344,3 +2344,125 @@ def test_71m_continuity_check_human_shows_prompt(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "Latest prompt: 71M Human" in output
+
+
+# --- Phase 71V: Strategic Continuity Pointer Refresh ---
+
+
+def test_71v_extract_latest_phase_from_audit() -> None:
+    from pcae.core.context import _extract_latest_phase
+
+    audit = {"phases": [{"phase_id": "71S"}, {"phase_id": "71R"}]}
+    assert _extract_latest_phase(None, audit) == "71S"
+
+
+def test_71v_extract_latest_phase_from_handoff() -> None:
+    from pcae.core.context import _extract_latest_phase
+
+    handoff = {"recent_commits": [
+        "Complete Phase 71S Codex autonomy comparison handoff note",
+        "Document Phase 71S Codex autonomy comparison",
+    ]}
+    assert _extract_latest_phase(handoff, None) == "71S"
+
+
+def test_71v_extract_latest_phase_prefers_audit() -> None:
+    from pcae.core.context import _extract_latest_phase
+
+    audit = {"phases": [{"phase_id": "71U"}]}
+    handoff = {"recent_commits": ["Complete Phase 71S something"]}
+    assert _extract_latest_phase(handoff, audit) == "71U"
+
+
+def test_71v_extract_latest_phase_none_when_empty() -> None:
+    from pcae.core.context import _extract_latest_phase
+
+    assert _extract_latest_phase(None, None) is None
+    assert _extract_latest_phase({}, {}) is None
+    assert _extract_latest_phase({"recent_commits": []}, {"phases": []}) is None
+
+
+def test_71v_bootstrap_shows_latest_completed_phase(tmp_path: Path) -> None:
+    from pcae.core.context import ContextPack, build_bootstrap_prompt
+    from pcae.core.context import resolve_profile
+
+    pack = _make_pack(tmp_path, strategic_activated="69P")
+    profile, _ = resolve_profile("implementation")
+    audit = {"phases": [{"phase_id": "71S"}]}
+    handoff = {"recent_commits": ["Complete Phase 71S something"]}
+
+    result = build_bootstrap_prompt(pack, profile, handoff=handoff, audit=audit)
+
+    assert "Latest completed phase: 71S" in result
+    assert "Historical strategic decision: SLR-69P-001" in result
+    assert "Strategic Decision:" not in result
+
+
+def test_71v_bootstrap_no_historical_when_matching(tmp_path: Path) -> None:
+    from pcae.core.context import ContextPack, build_bootstrap_prompt
+    from pcae.core.context import resolve_profile
+
+    pack = _make_pack(tmp_path, strategic_activated="69P")
+    profile, _ = resolve_profile("implementation")
+    audit = {"phases": [{"phase_id": "69P"}]}
+
+    result = build_bootstrap_prompt(pack, profile, audit=audit)
+
+    assert "Latest completed phase: 69P" in result
+    assert "Strategic Decision: SLR-69P-001" in result
+    assert "Historical strategic decision" not in result
+
+
+def test_71v_bootstrap_no_latest_without_handoff_or_audit(tmp_path: Path) -> None:
+    from pcae.core.context import ContextPack, build_bootstrap_prompt
+    from pcae.core.context import resolve_profile
+
+    pack = _make_pack(tmp_path, strategic_activated="69P")
+    profile, _ = resolve_profile("implementation")
+
+    result = build_bootstrap_prompt(pack, profile)
+
+    assert "Latest completed phase:" not in result
+    assert "Strategic Decision: SLR-69P-001" in result
+    assert "Historical strategic decision" not in result
+
+
+def _make_pack(tmp_path: Path, strategic_activated: str = "69P") -> "ContextPack":
+    from pcae.core.context import ContextPack
+
+    return ContextPack(
+        active_task=None,
+        scope_boundaries={},
+        architecture_memory={
+            "decision_count": 0,
+            "accepted_count": 0,
+            "latest_decision": None,
+        },
+        governance_state={
+            "health_status": "healthy (idle)",
+            "check_status": "passed",
+            "session_continuity": "verified",
+            "agent_lock_state": {"locked": True, "agent_id": "test"},
+        },
+        irg_review_summary={"bootstrap_line": None},
+        operational_rules=("Rule one.",),
+        orchestration_state={
+            "advisory_recommendation_semantics": "User remains authoritative."
+        },
+        provenance_summary={},
+        roadmap_summary={"current_phase": "Phase 71S: Test Phase."},
+        strategic_continuity={
+            "current": {
+                "lineage_id": "SLR-69P-001",
+                "activated_phase_id": strategic_activated,
+                "selected_branch_id": "BR-005",
+                "decision_basis": "roadmap_gap",
+                "rationale": "Test rationale.",
+            },
+            "deferred_alternatives": [],
+            "referenced_review_findings": [],
+        },
+        validation_commands=("pcae health",),
+        bootstrap_handoff_notes=(),
+        advisory="compact by design",
+    )

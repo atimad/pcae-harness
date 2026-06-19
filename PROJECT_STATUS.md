@@ -2,14 +2,15 @@
 
 ## Current Phase
 
-Phase 71U: Git Index Lock Permission Diagnostics.
+Phase 71V: Strategic Continuity Pointer Refresh.
 
-Phase 71U adds `pcae doctor git-lock` and `--json` for read-only diagnosis of
-`.git/index.lock` issues. The command reports lock file existence, `.git` and
-`.git/index` writability, and classifies the situation as `ok`,
-`lock_present_stale`, `lock_present_active_process`, or `permission_denied`.
-Each status includes a reason and suggested next action. No lock files are
-deleted or created. No repository mutation.
+Phase 71V improves bootstrap/handoff continuity wording so stale strategic
+lineage does not confuse the current continuation phase. Bootstrap now shows
+"Latest completed phase: <id>" derived from audit or handoff data. When the
+latest completed phase differs from the strategic lineage's activated phase,
+the strategic section is relabeled as "Historical strategic decision" to avoid
+implying it is the current next phase. Historical lineage remains visible for
+context. No phase execution, queue, or task behavior changes.
 
 ## Milestone: Execution Chain Traceability Complete
 

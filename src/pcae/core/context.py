@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import re
 
 from pcae.core.architecture import (
     ADR_INSPECTION_ADVISORY as _ADR_INSPECTION_ADVISORY,
@@ -144,6 +145,28 @@ _STALE_CONTEXT_RULE = (
 )
 
 
+_PHASE_FROM_COMMIT_RE = re.compile(
+    r"^(?:Implement|Document|Design|Add|Refine|Complete) Phase (\S+)\s"
+)
+
+
+def _extract_latest_phase(
+    handoff: dict | None, audit: dict | None
+) -> str | None:
+    if audit:
+        phases = audit.get("phases") or []
+        if phases:
+            return phases[0].get("phase_id")
+
+    if handoff:
+        for commit_msg in handoff.get("recent_commits") or []:
+            m = _PHASE_FROM_COMMIT_RE.match(commit_msg)
+            if m:
+                return m.group(1)
+
+    return None
+
+
 def build_bootstrap_prompt(
     pack: ContextPack,
     profile: WorkModeProfile,
@@ -208,12 +231,19 @@ def build_bootstrap_prompt(
 
     lines.append(f"Emphasized: {', '.join(profile.emphasized_sections)}")
 
+    latest_phase = _extract_latest_phase(handoff, audit)
+    if latest_phase:
+        lines.append(f"Latest completed phase: {latest_phase}")
+
     continuity = pack.strategic_continuity
     current_lineage = continuity.get("current")
     if isinstance(current_lineage, dict):
-        lines.append(f"Strategic Decision: {current_lineage['lineage_id']}")
+        activated = current_lineage["activated_phase_id"]
+        is_historical = latest_phase is not None and latest_phase != activated
+        label = "Historical strategic decision" if is_historical else "Strategic Decision"
+        lines.append(f"{label}: {current_lineage['lineage_id']}")
         lines.append(
-            f"Activated: {current_lineage['activated_phase_id']} "
+            f"Activated: {activated} "
             f"on {current_lineage['selected_branch_id']}"
         )
         lines.append(f"Decision Basis: {current_lineage['decision_basis']}")
