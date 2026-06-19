@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import subprocess
@@ -982,6 +983,155 @@ def run_phase_queue_validate(args: argparse.Namespace) -> int:
     print()
     print(f"  {result['note']}")
     return 0 if result["valid"] else 1
+
+
+QUEUE_APPROVALS_DIR = Path(".pcae") / "phase-queue-approvals"
+
+
+def _compute_queue_digest(root: HarnessPath) -> str:
+    queue_path = root.join(PHASE_QUEUE_PATH)
+    if not queue_path.is_file():
+        return hashlib.sha256(b"").hexdigest()
+    content = queue_path.read_bytes()
+    return hashlib.sha256(content).hexdigest()
+
+
+def _build_queue_approve(root: HarnessPath, message: str) -> dict:
+    validation = _build_queue_validate(root)
+
+    if not validation["valid"]:
+        return {
+            "approved": False,
+            "execution_authorized": False,
+            "refusal_reason": f"Queue validation failed: {len(validation['issues'])} issue(s). Run: pcae phase queue validate",
+            "validation": validation,
+        }
+
+    if not validation["queue_ready"]:
+        return {
+            "approved": False,
+            "execution_authorized": False,
+            "refusal_reason": "Queue is empty. Cannot approve an empty phase queue.",
+            "validation": validation,
+        }
+
+    digest = _compute_queue_digest(root)
+
+    return {
+        "approved": True,
+        "execution_authorized": False,
+        "queue_entry_count": validation["queue_entry_count"],
+        "queue_digest": digest,
+        "approval_message": message,
+        "approver_source": "local_cli",
+        "validation": validation,
+    }
+
+
+def _save_queue_approval(root: HarnessPath, approval: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    approval_with_ts = {**approval, "approved_at": ts}
+    approval_dir = root.join(QUEUE_APPROVALS_DIR)
+    approval_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = approval_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = approval_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(approval_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_queue_approve(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    message = getattr(args, "message", "") or "Queue approved."
+    dry_run = getattr(args, "dry_run", False)
+    approval = _build_queue_approve(root, message)
+
+    if not approval.get("approved", False):
+        if args.json:
+            print(json.dumps(approval, indent=2, sort_keys=True))
+        else:
+            print(f"Queue approval refused: {approval['refusal_reason']}")
+        return 1
+
+    if not dry_run:
+        saved_path = _save_queue_approval(root, approval)
+        if not args.json:
+            print(f"Queue approval saved: {saved_path}")
+
+    if args.json:
+        result = {**approval, "dry_run": dry_run}
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Phase Queue Approval")
+    print("=" * 40)
+    print(f"  Approved: yes")
+    print(f"  Dry run: {'yes' if dry_run else 'no'}")
+    print(f"  Entry count: {approval['queue_entry_count']}")
+    print(f"  Queue digest: {approval['queue_digest']}")
+    print(f"  Message: {approval['approval_message']}")
+    print(f"  Approver: {approval['approver_source']}")
+    print(f"  Execution authorized: no")
+    return 0
+
+
+def _read_latest_queue_approval(root: HarnessPath) -> dict | None:
+    latest = root.join(QUEUE_APPROVALS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def run_phase_queue_approval_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    approval = _read_latest_queue_approval(root)
+
+    if approval is None:
+        if args.json:
+            print(json.dumps({"present": False, "reason": "No queue approval artifact found."}, indent=2, sort_keys=True))
+        else:
+            print("No queue approval artifact found.")
+            print("Run: pcae phase queue approve --message '...'")
+        return 1
+
+    current_digest = _compute_queue_digest(root)
+
+    result = {
+        "present": True,
+        "approved": approval.get("approved", False),
+        "approved_at": approval.get("approved_at"),
+        "queue_entry_count": approval.get("queue_entry_count", 0),
+        "queue_digest": approval.get("queue_digest"),
+        "current_queue_digest": current_digest,
+        "queue_digest_matches": approval.get("queue_digest") == current_digest,
+        "approval_message": approval.get("approval_message"),
+        "approver_source": approval.get("approver_source"),
+        "execution_authorized": approval.get("execution_authorized", False),
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Phase Queue Approval (persisted)")
+    print("=" * 40)
+    print(f"  Present: yes")
+    print(f"  Approved: {'yes' if result['approved'] else 'no'}")
+    print(f"  Approved at: {result['approved_at'] or 'unknown'}")
+    print(f"  Entry count: {result['queue_entry_count']}")
+    print(f"  Queue digest: {result['queue_digest'] or 'none'}")
+    print(f"  Current queue matches: {'yes' if result['queue_digest_matches'] else 'NO'}")
+    print(f"  Message: {result['approval_message'] or 'none'}")
+    print(f"  Approver: {result['approver_source'] or 'unknown'}")
+    print(f"  Execution authorized: {'yes' if result['execution_authorized'] else 'no'}")
+    return 0
 
 
 def _build_manual_steps(next_agent: str) -> list[str]:

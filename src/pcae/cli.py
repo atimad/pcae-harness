@@ -437,6 +437,8 @@ from pcae.commands.phase import (
     run_phase_prompt_roundtrip_check,
     run_phase_prompt_show,
     run_phase_queue_add,
+    run_phase_queue_approval_show,
+    run_phase_queue_approve,
     run_phase_queue_check,
     run_phase_queue_clear,
     run_phase_queue_hygiene,
@@ -4821,6 +4823,38 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_queue_validate_parser.set_defaults(handler=run_phase_queue_validate)
+
+    phase_queue_approve_parser = phase_queue_subparsers.add_parser(
+        "approve",
+        help="Approve the current phase queue snapshot for future runner consideration.",
+    )
+    phase_queue_approve_parser.add_argument(
+        "--message",
+        default=None,
+        help="Approval message (default: 'Queue approved.').",
+    )
+    phase_queue_approve_parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Report proposed approval without writing.",
+    )
+    phase_queue_approve_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_approve_parser.set_defaults(handler=run_phase_queue_approve)
+
+    phase_queue_approval_show_parser = phase_queue_subparsers.add_parser(
+        "approval-show",
+        help="Show the latest persisted queue approval artifact.",
+    )
+    phase_queue_approval_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_approval_show_parser.set_defaults(handler=run_phase_queue_approval_show)
 
     phase_audit_parser = phase_subparsers.add_parser(
         "audit",

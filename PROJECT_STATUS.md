@@ -2,14 +2,13 @@
 
 ## Current Phase
 
-Phase 72L: Real Queue Item Validation.
+Phase 72M: Queue Approval Artifact.
 
-Phase 72L adds `pcae phase queue validate` and `--json` for read-only validation
-of real phase queue entries. It checks queue readability, entry titles, supported
-source_type, source_prompt_path for captured_prompt entries, placeholder/dummy
-detection, duplicate title detection, invalid phase_id patterns, and forbidden
-execution-authorizing fields. Empty queue is valid but reports `queue_ready=false`.
-No queue mutation, no task creation, no execution.
+Phase 72M adds `pcae phase queue approve` and `pcae phase queue approval-show`
+for approving the current phase queue snapshot for future runner consideration.
+Requires queue validation to pass and queue to be non-empty. Records SHA-256
+queue digest, entry count, approval message, approver source, and always sets
+`execution_authorized=false`. No queue mutation, no task creation, no execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

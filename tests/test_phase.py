@@ -6316,3 +6316,186 @@ def test_72l_queue_validate_not_array(tmp_path: Path, monkeypatch, capsys) -> No
     assert exit_code == 1
     assert data["valid"] is False
     assert "not a JSON array" in str(data["issues"])
+
+
+# ---------------------------------------------------------------------------
+# Phase 72M: queue approval artifact
+# ---------------------------------------------------------------------------
+
+
+def test_72m_queue_approve_dry_run_with_valid_queue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        "Phase 72A: valid entry",
+    ], indent=2) + "\n", encoding="utf-8")
+    before = queue_path.read_text(encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approve", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approved"] is True
+    assert data["dry_run"] is True
+    assert data["execution_authorized"] is False
+    assert data["approver_source"] == "local_cli"
+    assert data["queue_entry_count"] == 1
+    assert queue_path.read_text(encoding="utf-8") == before
+    assert not (tmp_path / ".pcae" / "phase-queue-approvals" / "latest.json").exists()
+
+
+def test_72m_queue_approve_success_and_persist(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps([
+        "Phase 72A: valid entry",
+    ], indent=2) + "\n", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approve", "--message", "Test approval", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approved"] is True
+    assert data["execution_authorized"] is False
+    assert data["queue_entry_count"] == 1
+    assert len(data["queue_digest"]) == 64  # SHA-256 hex digest
+
+    approval_path = tmp_path / ".pcae" / "phase-queue-approvals" / "latest.json"
+    assert approval_path.is_file()
+    saved = json.loads(approval_path.read_text(encoding="utf-8"))
+    assert saved["approved"] is True
+    assert saved["execution_authorized"] is False
+    assert saved["approved_at"] is not None
+    assert saved["approver_source"] == "local_cli"
+
+
+def test_72m_queue_approve_refuses_empty_queue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text("[]", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approve", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["approved"] is False
+    assert "empty" in data["refusal_reason"].lower()
+
+
+def test_72m_queue_approve_refuses_invalid_queue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps(["dummy placeholder entry"]), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approve", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["approved"] is False
+    assert "validation failed" in data["refusal_reason"].lower()
+
+
+def test_72m_queue_approve_no_mutation_on_refusal(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text("[]", encoding="utf-8")
+    before = queue_path.read_text(encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approve"])
+
+    capsys.readouterr()
+    assert exit_code == 1
+    assert queue_path.read_text(encoding="utf-8") == before
+    assert not (tmp_path / ".pcae" / "phase-queue-approvals" / "latest.json").exists()
+
+
+def test_72m_queue_approval_show_when_present(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps(["Phase 72A: test"]), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "approve", "--message", "Show test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "approval-show", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["present"] is True
+    assert data["approved"] is True
+    assert data["queue_entry_count"] == 1
+    assert data["queue_digest_matches"] is True
+    assert data["execution_authorized"] is False
+    assert data["approval_message"] == "Show test"
+
+
+def test_72m_queue_approval_show_mismatch(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps(["Phase 72A: original"]), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "approve", "--message", "First approval"])
+    capsys.readouterr()
+
+    queue_path.write_text(json.dumps(["Phase 72B: modified"]), encoding="utf-8")
+
+    exit_code = main(["phase", "queue", "approval-show", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["present"] is True
+    assert data["queue_digest_matches"] is False
+
+
+def test_72m_queue_approval_show_none(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approval-show", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["present"] is False
+
+
+def test_72m_queue_approve_human_output_shows_no_execution(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps(["Phase 72A: test"]), encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approve", "--dry-run"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution authorized: no" in output
+
+
+def test_72m_queue_approve_does_not_mutate_queue(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "approve", "--message", "Queue stays same"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
