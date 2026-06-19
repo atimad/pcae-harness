@@ -64,7 +64,7 @@ advisory
 
 ## Acceptance Checks
 
-- pcae health passes
+- pcae health
 
 ## Documentation Requirements
 
