@@ -10,7 +10,7 @@ Phase 72B: Runner Stop-Condition Policy Matrix
 
 ## Status
 
-active
+done
 
 ## Mode
 
