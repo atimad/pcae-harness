@@ -2106,6 +2106,122 @@ def test_71u_git_lock_human_output_lock_present(
     assert "Suggested action:" in output
 
 
+# --- Phase 71X: git lock diagnostic visibility in task finish failure ---
+
+
+def test_71x_task_finish_commit_lock_error_shows_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Lock error task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    real_run = subprocess.run
+
+    def _patched_run(cmd, *args, **kwargs):
+        if isinstance(cmd, list) and "commit" in cmd:
+            raise subprocess.CalledProcessError(
+                128, cmd,
+                stderr="fatal: Unable to create '.git/index.lock': Operation not permitted",
+            )
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", _patched_run)
+
+    exit_code = main(["task", "finish", "--skip-checks", "--commit", "Complete lock test"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "pcae doctor git-lock" in output
+    assert "pcae task finish recover --dry-run" in output
+    assert "pcae task finish recover --message" in output
+
+
+def test_71x_task_finish_commit_lock_error_json_includes_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Lock error json task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    real_run = subprocess.run
+
+    def _patched_run(cmd, *args, **kwargs):
+        if isinstance(cmd, list) and "commit" in cmd:
+            raise subprocess.CalledProcessError(
+                128, cmd,
+                stderr="fatal: Unable to create '.git/index.lock': Operation not permitted",
+            )
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", _patched_run)
+
+    exit_code = main(["task", "finish", "--skip-checks", "--commit", "Complete lock test", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["committed"] is False
+    assert "guidance" in data
+    assert any("doctor git-lock" in g for g in data["guidance"])
+    assert any("recover --dry-run" in g for g in data["guidance"])
+
+
+def test_71x_task_finish_commit_normal_error_no_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_git_repo(tmp_path)
+    init_harness(HarnessPath(tmp_path))
+    (tmp_path / "tasks" / "DONE.md").write_text(
+        "# Done\n\n## Completed\n\n", encoding="utf-8"
+    )
+    create_task_contract(
+        HarnessPath(tmp_path),
+        "Normal error task",
+        created_at=datetime(2026, 6, 18, 5, 0, tzinfo=timezone.utc),
+    )
+    write_session_snapshot(HarnessPath(tmp_path))
+    commit_all(tmp_path, "init")
+    monkeypatch.chdir(tmp_path)
+
+    real_run = subprocess.run
+
+    def _patched_run(cmd, *args, **kwargs):
+        if isinstance(cmd, list) and "commit" in cmd:
+            raise subprocess.CalledProcessError(
+                1, cmd,
+                stderr="error: some other git error",
+            )
+        return real_run(cmd, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", _patched_run)
+
+    exit_code = main(["task", "finish", "--skip-checks", "--commit", "Complete normal error"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "pcae doctor git-lock" not in output
+
+
 # --- Phase 70D: pcae task new ergonomics ---
 
 

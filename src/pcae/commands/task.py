@@ -249,10 +249,32 @@ def run_task_finish(args: argparse.Namespace) -> int:
                         commit_hash = parts[1].rstrip("]")
                     break
         except subprocess.CalledProcessError as error:
+            err_text = error.stderr.strip()
+            is_lock_error = (
+                "index.lock" in err_text or "Operation not permitted" in err_text
+            )
             if args.json:
-                print(json.dumps({"committed": False, "error": error.stderr.strip(), "finished": True, "task_id": result.completed_task.task_id}, indent=2, sort_keys=True))
+                data = {
+                    "committed": False,
+                    "error": err_text,
+                    "finished": True,
+                    "task_id": result.completed_task.task_id,
+                }
+                if is_lock_error:
+                    data["guidance"] = [
+                        "pcae doctor git-lock",
+                        "pcae task finish recover --dry-run",
+                        f"pcae task finish recover --message \"{commit_message}\"",
+                    ]
+                print(json.dumps(data, indent=2, sort_keys=True))
             else:
-                print(f"Task finished but commit failed: {error.stderr.strip()}")
+                print(f"Task finished but commit failed: {err_text}")
+                if is_lock_error:
+                    print()
+                    print("Suggested next steps:")
+                    print("  1. Run: pcae doctor git-lock")
+                    print("  2. Run: pcae task finish recover --dry-run")
+                    print(f"  3. Run: pcae task finish recover --message \"{commit_message}\"")
             return 1
 
     if args.json:

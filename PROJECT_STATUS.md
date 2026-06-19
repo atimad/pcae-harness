@@ -2,15 +2,15 @@
 
 ## Current Phase
 
-Phase 71W: Audit Handoff Summary Freshness.
+Phase 71X: Git Lock Diagnostic Visibility in Task Finish Failure.
 
-Phase 71W improves `pcae phase audit-show` freshness semantics so stale
-handoff summaries captured at audit creation time are clearly distinguished
-from the current latest handoff summary. JSON output includes
-`current_handoff_summary`, `current_handoff_created_at`, and
-`handoff_summary_stale` fields. Human output shows both "at audit" and
-"current" values when stale. Existing `latest_handoff_summary` field is
-preserved for backward compatibility.
+Phase 71X improves failure guidance when `pcae task finish --commit` fails
+during the closure commit due to `.git/index.lock` or `Operation not permitted`
+errors. The output now includes actionable next steps: run `pcae doctor
+git-lock`, then `pcae task finish recover --dry-run`, then `pcae task finish
+recover --message "..."`. JSON output includes a `guidance` array. Normal
+commit failures without lock/permission errors remain unchanged. No automatic
+recovery or lock deletion.
 
 ## Milestone: Execution Chain Traceability Complete
 
