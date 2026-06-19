@@ -2126,3 +2126,123 @@ def run_phase_runner_plan(args: argparse.Namespace) -> int:
     print()
     print(f"  {plan['note']}")
     return 0
+
+
+_RUNNER_POLICY_MATRIX: list[dict] = [
+    {
+        "condition": "dirty tree before phase",
+        "category": "hard_stop",
+        "guidance": "Commit or stash changes before starting a phase.",
+    },
+    {
+        "condition": "active task present before phase",
+        "category": "hard_stop",
+        "guidance": "Finish or close the active task before starting a new phase.",
+    },
+    {
+        "condition": "test failure",
+        "category": "hard_stop",
+        "guidance": "Fix test failures before continuing. Do not skip tests.",
+    },
+    {
+        "condition": "pcae health failure",
+        "category": "hard_stop",
+        "guidance": "Resolve health issues before continuing.",
+    },
+    {
+        "condition": "pcae check failure",
+        "category": "hard_stop",
+        "guidance": "Resolve check violations before continuing.",
+    },
+    {
+        "condition": "task-memory inconsistency",
+        "category": "hard_stop",
+        "guidance": "Run pcae doctor task-memory --fix or resolve manually.",
+    },
+    {
+        "condition": "push check not ready",
+        "category": "hard_stop",
+        "guidance": "Resolve push blockers before continuing.",
+    },
+    {
+        "condition": "lifecycle review enforcement block",
+        "category": "hard_stop",
+        "guidance": "Complete the required lifecycle review before continuing.",
+    },
+    {
+        "condition": "task finish partial failure",
+        "category": "recoverable_stop",
+        "guidance": "Run pcae task finish recover --dry-run, then pcae task finish recover --message '...'.",
+    },
+    {
+        "condition": "git index lock / permission failure",
+        "category": "recoverable_stop",
+        "guidance": "Run pcae doctor git-lock for diagnosis and next steps.",
+    },
+    {
+        "condition": "scope drift required",
+        "category": "hard_stop",
+        "guidance": "Stop and report. Do not modify files outside the active task scope.",
+    },
+    {
+        "condition": "ambiguity detected",
+        "category": "hard_stop",
+        "guidance": "Stop and report. Do not guess or assume.",
+    },
+    {
+        "condition": "queue empty",
+        "category": "continue_allowed",
+        "guidance": "Environment is ready. No queued phases to execute.",
+    },
+    {
+        "condition": "audit warning present",
+        "category": "advisory_warning",
+        "guidance": "Investigate audit warnings. They may indicate incomplete phase commits.",
+    },
+    {
+        "condition": "handoff missing",
+        "category": "advisory_warning",
+        "guidance": "Consider running pcae phase handoff before starting a runner.",
+    },
+    {
+        "condition": "autonomy summary missing",
+        "category": "advisory_warning",
+        "guidance": "Consider running pcae phase autonomy-summary --save for observability.",
+    },
+]
+
+_RUNNER_POLICY_NOTE = (
+    "Human authority is absolute. This policy matrix is advisory for "
+    "bounded runner behavior. The human user may override any stop condition."
+)
+
+
+def run_phase_runner_policy(args: argparse.Namespace) -> int:
+    matrix = list(_RUNNER_POLICY_MATRIX)
+
+    if args.json:
+        print(json.dumps({
+            "policy_matrix": matrix,
+            "categories": ["hard_stop", "recoverable_stop", "advisory_warning", "continue_allowed"],
+            "human_authority_note": _RUNNER_POLICY_NOTE,
+        }, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Stop-Condition Policy Matrix")
+    print("=" * 40)
+
+    for category, label in [
+        ("hard_stop", "Hard Stop"),
+        ("recoverable_stop", "Recoverable Stop"),
+        ("advisory_warning", "Advisory Warning"),
+        ("continue_allowed", "Continue Allowed"),
+    ]:
+        entries = [e for e in matrix if e["category"] == category]
+        if entries:
+            print(f"\n  [{label}]")
+            for e in entries:
+                print(f"    {e['condition']}")
+                print(f"      → {e['guidance']}")
+
+    print(f"\n  Note: {_RUNNER_POLICY_NOTE}")
+    return 0

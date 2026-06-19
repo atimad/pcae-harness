@@ -2,13 +2,15 @@
 
 ## Current Phase
 
-Phase 72A: Bounded Phase Runner Dry-Run Planner.
+Phase 72B: Runner Stop-Condition Policy Matrix.
 
-Phase 72A adds `pcae phase runner-plan`, `--json`, and `--max-phases N` for
-planning-only bounded runner computation. Shows planned phases from queue
-(capped at 3), stop conditions, validation sequence, commit/push sequence,
-and recovery path. Does not execute queue items, mutate queue, create tasks,
-or make commits.
+Phase 72B adds `pcae phase runner-policy` and `--json` exposing a documented
+stop-condition policy matrix for bounded runner behavior. Defines 16
+conditions across 4 categories: hard stop (10), recoverable stop (2),
+advisory warning (3), and continue allowed (1). Task finish partial failure
+references `pcae task finish recover`. Git lock issues reference `pcae doctor
+git-lock`. Human authority is explicitly stated as absolute. The policy is
+advisory only and does not execute or enforce behavior.
 
 ## Milestone: Execution Chain Traceability Complete
 

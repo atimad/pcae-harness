@@ -3891,6 +3891,101 @@ def test_72a_runner_plan_human_output(
     assert "Recovery path:" in output
 
 
+# Phase 72B — Runner Stop-Condition Policy Matrix
+# ---------------------------------------------------------------------------
+
+
+def test_72b_runner_policy_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-policy"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Hard Stop" in output
+    assert "Recoverable Stop" in output
+    assert "Advisory Warning" in output
+    assert "Continue Allowed" in output
+    assert "Human authority is absolute" in output
+
+
+def test_72b_runner_policy_json_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-policy", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert "policy_matrix" in data
+    assert "categories" in data
+    assert "human_authority_note" in data
+    assert len(data["policy_matrix"]) >= 16
+
+    categories = {e["category"] for e in data["policy_matrix"]}
+    assert "hard_stop" in categories
+    assert "recoverable_stop" in categories
+    assert "advisory_warning" in categories
+    assert "continue_allowed" in categories
+
+
+def test_72b_runner_policy_contains_recovery_guidance(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-policy", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+
+    recoverable = [e for e in data["policy_matrix"] if e["category"] == "recoverable_stop"]
+    assert any("task finish recover" in e["guidance"] for e in recoverable)
+    assert any("doctor git-lock" in e["guidance"] for e in recoverable)
+
+
+def test_72b_runner_policy_matrix_entries_have_required_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-policy", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+
+    for entry in data["policy_matrix"]:
+        assert "condition" in entry
+        assert "category" in entry
+        assert "guidance" in entry
+        assert entry["category"] in data["categories"]
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
