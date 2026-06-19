@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 72J: Runner Simulation Approval Persistence Check (20260619-2035-phase-72j-runner-simulation-approval-persistence-check)
 - Phase 72I: Compact Historical Continuity Summary (20260619-2030-phase-72i-compact-historical-continuity-summary)
 - Phase 72H: Runner Execution Preflight Design (20260619-2019-phase-72h-runner-execution-preflight-design)
 - Phase 72G: Runner Simulation Approval Gate (20260619-2015-phase-72g-runner-simulation-approval-gate)
