@@ -2427,6 +2427,79 @@ def test_71v_bootstrap_no_latest_without_handoff_or_audit(tmp_path: Path) -> Non
     assert "Historical strategic decision" not in result
 
 
+# Phase 72I — Compact Historical Continuity Summary
+# ---------------------------------------------------------------------------
+
+
+def test_72i_compact_historical_no_full_rationale(tmp_path: Path) -> None:
+    from pcae.core.context import build_bootstrap_prompt
+    from pcae.core.context import resolve_profile
+
+    pack = _make_pack(tmp_path, strategic_activated="69P")
+    profile, _ = resolve_profile("implementation")
+    audit = {"phases": [{"phase_id": "72H"}]}
+
+    result = build_bootstrap_prompt(pack, profile, audit=audit)
+
+    assert "Historical strategic decision: SLR-69P-001" in result
+    assert "Full details: pcae strategic-continuity show current" in result
+    assert "Deferred Alternatives:" not in result
+    assert "Referenced Review Findings:" not in result
+    assert "SLR-69P-002" not in result
+
+
+def test_72i_compact_historical_short_reason(tmp_path: Path) -> None:
+    from pcae.core.context import build_bootstrap_prompt
+    from pcae.core.context import resolve_profile
+
+    pack = _make_pack(tmp_path, strategic_activated="69P")
+    profile, _ = resolve_profile("implementation")
+    audit = {"phases": [{"phase_id": "72H"}]}
+
+    result = build_bootstrap_prompt(pack, profile, audit=audit)
+
+    for line in result.splitlines():
+        if "Historical strategic decision:" in line:
+            assert "phase 69P" in line
+            assert "roadmap_gap" in line
+            assert len(line) < 300
+            break
+    else:
+        raise AssertionError("Historical strategic decision line not found")
+
+
+def test_72i_current_strategic_still_shows_full(tmp_path: Path) -> None:
+    from pcae.core.context import build_bootstrap_prompt
+    from pcae.core.context import resolve_profile
+
+    pack = _make_pack(tmp_path, strategic_activated="69P")
+    profile, _ = resolve_profile("implementation")
+    audit = {"phases": [{"phase_id": "69P"}]}
+
+    result = build_bootstrap_prompt(pack, profile, audit=audit)
+
+    assert "Strategic Decision: SLR-69P-001" in result
+    assert "Reason: Test rationale." in result
+    assert "Deferred Alternatives:" in result
+    assert "Referenced Review Findings:" in result
+
+
+def test_72i_compact_historical_preserves_latest_phase(tmp_path: Path) -> None:
+    from pcae.core.context import build_bootstrap_prompt
+    from pcae.core.context import resolve_profile
+
+    pack = _make_pack(tmp_path, strategic_activated="69P")
+    profile, _ = resolve_profile("implementation")
+    audit = {"phases": [{"phase_id": "72H"}]}
+
+    result = build_bootstrap_prompt(pack, profile, audit=audit)
+
+    assert "Latest completed phase: 72H" in result
+    assert "Governance:" in result
+    assert "Rules:" in result
+    assert "Validate:" in result
+
+
 def _make_pack(tmp_path: Path, strategic_activated: str = "69P") -> "ContextPack":
     from pcae.core.context import ContextPack
 

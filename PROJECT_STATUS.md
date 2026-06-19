@@ -2,14 +2,13 @@
 
 ## Current Phase
 
-Phase 72H: Runner Execution Preflight Design.
+Phase 72I: Compact Historical Continuity Summary.
 
-Phase 72H adds `pcae phase runner-execution-preflight` and `--json` for a
-design-only preflight specification. Defines 17 requirements for future
-runner execution including clean tree, health, queue, simulation, review,
-approval, and execution authorization. Always reports `design_only` status
-with `execution_available=false` and `execution_authorized=false`. Execution
-is not implemented. Human authority is explicitly stated.
+Phase 72I makes compact bootstrap summarize historical strategic continuity
+in a single line with decision ID, activation phase, decision basis, and
+first sentence of rationale, instead of printing the full multi-paragraph
+body. Current (non-historical) decisions still show full details. No
+strategic continuity data is removed or altered.
 
 ## Milestone: Execution Chain Traceability Complete
 

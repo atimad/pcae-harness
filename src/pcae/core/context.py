@@ -240,27 +240,35 @@ def build_bootstrap_prompt(
     if isinstance(current_lineage, dict):
         activated = current_lineage["activated_phase_id"]
         is_historical = latest_phase is not None and latest_phase != activated
-        label = "Historical strategic decision" if is_historical else "Strategic Decision"
-        lines.append(f"{label}: {current_lineage['lineage_id']}")
-        lines.append(
-            f"Activated: {activated} "
-            f"on {current_lineage['selected_branch_id']}"
-        )
-        lines.append(f"Decision Basis: {current_lineage['decision_basis']}")
-        lines.append(f"Reason: {current_lineage['rationale']}")
-        deferred = continuity.get("deferred_alternatives") or []
-        deferred_text = "; ".join(
-            f"{alternative['phase_id']} ({alternative['reason']})"
-            for alternative in deferred[:3]
-        )
-        lines.append(f"Deferred Alternatives: {deferred_text or 'none'}")
-        referenced_findings = continuity.get("referenced_review_findings") or []
-        findings_text = "; ".join(
-            f"{reference['review_id']} ({reference['finding_count']} findings)"
-            for reference in referenced_findings[:3]
-        )
-        lines.append(f"Referenced Review Findings: {findings_text or 'none'}")
-        lines.append("Details: pcae strategic-continuity show current")
+        if is_historical:
+            rationale = current_lineage.get("rationale", "")
+            short_reason = rationale.split(".")[0].strip() if rationale else "unknown"
+            lines.append(
+                f"Historical strategic decision: {current_lineage['lineage_id']} "
+                f"(phase {activated}, {current_lineage['decision_basis']}: {short_reason})"
+            )
+            lines.append("Full details: pcae strategic-continuity show current")
+        else:
+            lines.append(f"Strategic Decision: {current_lineage['lineage_id']}")
+            lines.append(
+                f"Activated: {activated} "
+                f"on {current_lineage['selected_branch_id']}"
+            )
+            lines.append(f"Decision Basis: {current_lineage['decision_basis']}")
+            lines.append(f"Reason: {current_lineage['rationale']}")
+            deferred = continuity.get("deferred_alternatives") or []
+            deferred_text = "; ".join(
+                f"{alternative['phase_id']} ({alternative['reason']})"
+                for alternative in deferred[:3]
+            )
+            lines.append(f"Deferred Alternatives: {deferred_text or 'none'}")
+            referenced_findings = continuity.get("referenced_review_findings") or []
+            findings_text = "; ".join(
+                f"{reference['review_id']} ({reference['finding_count']} findings)"
+                for reference in referenced_findings[:3]
+            )
+            lines.append(f"Referenced Review Findings: {findings_text or 'none'}")
+            lines.append("Details: pcae strategic-continuity show current")
 
     irg = pack.irg_review_summary
     if irg.get("bootstrap_line"):
