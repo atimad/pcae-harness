@@ -2,12 +2,11 @@
 
 ## Current Phase
 
-Phase 72M: Queue Approval Artifact.
+Phase 72N: Queue-to-Runner Preflight Bridge.
 
-Phase 72M adds `pcae phase queue approve` and `pcae phase queue approval-show`
-for approving the current phase queue snapshot for future runner consideration.
-Requires queue validation to pass and queue to be non-empty. Records SHA-256
-queue digest, entry count, approval message, approver source, and always sets
+Phase 72N extends `pcae phase runner-execution-preflight` to include real queue
+validation and queue approval status, bridging queue governance into the runner
+preflight gate. Execution remains `execution_available=false` and
 `execution_authorized=false`. No queue mutation, no task creation, no execution.
 
 ## Milestone: Execution Chain Traceability Complete

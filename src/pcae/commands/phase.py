@@ -2965,6 +2965,11 @@ _PREFLIGHT_REQUIREMENTS = [
     {"requirement": "task-memory clean", "check": "task_memory_clean"},
     {"requirement": "no unpushed commits", "check": "no_unpushed"},
     {"requirement": "queue non-empty", "check": "queue_present"},
+    {"requirement": "queue validation present", "check": "queue_validation_present"},
+    {"requirement": "queue valid", "check": "queue_valid"},
+    {"requirement": "queue approval present", "check": "queue_approval_present"},
+    {"requirement": "queue approval matches current queue", "check": "queue_approval_matches"},
+    {"requirement": "queue approval execution_authorized=false", "check": "queue_approval_not_authorized"},
     {"requirement": "runner-readiness environment_ready", "check": "environment_ready"},
     {"requirement": "runner-plan executable", "check": "plan_executable"},
     {"requirement": "runner-policy loaded", "check": "policy_loaded"},
@@ -2992,9 +2997,24 @@ def _read_latest_sim_approval(root: HarnessPath) -> dict | None:
 def _build_execution_preflight(root: HarnessPath) -> dict:
     readiness = _build_runner_readiness(root)
     queue = _read_phase_queue(root)
+    queue_validation = _build_queue_validate(root)
+    queue_approval = _read_latest_queue_approval(root)
     sim = _read_latest_simulation(root)
     review = _read_latest_sim_review(root)
     approval = _read_latest_sim_approval(root)
+
+    queue_approval_present = (
+        queue_approval is not None and queue_approval.get("approved", False)
+    )
+    current_queue_digest = _compute_queue_digest(root)
+    queue_approval_matches = (
+        queue_approval is not None
+        and queue_approval.get("queue_digest") == current_queue_digest
+    )
+    queue_approval_not_authorized = (
+        queue_approval is not None
+        and queue_approval.get("execution_authorized") is False
+    )
 
     checks: dict[str, bool] = {
         "working_tree_clean": readiness["working_tree"] == "clean",
@@ -3003,6 +3023,11 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
         "task_memory_clean": readiness["task_memory_status"] == "clean",
         "no_unpushed": readiness["push_state"] in ("nothing_to_push", "post_finish_closure"),
         "queue_present": len(queue) > 0,
+        "queue_validation_present": queue_validation["queue_readable"],
+        "queue_valid": queue_validation["valid"],
+        "queue_approval_present": queue_approval_present,
+        "queue_approval_matches": queue_approval_matches,
+        "queue_approval_not_authorized": queue_approval_not_authorized,
         "environment_ready": readiness["environment_ready"],
         "plan_executable": readiness["environment_ready"] and len(queue) > 0,
         "policy_loaded": True,
@@ -3028,6 +3053,15 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
         "preflight_status": "design_only",
         "execution_available": False,
         "execution_authorized": False,
+        "queue_validation_status": "valid" if queue_validation["valid"] else "invalid",
+        "queue_validation_present": queue_validation["queue_readable"],
+        "queue_valid": queue_validation["valid"],
+        "queue_approval_present": queue_approval_present,
+        "queue_approval_matches_current_queue": queue_approval_matches,
+        "queue_approval_execution_authorized": (
+            queue_approval.get("execution_authorized")
+            if queue_approval is not None else None
+        ),
         "requirements_met": len(met),
         "requirements_total": len(_PREFLIGHT_REQUIREMENTS),
         "requirements": [

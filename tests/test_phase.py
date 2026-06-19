@@ -4598,7 +4598,7 @@ def test_72h_preflight_design_only(
     assert data["preflight_status"] == "design_only"
     assert data["execution_available"] is False
     assert data["execution_authorized"] is False
-    assert data["requirements_total"] == 17
+    assert data["requirements_total"] == 22
     assert "requirements" in data
     assert "unmet_requirements" in data
     assert "human_authority_note" in data
@@ -6499,3 +6499,191 @@ def test_72m_queue_approve_does_not_mutate_queue(tmp_path: Path, monkeypatch, ca
     capsys.readouterr()
 
     assert queue_path.read_text(encoding="utf-8") == before
+
+
+# ---------------------------------------------------------------------------
+# Phase 72N: queue-to-runner preflight bridge
+# ---------------------------------------------------------------------------
+
+
+def _make_queue_file(tmp_path: Path, entries: list) -> None:
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text(json.dumps(entries, indent=2) + "\n", encoding="utf-8")
+
+
+def _make_queue_approval(tmp_path: Path, digest: str) -> None:
+    approval_dir = tmp_path / ".pcae" / "phase-queue-approvals"
+    approval_dir.mkdir(parents=True, exist_ok=True)
+    approval = {
+        "approved": True,
+        "execution_authorized": False,
+        "queue_entry_count": 1,
+        "queue_digest": digest,
+        "approval_message": "test",
+        "approver_source": "local_cli",
+        "approved_at": "20260619T000000Z",
+    }
+    (approval_dir / "latest.json").write_text(
+        json.dumps(approval, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+
+def test_72n_preflight_empty_queue_reports_queue_issues(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _make_queue_file(tmp_path, [])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_valid"] is True
+    assert data["queue_approval_present"] is False
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+    assert "queue non-empty" in data["unmet_requirements"]
+
+
+def test_72n_preflight_valid_approved_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import hashlib as _hashlib
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    entries = ["Phase 72A: valid entry"]
+    _make_queue_file(tmp_path, entries)
+    digest = _hashlib.sha256(
+        (json.dumps(entries, indent=2) + "\n").encode("utf-8")
+    ).hexdigest()
+    _make_queue_approval(tmp_path, digest)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_valid"] is True
+    assert data["queue_validation_status"] == "valid"
+    assert data["queue_approval_present"] is True
+    assert data["queue_approval_matches_current_queue"] is True
+    assert data["queue_approval_execution_authorized"] is False
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72n_preflight_approval_mismatch_when_queue_changed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import hashlib as _hashlib
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    # Create approval based on original queue
+    original = ["Phase 72A: original"]
+    original_digest = _hashlib.sha256(
+        (json.dumps(original, indent=2) + "\n").encode("utf-8")
+    ).hexdigest()
+    _make_queue_approval(tmp_path, original_digest)
+    # Now queue has different content
+    _make_queue_file(tmp_path, ["Phase 72B: modified"])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_valid"] is True
+    assert data["queue_approval_present"] is True
+    assert data["queue_approval_matches_current_queue"] is False
+    assert "queue approval matches current queue" in data["unmet_requirements"]
+
+
+def test_72n_preflight_invalid_queue_reports_issues(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _make_queue_file(tmp_path, ["dummy placeholder"])
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_valid"] is False
+    assert "queue valid" in data["unmet_requirements"]
+
+
+def test_72n_preflight_execution_always_unavailable(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import hashlib as _hashlib
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    entries = ["Phase 72A: perfectly valid"]
+    _make_queue_file(tmp_path, entries)
+    digest = _hashlib.sha256(
+        (json.dumps(entries, indent=2) + "\n").encode("utf-8")
+    ).hexdigest()
+    _make_queue_approval(tmp_path, digest)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+    assert data["preflight_status"] == "design_only"
+    assert "execution_authorized true (future phase)" in data["unmet_requirements"]
+
+
+def test_72n_preflight_queue_approval_execution_authorized_is_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import hashlib as _hashlib
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    entries = ["Phase 72A: test"]
+    _make_queue_file(tmp_path, entries)
+    digest = _hashlib.sha256(
+        (json.dumps(entries, indent=2) + "\n").encode("utf-8")
+    ).hexdigest()
+    _make_queue_approval(tmp_path, digest)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_approval_execution_authorized"] is False
+
+
+def test_72n_preflight_human_output_states_no_execution(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Execution available: no" in output
+    assert "Execution authorized: no" in output
+    assert "design only" in output.lower()
