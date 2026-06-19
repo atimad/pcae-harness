@@ -6838,3 +6838,131 @@ def test_72o_fixture_human_output_no_execution(tmp_path: Path, monkeypatch, caps
     output = capsys.readouterr().out
     assert exit_code == 0
     assert "No execution performed" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase 72P: queue approval matching with non-empty queue
+# ---------------------------------------------------------------------------
+
+
+def test_72p_approval_check_match_with_fixture_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "Fixture approval"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "approval-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["ready"] is True
+    assert data["approval_present"] is True
+    assert data["approval_matches"] is True
+    assert data["queue_valid"] is True
+    assert data["execution_authorized"] is False
+
+
+def test_72p_approval_check_mismatch_when_queue_changes(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "Original"])
+    capsys.readouterr()
+    # Add another fixture → queue digest changes
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "approval-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["ready"] is False
+    assert data["approval_present"] is True
+    assert data["approval_matches"] is False
+    assert "does not match" in str(data["reasons"])
+
+
+def test_72p_approval_check_empty_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    queue_path.write_text("[]", encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "approval-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["ready"] is False
+    assert "empty" in str(data["reasons"])
+
+
+def test_72p_approval_check_execution_authorized_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "Check exec auth"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "approval-check", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["execution_authorized"] is False
+    assert data["ready"] is True
+
+
+def test_72p_approval_show_reports_match_and_mismatch(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "Show test"])
+    capsys.readouterr()
+
+    # Approval matches
+    exit_code = main(["phase", "queue", "approval-show", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_digest_matches"] is True
+
+    # Modify queue → mismatch
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "approval-show", "--json"])
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_digest_matches"] is False
+
+
+def test_72p_approval_check_no_execution(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "No exec"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "approval-check"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No execution performed" in output
+    assert "read-only" in output.lower()

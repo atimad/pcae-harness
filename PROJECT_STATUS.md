@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72O: Safe Queue Fixture Lifecycle.
+Phase 72P: Queue Approval Matching With Non-Empty Queue.
 
-Phase 72O adds `pcae phase queue fixture-add` and `fixture-clear` for creating and
-safely removing non-executable test fixture entries. Fixtures are explicitly marked
-`source_type=fixture`, `fixture=true`, `execution_authorized=false`. Queue validation
-recognizes fixtures as valid and reports `fixture_count`. No execution, no task creation.
+Phase 72P adds `pcae phase queue approval-check` for a focused pass/fail check of
+queue approval state (queue presence, validity, approval presence, digest match,
+execution_authorized=false). Hardens approval matching using fixture queues from 72O.
+No execution, no task creation.
 
 ## Milestone: Execution Chain Traceability Complete
 

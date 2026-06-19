@@ -1221,6 +1221,70 @@ def run_phase_queue_approval_show(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_phase_queue_approval_check(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    queue = _read_phase_queue(root)
+    validation = _build_queue_validate(root)
+    approval = _read_latest_queue_approval(root)
+
+    reasons: list[str] = []
+
+    if not validation["queue_ready"]:
+        reasons.append("queue is empty")
+    if not validation["valid"]:
+        reasons.append(f"queue validation failed: {len(validation['issues'])} issue(s)")
+    if approval is None:
+        reasons.append("no queue approval artifact found")
+    else:
+        current_digest = _compute_queue_digest(root)
+        if approval.get("queue_digest") != current_digest:
+            reasons.append("queue approval does not match current queue")
+        if approval.get("execution_authorized") is not False:
+            reasons.append("execution_authorized is not explicitly false")
+
+    ready = len(reasons) == 0
+
+    result = {
+        "ready": ready,
+        "reasons": reasons,
+        "queue_present": len(queue) > 0,
+        "queue_valid": validation["valid"],
+        "queue_ready": validation["queue_ready"],
+        "approval_present": approval is not None,
+        "approval_matches": (
+            approval is not None
+            and approval.get("queue_digest") == _compute_queue_digest(root)
+        ) if approval is not None else False,
+        "execution_authorized": (
+            approval.get("execution_authorized", False) if approval else None
+        ),
+        "note": "No execution performed. This is a read-only check.",
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if ready else 1
+
+    print("Queue Approval Check")
+    print("=" * 40)
+    print(f"  Ready: {'yes' if result['ready'] else 'NO'}")
+    print(f"  Queue present: {'yes' if result['queue_present'] else 'no'}")
+    print(f"  Queue valid: {'yes' if result['queue_valid'] else 'no'}")
+    print(f"  Queue ready: {'yes' if result['queue_ready'] else 'no'}")
+    print(f"  Approval present: {'yes' if result['approval_present'] else 'no'}")
+    if result["approval_present"]:
+        print(f"  Approval matches: {'yes' if result['approval_matches'] else 'NO'}")
+        print(f"  Execution authorized: {'yes' if result['execution_authorized'] else 'no'}")
+    if reasons:
+        print()
+        print("  Reasons:")
+        for r in reasons:
+            print(f"    - {r}")
+    print()
+    print(f"  {result['note']}")
+    return 0 if ready else 1
+
+
 def _build_manual_steps(next_agent: str) -> list[str]:
     return [
         "Close or reset the current AI session if needed.",

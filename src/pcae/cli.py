@@ -437,6 +437,7 @@ from pcae.commands.phase import (
     run_phase_prompt_roundtrip_check,
     run_phase_prompt_show,
     run_phase_queue_add,
+    run_phase_queue_approval_check,
     run_phase_queue_approval_show,
     run_phase_queue_approve,
     run_phase_queue_check,
@@ -4885,6 +4886,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON output.",
     )
     phase_queue_approval_show_parser.set_defaults(handler=run_phase_queue_approval_show)
+
+    phase_queue_approval_check_parser = phase_queue_subparsers.add_parser(
+        "approval-check",
+        help="Check whether queue approval matches the current queue state.",
+    )
+    phase_queue_approval_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    phase_queue_approval_check_parser.set_defaults(handler=run_phase_queue_approval_check)
 
     phase_audit_parser = phase_subparsers.add_parser(
         "audit",
