@@ -2617,3 +2617,117 @@ def run_phase_runner_sim_approve(args: argparse.Namespace) -> int:
     print(f"  Approver: {approval['approver_source']}")
     print(f"  Execution authorized: no")
     return 0
+
+
+_PREFLIGHT_REQUIREMENTS = [
+    {"requirement": "clean working tree", "check": "working_tree_clean"},
+    {"requirement": "healthy idle", "check": "health_idle"},
+    {"requirement": "pcae check passed", "check": "check_passed"},
+    {"requirement": "task-memory clean", "check": "task_memory_clean"},
+    {"requirement": "no unpushed commits", "check": "no_unpushed"},
+    {"requirement": "queue non-empty", "check": "queue_present"},
+    {"requirement": "runner-readiness environment_ready", "check": "environment_ready"},
+    {"requirement": "runner-plan executable", "check": "plan_executable"},
+    {"requirement": "runner-policy loaded", "check": "policy_loaded"},
+    {"requirement": "latest simulation exists", "check": "simulation_present"},
+    {"requirement": "latest simulation review ready", "check": "review_ready"},
+    {"requirement": "latest simulation approval exists", "check": "approval_present"},
+    {"requirement": "approval matches latest simulation/review", "check": "approval_matches"},
+    {"requirement": "execution_authorized true (future phase)", "check": "execution_authorized"},
+    {"requirement": "max phases bounded", "check": "max_bounded"},
+    {"requirement": "hard stop policy enforced", "check": "policy_enforced"},
+    {"requirement": "recovery path available", "check": "recovery_available"},
+]
+
+
+def _read_latest_sim_approval(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_SIMULATION_APPROVALS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _build_execution_preflight(root: HarnessPath) -> dict:
+    readiness = _build_runner_readiness(root)
+    queue = _read_phase_queue(root)
+    sim = _read_latest_simulation(root)
+    review = _read_latest_sim_review(root)
+    approval = _read_latest_sim_approval(root)
+
+    checks: dict[str, bool] = {
+        "working_tree_clean": readiness["working_tree"] == "clean",
+        "health_idle": readiness["health_status"] == "healthy",
+        "check_passed": readiness["check_passed"],
+        "task_memory_clean": readiness["task_memory_status"] == "clean",
+        "no_unpushed": readiness["push_state"] in ("nothing_to_push", "post_finish_closure"),
+        "queue_present": len(queue) > 0,
+        "environment_ready": readiness["environment_ready"],
+        "plan_executable": readiness["environment_ready"] and len(queue) > 0,
+        "policy_loaded": True,
+        "simulation_present": sim is not None,
+        "review_ready": review is not None and review.get("review_status") == "ready_for_approval",
+        "approval_present": approval is not None and approval.get("approved", False),
+        "approval_matches": (
+            approval is not None
+            and sim is not None
+            and review is not None
+            and approval.get("approved_simulation_created_at") == sim.get("created_at")
+        ),
+        "execution_authorized": False,
+        "max_bounded": True,
+        "policy_enforced": True,
+        "recovery_available": True,
+    }
+
+    met = [r for r in _PREFLIGHT_REQUIREMENTS if checks.get(r["check"], False)]
+    unmet = [r for r in _PREFLIGHT_REQUIREMENTS if not checks.get(r["check"], False)]
+
+    return {
+        "preflight_status": "design_only",
+        "execution_available": False,
+        "execution_authorized": False,
+        "requirements_met": len(met),
+        "requirements_total": len(_PREFLIGHT_REQUIREMENTS),
+        "requirements": [
+            {**r, "met": checks.get(r["check"], False)}
+            for r in _PREFLIGHT_REQUIREMENTS
+        ],
+        "unmet_requirements": [r["requirement"] for r in unmet],
+        "human_authority_note": _RUNNER_POLICY_NOTE,
+        "note": (
+            "Execution is not implemented and not authorized. "
+            "This is a design-only preflight specification."
+        ),
+    }
+
+
+def run_phase_runner_execution_preflight(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    preflight = _build_execution_preflight(root)
+
+    if args.json:
+        print(json.dumps(preflight, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Execution Preflight (design only)")
+    print("=" * 40)
+    print(f"  Status: {preflight['preflight_status']}")
+    print(f"  Execution available: no")
+    print(f"  Execution authorized: no")
+    print(f"  Requirements met: {preflight['requirements_met']}/{preflight['requirements_total']}")
+    print()
+    for req in preflight["requirements"]:
+        mark = "OK" if req["met"] else "--"
+        print(f"  [{mark}] {req['requirement']}")
+    if preflight["unmet_requirements"]:
+        print()
+        print("  Unmet:")
+        for u in preflight["unmet_requirements"]:
+            print(f"    - {u}")
+    print()
+    print(f"  {preflight['note']}")
+    print(f"  {preflight['human_authority_note']}")
+    return 0

@@ -4576,6 +4576,100 @@ def test_72g_sim_approve_human_output(
     assert "Execution authorized: no" in output
 
 
+# Phase 72H — Runner Execution Preflight Design
+# ---------------------------------------------------------------------------
+
+
+def test_72h_preflight_design_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["preflight_status"] == "design_only"
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+    assert data["requirements_total"] == 17
+    assert "requirements" in data
+    assert "unmet_requirements" in data
+    assert "human_authority_note" in data
+
+
+def test_72h_preflight_execution_authorized_always_false(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Test phase"])
+    main(["phase", "runner-simulate", "--save"])
+    main(["phase", "runner-sim-review", "--save"])
+    main(["phase", "runner-sim-approve", "--message", "test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["execution_authorized"] is False
+    assert "execution_authorized true" in str(data["unmet_requirements"])
+
+
+def test_72h_preflight_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "design only" in output.lower()
+    assert "Execution available: no" in output
+    assert "Execution authorized: no" in output
+    assert "Human authority is absolute" in output
+
+
+def test_72h_preflight_requirements_have_met_field(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    for req in data["requirements"]:
+        assert "requirement" in req
+        assert "check" in req
+        assert "met" in req
+        assert isinstance(req["met"], bool)
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------

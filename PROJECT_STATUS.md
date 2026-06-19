@@ -2,12 +2,14 @@
 
 ## Current Phase
 
-Phase 72G: Runner Simulation Approval Gate.
+Phase 72H: Runner Execution Preflight Design.
 
-Phase 72G adds `pcae phase runner-sim-approve`, `--json`, `--message`, and
-`--dry-run` for recording human approval of a runner simulation. Requires a
-review artifact with `ready_for_approval` status. Approval explicitly records
-`execution_authorized=false`. Does not execute or authorize execution.
+Phase 72H adds `pcae phase runner-execution-preflight` and `--json` for a
+design-only preflight specification. Defines 17 requirements for future
+runner execution including clean tree, health, queue, simulation, review,
+approval, and execution authorization. Always reports `design_only` status
+with `execution_available=false` and `execution_authorized=false`. Execution
+is not implemented. Human authority is explicitly stated.
 
 ## Milestone: Execution Chain Traceability Complete
 
