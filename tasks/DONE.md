@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 71H Autonomy Audit Artifact Persistence (20260619-0857-71h-autonomy-audit-artifact-persistence)
 - 71G Phase Queue Residue Hygiene (20260619-0850-71g-phase-queue-residue-hygiene)
 - Phase 71F: Governed Phase Queue Runner Design (20260619-0658-phase-71f-governed-phase-queue-runner-design)
 - Phase 71E: Phase Queue Readiness Check (20260619-0652-phase-71e-phase-queue-readiness-check)
