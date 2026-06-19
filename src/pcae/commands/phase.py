@@ -2530,3 +2530,90 @@ def run_phase_runner_sim_review(args: argparse.Namespace) -> int:
     for r in review["review_reasons"]:
         print(f"    - {r}")
     return 0
+
+
+RUNNER_SIMULATION_APPROVALS_DIR = Path(".pcae") / "runner-simulation-approvals"
+
+
+def _read_latest_sim_review(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_SIMULATION_REVIEWS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _build_sim_approval(root: HarnessPath, message: str) -> dict:
+    review = _read_latest_sim_review(root)
+    if review is None:
+        return {
+            "approved": False,
+            "refusal_reason": "No review artifact found. Run: pcae phase runner-sim-review --save",
+        }
+
+    if review.get("review_status") != "ready_for_approval":
+        return {
+            "approved": False,
+            "refusal_reason": f"Review status is '{review.get('review_status')}', not 'ready_for_approval'.",
+        }
+
+    return {
+        "approved": True,
+        "approved_simulation_created_at": review.get("simulation_created_at"),
+        "reviewed_at": review.get("reviewed_at"),
+        "message": message,
+        "approver_source": "local_cli",
+        "execution_authorized": False,
+    }
+
+
+def _save_sim_approval(root: HarnessPath, approval: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    approval_with_ts = {**approval, "approved_at": ts}
+    approval_dir = root.join(RUNNER_SIMULATION_APPROVALS_DIR)
+    approval_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = approval_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = approval_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(approval_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_sim_approve(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    message = getattr(args, "message", "") or "Simulation approved."
+    dry_run = getattr(args, "dry_run", False)
+    approval = _build_sim_approval(root, message)
+
+    if not approval.get("approved", False):
+        if args.json:
+            print(json.dumps(approval, indent=2, sort_keys=True))
+        else:
+            print(f"Approval refused: {approval['refusal_reason']}")
+        return 1
+
+    if not dry_run:
+        saved_path = _save_sim_approval(root, approval)
+        if not args.json:
+            print(f"Approval saved: {saved_path}")
+
+    if args.json:
+        result = {**approval, "dry_run": dry_run}
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Simulation Approval")
+    print("=" * 40)
+    print(f"  Approved: yes")
+    print(f"  Dry run: {'yes' if dry_run else 'no'}")
+    print(f"  Simulation created: {approval.get('approved_simulation_created_at', 'unknown')}")
+    print(f"  Message: {approval['message']}")
+    print(f"  Approver: {approval['approver_source']}")
+    print(f"  Execution authorized: no")
+    return 0

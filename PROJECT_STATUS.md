@@ -2,13 +2,12 @@
 
 ## Current Phase
 
-Phase 72F: Runner Simulation Review Artifact.
+Phase 72G: Runner Simulation Approval Gate.
 
-Phase 72F adds `pcae phase runner-sim-review`, `--json`, and `--save` for
-reviewing the latest runner simulation artifact. Reports review status as
-`ready_for_approval`, `blocked`, or `missing_simulation`. Includes
-simulation metadata, readiness summary, and policy summary. Does not
-approve or execute anything.
+Phase 72G adds `pcae phase runner-sim-approve`, `--json`, `--message`, and
+`--dry-run` for recording human approval of a runner simulation. Requires a
+review artifact with `ready_for_approval` status. Approval explicitly records
+`execution_authorized=false`. Does not execute or authorize execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

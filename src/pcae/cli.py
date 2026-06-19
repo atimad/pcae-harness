@@ -418,6 +418,7 @@ from pcae.commands.phase import (
     run_phase_runner_plan,
     run_phase_runner_policy,
     run_phase_runner_readiness,
+    run_phase_runner_sim_approve,
     run_phase_runner_sim_fixture,
     run_phase_runner_sim_review,
     run_phase_runner_simulate,
@@ -5037,6 +5038,21 @@ def build_parser() -> argparse.ArgumentParser:
         help="Number of simulated entries to generate (default: 3, max: 10).",
     )
     phase_runner_sim_fixture_parser.set_defaults(handler=run_phase_runner_sim_fixture)
+
+    phase_runner_sim_approve_parser = phase_subparsers.add_parser(
+        "runner-sim-approve",
+        help="Record approval of a runner simulation (does not authorize execution).",
+    )
+    phase_runner_sim_approve_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_sim_approve_parser.add_argument(
+        "--message", default=None, help="Approval message."
+    )
+    phase_runner_sim_approve_parser.add_argument(
+        "--dry-run", action="store_true", help="Report proposed approval without writing."
+    )
+    phase_runner_sim_approve_parser.set_defaults(handler=run_phase_runner_sim_approve)
 
     phase_runner_sim_review_parser = phase_subparsers.add_parser(
         "runner-sim-review",

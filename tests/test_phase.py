@@ -4449,6 +4449,133 @@ def test_72f_sim_review_human_output(
     assert "missing_simulation" in output
 
 
+# Phase 72G — Runner Simulation Approval Gate
+# ---------------------------------------------------------------------------
+
+
+def test_72g_sim_approve_missing_review(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-sim-approve", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["approved"] is False
+    assert "review" in data["refusal_reason"].lower()
+
+
+def test_72g_sim_approve_blocked_review(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    review_dir = tmp_path / ".pcae" / "runner-simulation-reviews"
+    review_dir.mkdir(parents=True, exist_ok=True)
+    (review_dir / "latest.json").write_text(
+        _json.dumps({"review_status": "blocked"}), encoding="utf-8"
+    )
+
+    exit_code = main(["phase", "runner-sim-approve", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["approved"] is False
+    assert "blocked" in data["refusal_reason"]
+
+
+def test_72g_sim_approve_success(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-review", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-sim-approve", "--message", "Test approval", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approved"] is True
+    assert data["execution_authorized"] is False
+    assert data["message"] == "Test approval"
+    assert data["approver_source"] == "local_cli"
+
+    latest = tmp_path / ".pcae" / "runner-simulation-approvals" / "latest.json"
+    assert latest.exists()
+
+
+def test_72g_sim_approve_dry_run(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-review", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-sim-approve", "--dry-run", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approved"] is True
+    assert data["dry_run"] is True
+    assert data["execution_authorized"] is False
+
+    latest = tmp_path / ".pcae" / "runner-simulation-approvals" / "latest.json"
+    assert not latest.exists()
+
+
+def test_72g_sim_approve_human_output(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-simulate", "--save"])
+    capsys.readouterr()
+    main(["phase", "runner-sim-review", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-sim-approve", "--message", "Human OK"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Approved: yes" in output
+    assert "Execution authorized: no" in output
+
+
 # ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
