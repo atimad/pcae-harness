@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 72C: Runner Simulation Fixture Queue (20260619-1913-phase-72c-runner-simulation-fixture-queue)
 - Phase 72B: Runner Stop-Condition Policy Matrix (20260619-1845-phase-72b-runner-stop-condition-policy-matrix)
 - Phase 72A: Bounded Phase Runner Dry-Run Planner (20260619-1840-phase-72a-bounded-phase-runner-dry-run-planner)
 - Phase 71Z: Phase Queue Runner Readiness Contract (20260619-1836-phase-71z-phase-queue-runner-readiness-contract)
