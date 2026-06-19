@@ -2,14 +2,15 @@
 
 ## Current Phase
 
-Phase 71R: Phase Prompt Queue Round-Trip Validation.
+Phase 71S: Codex Autonomy Comparison Handoff Note.
 
-Phase 71R adds read-only validation for the captured prompt to phase queue
-planning chain. `pcae phase prompt-roundtrip-check` verifies latest prompt
-metadata/content, prompt-show loadability, prompt-enqueue dry-run derivation,
-readable queue state, and handoff/bootstrap visibility signals without
-executing prompts, mutating prompt artifacts, mutating the phase queue, creating
-task contracts, or running queued phases.
+Phase 71S records a documentation-only autonomy comparison note in
+`docs/ARCHITECTURE.md`. The note defines agent-neutral comparison criteria,
+expected end-of-run report fields, and observed Codex stop-and-recover behavior
+from 71Q/71Q.1/71R, while distinguishing governed agent behavior from the
+Codex sandbox Git index-lock permission issue. No code behavior, task finish,
+push, prompt, queue, review enforcement, or execution-governance behavior is
+changed.
 
 ## Milestone: Execution Chain Traceability Complete
 
