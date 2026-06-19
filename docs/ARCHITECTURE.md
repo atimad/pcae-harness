@@ -464,3 +464,70 @@ The runner orchestrates these existing commands in sequence:
 - No branch/remote management — uses current branch.
 - No prompt generation — phase descriptions are human-authored in the queue.
 - No PCAE-native agent invocation — the agent drives implementation, not PCAE.
+
+## Phase Prompt Queue Bridge Design (Phase 71O)
+
+### Problem
+
+PCAE can now capture phase prompts (71K–71L) and manage a phase queue (70Y), but these are independent systems. A captured prompt containing multiple future phases must be manually decomposed and added to the queue. Implementing automatic prompt-to-queue conversion or execution without a design would be high-risk.
+
+### Key Distinction: Prompt Storage vs. Queue Items
+
+Phase prompts (`.pcae/phase-prompts/`) are **captured text artifacts** — human-authored descriptions saved for continuity and reference. They are never executed by PCAE.
+
+Phase queue items (`.pcae/phase-queue.json`) are **planning entries** — short descriptions that identify phases for future execution by the governed queue runner (71F design). Queue items are also not executed by PCAE directly; they guide the external agent.
+
+The bridge transfers metadata from captured prompts into queue items. It does not transfer execution authority.
+
+### Proposed Command Shape
+
+```
+pcae phase prompt-enqueue latest [--dry-run] [--json]
+pcae phase prompt-enqueue <filename> [--dry-run] [--json]
+```
+
+- `latest` enqueues from the latest captured prompt metadata.
+- `<filename>` enqueues from a specific timestamped prompt artifact.
+- `--dry-run` reports what would be enqueued without modifying the queue.
+- Default behavior: add one queue entry derived from the prompt title.
+
+### Metadata Transfer Model
+
+The bridge transfers the following from the prompt artifact to the queue item:
+
+| Prompt Field       | Queue Entry           |
+|--------------------|-----------------------|
+| `title`            | queue item description |
+| `latest_path`      | `source_prompt_path`  |
+| `created_at`       | `source_prompt_created_at` |
+| `slug`             | (not transferred)     |
+| content            | (not transferred)     |
+
+Content is never transferred to the queue. The queue item is a short description derived from the prompt title only.
+
+### Safety Model
+
+1. **Enqueue only** — the bridge adds items to the phase queue. It does not execute prompts, create task contracts, or trigger the queue runner.
+2. **Dry-run first** — `--dry-run` is recommended before any enqueue. It shows the proposed queue entry without modifying state.
+3. **No automatic execution** — `pcae phase queue run` (71F design) is a separate command that requires its own readiness check (`pcae phase queue check`) before execution. The bridge does not invoke it.
+4. **Prompt content is never executed** — the bridge transfers the title as a queue description. The full prompt content remains in the prompt artifact for human reference.
+5. **Duplicate detection** — if the queue already contains an entry with the same description, the bridge refuses to add a duplicate.
+6. **Confirmation for ambiguous prompts** — if the prompt title contains multiple phase identifiers (e.g., "71P and 71Q"), the bridge should warn that multi-phase prompts may need manual decomposition.
+
+### Interaction with Existing Systems
+
+- **Phase queue list/check**: the enqueued item appears in `pcae phase queue list` and is evaluated by `pcae phase queue check` like any other queue entry.
+- **Handoff/bootstrap prompt visibility**: the bridge does not affect prompt visibility in handoff or bootstrap (71M). The captured prompt remains visible regardless of whether it has been enqueued.
+- **Audit artifacts**: `pcae phase audit` tracks commit pairs, not queue source. The bridge adds no audit-specific metadata.
+- **Future governed queue runner**: when `pcae phase queue run` is implemented (71F), it consumes queue entries without awareness of their source. The `source_prompt_path` metadata is informational only.
+- **Prompt hygiene**: `pcae phase prompt-hygiene` and `prompt-prune` operate on prompt artifacts independently of the queue. Pruning a prompt artifact does not remove its corresponding queue entry.
+
+### What This Design Does NOT Include
+
+- No implementation in Phase 71O — design only.
+- No prompt execution — prompt content is never run.
+- No automatic task creation from prompts.
+- No multi-phase prompt decomposition — single title → single queue entry.
+- No queue runner invocation from the bridge.
+- No reverse bridge (queue → prompt).
+- No prompt-id or source tracking beyond informational metadata.
