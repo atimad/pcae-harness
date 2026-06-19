@@ -2734,6 +2734,256 @@ def test_71c_audit_no_handoff(
 
 
 # ---------------------------------------------------------------------------
+# Phase queue residue hygiene (Phase 71G)
+# ---------------------------------------------------------------------------
+
+
+def test_71g_hygiene_empty_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "hygiene"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "clean" in output.lower()
+    assert "empty" in output.lower()
+
+
+def test_71g_hygiene_empty_queue_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "queue", "hygiene", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 0
+    assert data["has_issues"] is False
+    assert data["findings"] == []
+    assert data["clearable_count"] == 0
+
+
+def test_71g_hygiene_no_placeholders(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase 72A: implement auth module"])
+    main(["phase", "queue", "add", "Phase 72B: add tests for auth"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "clean" in output.lower()
+    assert "no placeholders" in output.lower()
+
+
+def test_71g_hygiene_detects_placeholders(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase 72A: test phase"])
+    main(["phase", "queue", "add", "Phase 72B: real work"])
+    main(["phase", "queue", "add", "Phase 72C: next step"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "2 placeholder(s)" in output
+    assert "test phase" in output
+    assert "next step" in output
+
+
+def test_71g_hygiene_detects_placeholders_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase 72A: test phase"])
+    main(["phase", "queue", "add", "Phase 72B: real work"])
+    main(["phase", "queue", "add", "dummy entry"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 3
+    assert data["has_issues"] is True
+    assert data["clearable_count"] == 2
+    assert len(data["findings"]) == 2
+
+
+def test_71g_hygiene_clear_requires_confirm(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "test phase"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene", "--clear-placeholders"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "--confirm" in output
+
+
+def test_71g_hygiene_clear_requires_confirm_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "test phase"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene", "--clear-placeholders", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert "error" in data
+
+
+def test_71g_hygiene_clear_placeholders_confirmed(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase 72A: test phase"])
+    main(["phase", "queue", "add", "Phase 72B: real work"])
+    main(["phase", "queue", "add", "Phase 72C: next step"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene", "--clear-placeholders", "--confirm"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Cleared 2 placeholder(s)" in output
+    assert "1 real entries remain" in output
+
+    capsys.readouterr()
+    main(["phase", "queue", "list"])
+    list_output = capsys.readouterr().out
+    assert "Phase 72B: real work" in list_output
+    assert "test phase" not in list_output
+    assert "next step" not in list_output
+
+
+def test_71g_hygiene_clear_placeholders_confirmed_json(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "placeholder entry"])
+    main(["phase", "queue", "add", "real phase work"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene", "--clear-placeholders", "--confirm", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["cleared"] == 1
+    assert data["remaining"] == 1
+
+
+def test_71g_hygiene_clear_no_placeholders_to_clear(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase 72A: real work"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene", "--clear-placeholders", "--confirm"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "No placeholder entries" in output
+
+
+def test_71g_hygiene_case_insensitive(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "TEST PHASE entry"])
+    main(["phase", "queue", "add", "Placeholder Item"])
+    main(["phase", "queue", "add", "DUMMY run"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "hygiene", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["clearable_count"] == 3
+
+
+def test_71g_hygiene_real_entries_not_cleared(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "queue", "add", "Phase 72A: implement auth"])
+    main(["phase", "queue", "add", "Phase 72B: test phase"])
+    main(["phase", "queue", "add", "Phase 72C: add logging"])
+    capsys.readouterr()
+
+    main(["phase", "queue", "hygiene", "--clear-placeholders", "--confirm"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "queue", "list", "--json"])
+
+    import json as _json
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["queue_length"] == 2
+    assert data["queue"] == ["Phase 72A: implement auth", "Phase 72C: add logging"]
+
+
+# ---------------------------------------------------------------------------
 # helpers
 # ---------------------------------------------------------------------------
 

@@ -313,6 +313,13 @@ def _build_auto_summary(root: HarnessPath) -> str:
 HANDOFFS_DIR = Path(".pcae") / "handoffs"
 PHASE_QUEUE_PATH = Path(".pcae") / "phase-queue.json"
 
+PLACEHOLDER_PATTERNS = [
+    "test phase",
+    "next step",
+    "placeholder",
+    "dummy",
+]
+
 
 def _build_handoff_artifact(
     *,
@@ -665,6 +672,95 @@ def run_phase_queue_check(args: argparse.Namespace) -> int:
     for reason in reasons:
         print(f"  - {reason}")
     return 1
+
+
+def _is_placeholder(entry: str) -> bool:
+    lower = entry.lower().strip()
+    return any(pattern in lower for pattern in PLACEHOLDER_PATTERNS)
+
+
+def run_phase_queue_hygiene(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    queue = _read_phase_queue(root)
+
+    findings: list[dict] = []
+    clearable_indices: list[int] = []
+
+    for i, entry in enumerate(queue):
+        if _is_placeholder(entry):
+            findings.append({
+                "position": i + 1,
+                "entry": entry,
+                "reason": "matches placeholder pattern",
+            })
+            clearable_indices.append(i)
+
+    has_issues = len(findings) > 0
+
+    if args.clear_placeholders:
+        if not args.confirm:
+            if args.json:
+                print(json.dumps({
+                    "error": "--clear-placeholders requires --confirm",
+                    "findings": findings,
+                    "clearable_count": len(clearable_indices),
+                }, indent=2, sort_keys=True))
+            else:
+                print("Error: --clear-placeholders requires --confirm flag.")
+                if findings:
+                    print(f"  {len(findings)} placeholder(s) found. Re-run with --confirm to clear.")
+            return 1
+
+        if not findings:
+            if args.json:
+                print(json.dumps({
+                    "cleared": 0,
+                    "remaining": len(queue),
+                    "findings": [],
+                }, indent=2, sort_keys=True))
+            else:
+                print("No placeholder entries to clear.")
+            return 0
+
+        kept = [e for i, e in enumerate(queue) if i not in clearable_indices]
+        _write_phase_queue(root, kept)
+
+        if args.json:
+            print(json.dumps({
+                "cleared": len(clearable_indices),
+                "remaining": len(kept),
+                "findings": findings,
+            }, indent=2, sort_keys=True))
+        else:
+            print(f"Cleared {len(clearable_indices)} placeholder(s).")
+            for f in findings:
+                print(f"  - removed position {f['position']}: {f['entry']}")
+            if kept:
+                print(f"  {len(kept)} real entries remain.")
+        return 0
+
+    if args.json:
+        print(json.dumps({
+            "queue_length": len(queue),
+            "has_issues": has_issues,
+            "findings": findings,
+            "clearable_count": len(clearable_indices),
+        }, indent=2, sort_keys=True))
+        return 0
+
+    if not queue:
+        print("Phase queue hygiene: clean (queue is empty)")
+        return 0
+
+    if not has_issues:
+        print(f"Phase queue hygiene: clean ({len(queue)} entries, no placeholders)")
+        return 0
+
+    print(f"Phase queue hygiene: {len(findings)} placeholder(s) found")
+    for f in findings:
+        print(f"  {f['position']}. {f['entry']} — {f['reason']}")
+    print(f"\nTo clear: pcae phase queue hygiene --clear-placeholders --confirm")
+    return 0
 
 
 def _build_manual_steps(next_agent: str) -> list[str]:
