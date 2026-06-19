@@ -1000,7 +1000,7 @@ def run_phase_start(args: argparse.Namespace) -> int:
 
 
 _PHASE_COMMIT_RE = re.compile(
-    r"^(Implement|Complete) Phase (\S+)\s+(.+)$"
+    r"^(Implement|Document|Design|Add|Refine|Complete) Phase (\S+)\s+(.+)$"
 )
 
 
@@ -1039,10 +1039,10 @@ def _detect_phase_commits(
             "description": description,
             "subject": subject,
         }
-        if kind == "Implement":
-            impl_map.setdefault(phase_id, entry)
-        else:
+        if kind == "Complete":
             comp_map.setdefault(phase_id, entry)
+        else:
+            impl_map.setdefault(phase_id, entry)
 
     all_phase_ids = list(dict.fromkeys(
         list(comp_map.keys()) + list(impl_map.keys())

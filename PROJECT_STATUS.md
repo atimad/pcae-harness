@@ -2,15 +2,15 @@
 
 ## Current Phase
 
-Phase 71S: Codex Autonomy Comparison Handoff Note.
+Phase 71T: Audit Commit Pair Classification Flexibility.
 
-Phase 71S records a documentation-only autonomy comparison note in
-`docs/ARCHITECTURE.md`. The note defines agent-neutral comparison criteria,
-expected end-of-run report fields, and observed Codex stop-and-recover behavior
-from 71Q/71Q.1/71R, while distinguishing governed agent behavior from the
-Codex sandbox Git index-lock permission issue. No code behavior, task finish,
-push, prompt, queue, review enforcement, or execution-governance behavior is
-changed.
+Phase 71T expands phase audit commit-pair recognition to accept `Document`,
+`Design`, `Add`, and `Refine` verbs as valid implementation commit prefixes
+alongside `Implement`. Classification is now phase-id based: any recognized
+verb followed by `Phase <id>` is treated as implementation unless the verb is
+`Complete`. This resolves false warnings for documentation-only or design-only
+phases (e.g., Phase 71S) while preserving warnings for genuinely missing
+implementation commits.
 
 ## Milestone: Execution Chain Traceability Complete
 

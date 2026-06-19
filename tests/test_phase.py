@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import subprocess
 
+import pytest
+
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.agent import acquire_agent_lock, read_agent_lock
@@ -2582,6 +2584,90 @@ def test_71c_audit_commit_pair_detection(
     assert phase["implementation_commit"] is not None
     assert phase["completion_commit"] is not None
     assert phase["commit_pair_complete"] is True
+
+
+# Phase 71T — Audit Commit Pair Classification Flexibility
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("verb", ["Implement", "Document", "Design", "Add", "Refine"])
+def test_71t_audit_recognizes_implementation_verbs(
+    tmp_path: Path, monkeypatch, capsys, verb: str
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    dummy = tmp_path / "dummy.txt"
+    dummy.write_text(f"impl {verb}", encoding="utf-8")
+    run_git(tmp_path, "add", "dummy.txt")
+    run_git(tmp_path, "commit", "-m", f"{verb} Phase 80A test {verb.lower()} phase")
+    dummy.write_text(f"comp {verb}", encoding="utf-8")
+    run_git(tmp_path, "add", "dummy.txt")
+    run_git(tmp_path, "commit", "-m", f"Complete Phase 80A test {verb.lower()} phase")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase = data["phases"][0]
+    assert phase["phase_id"] == "80A"
+    assert phase["implementation_commit"] is not None
+    assert phase["completion_commit"] is not None
+    assert phase["commit_pair_complete"] is True
+    assert not any("80A" in w for w in data["warnings"])
+
+
+def test_71t_complete_not_classified_as_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    dummy = tmp_path / "dummy.txt"
+    dummy.write_text("comp only", encoding="utf-8")
+    run_git(tmp_path, "add", "dummy.txt")
+    run_git(tmp_path, "commit", "-m", "Complete Phase 80B closure only phase")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase = data["phases"][0]
+    assert phase["phase_id"] == "80B"
+    assert phase["implementation_commit"] is None
+    assert phase["completion_commit"] is not None
+    assert phase["commit_pair_complete"] is False
+    assert any("80B" in w and "implementation" in w for w in data["warnings"])
+
+
+def test_71t_missing_impl_still_warns(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    dummy = tmp_path / "dummy.txt"
+    dummy.write_text("comp only", encoding="utf-8")
+    run_git(tmp_path, "add", "dummy.txt")
+    run_git(tmp_path, "commit", "-m", "Complete Phase 80C genuinely missing impl")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--json"])
+
+    data = _json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert any("80C" in w and "implementation" in w for w in data["warnings"])
 
 
 def test_71c_audit_missing_pair_warning(
