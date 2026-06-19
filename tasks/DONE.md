@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 71T: Audit Commit Pair Classification Flexibility (20260619-1717-phase-71t-audit-commit-pair-classification-flexibility)
 - Phase 71S Codex Autonomy Comparison Handoff Note (20260619-1518-phase-71s-codex-autonomy-comparison-handoff-note)
 - Phase 71R Phase Prompt Queue Round-Trip Validation (20260619-1457-phase-71r-phase-prompt-queue-round-trip-validation)
 - Phase 71Q.1 Partial Task Finish Recovery (20260619-1431-phase-71q-1-partial-task-finish-recovery)

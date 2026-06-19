@@ -10,7 +10,7 @@ Phase 71T: Audit Commit Pair Classification Flexibility
 
 ## Status
 
-active
+done
 
 ## Mode
 
