@@ -369,6 +369,8 @@ def _build_handoff_artifact(
 
     push = assess_push_readiness(root)
 
+    queue = _read_phase_queue(root)
+
     now = datetime.now(timezone.utc)
     task_suffix = task_id if task_id else "idle"
     handoff_id = f"handoff-{now:%Y%m%dT%H%M%S}-{now.microsecond:06d}-{task_suffix}"
@@ -386,6 +388,9 @@ def _build_handoff_artifact(
         "latest_commit": latest_commit,
         "lifecycle_review": review,
         "next_agent": next_agent,
+        "phase_queue_count": len(queue),
+        "phase_queue_next": queue[0] if queue else None,
+        "phase_queue_present": len(queue) > 0,
         "push_mode": push.mode,
         "push_ready": push.ready,
         "recent_commits": recent_commits,
@@ -448,6 +453,9 @@ def run_phase_handoff_show(args: argparse.Namespace) -> int:
         print(f"  Next agent: {data['next_agent']}")
         print(f"  Auto-summary: {data['auto_summary']}")
         print(f"  Summary: {data['summary']}")
+        if data.get("phase_queue_present"):
+            print(f"  Phase queue: {data['phase_queue_count']} entries")
+            print(f"  Next queued: {data['phase_queue_next']}")
         print()
         print(f"  Bootstrap: {data['bootstrap_command']}")
 

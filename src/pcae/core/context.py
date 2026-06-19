@@ -185,6 +185,8 @@ def build_bootstrap_prompt(
         if handoff_review:
             lines.append(f"  Review: {handoff_review}")
         lines.append(f"  Next action: {handoff.get('recommended_next_action', 'unknown')}")
+        if handoff.get("phase_queue_present"):
+            lines.append(f"  Phase queue: {handoff['phase_queue_count']} entries, next: {handoff['phase_queue_next']}")
         lines.append(f"Phase (from PROJECT_STATUS.md): {rs['current_phase']}")
     else:
         lines.append(f"Phase: {rs['current_phase']}")

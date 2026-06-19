@@ -643,6 +643,9 @@ def test_phase_handoff_json_output(
         "lifecycle_review",
         "manual_steps",
         "next_agent",
+        "phase_queue_count",
+        "phase_queue_next",
+        "phase_queue_present",
         "provenance_event_count",
         "push_mode",
         "push_ready",
@@ -2232,6 +2235,108 @@ def test_70x_prune_dry_run_json(
     assert len(data["pruned"]) == 2
     handoffs_dir = tmp_path / ".pcae" / "handoffs"
     assert len(list(handoffs_dir.glob("handoff-*.json"))) == 3
+
+
+# ---------------------------------------------------------------------------
+# Phase queue visibility in handoff (Phase 71D)
+# ---------------------------------------------------------------------------
+
+
+def test_71d_handoff_artifact_includes_queue_fields_when_queue_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Queue visibility task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "add", "Phase 72A: test phase"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["phase_queue_present"] is True
+    assert data["phase_queue_count"] == 1
+    assert data["phase_queue_next"] == "Phase 72A: test phase"
+
+
+def test_71d_handoff_artifact_queue_absent(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "No queue task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-next", "--json"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    data = _json.loads(output)
+    assert data["phase_queue_present"] is False
+    assert data["phase_queue_count"] == 0
+    assert data["phase_queue_next"] is None
+
+
+def test_71d_handoff_show_displays_queue_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    import json as _json
+
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff show queue task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "add", "Phase 72B: next step"])
+    capsys.readouterr()
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue: 1 entries" in output
+    assert "Next queued: Phase 72B: next step" in output
+
+
+def test_71d_handoff_show_silent_when_no_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    create_task_contract(root, "Handoff show no queue task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    acquire_agent_lock(root, "claude-local")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "handoff", "--next-agent", "claude-next"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "handoff-show"])
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue" not in output
 
 
 # ---------------------------------------------------------------------------

@@ -224,6 +224,9 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
         print(f"  Review: {handoff.get('lifecycle_review', 'unknown')}")
         print(f"  Latest commit: {handoff.get('latest_commit', 'unknown')}")
         print(f"  Next action: {handoff.get('recommended_next_action', 'unknown')}")
+        if handoff.get("phase_queue_present"):
+            print(f"  Phase queue: {handoff['phase_queue_count']} entries")
+            print(f"  Next queued: {handoff['phase_queue_next']}")
     challenge = build_irg_challenge_context(root)
     assessment = build_challenge_attention_assessment(root, surface="bootstrap", challenge_data=challenge)
     lines = render_irg_challenge_compact_lines_with_allocation(

@@ -1833,3 +1833,86 @@ def test_71a_compact_bootstrap_prompt_text_contains_handoff_summary(
     assert exit_code == 0
     assert "Task: idle" in output
     assert "Next action:" in output
+
+
+# ---------------------------------------------------------------------------
+# Phase queue visibility in bootstrap (Phase 71D)
+# ---------------------------------------------------------------------------
+
+
+def test_71d_bootstrap_shows_queue_from_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Queue bootstrap task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    handoff = _sample_handoff()
+    handoff["phase_queue_present"] = True
+    handoff["phase_queue_count"] = 3
+    handoff["phase_queue_next"] = "Phase 72A: queue item"
+    _write_handoff_artifact(tmp_path, handoff)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue: 3 entries" in output
+    assert "Next queued: Phase 72A: queue item" in output
+
+
+def test_71d_bootstrap_silent_when_no_queue_in_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "No queue bootstrap task")
+    patch_task_allowed_files(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue" not in output
+
+
+def test_71d_compact_bootstrap_shows_queue_from_handoff(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    handoff = _sample_handoff()
+    handoff["phase_queue_present"] = True
+    handoff["phase_queue_count"] = 2
+    handoff["phase_queue_next"] = "Phase 72C: compact queue"
+    _write_handoff_artifact(tmp_path, handoff)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue: 2 entries" in output
+    assert "Phase 72C: compact queue" in output
+
+
+def test_71d_compact_bootstrap_silent_when_no_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _write_handoff_artifact(tmp_path, _sample_handoff())
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["session", "bootstrap", "--compact"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Phase queue" not in output
