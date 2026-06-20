@@ -3286,3 +3286,90 @@ def run_phase_runner_execution_authorize(args: argparse.Namespace) -> int:
     print()
     print(f"  {_EXECUTION_AUTHORIZATION_REFUSAL}")
     return 1
+
+
+_EXECUTION_AUTHZ_SCHEMA = {
+    "schema_version": "1.0",
+    "schema_only": True,
+    "artifact_written": False,
+    "execution_authorized": False,
+    "authorization_available": False,
+    "proposed_fields": {
+        "artifact_version": "string — schema version (e.g. \"1.0\")",
+        "authorization_id": "string — unique identifier for this authorization",
+        "authorized": "bool — whether execution is authorized",
+        "execution_authorized": "bool — synonym for authorized",
+        "authorized_at": "ISO timestamp — when authorization was recorded",
+        "authorizer_source": "string — source of authorization (e.g. \"local_cli\")",
+        "queue_digest": "string — SHA-256 of the approved queue at authorization time",
+        "queue_approval_ref": "string — reference to queue approval artifact",
+        "simulation_ref": "string — reference to simulation artifact",
+        "simulation_review_ref": "string — reference to simulation review artifact",
+        "simulation_approval_ref": "string — reference to simulation approval artifact",
+        "preflight_ref": "string — reference to preflight state at authorization time",
+        "max_phases": "int — maximum phases authorized to execute",
+        "scope": "list of phase IDs — bounds for authorized execution",
+        "required_stop_policy_version": "string — policy version required for execution",
+        "expires_at": "ISO timestamp — when authorization expires (if applicable)",
+        "revocation_supported": "bool — whether this authorization can be revoked",
+        "human_authority_statement": "string — explicit statement of human authority",
+    },
+    "minimum_requirements": [
+        "clean working tree",
+        "healthy idle",
+        "pcae check passed",
+        "task-memory clean",
+        "no unpushed commits",
+        "non-empty valid queue",
+        "queue approval matching current queue",
+        "runner simulation exists",
+        "runner simulation review ready",
+        "runner simulation approval exists",
+        "runner preflight satisfied except execution_authorized",
+        "max phase bound",
+        "stop-condition policy loaded",
+        "explicit human authorization event",
+    ],
+    "forbidden_implied_authorization": [
+        "no implied authorization from queue approval",
+        "no implied authorization from simulation approval",
+        "no implied authorization from passing preflight",
+        "no authorization if queue changed after approval",
+        "no authorization if audit warnings exist",
+        "no authorization if there is an active task or dirty tree",
+    ],
+    "note": (
+        "This is a read-only schema preview. No authorization artifact is written. "
+        "Execution authorization is not implemented. "
+        "Human authority remains absolute."
+    ),
+}
+
+
+def run_phase_runner_execution_authorization_schema(args: argparse.Namespace) -> int:
+    if args.json:
+        print(json.dumps(_EXECUTION_AUTHZ_SCHEMA, indent=2, sort_keys=True))
+        return 0
+
+    print("Execution Authorization Artifact Schema (proposed)")
+    print("=" * 40)
+    print(f"  Schema version: {_EXECUTION_AUTHZ_SCHEMA['schema_version']}")
+    print(f"  Schema only: yes")
+    print(f"  Artifact written: no")
+    print(f"  Execution authorized: no")
+    print(f"  Authorization available: no")
+    print()
+    print("  Proposed fields:")
+    for field, desc in _EXECUTION_AUTHZ_SCHEMA["proposed_fields"].items():
+        print(f"    {field}: {desc}")
+    print()
+    print("  Minimum requirements:")
+    for req in _EXECUTION_AUTHZ_SCHEMA["minimum_requirements"]:
+        print(f"    - {req}")
+    print()
+    print("  Forbidden implied authorization:")
+    for rule in _EXECUTION_AUTHZ_SCHEMA["forbidden_implied_authorization"]:
+        print(f"    - {rule}")
+    print()
+    print(f"  {_EXECUTION_AUTHZ_SCHEMA['note']}")
+    return 0

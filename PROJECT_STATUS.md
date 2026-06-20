@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72R: Execution Authorization Design Record.
+Phase 72S: Execution Authorization Artifact Schema Dry Run.
 
-Phase 72R adds a formal design record to `docs/ARCHITECTURE.md` defining execution
-authorization, distinguishing it from queue approval, simulation approval, and
-preflight. Defines 14 minimum future requirements and 6 forbidden implied-authorization
-cases. Includes proposed future artifact schema. Documentation only; no code changes.
+Phase 72S adds `pcae phase runner-execution-authorization-schema` for a read-only
+schema preview of the proposed future execution authorization artifact. Output is
+always `schema_only=true`, `artifact_written=false`, `execution_authorized=false`.
+No artifact persistence, no queue/task mutation, no execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

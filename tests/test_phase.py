@@ -7104,3 +7104,82 @@ def test_72q_preflight_no_fixture_leftovers(
     assert exit_code == 0
     assert data["queue_entry_count"] == 0
     assert data["fixture_count"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Phase 72S: execution authorization artifact schema dry run
+# ---------------------------------------------------------------------------
+
+
+def test_72s_schema_json_output(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-authorization-schema", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["schema_only"] is True
+    assert data["artifact_written"] is False
+    assert data["execution_authorized"] is False
+    assert data["authorization_available"] is False
+    assert isinstance(data["proposed_fields"], dict)
+    assert len(data["proposed_fields"]) > 10
+    assert isinstance(data["minimum_requirements"], list)
+    assert isinstance(data["forbidden_implied_authorization"], list)
+
+
+def test_72s_schema_no_artifact_written(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-execution-authorization-schema"])
+    capsys.readouterr()
+
+    assert not (tmp_path / ".pcae" / "execution-authorizations").exists()
+    assert not (tmp_path / ".pcae" / "execution-auth").exists()
+
+
+def test_72s_schema_no_queue_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-execution-authorization-schema"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_72s_schema_no_task_created(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    before_tasks = list((tmp_path / "tasks" / "active").glob("*.md"))
+
+    main(["phase", "runner-execution-authorization-schema", "--json"])
+    capsys.readouterr()
+
+    assert list((tmp_path / "tasks" / "active").glob("*.md")) == before_tasks
+
+
+def test_72s_schema_human_output_states_read_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-authorization-schema"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "schema only" in output.lower()
+    assert "read-only" in output.lower()
+    assert "not implemented" in output.lower()
+    assert "execution authorized: no" in output.lower()

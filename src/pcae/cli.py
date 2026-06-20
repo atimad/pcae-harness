@@ -419,6 +419,7 @@ from pcae.commands.phase import (
     run_phase_runner_policy,
     run_phase_runner_readiness,
     run_phase_runner_execution_authorize,
+    run_phase_runner_execution_authorization_schema,
     run_phase_runner_execution_preflight,
     run_phase_runner_sim_approve,
     run_phase_runner_sim_approval_show,
@@ -5153,6 +5154,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_runner_execution_preflight_parser.set_defaults(
         handler=run_phase_runner_execution_preflight
+    )
+
+    phase_runner_execution_authorization_schema_parser = phase_subparsers.add_parser(
+        "runner-execution-authorization-schema",
+        help="Show the proposed future execution authorization artifact schema (read-only, schema only).",
+    )
+    phase_runner_execution_authorization_schema_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_authorization_schema_parser.set_defaults(
+        handler=run_phase_runner_execution_authorization_schema
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
