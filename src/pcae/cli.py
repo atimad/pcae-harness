@@ -441,7 +441,10 @@ from pcae.commands.phase import (
     run_phase_single_runner_activate,
     run_phase_activated_task_implementation_handoff,
     run_phase_activated_task_implementation_readiness,
+    run_phase_activated_task_completion_flow,
     run_phase_activated_task_implementation_start,
+    run_phase_activated_task_lifecycle_summary,
+    run_phase_activated_task_manual_impl_scenario,
     run_phase_single_runner_activation_boundary,
     run_phase_single_runner_activation_scenario,
     run_phase_single_runner_activation_rollback,
@@ -5575,6 +5578,48 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_activated_task_implementation_start_parser.set_defaults(
         handler=run_phase_activated_task_implementation_start
+    )
+
+    phase_activated_task_manual_impl_scenario_parser = phase_subparsers.add_parser(
+        "activated-task-manual-implementation-scenario",
+        help="Run manual implementation scenario (does not implement).",
+    )
+    phase_activated_task_manual_impl_scenario_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_manual_impl_scenario_parser.add_argument(
+        "--save", action="store_true", help="Persist the scenario artifact."
+    )
+    phase_activated_task_manual_impl_scenario_parser.set_defaults(
+        handler=run_phase_activated_task_manual_impl_scenario
+    )
+
+    phase_activated_task_completion_flow_parser = phase_subparsers.add_parser(
+        "activated-task-completion-flow",
+        help="Show the activated task completion flow.",
+    )
+    phase_activated_task_completion_flow_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_completion_flow_parser.add_argument(
+        "--save", action="store_true", help="Persist the flow artifact."
+    )
+    phase_activated_task_completion_flow_parser.set_defaults(
+        handler=run_phase_activated_task_completion_flow
+    )
+
+    phase_activated_task_lifecycle_summary_parser = phase_subparsers.add_parser(
+        "activated-task-lifecycle-summary",
+        help="Show the activated task lifecycle summary.",
+    )
+    phase_activated_task_lifecycle_summary_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_lifecycle_summary_parser.add_argument(
+        "--save", action="store_true", help="Persist the summary artifact."
+    )
+    phase_activated_task_lifecycle_summary_parser.set_defaults(
+        handler=run_phase_activated_task_lifecycle_summary
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73X: Activated Task Implementation Start Gate.
+Phase 73Y: Activated Task Manual Implementation Scenario.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

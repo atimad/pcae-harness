@@ -6225,3 +6225,127 @@ def run_phase_activated_task_implementation_start(args: argparse.Namespace) -> i
     if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
     print(f"\n  {result['next_command_hint']}")
     return 0
+
+
+ACTIVATED_TASK_MANUAL_IMPL_SCENARIOS_DIR = Path(".pcae") / "activated-task-manual-implementation-scenarios"
+
+
+def _run_manual_impl_scenario(root: HarnessPath) -> dict:
+    checks = []; violations = []
+    def chk(label, ok):
+        if ok: checks.append(f"PASS: {label}")
+        else: violations.append(f"FAIL: {label}")
+    queue = _read_phase_queue(root); before_count = len(queue)
+    fixture = _build_queue_fixture_entries(1); queue.extend(fixture); _write_phase_queue(root, queue)
+    chk("fixture add", len(_read_phase_queue(root)) == before_count + 1)
+    val = _build_queue_validate(root); chk("queue valid", val["valid"])
+    app = _build_queue_approve(root, "Scenario"); chk("queue approved", app.get("approved"))
+    if app.get("approved"): _save_queue_approval(root, app)
+    act = _build_single_runner_activation(root, before_count, allow_fixture=True)
+    chk("activation executed", act.get("activated")); chk("task created", act.get("task_created"))
+    ho = _build_activated_task_impl_handoff(root); chk("handoff ready", ho["handoff_status"] == "ready")
+    rd = _build_activated_task_impl_readiness(root); chk("readiness ready", rd["ready_for_manual_implementation"])
+    sg = _build_activated_task_impl_start_gate(root); chk("start gate allowed", sg["manual_implementation_allowed"])
+    chk("auto impl not allowed", not sg.get("automatic_implementation_allowed", True))
+    chk("runner exec not allowed", not sg.get("runner_execution_allowed", True))
+    status = _build_single_runner_activation_status(root)
+    if status.get("rollback_available"):
+        tid = act.get("created_task_id")
+        if tid: (root.join(Path("tasks") / "active" / f"{tid}.md")).unlink(missing_ok=True)
+        chk("rollback performed", True)
+    q2 = _read_phase_queue(root); kept = [e for e in q2 if not (isinstance(e, dict) and e.get("fixture"))]
+    _write_phase_queue(root, kept); chk("queue cleaned", len(_read_phase_queue(root)) == before_count)
+    final_has_task = any((root.join(Path("tasks") / "active")).glob("*.md")) if (root.join(Path("tasks") / "active")).is_dir() else False
+    chk("final no active task", not final_has_task)
+    passed = len(violations) == 0
+    return {"scenario_status": "passed" if passed else "failed", "activation_created": act.get("activated"), "handoff_status": ho["handoff_status"], "readiness_status": rd["readiness_status"], "start_gate_status": sg["start_gate_status"], "manual_implementation_allowed": sg.get("manual_implementation_allowed"), "automatic_implementation_allowed": False, "runner_execution_allowed": False, "prompt_executed": False, "implementation_performed": False, "execution_authorized": False, "cleanup_performed": True, "final_active_task_present": final_has_task, "checks": checks, "violations": violations}
+
+
+def run_phase_activated_task_manual_impl_scenario(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _run_manual_impl_scenario(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_MANUAL_IMPL_SCENARIOS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Scenario saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0 if result["scenario_status"] == "passed" else 1
+    print("Manual Implementation Scenario"); print("=" * 40)
+    print(f"  Status: {result['scenario_status']}")
+    print(f"  Start gate: {result.get('start_gate_status')}")
+    print(f"  Manual impl allowed: {'yes' if result.get('manual_implementation_allowed') else 'no'}")
+    print(f"  Auto impl allowed: no"); print(f"  Runner exec allowed: no")
+    if result["violations"]: print(f"\n  Violations:"); [print(f"    - {v}") for v in result["violations"]]
+    print(f"\n  Checks: {len(result['checks'])} passed, {len(result['violations'])} failed")
+    return 0 if result["scenario_status"] == "passed" else 1
+
+
+# Phase 73Z: activated task completion flow
+ACTIVATED_TASK_COMPLETION_FLOWS_DIR = Path(".pcae") / "activated-task-completion-flows"
+
+
+def _build_activated_task_completion_flow(root: HarnessPath) -> dict:
+    from pcae.core.tasks import find_latest_active_task
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).is_file() else None
+    active_task = find_latest_active_task(root)
+    if act_data is None or not act_data.get("activated"):
+        return {"flow_status": "no_activated_task", "execution_authorized": False, "expected_steps": ["create activation", "activation execute", "handoff", "readiness", "start gate"]}
+    handoff = _build_activated_task_impl_handoff(root)
+    readiness = _build_activated_task_impl_readiness(root)
+    start_gate = _build_activated_task_impl_start_gate(root)
+    expected = ["activation execute", "implementation handoff", "implementation readiness", "implementation start gate", "normal task-contract implementation", "pcae check", "implementation commit", "pcae task finish --commit", "pcae push"]
+    forbidden = ["automatic prompt execution", "queue runner implementation", "bypassing pcae check", "automatic task finish", "automatic push"]
+    if not start_gate["manual_implementation_allowed"]: flow = "blocked"
+    elif start_gate["manual_implementation_allowed"] and not readiness.get("implementation_detected", True): flow = "implementation_ready"
+    else: flow = "valid"
+    return {"flow_status": flow, "expected_steps": expected, "current_step": "start gate" if start_gate.get("manual_implementation_allowed") else "pre-implementation", "blockers": start_gate.get("blockers", []), "forbidden_shortcuts": forbidden, "automatic_implementation_allowed": False, "runner_execution_allowed": False, "execution_authorized": False}
+
+
+def run_phase_activated_task_completion_flow(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_activated_task_completion_flow(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_COMPLETION_FLOWS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Flow saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Activated Task Completion Flow"); print("=" * 40)
+    print(f"  Flow status: {result['flow_status']}")
+    if result.get("expected_steps"): print(f"\n  Expected steps:"); [print(f"    {i+1}. {s}") for i,s in enumerate(result["expected_steps"])]
+    if result.get("forbidden_shortcuts"): print(f"\n  Forbidden:"); [print(f"    - {s}") for s in result["forbidden_shortcuts"]]
+    print(f"\n  Auto impl: no"); print(f"  Runner exec: no"); print(f"  Exec authorized: no")
+    return 0
+
+
+# Phase 74A: activated task lifecycle summary
+ACTIVATED_TASK_LIFECYCLE_SUMMARIES_DIR = Path(".pcae") / "activated-task-lifecycle-summaries"
+
+
+def _build_activated_task_lifecycle_summary(root: HarnessPath) -> dict:
+    from pcae.core.tasks import find_latest_active_task
+    boundary = _build_activation_boundary(root)
+    handoff = _build_activated_task_impl_handoff(root)
+    readiness = _build_activated_task_impl_readiness(root)
+    start_gate = _build_activated_task_impl_start_gate(root)
+    activation_present = boundary["activation_present"]
+    implem_detected = boundary.get("implementation_detected", False)
+    rollback_available = _build_single_runner_activation_status(root).get("rollback_available", False)
+    if not activation_present: lifecycle = "no_activation"
+    elif boundary["boundary_status"] == "mismatch": lifecycle = "blocked"
+    elif start_gate["manual_implementation_allowed"] and not implem_detected: lifecycle = "implementation_ready"
+    elif implem_detected: lifecycle = "implementation_in_progress"
+    elif handoff["handoff_status"] == "ready": lifecycle = "activation_ready"
+    else: lifecycle = "blocked"
+    next_action = { "no_activation": "Run pcae phase single-runner-activate", "activation_ready": "Run pcae phase activated-task-implementation-handoff", "implementation_ready": "Proceed with normal task-contract implementation workflow", "implementation_in_progress": "Continue implementation. Use pcae check and pcae task finish", "blocked": "Resolve blockers first" }.get(lifecycle, "Review lifecycle status")
+    return {"lifecycle_status": lifecycle, "current_stage": lifecycle, "next_recommended_action": next_action, "blockers": start_gate.get("blockers", []), "warnings": [], "prompt_executed": False, "implementation_performed": implem_detected, "automatic_implementation_allowed": False, "runner_execution_allowed": False, "execution_authorized": False}
+
+
+def run_phase_activated_task_lifecycle_summary(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_activated_task_lifecycle_summary(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_LIFECYCLE_SUMMARIES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Summary saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Activated Task Lifecycle Summary"); print("=" * 40)
+    print(f"  Status: {result['lifecycle_status']}"); print(f"  Next: {result['next_recommended_action']}")
+    if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  Auto impl: no"); print(f"  Runner exec: no"); print(f"  Exec authorized: no")
+    return 0

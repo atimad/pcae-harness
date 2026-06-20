@@ -9137,3 +9137,43 @@ def test_73x_start_gate_allowed(tmp_path, monkeypatch, capsys):
     main(["phase", "activated-task-implementation-start", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["manual_implementation_allowed"] is True; assert d["runner_execution_allowed"] is False
     assert d["execution_authorized"] is False
+
+# Phase 73Y: activated task manual implementation scenario
+def test_73y_scenario_passes(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "activated-task-manual-implementation-scenario", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0; assert d["scenario_status"] == "passed"; assert d["execution_authorized"] is False
+    assert d["automatic_implementation_allowed"] is False
+def test_73y_scenario_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-manual-implementation-scenario", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "activated-task-manual-implementation-scenarios" / "latest.json").is_file()
+
+# Phase 73Z: activated task completion flow
+def test_73z_flow_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-completion-flow", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["flow_status"] == "no_activated_task"; assert d["execution_authorized"] is False
+def test_73z_flow_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-completion-flow", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "activated-task-completion-flows" / "latest.json").is_file()
+
+# Phase 74A: activated task lifecycle summary
+def test_74a_summary_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-lifecycle-summary", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lifecycle_status"] == "no_activation"; assert d["execution_authorized"] is False
+def test_74a_summary_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-lifecycle-summary", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lifecycle_status"] == "implementation_ready"; assert d["execution_authorized"] is False
