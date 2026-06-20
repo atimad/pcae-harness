@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74I Agent Invocation Dry Run (20260620-1332-74i-agent-invocation-dry-run)
 - 74H Agent Backend Registry (20260620-1328-74h-agent-backend-registry)
 - 74G Agent Output Apply Dry Run (20260620-1309-74g-agent-output-apply-dry-run)
 - 74F Agent Output Review and Scope Check (20260620-1309-74f-agent-output-review-and-scope-check)
