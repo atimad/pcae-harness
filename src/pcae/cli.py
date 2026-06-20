@@ -421,6 +421,8 @@ from pcae.commands.phase import (
     run_phase_runner_authorization_summary,
     run_phase_runner_execute,
     run_phase_runner_execution_authorize,
+    run_phase_runner_execution_trace_approval_show,
+    run_phase_runner_execution_trace_approve,
     run_phase_runner_execution_trace_review,
     run_phase_runner_execution_authorization_schema,
     run_phase_runner_execution_preflight,
@@ -5209,6 +5211,34 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_runner_execution_trace_review_parser.set_defaults(
         handler=run_phase_runner_execution_trace_review
+    )
+
+    phase_runner_execution_trace_approve_parser = phase_subparsers.add_parser(
+        "runner-execution-trace-approve",
+        help="Approve a runner no-op trace (does not authorize execution).",
+    )
+    phase_runner_execution_trace_approve_parser.add_argument(
+        "--message", default=None, help="Approval message."
+    )
+    phase_runner_execution_trace_approve_parser.add_argument(
+        "--dry-run", action="store_true", help="Report proposed approval without writing."
+    )
+    phase_runner_execution_trace_approve_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_trace_approve_parser.set_defaults(
+        handler=run_phase_runner_execution_trace_approve
+    )
+
+    phase_runner_execution_trace_approval_show_parser = phase_subparsers.add_parser(
+        "runner-execution-trace-approval-show",
+        help="Show the latest persisted trace approval artifact.",
+    )
+    phase_runner_execution_trace_approval_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_trace_approval_show_parser.set_defaults(
+        handler=run_phase_runner_execution_trace_approval_show
     )
 
     phase_runner_execution_request_parser = phase_subparsers.add_parser(

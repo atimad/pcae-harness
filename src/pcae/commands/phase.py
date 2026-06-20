@@ -3997,6 +3997,152 @@ def run_phase_runner_execution_trace_review(args: argparse.Namespace) -> int:
     return 0
 
 
+RUNNER_EXECUTION_TRACE_APPROVALS_DIR = Path(".pcae") / "runner-execution-trace-approvals"
+
+
+def _read_latest_runner_execution_trace_review(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_EXECUTION_TRACE_REVIEWS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _build_runner_execution_trace_approve(root: HarnessPath, message: str) -> dict:
+    review = _read_latest_runner_execution_trace_review(root)
+    if review is None:
+        return {
+            "approved": False,
+            "execution_authorized": False,
+            "execution_available": False,
+            "refusal_reason": "No trace review artifact found. Run: pcae phase runner-execution-trace-review --save",
+        }
+    if review.get("review_status") != "ready_for_approval":
+        return {
+            "approved": False,
+            "execution_authorized": False,
+            "execution_available": False,
+            "refusal_reason": f"Review status is '{review.get('review_status')}', not 'ready_for_approval'.",
+        }
+    return {
+        "approved": True,
+        "noop_approved": True,
+        "execution_authorized": False,
+        "execution_available": False,
+        "trace_ref": review.get("trace_id"),
+        "trace_created_at": review.get("trace_created_at"),
+        "trace_review_ref": review.get("reviewed_at") or review.get("review_status"),
+        "message": message,
+        "approver_source": "local_cli",
+    }
+
+
+def _save_runner_execution_trace_approval(root: HarnessPath, approval: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    approval_with_ts = {**approval, "approved_at": ts}
+    approval_dir = root.join(RUNNER_EXECUTION_TRACE_APPROVALS_DIR)
+    approval_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = approval_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = approval_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(approval_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def _read_latest_runner_execution_trace_approval(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_EXECUTION_TRACE_APPROVALS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def run_phase_runner_execution_trace_approve(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    message = getattr(args, "message", "") or "No-op trace approved."
+    dry_run = getattr(args, "dry_run", False)
+    approval = _build_runner_execution_trace_approve(root, message)
+
+    if not approval.get("approved", False):
+        if args.json:
+            print(json.dumps(approval, indent=2, sort_keys=True))
+        else:
+            print(f"Approval refused: {approval['refusal_reason']}")
+        return 1
+
+    if not dry_run:
+        _save_runner_execution_trace_approval(root, approval)
+
+    if args.json:
+        result = {**approval, "dry_run": dry_run}
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner No-Op Trace Approval")
+    print("=" * 40)
+    print(f"  Approved: yes")
+    print(f"  No-op approved: yes")
+    print(f"  Dry run: {'yes' if dry_run else 'no'}")
+    print(f"  Trace ref: {approval.get('trace_ref', 'unknown')}")
+    print(f"  Message: {approval['message']}")
+    print(f"  Approver: {approval['approver_source']}")
+    print(f"  Execution authorized: no")
+    print(f"  Execution available: no")
+    print()
+    print("  This approves a no-op trace only, not execution.")
+    return 0
+
+
+def run_phase_runner_execution_trace_approval_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    approval = _read_latest_runner_execution_trace_approval(root)
+
+    if approval is None:
+        if args.json:
+            print(json.dumps({"present": False, "reason": "No trace approval artifact found."}, indent=2, sort_keys=True))
+        else:
+            print("No trace approval artifact found.")
+            print("Run: pcae phase runner-execution-trace-approve --message '...'")
+        return 1
+
+    result = {
+        "present": True,
+        "approved": approval.get("approved", False),
+        "noop_approved": approval.get("noop_approved", False),
+        "approved_at": approval.get("approved_at"),
+        "trace_ref": approval.get("trace_ref"),
+        "message": approval.get("message"),
+        "approver_source": approval.get("approver_source"),
+        "execution_authorized": approval.get("execution_authorized", False),
+        "execution_available": approval.get("execution_available", False),
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner No-Op Trace Approval (persisted)")
+    print("=" * 40)
+    print(f"  Present: yes")
+    print(f"  Approved: {'yes' if result['approved'] else 'no'}")
+    print(f"  No-op approved: {'yes' if result['noop_approved'] else 'no'}")
+    print(f"  Approved at: {result['approved_at'] or 'unknown'}")
+    print(f"  Trace ref: {result['trace_ref'] or 'unknown'}")
+    print(f"  Message: {result['message'] or 'none'}")
+    print(f"  Approver: {result['approver_source'] or 'unknown'}")
+    print(f"  Execution authorized: {'yes' if result['execution_authorized'] else 'no'}")
+    print(f"  Execution available: {'yes' if result['execution_available'] else 'no'}")
+    return 0
+
+
 RUNNER_EXECUTION_REQUESTS_DIR = Path(".pcae") / "runner-execution-requests"
 
 

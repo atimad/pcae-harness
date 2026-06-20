@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73D: Runner No-Op Trace Review Artifact.
+Phase 73E: Runner No-Op Trace Approval Artifact.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

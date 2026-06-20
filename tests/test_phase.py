@@ -8377,3 +8377,84 @@ def test_73d_trace_review_no_mutation(
     capsys.readouterr()
 
     assert queue_path.read_text(encoding="utf-8") == before
+
+
+# ---------------------------------------------------------------------------
+# Phase 73E: runner no-op trace approval artifact
+# ---------------------------------------------------------------------------
+
+
+def test_73e_trace_approve_missing_review(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-trace-approve", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["approved"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_73e_trace_approve_success(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    main(["phase", "runner-execution-trace-review", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-trace-approve", "--message", "Approved", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approved"] is True
+    assert data["noop_approved"] is True
+    assert data["execution_authorized"] is False
+    assert data["execution_available"] is False
+    approval_path = tmp_path / ".pcae" / "runner-execution-trace-approvals" / "latest.json"
+    assert approval_path.is_file()
+    saved = json.loads(approval_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_73e_trace_approve_dry_run(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    main(["phase", "runner-execution-trace-review", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-trace-approve", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["dry_run"] is True
+    assert not (tmp_path / ".pcae" / "runner-execution-trace-approvals" / "latest.json").exists()
+
+
+def test_73e_trace_approval_show(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    main(["phase", "runner-execution-trace-review", "--save"])
+    main(["phase", "runner-execution-trace-approve", "--message", "Show test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-trace-approval-show", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["present"] is True
+    assert data["execution_authorized"] is False
