@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73G Single-Phase Runner Contract Design (20260620-0831-73g-single-phase-runner-contract-design)
 - 73F Runner No-Op Execution Preflight Integration (20260620-0813-73f-runner-no-op-execution-preflight-integration)
 - 73E Runner No-Op Trace Approval Artifact (20260620-0808-73e-runner-no-op-trace-approval-artifact)
 - 73D Runner No-Op Trace Review Artifact (20260620-0803-73d-runner-no-op-trace-review-artifact)
