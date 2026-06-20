@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73A: Runner No-Op Execution Trace.
+Phase 73B: Runner No-Op Execution Approval Binding.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
