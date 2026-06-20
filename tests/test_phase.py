@@ -10173,3 +10173,60 @@ def test_75f_regression_save(tmp_path, monkeypatch, capsys):
     p = tmp_path / ".pcae" / "activated-task-capture-safety-regressions" / "latest.json"
     assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
     assert d["apply_performed"] is False; assert d["execution_authorized"] is False
+
+
+# Phase 75F.1: shared implementation commit audit regression
+def _create_git_commit(tmp_path, msg, files=None):
+    import subprocess as _sp
+    if files:
+        for f in files: (tmp_path / f).parent.mkdir(parents=True, exist_ok=True); (tmp_path / f).write_text(f"content\n")
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "--allow-empty", "-m", msg], cwd=tmp_path, check=True, capture_output=True)
+
+def test_75f1_clean_single_phase_no_warnings(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path)
+    _create_git_commit(tmp_path, "Implement Phase 75X single phase impl", ["src/a.py"])
+    _create_git_commit(tmp_path, "Complete Phase 75X single phase completion")
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "audit", "--last", "5", "--json"]); d = json.loads(capsys.readouterr().out)
+    phase = next((p for p in d["phases"] if p["phase_id"] == "75X"), None)
+    assert phase is not None; assert phase.get("implementation_commit_shared") is not True
+    assert phase["commit_pair_complete"] is True; assert len(d["warnings"]) == 0
+
+def test_75f1_shared_range_detected(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path)
+    _create_git_commit(tmp_path, "Implement Phases 75B-75F shared range impl", ["src/a.py"])
+    _create_git_commit(tmp_path, "Complete Phase 75B b completion")
+    _create_git_commit(tmp_path, "Complete Phase 75C c completion")
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "audit", "--last", "5", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert any("shared multi-phase" in w.lower() or "75B" in w for w in d["warnings"])
+
+def test_75f1_missing_impl_warning(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path)
+    _create_git_commit(tmp_path, "Complete Phase 75M missing-impl completion")
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "audit", "--last", "5", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert any("missing implementation" in w.lower() for w in d["warnings"])
+
+def test_75f1_missing_comp_detected(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path)
+    _create_git_commit(tmp_path, "Implement Phase 75N missing-comp impl", ["src/a.py"])
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "audit", "--last", "5", "--json"]); d = json.loads(capsys.readouterr().out)
+    phase = next((p for p in d["phases"] if p["phase_id"] == "75N"), None)
+    assert phase is not None; assert phase["commit_pair_complete"] is False
+
+def test_75f1_json_output_shape_stable(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path)
+    _create_git_commit(tmp_path, "Implement Phase 75P single impl", ["src/a.py"])
+    _create_git_commit(tmp_path, "Complete Phase 75P single comp")
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "audit", "--last", "3", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert "phases" in d; assert "warnings" in d; assert "healthy_idle" in d
+    assert isinstance(d["phases"], list); assert isinstance(d["warnings"], list)
