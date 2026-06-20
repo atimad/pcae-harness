@@ -439,6 +439,7 @@ from pcae.commands.phase import (
     run_phase_execution_authorization_schema,
     run_phase_real_execution_disabled_proof,
     run_phase_single_runner_activate,
+    run_phase_activated_task_implementation_handoff,
     run_phase_single_runner_activation_boundary,
     run_phase_single_runner_activation_scenario,
     run_phase_single_runner_activation_rollback,
@@ -5527,6 +5528,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_single_runner_activation_boundary_parser.set_defaults(
         handler=run_phase_single_runner_activation_boundary
+    )
+
+    phase_activated_task_implementation_handoff_parser = phase_subparsers.add_parser(
+        "activated-task-implementation-handoff",
+        help="Show implementation handoff for activation-created task.",
+    )
+    phase_activated_task_implementation_handoff_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_implementation_handoff_parser.add_argument(
+        "--save", action="store_true", help="Persist the handoff artifact."
+    )
+    phase_activated_task_implementation_handoff_parser.set_defaults(
+        handler=run_phase_activated_task_implementation_handoff
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

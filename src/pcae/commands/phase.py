@@ -6077,3 +6077,50 @@ def run_phase_single_runner_activation_boundary(args: argparse.Namespace) -> int
     print(f"  Suggested next: {result['suggested_next_step']}")
     print(f"\n  {result['note']}")
     return 0
+
+
+ACTIVATED_TASK_IMPLEMENTATION_HANDOFFS_DIR = Path(".pcae") / "activated-task-implementation-handoffs"
+
+
+def _build_activated_task_impl_handoff(root: HarnessPath) -> dict:
+    from pcae.core.tasks import find_latest_active_task
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).is_file() else None
+    active_task = find_latest_active_task(root)
+    if act_data is None or not act_data.get("activated"):
+        return {"handoff_status": "no_activated_task", "execution_authorized": False}
+    activation_task_id = act_data.get("created_task_id")
+    active_task_id = active_task.task_id if active_task else None
+    task_matches = active_task is not None and activation_task_id == active_task_id
+    if not task_matches:
+        return {"handoff_status": "mismatch", "activation_task_id": activation_task_id, "active_task_id": active_task_id, "execution_authorized": False}
+    return {
+        "handoff_status": "ready",
+        "activation_ref": str(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json"),
+        "active_task_path": str(Path("tasks") / "active" / f"{active_task_id}.md"),
+        "active_task_title": active_task.title if active_task else None,
+        "active_task_id": active_task_id,
+        "queue_item_title": act_data.get("selected_title"),
+        "allowed_next_step": "normal_task_implementation_workflow",
+        "forbidden_next_steps": ["automatic prompt execution", "queue runner implementation", "bypassing pcae check", "committing outside task contract", "pushing outside pcae push"],
+        "prompt_executed": False,
+        "implementation_performed": False,
+        "execution_authorized": False,
+        "suggested_operator_action": "Follow normal task-contract workflow. Implement within allowed files. Run pcae check. Commit. Use pcae task finish --commit and pcae push.",
+    }
+
+
+def run_phase_activated_task_implementation_handoff(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_activated_task_impl_handoff(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_IMPLEMENTATION_HANDOFFS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Handoff saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Activated Task Implementation Handoff"); print("=" * 40)
+    print(f"  Status: {result['handoff_status']}")
+    if result['handoff_status'] == 'ready':
+        print(f"  Task: {result['active_task_id']}"); print(f"  Title: {result['active_task_title']}")
+        print(f"  Allowed next: {result['allowed_next_step']}")
+        print(f"  Prompt executed: no"); print(f"  Implementation: no"); print(f"  Exec authorized: no")
+    print(f"\n  {result.get('suggested_operator_action', '')}")
+    return 0

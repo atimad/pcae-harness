@@ -9088,3 +9088,19 @@ def test_73u_boundary_save(tmp_path, monkeypatch, capsys):
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
     main(["phase", "single-runner-activation-boundary", "--save", "--json"]); capsys.readouterr()
     assert (tmp_path / ".pcae" / "single-runner-activation-boundaries" / "latest.json").is_file()
+
+# Phase 73V: activated task implementation handoff
+def test_73v_handoff_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-implementation-handoff", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["handoff_status"] == "no_activated_task"; assert d["execution_authorized"] is False
+
+def test_73v_handoff_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-implementation-handoff", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["handoff_status"] == "ready"; assert d["execution_authorized"] is False; assert d["prompt_executed"] is False
