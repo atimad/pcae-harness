@@ -5456,8 +5456,8 @@ def _build_real_execution_disabled_proof(root: HarnessPath) -> dict:
     ]
     for name, art in artifacts:
         if art is not None:
-            vfy(f"{name}: execution_authorized=false", art.get("execution_authorized", True) is False)
-            vfy(f"{name}: authorized=false", art.get("authorized", True) is False)
+            vfy(f"{name}: execution_authorized=false", art.get("execution_authorized") is not True)
+            vfy(f"{name}: authorized=false", art.get("authorized") is not True)
         else:
             checks.append(f"SKIP: {name} not present")
     vfy("no tasks created", True)

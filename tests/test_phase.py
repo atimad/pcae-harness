@@ -9757,3 +9757,62 @@ def test_74w1_handoff_no_sync_lock_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["lock_sync_performed"] is False
     # Lock should not be written (remains unset)
     assert d["lock_sync_requested"] is False
+
+
+# Phase 74W.3: real execution disabled proof logic fix
+def test_74w3_proof_passes_in_safe_state(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-execution-disabled-proof", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert d["proof_status"] == "passed"
+    assert d["real_execution_disabled"] is True
+    assert d["execution_authorized"] is False
+    assert d["violations"] == []
+
+def test_74w3_proof_safe_state_no_violations(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-execution-disabled-proof", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["proof_status"] == "passed"
+    assert d["real_execution_disabled"] is True
+    # In a clean state with no artifacts, all checks are SKIP, and no violations
+    assert len(d["violations"]) == 0
+
+def test_74w3_proof_json_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-execution-disabled-proof", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["proof_status"] == "passed"
+    assert d["real_execution_disabled"] is True
+    assert d["execution_authorized"] is False
+    assert "checks" in d
+    assert "violations" in d
+
+def test_74w3_proof_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-execution-disabled-proof", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "real-execution-disabled-proofs" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["proof_status"] == "passed"
+    assert d["real_execution_disabled"] is True
+
+def test_74w3_proof_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-execution-disabled-proof"]); out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Real Execution Disabled Proof" in out
+    assert "Proof status: passed" in out
+    assert "Real execution disabled: yes" in out
+
+def test_74w3_proof_runner_execute_still_refuses(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    # Runner execution still refuses (this fix does not enable execution)
+    assert d["execution_authorized"] is False
+    assert d["execution_available"] is False

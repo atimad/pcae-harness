@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74W.2: Session Bootstrap Agent Lock Rehydration.
+Phase 74W.3: Real Execution Disabled Proof Logic Fix.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
