@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73A Runner No-Op Execution Trace (20260620-0704-73a-runner-no-op-execution-trace)
 - 72Z Authorization Lifecycle Summary Artifact (20260620-0652-72z-authorization-lifecycle-summary-artifact)
 - 72Y Denied Request Authorization Block (20260620-0647-72y-denied-request-authorization-block)
 - 72X Execution Request Preflight Integration (20260620-0641-72x-execution-request-preflight-integration)
