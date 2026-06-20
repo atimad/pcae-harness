@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74A: Activated Task Lifecycle Summary.
+Phase 74B: Activated Task Agent Implementation Package.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

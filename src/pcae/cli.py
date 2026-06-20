@@ -443,6 +443,9 @@ from pcae.commands.phase import (
     run_phase_activated_task_implementation_readiness,
     run_phase_activated_task_completion_flow,
     run_phase_activated_task_implementation_start,
+    run_phase_activated_task_agent_package,
+    run_phase_activated_task_agent_start,
+    run_phase_activated_task_agent_start_show,
     run_phase_activated_task_lifecycle_summary,
     run_phase_activated_task_manual_impl_scenario,
     run_phase_single_runner_activation_boundary,
@@ -5620,6 +5623,48 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_activated_task_lifecycle_summary_parser.set_defaults(
         handler=run_phase_activated_task_lifecycle_summary
+    )
+
+    phase_activated_task_agent_package_parser = phase_subparsers.add_parser(
+        "activated-task-agent-package",
+        help="Generate agent implementation package for activated task.",
+    )
+    phase_activated_task_agent_package_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_agent_package_parser.add_argument(
+        "--save", action="store_true", help="Persist the package artifact."
+    )
+    phase_activated_task_agent_package_parser.set_defaults(
+        handler=run_phase_activated_task_agent_package
+    )
+
+    phase_activated_task_agent_start_parser = phase_subparsers.add_parser(
+        "activated-task-agent-start",
+        help="Start gate for agent-assisted implementation.",
+    )
+    phase_activated_task_agent_start_parser.add_argument(
+        "--dry-run", action="store_true", default=True, help="Dry-run only (default)."
+    )
+    phase_activated_task_agent_start_parser.add_argument(
+        "--execute", action="store_true", help="Record agent assistance start artifact."
+    )
+    phase_activated_task_agent_start_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_agent_start_parser.set_defaults(
+        handler=run_phase_activated_task_agent_start
+    )
+
+    phase_activated_task_agent_start_show_parser = phase_subparsers.add_parser(
+        "activated-task-agent-start-show",
+        help="Show the latest agent assistance start artifact.",
+    )
+    phase_activated_task_agent_start_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_agent_start_show_parser.set_defaults(
+        handler=run_phase_activated_task_agent_start_show
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

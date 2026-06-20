@@ -6349,3 +6349,122 @@ def run_phase_activated_task_lifecycle_summary(args: argparse.Namespace) -> int:
     if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
     print(f"\n  Auto impl: no"); print(f"  Runner exec: no"); print(f"  Exec authorized: no")
     return 0
+
+
+ACTIVATED_TASK_AGENT_PACKAGES_DIR = Path(".pcae") / "activated-task-agent-packages"
+
+
+def _build_activated_task_agent_package(root: HarnessPath) -> dict:
+    from pcae.core.tasks import find_latest_active_task
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).is_file() else None
+    active_task = find_latest_active_task(root)
+    if act_data is None or not act_data.get("activated"):
+        return {"package_status": "no_activated_task", "execution_authorized": False, "automatic_invocation_allowed": False}
+    start_gate = _build_activated_task_impl_start_gate(root)
+    if not start_gate["manual_implementation_allowed"]:
+        return {"package_status": "blocked", "blockers": start_gate.get("blockers", []), "execution_authorized": False, "automatic_invocation_allowed": False}
+    task_path = str(Path("tasks") / "active" / f"{act_data['created_task_id']}.md")
+    return {
+        "package_status": "ready",
+        "active_task_path": task_path,
+        "active_task_title": active_task.title if active_task else act_data.get("selected_title"),
+        "active_task_id": act_data["created_task_id"],
+        "activation_ref": str(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json"),
+        "task_contract_summary": f"Active task: {act_data.get('selected_title', 'Unknown')}. Scope defined by task contract allowed files.",
+        "allowed_files": "Per task contract. Add allowed files to the task contract before implementation.",
+        "forbidden_files": "Outside task contract scope.",
+        "implementation_goal": f"Implement the changes described by: {act_data.get('selected_title', 'the activated queue item')}",
+        "validation_commands": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory", "pcae push check"],
+        "commit_rules": ["Commit only allowed files", "Use pcae task finish --commit for closure"],
+        "push_rules": ["Use pcae push (not raw git push)", "Do not force push"],
+        "stop_conditions": ["test failure", "pcae check failure", "scope drift required", "ambiguity detected"],
+        "agent_prompt_text": f"You are implementing task: {act_data.get('selected_title', 'Unknown')}. Work within the task contract scope. Run pcae check before commits. Use pcae task finish --commit to complete.",
+        "automatic_invocation_allowed": False,
+        "automatic_implementation_allowed": False,
+        "runner_execution_allowed": False,
+        "execution_authorized": False,
+    }
+
+
+def run_phase_activated_task_agent_package(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_activated_task_agent_package(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_AGENT_PACKAGES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Package saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Activated Task Agent Package"); print("=" * 40)
+    print(f"  Status: {result['package_status']}")
+    if result['package_status'] == 'ready':
+        print(f"  Task: {result['active_task_id']}"); print(f"  Title: {result['active_task_title']}")
+        print(f"  Agent invocation allowed: no"); print(f"  Auto impl allowed: no")
+        print(f"  Runner exec allowed: no"); print(f"  Execution authorized: no")
+        if result.get('agent_prompt_text'): print(f"\n  Agent prompt:\n    {result['agent_prompt_text']}")
+    return 0
+
+
+# Phase 74C/74D: agent start dry-run and execute
+ACTIVATED_TASK_AGENT_STARTS_DIR = Path(".pcae") / "activated-task-agent-starts"
+
+
+def _build_agent_start_dry_run(root: HarnessPath) -> dict:
+    from pcae.core.tasks import find_latest_active_task, diagnose_task_memory
+    from pcae.core.health import build_health_data, is_healthy
+    pkg = _build_activated_task_agent_package(root)
+    blockers = []; warnings = []
+    if pkg["package_status"] == "no_activated_task": blockers.append("no activation-created task")
+    elif pkg["package_status"] == "blocked": blockers.extend(pkg.get("blockers", []))
+    else:
+        health_data = build_health_data(root)
+        if not is_healthy(health_data): warnings.append("health not healthy — ensure task contract covers current state")
+        diag = diagnose_task_memory(root)
+        if diag.has_errors: blockers.append("task-memory has errors")
+    agent_start_allowed = len(blockers) == 0 and pkg["package_status"] == "ready"
+    return {"dry_run": True, "agent_start_allowed": agent_start_allowed, "agent_invocation_performed": False, "implementation_performed": False, "files_modified": False, "commits_created": 0, "automatic_implementation_allowed": False, "runner_execution_allowed": False, "execution_authorized": False, "blockers": blockers, "warnings": warnings, "next_operator_action": "Before starting external agent, review task contract scope and ensure allowed files are specified."}
+
+
+def _build_agent_start_execute(root: HarnessPath) -> dict:
+    dry = _build_agent_start_dry_run(root)
+    if not dry["agent_start_allowed"]: return {"agent_assistance_started": False, "execution_authorized": False, "refusal_reason": "; ".join(dry["blockers"])}
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8"))
+    ts = datetime.now(timezone.utc)
+    result = {"agent_assistance_started": True, "started_at": ts.isoformat(), "active_task_path": str(Path("tasks") / "active" / f"{act_data['created_task_id']}.md"), "active_task_id": act_data["created_task_id"], "agent_package_ref": str(ACTIVATED_TASK_AGENT_PACKAGES_DIR / "latest.json"), "activation_ref": str(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json"), "allowed_mode": "external_agent_or_operator_manual_start", "agent_invocation_performed": False, "prompt_executed": False, "implementation_performed": False, "files_modified": False, "commits_created": 0, "automatic_implementation_allowed": False, "runner_execution_allowed": False, "execution_authorized": False, "next_operator_action": "Provide the agent package to your external agent/operator. Implementation proceeds under normal task-contract workflow."}
+    d = root.join(ACTIVATED_TASK_AGENT_STARTS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+    (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return result
+
+
+def run_phase_activated_task_agent_start(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); execute = getattr(args, "execute", False)
+    if not execute:
+        result = _build_agent_start_dry_run(root)
+        if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+        print("Agent Implementation Start (dry run)"); print("=" * 40)
+        print(f"  Agent start allowed: {'yes' if result['agent_start_allowed'] else 'NO'}"); print(f"  Agent invocation: no")
+        if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+        return 0
+    result = _build_agent_start_execute(root)
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0 if result.get("agent_assistance_started") else 1
+    if not result.get("agent_assistance_started"): print(f"Start refused: {result.get('refusal_reason')}"); return 1
+    print("Agent Assistance Start (executed)"); print("=" * 40)
+    print(f"  Started: yes"); print(f"  Task: {result['active_task_id']}")
+    print(f"  Agent invoked: no"); print(f"  Prompt executed: no"); print(f"  Implementation: no")
+    print(f"  Auto impl: no"); print(f"  Runner exec: no"); print(f"  Exec authorized: no")
+    print(f"\n  {result['next_operator_action']}")
+    return 0
+
+
+def run_phase_activated_task_agent_start_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")
+    if not p.is_file():
+        if args.json: print(json.dumps({"present": False}))
+        else: print("No agent start artifact found.")
+        return 1
+    data = json.loads(p.read_text(encoding="utf-8"))
+    if args.json: print(json.dumps({"present": True, **data}, indent=2, sort_keys=True))
+    else:
+        print("Agent Assistance Start"); print(f"  Started: {data.get('agent_assistance_started')}")
+        print(f"  Task: {data.get('active_task_id')}"); print(f"  Agent invoked: {data.get('agent_invocation_performed')}")
+        print(f"  Execution authorized: {data.get('execution_authorized')}")
+    return 0
