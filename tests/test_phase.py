@@ -8896,3 +8896,27 @@ def test_73n_readiness_still_blocks(tmp_path, monkeypatch, capsys):
     main(["phase", "execution-authorization-contract", "--save"]); capsys.readouterr()
     main(["phase", "single-runner-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["ready_for_real_execution"] is False; assert d["readiness_status"] != "design_ready"
+
+# ---------------------------------------------------------------------------
+# Phase 73O: real execution still-disabled proof
+# ---------------------------------------------------------------------------
+def test_73o_proof_passes(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-execution-disabled-proof", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0; assert d["proof_status"] == "passed"
+    assert d["real_execution_disabled"] is True; assert d["execution_authorized"] is False
+
+def test_73o_proof_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-execution-disabled-proof", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "real-execution-disabled-proofs" / "latest.json").is_file()
+
+def test_73o_proof_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    q = tmp_path / ".pcae" / "phase-queue.json"; b = json.dumps(["73O test"]) + "\n"; q.write_text(b); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-execution-disabled-proof"]); capsys.readouterr()
+    assert q.read_text() == b

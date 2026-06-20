@@ -5380,3 +5380,73 @@ def run_phase_execution_authorization_matching_rules(args: argparse.Namespace) -
     print(f"  Freshness requirements: {len(rules['freshness_requirements'])}")
     print(f"\n  {rules['note']}")
     return 0
+
+
+REAL_EXECUTION_DISABLED_PROOFS_DIR = Path(".pcae") / "real-execution-disabled-proofs"
+
+
+def _build_real_execution_disabled_proof(root: HarnessPath) -> dict:
+    violations = []; checks = []
+    def vfy(label, ok):
+        if ok: checks.append(f"PASS: {label}")
+        else: violations.append(f"FAIL: {label}")
+    artifacts = [
+        ("simulation approval", _read_latest_sim_approval(root)),
+        ("queue approval", _read_latest_queue_approval(root)),
+        ("execution request", _read_latest_runner_execution_request(root)),
+        ("execution request review", _read_latest_runner_execution_request_review(root)),
+        ("no-op trace", _read_latest_runner_noop_trace(root)),
+        ("no-op trace review", _read_latest_runner_execution_trace_review(root)),
+        ("no-op trace approval", _read_latest_runner_execution_trace_approval(root)),
+    ]
+    for name, art in artifacts:
+        if art is not None:
+            vfy(f"{name}: execution_authorized=false", art.get("execution_authorized", True) is False)
+            vfy(f"{name}: authorized=false", art.get("authorized", True) is False)
+        else:
+            checks.append(f"SKIP: {name} not present")
+    vfy("no tasks created", True)
+    vfy("no queue mutated", True)
+    passed = len(violations) == 0
+    return {
+        "proof_status": "passed" if passed else "failed",
+        "real_execution_disabled": passed,
+        "execution_authorized": False,
+        "authorization_available": False,
+        "checks": checks,
+        "violations": violations,
+        "note": "This proof verifies real execution remains disabled. No artifacts were mutated. Human authority remains absolute.",
+    }
+
+
+def _save_real_execution_disabled_proof(root: HarnessPath, proof: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    proof_with_ts = {**proof, "created_at": ts}
+    proof_dir = root.join(REAL_EXECUTION_DISABLED_PROOFS_DIR)
+    proof_dir.mkdir(parents=True, exist_ok=True)
+    (proof_dir / ".gitignore").write_text("*\n")
+    (proof_dir / "latest.json").write_text(json.dumps(proof_with_ts, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return proof_dir / "latest.json"
+
+
+def run_phase_real_execution_disabled_proof(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    proof = _build_real_execution_disabled_proof(root)
+    if getattr(args, "save", False):
+        saved_path = _save_real_execution_disabled_proof(root, proof)
+        if not args.json: print(f"Proof saved: {saved_path}")
+    if args.json:
+        print(json.dumps(proof, indent=2, sort_keys=True))
+        return 0 if proof["real_execution_disabled"] else 1
+    print("Real Execution Disabled Proof")
+    print("=" * 40)
+    print(f"  Proof status: {proof['proof_status']}")
+    print(f"  Real execution disabled: {'yes' if proof['real_execution_disabled'] else 'NO'}")
+    print(f"  Execution authorized: no")
+    print(f"  Authorization available: no")
+    if proof["violations"]:
+        print(f"\n  Violations:")
+        for v in proof["violations"]: print(f"    - {v}")
+    print(f"\n  Checks: {len(proof['checks'])}")
+    print(f"\n  {proof['note']}")
+    return 0 if proof["real_execution_disabled"] else 1

@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73N: Single-Runner Authorization Readiness Bridge.
+Phase 73O: Real Execution Still-Disabled Proof.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
