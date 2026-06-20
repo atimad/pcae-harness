@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 76C: Captured Output Manual Apply Execution Preflight (20260620-1905-phase-76c-captured-output-manual-apply-execution-preflight)
 - Phase 76B: Captured Output Human Approval Validation (20260620-1903-phase-76b-captured-output-human-approval-validation)
 - Phase 76A: Captured Output Human Approval Artifact (20260620-1857-phase-76a-captured-output-human-approval-artifact)
 - Phase 75I.3: Captured Output Manual Apply Approval Recheck (20260620-1835-phase-75i-3-captured-output-manual-apply-approval-recheck)
