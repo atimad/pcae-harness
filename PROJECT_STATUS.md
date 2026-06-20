@@ -2,13 +2,12 @@
 
 ## Current Phase
 
-Phase 72Q: Queue Preflight Positive Non-Execution Path.
+Phase 72R: Execution Authorization Design Record.
 
-Phase 72Q proves the positive non-execution path: a valid fixture queue with matching
-approval correctly satisfies all queue-related preflight requirements while execution
-remains `execution_available=false`, `execution_authorized=false`, and
-`preflight_status=design_only`. Tests cover cleared queue revert and fixture cleanup.
-No execution, no task creation.
+Phase 72R adds a formal design record to `docs/ARCHITECTURE.md` defining execution
+authorization, distinguishing it from queue approval, simulation approval, and
+preflight. Defines 14 minimum future requirements and 6 forbidden implied-authorization
+cases. Includes proposed future artifact schema. Documentation only; no code changes.
 
 ## Milestone: Execution Chain Traceability Complete
 

@@ -594,3 +594,99 @@ Content is never transferred to the queue. The queue item is a short description
 - No queue runner invocation from the bridge.
 - No reverse bridge (queue → prompt).
 - No prompt-id or source tracking beyond informational metadata.
+
+
+## Execution Authorization Design Record (Phase 72R)
+
+### Problem
+
+PCAE now has multiple governance layers that could be confused with execution authorization:
+- **Queue approval** (Phase 72M): approves a phase queue snapshot for future runner consideration
+- **Simulation approval** (Phase 72G): approves a runner simulation trace
+- **Runner preflight** (Phase 72H/72N): checks readiness requirements
+- **Execution authorization negative gate** (Phase 72K): explicitly refuses all authorization
+
+Before any execution authorization can exist, PCAE must formally define what it means, what it must not mean, and what requirements must be satisfied. This design record serves as the authoritative reference for all future execution authorization work.
+
+### Core Distinction
+
+Execution authorization is **separate and independent** from all other approval and readiness signals. No other artifact, check, or state implies execution authorization.
+
+| Artifact / Check | What it means | What it does NOT mean |
+|---|---|---|
+| Queue approval (Phase 72M) | "This queue snapshot is reviewed and approved for consideration" | "This queue may be executed" |
+| Simulation approval (Phase 72G) | "This simulation trace is reviewed and approved" | "The simulated phases may be executed" |
+| Runner preflight (Phase 72H/72N) | "These readiness checks have been evaluated" | "The runner may execute" |
+| Queue validation (Phase 72L) | "This queue has no structural issues" | "This queue content is approved" |
+| Human chat discussion | "A human discussed this in natural language" | "The human authorized execution" |
+
+Execution authorization **must be its own explicit, recorded, human-invoked artifact**. It cannot be derived, inferred, or implied from any combination of other artifacts, checks, or conversational context.
+
+### Minimum Future Requirements for Execution Authorization
+
+When execution authorization is eventually implemented, it must require **all** of the following:
+
+1. **Clean working tree** — no uncommitted changes
+2. **Healthy idle** — `pcae health` passes, no active task
+3. **Check passed** — `pcae check` passes
+4. **Task-memory clean** — `pcae doctor task-memory` reports no inconsistencies
+5. **No unpushed commits** — `pcae push check` reports `nothing_to_push`
+6. **Non-empty valid queue** — queue present, readable, and passes `pcae phase queue validate`
+7. **Queue approval matching current queue** — a persisted queue approval exists whose digest matches the current queue
+8. **Runner simulation exists** — a simulation trace artifact is persisted
+9. **Runner simulation review ready** — the simulation has been reviewed and the review status is `ready_for_approval`
+10. **Runner simulation approval exists** — the simulation has been explicitly approved
+11. **Runner preflight satisfied except authorization itself** — all preflight requirements are met except `execution_authorized`
+12. **Max phase bound** — the number of phases to execute is bounded
+13. **Stop-condition policy loaded** — the runner policy matrix is available
+14. **Explicit human authorization event** — a dedicated execution authorization artifact is created by an explicit human command invocation
+
+### Forbidden Implied-Authorization Cases
+
+The following **must never** cause or imply execution authorization:
+
+- **Queue approval alone** — approving a queue does not authorize execution of its entries
+- **Simulation approval alone** — approving a simulation does not authorize executing the simulated phases
+- **Passing preflight** — meeting all preflight requirements except `execution_authorized` is still not authorization
+- **Queue changed after approval** — if the queue has been modified since the last approval, authorization is impossible regardless of other state
+- **Audit warnings present** — any warning in the phase audit blocks authorization
+- **Active task or dirty tree** — any non-idle state blocks authorization
+- **Conversational context** — a human saying "go ahead" in chat is not a recorded authorization artifact
+
+### Proposed Future Artifact Shape (Schema Only)
+
+When implemented, an execution authorization artifact is expected to have this shape. This schema is **not yet implemented**; no command writes to it.
+
+```
+Store: .pcae/execution-authorizations/
+File:  latest.json (+ timestamped copies)
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `artifact_version` | string | Schema version (e.g. `"1.0"`) |
+| `authorization_id` | string | Unique identifier |
+| `authorized` | bool | Whether execution is authorized (always `false` in this design) |
+| `execution_authorized` | bool | Synonym for `authorized` |
+| `authorized_at` | ISO timestamp | When the authorization was recorded |
+| `authorizer_source` | string | Source of the authorization (always `"local_cli"`) |
+| `queue_digest` | string | SHA-256 of the approved queue |
+| `queue_approval_ref` | string | Reference to the queue approval artifact |
+| `simulation_ref` | string | Reference to the simulation artifact |
+| `simulation_review_ref` | string | Reference to the simulation review artifact |
+| `simulation_approval_ref` | string | Reference to the simulation approval artifact |
+| `preflight_ref` | string | Reference to the preflight state at authorization time |
+| `max_phases` | int | Maximum phases authorized to execute |
+| `scope` | list | Phase IDs or bounds for authorized execution |
+| `required_stop_policy_version` | string | Policy version required for execution |
+| `expires_at` | ISO timestamp | When this authorization expires (if applicable) |
+| `revocation_supported` | bool | Whether this authorization can be revoked |
+| `human_authority_statement` | string | Explicit statement that human authority is absolute |
+
+### Current State (As of Phase 72R)
+
+- **Execution authorization is not implemented.** The `pcae phase runner-execution-authorize` command is a negative gate that always refuses, reporting `authorization_available=false`, `authorized=false`, `mutation_performed=false`.
+- **No command can create `execution_authorized=true`.** Every approval, check, and preflight command explicitly sets or reports `execution_authorized=false`.
+- **This design record is read-only documentation.** It defines the concept, requirements, and schema shape but does not implement any authorization writing behavior.
+- **The schema described above is a proposal.** Phase 72S exposes this schema as a read-only command (`pcae phase runner-execution-authorization-schema`) without persisting any artifact.
+- **Human authority remains absolute.** No agent, runner, or automated system can override human authorization decisions.
