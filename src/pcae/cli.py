@@ -464,6 +464,7 @@ from pcae.commands.phase import (
     run_phase_activated_task_prompt_capture,
     run_phase_activated_task_prompt_capture_smoke,
     run_phase_activated_task_prompt_capture_show,
+    run_phase_activated_task_capture_intake_scenario,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6043,6 +6044,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_activated_task_prompt_capture_show_parser.set_defaults(
         handler=run_phase_activated_task_prompt_capture_show
+    )
+
+    phase_activated_task_capture_intake_scenario_parser = phase_subparsers.add_parser(
+        "activated-task-capture-intake-scenario",
+        help="Intake activated task capture output into agent output intake (Phase 75A).",
+    )
+    phase_activated_task_capture_intake_scenario_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_capture_intake_scenario_parser.add_argument(
+        "--save", action="store_true", help="Persist the scenario artifact."
+    )
+    phase_activated_task_capture_intake_scenario_parser.set_defaults(
+        handler=run_phase_activated_task_capture_intake_scenario
     )
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(

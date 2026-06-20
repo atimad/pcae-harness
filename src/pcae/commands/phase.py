@@ -8312,3 +8312,120 @@ def run_phase_activated_task_prompt_capture_show(args: argparse.Namespace) -> in
         print(f"  Captured stdout: {'yes' if d.get('captured_stdout_path') else 'no'}")
         print(f"  Task package sent: {'yes' if d.get('task_package_sent') else 'no'}")
     return 0
+
+
+# Phase 75A: activated task capture intake scenario
+ACTIVATED_TASK_CAPTURE_INTAKE_SCENARIOS_DIR = Path(".pcae") / "activated-task-capture-intake-scenarios"
+
+
+def _build_activated_task_capture_intake_scenario(root: HarnessPath) -> dict:
+    """Read 74Z capture artifact and bridge to agent output intake."""
+    base = {
+        "scenario_status": "blocked",
+        "capture_ref": None,
+        "captured_stdout_path": None,
+        "intake_created": False,
+        "intake_ref": None,
+        "intake_status": None,
+        "output_digest": None,
+        "patch_detected": False,
+        "files_mentioned": [],
+        "apply_performed": False,
+        "files_modified": False,
+        "commits_created": 0,
+        "push_performed": False,
+        "implementation_performed": False,
+        "execution_authorized": False,
+        "blockers": [],
+        "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    capture_path = root.join(ACTIVATED_TASK_PROMPT_CAPTURES_DIR / "latest.json")
+    if not capture_path.is_file():
+        base["scenario_status"] = "missing_capture"
+        base["blockers"] = ["no activated task prompt capture artifact"]
+        base["next_operator_action"] = "Run pcae phase activated-task-prompt-capture-smoke --allow-real-invocation first."
+        return base
+
+    capture = json.loads(capture_path.read_text(encoding="utf-8"))
+    if capture.get("smoke_status") != "passed":
+        base["scenario_status"] = "capture_not_successful"
+        base["blockers"] = [f"capture smoke status: {capture.get('smoke_status')}"]
+        base["next_operator_action"] = "Run pcae phase activated-task-prompt-capture-smoke --allow-real-invocation to get a successful capture."
+        return base
+
+    stdout_path_str = capture.get("captured_stdout_path")
+    if not stdout_path_str:
+        base["scenario_status"] = "missing_output"
+        base["blockers"] = ["captured stdout path missing"]
+        return base
+
+    stdout_path = Path(stdout_path_str)
+    if not stdout_path.is_absolute():
+        stdout_path = root.join(stdout_path)
+
+    if not stdout_path.is_file():
+        base["scenario_status"] = "missing_output"
+        base["blockers"] = [f"captured stdout file not found: {stdout_path_str}"]
+        return base
+
+    output_content = stdout_path.read_text(encoding="utf-8")
+    if not output_content.strip():
+        base["scenario_status"] = "missing_output"
+        base["blockers"] = ["captured stdout is empty"]
+        return base
+
+    # Use existing intake logic
+    intake_result = _build_agent_output_intake(root, output_content, str(stdout_path))
+
+    # Persist intake
+    d = root.join(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / ".gitignore").write_text("*\n")
+    (d / "latest.json").write_text(json.dumps(intake_result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    return {
+        **base,
+        "scenario_status": "passed",
+        "capture_ref": str(ACTIVATED_TASK_PROMPT_CAPTURES_DIR / "latest.json"),
+        "captured_stdout_path": str(stdout_path),
+        "intake_created": True,
+        "intake_ref": str(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json"),
+        "intake_status": intake_result.get("intake_status"),
+        "output_digest": intake_result.get("output_digest"),
+        "patch_detected": intake_result.get("patch_detected", False),
+        "files_mentioned": intake_result.get("files_mentioned", []),
+        "blockers": [],
+        "warnings": ["patch detected in captured output"] if intake_result.get("patch_detected") else [],
+        "next_operator_action": "Run pcae phase activated-task-agent-output-review --json to review bridged intake.",
+    }
+
+
+def run_phase_activated_task_capture_intake_scenario(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_activated_task_capture_intake_scenario(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_CAPTURE_INTAKE_SCENARIOS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Intake scenario saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["scenario_status"] == "passed" else 1
+    print("Activated Task Capture Intake Scenario")
+    print("=" * 40)
+    print(f"  Scenario status: {result['scenario_status']}")
+    print(f"  Intake created: {'yes' if result['intake_created'] else 'no'}")
+    print(f"  Patch detected: {'yes' if result['patch_detected'] else 'no'}")
+    print(f"  Apply performed: no")
+    print(f"  Files modified: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["warnings"]:
+        print(f"\n  Warnings:"); [print(f"    - {w}") for w in result["warnings"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["scenario_status"] == "passed" else 1
