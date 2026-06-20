@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Claude-DeepSeek Prompt Capture Dry Run (Phase 74V): adds `pcae phase claude-deepseek-prompt-capture --dry-run --json --save` evaluating prerequisites for harmless output-only prompt capture. Checks lock, contract, enablement, safety review, git status. Reports would_send_prompt_text, would_send_task_package=false, would_request_task_implementation=false. All execution flags remain false. No backend invoked. 5 new tests.
 - Claude-DeepSeek Prompt Capture Contract (Phase 74U): adds `pcae phase claude-deepseek-prompt-capture-contract --json --save` defining the harmless output-only prompt capture contract. Includes deterministic test prompt (PCAE_CAPTURE_OK), 20 requirements, 15 forbidden cases. All execution flags remain false. No backend invoked. 4 new tests.
 - Activated Task Manual Implementation Scenario (Phase 73Y): adds `pcae phase activated-task-manual-implementation-scenario --json --save` to validate the full pre-implementation path. Exercises fixture add, queue approve, activation execute, implementation handoff, readiness, start gate, rollback, and cleanup. All implementation flags remain false. 2 new tests.
 - Activated Task Completion Flow (Phase 73Z): adds `pcae phase activated-task-completion-flow --json --save` documenting expected completion steps (implementation → check → commit → task finish → push) and forbidden shortcuts. Reports `flow_status` and `automatic_implementation_allowed=false`. 2 new tests.

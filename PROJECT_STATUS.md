@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74U: Claude-DeepSeek Prompt Capture Contract.
+Phase 74V: Claude-DeepSeek Prompt Capture Dry Run.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

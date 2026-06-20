@@ -7333,3 +7333,139 @@ def run_phase_claude_deepseek_prompt_capture_contract(args: argparse.Namespace) 
         print(f"    ... and {len(contract['forbidden_cases']) - 8} more")
     print(f"\n  {contract['note']}")
     return 0
+
+
+# Phase 74V: claude-deepseek prompt capture dry run
+CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR = Path(".pcae") / "claude-deepseek-prompt-captures"
+CLAUDE_DEEPSEEK_PROMPT_CAPTURE_DRY_RUNS_DIR = Path(".pcae") / "claude-deepseek-prompt-capture-dry-runs"
+
+
+def _build_claude_deepseek_prompt_capture_dry_run(root: HarnessPath) -> dict:
+    backend_name = "claude-deepseek"
+    lock = _build_agent_lock_status(root)
+    reg = _build_agent_backend_registry(root, backend_name)
+    backend = reg["backends"][0] if reg["backends"] else None
+    blockers = []
+    warnings = []
+
+    lock_matches = lock.get("backend_name") == backend_name
+    if not lock_matches:
+        blockers.append(f"lock not {backend_name}")
+
+    backend_available = backend["available"] if backend else False
+    if not backend_available:
+        blockers.append(f"'{backend_name}' not available on PATH")
+
+    contract_path = root.join(CLAUDE_DEEPSEEK_PROMPT_CAPTURE_CONTRACTS_DIR / "latest.json")
+    contract_present = contract_path.is_file()
+    if not contract_present:
+        blockers.append("prompt capture contract missing")
+
+    enable_path = root.join(CLAUDE_DEEPSEEK_CAPTURE_ENABLEMENTS_DIR / "latest.json")
+    enable_present = enable_path.is_file()
+    if not enable_present:
+        blockers.append("capture enablement missing")
+
+    safety_path = root.join(CLAUDE_DEEPSEEK_INVOCATION_SAFETY_REVIEWS_DIR / "latest.json")
+    safety_ready = safety_path.is_file()
+    if not safety_ready:
+        warnings.append("safety review not present")
+
+    from pcae.core.git_status import read_git_changes
+    git_changes = read_git_changes(root)
+    if git_changes:
+        warnings.append("working tree has changes")
+
+    contract_data = {}
+    test_prompt = ""
+    if contract_present:
+        contract_data = json.loads(contract_path.read_text(encoding="utf-8"))
+        test_prompt = contract_data.get("test_prompt", "")
+
+    capture_allowed = len(blockers) == 0 and backend_available
+
+    stdout_path = str(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR / "latest.stdout.txt")
+    stderr_path = str(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR / "latest.stderr.txt")
+    artifact_path = str(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR / "latest.json")
+
+    return {
+        "dry_run": True,
+        "capture_allowed": capture_allowed,
+        "backend_name": backend_name,
+        "backend_available": backend_available,
+        "lock_matches_backend": lock_matches,
+        "prompt_capture_contract_present": contract_present,
+        "enablement_present": enable_present,
+        "safety_review_ready": safety_ready,
+        "would_send_prompt_text": test_prompt,
+        "would_send_task_package": False,
+        "would_request_task_implementation": False,
+        "would_invoke_command": "claude-deepseek" if capture_allowed else None,
+        "would_capture_stdout": True,
+        "would_capture_stderr": True,
+        "would_write_capture_artifact_path": artifact_path if capture_allowed else None,
+        "would_write_stdout_path": stdout_path if capture_allowed else None,
+        "would_write_stderr_path": stderr_path if capture_allowed else None,
+        "mutation_guard_planned": True,
+        "explicit_opt_in_required": True,
+        "real_backend_invocation_performed": False,
+        "agent_invocation_performed": False,
+        "prompt_executed": False,
+        "apply_performed": False,
+        "files_modified": False,
+        "commits_created": 0,
+        "execution_authorized": False,
+        "blockers": blockers,
+        "warnings": warnings,
+        "next_operator_action": (
+            "All prerequisites satisfied. Run pcae phase claude-deepseek-prompt-capture-smoke --allow-real-invocation to send the harmless prompt."
+            if capture_allowed
+            else "Resolve blockers first."
+        ),
+    }
+
+
+def run_phase_claude_deepseek_prompt_capture(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_claude_deepseek_prompt_capture_dry_run(root)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_PROMPT_CAPTURE_DRY_RUNS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Prompt capture dry-run saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+    print("Claude-DeepSeek Prompt Capture (dry run)")
+    print("=" * 40)
+    print(f"  Backend: {result['backend_name']}")
+    print(f"  Backend available: {'yes' if result['backend_available'] else 'NO'}")
+    print(f"  Lock matches backend: {'yes' if result['lock_matches_backend'] else 'NO'}")
+    print(f"  Contract present: {'yes' if result['prompt_capture_contract_present'] else 'NO'}")
+    print(f"  Enablement present: {'yes' if result['enablement_present'] else 'NO'}")
+    print(f"  Safety review ready: {'yes' if result['safety_review_ready'] else 'NO'}")
+    print(f"  Capture allowed: {'yes' if result['capture_allowed'] else 'NO'}")
+    if result["would_send_prompt_text"]:
+        prompt_preview = result["would_send_prompt_text"].strip()[:120]
+        print(f"\n  Would send prompt:\n    {prompt_preview}")
+    print(f"  Would send task package: no")
+    print(f"  Would request implementation: no")
+    print(f"  Would invoke: {'yes' if result['would_invoke_command'] else 'NO'}")
+    print(f"  Mutation guard planned: yes")
+    print(f"  Explicit opt-in required: yes")
+    print(f"\n  Real backend invoked: no")
+    print(f"  Agent invoked: no")
+    print(f"  Prompt executed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    if result["warnings"]:
+        print(f"\n  Warnings:")
+        for w in result["warnings"]:
+            print(f"    - {w}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0

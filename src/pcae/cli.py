@@ -457,6 +457,7 @@ from pcae.commands.phase import (
     run_phase_claude_deepseek_capture_smoke,
     run_phase_claude_deepseek_invocation_safety_review,
     run_phase_claude_deepseek_prompt_capture_contract,
+    run_phase_claude_deepseek_prompt_capture,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -5966,6 +5967,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_claude_deepseek_prompt_capture_contract_parser.set_defaults(
         handler=run_phase_claude_deepseek_prompt_capture_contract
+    )
+
+    phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
+        "claude-deepseek-prompt-capture",
+        help="Dry-run claude-deepseek prompt capture (Phase 74V).",
+    )
+    phase_claude_deepseek_prompt_capture_parser.add_argument(
+        "--dry-run", action="store_true", default=True, help="Dry-run mode (always on; the default)."
+    )
+    phase_claude_deepseek_prompt_capture_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_prompt_capture_parser.add_argument(
+        "--save", action="store_true", help="Persist the dry-run artifact."
+    )
+    phase_claude_deepseek_prompt_capture_parser.set_defaults(
+        handler=run_phase_claude_deepseek_prompt_capture
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
