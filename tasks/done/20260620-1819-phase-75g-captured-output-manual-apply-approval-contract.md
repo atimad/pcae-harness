@@ -10,7 +10,7 @@ Phase 75G: Captured Output Manual Apply Approval Contract
 
 ## Status
 
-active
+done
 
 ## Mode
 
