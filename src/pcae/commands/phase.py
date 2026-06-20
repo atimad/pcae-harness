@@ -432,6 +432,30 @@ def _build_handoff_artifact(
         "task_state": "active" if active_task else "idle",
         "unpushed_commits": unpushed,
         "working_tree": "clean" if not changes else f"{len(changes)} changed",
+        "activation": _build_handoff_activation_summary(root),
+    }
+
+
+def _build_handoff_activation_summary(root: HarnessPath) -> dict | None:
+    act_path = root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")
+    if not act_path.is_file():
+        return None
+    try:
+        act = json.loads(act_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    status = _build_single_runner_activation_status(root)
+    scenario_path = root.join(SINGLE_RUNNER_ACTIVATION_SCENARIOS_DIR / "latest.json")
+    scenario_present = scenario_path.is_file()
+    return {
+        "activation_present": True,
+        "task_created": act.get("task_created", False),
+        "prompt_executed": act.get("prompt_executed", False),
+        "implementation_performed": act.get("implementation_performed", False),
+        "execution_authorized": act.get("execution_authorized", False),
+        "active_task_matches_activation": status.get("active_task_matches_activation", False),
+        "rollback_available": status.get("rollback_available", False),
+        "scenario_present": scenario_present,
     }
 
 

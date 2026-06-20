@@ -630,6 +630,7 @@ def test_phase_handoff_json_output(
     assert isinstance(data["restart_workflows"], list)
     assert len(data["restart_workflows"]) == 3
     expected_keys = {
+        "activation",
         "active_task_id",
         "active_task_title",
         "audit_summary",
@@ -9043,3 +9044,23 @@ def test_73s_scenario_cleanup(tmp_path, monkeypatch, capsys):
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
     main(["phase", "single-runner-activation-scenario"]); capsys.readouterr()
     assert not any((tmp_path / "tasks" / "active").glob("*.md")) if (tmp_path / "tasks" / "active").is_dir() else True
+
+# ---------------------------------------------------------------------------
+# Phase 73T: activation handoff and bootstrap visibility
+# ---------------------------------------------------------------------------
+def test_73t_handoff_includes_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness; from pcae.core.agent import acquire_agent_lock
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    main(["phase", "handoff", "--next-agent", "claude-next", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activation"] is not None; assert d["activation"]["activation_present"] is True
+    assert d["activation"]["execution_authorized"] is False
+
+def test_73t_handoff_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "handoff", "--next-agent", "claude-next", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activation"] is None
