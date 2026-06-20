@@ -9044,6 +9044,146 @@ def run_phase_captured_output_manual_apply_approval_review(args: argparse.Namesp
     return 0 if result["review_status"] == "approval_review_ready" else 1
 
 
+# Phase 75I: captured output manual apply preflight
+CAPTURED_OUTPUT_MANUAL_APPLY_PREFLIGHTS_DIR = Path(".pcae") / "captured-output-manual-apply-preflights"
+
+
+def _build_captured_output_manual_apply_preflight(root: HarnessPath) -> dict:
+    base = {
+        "preflight_status": "blocked", "human_approval_required": True,
+        "human_approval_artifact_present": False, "manual_apply_allowed": False,
+        "automatic_apply_allowed": False, "backend_apply_allowed": False,
+        "captured_output_ref": None, "apply_dry_run_ref": None,
+        "approval_contract_ref": None, "approval_review_ref": None,
+        "allowed_files": [], "forbidden_files": [
+            "No backend invocation", "No prompt execution", "No patch application",
+            "No project code modification from backend output",
+            "No automatic commit", "No automatic task finish", "No automatic push",
+            "No execution authorization", "No runner-execute real execution",
+        ],
+        "validation_commands_after_manual_apply": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "required_operator_steps": [], "forbidden_shortcuts": [
+            "Do not apply automatically", "Do not commit from backend output",
+            "Do not push from backend output", "Do not skip review",
+            "Do not skip apply dry-run", "Do not authorize runner execution",
+        ],
+        "recommended_next_phase": "76A (future human approval artifact phase)",
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read contract
+    contract_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR / "latest.json")
+    if not contract_path.is_file():
+        base["preflight_status"] = "contract_not_ready"
+        base["blockers"] = ["No approval contract found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-approval-contract --save first."
+        return base
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    base["approval_contract_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR / "latest.json")
+
+    if contract.get("contract_status") != "ready":
+        base["preflight_status"] = "contract_not_ready"
+        base["blockers"] = [f"Contract not ready: {contract.get('contract_status')}"]
+        base["next_operator_action"] = contract.get("next_operator_action", "Resolve contract blockers first.")
+        return base
+
+    # Read review
+    review_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_REVIEWS_DIR / "latest.json")
+    if not review_path.is_file():
+        base["preflight_status"] = "review_not_ready"
+        base["blockers"] = ["No approval review found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-approval-review --save first."
+        return base
+    review = json.loads(review_path.read_text(encoding="utf-8"))
+    base["approval_review_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_REVIEWS_DIR / "latest.json")
+
+    if review.get("review_status") != "approval_review_ready":
+        base["preflight_status"] = "review_not_ready"
+        base["blockers"] = [f"Review not ready: {review.get('review_status')}"]
+        base["next_operator_action"] = review.get("next_operator_action", "Resolve review blockers first.")
+        return base
+
+    # Read manual apply readiness for allowed files and refs
+    readiness_path = root.join(ACTIVATED_TASK_CAPTURE_MANUAL_APPLY_READINESS_DIR / "latest.json")
+    if readiness_path.is_file():
+        readiness = json.loads(readiness_path.read_text(encoding="utf-8"))
+        base["captured_output_ref"] = readiness.get("capture_ref")
+        base["apply_dry_run_ref"] = readiness.get("apply_dry_run_ref")
+        base["allowed_files"] = readiness.get("would_touch_files", [])
+
+    # Check real execution disabled proof
+    proof_path = root.join(REAL_EXECUTION_DISABLED_PROOFS_DIR / "latest.json")
+    if proof_path.is_file():
+        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+        if proof.get("proof_status") != "passed":
+            base["preflight_status"] = "blocked"
+            base["blockers"] = ["Real execution disabled proof not passed."]
+            base["next_operator_action"] = "Run pcae phase real-execution-disabled-proof --save to verify."
+            return base
+
+    # Run health and check
+    from pcae.core.health import build_health_data, is_healthy
+    hd = build_health_data(root)
+    if not is_healthy(hd):
+        base["preflight_status"] = "blocked"
+        base["blockers"] = ["Health not healthy."]
+        base["next_operator_action"] = "Run pcae health to diagnose and resolve health issues."
+        return base
+
+    # Ready
+    base["preflight_status"] = "ready_for_human_approval"
+    base["blockers"] = []
+    base["required_operator_steps"] = [
+        "1. Review captured output: cat .pcae/activated-task-prompt-captures/latest.stdout.txt",
+        "2. Review approval contract: pcae phase captured-output-manual-apply-approval-contract --json",
+        "3. Review approval review: pcae phase captured-output-manual-apply-approval-review --json",
+        "4. Review apply dry-run: pcae phase activated-task-agent-output-apply --dry-run --json",
+        "5. Request explicit human approval (future phase: human approval artifact)",
+        "6. If explicitly approved, manually apply changes following task contract scope",
+        "7. Run: pcae health && pcae check && python -m pytest -n auto",
+        "8. Commit using pcae task finish --commit",
+        "9. Push using pcae push",
+    ]
+    base["next_operator_action"] = (
+        "Preflight complete. All governance prerequisites satisfied. "
+        "Manual apply requires explicit human approval artifact (future phase). "
+        "Do not apply, commit, push, or authorize execution without explicit approval."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_preflight(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_preflight(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_PREFLIGHTS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Preflight saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["preflight_status"] == "ready_for_human_approval" else 1
+    print("Captured Output Manual Apply Preflight"); print("=" * 40)
+    print(f"  Preflight status: {result['preflight_status']}")
+    print(f"  Human approval required: yes")
+    print(f"  Human approval artifact present: no")
+    print(f"  Manual apply allowed: no")
+    print(f"  Automatic apply allowed: no")
+    print(f"  Backend apply allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["required_operator_steps"]:
+        print(f"\n  Operator steps:"); [print(f"    {s}") for s in result["required_operator_steps"][:5]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["preflight_status"] == "ready_for_human_approval" else 1
+
+
 def _build_activated_task_capture_safety_regression(root: HarnessPath) -> dict:
     cases = []
     all_passed = True

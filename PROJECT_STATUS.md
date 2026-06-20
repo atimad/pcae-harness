@@ -2,11 +2,12 @@
 
 ## Current Phase
 
-Phase 75H: Captured Output Manual Apply Approval Review.
+Phase 75I: Captured Output Manual Apply Preflight.
 
-Phase 75H adds `pcae phase captured-output-manual-apply-approval-review --json --save`
-recording whether the current captured output is eligible for explicit human approval.
-Review only — does not approve, apply, modify project code, invoke backend, or authorize runner execution.
+Phase 75I adds `pcae phase captured-output-manual-apply-preflight --json --save`
+as final preflight confirming all governance prerequisites are satisfied before a human
+may manually apply captured output. Preflight only — does not apply, modify project code,
+invoke backend, or authorize runner execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

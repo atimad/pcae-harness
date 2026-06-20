@@ -10386,3 +10386,61 @@ def test_75h_review_human_output(tmp_path, monkeypatch, capsys):
     assert "Automatic apply allowed: no" in out
     assert "Apply performed: no" in out
     assert "Execution authorized: no" in out
+
+
+# Phase 75I: captured output manual apply preflight
+def test_75i_preflight_missing_contract(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["preflight_status"] == "contract_not_ready"
+    assert d["human_approval_required"] is True
+    assert d["human_approval_artifact_present"] is False
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["backend_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75i_preflight_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-preflight", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-preflights" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert "preflight_status" in d
+    assert d["execution_authorized"] is False
+    assert d["apply_performed"] is False
+
+
+def test_75i_preflight_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75i_preflight_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "captured-output-manual-apply-preflight"])
+    out = capsys.readouterr().out
+    assert exit_code != 0  # blocked when no contract
+    assert "Captured Output Manual Apply Preflight" in out
+    assert "Preflight status:" in out
+    assert "Human approval required: yes" in out
+    assert "Human approval artifact present: no" in out
+    assert "Manual apply allowed: no" in out
+    assert "Automatic apply allowed: no" in out
+    assert "Apply performed: no" in out
+    assert "Execution authorized: no" in out
