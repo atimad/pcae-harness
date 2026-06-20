@@ -5191,3 +5191,106 @@ def run_phase_execution_authorization_contract(args: argparse.Namespace) -> int:
     print()
     print(f"  {contract['note']}")
     return 0
+
+
+EXECUTION_AUTHORIZATION_SCHEMAS_DIR = Path(".pcae") / "execution-authorization-schemas"
+
+_EXECUTION_AUTHORIZATION_SCHEMA = {
+    "schema_only": True,
+    "dry_run": False,
+    "artifact_written": False,
+    "authorization_available": False,
+    "authorized": False,
+    "execution_authorized": False,
+    "proposed_artifact_fields": {
+        "authorization_id": "string — unique identifier",
+        "created_at": "ISO timestamp",
+        "approver_source": "string — always local_cli",
+        "authorization_scope": "string — always single_phase_only",
+        "queue_digest": "string — SHA-256 of approved queue",
+        "queue_entry_title": "string — title of the single queued phase",
+        "max_phases": "int — always 1",
+        "request_ref": "string — reference to execution request",
+        "request_review_ref": "string — reference to request review",
+        "noop_trace_ref": "string — reference to no-op trace",
+        "noop_trace_review_ref": "string — reference to no-op trace review",
+        "noop_trace_approval_ref": "string — reference to no-op trace approval",
+        "single_runner_contract_ref": "string — reference to runner contract",
+        "single_runner_readiness_ref": "string — reference to readiness check",
+        "refusal_matrix_ref": "string — reference to refusal matrix",
+        "expires_at": "ISO timestamp — when authorization expires",
+        "execution_authorized": "bool — must be explicitly set true by human",
+        "authorization_available": "bool — true only when all checks pass",
+    },
+    "proposed_validation_rules": [
+        "queue digest must match current queue",
+        "queue entry must exist and be the single item in queue",
+        "request must exist and not be denied or revoked",
+        "request review must exist and be ready",
+        "no-op trace must exist and be safe",
+        "no-op trace review must exist and be ready_for_approval",
+        "no-op trace approval must exist and match trace",
+        "single-runner readiness must be design_ready",
+        "no hard-stop refusal conditions active",
+        "health must be healthy idle",
+        "check must pass",
+        "task-memory must be clean",
+        "no unpushed commits",
+        "expires_at must be in the future",
+    ],
+    "proposed_invalidators": [
+        "queue digest changes",
+        "queue entry removed or changed",
+        "execution request missing or denied/revoked",
+        "no-op trace missing or changed",
+        "no-op trace review missing or blocked",
+        "no-op trace approval missing or stale",
+        "preflight status changes",
+        "single-runner readiness changes",
+        "hard-stop refusal condition appears",
+        "authorization expires",
+        "dirty tree appears",
+        "active task appears",
+    ],
+    "proposed_expiry_policy": {
+        "max_duration": "24 hours from authorized_at",
+        "auto_invalidate": True,
+        "renewal_requires_full_recheck": True,
+    },
+    "note": (
+        "This is a schema preview only. No authorization artifact is written. "
+        "Execution authorization is not available. "
+        "Human authority remains absolute."
+    ),
+}
+
+
+def run_phase_execution_authorization_schema(args: argparse.Namespace) -> int:
+    dry_run = getattr(args, "dry_run", False)
+    schema = dict(_EXECUTION_AUTHORIZATION_SCHEMA)
+    schema["dry_run"] = dry_run
+
+    if getattr(args, "save", False):
+        schema_dir = HarnessPath.cwd().join(EXECUTION_AUTHORIZATION_SCHEMAS_DIR)
+        schema_dir.mkdir(parents=True, exist_ok=True)
+        (schema_dir / ".gitignore").write_text("*\n")
+        latest_path = schema_dir / "latest.json"
+        latest_path.write_text(json.dumps(schema, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Schema saved: {latest_path}")
+
+    if args.json:
+        print(json.dumps(schema, indent=2, sort_keys=True))
+        return 0
+
+    print("Execution Authorization Artifact Schema (preview only)")
+    print("=" * 40)
+    print(f"  Schema only: yes")
+    print(f"  Dry run: {'yes' if dry_run else 'no'}")
+    print(f"  Artifact written: no")
+    print(f"  Authorization available: no")
+    print(f"  Authorized: no")
+    print(f"  Execution authorized: no")
+    print()
+    print(f"  {schema['note']}")
+    return 0
