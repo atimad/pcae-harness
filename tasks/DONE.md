@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 72U Execution Authorization Request Artifact (20260620-0616-72u-execution-authorization-request-artifact)
 - 72T Runner Execution Command Stub Refusal (20260620-0252-72t-runner-execution-command-stub-refusal)
 - 72S Execution Authorization Artifact Schema Dry Run (20260620-0248-72s-execution-authorization-artifact-schema-dry-run)
 - 72R Execution Authorization Design Record (20260620-0245-72r-execution-authorization-design-record)
