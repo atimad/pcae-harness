@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73P: Single Queue Item Activation Dry Run.
+Phase 73Q: Single Queue Item Activation Execution.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

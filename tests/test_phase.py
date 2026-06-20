@@ -8950,3 +8950,41 @@ def test_73p_activate_dry_run_blocked_by_active_task(tmp_path, monkeypatch, caps
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); create_task_contract(HarnessPath(tmp_path), "blocking"); patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
     main(["phase", "single-runner-activate", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["activation_allowed"] is False
+
+# ---------------------------------------------------------------------------
+# Phase 73Q: single queue item activation execution
+# ---------------------------------------------------------------------------
+def test_73q_activate_execute_creates_task(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    exit_code = main(["phase", "single-runner-activate", "--execute", "--allow-fixture", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0; assert d["activated"] is True
+    assert d["task_created"] is True; assert d["prompt_executed"] is False
+    assert d["execution_authorized"] is False
+    assert (tmp_path / ".pcae" / "single-runner-activations" / "latest.json").is_file()
+
+def test_73q_activate_refuses_dirty_tree(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    (tmp_path / "dirty.txt").write_text("x")
+    main(["phase", "single-runner-activate", "--execute", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activated"] is False; assert "dirty" in str(d["blockers"]).lower()
+
+def test_73q_activate_refuses_empty_queue(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activate", "--execute", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activated"] is False
+
+def test_73q_activation_show(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    exit_code = main(["phase", "single-runner-activation-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0; assert d["present"] is True; assert d["execution_authorized"] is False

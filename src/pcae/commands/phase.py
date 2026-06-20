@@ -5538,3 +5538,182 @@ def run_phase_single_runner_activate(args: argparse.Namespace) -> int:
         for w in result["warnings"]: print(f"    - {w}")
     print(f"\n  {result['note']}")
     return 0
+
+
+SINGLE_RUNNER_ACTIVATIONS_DIR = Path(".pcae") / "single-runner-activations"
+
+
+def _build_single_runner_activation(root: HarnessPath, selected_index: int, allow_fixture: bool) -> dict:
+    from pcae.core.git_status import read_git_changes
+    from pcae.core.tasks import find_latest_active_task
+
+    changes = read_git_changes(root)
+    active_task = find_latest_active_task(root)
+    queue = _read_phase_queue(root)
+    queue_validation = _build_queue_validate(root)
+    queue_approval = _read_latest_queue_approval(root)
+
+    blockers = []
+    def block(msg): blockers.append(msg)
+
+    if changes: block("working tree is dirty")
+    if active_task is not None: block(f"active task exists: {active_task.task_id}")
+    if not queue_validation["queue_ready"]: block("queue is empty")
+    if not queue_validation["valid"]: block("queue validation failed")
+    if queue_approval is None: block("no queue approval artifact")
+    elif queue_approval.get("queue_digest") != _compute_queue_digest(root): block("queue approval stale")
+    if selected_index < 0 or selected_index >= len(queue): block(f"index {selected_index} out of range")
+    if 0 <= selected_index < len(queue):
+        entry = queue[selected_index]
+        if isinstance(entry, dict) and (entry.get("source_type") == "fixture" or entry.get("fixture")):
+            if not allow_fixture: block("fixture entry requires --allow-fixture")
+
+    if blockers:
+        return {
+            "activated": False,
+            "execution_authorized": False,
+            "task_created": False,
+            "blockers": blockers,
+            "refusal_reason": "; ".join(blockers),
+        }
+
+    title = _phase_queue_entry_title(queue[selected_index])
+    slug = _slugify(title)
+    ts = datetime.now(timezone.utc)
+    task_id = f"{ts:%Y%m%d-%H%M}-{slug[:40]}"
+    task_path = root.join(Path("tasks") / "active" / f"{task_id}.md")
+    task_path.parent.mkdir(parents=True, exist_ok=True)
+    task_content = f"""# Task Contract
+
+## Task ID
+
+{task_id}
+
+## Title
+
+{title}
+
+## Status
+
+active
+
+## Mode
+
+implementation
+
+## Goal
+
+Activated from queue: {title}
+
+## Allowed Files
+
+- TBD
+
+## Forbidden Files
+
+- TBD
+
+## Acceptance Criteria
+
+- TBD
+
+## Created Timestamp
+
+{ts.isoformat()}
+
+## Activation Note
+
+This task was created by pcae phase single-runner-activate --execute from queue item index {selected_index}.
+The activation artifact is at .pcae/single-runner-activations/latest.json.
+No prompt was executed. No implementation was performed.
+"""
+    task_path.write_text(task_content, encoding="utf-8")
+
+    activation = {
+        "activated": True,
+        "created_at": ts.isoformat(),
+        "selected_index": selected_index,
+        "selected_title": title,
+        "queue_digest": _compute_queue_digest(root),
+        "queue_approval_digest": queue_approval.get("queue_digest") if queue_approval else None,
+        "created_task_id": task_id,
+        "created_task_path": str(Path("tasks") / "active" / f"{task_id}.md"),
+        "task_created": True,
+        "queue_mutated": False,
+        "prompt_executed": False,
+        "implementation_performed": False,
+        "commits_created": 0,
+        "runner_execution_performed": False,
+        "execution_authorized": False,
+        "note": "Activation stopped after task creation. No prompt executed. No implementation performed. Human authority remains absolute.",
+    }
+
+    act_dir = root.join(SINGLE_RUNNER_ACTIVATIONS_DIR)
+    act_dir.mkdir(parents=True, exist_ok=True)
+    (act_dir / ".gitignore").write_text("*\n")
+    (act_dir / "latest.json").write_text(json.dumps(activation, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    return activation
+
+
+def run_phase_single_runner_activate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    execute = getattr(args, "execute", False)
+    selected_index = getattr(args, "index", 0)
+    allow_fixture = getattr(args, "allow_fixture", False)
+
+    if not execute:
+        # Dry-run path (Phase 73P behavior)
+        result = _build_single_runner_activate_dry_run(root, selected_index, allow_fixture)
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+            return 0
+        print("Single Runner Activation (dry run)")
+        print("=" * 40)
+        print(f"  Dry run: yes")
+        print(f"  Activation allowed: {'yes' if result['activation_allowed'] else 'NO'}")
+        if result["blockers"]:
+            for b in result["blockers"]: print(f"  Blocker: {b}")
+        print(f"\n  {result['note']}")
+        return 0
+
+    result = _build_single_runner_activation(root, selected_index, allow_fixture)
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("activated") else 1
+
+    if not result.get("activated"):
+        print(f"Activation refused: {result['refusal_reason']}")
+        return 1
+
+    print("Single Runner Activation (executed)")
+    print("=" * 40)
+    print(f"  Activated: yes")
+    print(f"  Task created: yes")
+    print(f"  Task ID: {result['created_task_id']}")
+    print(f"  Task path: {result['created_task_path']}")
+    print(f"  Queue mutated: no")
+    print(f"  Prompt executed: no")
+    print(f"  Implementation performed: no")
+    print(f"  Commits created: 0")
+    print(f"  Execution authorized: no")
+    print(f"\n  {result['note']}")
+    return 0
+
+
+def run_phase_single_runner_activation_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    act_path = root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")
+    if not act_path.is_file():
+        if args.json: print(json.dumps({"present": False}))
+        else: print("No activation artifact found.")
+        return 1
+    data = json.loads(act_path.read_text(encoding="utf-8"))
+    if args.json: print(json.dumps({"present": True, **data}, indent=2, sort_keys=True))
+    else:
+        print("Single Runner Activation (persisted)")
+        print(f"  Activated: {data.get('activated')}")
+        print(f"  Task: {data.get('created_task_id')}")
+        print(f"  Execution authorized: {data.get('execution_authorized')}")
+    return 0
