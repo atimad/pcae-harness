@@ -2770,8 +2770,11 @@ def test_70i_fix_skips_unrepairable_findings(
     exit_code = main(["doctor", "task-memory", "--fix"])
 
     output = capsys.readouterr().out
-    assert "Skipped (requires human action):" in output
-    assert "status 'active' but is in tasks/done/" in output
+    # active_status_in_done_folder is now repairable (75F.2)
+    assert "Skipped (requires human action):" in output or "active_status_in_done_folder" in output
+    # Verify the file was fixed
+    content = (tmp_path / "tasks" / "done" / "20260618-0500-wrong.md").read_text(encoding="utf-8")
+    assert "## Status\n\ncompleted" in content
 
 
 def test_70i_fix_json_output(
