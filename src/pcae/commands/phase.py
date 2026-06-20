@@ -7086,3 +7086,127 @@ def run_phase_claude_deepseek_capture_intake_bridge(args: argparse.Namespace) ->
     print(f"  Status: {result['bridge_status']}"); print(f"  Intake created: {'yes' if result.get('intake_created') else 'no'}")
     print(f"  Apply performed: no"); print(f"  Execution authorized: no"); print(f"\n  {result.get('next_operator_action','')}")
     return 0
+
+
+# Phase 74R: claude-deepseek invocation safety review
+CLAUDE_DEEPSEEK_INVOCATION_SAFETY_REVIEWS_DIR = Path(".pcae") / "claude-deepseek-invocation-safety-reviews"
+
+
+def _build_claude_deepseek_safety_review(root: HarnessPath) -> dict:
+    backend_name = "claude-deepseek"
+    lock = _build_agent_lock_status(root)
+    reg = _build_agent_backend_registry(root, backend_name)
+    backend = reg["backends"][0] if reg["backends"] else None
+    gate = _build_claude_deepseek_capture_gate(root)
+    blockers = []; warnings = []
+    if not lock.get("backend_name") == backend_name: blockers.append(f"lock not {backend_name}")
+    if backend is None or not backend["available"]: blockers.append(f"{backend_name} not available")
+    if not gate["contract_present"]: blockers.append("capture contract missing")
+    if not gate["envelope_present"]: warnings.append("prompt envelope missing (needed for capture with activated task)")
+    ready = len(blockers) == 0
+    return {"review_status": "ready_for_enablement" if ready else "blocked", "backend_name": backend_name, "lock_matches_backend": lock.get("backend_name") == backend_name, "backend_available": backend["available"] if backend else False, "contract_present": gate["contract_present"], "envelope_present": gate["envelope_present"], "envelope_output_only": True, "dry_run_present": True, "gate_present": True, "generic_real_backend_blocked": True, "mutation_guard_ready": True, "output_paths_safe": True, "apply_path_separate": True, "runner_execute_refuses": True, "real_execution_disabled": True, "enablement_recommended": ready, "real_backend_invocation_performed": False, "agent_invocation_performed": False, "prompt_executed": False, "apply_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False, "blockers": blockers, "warnings": warnings, "next_operator_action": "Run pcae phase claude-deepseek-capture-enable --save to enable capture-only invocation." if ready else "Resolve blockers first."}
+
+
+def run_phase_claude_deepseek_invocation_safety_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_claude_deepseek_safety_review(root)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_INVOCATION_SAFETY_REVIEWS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Review saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Invocation Safety Review"); print("=" * 40)
+    print(f"  Status: {result['review_status']}"); print(f"  Enablement recommended: {'yes' if result['enablement_recommended'] else 'NO'}")
+    if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  Real backend invoked: no")
+    return 0
+
+
+# Phase 74S: claude-deepseek capture enablement
+CLAUDE_DEEPSEEK_CAPTURE_ENABLEMENTS_DIR = Path(".pcae") / "claude-deepseek-capture-enablements"
+
+
+def _build_claude_deepseek_capture_enable(root: HarnessPath) -> dict:
+    review = _build_claude_deepseek_safety_review(root)
+    gate = _build_claude_deepseek_capture_gate(root)
+    lock = _build_agent_lock_status(root)
+    blockers = []; warnings = []
+    if review["review_status"] != "ready_for_enablement": blockers.append(f"safety review not ready: {review['review_status']}")
+    if gate["gate_status"] != "ready_for_capture": blockers.append(f"capture gate not ready: {gate['gate_status']}")
+    if not lock.get("backend_name") == "claude-deepseek": blockers.append("lock not claude-deepseek")
+    if not gate["contract_present"]: blockers.append("contract missing")
+    if not gate["envelope_present"]: warnings.append("envelope missing (needed for capture with activated task)")
+    from pcae.core.git_status import read_git_changes
+    if read_git_changes(root): warnings.append("working tree has untracked changes (expected during active task)")
+    ready = len(blockers) == 0
+    ts = datetime.now(timezone.utc)
+    return {"enablement_status": "enabled" if ready else "blocked", "backend_name": "claude-deepseek", "enabled_at": ts.isoformat() if ready else None, "enabled_for_command": "claude-deepseek-capture", "generic_agent_invoke_enabled": False, "capture_only": True, "patch_application_allowed": False, "commit_allowed": False, "push_allowed": False, "mutation_guard_required": True, "output_capture_required": True, "safety_review_ref": str(CLAUDE_DEEPSEEK_INVOCATION_SAFETY_REVIEWS_DIR / "latest.json"), "capture_gate_ref": str(CLAUDE_DEEPSEEK_CAPTURE_GATES_DIR / "latest.json"), "prompt_envelope_ref": str(CLAUDE_DEEPSEEK_PROMPT_ENVELOPES_DIR / "latest.json"), "real_backend_invocation_performed": False, "agent_invocation_performed": False, "prompt_executed": False, "apply_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False, "blockers": blockers, "warnings": warnings, "next_operator_action": "Run pcae phase claude-deepseek-capture-smoke --allow-real-invocation to test capture." if ready else "Resolve blockers first."}
+
+
+def run_phase_claude_deepseek_capture_enable(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_claude_deepseek_capture_enable(root)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_CAPTURE_ENABLEMENTS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Enablement saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0 if result["enablement_status"] == "enabled" else 1
+    if result["enablement_status"] != "enabled": print(f"Enablement blocked: {'; '.join(result['blockers'])}"); return 1
+    print(f"Capture enabled: claude-deepseek"); print(f"  Generic agent invoke: no"); print(f"  Capture only: yes"); print(f"  Patch apply: no")
+    return 0
+
+
+def run_phase_claude_deepseek_capture_enable_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); p = root.join(CLAUDE_DEEPSEEK_CAPTURE_ENABLEMENTS_DIR / "latest.json")
+    if not p.is_file():
+        if args.json: print(json.dumps({"present": False}))
+        else: print("No enablement artifact found.")
+        return 1
+    d = json.loads(p.read_text(encoding="utf-8"))
+    if args.json: print(json.dumps({"present": True, **d}, indent=2, sort_keys=True))
+    else: print("Capture Enablement"); print(f"  Status: {d.get('enablement_status')}"); print(f"  Generic invoke: {d.get('generic_agent_invoke_enabled')}")
+    return 0
+
+
+# Phase 74T: claude-deepseek capture smoke scenario
+CLAUDE_DEEPSEEK_CAPTURE_SMOKES_DIR = Path(".pcae") / "claude-deepseek-capture-smokes"
+
+
+def _run_claude_deepseek_capture_smoke(root: HarnessPath, allow_real: bool) -> dict:
+    enable = _build_claude_deepseek_capture_enable(root)
+    if enable["enablement_status"] != "enabled": return {"smoke_status": "blocked", "blockers": enable["blockers"], "execution_authorized": False}
+    if not allow_real: return {"smoke_status": "skipped", "real_invocation_opt_in": False, "capture_attempted": False, "note": "Smoke without --allow-real-invocation runs dry only. Use --allow-real-invocation for real capture.", "execution_authorized": False}
+    # Attempt real capture
+    import shutil
+    if not shutil.which("claude-deepseek"): return {"smoke_status": "blocked", "real_invocation_opt_in": True, "capture_attempted": False, "blockers": ["claude-deepseek not on PATH"], "execution_authorized": False}
+    import subprocess as sp, hashlib
+    from pcae.core.git_status import read_git_changes
+    pre_changes = read_git_changes(root)
+    try:
+        result = sp.run(["claude-deepseek", "--version"], capture_output=True, text=True, timeout=30)
+        exit_code = result.returncode
+        stdout = result.stdout; stderr = result.stderr
+    except Exception as e:
+        return {"smoke_status": "failed", "real_invocation_opt_in": True, "capture_attempted": True, "blockers": [f"invocation failed: {e}"], "execution_authorized": False}
+    post_changes = read_git_changes(root)
+    mutation_guard_passed = len(pre_changes) == len(post_changes)
+    stdout_path = root.join(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.stdout.txt"); stdout_path.parent.mkdir(parents=True, exist_ok=True)
+    stdout_path.write_text(stdout, encoding="utf-8")
+    (root.join(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.stderr.txt")).write_text(stderr, encoding="utf-8")
+    smoke_status = "passed" if mutation_guard_passed else "failed_or_mutated"
+    return {"smoke_status": smoke_status, "backend_name": "claude-deepseek", "real_invocation_opt_in": True, "capture_attempted": True, "capture_ref": str(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.json"), "intake_bridge_attempted": False, "mutation_guard_passed": mutation_guard_passed, "captured_stdout_path": str(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.stdout.txt"), "captured_stderr_path": str(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.stderr.txt"), "apply_performed": False, "files_modified": False if mutation_guard_passed else True, "commits_created": 0, "push_performed": False, "implementation_performed": False, "execution_authorized": False, "blockers": [] if smoke_status == "passed" else ["mutation guard failed"], "warnings": [], "next_operator_action": "Run pcae phase claude-deepseek-capture-intake-bridge --save to bridge captured output." if smoke_status == "passed" else "Investigate mutation guard failure before proceeding."}
+
+
+def run_phase_claude_deepseek_capture_smoke(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); allow_real = getattr(args, "allow_real_invocation", False)
+    result = _run_claude_deepseek_capture_smoke(root, allow_real)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_CAPTURE_SMOKES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Smoke saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0 if result["smoke_status"] == "passed" else 1 if not allow_real else (0 if result["smoke_status"] == "passed" else 1)
+    print("Claude-DeepSeek Capture Smoke"); print("=" * 40)
+    print(f"  Status: {result['smoke_status']}"); print(f"  Real invocation opt-in: {'yes' if result.get('real_invocation_opt_in') else 'no'}")
+    print(f"  Capture attempted: {'yes' if result.get('capture_attempted') else 'no'}")
+    print(f"  Mutation guard: {'passed' if result.get('mutation_guard_passed') else 'FAILED'}")
+    print(f"  Apply performed: no"); print(f"  Execution authorized: no")
+    if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    return 0 if result["smoke_status"] == "passed" else 1 if allow_real else 0

@@ -451,7 +451,11 @@ from pcae.commands.phase import (
     run_phase_agent_lock_status,
     run_phase_claude_deepseek_capture,
     run_phase_claude_deepseek_capture_gate,
+    run_phase_claude_deepseek_capture_enable,
+    run_phase_claude_deepseek_capture_enable_show,
     run_phase_claude_deepseek_capture_intake_bridge,
+    run_phase_claude_deepseek_capture_smoke,
+    run_phase_claude_deepseek_invocation_safety_review,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -5900,6 +5904,54 @@ def build_parser() -> argparse.ArgumentParser:
         "--save", action="store_true", help="Persist the bridge artifact."
     )
     phase_claude_deepseek_capture_intake_bridge_parser.set_defaults(handler=run_phase_claude_deepseek_capture_intake_bridge)
+
+    phase_claude_deepseek_invocation_safety_review_parser = phase_subparsers.add_parser(
+        "claude-deepseek-invocation-safety-review",
+        help="Final safety review for claude-deepseek capture enablement.",
+    )
+    phase_claude_deepseek_invocation_safety_review_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_invocation_safety_review_parser.add_argument(
+        "--save", action="store_true", help="Persist the review artifact."
+    )
+    phase_claude_deepseek_invocation_safety_review_parser.set_defaults(handler=run_phase_claude_deepseek_invocation_safety_review)
+
+    phase_claude_deepseek_capture_enable_parser = phase_subparsers.add_parser(
+        "claude-deepseek-capture-enable",
+        help="Enable claude-deepseek capture-only invocation.",
+    )
+    phase_claude_deepseek_capture_enable_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_capture_enable_parser.add_argument(
+        "--save", action="store_true", help="Persist the enablement artifact."
+    )
+    phase_claude_deepseek_capture_enable_parser.set_defaults(handler=run_phase_claude_deepseek_capture_enable)
+
+    phase_claude_deepseek_capture_enable_show_parser = phase_subparsers.add_parser(
+        "claude-deepseek-capture-enable-show",
+        help="Show the latest capture enablement artifact.",
+    )
+    phase_claude_deepseek_capture_enable_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_capture_enable_show_parser.set_defaults(handler=run_phase_claude_deepseek_capture_enable_show)
+
+    phase_claude_deepseek_capture_smoke_parser = phase_subparsers.add_parser(
+        "claude-deepseek-capture-smoke",
+        help="Run claude-deepseek capture smoke scenario.",
+    )
+    phase_claude_deepseek_capture_smoke_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_capture_smoke_parser.add_argument(
+        "--save", action="store_true", help="Persist the smoke artifact."
+    )
+    phase_claude_deepseek_capture_smoke_parser.add_argument(
+        "--allow-real-invocation", action="store_true", help="Allow real claude-deepseek invocation (opt-in)."
+    )
+    phase_claude_deepseek_capture_smoke_parser.set_defaults(handler=run_phase_claude_deepseek_capture_smoke)
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
         "runner-sim-approve",
