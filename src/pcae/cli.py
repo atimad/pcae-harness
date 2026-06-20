@@ -441,6 +441,7 @@ from pcae.commands.phase import (
     run_phase_single_runner_activate,
     run_phase_activated_task_implementation_handoff,
     run_phase_activated_task_implementation_readiness,
+    run_phase_activated_task_implementation_start,
     run_phase_single_runner_activation_boundary,
     run_phase_single_runner_activation_scenario,
     run_phase_single_runner_activation_rollback,
@@ -5557,6 +5558,23 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_activated_task_implementation_readiness_parser.set_defaults(
         handler=run_phase_activated_task_implementation_readiness
+    )
+
+    phase_activated_task_implementation_start_parser = phase_subparsers.add_parser(
+        "activated-task-implementation-start",
+        help="Start gate for activation-created task implementation.",
+    )
+    phase_activated_task_implementation_start_parser.add_argument(
+        "--dry-run", action="store_true", default=True, help="Dry-run start gate (default)."
+    )
+    phase_activated_task_implementation_start_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_implementation_start_parser.add_argument(
+        "--save", action="store_true", help="Persist the start gate artifact."
+    )
+    phase_activated_task_implementation_start_parser.set_defaults(
+        handler=run_phase_activated_task_implementation_start
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

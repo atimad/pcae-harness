@@ -9120,3 +9120,20 @@ def test_73w_readiness_ready(tmp_path, monkeypatch, capsys):
     main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
     main(["phase", "activated-task-implementation-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["ready_for_manual_implementation"] is True; assert d["execution_authorized"] is False
+
+# Phase 73X: activated task implementation start gate
+def test_73x_start_gate_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-implementation-start", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["start_gate_status"] == "blocked"; assert d["manual_implementation_allowed"] is False
+    assert d["automatic_implementation_allowed"] is False; assert d["execution_authorized"] is False
+def test_73x_start_gate_allowed(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-implementation-start", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["manual_implementation_allowed"] is True; assert d["runner_execution_allowed"] is False
+    assert d["execution_authorized"] is False

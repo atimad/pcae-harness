@@ -6173,3 +6173,55 @@ def run_phase_activated_task_implementation_readiness(args: argparse.Namespace) 
     if result["warnings"]: print(f"\n  Warnings:"); [print(f"    - {w}") for w in result["warnings"]]
     print(f"\n  {result['suggested_next_step']}")
     return 0
+
+
+ACTIVATED_TASK_IMPLEMENTATION_START_GATES_DIR = Path(".pcae") / "activated-task-implementation-start-gates"
+
+
+def _build_activated_task_impl_start_gate(root: HarnessPath) -> dict:
+    readiness = _build_activated_task_impl_readiness(root)
+    boundary = _build_activation_boundary(root)
+    blockers = []; warnings = []
+    if not boundary["activation_present"]: blockers.append("no activation artifact")
+    elif not boundary["active_task_matches_activation"]: blockers.append("active task mismatch")
+    elif boundary["implementation_detected"]: blockers.append("implementation already detected")
+    if not readiness["ready_for_manual_implementation"]:
+        blockers.append(f"readiness not ready: {readiness['readiness_status']}")
+    from pcae.core.tasks import diagnose_task_memory
+    diag = diagnose_task_memory(root)
+    if diag.has_errors: blockers.append("task-memory has errors")
+
+    if blockers: status = "blocked"
+    elif not boundary["activation_present"]: status = "no_activated_task"
+    elif not boundary["active_task_matches_activation"]: status = "mismatch"
+    else: status = "allowed_for_manual_implementation"
+
+    return {
+        "start_gate_status": status,
+        "manual_implementation_allowed": status == "allowed_for_manual_implementation",
+        "automatic_implementation_allowed": False,
+        "runner_execution_allowed": False,
+        "execution_authorized": False,
+        "blockers": blockers,
+        "warnings": warnings,
+        "next_command_hint": "Begin normal task-contract workflow. Use pcae check and pcae task finish --commit." if status == "allowed_for_manual_implementation" else "Resolve blockers first.",
+    }
+
+
+def run_phase_activated_task_implementation_start(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_activated_task_impl_start_gate(root)
+    dry_run = getattr(args, "dry_run", True)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_IMPLEMENTATION_START_GATES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps({**result, "dry_run": dry_run}, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Start gate saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps({**result, "dry_run": dry_run}, indent=2, sort_keys=True)); return 0
+    print("Activated Task Implementation Start Gate"); print("=" * 40)
+    print(f"  Status: {result['start_gate_status']}")
+    print(f"  Manual implementation allowed: {'yes' if result['manual_implementation_allowed'] else 'no'}")
+    print(f"  Automatic implementation allowed: no")
+    print(f"  Runner execution allowed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  {result['next_command_hint']}")
+    return 0
