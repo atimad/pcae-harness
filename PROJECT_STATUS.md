@@ -2,11 +2,12 @@
 
 ## Current Phase
 
-Phase 72Y: Denied Request Authorization Block.
+Phase 72Z: Authorization Lifecycle Summary Artifact.
 
-Phase 72Y enhances `pcae phase runner-execution-authorize` to inspect execution
-request lifecycle state and explicitly report denied/revoked requests as blocking.
-Also includes Phase 72Z authorization summary code. Always refuses authorization.
+Phase 72Z adds `pcae phase runner-authorization-summary` for a read-only summary
+of the complete authorization lifecycle. Reports `overall_status`, queue state,
+approval state, request lifecycle, denial state, and execution gate status.
+Always `execution_available=false`, `execution_authorized=false`.
 
 ## Milestone: Execution Chain Traceability Complete
 
