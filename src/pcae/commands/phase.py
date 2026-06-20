@@ -4767,3 +4767,113 @@ def run_phase_runner_authorization_summary(args: argparse.Namespace) -> int:
     print()
     print(f"  {summary['note']}")
     return 0
+
+
+SINGLE_RUNNER_CONTRACTS_DIR = Path(".pcae") / "single-runner-contracts"
+
+_SINGLE_RUNNER_CONTRACT = {
+    "design_only": True,
+    "execution_enabled": False,
+    "execution_authorized": False,
+    "contract_version": "1.0",
+    "scope": "single_phase_bounded",
+    "minimum_requirements": [
+        "single phase maximum per execution",
+        "clean working tree (no uncommitted changes)",
+        "healthy idle (pcae health passes, no active task)",
+        "pcae check passed",
+        "task-memory clean (pcae doctor task-memory)",
+        "push check nothing_to_push (pcae push check)",
+        "queue non-empty",
+        "queue valid (pcae phase queue validate)",
+        "queue approval present and matching current queue",
+        "simulation approval present and matching latest simulation",
+        "execution request present",
+        "execution request review present",
+        "execution request not denied",
+        "execution request not revoked",
+        "no-op execution trace present",
+        "no-op trace safe (noop=true, mutation_performed=false)",
+        "no-op trace review status ready_for_approval",
+        "no-op trace approval present and matching trace",
+        "execution authorization artifact (future phase, not yet implemented)",
+        "runner preflight satisfied except execution_authorized",
+        "one-phase commit discipline (implementation + completion commit pair)",
+        "stop on any hard-stop policy condition",
+    ],
+    "explicitly_forbidden": [
+        "multi-phase execution (only one phase per bounded run)",
+        "execution with dirty working tree",
+        "execution with active task present",
+        "execution with missing queue approval",
+        "execution with stale queue approval (digest mismatch)",
+        "execution with denied or revoked execution request",
+        "execution without explicit human authorization artifact",
+        "task creation without bounded single queue item",
+        "automatic push beyond governed pcae push",
+        "background or asynchronous execution",
+        "execution with audit warnings",
+        "execution that modifies the phase queue",
+        "execution that modifies runner artifacts",
+        "execution that modifies the contract itself",
+    ],
+    "commit_discipline": {
+        "implementation_commit": "Implement Phase <id> <description>",
+        "completion_commit": "Complete Phase <id> <description>",
+        "per_phase": True,
+        "shared_implementation_forbidden": True,
+    },
+    "note": (
+        "This is a design-only contract. It does not enable or authorize "
+        "real execution. All execution commands currently refuse or operate "
+        "in no-op mode. Human authority remains absolute."
+    ),
+}
+
+
+def run_phase_single_runner_contract(args: argparse.Namespace) -> int:
+    contract = dict(_SINGLE_RUNNER_CONTRACT)
+
+    if getattr(args, "save", False):
+        contract_dir = HarnessPath.cwd().join(SINGLE_RUNNER_CONTRACTS_DIR)
+        contract_dir.mkdir(parents=True, exist_ok=True)
+        gitignore_path = contract_dir / ".gitignore"
+        if not gitignore_path.exists():
+            gitignore_path.write_text("*\n", encoding="utf-8")
+        latest_path = contract_dir / "latest.json"
+        latest_path.write_text(
+            json.dumps(contract, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        if not args.json:
+            print(f"Contract saved: {latest_path}")
+
+    if args.json:
+        print(json.dumps(contract, indent=2, sort_keys=True))
+        return 0
+
+    print("Single-Phase Runner Contract (design only)")
+    print("=" * 40)
+    print(f"  Design only: yes")
+    print(f"  Execution enabled: no")
+    print(f"  Execution authorized: no")
+    print(f"  Contract version: {contract['contract_version']}")
+    print(f"  Scope: {contract['scope']}")
+    print()
+    print("  Minimum requirements:")
+    for req in contract["minimum_requirements"]:
+        print(f"    - {req}")
+    print()
+    print("  Explicitly forbidden:")
+    for rule in contract["explicitly_forbidden"]:
+        print(f"    - {rule}")
+    print()
+    print(f"  Commit discipline:")
+    cd = contract["commit_discipline"]
+    print(f"    Implementation: {cd['implementation_commit']}")
+    print(f"    Completion: {cd['completion_commit']}")
+    print(f"    Per-phase: {'yes' if cd['per_phase'] else 'no'}")
+    print(f"    Shared forbidden: {'yes' if cd['shared_implementation_forbidden'] else 'no'}")
+    print()
+    print(f"  {contract['note']}")
+    return 0

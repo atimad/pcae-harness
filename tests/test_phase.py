@@ -8546,3 +8546,69 @@ def test_73f_preflight_still_design_only(
     assert data["preflight_status"] == "design_only"
     assert data["execution_available"] is False
     assert data["execution_authorized"] is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 73G: single-phase runner contract design
+# ---------------------------------------------------------------------------
+
+
+def test_73g_contract_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "single-runner-contract", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["design_only"] is True
+    assert data["execution_enabled"] is False
+    assert data["execution_authorized"] is False
+    assert len(data["minimum_requirements"]) > 10
+    assert len(data["explicitly_forbidden"]) > 5
+
+
+def test_73g_contract_save(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "single-runner-contract", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    contract_path = tmp_path / ".pcae" / "single-runner-contracts" / "latest.json"
+    assert contract_path.is_file()
+    saved = json.loads(contract_path.read_text(encoding="utf-8"))
+    assert saved["design_only"] is True
+    assert saved["execution_authorized"] is False
+
+
+def test_73g_contract_no_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 73G: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "single-runner-contract"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_73g_contract_human_output_states_design_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "single-runner-contract"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert "design only" in output.lower()
+    assert "does not enable" in output.lower()
