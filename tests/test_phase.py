@@ -9816,3 +9816,73 @@ def test_74w3_proof_runner_execute_still_refuses(tmp_path, monkeypatch, capsys):
     # Runner execution still refuses (this fix does not enable execution)
     assert d["execution_authorized"] is False
     assert d["execution_available"] is False
+
+
+# Phase 74X: activated task prompt capture contract
+def test_74x_contract_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-prompt-capture-contract", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["contract_status"] == "no_activated_task"
+    assert d["activated_task_required"] is True
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["output_only_required"] is True
+    assert d["patch_application_allowed"] is False
+    assert d["commit_allowed"] is False
+    assert d["push_allowed"] is False
+    assert d["explicit_opt_in_required"] is True
+    assert d["real_backend_invocation_performed"] is False
+    assert d["prompt_executed"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["execution_authorized"] is False
+
+def test_74x_contract_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-prompt-capture-contract", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-prompt-capture-contracts" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["output_only_required"] is True
+    assert d["execution_authorized"] is False
+
+def test_74x_contract_ready_synthetic(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-package", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "activated-task-prompt-capture-contract", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["contract_status"] == "ready"
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["execution_authorized"] is False
+    # Clean up
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_74x_contract_missing_package(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-prompt-capture-contract", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["contract_status"] == "missing_agent_package"
+    assert d["task_implementation_requested"] is False
+    # Clean up
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_74x_contract_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "activated-task-prompt-capture-contract"]); out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Prompt Capture Contract" in out
+    assert "claude-deepseek" in out
+    assert "Real backend invoked: no" in out

@@ -7762,3 +7762,206 @@ def run_phase_claude_deepseek_prompt_capture_show(args: argparse.Namespace) -> i
         print(f"  Captured stdout: {'yes' if d.get('captured_stdout_path') else 'no'}")
         print(f"  Real backend invoked: {'yes' if d.get('real_invocation_opt_in') else 'no'}")
     return 0
+
+
+# Phase 74X: activated task prompt capture contract
+ACTIVATED_TASK_PROMPT_CAPTURE_CONTRACTS_DIR = Path(".pcae") / "activated-task-prompt-capture-contracts"
+
+_ACTIVATED_TASK_PROMPT_CAPTURE_CONTRACT = {
+    "contract_status": "ready",
+    "backend_name": "claude-deepseek",
+    "activated_task_required": True,
+    "task_package_sent": False,
+    "task_implementation_requested": False,
+    "output_only_required": True,
+    "patch_application_allowed": False,
+    "commit_allowed": False,
+    "push_allowed": False,
+    "mutation_guard_required": True,
+    "explicit_opt_in_required": True,
+    "real_backend_invocation_performed": False,
+    "agent_invocation_performed": False,
+    "prompt_executed": False,
+    "apply_performed": False,
+    "files_modified": False,
+    "commits_created": 0,
+    "execution_authorized": False,
+    "requirements": [
+        "active task must exist and be activation-created",
+        "agent package must exist and be ready",
+        "agent start artifact must exist",
+        "agent lock backend_name must be claude-deepseek",
+        "prompt capture enablement/safety prerequisites must be satisfied",
+        "mutation guard required (pre/post git status comparison)",
+        "output capture path must be under .pcae",
+        "real invocation requires explicit opt-in (--allow-real-invocation)",
+        "default execution must skip real invocation",
+        "send activated task package as read-only context only",
+        "ask for proposed solution only",
+        "output-only response required",
+        "no file edits allowed",
+        "no shell command execution allowed",
+        "no commits allowed",
+        "no pushes allowed",
+        "no destructive actions allowed",
+        "include proposed patch text if useful, but do not apply it",
+        "include tests to run",
+        "include assumptions and risks",
+    ],
+    "forbidden_cases": [
+        "sending activated task package without output-only constraints",
+        "asking backend to modify files",
+        "asking backend to run shell commands",
+        "asking backend to commit",
+        "asking backend to push",
+        "applying captured output automatically",
+        "committing backend output",
+        "pushing backend output",
+        "authorizing runner execution",
+        "creating artifacts with execution_authorized=true",
+        "invoking claude-kimi",
+        "invoking codex",
+        "invoking claude-deepseek without explicit opt-in",
+        "hidden or background execution",
+        "real backend invocation without mutation guard",
+    ],
+    "response_format": {
+        "sections": [
+            "## Summary",
+            "## Proposed Files",
+            "## Proposed Patch or Proposed Instructions",
+            "## Tests To Run",
+            "## Risks",
+            "## Assumptions",
+            "## Stop Conditions",
+        ],
+    },
+    "prompt_template": (
+        "SYSTEM: You are a capture-only backend (claude-deepseek). "
+        "Your output will be captured and reviewed but NOT applied automatically.\n\n"
+        "TASK: {task_title}\n\n"
+        "SAFETY RULES:\n"
+        "- DO NOT edit any files.\n"
+        "- DO NOT commit anything.\n"
+        "- DO NOT push anything.\n"
+        "- DO NOT run destructive commands.\n"
+        "- DO NOT assume your output will be applied.\n"
+        "- Return proposed changes as formatted output only.\n"
+        "- Your output will go through intake, review, and apply-dry-run before any human considers applying it.\n\n"
+        "OUTPUT FORMAT (use these sections):\n"
+        "## Summary\n"
+        "## Proposed Files\n"
+        "## Proposed Patch or Proposed Instructions\n"
+        "## Tests To Run\n"
+        "## Risks\n"
+        "## Assumptions\n"
+        "## Stop Conditions\n\n"
+        "TIMEOUT: 300 seconds. CAPTURE ONLY."
+    ),
+    "output_capture_path": ".pcae/activated-task-prompt-captures/",
+    "default_timeout_seconds": 300,
+    "blockers": [],
+    "warnings": [],
+    "note": "This is a design contract only. No backend was invoked. No task package was sent. Human authority remains absolute.",
+}
+
+
+def _build_activated_task_prompt_capture_contract(root: HarnessPath) -> dict:
+    """Evaluate contract status against current repo state."""
+    contract = dict(_ACTIVATED_TASK_PROMPT_CAPTURE_CONTRACT)
+    blockers = []
+    warnings = []
+
+    act_path = root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")
+    if not act_path.is_file():
+        contract["contract_status"] = "no_activated_task"
+        blockers.append("no activation artifact")
+        contract["blockers"] = blockers
+        contract["warnings"] = warnings
+        return contract
+
+    act_data = json.loads(act_path.read_text(encoding="utf-8"))
+    if not act_data.get("activated"):
+        contract["contract_status"] = "no_activated_task"
+        blockers.append("activation not active")
+        contract["blockers"] = blockers
+        contract["warnings"] = warnings
+        return contract
+
+    pkg_path = root.join(ACTIVATED_TASK_AGENT_PACKAGES_DIR / "latest.json")
+    if not pkg_path.is_file():
+        contract["contract_status"] = "missing_agent_package"
+        blockers.append("agent package missing")
+        contract["blockers"] = blockers
+        contract["warnings"] = warnings
+        return contract
+
+    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+    if pkg.get("package_status") != "ready":
+        contract["contract_status"] = "missing_agent_package"
+        blockers.append(f"agent package not ready: {pkg.get('package_status')}")
+        contract["blockers"] = blockers
+        contract["warnings"] = warnings
+        return contract
+
+    start_path = root.join(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")
+    if not start_path.is_file():
+        contract["contract_status"] = "missing_agent_start"
+        blockers.append("agent start artifact missing")
+        contract["blockers"] = blockers
+        contract["warnings"] = warnings
+        return contract
+
+    lock = _build_agent_lock_status(root)
+    if lock.get("backend_name") != "claude-deepseek":
+        blockers.append("lock not claude-deepseek")
+
+    if blockers:
+        contract["contract_status"] = "blocked"
+    else:
+        contract["contract_status"] = "ready"
+
+    contract["blockers"] = blockers
+    contract["warnings"] = warnings
+    return contract
+
+
+def run_phase_activated_task_prompt_capture_contract(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    contract = _build_activated_task_prompt_capture_contract(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_PROMPT_CAPTURE_CONTRACTS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Contract saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(contract, indent=2, sort_keys=True))
+        return 0
+    print("Activated Task Prompt Capture Contract")
+    print("=" * 40)
+    print(f"  Backend: {contract['backend_name']}")
+    print(f"  Contract status: {contract['contract_status']}")
+    print(f"  Activated task required: yes")
+    print(f"  Output only required: yes")
+    print(f"  Task package sent: no")
+    print(f"  Implementation requested: no")
+    print(f"  Patch application allowed: no")
+    print(f"  Commit allowed: no")
+    print(f"  Push allowed: no")
+    print(f"  Explicit opt-in required: yes")
+    print(f"  Real backend invoked: no")
+    print(f"  Prompt executed: no")
+    print(f"  Execution authorized: no")
+    if contract["blockers"]:
+        print(f"\n  Blockers:")
+        for b in contract["blockers"]:
+            print(f"    - {b}")
+    print(f"\n  Requirements ({len(contract['requirements'])}):")
+    for r in contract["requirements"][:8]:
+        print(f"    - {r}")
+    if len(contract["requirements"]) > 8:
+        print(f"    ... and {len(contract['requirements']) - 8} more")
+    print(f"\n  {contract['note']}")
+    return 0
