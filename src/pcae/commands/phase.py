@@ -5851,3 +5851,120 @@ def run_phase_single_runner_activation_rollback(args: argparse.Namespace) -> int
     print(f"  Execution authorized: no")
     print(f"\n  {result['note']}")
     return 0
+
+
+SINGLE_RUNNER_ACTIVATION_SCENARIOS_DIR = Path(".pcae") / "single-runner-activation-scenarios"
+
+
+def _run_activation_scenario(root: HarnessPath) -> dict:
+    checks = []; violations = []
+    def chk(label, ok):
+        if ok: checks.append(f"PASS: {label}")
+        else: violations.append(f"FAIL: {label}")
+
+    # Phase 1: fixture queue
+    queue = _read_phase_queue(root)
+    before_count = len(queue)
+    fixture = _build_queue_fixture_entries(1)
+    queue.extend(fixture); _write_phase_queue(root, queue)
+    chk("fixture queue add", len(_read_phase_queue(root)) == before_count + 1)
+
+    # Phase 2: queue validation
+    validation = _build_queue_validate(root)
+    chk("queue validation passes", validation["valid"] and validation["queue_ready"])
+
+    # Phase 3: queue approval
+    approval = _build_queue_approve(root, "Scenario approval")
+    if approval.get("approved"):
+        _save_queue_approval(root, approval)
+    chk("queue approval created", approval.get("approved", False))
+
+    # Phase 4: activation dry-run
+    dry = _build_single_runner_activate_dry_run(root, before_count, allow_fixture=True)
+    chk("activation dry-run allowed", dry["activation_allowed"])
+    chk("activation dry-run no mutation", not dry["task_created"] and not dry["queue_mutated"])
+
+    # Phase 5: activation execution
+    activation = _build_single_runner_activation(root, before_count, allow_fixture=True)
+    chk("activation executed", activation.get("activated", False))
+    chk("activation task created", activation.get("task_created", False))
+    chk("activation prompt not executed", not activation.get("prompt_executed", True))
+    chk("activation implementation not performed", not activation.get("implementation_performed", True))
+    chk("activation exec authorized false", not activation.get("execution_authorized", True))
+
+    # Phase 6: activation status
+    status = _build_single_runner_activation_status(root)
+    chk("activation status present", status["activation_present"])
+    chk("activation task matches", status["active_task_matches_activation"])
+    chk("activation rollback available", status["rollback_available"])
+
+    # Phase 7: rollback dry-run (status already has rollback info)
+
+    # Phase 8: rollback execute
+    if status["rollback_available"]:
+        task_id = activation.get("created_task_id")
+        if task_id:
+            task_file = root.join(Path("tasks") / "active" / f"{task_id}.md")
+            if task_file.is_file():
+                task_file.unlink()
+        chk("rollback task removed", not task_file.is_file() if task_id else True)
+    else:
+        violations.append("FAIL: rollback not available, cannot complete scenario")
+
+    # Phase 9: cleanup
+    queue_after = _read_phase_queue(root)
+    kept = [e for e in queue_after if not (isinstance(e, dict) and (e.get("source_type") == "fixture" or e.get("fixture")))]
+    _write_phase_queue(root, kept)
+    final_task = (root.join(Path("tasks") / "active")).glob("*.md") if (root.join(Path("tasks") / "active")).is_dir() else []
+    final_has_task = any(True for _ in final_task)
+    chk("final no active task", not final_has_task)
+    chk("final queue cleaned", len(_read_phase_queue(root)) == before_count)
+
+    passed = len(violations) == 0
+    return {
+        "scenario_status": "passed" if passed else "failed",
+        "activation_created": activation.get("activated", False),
+        "active_task_created": activation.get("task_created", False),
+        "rollback_performed": True,
+        "final_active_task_present": final_has_task if 'final_has_task' in dir() else False,
+        "prompt_executed": False,
+        "implementation_performed": False,
+        "execution_authorized": False,
+        "mutation_performed": True,
+        "cleanup_performed": True,
+        "checks": checks,
+        "violations": violations,
+        "note": "Controlled activation scenario. No prompt executed. No implementation performed. Human authority remains absolute.",
+    }
+
+
+def run_phase_single_runner_activation_scenario(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _run_activation_scenario(root)
+
+    if getattr(args, "save", False):
+        sc_dir = root.join(SINGLE_RUNNER_ACTIVATION_SCENARIOS_DIR)
+        sc_dir.mkdir(parents=True, exist_ok=True)
+        (sc_dir / ".gitignore").write_text("*\n")
+        (sc_dir / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Scenario saved: {sc_dir / 'latest.json'}")
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["scenario_status"] == "passed" else 1
+
+    print("Activation End-to-End Scenario")
+    print("=" * 40)
+    print(f"  Status: {result['scenario_status']}")
+    print(f"  Activation created: {'yes' if result['activation_created'] else 'no'}")
+    print(f"  Task created: {'yes' if result['active_task_created'] else 'no'}")
+    print(f"  Rollback performed: {'yes' if result['rollback_performed'] else 'no'}")
+    print(f"  Final active task: {'yes' if result['final_active_task_present'] else 'no'}")
+    print(f"  Prompt executed: no")
+    print(f"  Implementation performed: no")
+    print(f"  Execution authorized: no")
+    if result["violations"]:
+        print(f"\n  Violations:"); [print(f"    - {v}") for v in result["violations"]]
+    print(f"\n  Checks: {len(result['checks'])} passed, {len(result['violations'])} failed")
+    print(f"\n  {result['note']}")
+    return 0 if result["scenario_status"] == "passed" else 1

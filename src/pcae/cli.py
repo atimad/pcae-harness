@@ -439,6 +439,7 @@ from pcae.commands.phase import (
     run_phase_execution_authorization_schema,
     run_phase_real_execution_disabled_proof,
     run_phase_single_runner_activate,
+    run_phase_single_runner_activation_scenario,
     run_phase_single_runner_activation_rollback,
     run_phase_single_runner_activation_show,
     run_phase_single_runner_activation_status,
@@ -5497,6 +5498,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_single_runner_activation_rollback_parser.set_defaults(
         handler=run_phase_single_runner_activation_rollback
+    )
+
+    phase_single_runner_activation_scenario_parser = phase_subparsers.add_parser(
+        "single-runner-activation-scenario",
+        help="Run end-to-end activation scenario (fixture->approve->activate->rollback->clean).",
+    )
+    phase_single_runner_activation_scenario_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_single_runner_activation_scenario_parser.add_argument(
+        "--save", action="store_true", help="Persist the scenario artifact."
+    )
+    phase_single_runner_activation_scenario_parser.set_defaults(
+        handler=run_phase_single_runner_activation_scenario
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

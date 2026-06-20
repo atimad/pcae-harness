@@ -9020,3 +9020,26 @@ def test_73r_rollback_refuses_manual_task(tmp_path, monkeypatch, capsys):
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); create_task_contract(HarnessPath(tmp_path), "manual"); patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
     main(["phase", "single-runner-activation-rollback", "--execute", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["rollback_performed"] is False
+
+# ---------------------------------------------------------------------------
+# Phase 73S: activation end-to-end fixture scenario
+# ---------------------------------------------------------------------------
+def test_73s_scenario_passes(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "single-runner-activation-scenario", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0; assert d["scenario_status"] == "passed"
+    assert d["prompt_executed"] is False; assert d["execution_authorized"] is False
+
+def test_73s_scenario_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activation-scenario", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "single-runner-activation-scenarios" / "latest.json").is_file()
+
+def test_73s_scenario_cleanup(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activation-scenario"]); capsys.readouterr()
+    assert not any((tmp_path / "tasks" / "active").glob("*.md")) if (tmp_path / "tasks" / "active").is_dir() else True
