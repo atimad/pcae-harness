@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 75I.1: Governance Bypass Review Classification (20260620-1835-phase-75i-1-governance-bypass-review-classification)
 - Phase 75I: Captured Output Manual Apply Preflight (20260620-1819-phase-75i-captured-output-manual-apply-preflight)
 - Phase 75H: Captured Output Manual Apply Approval Review (20260620-1819-phase-75h-captured-output-manual-apply-approval-review)
 - Phase 75G: Captured Output Manual Apply Approval Contract (20260620-1819-phase-75g-captured-output-manual-apply-approval-contract)
