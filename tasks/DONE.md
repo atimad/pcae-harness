@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74M Claude-DeepSeek Capture Dry Run (20260620-1339-74m-claude-deepseek-capture-dry-run)
 - 74L Claude-DeepSeek Backend Prompt Envelope (20260620-1339-74l-claude-deepseek-backend-prompt-envelope)
 - 74K Real Backend Capture Contract (20260620-1336-74k-real-backend-capture-contract)
 - 74J Agent Invocation Output Capture (20260620-1332-74j-agent-invocation-output-capture)
