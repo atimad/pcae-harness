@@ -10444,3 +10444,67 @@ def test_75i_preflight_human_output(tmp_path, monkeypatch, capsys):
     assert "Automatic apply allowed: no" in out
     assert "Apply performed: no" in out
     assert "Execution authorized: no" in out
+
+
+# Phase 75I.1: governance bypass review classification
+def test_75i1_classification_missing_report(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "governance-bypass-classification", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["classification_status"] == "needs_review"
+    assert d["manual_apply_blocking"] is True
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75i1_classification_clean(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    d = tmp_path / ".pcae" / "governance-bypass-reports"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "report_status": "clean", "suspected_bypass_commits": [],
+        "declared_bypass_commits": [], "undeclared_bypass_commits": [],
+        "protected_paths_touched": [], "recommendations": ["No suspicious commits."],
+        "execution_authorized": False,
+    }))
+    main(["phase", "governance-bypass-classification", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert out["classification_status"] == "clean"
+    assert out["manual_apply_blocking"] is False
+    assert out["apply_performed"] is False
+
+
+def test_75i1_classification_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    d = tmp_path / ".pcae" / "governance-bypass-reports"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "report_status": "clean", "suspected_bypass_commits": [],
+        "declared_bypass_commits": [], "undeclared_bypass_commits": [],
+        "protected_paths_touched": [], "recommendations": [],
+        "execution_authorized": False,
+    }))
+    main(["phase", "governance-bypass-classification", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "governance-bypass-classifications" / "latest.json"
+    assert p.is_file()
+    d2 = json.loads(p.read_text(encoding="utf-8"))
+    assert d2["classification_status"] == "clean"
+    assert d2["execution_authorized"] is False
+    assert d2["apply_performed"] is False
+
+
+def test_75i1_classification_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "governance-bypass-classification", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False

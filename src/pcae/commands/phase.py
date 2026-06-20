@@ -9402,3 +9402,198 @@ def run_phase_governance_bypass_report(args: argparse.Namespace) -> int:
         print(f"\n  Recommendations:"); [print(f"    - {r}") for r in result["recommendations"]]
     print(f"\n  {result['note'][:160]}...")
     return 0
+
+
+# Phase 75I.1: governance bypass review classification
+GOVERNANCE_BYPASS_CLASSIFICATIONS_DIR = Path(".pcae") / "governance-bypass-classifications"
+
+
+def _build_governance_bypass_classification(root: HarnessPath) -> dict:
+    base = {
+        "classification_status": "blocking", "source_report_status": None,
+        "total_suspected": 0, "declared_count": 0, "undeclared_count": 0,
+        "historical_advisory_count": 0, "needs_review_count": 0, "blocking_count": 0,
+        "classifications": [], "classification_policy": (
+            "Conservative heuristic classification. "
+            "Declared bypasses (explicit no-verify/bypass messages): historical. "
+            "Undeclared commits before governance-hardening cutoff (75F.3): historical_advisory. "
+            "Undeclared commits with explicit bypass messages: needs_review. "
+            "Recent undeclared commits with suspicious patterns: blocking. "
+            "Normal PCAE task implementation commits: false_positive_candidate. "
+            "Report is heuristic, not exact. Manual review still required."
+        ),
+        "manual_apply_blocking": True, "recommendations": [],
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read bypass report
+    report_path = root.join(GOVERNANCE_BYPASS_REPORTS_DIR / "latest.json")
+    if not report_path.is_file():
+        base["classification_status"] = "needs_review"
+        base["blockers"] = ["No governance bypass report found."]
+        base["next_operator_action"] = "Run pcae phase governance-bypass-report --save first."
+        return base
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    base["source_report_status"] = report.get("report_status")
+    base["total_suspected"] = len(report.get("suspected_bypass_commits", []))
+    base["declared_count"] = len(report.get("declared_bypass_commits", []))
+    base["undeclared_count"] = len(report.get("undeclared_bypass_commits", []))
+
+    if base["source_report_status"] == "clean":
+        base["classification_status"] = "clean"
+        base["manual_apply_blocking"] = False
+        base["blockers"] = []
+        base["next_operator_action"] = "No bypass findings to classify. Manual apply approval review can proceed."
+        return base
+
+    declared_hashes = {c["commit"] for c in report.get("declared_bypass_commits", [])}
+    classifications = []
+
+    # Determine cutoff: classify all suspected commits
+    governance_hardening_commit_hashes = set()
+    # Phases 75F.1, 75F.2, 75F.3 are governance hardening
+    # Read phase audit to find the hardening phase commit hashes
+    audit_path = root.join(PHASE_AUDITS_DIR / "latest.json")
+    hardening_phase_ids = {"75F.1", "75F.2", "75F.3", "75F"}
+    hardening_commit_hashes = set()
+    if audit_path.is_file():
+        audit = json.loads(audit_path.read_text(encoding="utf-8"))
+        for p in audit.get("phases", []):
+            if p.get("phase_id") in hardening_phase_ids:
+                if p.get("implementation_commit"):
+                    hardening_commit_hashes.add(p["implementation_commit"][:12])
+                if p.get("completion_commit"):
+                    hardening_commit_hashes.add(p["completion_commit"][:12])
+
+    # Post-hardening phase commit detection: 75G, 75H, 75I
+    post_hardening_phase_ids = {"75G", "75H", "75I", "75I.1", "75I.2", "75I.3"}
+    post_hardening_hashes = set()
+    if audit_path.is_file():
+        for p in audit.get("phases", []):
+            if p.get("phase_id") in post_hardening_phase_ids:
+                if p.get("implementation_commit"):
+                    post_hardening_hashes.add(p["implementation_commit"][:12])
+                if p.get("completion_commit"):
+                    post_hardening_hashes.add(p["completion_commit"][:12])
+
+    for c in report.get("suspected_bypass_commits", []):
+        ch = c["commit"]
+        msg = c.get("message", "")
+        is_declared = ch in declared_hashes
+        has_bypass_keyword = any(kw in msg.lower() for kw in ["no-verify", "bypass", "without check"])
+        is_post_hardening = ch in post_hardening_hashes
+        is_hardening = ch in hardening_commit_hashes
+
+        # Check if message looks like a normal PCAE phase commit
+        is_normal_phase_commit = bool(
+            msg.startswith("Implement Phase ") or msg.startswith("Complete Phase ")
+            or msg.startswith("Fix ") or msg.startswith("Clean up ") or msg.startswith("Update ")
+        )
+        is_task_only = all(
+            f.startswith("tasks/") or f.startswith("CHANGELOG.md") or f.startswith("PROJECT_STATUS.md")
+            for f in c.get("files", [])
+        )
+
+        classification = {
+            "commit": ch, "message": msg, "files": c.get("files", []),
+            "category": "undeclared_needs_review",
+        }
+
+        if is_declared:
+            classification["category"] = "declared_historical"
+            classification["reason"] = "Explicitly declared bypass (no-verify/bypass keyword in message)."
+        elif has_bypass_keyword and not is_declared:
+            classification["category"] = "undeclared_needs_review"
+            classification["reason"] = "Undeclared commit with bypass/no-verify keyword in message."
+        elif is_post_hardening and is_normal_phase_commit:
+            classification["category"] = "false_positive_candidate"
+            classification["reason"] = "Post-governance-hardening normal PCAE phase implementation commit."
+        elif is_hardening:
+            classification["category"] = "historical_advisory"
+            classification["reason"] = "Governance hardening phase commit. Historical/advisory only."
+        elif is_normal_phase_commit and is_task_only:
+            classification["category"] = "false_positive_candidate"
+            classification["reason"] = "Normal PCAE task management commit, task-only files."
+        else:
+            classification["category"] = "undeclared_historical_advisory"
+            classification["reason"] = "Pre-hardening undeclared commit. Historical context only."
+
+        classifications.append(classification)
+
+    base["classifications"] = classifications
+
+    # Count categories
+    hist_adv = sum(1 for cl in classifications if cl["category"] in ("historical_advisory", "declared_historical"))
+    needs_rev = sum(1 for cl in classifications if cl["category"] == "undeclared_needs_review")
+    blocking = sum(1 for cl in classifications if cl["category"] == "current_blocking")
+    fp = sum(1 for cl in classifications if cl["category"] == "false_positive_candidate")
+
+    base["historical_advisory_count"] = hist_adv
+    base["needs_review_count"] = needs_rev
+    base["blocking_count"] = blocking
+
+    # Determine overall status
+    if needs_rev > 0:
+        base["classification_status"] = "needs_review"
+        base["manual_apply_blocking"] = True
+        base["blockers"] = [f"{needs_rev} undeclared finding(s) need review."]
+        base["next_operator_action"] = "Review undeclared needs_review findings. Declare or reconcile."
+    elif blocking > 0:
+        base["classification_status"] = "blocking"
+        base["manual_apply_blocking"] = True
+        base["blockers"] = [f"{blocking} current blocking finding(s)."]
+        base["next_operator_action"] = "Address blocking findings before manual apply."
+    elif hist_adv > 0 or fp > 0:
+        base["classification_status"] = "advisory_only"
+        base["manual_apply_blocking"] = False
+        base["blockers"] = []
+        base["recommendations"].append(
+            f"{hist_adv} historical/advisory, {fp} false positive candidate(s). "
+            "No current blocking findings. Manual apply approval can proceed."
+        )
+        base["next_operator_action"] = (
+            "Classification complete. No blocking findings. "
+            "Run pcae phase governance-bypass-reconcile to finalize reconciliation."
+        )
+    else:
+        base["classification_status"] = "clean"
+        base["manual_apply_blocking"] = False
+        base["blockers"] = []
+        base["next_operator_action"] = "No findings to classify. Manual apply approval can proceed."
+
+    return base
+
+
+def run_phase_governance_bypass_classification(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_governance_bypass_classification(root)
+    if getattr(args, "save", False):
+        d = root.join(GOVERNANCE_BYPASS_CLASSIFICATIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Classification saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["classification_status"] in ("clean", "advisory_only") else 1
+    print("Governance Bypass Classification"); print("=" * 40)
+    print(f"  Classification: {result['classification_status']}")
+    print(f"  Source report: {result['source_report_status']}")
+    print(f"  Total suspected: {result['total_suspected']}")
+    print(f"  Declared: {result['declared_count']}")
+    print(f"  Undeclared: {result['undeclared_count']}")
+    print(f"  Historical/advisory: {result['historical_advisory_count']}")
+    print(f"  Needs review: {result['needs_review_count']}")
+    print(f"  Blocking: {result['blocking_count']}")
+    print(f"  Manual apply blocking: {'yes' if result['manual_apply_blocking'] else 'no'}")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["recommendations"]:
+        print(f"\n  Recommendations:"); [print(f"    - {r}") for r in result["recommendations"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["classification_status"] in ("clean", "advisory_only") else 1

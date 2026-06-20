@@ -474,6 +474,7 @@ from pcae.commands.phase import (
     run_phase_captured_output_manual_apply_approval_contract,
     run_phase_captured_output_manual_apply_approval_review,
     run_phase_captured_output_manual_apply_preflight,
+    run_phase_governance_bypass_classification,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6148,6 +6149,15 @@ def build_parser() -> argparse.ArgumentParser:
     phase_captured_output_manual_apply_preflight_parser.add_argument("--json", action="store_true")
     phase_captured_output_manual_apply_preflight_parser.add_argument("--save", action="store_true")
     phase_captured_output_manual_apply_preflight_parser.set_defaults(handler=run_phase_captured_output_manual_apply_preflight)
+
+    # Phase 75I.1
+    phase_governance_bypass_classification_parser = phase_subparsers.add_parser(
+        "governance-bypass-classification",
+        help="Classify governance bypass findings (Phase 75I.1).",
+    )
+    phase_governance_bypass_classification_parser.add_argument("--json", action="store_true")
+    phase_governance_bypass_classification_parser.add_argument("--save", action="store_true")
+    phase_governance_bypass_classification_parser.set_defaults(handler=run_phase_governance_bypass_classification)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
