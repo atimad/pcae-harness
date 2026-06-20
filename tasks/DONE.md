@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 72R Execution Authorization Design Record (20260620-0245-72r-execution-authorization-design-record)
 - 72Q Queue Preflight Positive Non-Execution Path (20260619-2209-72q-queue-preflight-positive-non-execution-path)
 - 72P Queue Approval Matching With Non-Empty Queue (20260619-2204-72p-queue-approval-matching-with-non-empty-queue)
 - 72O Safe Queue Fixture Lifecycle (20260619-2159-72o-safe-queue-fixture-lifecycle)
