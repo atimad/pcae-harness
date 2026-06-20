@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74K Real Backend Capture Contract (20260620-1336-74k-real-backend-capture-contract)
 - 74J Agent Invocation Output Capture (20260620-1332-74j-agent-invocation-output-capture)
 - 74I Agent Invocation Dry Run (20260620-1332-74i-agent-invocation-dry-run)
 - 74H Agent Backend Registry (20260620-1328-74h-agent-backend-registry)
