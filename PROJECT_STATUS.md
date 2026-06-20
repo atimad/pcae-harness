@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74S: Claude-DeepSeek Capture Execute Enablement.
+Phase 74T: Claude-DeepSeek Capture Smoke Scenario.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
