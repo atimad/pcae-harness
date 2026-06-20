@@ -3491,36 +3491,52 @@ def run_phase_runner_execution_authorize(args: argparse.Namespace) -> int:
     request_revoked = exec_request.get("revoked", False) if exec_request else False
     request_blocks = request_denied or request_revoked
 
+    # Check contract/schema/rules presence
+    contract_path = root.join(EXECUTION_AUTHORIZATION_CONTRACTS_DIR / "latest.json")
+    schema_path = root.join(EXECUTION_AUTHORIZATION_SCHEMAS_DIR / "latest.json")
+    rules_path = root.join(EXECUTION_AUTHORIZATION_MATCHING_RULES_DIR / "latest.json")
+    contract_present = contract_path.is_file()
+    schema_present = schema_path.is_file()
+    rules_present = rules_path.is_file()
+
     if request_blocks:
         block_detail = []
-        if request_denied:
-            block_detail.append("request has been denied")
-        if request_revoked:
-            block_detail.append("request has been revoked")
+        if request_denied: block_detail.append("request has been denied")
+        if request_revoked: block_detail.append("request has been revoked")
         refusal = (
             "Execution authorization is not implemented. "
             "Additionally, the execution request is in a blocking lifecycle state: "
-            + "; ".join(block_detail)
-            + ". Human authority remains absolute."
+            + "; ".join(block_detail) + ". Human authority remains absolute."
         )
     elif not request_present:
-        refusal = (
+        missing = []
+        if not contract_present: missing.append("authorization contract")
+        if not schema_present: missing.append("authorization schema")
+        if not rules_present: missing.append("matching rules")
+        ref = (
             "Execution authorization is not implemented. "
             "No execution request artifact is present. "
-            "Human authority remains absolute."
         )
+        if missing:
+            ref += f"Authorization prerequisites incomplete: {', '.join(missing)} missing. "
+        ref += "Human authority remains absolute."
+        refusal = ref
     else:
         refusal = _EXECUTION_AUTHORIZATION_REFUSAL
 
     result = {
         "authorization_available": False,
         "authorized": False,
+        "execution_authorized": False,
         "mutation_performed": False,
         "dry_run": getattr(args, "dry_run", False),
         "request_present": request_present,
         "request_denied": request_denied,
         "request_revoked": request_revoked,
         "authorization_blocked_by_request_state": request_blocks,
+        "execution_authorization_contract_present": contract_present,
+        "execution_authorization_schema_present": schema_present,
+        "execution_authorization_matching_rules_present": rules_present,
         "refusal_reason": refusal,
     }
 
@@ -3537,6 +3553,9 @@ def run_phase_runner_execution_authorize(args: argparse.Namespace) -> int:
     if request_present:
         print(f"  Request denied: {'yes' if request_denied else 'no'}")
         print(f"  Request revoked: {'yes' if request_revoked else 'no'}")
+    print(f"  Contract present: {'yes' if contract_present else 'no'}")
+    print(f"  Schema present: {'yes' if schema_present else 'no'}")
+    print(f"  Matching rules present: {'yes' if rules_present else 'no'}")
     print()
     print(f"  {refusal}")
     return 1

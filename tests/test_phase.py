@@ -8836,3 +8836,35 @@ def test_73l_rules_no_mutation(tmp_path, monkeypatch, capsys):
     q = tmp_path / ".pcae" / "phase-queue.json"; b = json.dumps(["73L test"]) + "\n"; q.write_text(b); monkeypatch.chdir(tmp_path)
     main(["phase", "execution-authorization-matching-rules"]); capsys.readouterr()
     assert q.read_text() == b
+
+# ---------------------------------------------------------------------------
+# Phase 73M: negative gate integration
+# ---------------------------------------------------------------------------
+def test_73m_auth_gate_includes_contract_schema_rules(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "execution-authorization-contract", "--save"]); capsys.readouterr()
+    main(["phase", "execution-authorization-schema", "--save"]); capsys.readouterr()
+    main(["phase", "execution-authorization-matching-rules", "--save"]); capsys.readouterr()
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1; assert d["authorized"] is False
+    assert d["execution_authorization_contract_present"] is True
+    assert d["execution_authorization_schema_present"] is True
+    assert d["execution_authorization_matching_rules_present"] is True
+
+def test_73m_auth_gate_missing_prereqs(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1; assert d["authorized"] is False
+    assert d["execution_authorization_contract_present"] is False
+
+def test_73m_auth_gate_no_positive_auth(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "execution-authorization-contract", "--save"]); capsys.readouterr()
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1; assert d["authorized"] is False; assert d["execution_authorized"] not in d or d.get("execution_authorized") is not True
