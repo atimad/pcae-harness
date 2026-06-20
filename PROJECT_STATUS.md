@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74O: Claude-DeepSeek Capture Execution Gate.
+Phase 74P: Claude-DeepSeek Capture-Only Invocation.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
