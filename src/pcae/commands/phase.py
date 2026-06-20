@@ -7469,3 +7469,265 @@ def run_phase_claude_deepseek_prompt_capture(args: argparse.Namespace) -> int:
             print(f"    - {w}")
     print(f"\n  {result['next_operator_action']}")
     return 0
+
+
+# Phase 74W: claude-deepseek output-only prompt smoke
+CLAUDE_DEEPSEEK_PROMPT_CAPTURE_SMOKES_DIR = Path(".pcae") / "claude-deepseek-prompt-capture-smokes"
+
+
+def _run_claude_deepseek_prompt_capture_smoke(root: HarnessPath, allow_real: bool) -> dict:
+    # Verify prerequisites
+    dry_run = _build_claude_deepseek_prompt_capture_dry_run(root)
+    if not dry_run["capture_allowed"]:
+        return {
+            "smoke_status": "blocked",
+            "backend_name": "claude-deepseek",
+            "real_invocation_opt_in": allow_real,
+            "prompt_sent": False,
+            "task_package_sent": False,
+            "task_implementation_requested": False,
+            "expected_output": "PCAE_CAPTURE_OK",
+            "output_matched_expected": False,
+            "capture_ref": None,
+            "captured_stdout_path": None,
+            "captured_stderr_path": None,
+            "stdout_digest": None,
+            "stderr_digest": None,
+            "exit_code": None,
+            "mutation_guard_passed": False,
+            "apply_performed": False,
+            "files_modified": False,
+            "commits_created": 0,
+            "push_performed": False,
+            "implementation_performed": False,
+            "execution_authorized": False,
+            "blockers": dry_run["blockers"],
+            "warnings": dry_run.get("warnings", []),
+            "next_operator_action": "Resolve blockers first.",
+        }
+
+    if not allow_real:
+        return {
+            "smoke_status": "skipped",
+            "backend_name": "claude-deepseek",
+            "real_invocation_opt_in": False,
+            "prompt_sent": False,
+            "task_package_sent": False,
+            "task_implementation_requested": False,
+            "expected_output": "PCAE_CAPTURE_OK",
+            "output_matched_expected": False,
+            "capture_ref": None,
+            "captured_stdout_path": None,
+            "captured_stderr_path": None,
+            "stdout_digest": None,
+            "stderr_digest": None,
+            "exit_code": None,
+            "mutation_guard_passed": False,
+            "apply_performed": False,
+            "files_modified": False,
+            "commits_created": 0,
+            "push_performed": False,
+            "implementation_performed": False,
+            "execution_authorized": False,
+            "blockers": [],
+            "warnings": ["Default smoke does not invoke real backend. Use --allow-real-invocation to opt in."],
+            "next_operator_action": "Run with --allow-real-invocation to send the harmless prompt.",
+        }
+
+    # Attempt real prompt capture with explicit opt-in
+    import shutil as _shutil
+    if not _shutil.which("claude-deepseek"):
+        return {
+            "smoke_status": "blocked",
+            "backend_name": "claude-deepseek",
+            "real_invocation_opt_in": True,
+            "prompt_sent": False,
+            "task_package_sent": False,
+            "task_implementation_requested": False,
+            "expected_output": "PCAE_CAPTURE_OK",
+            "output_matched_expected": False,
+            "capture_ref": None,
+            "captured_stdout_path": None,
+            "captured_stderr_path": None,
+            "stdout_digest": None,
+            "stderr_digest": None,
+            "exit_code": None,
+            "mutation_guard_passed": False,
+            "apply_performed": False,
+            "files_modified": False,
+            "commits_created": 0,
+            "push_performed": False,
+            "implementation_performed": False,
+            "execution_authorized": False,
+            "blockers": ["claude-deepseek not on PATH"],
+            "warnings": [],
+            "next_operator_action": "Install or configure claude-deepseek on PATH.",
+        }
+
+    from pcae.core.git_status import read_git_changes as _read_git_changes
+    pre_changes = _read_git_changes(root)
+
+    # Get the test prompt from contract
+    contract_path = root.join(CLAUDE_DEEPSEEK_PROMPT_CAPTURE_CONTRACTS_DIR / "latest.json")
+    test_prompt = ""
+    if contract_path.is_file():
+        contract_data = json.loads(contract_path.read_text(encoding="utf-8"))
+        test_prompt = contract_data.get("test_prompt", "Return exactly: PCAE_CAPTURE_OK")
+
+    import subprocess as _sp
+    exit_code = None
+    stdout = ""
+    stderr = ""
+    try:
+        result = _sp.run(
+            ["claude-deepseek", test_prompt],
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+        exit_code = result.returncode
+        stdout = result.stdout
+        stderr = result.stderr
+    except Exception as e:
+        post_changes = _read_git_changes(root)
+        mutation_ok = len(pre_changes) == len(post_changes)
+        return {
+            "smoke_status": "failed" if mutation_ok else "failed_or_mutated",
+            "backend_name": "claude-deepseek",
+            "real_invocation_opt_in": True,
+            "prompt_sent": True,
+            "task_package_sent": False,
+            "task_implementation_requested": False,
+            "expected_output": "PCAE_CAPTURE_OK",
+            "output_matched_expected": False,
+            "capture_ref": None,
+            "captured_stdout_path": None,
+            "captured_stderr_path": None,
+            "stdout_digest": None,
+            "stderr_digest": None,
+            "exit_code": None,
+            "mutation_guard_passed": mutation_ok,
+            "apply_performed": False,
+            "files_modified": not mutation_ok,
+            "commits_created": 0,
+            "push_performed": False,
+            "implementation_performed": False,
+            "execution_authorized": False,
+            "blockers": [f"Invocation failed: {e}"],
+            "warnings": [],
+            "next_operator_action": "Check claude-deepseek availability and retry.",
+        }
+
+    post_changes = _read_git_changes(root)
+    mutation_guard_passed = len(pre_changes) == len(post_changes)
+
+    import hashlib as _hashlib
+    stdout_digest = _hashlib.sha256(stdout.encode("utf-8")).hexdigest() if stdout else None
+    stderr_digest = _hashlib.sha256(stderr.encode("utf-8")).hexdigest() if stderr else None
+
+    output_matched = "PCAE_CAPTURE_OK" in stdout if stdout else False
+
+    # Store captured output
+    capture_dir = root.join(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR)
+    capture_dir.mkdir(parents=True, exist_ok=True)
+    (capture_dir / ".gitignore").write_text("*\n")
+    stdout_path = capture_dir / "latest.stdout.txt"
+    stderr_path = capture_dir / "latest.stderr.txt"
+    stdout_path.write_text(stdout, encoding="utf-8")
+    stderr_path.write_text(stderr, encoding="utf-8")
+
+    smoke_status = "passed" if mutation_guard_passed else "failed_or_mutated"
+
+    smoke = {
+        "smoke_status": smoke_status,
+        "backend_name": "claude-deepseek",
+        "real_invocation_opt_in": True,
+        "prompt_sent": True,
+        "task_package_sent": False,
+        "task_implementation_requested": False,
+        "expected_output": "PCAE_CAPTURE_OK",
+        "output_matched_expected": output_matched,
+        "capture_ref": str(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR / "latest.json"),
+        "captured_stdout_path": str(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR / "latest.stdout.txt"),
+        "captured_stderr_path": str(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR / "latest.stderr.txt"),
+        "stdout_digest": stdout_digest,
+        "stderr_digest": stderr_digest,
+        "exit_code": exit_code,
+        "mutation_guard_passed": mutation_guard_passed,
+        "apply_performed": False,
+        "files_modified": not mutation_guard_passed,
+        "commits_created": 0,
+        "push_performed": False,
+        "implementation_performed": False,
+        "execution_authorized": False,
+        "blockers": [] if smoke_status == "passed" else ["mutation guard failed"],
+        "warnings": [] if output_matched else ["Output did not contain expected PCAE_CAPTURE_OK"],
+        "next_operator_action": (
+            "Smoke passed. Captured output stored under .pcae/claude-deepseek-prompt-captures/. Do not apply output."
+            if smoke_status == "passed"
+            else "Investigate mutation guard failure before proceeding."
+        ),
+    }
+
+    # Persist the smoke artifact
+    (capture_dir / "latest.json").write_text(json.dumps(smoke, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    return smoke
+
+
+def run_phase_claude_deepseek_prompt_capture_smoke(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    allow_real = getattr(args, "allow_real_invocation", False)
+    result = _run_claude_deepseek_prompt_capture_smoke(root, allow_real)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_PROMPT_CAPTURE_SMOKES_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Prompt capture smoke saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["smoke_status"] == "passed" else (0 if result["smoke_status"] == "skipped" else 1)
+    print("Claude-DeepSeek Prompt Capture Smoke")
+    print("=" * 40)
+    print(f"  Status: {result['smoke_status']}")
+    print(f"  Real invocation opt-in: {'yes' if result.get('real_invocation_opt_in') else 'no'}")
+    print(f"  Prompt sent: {'yes' if result.get('prompt_sent') else 'no'}")
+    print(f"  Task package sent: no")
+    print(f"  Implementation requested: no")
+    print(f"  Mutation guard: {'passed' if result.get('mutation_guard_passed') else 'FAILED' if result.get('smoke_status') == 'failed_or_mutated' else 'N/A'}")
+    print(f"  Output matched expected: {'yes' if result.get('output_matched_expected') else 'no'}")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    if result.get("warnings"):
+        print(f"\n  Warnings:")
+        for w in result["warnings"]:
+            print(f"    - {w}")
+    if result.get("next_operator_action"):
+        print(f"\n  {result['next_operator_action']}")
+    return 0 if result["smoke_status"] in ("passed", "skipped") else 1
+
+
+def run_phase_claude_deepseek_prompt_capture_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(CLAUDE_DEEPSEEK_PROMPT_CAPTURES_DIR / "latest.json")
+    if not p.is_file():
+        if args.json:
+            print(json.dumps({"present": False}))
+        else:
+            print("No prompt capture artifact found.")
+        return 1
+    d = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps({"present": True, **d}, indent=2, sort_keys=True))
+    else:
+        print("Claude-DeepSeek Prompt Capture")
+        print(f"  Status: {d.get('smoke_status')}")
+        print(f"  Captured stdout: {'yes' if d.get('captured_stdout_path') else 'no'}")
+        print(f"  Real backend invoked: {'yes' if d.get('real_invocation_opt_in') else 'no'}")
+    return 0

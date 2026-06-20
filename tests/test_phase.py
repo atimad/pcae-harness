@@ -9606,3 +9606,85 @@ def test_74v_prompt_capture_dry_run_human_output(tmp_path, monkeypatch, capsys):
     assert "claude-deepseek" in out
     assert "Real backend invoked: no" in out
     assert "Would send task package: no" in out
+
+
+# Phase 74W: claude-deepseek output-only prompt smoke
+def test_74w_prompt_smoke_skipped_default(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-capture-contract", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-capture-enable", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-capture-smoke", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["smoke_status"] in ("skipped", "blocked")
+    assert d.get("prompt_sent") is not True
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["execution_authorized"] is False
+
+def test_74w_prompt_smoke_blocked_no_prereqs(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-prompt-capture-smoke", "--allow-real-invocation", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["smoke_status"] == "blocked"
+    assert d["prompt_sent"] is False
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["apply_performed"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
+
+def test_74w_prompt_smoke_missing_contract(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-capture-enable", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-capture-smoke", "--allow-real-invocation", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["smoke_status"] == "blocked"
+    assert "contract" in str(d.get("blockers", [])).lower() or "contract" in str(d.get("capture_ref", ""))
+    assert d["task_package_sent"] is False
+
+def test_74w_prompt_smoke_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-prompt-capture-smoke", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "claude-deepseek-prompt-capture-smokes" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["smoke_status"] in ("blocked", "skipped")
+    assert d["execution_authorized"] is False
+
+def test_74w_prompt_capture_show_missing(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "claude-deepseek-prompt-capture-show", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["present"] is False
+
+def test_74w_prompt_smoke_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-capture-contract", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-capture-enable", "--save"]); capsys.readouterr()
+    exit_code = main(["phase", "claude-deepseek-prompt-capture-smoke"]); out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Prompt Capture Smoke" in out
+    assert "Claude-DeepSeek" in out
+    assert "Task package sent: no" in out
+
+def test_74w_prompt_smoke_no_task_package(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-capture-contract", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-capture-enable", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-capture-smoke", "--allow-real-invocation", "--json"]); d = json.loads(capsys.readouterr().out)
+    # Either blocked (no claude-deepseek on PATH) or passed/failed
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["apply_performed"] is False
+    assert d["commits_created"] == 0
+    assert d["execution_authorized"] is False

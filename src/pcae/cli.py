@@ -458,6 +458,8 @@ from pcae.commands.phase import (
     run_phase_claude_deepseek_invocation_safety_review,
     run_phase_claude_deepseek_prompt_capture_contract,
     run_phase_claude_deepseek_prompt_capture,
+    run_phase_claude_deepseek_prompt_capture_smoke,
+    run_phase_claude_deepseek_prompt_capture_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -5984,6 +5986,35 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_claude_deepseek_prompt_capture_parser.set_defaults(
         handler=run_phase_claude_deepseek_prompt_capture
+    )
+
+    phase_claude_deepseek_prompt_capture_smoke_parser = phase_subparsers.add_parser(
+        "claude-deepseek-prompt-capture-smoke",
+        help="Run claude-deepseek output-only prompt capture smoke (Phase 74W).",
+    )
+    phase_claude_deepseek_prompt_capture_smoke_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_prompt_capture_smoke_parser.add_argument(
+        "--save", action="store_true", help="Persist the smoke artifact."
+    )
+    phase_claude_deepseek_prompt_capture_smoke_parser.add_argument(
+        "--allow-real-invocation", action="store_true",
+        help="Allow real claude-deepseek invocation with the harmless prompt (opt-in).",
+    )
+    phase_claude_deepseek_prompt_capture_smoke_parser.set_defaults(
+        handler=run_phase_claude_deepseek_prompt_capture_smoke
+    )
+
+    phase_claude_deepseek_prompt_capture_show_parser = phase_subparsers.add_parser(
+        "claude-deepseek-prompt-capture-show",
+        help="Show the latest claude-deepseek prompt capture artifact (Phase 74W).",
+    )
+    phase_claude_deepseek_prompt_capture_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_prompt_capture_show_parser.set_defaults(
+        handler=run_phase_claude_deepseek_prompt_capture_show
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
