@@ -3261,6 +3261,12 @@ _PREFLIGHT_REQUIREMENTS = [
     {"requirement": "execution request not denied", "check": "execution_request_not_denied"},
     {"requirement": "execution request not revoked", "check": "execution_request_not_revoked"},
     {"requirement": "execution request review present", "check": "execution_request_review_present"},
+    {"requirement": "no-op trace present", "check": "noop_trace_present"},
+    {"requirement": "no-op trace safe", "check": "noop_trace_safe"},
+    {"requirement": "no-op trace review present", "check": "noop_trace_review_present"},
+    {"requirement": "no-op trace review ready", "check": "noop_trace_review_ready"},
+    {"requirement": "no-op trace approval present", "check": "noop_trace_approval_present"},
+    {"requirement": "no-op trace approval matches trace", "check": "noop_trace_approval_matches"},
     {"requirement": "runner-readiness environment_ready", "check": "environment_ready"},
     {"requirement": "runner-plan executable", "check": "plan_executable"},
     {"requirement": "runner-policy loaded", "check": "policy_loaded"},
@@ -3295,6 +3301,9 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
     sim = _read_latest_simulation(root)
     review = _read_latest_sim_review(root)
     approval = _read_latest_sim_approval(root)
+    noop_trace = _read_latest_runner_noop_trace(root)
+    noop_trace_review = _read_latest_runner_execution_trace_review(root)
+    noop_trace_approval = _read_latest_runner_execution_trace_approval(root)
 
     queue_approval_present = (
         queue_approval is not None and queue_approval.get("approved", False)
@@ -3315,6 +3324,28 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
     exec_request_review_present = exec_request_review is not None
     request_blocks = exec_request_denied or exec_request_revoked
 
+    noop_trace_present = noop_trace is not None
+    noop_trace_safe = (
+        noop_trace is not None
+        and noop_trace.get("noop", False)
+        and not noop_trace.get("mutation_performed", True)
+        and not noop_trace.get("queue_mutated", True)
+        and noop_trace.get("tasks_created", 0) == 0
+    )
+    noop_trace_review_present = noop_trace_review is not None
+    noop_trace_review_ready = (
+        noop_trace_review is not None
+        and noop_trace_review.get("review_status") == "ready_for_approval"
+    )
+    noop_trace_approval_present = (
+        noop_trace_approval is not None and noop_trace_approval.get("approved", False)
+    )
+    noop_trace_approval_matches = (
+        noop_trace_approval is not None
+        and noop_trace is not None
+        and noop_trace_approval.get("trace_ref") == noop_trace.get("trace_id")
+    )
+
     checks: dict[str, bool] = {
         "working_tree_clean": readiness["working_tree"] == "clean",
         "health_idle": readiness["health_status"] == "healthy",
@@ -3331,6 +3362,12 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
         "execution_request_not_denied": not exec_request_denied,
         "execution_request_not_revoked": not exec_request_revoked,
         "execution_request_review_present": exec_request_review_present,
+        "noop_trace_present": noop_trace_present,
+        "noop_trace_safe": noop_trace_safe,
+        "noop_trace_review_present": noop_trace_review_present,
+        "noop_trace_review_ready": noop_trace_review_ready,
+        "noop_trace_approval_present": noop_trace_approval_present,
+        "noop_trace_approval_matches": noop_trace_approval_matches,
         "environment_ready": readiness["environment_ready"],
         "plan_executable": readiness["environment_ready"] and len(queue) > 0,
         "policy_loaded": True,
@@ -3371,6 +3408,19 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
         "execution_request_denied": exec_request_denied,
         "execution_request_revoked": exec_request_revoked,
         "request_blocks_authorization": request_blocks,
+        "noop_trace_present": noop_trace_present,
+        "noop_trace_safe": noop_trace_safe,
+        "noop_trace_review_present": noop_trace_review_present,
+        "noop_trace_review_status": (
+            noop_trace_review.get("review_status")
+            if noop_trace_review else None
+        ),
+        "noop_trace_approval_present": noop_trace_approval_present,
+        "noop_trace_approval_matches_trace_or_review": noop_trace_approval_matches,
+        "noop_trace_approval_execution_authorized": (
+            noop_trace_approval.get("execution_authorized")
+            if noop_trace_approval else None
+        ),
         "queue_validation_status": "valid" if queue_validation["valid"] else "invalid",
         "queue_validation_present": queue_validation["queue_readable"],
         "queue_valid": queue_validation["valid"],

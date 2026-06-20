@@ -4598,7 +4598,7 @@ def test_72h_preflight_design_only(
     assert data["preflight_status"] == "design_only"
     assert data["execution_available"] is False
     assert data["execution_authorized"] is False
-    assert data["requirements_total"] == 26
+    assert data["requirements_total"] == 32
     assert "requirements" in data
     assert "unmet_requirements" in data
     assert "human_authority_note" in data
@@ -8457,4 +8457,92 @@ def test_73e_trace_approval_show(
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 0
     assert data["present"] is True
+    assert data["execution_authorized"] is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 73F: runner no-op execution preflight integration
+# ---------------------------------------------------------------------------
+
+
+def test_73f_preflight_missing_noop_trace(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["noop_trace_present"] is False
+    assert data["noop_trace_safe"] is False
+    assert data["noop_trace_review_present"] is False
+    assert data["noop_trace_approval_present"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_73f_preflight_safe_reviewed_approved_trace(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    main(["phase", "runner-execution-trace-review", "--save"])
+    main(["phase", "runner-execution-trace-approve", "--message", "Preflight test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["noop_trace_present"] is True
+    assert data["noop_trace_safe"] is True
+    assert data["noop_trace_review_present"] is True
+    assert data["noop_trace_approval_present"] is True
+    assert data["noop_trace_approval_matches_trace_or_review"] is True
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_73f_preflight_noop_approval_mismatch(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    main(["phase", "runner-execution-trace-review", "--save"])
+    main(["phase", "runner-execution-trace-approve", "--message", "First"])
+    capsys.readouterr()
+    # Create a new trace — approval now references old trace
+    main(["phase", "runner-execute", "--noop", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["noop_trace_approval_matches_trace_or_review"] is False
+
+
+def test_73f_preflight_still_design_only(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-preflight", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["preflight_status"] == "design_only"
+    assert data["execution_available"] is False
     assert data["execution_authorized"] is False
