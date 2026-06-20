@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74Q Captured Output Intake Bridge (20260620-1408-74q-captured-output-intake-bridge)
 - 74P Claude-DeepSeek Capture-Only Invocation (20260620-1408-74p-claude-deepseek-capture-only-invocation)
 - 74O Claude-DeepSeek Capture Execution Gate (20260620-1408-74o-claude-deepseek-capture-execution-gate)
 - 74N Agent Backend Lock Identity (20260620-1404-74n-agent-backend-lock-identity)
