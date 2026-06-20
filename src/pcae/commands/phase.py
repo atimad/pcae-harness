@@ -8893,6 +8893,157 @@ def run_phase_captured_output_manual_apply_approval_contract(args: argparse.Name
     return 0 if result["contract_status"] == "ready" else 1
 
 
+# Phase 75H: captured output manual apply approval review
+CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_REVIEWS_DIR = Path(".pcae") / "captured-output-manual-apply-approval-reviews"
+
+
+def _build_captured_output_manual_apply_approval_review(root: HarnessPath) -> dict:
+    base = {
+        "review_status": "blocked", "human_approval_can_be_requested": False,
+        "human_approval_granted": False, "manual_apply_allowed": False,
+        "automatic_apply_allowed": False, "backend_apply_allowed": False,
+        "captured_output_ref": None, "apply_dry_run_ref": None,
+        "readiness_ref": None, "contract_ref": None,
+        "risks": [], "unresolved_risks": [], "historical_advisories": [],
+        "validation_commands": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "required_human_checks": [], "approval_request_summary": "",
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read contract
+    contract_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR / "latest.json")
+    if not contract_path.is_file():
+        base["review_status"] = "contract_not_ready"
+        base["blockers"] = ["No approval contract found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-approval-contract --save first."
+        return base
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
+    base["contract_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR / "latest.json")
+
+    if contract.get("contract_status") != "ready":
+        base["review_status"] = "contract_not_ready"
+        base["blockers"] = [f"Contract not ready: {contract.get('contract_status')}"]
+        base["next_operator_action"] = contract.get("next_operator_action", "Resolve contract blockers first.")
+        return base
+
+    # Read manual apply readiness
+    readiness_path = root.join(ACTIVATED_TASK_CAPTURE_MANUAL_APPLY_READINESS_DIR / "latest.json")
+    if not readiness_path.is_file():
+        base["review_status"] = "readiness_not_ready"
+        base["blockers"] = ["No manual apply readiness artifact found."]
+        base["next_operator_action"] = "Run pcae phase activated-task-capture-manual-apply-readiness --save first."
+        return base
+    readiness = json.loads(readiness_path.read_text(encoding="utf-8"))
+    base["readiness_ref"] = str(ACTIVATED_TASK_CAPTURE_MANUAL_APPLY_READINESS_DIR / "latest.json")
+    base["captured_output_ref"] = readiness.get("capture_ref")
+
+    if readiness.get("readiness_status") != "ready_for_manual_apply":
+        base["review_status"] = "readiness_not_ready"
+        base["blockers"] = [f"Manual apply readiness not ready: {readiness.get('readiness_status')}"]
+        base["next_operator_action"] = readiness.get("next_operator_action", "Resolve readiness blockers first.")
+        return base
+
+    # Read apply dry-run
+    apply_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR / "latest.json")
+    base["apply_dry_run_ref"] = None
+    if apply_path.is_file():
+        base["apply_dry_run_ref"] = str(ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR / "latest.json")
+
+    # Check real execution disabled proof
+    proof_path = root.join(REAL_EXECUTION_DISABLED_PROOFS_DIR / "latest.json")
+    if proof_path.is_file():
+        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+        if proof.get("proof_status") != "passed":
+            base["review_status"] = "blocked"
+            base["blockers"] = ["Real execution disabled proof not passed."]
+            base["next_operator_action"] = "Run pcae phase real-execution-disabled-proof --save to verify."
+            return base
+
+    # Check governance bypass report (advisory, not blocking)
+    bypass_path = root.join(GOVERNANCE_BYPASS_REPORTS_DIR / "latest.json")
+    if bypass_path.is_file():
+        bypass = json.loads(bypass_path.read_text(encoding="utf-8"))
+        if bypass.get("report_status") in ("warning",):
+            base["risks"].append(f"Governance bypass report: {bypass.get('report_status')} — {len(bypass.get('suspected_bypass_commits', []))} suspected bypasses")
+            base["historical_advisories"].append("governance-bypass-report-status:" + bypass.get("report_status", "unknown"))
+
+    # Gather risks and unresolved risks
+    would_touch = readiness.get("would_touch_files", [])
+    base["risks"].extend(readiness.get("warnings", []))
+    base["risks"].extend(contract.get("warnings", []))
+
+    # Unresolved risks exist if governance bypass report has warnings
+    if bypass_path.is_file():
+        bypass = json.loads(bypass_path.read_text(encoding="utf-8"))
+        if bypass.get("report_status") == "warning" and len(bypass.get("undeclared_bypass_commits", [])) > 0:
+            base["unresolved_risks"].append(
+                f"Governance bypass report has {len(bypass.get('undeclared_bypass_commits', []))} undeclared suspected bypass commits"
+            )
+
+    # If unresolved risks, report blocked
+    if base["unresolved_risks"]:
+        base["review_status"] = "unresolved_risk"
+        base["blockers"] = base["unresolved_risks"]
+        base["next_operator_action"] = "Review and address unresolved risks before requesting approval."
+        return base
+
+    # Ready
+    base["review_status"] = "approval_review_ready"
+    base["human_approval_can_be_requested"] = True
+    base["blockers"] = []
+    base["required_human_checks"] = [
+        "1. Review captured output manually",
+        "2. Review apply dry-run output",
+        "3. Confirm no out-of-scope files",
+        "4. Confirm no suspicious claims unresolved",
+        "5. Confirm governance bypass report is understood",
+        "6. Run validation commands after any manual apply",
+    ]
+    base["approval_request_summary"] = (
+        "All governance prerequisites satisfied. "
+        "The human operator should review captured output, apply dry-run, "
+        "and confirm no out-of-scope changes before requesting explicit approval."
+    )
+    base["next_operator_action"] = (
+        "Approval review is ready. Run pcae phase captured-output-manual-apply-preflight for final preflight check."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_approval_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_approval_review(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_REVIEWS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Approval review saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["review_status"] == "approval_review_ready" else 1
+    print("Captured Output Manual Apply Approval Review"); print("=" * 40)
+    print(f"  Review status: {result['review_status']}")
+    print(f"  Human approval can be requested: {'yes' if result['human_approval_can_be_requested'] else 'no'}")
+    print(f"  Human approval granted: no")
+    print(f"  Manual apply allowed: no")
+    print(f"  Automatic apply allowed: no")
+    print(f"  Backend apply allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["risks"]:
+        print(f"\n  Risks:"); [print(f"    - {r}") for r in result["risks"][:4]]
+    if result["required_human_checks"]:
+        print(f"\n  Required human checks:"); [print(f"    {c}") for c in result["required_human_checks"][:4]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["review_status"] == "approval_review_ready" else 1
+
+
 def _build_activated_task_capture_safety_regression(root: HarnessPath) -> dict:
     cases = []
     all_passed = True

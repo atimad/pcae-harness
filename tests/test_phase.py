@@ -10329,3 +10329,60 @@ def test_75g_contract_human_output(tmp_path, monkeypatch, capsys):
     assert "Backend apply allowed: no" in out
     assert "Apply performed: no" in out
     assert "Execution authorized: no" in out
+
+
+# Phase 75H: captured output manual apply approval review
+def test_75h_review_missing_contract(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["review_status"] == "contract_not_ready"
+    assert d["human_approval_can_be_requested"] is False
+    assert d["human_approval_granted"] is False
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["backend_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75h_review_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-review", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-approval-reviews" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert "review_status" in d
+    assert d["execution_authorized"] is False
+    assert d["apply_performed"] is False
+
+
+def test_75h_review_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75h_review_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "captured-output-manual-apply-approval-review"])
+    out = capsys.readouterr().out
+    assert exit_code != 0  # blocked when no contract
+    assert "Captured Output Manual Apply Approval Review" in out
+    assert "Review status:" in out
+    assert "Human approval granted: no" in out
+    assert "Manual apply allowed: no" in out
+    assert "Automatic apply allowed: no" in out
+    assert "Apply performed: no" in out
+    assert "Execution authorized: no" in out

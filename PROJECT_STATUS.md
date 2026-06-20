@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 75G: Captured Output Manual Apply Approval Contract.
+Phase 75H: Captured Output Manual Apply Approval Review.
 
-Phase 75G adds `pcae phase captured-output-manual-apply-approval-contract --json --save`
-defining what must be true before a human may manually apply captured backend output.
-Contract only — does not approve, apply, modify project code, invoke backend, or authorize runner execution.
+Phase 75H adds `pcae phase captured-output-manual-apply-approval-review --json --save`
+recording whether the current captured output is eligible for explicit human approval.
+Review only — does not approve, apply, modify project code, invoke backend, or authorize runner execution.
 
 ## Milestone: Execution Chain Traceability Complete
 
