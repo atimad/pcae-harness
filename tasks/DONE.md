@@ -414,3 +414,7 @@
 - Added `pcae orchestration explain TASK_TYPE` and `pcae orchestration explain TASK_TYPE --json` to explain why PCAE recommends a given agent for a task type. The command reports the recommendation, fallback behavior, explanation, and alternative registered agents with roles and why-not-selected notes, while remaining advisory and read-only.
 - Added `pcae orchestration capabilities` and `pcae orchestration capabilities --json` to expose the current governed agent capability matrix. The command reports registered agents, kinds, and declared roles with the advisory reminder that capabilities are policy-declared and non-binding.
 - Completed implementation work for Phase 65I Strategic Registry Coherence Hardening; the roadmap phase remains active pending an explicitly approved successor activation. Authoritative phase, branch, and capability projection drift now blocks governance checks while generated-document drift remains advisory and non-mutating.
+- 2026-06-20: 20260620-1807-phase-75e-add-manual-apply-readiness-command-for-captured-output
+- 2026-06-20: 20260620-1807-phase-75d-add-consolidated-captured-output-lifecycle-summary
+- 2026-06-20: 20260620-1807-phase-75c-add-scenario-command-for-apply-dry-run-of-captured-output
+- 2026-06-20: 20260620-1807-phase-75b-add-scenario-command-for-reviewing-captured-output-intake
