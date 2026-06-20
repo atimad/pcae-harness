@@ -9325,3 +9325,50 @@ def test_74j_invocation_show(tmp_path, monkeypatch, capsys):
     main(["phase", "agent-invoke", "--execute", "--backend", "noop"]); capsys.readouterr()
     main(["phase", "agent-invocation-show", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["present"] is True; assert d["execution_authorized"] is False
+
+# Phase 74K: real backend capture contract
+def test_74k_contract_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-backend-capture-contract", "--backend", "claude-deepseek", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["capture_only"] is True; assert d["real_backend_invocation_performed"] is False
+    assert len(d["requirements"]) > 10; assert d["execution_authorized"] is False
+def test_74k_contract_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-backend-capture-contract", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "real-backend-capture-contracts" / "latest.json").is_file()
+# Phase 74L: claude-deepseek prompt envelope
+def test_74l_envelope_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-prompt-envelope", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["envelope_status"] == "no_activated_task"; assert d["real_backend_invocation_performed"] is False
+def test_74l_envelope_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-package", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-envelope", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["envelope_status"] == "ready"; assert d["prompt_executed"] is False
+    assert "DO NOT edit" in d.get("envelope_text", "")
+# Phase 74M: claude-deepseek capture dry run
+def test_74m_capture_dry_run_blocked(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-capture", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["capture_allowed"] is False; assert d["real_backend_invocation_performed"] is False
+    assert d["execution_authorized"] is False
+def test_74m_capture_dry_run_with_contract(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "real-backend-capture-contract", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-prompt-envelope", "--save"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-capture", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["mutation_guard_planned"] is True; assert d["real_backend_invocation_performed"] is False
+    assert d["execution_authorized"] is False

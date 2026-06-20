@@ -6725,3 +6725,177 @@ def run_phase_agent_invocation_show(args: argparse.Namespace) -> int:
         print("Agent Invocation"); print(f"  Backend: {d.get('backend_name')}"); print(f"  Status: {d.get('invocation_status')}")
         print(f"  Agent invoked: {d.get('agent_invocation_performed')}"); print(f"  Exec authorized: {d.get('execution_authorized')}")
     return 0
+
+
+# Phase 74K: real backend capture contract
+REAL_BACKEND_CAPTURE_CONTRACTS_DIR = Path(".pcae") / "real-backend-capture-contracts"
+
+_REAL_BACKEND_CAPTURE_CONTRACT = {
+    "capture_only": True,
+    "real_backend_invocation_performed": False,
+    "agent_invocation_performed": False,
+    "apply_performed": False,
+    "files_modified": False,
+    "commits_created": 0,
+    "execution_authorized": False,
+    "requirements": [
+        "clean working tree before invocation",
+        "healthy idle or explicitly allowed active task state",
+        "active task must be activation-created",
+        "agent package must be ready",
+        "agent start artifact must exist",
+        "backend must be registered in agent backend registry",
+        "backend command must be available on PATH",
+        "backend invocation must be explicit (--execute required)",
+        "mutation guard: pre/post git status comparison required",
+        "stdout and stderr capture required",
+        "timeout required (default 300s)",
+        "captured output must be stored under .pcae",
+        "output must go through intake/review/apply-dry-run before apply",
+        "no commits during invocation",
+        "no push during invocation",
+        "no automatic patch apply",
+        "no background execution",
+        "prompt envelope must be prepared",
+        "capture contract must be reviewed",
+    ],
+    "forbidden_cases": [
+        "dirty working tree before invocation",
+        "backend unavailable on PATH",
+        "missing agent package",
+        "missing active task",
+        "missing agent start artifact",
+        "backend modifies files",
+        "backend creates commits",
+        "backend pushes changes",
+        "backend output applied automatically",
+        "invocation without explicit backend selection",
+        "invocation without --execute flag",
+    ],
+    "note": "This is a design contract only. No backend was invoked. Human authority remains absolute.",
+}
+
+
+def run_phase_real_backend_capture_contract(args: argparse.Namespace) -> int:
+    backend_name = getattr(args, "backend", "claude-deepseek")
+    contract = dict(_REAL_BACKEND_CAPTURE_CONTRACT)
+    contract["backend_name"] = backend_name; contract["contract_status"] = "active"
+    if getattr(args, "save", False):
+        d = HarnessPath.cwd().join(REAL_BACKEND_CAPTURE_CONTRACTS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Contract saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(contract, indent=2, sort_keys=True)); return 0
+    print("Real Backend Capture Contract"); print("=" * 40)
+    print(f"  Backend: {contract['backend_name']}"); print(f"  Capture only: yes"); print(f"  Real backend invoked: no")
+    print(f"\n  Requirements ({len(contract['requirements'])}):"); [print(f"    - {r}") for r in contract['requirements'][:8]]
+    print(f"\n  Forbidden ({len(contract['forbidden_cases'])}):"); [print(f"    - {f}") for f in contract['forbidden_cases'][:6]]
+    print(f"\n  {contract['note']}")
+    return 0
+
+
+# Phase 74L: claude-deepseek prompt envelope
+CLAUDE_DEEPSEEK_PROMPT_ENVELOPES_DIR = Path(".pcae") / "claude-deepseek-prompt-envelopes"
+
+
+def _build_claude_deepseek_prompt_envelope(root: HarnessPath) -> dict:
+    from pcae.core.tasks import find_latest_active_task
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).is_file() else None
+    if act_data is None or not act_data.get("activated"): return {"envelope_status": "no_activated_task", "real_backend_invocation_performed": False}
+    pkg_path = root.join(ACTIVATED_TASK_AGENT_PACKAGES_DIR / "latest.json")
+    if not pkg_path.is_file(): return {"envelope_status": "missing_agent_package", "real_backend_invocation_performed": False}
+    pkg = json.loads(pkg_path.read_text(encoding="utf-8"))
+    title = pkg.get("active_task_title", "Unknown task")
+    envelope_text = f"""SYSTEM: You are a capture-only backend (claude-deepseek). Your output will be captured and reviewed but NOT applied automatically.
+
+TASK: {title}
+
+SAFETY RULES:
+- DO NOT edit any files.
+- DO NOT commit anything.
+- DO NOT push anything.
+- DO NOT run destructive commands.
+- DO NOT assume your output will be applied.
+- Return proposed changes as formatted output only.
+- Your output will go through intake, review, and apply-dry-run before any human considers applying it.
+
+OUTPUT FORMAT (use these sections):
+## Summary
+Brief summary of proposed changes.
+
+## Proposed Files
+List files that would be modified/created.
+
+## Proposed Patch
+Diff or detailed instructions.
+
+## Tests to Run
+Which tests validate these changes.
+
+## Risks
+Potential risks or side effects.
+
+## Assumptions
+What you assumed about the codebase.
+
+STOP CONDITIONS:
+- If you cannot complete without editing files, report why.
+- If you need more information, ask.
+- If you detect a safety issue, report it immediately.
+
+TIMEOUT: 300 seconds. CAPTURE ONLY: Your response will be captured to .pcae/agent-invocations/.
+"""
+    return {"envelope_status": "ready", "backend_name": "claude-deepseek", "active_task_title": title, "envelope_text": envelope_text, "real_backend_invocation_performed": False, "agent_invocation_performed": False, "prompt_executed": False, "apply_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False}
+
+
+def run_phase_claude_deepseek_prompt_envelope(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_claude_deepseek_prompt_envelope(root)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_PROMPT_ENVELOPES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Envelope saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Claude-DeepSeek Prompt Envelope"); print("=" * 40)
+    print(f"  Status: {result['envelope_status']}"); print(f"  Real backend invoked: no")
+    if result.get('envelope_text'): print(f"\n  Envelope preview:\n{result['envelope_text'][:300]}...")
+    return 0
+
+
+# Phase 74M: claude-deepseek capture dry run
+CLAUDE_DEEPSEEK_CAPTURE_DRY_RUNS_DIR = Path(".pcae") / "claude-deepseek-capture-dry-runs"
+
+
+def _build_claude_deepseek_capture_dry_run(root: HarnessPath) -> dict:
+    backend_name = "claude-deepseek"
+    reg = _build_agent_backend_registry(root, backend_name)
+    backend = reg["backends"][0] if reg["backends"] else None
+    blockers = []; warnings = []
+    if backend is None: blockers.append(f"'{backend_name}' not in registry")
+    elif not backend["available"]: blockers.append(f"'{backend_name}' command not found on PATH")
+    contract_path = root.join(REAL_BACKEND_CAPTURE_CONTRACTS_DIR / "latest.json")
+    envelope_path = root.join(CLAUDE_DEEPSEEK_PROMPT_ENVELOPES_DIR / "latest.json")
+    if not contract_path.is_file(): blockers.append("real backend capture contract missing")
+    if not envelope_path.is_file(): blockers.append("prompt envelope missing")
+    from pcae.core.tasks import find_latest_active_task
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).is_file() else None
+    if act_data is None: blockers.append("no activation artifact")
+    from pcae.core.git_status import read_git_changes
+    if read_git_changes(root): warnings.append("working tree has changes")
+    capture_allowed = len(blockers) == 0 and backend is not None and backend["available"]
+    return {"dry_run": True, "backend_name": backend_name, "capture_allowed": capture_allowed, "backend_available": backend["available"] if backend else False, "would_invoke_command": backend["command"] if backend else None, "would_send_envelope_path": str(CLAUDE_DEEPSEEK_PROMPT_ENVELOPES_DIR / "latest.json") if capture_allowed else None, "would_capture_stdout": True, "would_capture_stderr": True, "would_write_invocation_artifact_path": str(AGENT_INVOCATIONS_DIR / "latest.json"), "mutation_guard_planned": True, "real_backend_invocation_performed": False, "agent_invocation_performed": False, "prompt_executed": False, "apply_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False, "blockers": blockers, "warnings": warnings, "next_operator_action": "Review the capture contract and prompt envelope. When ready, an explicit future phase will enable real backend capture."}
+
+
+def run_phase_claude_deepseek_capture(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_claude_deepseek_capture_dry_run(root)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_CAPTURE_DRY_RUNS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Capture dry-run saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Claude-DeepSeek Capture (dry run)"); print("=" * 40)
+    print(f"  Backend: {result['backend_name']}"); print(f"  Available: {'yes' if result['backend_available'] else 'NO'}")
+    print(f"  Capture allowed: {'yes' if result['capture_allowed'] else 'NO'}")
+    if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["warnings"]: print(f"\n  Warnings:"); [print(f"    - {w}") for w in result["warnings"]]
+    print(f"\n  Real backend invoked: no"); print(f"  Agent invoked: no"); print(f"  Execution authorized: no")
+    print(f"\n  {result['next_operator_action']}")
+    return 0

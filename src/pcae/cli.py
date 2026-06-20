@@ -446,6 +446,9 @@ from pcae.commands.phase import (
     run_phase_activated_task_agent_package,
     run_phase_activated_task_agent_start,
     run_phase_agent_backend_registry,
+    run_phase_claude_deepseek_capture,
+    run_phase_claude_deepseek_prompt_envelope,
+    run_phase_real_backend_capture_contract,
     run_phase_agent_invocation_show,
     run_phase_agent_invoke,
     run_phase_activated_task_agent_output_apply,
@@ -5779,6 +5782,54 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_agent_invocation_show_parser.set_defaults(
         handler=run_phase_agent_invocation_show
+    )
+
+    phase_real_backend_capture_contract_parser = phase_subparsers.add_parser(
+        "real-backend-capture-contract",
+        help="Show the real backend capture contract.",
+    )
+    phase_real_backend_capture_contract_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_real_backend_capture_contract_parser.add_argument(
+        "--save", action="store_true", help="Persist the contract artifact."
+    )
+    phase_real_backend_capture_contract_parser.add_argument(
+        "--backend", default="claude-deepseek", metavar="NAME", help="Backend name (default: claude-deepseek)."
+    )
+    phase_real_backend_capture_contract_parser.set_defaults(
+        handler=run_phase_real_backend_capture_contract
+    )
+
+    phase_claude_deepseek_prompt_envelope_parser = phase_subparsers.add_parser(
+        "claude-deepseek-prompt-envelope",
+        help="Generate claude-deepseek prompt envelope.",
+    )
+    phase_claude_deepseek_prompt_envelope_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_prompt_envelope_parser.add_argument(
+        "--save", action="store_true", help="Persist the envelope artifact."
+    )
+    phase_claude_deepseek_prompt_envelope_parser.set_defaults(
+        handler=run_phase_claude_deepseek_prompt_envelope
+    )
+
+    phase_claude_deepseek_capture_parser = phase_subparsers.add_parser(
+        "claude-deepseek-capture",
+        help="Dry-run claude-deepseek capture invocation.",
+    )
+    phase_claude_deepseek_capture_parser.add_argument(
+        "--dry-run", action="store_true", default=True, help="Dry-run only (default)."
+    )
+    phase_claude_deepseek_capture_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_capture_parser.add_argument(
+        "--save", action="store_true", help="Persist the dry-run artifact."
+    )
+    phase_claude_deepseek_capture_parser.set_defaults(
+        handler=run_phase_claude_deepseek_capture
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
