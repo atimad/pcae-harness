@@ -3572,3 +3572,261 @@ def run_phase_runner_execution_request_show(args: argparse.Namespace) -> int:
     print(f"  Request ready: {'yes' if result['request_ready'] else 'no'}")
     print(f"  Message: {result['message'] or 'none'}")
     return 0
+
+
+RUNNER_EXECUTION_REQUEST_REVIEWS_DIR = Path(".pcae") / "runner-execution-request-reviews"
+
+
+def _build_runner_execution_request_review(root: HarnessPath) -> dict:
+    request = _read_latest_runner_execution_request(root)
+
+    if request is None:
+        return {
+            "review_status": "missing_request",
+            "review_reasons": ["No execution request artifact found. Run: pcae phase runner-execution-request --message '...'"],
+            "request_present": False,
+            "approval_granted": False,
+            "execution_authorized": False,
+        }
+
+    reasons: list[str] = []
+    missing: list[str] = []
+
+    if request.get("denied", False):
+        reasons.append("request has been denied")
+    if request.get("revoked", False):
+        reasons.append("request has been revoked")
+    if request.get("execution_authorized", False):
+        reasons.append("execution_authorized is true (unexpected)")
+
+    queue_validation = _build_queue_validate(root)
+    if not queue_validation["valid"]:
+        missing.append("queue validation failed")
+    if not queue_validation["queue_ready"]:
+        missing.append("queue is empty or not ready")
+
+    sim = _read_latest_simulation(root)
+    if sim is None:
+        missing.append("no simulation artifact")
+
+    status = "blocked" if reasons or missing else "ready_for_denial_or_future_authorization"
+
+    return {
+        "review_status": status,
+        "review_reasons": reasons or ["Request appears structurally valid but execution authorization is still unavailable."],
+        "missing_prerequisites": missing,
+        "request_present": True,
+        "request_id": request.get("request_id"),
+        "request_created_at": request.get("created_at"),
+        "request_execution_authorized": request.get("execution_authorized", False),
+        "request_denied": request.get("denied", False),
+        "request_revoked": request.get("revoked", False),
+        "approval_granted": False,
+        "execution_authorized": False,
+        "note": "Execution is not authorized. This review does not approve or authorize execution.",
+    }
+
+
+def _save_runner_execution_request_review(root: HarnessPath, review: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    review_with_ts = {**review, "reviewed_at": ts}
+    review_dir = root.join(RUNNER_EXECUTION_REQUEST_REVIEWS_DIR)
+    review_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = review_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = review_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(review_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_execution_request_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    review = _build_runner_execution_request_review(root)
+
+    if getattr(args, "save", False):
+        saved_path = _save_runner_execution_request_review(root, review)
+        if not args.json:
+            print(f"Review saved: {saved_path}")
+
+    if args.json:
+        print(json.dumps(review, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Execution Request Review")
+    print("=" * 40)
+    print(f"  Review status: {review['review_status']}")
+    print(f"  Request present: {'yes' if review['request_present'] else 'no'}")
+    if review["request_present"]:
+        print(f"  Request ID: {review['request_id'] or 'unknown'}")
+        print(f"  Request denied: {'yes' if review['request_denied'] else 'no'}")
+        print(f"  Request revoked: {'yes' if review['request_revoked'] else 'no'}")
+    print(f"  Approval granted: no")
+    print(f"  Execution authorized: no")
+    if review["missing_prerequisites"]:
+        print()
+        print("  Missing prerequisites:")
+        for m in review["missing_prerequisites"]:
+            print(f"    - {m}")
+    print()
+    print("  Reasons:")
+    for r in review["review_reasons"]:
+        print(f"    - {r}")
+    print()
+    print(f"  {review['note']}")
+    return 0
+
+
+RUNNER_EXECUTION_REQUEST_DENIALS_DIR = Path(".pcae") / "runner-execution-request-denials"
+RUNNER_EXECUTION_REQUEST_REVOCATIONS_DIR = Path(".pcae") / "runner-execution-request-revocations"
+
+
+def _build_runner_execution_request_deny(root: HarnessPath, message: str) -> dict:
+    request = _read_latest_runner_execution_request(root)
+
+    if request is None:
+        return {
+            "denied": False,
+            "execution_authorized": False,
+            "refusal_reason": "No execution request artifact found. Run: pcae phase runner-execution-request --message '...'",
+        }
+
+    if request.get("denied", False):
+        return {
+            "denied": True,
+            "execution_authorized": False,
+            "already_denied": True,
+            "request_id": request.get("request_id"),
+            "message": message,
+            "note": "Request was already denied. Idempotent: denial state unchanged.",
+        }
+
+    return {
+        "denied": True,
+        "execution_authorized": False,
+        "denied_request_id": request.get("request_id"),
+        "denied_request_created_at": request.get("created_at"),
+        "message": message,
+        "denier_source": "local_cli",
+    }
+
+
+def _save_runner_execution_request_denial(root: HarnessPath, denial: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    denial_with_ts = {**denial, "denied_at": ts}
+    denial_dir = root.join(RUNNER_EXECUTION_REQUEST_DENIALS_DIR)
+    denial_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = denial_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = denial_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(denial_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_execution_request_deny(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    message = getattr(args, "message", "") or "Execution request denied."
+    denial = _build_runner_execution_request_deny(root, message)
+
+    if not denial.get("denied", False):
+        if args.json:
+            print(json.dumps(denial, indent=2, sort_keys=True))
+        else:
+            print(f"Denial refused: {denial['refusal_reason']}")
+        return 1
+
+    _save_runner_execution_request_denial(root, denial)
+
+    if args.json:
+        print(json.dumps(denial, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Execution Request Denial")
+    print("=" * 40)
+    print(f"  Denied: yes")
+    print(f"  Already denied: {'yes' if denial.get('already_denied') else 'no'}")
+    print(f"  Request ID: {denial.get('denied_request_id') or denial.get('request_id') or 'unknown'}")
+    print(f"  Execution authorized: no")
+    print(f"  Message: {message}")
+    return 0
+
+
+def _build_runner_execution_request_revoke(root: HarnessPath, message: str) -> dict:
+    request = _read_latest_runner_execution_request(root)
+
+    if request is None:
+        return {
+            "revoked": False,
+            "execution_authorized": False,
+            "refusal_reason": "No execution request artifact found. Run: pcae phase runner-execution-request --message '...'",
+        }
+
+    if request.get("revoked", False):
+        return {
+            "revoked": True,
+            "execution_authorized": False,
+            "already_revoked": True,
+            "request_id": request.get("request_id"),
+            "message": message,
+            "note": "Request was already revoked. Idempotent: revocation state unchanged.",
+        }
+
+    return {
+        "revoked": True,
+        "execution_authorized": False,
+        "revoked_request_id": request.get("request_id"),
+        "revoked_request_created_at": request.get("created_at"),
+        "message": message,
+        "revoker_source": "local_cli",
+    }
+
+
+def _save_runner_execution_request_revocation(root: HarnessPath, revocation: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    revocation_with_ts = {**revocation, "revoked_at": ts}
+    revoke_dir = root.join(RUNNER_EXECUTION_REQUEST_REVOCATIONS_DIR)
+    revoke_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = revoke_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = revoke_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(revocation_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_execution_request_revoke(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    message = getattr(args, "message", "") or "Execution request revoked."
+    revocation = _build_runner_execution_request_revoke(root, message)
+
+    if not revocation.get("revoked", False):
+        if args.json:
+            print(json.dumps(revocation, indent=2, sort_keys=True))
+        else:
+            print(f"Revocation refused: {revocation['refusal_reason']}")
+        return 1
+
+    _save_runner_execution_request_revocation(root, revocation)
+
+    if args.json:
+        print(json.dumps(revocation, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Execution Request Revocation")
+    print("=" * 40)
+    print(f"  Revoked: yes")
+    print(f"  Already revoked: {'yes' if revocation.get('already_revoked') else 'no'}")
+    print(f"  Request ID: {revocation.get('revoked_request_id') or revocation.get('request_id') or 'unknown'}")
+    print(f"  Execution authorized: no")
+    print(f"  Message: {message}")
+    return 0

@@ -421,6 +421,9 @@ from pcae.commands.phase import (
     run_phase_runner_execute,
     run_phase_runner_execution_authorize,
     run_phase_runner_execution_request,
+    run_phase_runner_execution_request_deny,
+    run_phase_runner_execution_request_review,
+    run_phase_runner_execution_request_revoke,
     run_phase_runner_execution_request_show,
     run_phase_runner_execution_authorization_schema,
     run_phase_runner_execution_preflight,
@@ -5208,6 +5211,48 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_runner_execution_request_show_parser.set_defaults(
         handler=run_phase_runner_execution_request_show
+    )
+
+    phase_runner_execution_request_review_parser = phase_subparsers.add_parser(
+        "runner-execution-request-review",
+        help="Review an execution authorization request (does not authorize execution).",
+    )
+    phase_runner_execution_request_review_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_request_review_parser.add_argument(
+        "--save", action="store_true", help="Persist the review artifact."
+    )
+    phase_runner_execution_request_review_parser.set_defaults(
+        handler=run_phase_runner_execution_request_review
+    )
+
+    phase_runner_execution_request_deny_parser = phase_subparsers.add_parser(
+        "runner-execution-request-deny",
+        help="Deny an execution authorization request (does not authorize execution).",
+    )
+    phase_runner_execution_request_deny_parser.add_argument(
+        "--message", default=None, help="Denial message."
+    )
+    phase_runner_execution_request_deny_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_request_deny_parser.set_defaults(
+        handler=run_phase_runner_execution_request_deny
+    )
+
+    phase_runner_execution_request_revoke_parser = phase_subparsers.add_parser(
+        "runner-execution-request-revoke",
+        help="Revoke an execution authorization request (does not authorize execution).",
+    )
+    phase_runner_execution_request_revoke_parser.add_argument(
+        "--message", default=None, help="Revocation message."
+    )
+    phase_runner_execution_request_revoke_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_request_revoke_parser.set_defaults(
+        handler=run_phase_runner_execution_request_revoke
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

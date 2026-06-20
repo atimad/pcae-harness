@@ -7389,3 +7389,82 @@ def test_72u_execution_request_no_task_created(
     capsys.readouterr()
 
     assert list((tmp_path / "tasks" / "active").glob("*.md")) == before_tasks
+
+
+# ---------------------------------------------------------------------------
+# Phase 72V: execution authorization request review
+# ---------------------------------------------------------------------------
+
+
+def test_72v_request_review_missing_request(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-request-review", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["review_status"] == "missing_request"
+    assert data["request_present"] is False
+    assert data["approval_granted"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72v_request_review_with_request(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Review me"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-request-review", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["request_present"] is True
+    assert data["approval_granted"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72v_request_review_save(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Save review test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-request-review", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approval_granted"] is False
+    assert data["execution_authorized"] is False
+    review_path = tmp_path / ".pcae" / "runner-execution-request-reviews" / "latest.json"
+    assert review_path.is_file()
+    saved = json.loads(review_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_72v_request_review_no_approval(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "No approval test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-request-review", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["approval_granted"] is False
+    assert data["execution_authorized"] is False
+    assert data["note"] is not None

@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72U: Execution Authorization Request Artifact.
+Phase 72V: Execution Authorization Request Review.
 
-Phase 72U adds `pcae phase runner-execution-request` and
-`runner-execution-request-show` for creating a non-authorizing execution request
-with governance snapshot. Request always sets `execution_authorized=false`,
-`approved=false`, `denied=false`, `revoked=false`. No queue/task mutation.
+Phase 72V adds `pcae phase runner-execution-request-review` for evaluating
+execution authorization requests without approving execution. Reports review
+status, missing prerequisites, `approval_granted=false`, `execution_authorized=false`.
+No execution, no task creation.
 
 ## Milestone: Execution Chain Traceability Complete
 
