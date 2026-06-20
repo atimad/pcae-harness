@@ -10510,6 +10510,97 @@ def test_75i1_classification_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["execution_authorized"] is False
 
 
+# Phase 76A: captured output human approval artifact
+def test_76a_approval_missing_recheck(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-human-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["approval_status"] == "missing_recheck"
+    assert d["human_approval_granted"] is False
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76a_approval_ready_unapproved(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Create ready recheck
+    rd = tmp_path / ".pcae" / "captured-output-manual-apply-approval-rechecks"
+    rd.mkdir(parents=True, exist_ok=True)
+    (rd / "latest.json").write_text(json.dumps({"recheck_status": "approval_review_ready"}))
+    main(["phase", "captured-output-human-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["approval_status"] == "ready_for_approval_request"
+    assert d["human_approval_granted"] is False
+    assert d["human_approval_artifact_present"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["apply_performed"] is False
+
+
+def test_76a_approval_approved_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    rd = tmp_path / ".pcae" / "captured-output-manual-apply-approval-rechecks"
+    rd.mkdir(parents=True, exist_ok=True)
+    (rd / "latest.json").write_text(json.dumps({"recheck_status": "approval_review_ready"}))
+    main(["phase", "captured-output-human-approval", "--approve", "--approved-by", "Tester",
+          "--reason", "Testing approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["approval_status"] == "approved"
+    assert d["human_approval_granted"] is True
+    assert d["approved_by"] == "Tester"
+    assert d["approval_reason"] == "Testing approval"
+    assert d["manual_apply_allowed_after_validation"] is True
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["backend_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76a_approval_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    rd = tmp_path / ".pcae" / "captured-output-manual-apply-approval-rechecks"
+    rd.mkdir(parents=True, exist_ok=True)
+    (rd / "latest.json").write_text(json.dumps({"recheck_status": "approval_review_ready"}))
+    main(["phase", "captured-output-human-approval", "--approve", "--approved-by", "T",
+          "--reason", "R", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-human-approvals" / "latest.json"
+    assert p.is_file()
+    d2 = json.loads(p.read_text(encoding="utf-8"))
+    assert d2["human_approval_granted"] is True
+    assert d2["execution_authorized"] is False
+    assert d2["apply_performed"] is False
+
+
+def test_76a_approval_show_no_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "captured-output-human-approval-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["human_approval_granted"] is False
+    assert d["human_approval_artifact_present"] is False
+    assert exit_code != 0
+
+
+def test_76a_approval_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-human-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
+
+
 # Phase 75I.2: governance bypass declaration reconciliation
 def test_75i2_reconcile_missing_classification(tmp_path, monkeypatch, capsys):
     from pcae.commands.init import init_harness

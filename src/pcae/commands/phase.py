@@ -9874,3 +9874,149 @@ def run_phase_captured_output_manual_apply_approval_recheck(args: argparse.Names
         print(f"\n  Historical advisories ({len(result['historical_advisories'])} retained)")
     print(f"\n  {result['next_operator_action']}")
     return 0 if result["recheck_status"] == "approval_review_ready" else 1
+
+
+# Phase 76A: captured output human approval artifact
+CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR = Path(".pcae") / "captured-output-human-approvals"
+
+
+def _build_captured_output_human_approval(root: HarnessPath, approve: bool = False,
+                                          approved_by: str = "", reason: str = "") -> dict:
+    base = {
+        "approval_status": "blocked", "human_approval_granted": False,
+        "human_approval_artifact_present": False, "approved_by": None,
+        "approval_reason": None, "approval_scope": None,
+        "captured_output_ref": None, "captured_output_digest": None,
+        "apply_dry_run_ref": None, "allowed_files": [], "forbidden_files": [
+            "No backend invocation", "No prompt execution", "No patch application",
+            "No project code modification from backend output",
+            "No automatic commit", "No automatic task finish", "No automatic push",
+            "No execution authorization", "No runner-execute real execution",
+        ],
+        "validation_commands_after_manual_apply": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "manual_apply_allowed_after_validation": False, "manual_apply_allowed": False,
+        "automatic_apply_allowed": False, "backend_apply_allowed": False,
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read recheck
+    recheck_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_RECHECKS_DIR / "latest.json")
+    if not recheck_path.is_file():
+        base["approval_status"] = "missing_recheck"
+        base["blockers"] = ["No approval recheck found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-approval-recheck --save first."
+        return base
+    recheck = json.loads(recheck_path.read_text(encoding="utf-8"))
+    if recheck.get("recheck_status") != "approval_review_ready":
+        base["approval_status"] = "preflight_not_ready"
+        base["blockers"] = [f"Recheck not ready: {recheck.get('recheck_status')}"]
+        base["next_operator_action"] = "Ensure approval recheck is approval_review_ready before requesting approval."
+        return base
+
+    # Read readiness and lifecycle for refs
+    readiness_path = root.join(ACTIVATED_TASK_CAPTURE_MANUAL_APPLY_READINESS_DIR / "latest.json")
+    if readiness_path.is_file():
+        readiness = json.loads(readiness_path.read_text(encoding="utf-8"))
+        base["captured_output_ref"] = readiness.get("capture_ref")
+        base["apply_dry_run_ref"] = readiness.get("apply_dry_run_ref")
+        base["allowed_files"] = readiness.get("would_touch_files", [])
+
+    # Digest captured output
+    capture_dir = root.join(ACTIVATED_TASK_PROMPT_CAPTURES_DIR)
+    if base["captured_output_ref"]:
+        stdout_path = capture_dir / "latest.stdout.txt"
+        if stdout_path.is_file():
+            base["captured_output_digest"] = hashlib.sha256(stdout_path.read_bytes()).hexdigest()[:16]
+
+    if not approve:
+        base["approval_status"] = "ready_for_approval_request"
+        base["human_approval_granted"] = False
+        base["human_approval_artifact_present"] = False
+        base["blockers"] = []
+        base["next_operator_action"] = (
+            "All prerequisites ready. Run pcae phase captured-output-human-approval "
+            "--approve --approved-by \"<name>\" --reason \"<reason>\" to grant explicit human approval."
+        )
+        return base
+
+    # Approve
+    base["approval_status"] = "approved"
+    base["human_approval_granted"] = True
+    base["human_approval_artifact_present"] = True
+    base["approved_by"] = approved_by or "operator"
+    base["approval_reason"] = reason or "Explicit human approval for captured output manual apply."
+    base["approval_scope"] = {
+        "captured_output_ref": base["captured_output_ref"],
+        "captured_output_digest": base["captured_output_digest"],
+        "apply_dry_run_ref": base["apply_dry_run_ref"],
+        "allowed_files": base["allowed_files"],
+        "forbidden_files": base["forbidden_files"],
+        "validation_commands": base["validation_commands_after_manual_apply"],
+    }
+    base["manual_apply_allowed_after_validation"] = True
+    base["manual_apply_allowed"] = False  # this phase does not apply
+    base["blockers"] = []
+    base["next_operator_action"] = (
+        "Human approval granted. Manual apply is NOT performed in this phase. "
+        "Run pcae phase captured-output-human-approval-validate to validate approval, "
+        "then pcae phase captured-output-manual-apply-execution-preflight before any future apply."
+    )
+    return base
+
+
+def run_phase_captured_output_human_approval(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    approve = getattr(args, "approve", False)
+    approved_by = getattr(args, "approved_by", "") or ""
+    reason = getattr(args, "reason", "") or ""
+    result = _build_captured_output_human_approval(root, approve=approve, approved_by=approved_by, reason=reason)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Human approval saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["human_approval_granted"] else 1
+    print("Captured Output Human Approval"); print("=" * 40)
+    print(f"  Approval status: {result['approval_status']}")
+    print(f"  Human approval granted: {'yes' if result['human_approval_granted'] else 'no'}")
+    print(f"  Approved by: {result['approved_by'] or 'n/a'}")
+    print(f"  Manual apply allowed after validation: {'yes' if result['manual_apply_allowed_after_validation'] else 'no'}")
+    print(f"  Manual apply allowed (this phase): no")
+    print(f"  Automatic apply allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["human_approval_granted"] else 1
+
+
+def run_phase_captured_output_human_approval_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+    if not p.is_file():
+        result = {"approval_status": "no_artifact", "human_approval_granted": False,
+                  "human_approval_artifact_present": False}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No human approval artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    result["human_approval_artifact_present"] = True
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("human_approval_granted") else 1
+    print("Captured Output Human Approval (Show)"); print("=" * 40)
+    print(f"  Approval status: {result.get('approval_status', 'unknown')}")
+    print(f"  Human approval granted: {'yes' if result.get('human_approval_granted') else 'no'}")
+    print(f"  Approved by: {result.get('approved_by', 'n/a')}")
+    print(f"  Approval reason: {result.get('approval_reason', 'n/a')[:100]}")
+    print(f"  Artifact present: yes")
+    return 0 if result.get("human_approval_granted") else 1

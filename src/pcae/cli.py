@@ -477,6 +477,8 @@ from pcae.commands.phase import (
     run_phase_governance_bypass_classification,
     run_phase_governance_bypass_reconcile,
     run_phase_captured_output_manual_apply_approval_recheck,
+    run_phase_captured_output_human_approval,
+    run_phase_captured_output_human_approval_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6178,6 +6180,25 @@ def build_parser() -> argparse.ArgumentParser:
     phase_captured_output_manual_apply_approval_recheck_parser.add_argument("--json", action="store_true")
     phase_captured_output_manual_apply_approval_recheck_parser.add_argument("--save", action="store_true")
     phase_captured_output_manual_apply_approval_recheck_parser.set_defaults(handler=run_phase_captured_output_manual_apply_approval_recheck)
+
+    # Phase 76A
+    phase_captured_output_human_approval_parser = phase_subparsers.add_parser(
+        "captured-output-human-approval",
+        help="Human approval artifact for captured output manual apply (Phase 76A).",
+    )
+    phase_captured_output_human_approval_parser.add_argument("--json", action="store_true")
+    phase_captured_output_human_approval_parser.add_argument("--save", action="store_true")
+    phase_captured_output_human_approval_parser.add_argument("--approve", action="store_true")
+    phase_captured_output_human_approval_parser.add_argument("--approved-by", type=str, default="")
+    phase_captured_output_human_approval_parser.add_argument("--reason", type=str, default="")
+    phase_captured_output_human_approval_parser.set_defaults(handler=run_phase_captured_output_human_approval)
+
+    phase_captured_output_human_approval_show_parser = phase_subparsers.add_parser(
+        "captured-output-human-approval-show",
+        help="Show latest human approval artifact for captured output (Phase 76A).",
+    )
+    phase_captured_output_human_approval_show_parser.add_argument("--json", action="store_true")
+    phase_captured_output_human_approval_show_parser.set_defaults(handler=run_phase_captured_output_human_approval_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

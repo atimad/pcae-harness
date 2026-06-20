@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 75I.3: Captured Output Manual Apply Approval Recheck.
+Phase 76A: Captured Output Human Approval Artifact.
 
-Phase 75I.3 adds `pcae phase captured-output-manual-apply-approval-recheck --json --save`
-rechecking manual apply approval after bypass reconciliation. When non-blocking,
-human approval can be requested (future phase 76A). Recheck only — does not apply,
-modify project code, invoke backend, or authorize runner execution.
+Phase 76A adds `pcae phase captured-output-human-approval [--approve] --json --save`
+and `pcae phase captured-output-human-approval-show --json`. Binds explicit human
+approval to a specific captured output and apply dry-run without applying anything.
+Artifact only — does not apply, modify project code, invoke backend, or authorize execution.
 
 ## Milestone: Execution Chain Traceability Complete
 
