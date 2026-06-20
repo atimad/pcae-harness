@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74T Claude-DeepSeek Capture Smoke Scenario (20260620-1422-74t-claude-deepseek-capture-smoke-scenario)
 - 74S Claude-DeepSeek Capture Execute Enablement (20260620-1422-74s-claude-deepseek-capture-execute-enablement)
 - 74R Claude-DeepSeek Invocation Safety Review (20260620-1417-74r-claude-deepseek-invocation-safety-review)
 - 74Q Captured Output Intake Bridge (20260620-1408-74q-captured-output-intake-bridge)
