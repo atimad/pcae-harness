@@ -7280,3 +7280,112 @@ def test_72t_runner_execute_human_output_unmistakable(
     assert "mutation performed: no" in output.lower()
     assert "tasks created: 0" in output.lower()
     assert "queue mutated: no" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 72U: execution authorization request artifact
+# ---------------------------------------------------------------------------
+
+
+def test_72u_execution_request_dry_run_writes_nothing(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-request", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["dry_run"] is True
+    assert data["artifact_written"] is False
+    assert data["execution_authorized"] is False
+    assert not (tmp_path / ".pcae" / "runner-execution-requests" / "latest.json").exists()
+
+
+def test_72u_execution_request_persists_with_correct_fields(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-request", "--message", "Test request", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["requested"] is True
+    assert data["approved"] is False
+    assert data["denied"] is False
+    assert data["revoked"] is False
+    assert data["execution_authorized"] is False
+    assert data["requester_source"] == "local_cli"
+    assert data["artifact_written"] is True
+
+    approval_path = tmp_path / ".pcae" / "runner-execution-requests" / "latest.json"
+    assert approval_path.is_file()
+    saved = json.loads(approval_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_72u_execution_request_show_when_present(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Show test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-request-show", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["present"] is True
+    assert data["execution_authorized"] is False
+    assert data["requested"] is True
+
+
+def test_72u_execution_request_show_none(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-request-show", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["present"] is False
+
+
+def test_72u_execution_request_no_queue_mutation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-execution-request", "--message", "No mutation"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_72u_execution_request_no_task_created(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    before_tasks = list((tmp_path / "tasks" / "active").glob("*.md"))
+
+    main(["phase", "runner-execution-request", "--message", "No tasks"])
+    capsys.readouterr()
+
+    assert list((tmp_path / "tasks" / "active").glob("*.md")) == before_tasks

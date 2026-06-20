@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72T: Runner Execution Command Stub Refusal.
+Phase 72U: Execution Authorization Request Artifact.
 
-Phase 72T adds `pcae phase runner-execute` as an explicit stub that always refuses
-execution, reporting `execution_available=false`, `execution_authorized=false`,
-`mutation_performed=false`, `tasks_created=0`, `queue_mutated=false`. No queue
-mutation, no task creation, no artifact persistence, no execution.
+Phase 72U adds `pcae phase runner-execution-request` and
+`runner-execution-request-show` for creating a non-authorizing execution request
+with governance snapshot. Request always sets `execution_authorized=false`,
+`approved=false`, `denied=false`, `revoked=false`. No queue/task mutation.
 
 ## Milestone: Execution Chain Traceability Complete
 

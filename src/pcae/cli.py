@@ -420,6 +420,8 @@ from pcae.commands.phase import (
     run_phase_runner_readiness,
     run_phase_runner_execute,
     run_phase_runner_execution_authorize,
+    run_phase_runner_execution_request,
+    run_phase_runner_execution_request_show,
     run_phase_runner_execution_authorization_schema,
     run_phase_runner_execution_preflight,
     run_phase_runner_sim_approve,
@@ -5179,6 +5181,34 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     phase_runner_execute_parser.set_defaults(handler=run_phase_runner_execute)
+
+    phase_runner_execution_request_parser = phase_subparsers.add_parser(
+        "runner-execution-request",
+        help="Create an execution authorization request (does not authorize execution).",
+    )
+    phase_runner_execution_request_parser.add_argument(
+        "--message", default=None, help="Request message."
+    )
+    phase_runner_execution_request_parser.add_argument(
+        "--dry-run", action="store_true", help="Report proposed request without writing."
+    )
+    phase_runner_execution_request_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_request_parser.set_defaults(
+        handler=run_phase_runner_execution_request
+    )
+
+    phase_runner_execution_request_show_parser = phase_subparsers.add_parser(
+        "runner-execution-request-show",
+        help="Show the latest persisted execution authorization request.",
+    )
+    phase_runner_execution_request_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_request_show_parser.set_defaults(
+        handler=run_phase_runner_execution_request_show
+    )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
         "runner-sim-approve",

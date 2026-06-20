@@ -3432,3 +3432,143 @@ def run_phase_runner_execute(args: argparse.Namespace) -> int:
     print()
     print(f"  {result['note']}")
     return 1
+
+
+RUNNER_EXECUTION_REQUESTS_DIR = Path(".pcae") / "runner-execution-requests"
+
+
+def _build_runner_execution_request(root: HarnessPath, message: str) -> dict:
+    queue_validation = _build_queue_validate(root)
+    sim = _read_latest_simulation(root)
+    timestamp = datetime.now(timezone.utc)
+    request_id = f"req-{timestamp:%Y%m%dT%H%M%S}-{timestamp.microsecond:06d}"
+
+    return {
+        "request_id": request_id,
+        "requested": True,
+        "approved": False,
+        "denied": False,
+        "revoked": False,
+        "execution_authorized": False,
+        "created_at": timestamp.isoformat(),
+        "requester_source": "local_cli",
+        "message": message,
+        "request_ready": queue_validation["queue_ready"] and queue_validation["valid"],
+        "artifact_written": False,
+        "snapshot": {
+            "queue_validation": {
+                "valid": queue_validation["valid"],
+                "queue_ready": queue_validation["queue_ready"],
+                "entry_count": queue_validation["queue_entry_count"],
+            },
+            "simulation_present": sim is not None,
+            "note": "No execution performed. This is a request only.",
+        },
+    }
+
+
+def _save_runner_execution_request(root: HarnessPath, request: dict) -> Path:
+    request_dir = root.join(RUNNER_EXECUTION_REQUESTS_DIR)
+    request_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = request_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = request_dir / "latest.json"
+    request_with_written = {**request, "artifact_written": True}
+    latest_path.write_text(
+        json.dumps(request_with_written, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def _read_latest_runner_execution_request(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_EXECUTION_REQUESTS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def run_phase_runner_execution_request(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    message = getattr(args, "message", "") or "Execution authorization requested."
+    dry_run = getattr(args, "dry_run", False)
+    request = _build_runner_execution_request(root, message)
+
+    if not dry_run:
+        _save_runner_execution_request(root, request)
+
+    if args.json:
+        result = {**request, "dry_run": dry_run, "artifact_written": not dry_run}
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Execution Request")
+    print("=" * 40)
+    print(f"  Request ID: {request['request_id']}")
+    print(f"  Requested: yes")
+    print(f"  Approved: no")
+    print(f"  Denied: no")
+    print(f"  Revoked: no")
+    print(f"  Execution authorized: no")
+    print(f"  Request ready: {'yes' if request['request_ready'] else 'no'}")
+    print(f"  Dry run: {'yes' if dry_run else 'no'}")
+    print(f"  Artifact written: {'yes' if not dry_run else 'no'}")
+    print(f"  Message: {request['message']}")
+    print()
+    print(f"  Snapshot:")
+    qv = request["snapshot"]["queue_validation"]
+    print(f"    Queue valid: {'yes' if qv['valid'] else 'no'}")
+    print(f"    Queue ready: {'yes' if qv['queue_ready'] else 'no'}")
+    print(f"    Entry count: {qv['entry_count']}")
+    print(f"    Simulation present: {'yes' if request['snapshot']['simulation_present'] else 'no'}")
+    print()
+    print(f"  No execution performed. This is a request only.")
+    return 0
+
+
+def run_phase_runner_execution_request_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    request = _read_latest_runner_execution_request(root)
+
+    if request is None:
+        if args.json:
+            print(json.dumps({"present": False, "reason": "No execution request artifact found."}, indent=2, sort_keys=True))
+        else:
+            print("No execution request artifact found.")
+            print("Run: pcae phase runner-execution-request --message '...'")
+        return 1
+
+    result = {
+        "present": True,
+        "request_id": request.get("request_id"),
+        "requested": request.get("requested", False),
+        "approved": request.get("approved", False),
+        "denied": request.get("denied", False),
+        "revoked": request.get("revoked", False),
+        "execution_authorized": request.get("execution_authorized", False),
+        "created_at": request.get("created_at"),
+        "message": request.get("message"),
+        "request_ready": request.get("request_ready", False),
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Execution Request (persisted)")
+    print("=" * 40)
+    print(f"  Present: yes")
+    print(f"  Request ID: {result['request_id'] or 'unknown'}")
+    print(f"  Created: {result['created_at'] or 'unknown'}")
+    print(f"  Requested: {'yes' if result['requested'] else 'no'}")
+    print(f"  Approved: {'yes' if result['approved'] else 'no'}")
+    print(f"  Denied: {'yes' if result['denied'] else 'no'}")
+    print(f"  Revoked: {'yes' if result['revoked'] else 'no'}")
+    print(f"  Execution authorized: {'yes' if result['execution_authorized'] else 'no'}")
+    print(f"  Request ready: {'yes' if result['request_ready'] else 'no'}")
+    print(f"  Message: {result['message'] or 'none'}")
+    return 0
