@@ -9738,3 +9738,139 @@ def run_phase_governance_bypass_reconcile(args: argparse.Namespace) -> int:
         print(f"\n  Recommendations:"); [print(f"    - {r}") for r in result["recommendations"]]
     print(f"\n  {result['next_operator_action']}")
     return 0 if result["reconciliation_status"] in ("clean", "reconciled_advisory_only") else 1
+
+
+# Phase 75I.3: captured output manual apply approval recheck
+CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_RECHECKS_DIR = Path(".pcae") / "captured-output-manual-apply-approval-rechecks"
+
+
+def _build_captured_output_manual_apply_approval_recheck(root: HarnessPath) -> dict:
+    base = {
+        "recheck_status": "blocked", "review_status_after_recheck": "blocked",
+        "preflight_status_after_recheck": "blocked",
+        "human_approval_can_be_requested": False, "human_approval_granted": False,
+        "human_approval_artifact_present": False, "manual_apply_allowed": False,
+        "automatic_apply_allowed": False, "backend_apply_allowed": False,
+        "governance_reconciliation_ref": None, "historical_advisories": [],
+        "unresolved_risks": [],
+        "recommended_next_phase": "76A — Captured Output Human Approval Artifact (future)",
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read reconciliation
+    reconcile_path = root.join(GOVERNANCE_BYPASS_RECONCILIATIONS_DIR / "latest.json")
+    if not reconcile_path.is_file():
+        base["recheck_status"] = "reconciliation_missing"
+        base["blockers"] = ["No governance bypass reconciliation found."]
+        base["next_operator_action"] = "Run pcae phase governance-bypass-reconcile --save first."
+        return base
+    reconciliation = json.loads(reconcile_path.read_text(encoding="utf-8"))
+    base["governance_reconciliation_ref"] = str(GOVERNANCE_BYPASS_RECONCILIATIONS_DIR / "latest.json")
+    reconcil_status = reconciliation.get("reconciliation_status", "missing_classification")
+    manual_apply_blocking = reconciliation.get("manual_apply_blocking", True)
+
+    if reconcil_status in ("missing_classification",):
+        base["recheck_status"] = "reconciliation_missing"
+        base["blockers"] = ["Reconciliation is missing classification."]
+        base["next_operator_action"] = "Run pcae phase governance-bypass-classification --save first."
+        return base
+
+    if manual_apply_blocking:
+        base["recheck_status"] = "unresolved_blockers"
+        base["review_status_after_recheck"] = "unresolved_risk"
+        base["preflight_status_after_recheck"] = "review_not_ready"
+        base["blockers"] = [
+            f"Manual apply is blocked by bypass reconciliation: {reconcil_status}.",
+            f"{len(reconciliation.get('unresolved_findings', []))} unresolved finding(s).",
+            f"{len(reconciliation.get('blocking_findings', []))} blocking finding(s).",
+        ]
+        unresolved = reconciliation.get("unresolved_findings", []) + reconciliation.get("blocking_findings", [])
+        base["unresolved_risks"] = [
+            {"commit": u.get("commit"), "message": u.get("message", "")} for u in unresolved
+        ]
+        base["next_operator_action"] = "Address blocking findings before manual apply approval can proceed."
+        return base
+
+    # Non-blocking: reconciliation is clean or reconciled_advisory_only
+    # Read approval contract for context
+    contract_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR / "latest.json")
+    contract_ready = True
+    if contract_path.is_file():
+        contract = json.loads(contract_path.read_text(encoding="utf-8"))
+        if contract.get("contract_status") != "ready":
+            contract_ready = False
+
+    # Read approval review
+    review_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_REVIEWS_DIR / "latest.json")
+    review_ready = False
+    if review_path.is_file():
+        review = json.loads(review_path.read_text(encoding="utf-8"))
+        if review.get("review_status") in ("approval_review_ready",):
+            review_ready = True
+
+    # If reconciliation is non-blocking, bypass report findings are historical/advisory
+    base["historical_advisories"] = reconciliation.get("reconciled_historical_advisories", [])
+    base["historical_advisories"].extend([
+        {"type": "audit_warning", "warning": w}
+        for w in reconciliation.get("audit_warnings", [])
+    ])
+    base["unresolved_risks"] = []
+
+    # Contract must be ready
+    if not contract_ready:
+        base["recheck_status"] = "blocked"
+        base["review_status_after_recheck"] = "contract_not_ready"
+        base["preflight_status_after_recheck"] = "contract_not_ready"
+        base["blockers"] = ["Approval contract is not ready."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-approval-contract --save to refresh."
+        return base
+
+    # Ready
+    base["recheck_status"] = "approval_review_ready"
+    base["review_status_after_recheck"] = "approval_review_ready"
+    base["preflight_status_after_recheck"] = "ready_for_human_approval"
+    base["human_approval_can_be_requested"] = True
+    base["blockers"] = []
+    base["recommended_next_phase"] = "76A — Captured Output Human Approval Artifact (future)"
+    base["next_operator_action"] = (
+        "Recheck complete. Governance bypass findings are reconciled as non-blocking historical advisories. "
+        "Manual apply approval can now be requested in a future phase. "
+        "The next expected phase is 76A (human approval artifact). "
+        "Do not apply output, commit, or authorize execution without explicit human approval artifact."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_approval_recheck(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_approval_recheck(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_RECHECKS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Recheck saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["recheck_status"] == "approval_review_ready" else 1
+    print("Captured Output Manual Apply Approval Recheck"); print("=" * 40)
+    print(f"  Recheck status: {result['recheck_status']}")
+    print(f"  Review after recheck: {result['review_status_after_recheck']}")
+    print(f"  Preflight after recheck: {result['preflight_status_after_recheck']}")
+    print(f"  Human approval can be requested: {'yes' if result['human_approval_can_be_requested'] else 'no'}")
+    print(f"  Human approval granted: no")
+    print(f"  Human approval artifact present: no")
+    print(f"  Manual apply allowed: no")
+    print(f"  Automatic apply allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["historical_advisories"]:
+        print(f"\n  Historical advisories ({len(result['historical_advisories'])} retained)")
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["recheck_status"] == "approval_review_ready" else 1

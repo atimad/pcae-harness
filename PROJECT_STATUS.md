@@ -2,11 +2,12 @@
 
 ## Current Phase
 
-Phase 75I.2: Governance Bypass Declaration Reconciliation.
+Phase 75I.3: Captured Output Manual Apply Approval Recheck.
 
-Phase 75I.2 adds `pcae phase governance-bypass-reconcile --json --save`
-reconciling bypass classification findings into a decision about manual apply blocking.
-Reconciliation only — does not rewrite history, suppress warnings, or authorize execution.
+Phase 75I.3 adds `pcae phase captured-output-manual-apply-approval-recheck --json --save`
+rechecking manual apply approval after bypass reconciliation. When non-blocking,
+human approval can be requested (future phase 76A). Recheck only — does not apply,
+modify project code, invoke backend, or authorize runner execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

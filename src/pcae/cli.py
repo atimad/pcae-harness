@@ -476,6 +476,7 @@ from pcae.commands.phase import (
     run_phase_captured_output_manual_apply_preflight,
     run_phase_governance_bypass_classification,
     run_phase_governance_bypass_reconcile,
+    run_phase_captured_output_manual_apply_approval_recheck,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6168,6 +6169,15 @@ def build_parser() -> argparse.ArgumentParser:
     phase_governance_bypass_reconcile_parser.add_argument("--json", action="store_true")
     phase_governance_bypass_reconcile_parser.add_argument("--save", action="store_true")
     phase_governance_bypass_reconcile_parser.set_defaults(handler=run_phase_governance_bypass_reconcile)
+
+    # Phase 75I.3
+    phase_captured_output_manual_apply_approval_recheck_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-approval-recheck",
+        help="Recheck manual apply approval after bypass reconciliation (Phase 75I.3).",
+    )
+    phase_captured_output_manual_apply_approval_recheck_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_approval_recheck_parser.add_argument("--save", action="store_true")
+    phase_captured_output_manual_apply_approval_recheck_parser.set_defaults(handler=run_phase_captured_output_manual_apply_approval_recheck)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

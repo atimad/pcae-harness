@@ -10585,3 +10585,111 @@ def test_75i2_reconcile_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["push_performed"] is False
     assert d["implementation_performed"] is False
     assert d["execution_authorized"] is False
+
+
+# Phase 75I.3: captured output manual apply approval recheck
+def test_75i3_recheck_missing_reconciliation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-recheck", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["recheck_status"] == "reconciliation_missing"
+    assert d["human_approval_can_be_requested"] is False
+    assert d["human_approval_granted"] is False
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75i3_recheck_unresolved_blockers(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    rd = tmp_path / ".pcae" / "governance-bypass-reconciliations"
+    rd.mkdir(parents=True, exist_ok=True)
+    (rd / "latest.json").write_text(json.dumps({
+        "reconciliation_status": "unresolved_blockers",
+        "manual_apply_blocking": True,
+        "unresolved_findings": [{"commit": "abc", "message": "test"}],
+        "blocking_findings": [{"commit": "def", "message": "test2"}],
+        "declared_bypass_commits": [],
+        "reconciled_historical_advisories": [],
+        "audit_warnings": [],
+    }))
+    main(["phase", "captured-output-manual-apply-approval-recheck", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["recheck_status"] == "unresolved_blockers"
+    assert d["human_approval_can_be_requested"] is False
+    assert d["apply_performed"] is False
+
+
+def test_75i3_recheck_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Create non-blocking reconciliation
+    rd = tmp_path / ".pcae" / "governance-bypass-reconciliations"
+    rd.mkdir(parents=True, exist_ok=True)
+    (rd / "latest.json").write_text(json.dumps({
+        "reconciliation_status": "reconciled_advisory_only",
+        "manual_apply_blocking": False,
+        "unresolved_findings": [], "blocking_findings": [],
+        "declared_bypass_commits": [], "reconciled_historical_advisories": [
+            {"commit": "abc", "message": "old commit", "category": "historical_advisory"},
+        ],
+        "audit_warnings": ["test audit warning"],
+    }))
+    # Create ready contract
+    cd = tmp_path / ".pcae" / "captured-output-manual-apply-approval-contracts"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / "latest.json").write_text(json.dumps({"contract_status": "ready"}))
+    main(["phase", "captured-output-manual-apply-approval-recheck", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["recheck_status"] == "approval_review_ready"
+    assert d["review_status_after_recheck"] == "approval_review_ready"
+    assert d["preflight_status_after_recheck"] == "ready_for_human_approval"
+    assert d["human_approval_can_be_requested"] is True
+    assert d["human_approval_granted"] is False
+    assert d["human_approval_artifact_present"] is False
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+    assert "76A" in d["recommended_next_phase"]
+
+
+def test_75i3_recheck_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    rd = tmp_path / ".pcae" / "governance-bypass-reconciliations"
+    rd.mkdir(parents=True, exist_ok=True)
+    (rd / "latest.json").write_text(json.dumps({
+        "reconciliation_status": "reconciled_advisory_only",
+        "manual_apply_blocking": False,
+        "unresolved_findings": [], "blocking_findings": [],
+        "declared_bypass_commits": [], "reconciled_historical_advisories": [],
+        "audit_warnings": [],
+    }))
+    cd = tmp_path / ".pcae" / "captured-output-manual-apply-approval-contracts"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / "latest.json").write_text(json.dumps({"contract_status": "ready"}))
+    main(["phase", "captured-output-manual-apply-approval-recheck", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-approval-rechecks" / "latest.json"
+    assert p.is_file()
+    d2 = json.loads(p.read_text(encoding="utf-8"))
+    assert d2["recheck_status"] == "approval_review_ready"
+    assert d2["execution_authorized"] is False
+    assert d2["apply_performed"] is False
+
+
+def test_75i3_recheck_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-recheck", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
