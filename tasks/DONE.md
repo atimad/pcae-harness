@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73I Single-Phase Runner Refusal Matrix (20260620-0841-73i-single-phase-runner-refusal-matrix)
 - 73H Single-Phase Runner Readiness Check (20260620-0836-73h-single-phase-runner-readiness-check)
 - 73G Single-Phase Runner Contract Design (20260620-0831-73g-single-phase-runner-contract-design)
 - 73F Runner No-Op Execution Preflight Integration (20260620-0813-73f-runner-no-op-execution-preflight-integration)
