@@ -646,6 +646,10 @@ def test_phase_handoff_json_output(
         "health_status",
         "latest_commit",
         "lifecycle_review",
+        "lock_backend_name",
+        "lock_sync_blockers",
+        "lock_sync_performed",
+        "lock_sync_requested",
         "manual_steps",
         "next_agent",
         "phase_queue_count",
@@ -9688,3 +9692,68 @@ def test_74w_prompt_smoke_no_task_package(tmp_path, monkeypatch, capsys):
     assert d["apply_performed"] is False
     assert d["commits_created"] == 0
     assert d["execution_authorized"] is False
+
+
+# Phase 74W.1: handoff lock synchronization
+def test_74w1_handoff_sync_lock_deepseek(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "handoff", "--next-agent", "claude-deepseek", "--summary", "switching", "--sync-lock", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_sync_requested"] is True
+    assert d["lock_sync_performed"] is True
+    assert d["lock_backend_name"] == "claude-deepseek"
+    assert d["lock_sync_blockers"] == []
+    # Verify lock was actually written
+    lock_path = tmp_path / ".pcae" / "agent-locks" / "latest.json"
+    assert lock_path.is_file()
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    assert lock["lock_status"] == "active"
+    assert lock["backend_name"] == "claude-deepseek"
+    assert lock["execution_authorized"] is False
+
+def test_74w1_handoff_sync_lock_kimi(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "handoff", "--next-agent", "claude-kimi", "--summary", "switching", "--sync-lock", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_sync_performed"] is True
+    assert d["lock_backend_name"] == "claude-kimi"
+    lock = json.loads((tmp_path / ".pcae" / "agent-locks" / "latest.json").read_text(encoding="utf-8"))
+    assert lock["backend_name"] == "claude-kimi"
+    assert lock["invocation_allowed"] is False
+    assert lock["execution_authorized"] is False
+
+def test_74w1_handoff_sync_lock_unknown_backend_blocked(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "handoff", "--next-agent", "unknown-bot", "--summary", "switching", "--sync-lock", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_sync_requested"] is True
+    assert d["lock_sync_performed"] is False
+    assert d["lock_backend_name"] is None
+    assert len(d["lock_sync_blockers"]) > 0
+
+def test_74w1_handoff_sync_lock_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "handoff", "--next-agent", "claude-deepseek", "--summary", "switching", "--sync-lock"]); out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Agent lock synced" in out
+
+def test_74w1_handoff_sync_lock_clears_previous(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Set lock to kimi first
+    main(["phase", "agent-lock-set", "--backend", "claude-kimi"]); capsys.readouterr()
+    # Sync to deepseek
+    main(["phase", "handoff", "--next-agent", "claude-deepseek", "--summary", "switching", "--sync-lock", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_sync_performed"] is True
+    lock = json.loads((tmp_path / ".pcae" / "agent-locks" / "latest.json").read_text(encoding="utf-8"))
+    assert lock["backend_name"] == "claude-deepseek"
+
+def test_74w1_handoff_no_sync_lock_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "handoff", "--next-agent", "claude-deepseek", "--summary", "switching", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_sync_requested"] is False
+    assert d["lock_sync_performed"] is False
+    # Lock should not be written (remains unset)
+    assert d["lock_sync_requested"] is False

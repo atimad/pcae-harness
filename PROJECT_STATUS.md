@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74W: Claude-DeepSeek Output-Only Prompt Smoke.
+Phase 74W.1: Handoff Lock Synchronization.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

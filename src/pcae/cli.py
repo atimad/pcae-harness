@@ -4749,6 +4749,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON handoff result.",
     )
+    phase_handoff_parser.add_argument(
+        "--sync-lock",
+        action="store_true",
+        help="Synchronize agent lock identity with --next-agent backend.",
+    )
     phase_handoff_parser.set_defaults(handler=run_phase_handoff)
 
     phase_handoff_show_parser = phase_subparsers.add_parser(

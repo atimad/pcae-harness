@@ -119,11 +119,36 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
     )
     _persist_handoff_artifact(root, handoff_artifact)
 
+    # Handle --sync-lock: synchronize agent lock with next-agent
+    sync_lock_requested = getattr(args, "sync_lock", False)
+    lock_sync_performed = False
+    lock_sync_blockers = []
+    lock_backend_name = None
+
+    if sync_lock_requested:
+        lockable_backends = {
+            "claude-local", "claude-deepseek", "claude-kimi",
+            "codex", "manual", "noop",
+        }
+        if next_agent in lockable_backends:
+            lock_result = _set_agent_lock(root, next_agent)
+            if lock_result["lock_status"] == "active":
+                lock_sync_performed = True
+                lock_backend_name = next_agent
+            else:
+                lock_sync_blockers.append(lock_result.get("refusal_reason", "lock set failed"))
+        else:
+            lock_sync_blockers.append(f"'{next_agent}' is not a recognized lockable backend identity")
+
     if args.json:
         full_json = {
             **handoff_artifact,
             "check_status": "passed" if result.check_passed else "failed",
             "explicit_next_agent": explicit_next_agent,
+            "lock_sync_requested": sync_lock_requested,
+            "lock_sync_performed": lock_sync_performed,
+            "lock_backend_name": lock_backend_name,
+            "lock_sync_blockers": lock_sync_blockers,
             "manual_steps": manual_steps,
             "provenance_event_count": result.provenance_event_count,
             "recommendation_note": (
@@ -211,6 +236,12 @@ def run_phase_handoff(args: argparse.Namespace) -> int:
         print(f"Agent lock: acquired by {result.next_agent}")
     else:
         print("Agent lock: not acquired (lock already held)")
+
+    if sync_lock_requested:
+        if lock_sync_performed:
+            print(f"Agent lock synced: {lock_backend_name} (active)")
+        else:
+            print(f"Agent lock sync blocked: {'; '.join(lock_sync_blockers)}")
 
     print()
     print("Manual handoff steps:")
