@@ -3121,6 +3121,10 @@ _PREFLIGHT_REQUIREMENTS = [
     {"requirement": "queue approval present", "check": "queue_approval_present"},
     {"requirement": "queue approval matches current queue", "check": "queue_approval_matches"},
     {"requirement": "queue approval execution_authorized=false", "check": "queue_approval_not_authorized"},
+    {"requirement": "execution request present", "check": "execution_request_present"},
+    {"requirement": "execution request not denied", "check": "execution_request_not_denied"},
+    {"requirement": "execution request not revoked", "check": "execution_request_not_revoked"},
+    {"requirement": "execution request review present", "check": "execution_request_review_present"},
     {"requirement": "runner-readiness environment_ready", "check": "environment_ready"},
     {"requirement": "runner-plan executable", "check": "plan_executable"},
     {"requirement": "runner-policy loaded", "check": "policy_loaded"},
@@ -3150,6 +3154,8 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
     queue = _read_phase_queue(root)
     queue_validation = _build_queue_validate(root)
     queue_approval = _read_latest_queue_approval(root)
+    exec_request = _read_latest_runner_execution_request(root)
+    exec_request_review = _read_latest_runner_execution_request_review(root)
     sim = _read_latest_simulation(root)
     review = _read_latest_sim_review(root)
     approval = _read_latest_sim_approval(root)
@@ -3167,6 +3173,12 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
         and queue_approval.get("execution_authorized") is False
     )
 
+    exec_request_present = exec_request is not None
+    exec_request_denied = exec_request.get("denied", False) if exec_request else False
+    exec_request_revoked = exec_request.get("revoked", False) if exec_request else False
+    exec_request_review_present = exec_request_review is not None
+    request_blocks = exec_request_denied or exec_request_revoked
+
     checks: dict[str, bool] = {
         "working_tree_clean": readiness["working_tree"] == "clean",
         "health_idle": readiness["health_status"] == "healthy",
@@ -3179,6 +3191,10 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
         "queue_approval_present": queue_approval_present,
         "queue_approval_matches": queue_approval_matches,
         "queue_approval_not_authorized": queue_approval_not_authorized,
+        "execution_request_present": exec_request_present,
+        "execution_request_not_denied": not exec_request_denied,
+        "execution_request_not_revoked": not exec_request_revoked,
+        "execution_request_review_present": exec_request_review_present,
         "environment_ready": readiness["environment_ready"],
         "plan_executable": readiness["environment_ready"] and len(queue) > 0,
         "policy_loaded": True,
@@ -3204,6 +3220,21 @@ def _build_execution_preflight(root: HarnessPath) -> dict:
         "preflight_status": "design_only",
         "execution_available": False,
         "execution_authorized": False,
+        "execution_request_present": exec_request_present,
+        "execution_request_status": (
+            "denied" if exec_request_denied else
+            "revoked" if exec_request_revoked else
+            "present" if exec_request_present else
+            "missing"
+        ),
+        "execution_request_review_present": exec_request_review_present,
+        "execution_request_review_status": (
+            exec_request_review.get("review_status")
+            if exec_request_review else None
+        ),
+        "execution_request_denied": exec_request_denied,
+        "execution_request_revoked": exec_request_revoked,
+        "request_blocks_authorization": request_blocks,
         "queue_validation_status": "valid" if queue_validation["valid"] else "invalid",
         "queue_validation_present": queue_validation["queue_readable"],
         "queue_valid": queue_validation["valid"],
@@ -3492,6 +3523,16 @@ def _read_latest_runner_execution_request(root: HarnessPath) -> dict | None:
         return None
 
 
+def _read_latest_runner_execution_request_review(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_EXECUTION_REQUEST_REVIEWS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
 def run_phase_runner_execution_request(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     message = getattr(args, "message", "") or "Execution authorization requested."
@@ -3744,6 +3785,13 @@ def run_phase_runner_execution_request_deny(args: argparse.Namespace) -> int:
 
     _save_runner_execution_request_denial(root, denial)
 
+    # Update request artifact to reflect denial
+    if not denial.get("already_denied"):
+        req = _read_latest_runner_execution_request(root)
+        if req:
+            req["denied"] = True
+            _save_runner_execution_request(root, req)
+
     if args.json:
         print(json.dumps(denial, indent=2, sort_keys=True))
         return 0
@@ -3817,6 +3865,13 @@ def run_phase_runner_execution_request_revoke(args: argparse.Namespace) -> int:
         return 1
 
     _save_runner_execution_request_revocation(root, revocation)
+
+    # Update request artifact to reflect revocation
+    if not revocation.get("already_revoked"):
+        req = _read_latest_runner_execution_request(root)
+        if req:
+            req["revoked"] = True
+            _save_runner_execution_request(root, req)
 
     if args.json:
         print(json.dumps(revocation, indent=2, sort_keys=True))

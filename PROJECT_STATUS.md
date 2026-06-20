@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72W: Execution Authorization Request Denial and Revocation.
+Phase 72X: Execution Request Preflight Integration.
 
-Phase 72W adds `pcae phase runner-execution-request-deny` and
-`runner-execution-request-revoke` for safely denying and revoking execution
-authorization requests. Always sets `execution_authorized=false`. No queue
-mutation, no task creation, no execution.
+Phase 72X extends `pcae phase runner-execution-preflight` to include execution
+request lifecycle status. Reports request presence, status (missing/present/denied/revoked),
+review presence, and whether denied/revoked requests block authorization. Execution
+remains `execution_available=false`, `execution_authorized=false`.
 
 ## Milestone: Execution Chain Traceability Complete
 
