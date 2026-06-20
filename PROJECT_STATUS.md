@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74I: Agent Invocation Dry Run.
+Phase 74J: Agent Invocation Output Capture.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
