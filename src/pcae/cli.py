@@ -421,6 +421,7 @@ from pcae.commands.phase import (
     run_phase_runner_authorization_summary,
     run_phase_runner_execute,
     run_phase_runner_execution_authorize,
+    run_phase_runner_execution_trace_review,
     run_phase_runner_execution_authorization_schema,
     run_phase_runner_execution_preflight,
     run_phase_runner_execution_request,
@@ -5195,6 +5196,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Simulated abort scenario for no-op trace (requires --noop)."
     )
     phase_runner_execute_parser.set_defaults(handler=run_phase_runner_execute)
+
+    phase_runner_execution_trace_review_parser = phase_subparsers.add_parser(
+        "runner-execution-trace-review",
+        help="Review a runner no-op execution trace (does not authorize execution).",
+    )
+    phase_runner_execution_trace_review_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execution_trace_review_parser.add_argument(
+        "--save", action="store_true", help="Persist the review artifact."
+    )
+    phase_runner_execution_trace_review_parser.set_defaults(
+        handler=run_phase_runner_execution_trace_review
+    )
 
     phase_runner_execution_request_parser = phase_subparsers.add_parser(
         "runner-execution-request",

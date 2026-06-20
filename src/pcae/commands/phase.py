@@ -3886,6 +3886,117 @@ def run_phase_runner_execute(args: argparse.Namespace) -> int:
     return 1
 
 
+RUNNER_EXECUTION_TRACE_REVIEWS_DIR = Path(".pcae") / "runner-execution-trace-reviews"
+
+
+def _read_latest_runner_noop_trace(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_EXECUTION_TRACES_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _build_runner_execution_trace_review(root: HarnessPath) -> dict:
+    trace = _read_latest_runner_noop_trace(root)
+
+    if trace is None:
+        return {
+            "trace_present": False,
+            "review_status": "missing_trace",
+            "review_reasons": ["No no-op execution trace found. Run: pcae phase runner-execute --noop --save"],
+            "execution_authorized": False,
+            "execution_available": False,
+        }
+
+    blocked_reasons: list[str] = []
+    if trace.get("execution_authorized", True):
+        blocked_reasons.append("trace reports execution_authorized=true (unexpected)")
+    if trace.get("mutation_performed", True):
+        blocked_reasons.append("trace reports mutation_performed=true (unexpected)")
+    if trace.get("queue_mutated", True):
+        blocked_reasons.append("trace reports queue_mutated=true (unexpected)")
+    if trace.get("tasks_created", 0) > 0:
+        blocked_reasons.append("trace reports tasks_created > 0 (unexpected)")
+    if not trace.get("noop", False):
+        blocked_reasons.append("trace is not a no-op trace")
+
+    status = "blocked" if blocked_reasons else "ready_for_approval"
+
+    return {
+        "trace_present": True,
+        "trace_id": trace.get("trace_id"),
+        "trace_created_at": trace.get("created_at"),
+        "noop": trace.get("noop", False),
+        "would_execute": trace.get("would_execute", False),
+        "mutation_performed": trace.get("mutation_performed", False),
+        "execution_available": False,
+        "execution_authorized": False,
+        "queue_mutated": trace.get("queue_mutated", False),
+        "tasks_created": trace.get("tasks_created", 0),
+        "binding_complete": (trace.get("binding") or {}).get("binding_complete") if trace.get("binding") else None,
+        "scenario": trace.get("scenario"),
+        "review_status": status,
+        "review_reasons": blocked_reasons or ["No-op trace is safe and ready for approval review."],
+        "note": "This is a review of a no-op execution trace. No execution occurred or was authorized.",
+    }
+
+
+def _save_runner_execution_trace_review(root: HarnessPath, review: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    review_with_ts = {**review, "reviewed_at": ts}
+    review_dir = root.join(RUNNER_EXECUTION_TRACE_REVIEWS_DIR)
+    review_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = review_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = review_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(review_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_execution_trace_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    review = _build_runner_execution_trace_review(root)
+
+    if getattr(args, "save", False):
+        saved_path = _save_runner_execution_trace_review(root, review)
+        if not args.json:
+            print(f"Trace review saved: {saved_path}")
+
+    if args.json:
+        print(json.dumps(review, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner No-Op Trace Review")
+    print("=" * 40)
+    print(f"  Trace present: {'yes' if review['trace_present'] else 'no'}")
+    if review["trace_present"]:
+        print(f"  Trace ID: {review.get('trace_id', 'unknown')}")
+        print(f"  No-op: {'yes' if review['noop'] else 'no'}")
+        print(f"  Would execute: {'no' if not review['would_execute'] else 'YES'}")
+        print(f"  Mutation performed: {'no' if not review['mutation_performed'] else 'YES'}")
+        if review.get("scenario"):
+            print(f"  Scenario: {review['scenario']}")
+        if review.get("binding_complete") is not None:
+            print(f"  Binding complete: {'yes' if review['binding_complete'] else 'no'}")
+    print(f"  Review status: {review['review_status']}")
+    print(f"  Execution available: no")
+    print(f"  Execution authorized: no")
+    print()
+    print("  Reasons:")
+    for r in review["review_reasons"]:
+        print(f"    - {r}")
+    print()
+    print(f"  {review['note']}")
+    return 0
+
+
 RUNNER_EXECUTION_REQUESTS_DIR = Path(".pcae") / "runner-execution-requests"
 
 

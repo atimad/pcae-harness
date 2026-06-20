@@ -8300,3 +8300,80 @@ def test_73c1_audit_json_fields_for_shared(
     assert "shared_commit_phase_ids" in phase
     assert isinstance(phase["shared_commit_phase_ids"], list)
     assert len(phase["shared_commit_phase_ids"]) > 1
+
+
+# ---------------------------------------------------------------------------
+# Phase 73D: runner no-op trace review artifact
+# ---------------------------------------------------------------------------
+
+
+def test_73d_trace_review_missing_trace(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-trace-review", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["trace_present"] is False
+    assert data["review_status"] == "missing_trace"
+    assert data["execution_authorized"] is False
+
+
+def test_73d_trace_review_safe_trace(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-trace-review", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["trace_present"] is True
+    assert data["noop"] is True
+    assert data["review_status"] == "ready_for_approval"
+    assert data["execution_authorized"] is False
+
+
+def test_73d_trace_review_save(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-trace-review", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    review_path = tmp_path / ".pcae" / "runner-execution-trace-reviews" / "latest.json"
+    assert review_path.is_file()
+    saved = json.loads(review_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_73d_trace_review_no_mutation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execute", "--noop", "--save"])
+    capsys.readouterr()
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 73D: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+
+    main(["phase", "runner-execution-trace-review"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
