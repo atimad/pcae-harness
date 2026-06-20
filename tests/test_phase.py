@@ -9469,3 +9469,64 @@ def test_74t_smoke_blocked_no_enable(tmp_path, monkeypatch, capsys):
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
     main(["phase", "claude-deepseek-capture-smoke", "--allow-real-invocation", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["smoke_status"] == "blocked"; assert d["execution_authorized"] is False
+
+# Phase 74U: claude-deepseek prompt capture contract
+def test_74u_prompt_capture_contract_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-prompt-capture-contract", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["contract_status"] == "ready"
+    assert d["backend_name"] == "claude-deepseek"
+    assert d["prompt_capture_only"] is True
+    assert d["prompt_type"] == "harmless_output_only_smoke"
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["patch_application_allowed"] is False
+    assert d["commit_allowed"] is False
+    assert d["push_allowed"] is False
+    assert d["mutation_guard_required"] is True
+    assert d["explicit_opt_in_required"] is True
+    assert d["real_backend_invocation_performed"] is False
+    assert d["agent_invocation_performed"] is False
+    assert d["prompt_executed"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["execution_authorized"] is False
+    assert "PCAE_CAPTURE_OK" in d["test_prompt"]
+    assert d["expected_output"] == "PCAE_CAPTURE_OK"
+    assert len(d["requirements"]) > 10
+    assert len(d["forbidden_cases"]) > 8
+
+def test_74u_prompt_capture_contract_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-prompt-capture-contract", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "claude-deepseek-prompt-capture-contracts" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["contract_status"] == "ready"
+    assert d["prompt_executed"] is False
+    assert d["execution_authorized"] is False
+
+def test_74u_prompt_capture_contract_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "claude-deepseek-prompt-capture-contract"]); out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "Prompt Capture Contract" in out
+    assert "claude-deepseek" in out
+    assert "PCAE_CAPTURE_OK" in out
+    assert "Real backend invoked: no" in out or "real_backend_invocation_performed" in out
+
+def test_74u_contract_forbids_task_package(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-prompt-capture-contract", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["patch_application_allowed"] is False
+    assert "sending an activated task package" in str(d["forbidden_cases"]).lower() or \
+           "activated task package" in str(d["forbidden_cases"])
+    assert "requesting task implementation" in str(d["forbidden_cases"]).lower() or \
+           "implementation" in str(d["forbidden_cases"])

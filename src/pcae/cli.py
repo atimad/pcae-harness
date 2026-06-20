@@ -456,6 +456,7 @@ from pcae.commands.phase import (
     run_phase_claude_deepseek_capture_intake_bridge,
     run_phase_claude_deepseek_capture_smoke,
     run_phase_claude_deepseek_invocation_safety_review,
+    run_phase_claude_deepseek_prompt_capture_contract,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -5952,6 +5953,20 @@ def build_parser() -> argparse.ArgumentParser:
         "--allow-real-invocation", action="store_true", help="Allow real claude-deepseek invocation (opt-in)."
     )
     phase_claude_deepseek_capture_smoke_parser.set_defaults(handler=run_phase_claude_deepseek_capture_smoke)
+
+    phase_claude_deepseek_prompt_capture_contract_parser = phase_subparsers.add_parser(
+        "claude-deepseek-prompt-capture-contract",
+        help="Show the claude-deepseek prompt capture contract (Phase 74U).",
+    )
+    phase_claude_deepseek_prompt_capture_contract_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_prompt_capture_contract_parser.add_argument(
+        "--save", action="store_true", help="Persist the contract artifact."
+    )
+    phase_claude_deepseek_prompt_capture_contract_parser.set_defaults(
+        handler=run_phase_claude_deepseek_prompt_capture_contract
+    )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
         "runner-sim-approve",

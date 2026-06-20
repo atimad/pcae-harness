@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Claude-DeepSeek Prompt Capture Contract (Phase 74U): adds `pcae phase claude-deepseek-prompt-capture-contract --json --save` defining the harmless output-only prompt capture contract. Includes deterministic test prompt (PCAE_CAPTURE_OK), 20 requirements, 15 forbidden cases. All execution flags remain false. No backend invoked. 4 new tests.
 - Activated Task Manual Implementation Scenario (Phase 73Y): adds `pcae phase activated-task-manual-implementation-scenario --json --save` to validate the full pre-implementation path. Exercises fixture add, queue approve, activation execute, implementation handoff, readiness, start gate, rollback, and cleanup. All implementation flags remain false. 2 new tests.
 - Activated Task Completion Flow (Phase 73Z): adds `pcae phase activated-task-completion-flow --json --save` documenting expected completion steps (implementation → check → commit → task finish → push) and forbidden shortcuts. Reports `flow_status` and `automatic_implementation_allowed=false`. 2 new tests.
 - Activated Task Lifecycle Summary (Phase 74A): adds `pcae phase activated-task-lifecycle-summary --json --save` aggregating activation, boundary, handoff, readiness, and start gate state into a single `lifecycle_status` with `next_recommended_action`. All execution flags remain false. 2 new tests.

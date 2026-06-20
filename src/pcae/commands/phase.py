@@ -7210,3 +7210,126 @@ def run_phase_claude_deepseek_capture_smoke(args: argparse.Namespace) -> int:
     print(f"  Apply performed: no"); print(f"  Execution authorized: no")
     if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
     return 0 if result["smoke_status"] == "passed" else 1 if allow_real else 0
+
+
+# Phase 74U: claude-deepseek prompt capture contract
+CLAUDE_DEEPSEEK_PROMPT_CAPTURE_CONTRACTS_DIR = Path(".pcae") / "claude-deepseek-prompt-capture-contracts"
+
+_HARMLESS_DETERMINISTIC_TEST_PROMPT = (
+    "Return exactly: PCAE_CAPTURE_OK\n"
+    "Do not edit files.\n"
+    "Do not run commands.\n"
+    "Do not commit.\n"
+    "Do not push."
+)
+
+_CLAUDE_DEEPSEEK_PROMPT_CAPTURE_CONTRACT = {
+    "contract_status": "ready",
+    "backend_name": "claude-deepseek",
+    "prompt_capture_only": True,
+    "prompt_type": "harmless_output_only_smoke",
+    "task_package_sent": False,
+    "task_implementation_requested": False,
+    "patch_application_allowed": False,
+    "commit_allowed": False,
+    "push_allowed": False,
+    "mutation_guard_required": True,
+    "explicit_opt_in_required": True,
+    "real_backend_invocation_performed": False,
+    "agent_invocation_performed": False,
+    "prompt_executed": False,
+    "apply_performed": False,
+    "files_modified": False,
+    "commits_created": 0,
+    "execution_authorized": False,
+    "test_prompt": _HARMLESS_DETERMINISTIC_TEST_PROMPT,
+    "expected_output": "PCAE_CAPTURE_OK",
+    "requirements": [
+        "prompt must be harmless and output-only",
+        "prompt must not mention active task implementation",
+        "prompt must not ask for code changes",
+        "prompt must not ask for shell commands",
+        "prompt must require deterministic short response",
+        "prompt must forbid file edits",
+        "prompt must forbid commits",
+        "prompt must forbid pushes",
+        "output capture path must be under .pcae",
+        "stdout and stderr capture required",
+        "timeout required (default 300s)",
+        "mutation guard required (pre/post git status)",
+        "real invocation requires explicit opt-in (--allow-real-invocation)",
+        "default execution must skip real invocation",
+        "backend_name must be claude-deepseek",
+        "no activated task package may be sent",
+        "no implementation may be requested",
+        "no patch application may occur",
+        "no commit or push may result",
+        "no runner execution authorization",
+    ],
+    "forbidden_cases": [
+        "sending an activated task package",
+        "requesting task implementation",
+        "asking for code changes",
+        "asking for shell commands",
+        "applying captured output",
+        "committing backend output",
+        "pushing backend output",
+        "authorizing runner execution",
+        "creating artifacts with execution_authorized=true",
+        "invoking claude-kimi",
+        "invoking codex",
+        "invoking claude-deepseek without explicit opt-in",
+        "generic agent-invoke --execute --backend claude-deepseek",
+        "hidden or background execution",
+        "real backend invocation without mutation guard",
+    ],
+    "output_capture_path": ".pcae/claude-deepseek-prompt-captures/",
+    "default_timeout_seconds": 300,
+    "blockers": [],
+    "warnings": [],
+    "note": "This is a design contract only. No backend was invoked. No prompt was sent. Human authority remains absolute.",
+}
+
+
+def run_phase_claude_deepseek_prompt_capture_contract(args: argparse.Namespace) -> int:
+    contract = dict(_CLAUDE_DEEPSEEK_PROMPT_CAPTURE_CONTRACT)
+    if getattr(args, "save", False):
+        d = HarnessPath.cwd().join(CLAUDE_DEEPSEEK_PROMPT_CAPTURE_CONTRACTS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Contract saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(contract, indent=2, sort_keys=True))
+        return 0
+    print("Claude-DeepSeek Prompt Capture Contract")
+    print("=" * 40)
+    print(f"  Backend: {contract['backend_name']}")
+    print(f"  Contract status: {contract['contract_status']}")
+    print(f"  Prompt type: {contract['prompt_type']}")
+    print(f"  Prompt capture only: yes")
+    print(f"  Task package sent: no")
+    print(f"  Implementation requested: no")
+    print(f"  Patch application allowed: no")
+    print(f"  Commit allowed: no")
+    print(f"  Push allowed: no")
+    print(f"  Explicit opt-in required: yes")
+    print(f"  Real backend invoked: no")
+    print(f"  Agent invoked: no")
+    print(f"  Prompt executed: no")
+    print(f"  Execution authorized: no")
+    print(f"\n  Test prompt:\n    {contract['test_prompt'].strip().replace(chr(10), chr(10) + '    ')}")
+    print(f"  Expected output: {contract['expected_output']}")
+    print(f"\n  Requirements ({len(contract['requirements'])}):")
+    for r in contract["requirements"][:10]:
+        print(f"    - {r}")
+    if len(contract["requirements"]) > 10:
+        print(f"    ... and {len(contract['requirements']) - 10} more")
+    print(f"\n  Forbidden ({len(contract['forbidden_cases'])}):")
+    for f in contract["forbidden_cases"][:8]:
+        print(f"    - {f}")
+    if len(contract["forbidden_cases"]) > 8:
+        print(f"    ... and {len(contract['forbidden_cases']) - 8} more")
+    print(f"\n  {contract['note']}")
+    return 0
