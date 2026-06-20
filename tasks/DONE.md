@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74F Agent Output Review and Scope Check (20260620-1309-74f-agent-output-review-and-scope-check)
 - 74E Agent Output Intake Artifact (20260620-1306-74e-agent-output-intake-artifact)
 - 74D Agent Assistance Start Artifact (20260620-1300-74d-agent-assistance-start-artifact)
 - 74C Agent Implementation Start Dry Run (20260620-1300-74c-agent-implementation-start-dry-run)
