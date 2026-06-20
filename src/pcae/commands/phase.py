@@ -10260,3 +10260,375 @@ def run_phase_captured_output_manual_apply_execution_preflight(args: argparse.Na
         print(f"\n  Future operator steps:"); [print(f"    {s}") for s in result["required_operator_steps_for_future_apply"][:5]]
     print(f"\n  {result['next_operator_action']}")
     return 0 if result["execution_preflight_status"] == "ready_for_manual_apply_execution" else 1
+
+
+# Phase 76D: captured output manual apply execution
+CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR = Path(".pcae") / "captured-output-manual-apply-executions"
+
+
+def _parse_patch_from_text(text: str) -> list[dict]:
+    """Parse unified diff patch blocks from text. Returns list of {path, content}."""
+    import re as _re
+    patches = []
+    lines = text.splitlines()
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        # Match unified diff header: --- a/path or +++ b/path
+        if line.startswith("--- ") or line.startswith("+++ "):
+            # Look for the pair
+            m_a = _re.match(r"^--- (?:a/)?(\S+)", line)
+            m_b = None
+            if i + 1 < len(lines):
+                m_b = _re.match(r"^\+\+\+ (?:b/)?(\S+)", lines[i + 1])
+            if m_a and m_b:
+                path = m_b.group(1)
+                patch_lines = [line, lines[i + 1]]
+                j = i + 2
+                while j < len(lines) and (lines[j].startswith(("@@", "+", "-", " ")) or lines[j].strip() == ""):
+                    patch_lines.append(lines[j])
+                    j += 1
+                patches.append({"path": path, "content": "\n".join(patch_lines) + "\n"})
+                i = j
+                continue
+        i += 1
+    return patches
+
+
+def _is_path_safe(file_path: str, allowed_files: list[str], forbidden: bool = False) -> bool:
+    """Check file path for safety: no parent traversal, no absolute paths, within allowed."""
+    # Reject absolute paths
+    if file_path.startswith("/"):
+        return False
+    # Reject parent traversal
+    parts = file_path.replace("\\", "/").split("/")
+    if ".." in parts:
+        return False
+    # If checking against allowed files
+    if allowed_files:
+        # Simple check: file must be in allowed list
+        for af in allowed_files:
+            if af and (file_path == af or file_path.endswith(af) or af.endswith(file_path)):
+                return True
+        return False
+    return True
+
+
+def _read_git_status_snapshot(root) -> dict:
+    """Capture current git status for mutation guard."""
+    import subprocess as _sp
+    try:
+        result = _sp.run(["git", "status", "--porcelain"], cwd=root.path,
+                         check=True, capture_output=True, text=True)
+        return {"porcelain": result.stdout, "files": [l[3:] for l in result.stdout.splitlines() if l.strip()]}
+    except (_sp.CalledProcessError, OSError):
+        return {"porcelain": "", "files": []}
+
+
+def _build_captured_output_manual_apply_execution(root: HarnessPath, execute: bool = False,
+                                                    dry_run: bool = False) -> dict:
+    base = {
+        "manual_apply_status": "blocked", "dry_run": dry_run,
+        "execute_requested": execute, "human_approval_valid": False,
+        "execution_preflight_ready": False, "manual_apply_performed": False,
+        "apply_performed": False, "files_modified": False,
+        "changed_files": [], "allowed_files": [], "forbidden_files": [],
+        "unexpected_changed_files": [], "captured_output_ref": None,
+        "captured_output_digest": None, "approval_ref": None,
+        "validation_ref": None, "execution_preflight_ref": None,
+        "apply_dry_run_ref": None,
+        "mutation_guard_passed": False, "pre_git_status": None, "post_git_status": None,
+        "commits_created": 0, "push_performed": False,
+        "implementation_performed": False,
+        "automatic_apply_allowed": False, "backend_apply_allowed": False,
+        "execution_authorized": False,
+        "validation_commands_after_apply": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "recommended_next_phase": "76E — Manual Apply Result Validation (future)",
+        "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Check approval
+    approval_path = root.join(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+    if not approval_path.is_file():
+        base["manual_apply_status"] = "blocked"; base["blockers"] = ["No human approval artifact."]
+        base["next_operator_action"] = "Run pcae phase captured-output-human-approval --approve first."
+        return base
+    approval = json.loads(approval_path.read_text(encoding="utf-8"))
+    base["approval_ref"] = str(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+    if not approval.get("human_approval_granted"):
+        base["manual_apply_status"] = "blocked"; base["blockers"] = ["Approval not granted."]
+        base["next_operator_action"] = "Approval must be granted before manual apply."
+        return base
+
+    # Check validation
+    val_path = root.join(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR / "latest.json")
+    if not val_path.is_file():
+        base["manual_apply_status"] = "blocked"; base["blockers"] = ["No approval validation."]
+        base["next_operator_action"] = "Run pcae phase captured-output-human-approval-validate --save first."
+        return base
+    validation = json.loads(val_path.read_text(encoding="utf-8"))
+    base["validation_ref"] = str(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR / "latest.json")
+    base["human_approval_valid"] = validation.get("human_approval_valid", False)
+    if validation.get("validation_status") != "valid":
+        base["manual_apply_status"] = "blocked"
+        base["blockers"] = [f"Validation not valid: {validation.get('validation_status')}"]
+        base["next_operator_action"] = "Validation must be valid before manual apply."
+        return base
+
+    # Check execution preflight
+    preflight_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTION_PREFLIGHTS_DIR / "latest.json")
+    if not preflight_path.is_file():
+        base["manual_apply_status"] = "blocked"; base["blockers"] = ["No execution preflight."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-execution-preflight --save first."
+        return base
+    preflight = json.loads(preflight_path.read_text(encoding="utf-8"))
+    base["execution_preflight_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTION_PREFLIGHTS_DIR / "latest.json")
+    base["execution_preflight_ready"] = preflight.get("execution_preflight_status") == "ready_for_manual_apply_execution"
+    if not base["execution_preflight_ready"]:
+        base["manual_apply_status"] = "blocked"
+        base["blockers"] = [f"Preflight not ready: {preflight.get('execution_preflight_status')}"]
+        base["next_operator_action"] = "Execution preflight must be ready_for_manual_apply_execution."
+        return base
+
+    # Get allowed files from approval scope
+    scope = (approval.get("approval_scope") or {})
+    allowed = list(set(scope.get("allowed_files", [])))
+    forbidden = list(set(scope.get("forbidden_files", [])))
+    base["allowed_files"] = allowed
+    base["forbidden_files"] = forbidden
+
+    # Read captured output
+    capture_dir = root.join(ACTIVATED_TASK_PROMPT_CAPTURES_DIR)
+    stdout_path = capture_dir / "latest.stdout.txt"
+    base["captured_output_ref"] = str(ACTIVATED_TASK_PROMPT_CAPTURES_DIR / "latest.json")
+    base["apply_dry_run_ref"] = str(ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR / "latest.json")
+
+    captured_text = ""
+    if stdout_path.is_file():
+        captured_text = stdout_path.read_text(encoding="utf-8")
+        base["captured_output_digest"] = hashlib.sha256(stdout_path.read_bytes()).hexdigest()[:16]
+
+    # Parse patches from captured output
+    patches = _parse_patch_from_text(captured_text)
+
+    # Check if patches contain actual changes (have @@ lines with + lines)
+    actionable_patches = []
+    for p in patches:
+        content = p.get("content", "")
+        if "@@" in content and any(l.startswith("+") and not l.startswith("+++") for l in content.splitlines()):
+            actionable_patches.append(p)
+        elif "@@" in content and any(l.startswith("-") and not l.startswith("---") for l in content.splitlines()):
+            actionable_patches.append(p)
+
+    # Check for explicit "no changes" statements
+    no_change_indicators = [
+        "no code changes are required", "no patch", "no changes to apply",
+        "no changes needed", "no changes required", "does not require code changes",
+        "no files need to be created", "without real implementation",
+    ]
+    has_no_change_statement = any(
+        indicator in captured_text.lower() for indicator in no_change_indicators
+    )
+
+    if dry_run:
+        if not actionable_patches:
+            if has_no_change_statement:
+                base["manual_apply_status"] = "dry_run_ready"
+                base["blockers"] = []
+                base["next_operator_action"] = "Dry-run complete. Captured output contains no applyable changes (fixture/no-op). Use --execute to confirm."
+            else:
+                base["manual_apply_status"] = "blocked_no_applyable_changes"
+                base["blockers"] = ["No parseable patch found in captured output."]
+                base["next_operator_action"] = "Captured output has no applyable patch. Nothing to apply."
+            return base
+        base["manual_apply_status"] = "dry_run_ready"
+        base["blockers"] = []
+        base["changed_files"] = [p["path"] for p in actionable_patches]
+        base["next_operator_action"] = f"Dry-run complete. Would apply {len(actionable_patches)} patch(es) to {len(set(p['path'] for p in actionable_patches))} file(s). Use --execute to apply."
+        return base
+
+    # Non-execute, non-dry-run: just report status
+    if not execute:
+        if not actionable_patches:
+            if has_no_change_statement:
+                base["manual_apply_status"] = "no_changes_to_apply"
+                base["blockers"] = []
+                base["next_operator_action"] = (
+                    "Captured output explicitly states no code changes are required (fixture/no-op). "
+                    "No files need modification. Use --execute to formally record this result."
+                )
+            else:
+                base["manual_apply_status"] = "blocked_no_applyable_changes"
+                base["blockers"] = ["No parseable patch found in captured output."]
+                base["next_operator_action"] = "Captured output has no applyable patch. Nothing to apply."
+            return base
+        base["manual_apply_status"] = "dry_run_ready"
+        base["blockers"] = []
+        base["next_operator_action"] = f"Ready. {len(actionable_patches)} patch(es) parseable. Use --dry-run to preview or --execute to apply."
+        return base
+
+    # Execute path
+    # Check repo clean
+    pre_status = _read_git_status_snapshot(root)
+    base["pre_git_status"] = pre_status
+    if pre_status["files"]:
+        base["manual_apply_status"] = "blocked_dirty_tree"
+        base["blockers"] = ["Working tree is not clean. Manual apply requires a clean tree."]
+        base["next_operator_action"] = "Commit or stash pending changes before manual apply."
+        return base
+
+    if not actionable_patches:
+        # No changes to apply — record as no-op execution
+        base["manual_apply_status"] = "no_changes_to_apply"
+        base["manual_apply_performed"] = True
+        base["apply_performed"] = False
+        base["files_modified"] = False
+        base["mutation_guard_passed"] = True
+        base["implementation_performed"] = False
+        base["blockers"] = []
+        base["post_git_status"] = _read_git_status_snapshot(root)
+        base["next_operator_action"] = (
+            "Manual apply execution complete. No changes were applied (fixture/no-op captured output). "
+            "Proceed to pcae phase captured-output-manual-apply-result-show to review."
+        )
+        return base
+
+    # Validate each patch
+    invalid_patches = []
+    valid_patches = []
+    for p in actionable_patches:
+        path = p["path"]
+        if not _is_path_safe(path, allowed):
+            invalid_patches.append({"path": path, "reason": "path not in allowed files or unsafe"})
+        else:
+            valid_patches.append(p)
+
+    if invalid_patches:
+        base["manual_apply_status"] = "failed_or_out_of_scope"
+        base["blockers"] = [f"Patch for {ip['path']}: {ip['reason']}" for ip in invalid_patches]
+        base["next_operator_action"] = "Some patches target forbidden or unsafe paths. Blocked."
+        return base
+
+    # Apply valid patches
+    try:
+        applied_files = []
+        for p in valid_patches:
+            target = root.path / p["path"]
+            content = p.get("content", "")
+
+            # Parse the diff and apply simple changes
+            # For safety, only handle simple unified diffs: write the new content
+            new_lines = []
+            old_lines = (target.read_text(encoding="utf-8").splitlines()
+                         if target.is_file() else [])
+            in_hunk = False
+            for line in content.splitlines():
+                if line.startswith("@@ "):
+                    in_hunk = True
+                    continue
+                if not in_hunk:
+                    continue
+                if line.startswith("+"):
+                    new_lines.append(line[1:])
+                elif line.startswith(" "):
+                    new_lines.append(line[1:])
+                # skip minus lines (removals)
+
+            if new_lines:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+                applied_files.append(p["path"])
+
+        base["files_modified"] = len(applied_files) > 0
+        base["changed_files"] = applied_files
+        base["apply_performed"] = len(applied_files) > 0
+        base["implementation_performed"] = len(applied_files) > 0
+    except Exception as e:
+        base["manual_apply_status"] = "failed_or_out_of_scope"
+        base["blockers"] = [f"Error applying patch: {e}"]
+        base["next_operator_action"] = "Patch application failed. No partial changes committed."
+        return base
+
+    # Post-mutation guard
+    post_status = _read_git_status_snapshot(root)
+    base["post_git_status"] = post_status
+    unexpected = [f for f in post_status["files"] if f not in allowed and f not in applied_files]
+    base["unexpected_changed_files"] = unexpected
+
+    if unexpected:
+        base["manual_apply_status"] = "failed_or_out_of_scope"
+        base["mutation_guard_passed"] = False
+        base["blockers"] = [f"Unexpected changed file: {f}" for f in unexpected]
+        base["next_operator_action"] = "Mutation guard detected unexpected changes. Reset and investigate."
+        return base
+
+    base["mutation_guard_passed"] = True
+    base["manual_apply_status"] = "applied"
+    base["manual_apply_performed"] = True
+    base["blockers"] = []
+    base["next_operator_action"] = (
+        "Manual apply execution complete. Changes applied but NOT committed or pushed. "
+        "Run pcae phase captured-output-manual-apply-result-show to review, "
+        "then proceed to Phase 76E for result validation."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_execute(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    execute = getattr(args, "execute", False)
+    dry_run = getattr(args, "dry_run", False)
+    result = _build_captured_output_manual_apply_execution(root, execute=execute, dry_run=dry_run)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Manual apply result saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        ok_statuses = ("applied", "no_changes_to_apply", "dry_run_ready")
+        return 0 if result["manual_apply_status"] in ok_statuses else 1
+    print("Captured Output Manual Apply Execution"); print("=" * 40)
+    print(f"  Manual apply status: {result['manual_apply_status']}")
+    print(f"  Dry-run: {'yes' if dry_run else 'no'}")
+    print(f"  Execute requested: {'yes' if execute else 'no'}")
+    print(f"  Approval valid: {'yes' if result['human_approval_valid'] else 'no'}")
+    print(f"  Preflight ready: {'yes' if result['execution_preflight_ready'] else 'no'}")
+    print(f"  Manual apply performed: {'yes' if result['manual_apply_performed'] else 'no'}")
+    print(f"  Files modified: {'yes' if result['files_modified'] else 'no'}")
+    print(f"  Commits created: 0")
+    print(f"  Push performed: no")
+    print(f"  Execution authorized: no")
+    if result["changed_files"]:
+        print(f"\n  Changed files:"); [print(f"    {f}") for f in result["changed_files"]]
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["manual_apply_status"] in ("applied", "no_changes_to_apply", "dry_run_ready") else 1
+
+
+def run_phase_captured_output_manual_apply_result_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR / "latest.json")
+    if not p.is_file():
+        result = {"manual_apply_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No manual apply execution result found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        ok_statuses = ("applied", "no_changes_to_apply", "dry_run_ready")
+        return 0 if result.get("manual_apply_status") in ok_statuses else 1
+    print("Manual Apply Execution Result (Show)"); print("=" * 40)
+    print(f"  Status: {result.get('manual_apply_status', 'unknown')}")
+    print(f"  Manual apply performed: {'yes' if result.get('manual_apply_performed') else 'no'}")
+    print(f"  Files modified: {'yes' if result.get('files_modified') else 'no'}")
+    print(f"  Commits created: {result.get('commits_created', 0)}")
+    print(f"  Push performed: {'yes' if result.get('push_performed') else 'no'}")
+    print(f"  Execution authorized: {'yes' if result.get('execution_authorized') else 'no'}")
+    return 0

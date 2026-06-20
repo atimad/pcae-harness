@@ -2,12 +2,11 @@
 
 ## Current Phase
 
-Phase 76C: Captured Output Manual Apply Execution Preflight.
+Phase 76D: Captured Output Manual Apply Execution.
 
-Phase 76C adds `pcae phase captured-output-manual-apply-execution-preflight --json --save`
-as final preflight confirming all governance prerequisites (approval validation, captured
-output, apply dry-run) are satisfied before a future manual apply phase (76D). Preflight
-only — does not apply, modify project code, invoke backend, or authorize execution.
+Phase 76D adds `pcae phase captured-output-manual-apply-execute [--execute] --json --save`
+for controlled manual apply execution with explicit operator consent, safety guards,
+and mutation guard. Never commits or pushes. Captured output contains fixture no-op.
 
 ## Milestone: Execution Chain Traceability Complete
 

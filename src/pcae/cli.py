@@ -481,6 +481,8 @@ from pcae.commands.phase import (
     run_phase_captured_output_human_approval_show,
     run_phase_captured_output_human_approval_validate,
     run_phase_captured_output_manual_apply_execution_preflight,
+    run_phase_captured_output_manual_apply_execute,
+    run_phase_captured_output_manual_apply_result_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6219,6 +6221,24 @@ def build_parser() -> argparse.ArgumentParser:
     phase_captured_output_manual_apply_execution_preflight_parser.add_argument("--json", action="store_true")
     phase_captured_output_manual_apply_execution_preflight_parser.add_argument("--save", action="store_true")
     phase_captured_output_manual_apply_execution_preflight_parser.set_defaults(handler=run_phase_captured_output_manual_apply_execution_preflight)
+
+    # Phase 76D
+    phase_captured_output_manual_apply_execute_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-execute",
+        help="Manual apply execution for captured output (Phase 76D).",
+    )
+    phase_captured_output_manual_apply_execute_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_execute_parser.add_argument("--save", action="store_true")
+    phase_captured_output_manual_apply_execute_parser.add_argument("--dry-run", action="store_true")
+    phase_captured_output_manual_apply_execute_parser.add_argument("--execute", action="store_true")
+    phase_captured_output_manual_apply_execute_parser.set_defaults(handler=run_phase_captured_output_manual_apply_execute)
+
+    phase_captured_output_manual_apply_result_show_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-result-show",
+        help="Show latest manual apply execution result (Phase 76D).",
+    )
+    phase_captured_output_manual_apply_result_show_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_result_show_parser.set_defaults(handler=run_phase_captured_output_manual_apply_result_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
