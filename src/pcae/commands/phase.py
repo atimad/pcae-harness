@@ -4956,6 +4956,19 @@ def _build_single_runner_readiness(root: HarnessPath) -> dict:
     ))
     check("execution authorization available", False, block=False)
 
+    contract_path = root.join(EXECUTION_AUTHORIZATION_CONTRACTS_DIR / "latest.json")
+    schema_path = root.join(EXECUTION_AUTHORIZATION_SCHEMAS_DIR / "latest.json")
+    rules_path = root.join(EXECUTION_AUTHORIZATION_MATCHING_RULES_DIR / "latest.json")
+    contract_present = contract_path.is_file()
+    schema_present = schema_path.is_file()
+    rules_present = rules_path.is_file()
+    design_layer_complete = contract_present and schema_present and rules_present
+
+    check("execution authorization contract present", contract_present)
+    check("execution authorization schema present", schema_present)
+    check("execution authorization matching rules present", rules_present)
+    check("authorization design layer complete", design_layer_complete)
+
     request_blocks = False
     if exec_request:
         if exec_request.get("denied", False) or exec_request.get("revoked", False):
@@ -4977,6 +4990,10 @@ def _build_single_runner_readiness(root: HarnessPath) -> dict:
         "missing_requirements": missing,
         "satisfied_requirements": satisfied,
         "request_blocks_authorization": request_blocks,
+        "execution_authorization_contract_present": contract_present,
+        "execution_authorization_schema_present": schema_present,
+        "execution_authorization_matching_rules_present": rules_present,
+        "authorization_design_layer_complete": design_layer_complete,
         "note": (
             "This is a readiness check only. Real execution is not enabled. "
             "Human authority remains absolute."

@@ -8868,3 +8868,31 @@ def test_73m_auth_gate_no_positive_auth(tmp_path, monkeypatch, capsys):
     exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
     d = json.loads(capsys.readouterr().out)
     assert exit_code == 1; assert d["authorized"] is False; assert d["execution_authorized"] not in d or d.get("execution_authorized") is not True
+
+# ---------------------------------------------------------------------------
+# Phase 73N: single-runner authorization readiness bridge
+# ---------------------------------------------------------------------------
+def test_73n_readiness_missing_layer(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["ready_for_real_execution"] is False; assert d["execution_authorized"] is False
+    assert d["authorization_design_layer_complete"] is False
+
+def test_73n_readiness_complete_layer(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "execution-authorization-contract", "--save"]); capsys.readouterr()
+    main(["phase", "execution-authorization-schema", "--save"]); capsys.readouterr()
+    main(["phase", "execution-authorization-matching-rules", "--save"]); capsys.readouterr()
+    main(["phase", "single-runner-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["execution_authorization_contract_present"] is True
+    assert d["authorization_design_layer_complete"] is True
+    assert d["ready_for_real_execution"] is False; assert d["execution_authorized"] is False
+
+def test_73n_readiness_still_blocks(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "execution-authorization-contract", "--save"]); capsys.readouterr()
+    main(["phase", "single-runner-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["ready_for_real_execution"] is False; assert d["readiness_status"] != "design_ready"

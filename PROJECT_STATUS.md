@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73M: Execution Authorization Negative Gate Integration.
+Phase 73N: Single-Runner Authorization Readiness Bridge.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
