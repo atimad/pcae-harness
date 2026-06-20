@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73C: Runner No-Op Execution Abort Cases.
+Phase 73C.1: Shared Multi-Phase Implementation Commit Audit Handling.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

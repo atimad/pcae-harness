@@ -8109,3 +8109,194 @@ def test_73c_noop_scenario_requires_noop(
     data = json.loads(capsys.readouterr().out)
     assert exit_code == 1
     assert "error" in data
+
+
+# ---------------------------------------------------------------------------
+# Phase 73C.1: multi-phase implementation commit audit handling
+# ---------------------------------------------------------------------------
+
+
+def _create_phase_impl_only(root: Path, phase_id: str, description: str) -> None:
+    dummy = root / "dummy.txt"
+    dummy.write_text(f"impl {phase_id}", encoding="utf-8")
+    run_git(root, "add", "dummy.txt")
+    run_git(root, "commit", "-m", f"Implement Phase {phase_id} {description}")
+
+
+def _create_phase_comp_only(root: Path, phase_id: str, description: str) -> None:
+    dummy = root / "dummy.txt"
+    dummy.write_text(f"comp {phase_id}", encoding="utf-8")
+    run_git(root, "add", "dummy.txt")
+    run_git(root, "commit", "-m", f"Complete Phase {phase_id} {description}")
+
+
+def _create_shared_impl_commit(root: Path, subject: str) -> None:
+    dummy = root / "dummy.txt"
+    dummy.write_text("shared impl", encoding="utf-8")
+    run_git(root, "add", "dummy.txt")
+    run_git(root, "commit", "-m", subject)
+
+
+def test_73c1_audit_dedicated_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_commits(tmp_path, "73D", "dedicated test")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "5", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase = next(p for p in data["phases"] if p["phase_id"] == "73D")
+    assert phase["implementation_commit"] is not None
+    assert phase.get("implementation_commit_shared") is False
+    assert phase["commit_pair_complete"] is True
+    assert len(data["warnings"]) == 0
+
+
+def test_73c1_audit_missing_implementation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_phase_comp_only(tmp_path, "73D", "comp only")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "5", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase = next(p for p in data["phases"] if p["phase_id"] == "73D")
+    assert phase["implementation_commit"] is None
+    assert phase["commit_pair_complete"] is False
+    assert any("missing implementation" in w for w in data["warnings"])
+
+
+def test_73c1_audit_shared_range_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_shared_impl_commit(
+        tmp_path, "Implement Phases 73D-73F shared range implementation"
+    )
+    _create_phase_comp_only(tmp_path, "73D", "comp D")
+    _create_phase_comp_only(tmp_path, "73E", "comp E")
+    _create_phase_comp_only(tmp_path, "73F", "comp F")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "5", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase_d = next(p for p in data["phases"] if p["phase_id"] == "73D")
+    assert phase_d.get("implementation_commit_shared") is True
+    assert phase_d["implementation_commit"] is not None
+    assert phase_d["commit_pair_complete"] is False
+    assert any("shared multi-phase" in w for w in data["warnings"])
+    assert any("73D" in w for w in data["warnings"])
+
+
+def test_73c1_audit_shared_list_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_shared_impl_commit(
+        tmp_path, "Implement Phases 73D, 73E, 73F shared list implementation"
+    )
+    _create_phase_comp_only(tmp_path, "73D", "comp D")
+    _create_phase_comp_only(tmp_path, "73E", "comp E")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "5", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase_d = next(p for p in data["phases"] if p["phase_id"] == "73D")
+    assert phase_d.get("implementation_commit_shared") is True
+    assert "shared multi-phase" in str(data["warnings"])
+
+
+def test_73c1_audit_shared_and_commit(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_shared_impl_commit(
+        tmp_path, "Implement Phase 73D and 73E shared and implementation"
+    )
+    _create_phase_comp_only(tmp_path, "73D", "comp D")
+    _create_phase_comp_only(tmp_path, "73E", "comp E")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "5", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase_d = next(p for p in data["phases"] if p["phase_id"] == "73D")
+    assert phase_d.get("implementation_commit_shared") is True
+    assert "shared multi-phase" in str(data["warnings"])
+
+
+def test_73c1_audit_dedicated_overrides_shared(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_shared_impl_commit(
+        tmp_path, "Implement Phases 73D-73F shared range"
+    )
+    _create_phase_impl_only(tmp_path, "73D", "dedicated override")
+    _create_phase_comp_only(tmp_path, "73D", "comp D")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "5", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase_d = next(p for p in data["phases"] if p["phase_id"] == "73D")
+    assert phase_d.get("implementation_commit_shared") is False
+    assert phase_d["commit_pair_complete"] is True
+    # Other phases from the shared commit may still warn about 73E/73F.
+    # 73D itself must not have a shared-implementation warning.
+    assert not any(w.startswith("Phase 73D:") and "shared multi-phase" in w for w in data["warnings"])
+
+
+def test_73c1_audit_json_fields_for_shared(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    root = HarnessPath(tmp_path)
+    init_harness(root)
+    init_git_repo(tmp_path)
+    commit_baseline(tmp_path)
+    _create_shared_impl_commit(
+        tmp_path, "Implement Phases 73D-73F shared range"
+    )
+    _create_phase_comp_only(tmp_path, "73D", "comp D")
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "audit", "--last", "5", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    phase = next(p for p in data["phases"] if p["phase_id"] == "73D")
+    assert "implementation_commit_shared" in phase
+    assert phase["implementation_commit_shared"] is True
+    assert "shared_commit_phase_ids" in phase
+    assert isinstance(phase["shared_commit_phase_ids"], list)
+    assert len(phase["shared_commit_phase_ids"]) > 1

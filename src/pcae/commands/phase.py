@@ -1454,6 +1454,74 @@ _PHASE_COMMIT_RE = re.compile(
     r"^(Implement|Document|Design|Add|Refine|Complete) Phase (\S+)\s+(.+)$"
 )
 
+_MULTI_PHASE_COMMIT_RE = re.compile(
+    r"^(Implement|Document|Design|Add|Refine) Phases?\s+(.+)$"
+)
+
+_PHASE_ID_RE = re.compile(r"^(\d+)([A-Z])(?:\.(\d+))?$")
+
+
+def _expand_phase_range(start_id: str, end_id: str) -> list[str]:
+    """Expand a phase range like '73A' to '73C' into ['73A', '73B', '73C']."""
+    start_m = _PHASE_ID_RE.match(start_id)
+    end_m = _PHASE_ID_RE.match(end_id)
+    if not start_m or not end_m:
+        return []
+    start_num = int(start_m.group(1))
+    start_letter = start_m.group(2)
+    end_num = int(end_m.group(1))
+    end_letter = end_m.group(2)
+    if start_num != end_num:
+        return []
+    result = []
+    for c in range(ord(start_letter), ord(end_letter) + 1):
+        result.append(f"{start_num}{chr(c)}")
+    return result
+
+
+def _parse_multi_phase_ids_from_desc(description: str) -> list[str]:
+    """Extract additional phase IDs from a description starting with 'and <phase_id>'.
+
+    E.g. from "and 73E shared and implementation", returns ["73E"].
+    """
+    if not description.strip().startswith("and "):
+        return []
+    rest = description[4:].strip()  # remove "and "
+    # Try to extract a phase ID at the start
+    m = _PHASE_ID_RE.match(rest.split()[0] if rest.split() else "")
+    if m:
+        return [rest.split()[0]]
+    return []
+
+
+def _parse_multi_phase_ids(ids_text: str) -> list[str]:
+    """Parse multi-phase ID text like '73A-73C' or '73A, 73B, 73C' or '73A and 73B'."""
+    # Remove trailing description — take only up to first word that isn't a phase ID or separator
+    # The ids_text from the regex group is everything after "Phases "
+    # We need to extract just the phase ID part
+    # Split on common separators and stop at first non-phase-id token
+    tokens = re.split(r"[,\s]+", ids_text.strip())
+    phase_ids: list[str] = []
+    for token in tokens:
+        token = token.strip().rstrip(".")
+        if not token or token.lower() in ("and",):
+            continue
+        # Check if it looks like a phase range (e.g., "73A-73C")
+        if "-" in token and not token.startswith("-"):
+            parts = token.split("-", 1)
+            if len(parts) == 2:
+                expanded = _expand_phase_range(parts[0], parts[1])
+                if expanded:
+                    phase_ids.extend(expanded)
+                    continue
+        # Check if it looks like a single phase ID
+        if _PHASE_ID_RE.match(token):
+            phase_ids.append(token)
+            continue
+        # If we hit a non-phase-id token, stop (this is the description)
+        break
+    return phase_ids
+
 
 def _git_log_lines(root: HarnessPath, last: int) -> list[str]:
     try:
@@ -1474,29 +1542,77 @@ def _detect_phase_commits(
 ) -> list[dict]:
     impl_map: dict[str, dict] = {}
     comp_map: dict[str, dict] = {}
+    multi_phase_impls: list[dict] = []  # shared implementation commits
 
     for line in log_lines:
         parts = line.split(" ", 1)
         if len(parts) != 2:
             continue
         commit_hash, subject = parts
+
+        # Try single-phase match first
         m = _PHASE_COMMIT_RE.match(subject)
-        if not m:
+        if m:
+            kind, phase_id, description = m.group(1), m.group(2), m.group(3)
+            # Check if the description starts with "and" followed by another
+            # phase ID — this indicates a shared multi-phase commit in
+            # singular "Phase" form (e.g. "Implement Phase 73D and 73E ...")
+            extra_ids = _parse_multi_phase_ids_from_desc(description)
+            if extra_ids:
+                all_ids = [phase_id] + extra_ids
+                if kind != "Complete":
+                    multi_phase_impls.append({
+                        "commit": commit_hash[:12],
+                        "phase_ids": all_ids,
+                        "description": f"{phase_id} and {', '.join(extra_ids)}",
+                        "subject": subject,
+                    })
+                continue
+            entry = {
+                "commit": commit_hash[:12],
+                "phase_id": phase_id,
+                "description": description,
+                "subject": subject,
+            }
+            if kind == "Complete":
+                comp_map.setdefault(phase_id, entry)
+            else:
+                impl_map.setdefault(phase_id, entry)
             continue
-        kind, phase_id, description = m.group(1), m.group(2), m.group(3)
-        entry = {
-            "commit": commit_hash[:12],
-            "phase_id": phase_id,
-            "description": description,
-            "subject": subject,
-        }
-        if kind == "Complete":
-            comp_map.setdefault(phase_id, entry)
-        else:
-            impl_map.setdefault(phase_id, entry)
+
+        # Try multi-phase match (only for implementation commits, not completion)
+        mm = _MULTI_PHASE_COMMIT_RE.match(subject)
+        if mm:
+            kind = mm.group(1)
+            ids_text = mm.group(2)
+            if kind == "Complete":
+                continue  # multi-phase completion commits are not recognized
+            phase_ids = _parse_multi_phase_ids(ids_text)
+            if phase_ids:
+                multi_phase_impls.append({
+                    "commit": commit_hash[:12],
+                    "phase_ids": phase_ids,
+                    "description": ids_text[:80],
+                    "subject": subject,
+                })
+
+    # Process multi-phase implementation commits: distribute to affected phases
+    # but only if no dedicated implementation commit exists for that phase
+    shared_impl_map: dict[str, dict] = {}
+    for mp in multi_phase_impls:
+        for pid in mp["phase_ids"]:
+            if pid not in impl_map:
+                shared_impl_map.setdefault(pid, {
+                    "commit": mp["commit"],
+                    "phase_id": pid,
+                    "description": mp["description"],
+                    "subject": mp["subject"],
+                    "shared": True,
+                    "shared_commit_phase_ids": mp["phase_ids"],
+                })
 
     all_phase_ids = list(dict.fromkeys(
-        list(comp_map.keys()) + list(impl_map.keys())
+        list(comp_map.keys()) + list(impl_map.keys()) + list(shared_impl_map.keys())
     ))
 
     if since:
@@ -1508,13 +1624,22 @@ def _detect_phase_commits(
     phases: list[dict] = []
     for phase_id in all_phase_ids:
         impl = impl_map.get(phase_id)
+        shared = shared_impl_map.get(phase_id)
         comp = comp_map.get(phase_id)
+        has_shared = impl is None and shared is not None
         phases.append({
             "phase_id": phase_id,
-            "description": (comp or impl or {}).get("description", ""),
-            "implementation_commit": impl["commit"] if impl else None,
+            "description": (comp or impl or shared or {}).get("description", ""),
+            "implementation_commit": (
+                impl["commit"] if impl else (shared["commit"] if shared else None)
+            ),
+            "implementation_commit_shared": has_shared,
+            "shared_commit_phase_ids": (
+                shared.get("shared_commit_phase_ids") if has_shared else None
+            ),
             "completion_commit": comp["commit"] if comp else None,
             "commit_pair_complete": impl is not None and comp is not None,
+            # shared commits don't count as fully paired; they generate a separate warning
         })
 
     return phases
@@ -1550,15 +1675,26 @@ def _build_audit_report(root: HarnessPath, last: int, since: str | None) -> dict
 
     warnings: list[str] = []
     for phase in phases:
+        # Check for shared implementation commits first — always a warning
+        if phase.get("implementation_commit_shared"):
+            shared_ids = phase.get("shared_commit_phase_ids") or []
+            warnings.append(
+                f"Phase {phase['phase_id']}: implementation covered by shared "
+                f"multi-phase commit {phase['implementation_commit']} "
+                f"(phase range: {', '.join(shared_ids)}). "
+                f"Preferred: one implementation commit per phase."
+            )
+        # Then check for missing commits
         if not phase["commit_pair_complete"]:
             missing = []
             if phase["implementation_commit"] is None:
                 missing.append("implementation")
             if phase["completion_commit"] is None:
                 missing.append("completion")
-            warnings.append(
-                f"Phase {phase['phase_id']}: missing {', '.join(missing)} commit"
-            )
+            if missing:
+                warnings.append(
+                    f"Phase {phase['phase_id']}: missing {', '.join(missing)} commit"
+                )
 
     healthy_idle = healthy and not active_task and not changes
 
