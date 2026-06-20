@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 72S Execution Authorization Artifact Schema Dry Run (20260620-0248-72s-execution-authorization-artifact-schema-dry-run)
 - 72R Execution Authorization Design Record (20260620-0245-72r-execution-authorization-design-record)
 - 72Q Queue Preflight Positive Non-Execution Path (20260619-2209-72q-queue-preflight-positive-non-execution-path)
 - 72P Queue Approval Matching With Non-Empty Queue (20260619-2204-72p-queue-approval-matching-with-non-empty-queue)
