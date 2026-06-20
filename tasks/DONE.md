@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73L Execution Authorization Artifact Matching Rules (20260620-0929-73l-execution-authorization-artifact-matching-rules)
 - 73K Execution Authorization Artifact Schema and Dry Run (20260620-0925-73k-execution-authorization-artifact-schema-and-dry-run)
 - 73J Execution Authorization Artifact Design (20260620-0916-73j-execution-authorization-artifact-design)
 - 73I Single-Phase Runner Refusal Matrix (20260620-0841-73i-single-phase-runner-refusal-matrix)
