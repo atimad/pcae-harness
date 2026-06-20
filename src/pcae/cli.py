@@ -434,6 +434,7 @@ from pcae.commands.phase import (
     run_phase_runner_sim_approve,
     run_phase_single_runner_contract,
     run_phase_single_runner_readiness,
+    run_phase_single_runner_refusal_matrix,
     run_phase_runner_sim_approval_show,
     run_phase_runner_sim_fixture,
     run_phase_runner_sim_review,
@@ -5353,6 +5354,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_single_runner_readiness_parser.set_defaults(
         handler=run_phase_single_runner_readiness
+    )
+
+    phase_single_runner_refusal_matrix_parser = phase_subparsers.add_parser(
+        "single-runner-refusal-matrix",
+        help="Show the refusal matrix for a future single-phase runner (does not enable execution).",
+    )
+    phase_single_runner_refusal_matrix_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_single_runner_refusal_matrix_parser.add_argument(
+        "--save", action="store_true", help="Persist the refusal matrix artifact."
+    )
+    phase_single_runner_refusal_matrix_parser.set_defaults(
+        handler=run_phase_single_runner_refusal_matrix
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

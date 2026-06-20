@@ -5019,3 +5019,90 @@ def run_phase_single_runner_readiness(args: argparse.Namespace) -> int:
     print()
     print(f"  {data['note']}")
     return 0
+
+
+SINGLE_RUNNER_REFUSAL_MATRICES_DIR = Path(".pcae") / "single-runner-refusal-matrices"
+
+_SINGLE_RUNNER_REFUSAL_MATRIX = [
+    {"condition": "dirty_tree", "category": "hard_stop", "refusal_reason": "Working tree has uncommitted changes.", "suggested_action": "Commit or stash changes before starting a phase.", "execution_allowed": False},
+    {"condition": "active_task", "category": "hard_stop", "refusal_reason": "An active task contract exists.", "suggested_action": "Finish or close the active task before starting a new phase.", "execution_allowed": False},
+    {"condition": "health_not_idle", "category": "hard_stop", "refusal_reason": "pcae health is not healthy idle.", "suggested_action": "Run pcae health and resolve issues.", "execution_allowed": False},
+    {"condition": "check_failed", "category": "hard_stop", "refusal_reason": "pcae check failed.", "suggested_action": "Run pcae check and resolve violations.", "execution_allowed": False},
+    {"condition": "task_memory_dirty", "category": "hard_stop", "refusal_reason": "Task memory has inconsistencies.", "suggested_action": "Run pcae doctor task-memory --fix.", "execution_allowed": False},
+    {"condition": "unpushed_commits", "category": "advisory_warning", "refusal_reason": "Unpushed commits present.", "suggested_action": "Run pcae push or pcae push check.", "execution_allowed": False},
+    {"condition": "queue_empty", "category": "hard_stop", "refusal_reason": "Phase queue is empty.", "suggested_action": "Add phases to the queue or use fixture-add for testing.", "execution_allowed": False},
+    {"condition": "queue_invalid", "category": "hard_stop", "refusal_reason": "Phase queue validation failed.", "suggested_action": "Run pcae phase queue validate and resolve issues.", "execution_allowed": False},
+    {"condition": "queue_approval_missing", "category": "hard_stop", "refusal_reason": "No queue approval artifact.", "suggested_action": "Run pcae phase queue approve --message '...'.", "execution_allowed": False},
+    {"condition": "queue_approval_stale", "category": "hard_stop", "refusal_reason": "Queue approval does not match current queue.", "suggested_action": "Re-approve the queue after changes.", "execution_allowed": False},
+    {"condition": "simulation_approval_missing", "category": "hard_stop", "refusal_reason": "No simulation approval artifact.", "suggested_action": "Run pcae phase runner-sim-approve.", "execution_allowed": False},
+    {"condition": "execution_request_missing", "category": "hard_stop", "refusal_reason": "No execution request artifact.", "suggested_action": "Run pcae phase runner-execution-request.", "execution_allowed": False},
+    {"condition": "execution_request_denied", "category": "hard_stop", "refusal_reason": "Execution request has been denied.", "suggested_action": "Create a new execution request after resolving blocking issues.", "execution_allowed": False},
+    {"condition": "execution_request_revoked", "category": "hard_stop", "refusal_reason": "Execution request has been revoked.", "suggested_action": "Create a new execution request after resolving blocking issues.", "execution_allowed": False},
+    {"condition": "noop_trace_missing", "category": "hard_stop", "refusal_reason": "No no-op execution trace.", "suggested_action": "Run pcae phase runner-execute --noop --save.", "execution_allowed": False},
+    {"condition": "noop_trace_review_missing", "category": "hard_stop", "refusal_reason": "No no-op trace review.", "suggested_action": "Run pcae phase runner-execution-trace-review --save.", "execution_allowed": False},
+    {"condition": "noop_trace_review_blocked", "category": "hard_stop", "refusal_reason": "No-op trace review is blocked.", "suggested_action": "Investigate review_reasons and resolve blocking issues.", "execution_allowed": False},
+    {"condition": "noop_trace_approval_missing", "category": "hard_stop", "refusal_reason": "No no-op trace approval.", "suggested_action": "Run pcae phase runner-execution-trace-approve.", "execution_allowed": False},
+    {"condition": "noop_trace_approval_stale", "category": "hard_stop", "refusal_reason": "No-op trace approval does not match current trace.", "suggested_action": "Re-approve the trace after changes.", "execution_allowed": False},
+    {"condition": "authorization_missing", "category": "hard_stop", "refusal_reason": "No execution authorization artifact (future phase).", "suggested_action": "Wait for future execution authorization phase.", "execution_allowed": False},
+    {"condition": "authorization_unavailable", "category": "hard_stop", "refusal_reason": "Execution authorization is not implemented.", "suggested_action": "Wait for future explicit execution-authorization phase.", "execution_allowed": False},
+    {"condition": "multi_phase_request", "category": "hard_stop", "refusal_reason": "Multiple phases requested in a single bounded run.", "suggested_action": "Execute only one phase per bounded run.", "execution_allowed": False},
+    {"condition": "shared_implementation_commit", "category": "advisory_warning", "refusal_reason": "Shared implementation commits detected in audit.", "suggested_action": "Use one implementation commit per phase.", "execution_allowed": False},
+]
+
+
+def run_phase_single_runner_refusal_matrix(args: argparse.Namespace) -> int:
+    matrix = list(_SINGLE_RUNNER_REFUSAL_MATRIX)
+
+    if getattr(args, "save", False):
+        matrix_dir = HarnessPath.cwd().join(SINGLE_RUNNER_REFUSAL_MATRICES_DIR)
+        matrix_dir.mkdir(parents=True, exist_ok=True)
+        gitignore_path = matrix_dir / ".gitignore"
+        if not gitignore_path.exists():
+            gitignore_path.write_text("*\n", encoding="utf-8")
+        saved = {
+            "design_only": True,
+            "execution_enabled": False,
+            "refusal_matrix": matrix,
+            "note": "This is a refusal matrix only. No real execution is enabled.",
+        }
+        latest_path = matrix_dir / "latest.json"
+        latest_path.write_text(
+            json.dumps(saved, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        if not args.json:
+            print(f"Refusal matrix saved: {latest_path}")
+
+    if args.json:
+        print(json.dumps({
+            "design_only": True,
+            "execution_enabled": False,
+            "refusal_matrix": matrix,
+            "categories": ["hard_stop", "recoverable_stop", "advisory_warning", "continue_allowed"],
+            "note": "This is a refusal matrix only. No real execution is enabled.",
+        }, indent=2, sort_keys=True))
+        return 0
+
+    print("Single-Phase Runner Refusal Matrix")
+    print("=" * 40)
+    print(f"  Design only: yes")
+    print(f"  Execution enabled: no")
+    print()
+
+    for category, label in [
+        ("hard_stop", "Hard Stop"),
+        ("recoverable_stop", "Recoverable Stop"),
+        ("advisory_warning", "Advisory Warning"),
+        ("continue_allowed", "Continue Allowed"),
+    ]:
+        entries = [e for e in matrix if e["category"] == category]
+        if entries:
+            print(f"  [{label}]")
+            for e in entries:
+                print(f"    {e['condition']}")
+                print(f"      → {e['refusal_reason']}")
+                print(f"      → Action: {e['suggested_action']}")
+            print()
+
+    print("  This is a refusal matrix only. No real execution is enabled.")
+    return 0

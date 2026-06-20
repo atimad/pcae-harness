@@ -8660,3 +8660,55 @@ def test_73h_readiness_no_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
     capsys.readouterr()
 
     assert queue_path.read_text(encoding="utf-8") == before
+
+
+# ---------------------------------------------------------------------------
+# Phase 73I: single-phase runner refusal matrix
+# ---------------------------------------------------------------------------
+
+
+def test_73i_refusal_matrix_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "single-runner-refusal-matrix", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["design_only"] is True
+    assert data["execution_enabled"] is False
+    assert len(data["refusal_matrix"]) > 15
+    assert "categories" in data
+
+
+def test_73i_refusal_matrix_save(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "single-runner-refusal-matrix", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    matrix_path = tmp_path / ".pcae" / "single-runner-refusal-matrices" / "latest.json"
+    assert matrix_path.is_file()
+    saved = json.loads(matrix_path.read_text(encoding="utf-8"))
+    assert saved["design_only"] is True
+    assert len(saved["refusal_matrix"]) > 15
+
+
+def test_73i_refusal_matrix_no_mutation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 73I: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "single-runner-refusal-matrix"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
