@@ -10917,6 +10917,129 @@ def test_76d_execute_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["execution_authorized"] is False
 
 
+# Phase 76E: manual apply result validation
+def test_76e_validation_missing_result(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-result-validate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["result_validation_status"] == "missing_execution_result"
+    assert d["apply_result_valid"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76e_validation_no_op(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    ed = tmp_path / ".pcae" / "captured-output-manual-apply-executions"
+    ed.mkdir(parents=True, exist_ok=True)
+    (ed / "latest.json").write_text(json.dumps({
+        "manual_apply_status": "no_changes_to_apply", "files_modified": False,
+        "changed_files": [], "unexpected_changed_files": [], "mutation_guard_passed": True,
+        "apply_performed": False, "commits_created": 0, "push_performed": False,
+        "allowed_files": [], "forbidden_files": [],
+    }))
+    main(["phase", "captured-output-manual-apply-result-validate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["result_validation_status"] == "validated_no_op"
+    assert d["apply_result_valid"] is True
+    assert d["no_changes_to_apply"] is True
+    assert d["no_commit_needed"] is True
+    assert d["no_push_needed"] is True
+    assert d["files_modified"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76e_validation_applied_allowed(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    ed = tmp_path / ".pcae" / "captured-output-manual-apply-executions"
+    ed.mkdir(parents=True, exist_ok=True)
+    (ed / "latest.json").write_text(json.dumps({
+        "manual_apply_status": "applied", "files_modified": True,
+        "changed_files": ["test.txt"], "unexpected_changed_files": [],
+        "mutation_guard_passed": True, "apply_performed": True,
+        "commits_created": 0, "push_performed": False,
+        "allowed_files": ["test.txt"], "forbidden_files": [],
+    }))
+    main(["phase", "captured-output-manual-apply-result-validate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["result_validation_status"] == "validated_applied"
+    assert d["apply_result_valid"] is True
+    assert d["no_commit_needed"] is True
+    assert d["no_push_needed"] is True
+    assert d["validation_commands_required"] is True
+
+
+def test_76e_validation_applied_unexpected_file(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    ed = tmp_path / ".pcae" / "captured-output-manual-apply-executions"
+    ed.mkdir(parents=True, exist_ok=True)
+    (ed / "latest.json").write_text(json.dumps({
+        "manual_apply_status": "applied", "files_modified": True,
+        "changed_files": ["test.txt"], "unexpected_changed_files": ["bad.py"],
+        "mutation_guard_passed": False, "apply_performed": True,
+        "commits_created": 0, "push_performed": False,
+        "allowed_files": ["test.txt"], "forbidden_files": [],
+    }))
+    main(["phase", "captured-output-manual-apply-result-validate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["result_validation_status"] == "invalid_result"
+    assert d["apply_result_valid"] is False
+
+
+def test_76e_validation_blocked_result(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    ed = tmp_path / ".pcae" / "captured-output-manual-apply-executions"
+    ed.mkdir(parents=True, exist_ok=True)
+    (ed / "latest.json").write_text(json.dumps({
+        "manual_apply_status": "blocked_dirty_tree", "files_modified": False,
+        "changed_files": [], "blockers": ["dirty tree"],
+    }))
+    main(["phase", "captured-output-manual-apply-result-validate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["result_validation_status"] == "blocked_or_failed"
+    assert d["apply_result_valid"] is False
+
+
+def test_76e_validation_save_and_show(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    ed = tmp_path / ".pcae" / "captured-output-manual-apply-executions"
+    ed.mkdir(parents=True, exist_ok=True)
+    (ed / "latest.json").write_text(json.dumps({
+        "manual_apply_status": "no_changes_to_apply", "files_modified": False,
+        "changed_files": [], "unexpected_changed_files": [], "mutation_guard_passed": True,
+        "apply_performed": False, "commits_created": 0, "push_performed": False,
+        "allowed_files": [], "forbidden_files": [],
+    }))
+    main(["phase", "captured-output-manual-apply-result-validate", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-result-validations" / "latest.json"
+    assert p.is_file()
+    d2 = json.loads(p.read_text(encoding="utf-8"))
+    assert d2["result_validation_status"] == "validated_no_op"
+    assert d2["execution_authorized"] is False
+    # Test show
+    main(["phase", "captured-output-manual-apply-result-validation-show", "--json"])
+    d3 = json.loads(capsys.readouterr().out)
+    assert d3["result_validation_status"] == "validated_no_op"
+
+
+def test_76e_validation_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-result-validate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+
+
 # Phase 75I.2: governance bypass declaration reconciliation
 def test_75i2_reconcile_missing_classification(tmp_path, monkeypatch, capsys):
     from pcae.commands.init import init_harness

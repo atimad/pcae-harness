@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 76D: Captured Output Manual Apply Execution.
+Phase 76E: Manual Apply Result Validation.
 
-Phase 76D adds `pcae phase captured-output-manual-apply-execute [--execute] --json --save`
-for controlled manual apply execution with explicit operator consent, safety guards,
-and mutation guard. Never commits or pushes. Captured output contains fixture no-op.
+Phase 76E adds `pcae phase captured-output-manual-apply-result-validate --json --save`
+validating the 76D manual apply execution result. Real repo result: validated_no_op
+(fixture no-op). No commit or push needed. Validates all result paths.
 
 ## Milestone: Execution Chain Traceability Complete
 

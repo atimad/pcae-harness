@@ -10632,3 +10632,191 @@ def run_phase_captured_output_manual_apply_result_show(args: argparse.Namespace)
     print(f"  Push performed: {'yes' if result.get('push_performed') else 'no'}")
     print(f"  Execution authorized: {'yes' if result.get('execution_authorized') else 'no'}")
     return 0
+
+
+# Phase 76E: manual apply result validation
+CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR = Path(".pcae") / "captured-output-manual-apply-result-validations"
+
+
+def _build_captured_output_manual_apply_result_validate(root: HarnessPath) -> dict:
+    base = {
+        "result_validation_status": "missing_execution_result",
+        "manual_apply_status": None, "manual_apply_result_ref": None,
+        "human_approval_valid": False, "execution_preflight_ready": False,
+        "apply_result_valid": False, "no_changes_to_apply": False,
+        "files_modified": False, "changed_files": [], "allowed_files": [], "forbidden_files": [],
+        "unexpected_changed_files": [], "mutation_guard_passed": False,
+        "apply_performed": False, "commits_created": 0, "push_performed": False,
+        "no_commit_needed": False, "no_push_needed": False,
+        "validation_commands_after_apply": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "validation_commands_required": False, "current_git_status": None,
+        "backend_invocation_performed": False, "automatic_apply_allowed": False,
+        "backend_apply_allowed": False, "execution_authorized": False,
+        "recommended_next_phase": "76F — Manual Apply No-Op Closure Summary (future)",
+        "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read execution result
+    result_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR / "latest.json")
+    if not result_path.is_file():
+        base["result_validation_status"] = "missing_execution_result"
+        base["blockers"] = ["No manual apply execution result found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-execute [--execute] --save first."
+        return base
+    exec_result = json.loads(result_path.read_text(encoding="utf-8"))
+    base["manual_apply_result_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR / "latest.json")
+    base["manual_apply_status"] = exec_result.get("manual_apply_status")
+    base["files_modified"] = exec_result.get("files_modified", False)
+    base["changed_files"] = exec_result.get("changed_files", [])
+    base["allowed_files"] = exec_result.get("allowed_files", [])
+    base["forbidden_files"] = exec_result.get("forbidden_files", [])
+    base["unexpected_changed_files"] = exec_result.get("unexpected_changed_files", [])
+    base["mutation_guard_passed"] = exec_result.get("mutation_guard_passed", False)
+    base["apply_performed"] = exec_result.get("apply_performed", False)
+    base["commits_created"] = exec_result.get("commits_created", 0)
+    base["push_performed"] = exec_result.get("push_performed", False)
+
+    status = base["manual_apply_status"]
+
+    # Validate no_changes_to_apply
+    if status == "no_changes_to_apply":
+        base["result_validation_status"] = "validated_no_op"
+        base["apply_result_valid"] = True
+        base["no_changes_to_apply"] = True
+        base["no_commit_needed"] = True
+        base["no_push_needed"] = True
+        base["validation_commands_required"] = False
+        base["blockers"] = []
+        base["recommended_next_phase"] = "76F — Manual Apply No-Op Closure Summary (future)"
+        base["next_operator_action"] = (
+            "Manual apply result validated as no-op. No changes were applied (fixture/no-op captured output). "
+            "No commit, push, or validation commands are needed. Result is valid."
+        )
+        return base
+
+    # Validate dry_run_ready (non-mutating, ready for apply)
+    if status == "dry_run_ready":
+        base["result_validation_status"] = "validated_no_op"
+        base["apply_result_valid"] = True
+        base["no_changes_to_apply"] = True
+        base["no_commit_needed"] = True
+        base["no_push_needed"] = True
+        base["validation_commands_required"] = False
+        base["blockers"] = []
+        base["next_operator_action"] = (
+            "Dry-run result validated. No files were modified. No commit or push needed."
+        )
+        return base
+
+    # Validate applied
+    if status == "applied":
+        # Check changed files are within allowed files
+        unexpected = exec_result.get("unexpected_changed_files", [])
+        if unexpected:
+            base["result_validation_status"] = "invalid_result"
+            base["apply_result_valid"] = False
+            base["blockers"] = [f"Unexpected changed file: {f}" for f in unexpected]
+            base["next_operator_action"] = "Unexpected files were modified during apply. Result is invalid."
+            return base
+
+        if not exec_result.get("mutation_guard_passed", False):
+            base["result_validation_status"] = "invalid_result"
+            base["apply_result_valid"] = False
+            base["blockers"] = ["Mutation guard did not pass."]
+            base["next_operator_action"] = "Mutation guard failed. Result is invalid."
+            return base
+
+        if exec_result.get("commits_created", 0) > 0 or exec_result.get("push_performed", False):
+            base["result_validation_status"] = "invalid_result"
+            base["apply_result_valid"] = False
+            base["blockers"] = ["Commit or push detected in execution result."]
+            base["next_operator_action"] = "Execution result shows commit/push — not allowed in manual apply execution phase."
+            return base
+
+        base["result_validation_status"] = "validated_applied"
+        base["apply_result_valid"] = True
+        base["no_changes_to_apply"] = False
+        base["no_commit_needed"] = True  # commit is not performed here
+        base["no_push_needed"] = True
+        base["validation_commands_required"] = True
+        base["blockers"] = []
+        base["recommended_next_phase"] = "76F — Manual Apply Result Closure (future)"
+        base["next_operator_action"] = (
+            "Manual apply result validated as applied. Changes are within allowed scope, "
+            "mutation guard passed, no commit/push performed. Run validation commands "
+            "before future closure phase."
+        )
+        return base
+
+    # Blocked / failed / other statuses
+    if status in ("blocked", "failed_or_out_of_scope", "blocked_dirty_tree",
+                  "blocked_no_applyable_changes"):
+        base["result_validation_status"] = "blocked_or_failed"
+        base["apply_result_valid"] = False
+        base["blockers"] = [f"Execution result is {status}."]
+        blockers = exec_result.get("blockers", [])
+        base["blockers"].extend(blockers[:5])
+        base["next_operator_action"] = exec_result.get("next_operator_action", "Resolve execution blockers first.")
+        return base
+
+    # Unknown status
+    base["result_validation_status"] = "invalid_result"
+    base["apply_result_valid"] = False
+    base["blockers"] = [f"Unknown execution status: {status}"]
+    base["next_operator_action"] = "Execution result has unknown status."
+    return base
+
+
+def run_phase_captured_output_manual_apply_result_validate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_result_validate(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Result validation saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["result_validation_status"] in ("validated_no_op", "validated_applied") else 1
+    print("Manual Apply Result Validation"); print("=" * 40)
+    print(f"  Validation status: {result['result_validation_status']}")
+    print(f"  Apply result valid: {'yes' if result['apply_result_valid'] else 'no'}")
+    print(f"  Manual apply status: {result['manual_apply_status']}")
+    print(f"  No changes to apply: {'yes' if result['no_changes_to_apply'] else 'no'}")
+    print(f"  Files modified: {'yes' if result['files_modified'] else 'no'}")
+    print(f"  Changed files: {len(result['changed_files'])}")
+    print(f"  Mutation guard passed: {'yes' if result['mutation_guard_passed'] else 'no'}")
+    print(f"  Commits created: {result['commits_created']}")
+    print(f"  Push performed: {'yes' if result['push_performed'] else 'no'}")
+    print(f"  No commit needed: {'yes' if result['no_commit_needed'] else 'no'}")
+    print(f"  No push needed: {'yes' if result['no_push_needed'] else 'no'}")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["result_validation_status"] in ("validated_no_op", "validated_applied") else 1
+
+
+def run_phase_captured_output_manual_apply_result_validation_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR / "latest.json")
+    if not p.is_file():
+        result = {"result_validation_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No result validation artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("result_validation_status") in ("validated_no_op", "validated_applied") else 1
+    print("Manual Apply Result Validation (Show)"); print("=" * 40)
+    print(f"  Status: {result.get('result_validation_status', 'unknown')}")
+    print(f"  Apply valid: {'yes' if result.get('apply_result_valid') else 'no'}")
+    print(f"  No commit needed: {'yes' if result.get('no_commit_needed') else 'no'}")
+    print(f"  No push needed: {'yes' if result.get('no_push_needed') else 'no'}")
+    return 0

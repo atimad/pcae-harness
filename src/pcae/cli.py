@@ -483,6 +483,8 @@ from pcae.commands.phase import (
     run_phase_captured_output_manual_apply_execution_preflight,
     run_phase_captured_output_manual_apply_execute,
     run_phase_captured_output_manual_apply_result_show,
+    run_phase_captured_output_manual_apply_result_validate,
+    run_phase_captured_output_manual_apply_result_validation_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6239,6 +6241,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_captured_output_manual_apply_result_show_parser.add_argument("--json", action="store_true")
     phase_captured_output_manual_apply_result_show_parser.set_defaults(handler=run_phase_captured_output_manual_apply_result_show)
+
+    # Phase 76E
+    phase_captured_output_manual_apply_result_validate_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-result-validate",
+        help="Validate manual apply execution result (Phase 76E).",
+    )
+    phase_captured_output_manual_apply_result_validate_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_result_validate_parser.add_argument("--save", action="store_true")
+    phase_captured_output_manual_apply_result_validate_parser.set_defaults(handler=run_phase_captured_output_manual_apply_result_validate)
+
+    phase_captured_output_manual_apply_result_validation_show_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-result-validation-show",
+        help="Show latest manual apply result validation (Phase 76E).",
+    )
+    phase_captured_output_manual_apply_result_validation_show_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_result_validation_show_parser.set_defaults(handler=run_phase_captured_output_manual_apply_result_validation_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
