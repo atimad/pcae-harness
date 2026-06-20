@@ -7877,3 +7877,235 @@ def test_72z_summary_no_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
     capsys.readouterr()
 
     assert queue_path.read_text(encoding="utf-8") == before
+
+
+# ---------------------------------------------------------------------------
+# Phase 73A: runner no-op execution trace
+# ---------------------------------------------------------------------------
+
+
+def test_73a_noop_trace_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["noop"] is True
+    assert data["execution_authorized"] is False
+    assert data["execution_available"] is False
+    assert data["would_execute"] is False
+    assert data["mutation_performed"] is False
+    assert data["tasks_created"] == 0
+    assert data["queue_mutated"] is False
+    assert "trace_id" in data
+    assert "binding" in data
+
+
+def test_73a_noop_trace_save(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    trace_path = tmp_path / ".pcae" / "runner-execution-traces" / "latest.json"
+    assert trace_path.is_file()
+    saved = json.loads(trace_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+    assert saved["noop"] is True
+
+
+def test_73a_noop_no_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-execute", "--noop"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_73a_noop_preserves_refusal_without_noop(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["execution_authorized"] is False
+    assert data["execution_available"] is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 73B: runner no-op execution approval binding
+# ---------------------------------------------------------------------------
+
+
+def test_73b_noop_binding_empty_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["binding"]["binding_complete"] is False
+    assert "empty" in str(data["binding"]["binding_reasons"]).lower()
+
+
+def test_73b_noop_binding_blocked_denied(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Block bind"])
+    main(["phase", "runner-execution-request-deny", "--message", "Denied"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["binding"]["execution_request_denied"] is True
+    assert data["binding"]["binding_complete"] is False
+    assert "denied" in str(data["binding"]["binding_reasons"]).lower()
+
+
+def test_73b_noop_binding_with_fixture_and_approval(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"])
+    main(["phase", "queue", "approve", "--message", "Bind test"])
+    main(["phase", "runner-execution-request", "--message", "Bind req"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["binding"]["queue_approval_present"] is True
+    assert data["binding"]["queue_approval_matches_current_queue"] is True
+    assert data["binding"]["execution_request_present"] is True
+    assert data["binding"]["binding_complete"] is True
+    assert data["execution_authorized"] is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 73C: runner no-op execution abort scenarios
+# ---------------------------------------------------------------------------
+
+
+def test_73c_noop_scenario_dirty_tree(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--scenario", "dirty-tree", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["scenario"] == "dirty-tree"
+    assert data["policy_category"] == "hard_stop"
+    assert data["abort"] is True
+    assert data["execution_authorized"] is False
+    assert data["mutation_performed"] is False
+
+
+def test_73c_noop_scenario_denied_request(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--scenario", "denied-request", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["scenario"] == "denied-request"
+    assert data["abort"] is True
+    assert data["execution_authorized"] is False
+
+
+def test_73c_noop_scenario_queue_empty(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--scenario", "queue-empty", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["scenario"] == "queue-empty"
+    assert data["policy_category"] == "continue_allowed"
+    assert data["execution_authorized"] is False
+
+
+def test_73c_noop_scenario_authorization_unavailable(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--noop", "--scenario", "authorization-unavailable", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["scenario"] == "authorization-unavailable"
+    assert data["abort"] is True
+    assert data["execution_authorized"] is False
+
+
+def test_73c_noop_scenario_no_mutation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-execute", "--noop", "--scenario", "active-task"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_73c_noop_scenario_requires_noop(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--scenario", "dirty-tree", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert "error" in data

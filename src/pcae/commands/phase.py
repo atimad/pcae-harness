@@ -3462,7 +3462,255 @@ _RUNNER_EXECUTION_SUGGESTED_STEPS = [
 ]
 
 
+RUNNER_EXECUTION_TRACES_DIR = Path(".pcae") / "runner-execution-traces"
+
+_RUNNER_NOOP_SCENARIOS: dict[str, dict] = {
+    "dirty-tree": {
+        "scenario": "dirty-tree",
+        "simulated_condition": "Working tree has uncommitted changes",
+        "policy_category": "hard_stop",
+        "abort": True,
+        "suggested_action": "Commit or stash changes before starting a phase.",
+    },
+    "active-task": {
+        "scenario": "active-task",
+        "simulated_condition": "An active task contract exists",
+        "policy_category": "hard_stop",
+        "abort": True,
+        "suggested_action": "Finish or close the active task before starting a new phase.",
+    },
+    "denied-request": {
+        "scenario": "denied-request",
+        "simulated_condition": "Execution request has been denied",
+        "policy_category": "hard_stop",
+        "abort": True,
+        "suggested_action": "Create a new execution request or wait for future authorization phases.",
+    },
+    "revoked-request": {
+        "scenario": "revoked-request",
+        "simulated_condition": "Execution request has been revoked",
+        "policy_category": "hard_stop",
+        "abort": True,
+        "suggested_action": "Create a new execution request or wait for future authorization phases.",
+    },
+    "queue-empty": {
+        "scenario": "queue-empty",
+        "simulated_condition": "Phase queue is empty",
+        "policy_category": "continue_allowed",
+        "abort": True,
+        "suggested_action": "Add phases to the queue or use fixture-add for testing.",
+    },
+    "authorization-unavailable": {
+        "scenario": "authorization-unavailable",
+        "simulated_condition": "Execution authorization is not implemented",
+        "policy_category": "hard_stop",
+        "abort": True,
+        "suggested_action": "Wait for a future explicit execution-authorization phase.",
+    },
+}
+
+
+def _build_runner_noop_trace(root: HarnessPath, scenario: str | None) -> dict:
+    queue_validation = _build_queue_validate(root)
+    queue_approval = _read_latest_queue_approval(root)
+    preflight = _build_execution_preflight(root)
+    auth_summary = _build_runner_authorization_summary(root)
+    exec_request = _read_latest_runner_execution_request(root)
+    timestamp = datetime.now(timezone.utc)
+
+    if scenario and scenario in _RUNNER_NOOP_SCENARIOS:
+        sc = _RUNNER_NOOP_SCENARIOS[scenario]
+        return {
+            "noop": True,
+            "scenario": sc["scenario"],
+            "simulated_condition": sc["simulated_condition"],
+            "policy_category": sc["policy_category"],
+            "abort": sc["abort"],
+            "execution_available": False,
+            "execution_authorized": False,
+            "would_execute": False,
+            "mutation_performed": False,
+            "tasks_created": 0,
+            "queue_mutated": False,
+            "suggested_action": sc["suggested_action"],
+            "suggested_next_steps": list(_RUNNER_EXECUTION_SUGGESTED_STEPS),
+            "trace_id": f"noop-{timestamp:%Y%m%dT%H%M%S}-{timestamp.microsecond:06d}",
+            "created_at": timestamp.isoformat(),
+            "note": (
+                f"Simulated no-op abort scenario: {sc['scenario']}. "
+                "No repository state was mutated. This is a simulation only."
+            ),
+        }
+
+    request_present = exec_request is not None
+    request_denied = exec_request.get("denied", False) if exec_request else False
+    request_revoked = exec_request.get("revoked", False) if exec_request else False
+    request_blocks = request_denied or request_revoked
+
+    binding_complete = (
+        queue_validation["queue_ready"]
+        and queue_validation["valid"]
+        and queue_approval is not None
+        and queue_approval.get("queue_digest") == _compute_queue_digest(root)
+        and request_present
+        and not request_blocks
+    )
+    binding_reasons: list[str] = []
+    if not queue_validation["queue_ready"]:
+        binding_reasons.append("queue is empty or not ready")
+    if not queue_validation["valid"]:
+        binding_reasons.append("queue validation failed")
+    if queue_approval is None:
+        binding_reasons.append("no queue approval artifact")
+    elif queue_approval.get("queue_digest") != _compute_queue_digest(root):
+        binding_reasons.append("queue approval does not match current queue")
+    if not request_present:
+        binding_reasons.append("no execution request artifact")
+    if request_blocks:
+        binding_reasons.append("request is denied or revoked")
+
+    return {
+        "noop": True,
+        "execution_available": False,
+        "execution_authorized": False,
+        "would_execute": False,
+        "mutation_performed": False,
+        "tasks_created": 0,
+        "queue_mutated": False,
+        "trace_id": f"noop-{timestamp:%Y%m%dT%H%M%S}-{timestamp.microsecond:06d}",
+        "created_at": timestamp.isoformat(),
+        "refusal_reason": (
+            "Runner execution is not implemented and not authorized. "
+            "This is a no-op trace only."
+        ),
+        "queue_validation_snapshot": {
+            "valid": queue_validation["valid"],
+            "queue_ready": queue_validation["queue_ready"],
+            "entry_count": queue_validation["queue_entry_count"],
+        },
+        "queue_approval_snapshot": {
+            "present": queue_approval is not None,
+            "matches_current_queue": (
+                queue_approval.get("queue_digest") == _compute_queue_digest(root)
+            ) if queue_approval else False,
+        },
+        "preflight_snapshot": {
+            "status": preflight["preflight_status"],
+            "requirements_met": preflight["requirements_met"],
+            "requirements_total": preflight["requirements_total"],
+        },
+        "authorization_summary_snapshot": {
+            "overall_status": auth_summary["overall_status"],
+        },
+        "runner_policy_summary": {
+            "hard_stop_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "hard_stop"]),
+            "recoverable_stop_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "recoverable_stop"]),
+            "advisory_warning_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "advisory_warning"]),
+            "continue_allowed_count": len([e for e in _RUNNER_POLICY_MATRIX if e["category"] == "continue_allowed"]),
+        },
+        "binding": {
+            "queue_approval_present": queue_approval is not None,
+            "queue_approval_matches_current_queue": (
+                queue_approval.get("queue_digest") == _compute_queue_digest(root)
+            ) if queue_approval else False,
+            "simulation_approval_present": _read_latest_sim_approval(root) is not None,
+            "execution_request_present": request_present,
+            "execution_request_review_present": _read_latest_runner_execution_request_review(root) is not None,
+            "execution_request_denied": request_denied,
+            "execution_request_revoked": request_revoked,
+            "authorization_summary_status": auth_summary["overall_status"],
+            "preflight_status": preflight["preflight_status"],
+            "binding_complete": binding_complete,
+            "binding_reasons": binding_reasons or ["governance chain is complete for no-op trace"],
+        },
+        "suggested_next_steps": list(_RUNNER_EXECUTION_SUGGESTED_STEPS),
+        "note": (
+            "This is a no-op execution trace. No queue entries were executed. "
+            "No artifacts, queue entries, or tasks are mutated. "
+            "Human authority remains absolute."
+        ),
+    }
+
+
+def _save_runner_noop_trace(root: HarnessPath, trace: dict) -> Path:
+    trace_dir = root.join(RUNNER_EXECUTION_TRACES_DIR)
+    trace_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = trace_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = trace_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(trace, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
 def run_phase_runner_execute(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    noop = getattr(args, "noop", False)
+    scenario: str | None = getattr(args, "scenario", None)
+
+    if scenario and not noop:
+        if args.json:
+            print(json.dumps({
+                "error": "--scenario requires --noop",
+                "execution_authorized": False,
+            }, indent=2, sort_keys=True))
+        else:
+            print("Error: --scenario requires --noop flag.")
+        return 1
+
+    if noop:
+        trace = _build_runner_noop_trace(root, scenario)
+
+        if getattr(args, "save", False):
+            saved_path = _save_runner_noop_trace(root, trace)
+            if not args.json:
+                print(f"No-op trace saved: {saved_path}")
+
+        if args.json:
+            print(json.dumps(trace, indent=2, sort_keys=True))
+            return 0
+
+        print("Runner Execution No-Op Trace")
+        print("=" * 40)
+        print(f"  No-op: yes")
+        if trace.get("scenario"):
+            print(f"  Scenario: {trace['scenario']}")
+            print(f"  Simulated condition: {trace['simulated_condition']}")
+            print(f"  Policy category: {trace['policy_category']}")
+            print(f"  Abort: {'yes' if trace.get('abort') else 'no'}")
+            print(f"  Suggested action: {trace.get('suggested_action')}")
+        else:
+            print(f"  Trace ID: {trace['trace_id']}")
+            b = trace["binding"]
+            print(f"  Binding complete: {'yes' if b['binding_complete'] else 'no'}")
+            if b["binding_reasons"]:
+                print("  Binding reasons:")
+                for r in b["binding_reasons"]:
+                    print(f"    - {r}")
+            print()
+            print("  Snapshots:")
+            qv = trace["queue_validation_snapshot"]
+            print(f"    Queue: valid={'yes' if qv['valid'] else 'no'} ready={'yes' if qv['queue_ready'] else 'no'} entries={qv['entry_count']}")
+            qa = trace["queue_approval_snapshot"]
+            print(f"    Queue approval: present={'yes' if qa['present'] else 'no'} matches={'yes' if qa['matches_current_queue'] else 'no'}")
+            ps = trace["preflight_snapshot"]
+            print(f"    Preflight: {ps['status']} ({ps['requirements_met']}/{ps['requirements_total']})")
+            a_s = trace["authorization_summary_snapshot"]
+            print(f"    Authorization: {a_s['overall_status']}")
+        print(f"  Execution available: no")
+        print(f"  Execution authorized: no")
+        print(f"  Would execute: no")
+        print(f"  Mutation performed: no")
+        print(f"  Tasks created: 0")
+        print(f"  Queue mutated: no")
+        print()
+        print(f"  {trace['note']}")
+        return 0
+
+    # Non-noop: original refusal behavior
     result = {
         "execution_available": False,
         "execution_authorized": False,

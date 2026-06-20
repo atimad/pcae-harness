@@ -2,12 +2,11 @@
 
 ## Current Phase
 
-Phase 72Z: Authorization Lifecycle Summary Artifact.
+Phase 73A: Runner No-Op Execution Trace.
 
-Phase 72Z adds `pcae phase runner-authorization-summary` for a read-only summary
-of the complete authorization lifecycle. Reports `overall_status`, queue state,
-approval state, request lifecycle, denial state, and execution gate status.
-Always `execution_available=false`, `execution_authorized=false`.
+Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
+abort case reporting. Supports 6 scenarios mapping to policy categories. No
+repository/queue/task/request mutation. Execution remains unavailable and unauthorized.
 
 ## Milestone: Execution Chain Traceability Complete
 

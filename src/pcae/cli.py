@@ -5184,6 +5184,16 @@ def build_parser() -> argparse.ArgumentParser:
     phase_runner_execute_parser.add_argument(
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
+    phase_runner_execute_parser.add_argument(
+        "--noop", action="store_true", help="Produce a no-op execution trace without real execution."
+    )
+    phase_runner_execute_parser.add_argument(
+        "--save", action="store_true", help="Persist the no-op trace artifact (requires --noop)."
+    )
+    phase_runner_execute_parser.add_argument(
+        "--scenario", default=None, metavar="NAME",
+        help="Simulated abort scenario for no-op trace (requires --noop)."
+    )
     phase_runner_execute_parser.set_defaults(handler=run_phase_runner_execute)
 
     phase_runner_execution_request_parser = phase_subparsers.add_parser(
