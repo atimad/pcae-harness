@@ -10,7 +10,7 @@ Phase 74X: Activated Task Prompt Capture Contract
 
 ## Status
 
-active
+done
 
 ## Mode
 
