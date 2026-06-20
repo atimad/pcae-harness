@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 75A: Activated Task Capture Intake Scenario (20260620-1759-phase-75a-activated-task-capture-intake-scenario)
 - Phase 74Z: Activated Task Output-Only Capture Smoke (20260620-1741-phase-74z-activated-task-output-only-capture-smoke)
 - Phase 74Y: Activated Task Prompt Capture Dry Run (20260620-1737-phase-74y-activated-task-prompt-capture-dry-run)
 - Phase 74X: Activated Task Prompt Capture Contract (20260620-1733-phase-74x-activated-task-prompt-capture-contract)

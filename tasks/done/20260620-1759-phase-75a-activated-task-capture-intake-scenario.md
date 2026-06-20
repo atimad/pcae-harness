@@ -10,7 +10,7 @@ Phase 75A: Activated Task Capture Intake Scenario
 
 ## Status
 
-active
+done
 
 ## Mode
 
