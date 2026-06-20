@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 75F: Captured Output Safety Regression Scenario.
+Phase 75G: Captured Output Manual Apply Approval Contract.
 
-Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
-abort case reporting. Supports 6 scenarios mapping to policy categories. No
-repository/queue/task/request mutation. Execution remains unavailable and unauthorized.
+Phase 75G adds `pcae phase captured-output-manual-apply-approval-contract --json --save`
+defining what must be true before a human may manually apply captured backend output.
+Contract only — does not approve, apply, modify project code, invoke backend, or authorize runner execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

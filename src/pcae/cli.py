@@ -471,6 +471,7 @@ from pcae.commands.phase import (
     run_phase_activated_task_capture_manual_apply_readiness,
     run_phase_activated_task_capture_safety_regression,
     run_phase_governance_bypass_report,
+    run_phase_captured_output_manual_apply_approval_contract,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6118,6 +6119,15 @@ def build_parser() -> argparse.ArgumentParser:
     phase_governance_bypass_report_parser.add_argument("--json", action="store_true")
     phase_governance_bypass_report_parser.add_argument("--save", action="store_true")
     phase_governance_bypass_report_parser.set_defaults(handler=run_phase_governance_bypass_report)
+
+    # Phase 75G
+    phase_captured_output_manual_apply_approval_contract_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-approval-contract",
+        help="Manual apply approval contract for captured output (Phase 75G).",
+    )
+    phase_captured_output_manual_apply_approval_contract_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_approval_contract_parser.add_argument("--save", action="store_true")
+    phase_captured_output_manual_apply_approval_contract_parser.set_defaults(handler=run_phase_captured_output_manual_apply_approval_contract)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

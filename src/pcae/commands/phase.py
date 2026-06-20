@@ -8752,6 +8752,147 @@ def run_phase_activated_task_capture_manual_apply_readiness(args: argparse.Names
 ACTIVATED_TASK_CAPTURE_SAFETY_REGRESSIONS_DIR = Path(".pcae") / "activated-task-capture-safety-regressions"
 
 
+# Phase 75G: captured output manual apply approval contract
+CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR = Path(".pcae") / "captured-output-manual-apply-approval-contracts"
+
+
+def _build_captured_output_manual_apply_approval_contract(root: HarnessPath) -> dict:
+    base = {
+        "contract_status": "blocked", "manual_apply_approval_required": True,
+        "manual_apply_allowed_after_approval": False, "automatic_apply_allowed": False,
+        "backend_apply_allowed": False, "captured_output_ref": None, "intake_ref": None,
+        "review_ref": None, "apply_dry_run_ref": None, "lifecycle_ref": None,
+        "readiness_ref": None, "allowed_files": [], "forbidden_files": [
+            "No backend invocation", "No prompt execution", "No patch application",
+            "No project code modification from backend output",
+            "No automatic commit", "No automatic task finish", "No automatic push",
+            "No execution authorization", "No runner-execute real execution",
+        ],
+        "validation_commands": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "operator_requirements": [
+            "Explicit human approval required",
+            "Manual apply must be done by operator, not backend",
+            "Operator must inspect captured output",
+            "Operator must inspect apply dry-run",
+            "Operator must confirm allowed files",
+            "Operator must run validation commands after manual apply",
+            "Operator must not use raw git push",
+            "Operator must use governed commit/push path after manual apply",
+        ],
+        "forbidden_shortcuts": [
+            "Do not apply automatically", "Do not commit from backend output",
+            "Do not push from backend output", "Do not skip review",
+            "Do not skip apply dry-run", "Do not authorize runner execution",
+        ],
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Check capture exists
+    capture_path = root.join(ACTIVATED_TASK_PROMPT_CAPTURES_DIR / "latest.json")
+    if not capture_path.is_file():
+        base["contract_status"] = "no_capture"
+        base["blockers"] = ["No captured output found."]
+        base["next_operator_action"] = "No capture available. Cannot proceed."
+        return base
+    base["captured_output_ref"] = str(ACTIVATED_TASK_PROMPT_CAPTURES_DIR / "latest.json")
+
+    # Check intake exists
+    intake_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json")
+    if not intake_path.is_file():
+        base["contract_status"] = "blocked"
+        base["blockers"] = ["No intake artifact found."]
+        base["next_operator_action"] = "Intake must exist before contract can be ready."
+        return base
+    base["intake_ref"] = str(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json")
+
+    # Check review is ready
+    review_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_REVIEWS_DIR / "latest.json")
+    if review_path.is_file():
+        review = json.loads(review_path.read_text(encoding="utf-8"))
+        base["review_ref"] = str(ACTIVATED_TASK_AGENT_OUTPUT_REVIEWS_DIR / "latest.json")
+        if review.get("review_status") not in ("ready_for_apply_dry_run", "passed"):
+            base["contract_status"] = "blocked"
+            base["blockers"] = [f"Review not ready: {review.get('review_status')}"]
+            base["next_operator_action"] = "Review must be ready_for_apply_dry_run before contract can be ready."
+            return base
+    else:
+        base["contract_status"] = "blocked"
+        base["blockers"] = ["No review artifact found."]
+        base["next_operator_action"] = "Review must exist before contract can be ready."
+        return base
+
+    # Check apply dry-run exists
+    apply_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR / "latest.json")
+    if not apply_path.is_file():
+        base["contract_status"] = "no_apply_dry_run"
+        base["blockers"] = ["No apply dry-run artifact found."]
+        base["next_operator_action"] = "Apply dry-run must exist before contract can be ready."
+        return base
+    base["apply_dry_run_ref"] = str(ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR / "latest.json")
+
+    # Check lifecycle
+    lifecycle = _build_activated_task_capture_lifecycle_summary(root)
+    base["lifecycle_ref"] = str(ACTIVATED_TASK_CAPTURE_LIFECYCLE_SUMMARIES_DIR / "latest.json")
+    if lifecycle.get("lifecycle_status") != "apply_dry_run_ready":
+        base["contract_status"] = "blocked"
+        base["blockers"] = [f"Lifecycle not at apply_dry_run_ready: {lifecycle.get('lifecycle_status')}"]
+        base["next_operator_action"] = lifecycle.get("next_operator_action", "Complete lifecycle pipeline first.")
+        return base
+
+    # Check manual apply readiness
+    readiness = _build_activated_task_capture_manual_apply_readiness(root)
+    base["readiness_ref"] = str(ACTIVATED_TASK_CAPTURE_MANUAL_APPLY_READINESS_DIR / "latest.json")
+    if readiness.get("readiness_status") != "ready_for_manual_apply":
+        base["contract_status"] = "readiness_not_ready"
+        base["blockers"] = [f"Manual apply readiness not ready: {readiness.get('readiness_status')}"]
+        base["next_operator_action"] = readiness.get("next_operator_action", "Resolve readiness blockers first.")
+        return base
+
+    # Populate allowed files from readiness
+    base["allowed_files"] = readiness.get("would_touch_files", [])
+
+    # Ready
+    base["contract_status"] = "ready"
+    base["manual_apply_allowed_after_approval"] = True
+    base["blockers"] = []
+    base["next_operator_action"] = (
+        "Contract is ready. Operator must explicitly approve before manual apply. "
+        "Run pcae phase captured-output-manual-apply-approval-review to review eligibility."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_approval_contract(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_approval_contract(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Approval contract saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["contract_status"] == "ready" else 1
+    print("Captured Output Manual Apply Approval Contract"); print("=" * 40)
+    print(f"  Contract status: {result['contract_status']}")
+    print(f"  Manual apply approval required: {'yes' if result['manual_apply_approval_required'] else 'no'}")
+    print(f"  Manual apply allowed after approval: {'yes' if result['manual_apply_allowed_after_approval'] else 'no'}")
+    print(f"  Automatic apply allowed: no")
+    print(f"  Backend apply allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["operator_requirements"]:
+        print(f"\n  Operator requirements:"); [print(f"    - {r}") for r in result["operator_requirements"][:4]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["contract_status"] == "ready" else 1
+
+
 def _build_activated_task_capture_safety_regression(root: HarnessPath) -> dict:
     cases = []
     all_passed = True

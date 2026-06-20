@@ -10269,3 +10269,63 @@ def test_75f3_bypass_report_human_output(tmp_path, monkeypatch, capsys):
     exit_code = main(["phase", "governance-bypass-report"]); out = capsys.readouterr().out
     assert exit_code == 0; assert "Governance Bypass Report" in out
     assert "Execution authorized: no" in out
+
+
+# Phase 75G: captured output manual apply approval contract
+def test_75g_contract_blocked_no_capture(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-contract", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["contract_status"] == "no_capture"
+    assert d["manual_apply_approval_required"] is True
+    assert d["manual_apply_allowed_after_approval"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["backend_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["execution_authorized"] is False
+    assert len(d["blockers"]) >= 1
+    assert len(d["operator_requirements"]) >= 4
+
+
+def test_75g_contract_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-contract", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-approval-contracts" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert "contract_status" in d
+    assert d["automatic_apply_allowed"] is False
+    assert d["execution_authorized"] is False
+    assert d["apply_performed"] is False
+
+
+def test_75g_contract_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-approval-contract", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75g_contract_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "captured-output-manual-apply-approval-contract"])
+    out = capsys.readouterr().out
+    assert exit_code != 0  # blocked when no capture
+    assert "Captured Output Manual Apply Approval Contract" in out
+    assert "Contract status:" in out
+    assert "Automatic apply allowed: no" in out
+    assert "Backend apply allowed: no" in out
+    assert "Apply performed: no" in out
+    assert "Execution authorized: no" in out
