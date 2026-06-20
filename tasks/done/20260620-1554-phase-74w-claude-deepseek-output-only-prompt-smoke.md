@@ -10,7 +10,7 @@ Phase 74W: Claude-DeepSeek Output-Only Prompt Smoke
 
 ## Status
 
-active
+done
 
 ## Mode
 

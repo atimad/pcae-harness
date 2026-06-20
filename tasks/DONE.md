@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 74W: Claude-DeepSeek Output-Only Prompt Smoke (20260620-1554-phase-74w-claude-deepseek-output-only-prompt-smoke)
 - Phase 74V: Claude-DeepSeek Prompt Capture Dry Run (20260620-1550-phase-74v-claude-deepseek-prompt-capture-dry-run)
 - Phase 74U: Claude-DeepSeek Prompt Capture Contract (20260620-1549-phase-74u-claude-deepseek-prompt-capture-contract)
 - 74T Claude-DeepSeek Capture Smoke Scenario (20260620-1422-74t-claude-deepseek-capture-smoke-scenario)
