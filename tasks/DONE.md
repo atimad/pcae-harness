@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 75I.3: Captured Output Manual Apply Approval Recheck (20260620-1835-phase-75i-3-captured-output-manual-apply-approval-recheck)
 - Phase 75I.2: Governance Bypass Declaration Reconciliation (20260620-1835-phase-75i-2-governance-bypass-declaration-reconciliation)
 - Phase 75I.1: Governance Bypass Review Classification (20260620-1835-phase-75i-1-governance-bypass-review-classification)
 - Phase 75I: Captured Output Manual Apply Preflight (20260620-1819-phase-75i-captured-output-manual-apply-preflight)
