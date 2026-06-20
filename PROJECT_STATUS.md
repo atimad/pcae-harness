@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74P: Claude-DeepSeek Capture-Only Invocation.
+Phase 74Q: Captured Output Intake Bridge.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
