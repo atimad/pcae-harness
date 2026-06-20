@@ -10,7 +10,7 @@ Phase 75F: Add captured output safety regression scenario
 
 ## Status
 
-active
+done
 
 ## Mode
 
