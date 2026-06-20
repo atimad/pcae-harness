@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 72X Execution Request Preflight Integration (20260620-0641-72x-execution-request-preflight-integration)
 - 72W Execution Authorization Request Denial and Revocation (20260620-0625-72w-execution-authorization-request-denial-and-revocation)
 - 72V Execution Authorization Request Review (20260620-0621-72v-execution-authorization-request-review)
 - 72U Execution Authorization Request Artifact (20260620-0616-72u-execution-authorization-request-artifact)
