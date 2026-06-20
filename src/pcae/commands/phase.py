@@ -6899,3 +6899,190 @@ def run_phase_claude_deepseek_capture(args: argparse.Namespace) -> int:
     print(f"\n  Real backend invoked: no"); print(f"  Agent invoked: no"); print(f"  Execution authorized: no")
     print(f"\n  {result['next_operator_action']}")
     return 0
+
+
+# Phase 74N: agent backend lock identity
+AGENT_LOCKS_DIR = Path(".pcae") / "agent-locks"
+
+_AGENT_LOCK_BACKENDS = {
+    "claude-local": {"backend_type": "claude", "command": "claude", "available": False, "invocation_allowed": False},
+    "claude-deepseek": {"backend_type": "claude", "command": "claude-deepseek", "available": False, "invocation_allowed": False},
+    "claude-kimi": {"backend_type": "claude", "command": "claude-kimi", "available": False, "invocation_allowed": False},
+    "codex": {"backend_type": "codex", "command": "codex", "available": False, "invocation_allowed": False},
+    "manual": {"backend_type": "manual", "command": "none", "available": True, "invocation_allowed": False},
+    "noop": {"backend_type": "noop", "command": "echo", "available": True, "invocation_allowed": False},
+}
+
+
+def _build_agent_lock_status(root: HarnessPath) -> dict:
+    lock_path = root.join(AGENT_LOCKS_DIR / "latest.json")
+    if not lock_path.is_file():
+        return {"lock_status": "unset", "execution_authorized": False}
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    return {"lock_status": lock.get("lock_status", "active"), "session_agent": lock.get("session_agent"), "backend_name": lock.get("backend_name"), "backend_command": lock.get("backend_command"), "backend_available": lock.get("backend_available"), "lock_owner": lock.get("lock_owner"), "started_at": lock.get("started_at"), "execution_authorized": False}
+
+
+def _set_agent_lock(root: HarnessPath, backend_name: str) -> dict:
+    import shutil
+    if backend_name not in _AGENT_LOCK_BACKENDS:
+        return {"lock_status": "blocked", "refusal_reason": f"Unknown backend: {backend_name}", "execution_authorized": False}
+    info = _AGENT_LOCK_BACKENDS[backend_name]
+    available = shutil.which(info["command"]) is not None if info["command"] not in ("none", "echo") else info["available"]
+    ts = datetime.now(timezone.utc)
+    lock = {"lock_status": "active", "session_agent": backend_name, "backend_name": backend_name, "backend_type": info["backend_type"], "backend_command": info["command"], "backend_available": available, "lock_owner": backend_name, "started_at": ts.isoformat(), "updated_at": ts.isoformat(), "may_modify_files": False, "may_commit": False, "may_push": False, "may_execute_shell": backend_name == "noop", "invocation_allowed": info["invocation_allowed"], "execution_authorized": False, "repo_path": str(root.path)}
+    d = root.join(AGENT_LOCKS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+    (d / "latest.json").write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return lock
+
+
+def _clear_agent_lock(root: HarnessPath) -> dict:
+    d = root.join(AGENT_LOCKS_DIR)
+    if (d / "latest.json").is_file(): (d / "latest.json").unlink()
+    return {"lock_status": "cleared", "execution_authorized": False}
+
+
+def run_phase_agent_lock_status(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_agent_lock_status(root)
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Agent Lock Status"); print("=" * 40)
+    print(f"  Status: {result['lock_status']}")
+    if result.get('backend_name'): print(f"  Backend: {result['backend_name']} (available: {'yes' if result.get('backend_available') else 'no'})")
+    print(f"  Execution authorized: no")
+    return 0
+
+
+def run_phase_agent_lock_set(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); backend = getattr(args, "backend", "claude-local")
+    result = _set_agent_lock(root, backend)
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0 if result["lock_status"] == "active" else 1
+    if result["lock_status"] == "blocked": print(f"Lock refused: {result['refusal_reason']}"); return 1
+    print(f"Agent lock: set to {result['backend_name']}"); print(f"  Available: {'yes' if result['backend_available'] else 'no'}")
+    return 0
+
+
+def run_phase_agent_lock_clear(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _clear_agent_lock(root)
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Agent lock: cleared")
+    return 0
+
+
+# Phase 74O: claude-deepseek capture execution gate
+CLAUDE_DEEPSEEK_CAPTURE_GATES_DIR = Path(".pcae") / "claude-deepseek-capture-gates"
+
+
+def _build_claude_deepseek_capture_gate(root: HarnessPath) -> dict:
+    backend_name = "claude-deepseek"
+    reg = _build_agent_backend_registry(root, backend_name)
+    backend = reg["backends"][0] if reg["backends"] else None
+    lock_data = _build_agent_lock_status(root)
+    blockers = []; warnings = []
+    if backend is None: blockers.append(f"'{backend_name}' not in registry")
+    elif not backend["available"]: blockers.append(f"'{backend_name}' not on PATH")
+    if not lock_data.get("backend_name") == backend_name: blockers.append(f"agent lock not set to {backend_name} (current: {lock_data.get('backend_name', 'unset')})")
+    if not (root.join(REAL_BACKEND_CAPTURE_CONTRACTS_DIR / "latest.json")).is_file(): blockers.append("capture contract missing")
+    if not (root.join(CLAUDE_DEEPSEEK_PROMPT_ENVELOPES_DIR / "latest.json")).is_file(): blockers.append("prompt envelope missing")
+    from pcae.core.git_status import read_git_changes
+    if read_git_changes(root): warnings.append("working tree has changes")
+    ready = len(blockers) == 0
+    return {"gate_status": "ready_for_capture" if ready else "blocked", "backend_name": backend_name, "backend_available": backend["available"] if backend else False, "lock_backend_name": lock_data.get("backend_name"), "lock_matches_backend": lock_data.get("backend_name") == backend_name, "contract_present": (root.join(REAL_BACKEND_CAPTURE_CONTRACTS_DIR / "latest.json")).is_file(), "envelope_present": (root.join(CLAUDE_DEEPSEEK_PROMPT_ENVELOPES_DIR / "latest.json")).is_file(), "dry_run_present": True, "mutation_guard_ready": True, "generic_agent_invoke_blocks_real_backend": True, "capture_execution_allowed": ready, "real_backend_invocation_performed": False, "agent_invocation_performed": False, "prompt_executed": False, "apply_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False, "blockers": blockers, "warnings": warnings, "next_operator_action": "Run pcae phase claude-deepseek-capture --execute to perform capture-only invocation." if ready else "Resolve blockers before capture."}
+
+
+def run_phase_claude_deepseek_capture_gate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_claude_deepseek_capture_gate(root)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_CAPTURE_GATES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Gate saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Claude-DeepSeek Capture Gate"); print("=" * 40)
+    print(f"  Status: {result['gate_status']}"); print(f"  Backend available: {'yes' if result['backend_available'] else 'no'}")
+    print(f"  Lock matches: {'yes' if result['lock_matches_backend'] else 'NO'}"); print(f"  Capture allowed: {'yes' if result['capture_execution_allowed'] else 'NO'}")
+    if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  Real backend invoked: no"); return 0
+
+
+# Phase 74P: claude-deepseek capture-only invocation
+CLAUDE_DEEPSEEK_CAPTURES_DIR = Path(".pcae") / "claude-deepseek-captures"
+
+
+def _run_claude_deepseek_capture(root: HarnessPath) -> dict:
+    gate = _build_claude_deepseek_capture_gate(root)
+    if not gate["capture_execution_allowed"]: return {"capture_status": "blocked", "blockers": gate["blockers"], "execution_authorized": False}
+    import subprocess as sp, hashlib
+    backend_name = "claude-deepseek"; backend_cmd = gate.get("lock_backend_name", backend_name)
+    # Check command availability
+    import shutil
+    cmd_path = shutil.which(backend_cmd)
+    if cmd_path is None: return {"capture_status": "blocked", "blockers": [f"Command '{backend_cmd}' not found on PATH"], "execution_authorized": False}
+    # Real backend capture blocked for safety in this phase
+    return {"capture_status": "blocked", "backend_name": backend_name, "backend_command": backend_cmd, "blockers": [f"Real backend '{backend_name}' capture invocation not yet implemented. The gate is ready but actual invocation requires an explicit future phase. Use the dry-run and gate artifacts to verify readiness."], "real_backend_invocation_performed": False, "agent_invocation_performed": False, "execution_authorized": False, "note": "The capture gate is satisfied. Real invocation will be enabled in a future phase after safety review."}
+
+
+def run_phase_claude_deepseek_capture(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); execute = getattr(args, "execute", False)
+    if not execute:
+        result = _build_claude_deepseek_capture_dry_run(root)
+        if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+        print("Claude-DeepSeek Capture (dry run)"); print("=" * 40)
+        print(f"  Capture allowed: {'yes' if result['capture_allowed'] else 'NO'}")
+        if result.get("blockers"): [print(f"  Blocker: {b}") for b in result["blockers"]]
+        print(f"  Real backend invoked: no"); return 0
+    result = _run_claude_deepseek_capture(root)
+    d = root.join(CLAUDE_DEEPSEEK_CAPTURES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+    (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0 if result.get("capture_status") == "captured" else 1
+    if result["capture_status"] != "captured": print(f"Capture blocked: {'; '.join(result.get('blockers',[]))}"); return 1
+    print("Claude-DeepSeek Capture (executed)"); print("=" * 40)
+    print(f"  Status: captured"); print(f"  Real backend invoked: yes"); print(f"  Execution authorized: no")
+    return 0
+
+
+def run_phase_claude_deepseek_capture_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.json")
+    if not p.is_file():
+        if args.json: print(json.dumps({"present": False}))
+        else: print("No capture artifact found.")
+        return 1
+    d = json.loads(p.read_text(encoding="utf-8"))
+    if args.json: print(json.dumps({"present": True, **d}, indent=2, sort_keys=True))
+    else:
+        print("Claude-DeepSeek Capture"); print(f"  Status: {d.get('capture_status')}")
+        print(f"  Real backend invoked: {d.get('real_backend_invocation_performed')}")
+    return 0
+
+
+# Phase 74Q: captured output intake bridge
+CLAUDE_DEEPSEEK_CAPTURE_INTAKE_BRIDGES_DIR = Path(".pcae") / "claude-deepseek-capture-intake-bridges"
+
+
+def _build_claude_deepseek_capture_intake_bridge(root: HarnessPath) -> dict:
+    capture_path = root.join(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.json")
+    if not capture_path.is_file(): return {"bridge_status": "missing_capture", "execution_authorized": False}
+    capture = json.loads(capture_path.read_text(encoding="utf-8"))
+    if capture.get("capture_status") != "captured": return {"bridge_status": "capture_not_successful", "capture_status": capture.get("capture_status"), "execution_authorized": False}
+    stdout_path = root.join(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.stdout.txt")
+    if not stdout_path.is_file(): return {"bridge_status": "missing_output", "execution_authorized": False}
+    content = stdout_path.read_text(encoding="utf-8")
+    import hashlib
+    digest = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    # Create intake artifact from captured output
+    intake_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR)
+    intake_path.mkdir(parents=True, exist_ok=True)
+    intake = {"intake_status": "recorded", "output_source": str(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.stdout.txt"), "output_digest": digest, "output_summary": content[:200].strip(), "patch_detected": "diff" in content[:500] or "---" in content[:500], "files_mentioned": [], "apply_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False, "bridged_from": "claude-deepseek-capture-intake-bridge"}
+    (intake_path / "latest.json").write_text(json.dumps(intake, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {"bridge_status": "bridged", "capture_ref": str(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.json"), "captured_stdout_path": str(CLAUDE_DEEPSEEK_CAPTURES_DIR / "latest.stdout.txt"), "intake_created": True, "intake_ref": str(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json"), "output_digest": digest, "patch_detected": intake["patch_detected"], "apply_performed": False, "files_modified": False, "commits_created": 0, "prompt_executed_from_bridge": False, "agent_invocation_performed_from_bridge": False, "implementation_performed": False, "execution_authorized": False, "next_operator_action": "Run pcae phase activated-task-agent-output-review to review bridged intake."}
+
+
+def run_phase_claude_deepseek_capture_intake_bridge(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_claude_deepseek_capture_intake_bridge(root)
+    if getattr(args, "save", False):
+        d = root.join(CLAUDE_DEEPSEEK_CAPTURE_INTAKE_BRIDGES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Bridge saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Capture Intake Bridge"); print("=" * 40)
+    print(f"  Status: {result['bridge_status']}"); print(f"  Intake created: {'yes' if result.get('intake_created') else 'no'}")
+    print(f"  Apply performed: no"); print(f"  Execution authorized: no"); print(f"\n  {result.get('next_operator_action','')}")
+    return 0

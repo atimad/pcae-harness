@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74M: Claude-DeepSeek Capture Dry Run.
+Phase 74N: Agent Backend Lock Identity.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

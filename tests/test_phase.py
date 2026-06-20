@@ -9372,3 +9372,55 @@ def test_74m_capture_dry_run_with_contract(tmp_path, monkeypatch, capsys):
     main(["phase", "claude-deepseek-capture", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["mutation_guard_planned"] is True; assert d["real_backend_invocation_performed"] is False
     assert d["execution_authorized"] is False
+
+# Phase 74N: agent lock identity
+def test_74n_lock_status_unset(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-status", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_status"] == "unset"; assert d["execution_authorized"] is False
+def test_74n_lock_set_deepseek(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_status"] == "active"; assert d["backend_name"] == "claude-deepseek"
+    assert d["invocation_allowed"] is False; assert d["execution_authorized"] is False
+def test_74n_lock_set_kimi(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-kimi", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_status"] == "active"; assert d["backend_name"] == "claude-kimi"
+def test_74n_lock_clear(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "agent-lock-clear", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_status"] == "cleared"
+def test_74n_lock_unknown(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "agent-lock-set", "--backend", "unknown-bot", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1; assert d["lock_status"] == "blocked"
+# Phase 74O: capture gate
+def test_74o_gate_blocked_no_lock(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-capture-gate", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["gate_status"] == "blocked"; assert d["real_backend_invocation_performed"] is False
+def test_74o_gate_blocked_no_contract(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "claude-deepseek-capture-gate", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lock_matches_backend"] is True; assert "contract missing" in str(d["blockers"])
+# Phase 74Q: intake bridge
+def test_74q_bridge_missing_capture(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-capture-intake-bridge", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["bridge_status"] == "missing_capture"; assert d["execution_authorized"] is False
+def test_74q_bridge_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "claude-deepseek-capture-intake-bridge", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "claude-deepseek-capture-intake-bridges" / "latest.json").is_file()

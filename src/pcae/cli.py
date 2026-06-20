@@ -446,7 +446,13 @@ from pcae.commands.phase import (
     run_phase_activated_task_agent_package,
     run_phase_activated_task_agent_start,
     run_phase_agent_backend_registry,
+    run_phase_agent_lock_clear,
+    run_phase_agent_lock_set,
+    run_phase_agent_lock_status,
     run_phase_claude_deepseek_capture,
+    run_phase_claude_deepseek_capture_gate,
+    run_phase_claude_deepseek_capture_intake_bridge,
+    run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
     run_phase_agent_invocation_show,
@@ -5831,6 +5837,69 @@ def build_parser() -> argparse.ArgumentParser:
     phase_claude_deepseek_capture_parser.set_defaults(
         handler=run_phase_claude_deepseek_capture
     )
+
+    phase_agent_lock_status_parser = phase_subparsers.add_parser(
+        "agent-lock-status",
+        help="Show current agent backend lock identity.",
+    )
+    phase_agent_lock_status_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_agent_lock_status_parser.set_defaults(handler=run_phase_agent_lock_status)
+
+    phase_agent_lock_set_parser = phase_subparsers.add_parser(
+        "agent-lock-set",
+        help="Set agent backend lock identity.",
+    )
+    phase_agent_lock_set_parser.add_argument(
+        "--backend", default="claude-local", metavar="NAME", help="Backend to lock (default: claude-local)."
+    )
+    phase_agent_lock_set_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_agent_lock_set_parser.set_defaults(handler=run_phase_agent_lock_set)
+
+    phase_agent_lock_clear_parser = phase_subparsers.add_parser(
+        "agent-lock-clear",
+        help="Clear agent backend lock.",
+    )
+    phase_agent_lock_clear_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_agent_lock_clear_parser.set_defaults(handler=run_phase_agent_lock_clear)
+
+    phase_claude_deepseek_capture_gate_parser = phase_subparsers.add_parser(
+        "claude-deepseek-capture-gate",
+        help="Check claude-deepseek capture execution gate.",
+    )
+    phase_claude_deepseek_capture_gate_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_capture_gate_parser.add_argument(
+        "--save", action="store_true", help="Persist the gate artifact."
+    )
+    phase_claude_deepseek_capture_gate_parser.set_defaults(handler=run_phase_claude_deepseek_capture_gate)
+
+    phase_claude_deepseek_capture_parser2 = phase_subparsers.add_parser(
+        "claude-deepseek-capture-show",
+        help="Show the latest claude-deepseek capture artifact.",
+    )
+    phase_claude_deepseek_capture_parser2.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_capture_parser2.set_defaults(handler=run_phase_claude_deepseek_capture_show)
+
+    phase_claude_deepseek_capture_intake_bridge_parser = phase_subparsers.add_parser(
+        "claude-deepseek-capture-intake-bridge",
+        help="Bridge captured output to agent output intake.",
+    )
+    phase_claude_deepseek_capture_intake_bridge_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_claude_deepseek_capture_intake_bridge_parser.add_argument(
+        "--save", action="store_true", help="Persist the bridge artifact."
+    )
+    phase_claude_deepseek_capture_intake_bridge_parser.set_defaults(handler=run_phase_claude_deepseek_capture_intake_bridge)
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
         "runner-sim-approve",
