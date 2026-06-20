@@ -5450,3 +5450,91 @@ def run_phase_real_execution_disabled_proof(args: argparse.Namespace) -> int:
     print(f"\n  Checks: {len(proof['checks'])}")
     print(f"\n  {proof['note']}")
     return 0 if proof["real_execution_disabled"] else 1
+
+
+def _build_single_runner_activate_dry_run(root: HarnessPath, selected_index: int, allow_fixture: bool) -> dict:
+    blockers = []; warnings_list = []
+    def block(msg): blockers.append(msg)
+    def warn(msg): warnings_list.append(msg)
+
+    from pcae.core.git_status import read_git_changes
+    from pcae.core.tasks import find_latest_active_task
+    changes = read_git_changes(root)
+    active_task = find_latest_active_task(root)
+    queue = _read_phase_queue(root)
+    queue_validation = _build_queue_validate(root)
+    queue_approval = _read_latest_queue_approval(root)
+
+    if changes: block("working tree is dirty")
+    if active_task is not None: block(f"active task exists: {active_task.task_id}")
+    if not queue_validation["queue_ready"]: block("queue is empty")
+    if not queue_validation["valid"]: block("queue validation failed")
+    if queue_approval is None: block("no queue approval artifact")
+    elif queue_approval.get("queue_digest") != _compute_queue_digest(root): block("queue approval does not match current queue")
+    if selected_index < 0 or selected_index >= len(queue): block(f"selected index {selected_index} out of range (0-{max(0, len(queue)-1)})")
+
+    selected_entry = None; selected_title = None; is_fixture = False
+    if 0 <= selected_index < len(queue):
+        selected_entry = queue[selected_index]
+        selected_title = _phase_queue_entry_title(selected_entry)
+        if isinstance(selected_entry, dict) and (selected_entry.get("source_type") == "fixture" or selected_entry.get("fixture")):
+            is_fixture = True
+            if not allow_fixture: block("selected entry is a fixture; use --allow-fixture to override")
+
+    activation_allowed = len(blockers) == 0
+    return {
+        "dry_run": True,
+        "execute": False,
+        "activation_allowed": activation_allowed,
+        "selected_index": selected_index,
+        "selected_title": selected_title,
+        "is_fixture": is_fixture,
+        "would_create_task_path": f"tasks/active/<task-id>-{_slugify(selected_title or 'untitled')}.md" if activation_allowed else None,
+        "would_write_activation_artifact_path": ".pcae/single-runner-activations/latest.json" if activation_allowed else None,
+        "would_mutate_queue": False,
+        "would_create_task": activation_allowed,
+        "mutation_performed": False,
+        "task_created": False,
+        "queue_mutated": False,
+        "execution_authorized": False,
+        "runner_execution_performed": False,
+        "blockers": blockers,
+        "warnings": warnings_list,
+        "note": "Dry-run activation preview only. No task created. No queue mutated. No execution performed.",
+    }
+
+
+def run_phase_single_runner_activate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    selected_index = getattr(args, "index", 0)
+    allow_fixture = getattr(args, "allow_fixture", False)
+    dry_run = getattr(args, "dry_run", True)
+    result = _build_single_runner_activate_dry_run(root, selected_index, allow_fixture)
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Single Runner Activation (dry run)")
+    print("=" * 40)
+    print(f"  Dry run: yes")
+    print(f"  Execute: no")
+    print(f"  Activation allowed: {'yes' if result['activation_allowed'] else 'NO'}")
+    print(f"  Selected index: {result['selected_index']}")
+    if result['selected_title']:
+        print(f"  Selected title: {result['selected_title']}")
+    print(f"  Would create task: {'yes' if result['would_create_task'] else 'no'}")
+    if result['would_create_task_path']:
+        print(f"  Proposed task path: {result['would_create_task_path']}")
+    print(f"  Would mutate queue: no")
+    print(f"  Mutation performed: no")
+    print(f"  Task created: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]: print(f"    - {b}")
+    if result["warnings"]:
+        print(f"\n  Warnings:")
+        for w in result["warnings"]: print(f"    - {w}")
+    print(f"\n  {result['note']}")
+    return 0

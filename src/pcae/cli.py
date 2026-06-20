@@ -438,6 +438,7 @@ from pcae.commands.phase import (
     run_phase_execution_authorization_matching_rules,
     run_phase_execution_authorization_schema,
     run_phase_real_execution_disabled_proof,
+    run_phase_single_runner_activate,
     run_phase_single_runner_refusal_matrix,
     run_phase_runner_sim_approval_show,
     run_phase_runner_sim_fixture,
@@ -5431,6 +5432,26 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_real_execution_disabled_proof_parser.set_defaults(
         handler=run_phase_real_execution_disabled_proof
+    )
+
+    phase_single_runner_activate_parser = phase_subparsers.add_parser(
+        "single-runner-activate",
+        help="Preview single queue item activation (dry-run only).",
+    )
+    phase_single_runner_activate_parser.add_argument(
+        "--dry-run", action="store_true", default=True, help="Dry-run activation preview (default)."
+    )
+    phase_single_runner_activate_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_single_runner_activate_parser.add_argument(
+        "--index", type=int, default=0, help="Queue index to activate (default: 0)."
+    )
+    phase_single_runner_activate_parser.add_argument(
+        "--allow-fixture", action="store_true", help="Allow activation of fixture entries."
+    )
+    phase_single_runner_activate_parser.set_defaults(
+        handler=run_phase_single_runner_activate
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

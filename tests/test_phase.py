@@ -8920,3 +8920,33 @@ def test_73o_proof_no_mutation(tmp_path, monkeypatch, capsys):
     q = tmp_path / ".pcae" / "phase-queue.json"; b = json.dumps(["73O test"]) + "\n"; q.write_text(b); monkeypatch.chdir(tmp_path)
     main(["phase", "real-execution-disabled-proof"]); capsys.readouterr()
     assert q.read_text() == b
+
+# ---------------------------------------------------------------------------
+# Phase 73P: single queue item activation dry run
+# ---------------------------------------------------------------------------
+def test_73p_activate_dry_run_empty_queue(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activate", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activation_allowed"] is False; assert d["task_created"] is False; assert d["execution_authorized"] is False
+
+def test_73p_activate_dry_run_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    q = tmp_path / ".pcae" / "phase-queue.json"; b = json.dumps(["Phase 73P: test"]) + "\n"; q.write_text(b); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activate", "--dry-run"]); capsys.readouterr()
+    assert q.read_text() == b; assert not (tmp_path / "tasks" / "active" / "test").exists()
+
+def test_73p_activate_dry_run_with_approved_queue(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--dry-run", "--allow-fixture", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activation_allowed"] is True; assert d["would_create_task"] is True; assert d["task_created"] is False
+
+def test_73p_activate_dry_run_blocked_by_active_task(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness; from pcae.core.tasks import create_task_contract
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); create_task_contract(HarnessPath(tmp_path), "blocking"); patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activate", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activation_allowed"] is False
