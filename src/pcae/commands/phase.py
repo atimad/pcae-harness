@@ -8825,3 +8825,148 @@ def run_phase_activated_task_capture_safety_regression(args: argparse.Namespace)
     print(f"\n  Cases:"); [print(f"    {c}") for c in result["cases"]]
     print(f"\n  {result['next_operator_action']}")
     return 0 if result["scenario_status"] == "passed" else 1
+
+
+# Phase 75F.3: governance bypass detection
+GOVERNANCE_BYPASS_REPORTS_DIR = Path(".pcae") / "governance-bypass-reports"
+
+_GOVERNANCE_PROTECTED_PATHS = [
+    "tasks/active/", "tasks/done/", "tasks/DONE.md", "tasks/TODO.md",
+    "CHANGELOG.md", "PROJECT_STATUS.md", ".pcae/",
+]
+
+_SUSPICIOUS_MESSAGE_PATTERNS = [
+    r"no[\s-]*verify", r"bypass", r"cleanup", r"fix.*task",
+    r"file.*move", r"amend", r"without.*check",
+]
+
+
+def _build_governance_bypass_report(root: HarnessPath) -> dict:
+    import subprocess as _sp
+    import re as _re
+
+    suspected = []
+    declared = []
+    undeclared = []
+    protected_touched = set()
+
+    try:
+        result = _sp.run(
+            ["git", "log", "--max-count=30", "--name-only", "--format=COMMIT:%H%nMSG:%s%nFILES:"],
+            cwd=root.path, check=True, capture_output=True, text=True,
+        )
+        log_text = result.stdout
+    except (_sp.CalledProcessError, OSError):
+        return {
+            "report_status": "advisory", "suspected_bypass_commits": [],
+            "declared_bypass_commits": [], "undeclared_bypass_commits": [],
+            "protected_paths_touched": [], "active_task_present_at_report_time": False,
+            "recommendations": ["Could not read git log."], "execution_authorized": False,
+            "note": "Git history could not be read. This report may be incomplete.",
+        }
+
+    commits = []
+    current = {}
+    for line in log_text.splitlines():
+        if line.startswith("COMMIT:"):
+            if current:
+                commits.append(current)
+            current = {"hash": line[7:].strip()[:12], "msg": "", "files": []}
+        elif line.startswith("MSG:"):
+            current["msg"] = line[4:].strip()
+        elif line.startswith("FILES:"):
+            pass
+        elif line.strip():
+            current["files"].append(line.strip())
+    if current and current.get("hash"):
+        commits.append(current)
+
+    from pcae.core.tasks import find_latest_active_task
+    active_task = find_latest_active_task(root)
+    active_task_present = active_task is not None
+
+    for c in commits:
+        msg = c.get("msg", "")
+        files = c.get("files", [])
+        is_suspicious = False
+
+        # Check if commit touches protected governance paths
+        for f in files:
+            for pp in _GOVERNANCE_PROTECTED_PATHS:
+                if f.startswith(pp):
+                    protected_touched.add(f)
+                    is_suspicious = True
+                    break
+
+        # Check message for suspicious patterns
+        for pat in _SUSPICIOUS_MESSAGE_PATTERNS:
+            if _re.search(pat, msg, _re.IGNORECASE):
+                is_suspicious = True
+                break
+
+        # Check if declared bypass
+        is_declared = any(kw in msg.lower() for kw in ["no-verify", "bypass", "without check"])
+
+        if is_suspicious:
+            entry = {"commit": c["hash"], "message": msg, "files": files}
+            if is_declared:
+                declared.append(entry)
+            else:
+                undeclared.append(entry)
+            suspected.append(entry)
+
+    report_status = "clean"
+    recommendations = []
+    if suspected:
+        report_status = "advisory" if len(undeclared) == 0 else "warning"
+    if undeclared:
+        recommendations.append(f"{len(undeclared)} undeclared suspicious commit(s) found. Review manually.")
+    if declared:
+        recommendations.append(f"{len(declared)} declared bypass commit(s) found. Already documented.")
+    if not suspected:
+        recommendations.append("No suspicious commits detected in recent history.")
+
+    return {
+        "report_status": report_status,
+        "suspected_bypass_commits": suspected,
+        "declared_bypass_commits": declared,
+        "undeclared_bypass_commits": undeclared,
+        "protected_paths_touched": sorted(protected_touched),
+        "active_task_present_at_report_time": active_task_present,
+        "recommendations": recommendations,
+        "execution_authorized": False,
+        "note": (
+            "Git does not reliably record --no-verify usage. This report uses heuristics "
+            "(message patterns, protected paths touched). Exact bypass detection is not guaranteed. "
+            "Declared bypasses may use keywords like 'no-verify', 'bypass', or 'without check' in messages."
+        ),
+    }
+
+
+def run_phase_governance_bypass_report(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_governance_bypass_report(root)
+    if getattr(args, "save", False):
+        d = root.join(GOVERNANCE_BYPASS_REPORTS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Bypass report saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+    print("Governance Bypass Report"); print("=" * 40)
+    print(f"  Report status: {result['report_status']}")
+    print(f"  Suspected bypass commits: {len(result['suspected_bypass_commits'])}")
+    print(f"  Declared: {len(result['declared_bypass_commits'])}")
+    print(f"  Undeclared: {len(result['undeclared_bypass_commits'])}")
+    print(f"  Protected paths touched: {len(result['protected_paths_touched'])}")
+    print(f"  Active task present: {'yes' if result['active_task_present_at_report_time'] else 'no'}")
+    print(f"  Execution authorized: no")
+    if result["suspected_bypass_commits"]:
+        print(f"\n  Suspected commits:")
+        for c in result["suspected_bypass_commits"][:8]:
+            print(f"    {c['commit']}: {c['message'][:80]}")
+    if result["recommendations"]:
+        print(f"\n  Recommendations:"); [print(f"    - {r}") for r in result["recommendations"]]
+    print(f"\n  {result['note'][:160]}...")
+    return 0

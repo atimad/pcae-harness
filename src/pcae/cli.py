@@ -470,6 +470,7 @@ from pcae.commands.phase import (
     run_phase_activated_task_capture_lifecycle_summary,
     run_phase_activated_task_capture_manual_apply_readiness,
     run_phase_activated_task_capture_safety_regression,
+    run_phase_governance_bypass_report,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6109,6 +6110,14 @@ def build_parser() -> argparse.ArgumentParser:
     phase_activated_task_capture_safety_regression_parser.add_argument("--json", action="store_true")
     phase_activated_task_capture_safety_regression_parser.add_argument("--save", action="store_true")
     phase_activated_task_capture_safety_regression_parser.set_defaults(handler=run_phase_activated_task_capture_safety_regression)
+
+    phase_governance_bypass_report_parser = phase_subparsers.add_parser(
+        "governance-bypass-report",
+        help="Detect and report governance bypass commits (Phase 75F.3).",
+    )
+    phase_governance_bypass_report_parser.add_argument("--json", action="store_true")
+    phase_governance_bypass_report_parser.add_argument("--save", action="store_true")
+    phase_governance_bypass_report_parser.set_defaults(handler=run_phase_governance_bypass_report)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

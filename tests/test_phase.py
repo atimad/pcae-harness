@@ -10230,3 +10230,42 @@ def test_75f1_json_output_shape_stable(tmp_path, monkeypatch, capsys):
     main(["phase", "audit", "--last", "3", "--json"]); d = json.loads(capsys.readouterr().out)
     assert "phases" in d; assert "warnings" in d; assert "healthy_idle" in d
     assert isinstance(d["phases"], list); assert isinstance(d["warnings"], list)
+
+
+# Phase 75F.3: governance bypass report
+def test_75f3_bypass_report_clean_history(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "governance-bypass-report", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["report_status"] in ("clean", "advisory", "warning")
+    assert "suspected_bypass_commits" in d; assert "recommendations" in d
+    assert d["execution_authorized"] is False
+
+def test_75f3_bypass_report_suspicious_commit(tmp_path, monkeypatch, capsys):
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    # Create a suspicious commit: touches DONE.md with no active task
+    _sp.run(["git", "commit", "--allow-empty", "-m", "cleanup task files no-verify bypass"], cwd=tmp_path, check=True, capture_output=True)
+    (tmp_path / "tasks" / "DONE.md").parent.mkdir(parents=True, exist_ok=True)
+    (tmp_path / "tasks" / "DONE.md").write_text("# Done\n")
+    _sp.run(["git", "add", "tasks/DONE.md"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "Fix task status without check"], cwd=tmp_path, check=True, capture_output=True)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "governance-bypass-report", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert len(d["suspected_bypass_commits"]) >= 1
+    assert d["execution_authorized"] is False
+
+def test_75f3_bypass_report_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "governance-bypass-report", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "governance-bypass-reports" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["execution_authorized"] is False
+
+def test_75f3_bypass_report_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "governance-bypass-report"]); out = capsys.readouterr().out
+    assert exit_code == 0; assert "Governance Bypass Report" in out
+    assert "Execution authorized: no" in out
