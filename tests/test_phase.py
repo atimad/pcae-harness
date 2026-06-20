@@ -8988,3 +8988,35 @@ def test_73q_activation_show(tmp_path, monkeypatch, capsys):
     exit_code = main(["phase", "single-runner-activation-show", "--json"])
     d = json.loads(capsys.readouterr().out)
     assert exit_code == 0; assert d["present"] is True; assert d["execution_authorized"] is False
+
+# ---------------------------------------------------------------------------
+# Phase 73R: activation recovery and rollback guard
+# ---------------------------------------------------------------------------
+def test_73r_activation_status_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activation-status", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["activation_present"] is False; assert d["rollback_available"] is False
+
+def test_73r_rollback_dry_run_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activation-rollback", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["rollback_available"] is False; assert d["execution_authorized"] is False
+
+def test_73r_rollback_execute_safe(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    exit_code = main(["phase", "single-runner-activation-rollback", "--execute", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0; assert d["rollback_performed"] is True; assert d["active_task_removed"] is True
+    assert d["execution_authorized"] is False
+
+def test_73r_rollback_refuses_manual_task(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness; from pcae.core.tasks import create_task_contract
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); create_task_contract(HarnessPath(tmp_path), "manual"); patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activation-rollback", "--execute", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["rollback_performed"] is False

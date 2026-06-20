@@ -5717,3 +5717,137 @@ def run_phase_single_runner_activation_show(args: argparse.Namespace) -> int:
         print(f"  Task: {data.get('created_task_id')}")
         print(f"  Execution authorized: {data.get('execution_authorized')}")
     return 0
+
+
+def _build_single_runner_activation_status(root: HarnessPath) -> dict:
+    act_path = root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")
+    activation_present = act_path.is_file()
+    activation_data = None
+    if activation_present:
+        activation_data = json.loads(act_path.read_text(encoding="utf-8"))
+
+    from pcae.core.tasks import find_latest_active_task
+    from pcae.core.git_status import read_git_changes
+    active_task = find_latest_active_task(root)
+    changes = read_git_changes(root)
+
+    active_task_present = active_task is not None
+    activation_task_id = activation_data.get("created_task_id") if activation_data else None
+    active_task_id = active_task.task_id if active_task else None
+    task_matches = active_task_present and activation_task_id == active_task_id
+
+    rollback_blockers = []
+    if not activation_present: rollback_blockers.append("no activation artifact")
+    if not active_task_present: rollback_blockers.append("no active task")
+    if not task_matches: rollback_blockers.append("active task does not match activation")
+
+    # Check if task was modified beyond activation content
+    if task_matches and active_task:
+        task_file = root.join(Path("tasks") / "active" / f"{active_task_id}.md")
+        if task_file.is_file():
+            content = task_file.read_text(encoding="utf-8")
+            if "Activation Note" not in content:
+                rollback_blockers.append("task content modified (no activation note)")
+            elif "## Implementation" in content or "## Changes" in content:
+                rollback_blockers.append("task appears to have implementation content")
+
+    if changes:
+        activation_dir = str(Path("tasks") / "active")
+        activation_file = str(Path("tasks") / "active" / f"{activation_task_id}.md") if activation_task_id else None
+        unrelated = [c for c in changes if str(c.path) not in (activation_dir, activation_file)]
+        if unrelated:
+            rollback_blockers.append(f"working tree has {len(unrelated)} unrelated changed file(s)")
+
+    rollback_available = len(rollback_blockers) == 0
+
+    return {
+        "activation_present": activation_present,
+        "active_task_present": active_task_present,
+        "active_task_matches_activation": task_matches,
+        "activation_task_id": activation_task_id,
+        "active_task_id": active_task_id,
+        "rollback_available": rollback_available,
+        "rollback_blockers": rollback_blockers,
+        "queue_restore_available": False,
+        "implementation_detected": any("implementation" in b.lower() for b in rollback_blockers),
+        "execution_authorized": False,
+        "note": "Status inspection only. No execution performed.",
+    }
+
+
+def run_phase_single_runner_activation_status(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_single_runner_activation_status(root)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Activation Status")
+    print("=" * 40)
+    print(f"  Activation present: {'yes' if result['activation_present'] else 'no'}")
+    print(f"  Active task present: {'yes' if result['active_task_present'] else 'no'}")
+    print(f"  Task matches activation: {'yes' if result['active_task_matches_activation'] else 'no'}")
+    print(f"  Rollback available: {'yes' if result['rollback_available'] else 'NO'}")
+    if result["rollback_blockers"]:
+        for b in result["rollback_blockers"]: print(f"  Blocker: {b}")
+    print(f"  Execution authorized: no")
+    return 0
+
+
+def run_phase_single_runner_activation_rollback(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    dry_run = getattr(args, "dry_run", True)
+    execute = getattr(args, "execute", False)
+    status = _build_single_runner_activation_status(root)
+
+    if not execute:
+        result = {
+            "dry_run": True,
+            "rollback_performed": False,
+            "active_task_removed": False,
+            "queue_restored": False,
+            "mutation_performed": False,
+            "rollback_available": status["rollback_available"],
+            "rollback_blockers": status["rollback_blockers"],
+            "execution_authorized": False,
+            "note": "Dry-run rollback preview only. No files mutated.",
+        }
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True)); return 0
+        print("Activation Rollback (dry run)")
+        print("=" * 40)
+        print(f"  Rollback available: {'yes' if result['rollback_available'] else 'NO'}")
+        if result["rollback_blockers"]:
+            for b in result["rollback_blockers"]: print(f"  Blocker: {b}")
+        print(f"  Mutation performed: no")
+        return 0 if result["rollback_available"] else 1
+
+    if not status["rollback_available"]:
+        if args.json: print(json.dumps({"rollback_performed": False, "blockers": status["rollback_blockers"], "execution_authorized": False}))
+        else: print(f"Rollback refused: {'; '.join(status['rollback_blockers'])}")
+        return 1
+
+    # Perform rollback
+    act_data = json.loads(root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json").read_text(encoding="utf-8"))
+    task_id = act_data["created_task_id"]
+    task_file = root.join(Path("tasks") / "active" / f"{task_id}.md")
+    if task_file.is_file():
+        task_file.unlink()
+
+    result = {
+        "dry_run": False,
+        "rollback_performed": True,
+        "active_task_removed": True,
+        "queue_restored": False,
+        "mutation_performed": True,
+        "execution_authorized": False,
+        "note": "Activation-created task removed. No implementation was undone. Human authority remains absolute.",
+    }
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Activation Rollback (executed)")
+    print("=" * 40)
+    print(f"  Rollback performed: yes")
+    print(f"  Active task removed: yes")
+    print(f"  Queue restored: no")
+    print(f"  Execution authorized: no")
+    print(f"\n  {result['note']}")
+    return 0
