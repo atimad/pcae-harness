@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73I: Single-Phase Runner Refusal Matrix.
+Phase 73J: Execution Authorization Artifact Contract.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

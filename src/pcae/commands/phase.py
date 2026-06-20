@@ -5106,3 +5106,88 @@ def run_phase_single_runner_refusal_matrix(args: argparse.Namespace) -> int:
 
     print("  This is a refusal matrix only. No real execution is enabled.")
     return 0
+
+
+EXECUTION_AUTHORIZATION_CONTRACTS_DIR = Path(".pcae") / "execution-authorization-contracts"
+
+_EXECUTION_AUTHORIZATION_CONTRACT = {
+    "design_only": True,
+    "execution_enabled": False,
+    "authorization_available": False,
+    "execution_authorized": False,
+    "contract_version": "1.0",
+    "required_fields": [
+        "authorization_id",
+        "created_at",
+        "approver_source",
+        "authorization_scope (single_phase_only)",
+        "queue_digest",
+        "queue_entry_id",
+        "queue_entry_title",
+        "max_phases (always 1)",
+        "request_ref",
+        "request_review_ref",
+        "no_denial_or_revocation",
+        "noop_trace_ref",
+        "noop_trace_review_ref",
+        "noop_trace_approval_ref",
+        "single_runner_contract_ref",
+        "single_runner_readiness_ref",
+        "refusal_matrix_ref",
+        "expires_at",
+        "execution_authorized (must be true only after explicit human authorization)",
+        "authorization_available (must be true only when all checks pass)",
+    ],
+    "required_invariants": [
+        "one queued phase only (queue length = 1)",
+        "clean healthy idle state (health, check, task-memory, push all pass)",
+        "matching queue approval (digest matches current queue)",
+        "matching no-op trace approval (trace_ref matches current trace)",
+        "request reviewed and not denied/revoked",
+        "no hard-stop refusal conditions in runner refusal matrix",
+        "authorization expires (must have expires_at)",
+        "authorization invalidates on queue/preflight/request/trace changes",
+    ],
+    "note": (
+        "This is a design-only contract. It does not authorize execution. "
+        "No positive authorization artifact exists or can be created. "
+        "Human authority remains absolute."
+    ),
+}
+
+
+def run_phase_execution_authorization_contract(args: argparse.Namespace) -> int:
+    contract = dict(_EXECUTION_AUTHORIZATION_CONTRACT)
+
+    if getattr(args, "save", False):
+        contract_dir = HarnessPath.cwd().join(EXECUTION_AUTHORIZATION_CONTRACTS_DIR)
+        contract_dir.mkdir(parents=True, exist_ok=True)
+        gitignore_path = contract_dir / ".gitignore"
+        if not gitignore_path.exists():
+            gitignore_path.write_text("*\n", encoding="utf-8")
+        latest_path = contract_dir / "latest.json"
+        latest_path.write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Contract saved: {latest_path}")
+
+    if args.json:
+        print(json.dumps(contract, indent=2, sort_keys=True))
+        return 0
+
+    print("Execution Authorization Artifact Contract (design only)")
+    print("=" * 40)
+    print(f"  Design only: yes")
+    print(f"  Execution enabled: no")
+    print(f"  Authorization available: no")
+    print(f"  Execution authorized: no")
+    print()
+    print("  Required fields:")
+    for f in contract["required_fields"]:
+        print(f"    - {f}")
+    print()
+    print("  Required invariants:")
+    for inv in contract["required_invariants"]:
+        print(f"    - {inv}")
+    print()
+    print(f"  {contract['note']}")
+    return 0

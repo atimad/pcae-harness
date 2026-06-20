@@ -434,6 +434,7 @@ from pcae.commands.phase import (
     run_phase_runner_sim_approve,
     run_phase_single_runner_contract,
     run_phase_single_runner_readiness,
+    run_phase_execution_authorization_contract,
     run_phase_single_runner_refusal_matrix,
     run_phase_runner_sim_approval_show,
     run_phase_runner_sim_fixture,
@@ -5368,6 +5369,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_single_runner_refusal_matrix_parser.set_defaults(
         handler=run_phase_single_runner_refusal_matrix
+    )
+
+    phase_execution_authorization_contract_parser = phase_subparsers.add_parser(
+        "execution-authorization-contract",
+        help="Show the design-only execution authorization contract (does not authorize execution).",
+    )
+    phase_execution_authorization_contract_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_execution_authorization_contract_parser.add_argument(
+        "--save", action="store_true", help="Persist the contract artifact."
+    )
+    phase_execution_authorization_contract_parser.set_defaults(
+        handler=run_phase_execution_authorization_contract
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

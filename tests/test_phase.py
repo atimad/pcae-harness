@@ -8712,3 +8712,54 @@ def test_73i_refusal_matrix_no_mutation(
     capsys.readouterr()
 
     assert queue_path.read_text(encoding="utf-8") == before
+
+
+# ---------------------------------------------------------------------------
+# Phase 73J: execution authorization artifact design
+# ---------------------------------------------------------------------------
+
+
+def test_73j_contract_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "execution-authorization-contract", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["design_only"] is True
+    assert data["execution_enabled"] is False
+    assert data["authorization_available"] is False
+    assert data["execution_authorized"] is False
+    assert len(data["required_fields"]) > 10
+    assert len(data["required_invariants"]) > 5
+
+
+def test_73j_contract_save(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "execution-authorization-contract", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    cpath = tmp_path / ".pcae" / "execution-authorization-contracts" / "latest.json"
+    assert cpath.is_file()
+    saved = json.loads(cpath.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_73j_contract_no_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 73J: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "execution-authorization-contract"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
