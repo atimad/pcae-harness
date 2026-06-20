@@ -9597,3 +9597,144 @@ def run_phase_governance_bypass_classification(args: argparse.Namespace) -> int:
         print(f"\n  Recommendations:"); [print(f"    - {r}") for r in result["recommendations"]]
     print(f"\n  {result['next_operator_action']}")
     return 0 if result["classification_status"] in ("clean", "advisory_only") else 1
+
+
+# Phase 75I.2: governance bypass declaration reconciliation
+GOVERNANCE_BYPASS_RECONCILIATIONS_DIR = Path(".pcae") / "governance-bypass-reconciliations"
+
+
+def _build_governance_bypass_reconcile(root: HarnessPath) -> dict:
+    base = {
+        "reconciliation_status": "missing_classification", "manual_apply_blocking": True,
+        "declared_bypass_commits": [], "reconciled_historical_advisories": [],
+        "unresolved_findings": [], "blocking_findings": [], "audit_warnings": [],
+        "governance_policy": (
+            "Historical/advisory bypass debt (pre-governance-hardening phases) is reconciled "
+            "as non-blocking for manual apply approval. Current audit warnings remain visible "
+            "as historical advisories. Only findings classified as needs_review or blocking "
+            "prevent reconciliation. Declared bypasses are preserved as historical records."
+        ),
+        "recommendations": [],
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read classification
+    class_path = root.join(GOVERNANCE_BYPASS_CLASSIFICATIONS_DIR / "latest.json")
+    if not class_path.is_file():
+        base["reconciliation_status"] = "missing_classification"
+        base["blockers"] = ["No governance bypass classification found."]
+        base["next_operator_action"] = "Run pcae phase governance-bypass-classification --save first."
+        return base
+    classification = json.loads(class_path.read_text(encoding="utf-8"))
+    class_status = classification.get("classification_status", "blocking")
+
+    # Read audit warnings
+    audit_path = root.join(PHASE_AUDITS_DIR / "latest.json")
+    if audit_path.is_file():
+        audit = json.loads(audit_path.read_text(encoding="utf-8"))
+        base["audit_warnings"] = audit.get("warnings", [])
+
+    # Read bypass report for declared list
+    report_path = root.join(GOVERNANCE_BYPASS_REPORTS_DIR / "latest.json")
+    if report_path.is_file():
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        base["declared_bypass_commits"] = [
+            {"commit": c["commit"], "message": c.get("message", "")}
+            for c in report.get("declared_bypass_commits", [])
+        ]
+
+    # Reconcile based on classification status
+    if class_status in ("clean",):
+        base["reconciliation_status"] = "clean"
+        base["manual_apply_blocking"] = False
+        base["blockers"] = []
+        base["recommendations"].append("No bypass findings to reconcile.")
+        base["next_operator_action"] = "Reconciliation complete. Manual apply approval can proceed."
+        return base
+
+    if class_status in ("advisory_only",):
+        base["reconciliation_status"] = "reconciled_advisory_only"
+        base["manual_apply_blocking"] = False
+        base["blockers"] = []
+        # Transfer historical findings as reconciled advisories
+        for cl in classification.get("classifications", []):
+            cat = cl.get("category", "")
+            if cat in ("historical_advisory", "declared_historical", "false_positive_candidate"):
+                base["reconciled_historical_advisories"].append({
+                    "commit": cl["commit"], "message": cl.get("message", ""),
+                    "category": cat, "reason": cl.get("reason", ""),
+                })
+        base["recommendations"].append(
+            f"{len(base['reconciled_historical_advisories'])} findings reconciled as historical/advisory. "
+            "No current blocking findings. Manual apply approval can proceed."
+        )
+        # Preserve audit warnings
+        base["recommendations"].append(
+            f"{len(base['audit_warnings'])} audit warnings remain as historical advisories."
+        )
+        base["next_operator_action"] = (
+            "Reconciliation complete. All findings are historical/advisory. "
+            "Run pcae phase captured-output-manual-apply-approval-recheck to update approval review."
+        )
+        return base
+
+    if class_status in ("needs_review", "blocking"):
+        base["reconciliation_status"] = "unresolved_blockers"
+        base["manual_apply_blocking"] = True
+        needs_rev = [cl for cl in classification.get("classifications", [])
+                     if cl.get("category") in ("undeclared_needs_review", "current_blocking")]
+        base["unresolved_findings"] = [
+            {"commit": cl["commit"], "message": cl.get("message", ""), "category": cl["category"]}
+            for cl in needs_rev
+        ]
+        base["blocking_findings"] = [
+            {"commit": cl["commit"], "message": cl.get("message", ""), "category": cl["category"]}
+            for cl in classification.get("classifications", [])
+            if cl.get("category") == "current_blocking"
+        ]
+        base["blockers"] = [
+            f"{len(base['unresolved_findings'])} unresolved finding(s) need review.",
+            f"{len(base['blocking_findings'])} blocking finding(s) prevent reconciliation.",
+        ]
+        base["recommendations"].append("Address unresolved/blocking findings before reconciliation.")
+        base["next_operator_action"] = "Review and resolve blocking findings. Declare or reconcile undeclared needs_review items."
+        return base
+
+    # Default: missing or unknown classification
+    base["reconciliation_status"] = "missing_classification"
+    base["blockers"] = ["Unknown classification status."]
+    base["next_operator_action"] = "Run pcae phase governance-bypass-classification --save to regenerate."
+    return base
+
+
+def run_phase_governance_bypass_reconcile(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_governance_bypass_reconcile(root)
+    if getattr(args, "save", False):
+        d = root.join(GOVERNANCE_BYPASS_RECONCILIATIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Reconciliation saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["reconciliation_status"] in ("clean", "reconciled_advisory_only") else 1
+    print("Governance Bypass Reconciliation"); print("=" * 40)
+    print(f"  Reconciliation: {result['reconciliation_status']}")
+    print(f"  Manual apply blocking: {'yes' if result['manual_apply_blocking'] else 'no'}")
+    print(f"  Declared bypasses: {len(result['declared_bypass_commits'])}")
+    print(f"  Reconciled advisories: {len(result['reconciled_historical_advisories'])}")
+    print(f"  Unresolved findings: {len(result['unresolved_findings'])}")
+    print(f"  Blocking findings: {len(result['blocking_findings'])}")
+    print(f"  Audit warnings: {len(result['audit_warnings'])}")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["recommendations"]:
+        print(f"\n  Recommendations:"); [print(f"    - {r}") for r in result["recommendations"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["reconciliation_status"] in ("clean", "reconciled_advisory_only") else 1

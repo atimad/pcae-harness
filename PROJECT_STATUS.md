@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 75I.1: Governance Bypass Review Classification.
+Phase 75I.2: Governance Bypass Declaration Reconciliation.
 
-Phase 75I.1 adds `pcae phase governance-bypass-classification --json --save`
-classifying governance bypass findings as historical/advisory or current blocking.
-Classification only — does not rewrite history, suppress warnings, or authorize execution.
+Phase 75I.2 adds `pcae phase governance-bypass-reconcile --json --save`
+reconciling bypass classification findings into a decision about manual apply blocking.
+Reconciliation only — does not rewrite history, suppress warnings, or authorize execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

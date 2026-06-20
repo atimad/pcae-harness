@@ -10508,3 +10508,80 @@ def test_75i1_classification_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["push_performed"] is False
     assert d["implementation_performed"] is False
     assert d["execution_authorized"] is False
+
+
+# Phase 75I.2: governance bypass declaration reconciliation
+def test_75i2_reconcile_missing_classification(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "governance-bypass-reconcile", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["reconciliation_status"] == "missing_classification"
+    assert d["manual_apply_blocking"] is True
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_75i2_reconcile_advisory_only_synthetic(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Create classification with advisory_only status
+    cd = tmp_path / ".pcae" / "governance-bypass-classifications"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / "latest.json").write_text(json.dumps({
+        "classification_status": "advisory_only", "manual_apply_blocking": False,
+        "classifications": [
+            {"commit": "abc123", "message": "Fix docs", "category": "historical_advisory", "reason": "test"},
+            {"commit": "def456", "message": "Task update", "category": "false_positive_candidate", "reason": "test"},
+        ],
+    }))
+    # Create audit
+    ad = tmp_path / ".pcae" / "phase-audits"
+    ad.mkdir(parents=True, exist_ok=True)
+    (ad / "latest.json").write_text(json.dumps({"warnings": ["test warning"]}))
+    # Create bypass report with declared
+    br = tmp_path / ".pcae" / "governance-bypass-reports"
+    br.mkdir(parents=True, exist_ok=True)
+    (br / "latest.json").write_text(json.dumps({
+        "report_status": "warning", "declared_bypass_commits": [
+            {"commit": "xyz", "message": "no-verify commit"},
+        ],
+    }))
+    main(["phase", "governance-bypass-reconcile", "--json"])
+    out = json.loads(capsys.readouterr().out)
+    assert out["reconciliation_status"] == "reconciled_advisory_only"
+    assert out["manual_apply_blocking"] is False
+    assert len(out["reconciled_historical_advisories"]) >= 2
+    assert len(out["declared_bypass_commits"]) >= 1
+    assert out["apply_performed"] is False
+
+
+def test_75i2_reconcile_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    cd = tmp_path / ".pcae" / "governance-bypass-classifications"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / "latest.json").write_text(json.dumps({
+        "classification_status": "clean", "classifications": [],
+    }))
+    main(["phase", "governance-bypass-reconcile", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "governance-bypass-reconciliations" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["reconciliation_status"] == "clean"
+    assert d["execution_authorized"] is False
+    assert d["apply_performed"] is False
+
+
+def test_75i2_reconcile_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "governance-bypass-reconcile", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
