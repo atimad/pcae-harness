@@ -7468,3 +7468,110 @@ def test_72v_request_review_no_approval(
     assert data["approval_granted"] is False
     assert data["execution_authorized"] is False
     assert data["note"] is not None
+
+
+# ---------------------------------------------------------------------------
+# Phase 72W: execution authorization request denial and revocation
+# ---------------------------------------------------------------------------
+
+
+def test_72w_deny_missing_request(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-request-deny", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["denied"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72w_deny_with_request(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Deny me"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-request-deny", "--message", "Denied", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["denied"] is True
+    assert data["execution_authorized"] is False
+    denial_path = tmp_path / ".pcae" / "runner-execution-request-denials" / "latest.json"
+    assert denial_path.is_file()
+    saved = json.loads(denial_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_72w_revoke_missing_request(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-request-revoke", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["revoked"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72w_revoke_with_request(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Revoke me"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-request-revoke", "--message", "Revoked", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["revoked"] is True
+    assert data["execution_authorized"] is False
+    revoke_path = tmp_path / ".pcae" / "runner-execution-request-revocations" / "latest.json"
+    assert revoke_path.is_file()
+    saved = json.loads(revoke_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_72w_deny_does_not_mutate_queue(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Queue check"])
+    capsys.readouterr()
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+
+    main(["phase", "runner-execution-request-deny", "--message", "Denied"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_72w_no_execution_authorized_true(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Auth check"])
+    capsys.readouterr()
+
+    deny = main(["phase", "runner-execution-request-deny", "--json"])
+    deny_data = json.loads(capsys.readouterr().out)
+    assert deny_data["execution_authorized"] is False
+
+    main(["phase", "runner-execution-request", "--message", "Revoke check"])
+    capsys.readouterr()
+    revoke = main(["phase", "runner-execution-request-revoke", "--json"])
+    revoke_data = json.loads(capsys.readouterr().out)
+    assert revoke_data["execution_authorized"] is False

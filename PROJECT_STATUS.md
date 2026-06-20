@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72V: Execution Authorization Request Review.
+Phase 72W: Execution Authorization Request Denial and Revocation.
 
-Phase 72V adds `pcae phase runner-execution-request-review` for evaluating
-execution authorization requests without approving execution. Reports review
-status, missing prerequisites, `approval_granted=false`, `execution_authorized=false`.
-No execution, no task creation.
+Phase 72W adds `pcae phase runner-execution-request-deny` and
+`runner-execution-request-revoke` for safely denying and revoking execution
+authorization requests. Always sets `execution_authorized=false`. No queue
+mutation, no task creation, no execution.
 
 ## Milestone: Execution Chain Traceability Complete
 
