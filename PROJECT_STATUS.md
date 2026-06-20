@@ -2,12 +2,11 @@
 
 ## Current Phase
 
-Phase 72X: Execution Request Preflight Integration.
+Phase 72Y: Denied Request Authorization Block.
 
-Phase 72X extends `pcae phase runner-execution-preflight` to include execution
-request lifecycle status. Reports request presence, status (missing/present/denied/revoked),
-review presence, and whether denied/revoked requests block authorization. Execution
-remains `execution_available=false`, `execution_authorized=false`.
+Phase 72Y enhances `pcae phase runner-execution-authorize` to inspect execution
+request lifecycle state and explicitly report denied/revoked requests as blocking.
+Also includes Phase 72Z authorization summary code. Always refuses authorization.
 
 ## Milestone: Execution Chain Traceability Complete
 

@@ -418,15 +418,16 @@ from pcae.commands.phase import (
     run_phase_runner_plan,
     run_phase_runner_policy,
     run_phase_runner_readiness,
+    run_phase_runner_authorization_summary,
     run_phase_runner_execute,
     run_phase_runner_execution_authorize,
+    run_phase_runner_execution_authorization_schema,
+    run_phase_runner_execution_preflight,
     run_phase_runner_execution_request,
     run_phase_runner_execution_request_deny,
     run_phase_runner_execution_request_review,
     run_phase_runner_execution_request_revoke,
     run_phase_runner_execution_request_show,
-    run_phase_runner_execution_authorization_schema,
-    run_phase_runner_execution_preflight,
     run_phase_runner_sim_approve,
     run_phase_runner_sim_approval_show,
     run_phase_runner_sim_fixture,
@@ -5253,6 +5254,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_runner_execution_request_revoke_parser.set_defaults(
         handler=run_phase_runner_execution_request_revoke
+    )
+
+    phase_runner_authorization_summary_parser = phase_subparsers.add_parser(
+        "runner-authorization-summary",
+        help="Summarize the complete authorization lifecycle state (read-only).",
+    )
+    phase_runner_authorization_summary_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_authorization_summary_parser.add_argument(
+        "--save", action="store_true", help="Persist the summary artifact."
+    )
+    phase_runner_authorization_summary_parser.set_defaults(
+        handler=run_phase_runner_authorization_summary
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

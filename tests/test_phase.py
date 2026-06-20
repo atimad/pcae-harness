@@ -7682,3 +7682,198 @@ def test_72x_preflight_with_request_review(
     assert data["execution_request_review_present"] is True
     assert data["execution_request_review_status"] is not None
     assert data["execution_authorized"] is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 72Y: denied request authorization block
+# ---------------------------------------------------------------------------
+
+
+def test_72y_auth_refusal_missing_request(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["authorized"] is False
+    assert data["authorization_available"] is False
+    assert data["request_present"] is False
+    assert data["request_denied"] is False
+    assert data["request_revoked"] is False
+    assert data["authorization_blocked_by_request_state"] is False
+
+
+def test_72y_auth_refusal_with_request(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Auth test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["request_present"] is True
+    assert data["request_denied"] is False
+    assert data["authorization_blocked_by_request_state"] is False
+    assert data["authorized"] is False
+
+
+def test_72y_auth_refusal_denied_blocks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Block auth"])
+    main(["phase", "runner-execution-request-deny", "--message", "Denied"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["request_present"] is True
+    assert data["request_denied"] is True
+    assert data["authorization_blocked_by_request_state"] is True
+    assert "denied" in data["refusal_reason"].lower()
+    assert data["authorized"] is False
+
+
+def test_72y_auth_refusal_revoked_blocks(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Revoke auth"])
+    main(["phase", "runner-execution-request-revoke", "--message", "Revoked"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-execution-authorize", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["request_revoked"] is True
+    assert data["authorization_blocked_by_request_state"] is True
+    assert "revoked" in data["refusal_reason"].lower()
+    assert data["authorized"] is False
+
+
+# ---------------------------------------------------------------------------
+# Phase 72Z: authorization lifecycle summary artifact
+# ---------------------------------------------------------------------------
+
+
+def test_72z_summary_missing_artifacts(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-authorization-summary", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["overall_status"] == "incomplete"
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+    assert data["execution_request"]["present"] is False
+    assert data["execution_request"]["status"] == "missing"
+
+
+def test_72z_summary_with_request(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Summary test"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-authorization-summary", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["execution_request"]["present"] is True
+    assert data["execution_request"]["status"] == "present"
+    assert data["execution_request"]["blocks_authorization"] is False
+    assert data["execution_authorized"] is False
+
+
+def test_72z_summary_denied_request_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Block summary"])
+    main(["phase", "runner-execution-request-deny", "--message", "Denied"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-authorization-summary", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["overall_status"] == "blocked"
+    assert data["execution_request"]["blocks_authorization"] is True
+    assert data["execution_request"]["status"] == "denied"
+    assert data["execution_authorized"] is False
+
+
+def test_72z_summary_revoked_request_blocked(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "runner-execution-request", "--message", "Rev summary"])
+    main(["phase", "runner-execution-request-revoke", "--message", "Revoked"])
+    capsys.readouterr()
+
+    exit_code = main(["phase", "runner-authorization-summary", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["overall_status"] == "blocked"
+    assert data["execution_request"]["status"] == "revoked"
+    assert data["execution_authorized"] is False
+
+
+def test_72z_summary_save(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-authorization-summary", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["execution_authorized"] is False
+    summary_path = tmp_path / ".pcae" / "runner-authorization-summaries" / "latest.json"
+    assert summary_path.is_file()
+    saved = json.loads(summary_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_72z_summary_no_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-authorization-summary"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before

@@ -3297,12 +3297,45 @@ _EXECUTION_AUTHORIZATION_REFUSAL = (
 
 
 def run_phase_runner_execution_authorize(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    exec_request = _read_latest_runner_execution_request(root)
+
+    request_present = exec_request is not None
+    request_denied = exec_request.get("denied", False) if exec_request else False
+    request_revoked = exec_request.get("revoked", False) if exec_request else False
+    request_blocks = request_denied or request_revoked
+
+    if request_blocks:
+        block_detail = []
+        if request_denied:
+            block_detail.append("request has been denied")
+        if request_revoked:
+            block_detail.append("request has been revoked")
+        refusal = (
+            "Execution authorization is not implemented. "
+            "Additionally, the execution request is in a blocking lifecycle state: "
+            + "; ".join(block_detail)
+            + ". Human authority remains absolute."
+        )
+    elif not request_present:
+        refusal = (
+            "Execution authorization is not implemented. "
+            "No execution request artifact is present. "
+            "Human authority remains absolute."
+        )
+    else:
+        refusal = _EXECUTION_AUTHORIZATION_REFUSAL
+
     result = {
         "authorization_available": False,
         "authorized": False,
-        "refusal_reason": _EXECUTION_AUTHORIZATION_REFUSAL,
         "mutation_performed": False,
         "dry_run": getattr(args, "dry_run", False),
+        "request_present": request_present,
+        "request_denied": request_denied,
+        "request_revoked": request_revoked,
+        "authorization_blocked_by_request_state": request_blocks,
+        "refusal_reason": refusal,
     }
 
     if args.json:
@@ -3314,8 +3347,12 @@ def run_phase_runner_execution_authorize(args: argparse.Namespace) -> int:
     print(f"  Authorization available: no")
     print(f"  Authorized: no")
     print(f"  Mutation performed: no")
+    print(f"  Request present: {'yes' if request_present else 'no'}")
+    if request_present:
+        print(f"  Request denied: {'yes' if request_denied else 'no'}")
+        print(f"  Request revoked: {'yes' if request_revoked else 'no'}")
     print()
-    print(f"  {_EXECUTION_AUTHORIZATION_REFUSAL}")
+    print(f"  {refusal}")
     return 1
 
 
@@ -3884,4 +3921,158 @@ def run_phase_runner_execution_request_revoke(args: argparse.Namespace) -> int:
     print(f"  Request ID: {revocation.get('revoked_request_id') or revocation.get('request_id') or 'unknown'}")
     print(f"  Execution authorized: no")
     print(f"  Message: {message}")
+    return 0
+
+
+RUNNER_AUTHORIZATION_SUMMARIES_DIR = Path(".pcae") / "runner-authorization-summaries"
+
+
+def _read_latest_runner_execution_request_denial(root: HarnessPath) -> dict | None:
+    latest = root.join(RUNNER_EXECUTION_REQUEST_DENIALS_DIR / "latest.json")
+    if not latest.is_file():
+        return None
+    try:
+        return json.loads(latest.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _build_runner_authorization_summary(root: HarnessPath) -> dict:
+    queue_validation = _build_queue_validate(root)
+    queue_approval = _read_latest_queue_approval(root)
+    sim = _read_latest_simulation(root)
+    sim_approval = _read_latest_sim_approval(root)
+    exec_request = _read_latest_runner_execution_request(root)
+    exec_request_review = _read_latest_runner_execution_request_review(root)
+    exec_request_denial = _read_latest_runner_execution_request_denial(root)
+
+    request_present = exec_request is not None
+    request_denied = exec_request.get("denied", False) if exec_request else False
+    request_revoked = exec_request.get("revoked", False) if exec_request else False
+    request_blocks = request_denied or request_revoked
+
+    if request_blocks:
+        overall_status = "blocked"
+    elif not request_present:
+        overall_status = "incomplete"
+    elif not queue_validation["queue_ready"] or not queue_validation["valid"]:
+        overall_status = "incomplete"
+    else:
+        overall_status = "not_authorized"
+
+    return {
+        "overall_status": overall_status,
+        "execution_available": False,
+        "execution_authorized": False,
+        "queue_validation": {
+            "valid": queue_validation["valid"],
+            "queue_ready": queue_validation["queue_ready"],
+            "entry_count": queue_validation["queue_entry_count"],
+        },
+        "queue_approval": {
+            "present": queue_approval is not None,
+            "approved": queue_approval.get("approved", False) if queue_approval else False,
+            "matches_current_queue": (
+                queue_approval.get("queue_digest") == _compute_queue_digest(root)
+            ) if queue_approval else False,
+        },
+        "simulation_approval": {
+            "present": sim is not None,
+            "approved": sim_approval.get("approved", False) if sim_approval else False,
+        },
+        "execution_request": {
+            "present": request_present,
+            "status": (
+                "denied" if request_denied else
+                "revoked" if request_revoked else
+                "present" if request_present else
+                "missing"
+            ),
+            "denied": request_denied,
+            "revoked": request_revoked,
+            "blocks_authorization": request_blocks,
+        },
+        "request_review": {
+            "present": exec_request_review is not None,
+            "status": exec_request_review.get("review_status") if exec_request_review else None,
+        },
+        "denial": {
+            "present": exec_request_denial is not None,
+            "denied": exec_request_denial.get("denied", False) if exec_request_denial else False,
+        },
+        "execution_authorization_gate": {
+            "authorization_available": False,
+            "authorized": False,
+        },
+        "runner_execute_refusal": {
+            "execution_available": False,
+            "execution_authorized": False,
+            "mutation_performed": False,
+        },
+        "note": (
+            "This is a read-only authorization lifecycle summary. "
+            "No execution is authorized. "
+            "Human authority remains absolute."
+        ),
+    }
+
+
+def _save_runner_authorization_summary(root: HarnessPath, summary: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    summary_with_ts = {**summary, "created_at": ts}
+    summary_dir = root.join(RUNNER_AUTHORIZATION_SUMMARIES_DIR)
+    summary_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = summary_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = summary_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(summary_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_runner_authorization_summary(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    summary = _build_runner_authorization_summary(root)
+
+    if getattr(args, "save", False):
+        saved_path = _save_runner_authorization_summary(root, summary)
+        if not args.json:
+            print(f"Summary saved: {saved_path}")
+
+    if args.json:
+        print(json.dumps(summary, indent=2, sort_keys=True))
+        return 0
+
+    print("Runner Authorization Lifecycle Summary")
+    print("=" * 40)
+    print(f"  Overall status: {summary['overall_status']}")
+    print(f"  Execution available: no")
+    print(f"  Execution authorized: no")
+    print()
+    print("  Queue validation:")
+    qv = summary["queue_validation"]
+    print(f"    Valid: {'yes' if qv['valid'] else 'no'}")
+    print(f"    Ready: {'yes' if qv['queue_ready'] else 'no'}")
+    print(f"    Entries: {qv['entry_count']}")
+    print()
+    print("  Queue approval:")
+    qa = summary["queue_approval"]
+    print(f"    Present: {'yes' if qa['present'] else 'no'}")
+    print(f"    Matches queue: {'yes' if qa['matches_current_queue'] else 'no'}")
+    print()
+    print("  Execution request:")
+    er = summary["execution_request"]
+    print(f"    Present: {'yes' if er['present'] else 'no'}")
+    print(f"    Status: {er['status']}")
+    print(f"    Blocks authorization: {'yes' if er['blocks_authorization'] else 'no'}")
+    print()
+    print("  Execution authorization gate:")
+    ag = summary["execution_authorization_gate"]
+    print(f"    Available: {'yes' if ag['authorization_available'] else 'no'}")
+    print(f"    Authorized: {'yes' if ag['authorized'] else 'no'}")
+    print()
+    print(f"  {summary['note']}")
     return 0
