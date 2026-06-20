@@ -10,7 +10,7 @@ Phase 75B: Add scenario command for reviewing captured output intake
 
 ## Status
 
-active
+completedd
 
 ## Mode
 

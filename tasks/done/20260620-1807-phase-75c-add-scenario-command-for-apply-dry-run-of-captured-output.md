@@ -10,7 +10,7 @@ Phase 75C: Add scenario command for apply dry-run of captured output
 
 ## Status
 
-active
+completedd
 
 ## Mode
 

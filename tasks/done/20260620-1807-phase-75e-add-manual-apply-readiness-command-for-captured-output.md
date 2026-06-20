@@ -10,7 +10,7 @@ Phase 75E: Add manual apply readiness command for captured output
 
 ## Status
 
-active
+completedd
 
 ## Mode
 
