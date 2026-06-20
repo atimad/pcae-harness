@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 76B: Captured Output Human Approval Validation.
+Phase 76C: Captured Output Manual Apply Execution Preflight.
 
-Phase 76B adds `pcae phase captured-output-human-approval-validate --json --save`
-validating that human approval still matches current captured output, apply dry-run,
-and governance state. Validation only — does not apply, modify project code, invoke
-backend, or authorize execution.
+Phase 76C adds `pcae phase captured-output-manual-apply-execution-preflight --json --save`
+as final preflight confirming all governance prerequisites (approval validation, captured
+output, apply dry-run) are satisfied before a future manual apply phase (76D). Preflight
+only — does not apply, modify project code, invoke backend, or authorize execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

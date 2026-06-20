@@ -10146,3 +10146,117 @@ def run_phase_captured_output_human_approval_validate(args: argparse.Namespace) 
         print(f"\n  Failures:"); [print(f"    - {f}") for f in result["validation_failures"]]
     print(f"\n  {result['next_operator_action']}")
     return 0 if result["validation_status"] == "valid" else 1
+
+
+# Phase 76C: manual apply execution preflight
+CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTION_PREFLIGHTS_DIR = Path(".pcae") / "captured-output-manual-apply-execution-preflights"
+
+
+def _build_captured_output_manual_apply_execution_preflight(root: HarnessPath) -> dict:
+    base = {
+        "execution_preflight_status": "blocked",
+        "human_approval_valid": False,
+        "manual_apply_execution_allowed_in_future_phase": False,
+        "manual_apply_performed": False, "manual_apply_allowed": False,
+        "automatic_apply_allowed": False, "backend_apply_allowed": False,
+        "approval_ref": None, "validation_ref": None,
+        "captured_output_ref": None, "apply_dry_run_ref": None,
+        "allowed_files": [], "forbidden_files": [
+            "No backend invocation", "No prompt execution", "No patch application",
+            "No project code modification from backend output",
+            "No automatic commit", "No automatic task finish", "No automatic push",
+            "No execution authorization", "No runner-execute real execution",
+        ],
+        "validation_commands_after_manual_apply": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "required_operator_steps_for_future_apply": [],
+        "forbidden_shortcuts": [
+            "Do not skip approval", "Do not skip validation",
+            "Do not apply automatically", "Do not commit from backend output",
+            "Do not push from backend output", "Do not authorize runner execution",
+        ],
+        "recommended_next_phase": "76D — Captured Output Manual Apply Execution (future)",
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read validation
+    val_path = root.join(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR / "latest.json")
+    if not val_path.is_file():
+        base["execution_preflight_status"] = "approval_validation_missing"
+        base["blockers"] = ["No approval validation found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-human-approval-validate --save first."
+        return base
+    validation = json.loads(val_path.read_text(encoding="utf-8"))
+    base["validation_ref"] = str(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR / "latest.json")
+    base["human_approval_valid"] = validation.get("human_approval_valid", False)
+
+    if validation.get("validation_status") != "valid":
+        base["execution_preflight_status"] = "approval_validation_not_valid"
+        base["blockers"] = [f"Validation not valid: {validation.get('validation_status')}"]
+        base["next_operator_action"] = validation.get("next_operator_action", "Resolve validation failures first.")
+        return base
+
+    # Read approval and readiness for refs
+    approval_path = root.join(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+    if approval_path.is_file():
+        base["approval_ref"] = str(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+        approval = json.loads(approval_path.read_text(encoding="utf-8"))
+        scope = approval.get("approval_scope") or {}
+        base["captured_output_ref"] = scope.get("captured_output_ref")
+        base["apply_dry_run_ref"] = scope.get("apply_dry_run_ref")
+        base["allowed_files"] = scope.get("allowed_files", [])
+        base["forbidden_files"].extend(scope.get("forbidden_files", []))
+
+    # Ready
+    base["execution_preflight_status"] = "ready_for_manual_apply_execution"
+    base["manual_apply_execution_allowed_in_future_phase"] = True
+    base["manual_apply_performed"] = False
+    base["manual_apply_allowed"] = False  # this phase does not apply
+    base["blockers"] = []
+    base["required_operator_steps_for_future_apply"] = [
+        "1. Confirm human approval is valid: pcae phase captured-output-human-approval-validate --json",
+        "2. Review captured output: cat .pcae/activated-task-prompt-captures/latest.stdout.txt",
+        "3. Review apply dry-run: pcae phase activated-task-agent-output-apply --dry-run --json",
+        "4. In a future phase (76D), manually apply changes following task contract scope",
+        "5. Run: pcae health && pcae check && python -m pytest -n auto",
+        "6. Commit using pcae task finish --commit",
+        "7. Push using pcae push",
+    ]
+    base["next_operator_action"] = (
+        "Execution preflight complete. All governance prerequisites satisfied. "
+        "Manual apply may proceed in a future phase (76D) with explicit operator action. "
+        "This phase does NOT apply anything, commit, or push."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_execution_preflight(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_execution_preflight(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTION_PREFLIGHTS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Execution preflight saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["execution_preflight_status"] == "ready_for_manual_apply_execution" else 1
+    print("Captured Output Manual Apply Execution Preflight"); print("=" * 40)
+    print(f"  Preflight status: {result['execution_preflight_status']}")
+    print(f"  Human approval valid: {'yes' if result['human_approval_valid'] else 'no'}")
+    print(f"  Manual apply allowed in future phase: {'yes' if result['manual_apply_execution_allowed_in_future_phase'] else 'no'}")
+    print(f"  Manual apply performed: no")
+    print(f"  Manual apply allowed (this phase): no")
+    print(f"  Automatic apply allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["required_operator_steps_for_future_apply"]:
+        print(f"\n  Future operator steps:"); [print(f"    {s}") for s in result["required_operator_steps_for_future_apply"][:5]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["execution_preflight_status"] == "ready_for_manual_apply_execution" else 1

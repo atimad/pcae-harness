@@ -10668,6 +10668,92 @@ def test_76b_validation_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["execution_authorized"] is False
 
 
+# Phase 76C: manual apply execution preflight
+def test_76c_preflight_missing_validation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["execution_preflight_status"] == "approval_validation_missing"
+    assert d["manual_apply_execution_allowed_in_future_phase"] is False
+    assert d["manual_apply_performed"] is False
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76c_preflight_invalid_validation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    vd = tmp_path / ".pcae" / "captured-output-human-approval-validations"
+    vd.mkdir(parents=True, exist_ok=True)
+    (vd / "latest.json").write_text(json.dumps({"validation_status": "stale_approval", "human_approval_valid": False}))
+    main(["phase", "captured-output-manual-apply-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["execution_preflight_status"] == "approval_validation_not_valid"
+    assert d["manual_apply_execution_allowed_in_future_phase"] is False
+
+
+def test_76c_preflight_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    vd = tmp_path / ".pcae" / "captured-output-human-approval-validations"
+    vd.mkdir(parents=True, exist_ok=True)
+    (vd / "latest.json").write_text(json.dumps({"validation_status": "valid", "human_approval_valid": True}))
+    ad = tmp_path / ".pcae" / "captured-output-human-approvals"
+    ad.mkdir(parents=True, exist_ok=True)
+    (ad / "latest.json").write_text(json.dumps({
+        "human_approval_granted": True, "approval_status": "approved",
+        "approval_scope": {"captured_output_ref": "test", "allowed_files": ["a.py"]},
+    }))
+    main(["phase", "captured-output-manual-apply-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["execution_preflight_status"] == "ready_for_manual_apply_execution"
+    assert d["manual_apply_execution_allowed_in_future_phase"] is True
+    assert d["manual_apply_performed"] is False
+    assert d["manual_apply_allowed"] is False
+    assert d["automatic_apply_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+    assert "76D" in d["recommended_next_phase"]
+
+
+def test_76c_preflight_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    vd = tmp_path / ".pcae" / "captured-output-human-approval-validations"
+    vd.mkdir(parents=True, exist_ok=True)
+    (vd / "latest.json").write_text(json.dumps({"validation_status": "valid", "human_approval_valid": True}))
+    ad = tmp_path / ".pcae" / "captured-output-human-approvals"
+    ad.mkdir(parents=True, exist_ok=True)
+    (ad / "latest.json").write_text(json.dumps({
+        "human_approval_granted": True, "approval_status": "approved",
+        "approval_scope": {},
+    }))
+    main(["phase", "captured-output-manual-apply-execution-preflight", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-execution-preflights" / "latest.json"
+    assert p.is_file()
+    d2 = json.loads(p.read_text(encoding="utf-8"))
+    assert d2["execution_preflight_status"] == "ready_for_manual_apply_execution"
+    assert d2["execution_authorized"] is False
+    assert d2["apply_performed"] is False
+
+
+def test_76c_preflight_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
+
+
 # Phase 75I.2: governance bypass declaration reconciliation
 def test_75i2_reconcile_missing_classification(tmp_path, monkeypatch, capsys):
     from pcae.commands.init import init_harness

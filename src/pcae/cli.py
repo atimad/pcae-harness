@@ -480,6 +480,7 @@ from pcae.commands.phase import (
     run_phase_captured_output_human_approval,
     run_phase_captured_output_human_approval_show,
     run_phase_captured_output_human_approval_validate,
+    run_phase_captured_output_manual_apply_execution_preflight,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6209,6 +6210,15 @@ def build_parser() -> argparse.ArgumentParser:
     phase_captured_output_human_approval_validate_parser.add_argument("--json", action="store_true")
     phase_captured_output_human_approval_validate_parser.add_argument("--save", action="store_true")
     phase_captured_output_human_approval_validate_parser.set_defaults(handler=run_phase_captured_output_human_approval_validate)
+
+    # Phase 76C
+    phase_captured_output_manual_apply_execution_preflight_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-execution-preflight",
+        help="Manual apply execution preflight for captured output (Phase 76C).",
+    )
+    phase_captured_output_manual_apply_execution_preflight_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_execution_preflight_parser.add_argument("--save", action="store_true")
+    phase_captured_output_manual_apply_execution_preflight_parser.set_defaults(handler=run_phase_captured_output_manual_apply_execution_preflight)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
