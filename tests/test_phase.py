@@ -10069,3 +10069,107 @@ def test_75a_intake_human_output(tmp_path, monkeypatch, capsys):
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
     exit_code = main(["phase", "activated-task-capture-intake-scenario"]); out = capsys.readouterr().out
     assert exit_code == 1; assert "Capture Intake Scenario" in out; assert "Intake created: no" in out
+
+
+# Phase 75B: activated task capture review scenario
+def test_75b_review_missing_intake(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-review-scenario", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["scenario_status"] == "missing_intake"; assert d["review_created"] is False
+    assert d["apply_performed"] is False; assert d["execution_authorized"] is False
+
+def test_75b_review_synthetic_success(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-package", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    # Create intake artifact
+    intake_dir = tmp_path / ".pcae" / "activated-task-agent-output-intakes"
+    intake_dir.mkdir(parents=True, exist_ok=True)
+    intake_dir.joinpath("latest.json").write_text(json.dumps({"intake_status": "recorded", "files_mentioned": ["src/test.py"], "patch_detected": False}))
+    main(["phase", "activated-task-capture-review-scenario", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["review_created"] is True; assert d["apply_performed"] is False; assert d["execution_authorized"] is False
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_75b_review_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-review-scenario", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-capture-review-scenarios" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["scenario_status"] == "missing_intake"; assert d["execution_authorized"] is False
+
+
+# Phase 75C: activated task capture apply dry-run scenario
+def test_75c_apply_dry_run_missing_review(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-apply-dry-run-scenario", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["scenario_status"] == "missing_review"; assert d["apply_dry_run_created"] is False
+    assert d["apply_performed"] is False; assert d["execution_authorized"] is False
+
+def test_75c_apply_dry_run_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-apply-dry-run-scenario", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-capture-apply-dry-run-scenarios" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["apply_performed"] is False; assert d["execution_authorized"] is False
+
+
+# Phase 75D: captured output lifecycle summary
+def test_75d_lifecycle_no_capture(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-lifecycle-summary", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["lifecycle_status"] == "no_capture"; assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False; assert d["commits_created"] == 0
+
+def test_75d_lifecycle_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-lifecycle-summary", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-capture-lifecycle-summaries" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["execution_authorized"] is False
+
+
+# Phase 75E: captured output manual apply readiness
+def test_75e_readiness_blocked_no_capture(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-manual-apply-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["manual_apply_allowed"] is False; assert d["automatic_apply_allowed"] is False
+    assert d["apply_performed"] is False; assert d["execution_authorized"] is False
+
+def test_75e_readiness_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-manual-apply-readiness", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-capture-manual-apply-readiness" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["automatic_apply_allowed"] is False; assert d["execution_authorized"] is False
+
+
+# Phase 75F: captured output safety regression scenario
+def test_75f_regression_passes(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-safety-regression", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["scenario_status"] in ("passed", "failed"); assert d["no_mutation_verified"] is True
+    assert d["apply_performed"] is False; assert d["files_modified"] is False
+    assert d["commits_created"] == 0; assert d["push_performed"] is False
+    assert d["implementation_performed"] is False; assert d["execution_authorized"] is False
+    assert len(d["cases"]) >= 4
+
+def test_75f_regression_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-capture-safety-regression", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-capture-safety-regressions" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["apply_performed"] is False; assert d["execution_authorized"] is False

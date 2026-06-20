@@ -465,6 +465,11 @@ from pcae.commands.phase import (
     run_phase_activated_task_prompt_capture_smoke,
     run_phase_activated_task_prompt_capture_show,
     run_phase_activated_task_capture_intake_scenario,
+    run_phase_activated_task_capture_review_scenario,
+    run_phase_activated_task_capture_apply_dry_run_scenario,
+    run_phase_activated_task_capture_lifecycle_summary,
+    run_phase_activated_task_capture_manual_apply_readiness,
+    run_phase_activated_task_capture_safety_regression,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6059,6 +6064,51 @@ def build_parser() -> argparse.ArgumentParser:
     phase_activated_task_capture_intake_scenario_parser.set_defaults(
         handler=run_phase_activated_task_capture_intake_scenario
     )
+
+    # Phase 75B
+    phase_activated_task_capture_review_scenario_parser = phase_subparsers.add_parser(
+        "activated-task-capture-review-scenario",
+        help="Review captured output intake (Phase 75B).",
+    )
+    phase_activated_task_capture_review_scenario_parser.add_argument("--json", action="store_true")
+    phase_activated_task_capture_review_scenario_parser.add_argument("--save", action="store_true")
+    phase_activated_task_capture_review_scenario_parser.set_defaults(handler=run_phase_activated_task_capture_review_scenario)
+
+    # Phase 75C
+    phase_activated_task_capture_apply_dry_run_scenario_parser = phase_subparsers.add_parser(
+        "activated-task-capture-apply-dry-run-scenario",
+        help="Apply dry-run of captured output (Phase 75C).",
+    )
+    phase_activated_task_capture_apply_dry_run_scenario_parser.add_argument("--json", action="store_true")
+    phase_activated_task_capture_apply_dry_run_scenario_parser.add_argument("--save", action="store_true")
+    phase_activated_task_capture_apply_dry_run_scenario_parser.set_defaults(handler=run_phase_activated_task_capture_apply_dry_run_scenario)
+
+    # Phase 75D
+    phase_activated_task_capture_lifecycle_summary_parser = phase_subparsers.add_parser(
+        "activated-task-capture-lifecycle-summary",
+        help="Consolidated captured-output lifecycle summary (Phase 75D).",
+    )
+    phase_activated_task_capture_lifecycle_summary_parser.add_argument("--json", action="store_true")
+    phase_activated_task_capture_lifecycle_summary_parser.add_argument("--save", action="store_true")
+    phase_activated_task_capture_lifecycle_summary_parser.set_defaults(handler=run_phase_activated_task_capture_lifecycle_summary)
+
+    # Phase 75E
+    phase_activated_task_capture_manual_apply_readiness_parser = phase_subparsers.add_parser(
+        "activated-task-capture-manual-apply-readiness",
+        help="Manual apply readiness for captured output (Phase 75E).",
+    )
+    phase_activated_task_capture_manual_apply_readiness_parser.add_argument("--json", action="store_true")
+    phase_activated_task_capture_manual_apply_readiness_parser.add_argument("--save", action="store_true")
+    phase_activated_task_capture_manual_apply_readiness_parser.set_defaults(handler=run_phase_activated_task_capture_manual_apply_readiness)
+
+    # Phase 75F
+    phase_activated_task_capture_safety_regression_parser = phase_subparsers.add_parser(
+        "activated-task-capture-safety-regression",
+        help="Captured output safety regression (Phase 75F).",
+    )
+    phase_activated_task_capture_safety_regression_parser.add_argument("--json", action="store_true")
+    phase_activated_task_capture_safety_regression_parser.add_argument("--save", action="store_true")
+    phase_activated_task_capture_safety_regression_parser.set_defaults(handler=run_phase_activated_task_capture_safety_regression)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
