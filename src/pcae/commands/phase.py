@@ -7965,3 +7965,143 @@ def run_phase_activated_task_prompt_capture_contract(args: argparse.Namespace) -
         print(f"    ... and {len(contract['requirements']) - 8} more")
     print(f"\n  {contract['note']}")
     return 0
+
+
+# Phase 74Y: activated task prompt capture dry run
+ACTIVATED_TASK_PROMPT_CAPTURE_DRY_RUNS_DIR = Path(".pcae") / "activated-task-prompt-capture-dry-runs"
+
+
+def _build_activated_task_prompt_capture_dry_run(root: HarnessPath) -> dict:
+    backend_name = "claude-deepseek"
+    contract = _build_activated_task_prompt_capture_contract(root)
+    lock = _build_agent_lock_status(root)
+    reg = _build_agent_backend_registry(root, backend_name)
+    backend = reg["backends"][0] if reg["backends"] else None
+    blockers = []
+    warnings = []
+
+    lock_matches = lock.get("backend_name") == backend_name
+    if not lock_matches:
+        blockers.append(f"lock not {backend_name}")
+
+    backend_available = backend["available"] if backend else False
+    if not backend_available:
+        blockers.append(f"'{backend_name}' not available on PATH")
+
+    contract_present = contract["contract_status"] == "ready"
+    if not contract_present:
+        blockers.append(f"contract not ready: {contract['contract_status']}")
+
+    if contract["contract_status"] == "no_activated_task":
+        blockers.append("no activated task")
+
+    act_path = root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")
+    active_task_path = None
+    active_task_id = None
+    agent_package_path = None
+    agent_start_ref = None
+
+    if act_path.is_file():
+        act_data = json.loads(act_path.read_text(encoding="utf-8"))
+        if act_data.get("activated"):
+            active_task_path = str(Path("tasks") / "active" / f"{act_data.get('created_task_id', 'unknown')}.md")
+            active_task_id = act_data.get("created_task_id")
+
+    pkg_path = root.join(ACTIVATED_TASK_AGENT_PACKAGES_DIR / "latest.json")
+    if pkg_path.is_file():
+        agent_package_path = str(ACTIVATED_TASK_AGENT_PACKAGES_DIR / "latest.json")
+
+    start_path = root.join(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")
+    if start_path.is_file():
+        agent_start_ref = str(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")
+
+    if not agent_package_path:
+        blockers.append("agent package missing")
+    if not agent_start_ref:
+        blockers.append("agent start artifact missing")
+
+    from pcae.core.git_status import read_git_changes
+    if read_git_changes(root):
+        warnings.append("working tree has changes")
+
+    capture_allowed = len(blockers) == 0 and backend_available
+
+    return {
+        "dry_run": True,
+        "capture_allowed": capture_allowed,
+        "backend_name": backend_name,
+        "backend_available": backend_available,
+        "lock_matches_backend": lock_matches,
+        "active_task_path": active_task_path,
+        "active_task_id": active_task_id,
+        "agent_package_path": agent_package_path,
+        "agent_start_ref": agent_start_ref,
+        "prompt_capture_contract_present": contract["contract_status"] == "ready",
+        "would_send_task_package": capture_allowed,
+        "would_request_task_implementation": False,
+        "would_apply_patch": False,
+        "would_commit": False,
+        "would_push": False,
+        "would_invoke_command": "claude-deepseek" if capture_allowed else None,
+        "would_capture_stdout": True,
+        "would_capture_stderr": True,
+        "would_write_capture_artifact_path": str(ACTIVATED_TASK_PROMPT_CAPTURE_DRY_RUNS_DIR / "latest.json").replace("activated-task-prompt-capture-dry-runs", "activated-task-prompt-captures") if capture_allowed else None,
+        "would_write_stdout_path": str(Path(".pcae") / "activated-task-prompt-captures" / "latest.stdout.txt") if capture_allowed else None,
+        "would_write_stderr_path": str(Path(".pcae") / "activated-task-prompt-captures" / "latest.stderr.txt") if capture_allowed else None,
+        "mutation_guard_planned": True,
+        "explicit_opt_in_required": True,
+        "real_backend_invocation_performed": False,
+        "agent_invocation_performed": False,
+        "prompt_executed": False,
+        "apply_performed": False,
+        "files_modified": False,
+        "commits_created": 0,
+        "execution_authorized": False,
+        "blockers": blockers,
+        "warnings": warnings,
+        "next_operator_action": (
+            "All prerequisites satisfied. Run pcae phase activated-task-prompt-capture-smoke --allow-real-invocation to send the activated task package prompt."
+            if capture_allowed
+            else "Resolve blockers first."
+        ),
+    }
+
+
+def run_phase_activated_task_prompt_capture(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_activated_task_prompt_capture_dry_run(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_PROMPT_CAPTURE_DRY_RUNS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Prompt capture dry-run saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+    print("Activated Task Prompt Capture (dry run)")
+    print("=" * 40)
+    print(f"  Backend: {result['backend_name']}")
+    print(f"  Backend available: {'yes' if result['backend_available'] else 'NO'}")
+    print(f"  Lock matches: {'yes' if result['lock_matches_backend'] else 'NO'}")
+    print(f"  Contract ready: {'yes' if result['prompt_capture_contract_present'] else 'NO'}")
+    print(f"  Active task: {result.get('active_task_id', 'none')}")
+    print(f"  Capture allowed: {'yes' if result['capture_allowed'] else 'NO'}")
+    print(f"  Would send task package: {'yes' if result['would_send_task_package'] else 'no'}")
+    print(f"  Would request implementation: no")
+    print(f"  Would apply patch: no")
+    print(f"  Would commit: no")
+    print(f"  Would push: no")
+    print(f"  Would invoke: {'yes' if result['would_invoke_command'] else 'NO'}")
+    print(f"  Mutation guard planned: yes")
+    print(f"  Explicit opt-in required: yes")
+    print(f"\n  Real backend invoked: no")
+    print(f"  Prompt executed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0

@@ -9886,3 +9886,62 @@ def test_74x_contract_human_output(tmp_path, monkeypatch, capsys):
     assert "Prompt Capture Contract" in out
     assert "claude-deepseek" in out
     assert "Real backend invoked: no" in out
+
+
+# Phase 74Y: activated task prompt capture dry run
+def test_74y_dry_run_blocked_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-prompt-capture", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["dry_run"] is True; assert d["capture_allowed"] is False
+    assert d["would_send_task_package"] is False; assert d["would_request_task_implementation"] is False
+    assert d["would_apply_patch"] is False; assert d["would_commit"] is False; assert d["would_push"] is False
+    assert d["real_backend_invocation_performed"] is False; assert d["prompt_executed"] is False
+    assert d["execution_authorized"] is False
+
+def test_74y_dry_run_blocked_no_lock(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-package", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "activated-task-prompt-capture", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["capture_allowed"] is False
+    assert "lock not claude-deepseek" in str(d["blockers"])
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_74y_dry_run_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-package", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "activated-task-prompt-capture", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["capture_allowed"] is True; assert d["would_send_task_package"] is True
+    assert d["would_request_task_implementation"] is False; assert d["would_apply_patch"] is False
+    assert d["would_commit"] is False; assert d["would_push"] is False
+    assert d["mutation_guard_planned"] is True; assert d["explicit_opt_in_required"] is True
+    assert d["real_backend_invocation_performed"] is False; assert d["prompt_executed"] is False
+    assert d["apply_performed"] is False; assert d["files_modified"] is False
+    assert d["commits_created"] == 0; assert d["execution_authorized"] is False
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_74y_dry_run_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-prompt-capture", "--dry-run", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-prompt-capture-dry-runs" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["dry_run"] is True; assert d["real_backend_invocation_performed"] is False
+
+def test_74y_dry_run_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "activated-task-prompt-capture", "--dry-run"]); out = capsys.readouterr().out
+    assert exit_code == 0; assert "Prompt Capture (dry run)" in out
+    assert "claude-deepseek" in out; assert "Real backend invoked: no" in out
