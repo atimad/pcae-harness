@@ -6468,3 +6468,139 @@ def run_phase_activated_task_agent_start_show(args: argparse.Namespace) -> int:
         print(f"  Task: {data.get('active_task_id')}"); print(f"  Agent invoked: {data.get('agent_invocation_performed')}")
         print(f"  Execution authorized: {data.get('execution_authorized')}")
     return 0
+
+
+ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR = Path(".pcae") / "activated-task-agent-output-intakes"
+
+
+def _build_agent_output_intake(root: HarnessPath, output_content: str | None, output_source: str) -> dict:
+    from pcae.core.tasks import find_latest_active_task
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).is_file() else None
+    agent_start = json.loads((root.join(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")).is_file() else None
+    active_task = find_latest_active_task(root)
+    if act_data is None or not act_data.get("activated"): return {"intake_status": "no_activated_task", "execution_authorized": False}
+    if agent_start is None: return {"intake_status": "missing_agent_start", "execution_authorized": False}
+    if not output_content or not output_content.strip(): return {"intake_status": "no_output", "execution_authorized": False}
+    import hashlib
+    digest = hashlib.sha256(output_content.encode("utf-8")).hexdigest()
+    patch_detected = any(marker in output_content for marker in ["diff --git", "--- a/", "+++ b/", "@@ -", "+", "-"])
+    import re
+    files = re.findall(r'(?:--- a/|\+\+\+ b/|\b(?:src|tests|docs)/\S+\.(?:py|md|json|toml)\b)', output_content)
+    return {"intake_status": "recorded", "active_task_path": str(Path("tasks") / "active" / f"{act_data['created_task_id']}.md"), "active_task_id": act_data["created_task_id"], "agent_package_ref": str(ACTIVATED_TASK_AGENT_PACKAGES_DIR / "latest.json"), "agent_start_ref": str(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json"), "output_source": output_source, "output_digest": digest, "output_summary": output_content[:200].strip(), "patch_detected": patch_detected, "files_mentioned": files[:20], "apply_performed": False, "files_modified": False, "commits_created": 0, "prompt_executed": False, "agent_invocation_performed": False, "implementation_performed": False, "execution_authorized": False}
+
+
+def run_phase_activated_task_agent_output_intake(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    file_path = getattr(args, "from_file", None)
+    content = None; source = "inline"
+    if file_path:
+        fp = Path(file_path); source = str(fp)
+        if not fp.is_absolute(): fp = Path.cwd() / fp
+        if fp.is_file(): content = fp.read_text(encoding="utf-8")
+    result = _build_agent_output_intake(root, content, source)
+    if getattr(args, "save", False) and result.get("intake_status") == "recorded":
+        d = root.join(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Intake saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Agent Output Intake"); print("=" * 40)
+    print(f"  Status: {result['intake_status']}")
+    if result['intake_status'] == 'recorded':
+        print(f"  Digest: {result.get('output_digest','')[:16]}..."); print(f"  Patch: {'yes' if result.get('patch_detected') else 'no'}")
+        print(f"  Files: {', '.join(result.get('files_mentioned',[])[:5]) or 'none'}")
+    print(f"  Apply performed: no"); print(f"  Files modified: no"); print(f"  Exec authorized: no")
+    return 0
+
+
+def run_phase_activated_task_agent_output_intake_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json")
+    if not p.is_file():
+        if args.json: print(json.dumps({"present": False}))
+        else: print("No intake artifact found.")
+        return 1
+    d = json.loads(p.read_text(encoding="utf-8"))
+    if args.json: print(json.dumps({"present": True, **d}, indent=2, sort_keys=True))
+    else:
+        print("Agent Output Intake (persisted)"); print(f"  Status: {d.get('intake_status')}")
+        print(f"  Patch: {d.get('patch_detected')}"); print(f"  Exec authorized: {d.get('execution_authorized')}")
+    return 0
+
+
+# Phase 74F: agent output review
+ACTIVATED_TASK_AGENT_OUTPUT_REVIEWS_DIR = Path(".pcae") / "activated-task-agent-output-reviews"
+
+
+def _build_agent_output_review(root: HarnessPath) -> dict:
+    intake_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json")
+    if not intake_path.is_file(): return {"review_status": "missing_intake", "execution_authorized": False}
+    intake = json.loads(intake_path.read_text(encoding="utf-8"))
+    if intake.get("intake_status") != "recorded": return {"review_status": "blocked", "blockers": [f"intake not recorded: {intake.get('intake_status')}"], "execution_authorized": False}
+    from pcae.core.tasks import find_latest_active_task
+    active_task = find_latest_active_task(root)
+    allowed = set(); forbidden = set()
+    if active_task:
+        tf = root.join(Path("tasks") / "active" / f"{active_task.task_id}.md")
+        if tf.is_file():
+            content = tf.read_text(encoding="utf-8")
+            in_allowed = False
+            for line in content.split('\n'):
+                if line.strip().startswith('- ') and 'Allowed' in content[content.find(line)-100:content.find(line)]:
+                    allowed.add(line.strip('- ').strip())
+                elif line.strip().startswith('- ') and 'Forbidden' in content[content.find(line)-100:content.find(line)]:
+                    forbidden.add(line.strip('- ').strip())
+    files = intake.get("files_mentioned", [])
+    out_of_scope = [f for f in files if any(f.startswith(fb) for fb in forbidden)] if forbidden else []
+    suspicious = []
+    if intake.get("patch_detected"): suspicious.append("patch-like content detected — manual review required")
+    blockers = []; warnings = []
+    if out_of_scope: blockers.append(f"output references forbidden files: {', '.join(out_of_scope)}")
+    if not files: warnings.append("no files detected in output")
+    if blockers: status = "out_of_scope" if out_of_scope else "blocked"
+    else: status = "ready_for_apply_dry_run"
+    return {"review_status": status, "intake_ref": str(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json"), "active_task_path": str(Path("tasks") / "active" / f"{active_task.task_id}.md") if active_task else None, "files_mentioned": files, "allowed_files": list(allowed)[:20], "forbidden_files": list(forbidden)[:20], "out_of_scope_files": out_of_scope, "patch_detected": intake.get("patch_detected"), "suspicious_claims": suspicious, "blockers": blockers, "warnings": warnings, "apply_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False}
+
+
+def run_phase_activated_task_agent_output_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_agent_output_review(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_AGENT_OUTPUT_REVIEWS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Review saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Agent Output Review"); print("=" * 40)
+    print(f"  Status: {result['review_status']}")
+    if result.get("files_mentioned"): print(f"  Files: {', '.join(result['files_mentioned'][:5])}")
+    if result.get("out_of_scope_files"): print(f"  Out of scope: {', '.join(result['out_of_scope_files'])}")
+    if result.get("blockers"): [print(f"  Blocker: {b}") for b in result["blockers"]]
+    print(f"  Apply performed: no"); print(f"  Exec authorized: no")
+    return 0
+
+
+# Phase 74G: agent output apply dry run
+ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR = Path(".pcae") / "activated-task-agent-output-apply-dry-runs"
+
+
+def _build_agent_output_apply_dry_run(root: HarnessPath) -> dict:
+    review_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_REVIEWS_DIR / "latest.json")
+    if not review_path.is_file(): return {"dry_run": True, "apply_allowed": False, "blockers": ["no review artifact"], "execution_authorized": False}
+    review = json.loads(review_path.read_text(encoding="utf-8"))
+    if review.get("review_status") != "ready_for_apply_dry_run": return {"dry_run": True, "apply_allowed": False, "blockers": [f"review not ready: {review.get('review_status')}"], "execution_authorized": False}
+    intake = json.loads(root.join(ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR / "latest.json").read_text(encoding="utf-8"))
+    return {"dry_run": True, "apply_allowed": True, "apply_performed": False, "files_modified": False, "commits_created": 0, "queue_mutated": False, "prompt_executed": False, "agent_invocation_performed": False, "implementation_performed": False, "execution_authorized": False, "would_touch_files": intake.get("files_mentioned", []), "validation_commands": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory", "pcae push check"], "blockers": [], "warnings": [], "next_operator_action": "Manual application only. After applying, run validation commands. Use pcae task finish --commit to close."}
+
+
+def run_phase_activated_task_agent_output_apply(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_agent_output_apply_dry_run(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Apply dry-run saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Agent Output Apply (dry run)"); print("=" * 40)
+    print(f"  Apply allowed: {'yes' if result['apply_allowed'] else 'NO'}")
+    print(f"  Apply performed: no"); print(f"  Files modified: no"); print(f"  Exec authorized: no")
+    if result.get("would_touch_files"): print(f"  Would touch: {', '.join(result['would_touch_files'][:5])}")
+    if result.get("blockers"): [print(f"  Blocker: {b}") for b in result["blockers"]]
+    print(f"\n  {result.get('next_operator_action','')}")
+    return 0

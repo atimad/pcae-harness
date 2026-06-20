@@ -445,6 +445,10 @@ from pcae.commands.phase import (
     run_phase_activated_task_implementation_start,
     run_phase_activated_task_agent_package,
     run_phase_activated_task_agent_start,
+    run_phase_activated_task_agent_output_apply,
+    run_phase_activated_task_agent_output_intake,
+    run_phase_activated_task_agent_output_intake_show,
+    run_phase_activated_task_agent_output_review,
     run_phase_activated_task_agent_start_show,
     run_phase_activated_task_lifecycle_summary,
     run_phase_activated_task_manual_impl_scenario,
@@ -5665,6 +5669,65 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_activated_task_agent_start_show_parser.set_defaults(
         handler=run_phase_activated_task_agent_start_show
+    )
+
+    phase_activated_task_agent_output_intake_parser = phase_subparsers.add_parser(
+        "activated-task-agent-output-intake",
+        help="Record agent output for activated task without applying it.",
+    )
+    phase_activated_task_agent_output_intake_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_agent_output_intake_parser.add_argument(
+        "--save", action="store_true", help="Persist the intake artifact."
+    )
+    phase_activated_task_agent_output_intake_parser.add_argument(
+        "--from-file", default=None, metavar="PATH", help="Read agent output from file."
+    )
+    phase_activated_task_agent_output_intake_parser.set_defaults(
+        handler=run_phase_activated_task_agent_output_intake
+    )
+
+    phase_activated_task_agent_output_intake_show_parser = phase_subparsers.add_parser(
+        "activated-task-agent-output-intake-show",
+        help="Show the latest agent output intake artifact.",
+    )
+    phase_activated_task_agent_output_intake_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_agent_output_intake_show_parser.set_defaults(
+        handler=run_phase_activated_task_agent_output_intake_show
+    )
+
+    phase_activated_task_agent_output_review_parser = phase_subparsers.add_parser(
+        "activated-task-agent-output-review",
+        help="Review agent output against active task contract scope.",
+    )
+    phase_activated_task_agent_output_review_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_agent_output_review_parser.add_argument(
+        "--save", action="store_true", help="Persist the review artifact."
+    )
+    phase_activated_task_agent_output_review_parser.set_defaults(
+        handler=run_phase_activated_task_agent_output_review
+    )
+
+    phase_activated_task_agent_output_apply_parser = phase_subparsers.add_parser(
+        "activated-task-agent-output-apply",
+        help="Preview agent output application without applying (dry-run only).",
+    )
+    phase_activated_task_agent_output_apply_parser.add_argument(
+        "--dry-run", action="store_true", default=True, help="Dry-run only (default)."
+    )
+    phase_activated_task_agent_output_apply_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_agent_output_apply_parser.add_argument(
+        "--save", action="store_true", help="Persist the dry-run artifact."
+    )
+    phase_activated_task_agent_output_apply_parser.set_defaults(
+        handler=run_phase_activated_task_agent_output_apply
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

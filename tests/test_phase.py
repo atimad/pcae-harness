@@ -9225,3 +9225,55 @@ def test_74d_agent_start_show(tmp_path, monkeypatch, capsys):
     main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
     main(["phase", "activated-task-agent-start-show", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["present"] is True; assert d["execution_authorized"] is False
+
+# Phase 74E: agent output intake
+def test_74e_intake_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-agent-output-intake", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["intake_status"] == "no_activated_task"; assert d["execution_authorized"] is False
+def test_74e_intake_from_file(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    (tmp_path / "output.txt").write_text("diff --git a/src/cli.py b/src/cli.py\n--- a/src/cli.py\n+++ b/src/cli.py\n@@ -1 +1 @@\n-old\n+new")
+    main(["phase", "activated-task-agent-output-intake", "--from-file", "output.txt", "--save", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["intake_status"] == "recorded"; assert d["patch_detected"] is True; assert d["apply_performed"] is False
+# Phase 74F: agent output review
+def test_74f_review_missing_intake(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-agent-output-review", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["review_status"] == "missing_intake"; assert d["execution_authorized"] is False
+def test_74f_review_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    (tmp_path / "out.txt").write_text("test output")
+    main(["phase", "activated-task-agent-output-intake", "--from-file", "out.txt", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-output-review", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["review_status"] == "ready_for_apply_dry_run"; assert d["apply_performed"] is False
+# Phase 74G: agent output apply dry run
+def test_74g_apply_dry_run_blocked(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-agent-output-apply", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["apply_allowed"] is False; assert d["execution_authorized"] is False
+def test_74g_apply_dry_run_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    (tmp_path / "o.txt").write_text("output")
+    main(["phase", "activated-task-agent-output-intake", "--from-file", "o.txt", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-output-review", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-output-apply", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["apply_allowed"] is True; assert d["apply_performed"] is False
