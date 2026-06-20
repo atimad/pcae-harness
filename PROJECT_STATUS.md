@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73G: Single-Phase Runner Contract Design.
+Phase 73H: Single-Phase Runner Readiness Check.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No

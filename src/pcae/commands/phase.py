@@ -4877,3 +4877,145 @@ def run_phase_single_runner_contract(args: argparse.Namespace) -> int:
     print()
     print(f"  {contract['note']}")
     return 0
+
+
+SINGLE_RUNNER_READINESS_DIR = Path(".pcae") / "single-runner-readiness"
+
+
+def _build_single_runner_readiness(root: HarnessPath) -> dict:
+    readiness = _build_runner_readiness(root)
+    queue_validation = _build_queue_validate(root)
+    queue_approval = _read_latest_queue_approval(root)
+    sim_approval = _read_latest_sim_approval(root)
+    exec_request = _read_latest_runner_execution_request(root)
+    noop_trace = _read_latest_runner_noop_trace(root)
+    noop_trace_review = _read_latest_runner_execution_trace_review(root)
+    noop_trace_approval = _read_latest_runner_execution_trace_approval(root)
+
+    blockers: list[str] = []
+    satisfied: list[str] = []
+    missing: list[str] = []
+
+    def check(name: str, met: bool, *, block: bool = True) -> None:
+        if met:
+            satisfied.append(name)
+        elif block:
+            blockers.append(name)
+        else:
+            missing.append(name)
+
+    check("clean working tree", readiness["working_tree"] == "clean")
+    check("healthy idle", readiness["health_status"] == "healthy")
+    check("pcae check passed", readiness["check_passed"])
+    check("task-memory clean", readiness["task_memory_status"] == "clean")
+    check("no unpushed commits", readiness["push_state"] in ("nothing_to_push", "post_finish_closure"))
+    check("no active task", readiness["active_task"] is None)
+    check("queue non-empty", queue_validation["queue_ready"])
+    check("queue valid", queue_validation["valid"])
+    check("queue approval matching", (
+        queue_approval is not None
+        and queue_approval.get("queue_digest") == _compute_queue_digest(root)
+    ))
+    check("simulation approval present", sim_approval is not None and sim_approval.get("approved", False))
+    check("execution request present", exec_request is not None)
+    check("execution request not denied", not (exec_request.get("denied", False) if exec_request else False))
+    check("execution request not revoked", not (exec_request.get("revoked", False) if exec_request else False))
+    check("no-op trace present", noop_trace is not None)
+    check("no-op trace safe", (
+        noop_trace is not None
+        and noop_trace.get("noop", False)
+        and not noop_trace.get("mutation_performed", True)
+    ))
+    check("no-op trace review ready", (
+        noop_trace_review is not None
+        and noop_trace_review.get("review_status") == "ready_for_approval"
+    ))
+    check("no-op trace approval matching", (
+        noop_trace_approval is not None
+        and noop_trace is not None
+        and noop_trace_approval.get("trace_ref") == noop_trace.get("trace_id")
+    ))
+    check("execution authorization available", False, block=False)
+
+    request_blocks = False
+    if exec_request:
+        if exec_request.get("denied", False) or exec_request.get("revoked", False):
+            request_blocks = True
+            blockers.append("execution request denied or revoked")
+
+    if blockers:
+        status = "blocked"
+    elif missing:
+        status = "incomplete"
+    else:
+        status = "design_ready"
+
+    return {
+        "readiness_status": status,
+        "ready_for_real_execution": False,
+        "execution_authorized": False,
+        "blockers": blockers,
+        "missing_requirements": missing,
+        "satisfied_requirements": satisfied,
+        "request_blocks_authorization": request_blocks,
+        "note": (
+            "This is a readiness check only. Real execution is not enabled. "
+            "Human authority remains absolute."
+        ),
+    }
+
+
+def _save_single_runner_readiness(root: HarnessPath, data: dict) -> Path:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    data_with_ts = {**data, "created_at": ts}
+    rd_dir = root.join(SINGLE_RUNNER_READINESS_DIR)
+    rd_dir.mkdir(parents=True, exist_ok=True)
+    gitignore_path = rd_dir / ".gitignore"
+    if not gitignore_path.exists():
+        gitignore_path.write_text("*\n", encoding="utf-8")
+    latest_path = rd_dir / "latest.json"
+    latest_path.write_text(
+        json.dumps(data_with_ts, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return latest_path
+
+
+def run_phase_single_runner_readiness(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    data = _build_single_runner_readiness(root)
+
+    if getattr(args, "save", False):
+        saved_path = _save_single_runner_readiness(root, data)
+        if not args.json:
+            print(f"Readiness saved: {saved_path}")
+
+    if args.json:
+        print(json.dumps(data, indent=2, sort_keys=True))
+        return 0
+
+    print("Single-Phase Runner Readiness Check")
+    print("=" * 40)
+    print(f"  Status: {data['readiness_status']}")
+    print(f"  Ready for real execution: no")
+    print(f"  Execution authorized: no")
+    if data["request_blocks_authorization"]:
+        print(f"  Request blocks authorization: yes")
+    if data["blockers"]:
+        print()
+        print("  Blockers:")
+        for b in data["blockers"]:
+            print(f"    - {b}")
+    if data["missing_requirements"]:
+        print()
+        print("  Missing:")
+        for m in data["missing_requirements"]:
+            print(f"    - {m}")
+    if data["satisfied_requirements"]:
+        print()
+        print("  Satisfied:")
+        for s in data["satisfied_requirements"]:
+            print(f"    - {s}")
+    print()
+    print(f"  {data['note']}")
+    return 0

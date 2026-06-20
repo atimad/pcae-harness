@@ -8612,3 +8612,51 @@ def test_73g_contract_human_output_states_design_only(
     assert exit_code == 0
     assert "design only" in output.lower()
     assert "does not enable" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 73H: single-phase runner readiness check
+# ---------------------------------------------------------------------------
+
+
+def test_73h_readiness_json(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "single-runner-readiness", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert data["ready_for_real_execution"] is False
+    assert data["execution_authorized"] is False
+    assert data["readiness_status"] in ("blocked", "incomplete", "design_ready")
+
+
+def test_73h_readiness_save(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "single-runner-readiness", "--save", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    rd_path = tmp_path / ".pcae" / "single-runner-readiness" / "latest.json"
+    assert rd_path.is_file()
+    saved = json.loads(rd_path.read_text(encoding="utf-8"))
+    assert saved["execution_authorized"] is False
+
+
+def test_73h_readiness_no_mutation(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 73H: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "single-runner-readiness"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before

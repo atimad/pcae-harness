@@ -433,6 +433,7 @@ from pcae.commands.phase import (
     run_phase_runner_execution_request_show,
     run_phase_runner_sim_approve,
     run_phase_single_runner_contract,
+    run_phase_single_runner_readiness,
     run_phase_runner_sim_approval_show,
     run_phase_runner_sim_fixture,
     run_phase_runner_sim_review,
@@ -5338,6 +5339,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_single_runner_contract_parser.set_defaults(
         handler=run_phase_single_runner_contract
+    )
+
+    phase_single_runner_readiness_parser = phase_subparsers.add_parser(
+        "single-runner-readiness",
+        help="Check readiness for a future single-phase runner (does not enable execution).",
+    )
+    phase_single_runner_readiness_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_single_runner_readiness_parser.add_argument(
+        "--save", action="store_true", help="Persist the readiness artifact."
+    )
+    phase_single_runner_readiness_parser.set_defaults(
+        handler=run_phase_single_runner_readiness
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
