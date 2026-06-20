@@ -9277,3 +9277,51 @@ def test_74g_apply_dry_run_ready(tmp_path, monkeypatch, capsys):
     main(["phase", "activated-task-agent-output-review", "--save"]); capsys.readouterr()
     main(["phase", "activated-task-agent-output-apply", "--dry-run", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["apply_allowed"] is True; assert d["apply_performed"] is False
+
+# Phase 74H: agent backend registry
+def test_74h_registry_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-backend-registry", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert len(d["backends"]) >= 4; assert d["default_backend"] == "manual"
+def test_74h_registry_filter(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-backend-registry", "--backend", "noop", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert len(d["backends"]) == 1; assert d["backends"][0]["backend_name"] == "noop"
+# Phase 74I: agent invocation dry run
+def test_74i_invoke_dry_run_noop(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "agent-invoke", "--dry-run", "--backend", "noop", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["invocation_allowed"] is True; assert d["agent_invocation_performed"] is False
+def test_74i_invoke_dry_run_unavailable(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "agent-invoke", "--dry-run", "--backend", "claude-deepseek", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["invocation_allowed"] is False
+# Phase 74J: agent invocation capture
+def test_74j_invoke_execute_noop(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "agent-invoke", "--execute", "--backend", "noop", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["invocation_status"] == "captured"; assert d["agent_invocation_performed"] is True
+    assert d["execution_authorized"] is False; assert (tmp_path/".pcae"/"agent-invocations"/"latest.json").is_file()
+def test_74j_invocation_show(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "agent-invoke", "--execute", "--backend", "noop"]); capsys.readouterr()
+    main(["phase", "agent-invocation-show", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["present"] is True; assert d["execution_authorized"] is False

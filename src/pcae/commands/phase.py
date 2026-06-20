@@ -6604,3 +6604,124 @@ def run_phase_activated_task_agent_output_apply(args: argparse.Namespace) -> int
     if result.get("blockers"): [print(f"  Blocker: {b}") for b in result["blockers"]]
     print(f"\n  {result.get('next_operator_action','')}")
     return 0
+
+
+AGENT_BACKENDS_DIR = Path(".pcae") / "agent-backends"
+
+_AGENT_BACKEND_REGISTRY = [
+    {"backend_name": "manual", "backend_type": "manual", "command": "none", "available": True, "availability_check_performed": True, "invocation_supported": False, "output_capture_supported": False, "may_modify_files": False, "may_commit": False, "may_push": False, "may_execute_shell": False, "default_timeout_seconds": None, "notes": "Manual operator workflow. No command invocation."},
+    {"backend_name": "noop", "backend_type": "noop", "command": "echo", "available": True, "availability_check_performed": True, "invocation_supported": True, "output_capture_supported": True, "may_modify_files": False, "may_commit": False, "may_push": False, "may_execute_shell": False, "default_timeout_seconds": 30, "notes": "Safe no-op backend for testing. Returns deterministic output."},
+    {"backend_name": "claude", "backend_type": "claude", "command": "claude", "available": False, "availability_check_performed": False, "invocation_supported": False, "output_capture_supported": False, "may_modify_files": False, "may_commit": False, "may_push": False, "may_execute_shell": False, "default_timeout_seconds": 300, "notes": "Claude CLI. Availability checked via PATH. Invocation blocked pending safe capture support."},
+    {"backend_name": "claude-deepseek", "backend_type": "claude", "command": "claude-deepseek", "available": False, "availability_check_performed": False, "invocation_supported": False, "output_capture_supported": False, "may_modify_files": False, "may_commit": False, "may_push": False, "may_execute_shell": False, "default_timeout_seconds": 300, "notes": "Claude with DeepSeek model. Availability checked via PATH. Invocation blocked pending safe capture support."},
+    {"backend_name": "codex", "backend_type": "codex", "command": "codex", "available": False, "availability_check_performed": False, "invocation_supported": False, "output_capture_supported": False, "may_modify_files": False, "may_commit": False, "may_push": False, "may_execute_shell": False, "default_timeout_seconds": 300, "notes": "Codex CLI. Availability checked via PATH. Invocation blocked pending safe capture support."},
+]
+
+
+def _check_command_availability(command: str) -> bool:
+    if command in ("none", "echo"): return True
+    import shutil
+    return shutil.which(command) is not None
+
+
+def _build_agent_backend_registry(root: HarnessPath, backend_filter: str | None) -> dict:
+    backends = []
+    for b in _AGENT_BACKEND_REGISTRY:
+        entry = dict(b)
+        if not entry["availability_check_performed"]:
+            entry["available"] = _check_command_availability(entry["command"])
+            entry["availability_check_performed"] = True
+        if backend_filter is None or backend_filter == entry["backend_name"]:
+            backends.append(entry)
+    return {"backends": backends, "backend_count": len(backends), "default_backend": "manual", "note": "Registry only. No backends were invoked. Human authority remains absolute."}
+
+
+def run_phase_agent_backend_registry(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); backend_filter = getattr(args, "backend", None)
+    result = _build_agent_backend_registry(root, backend_filter)
+    if getattr(args, "save", False):
+        d = root.join(AGENT_BACKENDS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Registry saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Agent Backend Registry"); print("=" * 40)
+    for b in result["backends"]:
+        print(f"  {b['backend_name']} ({b['backend_type']}): available={'yes' if b['available'] else 'NO'} invoke={'yes' if b['invocation_supported'] else 'no'}")
+    print(f"\n  Default: {result['default_backend']}\n  {result['note']}")
+    return 0
+
+
+# Phase 74I/74J: agent invocation dry-run and capture
+AGENT_INVOCATIONS_DIR = Path(".pcae") / "agent-invocations"
+
+
+def _build_agent_invoke_dry_run(root: HarnessPath, backend_name: str) -> dict:
+    reg = _build_agent_backend_registry(root, backend_name)
+    backend = reg["backends"][0] if reg["backends"] else None
+    blockers = []; warnings = []
+    if backend is None: blockers.append(f"backend '{backend_name}' not found in registry")
+    elif not backend["available"]: blockers.append(f"backend '{backend_name}' is not available")
+    elif not backend["invocation_supported"]: blockers.append(f"backend '{backend_name}' does not support invocation")
+    act_data = json.loads((root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")).is_file() else None
+    agent_start = json.loads((root.join(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")).read_text(encoding="utf-8")) if (root.join(ACTIVATED_TASK_AGENT_STARTS_DIR / "latest.json")).is_file() else None
+    if act_data is None: blockers.append("no activation artifact")
+    if agent_start is None: blockers.append("no agent assistance start artifact")
+    invocation_allowed = len(blockers) == 0
+    return {"dry_run": True, "backend_name": backend_name, "backend_available": backend["available"] if backend else False, "invocation_allowed": invocation_allowed, "would_invoke_command": backend["command"] if backend else None, "would_send_package_path": str(ACTIVATED_TASK_AGENT_PACKAGES_DIR / "latest.json") if invocation_allowed else None, "would_capture_stdout": True, "would_capture_stderr": True, "would_write_invocation_artifact_path": str(AGENT_INVOCATIONS_DIR / "latest.json"), "may_modify_files": False, "may_commit": False, "may_push": False, "agent_invocation_performed": False, "prompt_executed": False, "implementation_performed": False, "files_modified": False, "commits_created": 0, "execution_authorized": False, "blockers": blockers, "warnings": warnings}
+
+
+def _run_noop_invocation(root: HarnessPath) -> dict:
+    import subprocess as sp, hashlib
+    ts_start = datetime.now(timezone.utc)
+    result = sp.run(["echo", "PCAE noop backend: invocation successful. No files modified."], capture_output=True, text=True, timeout=30)
+    ts_end = datetime.now(timezone.utc)
+    stdout_digest = hashlib.sha256(result.stdout.encode("utf-8")).hexdigest()
+    stderr_digest = hashlib.sha256(result.stderr.encode("utf-8")).hexdigest()
+    return {"invocation_status": "captured", "backend_name": "noop", "backend_command": "echo", "started_at": ts_start.isoformat(), "completed_at": ts_end.isoformat(), "exit_code": result.returncode, "stdout_digest": stdout_digest, "stderr_digest": stderr_digest, "output_summary": result.stdout[:200].strip(), "agent_invocation_performed": True, "prompt_executed": False, "apply_performed": False, "files_modified": False, "commits_created": 0, "queue_mutated": False, "implementation_performed": False, "execution_authorized": False, "mutation_guard_passed": True, "blockers": [], "warnings": []}
+
+
+def _build_agent_invoke_execute(root: HarnessPath, backend_name: str) -> dict:
+    dry = _build_agent_invoke_dry_run(root, backend_name)
+    if not dry["invocation_allowed"]: return {"invocation_status": "blocked", "blockers": dry["blockers"], "execution_authorized": False}
+    if backend_name == "noop":
+        result = _run_noop_invocation(root)
+        d = root.join(AGENT_INVOCATIONS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return result
+    return {"invocation_status": "blocked", "backend_name": backend_name, "blockers": [f"Real backend '{backend_name}' invocation not yet implemented. Use --backend noop for testing."], "execution_authorized": False}
+
+
+def run_phase_agent_invoke(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); backend_name = getattr(args, "backend", "noop"); execute = getattr(args, "execute", False)
+    if not execute:
+        result = _build_agent_invoke_dry_run(root, backend_name)
+        if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+        print("Agent Invocation (dry run)"); print("=" * 40)
+        print(f"  Backend: {result['backend_name']}"); print(f"  Available: {'yes' if result['backend_available'] else 'no'}")
+        print(f"  Invocation allowed: {'yes' if result['invocation_allowed'] else 'NO'}")
+        if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+        print(f"\n  Agent invoked: no"); print(f"  Execution authorized: no")
+        return 0
+    result = _build_agent_invoke_execute(root, backend_name)
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0 if result["invocation_status"] == "captured" else 1
+    if result["invocation_status"] != "captured": print(f"Invocation blocked: {'; '.join(result.get('blockers',[]))}"); return 1
+    print("Agent Invocation (executed)"); print("=" * 40)
+    print(f"  Backend: {result['backend_name']}"); print(f"  Status: {result['invocation_status']}")
+    print(f"  Exit code: {result.get('exit_code','')}"); print(f"  Output: {result.get('output_summary','')[:100]}")
+    print(f"  Agent invoked: yes"); print(f"  Files modified: no"); print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    return 0
+
+
+def run_phase_agent_invocation_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(AGENT_INVOCATIONS_DIR / "latest.json")
+    if not p.is_file():
+        if args.json: print(json.dumps({"present": False}))
+        else: print("No invocation artifact found.")
+        return 1
+    d = json.loads(p.read_text(encoding="utf-8"))
+    if args.json: print(json.dumps({"present": True, **d}, indent=2, sort_keys=True))
+    else:
+        print("Agent Invocation"); print(f"  Backend: {d.get('backend_name')}"); print(f"  Status: {d.get('invocation_status')}")
+        print(f"  Agent invoked: {d.get('agent_invocation_performed')}"); print(f"  Exec authorized: {d.get('execution_authorized')}")
+    return 0

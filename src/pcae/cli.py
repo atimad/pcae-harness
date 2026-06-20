@@ -445,6 +445,9 @@ from pcae.commands.phase import (
     run_phase_activated_task_implementation_start,
     run_phase_activated_task_agent_package,
     run_phase_activated_task_agent_start,
+    run_phase_agent_backend_registry,
+    run_phase_agent_invocation_show,
+    run_phase_agent_invoke,
     run_phase_activated_task_agent_output_apply,
     run_phase_activated_task_agent_output_intake,
     run_phase_activated_task_agent_output_intake_show,
@@ -5728,6 +5731,54 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_activated_task_agent_output_apply_parser.set_defaults(
         handler=run_phase_activated_task_agent_output_apply
+    )
+
+    phase_agent_backend_registry_parser = phase_subparsers.add_parser(
+        "agent-backend-registry",
+        help="Show the agent backend registry.",
+    )
+    phase_agent_backend_registry_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_agent_backend_registry_parser.add_argument(
+        "--save", action="store_true", help="Persist the registry artifact."
+    )
+    phase_agent_backend_registry_parser.add_argument(
+        "--backend", default=None, metavar="NAME", help="Filter by backend name."
+    )
+    phase_agent_backend_registry_parser.set_defaults(
+        handler=run_phase_agent_backend_registry
+    )
+
+    phase_agent_invoke_parser = phase_subparsers.add_parser(
+        "agent-invoke",
+        help="Dry-run or execute agent backend invocation.",
+    )
+    phase_agent_invoke_parser.add_argument(
+        "--dry-run", action="store_true", default=True, help="Dry-run only (default)."
+    )
+    phase_agent_invoke_parser.add_argument(
+        "--execute", action="store_true", help="Execute invocation (noop only)."
+    )
+    phase_agent_invoke_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_agent_invoke_parser.add_argument(
+        "--backend", default="noop", metavar="NAME", help="Backend to invoke (default: noop)."
+    )
+    phase_agent_invoke_parser.set_defaults(
+        handler=run_phase_agent_invoke
+    )
+
+    phase_agent_invocation_show_parser = phase_subparsers.add_parser(
+        "agent-invocation-show",
+        help="Show the latest agent invocation artifact.",
+    )
+    phase_agent_invocation_show_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_agent_invocation_show_parser.set_defaults(
+        handler=run_phase_agent_invocation_show
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
