@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73E Runner No-Op Trace Approval Artifact (20260620-0808-73e-runner-no-op-trace-approval-artifact)
 - 73D Runner No-Op Trace Review Artifact (20260620-0803-73d-runner-no-op-trace-review-artifact)
 - 73C.1 Multi-Phase Implementation Commit Audit Handling (20260620-0737-73c-1-multi-phase-implementation-commit-audit-handling)
 - 73C Runner No-Op Execution Abort Cases (20260620-0709-73c-runner-no-op-execution-abort-cases)
