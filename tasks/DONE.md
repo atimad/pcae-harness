@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 75F.1: Shared Implementation Commit Audit Regression (20260620-1815-phase-75f-1-shared-implementation-commit-audit-regression)
 - Phase 75F: Add captured output safety regression scenario (20260620-1807-phase-75f-add-captured-output-safety-regression-scenario)
 - Phase 75A: Activated Task Capture Intake Scenario (20260620-1759-phase-75a-activated-task-capture-intake-scenario)
 - Phase 74Z: Activated Task Output-Only Capture Smoke (20260620-1741-phase-74z-activated-task-output-only-capture-smoke)
