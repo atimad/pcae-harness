@@ -9945,3 +9945,82 @@ def test_74y_dry_run_human_output(tmp_path, monkeypatch, capsys):
     exit_code = main(["phase", "activated-task-prompt-capture", "--dry-run"]); out = capsys.readouterr().out
     assert exit_code == 0; assert "Prompt Capture (dry run)" in out
     assert "claude-deepseek" in out; assert "Real backend invoked: no" in out
+
+
+# Phase 74Z: activated task output-only capture smoke
+def test_74z_smoke_skipped_default(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-package", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "activated-task-prompt-capture-smoke", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["smoke_status"] in ("skipped", "blocked")
+    assert d.get("prompt_sent") is not True
+    assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["output_only_requested"] is True
+    assert d["execution_authorized"] is False
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_74z_smoke_blocked_no_prereqs(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-prompt-capture-smoke", "--allow-real-invocation", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["smoke_status"] == "blocked"
+    assert d["prompt_sent"] is False; assert d["task_package_sent"] is False
+    assert d["task_implementation_requested"] is False
+    assert d["apply_performed"] is False; assert d["commits_created"] == 0
+    assert d["push_performed"] is False; assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False
+
+def test_74z_smoke_missing_contract(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    main(["phase", "activated-task-prompt-capture-smoke", "--allow-real-invocation", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["smoke_status"] == "blocked"
+    assert d["task_package_sent"] is False
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_74z_smoke_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-prompt-capture-smoke", "--save", "--json"]); capsys.readouterr()
+    p = tmp_path / ".pcae" / "activated-task-prompt-capture-smokes" / "latest.json"
+    assert p.is_file(); d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["smoke_status"] in ("blocked", "skipped"); assert d["execution_authorized"] is False
+
+def test_74z_show_missing(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "activated-task-prompt-capture-show", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1; assert d["present"] is False
+
+def test_74z_smoke_human_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "t"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-package", "--save"]); capsys.readouterr()
+    main(["phase", "activated-task-agent-start", "--execute"]); capsys.readouterr()
+    main(["phase", "agent-lock-set", "--backend", "claude-deepseek"]); capsys.readouterr()
+    exit_code = main(["phase", "activated-task-prompt-capture-smoke"]); out = capsys.readouterr().out
+    assert exit_code == 0; assert "Prompt Capture Smoke" in out
+    assert "Implementation requested: no" in out; assert "Output only requested: yes" in out
+    main(["phase", "single-runner-activation-rollback", "--execute"]); capsys.readouterr()
+
+def test_74z_smoke_no_apply_commit_push(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-prompt-capture-smoke", "--allow-real-invocation", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False; assert d["commits_created"] == 0
+    assert d["push_performed"] is False; assert d["implementation_performed"] is False
+    assert d["execution_authorized"] is False

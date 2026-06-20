@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 74X: Activated Task Prompt Capture Contract.
+Phase 74Z: Activated Task Output-Only Capture Smoke.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
