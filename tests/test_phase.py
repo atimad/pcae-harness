@@ -8814,3 +8814,25 @@ def test_73k_schema_dry_run_no_mutation(
     capsys.readouterr()
 
     assert queue_path.read_text(encoding="utf-8") == before
+
+# ---------------------------------------------------------------------------
+# Phase 73L: execution authorization matching rules
+# ---------------------------------------------------------------------------
+def test_73l_rules_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    d = json.loads(capsys.readouterr().out) if main(["phase", "execution-authorization-matching-rules", "--json"]) is not None else json.loads(capsys.readouterr().out)
+    assert d["rules_only"]; assert not d["authorization_available"]; assert not d["execution_authorized"]; assert len(d["invalidation_rules"]) > 10
+
+def test_73l_rules_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "execution-authorization-matching-rules", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "execution-authorization-matching-rules" / "latest.json").is_file()
+
+def test_73l_rules_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    q = tmp_path / ".pcae" / "phase-queue.json"; b = json.dumps(["73L test"]) + "\n"; q.write_text(b); monkeypatch.chdir(tmp_path)
+    main(["phase", "execution-authorization-matching-rules"]); capsys.readouterr()
+    assert q.read_text() == b

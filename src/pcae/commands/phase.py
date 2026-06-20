@@ -5294,3 +5294,53 @@ def run_phase_execution_authorization_schema(args: argparse.Namespace) -> int:
     print()
     print(f"  {schema['note']}")
     return 0
+
+
+EXECUTION_AUTHORIZATION_MATCHING_RULES_DIR = Path(".pcae") / "execution-authorization-matching-rules"
+
+_EXECUTION_AUTHORIZATION_MATCHING_RULES = {
+    "rules_only": True,
+    "authorization_available": False,
+    "authorized": False,
+    "execution_authorized": False,
+    "invalidation_rules": [
+        {"trigger": "queue_digest_changed", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "queue_approval_mismatch", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "execution_request_missing_or_changed", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "execution_request_denied", "action": "block_authorization", "category": "hard_invalidation"},
+        {"trigger": "execution_request_revoked", "action": "block_authorization", "category": "hard_invalidation"},
+        {"trigger": "noop_trace_missing_or_unsafe", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "noop_trace_review_missing_or_blocked", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "noop_trace_approval_missing_or_stale", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "preflight_status_changed", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "single_runner_readiness_changed", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "hard_stop_refusal_appears", "action": "block_authorization", "category": "hard_invalidation"},
+        {"trigger": "authorization_expired", "action": "invalidate_authorization", "category": "hard_invalidation"},
+        {"trigger": "dirty_tree_appears", "action": "block_authorization", "category": "hard_invalidation"},
+        {"trigger": "active_task_appears", "action": "block_authorization", "category": "hard_invalidation"},
+        {"trigger": "unpushed_commits_appear", "action": "block_authorization", "category": "advisory"},
+    ],
+    "matching_requirements": ["queue digest equality", "queue approval digest equality", "no-op trace ID match", "request not denied/revoked"],
+    "freshness_requirements": ["authorization not expired", "queue approval created after authorization", "readiness check within authorization window"],
+    "note": "These are matching and invalidation rules only. No positive authorization artifact exists. Execution authorization is not available. Human authority remains absolute.",
+}
+
+
+def run_phase_execution_authorization_matching_rules(args: argparse.Namespace) -> int:
+    rules = dict(_EXECUTION_AUTHORIZATION_MATCHING_RULES)
+    if getattr(args, "save", False):
+        rules_dir = HarnessPath.cwd().join(EXECUTION_AUTHORIZATION_MATCHING_RULES_DIR)
+        rules_dir.mkdir(parents=True, exist_ok=True)
+        (rules_dir / ".gitignore").write_text("*\n")
+        (rules_dir / "latest.json").write_text(json.dumps(rules, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Matching rules saved: {rules_dir / 'latest.json'}")
+    if args.json:
+        print(json.dumps(rules, indent=2, sort_keys=True)); return 0
+    print("Execution Authorization Matching Rules (read-only)")
+    print("=" * 40)
+    print(f"  Rules only: yes\n  Authorization available: no\n  Authorized: no\n  Execution authorized: no")
+    print(f"\n  Invalidation rules: {len(rules['invalidation_rules'])}")
+    print(f"  Matching requirements: {len(rules['matching_requirements'])}")
+    print(f"  Freshness requirements: {len(rules['freshness_requirements'])}")
+    print(f"\n  {rules['note']}")
+    return 0

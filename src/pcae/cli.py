@@ -435,6 +435,7 @@ from pcae.commands.phase import (
     run_phase_single_runner_contract,
     run_phase_single_runner_readiness,
     run_phase_execution_authorization_contract,
+    run_phase_execution_authorization_matching_rules,
     run_phase_execution_authorization_schema,
     run_phase_single_runner_refusal_matrix,
     run_phase_runner_sim_approval_show,
@@ -5401,6 +5402,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_execution_authorization_schema_parser.set_defaults(
         handler=run_phase_execution_authorization_schema
+    )
+
+    phase_execution_authorization_matching_rules_parser = phase_subparsers.add_parser(
+        "execution-authorization-matching-rules",
+        help="Show execution authorization matching and invalidation rules.",
+    )
+    phase_execution_authorization_matching_rules_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_execution_authorization_matching_rules_parser.add_argument(
+        "--save", action="store_true", help="Persist the matching rules artifact."
+    )
+    phase_execution_authorization_matching_rules_parser.set_defaults(
+        handler=run_phase_execution_authorization_matching_rules
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
