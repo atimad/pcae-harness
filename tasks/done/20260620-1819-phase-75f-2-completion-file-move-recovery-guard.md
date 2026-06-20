@@ -10,7 +10,7 @@ Phase 75F.2: Completion File Move Recovery Guard
 
 ## Status
 
-active
+done
 
 ## Mode
 
