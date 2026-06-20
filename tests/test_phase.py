@@ -9104,3 +9104,19 @@ def test_73v_handoff_ready(tmp_path, monkeypatch, capsys):
     main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
     main(["phase", "activated-task-implementation-handoff", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["handoff_status"] == "ready"; assert d["execution_authorized"] is False; assert d["prompt_executed"] is False
+
+# Phase 73W: activated task implementation readiness
+def test_73w_readiness_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "activated-task-implementation-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["ready_for_manual_implementation"] is False; assert d["ready_for_automatic_implementation"] is False
+    assert d["execution_authorized"] is False
+def test_73w_readiness_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "activated-task-implementation-readiness", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["ready_for_manual_implementation"] is True; assert d["execution_authorized"] is False

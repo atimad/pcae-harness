@@ -6124,3 +6124,52 @@ def run_phase_activated_task_implementation_handoff(args: argparse.Namespace) ->
         print(f"  Prompt executed: no"); print(f"  Implementation: no"); print(f"  Exec authorized: no")
     print(f"\n  {result.get('suggested_operator_action', '')}")
     return 0
+
+
+ACTIVATED_TASK_IMPLEMENTATION_READINESS_DIR = Path(".pcae") / "activated-task-implementation-readiness"
+
+
+def _build_activated_task_impl_readiness(root: HarnessPath) -> dict:
+    handoff = _build_activated_task_impl_handoff(root)
+    boundary = _build_activation_boundary(root)
+    from pcae.core.git_status import read_git_changes
+    changes = read_git_changes(root)
+    blockers = []; warnings = []
+    if not boundary["activation_present"]: blockers.append("no activation artifact")
+    elif not boundary["active_task_matches_activation"]: blockers.append("active task mismatch")
+    elif boundary["implementation_detected"]: blockers.append("implementation already detected")
+    if handoff["handoff_status"] != "ready": blockers.append(f"handoff not ready: {handoff['handoff_status']}")
+    if changes: warnings.append(f"working tree has {len(changes)} change(s) — ensure changes are within task scope")
+
+    if blockers: status = "blocked"
+    elif not boundary["activation_present"]: status = "no_activated_task"
+    elif not boundary["active_task_matches_activation"]: status = "mismatch"
+    else: status = "ready_for_manual_implementation"
+
+    return {
+        "readiness_status": status,
+        "ready_for_manual_implementation": status == "ready_for_manual_implementation",
+        "ready_for_automatic_implementation": False,
+        "blockers": blockers,
+        "warnings": warnings,
+        "execution_authorized": False,
+        "suggested_next_step": "Begin normal task-contract implementation workflow." if status == "ready_for_manual_implementation" else "Resolve blockers before implementation.",
+    }
+
+
+def run_phase_activated_task_implementation_readiness(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd(); result = _build_activated_task_impl_readiness(root)
+    if getattr(args, "save", False):
+        d = root.join(ACTIVATED_TASK_IMPLEMENTATION_READINESS_DIR); d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Readiness saved: {d / 'latest.json'}")
+    if args.json: print(json.dumps(result, indent=2, sort_keys=True)); return 0
+    print("Activated Task Implementation Readiness"); print("=" * 40)
+    print(f"  Status: {result['readiness_status']}")
+    print(f"  Ready for manual implementation: {'yes' if result['ready_for_manual_implementation'] else 'no'}")
+    print(f"  Ready for automatic implementation: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]: print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["warnings"]: print(f"\n  Warnings:"); [print(f"    - {w}") for w in result["warnings"]]
+    print(f"\n  {result['suggested_next_step']}")
+    return 0

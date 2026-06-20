@@ -440,6 +440,7 @@ from pcae.commands.phase import (
     run_phase_real_execution_disabled_proof,
     run_phase_single_runner_activate,
     run_phase_activated_task_implementation_handoff,
+    run_phase_activated_task_implementation_readiness,
     run_phase_single_runner_activation_boundary,
     run_phase_single_runner_activation_scenario,
     run_phase_single_runner_activation_rollback,
@@ -5542,6 +5543,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_activated_task_implementation_handoff_parser.set_defaults(
         handler=run_phase_activated_task_implementation_handoff
+    )
+
+    phase_activated_task_implementation_readiness_parser = phase_subparsers.add_parser(
+        "activated-task-implementation-readiness",
+        help="Check readiness for implementing activation-created tasks.",
+    )
+    phase_activated_task_implementation_readiness_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_activated_task_implementation_readiness_parser.add_argument(
+        "--save", action="store_true", help="Persist the readiness artifact."
+    )
+    phase_activated_task_implementation_readiness_parser.set_defaults(
+        handler=run_phase_activated_task_implementation_readiness
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
