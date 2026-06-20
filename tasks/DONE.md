@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73U Activation-to-Implementation Boundary Enforcement (20260620-1210-73u-activation-to-implementation-boundary-enforcement)
 - 73T Activation Handoff and Bootstrap Visibility (20260620-1205-73t-activation-handoff-and-bootstrap-visibility)
 - 73S Activation End-to-End Fixture Scenario (20260620-1203-73s-activation-end-to-end-fixture-scenario)
 - 73R Activation Recovery and Rollback Guard (20260620-1135-73r-activation-recovery-and-rollback-guard)
