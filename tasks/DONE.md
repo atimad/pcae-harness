@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73C Runner No-Op Execution Abort Cases (20260620-0709-73c-runner-no-op-execution-abort-cases)
 - 73B Runner No-Op Execution Approval Binding (20260620-0709-73b-runner-no-op-execution-approval-binding)
 - 73A Runner No-Op Execution Trace (20260620-0704-73a-runner-no-op-execution-trace)
 - 72Z Authorization Lifecycle Summary Artifact (20260620-0652-72z-authorization-lifecycle-summary-artifact)
