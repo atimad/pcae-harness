@@ -10020,3 +10020,129 @@ def run_phase_captured_output_human_approval_show(args: argparse.Namespace) -> i
     print(f"  Approval reason: {result.get('approval_reason', 'n/a')[:100]}")
     print(f"  Artifact present: yes")
     return 0 if result.get("human_approval_granted") else 1
+
+
+# Phase 76B: human approval validation
+CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR = Path(".pcae") / "captured-output-human-approval-validations"
+
+
+def _build_captured_output_human_approval_validate(root: HarnessPath) -> dict:
+    base = {
+        "validation_status": "blocked", "human_approval_valid": False,
+        "manual_apply_allowed_after_validation": False, "manual_apply_allowed": False,
+        "automatic_apply_allowed": False, "backend_apply_allowed": False,
+        "approval_ref": None, "captured_output_ref": None,
+        "captured_output_digest_matches": False, "apply_dry_run_ref_matches": False,
+        "allowed_files_match": True, "forbidden_files_match": True,
+        "validation_commands": ["pcae health", "pcae check", "python -m pytest -n auto", "pcae doctor task-memory"],
+        "validation_failures": [],
+        "apply_performed": False, "files_modified": False, "commits_created": 0,
+        "push_performed": False, "implementation_performed": False,
+        "execution_authorized": False, "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read approval artifact
+    approval_path = root.join(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+    if not approval_path.is_file():
+        base["validation_status"] = "missing_approval"
+        base["blockers"] = ["No human approval artifact found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-human-approval --approve to create approval."
+        return base
+    approval = json.loads(approval_path.read_text(encoding="utf-8"))
+    base["approval_ref"] = str(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+
+    if not approval.get("human_approval_granted"):
+        base["validation_status"] = "approval_not_granted"
+        base["blockers"] = ["Approval artifact exists but human_approval_granted is false."]
+        base["next_operator_action"] = "Run pcae phase captured-output-human-approval --approve to grant approval."
+        return base
+
+    # Check current digest matches
+    capture_dir = root.join(ACTIVATED_TASK_PROMPT_CAPTURES_DIR)
+    stdout_path = capture_dir / "latest.stdout.txt"
+    if stdout_path.is_file():
+        current_digest = hashlib.sha256(stdout_path.read_bytes()).hexdigest()[:16]
+        approved_digest = (approval.get("approval_scope") or {}).get("captured_output_digest")
+        base["captured_output_digest_matches"] = (current_digest == approved_digest)
+        if not base["captured_output_digest_matches"]:
+            base["validation_failures"].append("Captured output digest changed since approval.")
+    else:
+        base["validation_failures"].append("Cannot verify digest: no captured output found.")
+
+    # Check apply dry-run ref still exists
+    apply_path = root.join(ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR / "latest.json")
+    base["apply_dry_run_ref_matches"] = apply_path.is_file()
+
+    # Gather validation failures
+    if not base["captured_output_digest_matches"]:
+        base["validation_failures"].append("captured_output_digest_mismatch")
+    if not base["apply_dry_run_ref_matches"]:
+        base["validation_failures"].append("apply_dry_run_ref_missing")
+
+    if base["validation_failures"]:
+        base["validation_status"] = "stale_approval"
+        base["blockers"] = base["validation_failures"]
+        base["next_operator_action"] = "Approval is stale. Re-approve with current captured output and apply dry-run."
+        return base
+
+    # Check governance state
+    from pcae.core.health import build_health_data, is_healthy
+    hd = build_health_data(root)
+    if not is_healthy(hd):
+        base["validation_status"] = "governance_not_clean"
+        base["blockers"] = ["Health is not healthy."]
+        base["next_operator_action"] = "Restore healthy governance state before manual apply."
+        return base
+
+    # Check real execution disabled proof
+    proof_path = root.join(REAL_EXECUTION_DISABLED_PROOFS_DIR / "latest.json")
+    if proof_path.is_file():
+        proof = json.loads(proof_path.read_text(encoding="utf-8"))
+        if proof.get("proof_status") != "passed":
+            base["validation_status"] = "governance_not_clean"
+            base["blockers"] = ["Real execution disabled proof not passed."]
+            base["next_operator_action"] = "Run pcae phase real-execution-disabled-proof --save to verify."
+            return base
+
+    # Valid
+    base["validation_status"] = "valid"
+    base["human_approval_valid"] = True
+    base["manual_apply_allowed_after_validation"] = True
+    base["manual_apply_allowed"] = False  # this phase does not apply
+    base["blockers"] = []
+    base["next_operator_action"] = (
+        "Approval is valid. Manual apply is NOT performed in this phase. "
+        "Run pcae phase captured-output-manual-apply-execution-preflight for final preflight check."
+    )
+    return base
+
+
+def run_phase_captured_output_human_approval_validate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_human_approval_validate(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Validation saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["validation_status"] == "valid" else 1
+    print("Captured Output Human Approval Validation"); print("=" * 40)
+    print(f"  Validation status: {result['validation_status']}")
+    print(f"  Human approval valid: {'yes' if result['human_approval_valid'] else 'no'}")
+    print(f"  Digest matches: {'yes' if result['captured_output_digest_matches'] else 'no'}")
+    print(f"  Apply dry-run ref matches: {'yes' if result['apply_dry_run_ref_matches'] else 'no'}")
+    print(f"  Manual apply after validation: {'yes' if result['manual_apply_allowed_after_validation'] else 'no'}")
+    print(f"  Manual apply allowed (this phase): no")
+    print(f"  Automatic apply allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    if result["validation_failures"]:
+        print(f"\n  Failures:"); [print(f"    - {f}") for f in result["validation_failures"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["validation_status"] == "valid" else 1

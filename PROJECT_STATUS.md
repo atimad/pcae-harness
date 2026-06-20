@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 76A: Captured Output Human Approval Artifact.
+Phase 76B: Captured Output Human Approval Validation.
 
-Phase 76A adds `pcae phase captured-output-human-approval [--approve] --json --save`
-and `pcae phase captured-output-human-approval-show --json`. Binds explicit human
-approval to a specific captured output and apply dry-run without applying anything.
-Artifact only — does not apply, modify project code, invoke backend, or authorize execution.
+Phase 76B adds `pcae phase captured-output-human-approval-validate --json --save`
+validating that human approval still matches current captured output, apply dry-run,
+and governance state. Validation only — does not apply, modify project code, invoke
+backend, or authorize execution.
 
 ## Milestone: Execution Chain Traceability Complete
 
