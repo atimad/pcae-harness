@@ -3373,3 +3373,62 @@ def run_phase_runner_execution_authorization_schema(args: argparse.Namespace) ->
     print()
     print(f"  {_EXECUTION_AUTHZ_SCHEMA['note']}")
     return 0
+
+
+_RUNNER_EXECUTION_REFUSAL = (
+    "Runner execution is not implemented and not authorized. "
+    "A future explicit execution-authorization phase is required before "
+    "machine-mediated runner execution can occur. "
+    "Queue entries, approvals, simulations, and preflight checks are "
+    "planning-only artifacts and do not authorize or enable execution. "
+    "Human authority remains absolute."
+)
+
+_RUNNER_EXECUTION_SUGGESTED_STEPS = [
+    "pcae phase queue validate",
+    "pcae phase queue approve --message '...'",
+    "pcae phase queue approval-check",
+    "pcae phase runner-execution-preflight",
+    "pcae phase runner-execution-authorize --dry-run",
+    "(Future) Explicit execution authorization phase",
+]
+
+
+def run_phase_runner_execute(args: argparse.Namespace) -> int:
+    result = {
+        "execution_available": False,
+        "execution_authorized": False,
+        "mutation_performed": False,
+        "tasks_created": 0,
+        "queue_mutated": False,
+        "dry_run": getattr(args, "dry_run", False),
+        "refusal_reason": _RUNNER_EXECUTION_REFUSAL,
+        "suggested_next_steps": list(_RUNNER_EXECUTION_SUGGESTED_STEPS),
+        "note": (
+            "This command always refuses. Runner execution is not implemented. "
+            "No artifacts, queue entries, or tasks are mutated. "
+            "Human authority remains absolute."
+        ),
+    }
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 1
+
+    print("Runner Execution")
+    print("=" * 40)
+    print(f"  Execution available: no")
+    print(f"  Execution authorized: no")
+    print(f"  Mutation performed: no")
+    print(f"  Tasks created: 0")
+    print(f"  Queue mutated: no")
+    print(f"  Dry run: {'yes' if result['dry_run'] else 'no'}")
+    print()
+    print(f"  {_RUNNER_EXECUTION_REFUSAL}")
+    print()
+    print("  Suggested next steps:")
+    for step in _RUNNER_EXECUTION_SUGGESTED_STEPS:
+        print(f"    - {step}")
+    print()
+    print(f"  {result['note']}")
+    return 1

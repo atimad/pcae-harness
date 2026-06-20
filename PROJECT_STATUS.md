@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 72S: Execution Authorization Artifact Schema Dry Run.
+Phase 72T: Runner Execution Command Stub Refusal.
 
-Phase 72S adds `pcae phase runner-execution-authorization-schema` for a read-only
-schema preview of the proposed future execution authorization artifact. Output is
-always `schema_only=true`, `artifact_written=false`, `execution_authorized=false`.
-No artifact persistence, no queue/task mutation, no execution.
+Phase 72T adds `pcae phase runner-execute` as an explicit stub that always refuses
+execution, reporting `execution_available=false`, `execution_authorized=false`,
+`mutation_performed=false`, `tasks_created=0`, `queue_mutated=false`. No queue
+mutation, no task creation, no artifact persistence, no execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

@@ -7183,3 +7183,100 @@ def test_72s_schema_human_output_states_read_only(
     assert "read-only" in output.lower()
     assert "not implemented" in output.lower()
     assert "execution authorized: no" in output.lower()
+
+
+# ---------------------------------------------------------------------------
+# Phase 72T: runner execution command stub refusal
+# ---------------------------------------------------------------------------
+
+
+def test_72t_runner_execute_always_refuses(tmp_path: Path, monkeypatch, capsys) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["execution_available"] is False
+    assert data["execution_authorized"] is False
+    assert data["mutation_performed"] is False
+    assert data["tasks_created"] == 0
+    assert data["queue_mutated"] is False
+
+
+def test_72t_runner_execute_dry_run_still_refuses(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute", "--dry-run", "--json"])
+
+    data = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert data["dry_run"] is True
+    assert data["execution_authorized"] is False
+
+
+def test_72t_runner_execute_no_queue_mutation(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    queue_path = tmp_path / ".pcae" / "phase-queue.json"
+    before = json.dumps(["Phase 72A: test"], indent=2) + "\n"
+    queue_path.write_text(before, encoding="utf-8")
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-execute"])
+    capsys.readouterr()
+
+    assert queue_path.read_text(encoding="utf-8") == before
+
+
+def test_72t_runner_execute_no_task_created(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    before_tasks = list((tmp_path / "tasks" / "active").glob("*.md"))
+
+    main(["phase", "runner-execute"])
+    capsys.readouterr()
+
+    assert list((tmp_path / "tasks" / "active").glob("*.md")) == before_tasks
+
+
+def test_72t_runner_execute_no_artifact_written(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    main(["phase", "runner-execute"])
+    capsys.readouterr()
+
+    assert not (tmp_path / ".pcae" / "execution-authorizations").exists()
+
+
+def test_72t_runner_execute_human_output_unmistakable(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    init_harness(HarnessPath(tmp_path))
+    init_git_repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+    exit_code = main(["phase", "runner-execute"])
+
+    output = capsys.readouterr().out
+    assert exit_code == 1
+    assert "not implemented" in output.lower()
+    assert "not authorized" in output.lower()
+    assert "mutation performed: no" in output.lower()
+    assert "tasks created: 0" in output.lower()
+    assert "queue mutated: no" in output.lower()

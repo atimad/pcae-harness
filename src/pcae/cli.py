@@ -418,6 +418,7 @@ from pcae.commands.phase import (
     run_phase_runner_plan,
     run_phase_runner_policy,
     run_phase_runner_readiness,
+    run_phase_runner_execute,
     run_phase_runner_execution_authorize,
     run_phase_runner_execution_authorization_schema,
     run_phase_runner_execution_preflight,
@@ -5166,6 +5167,18 @@ def build_parser() -> argparse.ArgumentParser:
     phase_runner_execution_authorization_schema_parser.set_defaults(
         handler=run_phase_runner_execution_authorization_schema
     )
+
+    phase_runner_execute_parser = phase_subparsers.add_parser(
+        "runner-execute",
+        help="Runner execution stub — always refuses. Execution is not implemented.",
+    )
+    phase_runner_execute_parser.add_argument(
+        "--dry-run", action="store_true", help="Report what would be checked (still refuses)."
+    )
+    phase_runner_execute_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_runner_execute_parser.set_defaults(handler=run_phase_runner_execute)
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(
         "runner-sim-approve",
