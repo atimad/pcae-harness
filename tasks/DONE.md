@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74H Agent Backend Registry (20260620-1328-74h-agent-backend-registry)
 - 74G Agent Output Apply Dry Run (20260620-1309-74g-agent-output-apply-dry-run)
 - 74F Agent Output Review and Scope Check (20260620-1309-74f-agent-output-review-and-scope-check)
 - 74E Agent Output Intake Artifact (20260620-1306-74e-agent-output-intake-artifact)
