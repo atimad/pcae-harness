@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 74R Claude-DeepSeek Invocation Safety Review (20260620-1417-74r-claude-deepseek-invocation-safety-review)
 - 74Q Captured Output Intake Bridge (20260620-1408-74q-captured-output-intake-bridge)
 - 74P Claude-DeepSeek Capture-Only Invocation (20260620-1408-74p-claude-deepseek-capture-only-invocation)
 - 74O Claude-DeepSeek Capture Execution Gate (20260620-1408-74o-claude-deepseek-capture-execution-gate)
