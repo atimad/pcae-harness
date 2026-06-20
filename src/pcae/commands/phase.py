@@ -5992,3 +5992,88 @@ def run_phase_single_runner_activation_scenario(args: argparse.Namespace) -> int
     print(f"\n  Checks: {len(result['checks'])} passed, {len(result['violations'])} failed")
     print(f"\n  {result['note']}")
     return 0 if result["scenario_status"] == "passed" else 1
+
+
+SINGLE_RUNNER_ACTIVATION_BOUNDARIES_DIR = Path(".pcae") / "single-runner-activation-boundaries"
+
+
+def _build_activation_boundary(root: HarnessPath) -> dict:
+    from pcae.core.tasks import find_latest_active_task
+    act_path = root.join(SINGLE_RUNNER_ACTIVATIONS_DIR / "latest.json")
+    activation_present = act_path.is_file()
+    activation_data = None
+    if activation_present:
+        activation_data = json.loads(act_path.read_text(encoding="utf-8"))
+
+    active_task = find_latest_active_task(root)
+    active_task_present = active_task is not None
+    activation_task_id = activation_data.get("created_task_id") if activation_data else None
+    active_task_id = active_task.task_id if active_task else None
+    task_matches = active_task_present and activation_task_id == active_task_id
+
+    implementation_detected = False
+    if task_matches and active_task:
+        task_file = root.join(Path("tasks") / "active" / f"{active_task_id}.md")
+        if task_file.is_file():
+            content = task_file.read_text(encoding="utf-8")
+            has_implementation = any(
+                marker in content for marker in
+                ["## Implementation", "## Changes", "### Modified Files", "### New Files"]
+            )
+            has_activation_note = "Activation Note" in content
+            if has_implementation or not has_activation_note:
+                implementation_detected = True
+
+    if not activation_present:
+        boundary_status = "no_activation"
+        suggested_next = "Run pcae phase single-runner-activate to create an active task from queue."
+    elif not task_matches:
+        boundary_status = "mismatch"
+        suggested_next = "Review activation artifact and active task. Consider rollback."
+    elif implementation_detected:
+        boundary_status = "implementation_detected"
+        suggested_next = "Implementation has begun. Activation boundary crossed. Continue normal task workflow."
+    else:
+        boundary_status = "clean_activation_boundary"
+        suggested_next = "Activation complete. Begin implementation in the created task scope."
+
+    return {
+        "boundary_status": boundary_status,
+        "activation_present": activation_present,
+        "active_task_matches_activation": task_matches,
+        "implementation_detected": implementation_detected,
+        "prompt_executed": activation_data.get("prompt_executed", False) if activation_data else False,
+        "implementation_performed": activation_data.get("implementation_performed", False) if activation_data else False,
+        "execution_authorized": False,
+        "suggested_next_step": suggested_next,
+        "note": "Activation does not imply implementation. Human authority remains absolute.",
+    }
+
+
+def run_phase_single_runner_activation_boundary(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_activation_boundary(root)
+
+    if getattr(args, "save", False):
+        bd_dir = root.join(SINGLE_RUNNER_ACTIVATION_BOUNDARIES_DIR)
+        bd_dir.mkdir(parents=True, exist_ok=True)
+        (bd_dir / ".gitignore").write_text("*\n")
+        (bd_dir / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Boundary saved: {bd_dir / 'latest.json'}")
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0
+
+    print("Activation-to-Implementation Boundary")
+    print("=" * 40)
+    print(f"  Boundary status: {result['boundary_status']}")
+    print(f"  Activation present: {'yes' if result['activation_present'] else 'no'}")
+    print(f"  Task matches activation: {'yes' if result['active_task_matches_activation'] else 'no'}")
+    print(f"  Implementation detected: {'yes' if result['implementation_detected'] else 'no'}")
+    print(f"  Prompt executed: {'yes' if result['prompt_executed'] else 'no'}")
+    print(f"  Implementation performed: {'yes' if result['implementation_performed'] else 'no'}")
+    print(f"  Execution authorized: no")
+    print(f"  Suggested next: {result['suggested_next_step']}")
+    print(f"\n  {result['note']}")
+    return 0

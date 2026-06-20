@@ -439,6 +439,7 @@ from pcae.commands.phase import (
     run_phase_execution_authorization_schema,
     run_phase_real_execution_disabled_proof,
     run_phase_single_runner_activate,
+    run_phase_single_runner_activation_boundary,
     run_phase_single_runner_activation_scenario,
     run_phase_single_runner_activation_rollback,
     run_phase_single_runner_activation_show,
@@ -5512,6 +5513,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_single_runner_activation_scenario_parser.set_defaults(
         handler=run_phase_single_runner_activation_scenario
+    )
+
+    phase_single_runner_activation_boundary_parser = phase_subparsers.add_parser(
+        "single-runner-activation-boundary",
+        help="Check activation-to-implementation boundary.",
+    )
+    phase_single_runner_activation_boundary_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_single_runner_activation_boundary_parser.add_argument(
+        "--save", action="store_true", help="Persist the boundary artifact."
+    )
+    phase_single_runner_activation_boundary_parser.set_defaults(
+        handler=run_phase_single_runner_activation_boundary
     )
 
     phase_runner_sim_approve_parser = phase_subparsers.add_parser(

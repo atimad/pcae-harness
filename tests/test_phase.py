@@ -9064,3 +9064,27 @@ def test_73t_handoff_no_activation(tmp_path, monkeypatch, capsys):
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
     main(["phase", "handoff", "--next-agent", "claude-next", "--json"]); d = json.loads(capsys.readouterr().out)
     assert d["activation"] is None
+
+# ---------------------------------------------------------------------------
+# Phase 73U: activation boundary enforcement
+# ---------------------------------------------------------------------------
+def test_73u_boundary_no_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activation-boundary", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["boundary_status"] == "no_activation"; assert d["execution_authorized"] is False
+
+def test_73u_boundary_clean_activation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "queue", "fixture-add", "--count", "1"]); capsys.readouterr()
+    main(["phase", "queue", "approve", "--message", "test"]); capsys.readouterr()
+    main(["phase", "single-runner-activate", "--execute", "--allow-fixture"]); capsys.readouterr()
+    main(["phase", "single-runner-activation-boundary", "--json"]); d = json.loads(capsys.readouterr().out)
+    assert d["boundary_status"] == "clean_activation_boundary"; assert d["implementation_detected"] is False
+
+def test_73u_boundary_save(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "single-runner-activation-boundary", "--save", "--json"]); capsys.readouterr()
+    assert (tmp_path / ".pcae" / "single-runner-activation-boundaries" / "latest.json").is_file()

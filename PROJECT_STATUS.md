@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 73T: Activation Handoff and Bootstrap Visibility.
+Phase 73U: Activation Boundary Enforcement.
 
 Phase 73C adds `--scenario` to `pcae phase runner-execute --noop` for simulated
 abort case reporting. Supports 6 scenarios mapping to policy categories. No
