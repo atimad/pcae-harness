@@ -10,7 +10,7 @@ Phase 75I.2: Governance Bypass Declaration Reconciliation
 
 ## Status
 
-active
+done
 
 ## Mode
 
