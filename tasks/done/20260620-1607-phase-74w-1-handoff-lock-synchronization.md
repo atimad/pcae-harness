@@ -10,7 +10,7 @@ Phase 74W.1: Handoff Lock Synchronization
 
 ## Status
 
-active
+done
 
 ## Mode
 
