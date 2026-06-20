@@ -2,14 +2,62 @@ from __future__ import annotations
 
 import argparse
 import json
+from pathlib import Path
 from typing import Any
 
 from pcae.core.agent import (
     acquire_agent_lock_idempotent,
     build_challenge_attention_assessment,
     build_irg_challenge_context,
+    read_agent_lock,
     render_irg_challenge_compact_lines_with_allocation,
 )
+
+_LOCKABLE_BACKENDS = frozenset({
+    "claude-local", "claude-deepseek", "claude-kimi",
+    "codex", "manual", "noop",
+})
+
+
+def _sync_backend_lock(root: HarnessPath, agent_id: str) -> dict:
+    """Synchronize the backend lock artifact (.pcae/agent-locks/latest.json)."""
+    from datetime import datetime, timezone
+    import shutil as _shutil
+
+    _BACKEND_INFO = {
+        "claude-local": {"backend_type": "claude", "command": "claude", "available": False, "invocation_allowed": False},
+        "claude-deepseek": {"backend_type": "claude", "command": "claude-deepseek", "available": False, "invocation_allowed": False},
+        "claude-kimi": {"backend_type": "claude", "command": "claude-kimi", "available": False, "invocation_allowed": False},
+        "codex": {"backend_type": "codex", "command": "codex", "available": False, "invocation_allowed": False},
+        "manual": {"backend_type": "manual", "command": "none", "available": True, "invocation_allowed": False},
+        "noop": {"backend_type": "noop", "command": "echo", "available": True, "invocation_allowed": False},
+    }
+
+    if agent_id not in _LOCKABLE_BACKENDS:
+        return {"lock_synced": False, "lock_backend_name": None, "lock_conflict": False, "blocker": f"'{agent_id}' is not a recognized lockable backend identity", "execution_authorized": False}
+
+    existing_lock = read_agent_lock(root)
+    if existing_lock is not None and existing_lock.agent_id != agent_id:
+        return {"lock_synced": False, "lock_backend_name": existing_lock.agent_id, "lock_conflict": True, "blocker": f"Core lock held by '{existing_lock.agent_id}', requested '{agent_id}'", "execution_authorized": False}
+
+    info = _BACKEND_INFO.get(agent_id,
+        {"backend_type": "claude", "command": agent_id, "available": False, "invocation_allowed": False})
+    available = _shutil.which(info["command"]) is not None if info["command"] not in ("none", "echo") else info["available"]
+    ts = datetime.now(timezone.utc)
+    lock_data = {
+        "lock_status": "active", "session_agent": agent_id, "backend_name": agent_id,
+        "backend_type": info["backend_type"], "backend_command": info["command"],
+        "backend_available": available, "lock_owner": agent_id,
+        "started_at": ts.isoformat(), "updated_at": ts.isoformat(),
+        "may_modify_files": False, "may_commit": False, "may_push": False,
+        "may_execute_shell": agent_id == "noop",
+        "invocation_allowed": info["invocation_allowed"],
+        "execution_authorized": False, "repo_path": str(root.path),
+    }
+    d = root.join(Path(".pcae") / "agent-locks"); d.mkdir(parents=True, exist_ok=True)
+    (d / ".gitignore").write_text("*\n")
+    (d / "latest.json").write_text(json.dumps(lock_data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return {"lock_synced": True, "lock_backend_name": agent_id, "lock_conflict": False, "blocker": None, "execution_authorized": False}
 from pcae.core.architecture import (
     read_architecture_history_summary,
     write_architecture_history_snapshot,
@@ -148,6 +196,9 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
             agent_id=args.agent_id,
         )
 
+    # Rehydrate backend lock identity
+    backend_lock_result = _sync_backend_lock(root, args.agent_id)
+
     _refresh_session_snapshot_for_governed_flow(root)
     health_data = build_health_data(root)
     health_status: str = health_data["overall_status"]
@@ -180,8 +231,13 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
                     "latest_event": _event_summary(latest_event),
                     "latest_handoff": handoff,
                     "lock_acquired": not already_held,
+                    "lock_backend_name": backend_lock_result["lock_backend_name"],
+                    "lock_conflict": backend_lock_result["lock_conflict"],
+                    "lock_rehydrated": backend_lock_result["lock_synced"],
+                    "lock_synced": backend_lock_result["lock_synced"],
                     "provenance_event_count": timeline.event_count,
                     "ready": ready,
+                    "recognized_backend": args.agent_id in _LOCKABLE_BACKENDS,
                 },
                 indent=2,
                 sort_keys=True,
@@ -194,6 +250,12 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
         print(f"Agent: {args.agent_id} (lock already held)")
     else:
         print(f"Agent: {args.agent_id}")
+    if backend_lock_result["lock_synced"]:
+        print(f"Backend lock rehydrated: {backend_lock_result['lock_backend_name']}")
+    elif backend_lock_result["lock_conflict"]:
+        print(f"Backend lock conflict: {backend_lock_result.get('blocker', 'unknown')}")
+    elif args.agent_id in _LOCKABLE_BACKENDS:
+        print(f"Backend lock: not rehydrated ({backend_lock_result.get('blocker', 'unknown')})")
     print(f"Health: {health_status}")
     print(f"Check: {'passed' if check_passed else 'failed'}")
     for v in health_data["violations"]:
@@ -248,6 +310,14 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
 
 def _run_compact_bootstrap(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
+
+    # Handle --sync-lock for compact bootstrap
+    sync_lock: bool = getattr(args, "sync_lock", False)
+    agent_id: str | None = getattr(args, "agent_id", None)
+    backend_lock_result: dict = {"lock_synced": False, "lock_backend_name": None, "lock_conflict": False, "blocker": None, "execution_authorized": False}
+    if sync_lock and agent_id:
+        backend_lock_result = _sync_backend_lock(root, agent_id)
+
     pack = build_context_pack(root)
     challenge = build_irg_challenge_context(root)
     handoff = _load_latest_handoff(root)
@@ -264,13 +334,19 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
             json.dumps(
                 {
                     "advisory": BOOTSTRAP_COMPACT_ADVISORY,
+                    "agent_id": agent_id,
                     "bootstrap_prompt": prompt,
                     "governance_state": pack.governance_state,
                     "independent_challenge_context": challenge,
                     "latest_handoff": handoff,
+                    "lock_backend_name": backend_lock_result["lock_backend_name"],
+                    "lock_conflict": backend_lock_result["lock_conflict"],
+                    "lock_rehydrated": backend_lock_result["lock_synced"],
+                    "lock_synced": backend_lock_result["lock_synced"],
                     "operational_rules": list(pack.operational_rules),
                     "orchestration_state": pack.orchestration_state,
                     "profile_type": profile.profile_type,
+                    "recognized_backend": agent_id in _LOCKABLE_BACKENDS if agent_id else False,
                     "validation_commands": list(pack.validation_commands),
                 },
                 indent=2,
@@ -278,6 +354,12 @@ def _run_compact_bootstrap(args: argparse.Namespace) -> int:
             )
         )
         return 0
+
+    if sync_lock and agent_id:
+        if backend_lock_result["lock_synced"]:
+            print(f"Backend lock rehydrated: {backend_lock_result['lock_backend_name']}")
+        else:
+            print(f"Backend lock not rehydrated: {backend_lock_result.get('blocker', 'unknown')}")
 
     if is_unknown:
         print(

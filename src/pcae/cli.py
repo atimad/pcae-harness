@@ -4570,6 +4570,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON bootstrap result.",
     )
+    session_bootstrap_parser.add_argument(
+        "--sync-lock",
+        action="store_true",
+        help="Rehydrate backend lock artifact (.pcae/agent-locks/latest.json) for --agent-id.",
+    )
     session_bootstrap_parser.set_defaults(handler=run_session_bootstrap)
 
     session_continuity_check_parser = session_subparsers.add_parser(

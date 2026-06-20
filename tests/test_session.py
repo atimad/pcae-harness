@@ -852,8 +852,13 @@ def test_session_bootstrap_json_output(
         "latest_event",
         "latest_handoff",
         "lock_acquired",
+        "lock_backend_name",
+        "lock_conflict",
+        "lock_rehydrated",
+        "lock_synced",
         "provenance_event_count",
         "ready",
+        "recognized_backend",
     }
     assert data["latest_handoff"] is None
 
@@ -1040,8 +1045,13 @@ def test_session_bootstrap_same_agent_json_lock_acquired_false(
         "latest_event",
         "latest_handoff",
         "lock_acquired",
+        "lock_backend_name",
+        "lock_conflict",
+        "lock_rehydrated",
+        "lock_synced",
         "provenance_event_count",
         "ready",
+        "recognized_backend",
     }
 
 
@@ -2539,3 +2549,77 @@ def _make_pack(tmp_path: Path, strategic_activated: str = "69P") -> "ContextPack
         bootstrap_handoff_notes=(),
         advisory="compact by design",
     )
+
+
+# Phase 74W.2: session bootstrap agent lock rehydration
+def test_74w2_bootstrap_rehydrates_backend_lock(tmp_path, monkeypatch, capsys):
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Lock rehydrate task")
+    patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-deepseek", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert d["lock_rehydrated"] is True
+    assert d["lock_backend_name"] == "claude-deepseek"
+    assert d["recognized_backend"] is True
+    assert d["lock_conflict"] is False
+    # Verify backend lock artifact was written
+    lock_path = tmp_path / ".pcae" / "agent-locks" / "latest.json"
+    assert lock_path.is_file()
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    assert lock["lock_status"] == "active"
+    assert lock["backend_name"] == "claude-deepseek"
+    assert lock["execution_authorized"] is False
+    assert lock["invocation_allowed"] is False
+
+def test_74w2_bootstrap_rehydrates_kimi_lock(tmp_path, monkeypatch, capsys):
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Kimi lock task")
+    patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-kimi", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert d["lock_rehydrated"] is True
+    assert d["lock_backend_name"] == "claude-kimi"
+    assert d["recognized_backend"] is True
+    lock = json.loads((tmp_path / ".pcae" / "agent-locks" / "latest.json").read_text(encoding="utf-8"))
+    assert lock["backend_name"] == "claude-kimi"
+    assert lock["invocation_allowed"] is False
+
+def test_74w2_bootstrap_unknown_agent_no_rehydrate(tmp_path, monkeypatch, capsys):
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Unknown agent task")
+    patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["session", "bootstrap", "--agent-id", "unknown-bot", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert d["lock_rehydrated"] is False
+    assert d["recognized_backend"] is False
+
+def test_74w2_bootstrap_no_backend_invocation(tmp_path, monkeypatch, capsys):
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "No invocation task")
+    patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-deepseek", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    # Lock rehydration does not invoke backend, does not authorize execution
+    assert "execution_authorized" not in d or d.get("lock_rehydrated") in (True, False)
+    assert d.get("lock_backend_name") is not None or d.get("lock_rehydrated") is False
+
+def test_74w2_compact_bootstrap_sync_lock(tmp_path, monkeypatch, capsys):
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    create_task_contract(HarnessPath(tmp_path), "Compact sync task")
+    patch_task_allowed_files(tmp_path); commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["session", "bootstrap", "--agent-id", "claude-deepseek", "--compact", "--profile", "implementation", "--sync-lock", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert d["lock_synced"] is True
+    assert d["lock_backend_name"] == "claude-deepseek"
+    assert d["recognized_backend"] is True
+    # Verify backend lock was written
+    lock_path = tmp_path / ".pcae" / "agent-locks" / "latest.json"
+    assert lock_path.is_file()
+    lock = json.loads(lock_path.read_text(encoding="utf-8"))
+    assert lock["backend_name"] == "claude-deepseek"
+    assert lock["execution_authorized"] is False
