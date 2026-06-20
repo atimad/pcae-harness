@@ -3176,3 +3176,61 @@ def test_70p_task_update_acceptance_criterion(
     active_task = find_latest_active_task(HarnessPath(tmp_path))
     assert "Reviewed by human" in active_task.acceptance_criteria
     assert "pcae check" in active_task.acceptance_checks
+
+
+# Phase 75F.2: repair active_status_in_done_folder
+def test_75f2_repair_active_status_in_done_dry_run(tmp_path, monkeypatch, capsys):
+    done_dir = tmp_path / "tasks" / "done"
+    done_dir.mkdir(parents=True, exist_ok=True)
+    (done_dir / "20260620-1800-test-repair.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260620-1800-test-repair\n\n## Title\n\nRepair test\n\n## Status\n\nactive\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["doctor", "task-memory", "--fix", "--dry-run"])
+    out = capsys.readouterr().out
+    assert "active_status_in_done_folder" in out or "would_repair" in out
+    assert "dry run" in out.lower() or "dry" in out.lower()
+    # Verify file was NOT modified
+    content = (done_dir / "20260620-1800-test-repair.md").read_text(encoding="utf-8")
+    assert "## Status\n\nactive" in content
+
+def test_75f2_repair_active_status_in_done_fix(tmp_path, monkeypatch, capsys):
+    done_dir = tmp_path / "tasks" / "done"
+    done_dir.mkdir(parents=True, exist_ok=True)
+    (done_dir / "20260620-1801-test-fix.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260620-1801-test-fix\n\n## Title\n\nFix test\n\n## Status\n\nactive\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["doctor", "task-memory", "--fix"])
+    capsys.readouterr()
+    # Verify file WAS modified
+    content = (done_dir / "20260620-1801-test-fix.md").read_text(encoding="utf-8")
+    assert "## Status\n\ncompleted" in content
+    assert "## Status\n\nactive" not in content
+    # Verify clean after fix
+    exit_code = main(["doctor", "task-memory"])
+    out = capsys.readouterr().out
+    assert "has status 'active' but is in tasks/done/" not in out
+
+def test_75f2_repair_active_task_not_touched(tmp_path, monkeypatch, capsys):
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True, exist_ok=True)
+    (active_dir / "20260620-1802-active-task.md").write_text(
+        "# Task Contract\n\n## Task ID\n\n20260620-1802-active-task\n\n## Title\n\nActive task\n\n## Status\n\nactive\n",
+        encoding="utf-8",
+    )
+    monkeypatch.chdir(tmp_path)
+    main(["doctor", "task-memory", "--fix"])
+    capsys.readouterr()
+    content = (active_dir / "20260620-1802-active-task.md").read_text(encoding="utf-8")
+    assert "## Status\n\nactive" in content  # Active task in active/ stays active
+
+def test_75f2_repair_clean_noop(tmp_path, monkeypatch, capsys):
+    # No task directories at all — should be clean no-op
+    monkeypatch.chdir(tmp_path)
+    exit_code = main(["doctor", "task-memory", "--fix", "--dry-run"])
+    out = capsys.readouterr().out
+    assert exit_code == 0
+    assert "dry run" in out.lower()  # clean repair run shows dry run header

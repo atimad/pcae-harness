@@ -1499,6 +1499,7 @@ REPAIRABLE_CHECKS: frozenset[str] = frozenset({
     "done_file_missing_from_done_md",
     "todo_references_completed_task",
     "done_status_in_active_folder",
+    "active_status_in_done_folder",
 })
 
 
@@ -1570,7 +1571,36 @@ def _apply_repair(root: HarnessPath, finding: TaskMemoryFinding) -> TaskMemoryRe
         return _repair_todo_references_completed(root, finding)
     if finding.check == "done_status_in_active_folder":
         return _repair_done_status_in_active(root, finding)
+    if finding.check == "active_status_in_done_folder":
+        return _repair_active_status_in_done_folder(root, finding)
     return None
+
+
+def _repair_active_status_in_done_folder(root: HarnessPath, finding: TaskMemoryFinding) -> TaskMemoryRepair | None:
+    """Fix a task file in tasks/done/ that still has internal status 'active'."""
+    task_id = _extract_task_id_from_message(finding.message)
+    if not task_id:
+        return None
+    done_path = root.join(Path("tasks") / "done" / f"{task_id}.md")
+    if not done_path.is_file():
+        return None
+    content = done_path.read_text(encoding="utf-8")
+    status = read_task_section_text(content, "Status")
+    if status != "active":
+        return None  # already fixed or different issue
+    # Replace "active" with "completed" in the Status section
+    updated = content.replace("\n## Status\n\nactive\n", "\n## Status\n\ncompleted\n", 1)
+    if updated == content:
+        # Try alternative format
+        updated = content.replace("## Status\n\nactive", "## Status\n\ncompleted", 1)
+    if updated == content:
+        return None  # could not find the pattern
+    done_path.write_text(updated, encoding="utf-8")
+    return TaskMemoryRepair(
+        check="active_status_in_done_folder",
+        action="fixed_status_to_completed",
+        path=f"tasks/done/{task_id}.md",
+    )
 
 
 def _repair_done_file_missing(root: HarnessPath, finding: TaskMemoryFinding) -> TaskMemoryRepair | None:
