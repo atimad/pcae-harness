@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 73T Activation Handoff and Bootstrap Visibility (20260620-1205-73t-activation-handoff-and-bootstrap-visibility)
 - 73S Activation End-to-End Fixture Scenario (20260620-1203-73s-activation-end-to-end-fixture-scenario)
 - 73R Activation Recovery and Rollback Guard (20260620-1135-73r-activation-recovery-and-rollback-guard)
 - 73Q Single Queue Item Activation Execution (20260620-1132-73q-single-queue-item-activation-execution)
