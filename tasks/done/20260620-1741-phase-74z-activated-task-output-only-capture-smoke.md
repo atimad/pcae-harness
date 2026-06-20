@@ -10,7 +10,7 @@ Phase 74Z: Activated Task Output-Only Capture Smoke
 
 ## Status
 
-active
+done
 
 ## Mode
 
