@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 75F.3: No-Verify Governance Detection (20260620-1824-phase-75f-3-no-verify-governance-detection)
 - Phase 75F.2: Completion File Move Recovery Guard (20260620-1819-phase-75f-2-completion-file-move-recovery-guard)
 - Phase 75F.1: Shared Implementation Commit Audit Regression (20260620-1815-phase-75f-1-shared-implementation-commit-audit-regression)
 - Phase 75F: Add captured output safety regression scenario (20260620-1807-phase-75f-add-captured-output-safety-regression-scenario)

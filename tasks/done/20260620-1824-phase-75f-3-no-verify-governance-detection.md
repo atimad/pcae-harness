@@ -10,7 +10,7 @@ Phase 75F.3: No-Verify Governance Detection
 
 ## Status
 
-active
+done
 
 ## Mode
 
