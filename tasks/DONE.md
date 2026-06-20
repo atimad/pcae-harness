@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 75I: Captured Output Manual Apply Preflight (20260620-1819-phase-75i-captured-output-manual-apply-preflight)
 - Phase 75H: Captured Output Manual Apply Approval Review (20260620-1819-phase-75h-captured-output-manual-apply-approval-review)
 - Phase 75G: Captured Output Manual Apply Approval Contract (20260620-1819-phase-75g-captured-output-manual-apply-approval-contract)
 - Phase 75F.3: No-Verify Governance Detection (20260620-1824-phase-75f-3-no-verify-governance-detection)

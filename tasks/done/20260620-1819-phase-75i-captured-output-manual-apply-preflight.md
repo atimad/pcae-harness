@@ -10,7 +10,7 @@ Phase 75I: Captured Output Manual Apply Preflight
 
 ## Status
 
-active
+done
 
 ## Mode
 
