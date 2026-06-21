@@ -509,6 +509,8 @@ from pcae.commands.phase import (
     run_phase_backend_capture_retry_preflight_show,
     run_phase_backend_capture_governed_retry,
     run_phase_backend_capture_governed_retry_show,
+    run_phase_backend_retry_mutation_result_intake,
+    run_phase_backend_retry_mutation_result_intake_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6480,6 +6482,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_capture_governed_retry_show_parser.add_argument("--json", action="store_true")
     phase_backend_capture_governed_retry_show_parser.set_defaults(handler=run_phase_backend_capture_governed_retry_show)
+
+    # Phase 77K
+    phase_backend_retry_mutation_result_intake_parser = phase_subparsers.add_parser(
+        "backend-retry-mutation-result-intake",
+        help="Read and classify a 77J governed retry result with mutation-aware file detection (Phase 77K).",
+    )
+    phase_backend_retry_mutation_result_intake_parser.add_argument("--json", action="store_true")
+    phase_backend_retry_mutation_result_intake_parser.add_argument("--save", action="store_true")
+    phase_backend_retry_mutation_result_intake_parser.set_defaults(handler=run_phase_backend_retry_mutation_result_intake)
+
+    phase_backend_retry_mutation_result_intake_show_parser = phase_subparsers.add_parser(
+        "backend-retry-mutation-result-intake-show",
+        help="Show latest backend retry mutation result intake artifact (Phase 77K).",
+    )
+    phase_backend_retry_mutation_result_intake_show_parser.add_argument("--json", action="store_true")
+    phase_backend_retry_mutation_result_intake_show_parser.set_defaults(handler=run_phase_backend_retry_mutation_result_intake_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

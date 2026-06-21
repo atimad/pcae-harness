@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 77J: Backend Capture Governed Retry.
+Phase 77K: Backend Retry Mutation Result Intake.
 
-Phase 77J adds `pcae phase backend-capture-governed-retry --json --save` and
-`pcae phase backend-capture-governed-retry-show --json`. Performs exactly one governed
-backend capture retry at 300s timeout. Captures output, runs mutation guard, never applies.
-Persists to `.pcae/backend-capture-governed-retries/`. 10 new tests.
+Phase 77K adds `pcae phase backend-retry-mutation-result-intake --json --save` and
+`pcae phase backend-retry-mutation-result-intake-show --json`. Reads and classifies
+77J governed retry results with mutation-aware file detection. Never modifies backend-created files.
+Persists to `.pcae/backend-retry-mutation-result-intakes/latest.json`. 10 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 

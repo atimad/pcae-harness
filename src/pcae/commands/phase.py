@@ -13974,3 +13974,268 @@ def run_phase_backend_capture_governed_retry_show(args: argparse.Namespace) -> i
     print(f"  Timeout: {r.get('retry_timeout_seconds', 'n/a')}s")
     print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77K: backend retry mutation result intake
+BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR = Path(".pcae") / "backend-retry-mutation-result-intakes"
+
+_BACKEND_CREATED_FILE = "docs/REAL_CAPTURED_TASKS.md"
+
+
+def _build_backend_retry_mutation_result_intake(root: HarnessPath) -> dict:
+    """Read and classify a 77J governed retry result, with mutation-aware file detection.
+
+    This is INTAKE/CLASSIFICATION ONLY. It must not invoke backends, retry capture,
+    send packages, capture output, apply patches, modify/delete/stage/commit/push
+    backend-created files.
+    """
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp, os as _os
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Read 77J retry result
+    retry_ref = _ref_exists(root, BACKEND_CAPTURE_GOVERNED_RETRIES_DIR)
+    retry_data = None; retry_status = "unknown"
+    if retry_ref:
+        rp = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json")
+        if rp.is_file():
+            retry_data = json.loads(rp.read_text(encoding="utf-8"))
+            retry_status = retry_data.get("backend_retry_status", "unknown")
+
+    # Read stdout/stderr
+    stdout_size = 0; stderr_size = 0
+    sop = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.stdout.txt")
+    sep = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.stderr.txt")
+    if sop.is_file(): stdout_size = len(sop.read_text(encoding="utf-8"))
+    if sep.is_file(): stderr_size = len(sep.read_text(encoding="utf-8"))
+
+    # Detect backend-created file
+    bcf_path = root.path / _BACKEND_CREATED_FILE
+    bcf_detected = bcf_path.is_file()
+    bcf_files = [_BACKEND_CREATED_FILE] if bcf_detected else []
+    bcf_lines = 0; bcf_size = 0; bcf_sha256 = None; bcf_git_status = "none"
+    if bcf_detected:
+        content = bcf_path.read_text(encoding="utf-8")
+        bcf_lines = len(content.split("\n"))
+        bcf_size = len(content)
+        bcf_sha256 = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        try:
+            gs = _sp.run(["git", "status", "--porcelain", "--", _BACKEND_CREATED_FILE],
+                        cwd=str(root.path), capture_output=True, text=True, timeout=15)
+            bcf_git_status = "untracked" if gs.stdout.strip().startswith("??") else gs.stdout.strip() or "clean"
+        except Exception:
+            bcf_git_status = "unknown"
+
+    # Git status
+    try:
+        gr = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        current_git = gr.stdout.strip()
+    except Exception:
+        current_git = ""
+
+    # Classification
+    bl: list = []; intake_status = "classified"
+
+    if not retry_ref or retry_status in ("no_artifact", "unknown"):
+        intake_status = "missing_retry_result"; bl.append("No retry result found.")
+
+    if intake_status != "classified":
+        return _make_minimal_retry_intake(intake_status, bl, current_git, ts)
+
+    # Extract
+    rc_code = retry_data.get("return_code"); mg_ok = retry_data.get("mutation_guard_passed", True)
+    oc = retry_data.get("backend_output_captured", False); dr = retry_data.get("dry_run", False)
+    td = retry_data.get("timeout_detected", False); rex = retry_data.get("retry_exhausted", False)
+    chg = retry_data.get("changed_files", []); uchg = retry_data.get("unexpected_changed_files", [])
+
+    outcome = "unknown"; normal_ready = False; mutation_review = False
+    quarantine_review = False; emergency = False; output_avail = False
+
+    if dr:
+        outcome = "dry_run_only"
+    elif retry_status == "captured" and mg_ok and oc:
+        outcome = "captured_clean"; normal_ready = True; output_avail = True
+    elif retry_status == "failed_repo_mutation_detected":
+        if rc_code == 0 and oc and bcf_detected:
+            outcome = "repo_mutation_detected_with_output"
+            output_avail = True; mutation_review = True; quarantine_review = True
+        else:
+            outcome = "repo_mutation_detected_without_output"
+            emergency = True; mutation_review = True
+    elif retry_status == "failed_backend_timeout" or td:
+        outcome = "retry_timeout_failure"
+    elif retry_status == "failed_backend_invocation":
+        outcome = "retry_backend_failure"
+    else:
+        outcome = "unknown"
+
+    recommended = "77L — Backend-Created Output Quarantine Review" if outcome == "repo_mutation_detected_with_output" else (
+        "77L — Real Captured Backend Output Intake" if outcome == "captured_clean" else "Resolve blockers first."
+    )
+
+    return {
+        "backend_retry_mutation_intake_status": "classified",
+        "capture_outcome": outcome,
+        "retry_result_ref": str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json") if retry_ref else None,
+        "stdout_ref": str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.stdout.txt") if sop.is_file() else None,
+        "stderr_ref": str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.stderr.txt") if sep.is_file() else None,
+        "backend_retry_status": retry_status,
+        "backend_name": retry_data.get("backend_name") if retry_data else None,
+        "backend_command": retry_data.get("backend_command") if retry_data else None,
+        "package_id": retry_data.get("package_id") if retry_data else None,
+        "contract_id": retry_data.get("contract_id") if retry_data else None,
+        "package_digest": retry_data.get("package_digest") if retry_data else None,
+        "prompt_digest": retry_data.get("prompt_digest") if retry_data else None,
+        "execute_requested": retry_data.get("execute_requested", False) if retry_data else False,
+        "retry_attempt_number": retry_data.get("retry_attempt_number") if retry_data else None,
+        "retry_timeout_seconds": retry_data.get("retry_timeout_seconds") if retry_data else None,
+        "retry_attempts_used": retry_data.get("retry_attempts_used") if retry_data else None,
+        "retry_attempts_remaining": retry_data.get("retry_attempts_remaining") if retry_data else None,
+        "retry_exhausted": rex,
+        "backend_invocation_performed": retry_data.get("backend_invocation_performed", False) if retry_data else False,
+        "backend_capture_performed": retry_data.get("backend_capture_performed", False) if retry_data else False,
+        "backend_output_captured": oc,
+        "return_code": rc_code, "duration_seconds": retry_data.get("duration_seconds") if retry_data else None,
+        "timeout_detected": td,
+        "stdout_path": retry_data.get("stdout_path") if retry_data else None,
+        "stderr_path": retry_data.get("stderr_path") if retry_data else None,
+        "stdout_size_bytes": stdout_size, "stderr_size_bytes": stderr_size,
+        "backend_output_available": output_avail,
+        "mutation_guard_passed": mg_ok,
+        "pre_git_status": retry_data.get("pre_git_status") if retry_data else None,
+        "post_git_status": retry_data.get("post_git_status") if retry_data else None,
+        "changed_files": chg, "unexpected_changed_files": uchg,
+        "current_git_status": current_git,
+        "backend_created_file_detected": bcf_detected,
+        "backend_created_files": bcf_files,
+        "backend_created_file_line_count": bcf_lines,
+        "backend_created_file_size_bytes": bcf_size,
+        "backend_created_file_sha256": bcf_sha256,
+        "backend_created_file_git_status": bcf_git_status,
+        "normal_output_intake_ready": normal_ready,
+        "mutation_review_required": mutation_review,
+        "quarantine_review_required": quarantine_review,
+        "emergency_review_required": emergency,
+        "backend_invocation_performed_in_this_phase": False,
+        "backend_capture_performed_in_this_phase": False,
+        "backend_output_captured_in_this_phase": False,
+        "apply_performed": False, "files_modified_in_this_phase": False,
+        "files_modified_by_backend": len(uchg) > 0,
+        "commits_created": 0, "push_performed": False,
+        "execution_authorized": False, "output_application_allowed": False,
+        "file_preserved_untracked": bcf_detected,
+        "file_deleted": False, "file_staged": False, "file_committed": False, "file_pushed": False,
+        "recommended_next_phase": recommended,
+        "blockers": bl, "warnings": [],
+        "next_operator_action": (
+            f"Mutation intake complete. Backend-created file '{_BACKEND_CREATED_FILE}' "
+            f"detected ({bcf_lines} lines, {bcf_size} bytes). "
+            "File preserved untracked. Quarantine review required before any adoption."
+            if outcome == "repo_mutation_detected_with_output"
+            else ("Backend output captured cleanly. Proceed to normal intake."
+                  if outcome == "captured_clean" else "Resolve blockers first.")
+        ),
+        "generated_at": ts,
+    }
+
+
+def _make_minimal_retry_intake(intake_status: str, bl: list, git_status: str, ts: str) -> dict:
+    return {
+        "backend_retry_mutation_intake_status": intake_status,
+        "capture_outcome": "unknown", "retry_result_ref": None,
+        "stdout_ref": None, "stderr_ref": None,
+        "backend_retry_status": "unknown", "backend_name": None, "backend_command": None,
+        "package_id": None, "contract_id": None, "package_digest": None, "prompt_digest": None,
+        "execute_requested": False, "retry_attempt_number": None, "retry_timeout_seconds": None,
+        "retry_attempts_used": None, "retry_attempts_remaining": None, "retry_exhausted": False,
+        "backend_invocation_performed": False, "backend_capture_performed": False,
+        "backend_output_captured": False, "return_code": None, "duration_seconds": None,
+        "timeout_detected": False, "stdout_path": None, "stderr_path": None,
+        "stdout_size_bytes": 0, "stderr_size_bytes": 0,
+        "backend_output_available": False,
+        "mutation_guard_passed": True,
+        "pre_git_status": None, "post_git_status": None,
+        "changed_files": [], "unexpected_changed_files": [],
+        "current_git_status": git_status,
+        "backend_created_file_detected": False, "backend_created_files": [],
+        "backend_created_file_line_count": 0, "backend_created_file_size_bytes": 0,
+        "backend_created_file_sha256": None, "backend_created_file_git_status": "none",
+        "normal_output_intake_ready": False,
+        "mutation_review_required": False, "quarantine_review_required": False,
+        "emergency_review_required": False,
+        "backend_invocation_performed_in_this_phase": False,
+        "backend_capture_performed_in_this_phase": False,
+        "backend_output_captured_in_this_phase": False,
+        "apply_performed": False, "files_modified_in_this_phase": False,
+        "files_modified_by_backend": False,
+        "commits_created": 0, "push_performed": False,
+        "execution_authorized": False, "output_application_allowed": False,
+        "file_preserved_untracked": False, "file_deleted": False,
+        "file_staged": False, "file_committed": False, "file_pushed": False,
+        "recommended_next_phase": "Resolve blockers first.",
+        "blockers": bl, "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+        "generated_at": ts,
+    }
+
+
+def run_phase_backend_retry_mutation_result_intake(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    r = _build_backend_retry_mutation_result_intake(root)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Mutation intake saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r["backend_retry_mutation_intake_status"] == "classified" else 1
+    print("Backend Retry Mutation Result Intake"); print("=" * 36)
+    print(f"  Intake status: {r['backend_retry_mutation_intake_status']}")
+    print(f"  Capture outcome: {r['capture_outcome']}")
+    print(f"  Backend: {r.get('backend_name', 'n/a')}")
+    print(f"  Retry status: {r.get('backend_retry_status', 'n/a')}")
+    print(f"  Return code: {r.get('return_code', 'n/a')}")
+    print(f"  Duration: {r.get('duration_seconds', 'n/a')}s")
+    print(f"  Mutation guard: {'passed' if r['mutation_guard_passed'] else 'failed'}")
+    print(f"  Output available: {'yes' if r['backend_output_available'] else 'no'}")
+    print(f"  Created file detected: {'yes' if r['backend_created_file_detected'] else 'no'}")
+    if r['backend_created_files']:
+        print(f"  Created files: {r['backend_created_files']}")
+        print(f"  File lines: {r['backend_created_file_line_count']}")
+        print(f"  File size: {r['backend_created_file_size_bytes']} bytes")
+        print(f"  File SHA256: {r['backend_created_file_sha256'][:16] if r['backend_created_file_sha256'] else 'n/a'}...")
+        print(f"  File git: {r['backend_created_file_git_status']}")
+    print(f"  Normal intake ready: {'yes' if r['normal_output_intake_ready'] else 'no'}")
+    print(f"  Mutation review: {'yes' if r['mutation_review_required'] else 'no'}")
+    print(f"  Quarantine review: {'yes' if r['quarantine_review_required'] else 'no'}")
+    print(f"  Emergency review: {'yes' if r['emergency_review_required'] else 'no'}")
+    print(f"  Backend invoked (this phase): no")
+    print(f"  File preserved untracked: {'yes' if r['file_preserved_untracked'] else 'no'}")
+    print(f"  File deleted: no  File staged: no  File committed: no  File pushed: no")
+    print(f"  Recommended next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  - {b}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_retry_mutation_intake_status"] == "classified" else 1
+
+
+def run_phase_backend_retry_mutation_result_intake_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_retry_mutation_intake_status": "no_artifact"}
+        if args.json: print(json.dumps(r, indent=2, sort_keys=True))
+        else: print("No mutation intake artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("backend_retry_mutation_intake_status") == "classified" else 1
+    print("Backend Retry Mutation Result Intake (Show)"); print("=" * 42)
+    print(f"  Status: {r.get('backend_retry_mutation_intake_status', 'unknown')}")
+    print(f"  Outcome: {r.get('capture_outcome', 'unknown')}")
+    print(f"  Created file: {'yes' if r.get('backend_created_file_detected') else 'no'}")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0
