@@ -2,11 +2,14 @@
 
 ## Current Phase
 
-Phase 76G: Manual Apply Lifecycle Final Summary.
+Phase 77A: Real Captured Task Readiness Gate.
 
-Phase 76G adds `pcae phase captured-output-manual-apply-final-summary --json --save`
-consolidated final lifecycle summary for the complete captured-output governance pipeline.
-Lifecycle complete as no-op. Ready for real captured task readiness (Phase 77A).
+Phase 77A adds `pcae phase real-captured-task-readiness-gate --json --save` and
+`pcae phase real-captured-task-readiness-gate-show --json`. Read-only readiness gate
+assessing whether PCAE is ready to move from the completed fixture/no-op captured-output
+pipeline to a real captured task pipeline. Reports readiness_status, fixture_pipeline_closed,
+and all safety invariants (execution_allowed=false, backend_invocation_allowed=false).
+Persists to `.pcae/real-captured-task-readiness-gates/latest.json`. 9 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 

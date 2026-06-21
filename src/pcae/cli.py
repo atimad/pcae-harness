@@ -489,6 +489,8 @@ from pcae.commands.phase import (
     run_phase_captured_output_manual_apply_noop_closure_show,
     run_phase_captured_output_manual_apply_final_summary,
     run_phase_captured_output_manual_apply_final_summary_show,
+    run_phase_real_captured_task_readiness_gate,
+    run_phase_real_captured_task_readiness_gate_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6293,6 +6295,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_captured_output_manual_apply_final_summary_show_parser.add_argument("--json", action="store_true")
     phase_captured_output_manual_apply_final_summary_show_parser.set_defaults(handler=run_phase_captured_output_manual_apply_final_summary_show)
+
+    # Phase 77A
+    phase_real_captured_task_readiness_gate_parser = phase_subparsers.add_parser(
+        "real-captured-task-readiness-gate",
+        help="Assess readiness to move from fixture/no-op pipeline to real captured task pipeline (Phase 77A).",
+    )
+    phase_real_captured_task_readiness_gate_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_readiness_gate_parser.add_argument("--save", action="store_true")
+    phase_real_captured_task_readiness_gate_parser.set_defaults(handler=run_phase_real_captured_task_readiness_gate)
+
+    phase_real_captured_task_readiness_gate_show_parser = phase_subparsers.add_parser(
+        "real-captured-task-readiness-gate-show",
+        help="Show latest real captured task readiness gate artifact (Phase 77A).",
+    )
+    phase_real_captured_task_readiness_gate_show_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_readiness_gate_show_parser.set_defaults(handler=run_phase_real_captured_task_readiness_gate_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

@@ -11396,3 +11396,308 @@ def test_75i3_recheck_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["push_performed"] is False
     assert d["implementation_performed"] is False
     assert d["execution_authorized"] is False
+
+
+# Phase 77A: real captured task readiness gate
+
+def _seed_final_summary_77a(tmp_path: Path) -> None:
+    """Create a complete final summary artifact for testing."""
+    d = tmp_path / ".pcae" / "captured-output-manual-apply-final-summaries"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "lifecycle_final_status": "complete_no_op",
+        "lifecycle_closed": True,
+        "closure_type": "no_op",
+        "ready_for_real_captured_task_path": True,
+        "full_chain_complete": True,
+        "apply_performed": False,
+        "files_modified": False,
+        "changed_files": [],
+        "commits_created": 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        "real_execution_disabled": True,
+        "runner_execute_refuses": True,
+        "recommended_next_phase": "77A — Real Captured Task Readiness Gate (future)",
+        "blockers": [],
+        "warnings": [],
+        "next_operator_action": "Proceed to Phase 77A.",
+    }))
+
+def _seed_noop_closure_77a(tmp_path: Path) -> None:
+    """Create no-op closure for testing."""
+    d = tmp_path / ".pcae" / "captured-output-manual-apply-noop-closures"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "closure_status": "closed_no_op",
+        "lifecycle_closed": True,
+        "closure_type": "no_op",
+        "commit_needed": False,
+        "push_needed": False,
+        "execution_authorized": False,
+    }))
+
+def _seed_real_execution_disabled_proof_77a(tmp_path: Path) -> None:
+    """Create real execution disabled proof for testing."""
+    d = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "proof_status": "passed",
+        "real_execution_disabled": True,
+        "execution_authorized": False,
+        "violations": [],
+    }))
+
+def _seed_runner_execution_trace_77a(tmp_path: Path, execution_available: bool = False) -> None:
+    """Create runner execution trace for testing."""
+    d = tmp_path / ".pcae" / "runner-execution-traces"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "execution_authorized": False,
+        "execution_available": execution_available,
+        "dry_run": True,
+        "refusal_reason": "Runner execution is not implemented.",
+    }))
+
+def _seed_approval_artifact_77a(tmp_path: Path) -> None:
+    """Create human approval artifact for testing."""
+    d = tmp_path / ".pcae" / "captured-output-human-approvals"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "human_approval_granted": True,
+        "approval_status": "granted",
+    }))
+
+def _seed_approval_validation_77a(tmp_path: Path) -> None:
+    """Create human approval validation artifact for testing."""
+    d = tmp_path / ".pcae" / "captured-output-human-approval-validations"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "validation_status": "validated",
+        "human_approval_valid": True,
+    }))
+
+def _seed_execution_artifact_77a(tmp_path: Path) -> None:
+    """Create manual apply execution artifact for testing."""
+    d = tmp_path / ".pcae" / "captured-output-manual-apply-executions"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "manual_apply_status": "dry_run_ready",
+        "no_changes_to_apply": True,
+        "apply_performed": False,
+    }))
+
+def _seed_result_validation_77a(tmp_path: Path) -> None:
+    """Create result validation artifact for testing."""
+    d = tmp_path / ".pcae" / "captured-output-manual-apply-result-validations"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "result_validation_status": "validated_no_op",
+        "apply_result_valid": True,
+        "apply_performed": False,
+        "files_modified": False,
+        "changed_files": [],
+        "no_changes_to_apply": True,
+        "no_commit_needed": True,
+        "no_push_needed": True,
+    }))
+
+def _seed_all_77a_artifacts(tmp_path: Path) -> None:
+    """Seed all required artifacts for a ready state."""
+    _seed_final_summary_77a(tmp_path)
+    _seed_noop_closure_77a(tmp_path)
+    _seed_real_execution_disabled_proof_77a(tmp_path)
+    _seed_runner_execution_trace_77a(tmp_path, execution_available=False)
+    _seed_approval_artifact_77a(tmp_path)
+    _seed_approval_validation_77a(tmp_path)
+    _seed_execution_artifact_77a(tmp_path)
+    _seed_result_validation_77a(tmp_path)
+
+
+def test_77a_missing_final_summary_blocked(tmp_path, monkeypatch, capsys):
+    """Missing final lifecycle summary reports blocked_lifecycle_not_closed."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-captured-task-readiness-gate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["readiness_status"] == "blocked_lifecycle_not_closed"
+    assert d["fixture_pipeline_closed"] is False
+    assert d["lifecycle_closed"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["backend_invocation_allowed"] is False
+    assert d["execution_authorized"] is False
+    assert d["apply_performed"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+
+
+def test_77a_dirty_tree_blocked(tmp_path, monkeypatch, capsys):
+    """Dirty git status reports blocked_dirty_tree even with complete artifacts."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_all_77a_artifacts(tmp_path)
+    # Make tree dirty
+    (tmp_path / "dirty.txt").write_text("dirty")
+    main(["phase", "real-captured-task-readiness-gate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["readiness_status"] == "blocked_dirty_tree"
+    assert d["fixture_pipeline_closed"] is True
+    assert d["current_git_status"] == "dirty"
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["task_package_creation_allowed_in_future_phase"] is False
+    assert d["execution_authorized"] is False
+    assert "Working tree is not clean" in str(d["blockers"])
+
+
+def test_77a_execution_not_disabled_blocked(tmp_path, monkeypatch, capsys):
+    """Execution not disabled reports blocked_execution_not_disabled."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Seed all artifacts EXCEPT real-execution-disabled-proof (use custom one)
+    _seed_final_summary_77a(tmp_path)
+    _seed_noop_closure_77a(tmp_path)
+    _seed_runner_execution_trace_77a(tmp_path, execution_available=False)
+    _seed_approval_artifact_77a(tmp_path)
+    _seed_approval_validation_77a(tmp_path)
+    _seed_execution_artifact_77a(tmp_path)
+    _seed_result_validation_77a(tmp_path)
+    # Custom: real execution NOT disabled
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({
+        "proof_status": "passed",
+        "real_execution_disabled": False,
+        "execution_authorized": False,
+        "violations": [],
+    }))
+    # Commit so tree is clean
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-readiness-gate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["readiness_status"] == "blocked_execution_not_disabled"
+    assert d["real_execution_disabled"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_77a_runner_execution_available_blocked(tmp_path, monkeypatch, capsys):
+    """Runner execution available reports blocked_runner_execution_available."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Seed all artifacts EXCEPT runner-execution-trace (use custom one)
+    _seed_final_summary_77a(tmp_path)
+    _seed_noop_closure_77a(tmp_path)
+    _seed_real_execution_disabled_proof_77a(tmp_path)
+    _seed_approval_artifact_77a(tmp_path)
+    _seed_approval_validation_77a(tmp_path)
+    _seed_execution_artifact_77a(tmp_path)
+    _seed_result_validation_77a(tmp_path)
+    # Custom: runner execution AVAILABLE (should refuse)
+    d2 = tmp_path / ".pcae" / "runner-execution-traces"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({
+        "execution_authorized": False,
+        "execution_available": True,
+        "dry_run": True,
+    }))
+    # Commit so tree is clean
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-readiness-gate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["readiness_status"] == "blocked_runner_execution_available"
+    assert d["runner_execute_refuses"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_77a_ready_for_real_task_preparation(tmp_path, monkeypatch, capsys):
+    """Clean repo with all artifacts reports ready_for_real_task_preparation."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_all_77a_artifacts(tmp_path)
+    # Commit everything so tree is clean
+    import subprocess as _sp
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed artifacts"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-readiness-gate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["readiness_status"] == "ready_for_real_task_preparation"
+    assert d["fixture_pipeline_closed"] is True
+    assert d["lifecycle_final_status"] == "complete_no_op"
+    assert d["lifecycle_closed"] is True
+    assert d["current_git_status"] == "clean"
+    assert d["real_execution_disabled"] is True
+    assert d["runner_execute_refuses"] is True
+    # Safety invariants
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["backend_invocation_allowed"] is False
+    assert d["backend_capture_allowed_in_future_phase"] is False
+    assert d["task_package_creation_allowed_in_future_phase"] is True
+    assert d["execution_authorized"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert "77B" in d["recommended_next_phase"]
+
+
+def test_77a_show_json(tmp_path, monkeypatch, capsys):
+    """Show command works with --json."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_all_77a_artifacts(tmp_path)
+    # Save first
+    main(["phase", "real-captured-task-readiness-gate", "--save", "--json"])
+    capsys.readouterr()
+    # Show
+    main(["phase", "real-captured-task-readiness-gate-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert "readiness_status" in d
+    assert d.get("fixture_pipeline_closed") is True
+    assert d.get("real_captured_task_execution_allowed") is False
+
+
+def test_77a_save_persists_artifact(tmp_path, monkeypatch, capsys):
+    """--save persists the readiness gate artifact."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_all_77a_artifacts(tmp_path)
+    main(["phase", "real-captured-task-readiness-gate", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "real-captured-task-readiness-gates" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["readiness_status"] in ("ready_for_real_task_preparation", "blocked_dirty_tree")
+    assert d["execution_authorized"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+
+
+def test_77a_no_mutation(tmp_path, monkeypatch, capsys):
+    """Readiness gate command does not mutate files or create task packages."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_all_77a_artifacts(tmp_path)
+    main(["phase", "real-captured-task-readiness-gate", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["backend_invocation_allowed"] is False
+
+
+def test_77a_show_no_artifact(tmp_path, monkeypatch, capsys):
+    """Show command reports no artifact when none exists."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-captured-task-readiness-gate-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["readiness_status"] == "no_artifact"
+    assert d["fixture_pipeline_closed"] is False

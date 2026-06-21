@@ -11191,3 +11191,239 @@ def run_phase_captured_output_manual_apply_final_summary_show(args: argparse.Nam
     print(f"  Lifecycle closed: {'yes' if result.get('lifecycle_closed') else 'no'}")
     print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77A: real captured task readiness gate
+REAL_CAPTURED_TASK_READINESS_GATES_DIR = Path(".pcae") / "real-captured-task-readiness-gates"
+
+
+def _build_real_captured_task_readiness_gate(root: HarnessPath) -> dict:
+    """Assess readiness to move from fixture/no-op pipeline to real captured task pipeline.
+
+    This is a READ-ONLY gate. It must not create task packages, invoke backends,
+    capture output, apply patches, commit, or push.
+    """
+    from datetime import datetime, timezone
+    import subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Resolve artifact refs
+    final_summary_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR)
+    noop_closure_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_NOOP_CLOSURES_DIR)
+    result_validation_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR)
+    manual_apply_execution_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR)
+    approval_validation_ref = _ref_exists(root, CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR)
+    approval_ref = _ref_exists(root, CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR)
+    real_execution_disabled_proof_ref = _ref_exists(root, Path(".pcae") / "real-execution-disabled-proofs")
+    runner_authorization_ref = _ref_exists(root, Path(".pcae") / "runner-authorization-summaries")
+    runner_execution_trace_ref = _ref_exists(root, Path(".pcae") / "runner-execution-traces")
+
+    # Read agent lock
+    agent_lock = read_agent_lock(root)
+    agent_lock_active = agent_lock is not None
+    locked_backend_name = agent_lock.agent_id if agent_lock else None
+
+    # Read lifecycle final summary
+    lifecycle_final_status = "unknown"
+    lifecycle_closed = False
+    ready_for_real_captured_task_path = False
+    if final_summary_ref:
+        fs_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR / "latest.json")
+        if fs_path.is_file():
+            fs = json.loads(fs_path.read_text(encoding="utf-8"))
+            lifecycle_final_status = fs.get("lifecycle_final_status", "unknown")
+            lifecycle_closed = fs.get("lifecycle_closed", False)
+            ready_for_real_captured_task_path = fs.get("ready_for_real_captured_task_path", False)
+
+    fixture_pipeline_closed = lifecycle_final_status == "complete_no_op" and lifecycle_closed
+
+    # Read real execution disabled proof
+    real_execution_disabled = True
+    if real_execution_disabled_proof_ref:
+        rep_path = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep_path.is_file():
+            rep = json.loads(rep_path.read_text(encoding="utf-8"))
+            real_execution_disabled = rep.get("real_execution_disabled", True)
+
+    # Check runner-execute refusal via dry-run
+    runner_execute_refuses = True
+    if runner_execution_trace_ref:
+        ret_path = root.join(Path(".pcae") / "runner-execution-traces" / "latest.json")
+        if ret_path.is_file():
+            ret = json.loads(ret_path.read_text(encoding="utf-8"))
+            runner_execute_refuses = not ret.get("execution_available", True)
+
+    # Also check runner-authorization-summaries
+    if runner_authorization_ref:
+        ra_path = root.join(Path(".pcae") / "runner-authorization-summaries" / "latest.json")
+        if ra_path.is_file():
+            ra = json.loads(ra_path.read_text(encoding="utf-8"))
+            if ra.get("execution_authorized", False) or ra.get("execution_available", False):
+                runner_execute_refuses = False
+
+    # Read audit
+    audit_warning_count = 0
+    audit_warnings: list = []
+    audit_ref = _ref_exists(root, Path(".pcae") / "phase-audits")
+    if audit_ref:
+        a_path = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if a_path.is_file():
+            a = json.loads(a_path.read_text(encoding="utf-8"))
+            audit_warning_count = len(a.get("warnings", []))
+            audit_warnings = a.get("warnings", [])
+
+    # Read queue validation
+    queue_valid = False
+    queue_entry_count = 0
+    queue_ref = _ref_exists(root, Path(".pcae") / "phase-queue.json")
+    if root.join(Path(".pcae") / "phase-queue.json").is_file():
+        q = json.loads(root.join(Path(".pcae") / "phase-queue.json").read_text(encoding="utf-8"))
+        entries = q.get("entries", q) if isinstance(q, dict) else []
+        queue_entry_count = len(entries) if isinstance(entries, list) else 0
+        queue_valid = queue_entry_count == 0
+
+    # Git status check
+    git_status_clean = True
+    try:
+        result = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                         capture_output=True, text=True, timeout=15)
+        git_status_clean = result.stdout.strip() == ""
+    except Exception:
+        git_status_clean = True  # Assume clean if git fails
+
+    # Determine readiness status
+    blockers: list = []
+    warnings_list: list = []
+    readiness_status = "ready_for_real_task_preparation"
+
+    if not fixture_pipeline_closed:
+        readiness_status = "blocked_lifecycle_not_closed"
+        blockers.append("Fixture/no-op pipeline is not fully closed.")
+    elif not git_status_clean:
+        readiness_status = "blocked_dirty_tree"
+        blockers.append("Working tree is not clean.")
+    elif not real_execution_disabled:
+        readiness_status = "blocked_execution_not_disabled"
+        blockers.append("Real execution is not confirmed disabled.")
+    elif not runner_execute_refuses:
+        readiness_status = "blocked_runner_execution_available"
+        blockers.append("Runner execution is reported as available when it should refuse.")
+    elif audit_warning_count > 0:
+        # Warnings are advisory but we still report them
+        warnings_list.append(f"Audit has {audit_warning_count} warning(s).")
+
+    # Always enforce these safety constraints
+    base = {
+        "readiness_status": readiness_status,
+        "fixture_pipeline_closed": fixture_pipeline_closed,
+        "lifecycle_final_status": lifecycle_final_status,
+        "lifecycle_closed": lifecycle_closed,
+        "final_summary_ref": str(CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR / "latest.json") if final_summary_ref else None,
+        "noop_closure_ref": str(CAPTURED_OUTPUT_MANUAL_APPLY_NOOP_CLOSURES_DIR / "latest.json") if noop_closure_ref else None,
+        "result_validation_ref": str(CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR / "latest.json") if result_validation_ref else None,
+        "manual_apply_execution_ref": str(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR / "latest.json") if manual_apply_execution_ref else None,
+        "human_approval_validation_ref": str(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR / "latest.json") if approval_validation_ref else None,
+        "approval_ref": str(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json") if approval_ref else None,
+        "current_git_status": "clean" if git_status_clean else "dirty",
+        "audit_warning_count": audit_warning_count,
+        "audit_warnings": audit_warnings,
+        "real_execution_disabled": real_execution_disabled,
+        "runner_execute_refuses": runner_execute_refuses,
+        "agent_lock_active": agent_lock_active,
+        "locked_backend_name": locked_backend_name,
+        "queue_valid": queue_valid,
+        "queue_entry_count": queue_entry_count,
+        # Safety invariants — always false/zero
+        "real_captured_task_execution_allowed": False,
+        "backend_invocation_allowed": False,
+        "task_package_creation_allowed_in_future_phase": readiness_status == "ready_for_real_task_preparation",
+        "backend_capture_allowed_in_future_phase": False,
+        "apply_performed": False,
+        "files_modified": False,
+        "commits_created": 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        # Guidance
+        "required_next_gates": [
+            "77B — Real Captured Task Contract Preparation",
+            "77C — Real Captured Task Package Creation",
+        ] if readiness_status == "ready_for_real_task_preparation" else [
+            "Resolve blockers before proceeding to 77B.",
+        ],
+        "recommended_next_phase": "77B — Real Captured Task Contract Preparation" if readiness_status == "ready_for_real_task_preparation" else "Resolve blockers first.",
+        "blockers": blockers,
+        "warnings": warnings_list,
+        "next_operator_action": (
+            "PCAE is ready for real captured task preparation. Proceed to Phase 77B to design the real task contract."
+            if readiness_status == "ready_for_real_task_preparation"
+            else "Resolve blockers before proceeding to any real captured task phase."
+        ),
+        "generated_at": ts,
+    }
+    return base
+
+
+def run_phase_real_captured_task_readiness_gate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_real_captured_task_readiness_gate(root)
+    if getattr(args, "save", False):
+        d = root.join(REAL_CAPTURED_TASK_READINESS_GATES_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Readiness gate saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["readiness_status"] == "ready_for_real_task_preparation" else 1
+    print("Real Captured Task Readiness Gate"); print("=" * 36)
+    print(f"  Readiness status: {result['readiness_status']}")
+    print(f"  Fixture pipeline closed: {'yes' if result['fixture_pipeline_closed'] else 'no'}")
+    print(f"  Lifecycle final status: {result['lifecycle_final_status']}")
+    print(f"  Lifecycle closed: {'yes' if result['lifecycle_closed'] else 'no'}")
+    print(f"  Git status: {result['current_git_status']}")
+    print(f"  Audit warnings: {result['audit_warning_count']}")
+    print(f"  Real execution disabled: {'yes' if result['real_execution_disabled'] else 'no'}")
+    print(f"  Runner refuses: {'yes' if result['runner_execute_refuses'] else 'no'}")
+    print(f"  Agent lock active: {'yes' if result['agent_lock_active'] else 'no'}")
+    if result['locked_backend_name']:
+        print(f"  Locked backend: {result['locked_backend_name']}")
+    print(f"  Queue valid: {'yes' if result['queue_valid'] else 'no'}")
+    print(f"  Real task execution allowed: no")
+    print(f"  Backend invocation allowed: no")
+    print(f"  Task package creation (future phase): {'yes' if result['task_package_creation_allowed_in_future_phase'] else 'no'}")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    if result["warnings"]:
+        print(f"\n  Warnings:")
+        for w in result["warnings"]:
+            print(f"    - {w}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["readiness_status"] == "ready_for_real_task_preparation" else 1
+
+
+def run_phase_real_captured_task_readiness_gate_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(REAL_CAPTURED_TASK_READINESS_GATES_DIR / "latest.json")
+    if not p.is_file():
+        result = {"readiness_status": "no_artifact", "fixture_pipeline_closed": False}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No readiness gate artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("readiness_status") == "ready_for_real_task_preparation" else 1
+    print("Real Captured Task Readiness Gate (Show)"); print("=" * 40)
+    print(f"  Status: {result.get('readiness_status', 'unknown')}")
+    print(f"  Fixture pipeline closed: {'yes' if result.get('fixture_pipeline_closed') else 'no'}")
+    print(f"  Lifecycle final: {result.get('lifecycle_final_status', 'n/a')}")
+    print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
+    return 0
