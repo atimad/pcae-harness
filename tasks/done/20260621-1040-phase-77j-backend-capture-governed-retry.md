@@ -10,7 +10,7 @@ Phase 77J: Backend Capture Governed Retry
 
 ## Status
 
-active
+done
 
 ## Mode
 
