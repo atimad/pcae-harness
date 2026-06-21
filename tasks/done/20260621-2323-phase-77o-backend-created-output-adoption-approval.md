@@ -10,7 +10,7 @@ Phase 77O Backend-Created Output Adoption Approval
 
 ## Status
 
-active
+done
 
 ## Mode
 
