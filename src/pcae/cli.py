@@ -501,6 +501,8 @@ from pcae.commands.phase import (
     run_phase_real_captured_task_backend_capture_preflight_show,
     run_phase_real_captured_task_backend_capture,
     run_phase_real_captured_task_backend_capture_show,
+    run_phase_real_backend_capture_result_intake,
+    run_phase_real_backend_capture_result_intake_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6406,6 +6408,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_real_captured_task_backend_capture_show_parser.add_argument("--json", action="store_true")
     phase_real_captured_task_backend_capture_show_parser.set_defaults(handler=run_phase_real_captured_task_backend_capture_show)
+
+    # Phase 77G
+    phase_real_backend_capture_result_intake_parser = phase_subparsers.add_parser(
+        "real-backend-capture-result-intake",
+        help="Read and classify a 77F backend capture result (Phase 77G).",
+    )
+    phase_real_backend_capture_result_intake_parser.add_argument("--json", action="store_true")
+    phase_real_backend_capture_result_intake_parser.add_argument("--save", action="store_true")
+    phase_real_backend_capture_result_intake_parser.set_defaults(handler=run_phase_real_backend_capture_result_intake)
+
+    phase_real_backend_capture_result_intake_show_parser = phase_subparsers.add_parser(
+        "real-backend-capture-result-intake-show",
+        help="Show latest real backend capture result intake artifact (Phase 77G).",
+    )
+    phase_real_backend_capture_result_intake_show_parser.add_argument("--json", action="store_true")
+    phase_real_backend_capture_result_intake_show_parser.set_defaults(handler=run_phase_real_backend_capture_result_intake_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

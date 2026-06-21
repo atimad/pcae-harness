@@ -12963,3 +12963,198 @@ def test_77f_show_no_artifact(tmp_path, monkeypatch, capsys):
     d = json.loads(capsys.readouterr().out)
     assert exit_code == 1
     assert d["backend_capture_status"] == "no_artifact"
+
+
+# Phase 77G: real backend capture result intake
+
+def _seed_capture_77g(tmp_path: Path, status: str = "captured", return_code: int = 0, stderr_text: str = "",
+                       invoke_performed: bool = True, output_captured: bool = True,
+                       mutation_passed: bool = True, dry_run: bool = False) -> None:
+    """Create a 77F capture result artifact for testing."""
+    d = tmp_path / ".pcae" / "real-captured-task-backend-captures"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / ".gitignore").write_text("*\n")
+    (d / "latest.json").write_text(json.dumps({
+        "backend_capture_status": status,
+        "dry_run": dry_run,
+        "execute_requested": not dry_run,
+        "backend_invocation_performed": invoke_performed,
+        "backend_capture_performed": invoke_performed,
+        "backend_output_captured": output_captured,
+        "return_code": return_code,
+        "duration_seconds": 5.0,
+        "backend_name": "claude-deepseek",
+        "backend_command": "/usr/local/bin/claude-deepseek",
+        "package_id": "REAL-CAPTURED-TASK-001-PACKAGE-DRY-RUN",
+        "contract_id": "REAL-CAPTURED-TASK-001",
+        "package_digest": "pkg123",
+        "prompt_digest": "prompt456",
+        "mutation_guard_passed": mutation_passed,
+        "stdout_path": ".pcae/real-captured-task-backend-captures/latest.stdout.txt",
+        "stderr_path": ".pcae/real-captured-task-backend-captures/latest.stderr.txt",
+        "pre_git_status": "",
+        "post_git_status": "",
+        "changed_files": [],
+        "unexpected_changed_files": [],
+    }))
+    (d / "latest.stdout.txt").write_text("captured output content\n" if output_captured else "", encoding="utf-8")
+    (d / "latest.stderr.txt").write_text(stderr_text, encoding="utf-8")
+
+
+def test_77g_missing_capture_blocked(tmp_path, monkeypatch, capsys):
+    """Missing capture result reports missing_capture_result."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_capture_result_intake_status"] == "missing_capture_result"
+    assert d["output_intake_ready"] is False
+    assert d["backend_invocation_performed_in_this_phase"] is False
+
+
+def test_77g_dry_run_only_classified(tmp_path, monkeypatch, capsys):
+    """Dry-run capture classifies as dry_run_only."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path, status="dry_run_ready", invoke_performed=False, output_captured=False, dry_run=True)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["capture_outcome"] == "dry_run_only"
+    assert d["output_intake_ready"] is False
+    assert "77F" in d["recommended_next_phase"]
+
+
+def test_77g_successful_capture_classified(tmp_path, monkeypatch, capsys):
+    """Successful capture classifies as captured, output_intake_ready=true."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path, status="captured", return_code=0, output_captured=True)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["capture_outcome"] == "captured"
+    assert d["output_intake_ready"] is True
+    assert d["retry_policy_needed"] is False
+    assert "77H" in d["recommended_next_phase"]
+
+
+def test_77g_timeout_failure_classified(tmp_path, monkeypatch, capsys):
+    """Timeout failure classifies as timeout_failure, retry_policy_needed=true."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path, status="failed_backend_invocation", return_code=-1,
+                       stderr_text="TIMEOUT: backend invocation exceeded 120 seconds.", output_captured=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["capture_outcome"] == "timeout_failure"
+    assert d["output_intake_ready"] is False
+    assert d["retry_policy_needed"] is True
+    assert d["timeout_detected"] is True
+    assert "Timeout Policy" in d["recommended_next_phase"]
+
+
+def test_77g_backend_failure_classified(tmp_path, monkeypatch, capsys):
+    """Non-timeout backend failure classifies as backend_failure."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path, status="failed_backend_invocation", return_code=1,
+                       stderr_text="ERROR: command not found", output_captured=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["capture_outcome"] == "backend_failure"
+    assert d["retry_policy_needed"] is True
+    assert d["timeout_detected"] is False
+
+
+def test_77g_repo_mutation_classified(tmp_path, monkeypatch, capsys):
+    """Repo mutation classifies as repo_mutation_detected, emergency_review_required=true."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path, status="failed_repo_mutation_detected", mutation_passed=False, output_captured=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["capture_outcome"] == "repo_mutation_detected"
+    assert d["emergency_review_required"] is True
+    assert d["output_intake_ready"] is False
+    assert "Mutation" in d["recommended_next_phase"]
+
+
+def test_77g_dirty_tree_blocked(tmp_path, monkeypatch, capsys):
+    """Dirty tree reports blocked_dirty_tree."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path)
+    (tmp_path / "dirty.txt").write_text("dirty")
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_capture_result_intake_status"] == "blocked_dirty_tree"
+
+
+def test_77g_save_json(tmp_path, monkeypatch, capsys):
+    """--save persists intake artifact."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path, status="captured", output_captured=True)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-backend-capture-result-intake", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "real-backend-capture-result-intakes" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["capture_outcome"] == "captured"
+
+
+def test_77g_show_json(tmp_path, monkeypatch, capsys):
+    """Show command works with --json."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_capture_77g(tmp_path, status="captured", output_captured=True)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-backend-capture-result-intake", "--save", "--json"])
+    capsys.readouterr()
+    main(["phase", "real-backend-capture-result-intake-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["capture_outcome"] == "captured"
+
+
+def test_77g_no_mutation(tmp_path, monkeypatch, capsys):
+    """Intake never invokes backend or modifies files."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-backend-capture-result-intake", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_invocation_performed_in_this_phase"] is False
+    assert d["backend_capture_performed_in_this_phase"] is False
+    assert d["backend_output_captured_in_this_phase"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+
+
+def test_77g_show_no_artifact(tmp_path, monkeypatch, capsys):
+    """Show command reports no artifact when none exists."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-backend-capture-result-intake-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["backend_capture_result_intake_status"] == "no_artifact"

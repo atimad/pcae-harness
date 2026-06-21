@@ -13039,3 +13039,246 @@ def run_phase_real_captured_task_backend_capture_show(args: argparse.Namespace) 
     print(f"  Output captured: {'yes' if result.get('backend_output_captured') else 'no'}")
     print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77G: real backend capture result intake
+REAL_BACKEND_CAPTURE_RESULT_INTAKES_DIR = Path(".pcae") / "real-backend-capture-result-intakes"
+
+
+def _build_real_backend_capture_result_intake(root: HarnessPath) -> dict:
+    """Read and classify a 77F backend capture result.
+
+    This is RESULT INTAKE/CLASSIFICATION ONLY. It must not invoke backends,
+    retry capture, send packages, capture output, apply patches, commit, or push.
+    """
+    from datetime import datetime, timezone
+    import subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Read 77F capture result
+    capture_ref = _ref_exists(root, REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR)
+    capture_data = None
+    capture_status = "unknown"
+    if capture_ref:
+        cap_path = root.join(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR / "latest.json")
+        if cap_path.is_file():
+            capture_data = json.loads(cap_path.read_text(encoding="utf-8"))
+            capture_status = capture_data.get("backend_capture_status", "unknown")
+
+    # Git status
+    git_status_clean = True
+    try:
+        result_git = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                             capture_output=True, text=True, timeout=15)
+        git_status_clean = result_git.stdout.strip() == ""
+    except Exception:
+        git_status_clean = True
+
+    # Determine intake status
+    blockers: list = []
+    intake_status = "classified"
+
+    if not capture_ref or capture_status in ("no_artifact", "unknown"):
+        intake_status = "missing_capture_result"
+        blockers.append("No capture result artifact found.")
+
+    if git_status_clean is False and intake_status == "classified":
+        intake_status = "blocked_dirty_tree"
+        blockers.append("Working tree is not clean.")
+
+    # Quick return for missing/blocked
+    if intake_status != "classified":
+        return _make_minimal_intake(intake_status, git_status_clean, blockers, ts)
+
+    # Extract fields from capture result
+    dry_run_flag = capture_data.get("dry_run", False) if capture_data else False
+    invoke_performed = capture_data.get("backend_invocation_performed", False) if capture_data else False
+    output_captured = capture_data.get("backend_output_captured", False) if capture_data else False
+    return_code = capture_data.get("return_code") if capture_data else None
+    mutation_passed = capture_data.get("mutation_guard_passed", True) if capture_data else True
+    stderr_path = capture_data.get("stderr_path") if capture_data else None
+    stdout_path = capture_data.get("stdout_path") if capture_data else None
+    stdout_size = 0
+    stderr_size = 0
+    stderr_text = ""
+
+    if stderr_path:
+        sp = root.join(Path(stderr_path))
+        if sp.is_file():
+            stderr_text = sp.read_text(encoding="utf-8")
+            stderr_size = len(stderr_text)
+    if stdout_path:
+        op = root.join(Path(stdout_path))
+        if op.is_file():
+            stdout_size = len(op.read_text(encoding="utf-8"))
+
+    timeout_detected = "timeout" in stderr_text.lower() if stderr_text else False
+
+    # Classify
+    capture_outcome = "unknown"
+    output_intake_ready = False
+    retry_policy_needed = False
+    emergency_review_required = False
+    recommended_phase = "Resolve blockers first."
+
+    if capture_status == "captured":
+        capture_outcome = "captured"
+        output_intake_ready = True
+        recommended_phase = "77H — Real Captured Backend Output Intake"
+    elif capture_status == "failed_backend_invocation":
+        if timeout_detected or return_code == -1:
+            capture_outcome = "timeout_failure"
+            retry_policy_needed = True
+            recommended_phase = "77H — Backend Capture Timeout Policy"
+        else:
+            capture_outcome = "backend_failure"
+            retry_policy_needed = True
+            recommended_phase = "77H — Backend Capture Failure Policy"
+    elif capture_status == "failed_repo_mutation_detected":
+        capture_outcome = "repo_mutation_detected"
+        emergency_review_required = True
+        recommended_phase = "77H — Backend Capture Mutation Incident Review"
+    elif capture_status == "dry_run_ready":
+        capture_outcome = "dry_run_only"
+        recommended_phase = "77F — Real Captured Task Backend Capture (--execute)"
+    else:
+        capture_outcome = "unknown"
+
+    return {
+        "backend_capture_result_intake_status": "classified",
+        "capture_outcome": capture_outcome,
+        "capture_result_ref": str(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR / "latest.json") if capture_ref else None,
+        "backend_capture_status": capture_status,
+        "backend_name": capture_data.get("backend_name") if capture_data else None,
+        "backend_command": capture_data.get("backend_command") if capture_data else None,
+        "package_id": capture_data.get("package_id") if capture_data else None,
+        "contract_id": capture_data.get("contract_id") if capture_data else None,
+        "package_digest": capture_data.get("package_digest") if capture_data else None,
+        "prompt_digest": capture_data.get("prompt_digest") if capture_data else None,
+        "execute_requested": capture_data.get("execute_requested", False) if capture_data else False,
+        "backend_invocation_performed": invoke_performed,
+        "backend_capture_performed": capture_data.get("backend_capture_performed", False) if capture_data else False,
+        "backend_output_captured": output_captured,
+        "return_code": return_code,
+        "duration_seconds": capture_data.get("duration_seconds") if capture_data else None,
+        "stdout_path": stdout_path,
+        "stderr_path": stderr_path,
+        "stdout_size_bytes": stdout_size,
+        "stderr_size_bytes": stderr_size,
+        "timeout_detected": timeout_detected,
+        "mutation_guard_passed": mutation_passed,
+        "pre_git_status": capture_data.get("pre_git_status") if capture_data else None,
+        "post_git_status": capture_data.get("post_git_status") if capture_data else None,
+        "changed_files": capture_data.get("changed_files", []) if capture_data else [],
+        "unexpected_changed_files": capture_data.get("unexpected_changed_files", []) if capture_data else [],
+        "current_git_status": "clean" if git_status_clean else "dirty",
+        "output_intake_ready": output_intake_ready,
+        "retry_policy_needed": retry_policy_needed,
+        "emergency_review_required": emergency_review_required,
+        # Safety invariants
+        "backend_invocation_performed_in_this_phase": False,
+        "backend_capture_performed_in_this_phase": False,
+        "backend_output_captured_in_this_phase": False,
+        "apply_performed": False, "files_modified": False,
+        "commits_created": 0, "push_performed": False,
+        "execution_authorized": False, "output_application_allowed": False,
+        "recommended_next_phase": recommended_phase,
+        "blockers": blockers, "warnings": [],
+        "next_operator_action": (
+            f"Capture result classified as '{capture_outcome}'. {recommended_phase}."
+            if not blockers
+            else "Resolve blockers before proceeding."
+        ),
+        "generated_at": ts,
+    }
+
+
+def _make_minimal_intake(intake_status: str, git_clean: bool, blockers: list, ts: str) -> dict:
+    return {
+        "backend_capture_result_intake_status": intake_status,
+        "capture_outcome": "unknown", "capture_result_ref": None,
+        "backend_capture_status": "unknown", "backend_name": None, "backend_command": None,
+        "package_id": None, "contract_id": None, "package_digest": None, "prompt_digest": None,
+        "execute_requested": False, "backend_invocation_performed": False,
+        "backend_capture_performed": False, "backend_output_captured": False,
+        "return_code": None, "duration_seconds": None,
+        "stdout_path": None, "stderr_path": None, "stdout_size_bytes": 0, "stderr_size_bytes": 0,
+        "timeout_detected": False, "mutation_guard_passed": True,
+        "pre_git_status": None, "post_git_status": None,
+        "changed_files": [], "unexpected_changed_files": [],
+        "current_git_status": "clean" if git_clean else "dirty",
+        "output_intake_ready": False, "retry_policy_needed": False, "emergency_review_required": False,
+        "backend_invocation_performed_in_this_phase": False,
+        "backend_capture_performed_in_this_phase": False,
+        "backend_output_captured_in_this_phase": False,
+        "apply_performed": False, "files_modified": False,
+        "commits_created": 0, "push_performed": False,
+        "execution_authorized": False, "output_application_allowed": False,
+        "recommended_next_phase": "Resolve blockers first.",
+        "blockers": blockers, "warnings": [],
+        "next_operator_action": "Resolve blockers before proceeding.",
+        "generated_at": ts,
+    }
+
+
+def run_phase_real_backend_capture_result_intake(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_real_backend_capture_result_intake(root)
+    if getattr(args, "save", False):
+        d = root.join(REAL_BACKEND_CAPTURE_RESULT_INTAKES_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Result intake saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["backend_capture_result_intake_status"] == "classified" else 1
+    print("Real Backend Capture Result Intake"); print("=" * 34)
+    print(f"  Intake status: {result['backend_capture_result_intake_status']}")
+    print(f"  Capture outcome: {result['capture_outcome']}")
+    print(f"  Backend: {result.get('backend_name', 'n/a')}")
+    print(f"  Package ID: {result.get('package_id', 'n/a')}")
+    print(f"  Return code: {result.get('return_code', 'n/a')}")
+    print(f"  Duration: {result.get('duration_seconds', 'n/a')}s")
+    print(f"  Timeout detected: {'yes' if result['timeout_detected'] else 'no'}")
+    print(f"  Mutation guard: {'passed' if result['mutation_guard_passed'] else 'failed'}")
+    if result.get('stdout_size_bytes'):
+        print(f"  stdout: {result['stdout_size_bytes']} bytes")
+    if result.get('stderr_size_bytes'):
+        print(f"  stderr: {result['stderr_size_bytes']} bytes")
+    print(f"  Output intake ready: {'yes' if result['output_intake_ready'] else 'no'}")
+    print(f"  Retry policy needed: {'yes' if result['retry_policy_needed'] else 'no'}")
+    print(f"  Emergency review: {'yes' if result['emergency_review_required'] else 'no'}")
+    print(f"  Backend invoked (this phase): no")
+    print(f"  Output captured (this phase): no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["backend_capture_result_intake_status"] == "classified" else 1
+
+
+def run_phase_real_backend_capture_result_intake_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(REAL_BACKEND_CAPTURE_RESULT_INTAKES_DIR / "latest.json")
+    if not p.is_file():
+        result = {"backend_capture_result_intake_status": "no_artifact", "capture_outcome": "unknown"}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No result intake artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("backend_capture_result_intake_status") == "classified" else 1
+    print("Real Backend Capture Result Intake (Show)"); print("=" * 40)
+    print(f"  Status: {result.get('backend_capture_result_intake_status', 'unknown')}")
+    print(f"  Outcome: {result.get('capture_outcome', 'unknown')}")
+    print(f"  Output intake ready: {'yes' if result.get('output_intake_ready') else 'no'}")
+    print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
+    return 0
