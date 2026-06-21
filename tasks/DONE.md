@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 77A: Real Captured Task Readiness Gate (20260621-0902-phase-77a-real-captured-task-readiness-gate)
 - Phase 76G: Manual Apply Lifecycle Final Summary (20260621-0901-phase-76g-manual-apply-lifecycle-final-summary)
 - Phase 76F: Manual Apply No-Op Closure Summary (20260621-0900-phase-76f-manual-apply-noop-closure-summary)
 - Phase 76E: Manual Apply Result Validation (20260620-1930-phase-76e-manual-apply-result-validation)
