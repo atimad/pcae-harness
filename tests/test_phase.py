@@ -12181,3 +12181,344 @@ def test_77c_show_no_artifact(tmp_path, monkeypatch, capsys):
     assert exit_code == 1
     assert d["package_dry_run_status"] == "no_artifact"
     assert d["package_id"] is None
+
+
+# Phase 77D: real captured task package approval
+
+def _seed_dry_run_77d(tmp_path: Path, status: str = "ready", contract_digest: str = "abc123", package_digest: str = "def456") -> None:
+    """Create a dry-run artifact for testing."""
+    d = tmp_path / ".pcae" / "real-captured-task-package-dry-runs"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "package_dry_run_status": status,
+        "package_id": "REAL-CAPTURED-TASK-001-PACKAGE-DRY-RUN" if status == "ready" else None,
+        "contract_id": "REAL-CAPTURED-TASK-001" if status == "ready" else None,
+        "task_title": "Document first real captured task governance path" if status == "ready" else None,
+        "task_type": "documentation_only" if status == "ready" else None,
+        "scope_mode": "documentation_only" if status == "ready" else None,
+        "allowed_files": ["docs/REAL_CAPTURED_TASKS.md", "CHANGELOG.md", "PROJECT_STATUS.md"],
+        "forbidden_files": ["src/**", "tests/**", "pyproject.toml", ".pcae/**", ".githooks/**"],
+        "validation_commands": ["python -m pytest -n auto", "pcae check", "pcae health"],
+        "contract_digest": contract_digest,
+        "package_digest": package_digest,
+    }))
+
+def _seed_contract_77d(tmp_path: Path, status: str = "prepared") -> str:
+    """Create a contract for testing. Returns the stable contract digest."""
+    import hashlib
+    contract = {
+        "real_task_contract_status": status,
+        "contract_id": "REAL-CAPTURED-TASK-001" if status == "prepared" else None,
+        "task_title": "Document first real captured task governance path" if status == "prepared" else None,
+        "task_type": "documentation_only" if status == "prepared" else None,
+        "scope_mode": "documentation_only" if status == "prepared" else None,
+        "task_goal": "Create docs/REAL_CAPTURED_TASKS.md documenting the governance path.",
+        "allowed_files": ["docs/REAL_CAPTURED_TASKS.md", "CHANGELOG.md", "PROJECT_STATUS.md"],
+        "forbidden_files": ["src/**", "tests/**", "pyproject.toml", ".pcae/**", ".githooks/**"],
+        "allowed_actions": ["create_documentation_file", "update_changelog", "update_project_status"],
+        "forbidden_actions": ["modify_source_code", "modify_tests", "invoke_backend", "capture_backend_output", "apply_captured_output", "authorize_execution"],
+        "validation_commands": ["python -m pytest -n auto", "pcae check", "pcae health"],
+        "acceptance_criteria": ["docs/REAL_CAPTURED_TASKS.md exists", "All tests pass", "pcae check passes"],
+        "stop_conditions": ["Backend invocation would be required", "Source code modification would be required"],
+        "recommended_next_phase": "77C — Real Captured Task Package Dry-Run",
+    }
+    stable_digest = hashlib.sha256(json.dumps(contract, sort_keys=True).encode("utf-8")).hexdigest()
+    contract["generated_at"] = "2026-06-21T00:00:00Z"
+    d = tmp_path / ".pcae" / "real-captured-task-contracts"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps(contract))
+    return stable_digest
+
+
+def test_77d_missing_dry_run_blocked(tmp_path, monkeypatch, capsys):
+    """Missing dry-run reports missing_package_dry_run."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "missing_package_dry_run"
+    assert d["human_package_approval_granted"] is False
+    assert d["package_send_allowed_now"] is False
+    assert d["backend_invocation_allowed_now"] is False
+    assert d["backend_capture_allowed_now"] is False
+
+
+def test_77d_package_not_ready_blocked(tmp_path, monkeypatch, capsys):
+    """Package not ready reports package_not_ready."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_dry_run_77d(tmp_path, status="blocked_dirty_tree")
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "package_not_ready"
+
+
+def test_77d_digest_mismatch_blocked(tmp_path, monkeypatch, capsys):
+    """Digest mismatch reports digest_mismatch."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest="wrong_digest_00000", package_digest="pkg123")
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "digest_mismatch"
+
+
+def test_77d_dirty_tree_blocked(tmp_path, monkeypatch, capsys):
+    """Dirty git status reports blocked_dirty_tree."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    (tmp_path / "dirty.txt").write_text("dirty")
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "blocked_dirty_tree"
+
+
+def test_77d_audit_warnings_blocked(tmp_path, monkeypatch, capsys):
+    """Audit warnings report blocked_audit_warnings."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    # Add audit warning
+    ad = tmp_path / ".pcae" / "phase-audits"
+    ad.mkdir(parents=True, exist_ok=True)
+    (ad / "latest.json").write_text(json.dumps({"phases_detected": 1, "warnings": ["Test warning"]}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "blocked_audit_warnings"
+    assert d["audit_warning_count"] == 1
+
+
+def test_77d_execution_not_disabled_blocked(tmp_path, monkeypatch, capsys):
+    """Execution not disabled reports blocked_execution_not_disabled."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": False, "execution_authorized": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "blocked_execution_not_disabled"
+
+
+def test_77d_runner_available_blocked(tmp_path, monkeypatch, capsys):
+    """Runner execution available reports blocked_runner_execution_available."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True, "execution_authorized": False}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": True, "dry_run": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "blocked_runner_execution_available"
+
+
+def test_77d_missing_agent_lock_blocked(tmp_path, monkeypatch, capsys):
+    """Missing agent lock reports blocked_agent_lock_missing."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    # Do NOT set agent lock — intentionally missing
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True, "execution_authorized": False}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False, "dry_run": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    monkeypatch.chdir(tmp_path)
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "blocked_agent_lock_missing"
+
+
+def test_77d_ready_unapproved(tmp_path, monkeypatch, capsys):
+    """Clean repo reports ready_for_approval_request without --approve."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True, "execution_authorized": False}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False, "dry_run": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "ready_for_approval_request"
+    assert d["human_package_approval_granted"] is False
+    assert d["package_send_allowed_now"] is False
+    assert d["backend_invocation_allowed_now"] is False
+    assert d["backend_capture_allowed_now"] is False
+    assert d["backend_capture_preflight_allowed_in_future_phase"] is False
+
+
+def test_77d_approved(tmp_path, monkeypatch, capsys):
+    """--approve creates an approved artifact."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True, "execution_authorized": False}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False, "dry_run": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--approve", "--approved-by", "Operator", "--reason", "Approve for future capture preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "approved"
+    assert d["human_package_approval_granted"] is True
+    assert d["approved_by"] == "Operator"
+    assert d["approval_reason"] == "Approve for future capture preflight"
+    assert d["package_id"] == "REAL-CAPTURED-TASK-001-PACKAGE-DRY-RUN"
+    assert d["contract_id"] == "REAL-CAPTURED-TASK-001"
+    assert d["contract_digest"] == real_digest
+    assert d["package_digest"] == "pkg123"
+    # Safety invariants
+    assert d["package_created_for_send"] is False
+    assert d["package_send_allowed_now"] is False
+    assert d["package_sent"] is False
+    assert d["backend_invocation_allowed_now"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["backend_capture_allowed_now"] is False
+    assert d["backend_capture_performed"] is False
+    assert d["backend_capture_preflight_allowed_in_future_phase"] is True
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+    assert "77E" in d["recommended_next_phase"]
+
+
+def test_77d_save_json(tmp_path, monkeypatch, capsys):
+    """--save persists the approval artifact."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True, "execution_authorized": False}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False, "dry_run": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--approve", "--approved-by", "Op", "--reason", "Test", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "real-captured-task-package-approvals" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["package_approval_status"] == "approved"
+    assert d["human_package_approval_granted"] is True
+
+
+def test_77d_show_json(tmp_path, monkeypatch, capsys):
+    """Show command works with --json."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-local")
+    monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True, "execution_authorized": False}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False, "dry_run": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--approve", "--approved-by", "Op", "--reason", "T", "--save", "--json"])
+    capsys.readouterr()
+    main(["phase", "real-captured-task-package-approval-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["package_approval_status"] == "approved"
+    assert d["human_package_approval_granted"] is True
+
+
+def test_77d_no_mutation(tmp_path, monkeypatch, capsys):
+    """Approval does not mutate files or invoke backend."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    real_digest = _seed_contract_77d(tmp_path, status="prepared")
+    _seed_dry_run_77d(tmp_path, status="ready", contract_digest=real_digest, package_digest="pkg123")
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True, "execution_authorized": False}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False, "dry_run": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-package-approval", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+    assert d["package_created_for_send"] is False
+    assert d["package_send_allowed_now"] is False
+    assert d["package_sent"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["backend_capture_performed"] is False
+
+
+def test_77d_show_no_artifact(tmp_path, monkeypatch, capsys):
+    """Show command reports no artifact when none exists."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-captured-task-package-approval-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["package_approval_status"] == "no_artifact"
+
+
+def test_77d_approve_missing_args(tmp_path, monkeypatch, capsys):
+    """--approve without --approved-by and --reason errors."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-captured-task-package-approval", "--approve", "--json"])
+    assert exit_code == 1

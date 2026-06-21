@@ -495,6 +495,8 @@ from pcae.commands.phase import (
     run_phase_real_captured_task_contract_show,
     run_phase_real_captured_task_package_dry_run,
     run_phase_real_captured_task_package_dry_run_show,
+    run_phase_real_captured_task_package_approval,
+    run_phase_real_captured_task_package_approval_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6347,6 +6349,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_real_captured_task_package_dry_run_show_parser.add_argument("--json", action="store_true")
     phase_real_captured_task_package_dry_run_show_parser.set_defaults(handler=run_phase_real_captured_task_package_dry_run_show)
+
+    # Phase 77D
+    phase_real_captured_task_package_approval_parser = phase_subparsers.add_parser(
+        "real-captured-task-package-approval",
+        help="Approve a real captured task package for future backend capture preflight (Phase 77D).",
+    )
+    phase_real_captured_task_package_approval_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_package_approval_parser.add_argument("--save", action="store_true")
+    phase_real_captured_task_package_approval_parser.add_argument("--approve", action="store_true", help="Grant human approval to the package.")
+    phase_real_captured_task_package_approval_parser.add_argument("--approved-by", type=str, default=None, help="Name of approving operator.")
+    phase_real_captured_task_package_approval_parser.add_argument("--reason", type=str, default=None, help="Reason for approval.")
+    phase_real_captured_task_package_approval_parser.set_defaults(handler=run_phase_real_captured_task_package_approval)
+
+    phase_real_captured_task_package_approval_show_parser = phase_subparsers.add_parser(
+        "real-captured-task-package-approval-show",
+        help="Show latest real captured task package approval artifact (Phase 77D).",
+    )
+    phase_real_captured_task_package_approval_show_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_package_approval_show_parser.set_defaults(handler=run_phase_real_captured_task_package_approval_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
