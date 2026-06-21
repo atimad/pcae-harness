@@ -2,13 +2,12 @@
 
 ## Current Phase
 
-Phase 77G: Real Backend Capture Result Intake.
+Phase 77H: Backend Capture Timeout Policy.
 
-Phase 77G adds `pcae phase real-backend-capture-result-intake --json --save` and
-`pcae phase real-backend-capture-result-intake-show --json`. Reads and classifies
-77F backend capture results. Classifies outcomes: captured, timeout_failure,
-backend_failure, repo_mutation_detected, dry_run_only. Never invokes backend.
-Persists to `.pcae/real-backend-capture-result-intakes/latest.json`. 11 new tests.
+Phase 77H adds `pcae phase backend-capture-timeout-policy --json --save` and
+`pcae phase backend-capture-timeout-policy-show --json`. Creates governed timeout/retry
+policy: proposes 300s timeout, max 1 additional attempt. Never invokes backend.
+Persists to `.pcae/backend-capture-timeout-policies/latest.json`. 9 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 

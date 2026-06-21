@@ -13158,3 +13158,195 @@ def test_77g_show_no_artifact(tmp_path, monkeypatch, capsys):
     d = json.loads(capsys.readouterr().out)
     assert exit_code == 1
     assert d["backend_capture_result_intake_status"] == "no_artifact"
+
+
+# Phase 77H: backend capture timeout policy
+
+def _seed_intake_77h(tmp_path: Path, outcome: str = "timeout_failure", retry_needed: bool = True, emergency: bool = False) -> None:
+    """Create a 77G intake artifact for testing."""
+    d = tmp_path / ".pcae" / "real-backend-capture-result-intakes"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "backend_capture_result_intake_status": "classified",
+        "capture_outcome": outcome,
+        "retry_policy_needed": retry_needed,
+        "emergency_review_required": emergency,
+        "output_intake_ready": outcome == "captured",
+        "timeout_detected": outcome == "timeout_failure",
+    }))
+
+def _seed_capture_77h(tmp_path: Path, duration: float = 120.0, mutation: bool = True) -> None:
+    """Create a 77F capture artifact for testing."""
+    d = tmp_path / ".pcae" / "real-captured-task-backend-captures"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "backend_capture_status": "failed_backend_invocation",
+        "backend_invocation_performed": True,
+        "backend_name": "claude-deepseek",
+        "backend_command": "/usr/local/bin/claude-deepseek",
+        "package_id": "REAL-CAPTURED-TASK-001-PACKAGE-DRY-RUN",
+        "contract_id": "REAL-CAPTURED-TASK-001",
+        "package_digest": "pkg123", "prompt_digest": "prompt456",
+        "return_code": -1, "duration_seconds": duration,
+        "mutation_guard_passed": mutation,
+        "changed_files": [], "unexpected_changed_files": [],
+    }))
+
+
+def test_77h_missing_intake_blocked(tmp_path, monkeypatch, capsys):
+    """Missing intake reports missing_result_intake."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-capture-timeout-policy", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["timeout_policy_status"] == "missing_result_intake"
+
+
+def test_77h_captured_not_timeout(tmp_path, monkeypatch, capsys):
+    """Captured outcome reports not_timeout_failure."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_intake_77h(tmp_path, outcome="captured", retry_needed=False)
+    _seed_capture_77h(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-timeout-policy", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["timeout_policy_status"] == "not_timeout_failure"
+
+
+def test_77h_repo_mutation_blocked(tmp_path, monkeypatch, capsys):
+    """Repo mutation outcome reports blocked_mutation_incident."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_intake_77h(tmp_path, outcome="repo_mutation_detected", retry_needed=False, emergency=True)
+    _seed_capture_77h(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-timeout-policy", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["timeout_policy_status"] == "blocked_mutation_incident"
+    assert d["emergency_review_required"] is True
+
+
+def test_77h_backend_failure_not_timeout(tmp_path, monkeypatch, capsys):
+    """Non-timeout backend failure reports not_timeout_failure."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_intake_77h(tmp_path, outcome="backend_failure", retry_needed=True)
+    _seed_capture_77h(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-timeout-policy", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["timeout_policy_status"] == "not_timeout_failure"
+
+
+def test_77h_prepared_timeout_policy(tmp_path, monkeypatch, capsys):
+    """Timeout failure outcome prepares a valid timeout policy."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-deepseek")
+    monkeypatch.chdir(tmp_path)
+    _seed_intake_77h(tmp_path, outcome="timeout_failure")
+    _seed_capture_77h(tmp_path, duration=120.0, mutation=True)
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"proof_status": "passed", "real_execution_disabled": True}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-timeout-policy", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["timeout_policy_status"] == "prepared"
+    assert d["previous_timeout_seconds"] == 120
+    assert d["proposed_timeout_seconds"] == 300
+    assert d["max_additional_attempts"] == 1
+    assert d["retry_allowed_now"] is False
+    assert d["automatic_retry_allowed"] is False
+    assert d["backend_retry_preflight_allowed_in_future_phase"] is True
+    assert d["backend_invocation_allowed_now"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["backend_output_captured"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["execution_authorized"] is False
+    assert "77I" in d["recommended_next_phase"]
+
+
+def test_77h_save_json(tmp_path, monkeypatch, capsys):
+    """--save persists policy artifact."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-deepseek")
+    monkeypatch.chdir(tmp_path)
+    _seed_intake_77h(tmp_path, outcome="timeout_failure")
+    _seed_capture_77h(tmp_path)
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"real_execution_disabled": True}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-timeout-policy", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "backend-capture-timeout-policies" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["timeout_policy_status"] == "prepared"
+
+
+def test_77h_show_json(tmp_path, monkeypatch, capsys):
+    """Show command works."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-deepseek")
+    monkeypatch.chdir(tmp_path)
+    _seed_intake_77h(tmp_path, outcome="timeout_failure")
+    _seed_capture_77h(tmp_path)
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({"real_execution_disabled": True}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True)
+    (d3 / "latest.json").write_text(json.dumps({"execution_authorized": False, "execution_available": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-timeout-policy", "--save", "--json"])
+    capsys.readouterr()
+    main(["phase", "backend-capture-timeout-policy-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["timeout_policy_status"] == "prepared"
+
+
+def test_77h_no_mutation(tmp_path, monkeypatch, capsys):
+    """Policy never invokes backend."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-capture-timeout-policy", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_invocation_performed"] is False
+    assert d["backend_capture_performed"] is False
+    assert d["backend_output_captured"] is False
+    assert d["apply_performed"] is False
+
+
+def test_77h_show_no_artifact(tmp_path, monkeypatch, capsys):
+    """Show reports no artifact."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "backend-capture-timeout-policy-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["timeout_policy_status"] == "no_artifact"

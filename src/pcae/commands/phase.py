@@ -13282,3 +13282,231 @@ def run_phase_real_backend_capture_result_intake_show(args: argparse.Namespace) 
     print(f"  Output intake ready: {'yes' if result.get('output_intake_ready') else 'no'}")
     print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77H: backend capture timeout policy
+BACKEND_CAPTURE_TIMEOUT_POLICIES_DIR = Path(".pcae") / "backend-capture-timeout-policies"
+
+
+def _build_backend_capture_timeout_policy(root: HarnessPath) -> dict:
+    """Create a governed timeout/retry policy for a timed-out backend capture.
+
+    This is POLICY ONLY. It must not invoke backends, retry capture,
+    send packages, capture output, apply patches, commit, or push.
+    """
+    from datetime import datetime, timezone
+    import subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Read 77G intake
+    intake_ref = _ref_exists(root, REAL_BACKEND_CAPTURE_RESULT_INTAKES_DIR)
+    intake_data = None
+    capture_outcome = "unknown"
+    if intake_ref:
+        ip = root.join(REAL_BACKEND_CAPTURE_RESULT_INTAKES_DIR / "latest.json")
+        if ip.is_file():
+            intake_data = json.loads(ip.read_text(encoding="utf-8"))
+            capture_outcome = intake_data.get("capture_outcome", "unknown")
+
+    # Read 77F capture
+    capture_ref = _ref_exists(root, REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR)
+    capture_data = None
+    if capture_ref:
+        cp = root.join(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR / "latest.json")
+        if cp.is_file():
+            capture_data = json.loads(cp.read_text(encoding="utf-8"))
+
+    # Safety artifacts
+    real_execution_disabled = True
+    rep_ref = _ref_exists(root, Path(".pcae") / "real-execution-disabled-proofs")
+    if rep_ref:
+        rp = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rp.is_file():
+            real_execution_disabled = json.loads(rp.read_text(encoding="utf-8")).get("real_execution_disabled", True)
+
+    runner_execute_refuses = True
+    ret_ref = _ref_exists(root, Path(".pcae") / "runner-execution-traces")
+    if ret_ref:
+        rp2 = root.join(Path(".pcae") / "runner-execution-traces" / "latest.json")
+        if rp2.is_file():
+            runner_execute_refuses = not json.loads(rp2.read_text(encoding="utf-8")).get("execution_available", True)
+
+    agent_lock = read_agent_lock(root)
+    agent_lock_active = agent_lock is not None
+    locked_backend_name = agent_lock.agent_id if agent_lock else None
+
+    audit_warning_count = 0
+    audit_ref = _ref_exists(root, Path(".pcae") / "phase-audits")
+    if audit_ref:
+        ap = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if ap.is_file():
+            audit_warning_count = len(json.loads(ap.read_text(encoding="utf-8")).get("warnings", []))
+
+    git_status_clean = True
+    try:
+        r = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                    capture_output=True, text=True, timeout=15)
+        git_status_clean = r.stdout.strip() == ""
+    except Exception:
+        git_status_clean = True
+
+    # Gate validation
+    blockers: list = []
+    policy_status = "prepared"
+
+    if not intake_ref or capture_outcome in ("no_artifact", "unknown"):
+        policy_status = "missing_result_intake"
+        blockers.append("Result intake artifact is missing.")
+    elif capture_outcome == "captured":
+        policy_status = "not_timeout_failure"
+        blockers.append("Capture was successful. Proceed to output intake (77H output intake), not timeout policy.")
+    elif capture_outcome == "repo_mutation_detected":
+        policy_status = "blocked_mutation_incident"
+        blockers.append("Repo mutation detected. Emergency review required before any retry.")
+    elif capture_outcome == "backend_failure":
+        policy_status = "not_timeout_failure"
+        blockers.append("Backend failure (non-timeout). Separate backend failure policy needed.")
+    elif capture_outcome == "dry_run_only":
+        policy_status = "not_timeout_failure"
+        blockers.append("Dry-run only, no execution. Run --execute first.")
+    elif capture_outcome != "timeout_failure":
+        policy_status = "not_timeout_failure"
+        blockers.append(f"Unexpected capture outcome: '{capture_outcome}'.")
+    elif not git_status_clean:
+        policy_status = "blocked_dirty_tree"
+        blockers.append("Working tree is not clean.")
+    elif audit_warning_count > 0:
+        policy_status = "blocked_audit_warnings"
+        blockers.append(f"Audit has {audit_warning_count} warning(s).")
+    elif not real_execution_disabled:
+        policy_status = "blocked_execution_not_disabled"
+        blockers.append("Real execution is not confirmed disabled.")
+    elif not runner_execute_refuses:
+        policy_status = "blocked_runner_execution_available"
+        blockers.append("Runner execution is reported as available.")
+    elif not agent_lock_active:
+        policy_status = "blocked_agent_lock_missing"
+        blockers.append("No active agent lock.")
+    elif locked_backend_name not in ("claude-deepseek", "claude-local"):
+        policy_status = "blocked_backend_mismatch"
+        blockers.append(f"Locked backend '{locked_backend_name}' is not expected.")
+
+    # Extract fields for policy
+    prev_timeout = capture_data.get("duration_seconds") if capture_data else 120
+    mutation_passed = capture_data.get("mutation_guard_passed", True) if capture_data else True
+    changed = capture_data.get("changed_files", []) if capture_data else []
+    unexpected = capture_data.get("unexpected_changed_files", []) if capture_data else []
+
+    return {
+        "timeout_policy_status": policy_status,
+        "capture_outcome": capture_outcome,
+        "result_intake_ref": str(REAL_BACKEND_CAPTURE_RESULT_INTAKES_DIR / "latest.json") if intake_ref else None,
+        "capture_result_ref": str(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR / "latest.json") if capture_ref else None,
+        "backend_capture_status": capture_data.get("backend_capture_status") if capture_data else None,
+        "backend_name": capture_data.get("backend_name") if capture_data else None,
+        "backend_command": capture_data.get("backend_command") if capture_data else None,
+        "package_id": capture_data.get("package_id") if capture_data else None,
+        "contract_id": capture_data.get("contract_id") if capture_data else None,
+        "package_digest": capture_data.get("package_digest") if capture_data else None,
+        "prompt_digest": capture_data.get("prompt_digest") if capture_data else None,
+        "previous_timeout_seconds": int(prev_timeout) if prev_timeout else 120,
+        "proposed_timeout_seconds": 300 if policy_status == "prepared" else None,
+        "max_additional_attempts": 1 if policy_status == "prepared" else None,
+        "retry_policy_reason": (
+            "First governed capture timed out at 120s. Policy allows one retry at 300s timeout. "
+            "Same package, same backend, same gates, mutation guard, capture only."
+            if policy_status == "prepared" else None
+        ),
+        "retry_policy_needed": policy_status == "prepared",
+        "retry_allowed_now": False,
+        "automatic_retry_allowed": False,
+        "backend_retry_preflight_allowed_in_future_phase": policy_status == "prepared",
+        "backend_invocation_allowed_now": False,
+        "backend_capture_allowed_now": False,
+        "package_send_allowed_now": False,
+        "backend_invocation_performed": False,
+        "backend_capture_performed": False,
+        "backend_output_captured": False,
+        "output_intake_ready": False,
+        "emergency_review_required": capture_outcome == "repo_mutation_detected",
+        "mutation_guard_passed": mutation_passed,
+        "changed_files": changed,
+        "unexpected_changed_files": unexpected,
+        "current_git_status": "clean" if git_status_clean else "dirty",
+        "audit_warning_count": audit_warning_count,
+        "real_execution_disabled": real_execution_disabled,
+        "runner_execute_refuses": runner_execute_refuses,
+        "agent_lock_active": agent_lock_active,
+        "locked_backend_name": locked_backend_name,
+        "apply_performed": False, "files_modified": False,
+        "commits_created": 0, "push_performed": False,
+        "execution_authorized": False, "output_application_allowed": False,
+        "recommended_next_phase": (
+            "77I — Backend Capture Retry Preflight" if policy_status == "prepared"
+            else "Resolve blockers first."
+        ),
+        "blockers": blockers, "warnings": [],
+        "next_operator_action": (
+            "Timeout policy prepared. Proceed to Phase 77I for retry preflight. "
+            "No retry has been performed. No backend has been invoked."
+            if policy_status == "prepared"
+            else "Resolve blockers before proceeding."
+        ),
+        "generated_at": ts,
+    }
+
+
+def run_phase_backend_capture_timeout_policy(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_backend_capture_timeout_policy(root)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CAPTURE_TIMEOUT_POLICIES_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Timeout policy saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["timeout_policy_status"] == "prepared" else 1
+    print("Backend Capture Timeout Policy"); print("=" * 30)
+    print(f"  Policy status: {result['timeout_policy_status']}")
+    print(f"  Capture outcome: {result['capture_outcome']}")
+    print(f"  Backend: {result.get('backend_name', 'n/a')}")
+    print(f"  Previous timeout: {result.get('previous_timeout_seconds', 'n/a')}s")
+    print(f"  Proposed timeout: {result.get('proposed_timeout_seconds', 'n/a')}s")
+    print(f"  Max additional attempts: {result.get('max_additional_attempts', 'n/a')}")
+    print(f"  Retry allowed now: no")
+    print(f"  Automatic retry: no")
+    print(f"  Retry preflight (future): {'yes' if result['backend_retry_preflight_allowed_in_future_phase'] else 'no'}")
+    print(f"  Backend invoked: no")
+    print(f"  Output captured: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["timeout_policy_status"] == "prepared" else 1
+
+
+def run_phase_backend_capture_timeout_policy_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CAPTURE_TIMEOUT_POLICIES_DIR / "latest.json")
+    if not p.is_file():
+        r = {"timeout_policy_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("No timeout policy artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("timeout_policy_status") == "prepared" else 1
+    print("Backend Capture Timeout Policy (Show)"); print("=" * 36)
+    print(f"  Status: {r.get('timeout_policy_status', 'unknown')}")
+    print(f"  Proposed timeout: {r.get('proposed_timeout_seconds', 'n/a')}s")
+    print(f"  Next phase: {r.get('recommended_next_phase', 'n/a')}")
+    return 0

@@ -503,6 +503,8 @@ from pcae.commands.phase import (
     run_phase_real_captured_task_backend_capture_show,
     run_phase_real_backend_capture_result_intake,
     run_phase_real_backend_capture_result_intake_show,
+    run_phase_backend_capture_timeout_policy,
+    run_phase_backend_capture_timeout_policy_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6424,6 +6426,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_real_backend_capture_result_intake_show_parser.add_argument("--json", action="store_true")
     phase_real_backend_capture_result_intake_show_parser.set_defaults(handler=run_phase_real_backend_capture_result_intake_show)
+
+    # Phase 77H
+    phase_backend_capture_timeout_policy_parser = phase_subparsers.add_parser(
+        "backend-capture-timeout-policy",
+        help="Create a governed timeout/retry policy for a timed-out backend capture (Phase 77H).",
+    )
+    phase_backend_capture_timeout_policy_parser.add_argument("--json", action="store_true")
+    phase_backend_capture_timeout_policy_parser.add_argument("--save", action="store_true")
+    phase_backend_capture_timeout_policy_parser.set_defaults(handler=run_phase_backend_capture_timeout_policy)
+
+    phase_backend_capture_timeout_policy_show_parser = phase_subparsers.add_parser(
+        "backend-capture-timeout-policy-show",
+        help="Show latest backend capture timeout policy artifact (Phase 77H).",
+    )
+    phase_backend_capture_timeout_policy_show_parser.add_argument("--json", action="store_true")
+    phase_backend_capture_timeout_policy_show_parser.set_defaults(handler=run_phase_backend_capture_timeout_policy_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
