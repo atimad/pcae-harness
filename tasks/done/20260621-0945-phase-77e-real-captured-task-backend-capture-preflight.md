@@ -10,7 +10,7 @@ Phase 77E: Real Captured Task Backend Capture Preflight
 
 ## Status
 
-active
+done
 
 ## Mode
 
