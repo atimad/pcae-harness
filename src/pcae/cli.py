@@ -485,6 +485,8 @@ from pcae.commands.phase import (
     run_phase_captured_output_manual_apply_result_show,
     run_phase_captured_output_manual_apply_result_validate,
     run_phase_captured_output_manual_apply_result_validation_show,
+    run_phase_captured_output_manual_apply_noop_closure,
+    run_phase_captured_output_manual_apply_noop_closure_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6257,6 +6259,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_captured_output_manual_apply_result_validation_show_parser.add_argument("--json", action="store_true")
     phase_captured_output_manual_apply_result_validation_show_parser.set_defaults(handler=run_phase_captured_output_manual_apply_result_validation_show)
+
+    # Phase 76F
+    phase_captured_output_manual_apply_noop_closure_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-noop-closure",
+        help="No-op closure summary for captured output apply lifecycle (Phase 76F).",
+    )
+    phase_captured_output_manual_apply_noop_closure_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_noop_closure_parser.add_argument("--save", action="store_true")
+    phase_captured_output_manual_apply_noop_closure_parser.set_defaults(handler=run_phase_captured_output_manual_apply_noop_closure)
+
+    phase_captured_output_manual_apply_noop_closure_show_parser = phase_subparsers.add_parser(
+        "captured-output-manual-apply-noop-closure-show",
+        help="Show latest no-op closure artifact (Phase 76F).",
+    )
+    phase_captured_output_manual_apply_noop_closure_show_parser.add_argument("--json", action="store_true")
+    phase_captured_output_manual_apply_noop_closure_show_parser.set_defaults(handler=run_phase_captured_output_manual_apply_noop_closure_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

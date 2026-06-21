@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 76E: Manual Apply Result Validation.
+Phase 76F: Manual Apply No-Op Closure Summary.
 
-Phase 76E adds `pcae phase captured-output-manual-apply-result-validate --json --save`
-validating the 76D manual apply execution result. Real repo result: validated_no_op
-(fixture no-op). No commit or push needed. Validates all result paths.
+Phase 76F adds `pcae phase captured-output-manual-apply-noop-closure --json --save`
+formally closing the captured-output apply lifecycle as a no-op. No commit or push
+needed. Closure only — does not apply, modify project code, invoke backend, or authorize execution.
 
 ## Milestone: Execution Chain Traceability Complete
 

@@ -10820,3 +10820,164 @@ def run_phase_captured_output_manual_apply_result_validation_show(args: argparse
     print(f"  No commit needed: {'yes' if result.get('no_commit_needed') else 'no'}")
     print(f"  No push needed: {'yes' if result.get('no_push_needed') else 'no'}")
     return 0
+
+
+# Phase 76F: manual apply no-op closure summary
+CAPTURED_OUTPUT_MANUAL_APPLY_NOOP_CLOSURES_DIR = Path(".pcae") / "captured-output-manual-apply-noop-closures"
+
+
+def _build_captured_output_manual_apply_noop_closure(root: HarnessPath) -> dict:
+    base = {
+        "closure_status": "blocked", "closure_type": "no_op",
+        "manual_apply_result_ref": None, "result_validation_ref": None,
+        "human_approval_ref": None, "approval_validation_ref": None,
+        "execution_preflight_ref": None, "lifecycle_ref": None,
+        "no_changes_to_apply": False, "apply_result_valid": False,
+        "apply_performed": False, "files_modified": False,
+        "changed_files": [], "unexpected_changed_files": [],
+        "commits_created": 0, "push_performed": False,
+        "commit_needed": False, "push_needed": False,
+        "backend_invocation_performed": False, "automatic_apply_allowed": False,
+        "backend_apply_allowed": False, "execution_authorized": False,
+        "current_git_status": None, "closure_reason": None, "lifecycle_closed": False,
+        "recommended_next_phase": "76G — Manual Apply Lifecycle Final Summary (future)",
+        "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read result validation
+    val_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR / "latest.json")
+    if not val_path.is_file():
+        base["closure_status"] = "validation_missing"
+        base["blockers"] = ["No result validation found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-result-validate --save first."
+        return base
+    validation = json.loads(val_path.read_text(encoding="utf-8"))
+    base["result_validation_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR / "latest.json")
+    base["apply_result_valid"] = validation.get("apply_result_valid", False)
+    base["no_changes_to_apply"] = validation.get("no_changes_to_apply", False)
+    base["apply_performed"] = validation.get("apply_performed", False)
+    base["files_modified"] = validation.get("files_modified", False)
+    base["changed_files"] = validation.get("changed_files", [])
+    base["commits_created"] = validation.get("commits_created", 0)
+    base["push_performed"] = validation.get("push_performed", False)
+
+    # Read execution result
+    result_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR / "latest.json")
+    if result_path.is_file():
+        base["manual_apply_result_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR / "latest.json")
+        exec_result = json.loads(result_path.read_text(encoding="utf-8"))
+        base["unexpected_changed_files"] = exec_result.get("unexpected_changed_files", [])
+
+    # Read other refs for completeness
+    if root.join(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json").is_file():
+        base["human_approval_ref"] = str(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+    if root.join(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR / "latest.json").is_file():
+        base["approval_validation_ref"] = str(CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR / "latest.json")
+    if root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTION_PREFLIGHTS_DIR / "latest.json").is_file():
+        base["execution_preflight_ref"] = str(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTION_PREFLIGHTS_DIR / "latest.json")
+
+    val_status = validation.get("result_validation_status")
+
+    # Check git status
+    import subprocess as _sp
+    try:
+        gs = _sp.run(["git", "status", "--porcelain"], cwd=root.path,
+                     check=True, capture_output=True, text=True)
+        base["current_git_status"] = gs.stdout
+        if gs.stdout.strip():
+            base["closure_status"] = "blocked_dirty_tree"
+            base["blockers"] = ["Working tree is not clean."]
+            base["next_operator_action"] = "Clean the working tree before recording closure."
+            return base
+    except (_sp.CalledProcessError, OSError):
+        base["current_git_status"] = "unknown"
+
+    # Validate only no-op can be closed
+    if val_status != "validated_no_op":
+        if val_status == "validated_applied":
+            base["closure_status"] = "not_no_op"
+            base["closure_reason"] = "Result was applied (not no-op). Use applied-result commit/push readiness path in future phase."
+            base["blockers"] = ["validated_applied result cannot use no-op closure path."]
+            base["next_operator_action"] = "A future phase (applied-result commit readiness) is needed for applied results."
+        else:
+            base["closure_status"] = "blocked"
+            base["blockers"] = [f"Validation status is {val_status}, not validated_no_op."]
+            base["next_operator_action"] = validation.get("next_operator_action", "Resolve validation blockers first.")
+        return base
+
+    if not validation.get("no_commit_needed") or not validation.get("no_push_needed"):
+        base["closure_status"] = "blocked"
+        base["blockers"] = ["Validation says commit or push is needed."]
+        base["next_operator_action"] = "Validation must confirm no_commit_needed and no_push_needed."
+        return base
+
+    # Close as no-op
+    base["closure_status"] = "closed_no_op"
+    base["closure_type"] = "no_op"
+    base["lifecycle_closed"] = True
+    base["commit_needed"] = False
+    base["push_needed"] = False
+    base["closure_reason"] = (
+        "Captured output (QUEUE-FIXTURE-001) explicitly stated no code changes are required. "
+        "Manual apply execution and result validation confirmed no-op. "
+        "No commit or push is needed. Lifecycle is closed."
+    )
+    base["blockers"] = []
+    base["next_operator_action"] = (
+        "No-op closure complete. This captured-output apply lifecycle is formally closed. "
+        "No commit, push, or further action is needed for this output."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_noop_closure(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_noop_closure(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_NOOP_CLOSURES_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"No-op closure saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["closure_status"] == "closed_no_op" else 1
+    print("Manual Apply No-Op Closure Summary"); print("=" * 40)
+    print(f"  Closure status: {result['closure_status']}")
+    print(f"  Closure type: {result['closure_type']}")
+    print(f"  Lifecycle closed: {'yes' if result['lifecycle_closed'] else 'no'}")
+    print(f"  No changes to apply: {'yes' if result['no_changes_to_apply'] else 'no'}")
+    print(f"  Apply performed: no")
+    print(f"  Files modified: no")
+    print(f"  Changed files: {len(result['changed_files'])}")
+    print(f"  Commits created: {result['commits_created']}")
+    print(f"  Push performed: no")
+    print(f"  Commit needed: no")
+    print(f"  Push needed: no")
+    print(f"  Execution authorized: no")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["closure_status"] == "closed_no_op" else 1
+
+
+def run_phase_captured_output_manual_apply_noop_closure_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_NOOP_CLOSURES_DIR / "latest.json")
+    if not p.is_file():
+        result = {"closure_status": "no_artifact", "lifecycle_closed": False}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No no-op closure artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("closure_status") == "closed_no_op" else 1
+    print("Manual Apply No-Op Closure (Show)"); print("=" * 40)
+    print(f"  Status: {result.get('closure_status', 'unknown')}")
+    print(f"  Lifecycle closed: {'yes' if result.get('lifecycle_closed') else 'no'}")
+    print(f"  Closure reason: {result.get('closure_reason', 'n/a')[:120]}")
+    return 0

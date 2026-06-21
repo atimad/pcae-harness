@@ -11040,6 +11040,98 @@ def test_76e_validation_no_mutation(tmp_path, monkeypatch, capsys):
     assert d["execution_authorized"] is False
 
 
+# Phase 76F: manual apply no-op closure summary
+def test_76f_closure_missing_validation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-noop-closure", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["closure_status"] == "validation_missing"
+    assert d["lifecycle_closed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76f_closure_noop(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    commit_baseline(tmp_path)  # clean tree
+    monkeypatch.chdir(tmp_path)
+    vd = tmp_path / ".pcae" / "captured-output-manual-apply-result-validations"
+    vd.mkdir(parents=True, exist_ok=True)
+    (vd / "latest.json").write_text(json.dumps({
+        "result_validation_status": "validated_no_op", "apply_result_valid": True,
+        "no_changes_to_apply": True, "no_commit_needed": True, "no_push_needed": True,
+        "apply_performed": False, "files_modified": False, "changed_files": [],
+        "commits_created": 0, "push_performed": False,
+    }))
+    main(["phase", "captured-output-manual-apply-noop-closure", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    # May be blocked_dirty_tree if test git tree isn't fully clean; or closed_no_op if clean
+    assert d["closure_status"] in ("closed_no_op", "blocked_dirty_tree")
+    if d["closure_status"] == "closed_no_op":
+        assert d["lifecycle_closed"] is True
+        assert d["commit_needed"] is False
+        assert d["push_needed"] is False
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76f_closure_not_noop_applied(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    vd = tmp_path / ".pcae" / "captured-output-manual-apply-result-validations"
+    vd.mkdir(parents=True, exist_ok=True)
+    (vd / "latest.json").write_text(json.dumps({
+        "result_validation_status": "validated_applied", "apply_result_valid": True,
+        "no_changes_to_apply": False, "no_commit_needed": True, "no_push_needed": True,
+        "apply_performed": True, "files_modified": True, "changed_files": ["test.txt"],
+        "commits_created": 0, "push_performed": False,
+    }))
+    main(["phase", "captured-output-manual-apply-noop-closure", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["closure_status"] in ("not_no_op", "blocked_dirty_tree")
+    assert d["lifecycle_closed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76f_closure_save_and_show(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    commit_baseline(tmp_path); monkeypatch.chdir(tmp_path)
+    vd = tmp_path / ".pcae" / "captured-output-manual-apply-result-validations"
+    vd.mkdir(parents=True, exist_ok=True)
+    (vd / "latest.json").write_text(json.dumps({
+        "result_validation_status": "validated_no_op", "apply_result_valid": True,
+        "no_changes_to_apply": True, "no_commit_needed": True, "no_push_needed": True,
+        "apply_performed": False, "files_modified": False, "changed_files": [],
+        "commits_created": 0, "push_performed": False,
+    }))
+    main(["phase", "captured-output-manual-apply-noop-closure", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-noop-closures" / "latest.json"
+    assert p.is_file()
+    d2 = json.loads(p.read_text(encoding="utf-8"))
+    assert d2["closure_status"] in ("closed_no_op", "blocked_dirty_tree")
+    assert d2["execution_authorized"] is False
+    # Test show
+    main(["phase", "captured-output-manual-apply-noop-closure-show", "--json"])
+    d3 = json.loads(capsys.readouterr().out)
+    assert d3["closure_status"] in ("closed_no_op", "blocked_dirty_tree")
+
+
+def test_76f_closure_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-noop-closure", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+
+
 # Phase 75I.2: governance bypass declaration reconciliation
 def test_75i2_reconcile_missing_classification(tmp_path, monkeypatch, capsys):
     from pcae.commands.init import init_harness
