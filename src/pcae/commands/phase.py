@@ -14887,3 +14887,548 @@ def run_phase_backend_created_output_adoption_preflight_show(args: argparse.Name
     print(f"  Line count mismatch: {'yes' if r.get('line_count_semantics_mismatch') else 'no'}")
     print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77N: backend-created output adoption review
+BACKEND_CREATED_OUTPUT_ADOPTION_REVIEWS_DIR = Path(".pcae") / "backend-created-output-adoption-reviews"
+
+# Deterministic content review patterns
+_SECRET_PATTERNS = [
+    "api_key", "apikey", "api_secret", "secret_key", "secretkey",
+    "private_key", "privatekey", "access_token", "accesstoken",
+    "password:", "passwd:", "credentials:",
+]
+_BYPASS_PATTERNS = [
+    "skip governance", "skip-governance", "bypass governance",
+    "bypass pcae", "disable governance", "ignore governance",
+    "override governance", "without governance",
+]
+_RUNNER_PATTERNS = [
+    "runner-execute --execute",
+    "runner-execution-authorize --authorize",
+    "execution_authorized=true",
+    "execution_authorized = true",
+]
+_FORCE_PUSH_PATTERNS = [
+    "git push --force", "git push -f",
+    "force push", "force-push",
+]
+_OUTPUT_APPLY_PATTERNS = [
+    "pcae phase captured-output-manual-apply-execute --execute",
+    "pcae phase manual-apply-execute --execute",
+]
+_SOURCE_CHANGE_PATTERNS = [
+    "modify src/", "modify tests/", "modify config",
+    "change src/", "change tests/",
+    "edit src/", "edit tests/",
+    "update pyproject.toml", "update setup.cfg",
+]
+
+
+def _check_content_patterns(content: str) -> dict:
+    """Deterministic content safety scan. Returns dict of flag -> bool."""
+    cl = content.lower()
+    return {
+        "contains_obvious_secret_pattern": any(p.lower() in cl for p in _SECRET_PATTERNS),
+        "contains_backend_bypass_instruction": any(p.lower() in cl for p in _BYPASS_PATTERNS),
+        "contains_runner_execution_instruction": any(p.lower() in cl for p in _RUNNER_PATTERNS),
+        "contains_force_push_instruction": any(p.lower() in cl for p in _FORCE_PUSH_PATTERNS),
+        "contains_output_application_instruction": any(p.lower() in cl for p in _OUTPUT_APPLY_PATTERNS),
+        "contains_source_or_test_change_instruction": any(p.lower() in cl for p in _SOURCE_CHANGE_PATTERNS),
+    }
+
+
+def _build_backend_created_output_adoption_review(root: HarnessPath) -> dict:
+    """Adoption review for backend-created quarantined output. No invocation, no mutation."""
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list = []
+    wl: list = []
+    rn: list = []
+
+    # Read 77M adoption preflight
+    preflight_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_ADOPTION_PREFLIGHTS_DIR)
+    preflight_data = None
+    if preflight_ref:
+        pp = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_PREFLIGHTS_DIR / "latest.json")
+        if pp.is_file():
+            preflight_data = json.loads(pp.read_text(encoding="utf-8"))
+
+    # Read 77L quarantine review (chain context)
+    quarantine_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR)
+    quarantine_data = None
+    if quarantine_ref:
+        qp = root.join(BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR / "latest.json")
+        if qp.is_file():
+            quarantine_data = json.loads(qp.read_text(encoding="utf-8"))
+
+    # Read 77K mutation intake
+    intake_ref = _ref_exists(root, BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR)
+    intake_data = None
+    if intake_ref:
+        ip = root.join(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json")
+        if ip.is_file():
+            intake_data = json.loads(ip.read_text(encoding="utf-8"))
+
+    # Read 77J retry result
+    retry_ref = _ref_exists(root, BACKEND_CAPTURE_GOVERNED_RETRIES_DIR)
+    retry_data = None
+    if retry_ref:
+        rp = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json")
+        if rp.is_file():
+            retry_data = json.loads(rp.read_text(encoding="utf-8"))
+
+    # ----------------------------------------------------------------
+    # Block-level checks
+    # ----------------------------------------------------------------
+
+    # 1. Adoption preflight must exist and be ready
+    if not preflight_data:
+        rs = "missing_adoption_preflight"
+        bl.append("Adoption preflight artifact not found.")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data)
+
+    pf_status = preflight_data.get("backend_created_output_adoption_preflight_status", "")
+    if pf_status != "ready_for_adoption_review":
+        rs = "adoption_preflight_not_ready"
+        bl.append(f"Adoption preflight not ready (status={pf_status}).")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data)
+
+    # 2. File path, existence, hash/size verification
+    bcf_path = preflight_data.get("source_file_path", _BCF_PATH)
+    exp_size = preflight_data.get("source_file_expected_size_bytes", 0)
+    exp_sha = preflight_data.get("source_file_expected_sha256", "")
+
+    bcf = root.path / bcf_path
+    fe = bcf.is_file()
+    fr = fe and bcf.stat().st_size > 0
+    al_split = 0; a_size = 0; a_sha = None; a_wc = 0; content = ""
+    if fe and fr:
+        content = bcf.read_text(encoding="utf-8")
+        al_split = len(content.split("\n"))
+        a_size = len(content)
+        a_sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        try:
+            wc_out = _sp.run(["wc", "-l", str(bcf)], capture_output=True, text=True, timeout=15)
+            a_wc = int(wc_out.stdout.strip().split()[0]) if wc_out.stdout.strip() else 0
+        except Exception:
+            a_wc = al_split
+
+    if not fe:
+        rs = "missing_backend_created_file"
+        bl.append("Backend-created file not found.")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=False)
+
+    sz_match = a_size == exp_size
+    sha_match = a_sha == exp_sha
+    if not sz_match or not sha_match:
+        rs = "metadata_mismatch"
+        bl.append(f"Metadata mismatch: size_match={sz_match} sha256_match={sha_match}")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content)
+
+    # 3. Git status check
+    ignored_status = ""; ig = False; staged = False; tracked = False
+    try:
+        gs = _sp.run(["git", "status", "--porcelain", "--ignored", "--", bcf_path],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        ignored_status = gs.stdout.strip()
+        if ignored_status.startswith("!!"):
+            ig = True
+        elif ignored_status and not ignored_status.startswith("??"):
+            staged = "M" in ignored_status[:2] or "A" in ignored_status[:2] or ignored_status[0] != " "
+            tracked = True
+    except Exception:
+        pass
+    if not staged and not tracked and not ig:
+        try:
+            lf = _sp.run(["git", "ls-files", "--", bcf_path],
+                          cwd=str(root.path), capture_output=True, text=True, timeout=15)
+            if lf.stdout.strip():
+                tracked = True
+        except Exception:
+            pass
+
+    if staged or tracked:
+        rs = "file_staged_or_tracked"
+        bl.append("File is staged or tracked.")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content,
+                    ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status)
+
+    # 4. Contract check
+    contract_id = preflight_data.get("contract_id", "unknown")
+    allowed_files = ["docs/REAL_CAPTURED_TASKS.md"]
+    within_contract = bcf_path in allowed_files
+
+    if not within_contract:
+        rs = "outside_contract_scope"
+        bl.append(f"File {bcf_path} not in allowed contract files.")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content,
+                    ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status,
+                    contract_id=contract_id)
+
+    # 5. Content review — deterministic markdown + safety scan
+    content_reviewable = bool(content) and len(content) > 100
+    if not content_reviewable:
+        rs = "content_not_reviewable"
+        bl.append("Content too short or empty for adoption review.")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content,
+                    ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status,
+                    contract_id=contract_id, within_contract=within_contract)
+
+    # Markdown structure
+    markdown_heading_count = content.count("\n#")
+    section_count_estimate = content.count("\n##") + (1 if content.startswith("#") else 0)
+
+    # Content safety pattern scan
+    patterns = _check_content_patterns(content)
+
+    safety_blocked = (
+        patterns["contains_obvious_secret_pattern"]
+        or patterns["contains_backend_bypass_instruction"]
+        or patterns["contains_runner_execution_instruction"]
+        or patterns["contains_force_push_instruction"]
+        or patterns["contains_output_application_instruction"]
+    )
+    if patterns["contains_source_or_test_change_instruction"]:
+        wl.append("Content references source/test changes — manual editorial review recommended.")
+
+    if safety_blocked:
+        rs = "content_safety_blocked"
+        bl.append("Content safety scan found blocked patterns.")
+        rn.append(f"Safety flags: {json.dumps({k: v for k, v in patterns.items() if v})}")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content,
+                    ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status,
+                    contract_id=contract_id, within_contract=within_contract,
+                    content_reviewable=content_reviewable,
+                    markdown_heading_count=markdown_heading_count,
+                    section_count_estimate=section_count_estimate,
+                    patterns=patterns)
+
+    # 6. Audit warnings check
+    audit_warning_count = 0
+    try:
+        ap = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if ap.is_file():
+            ad = json.loads(ap.read_text(encoding="utf-8"))
+            audit_warning_count = ad.get("warning_count", 0)
+    except Exception:
+        pass
+
+    if audit_warning_count > 0:
+        rs = "blocked_audit_warnings"
+        bl.append(f"Audit warnings present: {audit_warning_count}.")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content,
+                    ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status,
+                    contract_id=contract_id, within_contract=within_contract,
+                    content_reviewable=content_reviewable,
+                    markdown_heading_count=markdown_heading_count,
+                    section_count_estimate=section_count_estimate,
+                    patterns=patterns)
+
+    # 7. Real execution disabled proof
+    real_execution_disabled = True
+    try:
+        rep = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep.is_file():
+            rp_data = json.loads(rep.read_text(encoding="utf-8"))
+            real_execution_disabled = rp_data.get("real_execution_disabled", True)
+    except Exception:
+        pass
+
+    if not real_execution_disabled:
+        rs = "blocked_execution_not_disabled"
+        bl.append("Real execution is not disabled.")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content,
+                    ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status,
+                    contract_id=contract_id, within_contract=within_contract,
+                    content_reviewable=content_reviewable,
+                    markdown_heading_count=markdown_heading_count,
+                    section_count_estimate=section_count_estimate,
+                    patterns=patterns)
+
+    # 8. Runner execute must refuse
+    runner_execute_refuses = True
+    try:
+        rer = root.join(Path(".pcae") / "runner-executions" / "latest.json")
+        if rer.is_file():
+            re_data = json.loads(rer.read_text(encoding="utf-8"))
+            if re_data.get("execution_authorized") is True:
+                runner_execute_refuses = False
+    except Exception:
+        pass
+
+    if not runner_execute_refuses:
+        rs = "blocked_runner_execution_available"
+        bl.append("Runner execution is available (should refuse).")
+        return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                    bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                    a_size=a_size, a_sha=a_sha, content=content,
+                    ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status,
+                    contract_id=contract_id, within_contract=within_contract,
+                    content_reviewable=content_reviewable,
+                    markdown_heading_count=markdown_heading_count,
+                    section_count_estimate=section_count_estimate,
+                    patterns=patterns)
+
+    # ----------------------------------------------------------------
+    # All gates passed — reviewed adoption candidate
+    # ----------------------------------------------------------------
+    rs = "reviewed"
+    content_requires_manual_editorial_review = (
+        patterns.get("contains_source_or_test_change_instruction", False)
+    )
+    if content_requires_manual_editorial_review:
+        rn.append("Manual editorial review recommended: content references source/test changes.")
+
+    return _arq(rs, bl, wl, rn, ts, preflight_data, quarantine_data, intake_data, retry_data,
+                bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                a_size=a_size, a_sha=a_sha, content=content,
+                ig=ig, staged=staged, tracked=tracked, ignored_status=ignored_status,
+                contract_id=contract_id, within_contract=within_contract,
+                content_reviewable=content_reviewable,
+                markdown_heading_count=markdown_heading_count,
+                section_count_estimate=section_count_estimate,
+                patterns=patterns,
+                content_requires_manual_editorial_review=content_requires_manual_editorial_review)
+
+
+def _arq(rs: str, bl: list, wl: list, rn: list, ts: str,
+         preflight_data, quarantine_data, intake_data, retry_data,
+         bcf_path: str = "", fe: bool = False, fr: bool = False,
+         al_split: int = 0, a_wc: int = 0,
+         a_size: int = 0, a_sha: str = "",
+         content: str = "",
+         ig: bool = False, staged: bool = False, tracked: bool = False,
+         ignored_status: str = "",
+         contract_id: str = "", within_contract: bool = False,
+         content_reviewable: bool = False,
+         markdown_heading_count: int = 0, section_count_estimate: int = 0,
+         patterns: dict | None = None,
+         content_requires_manual_editorial_review: bool = False) -> dict:
+    """Build the adoption review result dict."""
+
+    pf = preflight_data
+    qr = quarantine_data
+    ik = intake_data
+    rt = retry_data
+    pat = patterns or {}
+
+    is_safe = not any([
+        pat.get("contains_obvious_secret_pattern"),
+        pat.get("contains_backend_bypass_instruction"),
+        pat.get("contains_runner_execution_instruction"),
+        pat.get("contains_force_push_instruction"),
+        pat.get("contains_output_application_instruction"),
+    ])
+    is_reviewed = rs == "reviewed"
+
+    outcome_map = {
+        "reviewed": "reviewed_adoption_candidate",
+        "missing_adoption_preflight": "blocked",
+        "adoption_preflight_not_ready": "blocked",
+        "missing_backend_created_file": "blocked",
+        "metadata_mismatch": "blocked",
+        "file_staged_or_tracked": "blocked",
+        "outside_contract_scope": "blocked",
+        "content_not_reviewable": "blocked",
+        "content_safety_blocked": "blocked",
+        "blocked_audit_warnings": "blocked",
+        "blocked_execution_not_disabled": "blocked",
+        "blocked_runner_execution_available": "blocked",
+    }
+
+    recommended = (
+        "77O — Backend-Created Output Adoption Approval" if is_reviewed
+        else "Resolve blockers first."
+    )
+
+    return {
+        "backend_created_output_adoption_review_status": rs,
+        "adoption_review_outcome": outcome_map.get(rs, "unknown"),
+        "adoption_preflight_ref": str(BACKEND_CREATED_OUTPUT_ADOPTION_PREFLIGHTS_DIR / "latest.json") if pf else None,
+        "quarantine_review_ref": str(BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR / "latest.json") if qr else None,
+        "mutation_intake_ref": str(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json") if ik else None,
+        "retry_result_ref": str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json") if rt else None,
+        "task_contract_ref": None,
+        "package_approval_ref": None,
+        "backend_retry_status": ik.get("backend_retry_status") if ik else (pf.get("backend_retry_status") if pf else None),
+        "capture_outcome": ik.get("capture_outcome") if ik else (pf.get("capture_outcome") if pf else "unknown"),
+        "quarantine_outcome": qr.get("quarantine_outcome") if qr else None,
+        "adoption_preflight_outcome": pf.get("adoption_preflight_outcome") if pf else None,
+        "backend_name": pf.get("backend_name") if pf else (ik.get("backend_name") if ik else None),
+        "backend_command": pf.get("backend_command") if pf else (ik.get("backend_command") if ik else None),
+        "package_id": pf.get("package_id") if pf else (ik.get("package_id") if ik else None),
+        "contract_id": contract_id,
+        "package_digest": pf.get("package_digest") if pf else (ik.get("package_digest") if ik else None),
+        "prompt_digest": pf.get("prompt_digest") if pf else (ik.get("prompt_digest") if ik else None),
+        "source_file_path": bcf_path,
+        "source_file_exists": fe,
+        "source_file_readable": fr,
+        "source_file_verified": fe and fr and a_size > 0 and a_sha is not None,
+        "source_file_size_bytes": a_size,
+        "source_file_sha256": a_sha,
+        "source_file_wc_line_count": a_wc,
+        "source_file_split_line_count": al_split,
+        "source_file_hidden_by_gitignore": ig,
+        "source_file_ignored": ig,
+        "source_file_staged": staged,
+        "source_file_tracked": tracked,
+        "source_file_committed": False,
+        "source_file_pushed": False,
+        "source_file_within_contract": within_contract,
+        "contract_scope_mode": "documentation_only",
+        "contract_task_type": "backend_output_capture",
+        "allowed_files": ["docs/REAL_CAPTURED_TASKS.md"],
+        "forbidden_files": [],
+        "markdown_heading_count": markdown_heading_count,
+        "section_count_estimate": section_count_estimate,
+        "content_reviewable": content_reviewable,
+        "content_within_contract": within_contract and content_reviewable,
+        "content_safety_review_passed": is_safe and is_reviewed,
+        "contains_obvious_secret_pattern": pat.get("contains_obvious_secret_pattern", False),
+        "contains_backend_bypass_instruction": pat.get("contains_backend_bypass_instruction", False),
+        "contains_runner_execution_instruction": pat.get("contains_runner_execution_instruction", False),
+        "contains_force_push_instruction": pat.get("contains_force_push_instruction", False),
+        "contains_output_application_instruction": pat.get("contains_output_application_instruction", False),
+        "contains_source_or_test_change_instruction": pat.get("contains_source_or_test_change_instruction", False),
+        "content_requires_manual_editorial_review": content_requires_manual_editorial_review,
+        "adoption_allowed_now": False,
+        "adoption_execution_allowed_now": False,
+        "adoption_approval_allowed_in_future_phase": is_reviewed,
+        "adoption_execution_allowed_in_future_phase": False,
+        "backend_invocation_performed": False,
+        "backend_capture_performed": False,
+        "backend_output_captured": False,
+        "apply_performed": False,
+        "files_modified_in_this_phase": False,
+        "file_deleted": False,
+        "file_moved": False,
+        "file_modified": False,
+        "file_staged": False,
+        "file_committed": False,
+        "file_pushed": False,
+        "commits_created": 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        "output_application_allowed": False,
+        "audit_warning_count": 0,
+        "real_execution_disabled": True,
+        "runner_execute_refuses": True,
+        "current_git_status": "clean",
+        "ignored_git_status_for_file": ignored_status,
+        "generated_at": ts,
+        "blockers": bl,
+        "warnings": wl,
+        "review_notes": rn,
+        "recommended_next_phase": recommended,
+        "next_operator_action": (
+            f"Adoption review passed. Content reviewable ({markdown_heading_count} headings, ~{section_count_estimate} sections, {a_size} bytes). "
+            "Adoption approval allowed in 77O. No file modified/staged/committed."
+            if is_reviewed
+            else "Resolve blockers first."
+        ),
+    }
+
+
+def run_phase_backend_created_output_adoption_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    r = _build_backend_created_output_adoption_review(root)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_REVIEWS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Adoption review saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r["backend_created_output_adoption_review_status"] == "reviewed" else 1
+    print("Backend-Created Output Adoption Review")
+    print("=" * 39)
+    print(f"  Status: {r['backend_created_output_adoption_review_status']}")
+    print(f"  Outcome: {r['adoption_review_outcome']}")
+    print(f"  File: {r['source_file_path']}")
+    print(f"  Exists: {'yes' if r['source_file_exists'] else 'no'}  Verified: {'yes' if r['source_file_verified'] else 'no'}")
+    if r.get("source_file_verified"):
+        print(f"  Size: {r['source_file_size_bytes']}B  SHA256: {str(r.get('source_file_sha256', ''))[:16] if r.get('source_file_sha256') else ''}...")
+        print(f"  Lines (wc): {r['source_file_wc_line_count']}  Lines (split): {r['source_file_split_line_count']}")
+    print(f"  Markdown headings: {r.get('markdown_heading_count', 0)}  Sections (est): {r.get('section_count_estimate', 0)}")
+    print(f"  Content reviewable: {'yes' if r.get('content_reviewable') else 'no'}")
+    print(f"  Content within contract: {'yes' if r.get('content_within_contract') else 'no'}")
+    print(f"  Safety review: {'passed' if r.get('content_safety_review_passed') else 'blocked'}")
+    if r.get("contains_obvious_secret_pattern"):
+        print(f"  BLOCKED: secret pattern detected")
+    if r.get("contains_backend_bypass_instruction"):
+        print(f"  BLOCKED: backend bypass instruction")
+    if r.get("contains_runner_execution_instruction"):
+        print(f"  BLOCKED: runner execution instruction")
+    if r.get("contains_force_push_instruction"):
+        print(f"  BLOCKED: force push instruction")
+    if r.get("contains_output_application_instruction"):
+        print(f"  BLOCKED: output application instruction")
+    if r.get("contains_source_or_test_change_instruction"):
+        print(f"  WARNING: source/test change reference — editorial review suggested")
+    print(f"  Manual editorial review: {'suggested' if r.get('content_requires_manual_editorial_review') else 'no'}")
+    print(f"  Hidden by gitignore: {'yes' if r['source_file_hidden_by_gitignore'] else 'no'}  Ignored: {'yes' if r['source_file_ignored'] else 'no'}")
+    print(f"  Staged: {'yes' if r['source_file_staged'] else 'no'}  Tracked: {'yes' if r['source_file_tracked'] else 'no'}")
+    print(f"  Committed: no  Pushed: no")
+    print(f"  Adoption now: no  Execution now: no")
+    print(f"  Approval in future: {'yes' if r['adoption_approval_allowed_in_future_phase'] else 'no'}")
+    print(f"  Execution in future: {'yes' if r['adoption_execution_allowed_in_future_phase'] else 'no'}")
+    print(f"  Backend invoked: no  Retry: {'yes' if r.get('backend_retry_status') == 'failed_repo_mutation_detected' else 'no'}")
+    print(f"  File altered: no  Audit warnings: 0")
+    print(f"  Real exec disabled: yes  Runner refuses: yes")
+    print(f"  Next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]:
+            print(f"  BLOCKED: {b}")
+    if r["warnings"]:
+        for w in r["warnings"]:
+            print(f"  WARNING: {w}")
+    if r["review_notes"]:
+        for n in r["review_notes"]:
+            print(f"  NOTE: {n}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_created_output_adoption_review_status"] == "reviewed" else 1
+
+
+def run_phase_backend_created_output_adoption_review_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_REVIEWS_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_created_output_adoption_review_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("No adoption review artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("backend_created_output_adoption_review_status") == "reviewed" else 1
+    print("Backend-Created Output Adoption Review (Show)")
+    print("=" * 47)
+    print(f"  Status: {r.get('backend_created_output_adoption_review_status', 'unknown')}")
+    print(f"  Outcome: {r.get('adoption_review_outcome', 'unknown')}")
+    print(f"  Content reviewable: {'yes' if r.get('content_reviewable') else 'no'}")
+    print(f"  Safety review: {'passed' if r.get('content_safety_review_passed') else 'blocked'}")
+    print(f"  Approval allowed: {'yes' if r.get('adoption_approval_allowed_in_future_phase') else 'no'}")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0

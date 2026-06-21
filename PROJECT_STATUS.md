@@ -2,13 +2,14 @@
 
 ## Current Phase
 
-Phase 77M: Backend-Created Output Adoption Preflight.
+Phase 77N: Backend-Created Output Adoption Review.
 
-Phase 77M adds `pcae phase backend-created-output-adoption-preflight --json --save` and
-`pcae phase backend-created-output-adoption-preflight-show --json`. Adoption preflight for
-backend-created quarantined output. Verifies quarantine review passed, file metadata match,
-contract scope, and safety gates. Reports dual line counts (split/wc). Never modifies file.
-Persists to `.pcae/backend-created-output-adoption-preflights/latest.json`. 18 new tests.
+Phase 77N adds `pcae phase backend-created-output-adoption-review --json --save` and
+`pcae phase backend-created-output-adoption-review-show --json`. Adoption review for
+backend-created quarantined output. Performs deterministic content safety scan (secrets,
+bypass, runner, force-push, apply, source-change patterns). Reports markdown structure
+and reviewed_adoption_candidate outcome. Never modifies file. Persists to
+`.pcae/backend-created-output-adoption-reviews/latest.json`. 20 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 
