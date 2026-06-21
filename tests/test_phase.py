@@ -11701,3 +11701,253 @@ def test_77a_show_no_artifact(tmp_path, monkeypatch, capsys):
     assert exit_code == 1
     assert d["readiness_status"] == "no_artifact"
     assert d["fixture_pipeline_closed"] is False
+
+
+# Phase 77B: real captured task contract preparation
+
+def _seed_readiness_gate_77b(tmp_path: Path, readiness: str = "ready_for_real_task_preparation") -> None:
+    """Create a readiness gate artifact for testing."""
+    d = tmp_path / ".pcae" / "real-captured-task-readiness-gates"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "readiness_status": readiness,
+        "fixture_pipeline_closed": True,
+        "lifecycle_final_status": "complete_no_op",
+        "lifecycle_closed": True,
+        "task_package_creation_allowed_in_future_phase": readiness == "ready_for_real_task_preparation",
+        "real_captured_task_execution_allowed": False,
+        "backend_invocation_allowed": False,
+        "execution_authorized": False,
+        "recommended_next_phase": "77B — Real Captured Task Contract Preparation",
+    }))
+
+def _seed_final_summary_77b(tmp_path: Path) -> None:
+    """Create final summary artifact for 77B tests."""
+    d = tmp_path / ".pcae" / "captured-output-manual-apply-final-summaries"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "lifecycle_final_status": "complete_no_op",
+        "lifecycle_closed": True,
+        "closure_type": "no_op",
+    }))
+
+def _seed_real_execution_disabled_proof_77b(tmp_path: Path, disabled: bool = True) -> None:
+    """Create real execution disabled proof for testing."""
+    d = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "proof_status": "passed",
+        "real_execution_disabled": disabled,
+        "execution_authorized": False,
+    }))
+
+def _seed_runner_trace_77b(tmp_path: Path, execution_available: bool = False) -> None:
+    """Create runner execution trace for testing."""
+    d = tmp_path / ".pcae" / "runner-execution-traces"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "execution_authorized": False,
+        "execution_available": execution_available,
+        "dry_run": True,
+    }))
+
+
+def test_77b_missing_readiness_gate_blocked(tmp_path, monkeypatch, capsys):
+    """Missing readiness gate reports blocked_readiness_not_ready."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "real-captured-task-contract-prepare", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["real_task_contract_status"] == "blocked_readiness_not_ready"
+    assert d["contract_id"] is None
+    assert d["task_package_created"] is False
+    assert d["backend_invocation_allowed"] is False
+    assert d["backend_capture_allowed"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["execution_authorized"] is False
+    assert d["apply_performed"] is False
+    assert d["commits_created"] == 0
+
+
+def test_77b_not_ready_readiness_gate_blocked(tmp_path, monkeypatch, capsys):
+    """Readiness gate not ready reports blocked_readiness_not_ready."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="blocked_dirty_tree")
+    main(["phase", "real-captured-task-contract-prepare", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["real_task_contract_status"] == "blocked_readiness_not_ready"
+    assert d["contract_id"] is None
+    assert d["task_package_created"] is False
+
+
+def test_77b_dirty_tree_blocked(tmp_path, monkeypatch, capsys):
+    """Dirty git status reports blocked_dirty_tree even with ready readiness gate."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="ready_for_real_task_preparation")
+    _seed_final_summary_77b(tmp_path)
+    _seed_real_execution_disabled_proof_77b(tmp_path, disabled=True)
+    _seed_runner_trace_77b(tmp_path, execution_available=False)
+    # Make tree dirty
+    (tmp_path / "dirty.txt").write_text("dirty")
+    main(["phase", "real-captured-task-contract-prepare", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["real_task_contract_status"] == "blocked_dirty_tree"
+    assert d["current_git_status"] == "dirty"
+    assert d["task_package_created"] is False
+    assert "Working tree is not clean" in str(d["blockers"])
+
+
+def test_77b_execution_not_disabled_blocked(tmp_path, monkeypatch, capsys):
+    """Execution not disabled reports blocked_execution_not_disabled."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="ready_for_real_task_preparation")
+    _seed_final_summary_77b(tmp_path)
+    _seed_real_execution_disabled_proof_77b(tmp_path, disabled=False)
+    _seed_runner_trace_77b(tmp_path, execution_available=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-contract-prepare", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["real_task_contract_status"] == "blocked_execution_not_disabled"
+    assert d["real_execution_disabled"] is False
+
+
+def test_77b_runner_execution_available_blocked(tmp_path, monkeypatch, capsys):
+    """Runner execution available reports blocked_runner_execution_available."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="ready_for_real_task_preparation")
+    _seed_final_summary_77b(tmp_path)
+    _seed_real_execution_disabled_proof_77b(tmp_path, disabled=True)
+    _seed_runner_trace_77b(tmp_path, execution_available=True)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-contract-prepare", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["real_task_contract_status"] == "blocked_runner_execution_available"
+    assert d["runner_execute_refuses"] is False
+
+
+def test_77b_prepared_contract(tmp_path, monkeypatch, capsys):
+    """Clean repo with ready readiness gate prepares a documentation contract."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="ready_for_real_task_preparation")
+    _seed_final_summary_77b(tmp_path)
+    _seed_real_execution_disabled_proof_77b(tmp_path, disabled=True)
+    _seed_runner_trace_77b(tmp_path, execution_available=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-contract-prepare", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["real_task_contract_status"] == "prepared"
+    assert d["contract_id"] == "REAL-CAPTURED-TASK-001"
+    assert d["task_title"] == "Document first real captured task governance path"
+    assert d["task_type"] == "documentation_only"
+    assert d["scope_mode"] == "documentation_only"
+    assert "docs/REAL_CAPTURED_TASKS.md" in d["allowed_files"]
+    assert "CHANGELOG.md" in d["allowed_files"]
+    assert "PROJECT_STATUS.md" in d["allowed_files"]
+    assert "src/**" in d["forbidden_files"]
+    assert "tests/**" in d["forbidden_files"]
+    assert "pyproject.toml" in d["forbidden_files"]
+    assert "python -m pytest -n auto" in d["validation_commands"]
+    assert "pcae check" in d["validation_commands"]
+    assert "pcae health" in d["validation_commands"]
+    # Safety invariants
+    assert d["task_package_created"] is False
+    assert d["backend_invocation_allowed"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["backend_capture_allowed"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+    assert d["task_package_creation_allowed_in_future_phase"] is True
+    assert "77C" in d["recommended_next_phase"]
+
+
+def test_77b_save_persists_artifact(tmp_path, monkeypatch, capsys):
+    """--save persists the contract artifact."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="ready_for_real_task_preparation")
+    _seed_final_summary_77b(tmp_path)
+    _seed_real_execution_disabled_proof_77b(tmp_path, disabled=True)
+    _seed_runner_trace_77b(tmp_path, execution_available=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-contract-prepare", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "real-captured-task-contracts" / "latest.json"
+    assert p.is_file()
+    d = json.loads(p.read_text(encoding="utf-8"))
+    assert d["real_task_contract_status"] == "prepared"
+    assert d["contract_id"] == "REAL-CAPTURED-TASK-001"
+    assert d["task_package_created"] is False
+
+
+def test_77b_show_json(tmp_path, monkeypatch, capsys):
+    """Show command works with --json."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="ready_for_real_task_preparation")
+    _seed_final_summary_77b(tmp_path)
+    _seed_real_execution_disabled_proof_77b(tmp_path, disabled=True)
+    _seed_runner_trace_77b(tmp_path, execution_available=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    # Save first
+    main(["phase", "real-captured-task-contract-prepare", "--save", "--json"])
+    capsys.readouterr()
+    # Show
+    main(["phase", "real-captured-task-contract-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["real_task_contract_status"] == "prepared"
+    assert d["contract_id"] == "REAL-CAPTURED-TASK-001"
+    assert d["task_package_created"] is False
+
+
+def test_77b_no_mutation(tmp_path, monkeypatch, capsys):
+    """Contract preparation does not mutate files or create task packages."""
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_readiness_gate_77b(tmp_path, readiness="ready_for_real_task_preparation")
+    _seed_final_summary_77b(tmp_path)
+    _seed_real_execution_disabled_proof_77b(tmp_path, disabled=True)
+    _seed_runner_trace_77b(tmp_path, execution_available=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "seed"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "real-captured-task-contract-prepare", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+    assert d["task_package_created"] is False
+    assert d["backend_invocation_allowed"] is False
+    assert d["backend_capture_allowed"] is False
+    assert d["real_captured_task_execution_allowed"] is False
+
+
+def test_77b_show_no_artifact(tmp_path, monkeypatch, capsys):
+    """Show command reports no artifact when none exists."""
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "real-captured-task-contract-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["real_task_contract_status"] == "no_artifact"
+    assert d["contract_id"] is None

@@ -11427,3 +11427,286 @@ def run_phase_real_captured_task_readiness_gate_show(args: argparse.Namespace) -
     print(f"  Lifecycle final: {result.get('lifecycle_final_status', 'n/a')}")
     print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77B: real captured task contract preparation
+REAL_CAPTURED_TASK_CONTRACTS_DIR = Path(".pcae") / "real-captured-task-contracts"
+
+
+def _build_real_captured_task_contract(root: HarnessPath) -> dict:
+    """Prepare a governed real captured task contract.
+
+    This is CONTRACT PREPARATION ONLY. It must not create task packages,
+    invoke backends, capture output, apply patches, commit, or push.
+    """
+    from datetime import datetime, timezone
+    import subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Read the 77A readiness gate
+    readiness_gate_ref = _ref_exists(root, REAL_CAPTURED_TASK_READINESS_GATES_DIR)
+    readiness_status = "unknown"
+    if readiness_gate_ref:
+        rg_path = root.join(REAL_CAPTURED_TASK_READINESS_GATES_DIR / "latest.json")
+        if rg_path.is_file():
+            rg = json.loads(rg_path.read_text(encoding="utf-8"))
+            readiness_status = rg.get("readiness_status", "unknown")
+
+    # Read lifecycle final summary
+    final_summary_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR)
+
+    # Check execution disabled
+    real_execution_disabled = True
+    rep_ref = _ref_exists(root, Path(".pcae") / "real-execution-disabled-proofs")
+    if rep_ref:
+        rep_path = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep_path.is_file():
+            rep = json.loads(rep_path.read_text(encoding="utf-8"))
+            real_execution_disabled = rep.get("real_execution_disabled", True)
+
+    # Check runner refuses
+    runner_execute_refuses = True
+    ret_ref = _ref_exists(root, Path(".pcae") / "runner-execution-traces")
+    if ret_ref:
+        ret_path = root.join(Path(".pcae") / "runner-execution-traces" / "latest.json")
+        if ret_path.is_file():
+            ret = json.loads(ret_path.read_text(encoding="utf-8"))
+            runner_execute_refuses = not ret.get("execution_available", True)
+
+    # Agent lock
+    agent_lock = read_agent_lock(root)
+    agent_lock_active = agent_lock is not None
+    locked_backend_name = agent_lock.agent_id if agent_lock else None
+
+    # Audit
+    audit_warning_count = 0
+    audit_warnings: list = []
+    audit_ref = _ref_exists(root, Path(".pcae") / "phase-audits")
+    if audit_ref:
+        a_path = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if a_path.is_file():
+            a = json.loads(a_path.read_text(encoding="utf-8"))
+            audit_warning_count = len(a.get("warnings", []))
+            audit_warnings = a.get("warnings", [])
+
+    # Git status
+    git_status_clean = True
+    try:
+        result_cmd = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                             capture_output=True, text=True, timeout=15)
+        git_status_clean = result_cmd.stdout.strip() == ""
+    except Exception:
+        git_status_clean = True
+
+    # Determine contract status
+    blockers: list = []
+    warnings_list: list = []
+    contract_status = "prepared"
+
+    if not readiness_gate_ref or readiness_status == "no_artifact" or readiness_status == "unknown":
+        contract_status = "blocked_readiness_not_ready"
+        blockers.append("Readiness gate artifact is missing or unreadable. Run pcae phase real-captured-task-readiness-gate --save first.")
+    elif readiness_status != "ready_for_real_task_preparation":
+        contract_status = "blocked_readiness_not_ready"
+        blockers.append(f"Readiness gate reports '{readiness_status}', not ready_for_real_task_preparation.")
+    elif not git_status_clean:
+        contract_status = "blocked_dirty_tree"
+        blockers.append("Working tree is not clean.")
+    elif not real_execution_disabled:
+        contract_status = "blocked_execution_not_disabled"
+        blockers.append("Real execution is not confirmed disabled.")
+    elif not runner_execute_refuses:
+        contract_status = "blocked_runner_execution_available"
+        blockers.append("Runner execution is reported as available when it should refuse.")
+    elif audit_warning_count > 0:
+        warnings_list.append(f"Audit has {audit_warning_count} warning(s).")
+
+    # Build the contract (only meaningful if status is "prepared")
+    contract_id = "REAL-CAPTURED-TASK-001" if contract_status == "prepared" else None
+    task_title = "Document first real captured task governance path" if contract_status == "prepared" else None
+    task_type = "documentation_only" if contract_status == "prepared" else None
+    task_goal = (
+        "Create docs/REAL_CAPTURED_TASKS.md documenting the governance path for future real captured tasks."
+        if contract_status == "prepared" else None
+    )
+    scope_mode = "documentation_only" if contract_status == "prepared" else None
+    allowed_files = [
+        "docs/REAL_CAPTURED_TASKS.md",
+        "CHANGELOG.md",
+        "PROJECT_STATUS.md",
+    ] if contract_status == "prepared" else []
+    forbidden_files = [
+        "src/**",
+        "tests/**",
+        "pyproject.toml",
+        ".pcae/**",
+        ".githooks/**",
+    ] if contract_status == "prepared" else []
+    allowed_actions = [
+        "create_documentation_file",
+        "update_changelog",
+        "update_project_status",
+    ] if contract_status == "prepared" else []
+    forbidden_actions = [
+        "modify_source_code",
+        "modify_tests",
+        "modify_dependencies",
+        "invoke_backend",
+        "capture_backend_output",
+        "apply_captured_output",
+        "commit_backend_output",
+        "push_backend_output",
+        "authorize_execution",
+    ] if contract_status == "prepared" else []
+    validation_commands = [
+        "python -m pytest -n auto",
+        "pcae check",
+        "pcae health",
+    ] if contract_status == "prepared" else []
+    acceptance_criteria = [
+        "docs/REAL_CAPTURED_TASKS.md exists and documents the governance path",
+        "CHANGELOG.md updated",
+        "No source or test files modified",
+        "All tests pass",
+        "pcae check passes",
+        "pcae health passes",
+    ] if contract_status == "prepared" else []
+    stop_conditions = [
+        "Backend invocation would be required",
+        "Source code modification would be required",
+        "Test modification would be required",
+        "Dependency changes would be required",
+        "Remote API calls would be required",
+    ] if contract_status == "prepared" else []
+
+    return {
+        "real_task_contract_status": contract_status,
+        "contract_id": contract_id,
+        "task_title": task_title,
+        "task_type": task_type,
+        "task_goal": task_goal,
+        "scope_mode": scope_mode,
+        "allowed_files": allowed_files,
+        "forbidden_files": forbidden_files,
+        "allowed_actions": allowed_actions,
+        "forbidden_actions": forbidden_actions,
+        "validation_commands": validation_commands,
+        "acceptance_criteria": acceptance_criteria,
+        "stop_conditions": stop_conditions,
+        "readiness_gate_ref": str(REAL_CAPTURED_TASK_READINESS_GATES_DIR / "latest.json") if readiness_gate_ref else None,
+        "final_lifecycle_summary_ref": str(CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR / "latest.json") if final_summary_ref else None,
+        "backend_name": locked_backend_name,
+        "agent_lock_active": agent_lock_active,
+        "locked_backend_name": locked_backend_name,
+        "current_git_status": "clean" if git_status_clean else "dirty",
+        "audit_warning_count": audit_warning_count,
+        "audit_warnings": audit_warnings,
+        "real_execution_disabled": real_execution_disabled,
+        "runner_execute_refuses": runner_execute_refuses,
+        # Safety invariants — always enforced
+        "task_package_creation_allowed_in_future_phase": contract_status == "prepared",
+        "task_package_created": False,
+        "backend_invocation_allowed": False,
+        "backend_invocation_performed": False,
+        "backend_capture_allowed": False,
+        "real_captured_task_execution_allowed": False,
+        "apply_performed": False,
+        "files_modified": False,
+        "commits_created": 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        # Guidance
+        "recommended_next_phase": "77C — Real Captured Task Package Dry-Run" if contract_status == "prepared" else "Resolve blockers first.",
+        "blockers": blockers,
+        "warnings": warnings_list,
+        "next_operator_action": (
+            "Contract prepared. Proceed to Phase 77C to create the real task package dry-run."
+            if contract_status == "prepared"
+            else "Resolve blockers before proceeding to any real captured task contract phase."
+        ),
+        "generated_at": ts,
+    }
+
+
+def run_phase_real_captured_task_contract_prepare(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_real_captured_task_contract(root)
+    if getattr(args, "save", False):
+        d = root.join(REAL_CAPTURED_TASK_CONTRACTS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Contract saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["real_task_contract_status"] == "prepared" else 1
+    print("Real Captured Task Contract Preparation"); print("=" * 38)
+    print(f"  Contract status: {result['real_task_contract_status']}")
+    print(f"  Contract ID: {result.get('contract_id', 'n/a')}")
+    print(f"  Task title: {result.get('task_title', 'n/a')}")
+    print(f"  Task type: {result.get('task_type', 'n/a')}")
+    print(f"  Scope mode: {result.get('scope_mode', 'n/a')}")
+    print(f"  Git status: {result['current_git_status']}")
+    print(f"  Audit warnings: {result['audit_warning_count']}")
+    print(f"  Real execution disabled: {'yes' if result['real_execution_disabled'] else 'no'}")
+    print(f"  Runner refuses: {'yes' if result['runner_execute_refuses'] else 'no'}")
+    print(f"  Agent lock active: {'yes' if result['agent_lock_active'] else 'no'}")
+    if result.get('locked_backend_name'):
+        print(f"  Locked backend: {result['locked_backend_name']}")
+    print(f"  Task package created: no")
+    print(f"  Backend invocation allowed: no")
+    print(f"  Backend capture allowed: no")
+    print(f"  Real task execution allowed: no")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result.get("allowed_files"):
+        print(f"\n  Allowed files:")
+        for f in result["allowed_files"]:
+            print(f"    - {f}")
+    if result.get("forbidden_files"):
+        print(f"\n  Forbidden files:")
+        for f in result["forbidden_files"]:
+            print(f"    - {f}")
+    if result.get("validation_commands"):
+        print(f"\n  Validation commands:")
+        for c in result["validation_commands"]:
+            print(f"    - {c}")
+    if result.get("stop_conditions"):
+        print(f"\n  Stop conditions:")
+        for s in result["stop_conditions"]:
+            print(f"    - {s}")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    if result["warnings"]:
+        print(f"\n  Warnings:")
+        for w in result["warnings"]:
+            print(f"    - {w}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["real_task_contract_status"] == "prepared" else 1
+
+
+def run_phase_real_captured_task_contract_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(REAL_CAPTURED_TASK_CONTRACTS_DIR / "latest.json")
+    if not p.is_file():
+        result = {"real_task_contract_status": "no_artifact", "contract_id": None}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No contract artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("real_task_contract_status") == "prepared" else 1
+    print("Real Captured Task Contract (Show)"); print("=" * 32)
+    print(f"  Status: {result.get('real_task_contract_status', 'unknown')}")
+    print(f"  Contract ID: {result.get('contract_id', 'n/a')}")
+    print(f"  Task title: {result.get('task_title', 'n/a')}")
+    print(f"  Task type: {result.get('task_type', 'n/a')}")
+    print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
+    return 0

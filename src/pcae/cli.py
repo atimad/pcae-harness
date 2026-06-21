@@ -491,6 +491,8 @@ from pcae.commands.phase import (
     run_phase_captured_output_manual_apply_final_summary_show,
     run_phase_real_captured_task_readiness_gate,
     run_phase_real_captured_task_readiness_gate_show,
+    run_phase_real_captured_task_contract_prepare,
+    run_phase_real_captured_task_contract_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6311,6 +6313,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_real_captured_task_readiness_gate_show_parser.add_argument("--json", action="store_true")
     phase_real_captured_task_readiness_gate_show_parser.set_defaults(handler=run_phase_real_captured_task_readiness_gate_show)
+
+    # Phase 77B
+    phase_real_captured_task_contract_prepare_parser = phase_subparsers.add_parser(
+        "real-captured-task-contract-prepare",
+        help="Prepare a governed real captured task contract (Phase 77B).",
+    )
+    phase_real_captured_task_contract_prepare_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_contract_prepare_parser.add_argument("--save", action="store_true")
+    phase_real_captured_task_contract_prepare_parser.set_defaults(handler=run_phase_real_captured_task_contract_prepare)
+
+    phase_real_captured_task_contract_show_parser = phase_subparsers.add_parser(
+        "real-captured-task-contract-show",
+        help="Show latest real captured task contract artifact (Phase 77B).",
+    )
+    phase_real_captured_task_contract_show_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_contract_show_parser.set_defaults(handler=run_phase_real_captured_task_contract_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

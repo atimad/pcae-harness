@@ -2,14 +2,15 @@
 
 ## Current Phase
 
-Phase 77A: Real Captured Task Readiness Gate.
+Phase 77B: Real Captured Task Contract Preparation.
 
-Phase 77A adds `pcae phase real-captured-task-readiness-gate --json --save` and
-`pcae phase real-captured-task-readiness-gate-show --json`. Read-only readiness gate
-assessing whether PCAE is ready to move from the completed fixture/no-op captured-output
-pipeline to a real captured task pipeline. Reports readiness_status, fixture_pipeline_closed,
-and all safety invariants (execution_allowed=false, backend_invocation_allowed=false).
-Persists to `.pcae/real-captured-task-readiness-gates/latest.json`. 9 new tests.
+Phase 77B adds `pcae phase real-captured-task-contract-prepare --json --save` and
+`pcae phase real-captured-task-contract-show --json`. Prepares a governed low-risk
+documentation-only real captured task contract (REAL-CAPTURED-TASK-001). Reads 77A
+readiness gate and all safety artifacts. Contract specifies allowed/forbidden files,
+allowed/forbidden actions, validation commands, acceptance criteria, and stop conditions.
+Safety invariants enforce `task_package_created=false`, `backend_invocation_allowed=false`.
+Persists to `.pcae/real-captured-task-contracts/latest.json`. 10 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 
