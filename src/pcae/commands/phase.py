@@ -11710,3 +11710,313 @@ def run_phase_real_captured_task_contract_show(args: argparse.Namespace) -> int:
     print(f"  Task type: {result.get('task_type', 'n/a')}")
     print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77C: real captured task package dry-run
+REAL_CAPTURED_TASK_PACKAGE_DRY_RUNS_DIR = Path(".pcae") / "real-captured-task-package-dry-runs"
+
+
+def _build_real_captured_task_package_dry_run(root: HarnessPath) -> dict:
+    """Build a dry-run package envelope for REAL-CAPTURED-TASK-001 without sending.
+
+    This is PACKAGE DRY-RUN ONLY. It must not invoke backends, send packages,
+    capture output, apply patches, commit, or push.
+    """
+    from datetime import datetime, timezone
+    import hashlib
+    import subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Read the 77B contract
+    contract_ref = _ref_exists(root, REAL_CAPTURED_TASK_CONTRACTS_DIR)
+    contract_data = None
+    contract_status = "unknown"
+    if contract_ref:
+        ct_path = root.join(REAL_CAPTURED_TASK_CONTRACTS_DIR / "latest.json")
+        if ct_path.is_file():
+            contract_data = json.loads(ct_path.read_text(encoding="utf-8"))
+            contract_status = contract_data.get("real_task_contract_status", "unknown")
+
+    # Read readiness gate
+    readiness_gate_ref = _ref_exists(root, REAL_CAPTURED_TASK_READINESS_GATES_DIR)
+
+    # Read final lifecycle summary
+    final_summary_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR)
+
+    # Check execution disabled
+    real_execution_disabled = True
+    rep_ref = _ref_exists(root, Path(".pcae") / "real-execution-disabled-proofs")
+    if rep_ref:
+        rep_path = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep_path.is_file():
+            rep = json.loads(rep_path.read_text(encoding="utf-8"))
+            real_execution_disabled = rep.get("real_execution_disabled", True)
+
+    # Check runner refuses
+    runner_execute_refuses = True
+    ret_ref = _ref_exists(root, Path(".pcae") / "runner-execution-traces")
+    if ret_ref:
+        ret_path = root.join(Path(".pcae") / "runner-execution-traces" / "latest.json")
+        if ret_path.is_file():
+            ret = json.loads(ret_path.read_text(encoding="utf-8"))
+            runner_execute_refuses = not ret.get("execution_available", True)
+
+    # Agent lock
+    agent_lock = read_agent_lock(root)
+    agent_lock_active = agent_lock is not None
+    locked_backend_name = agent_lock.agent_id if agent_lock else None
+
+    # Audit
+    audit_warning_count = 0
+    audit_warnings: list = []
+    audit_ref = _ref_exists(root, Path(".pcae") / "phase-audits")
+    if audit_ref:
+        a_path = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if a_path.is_file():
+            a = json.loads(a_path.read_text(encoding="utf-8"))
+            audit_warning_count = len(a.get("warnings", []))
+            audit_warnings = a.get("warnings", [])
+
+    # Git status
+    git_status_clean = True
+    try:
+        result_cmd = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                             capture_output=True, text=True, timeout=15)
+        git_status_clean = result_cmd.stdout.strip() == ""
+    except Exception:
+        git_status_clean = True
+
+    # Determine package dry-run status
+    blockers: list = []
+    warnings_list: list = []
+    package_status = "ready"
+
+    if not contract_ref or contract_status == "no_artifact" or contract_status == "unknown":
+        package_status = "blocked_contract_missing"
+        blockers.append("Contract artifact is missing or unreadable. Run pcae phase real-captured-task-contract-prepare --save first.")
+    elif contract_status != "prepared":
+        package_status = "blocked_contract_not_prepared"
+        blockers.append(f"Contract reports '{contract_status}', not prepared.")
+    elif not git_status_clean:
+        package_status = "blocked_dirty_tree"
+        blockers.append("Working tree is not clean.")
+    elif not real_execution_disabled:
+        package_status = "blocked_execution_not_disabled"
+        blockers.append("Real execution is not confirmed disabled.")
+    elif not runner_execute_refuses:
+        package_status = "blocked_runner_execution_available"
+        blockers.append("Runner execution is reported as available when it should refuse.")
+    elif audit_warning_count > 0:
+        warnings_list.append(f"Audit has {audit_warning_count} warning(s).")
+
+    # Build the package (only meaningful if ready)
+    package_id = "REAL-CAPTURED-TASK-001-PACKAGE-DRY-RUN" if package_status == "ready" else None
+    contract_id = None
+    task_title = None
+    task_type = None
+    scope_mode = None
+    allowed_files: list = []
+    forbidden_files: list = []
+    allowed_actions: list = []
+    forbidden_actions: list = []
+    validation_commands: list = []
+    acceptance_criteria: list = []
+    stop_conditions: list = []
+    contract_digest = None
+    package_digest = None
+    prompt_envelope_preview = None
+
+    if package_status == "ready" and contract_data:
+        contract_id = contract_data.get("contract_id")
+        task_title = contract_data.get("task_title")
+        task_type = contract_data.get("task_type")
+        scope_mode = contract_data.get("scope_mode")
+        allowed_files = list(contract_data.get("allowed_files", []))
+        forbidden_files = list(contract_data.get("forbidden_files", []))
+        allowed_actions = list(contract_data.get("allowed_actions", []))
+        forbidden_actions = list(contract_data.get("forbidden_actions", []))
+        validation_commands = list(contract_data.get("validation_commands", []))
+        acceptance_criteria = list(contract_data.get("acceptance_criteria", []))
+        stop_conditions = list(contract_data.get("stop_conditions", []))
+
+        # Compute contract digest
+        contract_json = json.dumps(contract_data, sort_keys=True)
+        contract_digest = hashlib.sha256(contract_json.encode("utf-8")).hexdigest()
+
+        # Build the prompt envelope preview (preview only, not sent)
+        allowed_files_str = "\n".join(f"  - {f}" for f in allowed_files)
+        forbidden_files_str = "\n".join(f"  - {f}" for f in forbidden_files)
+        validation_str = "\n".join(f"  - {c}" for c in validation_commands)
+        stop_str = "\n".join(f"  - {s}" for s in stop_conditions)
+
+        prompt_envelope_preview = (
+            f"[PCAE Real Captured Task | {contract_id}]\n"
+            f"Task: {task_title}\n"
+            f"Type: {task_type}\n"
+            f"Scope: {scope_mode}\n\n"
+            f"Goal: {contract_data.get('task_goal', 'N/A')}\n\n"
+            f"Allowed files:\n{allowed_files_str}\n\n"
+            f"Forbidden files:\n{forbidden_files_str}\n\n"
+            f"Allowed actions:\n"
+            + "\n".join(f"  - {a}" for a in allowed_actions) + "\n\n"
+            f"Validation:\n{validation_str}\n\n"
+            f"Stop conditions:\n{stop_str}\n\n"
+            f"[This is a DRY-RUN package envelope. NOT SEND-AUTHORIZED.]\n"
+            f"[Do not invoke any backend. Do not execute.]\n"
+        )
+
+        # Compute package digest
+        package_digest = hashlib.sha256(prompt_envelope_preview.encode("utf-8")).hexdigest()
+
+    governance_requirements = [
+        "real_execution_disabled_proof must pass",
+        "runner_execute must refuse",
+        "git tree must be clean",
+        "contract must be prepared",
+        "package send must not be authorized",
+        "backend invocation must not be performed",
+        "backend capture must not be performed",
+    ]
+
+    return {
+        "package_dry_run_status": package_status,
+        "package_id": package_id,
+        "contract_id": contract_id,
+        "contract_ref": str(REAL_CAPTURED_TASK_CONTRACTS_DIR / "latest.json") if contract_ref else None,
+        "readiness_gate_ref": str(REAL_CAPTURED_TASK_READINESS_GATES_DIR / "latest.json") if readiness_gate_ref else None,
+        "final_lifecycle_summary_ref": str(CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR / "latest.json") if final_summary_ref else None,
+        "task_title": task_title,
+        "task_type": task_type,
+        "scope_mode": scope_mode,
+        "backend_name": locked_backend_name,
+        "agent_lock_active": agent_lock_active,
+        "locked_backend_name": locked_backend_name,
+        "contract_digest": contract_digest,
+        "package_digest": package_digest,
+        "prompt_envelope_preview": prompt_envelope_preview,
+        "allowed_files": allowed_files,
+        "forbidden_files": forbidden_files,
+        "allowed_actions": allowed_actions,
+        "forbidden_actions": forbidden_actions,
+        "validation_commands": validation_commands,
+        "acceptance_criteria": acceptance_criteria,
+        "stop_conditions": stop_conditions,
+        "governance_requirements": governance_requirements,
+        "current_git_status": "clean" if git_status_clean else "dirty",
+        "audit_warning_count": audit_warning_count,
+        "audit_warnings": audit_warnings,
+        "real_execution_disabled": real_execution_disabled,
+        "runner_execute_refuses": runner_execute_refuses,
+        # Safety invariants — always enforced
+        "package_created_for_send": False,
+        "package_send_allowed": False,
+        "backend_invocation_allowed": False,
+        "backend_invocation_performed": False,
+        "backend_capture_allowed": False,
+        "backend_capture_performed": False,
+        "real_captured_task_execution_allowed": False,
+        "apply_performed": False,
+        "files_modified": False,
+        "commits_created": 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        # Guidance
+        "recommended_next_phase": "77D — Real Captured Task Package Approval" if package_status == "ready" else "Resolve blockers first.",
+        "blockers": blockers,
+        "warnings": warnings_list,
+        "next_operator_action": (
+            "Package dry-run complete. The envelope is ready for review (Phase 77D). "
+            "No backend has been invoked. No package has been sent."
+            if package_status == "ready"
+            else "Resolve blockers before proceeding to any package dry-run phase."
+        ),
+        "generated_at": ts,
+    }
+
+
+def run_phase_real_captured_task_package_dry_run(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_real_captured_task_package_dry_run(root)
+    if getattr(args, "save", False):
+        d = root.join(REAL_CAPTURED_TASK_PACKAGE_DRY_RUNS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Package dry-run saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["package_dry_run_status"] == "ready" else 1
+    print("Real Captured Task Package Dry-Run"); print("=" * 34)
+    print(f"  Package status: {result['package_dry_run_status']}")
+    print(f"  Package ID: {result.get('package_id', 'n/a')}")
+    print(f"  Contract ID: {result.get('contract_id', 'n/a')}")
+    print(f"  Task title: {result.get('task_title', 'n/a')}")
+    print(f"  Task type: {result.get('task_type', 'n/a')}")
+    print(f"  Scope mode: {result.get('scope_mode', 'n/a')}")
+    print(f"  Git status: {result['current_git_status']}")
+    print(f"  Audit warnings: {result['audit_warning_count']}")
+    print(f"  Real execution disabled: {'yes' if result['real_execution_disabled'] else 'no'}")
+    print(f"  Runner refuses: {'yes' if result['runner_execute_refuses'] else 'no'}")
+    print(f"  Agent lock active: {'yes' if result['agent_lock_active'] else 'no'}")
+    if result.get('locked_backend_name'):
+        print(f"  Locked backend: {result['locked_backend_name']}")
+    if result.get('contract_digest'):
+        print(f"  Contract digest: {result['contract_digest'][:16]}...")
+    if result.get('package_digest'):
+        print(f"  Package digest: {result['package_digest'][:16]}...")
+    print(f"  Package created for send: no")
+    print(f"  Package send allowed: no")
+    print(f"  Backend invocation allowed: no")
+    print(f"  Backend invocation performed: no")
+    print(f"  Backend capture allowed: no")
+    print(f"  Backend capture performed: no")
+    print(f"  Real task execution allowed: no")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result.get("allowed_files"):
+        print(f"\n  Allowed files:")
+        for f in result["allowed_files"]:
+            print(f"    - {f}")
+    if result.get("forbidden_files"):
+        print(f"\n  Forbidden files:")
+        for f in result["forbidden_files"]:
+            print(f"    - {f}")
+    if result.get("validation_commands"):
+        print(f"\n  Validation:")
+        for c in result["validation_commands"]:
+            print(f"    - {c}")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    if result["warnings"]:
+        print(f"\n  Warnings:")
+        for w in result["warnings"]:
+            print(f"    - {w}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["package_dry_run_status"] == "ready" else 1
+
+
+def run_phase_real_captured_task_package_dry_run_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(REAL_CAPTURED_TASK_PACKAGE_DRY_RUNS_DIR / "latest.json")
+    if not p.is_file():
+        result = {"package_dry_run_status": "no_artifact", "package_id": None}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No package dry-run artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("package_dry_run_status") == "ready" else 1
+    print("Real Captured Task Package Dry-Run (Show)"); print("=" * 40)
+    print(f"  Status: {result.get('package_dry_run_status', 'unknown')}")
+    print(f"  Package ID: {result.get('package_id', 'n/a')}")
+    print(f"  Contract ID: {result.get('contract_id', 'n/a')}")
+    print(f"  Task title: {result.get('task_title', 'n/a')}")
+    print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
+    return 0

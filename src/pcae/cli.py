@@ -493,6 +493,8 @@ from pcae.commands.phase import (
     run_phase_real_captured_task_readiness_gate_show,
     run_phase_real_captured_task_contract_prepare,
     run_phase_real_captured_task_contract_show,
+    run_phase_real_captured_task_package_dry_run,
+    run_phase_real_captured_task_package_dry_run_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6329,6 +6331,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_real_captured_task_contract_show_parser.add_argument("--json", action="store_true")
     phase_real_captured_task_contract_show_parser.set_defaults(handler=run_phase_real_captured_task_contract_show)
+
+    # Phase 77C
+    phase_real_captured_task_package_dry_run_parser = phase_subparsers.add_parser(
+        "real-captured-task-package-dry-run",
+        help="Create a dry-run package envelope for REAL-CAPTURED-TASK-001 without sending (Phase 77C).",
+    )
+    phase_real_captured_task_package_dry_run_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_package_dry_run_parser.add_argument("--save", action="store_true")
+    phase_real_captured_task_package_dry_run_parser.set_defaults(handler=run_phase_real_captured_task_package_dry_run)
+
+    phase_real_captured_task_package_dry_run_show_parser = phase_subparsers.add_parser(
+        "real-captured-task-package-dry-run-show",
+        help="Show latest real captured task package dry-run artifact (Phase 77C).",
+    )
+    phase_real_captured_task_package_dry_run_show_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_package_dry_run_show_parser.set_defaults(handler=run_phase_real_captured_task_package_dry_run_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

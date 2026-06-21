@@ -2,15 +2,17 @@
 
 ## Current Phase
 
-Phase 77B: Real Captured Task Contract Preparation.
+Phase 77C: Real Captured Task Package Dry-Run.
 
-Phase 77B adds `pcae phase real-captured-task-contract-prepare --json --save` and
-`pcae phase real-captured-task-contract-show --json`. Prepares a governed low-risk
-documentation-only real captured task contract (REAL-CAPTURED-TASK-001). Reads 77A
-readiness gate and all safety artifacts. Contract specifies allowed/forbidden files,
-allowed/forbidden actions, validation commands, acceptance criteria, and stop conditions.
-Safety invariants enforce `task_package_created=false`, `backend_invocation_allowed=false`.
-Persists to `.pcae/real-captured-task-contracts/latest.json`. 10 new tests.
+Phase 77C adds `pcae phase real-captured-task-package-dry-run --json --save` and
+`pcae phase real-captured-task-package-dry-run-show --json`. Creates a dry-run package
+envelope for REAL-CAPTURED-TASK-001 without sending to any backend. Reads 77B contract
+and all safety artifacts. Builds prompt envelope preview with NOT SEND-AUTHORIZED markers,
+computes SHA256 contract and package digests. Safety invariants enforce
+`package_created_for_send=false`, `package_send_allowed=false`,
+`backend_invocation_allowed=false`, `backend_invocation_performed=false`,
+`backend_capture_allowed=false`, `backend_capture_performed=false`.
+Persists to `.pcae/real-captured-task-package-dry-runs/latest.json`. 10 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 
