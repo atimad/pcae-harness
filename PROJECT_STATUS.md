@@ -2,7 +2,13 @@
 
 ## Current Phase
 
-Phase 77N: Backend-Created Output Adoption Review.
+Phase 77O: Backend-Created Output Adoption Approval.
+
+Phase 77O adds `pcae phase backend-created-output-adoption-approval --json --save --approve
+--approved-by --reason` and `pcae phase backend-created-output-adoption-approval-show --json`.
+Operator approval artifact for reviewed backend-created output. Explicit `--approve` flag required
+for `human_adoption_approval_granted=true`. Never modifies file. Persists to
+`.pcae/backend-created-output-adoption-approvals/latest.json`. 18 new tests.
 
 Phase 77N adds `pcae phase backend-created-output-adoption-review --json --save` and
 `pcae phase backend-created-output-adoption-review-show --json`. Adoption review for
