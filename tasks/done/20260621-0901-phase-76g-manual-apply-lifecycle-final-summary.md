@@ -10,7 +10,7 @@ Phase 76G: Manual Apply Lifecycle Final Summary
 
 ## Status
 
-active
+done
 
 ## Mode
 
