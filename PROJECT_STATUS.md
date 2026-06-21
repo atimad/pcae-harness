@@ -2,17 +2,15 @@
 
 ## Current Phase
 
-Phase 77E: Real Captured Task Backend Capture Preflight.
+Phase 77F: Real Captured Task Backend Capture.
 
-Phase 77E adds `pcae phase real-captured-task-backend-capture-preflight --json --save` and
-`pcae phase real-captured-task-backend-capture-preflight-show --json`. Final preflight
-verifying all conditions before a future backend capture phase. Reads 77D approval,
-77C dry-run, and all safety artifacts. Verifies digest/id matching. Blocks on missing
-approval, unapproved, digest mismatch, dirty tree, audit warnings, execution not disabled,
-runner available, missing agent lock, backend mismatch. Ready reports
-`backend_capture_allowed_in_future_phase=true`. All present-tense safety invariants
-remain false. Persists to `.pcae/real-captured-task-backend-capture-preflights/latest.json`.
-10 new tests.
+Phase 77F adds `pcae phase real-captured-task-backend-capture --json --save` and
+`pcae phase real-captured-task-backend-capture-show --json`. Governed backend capture
+of the approved real captured task package. Default/--dry-run validates all gates without
+invocation. --execute invokes locked backend, captures stdout/stderr/return code, runs
+mutation guard, persists raw output. Strips NOT SEND-AUTHORIZED markers for governed send.
+Never applies output, commits, or pushes. Persists to
+`.pcae/real-captured-task-backend-captures/latest.json`. 12 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 

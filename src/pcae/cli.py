@@ -499,6 +499,8 @@ from pcae.commands.phase import (
     run_phase_real_captured_task_package_approval_show,
     run_phase_real_captured_task_backend_capture_preflight,
     run_phase_real_captured_task_backend_capture_preflight_show,
+    run_phase_real_captured_task_backend_capture,
+    run_phase_real_captured_task_backend_capture_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6386,6 +6388,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_real_captured_task_backend_capture_preflight_show_parser.add_argument("--json", action="store_true")
     phase_real_captured_task_backend_capture_preflight_show_parser.set_defaults(handler=run_phase_real_captured_task_backend_capture_preflight_show)
+
+    # Phase 77F
+    phase_real_captured_task_backend_capture_parser = phase_subparsers.add_parser(
+        "real-captured-task-backend-capture",
+        help="Perform a governed backend capture of the approved real captured task package (Phase 77F).",
+    )
+    phase_real_captured_task_backend_capture_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_backend_capture_parser.add_argument("--save", action="store_true")
+    phase_real_captured_task_backend_capture_parser.add_argument("--dry-run", action="store_true", help="Validate gates only, do not invoke backend (default).")
+    phase_real_captured_task_backend_capture_parser.add_argument("--execute", action="store_true", help="Invoke locked backend after gate validation.")
+    phase_real_captured_task_backend_capture_parser.set_defaults(handler=run_phase_real_captured_task_backend_capture)
+
+    phase_real_captured_task_backend_capture_show_parser = phase_subparsers.add_parser(
+        "real-captured-task-backend-capture-show",
+        help="Show latest real captured task backend capture artifact (Phase 77F).",
+    )
+    phase_real_captured_task_backend_capture_show_parser.add_argument("--json", action="store_true")
+    phase_real_captured_task_backend_capture_show_parser.set_defaults(handler=run_phase_real_captured_task_backend_capture_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

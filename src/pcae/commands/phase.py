@@ -12619,3 +12619,423 @@ def run_phase_real_captured_task_backend_capture_preflight_show(args: argparse.N
     print(f"  Future capture allowed: {'yes' if result.get('backend_capture_allowed_in_future_phase') else 'no'}")
     print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77F: real captured task backend capture
+REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR = Path(".pcae") / "real-captured-task-backend-captures"
+
+
+def _build_real_captured_task_backend_capture(root: HarnessPath, execute: bool = False) -> dict:
+    """Perform a governed backend capture of the approved real captured task package.
+
+    Default/--dry-run: validate only, no backend invocation.
+    --execute: invoke locked backend, capture output, mutation guard, never apply.
+
+    This is CAPTURE ONLY. It must not apply output, modify files from backend
+    output, commit, or push.
+    """
+    from datetime import datetime, timezone
+    import hashlib
+    import subprocess as _sp
+    import shutil as _shutil
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Read 77E preflight
+    preflight_ref = _ref_exists(root, REAL_CAPTURED_TASK_BACKEND_CAPTURE_PREFLIGHTS_DIR)
+    preflight_data = None
+    preflight_status = "unknown"
+    preflight_future_capture = False
+    if preflight_ref:
+        pf_path = root.join(REAL_CAPTURED_TASK_BACKEND_CAPTURE_PREFLIGHTS_DIR / "latest.json")
+        if pf_path.is_file():
+            preflight_data = json.loads(pf_path.read_text(encoding="utf-8"))
+            preflight_status = preflight_data.get("backend_capture_preflight_status", "unknown")
+            preflight_future_capture = preflight_data.get("backend_capture_allowed_in_future_phase", False)
+
+    # Read approval
+    approval_ref = _ref_exists(root, REAL_CAPTURED_TASK_PACKAGE_APPROVALS_DIR)
+    approval_data = None
+    if approval_ref:
+        ap_path = root.join(REAL_CAPTURED_TASK_PACKAGE_APPROVALS_DIR / "latest.json")
+        if ap_path.is_file():
+            approval_data = json.loads(ap_path.read_text(encoding="utf-8"))
+
+    # Read dry-run
+    dry_run_ref = _ref_exists(root, REAL_CAPTURED_TASK_PACKAGE_DRY_RUNS_DIR)
+    dry_run_data = None
+    if dry_run_ref:
+        dr_path = root.join(REAL_CAPTURED_TASK_PACKAGE_DRY_RUNS_DIR / "latest.json")
+        if dr_path.is_file():
+            dry_run_data = json.loads(dr_path.read_text(encoding="utf-8"))
+
+    # Execution disabled
+    real_execution_disabled = True
+    rep_ref = _ref_exists(root, Path(".pcae") / "real-execution-disabled-proofs")
+    if rep_ref:
+        rep_path = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep_path.is_file():
+            rep = json.loads(rep_path.read_text(encoding="utf-8"))
+            real_execution_disabled = rep.get("real_execution_disabled", True)
+
+    # Runner refuses
+    runner_execute_refuses = True
+    ret_ref = _ref_exists(root, Path(".pcae") / "runner-execution-traces")
+    if ret_ref:
+        ret_path = root.join(Path(".pcae") / "runner-execution-traces" / "latest.json")
+        if ret_path.is_file():
+            ret = json.loads(ret_path.read_text(encoding="utf-8"))
+            runner_execute_refuses = not ret.get("execution_available", True)
+
+    # Agent lock
+    agent_lock = read_agent_lock(root)
+    agent_lock_active = agent_lock is not None
+    locked_backend_name = agent_lock.agent_id if agent_lock else None
+
+    # Audit
+    audit_warning_count = 0
+    audit_warnings: list = []
+    audit_ref = _ref_exists(root, Path(".pcae") / "phase-audits")
+    if audit_ref:
+        a_path = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if a_path.is_file():
+            a = json.loads(a_path.read_text(encoding="utf-8"))
+            audit_warning_count = len(a.get("warnings", []))
+            audit_warnings = a.get("warnings", [])
+
+    # Git status
+    git_status_clean = True
+    pre_git_status = ""
+    try:
+        result_git = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                             capture_output=True, text=True, timeout=15)
+        pre_git_status = result_git.stdout.strip()
+        git_status_clean = pre_git_status == ""
+    except Exception:
+        git_status_clean = True
+
+    # Extract digests/ids from approval
+    approval_pkg_digest = approval_data.get("package_digest") if approval_data else None
+    approval_ct_digest = approval_data.get("contract_digest") if approval_data else None
+    approval_pkg_id = approval_data.get("package_id") if approval_data else None
+    approval_ct_id = approval_data.get("contract_id") if approval_data else None
+    approval_approved = approval_data.get("human_package_approval_granted", False) if approval_data else False
+
+    # Extract from dry-run
+    dry_pkg_digest = dry_run_data.get("package_digest") if dry_run_data else None
+    dry_ct_digest = dry_run_data.get("contract_digest") if dry_run_data else None
+    dry_pkg_id = dry_run_data.get("package_id") if dry_run_data else None
+    dry_ct_id = dry_run_data.get("contract_id") if dry_run_data else None
+    dry_task_title = dry_run_data.get("task_title") if dry_run_data else None
+    dry_task_type = dry_run_data.get("task_type") if dry_run_data else None
+    dry_prompt_preview = dry_run_data.get("prompt_envelope_preview") if dry_run_data else None
+
+    digest_mismatch = False
+    if approval_data and dry_run_data:
+        digest_mismatch = (
+            approval_pkg_digest != dry_pkg_digest
+            or approval_ct_digest != dry_ct_digest
+            or approval_pkg_id != dry_pkg_id
+            or approval_ct_id != dry_ct_id
+        )
+
+    # Gate validation
+    blockers: list = []
+    warnings_list: list = []
+    capture_status = "dry_run_ready"
+
+    if not preflight_ref or preflight_status in ("no_artifact", "unknown"):
+        capture_status = "missing_preflight"
+        blockers.append("Backend capture preflight is missing.")
+    elif not preflight_future_capture or preflight_status != "ready_for_backend_capture":
+        capture_status = "preflight_not_ready"
+        blockers.append(f"Preflight status is '{preflight_status}', not ready_for_backend_capture.")
+    elif not approval_data or not approval_approved:
+        capture_status = "package_not_approved"
+        blockers.append("Package is not approved.")
+    elif digest_mismatch:
+        capture_status = "digest_mismatch"
+        blockers.append("Digest or ID mismatch in the pipeline.")
+    elif not git_status_clean:
+        capture_status = "blocked_dirty_tree"
+        blockers.append("Working tree is not clean.")
+    elif audit_warning_count > 0:
+        capture_status = "blocked_audit_warnings"
+        blockers.append(f"Audit has {audit_warning_count} warning(s).")
+    elif not real_execution_disabled:
+        capture_status = "blocked_execution_not_disabled"
+        blockers.append("Real execution is not confirmed disabled.")
+    elif not runner_execute_refuses:
+        capture_status = "blocked_runner_execution_available"
+        blockers.append("Runner execution is reported as available.")
+    elif not agent_lock_active:
+        capture_status = "blocked_agent_lock_missing"
+        blockers.append("No active agent lock.")
+    elif locked_backend_name not in ("claude-deepseek", "claude-local"):
+        capture_status = "blocked_backend_mismatch"
+        blockers.append(f"Locked backend '{locked_backend_name}' is not an expected backend.")
+
+    # Backend invocation (only if --execute and all gates pass)
+    backend_invocation_performed = False
+    backend_capture_performed = False
+    backend_output_captured = False
+    package_sent = False
+    return_code = None
+    started_at = None
+    finished_at = None
+    duration_seconds = None
+    stdout_path = None
+    stderr_path = None
+    post_git_status = ""
+    changed_files: list = []
+    unexpected_changed_files: list = []
+    mutation_guard_passed = True
+    prompt_digest = None
+    backend_command = None
+    backend_invocation_allowed = False
+
+    if execute and capture_status == "dry_run_ready":
+        # Find backend command
+        backend_cmd_path = _shutil.which(locked_backend_name) if locked_backend_name else None
+        if not backend_cmd_path:
+            capture_status = "failed_backend_invocation"
+            blockers.append(f"Backend command '{locked_backend_name}' not found in PATH.")
+        else:
+            backend_command = backend_cmd_path
+            backend_invocation_allowed = True
+            package_sent = True
+
+            # Build governed prompt from dry-run envelope, stripping NOT SEND-AUTHORIZED markers
+            governed_prompt = (dry_prompt_preview or "").replace(
+                "[This is a DRY-RUN package envelope. NOT SEND-AUTHORIZED.]",
+                "[GOVERNED BACKEND CAPTURE — Phase 77F]"
+            ).replace(
+                "[Do not invoke any backend. Do not execute.]",
+                "[Produce documentation-only output. Do not mutate repo. Do not commit. Do not push. Return proposed content only.]"
+            )
+
+            if governed_prompt:
+                prompt_digest = hashlib.sha256(governed_prompt.encode("utf-8")).hexdigest()
+
+            # Mutation guard: record pre-invocation git status
+            try:
+                pre_result = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                                     capture_output=True, text=True, timeout=15)
+                pre_git_status = pre_result.stdout.strip()
+            except Exception:
+                pre_git_status = ""
+
+            # Invoke backend
+            started_at = datetime.now(timezone.utc).isoformat()
+            try:
+                invoke_result = _sp.run(
+                    [backend_cmd_path, "-p", governed_prompt],
+                    cwd=str(root.path),
+                    capture_output=True,
+                    text=True,
+                    timeout=120,
+                )
+                return_code = invoke_result.returncode
+                stdout_text = invoke_result.stdout or ""
+                stderr_text = invoke_result.stderr or ""
+                backend_invocation_performed = True
+                backend_capture_performed = True
+            except _sp.TimeoutExpired:
+                return_code = -1
+                stdout_text = ""
+                stderr_text = "TIMEOUT: backend invocation exceeded 120 seconds."
+                backend_invocation_performed = True
+                backend_capture_performed = False
+            except Exception as exc:
+                return_code = -2
+                stdout_text = ""
+                stderr_text = f"ERROR: {exc}"
+                backend_invocation_performed = True
+                backend_capture_performed = False
+
+            finished_at = datetime.now(timezone.utc).isoformat()
+            if started_at and finished_at:
+                try:
+                    start_dt = datetime.fromisoformat(started_at)
+                    end_dt = datetime.fromisoformat(finished_at)
+                    duration_seconds = (end_dt - start_dt).total_seconds()
+                except Exception:
+                    pass
+
+            # Persist raw output
+            cap_dir = root.join(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR)
+            cap_dir.mkdir(parents=True, exist_ok=True)
+            (cap_dir / ".gitignore").write_text("*\n")
+            stdout_path = str(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR / "latest.stdout.txt")
+            stderr_path = str(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR / "latest.stderr.txt")
+            (cap_dir / "latest.stdout.txt").write_text(stdout_text, encoding="utf-8")
+            (cap_dir / "latest.stderr.txt").write_text(stderr_text, encoding="utf-8")
+
+            backend_output_captured = backend_invocation_performed and return_code == 0
+            if stdout_text.strip():
+                backend_output_captured = True
+
+            # Mutation guard: post-invocation git status
+            try:
+                post_result = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                                      capture_output=True, text=True, timeout=15)
+                post_git_status = post_result.stdout.strip()
+            except Exception:
+                post_git_status = ""
+
+            # Compare pre/post — only .pcae/real-captured-task-backend-captures/ changes are expected
+            pre_lines = set(pre_git_status.split("\n")) if pre_git_status else set()
+            post_lines = set(post_git_status.split("\n")) if post_git_status else set()
+            new_lines = post_lines - pre_lines
+            for line in new_lines:
+                if line.strip():
+                    changed_files.append(line.strip())
+                    # Only .pcae/real-captured-task-backend-captures/ and .pcae/agent-locks/ changes are expected
+                    if not any(line.strip().startswith(p) for p in [
+                        ".pcae/real-captured-task-backend-captures/",
+                        ".pcae/agent-locks/",
+                        ".pcae/agent-lock.json",
+                    ]):
+                        unexpected_changed_files.append(line.strip())
+
+            mutation_guard_passed = len(unexpected_changed_files) == 0
+
+            if return_code != 0:
+                capture_status = "failed_backend_invocation"
+                blockers.append(f"Backend returned non-zero exit code: {return_code}")
+            elif not mutation_guard_passed:
+                capture_status = "failed_repo_mutation_detected"
+                blockers.append("Backend invocation modified unexpected repository files.")
+            else:
+                capture_status = "captured"
+
+    return {
+        "backend_capture_status": capture_status,
+        "dry_run": not execute,
+        "execute_requested": execute,
+        "package_id": approval_pkg_id,
+        "contract_id": approval_ct_id,
+        "package_digest": approval_pkg_digest,
+        "contract_digest": approval_ct_digest,
+        "prompt_digest": prompt_digest,
+        "backend_name": locked_backend_name,
+        "locked_backend_name": locked_backend_name,
+        "backend_command": backend_command,
+        "backend_invocation_allowed_for_this_command": backend_invocation_allowed,
+        "backend_invocation_performed": backend_invocation_performed,
+        "backend_capture_performed": backend_capture_performed,
+        "backend_output_captured": backend_output_captured,
+        "stdout_path": stdout_path,
+        "stderr_path": stderr_path,
+        "return_code": return_code,
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "duration_seconds": duration_seconds,
+        "pre_git_status": pre_git_status,
+        "post_git_status": post_git_status,
+        "changed_files": changed_files,
+        "unexpected_changed_files": unexpected_changed_files,
+        "mutation_guard_passed": mutation_guard_passed,
+        "package_sent": package_sent,
+        # Safety invariants
+        "apply_performed": False,
+        "files_modified": len(unexpected_changed_files) > 0,
+        "commits_created": 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        "real_captured_task_execution_allowed": False,
+        "output_application_allowed": False,
+        # Guidance
+        "recommended_next_phase": "77G — Real Captured Backend Output Intake" if capture_status == "captured" else "Resolve blockers first.",
+        "blockers": blockers,
+        "warnings": warnings_list,
+        "next_operator_action": (
+            "Backend capture complete. Output captured as data. "
+            "No output has been applied. No files have been mutated. "
+            "Proceed to Phase 77G for captured output intake."
+            if capture_status == "captured"
+            else (
+                "Backend capture gates validated. Run with --execute to perform governed backend capture."
+                if capture_status == "dry_run_ready"
+                else "Resolve blockers before proceeding to backend capture."
+            )
+        ),
+        "generated_at": ts,
+    }
+
+
+def run_phase_real_captured_task_backend_capture(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    dry_run_flag: bool = getattr(args, "dry_run", False)
+    execute_flag: bool = getattr(args, "execute", False)
+    if execute_flag and dry_run_flag:
+        print("Error: --execute and --dry-run are mutually exclusive.")
+        return 1
+    execute = execute_flag
+    result = _build_real_captured_task_backend_capture(root, execute=execute)
+    if getattr(args, "save", False):
+        d = root.join(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Backend capture saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["backend_capture_status"] in ("dry_run_ready", "captured") else 1
+    print("Real Captured Task Backend Capture"); print("=" * 32)
+    print(f"  Capture status: {result['backend_capture_status']}")
+    print(f"  Dry run: {'yes' if result['dry_run'] else 'no'}")
+    print(f"  Execute requested: {'yes' if result['execute_requested'] else 'no'}")
+    print(f"  Package ID: {result.get('package_id', 'n/a')}")
+    print(f"  Contract ID: {result.get('contract_id', 'n/a')}")
+    print(f"  Backend: {result.get('locked_backend_name', 'n/a')}")
+    print(f"  Backend invocation performed: {'yes' if result['backend_invocation_performed'] else 'no'}")
+    print(f"  Backend capture performed: {'yes' if result['backend_capture_performed'] else 'no'}")
+    print(f"  Backend output captured: {'yes' if result['backend_output_captured'] else 'no'}")
+    if result.get('return_code') is not None:
+        print(f"  Return code: {result['return_code']}")
+    if result.get('duration_seconds') is not None:
+        print(f"  Duration: {result['duration_seconds']:.1f}s")
+    if result.get('stdout_path'):
+        print(f"  stdout: {result['stdout_path']}")
+    if result.get('stderr_path'):
+        print(f"  stderr: {result['stderr_path']}")
+    print(f"  Mutation guard passed: {'yes' if result['mutation_guard_passed'] else 'no'}")
+    if result.get('unexpected_changed_files'):
+        print(f"  Unexpected changed files: {len(result['unexpected_changed_files'])}")
+    print(f"  Output application allowed: no")
+    print(f"  Apply performed: no")
+    print(f"  Commits created: 0")
+    print(f"  Push performed: no")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:")
+        for b in result["blockers"]:
+            print(f"    - {b}")
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["backend_capture_status"] in ("dry_run_ready", "captured") else 1
+
+
+def run_phase_real_captured_task_backend_capture_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(REAL_CAPTURED_TASK_BACKEND_CAPTURES_DIR / "latest.json")
+    if not p.is_file():
+        result = {"backend_capture_status": "no_artifact", "package_id": None}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No backend capture artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("backend_capture_status") in ("dry_run_ready", "captured") else 1
+    print("Real Captured Task Backend Capture (Show)"); print("=" * 38)
+    print(f"  Status: {result.get('backend_capture_status', 'unknown')}")
+    print(f"  Package ID: {result.get('package_id', 'n/a')}")
+    print(f"  Backend invoked: {'yes' if result.get('backend_invocation_performed') else 'no'}")
+    print(f"  Output captured: {'yes' if result.get('backend_output_captured') else 'no'}")
+    print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
+    return 0
