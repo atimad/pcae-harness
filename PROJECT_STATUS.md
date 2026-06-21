@@ -2,19 +2,17 @@
 
 ## Current Phase
 
-Phase 77D: Real Captured Task Package Approval.
+Phase 77E: Real Captured Task Backend Capture Preflight.
 
-Phase 77D adds `pcae phase real-captured-task-package-approval --json --save` and
-`pcae phase real-captured-task-package-approval-show --json`. Creates approval artifact
-binding operator approval to package/contract digests. Default reports
-`ready_for_approval_request`. `--approve --approved-by --reason` grants
-`human_package_approval_granted=true`. Verifies digest matching (stable, excludes
-volatile fields). Blocks on missing dry-run, package not ready, digest mismatch,
-dirty tree, audit warnings, execution not disabled, runner available, missing agent lock.
-Approved artifact authorizes only future backend capture preflight
-(`backend_capture_preflight_allowed_in_future_phase=true`). All present-tense safety
-invariants remain false. Persists to `.pcae/real-captured-task-package-approvals/latest.json`.
-15 new tests.
+Phase 77E adds `pcae phase real-captured-task-backend-capture-preflight --json --save` and
+`pcae phase real-captured-task-backend-capture-preflight-show --json`. Final preflight
+verifying all conditions before a future backend capture phase. Reads 77D approval,
+77C dry-run, and all safety artifacts. Verifies digest/id matching. Blocks on missing
+approval, unapproved, digest mismatch, dirty tree, audit warnings, execution not disabled,
+runner available, missing agent lock, backend mismatch. Ready reports
+`backend_capture_allowed_in_future_phase=true`. All present-tense safety invariants
+remain false. Persists to `.pcae/real-captured-task-backend-capture-preflights/latest.json`.
+10 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 
