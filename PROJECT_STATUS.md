@@ -2,12 +2,13 @@
 
 ## Current Phase
 
-Phase 77H: Backend Capture Timeout Policy.
+Phase 77I: Backend Capture Retry Preflight.
 
-Phase 77H adds `pcae phase backend-capture-timeout-policy --json --save` and
-`pcae phase backend-capture-timeout-policy-show --json`. Creates governed timeout/retry
-policy: proposes 300s timeout, max 1 additional attempt. Never invokes backend.
-Persists to `.pcae/backend-capture-timeout-policies/latest.json`. 9 new tests.
+Phase 77I adds `pcae phase backend-capture-retry-preflight --json --save` and
+`pcae phase backend-capture-retry-preflight-show --json`. Validates retry eligibility
+under 77H timeout policy. Reports retry_timeout=300s, max 1 attempt, 0 used, 1 remaining.
+Never invokes backend. Persists to `.pcae/backend-capture-retry-preflights/latest.json`.
+9 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 

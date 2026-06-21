@@ -505,6 +505,8 @@ from pcae.commands.phase import (
     run_phase_real_backend_capture_result_intake_show,
     run_phase_backend_capture_timeout_policy,
     run_phase_backend_capture_timeout_policy_show,
+    run_phase_backend_capture_retry_preflight,
+    run_phase_backend_capture_retry_preflight_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6442,6 +6444,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_capture_timeout_policy_show_parser.add_argument("--json", action="store_true")
     phase_backend_capture_timeout_policy_show_parser.set_defaults(handler=run_phase_backend_capture_timeout_policy_show)
+
+    # Phase 77I
+    phase_backend_capture_retry_preflight_parser = phase_subparsers.add_parser(
+        "backend-capture-retry-preflight",
+        help="Validate retry eligibility under the prepared timeout policy (Phase 77I).",
+    )
+    phase_backend_capture_retry_preflight_parser.add_argument("--json", action="store_true")
+    phase_backend_capture_retry_preflight_parser.add_argument("--save", action="store_true")
+    phase_backend_capture_retry_preflight_parser.set_defaults(handler=run_phase_backend_capture_retry_preflight)
+
+    phase_backend_capture_retry_preflight_show_parser = phase_subparsers.add_parser(
+        "backend-capture-retry-preflight-show",
+        help="Show latest backend capture retry preflight artifact (Phase 77I).",
+    )
+    phase_backend_capture_retry_preflight_show_parser.add_argument("--json", action="store_true")
+    phase_backend_capture_retry_preflight_show_parser.set_defaults(handler=run_phase_backend_capture_retry_preflight_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
