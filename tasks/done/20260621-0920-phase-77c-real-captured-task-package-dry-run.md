@@ -10,7 +10,7 @@ Phase 77C: Real Captured Task Package Dry-Run
 
 ## Status
 
-active
+done
 
 ## Mode
 
