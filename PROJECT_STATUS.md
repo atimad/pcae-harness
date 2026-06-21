@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 77K: Backend Retry Mutation Result Intake.
+Phase 77L: Backend-Created Output Quarantine Review.
 
-Phase 77K adds `pcae phase backend-retry-mutation-result-intake --json --save` and
-`pcae phase backend-retry-mutation-result-intake-show --json`. Reads and classifies
-77J governed retry results with mutation-aware file detection. Never modifies backend-created files.
-Persists to `.pcae/backend-retry-mutation-result-intakes/latest.json`. 10 new tests.
+Phase 77L adds `pcae phase backend-created-output-quarantine-review --json --save` and
+`pcae phase backend-created-output-quarantine-review-show --json`. Reviews quarantine state
+of backend-created file. Verifies metadata match, git-ignored status. Never modifies file.
+Persists to `.pcae/backend-created-output-quarantine-reviews/latest.json`. 8 new tests.
 
 ## Milestone: Execution Chain Traceability Complete
 

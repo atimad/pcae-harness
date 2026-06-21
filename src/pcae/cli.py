@@ -511,6 +511,8 @@ from pcae.commands.phase import (
     run_phase_backend_capture_governed_retry_show,
     run_phase_backend_retry_mutation_result_intake,
     run_phase_backend_retry_mutation_result_intake_show,
+    run_phase_backend_created_output_quarantine_review,
+    run_phase_backend_created_output_quarantine_review_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6498,6 +6500,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_retry_mutation_result_intake_show_parser.add_argument("--json", action="store_true")
     phase_backend_retry_mutation_result_intake_show_parser.set_defaults(handler=run_phase_backend_retry_mutation_result_intake_show)
+
+    # Phase 77L
+    phase_backend_created_output_quarantine_review_parser = phase_subparsers.add_parser(
+        "backend-created-output-quarantine-review",
+        help="Review quarantine state of backend-created output file (Phase 77L).",
+    )
+    phase_backend_created_output_quarantine_review_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_quarantine_review_parser.add_argument("--save", action="store_true")
+    phase_backend_created_output_quarantine_review_parser.set_defaults(handler=run_phase_backend_created_output_quarantine_review)
+
+    phase_backend_created_output_quarantine_review_show_parser = phase_subparsers.add_parser(
+        "backend-created-output-quarantine-review-show",
+        help="Show latest backend-created output quarantine review artifact (Phase 77L).",
+    )
+    phase_backend_created_output_quarantine_review_show_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_quarantine_review_show_parser.set_defaults(handler=run_phase_backend_created_output_quarantine_review_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

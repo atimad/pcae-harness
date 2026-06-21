@@ -13804,3 +13804,126 @@ def test_77k_show_no_artifact(tmp_path, monkeypatch, capsys):
     d = json.loads(capsys.readouterr().out)
     assert exit_code == 1
     assert d["backend_retry_mutation_intake_status"] == "no_artifact"
+
+
+# Phase 77L: backend-created output quarantine review
+
+def _seed_mutation_intake_77l(tmp_path: Path, outcome: str = "repo_mutation_detected_with_output",
+                                lines: int = 10, size: int = 100, sha: str = "abc123") -> None:
+    d = tmp_path / ".pcae" / "backend-retry-mutation-result-intakes"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "backend_retry_mutation_intake_status": "classified",
+        "capture_outcome": outcome,
+        "backend_retry_status": "failed_repo_mutation_detected",
+        "backend_name": "claude-deepseek", "backend_command": "/usr/bin/claude-deepseek",
+        "package_id": "PKG-001", "contract_id": "CT-001",
+        "package_digest": "pkg123", "prompt_digest": "pr456",
+        "backend_created_file_line_count": lines,
+        "backend_created_file_size_bytes": size,
+        "backend_created_file_sha256": sha,
+    }))
+
+def _seed_backend_file_77l(tmp_path: Path, content: str = "line1\nline2\n") -> str:
+    import hashlib
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "docs" / "REAL_CAPTURED_TASKS.md").write_text(content)
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def test_77l_missing_intake(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-created-output-quarantine-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_quarantine_review_status"] == "missing_mutation_intake"
+
+def test_77l_not_mutation_output(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_mutation_intake_77l(tmp_path, outcome="captured_clean")
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-quarantine-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_quarantine_review_status"] == "not_mutation_output"
+
+def test_77l_missing_file(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_mutation_intake_77l(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-quarantine-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_quarantine_review_status"] == "missing_backend_created_file"
+    assert d["evidence_loss_review_required"] is True
+
+def test_77l_metadata_mismatch(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_mutation_intake_77l(tmp_path, lines=10, size=100, sha="expected_sha")
+    sha = _seed_backend_file_77l(tmp_path, content="different content")
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-quarantine-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_quarantine_review_status"] == "metadata_mismatch"
+    assert d["evidence_integrity_review_required"] is True
+
+def test_77l_reviewed_quarantined(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "line1\nline2\nline3\n"
+    sha = _seed_backend_file_77l(tmp_path, content=content)
+    _seed_mutation_intake_77l(tmp_path, lines=len(content.split("\n")), size=len(content), sha=sha)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-quarantine-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_quarantine_review_status"] == "reviewed"
+    assert d["quarantine_outcome"] == "reviewed_quarantined_output"
+    assert d["backend_created_file_matches_77k"] is True
+    assert d["backend_created_file_detected"] is True
+    assert d["backend_created_output_reviewable"] is True
+    assert d["adoption_allowed_now"] is False
+    assert d["adoption_preflight_allowed_in_future_phase"] is True
+    assert d["backend_invocation_performed"] is False
+    assert d["file_deleted"] is False
+    assert d["file_staged"] is False
+    assert "77M" in d["recommended_next_phase"]
+
+def test_77l_save_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "test\n"; sha = _seed_backend_file_77l(tmp_path, content=content)
+    _seed_mutation_intake_77l(tmp_path, lines=len(content.split("\n")), size=len(content), sha=sha)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-quarantine-review", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "backend-created-output-quarantine-reviews" / "latest.json"
+    assert p.is_file()
+
+def test_77l_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-created-output-quarantine-review", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_invocation_performed"] is False
+    assert d["file_deleted"] is False
+    assert d["file_staged"] is False
+    assert d["file_committed"] is False
+
+def test_77l_show_no_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "backend-created-output-quarantine-review-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["backend_created_output_quarantine_review_status"] == "no_artifact"

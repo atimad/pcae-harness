@@ -14239,3 +14239,219 @@ def run_phase_backend_retry_mutation_result_intake_show(args: argparse.Namespace
     print(f"  Created file: {'yes' if r.get('backend_created_file_detected') else 'no'}")
     print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77L: backend-created output quarantine review
+BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR = Path(".pcae") / "backend-created-output-quarantine-reviews"
+
+_BCF_PATH = "docs/REAL_CAPTURED_TASKS.md"
+
+
+def _build_backend_created_output_quarantine_review(root: HarnessPath) -> dict:
+    """Review quarantine state of backend-created output file. No invocation, no mutation."""
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list = []
+
+    # Read 77K
+    intake_ref = _ref_exists(root, BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR)
+    intake_data = None
+    if intake_ref:
+        ip = root.join(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json")
+        if ip.is_file(): intake_data = json.loads(ip.read_text(encoding="utf-8"))
+
+    if not intake_data or intake_data.get("capture_outcome") != "repo_mutation_detected_with_output":
+        rs = "missing_mutation_intake" if not intake_data else "not_mutation_output"
+        bl.append("Mutation intake missing or wrong outcome.")
+        return _mq(rs, bl, ts, intake_data)
+
+    exp_lines = intake_data.get("backend_created_file_line_count", 0)
+    exp_size = intake_data.get("backend_created_file_size_bytes", 0)
+    exp_sha = intake_data.get("backend_created_file_sha256", "")
+
+    bcf = root.path / _BCF_PATH
+    fe = bcf.is_file(); fr = fe and bcf.stat().st_size > 0
+    al = 0; a_size = 0; a_sha = None
+    if fe and fr:
+        c = bcf.read_text(encoding="utf-8"); al = len(c.split("\n")); a_size = len(c)
+        a_sha = hashlib.sha256(c.encode("utf-8")).hexdigest()
+
+    ignored_status = ""; ig = False; ut = False; staged = False; tracked = False
+    try:
+        gs = _sp.run(["git", "status", "--porcelain", "--ignored", "--", _BCF_PATH],
+                    cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        ignored_status = gs.stdout.strip()
+        if ignored_status.startswith("!!"): ig = True
+        elif ignored_status.startswith("??"): ut = True
+        elif ignored_status:
+            staged = "M" in ignored_status[:2] or "A" in ignored_status[:2] or ignored_status[0] != " "
+            tracked = True
+    except Exception: pass
+
+    mm = a_sha == exp_sha and al == exp_lines and a_size == exp_size
+    rs = "reviewed"
+    if not fe: rs = "missing_backend_created_file"; bl.append("File missing.")
+    elif not mm: rs = "metadata_mismatch"; bl.append("Metadata mismatch.")
+    elif staged or tracked: rs = "file_staged_or_committed"; bl.append("File staged/tracked.")
+
+    return {
+        "backend_created_output_quarantine_review_status": rs,
+        "quarantine_outcome": (
+            "reviewed_quarantined_output" if rs == "reviewed"
+            else "missing_backend_created_file" if rs == "missing_backend_created_file"
+            else "metadata_mismatch" if rs == "metadata_mismatch"
+            else "file_staged_or_committed" if rs == "file_staged_or_committed"
+            else "not_mutation_output" if rs == "not_mutation_output" else "missing_mutation_intake"
+        ),
+        "mutation_intake_ref": str(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json") if intake_ref else None,
+        "retry_result_ref": str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json"),
+        "backend_retry_status": intake_data.get("backend_retry_status") if intake_data else None,
+        "capture_outcome": intake_data.get("capture_outcome") if intake_data else "unknown",
+        "backend_name": intake_data.get("backend_name") if intake_data else None,
+        "backend_command": intake_data.get("backend_command") if intake_data else None,
+        "package_id": intake_data.get("package_id") if intake_data else None,
+        "contract_id": intake_data.get("contract_id") if intake_data else None,
+        "package_digest": intake_data.get("package_digest") if intake_data else None,
+        "prompt_digest": intake_data.get("prompt_digest") if intake_data else None,
+        "backend_created_file_path": _BCF_PATH,
+        "expected_backend_created_file_line_count": exp_lines,
+        "expected_backend_created_file_size_bytes": exp_size,
+        "expected_backend_created_file_sha256": exp_sha,
+        "actual_backend_created_file_line_count": al,
+        "actual_backend_created_file_size_bytes": a_size,
+        "actual_backend_created_file_sha256": a_sha,
+        "backend_created_file_matches_77k": mm,
+        "backend_created_file_detected": fe, "backend_created_file_preserved": fe,
+        "backend_created_file_readable": fr,
+        "backend_created_file_hidden_by_gitignore": ig,
+        "backend_created_file_untracked": ut, "backend_created_file_ignored": ig,
+        "backend_created_file_staged": staged, "backend_created_file_tracked": tracked,
+        "backend_created_file_committed": False, "backend_created_file_pushed": False,
+        "backend_created_output_reviewable": rs == "reviewed",
+        "normal_output_intake_ready": False,
+        "adoption_allowed_now": False,
+        "adoption_preflight_allowed_in_future_phase": rs == "reviewed",
+        "mutation_review_required": True,
+        "quarantine_review_required": rs != "reviewed",
+        "evidence_loss_review_required": rs == "missing_backend_created_file",
+        "evidence_integrity_review_required": rs == "metadata_mismatch",
+        "governance_incident_review_required": rs == "file_staged_or_committed",
+        "emergency_review_required": False,
+        "backend_invocation_performed": False, "backend_capture_performed": False,
+        "backend_output_captured": False,
+        "apply_performed": False, "files_modified_in_this_phase": False,
+        "file_deleted": False, "file_moved": False, "file_modified": False,
+        "file_staged": False, "file_committed": False, "file_pushed": False,
+        "commits_created": 0, "push_performed": False,
+        "execution_authorized": False, "output_application_allowed": False,
+        "current_git_status": "clean", "ignored_git_status_for_file": ignored_status,
+        "generated_at": ts, "blockers": bl, "warnings": [],
+        "recommended_next_phase": "77M — Backend-Created Output Adoption Preflight" if rs == "reviewed" else "Resolve blockers first.",
+        "next_operator_action": (
+            f"Quarantine review passed. File preserved ({al} lines, {a_size} bytes). "
+            "Adoption preflight allowed in 77M. No file modified/staged/committed."
+            if rs == "reviewed" else "Resolve blockers first."
+        ),
+    }
+
+
+def _mq(rs: str, bl: list, ts: str, intake_data) -> dict:
+    return {
+        "backend_created_output_quarantine_review_status": rs,
+        "quarantine_outcome": "not_mutation_output" if rs == "not_mutation_output" else "missing_mutation_intake",
+        "mutation_intake_ref": str(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json"),
+        "retry_result_ref": str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json"),
+        "backend_retry_status": intake_data.get("backend_retry_status") if intake_data else None,
+        "capture_outcome": intake_data.get("capture_outcome", "unknown") if intake_data else "unknown",
+        "backend_name": intake_data.get("backend_name") if intake_data else None,
+        "backend_command": intake_data.get("backend_command") if intake_data else None,
+        "package_id": intake_data.get("package_id") if intake_data else None,
+        "contract_id": intake_data.get("contract_id") if intake_data else None,
+        "package_digest": intake_data.get("package_digest") if intake_data else None,
+        "prompt_digest": intake_data.get("prompt_digest") if intake_data else None,
+        "backend_created_file_path": _BCF_PATH,
+        "expected_backend_created_file_line_count": 0, "expected_backend_created_file_size_bytes": 0,
+        "expected_backend_created_file_sha256": "",
+        "actual_backend_created_file_line_count": 0, "actual_backend_created_file_size_bytes": 0,
+        "actual_backend_created_file_sha256": None,
+        "backend_created_file_matches_77k": False,
+        "backend_created_file_detected": False, "backend_created_file_preserved": False,
+        "backend_created_file_readable": False,
+        "backend_created_file_hidden_by_gitignore": False,
+        "backend_created_file_untracked": False, "backend_created_file_ignored": False,
+        "backend_created_file_staged": False, "backend_created_file_tracked": False,
+        "backend_created_file_committed": False, "backend_created_file_pushed": False,
+        "backend_created_output_reviewable": False,
+        "normal_output_intake_ready": False,
+        "adoption_allowed_now": False, "adoption_preflight_allowed_in_future_phase": False,
+        "mutation_review_required": False, "quarantine_review_required": True,
+        "evidence_loss_review_required": False, "evidence_integrity_review_required": False,
+        "governance_incident_review_required": False, "emergency_review_required": False,
+        "backend_invocation_performed": False, "backend_capture_performed": False,
+        "backend_output_captured": False,
+        "apply_performed": False, "files_modified_in_this_phase": False,
+        "file_deleted": False, "file_moved": False, "file_modified": False,
+        "file_staged": False, "file_committed": False, "file_pushed": False,
+        "commits_created": 0, "push_performed": False,
+        "execution_authorized": False, "output_application_allowed": False,
+        "current_git_status": "unknown", "ignored_git_status_for_file": "",
+        "generated_at": ts, "blockers": bl, "warnings": [],
+        "recommended_next_phase": "Resolve blockers first.",
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+
+def run_phase_backend_created_output_quarantine_review(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    r = _build_backend_created_output_quarantine_review(root)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Quarantine review saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r["backend_created_output_quarantine_review_status"] == "reviewed" else 1
+    print("Backend-Created Output Quarantine Review"); print("=" * 40)
+    print(f"  Review: {r['backend_created_output_quarantine_review_status']}")
+    print(f"  Outcome: {r['quarantine_outcome']}")
+    print(f"  File: {r['backend_created_file_path']}")
+    print(f"  Detected: {'yes' if r['backend_created_file_detected'] else 'no'}")
+    print(f"  Matches 77K: {'yes' if r['backend_created_file_matches_77k'] else 'no'}")
+    if r['backend_created_file_matches_77k']:
+        print(f"  Lines: {r['actual_backend_created_file_line_count']}  Size: {r['actual_backend_created_file_size_bytes']}B")
+        print(f"  SHA256: {r['actual_backend_created_file_sha256'][:16] if r.get('actual_backend_created_file_sha256') else ''}...")
+    print(f"  Ignored: {'yes' if r['backend_created_file_ignored'] else 'no'}")
+    print(f"  Untracked: {'yes' if r['backend_created_file_untracked'] else 'no'}")
+    print(f"  Staged: {'yes' if r['backend_created_file_staged'] else 'no'}")
+    print(f"  Reviewable: {'yes' if r['backend_created_output_reviewable'] else 'no'}")
+    print(f"  Adoption now: no  Preflight future: {'yes' if r['adoption_preflight_allowed_in_future_phase'] else 'no'}")
+    print(f"  Backend invoked: no  File altered: no")
+    print(f"  Next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  - {b}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_created_output_quarantine_review_status"] == "reviewed" else 1
+
+
+def run_phase_backend_created_output_quarantine_review_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_created_output_quarantine_review_status": "no_artifact"}
+        if args.json: print(json.dumps(r, indent=2, sort_keys=True))
+        else: print("No quarantine review artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("backend_created_output_quarantine_review_status") == "reviewed" else 1
+    print("Backend-Created Output Quarantine Review (Show)"); print("=" * 46)
+    print(f"  Status: {r.get('backend_created_output_quarantine_review_status', 'unknown')}")
+    print(f"  Outcome: {r.get('quarantine_outcome', 'unknown')}")
+    print(f"  File match: {'yes' if r.get('backend_created_file_matches_77k') else 'no'}")
+    print(f"  Adoption preflight: {'yes' if r.get('adoption_preflight_allowed_in_future_phase') else 'no'}")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0
