@@ -13518,3 +13518,147 @@ def test_77i_show_no_artifact(tmp_path, monkeypatch, capsys):
     d = json.loads(capsys.readouterr().out)
     assert exit_code == 1
     assert d["backend_retry_preflight_status"] == "no_artifact"
+
+
+# Phase 77J: backend capture governed retry
+
+def _seed_preflight_77j(tmp_path: Path, status: str = "ready_for_retry", remaining: int = 1, timeout: int = 300) -> None:
+    d = tmp_path / ".pcae" / "backend-capture-retry-preflights"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "backend_retry_preflight_status": status, "retry_timeout_seconds": timeout,
+        "max_additional_attempts": 1, "retry_attempts_used": 0, "retry_attempts_remaining": remaining,
+        "backend_retry_allowed_in_future_phase": status == "ready_for_retry",
+    }))
+
+def _seed_retry_artifacts_77j(tmp_path: Path) -> None:
+    d = tmp_path / ".pcae" / "real-captured-task-package-dry-runs"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "prompt_envelope_preview": "[DRY-RUN] NOT SEND-AUTHORIZED\nDo not invoke. Do not execute.",
+    }))
+    d2 = tmp_path / ".pcae" / "real-captured-task-package-approvals"
+    d2.mkdir(parents=True, exist_ok=True)
+    (d2 / "latest.json").write_text(json.dumps({
+        "package_id": "PKG-001", "contract_id": "CT-001",
+        "package_digest": "pkg123", "contract_digest": "ct456",
+    }))
+
+
+def test_77j_default_non_invoking(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-capture-governed-retry", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_invocation_performed"] is False
+
+def test_77j_dry_run_non_invoking(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-capture-governed-retry", "--dry-run", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_invocation_performed"] is False
+
+def test_77j_missing_preflight(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-capture-governed-retry", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_retry_status"] == "missing_retry_preflight"
+
+def test_77j_preflight_not_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_preflight_77j(tmp_path, status="blocked", remaining=0)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-governed-retry", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_retry_status"] == "retry_preflight_not_ready"
+
+def test_77j_attempts_exhausted(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_preflight_77j(tmp_path, status="ready_for_retry", remaining=0)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-governed-retry", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_retry_status"] == "attempts_exhausted"
+
+def test_77j_dry_run_ready(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-deepseek")
+    monkeypatch.chdir(tmp_path)
+    _seed_preflight_77j(tmp_path)
+    _seed_retry_artifacts_77j(tmp_path)
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True); (d2 / "latest.json").write_text(json.dumps({"real_execution_disabled": True}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True); (d3 / "latest.json").write_text(json.dumps({"execution_available": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-governed-retry", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_retry_status"] == "dry_run_ready"
+    assert d["backend_invocation_performed"] is False
+    assert d["output_application_allowed"] is False
+    assert d["apply_performed"] is False
+
+def test_77j_save_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-deepseek")
+    monkeypatch.chdir(tmp_path)
+    _seed_preflight_77j(tmp_path); _seed_retry_artifacts_77j(tmp_path)
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True); (d2 / "latest.json").write_text(json.dumps({"real_execution_disabled": True}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True); (d3 / "latest.json").write_text(json.dumps({"execution_available": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-governed-retry", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "backend-capture-governed-retries" / "latest.json"
+    assert p.is_file()
+
+def test_77j_show_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path)
+    acquire_agent_lock(HarnessPath(tmp_path), "claude-deepseek")
+    monkeypatch.chdir(tmp_path)
+    _seed_preflight_77j(tmp_path); _seed_retry_artifacts_77j(tmp_path)
+    d2 = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    d2.mkdir(parents=True, exist_ok=True); (d2 / "latest.json").write_text(json.dumps({"real_execution_disabled": True}))
+    d3 = tmp_path / ".pcae" / "runner-execution-traces"
+    d3.mkdir(parents=True, exist_ok=True); (d3 / "latest.json").write_text(json.dumps({"execution_available": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-capture-governed-retry", "--save", "--json"]); capsys.readouterr()
+    main(["phase", "backend-capture-governed-retry-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_retry_status"] == "dry_run_ready"
+
+def test_77j_no_output_application(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-capture-governed-retry", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["output_application_allowed"] is False
+
+def test_77j_show_no_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "backend-capture-governed-retry-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["backend_retry_status"] == "no_artifact"

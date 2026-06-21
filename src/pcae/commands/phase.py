@@ -13760,3 +13760,217 @@ def run_phase_backend_capture_retry_preflight_show(args: argparse.Namespace) -> 
     print(f"  Attempts remaining: {r.get('retry_attempts_remaining', 'n/a')}")
     print(f"  Next phase: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77J: backend capture governed retry
+BACKEND_CAPTURE_GOVERNED_RETRIES_DIR = Path(".pcae") / "backend-capture-governed-retries"
+
+
+def _build_backend_capture_governed_retry(root: HarnessPath, execute: bool = False) -> dict:
+    """Perform exactly one governed backend capture retry with the 300s timeout policy."""
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp, shutil as _shutil
+
+    ts = datetime.now(timezone.utc).isoformat()
+
+    # Read 77I retry preflight
+    preflight_ref = _ref_exists(root, BACKEND_CAPTURE_RETRY_PREFLIGHTS_DIR)
+    preflight_data = None; preflight_status = "unknown"
+    if preflight_ref:
+        pf = root.join(BACKEND_CAPTURE_RETRY_PREFLIGHTS_DIR / "latest.json")
+        if pf.is_file():
+            preflight_data = json.loads(pf.read_text(encoding="utf-8"))
+            preflight_status = preflight_data.get("backend_retry_preflight_status", "unknown")
+
+    # Dry-run for prompt
+    dr_ref = _ref_exists(root, REAL_CAPTURED_TASK_PACKAGE_DRY_RUNS_DIR)
+    dry_data = None; dry_prompt = None
+    if dr_ref:
+        dp = root.join(REAL_CAPTURED_TASK_PACKAGE_DRY_RUNS_DIR / "latest.json")
+        if dp.is_file():
+            dry_data = json.loads(dp.read_text(encoding="utf-8"))
+            dry_prompt = dry_data.get("prompt_envelope_preview")
+
+    # Approval
+    ap_ref = _ref_exists(root, REAL_CAPTURED_TASK_PACKAGE_APPROVALS_DIR)
+    ap_data = None
+    if ap_ref:
+        a = root.join(REAL_CAPTURED_TASK_PACKAGE_APPROVALS_DIR / "latest.json")
+        if a.is_file(): ap_data = json.loads(a.read_text(encoding="utf-8"))
+
+    # Safety
+    real_ed = True
+    rp = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+    if rp.is_file(): real_ed = json.loads(rp.read_text(encoding="utf-8")).get("real_execution_disabled", True)
+
+    runner_ok = True
+    rp2 = root.join(Path(".pcae") / "runner-execution-traces" / "latest.json")
+    if rp2.is_file(): runner_ok = not json.loads(rp2.read_text(encoding="utf-8")).get("execution_available", True)
+
+    al = read_agent_lock(root); al_active = al is not None; lb = al.agent_id if al else None
+
+    ac = 0
+    ap2 = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+    if ap2.is_file(): ac = len(json.loads(ap2.read_text(encoding="utf-8")).get("warnings", []))
+
+    gc = True; pg = ""
+    try:
+        rr = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        pg = rr.stdout.strip(); gc = pg == ""
+    except Exception: gc = True
+
+    # Validate
+    bl: list = []; rs = "dry_run_ready"
+    rto = preflight_data.get("retry_timeout_seconds", 300) if preflight_data else 300
+    ar = preflight_data.get("retry_attempts_remaining", 1) if preflight_data else 1
+
+    if not preflight_ref or preflight_status in ("no_artifact", "unknown"):
+        rs = "missing_retry_preflight"; bl.append("Retry preflight missing.")
+    elif preflight_status != "ready_for_retry":
+        rs = "retry_preflight_not_ready"; bl.append(f"Preflight: '{preflight_status}'.")
+    elif ar <= 0: rs = "attempts_exhausted"; bl.append("No attempts remaining.")
+    elif not gc: rs = "blocked_dirty_tree"; bl.append("Tree not clean.")
+    elif ac > 0: rs = "blocked_audit_warnings"; bl.append(f"{ac} audit warning(s).")
+    elif not real_ed: rs = "blocked_execution_not_disabled"; bl.append("Execution not disabled.")
+    elif not runner_ok: rs = "blocked_runner_execution_available"; bl.append("Runner available.")
+    elif not al_active: rs = "blocked_agent_lock_missing"; bl.append("No agent lock.")
+    elif lb not in ("claude-deepseek", "claude-local"):
+        rs = "blocked_backend_mismatch"; bl.append(f"Backend '{lb}' unexpected.")
+
+    # Execution
+    pid = ap_data.get("package_id") if ap_data else None
+    cid = ap_data.get("contract_id") if ap_data else None
+    pdg = ap_data.get("package_digest") if ap_data else None
+    cdg = ap_data.get("contract_digest") if ap_data else None
+    bi = False; cp = False; oc = False; psent = False; rc = None; sa = None; fa = None
+    dur = None; sop = None; sep = None; prd = None; bcmd = None; ba = False
+    pog = ""; chg: list = []; ucg: list = []; mok = True; rex = False; td = False
+
+    if execute and rs == "dry_run_ready":
+        bc = _shutil.which(lb) if lb else None
+        if not bc: rs = "failed_backend_invocation"; bl.append(f"Backend '{lb}' not found.")
+        else:
+            bcmd = bc; ba = True; psent = True
+            gp = (dry_prompt or "").replace("[This is a DRY-RUN package envelope. NOT SEND-AUTHORIZED.]",
+                "[GOVERNED BACKEND RETRY — Phase 77J]").replace(
+                "[Do not invoke any backend. Do not execute.]",
+                "[Produce documentation-only output. Do not mutate repo. Do not commit. Do not push.]")
+            if gp: prd = hashlib.sha256(gp.encode("utf-8")).hexdigest()
+            try:
+                pr = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path), capture_output=True, text=True, timeout=15)
+                pg = pr.stdout.strip()
+            except Exception: pg = ""
+            sa = datetime.now(timezone.utc).isoformat()
+            try:
+                iv = _sp.run([bc, "-p", gp], cwd=str(root.path), capture_output=True, text=True, timeout=int(rto))
+                rc = iv.returncode; bi = True; cp = True; so = iv.stdout or ""; se = iv.stderr or ""
+            except _sp.TimeoutExpired:
+                rc = -1; so = ""; se = "TIMEOUT: backend retry exceeded timeout."; bi = True; cp = False; td = True
+            except Exception as exc:
+                rc = -2; so = ""; se = f"ERROR: {exc}"; bi = True; cp = False
+            fa = datetime.now(timezone.utc).isoformat()
+            try: dur = (datetime.fromisoformat(fa) - datetime.fromisoformat(sa)).total_seconds()
+            except Exception: pass
+            cd = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR); cd.mkdir(parents=True, exist_ok=True)
+            (cd / ".gitignore").write_text("*\n")
+            sop = str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.stdout.txt")
+            sep = str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.stderr.txt")
+            (cd / "latest.stdout.txt").write_text(so, encoding="utf-8")
+            (cd / "latest.stderr.txt").write_text(se, encoding="utf-8")
+            oc = bi and rc == 0
+            if so.strip():
+                oc = True
+            try:
+                por = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path), capture_output=True, text=True, timeout=15)
+                pog = por.stdout.strip()
+            except Exception: pog = ""
+            pls = set(pg.split("\n")) if pg else set()
+            pos = set(pog.split("\n")) if pog else set()
+            for ln in pos - pls:
+                if ln.strip():
+                    chg.append(ln.strip())
+                    if not any(ln.strip().startswith(p) for p in [".pcae/backend-capture-governed-retries/", ".pcae/agent-locks/"]):
+                        ucg.append(ln.strip())
+            mok = len(ucg) == 0; rex = True; ar = 0
+            if td or rc == -1: rs = "failed_backend_timeout"; bl.append("Retry timed out.")
+            elif rc != 0: rs = "failed_backend_invocation"; bl.append(f"Non-zero: {rc}")
+            elif not mok: rs = "failed_repo_mutation_detected"; bl.append("Mutation detected.")
+            else: rs = "captured"
+
+    return {
+        "backend_retry_status": rs, "dry_run": not execute, "execute_requested": execute,
+        "retry_attempt_number": 1 if execute else None, "retry_timeout_seconds": rto,
+        "retry_attempts_used": 1 if execute and rs not in ("dry_run_ready",) else 0,
+        "retry_attempts_remaining": 0 if execute else ar, "retry_exhausted": rex,
+        "package_id": pid, "contract_id": cid, "package_digest": pdg, "contract_digest": cdg,
+        "prompt_digest": prd, "backend_name": lb, "locked_backend_name": lb, "backend_command": bcmd,
+        "backend_invocation_allowed_for_this_command": ba,
+        "backend_invocation_performed": bi, "backend_capture_performed": cp,
+        "backend_output_captured": oc, "stdout_path": sop, "stderr_path": sep,
+        "return_code": rc, "timeout_detected": td, "started_at": sa, "finished_at": fa,
+        "duration_seconds": dur, "pre_git_status": pg, "post_git_status": pog,
+        "changed_files": chg, "unexpected_changed_files": ucg, "mutation_guard_passed": mok,
+        "package_sent": psent, "apply_performed": False, "files_modified": len(ucg) > 0,
+        "commits_created": 0, "push_performed": False, "execution_authorized": False,
+        "real_captured_task_execution_allowed": False, "output_application_allowed": False,
+        "recommended_next_phase": "77K — Real Captured Backend Output Intake" if rs == "captured" else "Resolve blockers first.",
+        "blockers": bl, "warnings": [],
+        "next_operator_action": (
+            "Retry captured successfully. No output applied. Proceed to 77K."
+            if rs == "captured"
+            else ("Gates validated. Run --execute for one governed retry at 300s."
+                  if rs == "dry_run_ready" else "Resolve blockers first.")
+        ),
+        "generated_at": ts,
+    }
+
+
+def run_phase_backend_capture_governed_retry(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    dry = getattr(args, "dry_run", False); exe = getattr(args, "execute", False)
+    if exe and dry: print("Error: --execute and --dry-run are mutually exclusive."); return 1
+    r = _build_backend_capture_governed_retry(root, execute=exe)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR); d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json: print(f"Retry saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r["backend_retry_status"] in ("dry_run_ready", "captured") else 1
+    print("Backend Capture Governed Retry"); print("=" * 30)
+    print(f"  Status: {r['backend_retry_status']}")
+    print(f"  Execute: {'yes' if r['execute_requested'] else 'no'}")
+    print(f"  Timeout: {r.get('retry_timeout_seconds', 'n/a')}s")
+    print(f"  Used: {r['retry_attempts_used']}  Remaining: {r['retry_attempts_remaining']}")
+    print(f"  Exhausted: {'yes' if r['retry_exhausted'] else 'no'}")
+    print(f"  Invoked: {'yes' if r['backend_invocation_performed'] else 'no'}")
+    print(f"  Captured: {'yes' if r['backend_output_captured'] else 'no'}")
+    if r.get('return_code') is not None: print(f"  RC: {r['return_code']}")
+    if r.get('duration_seconds') is not None: print(f"  Duration: {r['duration_seconds']:.1f}s")
+    print(f"  Mutation: {'passed' if r['mutation_guard_passed'] else 'failed'}")
+    print(f"  Apply: no  Commits: 0")
+    print(f"  Next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  - {b}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_retry_status"] in ("dry_run_ready", "captured") else 1
+
+
+def run_phase_backend_capture_governed_retry_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_retry_status": "no_artifact"}
+        if args.json: print(json.dumps(r, indent=2, sort_keys=True))
+        else: print("No retry artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("backend_retry_status") in ("dry_run_ready", "captured") else 1
+    print("Backend Capture Governed Retry (Show)"); print("=" * 36)
+    print(f"  Status: {r.get('backend_retry_status', 'unknown')}")
+    print(f"  Timeout: {r.get('retry_timeout_seconds', 'n/a')}s")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0

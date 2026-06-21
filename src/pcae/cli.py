@@ -507,6 +507,8 @@ from pcae.commands.phase import (
     run_phase_backend_capture_timeout_policy_show,
     run_phase_backend_capture_retry_preflight,
     run_phase_backend_capture_retry_preflight_show,
+    run_phase_backend_capture_governed_retry,
+    run_phase_backend_capture_governed_retry_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6460,6 +6462,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_capture_retry_preflight_show_parser.add_argument("--json", action="store_true")
     phase_backend_capture_retry_preflight_show_parser.set_defaults(handler=run_phase_backend_capture_retry_preflight_show)
+
+    # Phase 77J
+    phase_backend_capture_governed_retry_parser = phase_subparsers.add_parser(
+        "backend-capture-governed-retry",
+        help="Perform exactly one governed backend capture retry at 300s timeout (Phase 77J).",
+    )
+    phase_backend_capture_governed_retry_parser.add_argument("--json", action="store_true")
+    phase_backend_capture_governed_retry_parser.add_argument("--save", action="store_true")
+    phase_backend_capture_governed_retry_parser.add_argument("--dry-run", action="store_true")
+    phase_backend_capture_governed_retry_parser.add_argument("--execute", action="store_true")
+    phase_backend_capture_governed_retry_parser.set_defaults(handler=run_phase_backend_capture_governed_retry)
+
+    phase_backend_capture_governed_retry_show_parser = phase_subparsers.add_parser(
+        "backend-capture-governed-retry-show",
+        help="Show latest backend capture governed retry artifact (Phase 77J).",
+    )
+    phase_backend_capture_governed_retry_show_parser.add_argument("--json", action="store_true")
+    phase_backend_capture_governed_retry_show_parser.set_defaults(handler=run_phase_backend_capture_governed_retry_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
