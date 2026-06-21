@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 77D: Real Captured Task Package Approval (20260621-0935-phase-77d-real-captured-task-package-approval)
 - Phase 77C: Real Captured Task Package Dry-Run (20260621-0920-phase-77c-real-captured-task-package-dry-run)
 - Phase 77B: Real Captured Task Contract Preparation (20260621-0915-phase-77b-real-captured-task-contract-preparation)
 - Phase 77A: Real Captured Task Readiness Gate (20260621-0902-phase-77a-real-captured-task-readiness-gate)
