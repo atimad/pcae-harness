@@ -29,6 +29,7 @@ Add a mutation-aware intake command for the 77J governed retry result. Classify 
 - PROJECT_STATUS.md
 - tasks/active
 - docs/REAL_CAPTURED_TASKS.md
+- .gitignore
 
 ## Acceptance Criteria
 
