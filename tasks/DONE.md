@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 77N Backend-Created Output Adoption Review (20260621-2308-phase-77n-backend-created-output-adoption-review)
 - Phase 77M Backend-Created Output Adoption Preflight (20260621-2201-phase-77m-backend-created-output-adoption-preflight)
 - Phase 77L: Backend-Created Output Quarantine Review (20260621-1115-phase-77l-backend-created-output-quarantine-review)
 - Phase 77K: Backend Retry Mutation Result Intake (20260621-1050-phase-77k-backend-retry-mutation-result-intake)

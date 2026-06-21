@@ -10,7 +10,7 @@ Phase 77N Backend-Created Output Adoption Review
 
 ## Status
 
-active
+done
 
 ## Mode
 
