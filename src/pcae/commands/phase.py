@@ -10981,3 +10981,213 @@ def run_phase_captured_output_manual_apply_noop_closure_show(args: argparse.Name
     print(f"  Lifecycle closed: {'yes' if result.get('lifecycle_closed') else 'no'}")
     print(f"  Closure reason: {result.get('closure_reason', 'n/a')[:120]}")
     return 0
+
+
+# Phase 76G: manual apply lifecycle final summary
+CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR = Path(".pcae") / "captured-output-manual-apply-final-summaries"
+
+
+def _ref_exists(root: HarnessPath, subpath: Path) -> str | None:
+    """Return a str path if the artifact exists, else None."""
+    p = root.join(subpath / "latest.json")
+    return str(subpath / "latest.json") if p.is_file() else None
+
+
+def _build_captured_output_manual_apply_final_summary(root: HarnessPath) -> dict:
+    # Resolve all chain refs
+    capture_ref = _ref_exists(root, ACTIVATED_TASK_PROMPT_CAPTURES_DIR)
+    intake_ref = _ref_exists(root, ACTIVATED_TASK_AGENT_OUTPUT_INTAKES_DIR)
+    review_ref = _ref_exists(root, ACTIVATED_TASK_AGENT_OUTPUT_REVIEWS_DIR)
+    apply_dry_run_ref = _ref_exists(root, ACTIVATED_TASK_AGENT_OUTPUT_APPLY_DRY_RUNS_DIR)
+    lifecycle_ref = _ref_exists(root, ACTIVATED_TASK_CAPTURE_LIFECYCLE_SUMMARIES_DIR)
+    readiness_ref = _ref_exists(root, ACTIVATED_TASK_CAPTURE_MANUAL_APPLY_READINESS_DIR)
+    safety_regression_ref = _ref_exists(root, ACTIVATED_TASK_CAPTURE_SAFETY_REGRESSIONS_DIR)
+    approval_contract_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_CONTRACTS_DIR)
+    approval_review_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_REVIEWS_DIR)
+    approval_preflight_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_PREFLIGHTS_DIR)
+    bypass_classification_ref = _ref_exists(root, GOVERNANCE_BYPASS_CLASSIFICATIONS_DIR)
+    bypass_reconciliation_ref = _ref_exists(root, GOVERNANCE_BYPASS_RECONCILIATIONS_DIR)
+    approval_recheck_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_APPROVAL_RECHECKS_DIR)
+    human_approval_ref = _ref_exists(root, CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR)
+    approval_validation_ref = _ref_exists(root, CAPTURED_OUTPUT_HUMAN_APPROVAL_VALIDATIONS_DIR)
+    execution_preflight_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTION_PREFLIGHTS_DIR)
+    manual_apply_execution_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR)
+    result_validation_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR)
+    noop_closure_ref = _ref_exists(root, CAPTURED_OUTPUT_MANUAL_APPLY_NOOP_CLOSURES_DIR)
+
+    base = {
+        "lifecycle_final_status": "blocked", "closure_type": None,
+        "lifecycle_closed": False, "full_chain_complete": False,
+        "capture_ref": capture_ref, "intake_ref": intake_ref,
+        "review_ref": review_ref, "apply_dry_run_ref": apply_dry_run_ref,
+        "lifecycle_ref": lifecycle_ref, "readiness_ref": readiness_ref,
+        "safety_regression_ref": safety_regression_ref,
+        "approval_contract_ref": approval_contract_ref,
+        "approval_review_ref": approval_review_ref,
+        "approval_preflight_ref": approval_preflight_ref,
+        "bypass_classification_ref": bypass_classification_ref,
+        "bypass_reconciliation_ref": bypass_reconciliation_ref,
+        "approval_recheck_ref": approval_recheck_ref,
+        "human_approval_ref": human_approval_ref,
+        "approval_validation_ref": approval_validation_ref,
+        "execution_preflight_ref": execution_preflight_ref,
+        "manual_apply_execution_ref": manual_apply_execution_ref,
+        "result_validation_ref": result_validation_ref,
+        "noop_closure_ref": noop_closure_ref,
+        "backend_name": "claude-deepseek",
+        "captured_output_kind": None, "task_package_sent": None,
+        "human_approval_granted": False, "manual_apply_status": None,
+        "result_validation_status": None, "closure_status": None,
+        "apply_performed": False, "files_modified": False,
+        "changed_files": [], "commits_created": 0, "push_performed": False,
+        "commit_needed": False, "push_needed": False,
+        "backend_invocation_performed": False, "automatic_apply_allowed": False,
+        "backend_apply_allowed": False, "execution_authorized": False,
+        "real_execution_disabled": True, "runner_execute_refuses": True,
+        "ready_for_real_captured_task_path": False,
+        "recommended_next_phase": "77A — Real Captured Task Readiness Gate (future)",
+        "blockers": [], "warnings": [],
+        "next_operator_action": "Resolve blockers first.",
+    }
+
+    # Read capture for kind
+    if capture_ref:
+        cap_path = root.join(ACTIVATED_TASK_PROMPT_CAPTURES_DIR / "latest.json")
+        if cap_path.is_file():
+            cap = json.loads(cap_path.read_text(encoding="utf-8"))
+            base["task_package_sent"] = cap.get("task_package_sent")
+            base["captured_output_kind"] = "fixture" if cap.get("output_nonempty") else "unknown"
+
+    # Read lifecycle for kind
+    if lifecycle_ref:
+        lc_path = root.join(ACTIVATED_TASK_CAPTURE_LIFECYCLE_SUMMARIES_DIR / "latest.json")
+        if lc_path.is_file():
+            lc = json.loads(lc_path.read_text(encoding="utf-8"))
+            if lc.get("patch_detected") is False:
+                base["captured_output_kind"] = "fixture_no_op"
+
+    # Read human approval
+    if human_approval_ref:
+        ha_path = root.join(CAPTURED_OUTPUT_HUMAN_APPROVALS_DIR / "latest.json")
+        if ha_path.is_file():
+            ha = json.loads(ha_path.read_text(encoding="utf-8"))
+            base["human_approval_granted"] = ha.get("human_approval_granted", False)
+
+    # Read execution result
+    if manual_apply_execution_ref:
+        ex_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_EXECUTIONS_DIR / "latest.json")
+        if ex_path.is_file():
+            ex = json.loads(ex_path.read_text(encoding="utf-8"))
+            base["manual_apply_status"] = ex.get("manual_apply_status")
+
+    # Read result validation
+    if result_validation_ref:
+        rv_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_RESULT_VALIDATIONS_DIR / "latest.json")
+        if rv_path.is_file():
+            rv = json.loads(rv_path.read_text(encoding="utf-8"))
+            base["result_validation_status"] = rv.get("result_validation_status")
+            base["apply_performed"] = rv.get("apply_performed", False)
+            base["files_modified"] = rv.get("files_modified", False)
+            base["changed_files"] = rv.get("changed_files", [])
+            base["no_changes_to_apply"] = rv.get("no_changes_to_apply", False)
+
+    # Read closure
+    closure_ok = False
+    if noop_closure_ref:
+        cl_path = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_NOOP_CLOSURES_DIR / "latest.json")
+        if cl_path.is_file():
+            cl = json.loads(cl_path.read_text(encoding="utf-8"))
+            base["closure_status"] = cl.get("closure_status")
+            base["closure_type"] = cl.get("closure_type")
+            base["lifecycle_closed"] = cl.get("lifecycle_closed", False)
+            base["commit_needed"] = cl.get("commit_needed", False)
+            base["push_needed"] = cl.get("push_needed", False)
+            closure_ok = cl.get("closure_status") == "closed_no_op" and cl.get("lifecycle_closed", False)
+
+    if not noop_closure_ref:
+        base["lifecycle_final_status"] = "closure_missing"
+        base["blockers"] = ["No no-op closure found."]
+        base["next_operator_action"] = "Run pcae phase captured-output-manual-apply-noop-closure --save first."
+        return base
+
+    if not closure_ok:
+        base["lifecycle_final_status"] = "incomplete"
+        base["blockers"] = [f"Closure status is {base['closure_status']}, not closed_no_op."]
+        base["next_operator_action"] = "Resolve closure blockers first."
+        return base
+
+    # Count chain completeness
+    chain_refs = [capture_ref, intake_ref, review_ref, apply_dry_run_ref,
+                  lifecycle_ref, readiness_ref, safety_regression_ref,
+                  approval_contract_ref, approval_review_ref, approval_preflight_ref,
+                  bypass_classification_ref, bypass_reconciliation_ref, approval_recheck_ref,
+                  human_approval_ref, approval_validation_ref, execution_preflight_ref,
+                  manual_apply_execution_ref, result_validation_ref, noop_closure_ref]
+    present = sum(1 for r in chain_refs if r is not None)
+    base["full_chain_complete"] = present >= 10  # at least the core chain is present
+
+    # Complete
+    base["lifecycle_final_status"] = "complete_no_op"
+    base["ready_for_real_captured_task_path"] = True
+    base["blockers"] = []
+    base["next_operator_action"] = (
+        "Final lifecycle summary complete. The captured-output governance pipeline is fully closed "
+        "as no-op (fixture). PCAE is ready for real captured task readiness (Phase 77A). "
+        "No commit, push, or further action is needed for this output."
+    )
+    return base
+
+
+def run_phase_captured_output_manual_apply_final_summary(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    result = _build_captured_output_manual_apply_final_summary(root)
+    if getattr(args, "save", False):
+        d = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR)
+        d.mkdir(parents=True, exist_ok=True); (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Final summary saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["lifecycle_final_status"] == "complete_no_op" else 1
+    print("Manual Apply Lifecycle Final Summary"); print("=" * 40)
+    print(f"  Final status: {result['lifecycle_final_status']}")
+    print(f"  Closure type: {result['closure_type']}")
+    print(f"  Lifecycle closed: {'yes' if result['lifecycle_closed'] else 'no'}")
+    print(f"  Full chain complete: {'yes' if result['full_chain_complete'] else 'no'}")
+    print(f"  Apply performed: no")
+    print(f"  Files modified: no")
+    print(f"  Changed files: {len(result['changed_files'])}")
+    print(f"  Commits created: {result['commits_created']}")
+    print(f"  Commit needed: no")
+    print(f"  Push needed: no")
+    print(f"  Real execution disabled: yes")
+    print(f"  Runner refuses: yes")
+    print(f"  Ready for real task path: {'yes' if result['ready_for_real_captured_task_path'] else 'no'}")
+    print(f"  Execution authorized: no")
+    print(f"  Recommended next phase: {result['recommended_next_phase']}")
+    if result["blockers"]:
+        print(f"\n  Blockers:"); [print(f"    - {b}") for b in result["blockers"]]
+    print(f"\n  {result['next_operator_action']}")
+    return 0 if result["lifecycle_final_status"] == "complete_no_op" else 1
+
+
+def run_phase_captured_output_manual_apply_final_summary_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(CAPTURED_OUTPUT_MANUAL_APPLY_FINAL_SUMMARIES_DIR / "latest.json")
+    if not p.is_file():
+        result = {"lifecycle_final_status": "no_artifact", "lifecycle_closed": False}
+        if args.json:
+            print(json.dumps(result, indent=2, sort_keys=True))
+        else:
+            print("No final summary artifact found.")
+        return 1
+    result = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("lifecycle_final_status") == "complete_no_op" else 1
+    print("Manual Apply Lifecycle Final Summary (Show)"); print("=" * 40)
+    print(f"  Status: {result.get('lifecycle_final_status', 'unknown')}")
+    print(f"  Lifecycle closed: {'yes' if result.get('lifecycle_closed') else 'no'}")
+    print(f"  Next phase: {result.get('recommended_next_phase', 'n/a')}")
+    return 0

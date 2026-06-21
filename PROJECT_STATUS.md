@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 76F: Manual Apply No-Op Closure Summary.
+Phase 76G: Manual Apply Lifecycle Final Summary.
 
-Phase 76F adds `pcae phase captured-output-manual-apply-noop-closure --json --save`
-formally closing the captured-output apply lifecycle as a no-op. No commit or push
-needed. Closure only — does not apply, modify project code, invoke backend, or authorize execution.
+Phase 76G adds `pcae phase captured-output-manual-apply-final-summary --json --save`
+consolidated final lifecycle summary for the complete captured-output governance pipeline.
+Lifecycle complete as no-op. Ready for real captured task readiness (Phase 77A).
 
 ## Milestone: Execution Chain Traceability Complete
 

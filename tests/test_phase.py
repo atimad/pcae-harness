@@ -11144,6 +11144,87 @@ def test_75i2_reconcile_missing_classification(tmp_path, monkeypatch, capsys):
     assert d["execution_authorized"] is False
 
 
+# Phase 76G: manual apply lifecycle final summary
+def test_76g_summary_missing_closure(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-final-summary", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["lifecycle_final_status"] == "closure_missing"
+    assert d["lifecycle_closed"] is False
+    assert d["execution_authorized"] is False
+
+
+def test_76g_summary_complete_no_op(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    # Create closure
+    cd = tmp_path / ".pcae" / "captured-output-manual-apply-noop-closures"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / "latest.json").write_text(json.dumps({
+        "closure_status": "closed_no_op", "closure_type": "no_op",
+        "lifecycle_closed": True, "commit_needed": False, "push_needed": False,
+    }))
+    main(["phase", "captured-output-manual-apply-final-summary", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["lifecycle_final_status"] == "complete_no_op"
+    assert d["lifecycle_closed"] is True
+    assert d["full_chain_complete"] is False  # only closure, no full chain
+    assert d["ready_for_real_captured_task_path"] is True
+    assert d["apply_performed"] is False
+    assert d["execution_authorized"] is False
+    assert "77A" in d["recommended_next_phase"]
+
+
+def test_76g_summary_incomplete_closure(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    cd = tmp_path / ".pcae" / "captured-output-manual-apply-noop-closures"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / "latest.json").write_text(json.dumps({
+        "closure_status": "blocked", "closure_type": "no_op",
+        "lifecycle_closed": False,
+    }))
+    main(["phase", "captured-output-manual-apply-final-summary", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["lifecycle_final_status"] == "incomplete"
+    assert d["lifecycle_closed"] is False
+
+
+def test_76g_summary_save_and_show(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    cd = tmp_path / ".pcae" / "captured-output-manual-apply-noop-closures"
+    cd.mkdir(parents=True, exist_ok=True)
+    (cd / "latest.json").write_text(json.dumps({
+        "closure_status": "closed_no_op", "closure_type": "no_op",
+        "lifecycle_closed": True, "commit_needed": False, "push_needed": False,
+    }))
+    main(["phase", "captured-output-manual-apply-final-summary", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "captured-output-manual-apply-final-summaries" / "latest.json"
+    assert p.is_file()
+    d2 = json.loads(p.read_text(encoding="utf-8"))
+    assert d2["lifecycle_final_status"] == "complete_no_op"
+    assert d2["execution_authorized"] is False
+    # Test show
+    main(["phase", "captured-output-manual-apply-final-summary-show", "--json"])
+    d3 = json.loads(capsys.readouterr().out)
+    assert d3["lifecycle_final_status"] == "complete_no_op"
+
+
+def test_76g_summary_no_mutation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "captured-output-manual-apply-final-summary", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["apply_performed"] is False
+    assert d["files_modified"] is False
+    assert d["commits_created"] == 0
+    assert d["push_performed"] is False
+    assert d["execution_authorized"] is False
+
+
 def test_75i2_reconcile_advisory_only_synthetic(tmp_path, monkeypatch, capsys):
     from pcae.commands.init import init_harness
     init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
