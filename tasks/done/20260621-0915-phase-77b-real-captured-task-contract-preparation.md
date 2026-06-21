@@ -10,7 +10,7 @@ Phase 77B: Real Captured Task Contract Preparation
 
 ## Status
 
-active
+done
 
 ## Mode
 
