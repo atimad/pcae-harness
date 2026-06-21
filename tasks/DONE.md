@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 77H: Backend Capture Timeout Policy (20260621-1020-phase-77h-backend-capture-timeout-policy)
 - Phase 77G: Real Backend Capture Result Intake (20260621-1015-phase-77g-real-backend-capture-result-intake)
 - Phase 77F: Real Captured Task Backend Capture (20260621-0955-phase-77f-real-captured-task-backend-capture)
 - Phase 77E: Real Captured Task Backend Capture Preflight (20260621-0945-phase-77e-real-captured-task-backend-capture-preflight)
