@@ -10,7 +10,7 @@ Phase 76F: Manual Apply No-Op Closure Summary
 
 ## Status
 
-active
+done
 
 ## Mode
 
