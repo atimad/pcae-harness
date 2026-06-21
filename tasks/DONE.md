@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 77L: Backend-Created Output Quarantine Review (20260621-1115-phase-77l-backend-created-output-quarantine-review)
 - Phase 77K: Backend Retry Mutation Result Intake (20260621-1050-phase-77k-backend-retry-mutation-result-intake)
 - Phase 77J: Backend Capture Governed Retry (20260621-1040-phase-77j-backend-capture-governed-retry)
 - Phase 77I: Backend Capture Retry Preflight (20260621-1030-phase-77i-backend-capture-retry-preflight)
