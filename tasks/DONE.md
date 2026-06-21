@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 77K: Backend Retry Mutation Result Intake (20260621-1050-phase-77k-backend-retry-mutation-result-intake)
 - Phase 77J: Backend Capture Governed Retry (20260621-1040-phase-77j-backend-capture-governed-retry)
 - Phase 77I: Backend Capture Retry Preflight (20260621-1030-phase-77i-backend-capture-retry-preflight)
 - Phase 77H: Backend Capture Timeout Policy (20260621-1020-phase-77h-backend-capture-timeout-policy)
