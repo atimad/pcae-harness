@@ -453,3 +453,4 @@
 - 2026-06-20: 20260620-1807-phase-75b-add-scenario-command-for-reviewing-captured-output-intake
 - Phase 77R: Backend-Created Output Adoption Commit Approval
 - Phase 77S: Backend-Created Output Adoption Commit Execution
+- Phase 77S.1: Adoption Commit Hook Bypass Reconciliation
