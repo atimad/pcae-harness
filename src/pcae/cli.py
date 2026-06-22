@@ -8198,6 +8198,25 @@ def build_parser() -> argparse.ArgumentParser:
     )
     doctor_git_lock_parser.set_defaults(handler=run_doctor_git_lock)
 
+    # ── pcae commit ──
+    from pcae.commands.commit import run_commit_implementation
+
+    commit_parser = subparsers.add_parser(
+        "commit",
+        help="Governed commit operations.",
+    )
+    commit_subparsers = commit_parser.add_subparsers(dest="commit_command", required=True)
+
+    commit_impl_parser = commit_subparsers.add_parser(
+        "implementation",
+        help="Staged-file-aware implementation commit: commits only explicit paths, preserves protected staged files.",
+    )
+    commit_impl_parser.add_argument("--json", action="store_true", help="Print machine-readable JSON output.")
+    commit_impl_parser.add_argument("--dry-run", action="store_true", help="Validate without committing.")
+    commit_impl_parser.add_argument("--message", "-m", type=str, default="", help="Commit message.")
+    commit_impl_parser.add_argument("--path", action="append", help="Explicit path to include in the commit (repeatable).")
+    commit_impl_parser.set_defaults(handler=run_commit_implementation)
+
     push_parser = subparsers.add_parser(
         "push",
         help="Governed push: validate readiness and push to the remote.",

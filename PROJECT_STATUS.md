@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 78E: Lifecycle Regression Suite.
+Phase 79A: Staged-File-Aware Implementation Commit Mode.
 
-Phase 78E adds tests/test_lifecycle_regression.py with 23 regression tests protecting the
-major invariants proven by the 77J-77V.1 backend-created output adoption lifecycle. No source
-code changes.
+Phase 79A adds `pcae commit implementation` command for staged-file-aware commits that commit
+only explicit paths while preserving unrelated pre-existing staged files. Addresses the 77S
+friction where implementation commits risked including the staged adoption file. 10 new tests.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
