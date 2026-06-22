@@ -2,7 +2,13 @@
 
 ## Current Phase
 
-Phase 77Q: Backend-Created Output Adoption Execution.
+Phase 77R: Backend-Created Output Adoption Commit Approval.
+
+Phase 77R adds `pcae phase backend-created-output-adoption-commit-approval --json --save
+--approve --approved-by --reason` and `pcae phase backend-created-output-adoption-commit-approval-show --json`.
+Commit approval for staged backend-created output. Verifies staged file metadata match, creates
+operator approval artifact for future commit execution. Never commits or pushes. Persists to
+`.pcae/backend-created-output-adoption-commit-approvals/latest.json`. 14 new tests.
 
 Phase 77Q adds `pcae phase backend-created-output-adoption-execution --json --save --dry-run
 --execute` and `pcae phase backend-created-output-adoption-execution-show --json`.
