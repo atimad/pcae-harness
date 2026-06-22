@@ -521,6 +521,8 @@ from pcae.commands.phase import (
     run_phase_backend_created_output_adoption_approval_show,
     run_phase_backend_created_output_adoption_execution_preflight,
     run_phase_backend_created_output_adoption_execution_preflight_show,
+    run_phase_backend_created_output_adoption_execution,
+    run_phase_backend_created_output_adoption_execution_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6591,6 +6593,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_created_output_adoption_execution_preflight_show_parser.add_argument("--json", action="store_true")
     phase_backend_created_output_adoption_execution_preflight_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_execution_preflight_show)
+
+    # Phase 77Q
+    phase_backend_created_output_adoption_execution_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-execution",
+        help="Adoption execution for backend-created output — stages gitignored file (Phase 77Q).",
+    )
+    phase_backend_created_output_adoption_execution_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_execution_parser.add_argument("--save", action="store_true")
+    phase_backend_created_output_adoption_execution_parser.add_argument("--dry-run", action="store_true")
+    phase_backend_created_output_adoption_execution_parser.add_argument("--execute", action="store_true")
+    phase_backend_created_output_adoption_execution_parser.set_defaults(handler=run_phase_backend_created_output_adoption_execution)
+
+    phase_backend_created_output_adoption_execution_show_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-execution-show",
+        help="Show latest backend-created output adoption execution artifact (Phase 77Q).",
+    )
+    phase_backend_created_output_adoption_execution_show_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_execution_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_execution_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

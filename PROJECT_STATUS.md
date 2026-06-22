@@ -2,7 +2,13 @@
 
 ## Current Phase
 
-Phase 77P: Backend-Created Output Adoption Execution Preflight.
+Phase 77Q: Backend-Created Output Adoption Execution.
+
+Phase 77Q adds `pcae phase backend-created-output-adoption-execution --json --save --dry-run
+--execute` and `pcae phase backend-created-output-adoption-execution-show --json`.
+Governed adoption execution: force-stages the gitignored backend-created file via `git add -f`,
+verifies content unchanged, stops before commit/push. Persists to
+`.pcae/backend-created-output-adoption-executions/latest.json`. 17 new tests.
 
 Phase 77P adds `pcae phase backend-created-output-adoption-execution-preflight --json --save`
 and `pcae phase backend-created-output-adoption-execution-preflight-show --json`.
