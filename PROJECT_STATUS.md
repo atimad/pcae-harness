@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phases 78B-78D: Lifecycle Documentation Batch.
+Phase 78E: Lifecycle Regression Suite.
 
-Phases 78B-78D add lifecycle retrospective, command consolidation plan, and adoption lifecycle
-summary. The backend-created output adoption lifecycle (77J-77V.1) is fully closed and
-documented. Documentation-only, no source code changes.
+Phase 78E adds tests/test_lifecycle_regression.py with 23 regression tests protecting the
+major invariants proven by the 77J-77V.1 backend-created output adoption lifecycle. No source
+code changes.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
