@@ -17096,3 +17096,65 @@ def test_77v_no_push_no_backend(tmp_path, monkeypatch, capsys):
     assert d["push_performed"] is False
     assert d["backend_invocation_performed"] is False
     assert d["docs_file_modified_in_this_phase"] is False
+
+
+# ── Phase 77V.1: Final Verification Tooling Push Decision ──
+
+
+def test_77v1_no_77v_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "final-verification-tooling-push-decision", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["final_verification_tooling_push_decision_status"] == "adoption_lifecycle_not_verified"
+    assert d["push_performed"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["force_push_performed"] is False
+    assert d["raw_git_push_performed"] is False
+    assert d["docs_file_modified_in_this_phase"] is False
+
+
+def test_77v1_save_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "final-verification-tooling-push-decision", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "final-verification-tooling-push-decisions" / "latest.json"
+    assert p.is_file()
+
+
+def test_77v1_show_no_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "final-verification-tooling-push-decision-show", "--json"])
+    assert exit_code == 1
+    d = json.loads(capsys.readouterr().out)
+    assert d["final_verification_tooling_push_decision_status"] == "no_artifact"
+
+
+def test_77v1_no_backend_no_runner(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "final-verification-tooling-push-decision", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_invocation_performed"] is False
+    assert d["runner_execute_performed"] is False
+    assert d["execution_authorized"] is False
+    assert d["force_push_performed"] is False
+    assert d["raw_git_push_performed"] is False
+
+
+def test_77v1_blocks_without_reconciliation(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    fv_dir = tmp_path / ".pcae" / "backend-created-output-adoption-final-verifications"
+    fv_dir.mkdir(parents=True, exist_ok=True)
+    (fv_dir / ".gitignore").write_text("*\n")
+    (fv_dir / "latest.json").write_text(json.dumps({
+        "backend_created_output_adoption_final_verification_status": "verified",
+        "lifecycle_closed": True,
+    }))
+    main(["phase", "final-verification-tooling-push-decision", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["final_verification_tooling_push_decision_status"] == "hook_bypass_reconciliation_missing"
+    assert d["push_performed"] is False

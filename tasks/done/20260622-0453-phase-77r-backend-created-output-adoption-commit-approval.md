@@ -10,7 +10,7 @@ Phase 77R Backend-Created Output Adoption Commit Approval
 
 ## Status
 
-active
+completed
 
 ## Mode
 

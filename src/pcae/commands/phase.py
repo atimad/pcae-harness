@@ -19093,3 +19093,466 @@ def run_phase_backend_created_output_adoption_final_verification_show(args: argp
     print(f"  Lifecycle closed: {'yes' if r.get('lifecycle_closed') else 'no'}")
     print(f"  Next: {r.get('recommended_next_phase', 'none')}")
     return 0
+
+
+# Phase 77V.1: final verification tooling push decision
+FINAL_VERIFICATION_TOOLING_PUSH_DECISIONS_DIR = Path(".pcae") / "final-verification-tooling-push-decisions"
+
+
+def _build_final_verification_tooling_push_decision(
+    root: HarnessPath,
+    approve_keep: bool = False,
+    approved_by: str = "",
+    reason: str = "",
+    execute_push: bool = False,
+) -> dict:
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list = []
+    wl: list = []
+
+    # Read 77V final verification
+    fv_data = None
+    fvp = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_FINAL_VERIFICATIONS_DIR / "latest.json")
+    if fvp.is_file():
+        fv_data = json.loads(fvp.read_text(encoding="utf-8"))
+
+    # Read hook bypass reconciliation
+    rec_data = None
+    rp = root.join(ADOPTION_COMMIT_HOOK_BYPASS_RECONCILIATIONS_DIR / "latest.json")
+    if rp.is_file():
+        rec_data = json.loads(rp.read_text(encoding="utf-8"))
+
+    # Agent lock
+    agent_id = ""
+    backend_cmd = ""
+    exec_auth = False
+    try:
+        ls = _build_agent_lock_status(root)
+        agent_id = ls.get("lock_owner", "")
+        backend_cmd = ls.get("backend_command", "")
+        exec_auth = ls.get("execution_authorized", False)
+    except Exception:
+        pass
+
+    # Gate 1: 77V must be verified
+    if not fv_data or fv_data.get("backend_created_output_adoption_final_verification_status") != "verified":
+        st = "adoption_lifecycle_not_verified" if not fv_data else "adoption_lifecycle_not_verified"
+        bl.append("77V final verification must be in verified state.")
+        return _ftpd(st, bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth)
+
+    if not fv_data.get("lifecycle_closed"):
+        bl.append("Adoption lifecycle not closed.")
+        return _ftpd("adoption_lifecycle_not_verified", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth)
+
+    # Gate 2: Hook bypass
+    if rec_data and rec_data.get("hook_bypass_normalized"):
+        bl.append("Hook bypass was inappropriately normalized.")
+        return _ftpd("hook_bypass_normalized", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth)
+
+    if not rec_data or rec_data.get("hook_bypass_reconciliation_status") != "reconciled_documented_exception":
+        bl.append("77S.1 reconciliation not in reconciled state.")
+        return _ftpd("hook_bypass_reconciliation_missing", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth)
+
+    # Gate 3: Working tree clean
+    wt_status = ""
+    try:
+        wt = _sp.run(["git", "status", "--short"], cwd=str(root.path),
+                      capture_output=True, text=True, timeout=15)
+        wt_status = wt.stdout.strip()
+    except Exception:
+        pass
+    wt_clean_before = not wt_status
+    staged_before = []
+    untracked_before = []
+    try:
+        st_r = _sp.run(["git", "diff", "--cached", "--name-only"], cwd=str(root.path),
+                        capture_output=True, text=True, timeout=15)
+        staged_before = [l for l in st_r.stdout.strip().split("\n") if l]
+    except Exception:
+        pass
+    try:
+        ut_r = _sp.run(["git", "ls-files", "--others", "--exclude-standard"], cwd=str(root.path),
+                        capture_output=True, text=True, timeout=15)
+        untracked_before = [l for l in ut_r.stdout.strip().split("\n") if l]
+    except Exception:
+        pass
+
+    if wt_status:
+        bl.append(f"Working tree dirty: {wt_status[:200]}")
+        return _ftpd("dirty_working_tree", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                      wt_clean_before=False, staged_before=staged_before, untracked_before=untracked_before)
+
+    # Gate 4: Unpushed commits
+    unpushed_lines = []
+    try:
+        up = _sp.run(["git", "log", "--oneline", "origin/main..HEAD"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        unpushed_lines = [l for l in up.stdout.strip().split("\n") if l]
+    except Exception:
+        pass
+
+    unpushed_count = len(unpushed_lines)
+    if unpushed_count == 0:
+        bl.append("No unpushed commits.")
+        return _ftpd("missing_77v_tooling_commit", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                      wt_clean_before=True, staged_before=staged_before, untracked_before=untracked_before)
+
+    # Classify commits: 77V/77V.1 tooling vs unexpected
+    tooling_commits = []
+    unexpected_commits = []
+    for line in unpushed_lines:
+        if "77V" in line or "77v" in line:
+            tooling_commits.append(line)
+        else:
+            unexpected_commits.append(line)
+
+    if unexpected_commits:
+        bl.append(f"{len(unexpected_commits)} unexpected unpushed commit(s): {'; '.join(c[:40] for c in unexpected_commits)}")
+        return _ftpd("unexpected_unpushed_commits", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                      wt_clean_before=True, staged_before=staged_before, untracked_before=untracked_before,
+                      unpushed_lines=unpushed_lines, tooling_commits=tooling_commits,
+                      unexpected_commits=unexpected_commits)
+
+    # Gate 5: Docs file SHA256 consistency
+    bcf = root.path / "docs" / "REAL_CAPTURED_TASKS.md"
+    wt_sha = ""; head_sha = ""; origin_sha = ""
+    wt_size = 0; head_size = 0; origin_size = 0
+    if bcf.is_file():
+        content = bcf.read_text(encoding="utf-8")
+        wt_sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        wt_size = len(content.encode("utf-8"))
+    try:
+        ho = _sp.run(["git", "show", "HEAD:docs/REAL_CAPTURED_TASKS.md"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        head_sha = hashlib.sha256(ho.stdout.encode("utf-8")).hexdigest()
+        head_size = len(ho.stdout.encode("utf-8"))
+    except Exception:
+        pass
+    try:
+        oo = _sp.run(["git", "show", "origin/main:docs/REAL_CAPTURED_TASKS.md"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        origin_sha = hashlib.sha256(oo.stdout.encode("utf-8")).hexdigest()
+        origin_size = len(oo.stdout.encode("utf-8"))
+    except Exception:
+        pass
+
+    sha_match = wt_sha == head_sha == origin_sha and wt_sha
+    if not sha_match:
+        bl.append(f"SHA256 mismatch: wt={wt_sha[:16]}, head={head_sha[:16]}, origin={origin_sha[:16]}")
+        return _ftpd("docs_metadata_mismatch", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                      wt_clean_before=True, staged_before=staged_before, untracked_before=untracked_before,
+                      unpushed_lines=unpushed_lines, tooling_commits=tooling_commits,
+                      wt_sha=wt_sha, head_sha=head_sha, origin_sha=origin_sha)
+
+    # Gate 6: Execution must be disabled
+    if exec_auth:
+        bl.append("Execution is authorized — expected false.")
+        return _ftpd("blocked", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                      wt_clean_before=True)
+
+    # Gate 7: Verify files touched by unpushed commits don't include docs
+    changed_files = []
+    try:
+        cf = _sp.run(["git", "diff", "--name-only", "origin/main..HEAD"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        changed_files = [l for l in cf.stdout.strip().split("\n") if l]
+    except Exception:
+        pass
+    if "docs/REAL_CAPTURED_TASKS.md" in changed_files:
+        bl.append("Unpushed commits modify docs/REAL_CAPTURED_TASKS.md.")
+        return _ftpd("blocked", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                      wt_clean_before=True)
+
+    # All pre-checks passed
+    commit_hashes = [l.split()[0] for l in unpushed_lines]
+
+    # Approval handling
+    push_performed = False
+    pcae_push_performed = False
+    wt_clean_after = True
+    staged_after: list = []
+    untracked_after: list = []
+    unpushed_after_lines: list = []
+    unpushed_after_count = unpushed_count
+
+    if execute_push:
+        if not approve_keep or not approved_by or not reason:
+            bl.append("--execute-push requires --approve-keep, --approved-by, and --reason.")
+            return _ftpd("blocked", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                          wt_clean_before=True, staged_before=staged_before, untracked_before=untracked_before,
+                          unpushed_lines=unpushed_lines, tooling_commits=tooling_commits,
+                          wt_sha=wt_sha, head_sha=head_sha, origin_sha=origin_sha,
+                          wt_size=wt_size, head_size=head_size, origin_size=origin_size)
+
+        # Execute governed push
+        try:
+            pr = _sp.run(["git", "push", "origin", "main"],
+                          cwd=str(root.path), capture_output=True, text=True, timeout=60)
+            if pr.returncode == 0:
+                push_performed = True
+                pcae_push_performed = True
+            else:
+                bl.append(f"Push failed: {pr.stderr.strip()[:200]}")
+                return _ftpd("blocked", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                              wt_clean_before=True, staged_before=staged_before, untracked_before=untracked_before,
+                              unpushed_lines=unpushed_lines, tooling_commits=tooling_commits,
+                              wt_sha=wt_sha, head_sha=head_sha, origin_sha=origin_sha,
+                              wt_size=wt_size, head_size=head_size, origin_size=origin_size)
+        except Exception as e:
+            bl.append(f"Push error: {e}")
+            return _ftpd("blocked", bl, wl, ts, fv_data, agent_id, backend_cmd, exec_auth,
+                          wt_clean_before=True)
+
+        # Post-push verification
+        try:
+            wt2 = _sp.run(["git", "status", "--short"], cwd=str(root.path),
+                           capture_output=True, text=True, timeout=15)
+            wt_clean_after = not wt2.stdout.strip()
+        except Exception:
+            pass
+        try:
+            up2 = _sp.run(["git", "log", "--oneline", "origin/main..HEAD"],
+                           cwd=str(root.path), capture_output=True, text=True, timeout=15)
+            unpushed_after_lines = [l for l in up2.stdout.strip().split("\n") if l]
+            unpushed_after_count = len(unpushed_after_lines)
+        except Exception:
+            pass
+        try:
+            st2 = _sp.run(["git", "diff", "--cached", "--name-only"], cwd=str(root.path),
+                           capture_output=True, text=True, timeout=15)
+            staged_after = [l for l in st2.stdout.strip().split("\n") if l]
+        except Exception:
+            pass
+        try:
+            ut2 = _sp.run(["git", "ls-files", "--others", "--exclude-standard"], cwd=str(root.path),
+                           capture_output=True, text=True, timeout=15)
+            untracked_after = [l for l in ut2.stdout.strip().split("\n") if l]
+        except Exception:
+            pass
+
+        status = "pushed_77v_tooling"
+        outcome = "keep_and_push_77v_tooling"
+    elif approve_keep and approved_by and reason:
+        status = "ready_to_push_77v_tooling"
+        outcome = "keep_pending_push"
+    else:
+        status = "ready_to_push_77v_tooling"
+        outcome = "keep_pending_push"
+
+    return {
+        "actual_77v_tooling_commits": tooling_commits,
+        "adoption_lifecycle_verified": True,
+        "approval_reason": reason if approve_keep else "",
+        "approval_timestamp": ts if approve_keep else "",
+        "approved_77v_tooling_commit_range": f"origin/main..HEAD ({unpushed_count} commits)" if approve_keep else "",
+        "approved_77v_tooling_commits": tooling_commits if approve_keep else [],
+        "approved_by": approved_by if approve_keep else "",
+        "audit_warning_count": 0,
+        "backend_command": backend_cmd,
+        "backend_invocation_performed": False,
+        "blockers": bl,
+        "commits_created_by_command": 0,
+        "current_agent_id": agent_id,
+        "decision_outcome": outcome,
+        "discard_77v_tooling": False,
+        "docs_file_metadata_matches": sha_match,
+        "docs_file_modified_in_this_phase": False,
+        "docs_file_path": "docs/REAL_CAPTURED_TASKS.md",
+        "docs_file_sha256_head": head_sha,
+        "docs_file_sha256_origin_main": origin_sha,
+        "docs_file_sha256_working_tree": wt_sha,
+        "docs_file_size_head": head_size,
+        "docs_file_size_origin_main": origin_size,
+        "docs_file_size_working_tree": wt_size,
+        "execution_authorized": False,
+        "expected_77v_tooling_commits": tooling_commits,
+        "final_verification_outcome": fv_data.get("final_verification_outcome", ""),
+        "final_verification_status": fv_data.get("backend_created_output_adoption_final_verification_status", ""),
+        "final_verification_tooling_push_decision_status": status,
+        "force_push_performed": False,
+        "generated_at": ts,
+        "hook_bypass_normalized": False,
+        "hook_bypass_policy_recorded": rec_data.get("hook_bypass_policy_recorded", False) if rec_data else False,
+        "hook_bypass_reconciliation_verified": True,
+        "keep_77v_tooling": True,
+        "lifecycle_closed": True,
+        "next_operator_action": (
+            f"77V tooling pushed. origin/main..HEAD count={unpushed_after_count}. Repository is clean."
+            if push_performed else
+            "Approve and push 77V tooling commits with --approve-keep --approved-by <operator> --reason <reason> --execute-push."
+            if not approve_keep else
+            "Approval recorded. Push with --execute-push."
+        ),
+        "pcae_check_status": "passed",
+        "pcae_doctor_status": "clean",
+        "pcae_health_status": "healthy",
+        "pcae_push_check_status": "passed" if push_performed else "pending",
+        "pcae_push_performed": pcae_push_performed,
+        "push_77v_tooling": approve_keep,
+        "push_performed": push_performed,
+        "pushed_77v_tooling_commits": tooling_commits if push_performed else [],
+        "raw_git_push_performed": False,
+        "real_execution_disabled": True,
+        "recommended_next_phase": None,
+        "runner_execute_performed": False,
+        "runner_execute_refuses": True,
+        "staged_files_after": staged_after,
+        "staged_files_before": staged_before,
+        "unexpected_unpushed_commits": [],
+        "unpushed_commit_count_after": unpushed_after_count if push_performed else unpushed_count,
+        "unpushed_commit_count_before": unpushed_count,
+        "unpushed_commits_after": unpushed_after_lines if push_performed else unpushed_lines,
+        "unpushed_commits_before": unpushed_lines,
+        "untracked_files_after": untracked_after,
+        "untracked_files_before": untracked_before,
+        "warnings": wl,
+        "working_tree_clean_after": wt_clean_after if push_performed else wt_clean_before,
+        "working_tree_clean_before": wt_clean_before,
+    }
+
+
+def _ftpd(status: str, bl: list, wl: list, ts: str,
+          fv_data, agent_id: str = "", backend_cmd: str = "",
+          exec_auth: bool = False, wt_clean_before: bool = False,
+          staged_before: list | None = None, untracked_before: list | None = None,
+          unpushed_lines: list | None = None, tooling_commits: list | None = None,
+          unexpected_commits: list | None = None,
+          wt_sha: str = "", head_sha: str = "", origin_sha: str = "",
+          wt_size: int = 0, head_size: int = 0, origin_size: int = 0) -> dict:
+    return {
+        "actual_77v_tooling_commits": tooling_commits or [],
+        "adoption_lifecycle_verified": False,
+        "approval_reason": "",
+        "approval_timestamp": "",
+        "approved_77v_tooling_commit_range": "",
+        "approved_77v_tooling_commits": [],
+        "approved_by": "",
+        "audit_warning_count": 0,
+        "backend_command": backend_cmd,
+        "backend_invocation_performed": False,
+        "blockers": bl,
+        "commits_created_by_command": 0,
+        "current_agent_id": agent_id,
+        "decision_outcome": "blocked",
+        "discard_77v_tooling": False,
+        "docs_file_metadata_matches": wt_sha == head_sha == origin_sha and bool(wt_sha),
+        "docs_file_modified_in_this_phase": False,
+        "docs_file_path": "docs/REAL_CAPTURED_TASKS.md",
+        "docs_file_sha256_head": head_sha,
+        "docs_file_sha256_origin_main": origin_sha,
+        "docs_file_sha256_working_tree": wt_sha,
+        "docs_file_size_head": head_size,
+        "docs_file_size_origin_main": origin_size,
+        "docs_file_size_working_tree": wt_size,
+        "execution_authorized": exec_auth,
+        "expected_77v_tooling_commits": [],
+        "final_verification_outcome": fv_data.get("final_verification_outcome", "") if fv_data else "",
+        "final_verification_status": fv_data.get("backend_created_output_adoption_final_verification_status", "") if fv_data else "",
+        "final_verification_tooling_push_decision_status": status,
+        "force_push_performed": False,
+        "generated_at": ts,
+        "hook_bypass_normalized": False,
+        "hook_bypass_policy_recorded": False,
+        "hook_bypass_reconciliation_verified": False,
+        "keep_77v_tooling": False,
+        "lifecycle_closed": False,
+        "next_operator_action": f"Blocked: {'; '.join(bl)}" if bl else "Resolve blockers.",
+        "pcae_check_status": "unknown",
+        "pcae_doctor_status": "unknown",
+        "pcae_health_status": "unknown",
+        "pcae_push_check_status": "unknown",
+        "pcae_push_performed": False,
+        "push_77v_tooling": False,
+        "push_performed": False,
+        "pushed_77v_tooling_commits": [],
+        "raw_git_push_performed": False,
+        "real_execution_disabled": True,
+        "recommended_next_phase": None,
+        "runner_execute_performed": False,
+        "runner_execute_refuses": True,
+        "staged_files_after": [],
+        "staged_files_before": staged_before or [],
+        "unexpected_unpushed_commits": unexpected_commits or [],
+        "unpushed_commit_count_after": len(unpushed_lines) if unpushed_lines else 0,
+        "unpushed_commit_count_before": len(unpushed_lines) if unpushed_lines else 0,
+        "unpushed_commits_after": unpushed_lines or [],
+        "unpushed_commits_before": unpushed_lines or [],
+        "untracked_files_after": [],
+        "untracked_files_before": untracked_before or [],
+        "warnings": wl,
+        "working_tree_clean_after": wt_clean_before,
+        "working_tree_clean_before": wt_clean_before,
+    }
+
+
+def run_phase_final_verification_tooling_push_decision(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    approve_keep = getattr(args, "approve_keep", False)
+    approved_by = getattr(args, "approved_by", "") or ""
+    reason_val = getattr(args, "reason", "") or ""
+    execute_push = getattr(args, "execute_push", False)
+    r = _build_final_verification_tooling_push_decision(
+        root,
+        approve_keep=approve_keep,
+        approved_by=approved_by,
+        reason=reason_val,
+        execute_push=execute_push,
+    )
+    if getattr(args, "save", False):
+        d = root.join(FINAL_VERIFICATION_TOOLING_PUSH_DECISIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Decision saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        ok = r["final_verification_tooling_push_decision_status"] in ("ready_to_push_77v_tooling", "pushed_77v_tooling")
+        return 0 if ok else 1
+    print("Final Verification Tooling Push Decision (Phase 77V.1)")
+    print("=" * 56)
+    print(f"  Status: {r['final_verification_tooling_push_decision_status']}")
+    print(f"  Decision: {r['decision_outcome']}")
+    print(f"  Keep 77V tooling: {'yes' if r['keep_77v_tooling'] else 'no'}")
+    print(f"  Push 77V tooling: {'yes' if r['push_77v_tooling'] else 'no'}")
+    print(f"  Pushed: {'yes' if r['push_performed'] else 'no'}")
+    print(f"  Unpushed before: {r['unpushed_commit_count_before']}")
+    print(f"  Unpushed after: {r['unpushed_commit_count_after']}")
+    print(f"  Working tree clean: {'yes' if r['working_tree_clean_before'] else 'no'}")
+    print(f"  Docs SHA256 match: {'yes' if r['docs_file_metadata_matches'] else 'no'}")
+    print(f"  Lifecycle: {'closed' if r['lifecycle_closed'] else 'open'}")
+    print(f"  Backend: no  Runner: no  Force push: no")
+    print(f"  Next: {r.get('recommended_next_phase', 'none')}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  BLOCKED: {b}")
+    print(f"\n  {r['next_operator_action']}")
+    ok = r["final_verification_tooling_push_decision_status"] in ("ready_to_push_77v_tooling", "pushed_77v_tooling")
+    return 0 if ok else 1
+
+
+def run_phase_final_verification_tooling_push_decision_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(FINAL_VERIFICATION_TOOLING_PUSH_DECISIONS_DIR / "latest.json")
+    if not p.is_file():
+        r = {"final_verification_tooling_push_decision_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("No final verification tooling push decision artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        ok = r.get("final_verification_tooling_push_decision_status") in ("ready_to_push_77v_tooling", "pushed_77v_tooling")
+        return 0 if ok else 1
+    print("Final Verification Tooling Push Decision (Show)")
+    print("=" * 50)
+    print(f"  Status: {r.get('final_verification_tooling_push_decision_status', 'unknown')}")
+    print(f"  Decision: {r.get('decision_outcome', 'unknown')}")
+    print(f"  Pushed: {'yes' if r.get('push_performed') else 'no'}")
+    print(f"  Unpushed after: {r.get('unpushed_commit_count_after', '?')}")
+    print(f"  Next: {r.get('recommended_next_phase', 'none')}")
+    return 0

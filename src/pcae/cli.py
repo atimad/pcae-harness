@@ -535,6 +535,8 @@ from pcae.commands.phase import (
     run_phase_backend_created_output_adoption_push_execution_show,
     run_phase_backend_created_output_adoption_final_verification,
     run_phase_backend_created_output_adoption_final_verification_show,
+    run_phase_final_verification_tooling_push_decision,
+    run_phase_final_verification_tooling_push_decision_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6729,6 +6731,26 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_created_output_adoption_final_verification_show_parser.add_argument("--json", action="store_true")
     phase_backend_created_output_adoption_final_verification_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_final_verification_show)
+
+    # Phase 77V.1
+    phase_ftpd_parser = phase_subparsers.add_parser(
+        "final-verification-tooling-push-decision",
+        help="Final verification tooling push decision (Phase 77V.1).",
+    )
+    phase_ftpd_parser.add_argument("--json", action="store_true")
+    phase_ftpd_parser.add_argument("--save", action="store_true")
+    phase_ftpd_parser.add_argument("--approve-keep", action="store_true", help="Approve keeping and pushing 77V tooling.")
+    phase_ftpd_parser.add_argument("--approved-by", type=str, default="", help="Operator who approves.")
+    phase_ftpd_parser.add_argument("--reason", type=str, default="", help="Approval reason.")
+    phase_ftpd_parser.add_argument("--execute-push", action="store_true", help="Execute the governed push.")
+    phase_ftpd_parser.set_defaults(handler=run_phase_final_verification_tooling_push_decision)
+
+    phase_ftpd_show_parser = phase_subparsers.add_parser(
+        "final-verification-tooling-push-decision-show",
+        help="Show latest final verification tooling push decision artifact (Phase 77V.1).",
+    )
+    phase_ftpd_show_parser.add_argument("--json", action="store_true")
+    phase_ftpd_show_parser.set_defaults(handler=run_phase_final_verification_tooling_push_decision_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
