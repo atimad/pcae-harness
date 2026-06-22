@@ -8232,6 +8232,10 @@ def build_parser() -> argparse.ArgumentParser:
     push_parser.add_argument(
         "--dry-run", action="store_true", help="Validate readiness without pushing."
     )
+    push_parser.add_argument(
+        "--staged-file-aware", action="store_true",
+        help="Push approved commits while preserving unrelated pre-existing staged files.",
+    )
     push_parser.set_defaults(handler=run_push)
     push_subparsers = push_parser.add_subparsers(dest="push_command")
 

@@ -2,11 +2,12 @@
 
 ## Current Phase
 
-Phase 79B: Staged-File-Aware Task Finish.
+Phase 79C: Staged-File-Aware Push.
 
-Phase 79B adds `--staged-file-aware` flag to `pcae task finish --commit` for pathspec-based
-completion commits that preserve unrelated pre-existing staged files. Addresses the 77S
-friction where task completion risked including the staged adoption file. 9 new tests.
+Phase 79C adds `--staged-file-aware` flag to `pcae push`. Pushes approved commits while
+preserving unrelated pre-existing staged files. Blocks if protected staged files appear in
+unpushed commit contents. Blocks force push. Completes the 79A-79C staged-file-aware
+governance hardening series. 10 new tests.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 

@@ -102,10 +102,49 @@ def run_push_check(args: argparse.Namespace) -> int:
     return 0 if readiness.ready or readiness.mode == "nothing_to_push" else 1
 
 
+def _staged_file_snapshot(root_path) -> dict[str, str]:
+    """Return {path: blob_hash} for all staged files."""
+    r = subprocess.run(["git", "diff", "--cached", "--name-only"],
+                       cwd=root_path, capture_output=True, text=True, timeout=15)
+    if r.returncode != 0:
+        return {}
+    paths = [l for l in r.stdout.strip().split("\n") if l]
+    result = {}
+    for p in paths:
+        h = subprocess.run(["git", "rev-parse", f":0:{p}"],
+                           cwd=root_path, capture_output=True, text=True, timeout=10)
+        result[p] = h.stdout.strip() if h.returncode == 0 else ""
+    return result
+
+
+def _files_in_unpushed_range(root_path) -> list[str]:
+    """Return file paths changed in origin/main..HEAD."""
+    try:
+        r = subprocess.run(["git", "diff", "--name-only", "origin/main..HEAD"],
+                           cwd=root_path, capture_output=True, text=True, timeout=15)
+        return [l for l in r.stdout.strip().split("\n") if l] if r.returncode == 0 else []
+    except Exception:
+        return []
+
+
+def _unpushed_commit_lines(root_path) -> list[str]:
+    try:
+        r = subprocess.run(["git", "log", "--oneline", "origin/main..HEAD"],
+                           cwd=root_path, capture_output=True, text=True, timeout=15)
+        return [l for l in r.stdout.strip().split("\n") if l] if r.returncode == 0 else []
+    except Exception:
+        return []
+
+
 def run_push(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
-    readiness = assess_push_readiness(root)
+    staged_file_aware = getattr(args, "staged_file_aware", False)
     dry_run = getattr(args, "dry_run", False)
+
+    if staged_file_aware:
+        return _run_push_staged_file_aware(root, args, dry_run)
+
+    readiness = assess_push_readiness(root)
 
     if not readiness.ready:
         if args.json:
@@ -160,6 +199,176 @@ def run_push(args: argparse.Namespace) -> int:
         print(f"Pushed: {push_output}")
 
     return 0
+
+
+def _run_push_staged_file_aware(root: HarnessPath, args: argparse.Namespace, dry_run: bool) -> int:
+    bl: list[str] = []
+    wl: list[str] = []
+
+    # Snapshot protected staged files
+    protected_before = _staged_file_snapshot(root.path)
+
+    # Get unpushed commits
+    unpushed_lines = _unpushed_commit_lines(root.path)
+    unpushed_count = len(unpushed_lines)
+    unpushed_hashes = [l.split()[0] for l in unpushed_lines] if unpushed_lines else []
+
+    if unpushed_count == 0:
+        r = _sfa_push_result("nothing_to_push", "nothing_to_push", bl, wl,
+                             protected_before=protected_before)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Staged-file-aware push: nothing to push.")
+        return 0
+
+    # Check which files are in the unpushed range
+    files_in_range = _files_in_unpushed_range(root.path)
+
+    # Block if any protected staged file appears in unpushed commit contents
+    protected_in_commits = [p for p in protected_before if p in files_in_range]
+    if protected_in_commits:
+        for p in protected_in_commits:
+            bl.append(f"Protected staged file '{p}' appears in unpushed commit range.")
+        r = _sfa_push_result("protected_file_in_unpushed_commits", "blocked", bl, wl,
+                             protected_before=protected_before,
+                             unpushed_lines=unpushed_lines,
+                             files_in_range=files_in_range,
+                             protected_in_commits=protected_in_commits)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Staged-file-aware push blocked.")
+            for b in bl:
+                print(f"  - {b}")
+        return 1
+
+    # Check for force push requirement (origin/main must be ancestor of HEAD)
+    try:
+        anc = subprocess.run(["git", "merge-base", "--is-ancestor", "origin/main", "HEAD"],
+                             cwd=root.path, capture_output=True, timeout=10)
+        if anc.returncode != 0:
+            bl.append("origin/main is not ancestor of HEAD; force push would be required.")
+            r = _sfa_push_result("force_push_required", "blocked", bl, wl,
+                                 protected_before=protected_before,
+                                 unpushed_lines=unpushed_lines,
+                                 files_in_range=files_in_range)
+            if args.json:
+                print(json.dumps(r, indent=2, sort_keys=True))
+            else:
+                print("Staged-file-aware push blocked: force push required.")
+            return 1
+    except Exception:
+        pass
+
+    if dry_run:
+        r = _sfa_push_result("ready", "dry_run", bl, wl,
+                             protected_before=protected_before,
+                             unpushed_lines=unpushed_lines,
+                             files_in_range=files_in_range)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Staged-file-aware push: ready (dry run, not pushing).")
+            print(f"  Unpushed commits: {unpushed_count}")
+            print(f"  Protected staged files: {len(protected_before)}")
+        return 0
+
+    # Execute governed push
+    try:
+        push_result = subprocess.run(
+            ["git", "push", "origin", "main"],
+            cwd=root.path,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        push_output = (push_result.stdout + push_result.stderr).strip()
+    except subprocess.CalledProcessError as error:
+        bl.append(f"Push failed: {error.stderr.strip()[:200]}")
+        r = _sfa_push_result("git_error", "blocked", bl, wl,
+                             protected_before=protected_before,
+                             unpushed_lines=unpushed_lines,
+                             files_in_range=files_in_range)
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print(f"Staged-file-aware push failed: {error.stderr.strip()}")
+        return 1
+
+    # Post-push: verify protected staged files preserved
+    protected_after = _staged_file_snapshot(root.path)
+    protected_preserved = True
+    for pp in protected_before:
+        if pp not in protected_after:
+            protected_preserved = False
+            wl.append(f"Protected staged file '{pp}' no longer staged after push.")
+        elif protected_after[pp] != protected_before[pp]:
+            protected_preserved = False
+            wl.append(f"Protected staged file '{pp}' blob changed after push.")
+
+    unpushed_after = _unpushed_commit_lines(root.path)
+    status = "pushed" if protected_preserved else "protected_staged_file_lost"
+
+    r = _sfa_push_result(status, "pushed", bl, wl,
+                         protected_before=protected_before,
+                         protected_after=protected_after,
+                         protected_preserved=protected_preserved,
+                         unpushed_lines=unpushed_lines,
+                         unpushed_after=unpushed_after,
+                         files_in_range=files_in_range,
+                         pushed_hashes=unpushed_hashes)
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+    else:
+        print(f"Staged-file-aware push: {push_output}")
+        if protected_before:
+            print(f"  Protected staged files preserved: {'yes' if protected_preserved else 'no'}")
+    return 0
+
+
+def _sfa_push_result(
+    status: str, outcome: str, bl: list, wl: list,
+    protected_before: dict | None = None,
+    protected_after: dict | None = None,
+    protected_preserved: bool = True,
+    unpushed_lines: list | None = None,
+    unpushed_after: list | None = None,
+    files_in_range: list | None = None,
+    protected_in_commits: list | None = None,
+    pushed_hashes: list | None = None,
+) -> dict:
+    pb = protected_before or {}
+    pa = protected_after or {}
+    ul = unpushed_lines or []
+    ua = unpushed_after or []
+    fr = files_in_range or []
+    return {
+        "backend_invocation_performed": False,
+        "blockers": bl,
+        "branch": "main",
+        "execution_authorized": False,
+        "files_in_unpushed_commits": sorted(fr),
+        "force_push_performed": False,
+        "protected_file_in_unpushed_commits": sorted(protected_in_commits or []),
+        "protected_staged_file_hashes_after": {p: pa.get(p, "") for p in sorted(pb)},
+        "protected_staged_file_hashes_before": {p: pb[p] for p in sorted(pb)},
+        "protected_staged_files_after": sorted(p for p in pb if p in pa),
+        "protected_staged_files_before": sorted(pb.keys()),
+        "protected_staged_files_preserved": protected_preserved,
+        "push_outcome": outcome,
+        "push_staged_file_aware_status": status,
+        "pushed_commit_hashes": pushed_hashes or [],
+        "raw_git_push_performed": False,
+        "remote": "origin",
+        "runner_execute_performed": False,
+        "unexpected_staged_files": [],
+        "unpushed_commit_hashes_before": [l.split()[0] for l in ul] if ul else [],
+        "unpushed_commits_after": ua,
+        "unpushed_commits_before": ul,
+        "warnings": wl,
+    }
 
 
 def _readiness_dict(readiness: PushReadiness) -> dict:
