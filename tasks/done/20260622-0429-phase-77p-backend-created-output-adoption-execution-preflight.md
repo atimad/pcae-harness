@@ -10,7 +10,7 @@ Phase 77P Backend-Created Output Adoption Execution Preflight
 
 ## Status
 
-active
+done
 
 ## Mode
 
