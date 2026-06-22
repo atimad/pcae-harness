@@ -533,6 +533,8 @@ from pcae.commands.phase import (
     run_phase_backend_created_output_adoption_push_approval_show,
     run_phase_backend_created_output_adoption_push_execution,
     run_phase_backend_created_output_adoption_push_execution_show,
+    run_phase_backend_created_output_adoption_final_verification,
+    run_phase_backend_created_output_adoption_final_verification_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6711,6 +6713,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_created_output_adoption_push_execution_show_parser.add_argument("--json", action="store_true")
     phase_backend_created_output_adoption_push_execution_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_push_execution_show)
+
+    # Phase 77V
+    phase_backend_created_output_adoption_final_verification_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-final-verification",
+        help="Final verification of the complete adoption lifecycle (Phase 77V).",
+    )
+    phase_backend_created_output_adoption_final_verification_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_final_verification_parser.add_argument("--save", action="store_true")
+    phase_backend_created_output_adoption_final_verification_parser.set_defaults(handler=run_phase_backend_created_output_adoption_final_verification)
+
+    phase_backend_created_output_adoption_final_verification_show_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-final-verification-show",
+        help="Show latest adoption final verification artifact (Phase 77V).",
+    )
+    phase_backend_created_output_adoption_final_verification_show_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_final_verification_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_final_verification_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

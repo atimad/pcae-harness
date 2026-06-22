@@ -17065,3 +17065,34 @@ def test_77u_no_push_no_backend(tmp_path, monkeypatch, capsys):
     assert d["push_performed"] is False
     assert d["backend_invocation_performed"] is False
     assert d["docs_file_modified_in_this_phase"] is False
+# Phase 77V tests
+def test_77v_missing_push_execution(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-created-output-adoption-final-verification", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_final_verification_status"] == "missing_push_execution"
+
+def test_77v_save_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-created-output-adoption-final-verification", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "backend-created-output-adoption-final-verifications" / "latest.json"
+    assert p.is_file()
+
+def test_77v_show_no_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "backend-created-output-adoption-final-verification-show", "--json"])
+    assert exit_code == 1
+
+def test_77v_no_push_no_backend(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-created-output-adoption-final-verification", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["push_performed"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["docs_file_modified_in_this_phase"] is False
