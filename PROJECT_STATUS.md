@@ -2,7 +2,13 @@
 
 ## Current Phase
 
-Phase 77S: Backend-Created Output Adoption Commit Execution.
+Phase 78A: PCAE Roadmap Documentation.
+
+Phase 78A adds docs/ROADMAP.md capturing the post-77V.1 direction: stabilize the completed
+backend-output adoption lifecycle, fix known friction, consolidate lifecycle orchestration,
+run a second real task, add multi-agent capability discovery, move toward governed multi-agent
+orchestration, improve memory/project intelligence, and productize PCAE. Documentation-only,
+no source code changes.
 
 Phase 77S adds `pcae phase backend-created-output-adoption-commit-execution --json --save
 --dry-run --execute` and `pcae phase backend-created-output-adoption-commit-execution-show --json`.
