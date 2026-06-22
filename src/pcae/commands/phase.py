@@ -17980,3 +17980,380 @@ def run_phase_adoption_commit_hook_bypass_reconcile_show(args: argparse.Namespac
     print(f"  Policy recorded: {'yes' if r.get('hook_bypass_policy_recorded') else 'no'}")
     print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77T: backend-created output adoption push approval
+BACKEND_CREATED_OUTPUT_ADOPTION_PUSH_APPROVALS_DIR = Path(".pcae") / "backend-created-output-adoption-push-approvals"
+
+
+def _build_backend_created_output_adoption_push_approval(root: HarnessPath, approve: bool = False,
+                                                          approved_by: str = "", reason: str = "") -> dict:
+    """Push approval for the adoption bundle. Verifies unpushed commits, does not push."""
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list = []
+    wl: list = []
+
+    # Read 77S.1 reconciliation
+    rec_data = None
+    rec_p = root.join(ADOPTION_COMMIT_HOOK_BYPASS_RECONCILIATIONS_DIR / "latest.json")
+    if rec_p.is_file():
+        rec_data = json.loads(rec_p.read_text(encoding="utf-8"))
+
+    # Read 77S commit execution
+    exec_data = None
+    exec_p = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_EXECUTIONS_DIR / "latest.json")
+    if exec_p.is_file():
+        exec_data = json.loads(exec_p.read_text(encoding="utf-8"))
+
+    # ----------------------------------------------------------------
+    # 1. Working tree must be clean
+    # ----------------------------------------------------------------
+    wt_status = ""
+    try:
+        wt = _sp.run(["git", "status", "--short"], cwd=str(root.path),
+                      capture_output=True, text=True, timeout=15)
+        wt_status = wt.stdout.strip()
+    except Exception:
+        pass
+    if wt_status:
+        rs = "dirty_working_tree"
+        bl.append(f"Working tree has changes: {wt_status[:200]}")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason)
+
+    # ----------------------------------------------------------------
+    # 2. Check unpushed commits
+    # ----------------------------------------------------------------
+    unpushed_lines = []
+    try:
+        up = _sp.run(["git", "log", "--oneline", "origin/main..HEAD"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        unpushed_lines = [l for l in up.stdout.strip().split("\n") if l]
+    except Exception:
+        pass
+
+    if not unpushed_lines:
+        rs = "no_unpushed_commits"
+        bl.append("No unpushed commits found.")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason)
+
+    unpushed_hashes = [l.split()[0] for l in unpushed_lines]
+    unpushed_count = len(unpushed_lines)
+
+    # ----------------------------------------------------------------
+    # 3. Verify adoption commit is present and correct
+    # ----------------------------------------------------------------
+    adoption_hash = exec_data.get("commit_hash", "f42402bc") if exec_data else "f42402bc"
+    adoption_in_range = any(adoption_hash.startswith(h) or h.startswith(adoption_hash[:12])
+                            for h in unpushed_hashes)
+
+    if not adoption_in_range:
+        rs = "adoption_commit_missing"
+        bl.append(f"Adoption commit {adoption_hash[:12]} not in unpushed range.")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason,
+                     unpushed_hashes=unpushed_hashes, unpushed_lines=unpushed_lines,
+                     unpushed_count=unpushed_count)
+
+    # Verify adoption commit files
+    adoption_files = []
+    try:
+        af = _sp.run(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", adoption_hash],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        adoption_files = [f for f in af.stdout.strip().split("\n") if f]
+    except Exception:
+        pass
+
+    only_expected = len(adoption_files) == 1 and adoption_files == ["docs/REAL_CAPTURED_TASKS.md"]
+    if not only_expected:
+        rs = "adoption_commit_mismatch"
+        bl.append(f"Adoption commit has unexpected files: {adoption_files}")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason,
+                     unpushed_hashes=unpushed_hashes, unpushed_lines=unpushed_lines,
+                     unpushed_count=unpushed_count)
+
+    # ----------------------------------------------------------------
+    # 4. File hash/size verification
+    # ----------------------------------------------------------------
+    bcf = root.path / "docs" / "REAL_CAPTURED_TASKS.md"
+    a_size = 0; a_sha = ""
+    if bcf.is_file():
+        c = bcf.read_text(encoding="utf-8")
+        a_size = len(c)
+        a_sha = hashlib.sha256(c.encode("utf-8")).hexdigest()
+
+    exp_size = exec_data.get("expected_file_size_bytes", 26373) if exec_data else 26373
+    exp_sha = exec_data.get("expected_file_sha256", "") if exec_data else ""
+    hash_match = a_size == exp_size and a_sha == exp_sha
+
+    # ----------------------------------------------------------------
+    # 5. Verify reconciliation
+    # ----------------------------------------------------------------
+    if not rec_data:
+        rs = "reconciliation_missing"
+        bl.append("77S.1 reconciliation artifact not found.")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason)
+
+    rec_status = rec_data.get("hook_bypass_reconciliation_status", "")
+    if rec_status not in ("reconciled_documented_exception", "reconciled_safer_commit_path"):
+        rs = "reconciliation_missing"
+        bl.append(f"Reconciliation not resolved (status={rec_status}).")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason)
+
+    if not rec_data.get("hook_bypass_policy_recorded"):
+        rs = "hook_bypass_policy_missing"
+        bl.append("Hook bypass policy not recorded.")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason)
+
+    if rec_data.get("hook_bypass_normalized"):
+        rs = "hook_bypass_normalized"
+        bl.append("Hook bypass was inappropriately normalized.")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve,
+                     approved_by=approved_by, reason=reason)
+
+    # ----------------------------------------------------------------
+    # 6. Safety gates
+    # ----------------------------------------------------------------
+    audit_warning_count = 0
+    try:
+        ap = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if ap.is_file():
+            ad = json.loads(ap.read_text(encoding="utf-8"))
+            audit_warning_count = ad.get("warning_count", 0)
+    except Exception:
+        pass
+    if audit_warning_count > 0:
+        rs = "blocked_audit_warnings"
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve)
+
+    real_execution_disabled = True
+    try:
+        rep = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep.is_file():
+            rp_data = json.loads(rep.read_text(encoding="utf-8"))
+            real_execution_disabled = rp_data.get("real_execution_disabled", True)
+    except Exception:
+        pass
+    if not real_execution_disabled:
+        rs = "blocked_execution_not_disabled"
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve)
+
+    runner_execute_refuses = True
+    try:
+        rer = root.join(Path(".pcae") / "runner-executions" / "latest.json")
+        if rer.is_file():
+            re_data = json.loads(rer.read_text(encoding="utf-8"))
+            if re_data.get("execution_authorized") is True:
+                runner_execute_refuses = False
+    except Exception:
+        pass
+    if not runner_execute_refuses:
+        rs = "blocked_runner_execution_available"
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve)
+
+    # Check if already pushed
+    if exec_data and exec_data.get("file_pushed"):
+        rs = "adoption_commit_already_pushed"
+        bl.append("Adoption commit already pushed.")
+        return _atq(rs, bl, wl, ts, rec_data, exec_data, approve=approve)
+
+    # ----------------------------------------------------------------
+    # All gates passed — ready or approved
+    # ----------------------------------------------------------------
+    if approve and approved_by:
+        rs = "approved"
+        approval_ts_str = datetime.now(timezone.utc).isoformat()
+    else:
+        rs = "ready_for_push_approval"
+        approval_ts_str = None
+
+    return _atq(rs, bl, wl, ts, rec_data, exec_data,
+                 approve=approve and bool(approved_by),
+                 approved_by=approved_by if approve else "",
+                 reason=reason if approve else "",
+                 approval_ts_str=approval_ts_str,
+                 unpushed_hashes=unpushed_hashes,
+                 unpushed_lines=unpushed_lines,
+                 unpushed_count=unpushed_count,
+                 adoption_hash=adoption_hash,
+                 adoption_files=adoption_files,
+                 a_size=a_size, a_sha=a_sha, hash_match=hash_match)
+
+
+def _atq(rs: str, bl: list, wl: list, ts: str,
+         rec_data, exec_data,
+         approve: bool = False, approved_by: str = "", reason: str = "",
+         approval_ts_str: str = None,
+         unpushed_hashes: list | None = None,
+         unpushed_lines: list | None = None,
+         unpushed_count: int = 0,
+         adoption_hash: str = "", adoption_files: list | None = None,
+         a_size: int = 0, a_sha: str = "", hash_match: bool = True) -> dict:
+    """Build push approval result dict."""
+
+    is_approved = rs == "approved"
+    is_ready = rs == "ready_for_push_approval"
+    uh = unpushed_hashes or []
+    ul = unpushed_lines or []
+    af = adoption_files or []
+
+    outcome_map = {
+        "approved": "approved",
+        "ready_for_push_approval": "ready_for_approval",
+        "dirty_working_tree": "blocked",
+        "no_unpushed_commits": "blocked",
+        "adoption_commit_missing": "blocked",
+        "adoption_commit_already_pushed": "blocked",
+        "adoption_commit_mismatch": "blocked",
+        "reconciliation_missing": "blocked",
+        "hook_bypass_policy_missing": "blocked",
+        "hook_bypass_normalized": "blocked",
+        "blocked_audit_warnings": "blocked",
+        "blocked_execution_not_disabled": "blocked",
+        "blocked_runner_execution_available": "blocked",
+    }
+
+    recommended = (
+        "77U — Backend-Created Output Adoption Push Execution" if is_approved
+        else ("77T — Backend-Created Output Adoption Push Approval" if is_ready
+              else "Resolve blockers first.")
+    )
+
+    return {
+        "backend_created_output_adoption_push_approval_status": rs,
+        "push_approval_outcome": outcome_map.get(rs, "unknown"),
+        "human_push_approval_granted": approve,
+        "approved_by": approved_by,
+        "approval_reason": reason,
+        "approval_timestamp": approval_ts_str,
+        "approved_commit_range": "origin/main..HEAD",
+        "approved_unpushed_commit_count": unpushed_count if is_approved else 0,
+        "approved_commits": ul if is_approved else [],
+        "approved_commit_hashes": uh if is_approved else [],
+        "expected_base_ref": "origin/main",
+        "expected_head_ref": "HEAD",
+        "working_tree_clean": True,
+        "git_status_short": "",
+        "unpushed_commit_count": unpushed_count,
+        "unpushed_commits": ul,
+        "adoption_commit_verified": is_ready or is_approved,
+        "adoption_commit_hash": adoption_hash,
+        "adoption_commit_message": "Adopt backend-created real captured task documentation",
+        "adoption_commit_in_unpushed_range": any(adoption_hash[:12] in h or h.startswith(adoption_hash[:12]) for h in uh),
+        "adoption_commit_contains_only_expected_file": len(af) == 1 and "docs/REAL_CAPTURED_TASKS.md" in af,
+        "adoption_commit_files": af,
+        "unexpected_adoption_commit_files": [f for f in af if f != "docs/REAL_CAPTURED_TASKS.md"],
+        "adoption_commit_already_pushed": False,
+        "docs_file_size_bytes": a_size,
+        "docs_file_sha256": a_sha,
+        "docs_file_hash_matches": hash_match,
+        "commit_execution_ref": ".pcae/backend-created-output-adoption-commit-executions/latest.json",
+        "hook_bypass_reconciliation_ref": ".pcae/adoption-commit-hook-bypass-reconciliations/latest.json",
+        "hook_bypass_reconciliation_verified": rec_data is not None and rec_data.get("hook_bypass_reconciliation_status", "") in ("reconciled_documented_exception", "reconciled_safer_commit_path") if rec_data else False,
+        "hook_bypass_policy_recorded": rec_data.get("hook_bypass_policy_recorded", False) if rec_data else False,
+        "hook_bypass_normalized": rec_data.get("hook_bypass_normalized", True) if rec_data else True,
+        "push_allowed_now": False,
+        "push_execution_allowed_now": False,
+        "push_execution_allowed_in_future_phase": is_approved,
+        "backend_invocation_performed": False,
+        "runner_execute_performed": False,
+        "docs_file_modified_in_this_phase": False,
+        "commits_created": 0,
+        "push_performed": False,
+        "pcae_push_performed": False,
+        "raw_git_push_performed": False,
+        "execution_authorized": False,
+        "audit_warning_count": 0,
+        "real_execution_disabled": True,
+        "runner_execute_refuses": True,
+        "generated_at": ts,
+        "blockers": bl,
+        "warnings": wl,
+        "recommended_next_phase": recommended,
+        "next_operator_action": (
+            f"Push approved by {approved_by}. {unpushed_count} unpushed commits approved. "
+            "Push execution allowed in 77U. Do NOT push in this phase."
+            if is_approved
+            else ("Ready for push approval. Use --approve --approved-by '<operator>' --reason '<reason>'."
+                  if is_ready else "Resolve blockers first.")
+        ),
+    }
+
+
+def run_phase_backend_created_output_adoption_push_approval(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    approve = getattr(args, "approve", False)
+    approved_by = getattr(args, "approved_by", "") or ""
+    reason = getattr(args, "reason", "") or ""
+    if approve and not approved_by:
+        if args.json:
+            r = {"backend_created_output_adoption_push_approval_status": "blocked",
+                 "push_approval_outcome": "blocked",
+                 "blockers": ["--approved-by is required with --approve."]}
+            print(json.dumps(r, indent=2, sort_keys=True))
+            return 1
+        print("Error: --approved-by is required with --approve.")
+        return 1
+    r = _build_backend_created_output_adoption_push_approval(root, approve=approve,
+                                                              approved_by=approved_by, reason=reason)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_PUSH_APPROVALS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Push approval saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r["backend_created_output_adoption_push_approval_status"] in ("approved", "ready_for_push_approval") else 1
+    print("Backend-Created Output Adoption Push Approval")
+    print("=" * 47)
+    print(f"  Status: {r['backend_created_output_adoption_push_approval_status']}")
+    print(f"  Outcome: {r['push_approval_outcome']}")
+    print(f"  Unpushed commits: {r['unpushed_commit_count']}")
+    print(f"  Adoption verified: {'yes' if r['adoption_commit_verified'] else 'no'}")
+    print(f"  Reconciliation verified: {'yes' if r['hook_bypass_reconciliation_verified'] else 'no'}")
+    print(f"  Bypass normalized: {'yes' if r['hook_bypass_normalized'] else 'no'}")
+    print(f"  Human approval: {'granted' if r.get('human_push_approval_granted') else 'not granted'}")
+    if r.get("human_push_approval_granted"):
+        print(f"  Approved by: {r.get('approved_by', '')}")
+        print(f"  Reason: {r.get('approval_reason', '')}")
+        print(f"  Approved commits: {r.get('approved_unpushed_commit_count', 0)}")
+    print(f"  Push now: no  Push future: {'yes' if r['push_execution_allowed_in_future_phase'] else 'no'}")
+    print(f"  Next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  BLOCKED: {b}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_created_output_adoption_push_approval_status"] in ("approved", "ready_for_push_approval") else 1
+
+
+def run_phase_backend_created_output_adoption_push_approval_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_PUSH_APPROVALS_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_created_output_adoption_push_approval_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("No push approval artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("backend_created_output_adoption_push_approval_status") in ("approved", "ready_for_push_approval") else 1
+    print("Backend-Created Output Adoption Push Approval (Show)")
+    print("=" * 55)
+    print(f"  Status: {r.get('backend_created_output_adoption_push_approval_status', 'unknown')}")
+    print(f"  Outcome: {r.get('push_approval_outcome', 'unknown')}")
+    print(f"  Approval: {'granted' if r.get('human_push_approval_granted') else 'not granted'}")
+    print(f"  Push allowed: {'yes' if r.get('push_execution_allowed_in_future_phase') else 'no'}")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0
