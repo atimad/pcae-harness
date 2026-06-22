@@ -527,6 +527,8 @@ from pcae.commands.phase import (
     run_phase_backend_created_output_adoption_commit_approval_show,
     run_phase_backend_created_output_adoption_commit_execution,
     run_phase_backend_created_output_adoption_commit_execution_show,
+    run_phase_adoption_commit_hook_bypass_reconcile,
+    run_phase_adoption_commit_hook_bypass_reconcile_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6652,6 +6654,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_created_output_adoption_commit_execution_show_parser.add_argument("--json", action="store_true")
     phase_backend_created_output_adoption_commit_execution_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_commit_execution_show)
+
+    # Phase 77S.1
+    phase_adoption_commit_hook_bypass_reconcile_parser = phase_subparsers.add_parser(
+        "adoption-commit-hook-bypass-reconcile",
+        help="Reconcile --no-verify hook bypass used in 77S adoption commit (Phase 77S.1).",
+    )
+    phase_adoption_commit_hook_bypass_reconcile_parser.add_argument("--json", action="store_true")
+    phase_adoption_commit_hook_bypass_reconcile_parser.add_argument("--save", action="store_true")
+    phase_adoption_commit_hook_bypass_reconcile_parser.set_defaults(handler=run_phase_adoption_commit_hook_bypass_reconcile)
+
+    phase_adoption_commit_hook_bypass_reconcile_show_parser = phase_subparsers.add_parser(
+        "adoption-commit-hook-bypass-reconcile-show",
+        help="Show latest adoption commit hook bypass reconciliation artifact (Phase 77S.1).",
+    )
+    phase_adoption_commit_hook_bypass_reconcile_show_parser.add_argument("--json", action="store_true")
+    phase_adoption_commit_hook_bypass_reconcile_show_parser.set_defaults(handler=run_phase_adoption_commit_hook_bypass_reconcile_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",
