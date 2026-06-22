@@ -519,6 +519,8 @@ from pcae.commands.phase import (
     run_phase_backend_created_output_adoption_review_show,
     run_phase_backend_created_output_adoption_approval,
     run_phase_backend_created_output_adoption_approval_show,
+    run_phase_backend_created_output_adoption_execution_preflight,
+    run_phase_backend_created_output_adoption_execution_preflight_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6573,6 +6575,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_created_output_adoption_approval_show_parser.add_argument("--json", action="store_true")
     phase_backend_created_output_adoption_approval_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_approval_show)
+
+    # Phase 77P
+    phase_backend_created_output_adoption_execution_preflight_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-execution-preflight",
+        help="Adoption execution preflight for backend-created output (Phase 77P).",
+    )
+    phase_backend_created_output_adoption_execution_preflight_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_execution_preflight_parser.add_argument("--save", action="store_true")
+    phase_backend_created_output_adoption_execution_preflight_parser.set_defaults(handler=run_phase_backend_created_output_adoption_execution_preflight)
+
+    phase_backend_created_output_adoption_execution_preflight_show_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-execution-preflight-show",
+        help="Show latest backend-created output adoption execution preflight artifact (Phase 77P).",
+    )
+    phase_backend_created_output_adoption_execution_preflight_show_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_execution_preflight_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_execution_preflight_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

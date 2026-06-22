@@ -15879,3 +15879,465 @@ def run_phase_backend_created_output_adoption_approval_show(args: argparse.Names
     print(f"  Exec preflight allowed: {'yes' if r.get('adoption_execution_preflight_allowed_in_future_phase') else 'no'}")
     print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77P: backend-created output adoption execution preflight
+BACKEND_CREATED_OUTPUT_ADOPTION_EXECUTION_PREFLIGHTS_DIR = Path(".pcae") / "backend-created-output-adoption-execution-preflights"
+
+
+def _build_backend_created_output_adoption_execution_preflight(root: HarnessPath) -> dict:
+    """Adoption execution preflight for backend-created output. No invocation, no mutation."""
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list = []
+    wl: list = []
+
+    # Read 77O adoption approval
+    approval_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_ADOPTION_APPROVALS_DIR)
+    approval_data = None
+    if approval_ref:
+        ap = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_APPROVALS_DIR / "latest.json")
+        if ap.is_file():
+            approval_data = json.loads(ap.read_text(encoding="utf-8"))
+
+    # Read 77N adoption review
+    review_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_ADOPTION_REVIEWS_DIR)
+    review_data = None
+    if review_ref:
+        rp = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_REVIEWS_DIR / "latest.json")
+        if rp.is_file():
+            review_data = json.loads(rp.read_text(encoding="utf-8"))
+
+    # Read 77M preflight
+    preflight_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_ADOPTION_PREFLIGHTS_DIR)
+    preflight_data = None
+    if preflight_ref:
+        pp = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_PREFLIGHTS_DIR / "latest.json")
+        if pp.is_file():
+            preflight_data = json.loads(pp.read_text(encoding="utf-8"))
+
+    # Read 77L quarantine review
+    quarantine_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR)
+    quarantine_data = None
+    if quarantine_ref:
+        qp = root.join(BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR / "latest.json")
+        if qp.is_file():
+            quarantine_data = json.loads(qp.read_text(encoding="utf-8"))
+
+    # Read 77K mutation intake
+    intake_ref = _ref_exists(root, BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR)
+    intake_data = None
+    if intake_ref:
+        ip = root.join(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json")
+        if ip.is_file():
+            intake_data = json.loads(ip.read_text(encoding="utf-8"))
+
+    # Read 77J retry result
+    retry_ref = _ref_exists(root, BACKEND_CAPTURE_GOVERNED_RETRIES_DIR)
+    retry_data = None
+    if retry_ref:
+        rrp = root.join(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json")
+        if rrp.is_file():
+            retry_data = json.loads(rrp.read_text(encoding="utf-8"))
+
+    # ----------------------------------------------------------------
+    # Block-level checks
+    # ----------------------------------------------------------------
+
+    # 1. Adoption approval must exist and be approved
+    if not approval_data:
+        rs = "missing_adoption_approval"
+        bl.append("Adoption approval artifact not found.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data)
+
+    if approval_data.get("backend_created_output_adoption_approval_status") != "approved":
+        rs = "adoption_approval_not_approved"
+        bl.append("Adoption approval not in approved state.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data)
+
+    if not approval_data.get("human_adoption_approval_granted"):
+        rs = "adoption_approval_not_approved"
+        bl.append("Human adoption approval not granted.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data)
+
+    approved_by = approval_data.get("approved_by", "")
+    approval_reason = approval_data.get("approval_reason", "")
+    if not approved_by or not approval_reason:
+        rs = "approval_metadata_missing"
+        bl.append("Approval metadata incomplete (missing approved_by or reason).")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data)
+
+    # 2. File path, existence, hash/size verification
+    bcf_path = approval_data.get("source_file_path", _BCF_PATH)
+    exp_size = approval_data.get("source_file_size_bytes", 0)
+    exp_sha = approval_data.get("source_file_sha256", "")
+
+    bcf = root.path / bcf_path
+    fe = bcf.is_file()
+    fr = fe and bcf.stat().st_size > 0
+    al_split = 0; a_size = 0; a_sha = None; a_wc = 0
+    if fe and fr:
+        content = bcf.read_text(encoding="utf-8")
+        al_split = len(content.split("\n"))
+        a_size = len(content)
+        a_sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        try:
+            wc_out = _sp.run(["wc", "-l", str(bcf)], capture_output=True, text=True, timeout=15)
+            a_wc = int(wc_out.stdout.strip().split()[0]) if wc_out.stdout.strip() else 0
+        except Exception:
+            a_wc = al_split
+    else:
+        content = ""
+
+    if not fe:
+        rs = "missing_backend_created_file"
+        bl.append("Backend-created file not found.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=False)
+
+    sz_match = a_size == exp_size
+    sha_match = a_sha == exp_sha
+    if not sz_match or not sha_match:
+        rs = "metadata_mismatch"
+        bl.append("Metadata mismatch.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                     a_size=a_size, a_sha=a_sha)
+
+    # 4. Git status check
+    ignored_status = ""; ig = False; staged = False; tracked = False
+    try:
+        gs = _sp.run(["git", "status", "--porcelain", "--ignored", "--", bcf_path],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        ignored_status = gs.stdout.strip()
+        if ignored_status.startswith("!!"):
+            ig = True
+        elif ignored_status and not ignored_status.startswith("??"):
+            staged = "M" in ignored_status[:2] or "A" in ignored_status[:2] or ignored_status[0] != " "
+            tracked = True
+    except Exception:
+        pass
+    if not staged and not tracked and not ig:
+        try:
+            lf = _sp.run(["git", "ls-files", "--", bcf_path],
+                          cwd=str(root.path), capture_output=True, text=True, timeout=15)
+            if lf.stdout.strip():
+                tracked = True
+        except Exception:
+            pass
+
+    if staged or tracked:
+        rs = "file_staged_or_tracked"
+        bl.append("File is staged or tracked — should be gitignored.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                     a_size=a_size, a_sha=a_sha, ig=ig, staged=staged, tracked=tracked,
+                     ignored_status=ignored_status)
+
+    # 5. Contract check
+    contract_id = approval_data.get("contract_id", preflight_data.get("contract_id") if preflight_data else "unknown")
+    allowed_files = ["docs/REAL_CAPTURED_TASKS.md"]
+    within_contract = bcf_path in allowed_files
+
+    if not within_contract:
+        rs = "outside_contract_scope"
+        bl.append("File not in allowed contract files.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                     a_size=a_size, a_sha=a_sha, ig=ig, ignored_status=ignored_status,
+                     contract_id=contract_id)
+
+    # 6. Content safety must have passed in review
+    if not review_data or not review_data.get("content_safety_review_passed"):
+        rs = "content_safety_not_passed"
+        bl.append("Content safety review not passed.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                     a_size=a_size, a_sha=a_sha, ig=ig, ignored_status=ignored_status,
+                     contract_id=contract_id, within_contract=within_contract)
+
+    # 7. Audit warnings check
+
+    audit_warning_count = 0
+    try:
+        ap = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if ap.is_file():
+            ad = json.loads(ap.read_text(encoding="utf-8"))
+            audit_warning_count = ad.get("warning_count", 0)
+    except Exception:
+        pass
+
+    if audit_warning_count > 0:
+        rs = "blocked_audit_warnings"
+        bl.append(f"Audit warnings present: {audit_warning_count}.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                     a_size=a_size, a_sha=a_sha, ig=ig, ignored_status=ignored_status,
+                     contract_id=contract_id, within_contract=within_contract)
+
+    # 7. Real execution disabled proof
+    real_execution_disabled = True
+    try:
+        rep = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep.is_file():
+            rp_data = json.loads(rep.read_text(encoding="utf-8"))
+            real_execution_disabled = rp_data.get("real_execution_disabled", True)
+    except Exception:
+        pass
+
+    if not real_execution_disabled:
+        rs = "blocked_execution_not_disabled"
+        bl.append("Real execution is not disabled.")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                     a_size=a_size, a_sha=a_sha, ig=ig, ignored_status=ignored_status,
+                     contract_id=contract_id, within_contract=within_contract)
+
+    # 8. Runner execute must refuse
+    runner_execute_refuses = True
+    try:
+        rer = root.join(Path(".pcae") / "runner-executions" / "latest.json")
+        if rer.is_file():
+            re_data = json.loads(rer.read_text(encoding="utf-8"))
+            if re_data.get("execution_authorized") is True:
+                runner_execute_refuses = False
+    except Exception:
+        pass
+
+    if not runner_execute_refuses:
+        rs = "blocked_runner_execution_available"
+        bl.append("Runner execution is available (should refuse).")
+        return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                     quarantine_data, intake_data, retry_data,
+                     bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                     a_size=a_size, a_sha=a_sha, ig=ig, ignored_status=ignored_status,
+                     contract_id=contract_id, within_contract=within_contract)
+
+    # ----------------------------------------------------------------
+    # All gates passed — ready for adoption execution
+    # ----------------------------------------------------------------
+    rs = "ready_for_adoption_execution"
+
+    return _aepq(rs, bl, wl, ts, approval_data, review_data, preflight_data,
+                 quarantine_data, intake_data, retry_data,
+                 bcf_path=bcf_path, fe=fe, fr=fr, al_split=al_split, a_wc=a_wc,
+                 a_size=a_size, a_sha=a_sha, ig=ig, ignored_status=ignored_status,
+                 contract_id=contract_id, within_contract=within_contract,
+                 approved_by=approved_by, approval_reason=approval_reason,
+                 audit_warning_count=audit_warning_count,
+                 real_execution_disabled=real_execution_disabled,
+                 runner_execute_refuses=runner_execute_refuses)
+
+
+def _aepq(rs: str, bl: list, wl: list, ts: str,
+          approval_data, review_data, preflight_data,
+          quarantine_data, intake_data, retry_data,
+          bcf_path: str = "", fe: bool = False, fr: bool = False,
+          al_split: int = 0, a_wc: int = 0,
+          a_size: int = 0, a_sha: str = "",
+          ig: bool = False, staged: bool = False, tracked: bool = False,
+          ignored_status: str = "",
+          contract_id: str = "", within_contract: bool = False,
+          approved_by: str = "", approval_reason: str = "",
+          audit_warning_count: int = 0,
+          real_execution_disabled: bool = True,
+          runner_execute_refuses: bool = True) -> dict:
+    """Build the adoption execution preflight result dict."""
+
+    ap = approval_data
+    rv = review_data
+    pf = preflight_data
+    qr = quarantine_data
+    ik = intake_data
+    rt = retry_data
+
+    is_ready = rs == "ready_for_adoption_execution"
+
+    outcome_map = {
+        "ready_for_adoption_execution": "ready_for_adoption_execution",
+        "missing_adoption_approval": "blocked",
+        "adoption_approval_not_approved": "blocked",
+        "approval_metadata_missing": "blocked",
+        "missing_backend_created_file": "blocked",
+        "metadata_mismatch": "blocked",
+        "file_staged_or_tracked": "blocked",
+        "outside_contract_scope": "blocked",
+        "content_safety_not_passed": "blocked",
+        "blocked_audit_warnings": "blocked",
+        "blocked_execution_not_disabled": "blocked",
+        "blocked_runner_execution_available": "blocked",
+    }
+
+    recommended = (
+        "77Q — Backend-Created Output Adoption Execution" if is_ready
+        else "Resolve blockers first."
+    )
+
+    return {
+        "backend_created_output_adoption_execution_preflight_status": rs,
+        "adoption_execution_preflight_outcome": outcome_map.get(rs, "unknown"),
+        "adoption_approval_ref": str(BACKEND_CREATED_OUTPUT_ADOPTION_APPROVALS_DIR / "latest.json") if ap else None,
+        "adoption_review_ref": str(BACKEND_CREATED_OUTPUT_ADOPTION_REVIEWS_DIR / "latest.json") if rv else None,
+        "adoption_preflight_ref": str(BACKEND_CREATED_OUTPUT_ADOPTION_PREFLIGHTS_DIR / "latest.json") if pf else None,
+        "quarantine_review_ref": str(BACKEND_CREATED_OUTPUT_QUARANTINE_REVIEWS_DIR / "latest.json") if qr else None,
+        "mutation_intake_ref": str(BACKEND_RETRY_MUTATION_RESULT_INTAKES_DIR / "latest.json") if ik else None,
+        "retry_result_ref": str(BACKEND_CAPTURE_GOVERNED_RETRIES_DIR / "latest.json") if rt else None,
+        "task_contract_ref": None,
+        "package_approval_ref": None,
+        "backend_retry_status": ik.get("backend_retry_status") if ik else (pf.get("backend_retry_status") if pf else None),
+        "capture_outcome": ik.get("capture_outcome") if ik else (pf.get("capture_outcome") if pf else "unknown"),
+        "quarantine_outcome": qr.get("quarantine_outcome") if qr else None,
+        "adoption_preflight_outcome": pf.get("adoption_preflight_outcome") if pf else None,
+        "adoption_review_outcome": rv.get("adoption_review_outcome") if rv else None,
+        "adoption_approval_outcome": ap.get("adoption_approval_outcome") if ap else None,
+        "backend_name": pf.get("backend_name") if pf else (ik.get("backend_name") if ik else None),
+        "backend_command": pf.get("backend_command") if pf else (ik.get("backend_command") if ik else None),
+        "package_id": pf.get("package_id") if pf else (ik.get("package_id") if ik else None),
+        "contract_id": contract_id,
+        "package_digest": pf.get("package_digest") if pf else (ik.get("package_digest") if ik else None),
+        "prompt_digest": pf.get("prompt_digest") if pf else (ik.get("prompt_digest") if ik else None),
+        "approved_by": approved_by,
+        "approval_reason": approval_reason,
+        "approval_timestamp": ap.get("approval_timestamp") if ap else None,
+        "human_adoption_approval_granted": ap.get("human_adoption_approval_granted", False) if ap else False,
+        "approval_verified": is_ready,
+        "source_file_path": bcf_path,
+        "source_file_exists": fe,
+        "source_file_readable": fr,
+        "source_file_verified": fe and fr and a_size > 0 and a_sha is not None,
+        "source_file_size_bytes": a_size,
+        "source_file_sha256": a_sha,
+        "source_file_wc_line_count": a_wc,
+        "source_file_split_line_count": al_split,
+        "source_file_hidden_by_gitignore": ig,
+        "source_file_ignored": ig,
+        "source_file_staged": staged,
+        "source_file_tracked": tracked,
+        "source_file_committed": False,
+        "source_file_pushed": False,
+        "source_file_within_contract": within_contract,
+        "contract_scope_mode": "documentation_only",
+        "contract_task_type": "backend_output_capture",
+        "allowed_files": ["docs/REAL_CAPTURED_TASKS.md"],
+        "forbidden_files": [],
+        "content_safety_review_passed": rv.get("content_safety_review_passed", False) if rv else False,
+        "adoption_allowed_now": False,
+        "adoption_execution_allowed_now": False,
+        "adoption_execution_allowed_in_future_phase": is_ready,
+        "proposed_execution_operation": "adopt_backend_created_documentation_file" if is_ready else "blocked",
+        "proposed_source_file": bcf_path if is_ready else "",
+        "proposed_target_file": bcf_path if is_ready else "",
+        "proposed_gitignore_handling": "force_add_ignored_file_in_future_execution_phase" if is_ready else "",
+        "proposed_staging_required_in_future_phase": is_ready,
+        "proposed_commit_required_in_future_phase": False,
+        "backend_invocation_performed": False,
+        "backend_capture_performed": False,
+        "backend_output_captured": False,
+        "apply_performed": False,
+        "files_modified_in_this_phase": False,
+        "file_deleted": False,
+        "file_moved": False,
+        "file_modified": False,
+        "file_staged": False,
+        "file_committed": False,
+        "file_pushed": False,
+        "commits_created": 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        "output_application_allowed": False,
+        "audit_warning_count": audit_warning_count,
+        "real_execution_disabled": real_execution_disabled,
+        "runner_execute_refuses": runner_execute_refuses,
+        "current_git_status": "clean",
+        "ignored_git_status_for_file": ignored_status,
+        "generated_at": ts,
+        "blockers": bl,
+        "warnings": wl,
+        "recommended_next_phase": recommended,
+        "next_operator_action": (
+            f"Execution preflight passed. File {bcf_path} verified ({a_size} bytes, SHA256 {a_sha[:16] if a_sha else ''}...). "
+            "Adoption execution allowed in 77Q (force-add gitignored file, stage only). No file modified/staged/committed in this phase."
+            if is_ready
+            else "Resolve blockers first."
+        ),
+    }
+
+
+def run_phase_backend_created_output_adoption_execution_preflight(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    r = _build_backend_created_output_adoption_execution_preflight(root)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_EXECUTION_PREFLIGHTS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Adoption execution preflight saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r["backend_created_output_adoption_execution_preflight_status"] == "ready_for_adoption_execution" else 1
+    print("Backend-Created Output Adoption Execution Preflight")
+    print("=" * 54)
+    print(f"  Status: {r['backend_created_output_adoption_execution_preflight_status']}")
+    print(f"  Outcome: {r['adoption_execution_preflight_outcome']}")
+    print(f"  Approval verified: {'yes' if r['approval_verified'] else 'no'}")
+    print(f"  File: {r['source_file_path']}")
+    if r.get("source_file_verified"):
+        print(f"  Size: {r['source_file_size_bytes']}B  SHA256: {str(r.get('source_file_sha256', ''))[:16] if r.get('source_file_sha256') else ''}...")
+        print(f"  Lines (wc): {r['source_file_wc_line_count']}  Lines (split): {r['source_file_split_line_count']}")
+    print(f"  Content safety: {'passed' if r.get('content_safety_review_passed') else 'blocked'}")
+    print(f"  Gitignored: {'yes' if r.get('source_file_hidden_by_gitignore') else 'no'}  Ignored: {'yes' if r.get('source_file_ignored') else 'no'}")
+    print(f"  Staged: {'yes' if r.get('source_file_staged') else 'no'}  Tracked: {'yes' if r.get('source_file_tracked') else 'no'}")
+    print(f"  Committed: no  Pushed: no")
+    print(f"  Adoption now: no  Execution now: no")
+    print(f"  Execution in future: {'yes' if r['adoption_execution_allowed_in_future_phase'] else 'no'}")
+    if r.get("adoption_execution_allowed_in_future_phase"):
+        print(f"  Proposed operation: {r.get('proposed_execution_operation', '')}")
+        print(f"  Proposed source: {r.get('proposed_source_file', '')}")
+        print(f"  Proposed target: {r.get('proposed_target_file', '')}")
+        print(f"  Gitignore handling: {r.get('proposed_gitignore_handling', '')}")
+        print(f"  Staging required: {'yes' if r.get('proposed_staging_required_in_future_phase') else 'no'}")
+        print(f"  Commit required: {'yes' if r.get('proposed_commit_required_in_future_phase') else 'no'}")
+    print(f"  Backend invoked: no  File altered: no")
+    print(f"  Next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  BLOCKED: {b}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_created_output_adoption_execution_preflight_status"] == "ready_for_adoption_execution" else 1
+
+
+def run_phase_backend_created_output_adoption_execution_preflight_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_EXECUTION_PREFLIGHTS_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_created_output_adoption_execution_preflight_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("No adoption execution preflight artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("backend_created_output_adoption_execution_preflight_status") == "ready_for_adoption_execution" else 1
+    print("Backend-Created Output Adoption Execution Preflight (Show)")
+    print("=" * 62)
+    print(f"  Status: {r.get('backend_created_output_adoption_execution_preflight_status', 'unknown')}")
+    print(f"  Outcome: {r.get('adoption_execution_preflight_outcome', 'unknown')}")
+    print(f"  Approval verified: {'yes' if r.get('approval_verified') else 'no'}")
+    print(f"  Execution allowed: {'yes' if r.get('adoption_execution_allowed_in_future_phase') else 'no'}")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0

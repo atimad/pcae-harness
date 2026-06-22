@@ -15379,3 +15379,368 @@ def test_77o_approval_binding_fields(tmp_path, monkeypatch, capsys):
     assert d["approved_by"] == "Operator"
     assert d["approval_reason"] == "Test binding."
     assert d["approval_timestamp"] is not None
+
+
+# Phase 77P: backend-created output adoption execution preflight
+
+def _seed_approval_77p(tmp_path, status="approved", approved=True,
+                        approved_by="Operator", reason="Test reason.",
+                        file_size=100, file_sha="abc123",
+                        bcf_path="docs/REAL_CAPTURED_TASKS.md",
+                        contract_id="CT-001"):
+    from pathlib import Path as _P
+    d = _P(tmp_path) / ".pcae" / "backend-created-output-adoption-approvals"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "backend_created_output_adoption_approval_status": status,
+        "adoption_approval_outcome": "approved" if status == "approved" else "blocked",
+        "human_adoption_approval_granted": approved,
+        "approved_by": approved_by,
+        "approval_reason": reason,
+        "approval_timestamp": "2026-01-01T00:00:00Z",
+        "source_file_path": bcf_path,
+        "source_file_size_bytes": file_size,
+        "source_file_sha256": file_sha,
+        "content_safety_review_passed": True,
+        "contract_id": contract_id,
+        "adoption_execution_preflight_allowed_in_future_phase": status == "approved",
+    }))
+
+
+def _seed_review_77p(tmp_path, safety_passed=True):
+    from pathlib import Path as _P
+    d = _P(tmp_path) / ".pcae" / "backend-created-output-adoption-reviews"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "content_safety_review_passed": safety_passed,
+        "adoption_review_outcome": "reviewed_adoption_candidate" if safety_passed else "blocked",
+    }))
+
+
+def _seed_preflight_77p(tmp_path):
+    from pathlib import Path as _P
+    d = _P(tmp_path) / ".pcae" / "backend-created-output-adoption-preflights"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "backend_name": "claude-deepseek", "package_id": "PKG-001",
+        "contract_id": "CT-001", "package_digest": "pkg123", "prompt_digest": "pr456",
+    }))
+
+
+def _seed_safety_artifacts_77p(tmp_path):
+    from pathlib import Path as _P
+    for sub in ["backend-retry-mutation-result-intakes", "backend-capture-governed-retries",
+                 "backend-created-output-quarantine-reviews"]:
+        d = _P(tmp_path) / ".pcae" / sub; d.mkdir(parents=True, exist_ok=True)
+        (d / "latest.json").write_text("{}")
+    d = _P(tmp_path) / ".pcae" / "phase-audits"; d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({"warning_count": 0}))
+    d = _P(tmp_path) / ".pcae" / "real-execution-disabled-proofs"; d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({"real_execution_disabled": True}))
+    d = _P(tmp_path) / ".pcae" / "runner-executions"; d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({"execution_authorized": False}))
+
+
+def test_77p_ready_for_adoption_execution(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Doc\n\nContent here.\n\nMore content.\n" * 5
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path)
+    _seed_preflight_77p(tmp_path)
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "ready_for_adoption_execution"
+    assert d["adoption_execution_preflight_outcome"] == "ready_for_adoption_execution"
+    assert d["approval_verified"] is True
+    assert d["source_file_verified"] is True
+    assert d["source_file_hidden_by_gitignore"] is True
+    assert d["source_file_staged"] is False
+    assert d["source_file_tracked"] is False
+    assert d["adoption_allowed_now"] is False
+    assert d["adoption_execution_allowed_now"] is False
+    assert d["adoption_execution_allowed_in_future_phase"] is True
+    assert d["proposed_execution_operation"] == "adopt_backend_created_documentation_file"
+    assert d["proposed_gitignore_handling"] == "force_add_ignored_file_in_future_execution_phase"
+    assert d["proposed_staging_required_in_future_phase"] is True
+    assert d["proposed_commit_required_in_future_phase"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["execution_authorized"] is False
+    assert "77Q" in d["recommended_next_phase"]
+
+
+def test_77p_missing_adoption_approval(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "missing_adoption_approval"
+
+
+def test_77p_adoption_approval_not_approved(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_approval_77p(tmp_path, status="ready_for_adoption_approval", approved=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "adoption_approval_not_approved"
+
+
+def test_77p_approval_metadata_missing(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_approval_77p(tmp_path, approved_by="")
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "approval_metadata_missing"
+
+
+def test_77p_missing_backend_file(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_approval_77p(tmp_path, file_size=100, file_sha="abc123")
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "missing_backend_created_file"
+
+
+def test_77p_metadata_mismatch(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "different\n"
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "docs" / "REAL_CAPTURED_TASKS.md").write_text(content)
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=100, file_sha="expected_sha")
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "metadata_mismatch"
+
+
+def test_77p_file_staged_or_tracked(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Doc\n\ncontent\n"
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "docs/REAL_CAPTURED_TASKS.md"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "staged"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "file_staged_or_tracked"
+
+
+def test_77p_outside_contract_scope(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Other\n\ncontent\n" * 5
+    other = "docs/OTHER.md"
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    (tmp_path / other).write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text(f"{other}\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha, bcf_path=other)
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "outside_contract_scope"
+
+
+def test_77p_content_safety_not_passed(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Doc\n\nContent.\n" * 3
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path, safety_passed=False)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "content_safety_not_passed"
+
+
+def test_77p_blocked_audit_warnings(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Doc\n\nContent.\n" * 5
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path)
+    _seed_safety_artifacts_77p(tmp_path)
+    d = tmp_path / ".pcae" / "phase-audits"
+    (d / "latest.json").write_text(json.dumps({"warning_count": 3}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "blocked_audit_warnings"
+
+
+def test_77p_blocked_execution_not_disabled(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Doc\n\nContent.\n" * 5
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path)
+    _seed_safety_artifacts_77p(tmp_path)
+    d = tmp_path / ".pcae" / "real-execution-disabled-proofs"
+    (d / "latest.json").write_text(json.dumps({"real_execution_disabled": False}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "blocked_execution_not_disabled"
+
+
+def test_77p_blocked_runner_available(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Doc\n\nContent.\n" * 5
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path)
+    _seed_safety_artifacts_77p(tmp_path)
+    d = tmp_path / ".pcae" / "runner-executions"
+    (d / "latest.json").write_text(json.dumps({"execution_authorized": True}))
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "blocked_runner_execution_available"
+
+
+def test_77p_save_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Test\n\nContent.\n" * 5
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path)
+    _seed_preflight_77p(tmp_path)
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "backend-created-output-adoption-execution-preflights" / "latest.json"
+    assert p.is_file()
+
+
+def test_77p_show_no_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "backend-created-output-adoption-execution-preflight-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert exit_code == 1
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "no_artifact"
+
+
+def test_77p_show_existing_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Show\n\nTest.\n" * 5
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path)
+    _seed_preflight_77p(tmp_path)
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--save", "--json"])
+    capsys.readouterr()
+    main(["phase", "backend-created-output-adoption-execution-preflight-show", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_execution_preflight_status"] == "ready_for_adoption_execution"
+
+
+def test_77p_no_backend_activity(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp, hashlib
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    content = "# Doc\n\nContent.\n" * 5
+    (tmp_path / "docs").mkdir(parents=True, exist_ok=True)
+    fp = tmp_path / "docs" / "REAL_CAPTURED_TASKS.md"
+    fp.write_text(content)
+    sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    (tmp_path / ".gitignore").write_text("docs/REAL_CAPTURED_TASKS.md\n")
+    _seed_approval_77p(tmp_path, file_size=len(content), file_sha=sha)
+    _seed_review_77p(tmp_path)
+    _seed_preflight_77p(tmp_path)
+    _seed_safety_artifacts_77p(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-execution-preflight", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_invocation_performed"] is False
+    assert d["backend_capture_performed"] is False
+    assert d["backend_output_captured"] is False
+    assert d["apply_performed"] is False
+    assert d["file_deleted"] is False
+    assert d["file_modified"] is False
+    assert d["file_staged"] is False
+    assert d["file_committed"] is False
+    assert d["file_pushed"] is False
+    assert d["execution_authorized"] is False

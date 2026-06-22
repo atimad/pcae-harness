@@ -2,7 +2,14 @@
 
 ## Current Phase
 
-Phase 77O: Backend-Created Output Adoption Approval.
+Phase 77P: Backend-Created Output Adoption Execution Preflight.
+
+Phase 77P adds `pcae phase backend-created-output-adoption-execution-preflight --json --save`
+and `pcae phase backend-created-output-adoption-execution-preflight-show --json`.
+Execution preflight verifying approval, file, contract, content safety, and safety gates for
+future adoption execution. Reports proposed execution operation and gitignore handling plan.
+Never stages or modifies file. Persists to
+`.pcae/backend-created-output-adoption-execution-preflights/latest.json`. 16 new tests.
 
 Phase 77O adds `pcae phase backend-created-output-adoption-approval --json --save --approve
 --approved-by --reason` and `pcae phase backend-created-output-adoption-approval-show --json`.
