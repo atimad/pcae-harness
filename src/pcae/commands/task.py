@@ -151,14 +151,31 @@ def run_task_complete(args: argparse.Namespace) -> int:
     return 0
 
 
+def _staged_file_snapshot(root_path):
+    """Return {path: blob_hash} for all staged files."""
+    import subprocess as _sp
+    r = _sp.run(["git", "diff", "--cached", "--name-only"],
+                cwd=root_path, capture_output=True, text=True, timeout=15)
+    if r.returncode != 0:
+        return {}
+    paths = [l for l in r.stdout.strip().split("\n") if l]
+    result = {}
+    for p in paths:
+        h = _sp.run(["git", "rev-parse", f":0:{p}"],
+                     cwd=root_path, capture_output=True, text=True, timeout=10)
+        result[p] = h.stdout.strip() if h.returncode == 0 else ""
+    return result
+
+
 def run_task_finish(args: argparse.Namespace) -> int:
     import subprocess
 
     root = HarnessPath.cwd()
     skip_checks = getattr(args, "skip_checks", False)
     commit_message = getattr(args, "commit", None)
+    staged_file_aware = getattr(args, "staged_file_aware", False)
 
-    if commit_message:
+    if commit_message and not staged_file_aware:
         from pcae.core.git_status import read_git_changes
 
         pre_changes = read_git_changes(root)
@@ -172,6 +189,11 @@ def run_task_finish(args: argparse.Namespace) -> int:
             else:
                 print(f"Task finish blocked.\n  - {blocker}")
             return 1
+
+    # Snapshot protected staged files before task finish
+    protected_before = {}
+    if staged_file_aware and commit_message:
+        protected_before = _staged_file_snapshot(root.path)
 
     validation = validate_task_finish(root, skip_checks=skip_checks)
     if not validation.safe_to_finish:
@@ -191,6 +213,9 @@ def run_task_finish(args: argparse.Namespace) -> int:
                 ),
                 "warnings": list(validation.warnings),
             }
+            if staged_file_aware:
+                data["staged_file_aware"] = True
+                data["protected_staged_files_before"] = sorted(protected_before.keys())
             print(json.dumps(data, indent=2, sort_keys=True))
         else:
             print("Task finish blocked.")
@@ -226,6 +251,26 @@ def run_task_finish(args: argparse.Namespace) -> int:
             if check_ignored.returncode != 0:
                 stageable_paths.append(p)
 
+        # Staged-file-aware: block if task-finish paths overlap protected staged files
+        if staged_file_aware:
+            conflict = set(stageable_paths) & set(protected_before.keys())
+            if conflict:
+                blockers = [f"Task finish path '{c}' is a protected pre-existing staged file." for c in sorted(conflict)]
+                if args.json:
+                    print(json.dumps({
+                        "blockers": blockers,
+                        "committed": False,
+                        "finished": True,
+                        "protected_staged_files_before": sorted(protected_before.keys()),
+                        "staged_file_aware": True,
+                        "task_id": result.completed_task.task_id,
+                    }, indent=2, sort_keys=True))
+                else:
+                    print("Task finish committed blocked (staged-file-aware).")
+                    for b in blockers:
+                        print(f"  - {b}")
+                return 1
+
         try:
             if stageable_paths:
                 subprocess.run(
@@ -235,13 +280,24 @@ def run_task_finish(args: argparse.Namespace) -> int:
                     capture_output=True,
                     text=True,
                 )
-            commit_result = subprocess.run(
-                ["git", "commit", "--no-verify", "-m", commit_message],
-                cwd=root.path,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
+
+            if staged_file_aware:
+                # Commit only the explicit task-finish paths (pathspec commit)
+                commit_result = subprocess.run(
+                    ["git", "commit", "--no-verify", "-m", commit_message, "--"] + stageable_paths,
+                    cwd=root.path,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+            else:
+                commit_result = subprocess.run(
+                    ["git", "commit", "--no-verify", "-m", commit_message],
+                    cwd=root.path,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
             for line in commit_result.stdout.splitlines():
                 if line.startswith("["):
                     parts = line.split()
@@ -266,6 +322,8 @@ def run_task_finish(args: argparse.Namespace) -> int:
                         "pcae task finish recover --dry-run",
                         f"pcae task finish recover --message \"{commit_message}\"",
                     ]
+                if staged_file_aware:
+                    data["staged_file_aware"] = True
                 print(json.dumps(data, indent=2, sort_keys=True))
             else:
                 print(f"Task finished but commit failed: {err_text}")
@@ -276,6 +334,20 @@ def run_task_finish(args: argparse.Namespace) -> int:
                     print("  2. Run: pcae task finish recover --dry-run")
                     print(f"  3. Run: pcae task finish recover --message \"{commit_message}\"")
             return 1
+
+    # Verify protected staged files preserved (staged-file-aware mode)
+    protected_after = {}
+    protected_preserved = True
+    sfa_warnings = []
+    if staged_file_aware and commit_message:
+        protected_after = _staged_file_snapshot(root.path)
+        for pp in protected_before:
+            if pp not in protected_after:
+                protected_preserved = False
+                sfa_warnings.append(f"Protected staged file '{pp}' no longer staged after commit.")
+            elif protected_after[pp] != protected_before[pp]:
+                protected_preserved = False
+                sfa_warnings.append(f"Protected staged file '{pp}' blob changed after commit.")
 
     if args.json:
         data = {
@@ -290,12 +362,29 @@ def run_task_finish(args: argparse.Namespace) -> int:
                 root.path
             ).as_posix(),
             "updated_files": [p.as_posix() for p in result.updated_files],
-            "warnings": list(result.warnings),
+            "warnings": list(result.warnings) + sfa_warnings,
         }
         if commit_message:
             data["committed"] = True
             data["commit_hash"] = commit_hash
             data["commit_message"] = commit_message
+        if staged_file_aware:
+            data["staged_file_aware"] = True
+            data["protected_staged_files_before"] = sorted(protected_before.keys())
+            data["protected_staged_files_after"] = sorted(
+                p for p in protected_before if p in protected_after
+            )
+            data["protected_staged_file_hashes_before"] = {
+                p: protected_before[p] for p in sorted(protected_before)
+            }
+            data["protected_staged_file_hashes_after"] = {
+                p: protected_after.get(p, "") for p in sorted(protected_before)
+            }
+            data["protected_staged_files_preserved"] = protected_preserved
+            data["push_performed"] = False
+            data["backend_invocation_performed"] = False
+            data["runner_execute_performed"] = False
+            data["execution_authorized"] = False
         print(json.dumps(data, indent=2, sort_keys=True))
     else:
         print(f"Finished task: {result.completed_task.task_id}")
@@ -309,9 +398,14 @@ def run_task_finish(args: argparse.Namespace) -> int:
                 print(f"  - {path.as_posix()}")
         if commit_hash:
             print(f"Committed: {commit_hash}")
-        if result.warnings:
+        if staged_file_aware and protected_before:
+            print(f"Protected staged files preserved: {'yes' if protected_preserved else 'no'}")
+            for pp in sorted(protected_before):
+                status = "preserved" if pp in protected_after and protected_after[pp] == protected_before[pp] else "LOST"
+                print(f"  - {pp}: {status}")
+        if result.warnings or sfa_warnings:
             print("Warnings:")
-            for warning in result.warnings:
+            for warning in list(result.warnings) + sfa_warnings:
                 print(f"  - {warning}")
 
     return 0

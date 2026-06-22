@@ -4488,6 +4488,11 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="MESSAGE",
         help="Stage finish changes and create a git commit with the given message.",
     )
+    task_finish_parser.add_argument(
+        "--staged-file-aware",
+        action="store_true",
+        help="Commit only task-finish paths, preserving unrelated pre-existing staged files.",
+    )
     task_finish_subparsers = task_finish_parser.add_subparsers(dest="finish_command")
     task_finish_recover_parser = task_finish_subparsers.add_parser(
         "recover",

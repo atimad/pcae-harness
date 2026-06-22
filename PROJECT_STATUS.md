@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 79A: Staged-File-Aware Implementation Commit Mode.
+Phase 79B: Staged-File-Aware Task Finish.
 
-Phase 79A adds `pcae commit implementation` command for staged-file-aware commits that commit
-only explicit paths while preserving unrelated pre-existing staged files. Addresses the 77S
-friction where implementation commits risked including the staged adoption file. 10 new tests.
+Phase 79B adds `--staged-file-aware` flag to `pcae task finish --commit` for pathspec-based
+completion commits that preserve unrelated pre-existing staged files. Addresses the 77S
+friction where task completion risked including the staged adoption file. 9 new tests.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
