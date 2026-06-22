@@ -10,7 +10,7 @@ Phase 78E Lifecycle Regression Suite
 
 ## Status
 
-active
+done
 
 ## Mode
 
