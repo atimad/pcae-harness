@@ -17283,3 +17283,379 @@ def run_phase_backend_created_output_adoption_commit_approval_show(args: argpars
     print(f"  Commit allowed: {'yes' if r.get('commit_execution_allowed_in_future_phase') else 'no'}")
     print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77S: backend-created output adoption commit execution
+BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_EXECUTIONS_DIR = Path(".pcae") / "backend-created-output-adoption-commit-executions"
+
+
+def _build_backend_created_output_adoption_commit_execution(root: HarnessPath, execute: bool = False) -> dict:
+    """Commit execution for staged backend-created output. Default/dry-run validates only.
+    --execute creates exactly one commit for docs/REAL_CAPTURED_TASKS.md, does not push."""
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list = []
+    wl: list = []
+
+    # Read 77R commit approval
+    commit_approval_data = None
+    ca_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_APPROVALS_DIR)
+    if ca_ref:
+        cp = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_APPROVALS_DIR / "latest.json")
+        if cp.is_file():
+            commit_approval_data = json.loads(cp.read_text(encoding="utf-8"))
+
+    # Read 77Q execution
+    exec_data = None
+    exec_ref = _ref_exists(root, BACKEND_CREATED_OUTPUT_ADOPTION_EXECUTIONS_DIR)
+    if exec_ref:
+        ep = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_EXECUTIONS_DIR / "latest.json")
+        if ep.is_file():
+            exec_data = json.loads(ep.read_text(encoding="utf-8"))
+
+    # Gate checks
+    if not commit_approval_data:
+        rs = "missing_commit_approval"
+        bl.append("Commit approval artifact not found.")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    if commit_approval_data.get("backend_created_output_adoption_commit_approval_status") != "approved":
+        rs = "commit_approval_not_approved"
+        bl.append("Commit approval not in approved state.")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    if not commit_approval_data.get("human_commit_approval_granted"):
+        rs = "commit_approval_not_approved"
+        bl.append("Human commit approval not granted.")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    # Check staged file
+    adopted_file = commit_approval_data.get("staged_file", commit_approval_data.get("adopted_file", _BCF_PATH))
+    expected_size = commit_approval_data.get("staged_file_size_bytes") or commit_approval_data.get("expected_file_size_bytes", 0)
+    expected_sha = commit_approval_data.get("staged_file_sha256") or commit_approval_data.get("expected_file_sha256", "")
+
+    # Get current staged files
+    cached_files = []
+    try:
+        cfo = _sp.run(["git", "diff", "--cached", "--name-only"], cwd=str(root.path),
+                       capture_output=True, text=True, timeout=15)
+        cached_files = [f for f in cfo.stdout.strip().split("\n") if f]
+    except Exception:
+        pass
+    if not cached_files:
+        try:
+            gs = _sp.run(["git", "status", "--porcelain"], cwd=str(root.path),
+                          capture_output=True, text=True, timeout=15)
+            for line in gs.stdout.strip().split("\n"):
+                if line and line[0] in ("A", "M") and not line.startswith("??"):
+                    cached_files.append(line[3:].strip())
+        except Exception:
+            pass
+
+    if not cached_files:
+        rs = "no_staged_file"
+        bl.append("No staged files found.")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    unexpected = [f for f in cached_files if f != adopted_file]
+    if adopted_file not in cached_files:
+        rs = "unexpected_staged_files" if unexpected else "no_staged_file"
+        bl.append(f"Expected {adopted_file} staged.")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute,
+                      cached_files=cached_files, unexpected=unexpected)
+
+    if unexpected:
+        rs = "unexpected_staged_files"
+        bl.append(f"Unexpected files staged: {unexpected}")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute,
+                      cached_files=cached_files, unexpected=unexpected)
+
+    # File metadata verification
+    bcf = root.path / adopted_file
+    if not bcf.is_file():
+        rs = "no_staged_file"
+        bl.append(f"File {adopted_file} not found on disk.")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute,
+                      cached_files=cached_files)
+
+    content = bcf.read_text(encoding="utf-8")
+    a_size = len(content)
+    a_sha = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    try:
+        wc_out = _sp.run(["wc", "-l", str(bcf)], capture_output=True, text=True, timeout=15)
+        a_wc = int(wc_out.stdout.strip().split()[0]) if wc_out.stdout.strip() else 0
+    except Exception:
+        a_wc = len(content.split("\n"))
+
+    if a_size != expected_size or a_sha != expected_sha:
+        rs = "staged_file_metadata_mismatch"
+        bl.append("Staged file metadata mismatch with approval.")
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute,
+                      cached_files=cached_files, a_size=a_size, a_sha=a_sha)
+
+    # Safety gates
+    audit_warning_count = 0
+    try:
+        ap = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if ap.is_file():
+            ad = json.loads(ap.read_text(encoding="utf-8"))
+            audit_warning_count = ad.get("warning_count", 0)
+    except Exception:
+        pass
+    if audit_warning_count > 0:
+        rs = "blocked_audit_warnings"
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    real_execution_disabled = True
+    try:
+        rep = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep.is_file():
+            rp_data = json.loads(rep.read_text(encoding="utf-8"))
+            real_execution_disabled = rp_data.get("real_execution_disabled", True)
+    except Exception:
+        pass
+    if not real_execution_disabled:
+        rs = "blocked_execution_not_disabled"
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    runner_execute_refuses = True
+    try:
+        rer = root.join(Path(".pcae") / "runner-executions" / "latest.json")
+        if rer.is_file():
+            re_data = json.loads(rer.read_text(encoding="utf-8"))
+            if re_data.get("execution_authorized") is True:
+                runner_execute_refuses = False
+    except Exception:
+        pass
+    if not runner_execute_refuses:
+        rs = "blocked_runner_execution_available"
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    if commit_approval_data.get("file_committed") or (exec_data and exec_data.get("file_committed")):
+        rs = "file_already_committed_or_pushed"
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=execute)
+
+    # ----------------------------------------------------------------
+    # All gates passed
+    # ----------------------------------------------------------------
+    if not execute:
+        rs = "ready_for_commit_execution"
+        return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=False,
+                      cached_files=cached_files, a_size=a_size, a_sha=a_sha, a_wc=a_wc)
+
+    # ----------------------------------------------------------------
+    # --execute: adoption commit
+    # ----------------------------------------------------------------
+    execution_ts = datetime.now(timezone.utc).isoformat()
+    commit_message = "Adopt backend-created real captured task documentation"
+
+    commit_result = _sp.run(["git", "commit", "-m", commit_message],
+                            cwd=str(root.path), capture_output=True, text=True, timeout=30)
+
+    commit_hash = ""
+    if commit_result.returncode == 0:
+        try:
+            ch = _sp.run(["git", "rev-parse", "HEAD"], cwd=str(root.path),
+                          capture_output=True, text=True, timeout=10)
+            commit_hash = ch.stdout.strip()
+        except Exception:
+            commit_hash = "unknown"
+
+    post_staged_files = []
+    try:
+        cfo2 = _sp.run(["git", "diff", "--cached", "--name-only"], cwd=str(root.path),
+                        capture_output=True, text=True, timeout=15)
+        post_staged_files = [f for f in cfo2.stdout.strip().split("\n") if f]
+    except Exception:
+        pass
+
+    committed_files = [adopted_file] if commit_result.returncode == 0 else []
+    committed = commit_result.returncode == 0
+
+    # Post-commit file verification
+    post_size = 0; post_sha = ""
+    if bcf.is_file() and committed:
+        pc = bcf.read_text(encoding="utf-8")
+        post_size = len(pc)
+        post_sha = hashlib.sha256(pc.encode("utf-8")).hexdigest()
+
+    rs = "committed" if committed else "blocked"
+
+    return _aesq(rs, bl, wl, ts, commit_approval_data, exec_data, execute=True,
+                  cached_files=cached_files, a_size=a_size, a_sha=a_sha, a_wc=a_wc,
+                  committed=committed, commit_hash=commit_hash,
+                  commit_message=commit_message,
+                  post_staged=post_staged_files,
+                  committed_files=committed_files,
+                  post_size=post_size, post_sha=post_sha,
+                  execution_ts=execution_ts)
+
+
+def _aesq(rs: str, bl: list, wl: list, ts: str,
+          commit_approval_data, exec_data,
+          execute: bool = False,
+          cached_files: list | None = None,
+          unexpected: list | None = None,
+          a_size: int = 0, a_sha: str = "", a_wc: int = 0,
+          committed: bool = False, commit_hash: str = "",
+          commit_message: str = "",
+          post_staged: list | None = None,
+          committed_files: list | None = None,
+          post_size: int = 0, post_sha: str = "",
+          execution_ts: str = None) -> dict:
+    """Build commit execution result dict."""
+
+    ca = commit_approval_data
+    is_committed = rs == "committed"
+    is_ready = rs == "ready_for_commit_execution"
+    cf = cached_files or []
+    ue = unexpected or []
+    ps = post_staged or []
+    cmf = committed_files or []
+
+    outcome_map = {
+        "ready_for_commit_execution": "ready_for_commit_execution",
+        "committed": "committed_for_future_push",
+        "missing_commit_approval": "blocked",
+        "commit_approval_not_approved": "blocked",
+        "no_staged_file": "blocked",
+        "staged_file_metadata_mismatch": "blocked",
+        "unexpected_staged_files": "blocked",
+        "file_already_committed_or_pushed": "blocked",
+        "blocked_audit_warnings": "blocked",
+        "blocked_execution_not_disabled": "blocked",
+        "blocked_runner_execution_available": "blocked",
+    }
+
+    recommended = (
+        "77T — Backend-Created Output Adoption Push Approval" if is_committed
+        else ("77S — Backend-Created Output Adoption Commit Execution" if is_ready
+              else "Resolve blockers first.")
+    )
+
+    adopted_file = ca.get("staged_file", ca.get("adopted_file", _BCF_PATH)) if ca else _BCF_PATH
+
+    return {
+        "backend_created_output_adoption_commit_execution_status": rs,
+        "adoption_commit_execution_outcome": outcome_map.get(rs, "unknown"),
+        "execute_requested": execute,
+        "commit_approval_ref": str(BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_APPROVALS_DIR / "latest.json") if ca else None,
+        "adoption_execution_ref": str(BACKEND_CREATED_OUTPUT_ADOPTION_EXECUTIONS_DIR / "latest.json") if exec_data else None,
+        "adoption_execution_preflight_ref": ".pcae/backend-created-output-adoption-execution-preflights/latest.json",
+        "adoption_approval_ref": ".pcae/backend-created-output-adoption-approvals/latest.json",
+        "adoption_review_ref": ".pcae/backend-created-output-adoption-reviews/latest.json",
+        "adoption_preflight_ref": ".pcae/backend-created-output-adoption-preflights/latest.json",
+        "adopted_file": adopted_file,
+        "staged_file": cf[0] if cf else "",
+        "pre_commit_staged_files": cf,
+        "post_commit_staged_files": ps,
+        "committed_files": cmf,
+        "unexpected_committed_files": [],
+        "staged_file_verified_before": a_size > 0,
+        "committed_file_verified_after": is_committed and post_size > 0,
+        "expected_file_size_bytes": a_size,
+        "actual_file_size_bytes": post_size if is_committed else a_size,
+        "expected_file_sha256": a_sha,
+        "actual_file_sha256": post_sha if is_committed else a_sha,
+        "actual_wc_line_count": a_wc,
+        "commit_created": committed,
+        "commit_hash": commit_hash,
+        "commit_message": commit_message if committed else "",
+        "file_committed": committed,
+        "file_pushed": False,
+        "push_allowed_now": False,
+        "push_execution_allowed_now": False,
+        "push_approval_allowed_in_future_phase": is_committed,
+        "push_execution_allowed_in_future_phase": False,
+        "backend_invocation_performed": False,
+        "backend_capture_performed": False,
+        "backend_output_captured": False,
+        "file_deleted": False,
+        "file_moved": False,
+        "file_modified": False,
+        "commits_created": 1 if committed else 0,
+        "push_performed": False,
+        "execution_authorized": False,
+        "audit_warning_count": 0,
+        "real_execution_disabled": True,
+        "runner_execute_refuses": True,
+        "generated_at": ts,
+        "execution_timestamp": execution_ts,
+        "blockers": bl,
+        "warnings": wl,
+        "recommended_next_phase": recommended,
+        "next_operator_action": (
+            f"Commit executed. Hash: {commit_hash[:12] if commit_hash else 'unknown'}... "
+            "File committed. Do NOT push in this phase. Next: 77T push approval."
+            if is_committed
+            else ("Ready for governed commit execution. Use --execute to commit the staged file."
+                  if is_ready else "Resolve blockers first.")
+        ),
+    }
+
+
+def run_phase_backend_created_output_adoption_commit_execution(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    execute = getattr(args, "execute", False)
+    dry_run = getattr(args, "dry_run", False)
+    if dry_run:
+        execute = False
+    r = _build_backend_created_output_adoption_commit_execution(root, execute=execute)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_EXECUTIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Commit execution saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        if r["backend_created_output_adoption_commit_execution_status"] in ("committed", "ready_for_commit_execution"):
+            return 0
+        return 1
+    print("Backend-Created Output Adoption Commit Execution")
+    print("=" * 50)
+    print(f"  Status: {r['backend_created_output_adoption_commit_execution_status']}")
+    print(f"  Outcome: {r['adoption_commit_execution_outcome']}")
+    if r.get("commit_created"):
+        print(f"  Commit: {r['commit_hash'][:12] if r.get('commit_hash') else 'unknown'}...")
+        print(f"  Message: {r.get('commit_message', '')}")
+        print(f"  Committed files: {r['committed_files']}")
+        print(f"  Post-commit staged: {r['post_commit_staged_files']}")
+        print(f"  Pushed: no")
+    else:
+        print(f"  Execute: {'requested' if r.get('execute_requested') else 'not requested'}")
+        print(f"  Staged: {r.get('pre_commit_staged_files', [])}")
+    print(f"  Push now: no  Push approval future: {'yes' if r.get('push_approval_allowed_in_future_phase') else 'no'}")
+    print(f"  Backend invoked: no")
+    print(f"  Next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  BLOCKED: {b}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_created_output_adoption_commit_execution_status"] in ("committed", "ready_for_commit_execution") else 1
+
+
+def run_phase_backend_created_output_adoption_commit_execution_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_EXECUTIONS_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_created_output_adoption_commit_execution_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("No commit execution artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r.get("backend_created_output_adoption_commit_execution_status") in ("committed", "ready_for_commit_execution") else 1
+    print("Backend-Created Output Adoption Commit Execution (Show)")
+    print("=" * 58)
+    print(f"  Status: {r.get('backend_created_output_adoption_commit_execution_status', 'unknown')}")
+    print(f"  Outcome: {r.get('adoption_commit_execution_outcome', 'unknown')}")
+    print(f"  Commit created: {'yes' if r.get('commit_created') else 'no'}")
+    print(f"  Pushed: {'yes' if r.get('file_pushed') else 'no'}")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0

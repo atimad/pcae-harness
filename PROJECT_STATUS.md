@@ -2,7 +2,13 @@
 
 ## Current Phase
 
-Phase 77R: Backend-Created Output Adoption Commit Approval.
+Phase 77S: Backend-Created Output Adoption Commit Execution.
+
+Phase 77S adds `pcae phase backend-created-output-adoption-commit-execution --json --save
+--dry-run --execute` and `pcae phase backend-created-output-adoption-commit-execution-show --json`.
+Governed commit execution: creates exactly one adoption commit for the staged backend-created file,
+does not push. Persists to `.pcae/backend-created-output-adoption-commit-executions/latest.json`.
+13 new tests.
 
 Phase 77R adds `pcae phase backend-created-output-adoption-commit-approval --json --save
 --approve --approved-by --reason` and `pcae phase backend-created-output-adoption-commit-approval-show --json`.
