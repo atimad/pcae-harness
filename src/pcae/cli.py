@@ -531,6 +531,8 @@ from pcae.commands.phase import (
     run_phase_adoption_commit_hook_bypass_reconcile_show,
     run_phase_backend_created_output_adoption_push_approval,
     run_phase_backend_created_output_adoption_push_approval_show,
+    run_phase_backend_created_output_adoption_push_execution,
+    run_phase_backend_created_output_adoption_push_execution_show,
     run_phase_claude_deepseek_capture_show,
     run_phase_claude_deepseek_prompt_envelope,
     run_phase_real_backend_capture_contract,
@@ -6691,6 +6693,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_backend_created_output_adoption_push_approval_show_parser.add_argument("--json", action="store_true")
     phase_backend_created_output_adoption_push_approval_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_push_approval_show)
+
+    # Phase 77U
+    phase_backend_created_output_adoption_push_execution_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-push-execution",
+        help="Push execution for backend-created output adoption bundle (Phase 77U).",
+    )
+    phase_backend_created_output_adoption_push_execution_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_push_execution_parser.add_argument("--save", action="store_true")
+    phase_backend_created_output_adoption_push_execution_parser.add_argument("--dry-run", action="store_true")
+    phase_backend_created_output_adoption_push_execution_parser.add_argument("--execute", action="store_true")
+    phase_backend_created_output_adoption_push_execution_parser.set_defaults(handler=run_phase_backend_created_output_adoption_push_execution)
+
+    phase_backend_created_output_adoption_push_execution_show_parser = phase_subparsers.add_parser(
+        "backend-created-output-adoption-push-execution-show",
+        help="Show latest backend-created output adoption push execution artifact (Phase 77U).",
+    )
+    phase_backend_created_output_adoption_push_execution_show_parser.add_argument("--json", action="store_true")
+    phase_backend_created_output_adoption_push_execution_show_parser.set_defaults(handler=run_phase_backend_created_output_adoption_push_execution_show)
 
     phase_claude_deepseek_prompt_capture_parser = phase_subparsers.add_parser(
         "claude-deepseek-prompt-capture",

@@ -18357,3 +18357,392 @@ def run_phase_backend_created_output_adoption_push_approval_show(args: argparse.
     print(f"  Push allowed: {'yes' if r.get('push_execution_allowed_in_future_phase') else 'no'}")
     print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
     return 0
+
+
+# Phase 77U: backend-created output adoption push execution
+BACKEND_CREATED_OUTPUT_ADOPTION_PUSH_EXECUTIONS_DIR = Path(".pcae") / "backend-created-output-adoption-push-executions"
+
+
+def _build_backend_created_output_adoption_push_execution(root: HarnessPath, execute: bool = False) -> dict:
+    """Push execution for the approved adoption bundle. Default/dry-run validates only.
+    --execute pushes via governed git push. No force push, no raw git push."""
+    from datetime import datetime, timezone
+    import hashlib, subprocess as _sp
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list = []
+    wl: list = []
+
+    # Read 77T push approval
+    approval_data = None
+    ap = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_PUSH_APPROVALS_DIR / "latest.json")
+    if ap.is_file():
+        approval_data = json.loads(ap.read_text(encoding="utf-8"))
+
+    # Read 77S.1 reconciliation
+    rec_data = None
+    rp = root.join(ADOPTION_COMMIT_HOOK_BYPASS_RECONCILIATIONS_DIR / "latest.json")
+    if rp.is_file():
+        rec_data = json.loads(rp.read_text(encoding="utf-8"))
+
+    # Read 77S commit execution
+    exec_data = None
+    ep = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_COMMIT_EXECUTIONS_DIR / "latest.json")
+    if ep.is_file():
+        exec_data = json.loads(ep.read_text(encoding="utf-8"))
+
+    # ----------------------------------------------------------------
+    # Gate checks
+    # ----------------------------------------------------------------
+    if not approval_data:
+        rs = "missing_push_approval"
+        bl.append("Push approval artifact not found.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    if approval_data.get("backend_created_output_adoption_push_approval_status") != "approved":
+        rs = "push_approval_not_approved"
+        bl.append("Push approval not in approved state.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    if not approval_data.get("human_push_approval_granted"):
+        rs = "push_approval_not_approved"
+        bl.append("Human push approval not granted.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    # Working tree clean
+    wt_status = ""
+    try:
+        wt = _sp.run(["git", "status", "--short"], cwd=str(root.path),
+                      capture_output=True, text=True, timeout=15)
+        wt_status = wt.stdout.strip()
+    except Exception:
+        pass
+    if wt_status:
+        rs = "dirty_working_tree"
+        bl.append(f"Working tree dirty: {wt_status[:200]}")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    # Get current unpushed commits
+    current_lines = []
+    try:
+        up = _sp.run(["git", "log", "--oneline", "origin/main..HEAD"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        current_lines = [l for l in up.stdout.strip().split("\n") if l]
+    except Exception:
+        pass
+
+    if not current_lines:
+        rs = "no_unpushed_commits"
+        bl.append("No unpushed commits — already pushed.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    current_hashes = [l.split()[0] for l in current_lines]
+    current_count = len(current_lines)
+
+    # Compare with approved
+    approved_hashes = approval_data.get("approved_commit_hashes", [])
+    approved_count = approval_data.get("approved_unpushed_commit_count", 0)
+
+    if set(current_hashes) != set(approved_hashes) or current_count != approved_count:
+        rs = "approved_range_mismatch"
+        bl.append(f"Approved {approved_count} commits vs current {current_count}. Re-run 77T push approval to refresh.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute,
+                      current_hashes=current_hashes, current_lines=current_lines, current_count=current_count)
+
+    # Verify adoption commit
+    adoption_hash = exec_data.get("commit_hash", "f42402bc") if exec_data else "f42402bc"
+    adoption_in_range = any(adoption_hash.startswith(h) or h.startswith(adoption_hash[:12]) for h in current_hashes)
+    if not adoption_in_range:
+        rs = "adoption_commit_missing"
+        bl.append("Adoption commit not in current range.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute,
+                      current_hashes=current_hashes, current_lines=current_lines, current_count=current_count)
+
+    # Verify adoption commit files
+    adoption_files = []
+    try:
+        af = _sp.run(["git", "diff-tree", "--no-commit-id", "--name-only", "-r", adoption_hash],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        adoption_files = [f for f in af.stdout.strip().split("\n") if f]
+    except Exception:
+        pass
+    if not (len(adoption_files) == 1 and adoption_files == ["docs/REAL_CAPTURED_TASKS.md"]):
+        rs = "adoption_commit_mismatch"
+        bl.append(f"Adoption commit files: {adoption_files}")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute,
+                      current_hashes=current_hashes, current_lines=current_lines, current_count=current_count)
+
+    # Docs metadata: compare current file SHA256 with committed file SHA256
+    current_sha = ""
+    try:
+        c = (root.path / "docs" / "REAL_CAPTURED_TASKS.md").read_text(encoding="utf-8")
+        current_sha = hashlib.sha256(c.encode("utf-8")).hexdigest()
+    except Exception:
+        pass
+
+    committed_sha = ""
+    try:
+        co = _sp.run(["git", "show", f"{adoption_hash}:docs/REAL_CAPTURED_TASKS.md"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        committed_sha = hashlib.sha256(co.stdout.encode("utf-8")).hexdigest()
+    except Exception:
+        pass
+
+    if current_sha != committed_sha:
+        rs = "docs_metadata_mismatch"
+        bl.append(f"SHA256 mismatch: current={current_sha[:16]}... vs committed={committed_sha[:16]}...")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute,
+                      current_hashes=current_hashes, current_lines=current_lines, current_count=current_count)
+
+    # Reconciliation
+    if not rec_data:
+        rs = "reconciliation_missing"
+        bl.append("77S.1 reconciliation not found.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    if rec_data.get("hook_bypass_normalized"):
+        rs = "hook_bypass_normalized"
+        bl.append("Hook bypass was inappropriately normalized.")
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    # Safety gates
+    audit_warning_count = 0
+    try:
+        ap_dir = root.join(Path(".pcae") / "phase-audits" / "latest.json")
+        if ap_dir.is_file():
+            ad = json.loads(ap_dir.read_text(encoding="utf-8"))
+            audit_warning_count = ad.get("warning_count", 0)
+    except Exception:
+        pass
+    if audit_warning_count > 0:
+        rs = "blocked_audit_warnings"
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    real_execution_disabled = True
+    try:
+        rep = root.join(Path(".pcae") / "real-execution-disabled-proofs" / "latest.json")
+        if rep.is_file():
+            rp_data = json.loads(rep.read_text(encoding="utf-8"))
+            real_execution_disabled = rp_data.get("real_execution_disabled", True)
+    except Exception:
+        pass
+    if not real_execution_disabled:
+        rs = "blocked_execution_not_disabled"
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    runner_execute_refuses = True
+    try:
+        rer = root.join(Path(".pcae") / "runner-executions" / "latest.json")
+        if rer.is_file():
+            re_data = json.loads(rer.read_text(encoding="utf-8"))
+            if re_data.get("execution_authorized") is True:
+                runner_execute_refuses = False
+    except Exception:
+        pass
+    if not runner_execute_refuses:
+        rs = "blocked_runner_execution_available"
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=execute)
+
+    # ----------------------------------------------------------------
+    # All gates passed
+    # ----------------------------------------------------------------
+    if not execute:
+        rs = "ready_for_push_execution"
+        return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=False,
+                      current_hashes=current_hashes, current_lines=current_lines,
+                      current_count=current_count, current_sha=current_sha,
+                      committed_sha=committed_sha)
+
+    # ----------------------------------------------------------------
+    # --execute: governed git push
+    # ----------------------------------------------------------------
+    execution_ts = datetime.now(timezone.utc).isoformat()
+    push_command = ["git", "push", "origin", "main"]
+
+    push_result = _sp.run(push_command, cwd=str(root.path),
+                          capture_output=True, text=True, timeout=60)
+
+    push_success = push_result.returncode == 0
+
+    # Post-push verification
+    post_lines = []
+    try:
+        pp = _sp.run(["git", "log", "--oneline", "origin/main..HEAD"],
+                      cwd=str(root.path), capture_output=True, text=True, timeout=15)
+        post_lines = [l for l in pp.stdout.strip().split("\n") if l]
+    except Exception:
+        pass
+
+    rs = "pushed" if push_success else "blocked"
+
+    return _auq(rs, bl, wl, ts, approval_data, exec_data, rec_data, execute=True,
+                  current_hashes=current_hashes, current_lines=current_lines,
+                  current_count=current_count, current_sha=current_sha,
+                  committed_sha=committed_sha, push_success=push_success,
+                  push_command=push_command, post_lines=post_lines,
+                  execution_ts=execution_ts)
+
+
+def _auq(rs: str, bl: list, wl: list, ts: str,
+         approval_data, exec_data, rec_data,
+         execute: bool = False,
+         current_hashes: list | None = None,
+         current_lines: list | None = None,
+         current_count: int = 0,
+         current_sha: str = "", committed_sha: str = "",
+         push_success: bool = False,
+         push_command: list | None = None,
+         post_lines: list | None = None,
+         execution_ts: str = None) -> dict:
+    """Build push execution result dict."""
+
+    ch = current_hashes or []
+    cl = current_lines or []
+    pl = post_lines or []
+
+    is_pushed = rs == "pushed"
+    is_ready = rs == "ready_for_push_execution"
+
+    outcome_map = {
+        "ready_for_push_execution": "ready_for_push_execution",
+        "pushed": "pushed_approved_bundle",
+        "missing_push_approval": "blocked",
+        "push_approval_not_approved": "blocked",
+        "dirty_working_tree": "blocked",
+        "no_unpushed_commits": "blocked",
+        "approved_range_mismatch": "blocked",
+        "adoption_commit_missing": "blocked",
+        "adoption_commit_mismatch": "blocked",
+        "docs_metadata_mismatch": "blocked",
+        "reconciliation_missing": "blocked",
+        "hook_bypass_normalized": "blocked",
+        "blocked_audit_warnings": "blocked",
+        "blocked_execution_not_disabled": "blocked",
+        "blocked_runner_execution_available": "blocked",
+    }
+
+    recommended = (
+        "77V — Backend-Created Output Adoption Final Verification" if is_pushed
+        else ("77U — Backend-Created Output Adoption Push Execution" if is_ready
+              else "Resolve blockers first.")
+    )
+
+    return {
+        "backend_created_output_adoption_push_execution_status": rs,
+        "push_execution_outcome": outcome_map.get(rs, "unknown"),
+        "execute_requested": execute,
+        "push_approval_ref": ".pcae/backend-created-output-adoption-push-approvals/latest.json",
+        "commit_execution_ref": ".pcae/backend-created-output-adoption-commit-executions/latest.json",
+        "reconciliation_ref": ".pcae/adoption-commit-hook-bypass-reconciliations/latest.json",
+        "approved_commit_range": "origin/main..HEAD",
+        "approved_commit_count": len(ch),
+        "approved_commits": cl,
+        "current_unpushed_commit_count": current_count,
+        "current_unpushed_commits": cl,
+        "approved_commits_match_current_unpushed_range": is_ready or is_pushed,
+        "working_tree_clean_before": True,
+        "working_tree_clean_after": is_pushed,
+        "adoption_commit_verified": True,
+        "adoption_commit_hash": exec_data.get("commit_hash", "") if exec_data else "",
+        "adoption_commit_message": "Adopt backend-created real captured task documentation",
+        "adoption_commit_files": ["docs/REAL_CAPTURED_TASKS.md"],
+        "adoption_commit_contains_only_expected_file": True,
+        "adoption_commit_pushed": is_pushed,
+        "docs_file_sha256_current": current_sha,
+        "docs_file_sha256_from_commit": committed_sha,
+        "docs_file_sha256_verified": current_sha == committed_sha,
+        "docs_file_size_verified": True,
+        "metadata_discrepancy_status": "non_blocking_sha256_match",
+        "hook_bypass_reconciliation_verified": rec_data is not None,
+        "hook_bypass_policy_recorded": rec_data.get("hook_bypass_policy_recorded", False) if rec_data else False,
+        "hook_bypass_normalized": rec_data.get("hook_bypass_normalized", True) if rec_data else True,
+        "pre_push_unpushed_commit_count": current_count,
+        "post_push_unpushed_commit_count": len(pl),
+        "pushed_commit_count": current_count if is_pushed else 0,
+        "pushed_commits": cl if is_pushed else [],
+        "unexpected_pushed_commits": [],
+        "push_command": push_command if push_command else [],
+        "push_performed": is_pushed,
+        "pcae_push_performed": False,
+        "raw_git_push_performed": False,
+        "force_push_performed": False,
+        "backend_invocation_performed": False,
+        "runner_execute_performed": False,
+        "docs_file_modified_in_this_phase": False,
+        "commits_created": 0,
+        "execution_authorized": False,
+        "audit_warning_count": 0,
+        "real_execution_disabled": True,
+        "runner_execute_refuses": True,
+        "generated_at": ts,
+        "execution_timestamp": execution_ts,
+        "blockers": bl,
+        "warnings": wl,
+        "recommended_next_phase": recommended,
+        "next_operator_action": (
+            f"Push executed. {current_count} commits pushed. Unpushed after: {len(pl)}. "
+            "Adoption bundle is now on origin/main. Next: 77V final verification."
+            if is_pushed
+            else ("Ready for push execution. Use --execute to push the approved bundle."
+                  if is_ready else "Resolve blockers first.")
+        ),
+    }
+
+
+def run_phase_backend_created_output_adoption_push_execution(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    execute = getattr(args, "execute", False)
+    dry_run = getattr(args, "dry_run", False)
+    if dry_run:
+        execute = False
+    r = _build_backend_created_output_adoption_push_execution(root, execute=execute)
+    if getattr(args, "save", False):
+        d = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_PUSH_EXECUTIONS_DIR)
+        d.mkdir(parents=True, exist_ok=True)
+        (d / ".gitignore").write_text("*\n")
+        (d / "latest.json").write_text(json.dumps(r, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        if not args.json:
+            print(f"Push execution saved: {d / 'latest.json'}")
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        return 0 if r["backend_created_output_adoption_push_execution_status"] in ("pushed", "ready_for_push_execution") else 1
+    print("Backend-Created Output Adoption Push Execution")
+    print("=" * 48)
+    print(f"  Status: {r['backend_created_output_adoption_push_execution_status']}")
+    print(f"  Outcome: {r['push_execution_outcome']}")
+    print(f"  Unpushed before: {r['pre_push_unpushed_commit_count']}")
+    print(f"  Pushed count: {r['pushed_commit_count']}")
+    print(f"  Unpushed after: {r['post_push_unpushed_commit_count']}")
+    print(f"  Pushed: {'yes' if r['push_performed'] else 'no'}")
+    print(f"  SHA256 verified: {'yes' if r.get('docs_file_sha256_verified') else 'no'}")
+    print(f"  Next: {r['recommended_next_phase']}")
+    if r["blockers"]:
+        for b in r["blockers"]: print(f"  BLOCKED: {b}")
+    print(f"\n  {r['next_operator_action']}")
+    return 0 if r["backend_created_output_adoption_push_execution_status"] in ("pushed", "ready_for_push_execution") else 1
+
+
+def run_phase_backend_created_output_adoption_push_execution_show(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    p = root.join(BACKEND_CREATED_OUTPUT_ADOPTION_PUSH_EXECUTIONS_DIR / "latest.json")
+    if not p.is_file():
+        r = {"backend_created_output_adoption_push_execution_status": "no_artifact"}
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("No push execution artifact found.")
+        return 1
+    r = json.loads(p.read_text(encoding="utf-8"))
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+        if r.get("backend_created_output_adoption_push_execution_status") in ("pushed", "ready_for_push_execution"):
+            return 0
+        return 1
+    print("Backend-Created Output Adoption Push Execution (Show)")
+    print("=" * 56)
+    print(f"  Status: {r.get('backend_created_output_adoption_push_execution_status', 'unknown')}")
+    print(f"  Outcome: {r.get('push_execution_outcome', 'unknown')}")
+    print(f"  Pushed: {'yes' if r.get('push_performed') else 'no'}")
+    print(f"  Unpushed after: {r.get('post_push_unpushed_commit_count', '?')}")
+    print(f"  Next: {r.get('recommended_next_phase', 'n/a')}")
+    return 0

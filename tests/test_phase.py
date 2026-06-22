@@ -16986,3 +16986,82 @@ def test_77t_no_push_no_backend(tmp_path, monkeypatch, capsys):
     assert d["raw_git_push_performed"] is False
     assert d["backend_invocation_performed"] is False
     assert d["docs_file_modified_in_this_phase"] is False
+# Phase 77U tests
+def _seed_push_approval_77u(tmp_path, status="approved", approved=True, approved_count=1, approved_hashes=None):
+    from pathlib import Path as _P
+    d = _P(tmp_path) / ".pcae" / "backend-created-output-adoption-push-approvals"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({
+        "backend_created_output_adoption_push_approval_status": status,
+        "human_push_approval_granted": approved,
+        "approved_by": "Operator",
+        "approved_unpushed_commit_count": approved_count,
+        "approved_commit_hashes": approved_hashes or [],
+        "push_execution_allowed_in_future_phase": status == "approved",
+    }))
+
+def _seed_safety_77u(tmp_path):
+    from pathlib import Path as _P
+    d = _P(tmp_path) / ".pcae" / "phase-audits"; d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({"warning_count": 0}))
+    d = _P(tmp_path) / ".pcae" / "real-execution-disabled-proofs"; d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({"real_execution_disabled": True}))
+    d = _P(tmp_path) / ".pcae" / "runner-executions"; d.mkdir(parents=True, exist_ok=True)
+    (d / "latest.json").write_text(json.dumps({"execution_authorized": False}))
+    for sub in ["adoption-commit-hook-bypass-reconciliations", "backend-created-output-adoption-commit-executions"]:
+        d = _P(tmp_path) / ".pcae" / sub; d.mkdir(parents=True, exist_ok=True)
+        (d / "latest.json").write_text(json.dumps({"hook_bypass_reconciliation_status": "reconciled_documented_exception", "hook_bypass_policy_recorded": True, "hook_bypass_normalized": False, "commit_hash": "f42402bc1234", "commit_created": True}))
+
+def test_77u_missing_push_approval(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    main(["phase", "backend-created-output-adoption-push-execution", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_push_execution_status"] == "missing_push_approval"
+
+def test_77u_push_approval_not_approved(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_push_approval_77u(tmp_path, status="ready_for_push_approval", approved=False)
+    main(["phase", "backend-created-output-adoption-push-execution", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_push_execution_status"] == "push_approval_not_approved"
+
+def test_77u_dirty_working_tree(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_push_approval_77u(tmp_path)
+    (tmp_path / "dirty.txt").write_text("x")
+    main(["phase", "backend-created-output-adoption-push-execution", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["backend_created_output_adoption_push_execution_status"] == "dirty_working_tree"
+
+def test_77u_save_json(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _seed_safety_77u(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-push-execution", "--save", "--json"])
+    capsys.readouterr()
+    p = tmp_path / ".pcae" / "backend-created-output-adoption-push-executions" / "latest.json"
+    assert p.is_file()
+
+def test_77u_show_no_artifact(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    exit_code = main(["phase", "backend-created-output-adoption-push-execution-show", "--json"])
+    assert exit_code == 1
+
+def test_77u_no_push_no_backend(tmp_path, monkeypatch, capsys):
+    from pcae.commands.init import init_harness
+    import subprocess as _sp
+    init_harness(HarnessPath(tmp_path)); init_git_repo(tmp_path); monkeypatch.chdir(tmp_path)
+    _sp.run(["git", "add", "-A"], cwd=tmp_path, check=True, capture_output=True)
+    _sp.run(["git", "commit", "-m", "s"], cwd=tmp_path, check=True, capture_output=True)
+    main(["phase", "backend-created-output-adoption-push-execution", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["push_performed"] is False
+    assert d["backend_invocation_performed"] is False
+    assert d["docs_file_modified_in_this_phase"] is False
