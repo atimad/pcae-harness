@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 79A Staged-File-Aware Implementation Commit Mode (20260622-2212-phase-79a-staged-file-aware-implementation-commit-mode)
 - Phase 78E Lifecycle Regression Suite (20260622-2150-phase-78e-lifecycle-regression-suite)
 - Phases 78B-78D Lifecycle Documentation Batch (20260622-2144-phases-78b-78d-lifecycle-documentation-batch)
 - Phase 78A PCAE Roadmap Documentation (20260622-2134-phase-78a-pcae-roadmap-documentation)
