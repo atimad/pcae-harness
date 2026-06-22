@@ -10,7 +10,7 @@ Phases 78B-78D Lifecycle Documentation Batch
 
 ## Status
 
-active
+done
 
 ## Mode
 
