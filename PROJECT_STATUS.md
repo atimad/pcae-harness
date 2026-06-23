@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 82A: Agent Capability Registry Design.
+Phase 82B: Agent Identity Capability Probe.
 
-82A defines the PCAE agent capability registry model: agent identity, capability, safety
-profile, task-type compatibility, routing constraints, mutation risk, and registry format.
-Design only, no implementation or backend probing.
+82B probed 4 backends: claude (available), claude-deepseek (available, wrapper), claude-kimi
+(missing), codex (available, unverified). No prompts sent, no task execution, no routing
+authorized. Probe and metadata recording only.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
