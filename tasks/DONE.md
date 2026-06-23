@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 82D Subagent Safety Profile (20260623-0856-phase-82d-subagent-safety-profile)
 - Phase 82C Subagent Discovery Contract (20260623-0851-phase-82c-subagent-discovery-contract)
 - Phase 82B Agent Identity Capability Probe (20260623-0837-phase-82b-agent-identity-capability-probe)
 - Phase 82A Agent Capability Registry Design (20260623-0752-phase-82a-agent-capability-registry-design)

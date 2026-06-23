@@ -10,7 +10,7 @@ Phase 82D Subagent Safety Profile
 
 ## Status
 
-active
+done
 
 ## Mode
 
