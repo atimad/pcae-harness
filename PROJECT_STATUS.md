@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 81E: Second Output Intake.
+Phase 81F: Second Adoption Lifecycle Gate Plan.
 
-81E classifies captured backend output for REAL-CAPTURED-TASK-002 as a reviewable adoption
-candidate. Contract compliance 17/17, safety 9/9. Recommended adoption target: README.md.
-No backend reinvocation, no adoption/staging/commit/push of backend output.
+81F evaluated all adoption gates via dry-run (all report `closed` from first lifecycle).
+Documents simplified second adoption path into README.md. No non-dry-run gates executed,
+no adoption/modification of README.md.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
