@@ -10,7 +10,7 @@ import json
 import subprocess
 
 from pcae.core.paths import HarnessPath
-from pcae.lifecycle import LIFECYCLE_STATES, detect_lifecycle_state, get_next_recommendation, evaluate_gate_dry_run
+from pcae.lifecycle import LIFECYCLE_STATES, detect_lifecycle_state, get_next_recommendation, evaluate_gate_dry_run, evaluate_gate_approval
 
 
 def _repo_indicators(root_path) -> dict:
@@ -185,3 +185,36 @@ def run_lifecycle_run_gate(args: argparse.Namespace) -> int:
                 print(f"  WARNING: {w}")
 
     return 0 if r["lifecycle_gate_dry_run_status"] == "ready" else 1
+
+
+def run_lifecycle_approve_gate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    gate_id = getattr(args, "gate", "") or ""
+    approved_by = getattr(args, "approved_by", "") or ""
+    reason_val = getattr(args, "reason", "") or ""
+    dry_run = getattr(args, "dry_run", False)
+
+    state_id, _ = detect_lifecycle_state(root.path)
+    r = evaluate_gate_approval(gate_id, state_id, approved_by, reason_val, dry_run=dry_run)
+
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+    else:
+        print(f"Gate Approval: {gate_id}")
+        print("=" * 40)
+        print(f"  Status: {r['lifecycle_gate_approval_status']}")
+        print(f"  Current state: {r['current_state']}")
+        print(f"  Target state: {r['target_state']}")
+        print(f"  Approved by: {r['approved_by']}")
+        print(f"  Reason: {r['reason']}")
+        print(f"  Approval performed: {'yes' if r['approval_performed'] else 'no'}")
+        print(f"  Execution authorized: no")
+        if r["blockers"]:
+            for b in r["blockers"]:
+                print(f"  BLOCKED: {b}")
+        if r["warnings"]:
+            for w in r["warnings"]:
+                print(f"  WARNING: {w}")
+
+    ok = r["lifecycle_gate_approval_status"] in ("approved", "approval_not_required", "dry_run")
+    return 0 if ok else 1

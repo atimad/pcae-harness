@@ -2,11 +2,12 @@
 
 ## Current Phase
 
-Phase 80D: Lifecycle Gate Runner Dry-Run.
+Phase 80E: Lifecycle Gate Approval.
 
-80D adds `pcae lifecycle backend-output-adoption run-gate --gate <gate> --dry-run [--json]`
-for read-only gate readiness evaluation. 16 gate definitions, --dry-run required, no
-execution/approval/mutation. 17 new tests.
+80E adds `pcae lifecycle backend-output-adoption approve-gate --gate <gate> --approved-by
+<name> --reason <reason> [--dry-run] [--json]`. Records human approval for a gate without
+executing it. Approval is separate from execution; execution_authorized=false always.
+15 new tests.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 

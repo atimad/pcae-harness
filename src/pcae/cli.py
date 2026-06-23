@@ -8204,7 +8204,7 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_git_lock_parser.set_defaults(handler=run_doctor_git_lock)
 
     # ── pcae lifecycle ──
-    from pcae.commands.lifecycle import run_lifecycle_status, run_lifecycle_next, run_lifecycle_run_gate
+    from pcae.commands.lifecycle import run_lifecycle_status, run_lifecycle_next, run_lifecycle_run_gate, run_lifecycle_approve_gate
 
     lifecycle_parser = subparsers.add_parser(
         "lifecycle",
@@ -8240,6 +8240,17 @@ def build_parser() -> argparse.ArgumentParser:
     lifecycle_run_gate_parser.add_argument("--dry-run", action="store_true", help="Required. Evaluate without executing.")
     lifecycle_run_gate_parser.add_argument("--json", action="store_true")
     lifecycle_run_gate_parser.set_defaults(handler=run_lifecycle_run_gate)
+
+    lifecycle_approve_gate_parser = lifecycle_boa_subparsers.add_parser(
+        "approve-gate",
+        help="Record human approval for a lifecycle gate (does not execute the gate).",
+    )
+    lifecycle_approve_gate_parser.add_argument("--gate", required=True, help="Gate ID to approve.")
+    lifecycle_approve_gate_parser.add_argument("--approved-by", type=str, default="", help="Operator who approves.")
+    lifecycle_approve_gate_parser.add_argument("--reason", type=str, default="", help="Approval reason.")
+    lifecycle_approve_gate_parser.add_argument("--dry-run", action="store_true", help="Preview approval without recording.")
+    lifecycle_approve_gate_parser.add_argument("--json", action="store_true")
+    lifecycle_approve_gate_parser.set_defaults(handler=run_lifecycle_approve_gate)
 
     # ── pcae commit ──
     from pcae.commands.commit import run_commit_implementation

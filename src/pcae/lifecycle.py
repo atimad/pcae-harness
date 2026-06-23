@@ -437,3 +437,106 @@ def evaluate_gate_dry_run(gate_id: str, current_state: str) -> dict[str, Any]:
         "target_state": gate.target_state,
         "warnings": wl,
     }
+
+
+# ── Phase 80E: Gate approval evaluation ──
+
+
+def evaluate_gate_approval(
+    gate_id: str,
+    current_state: str,
+    approved_by: str = "",
+    reason: str = "",
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Evaluate and optionally record gate approval. Never executes the gate."""
+    from datetime import datetime, timezone
+
+    ts = datetime.now(timezone.utc).isoformat()
+    bl: list[str] = []
+    wl: list[str] = []
+
+    if not gate_id or gate_id not in GATE_DEFINITIONS:
+        return _approval_result(
+            "unknown_gate", gate_id, current_state, "", "", bl + [f"Unknown gate: {gate_id}"],
+            wl, ts, approved_by, reason, dry_run,
+        )
+
+    gate = GATE_DEFINITIONS[gate_id]
+
+    if not approved_by:
+        bl.append("--approved-by is required.")
+        return _approval_result(
+            "missing_approver", gate_id, current_state, gate.target_state,
+            gate.gate_kind, bl, wl, ts, approved_by, reason, dry_run,
+        )
+
+    if not reason:
+        bl.append("--reason is required.")
+        return _approval_result(
+            "missing_reason", gate_id, current_state, gate.target_state,
+            gate.gate_kind, bl, wl, ts, approved_by, reason, dry_run,
+        )
+
+    if not gate.required_approvals:
+        wl.append(f"Gate '{gate.label}' does not require approval. Approval is informational only.")
+        status = "approval_not_required"
+    elif current_state not in gate.allowed_from_states:
+        bl.append(f"Gate '{gate.label}' is not available from state '{current_state}'. Allowed from: {', '.join(gate.allowed_from_states)}.")
+        return _approval_result(
+            "illegal_state_for_approval", gate_id, current_state, gate.target_state,
+            gate.gate_kind, bl, wl, ts, approved_by, reason, dry_run,
+        )
+    else:
+        status = "approved"
+
+    if dry_run:
+        return _approval_result(
+            "dry_run", gate_id, current_state, gate.target_state,
+            gate.gate_kind, bl, wl, ts, approved_by, reason, True,
+            approval_performed=False,
+        )
+
+    return _approval_result(
+        status, gate_id, current_state, gate.target_state,
+        gate.gate_kind, bl, wl, ts, approved_by, reason, dry_run,
+        approval_performed=status == "approved",
+        approval_required=bool(gate.required_approvals),
+    )
+
+
+def _approval_result(
+    status: str, gate_id: str, current_state: str, target_state: str,
+    gate_kind: str, bl: list, wl: list, ts: str,
+    approved_by: str, reason: str, dry_run: bool,
+    approval_performed: bool = False,
+    approval_required: bool = False,
+) -> dict[str, Any]:
+    return {
+        "adoption_execution_performed": False,
+        "approval_artifact_created": False,
+        "approval_artifact_path": None,
+        "approval_performed": approval_performed,
+        "approval_required": approval_required,
+        "approval_timestamp": ts if approval_performed else None,
+        "approved_by": approved_by,
+        "backend_invocation_performed": False,
+        "blockers": bl,
+        "commit_performed": False,
+        "current_state": current_state,
+        "dry_run": dry_run,
+        "execution_authorized": False,
+        "force_push_performed": False,
+        "gate": gate_id,
+        "gate_execution_performed": False,
+        "gate_kind": gate_kind,
+        "lifecycle_gate_approval_status": status,
+        "lifecycle_type": "backend-output-adoption",
+        "push_performed": False,
+        "raw_git_push_performed": False,
+        "read_only": dry_run or status != "approved",
+        "reason": reason,
+        "runner_execute_performed": False,
+        "target_state": target_state,
+        "warnings": wl,
+    }
