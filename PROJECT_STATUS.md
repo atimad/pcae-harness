@@ -2,22 +2,29 @@
 
 ## Current Phase
 
-Phase 84L: Roadmap Reconciliation and Phase 85 Planning.
+Phase 85A: Persistent Lifecycle Memory Model.
 
-84L reconciles the original Phase 84 persistent memory/project intelligence roadmap with the actual
-Phase 84 multi-agent governance design stream. The original Phase 84 plan (84A–84F: persistent
-lifecycle memory, artifact index, governance event timeline, decision log integration, risk register,
-project state snapshot) was deferred because the 83A–83L multi-agent lifecycle exposed a prerequisite:
-stable lifecycle objects and governance semantics before persistent memory. Phase 84 therefore produced
-10 governance design artifacts (84A–84J), a governance README summary (84K), health baselines
-(84K.1, 84K.3), handoff refresh (84K.2), and this reconciliation (84L). The original goals are
-now the Phase 85 sequence: 85A Persistent Lifecycle Memory Model, 85B Artifact Index,
-85C Governance Event Timeline, 85D Decision Log Integration, 85E Risk Register, 85F Project State
-Snapshot. Phase 85 builds on Phase 84 governance artifacts as inputs. Planning principles: build
-on Phase 84, design before implementation, maintain governance boundaries, reintroduce tests when
-implementation begins, preserve safety invariants. Deferred items carried forward: DF-1–DF-4,
-HY-1 (can be closed_no_action), IMPL-1, IMPL-2, TEST-1, HSR-1 (validator stale for doc streams).
-Recommends 85A as next phase. No Phase 85 task contract created.
+85A defines the durable memory model for PCAE lifecycle state, approvals, captures, adoption
+decisions, blocked/deferred items, and safe next actions. Design only — no implementation. Defines
+18 core memory entities (project_state, phase_record, lifecycle_state, artifact_record,
+approval_record, authorization_flag_record, backend_invocation_record, capture_record,
+intake_record, adoption_candidate_record, deferred_item_record, risk_record, decision_record,
+commit_record, push_record, handoff_record, bootstrap_record, next_action_record). 12 design
+principles (memory records state not permission, does not authorize execution/invocation/adoption/
+commit/push, preserves provenance, supports reconstruction after session reset, supports offline
+audit, is secondary to repo state). 15-threat model. 9 query targets answering original Phase 84
+questions (what phase, what approved, what blocked, what deferred, what safe next, what forbidden,
+what artifacts, what changed, what needs review). 12 update rules. 5-level provenance priority
+(repo state > PCAE commands > committed artifacts > human reports > conversation memory). 12 safety
+boundaries. 38 validation rules. 15 failure cases. Example memory snapshot. Future implementation
+plan (85A.1–85A.3 candidates). memory_model_version=0.1, implementation_status=not_started.
+Recommends 85B — Artifact Index.
+
+Phase 84L: Roadmap Reconciliation and Phase 85 Planning (completed).
+
+84L reconciled the original Phase 84 persistent memory roadmap with the actual Phase 84 multi-agent
+governance design stream. Defined Phase 85 sequence (85A–85F). Carried forward deferred items.
+Recommends 85A.
 
 Phase 84K.3: Re-run Full Health Baseline After Refresh (completed).
 
