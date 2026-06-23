@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 83B Agent Assignment Approval (20260623-1412-phase-83b-agent-assignment-approval)
 - Phase 83A Multi-Agent Task Contract (20260623-1301-phase-83a-multi-agent-task-contract)
 - Phase 82F Multi-Agent Task Split Dry-Run (20260623-1152-phase-82f-multi-agent-task-split-dry-run)
 - Phase 82E Agent Routing Dry-Run (20260623-1143-phase-82e-agent-routing-dry-run)
