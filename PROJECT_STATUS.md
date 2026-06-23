@@ -2,20 +2,26 @@
 
 ## Current Phase
 
-Phase 84K.2: Handoff State Refresh and Bootstrap Alignment.
+Phase 84K.3: Re-run Full Health Baseline After Refresh.
 
-84K.2 refreshes PCAE handoff, bootstrap, governance, and roadmap state based on `pcae
-handoff-state-refresh` findings (4 blockers, 6 warnings) reported after 84K.1 completion. The
-operator's strategic decision supersedes 84K.1's `ready_for_84L`: 84L is paused until
-handoff/bootstrap blockers are refreshed and validated. Refresh actions: roadmap position refreshed
-(84A–84K design stream complete, 84K.1 baseline complete, 84K.2 refresh in progress), governance
-status refreshed (all execution/invocation/adoption flags false), bootstrap profile refreshed
-(modern test command: `python -m pytest -n auto`, 3 serial exceptions retained), bootstrap
-validation refreshed (documentation-only phases use health/check/doctor/push, implementation phases
-must reintroduce tests), active/completed/next phase summaries refreshed, runtime/handoff/agent
-context refreshed. Phase 85 planning: not started. Roadmap reconciliation: not started. Source/test
-implementation: not started. Backend execution: not authorized. Next intended sequence: 84K.2 →
-84K.3 (if needed) → 84L.
+84K.3 re-runs the full health baseline after 84K.2's handoff state refresh. All PCAE commands pass
+(health=healthy, check=passed, doctor=clean, push=nothing_to_push). Repository clean, fully pushed,
+on main, synced with origin. 15/15 required artifacts present (expanded from 84K.1's 13/13 to include
+84K.1 and 84K.2 artifacts). 10/10 design artifacts consistent (implementation_status=not_started).
+Handoff-state-refresh: 4 blockers / 6 warnings persist unchanged across pre-84K.2, post-84K.2,
+and 84K.3 — classified as structural validator signals (not substantive governance blockers).
+Evidence: signals invariant across refresh, normal PCAE health passes, lifecycle summary clean.
+Bootstrap profile confirmed (modern test: `python -m pytest -n auto`, 3 serial exceptions).
+Governance status confirmed (all execution/invocation/adoption flags false). No blocking findings.
+Readiness decision: ready_for_84L_with_documented_structural_refresh_signals.
+Recommended next phase: 84L — Roadmap Reconciliation and Phase 85 Planning.
+
+Phase 84K.2: Handoff State Refresh and Bootstrap Alignment (completed).
+
+84K.2 refreshed PCAE handoff, bootstrap, governance, and roadmap state based on `pcae
+handoff-state-refresh` findings (4 blockers, 6 warnings) reported after 84K.1 completion.
+Refreshed all 10 domains. Remaining signals classified as structural. Readiness decision:
+refresh_clean_recommend_84K3_baseline.
 
 Phase 84K.1: Full Health Baseline and Hygiene Assessment (completed).
 
