@@ -2,18 +2,21 @@
 
 ## Current Phase
 
-Phase 84K: Multi-Agent Lessons README Summary.
+Phase 84K.1: Full Health Baseline and Hygiene Assessment.
 
-84K adds a concise multi-agent governance design summary to README.md and creates
-docs/MULTI_AGENT_GOVERNANCE_SUMMARY.md as a fuller index/overview. README section covers: design
-stream explanation (governed AI coding, not unrestricted execution), completed artifact table
-(84A–84J, 10 designs), key safety boundaries (8 items: identity, hash, capture, intake, adoption,
-commit/push, raw output, deferred tracking), testing note (84A–84K documentation-only, tests
-deferred to implementation phases), and next-step recommendation (84L roadmap reconciliation, Phase
-85 planning for deferred persistent memory/project intelligence). Summary artifact adds foundation
-(82A–82F), first lifecycle (83A–83L), design stream metrics, deferred implementation areas, and
-proposed 85A–85F roadmap reconciliation. Completes the 84-series multi-agent governance design
-documentation stream. Recommends 84L (Roadmap Reconciliation and Phase 85 Planning).
+84K.1 establishes a full health baseline before roadmap reconciliation. Assessment results: all PCAE
+commands pass (health/check/doctor/push), repository clean and fully pushed, 13/13 required artifacts
+present, 10/10 design artifacts consistent (implementation_status=not_started), task-memory clean,
+task filenames NOT truncated (operator reports were shorthand), governance boundaries intact, no
+blocking findings, 2 non-blocking findings (HY-1 evidence inaccuracy and normal active task state),
+3 deferred findings (implementation deferred, DF-1–DF-4 open, roadmap reconciliation pending).
+Readiness decision: ready_for_84L. No correction phase needed. Recommends 84L (Roadmap
+Reconciliation and Phase 85 Planning).
+
+Phase 84K added multi-agent governance design summary to README.md and created
+docs/MULTI_AGENT_GOVERNANCE_SUMMARY.md. README section covers 10 design artifacts, 8 safety
+boundaries, testing rationale, and 84L recommendation. Completes 84-series design documentation
+stream.
 
 Phase 84J defined a deferred item tracking policy (v0.1) for governed multi-agent work: 13-threat model,
 11 tracker design principles, 11-entity model (deferred_item through closure_record), 12 item
