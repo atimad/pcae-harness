@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 81D: Second Backend Capture.
+Phase 81E: Second Output Intake.
 
-81D invoked locked backend claude-local once with REAL-CAPTURED-TASK-002 prompt. Captured
-22-line markdown snippet (1599 bytes). No repo mutation detected. Output not applied,
-adopted, staged, committed, or pushed.
+81E classifies captured backend output for REAL-CAPTURED-TASK-002 as a reviewable adoption
+candidate. Contract compliance 17/17, safety 9/9. Recommended adoption target: README.md.
+No backend reinvocation, no adoption/staging/commit/push of backend output.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
