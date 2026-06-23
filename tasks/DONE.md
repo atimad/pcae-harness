@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 81C Second Backend Capture Preflight (20260623-0350-phase-81c-second-backend-capture-preflight)
 - Phase 81B Second Real Captured Task Contract (20260623-0344-phase-81b-second-real-captured-task-contract)
 - Phase 81A Second Real Captured Task Selection (20260623-0340-phase-81a-second-real-captured-task-selection)
 - Phase 80F Lifecycle Final Summary Command (20260623-0329-phase-80f-lifecycle-final-summary-command)
