@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 83B: Agent Assignment Approval.
+Phase 83C: Multi-Agent Contract Instance Dry-Run.
 
-83B approves future documentation-review multi-agent assignment: claude-local (planner),
-claude-deepseek (reviewer), human/operator (governance roles). All authorization flags
-false except assignment_model_approved. Approval only.
+83C creates draft contract MULTI-AGENT-DRY-RUN-001 for documentation-review: claude-local
+(planner), claude-deepseek (reviewer), human/operator (governance). Validation 20/20 passed.
+Status=draft, no routing/invocation/execution.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
