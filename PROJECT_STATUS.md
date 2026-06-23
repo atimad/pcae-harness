@@ -2,9 +2,17 @@
 
 ## Current Phase
 
-Phase 84D: Multi-Agent Output Intake Schema.
+Phase 84E: Multi-Agent Adoption Candidate Schema.
 
-84D defines a machine-readable schema (v0.1) for multi-agent output intake metadata: capture linkage,
+84E defines a machine-readable schema (v0.1) for multi-agent adoption candidates: candidate identity
+with source finding linkage, classification (10 candidate types, 8 status values), target file/scope
+binding with change-type constraints, risk/safety fields, approval/execution separation, deferred/
+rejected item tracking, human review fields, verification requirements. 32 validation rules.
+Illustrative example based on 83I–83K. 18 failure cases. Completes the four-schema suite
+(prompt package → capture → intake → adoption candidate). schema_status=draft_documented,
+implementation_status=not_started.
+
+Phase 84D defined a machine-readable schema (v0.1) for multi-agent output intake metadata: capture linkage,
 output identity/classification, prompt adherence checks (14 required), safety checks (13 required),
 contract fit checks (8 required), cross-output consistency checks (5 required), finding summaries,
 blocker/failure classification, adoption-readiness, human review fields. 30 validation rules.
