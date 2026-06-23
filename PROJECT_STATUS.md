@@ -2,11 +2,10 @@
 
 ## Current Phase
 
-Phase 82D: Subagent Safety Profile.
+Phase 82E: Agent Routing Dry-Run.
 
-82D defines the subagent safety profile: risk taxonomy (unknown/low/medium/high/blocked),
-capability-to-risk mapping, permission boundaries, approval/mutation/intake/quarantine
-requirements, and forbidden behaviors. Design only, no probing or backend invocation.
+82E simulates routing decisions for 13 task types against 4 backends. Advisory results only,
+no real routing, no backend invocation, no prompts sent.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
