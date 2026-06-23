@@ -10,7 +10,7 @@ Phase 81F Second Adoption Lifecycle Gate Plan
 
 ## Status
 
-active
+done
 
 ## Mode
 

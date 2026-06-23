@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 81F Second Adoption Lifecycle Gate Plan (20260623-0410-phase-81f-second-adoption-lifecycle-gate-plan)
 - Phase 81E Second Output Intake (20260623-0404-phase-81e-second-output-intake)
 - Phase 81D Second Backend Capture (20260623-0359-phase-81d-second-backend-capture)
 - Phase 81C Second Backend Capture Preflight (20260623-0350-phase-81c-second-backend-capture-preflight)
