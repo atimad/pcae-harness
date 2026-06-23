@@ -10,7 +10,7 @@ Phase 83C Multi-Agent Contract Instance Dry-Run
 
 ## Status
 
-active
+done
 
 ## Mode
 
