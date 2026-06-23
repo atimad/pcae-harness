@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 82A Agent Capability Registry Design (20260623-0752-phase-82a-agent-capability-registry-design)
 - Phase 81I Second Lifecycle Final Verification (20260623-0747-phase-81i-second-lifecycle-final-verification)
 - Phase 81H Second README Adoption Execution (20260623-0742-phase-81h-second-readme-adoption-execution)
 - Phase 81G Second Adoption Approval (20260623-0737-phase-81g-second-adoption-approval)

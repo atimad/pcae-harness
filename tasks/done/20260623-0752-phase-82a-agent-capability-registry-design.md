@@ -10,7 +10,7 @@ Phase 82A Agent Capability Registry Design
 
 ## Status
 
-active
+done
 
 ## Mode
 
