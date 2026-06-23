@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 81B: Second Real Captured Task Contract.
+Phase 81C: Second Backend Capture Preflight.
 
-81B formalizes REAL-CAPTURED-TASK-002 with exact prompt, output format, allowed/forbidden
-files, safety constraints, and all authorization flags false. Contract and preparation only,
-no backend invocation.
+81C verifies all preconditions for governed backend capture of REAL-CAPTURED-TASK-002.
+Contract verified, repo clean, mutation guard baseline captured, backend identified
+(claude-local). Preflight status: ready_for_future_81d_capture. No backend invocation.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
