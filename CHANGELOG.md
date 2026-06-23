@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Second Backend Capture (Phase 81D): adds `docs/SECOND_BACKEND_CAPTURE_RESULT.md`. Invoked locked backend claude-local exactly once with REAL-CAPTURED-TASK-002 prompt. Backend returned 22-line markdown snippet (1599 bytes, SHA256 73d1f434...). No repo mutation detected. Backend output not applied, adopted, staged, committed, or pushed. docs/REAL_CAPTURED_TASKS.md untouched.
 - Second Backend Capture Preflight (Phase 81C): adds `docs/SECOND_BACKEND_CAPTURE_PREFLIGHT.md`. Verifies all preconditions for future governed backend capture of REAL-CAPTURED-TASK-002: contract readable, repo clean, HEAD==origin/main, health/check/doctor clean, backend lock held, mutation guard baseline captured. Preflight status: ready_for_future_81d_capture. No backend invocation, no source/test changes.
 - Second Real Captured Task Contract (Phase 81B): adds `docs/SECOND_REAL_CAPTURED_TASK_CONTRACT.md` with stable ID REAL-CAPTURED-TASK-002. Formalizes the selected documentation-only task (lifecycle command snippet) with exact prompt, output format, allowed/forbidden files, safety constraints, authorization flags (all false), required future gates, and review criteria. No backend invocation, no source/test changes.
 - Second Real Captured Task Selection (Phase 81A): adds `docs/SECOND_REAL_CAPTURED_TASK_SELECTION.md`. Selects a documentation-only task (lifecycle command family snippet) for the second governed backend-created output adoption lifecycle. No source code changes, no tests, no backend invocation.
