@@ -35,5 +35,5 @@ execution, adoption, commit, or push.
 ## Status
 
 - [x] Created
-- [ ] In Progress
-- [ ] Complete
+- [x] In Progress
+- [x] Complete
