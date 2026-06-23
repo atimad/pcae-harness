@@ -36,5 +36,5 @@ two approved target files. Create an execution artifact.
 ## Status
 
 - [x] Created
-- [ ] In Progress
-- [ ] Complete
+- [x] In Progress
+- [x] Complete
