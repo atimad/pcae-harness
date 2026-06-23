@@ -10,7 +10,7 @@ Phase 82E Agent Routing Dry-Run
 
 ## Status
 
-active
+done
 
 ## Mode
 
