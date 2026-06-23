@@ -2,9 +2,16 @@
 
 ## Current Phase
 
-Phase 84C: Multi-Agent Capture Metadata Schema.
+Phase 84D: Multi-Agent Output Intake Schema.
 
-84C defines a machine-readable schema (v0.1) for multi-agent capture metadata: invocation identity,
+84D defines a machine-readable schema (v0.1) for multi-agent output intake metadata: capture linkage,
+output identity/classification, prompt adherence checks (14 required), safety checks (13 required),
+contract fit checks (8 required), cross-output consistency checks (5 required), finding summaries,
+blocker/failure classification, adoption-readiness, human review fields. 30 validation rules.
+Illustrative example based on 83H intake. 18 failure cases. schema_status=draft_documented,
+implementation_status=not_started.
+
+Phase 84C defined a machine-readable schema (v0.1) for multi-agent capture metadata: invocation identity,
 prompt/package linkage, backend identity, stdout/stderr metadata with SHA256, timing/return-code,
 timeout, mutation guard with pre/post git state, storage policy, failure classification, multi-agent
 grouping. 26 validation rules. Illustrative example based on 83G capture. 20 failure cases.
