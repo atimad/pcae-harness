@@ -2,9 +2,20 @@
 
 ## Current Phase
 
-Phase 84G: Multi-Agent Lifecycle Command Dry-Run.
+Phase 84H: Multi-Agent Backend Invocation Guard Hardening.
 
-84G designs a dry-run command surface (v0.1) for inspecting multi-agent lifecycle state: 8 proposed
+84H defines a backend invocation guard design (v0.1) for governed multi-agent execution: 15-threat
+model, 10 guard design principles, 20 required pre-invocation checks, agent identity checks (9 fields),
+backend command checks (9 fields with exact matching), wrapper verification checks (9 fields),
+prompt package checks (12 fields), prompt hash checks (6 fields with SHA256), authorization flag
+checks (11 flags), blocked-agent checks (8 conditions), subagent prevention checks (6 fields),
+non-interactive invocation checks (6 fields), timeout policy checks (5 fields), mutation guard checks
+(10 fields), capture requirement checks (10 fields). Guard decision model with 5 decisions and 12
+output fields. 22 blocked reason codes. Illustrative guard decisions for 83G planner/reviewer route.
+40 validation rules. 20 failure cases. guard_design_status=draft_documented,
+guard_implementation_status=not_started. Recommends 84I (Multi-Agent Prompt Capture Storage Policy).
+
+Phase 84G designed a dry-run command surface (v0.1) for inspecting multi-agent lifecycle state: 8 proposed
 commands (status, next, check-transition, explain-blocked, required-artifacts, flags, failures,
 summary) under pcae multi-agent lifecycle namespace. All read-only, --dry-run required, --json
 supported. Includes JSON output conventions, 18 blocked/error reason codes, global dry-run
