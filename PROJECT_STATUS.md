@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 80E: Lifecycle Gate Approval.
+Phase 80F: Lifecycle Final Summary Command.
 
-80E adds `pcae lifecycle backend-output-adoption approve-gate --gate <gate> --approved-by
-<name> --reason <reason> [--dry-run] [--json]`. Records human approval for a gate without
-executing it. Approval is separate from execution; execution_authorized=false always.
-15 new tests.
+80F adds `pcae lifecycle backend-output-adoption summary [--json]`. Aggregates lifecycle
+state, gate model, next recommendation, artifact summary, command capabilities, and safety
+flags. Read-only; no execution/approval/mutation. Completes the 80A-80F lifecycle
+orchestration stream. 15 new tests.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 

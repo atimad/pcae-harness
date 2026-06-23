@@ -540,3 +540,104 @@ def _approval_result(
         "target_state": target_state,
         "warnings": wl,
     }
+
+
+# ── Phase 80F: Final summary builder ──
+
+
+def build_lifecycle_summary(root_path: Path) -> dict[str, Any]:
+    """Build a complete read-only summary of the lifecycle. No mutation."""
+    import subprocess
+
+    state_id, details = detect_lifecycle_state(root_path)
+    state = LIFECYCLE_STATES.get(state_id, LIFECYCLE_STATES["blocked"])
+    rec = get_next_recommendation(state_id)
+
+    # Repo indicators
+    repo_clean = True
+    unpushed = 0
+    try:
+        r = subprocess.run(["git", "status", "--short"], cwd=root_path,
+                           capture_output=True, text=True, timeout=15)
+        repo_clean = not r.stdout.strip()
+    except Exception:
+        pass
+    try:
+        r = subprocess.run(["git", "rev-list", "--count", "origin/main..HEAD"],
+                           cwd=root_path, capture_output=True, text=True, timeout=15)
+        unpushed = int(r.stdout.strip()) if r.returncode == 0 else 0
+    except Exception:
+        pass
+
+    bl: list[str] = []
+    wl: list[str] = []
+    if not repo_clean:
+        wl.append("Working tree is not clean.")
+    if unpushed > 0:
+        wl.append(f"{unpushed} unpushed commit(s).")
+
+    lifecycle_closed = state_id in ("closed", "final_verified")
+
+    # Gate analysis
+    approval_gates = [g for g, gd in GATE_DEFINITIONS.items() if gd.required_approvals]
+    execution_gates = [g for g, gd in GATE_DEFINITIONS.items() if gd.dangerous_if_executed]
+    gates_list = [
+        {"gate_id": g, "label": gd.label, "kind": gd.gate_kind,
+         "approval_required": bool(gd.required_approvals),
+         "execution_boundary": gd.dangerous_if_executed}
+        for g, gd in GATE_DEFINITIONS.items()
+    ]
+
+    status = "summarized"
+    if state_id == "blocked":
+        status = "blocked"
+        bl.append("Lifecycle is blocked.")
+
+    return {
+        "adoption_execution_performed": False,
+        "approval_gate_count": len(approval_gates),
+        "approval_performed": False,
+        "artifact_summary": details.get("artifact_summary", {}),
+        "backend_invocation_performed": False,
+        "blockers": bl,
+        "command_capabilities": {
+            "final_summary_command": True,
+            "gate_approval_command": True,
+            "gate_dry_run_command": True,
+            "next_command": True,
+            "non_dry_run_runner_command": False,
+            "status_command": True,
+        },
+        "commit_performed": False,
+        "current_state": state_id,
+        "current_state_label": state.label,
+        "execution_authorized": False,
+        "execution_gate_count": len(execution_gates),
+        "force_push_performed": False,
+        "gate_count": len(GATE_DEFINITIONS),
+        "gate_execution_performed": False,
+        "gates": gates_list,
+        "lifecycle_closed": lifecycle_closed,
+        "lifecycle_summary_status": status,
+        "lifecycle_type": "backend-output-adoption",
+        "next_recommended_action": rec["recommended_next_action"],
+        "next_recommended_phase": rec["recommended_next_phase"],
+        "origin_main_head_count": unpushed,
+        "push_performed": False,
+        "raw_git_push_performed": False,
+        "read_only": True,
+        "repo_clean": repo_clean,
+        "runner_execute_performed": False,
+        "safety_summary": {
+            "approval_separate_from_execution": True,
+            "backend_invocation_not_performed": True,
+            "dry_run_gate_runner_available": True,
+            "execution_remains_disabled": True,
+            "gate_approval_command_available": True,
+            "next_command_available": True,
+            "non_dry_run_runner_absent": True,
+            "status_command_available": True,
+        },
+        "summary_generated": True,
+        "warnings": wl,
+    }

@@ -10,7 +10,7 @@ import json
 import subprocess
 
 from pcae.core.paths import HarnessPath
-from pcae.lifecycle import LIFECYCLE_STATES, detect_lifecycle_state, get_next_recommendation, evaluate_gate_dry_run, evaluate_gate_approval
+from pcae.lifecycle import LIFECYCLE_STATES, detect_lifecycle_state, get_next_recommendation, evaluate_gate_dry_run, evaluate_gate_approval, build_lifecycle_summary
 
 
 def _repo_indicators(root_path) -> dict:
@@ -218,3 +218,36 @@ def run_lifecycle_approve_gate(args: argparse.Namespace) -> int:
 
     ok = r["lifecycle_gate_approval_status"] in ("approved", "approval_not_required", "dry_run")
     return 0 if ok else 1
+
+
+def run_lifecycle_summary(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    r = build_lifecycle_summary(root.path)
+
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+    else:
+        print("Lifecycle Summary: backend-output-adoption")
+        print("=" * 46)
+        print(f"  Status: {r['lifecycle_summary_status']}")
+        print(f"  State: {r['current_state_label']} ({r['current_state']})")
+        print(f"  Closed: {'yes' if r['lifecycle_closed'] else 'no'}")
+        print(f"  Repo clean: {'yes' if r['repo_clean'] else 'no'}")
+        print(f"  Unpushed: {r['origin_main_head_count']}")
+        print(f"  Gates: {r['gate_count']} ({r['approval_gate_count']} approval, {r['execution_gate_count']} execution)")
+        print(f"  Next action: {r['next_recommended_action']}")
+        if r["next_recommended_phase"]:
+            print(f"  Next phase: {r['next_recommended_phase']}")
+        print(f"  Read-only: yes")
+        caps = r["command_capabilities"]
+        print(f"  Commands: status={caps['status_command']}, next={caps['next_command']}, "
+              f"dry-run={caps['gate_dry_run_command']}, approve={caps['gate_approval_command']}, "
+              f"runner={caps['non_dry_run_runner_command']}, summary={caps['final_summary_command']}")
+        if r["blockers"]:
+            for b in r["blockers"]:
+                print(f"  BLOCKED: {b}")
+        if r["warnings"]:
+            for w in r["warnings"]:
+                print(f"  WARNING: {w}")
+
+    return 0
