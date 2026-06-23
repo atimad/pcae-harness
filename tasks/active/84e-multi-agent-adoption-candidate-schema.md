@@ -34,5 +34,5 @@ candidate metadata. No implementation, no backend invocation, no adoption.
 ## Status
 
 - [x] Created
-- [ ] In Progress
-- [ ] Complete
+- [x] In Progress
+- [x] Complete
