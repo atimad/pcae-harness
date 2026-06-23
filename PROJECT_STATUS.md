@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 82E: Agent Routing Dry-Run.
+Phase 82F: Multi-Agent Task Split Dry-Run.
 
-82E simulates routing decisions for 13 task types against 4 backends. Advisory results only,
-no real routing, no backend invocation, no prompts sent.
+82F simulates multi-agent task splitting for 10 scenarios with role model, dependency model,
+and agent assignment matrix. Completes the 82A-82F agent capability discovery stream.
+No real split, routing, or backend invocation.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
