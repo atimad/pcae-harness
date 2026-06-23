@@ -2,9 +2,15 @@
 
 ## Current Phase
 
-Phase 83F: Multi-Agent Prompt/Invocation Approval.
+Phase 83G: Multi-Agent Prompt Send / Capture.
 
-83F approves future prompt sending/backend invocation for MULTI-AGENT-PROMPT-PACKAGE-DRY-RUN-001
+83G sent approved planner prompt to claude-local and documentation-reviewer prompt to
+claude-deepseek. Both invocations succeeded (rc=0). Planner: 159 lines, 11263 bytes, 104s.
+Reviewer: 330 lines, 20491 bytes, 131s. Mutation guard: no mutation detected. Outputs captured
+at /tmp/pcae-83g-*. prompts_sent=true, backend_invocation_performed=true;
+execution_authorized=false, adoption_authorized=false. No output adopted/applied/staged.
+
+Phase 83F approved future prompt sending/backend invocation for MULTI-AGENT-PROMPT-PACKAGE-DRY-RUN-001
 under contract MULTI-AGENT-DRY-RUN-001. Invocation approval 25/25 passed.
 backend_invocation_authorized=true, prompts_authorized=true; prompts_sent=false,
 backend_invocation_performed=false; execution_authorized=false, adoption_authorized=false,
