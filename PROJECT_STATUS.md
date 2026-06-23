@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 82C: Subagent Discovery Contract.
+Phase 82D: Subagent Safety Profile.
 
-82C defines the subagent discovery contract: identity/capability/safety models, discovery
-authorization, routing restrictions, validation rules, and artifact format. Design only,
-no probing or backend invocation.
+82D defines the subagent safety profile: risk taxonomy (unknown/low/medium/high/blocked),
+capability-to-risk mapping, permission boundaries, approval/mutation/intake/quarantine
+requirements, and forbidden behaviors. Design only, no probing or backend invocation.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
