@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 82B Agent Identity Capability Probe (20260623-0837-phase-82b-agent-identity-capability-probe)
 - Phase 82A Agent Capability Registry Design (20260623-0752-phase-82a-agent-capability-registry-design)
 - Phase 81I Second Lifecycle Final Verification (20260623-0747-phase-81i-second-lifecycle-final-verification)
 - Phase 81H Second README Adoption Execution (20260623-0742-phase-81h-second-readme-adoption-execution)

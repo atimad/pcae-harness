@@ -10,7 +10,7 @@ Phase 82B Agent Identity Capability Probe
 
 ## Status
 
-active
+done
 
 ## Mode
 
