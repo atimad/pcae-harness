@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 82F: Multi-Agent Task Split Dry-Run.
+Phase 83A: Multi-Agent Task Contract.
 
-82F simulates multi-agent task splitting for 10 scenarios with role model, dependency model,
-and agent assignment matrix. Completes the 82A-82F agent capability discovery stream.
-No real split, routing, or backend invocation.
+83A defines the formal multi-agent task contract: 30+ fields, role assignment model with
+separation rules, agent eligibility, approval boundaries, validation rules. Design only,
+no routing/invocation/execution.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
