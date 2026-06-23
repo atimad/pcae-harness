@@ -41,7 +41,7 @@ Create and validate a draft contract instance. Prove that contract fields, role 
 | contract_id | MULTI-AGENT-DRY-RUN-001 |
 | task_title | Review PCAE multi-agent documentation for consistency |
 | task_type | documentation_review |
-| risk_level | medium |
+| risk_level | medium (elevated from canonical `low` for single-agent documentation_review because this contract involves two agents with a governed handoff, increasing coordination complexity) |
 | created_at | 2026-06-23 |
 | created_by | Phase 83C |
 | parent_task | none |
@@ -102,6 +102,8 @@ Create and validate a draft contract instance. Prove that contract fields, role 
 - modify_docs_directly_by_agent
 
 ### Allowed Files (review context)
+
+**Note:** This list was authored before 83C and 83D existed. The actual review scope under this contract includes all 10 documents in the 82A-83D range, including 83C itself and 83D.
 
 - `docs/AGENT_CAPABILITY_REGISTRY_DESIGN.md`
 - `docs/AGENT_IDENTITY_CAPABILITY_PROBE.md`

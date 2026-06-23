@@ -79,7 +79,7 @@ Approves the role assignment model for a future documentation-review multi-agent
 
 | Check | Result |
 |-------|--------|
-| Planner (claude-local) differs from reviewer (claude-deepseep) | PASS |
+| Planner (claude-local) differs from reviewer (claude-deepseek) | PASS |
 | Adoption reviewer is human, not planner or reviewer agent | PASS |
 | Commit reviewer is human | PASS |
 | Push reviewer is human | PASS |
