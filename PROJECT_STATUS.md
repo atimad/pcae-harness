@@ -2,27 +2,28 @@
 
 ## Current Phase
 
-Phase 85B: Artifact Index.
+Phase 85C: Governance Event Timeline.
 
-85B defines the artifact index design — the evidence layer underneath the 85A memory model. Design
-only — no implementation. 24 artifact categories (roadmap, memory model, schema, state machine,
-command design, guard design, storage policy, tracker, governance summary, health baseline, handoff
-refresh, lifecycle trace, approval, capture, intake, adoption, deferred item, risk, status,
-changelog, readme, task contract, commit evidence, push evidence). 19 required metadata fields
-(artifact_id, type, path, title, status, version, source_phase, created_phase, last_updated_phase,
-implementation_status, authoritative_for, supersedes, superseded_by, related_artifacts,
-evidence_level, freshness_status, hash_or_commit_ref, required_for_memory_queries, safety_notes).
-12 design principles (records evidence not authorization, does not authorize execution/adoption/
-commit/push, preserves repository-relative paths, supports offline audit and memory provenance,
-identifies missing/stale artifacts, is secondary to repo state). 15-threat model. 10 artifact
-status values. 5 freshness status values. 6 evidence levels. 6-level source-of-truth precedence.
-10 query targets (find_artifacts_for_phase, find_latest_completed_phase_artifact,
-find_current_roadmap_artifact, find_approval_artifacts, find_blocked_items, find_deferred_items,
-find_risk_sources, find_health_baselines, find_artifacts_supporting_next_safe_action,
-find_artifacts_for_forbidden_action). 12 index update rules. 38 validation rules. 15 failure cases.
-Example artifact index entry. Future implementation plan (85B.1–85B.3 candidates).
-artifact_index_version=0.1, implementation_status=not_started. Recommends 85C — Governance Event
-Timeline.
+85C defines the governance event timeline design — the chronological/causal layer that adds temporal
+ordering to the 85A memory model and 85B artifact index. Design only — no implementation. 33 core
+event types (phase_started/completed, artifact_created/updated, approval_requested/granted/denied,
+authorization_flag_set/cleared, backend_invocation_approved/performed, prompt_package_created,
+prompt_sent, capture_created, output_intake_completed, adoption_candidate_created/approved/executed,
+item_deferred/rejected, blocker_detected/resolved, risk_identified/mitigated, commit_created,
+push_performed, handoff_refreshed, bootstrap_profile_updated, permission_requested/allowed/blocked/
+escalated, lifecycle_closed). 19 required event fields. 12 event status values. 12 design
+principles. 15-threat model. 11 event ordering rules. 9 causality/dependency rules. 4 permission
+decision event types with 12 dedicated fields. Future direction: PCAE as Permission Broker / Shell
+Gate (future_direction_only=true, not implemented). 11 query targets. 12 timeline update rules.
+42 validation rules. 15 failure cases. Example timeline. Future implementation plan (85C.1–85C.3
+candidates). timeline_version=0.1, implementation_status=not_started. Recommends 85D — Decision
+Log Integration.
+
+Phase 85B: Artifact Index (completed).
+
+85B defined the artifact index design: 24 categories, 19 metadata fields, 12 design principles,
+15-threat model, 10 query targets, 38 validation rules, 15 failure cases. artifact_index_version=0.1,
+implementation_status=not_started.
 
 Phase 85A: Persistent Lifecycle Memory Model (completed).
 
