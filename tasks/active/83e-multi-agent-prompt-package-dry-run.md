@@ -34,5 +34,5 @@ drafts, without sending prompts or invoking any backend.
 ## Status
 
 - [x] Created
-- [ ] In Progress
-- [ ] Complete
+- [x] In Progress
+- [x] Complete
