@@ -10,7 +10,7 @@ Phase 80D Lifecycle Gate Runner Dry-Run
 
 ## Status
 
-active
+done
 
 ## Mode
 
