@@ -2,9 +2,16 @@
 
 ## Current Phase
 
-Phase 84E: Multi-Agent Adoption Candidate Schema.
+Phase 84F: Multi-Agent Lifecycle State Machine.
 
-84E defines a machine-readable schema (v0.1) for multi-agent adoption candidates: candidate identity
+84F defines a lifecycle state machine (v0.1) for governed multi-agent work: 15 states, 17 allowed
+transitions, 15 blocked transitions, 11 lifecycle entities, transition guards, required artifact
+matrix, authorization flag matrix (18 flags across 12 states), 14 boundary rules, failure/quarantine/
+recovery/closure rules, example trace from 83A–83L. 35 validation rules. 22 failure cases.
+Connects the four-schema suite into a unified lifecycle model. state_machine_status=draft_documented,
+implementation_status=not_started.
+
+Phase 84E defined a machine-readable schema (v0.1) for multi-agent adoption candidates: candidate identity
 with source finding linkage, classification (10 candidate types, 8 status values), target file/scope
 binding with change-type constraints, risk/safety fields, approval/execution separation, deferred/
 rejected item tracking, human review fields, verification requirements. 32 validation rules.
