@@ -2,10 +2,10 @@
 
 ## Current Phase
 
-Phase 81G: Second Adoption Approval.
+Phase 81H: Second README Adoption Execution.
 
-81G approves future adoption of REAL-CAPTURED-TASK-002 snippet into README.md. All 13
-approval checks passed. Adoption execution deferred to 81H. README.md untouched.
+81H adopts the approved REAL-CAPTURED-TASK-002 snippet into README.md as a lifecycle command
+documentation section. No source/test changes, no backend invocation.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 

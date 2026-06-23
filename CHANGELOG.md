@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Second README Adoption Execution (Phase 81H): adopts REAL-CAPTURED-TASK-002 captured lifecycle command snippet into README.md. Adds "Backend-Output Adoption Lifecycle Commands" section documenting status, next, run-gate --dry-run, approve-gate, and summary commands. States non-dry-run gate execution not implemented, approval separate from execution, execution_authorized=false safety default. No source/test changes, no backend invocation.
 - Second Adoption Approval (Phase 81G): adds `docs/SECOND_ADOPTION_APPROVAL.md`. Approves future adoption of REAL-CAPTURED-TASK-002 captured snippet (SHA256 73d1f434...) into README.md. All 13 approval checks passed. Adoption execution deferred to 81H. README.md untouched, no backend reinvocation, no adoption execution.
 - Second Adoption Lifecycle Gate Plan (Phase 81F): adds `docs/SECOND_ADOPTION_LIFECYCLE_GATE_PLAN.md`. Evaluated all adoption gates via dry-run; lifecycle correctly reports `closed` from first lifecycle instance. Documents simplified adoption path (approval -> README edit -> commit -> push -> verify) and exact future README snippet. No non-dry-run gates executed, no adoption, no README modification.
 - Second Output Intake (Phase 81E): adds `docs/SECOND_OUTPUT_INTAKE.md`. Classifies captured backend output for REAL-CAPTURED-TASK-002 as a reviewable adoption candidate. Contract compliance: 17/17 checks passed. Safety review: 9/9 checks passed. Recommended adoption target: README.md. No backend reinvocation, no adoption, no output staging/commit/push.

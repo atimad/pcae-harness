@@ -171,6 +171,20 @@ Key lifecycle commands:
 | `pcae health` | Check overall governance health |
 | `pcae check` | Validate source changes against policy |
 
+## Backend-Output Adoption Lifecycle Commands
+
+PCAE includes read-only and approval-bound lifecycle commands for the `backend-output-adoption` lifecycle:
+
+| Command | Purpose |
+|---------|---------|
+| `pcae lifecycle backend-output-adoption status` | Display the current lifecycle state, including phase, gate results, and authorization flags. |
+| `pcae lifecycle backend-output-adoption next` | Show advisory next steps based on current state. Does not perform any action. |
+| `pcae lifecycle backend-output-adoption run-gate --dry-run` | Evaluate gate criteria and report pass/fail without recording results or changing state. |
+| `pcae lifecycle backend-output-adoption approve-gate` | Record gate approval. Approval is recorded as a governance decision only — it does not trigger execution. |
+| `pcae lifecycle backend-output-adoption summary` | Generate a final summary report of the lifecycle process, including all recorded decisions and gate evaluations. |
+
+Non-dry-run gate execution is not implemented. Approval is separate from execution, and `execution_authorized=false` remains the safety default. These commands are governance/advisory tooling, not autonomous execution.
+
 ## CLI Examples
 
 ```
