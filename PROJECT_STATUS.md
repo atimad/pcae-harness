@@ -2,9 +2,20 @@
 
 ## Current Phase
 
-Phase 84I: Multi-Agent Prompt Capture Storage Policy.
+Phase 84J: Multi-Agent Deferred Item Tracker.
 
-84I defines a prompt/capture storage policy (v0.1) for governed multi-agent execution: 15-threat
+84J defines a deferred item tracking policy (v0.1) for governed multi-agent work: 13-threat model,
+11 tracker design principles, 11-entity model (deferred_item through closure_record), 12 item
+categories (adoption/schema/state-machine/command/guard/storage/backend/subagent/blocked-agent/
+task-hygiene/documentation-hygiene/test-coverage deferred), 8 status values with transition rules,
+17 required fields, blocked/rejected/carry-forward/hygiene/future-implementation field sets, review
+cadence policy (5 triggers), escalation policy (5 conditions), closure policy (5 types). Relationships
+to adoption candidates, lifecycle state machine, and storage policy. 8 illustrative tracker entries
+(DF-1–DF-4, HY-1, IMPL-1, IMPL-2, TEST-1). Future test coverage section (8 areas). 35 validation
+rules. 15 failure cases. tracker_policy_status=draft_documented, tracker_implementation_status=
+not_started. Recommends 84K (Multi-Agent Lessons README Summary).
+
+Phase 84I defined a prompt/capture storage policy (v0.1) for governed multi-agent execution: 15-threat
 storage model, 11 storage design principles, 12-entity storage model (prompt_package through
 retention_record), prompt storage policy (10 fields with 3 location options), prompt hash policy
 (7 fields, SHA256, immutable-after-approval), invocation metadata storage policy (15 fields),
@@ -16,7 +27,7 @@ append-safe/versioned), git-tracked vs non-git policy (5 categories), proposed p
 reference chain), integrity verification policy (9 fields, 5 verification levels, offline audit),
 failure/recovery policy (13 entries). Example storage manifest based on 83G. 35 validation rules.
 18 failure cases. storage_policy_status=draft_documented, storage_policy_implementation_status=
-not_started. Recommends 84J (Multi-Agent Deferred Item Tracker).
+not_started.
 
 Phase 84H defined a backend invocation guard design (v0.1) for governed multi-agent execution: 15-threat
 model, 10 guard design principles, 20 required pre-invocation checks, agent identity checks (9 fields),
