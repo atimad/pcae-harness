@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phases 80A-80C Lifecycle Advisory Batch (20260623-0257-phases-80a-80c-lifecycle-advisory-batch)
 - Phases 79D-79F Governance Reliability Hardening (20260623-0245-phases-79d-79f-governance-reliability-hardening)
 - Phase 79C Staged-File-Aware Push (20260622-2234-phase-79c-staged-file-aware-push)
 - Phase 79B Staged-File-Aware Task Finish (20260622-2223-phase-79b-staged-file-aware-task-finish)
