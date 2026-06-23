@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 81I: Second Lifecycle Final Verification.
+Phase 82A: Agent Capability Registry Design.
 
-81I verifies and closes the second real captured task lifecycle (81A-81I). README 7/7 content
-checks passed, 8/8 artifacts verified, lifecycle_closed=true. Second lifecycle completed in
-9 phases with zero friction incidents.
+82A defines the PCAE agent capability registry model: agent identity, capability, safety
+profile, task-type compatibility, routing constraints, mutation risk, and registry format.
+Design only, no implementation or backend probing.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
