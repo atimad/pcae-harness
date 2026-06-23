@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 83A: Multi-Agent Task Contract.
+Phase 83B: Agent Assignment Approval.
 
-83A defines the formal multi-agent task contract: 30+ fields, role assignment model with
-separation rules, agent eligibility, approval boundaries, validation rules. Design only,
-no routing/invocation/execution.
+83B approves future documentation-review multi-agent assignment: claude-local (planner),
+claude-deepseek (reviewer), human/operator (governance roles). All authorization flags
+false except assignment_model_approved. Approval only.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
