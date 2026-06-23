@@ -2,16 +2,30 @@
 
 ## Current Phase
 
-Phase 84K.1: Full Health Baseline and Hygiene Assessment.
+Phase 84K.2: Handoff State Refresh and Bootstrap Alignment.
 
-84K.1 establishes a full health baseline before roadmap reconciliation. Assessment results: all PCAE
+84K.2 refreshes PCAE handoff, bootstrap, governance, and roadmap state based on `pcae
+handoff-state-refresh` findings (4 blockers, 6 warnings) reported after 84K.1 completion. The
+operator's strategic decision supersedes 84K.1's `ready_for_84L`: 84L is paused until
+handoff/bootstrap blockers are refreshed and validated. Refresh actions: roadmap position refreshed
+(84A–84K design stream complete, 84K.1 baseline complete, 84K.2 refresh in progress), governance
+status refreshed (all execution/invocation/adoption flags false), bootstrap profile refreshed
+(modern test command: `python -m pytest -n auto`, 3 serial exceptions retained), bootstrap
+validation refreshed (documentation-only phases use health/check/doctor/push, implementation phases
+must reintroduce tests), active/completed/next phase summaries refreshed, runtime/handoff/agent
+context refreshed. Phase 85 planning: not started. Roadmap reconciliation: not started. Source/test
+implementation: not started. Backend execution: not authorized. Next intended sequence: 84K.2 →
+84K.3 (if needed) → 84L.
+
+Phase 84K.1: Full Health Baseline and Hygiene Assessment (completed).
+
+84K.1 established a full health baseline before roadmap reconciliation. Assessment results: all PCAE
 commands pass (health/check/doctor/push), repository clean and fully pushed, 13/13 required artifacts
 present, 10/10 design artifacts consistent (implementation_status=not_started), task-memory clean,
 task filenames NOT truncated (operator reports were shorthand), governance boundaries intact, no
 blocking findings, 2 non-blocking findings (HY-1 evidence inaccuracy and normal active task state),
 3 deferred findings (implementation deferred, DF-1–DF-4 open, roadmap reconciliation pending).
-Readiness decision: ready_for_84L. No correction phase needed. Recommends 84L (Roadmap
-Reconciliation and Phase 85 Planning).
+Readiness decision: ready_for_84L (superseded by handoff refresh blockers).
 
 Phase 84K added multi-agent governance design summary to README.md and created
 docs/MULTI_AGENT_GOVERNANCE_SUMMARY.md. README section covers 10 design artifacts, 8 safety
