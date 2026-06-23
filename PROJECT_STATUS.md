@@ -2,12 +2,11 @@
 
 ## Current Phase
 
-Phase 80F: Lifecycle Final Summary Command.
+Phase 81A: Second Real Captured Task Selection.
 
-80F adds `pcae lifecycle backend-output-adoption summary [--json]`. Aggregates lifecycle
-state, gate model, next recommendation, artifact summary, command capabilities, and safety
-flags. Read-only; no execution/approval/mutation. Completes the 80A-80F lifecycle
-orchestration stream. 15 new tests.
+81A selects a documentation-only second real captured task: draft a lifecycle command family
+documentation snippet. No backend invocation, no source changes, no tests. Selection and
+planning only.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
