@@ -2,18 +2,26 @@
 
 ## Current Phase
 
-Phase 84J: Multi-Agent Deferred Item Tracker.
+Phase 84K: Multi-Agent Lessons README Summary.
 
-84J defines a deferred item tracking policy (v0.1) for governed multi-agent work: 13-threat model,
+84K adds a concise multi-agent governance design summary to README.md and creates
+docs/MULTI_AGENT_GOVERNANCE_SUMMARY.md as a fuller index/overview. README section covers: design
+stream explanation (governed AI coding, not unrestricted execution), completed artifact table
+(84A–84J, 10 designs), key safety boundaries (8 items: identity, hash, capture, intake, adoption,
+commit/push, raw output, deferred tracking), testing note (84A–84K documentation-only, tests
+deferred to implementation phases), and next-step recommendation (84L roadmap reconciliation, Phase
+85 planning for deferred persistent memory/project intelligence). Summary artifact adds foundation
+(82A–82F), first lifecycle (83A–83L), design stream metrics, deferred implementation areas, and
+proposed 85A–85F roadmap reconciliation. Completes the 84-series multi-agent governance design
+documentation stream. Recommends 84L (Roadmap Reconciliation and Phase 85 Planning).
+
+Phase 84J defined a deferred item tracking policy (v0.1) for governed multi-agent work: 13-threat model,
 11 tracker design principles, 11-entity model (deferred_item through closure_record), 12 item
-categories (adoption/schema/state-machine/command/guard/storage/backend/subagent/blocked-agent/
-task-hygiene/documentation-hygiene/test-coverage deferred), 8 status values with transition rules,
-17 required fields, blocked/rejected/carry-forward/hygiene/future-implementation field sets, review
-cadence policy (5 triggers), escalation policy (5 conditions), closure policy (5 types). Relationships
-to adoption candidates, lifecycle state machine, and storage policy. 8 illustrative tracker entries
-(DF-1–DF-4, HY-1, IMPL-1, IMPL-2, TEST-1). Future test coverage section (8 areas). 35 validation
-rules. 15 failure cases. tracker_policy_status=draft_documented, tracker_implementation_status=
-not_started. Recommends 84K (Multi-Agent Lessons README Summary).
+categories, 8 status values with transition rules, 17 required fields, blocked/rejected/carry-forward/
+hygiene/future-implementation field sets, review cadence policy (5 triggers), escalation policy (5
+conditions), closure policy (5 types). 8 illustrative tracker entries (DF-1–DF-4, HY-1, IMPL-1,
+IMPL-2, TEST-1). 35 validation rules. 15 failure cases. tracker_policy_status=draft_documented,
+tracker_implementation_status=not_started.
 
 Phase 84I defined a prompt/capture storage policy (v0.1) for governed multi-agent execution: 15-threat
 storage model, 11 storage design principles, 12-entity storage model (prompt_package through

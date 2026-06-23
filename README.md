@@ -185,6 +185,48 @@ PCAE includes read-only and approval-bound lifecycle commands for the `backend-o
 
 Non-dry-run gate execution is not implemented. Approval is separate from execution, and `execution_authorized=false` remains the safety default. These commands are governance/advisory tooling, not autonomous execution.
 
+## Multi-Agent Governance Design
+
+PCAE is building governance for AI-assisted and multi-agent software work — not unrestricted autonomous execution. The multi-agent design stream (Phases 82A–84K) defines how PCAE should discover agents, approve routing, send governed prompts, capture output, classify findings, review adoption candidates, and track deferred work, all under explicit human authorization at every step.
+
+The current multi-agent work is **design and governance documentation only**. No multi-agent runtime execution, schema parsing, or CLI automation has been implemented from these designs. All designs carry `implementation_status=not_started`.
+
+### Completed Design Artifacts (84-Series)
+
+| Phase | Artifact | Description |
+|-------|----------|-------------|
+| 84A | [Lifecycle Lessons / Roadmap](docs/MULTI_AGENT_LIFECYCLE_LESSONS_ROADMAP.md) | Retrospective and forward roadmap from the 83A–83L governed lifecycle |
+| 84B | [Prompt Package Schema](docs/MULTI_AGENT_PROMPT_PACKAGE_SCHEMA.md) | Machine-readable schema for approved prompts, roles, agents, and safety constraints |
+| 84C | [Capture Metadata Schema](docs/MULTI_AGENT_CAPTURE_METADATA_SCHEMA.md) | Schema for invocation captures: stdout/stderr hashes, timing, mutation guard |
+| 84D | [Output Intake Schema](docs/MULTI_AGENT_OUTPUT_INTAKE_SCHEMA.md) | Schema for classifying captured outputs before adoption review |
+| 84E | [Adoption Candidate Schema](docs/MULTI_AGENT_ADOPTION_CANDIDATE_SCHEMA.md) | Schema for candidates, deferred items, and rejected items |
+| 84F | [Lifecycle State Machine](docs/MULTI_AGENT_LIFECYCLE_STATE_MACHINE.md) | 15-state lifecycle connecting schemas into a unified model |
+| 84G | [Lifecycle Command Dry-Run](docs/MULTI_AGENT_LIFECYCLE_COMMAND_DRY_RUN.md) | Read-only command surface design for lifecycle inspection |
+| 84H | [Backend Invocation Guard](docs/MULTI_AGENT_BACKEND_INVOCATION_GUARD_HARDENING.md) | Pre-invocation guard design: identity, command, hash, timeout, mutation checks |
+| 84I | [Capture Storage Policy](docs/MULTI_AGENT_PROMPT_CAPTURE_STORAGE_POLICY.md) | Where prompts, captures, and evidence live; git-tracked vs non-git rules |
+| 84J | [Deferred Item Tracker](docs/MULTI_AGENT_DEFERRED_ITEM_TRACKER.md) | Tracking policy for deferred, blocked, rejected, and future implementation items |
+
+For a fuller overview, see [docs/MULTI_AGENT_GOVERNANCE_SUMMARY.md](docs/MULTI_AGENT_GOVERNANCE_SUMMARY.md).
+
+### Key Safety Boundaries
+
+- **Approved agent identity.** Only registered, verified agents may be invoked. Blocked and unknown agents are refused.
+- **Exact prompt and command authorization.** Prompt text is SHA256-hashed at approval; the guard blocks invocation on any mismatch.
+- **Capture before intake.** Every invocation must capture stdout/stderr with hashes before any classification occurs.
+- **Intake before adoption.** Captured output must pass intake classification before adoption review.
+- **Adoption approval before execution.** Human approval is required before any backend-originated change enters the repo.
+- **Governed commit and push.** Commits and pushes use governed PCAE paths, not raw git operations.
+- **Raw output is not adopted by default.** Backend output is evidence, not approved content, until explicitly reviewed and approved.
+- **Deferred items are tracked, not approved.** Recording a deferred item does not authorize its implementation.
+
+### Why Recent Phases Did Not Add Tests
+
+Phases 84A–84K were documentation and design-only: they produced governance design artifacts without modifying source code, tests, or CLI behavior. Test mutation was intentionally not authorized. Future implementation phases (schema parsers, guard validators, lifecycle commands) will reintroduce tests as part of their governed scope.
+
+### Next Steps
+
+The recommended next phase is **84L — Roadmap Reconciliation and Phase 85 Planning**, which should reconcile the original persistent memory/project intelligence roadmap (lifecycle memory model, artifact index, governance event timeline, decision log integration, risk register, project state snapshot) with the expanded 84-series multi-agent governance stream, then define Phase 85.
+
 ## CLI Examples
 
 ```
