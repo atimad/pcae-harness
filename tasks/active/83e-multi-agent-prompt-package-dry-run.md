@@ -12,6 +12,8 @@ drafts, without sending prompts or invoking any backend.
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/active/83e-multi-agent-prompt-package-dry-run.md
+- tasks/active/83d-multi-agent-routing-approval.md
+- tasks/completed/83d-multi-agent-routing-approval.md
 
 ## Forbidden Files
 
