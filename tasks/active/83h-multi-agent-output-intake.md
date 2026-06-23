@@ -36,5 +36,5 @@ whether they are reviewable candidates for future human adoption review.
 ## Status
 
 - [x] Created
-- [ ] In Progress
-- [ ] Complete
+- [x] In Progress
+- [x] Complete
