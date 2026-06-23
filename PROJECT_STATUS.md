@@ -2,9 +2,16 @@
 
 ## Current Phase
 
-Phase 84F: Multi-Agent Lifecycle State Machine.
+Phase 84G: Multi-Agent Lifecycle Command Dry-Run.
 
-84F defines a lifecycle state machine (v0.1) for governed multi-agent work: 15 states, 17 allowed
+84G designs a dry-run command surface (v0.1) for inspecting multi-agent lifecycle state: 8 proposed
+commands (status, next, check-transition, explain-blocked, required-artifacts, flags, failures,
+summary) under pcae multi-agent lifecycle namespace. All read-only, --dry-run required, --json
+supported. Includes JSON output conventions, 18 blocked/error reason codes, global dry-run
+invariants, 27 validation rules, 16 failure cases. command_design_status=draft_documented,
+command_implementation_status=not_started.
+
+Phase 84F defined a lifecycle state machine (v0.1) for governed multi-agent work: 15 states, 17 allowed
 transitions, 15 blocked transitions, 11 lifecycle entities, transition guards, required artifact
 matrix, authorization flag matrix (18 flags across 12 states), 14 boundary rules, failure/quarantine/
 recovery/closure rules, example trace from 83A–83L. 35 validation rules. 22 failure cases.
