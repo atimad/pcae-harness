@@ -2,9 +2,15 @@
 
 ## Current Phase
 
-Phase 84B: Multi-Agent Prompt Package Schema.
+Phase 84C: Multi-Agent Capture Metadata Schema.
 
-84B defines a machine-readable schema (v0.1) for multi-agent prompt packages: top-level fields,
+84C defines a machine-readable schema (v0.1) for multi-agent capture metadata: invocation identity,
+prompt/package linkage, backend identity, stdout/stderr metadata with SHA256, timing/return-code,
+timeout, mutation guard with pre/post git state, storage policy, failure classification, multi-agent
+grouping. 26 validation rules. Illustrative example based on 83G capture. 20 failure cases.
+schema_status=draft_documented, implementation_status=not_started.
+
+Phase 84B defined a machine-readable schema (v0.1) for multi-agent prompt packages: top-level fields,
 role/agent binding, prompt definitions with hash verification, allowed/forbidden context, expected/
 forbidden outputs, safety constraints, authorization flags, capture requirements, handoff fields.
 24 validation rules. Illustrative example based on MULTI-AGENT-PROMPT-PACKAGE-DRY-RUN-001.
