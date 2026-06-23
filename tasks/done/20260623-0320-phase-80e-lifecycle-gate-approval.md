@@ -10,7 +10,7 @@ Phase 80E Lifecycle Gate Approval
 
 ## Status
 
-active
+done
 
 ## Mode
 
