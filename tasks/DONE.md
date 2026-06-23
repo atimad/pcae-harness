@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 82F Multi-Agent Task Split Dry-Run (20260623-1152-phase-82f-multi-agent-task-split-dry-run)
 - Phase 82E Agent Routing Dry-Run (20260623-1143-phase-82e-agent-routing-dry-run)
 - Phase 82D Subagent Safety Profile (20260623-0856-phase-82d-subagent-safety-profile)
 - Phase 82C Subagent Discovery Contract (20260623-0851-phase-82c-subagent-discovery-contract)
