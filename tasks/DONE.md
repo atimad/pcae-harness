@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 81A Second Real Captured Task Selection (20260623-0340-phase-81a-second-real-captured-task-selection)
 - Phase 80F Lifecycle Final Summary Command (20260623-0329-phase-80f-lifecycle-final-summary-command)
 - Phase 80E Lifecycle Gate Approval (20260623-0320-phase-80e-lifecycle-gate-approval)
 - Phase 80D Lifecycle Gate Runner Dry-Run (20260623-0311-phase-80d-lifecycle-gate-runner-dry-run)
