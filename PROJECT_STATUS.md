@@ -2,23 +2,33 @@
 
 ## Current Phase
 
-Phase 85A: Persistent Lifecycle Memory Model.
+Phase 85B: Artifact Index.
 
-85A defines the durable memory model for PCAE lifecycle state, approvals, captures, adoption
-decisions, blocked/deferred items, and safe next actions. Design only — no implementation. Defines
-18 core memory entities (project_state, phase_record, lifecycle_state, artifact_record,
-approval_record, authorization_flag_record, backend_invocation_record, capture_record,
-intake_record, adoption_candidate_record, deferred_item_record, risk_record, decision_record,
-commit_record, push_record, handoff_record, bootstrap_record, next_action_record). 12 design
-principles (memory records state not permission, does not authorize execution/invocation/adoption/
-commit/push, preserves provenance, supports reconstruction after session reset, supports offline
-audit, is secondary to repo state). 15-threat model. 9 query targets answering original Phase 84
-questions (what phase, what approved, what blocked, what deferred, what safe next, what forbidden,
-what artifacts, what changed, what needs review). 12 update rules. 5-level provenance priority
-(repo state > PCAE commands > committed artifacts > human reports > conversation memory). 12 safety
-boundaries. 38 validation rules. 15 failure cases. Example memory snapshot. Future implementation
-plan (85A.1–85A.3 candidates). memory_model_version=0.1, implementation_status=not_started.
-Recommends 85B — Artifact Index.
+85B defines the artifact index design — the evidence layer underneath the 85A memory model. Design
+only — no implementation. 24 artifact categories (roadmap, memory model, schema, state machine,
+command design, guard design, storage policy, tracker, governance summary, health baseline, handoff
+refresh, lifecycle trace, approval, capture, intake, adoption, deferred item, risk, status,
+changelog, readme, task contract, commit evidence, push evidence). 19 required metadata fields
+(artifact_id, type, path, title, status, version, source_phase, created_phase, last_updated_phase,
+implementation_status, authoritative_for, supersedes, superseded_by, related_artifacts,
+evidence_level, freshness_status, hash_or_commit_ref, required_for_memory_queries, safety_notes).
+12 design principles (records evidence not authorization, does not authorize execution/adoption/
+commit/push, preserves repository-relative paths, supports offline audit and memory provenance,
+identifies missing/stale artifacts, is secondary to repo state). 15-threat model. 10 artifact
+status values. 5 freshness status values. 6 evidence levels. 6-level source-of-truth precedence.
+10 query targets (find_artifacts_for_phase, find_latest_completed_phase_artifact,
+find_current_roadmap_artifact, find_approval_artifacts, find_blocked_items, find_deferred_items,
+find_risk_sources, find_health_baselines, find_artifacts_supporting_next_safe_action,
+find_artifacts_for_forbidden_action). 12 index update rules. 38 validation rules. 15 failure cases.
+Example artifact index entry. Future implementation plan (85B.1–85B.3 candidates).
+artifact_index_version=0.1, implementation_status=not_started. Recommends 85C — Governance Event
+Timeline.
+
+Phase 85A: Persistent Lifecycle Memory Model (completed).
+
+85A defined the durable memory model: 18 core entities, 12 design principles, 15-threat model,
+9 query targets, 12 update rules, 5-level provenance priority, 12 safety boundaries, 38 validation
+rules, 15 failure cases. memory_model_version=0.1, implementation_status=not_started.
 
 Phase 84L: Roadmap Reconciliation and Phase 85 Planning (completed).
 
