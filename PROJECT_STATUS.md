@@ -2,9 +2,14 @@
 
 ## Current Phase
 
-Phase 83L: Multi-Agent Lifecycle Final Verification.
+Phase 84A: Multi-Agent Lifecycle Lessons / Roadmap Update.
 
-83L verifies and closes the 83A–83K multi-agent lifecycle. 17/17 artifacts verified, 12 phases
+84A documents lessons from the 83A–83L governed multi-agent lifecycle and proposes the 84-series
+roadmap. 10 proven capabilities, 10 manual areas, 5 risks, 5 friction points, 4 deferred items
+carried forward. Recommends 84B (Multi-Agent Prompt Package Schema) as next phase. 17 safety
+invariants to preserve. Documentation-only; no backend invocation, no adoption.
+
+Phase 83L verified and closed the 83A–83K multi-agent lifecycle. 17/17 artifacts verified, 12 phases
 completed, contract MULTI-AGENT-DRY-RUN-001 closed. 2 agents invoked (83G only), 3 adoption
 candidates executed (83K), 4 deferred, 4 rejected. All governance boundaries preserved. No source,
 test, README, or docs/REAL_CAPTURED_TASKS.md modifications. lifecycle_status=verified,
