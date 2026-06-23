@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Second Adoption Approval (Phase 81G): adds `docs/SECOND_ADOPTION_APPROVAL.md`. Approves future adoption of REAL-CAPTURED-TASK-002 captured snippet (SHA256 73d1f434...) into README.md. All 13 approval checks passed. Adoption execution deferred to 81H. README.md untouched, no backend reinvocation, no adoption execution.
 - Second Adoption Lifecycle Gate Plan (Phase 81F): adds `docs/SECOND_ADOPTION_LIFECYCLE_GATE_PLAN.md`. Evaluated all adoption gates via dry-run; lifecycle correctly reports `closed` from first lifecycle instance. Documents simplified adoption path (approval -> README edit -> commit -> push -> verify) and exact future README snippet. No non-dry-run gates executed, no adoption, no README modification.
 - Second Output Intake (Phase 81E): adds `docs/SECOND_OUTPUT_INTAKE.md`. Classifies captured backend output for REAL-CAPTURED-TASK-002 as a reviewable adoption candidate. Contract compliance: 17/17 checks passed. Safety review: 9/9 checks passed. Recommended adoption target: README.md. No backend reinvocation, no adoption, no output staging/commit/push.
 - Second Backend Capture (Phase 81D): adds `docs/SECOND_BACKEND_CAPTURE_RESULT.md`. Invoked locked backend claude-local exactly once with REAL-CAPTURED-TASK-002 prompt. Backend returned 22-line markdown snippet (1599 bytes, SHA256 73d1f434...). No repo mutation detected. Backend output not applied, adopted, staged, committed, or pushed. docs/REAL_CAPTURED_TASKS.md untouched.

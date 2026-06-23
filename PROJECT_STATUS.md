@@ -2,11 +2,10 @@
 
 ## Current Phase
 
-Phase 81F: Second Adoption Lifecycle Gate Plan.
+Phase 81G: Second Adoption Approval.
 
-81F evaluated all adoption gates via dry-run (all report `closed` from first lifecycle).
-Documents simplified second adoption path into README.md. No non-dry-run gates executed,
-no adoption/modification of README.md.
+81G approves future adoption of REAL-CAPTURED-TASK-002 snippet into README.md. All 13
+approval checks passed. Adoption execution deferred to 81H. README.md untouched.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
