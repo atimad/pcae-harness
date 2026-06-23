@@ -2,9 +2,15 @@
 
 ## Current Phase
 
-Phase 84A: Multi-Agent Lifecycle Lessons / Roadmap Update.
+Phase 84B: Multi-Agent Prompt Package Schema.
 
-84A documents lessons from the 83A–83L governed multi-agent lifecycle and proposes the 84-series
+84B defines a machine-readable schema (v0.1) for multi-agent prompt packages: top-level fields,
+role/agent binding, prompt definitions with hash verification, allowed/forbidden context, expected/
+forbidden outputs, safety constraints, authorization flags, capture requirements, handoff fields.
+24 validation rules. Illustrative example based on MULTI-AGENT-PROMPT-PACKAGE-DRY-RUN-001.
+13 failure cases. schema_status=draft_documented, implementation_status=not_started.
+
+Phase 84A documented lessons from the 83A–83L governed multi-agent lifecycle and proposed the 84-series
 roadmap. 10 proven capabilities, 10 manual areas, 5 risks, 5 friction points, 4 deferred items
 carried forward. Recommends 84B (Multi-Agent Prompt Package Schema) as next phase. 17 safety
 invariants to preserve. Documentation-only; no backend invocation, no adoption.
