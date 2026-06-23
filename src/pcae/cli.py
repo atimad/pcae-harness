@@ -8203,6 +8203,35 @@ def build_parser() -> argparse.ArgumentParser:
     )
     doctor_git_lock_parser.set_defaults(handler=run_doctor_git_lock)
 
+    # ── pcae lifecycle ──
+    from pcae.commands.lifecycle import run_lifecycle_status, run_lifecycle_next
+
+    lifecycle_parser = subparsers.add_parser(
+        "lifecycle",
+        help="Read-only lifecycle advisory commands.",
+    )
+    lifecycle_subparsers = lifecycle_parser.add_subparsers(dest="lifecycle_command", required=True)
+
+    lifecycle_boa_parser = lifecycle_subparsers.add_parser(
+        "backend-output-adoption",
+        help="Backend-output-adoption lifecycle commands.",
+    )
+    lifecycle_boa_subparsers = lifecycle_boa_parser.add_subparsers(dest="lifecycle_boa_command", required=True)
+
+    lifecycle_status_parser = lifecycle_boa_subparsers.add_parser(
+        "status",
+        help="Show current lifecycle state (read-only, advisory).",
+    )
+    lifecycle_status_parser.add_argument("--json", action="store_true")
+    lifecycle_status_parser.set_defaults(handler=run_lifecycle_status)
+
+    lifecycle_next_parser = lifecycle_boa_subparsers.add_parser(
+        "next",
+        help="Recommend next governed action (read-only, advisory).",
+    )
+    lifecycle_next_parser.add_argument("--json", action="store_true")
+    lifecycle_next_parser.set_defaults(handler=run_lifecycle_next)
+
     # ── pcae commit ──
     from pcae.commands.commit import run_commit_implementation
 

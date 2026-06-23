@@ -2,12 +2,11 @@
 
 ## Current Phase
 
-Phases 79D-79F: Governance Reliability Hardening.
+Phases 80A-80C: Lifecycle Advisory Batch.
 
-79D formalizes hook-bypass policy: forbidden by default, accepted only as bounded documented
-exceptions with exact commit/file scope. 79E adds artifact metadata consistency validation
-with strict/advisory modes (full SHA256 required). 79F adds task-memory reconciliation test
-coverage. 30 new tests. Completes the 79 governance hardening stream.
+80A defines the lifecycle state machine (17 states, artifact-based detection). 80B adds
+read-only lifecycle status command. 80C adds read-only next-step recommendation command.
+All commands are advisory only — no gate execution, no approval, no mutation. 24 new tests.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
