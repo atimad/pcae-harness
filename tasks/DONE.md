@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 80F Lifecycle Final Summary Command (20260623-0329-phase-80f-lifecycle-final-summary-command)
 - Phase 80E Lifecycle Gate Approval (20260623-0320-phase-80e-lifecycle-gate-approval)
 - Phase 80D Lifecycle Gate Runner Dry-Run (20260623-0311-phase-80d-lifecycle-gate-runner-dry-run)
 - Phases 80A-80C Lifecycle Advisory Batch (20260623-0257-phases-80a-80c-lifecycle-advisory-batch)

@@ -10,7 +10,7 @@ Phase 80F Lifecycle Final Summary Command
 
 ## Status
 
-active
+done
 
 ## Mode
 
