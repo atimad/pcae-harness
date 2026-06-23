@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 81A: Second Real Captured Task Selection.
+Phase 81B: Second Real Captured Task Contract.
 
-81A selects a documentation-only second real captured task: draft a lifecycle command family
-documentation snippet. No backend invocation, no source changes, no tests. Selection and
-planning only.
+81B formalizes REAL-CAPTURED-TASK-002 with exact prompt, output format, allowed/forbidden
+files, safety constraints, and all authorization flags false. Contract and preparation only,
+no backend invocation.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
