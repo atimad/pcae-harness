@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phase 82B: Agent Identity Capability Probe.
+Phase 82C: Subagent Discovery Contract.
 
-82B probed 4 backends: claude (available), claude-deepseek (available, wrapper), claude-kimi
-(missing), codex (available, unverified). No prompts sent, no task execution, no routing
-authorized. Probe and metadata recording only.
+82C defines the subagent discovery contract: identity/capability/safety models, discovery
+authorization, routing restrictions, validation rules, and artifact format. Design only,
+no probing or backend invocation.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
