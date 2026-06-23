@@ -2,10 +2,11 @@
 
 ## Current Phase
 
-Phase 81H: Second README Adoption Execution.
+Phase 81I: Second Lifecycle Final Verification.
 
-81H adopts the approved REAL-CAPTURED-TASK-002 snippet into README.md as a lifecycle command
-documentation section. No source/test changes, no backend invocation.
+81I verifies and closes the second real captured task lifecycle (81A-81I). README 7/7 content
+checks passed, 8/8 artifacts verified, lifecycle_closed=true. Second lifecycle completed in
+9 phases with zero friction incidents.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
