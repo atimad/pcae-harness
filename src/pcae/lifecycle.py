@@ -231,3 +231,209 @@ def get_next_recommendation(state_id: str) -> dict[str, Any]:
         "required_approval": state.approval_required,
         "required_preconditions": [f"artifact: {state.artifact_dir}"] if state.artifact_dir else [],
     }
+
+
+# ── Phase 80D: Gate definitions for dry-run evaluation ──
+
+
+@dataclass(frozen=True)
+class GateDefinition:
+    gate_id: str
+    label: str
+    gate_kind: str
+    allowed_from_states: tuple[str, ...]
+    target_state: str
+    required_artifacts: tuple[str, ...]
+    required_approvals: tuple[str, ...]
+    required_preconditions: tuple[str, ...]
+    dangerous_if_executed: bool
+    future_execution_phase: str
+
+
+GATE_DEFINITIONS: dict[str, GateDefinition] = {
+    "backend_capture_preflight": GateDefinition(
+        "backend_capture_preflight", "Backend Capture Preflight", "review",
+        ("idle",), "backend_capture_attempted",
+        ("task contract", "backend lock"), (), ("clean working tree",),
+        False, "77E",
+    ),
+    "backend_capture": GateDefinition(
+        "backend_capture", "Backend Capture", "backend",
+        ("backend_capture_attempted",), "mutation_detected",
+        ("backend capture preflight",), (), ("backend lock", "clean working tree"),
+        True, "77F/77J",
+    ),
+    "mutation_intake": GateDefinition(
+        "mutation_intake", "Mutation Intake", "intake",
+        ("mutation_detected",), "quarantined",
+        ("backend capture result",), (), (),
+        False, "77G/77K",
+    ),
+    "quarantine_review": GateDefinition(
+        "quarantine_review", "Quarantine Review", "review",
+        ("mutation_detected", "quarantined"), "quarantined",
+        ("mutation intake",), (), ("file exists", "file untracked"),
+        False, "77L",
+    ),
+    "adoption_preflight": GateDefinition(
+        "adoption_preflight", "Adoption Preflight", "review",
+        ("quarantined",), "adoption_review_ready",
+        ("quarantine review",), (), (),
+        False, "77M",
+    ),
+    "adoption_review": GateDefinition(
+        "adoption_review", "Adoption Review", "review",
+        ("adoption_review_ready",), "adoption_reviewed",
+        ("adoption preflight",), (), ("content safety scan",),
+        False, "77N",
+    ),
+    "adoption_approval": GateDefinition(
+        "adoption_approval", "Adoption Approval", "approval",
+        ("adoption_reviewed",), "adoption_approved",
+        ("adoption review",), ("operator adoption approval",), (),
+        False, "77O",
+    ),
+    "adoption_execution_preflight": GateDefinition(
+        "adoption_execution_preflight", "Adoption Execution Preflight", "review",
+        ("adoption_approved",), "adoption_execution_ready",
+        ("adoption approval",), (), ("safety gates",),
+        False, "77P",
+    ),
+    "adoption_execution": GateDefinition(
+        "adoption_execution", "Adoption Execution", "execution",
+        ("adoption_execution_ready",), "staged_for_commit",
+        ("execution preflight",), (), ("clean working tree",),
+        True, "77Q",
+    ),
+    "commit_approval": GateDefinition(
+        "commit_approval", "Commit Approval", "approval",
+        ("staged_for_commit",), "commit_approved",
+        ("adoption execution",), ("operator commit approval",), ("file staged",),
+        False, "77R",
+    ),
+    "commit_execution": GateDefinition(
+        "commit_execution", "Commit Execution", "execution",
+        ("commit_approved",), "committed_for_push",
+        ("commit approval",), (), ("staged file matches approval",),
+        True, "77S",
+    ),
+    "hook_bypass_reconciliation": GateDefinition(
+        "hook_bypass_reconciliation", "Hook Bypass Reconciliation", "review",
+        ("committed_for_push",), "hook_bypass_reconciled",
+        ("commit execution",), (), (),
+        False, "77S.1",
+    ),
+    "push_approval": GateDefinition(
+        "push_approval", "Push Approval", "approval",
+        ("committed_for_push", "hook_bypass_reconciled"), "push_approved",
+        ("commit execution", "hook bypass reconciliation"), ("operator push approval",), ("clean working tree",),
+        False, "77T",
+    ),
+    "push_execution": GateDefinition(
+        "push_execution", "Push Execution", "execution",
+        ("push_approved",), "pushed",
+        ("push approval",), (), ("clean working tree", "no force push"),
+        True, "77U",
+    ),
+    "final_verification": GateDefinition(
+        "final_verification", "Final Verification", "verification",
+        ("pushed",), "final_verified",
+        ("push execution",), (), ("clean working tree", "origin/main reachable"),
+        False, "77V",
+    ),
+    "tooling_closure": GateDefinition(
+        "tooling_closure", "Tooling Closure", "closure",
+        ("final_verified",), "closed",
+        ("final verification",), (), ("clean working tree",),
+        False, "77V.1",
+    ),
+}
+
+
+def evaluate_gate_dry_run(gate_id: str, current_state: str) -> dict[str, Any]:
+    """Evaluate whether a gate would be runnable. Read-only, no execution."""
+    if gate_id not in GATE_DEFINITIONS:
+        return {
+            "allowed_next_actions": [],
+            "allowed_next_states": [],
+            "approval_performed": False,
+            "backend_invocation_performed": False,
+            "blockers": [f"Unknown gate: {gate_id}"],
+            "commit_performed": False,
+            "current_state": current_state,
+            "dry_run": True,
+            "execution_authorized": False,
+            "force_push_performed": False,
+            "gate": gate_id,
+            "gate_execution_performed": False,
+            "gate_kind": "unknown",
+            "lifecycle_gate_dry_run_status": "unknown_gate",
+            "lifecycle_type": "backend-output-adoption",
+            "planned_action_summary": "No action: unknown gate.",
+            "push_performed": False,
+            "raw_git_push_performed": False,
+            "read_only": True,
+            "required_approvals": [],
+            "required_artifacts": [],
+            "required_preconditions": [],
+            "runner_execute_performed": False,
+            "target_state": "",
+            "warnings": [],
+        }
+
+    gate = GATE_DEFINITIONS[gate_id]
+    bl: list[str] = []
+    wl: list[str] = []
+
+    # Check if transition is legal from current state
+    legal = current_state in gate.allowed_from_states
+    if not legal:
+        if current_state == "closed":
+            bl.append(f"Lifecycle is closed. Gate '{gate.label}' is not available from closed state.")
+        elif current_state == "blocked":
+            bl.append("Lifecycle is blocked. Resolve blockers before running gates.")
+        else:
+            bl.append(f"Gate '{gate.label}' is not allowed from state '{current_state}'. Allowed from: {', '.join(gate.allowed_from_states)}.")
+
+    # Determine status
+    if bl:
+        status = "illegal_transition"
+    elif gate.required_approvals:
+        status = "ready"
+        wl.append(f"Approval required: {', '.join(gate.required_approvals)}.")
+    else:
+        status = "ready"
+
+    target_state_def = LIFECYCLE_STATES.get(gate.target_state, LIFECYCLE_STATES["blocked"])
+    action_desc = f"Would evaluate gate '{gate.label}' ({gate.gate_kind})"
+    if gate.dangerous_if_executed:
+        action_desc += " [DANGEROUS: modifies repository state]"
+    action_desc += f". Target state: {gate.target_state}. Phase: {gate.future_execution_phase}."
+
+    return {
+        "allowed_next_actions": list(target_state_def.allowed_next_actions),
+        "allowed_next_states": [gate.target_state],
+        "approval_performed": False,
+        "backend_invocation_performed": False,
+        "blockers": bl,
+        "commit_performed": False,
+        "current_state": current_state,
+        "dry_run": True,
+        "execution_authorized": False,
+        "force_push_performed": False,
+        "gate": gate_id,
+        "gate_execution_performed": False,
+        "gate_kind": gate.gate_kind,
+        "lifecycle_gate_dry_run_status": status if not bl else "illegal_transition",
+        "lifecycle_type": "backend-output-adoption",
+        "planned_action_summary": action_desc,
+        "push_performed": False,
+        "raw_git_push_performed": False,
+        "read_only": True,
+        "required_approvals": list(gate.required_approvals),
+        "required_artifacts": list(gate.required_artifacts),
+        "required_preconditions": list(gate.required_preconditions),
+        "runner_execute_performed": False,
+        "target_state": gate.target_state,
+        "warnings": wl,
+    }

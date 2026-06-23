@@ -1,4 +1,4 @@
-"""Read-only lifecycle advisory commands (Phases 80B-80C).
+"""Read-only lifecycle advisory commands (Phases 80B-80D).
 
 These commands inspect lifecycle artifacts and recommend next actions.
 They do not mutate state, invoke backends, run gates, or approve anything.
@@ -10,7 +10,7 @@ import json
 import subprocess
 
 from pcae.core.paths import HarnessPath
-from pcae.lifecycle import LIFECYCLE_STATES, detect_lifecycle_state, get_next_recommendation
+from pcae.lifecycle import LIFECYCLE_STATES, detect_lifecycle_state, get_next_recommendation, evaluate_gate_dry_run
 
 
 def _repo_indicators(root_path) -> dict:
@@ -141,3 +141,47 @@ def run_lifecycle_next(args: argparse.Namespace) -> int:
             for b in bl:
                 print(f"  BLOCKED: {b}")
     return 0
+
+
+def run_lifecycle_run_gate(args: argparse.Namespace) -> int:
+    root = HarnessPath.cwd()
+    gate_id = getattr(args, "gate", "") or ""
+    dry_run = getattr(args, "dry_run", False)
+
+    if not dry_run:
+        r = {
+            "blockers": ["--dry-run is required. Gate execution is not implemented."],
+            "dry_run": False,
+            "gate": gate_id,
+            "lifecycle_gate_dry_run_status": "dry_run_required",
+            "lifecycle_type": "backend-output-adoption",
+            "read_only": True,
+        }
+        if args.json:
+            print(json.dumps(r, indent=2, sort_keys=True))
+        else:
+            print("Gate runner blocked: --dry-run is required.")
+        return 1
+
+    state_id, _ = detect_lifecycle_state(root.path)
+    r = evaluate_gate_dry_run(gate_id, state_id)
+
+    if args.json:
+        print(json.dumps(r, indent=2, sort_keys=True))
+    else:
+        print(f"Gate Dry-Run: {gate_id}")
+        print("=" * 40)
+        print(f"  Status: {r['lifecycle_gate_dry_run_status']}")
+        print(f"  Current state: {r['current_state']}")
+        print(f"  Target state: {r['target_state']}")
+        print(f"  Gate kind: {r['gate_kind']}")
+        print(f"  Dry-run: yes (no execution)")
+        print(f"  Action: {r['planned_action_summary']}")
+        if r["blockers"]:
+            for b in r["blockers"]:
+                print(f"  BLOCKED: {b}")
+        if r["warnings"]:
+            for w in r["warnings"]:
+                print(f"  WARNING: {w}")
+
+    return 0 if r["lifecycle_gate_dry_run_status"] == "ready" else 1

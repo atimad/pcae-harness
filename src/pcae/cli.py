@@ -8204,7 +8204,7 @@ def build_parser() -> argparse.ArgumentParser:
     doctor_git_lock_parser.set_defaults(handler=run_doctor_git_lock)
 
     # ── pcae lifecycle ──
-    from pcae.commands.lifecycle import run_lifecycle_status, run_lifecycle_next
+    from pcae.commands.lifecycle import run_lifecycle_status, run_lifecycle_next, run_lifecycle_run_gate
 
     lifecycle_parser = subparsers.add_parser(
         "lifecycle",
@@ -8231,6 +8231,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     lifecycle_next_parser.add_argument("--json", action="store_true")
     lifecycle_next_parser.set_defaults(handler=run_lifecycle_next)
+
+    lifecycle_run_gate_parser = lifecycle_boa_subparsers.add_parser(
+        "run-gate",
+        help="Dry-run gate evaluation (read-only, --dry-run required).",
+    )
+    lifecycle_run_gate_parser.add_argument("--gate", required=True, help="Gate ID to evaluate.")
+    lifecycle_run_gate_parser.add_argument("--dry-run", action="store_true", help="Required. Evaluate without executing.")
+    lifecycle_run_gate_parser.add_argument("--json", action="store_true")
+    lifecycle_run_gate_parser.set_defaults(handler=run_lifecycle_run_gate)
 
     # ── pcae commit ──
     from pcae.commands.commit import run_commit_implementation

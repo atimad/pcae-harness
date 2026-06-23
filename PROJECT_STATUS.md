@@ -2,11 +2,11 @@
 
 ## Current Phase
 
-Phases 80A-80C: Lifecycle Advisory Batch.
+Phase 80D: Lifecycle Gate Runner Dry-Run.
 
-80A defines the lifecycle state machine (17 states, artifact-based detection). 80B adds
-read-only lifecycle status command. 80C adds read-only next-step recommendation command.
-All commands are advisory only — no gate execution, no approval, no mutation. 24 new tests.
+80D adds `pcae lifecycle backend-output-adoption run-gate --gate <gate> --dry-run [--json]`
+for read-only gate readiness evaluation. 16 gate definitions, --dry-run required, no
+execution/approval/mutation. 17 new tests.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
