@@ -2,12 +2,12 @@
 
 ## Current Phase
 
-Phase 79C: Staged-File-Aware Push.
+Phases 79D-79F: Governance Reliability Hardening.
 
-Phase 79C adds `--staged-file-aware` flag to `pcae push`. Pushes approved commits while
-preserving unrelated pre-existing staged files. Blocks if protected staged files appear in
-unpushed commit contents. Blocks force push. Completes the 79A-79C staged-file-aware
-governance hardening series. 10 new tests.
+79D formalizes hook-bypass policy: forbidden by default, accepted only as bounded documented
+exceptions with exact commit/file scope. 79E adds artifact metadata consistency validation
+with strict/advisory modes (full SHA256 required). 79F adds task-memory reconciliation test
+coverage. 30 new tests. Completes the 79 governance hardening stream.
 
 Phase 78A added docs/ROADMAP.md capturing the post-77V.1 direction.
 
