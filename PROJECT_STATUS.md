@@ -2,19 +2,28 @@
 
 ## Current Phase
 
-Phase 84K.3: Re-run Full Health Baseline After Refresh.
+Phase 84L: Roadmap Reconciliation and Phase 85 Planning.
 
-84K.3 re-runs the full health baseline after 84K.2's handoff state refresh. All PCAE commands pass
-(health=healthy, check=passed, doctor=clean, push=nothing_to_push). Repository clean, fully pushed,
-on main, synced with origin. 15/15 required artifacts present (expanded from 84K.1's 13/13 to include
-84K.1 and 84K.2 artifacts). 10/10 design artifacts consistent (implementation_status=not_started).
-Handoff-state-refresh: 4 blockers / 6 warnings persist unchanged across pre-84K.2, post-84K.2,
-and 84K.3 — classified as structural validator signals (not substantive governance blockers).
-Evidence: signals invariant across refresh, normal PCAE health passes, lifecycle summary clean.
-Bootstrap profile confirmed (modern test: `python -m pytest -n auto`, 3 serial exceptions).
-Governance status confirmed (all execution/invocation/adoption flags false). No blocking findings.
-Readiness decision: ready_for_84L_with_documented_structural_refresh_signals.
-Recommended next phase: 84L — Roadmap Reconciliation and Phase 85 Planning.
+84L reconciles the original Phase 84 persistent memory/project intelligence roadmap with the actual
+Phase 84 multi-agent governance design stream. The original Phase 84 plan (84A–84F: persistent
+lifecycle memory, artifact index, governance event timeline, decision log integration, risk register,
+project state snapshot) was deferred because the 83A–83L multi-agent lifecycle exposed a prerequisite:
+stable lifecycle objects and governance semantics before persistent memory. Phase 84 therefore produced
+10 governance design artifacts (84A–84J), a governance README summary (84K), health baselines
+(84K.1, 84K.3), handoff refresh (84K.2), and this reconciliation (84L). The original goals are
+now the Phase 85 sequence: 85A Persistent Lifecycle Memory Model, 85B Artifact Index,
+85C Governance Event Timeline, 85D Decision Log Integration, 85E Risk Register, 85F Project State
+Snapshot. Phase 85 builds on Phase 84 governance artifacts as inputs. Planning principles: build
+on Phase 84, design before implementation, maintain governance boundaries, reintroduce tests when
+implementation begins, preserve safety invariants. Deferred items carried forward: DF-1–DF-4,
+HY-1 (can be closed_no_action), IMPL-1, IMPL-2, TEST-1, HSR-1 (validator stale for doc streams).
+Recommends 85A as next phase. No Phase 85 task contract created.
+
+Phase 84K.3: Re-run Full Health Baseline After Refresh (completed).
+
+84K.3 re-ran the full health baseline after 84K.2. All PCAE commands pass. 15/15 artifacts present.
+Handoff-state-refresh 4B/6W classified as structural. Readiness decision:
+ready_for_84L_with_documented_structural_refresh_signals.
 
 Phase 84K.2: Handoff State Refresh and Bootstrap Alignment (completed).
 
