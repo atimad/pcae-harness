@@ -2,9 +2,23 @@
 
 ## Current Phase
 
-Phase 84H: Multi-Agent Backend Invocation Guard Hardening.
+Phase 84I: Multi-Agent Prompt Capture Storage Policy.
 
-84H defines a backend invocation guard design (v0.1) for governed multi-agent execution: 15-threat
+84I defines a prompt/capture storage policy (v0.1) for governed multi-agent execution: 15-threat
+storage model, 11 storage design principles, 12-entity storage model (prompt_package through
+retention_record), prompt storage policy (10 fields with 3 location options), prompt hash policy
+(7 fields, SHA256, immutable-after-approval), invocation metadata storage policy (15 fields),
+stdout/stderr capture storage policy (11 fields, 3 storage classes), raw backend output policy
+(7 fields, not-git-tracked-by-default, not-adopted-by-default), capture manifest policy (12 fields,
+append-safe/versioned), git-tracked vs non-git policy (5 categories), proposed path conventions
+(10 entities), retention policy (6 classes with cleanup rules), redaction/secret-handling policy
+(7 fields with detection/redaction workflow), adoption review reference policy (5 fields with
+reference chain), integrity verification policy (9 fields, 5 verification levels, offline audit),
+failure/recovery policy (13 entries). Example storage manifest based on 83G. 35 validation rules.
+18 failure cases. storage_policy_status=draft_documented, storage_policy_implementation_status=
+not_started. Recommends 84J (Multi-Agent Deferred Item Tracker).
+
+Phase 84H defined a backend invocation guard design (v0.1) for governed multi-agent execution: 15-threat
 model, 10 guard design principles, 20 required pre-invocation checks, agent identity checks (9 fields),
 backend command checks (9 fields with exact matching), wrapper verification checks (9 fields),
 prompt package checks (12 fields), prompt hash checks (6 fields with SHA256), authorization flag
@@ -13,7 +27,7 @@ non-interactive invocation checks (6 fields), timeout policy checks (5 fields), 
 (10 fields), capture requirement checks (10 fields). Guard decision model with 5 decisions and 12
 output fields. 22 blocked reason codes. Illustrative guard decisions for 83G planner/reviewer route.
 40 validation rules. 20 failure cases. guard_design_status=draft_documented,
-guard_implementation_status=not_started. Recommends 84I (Multi-Agent Prompt Capture Storage Policy).
+guard_implementation_status=not_started.
 
 Phase 84G designed a dry-run command surface (v0.1) for inspecting multi-agent lifecycle state: 8 proposed
 commands (status, next, check-transition, explain-blocked, required-artifacts, flags, failures,
