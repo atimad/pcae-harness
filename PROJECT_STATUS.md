@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 86I: Phase 85 Integration Tests.
+Phase 86J: Phase 86 Read-Only Stack Documentation Update.
+
+86J updates user-facing and project-facing documentation to describe the completed Phase 86
+read-only project-intelligence stack. Adds README section documenting all six commands, read-only
+guarantees, non-authorizing boundary, test coverage (7122 tests). Creates
+docs/PHASE_85_READ_ONLY_STACK_SUMMARY.md covering completed sequence, available commands, output
+layers, read-only guarantees, non-authorizing boundary, storage/cache policy, test coverage,
+integration guarantees, what PCAE can now answer, what it cannot do, limitations. Updates README
+roadmap to reflect 86-series completion. Documentation/status only — no source or test changes.
+Recommends 86K — Phase 86 Read-Only Stack Final Verification.
+
+Phase 86I: Phase 85 Integration Tests (completed).
 
 86I adds integration tests for the complete Phase 85 read-only project-intelligence stack.
 Validates all six commands together: artifact-index, memory-snapshot, governance-timeline,

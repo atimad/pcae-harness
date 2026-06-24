@@ -225,7 +225,26 @@ Phases 84A–84K were documentation and design-only: they produced governance de
 
 ### Next Steps
 
-The recommended next phase is **84L — Roadmap Reconciliation and Phase 85 Planning**, which should reconcile the original persistent memory/project intelligence roadmap (lifecycle memory model, artifact index, governance event timeline, decision log integration, risk register, project state snapshot) with the expanded 84-series multi-agent governance stream, then define Phase 85.
+The 84-series multi-agent governance design stream was reconciled in Phase 84L with a Phase 85 plan. Phase 85 designs (85A–85F) and Phase 86 implementation (86A–86I) are complete. See the **Read-Only Project Intelligence Stack** section below.
+
+## Read-Only Project Intelligence Stack
+
+Phases 86A–86I implemented a read-only project-intelligence stack that answers governance questions from committed evidence. Six commands are available:
+
+| Command | Purpose |
+|---------|---------|
+| `pcae artifact-index --json` | Lists governance artifacts with type, path, status, and freshness |
+| `pcae memory-snapshot --json` | Reports current project memory state: phase, lifecycle, roadmap |
+| `pcae governance-timeline --json` | Extracts ordered governance events from commits and artifacts |
+| `pcae decision-log --json` | Extracts decision records with scope and authorization flags |
+| `pcae risk-register --json` | Extracts risk records: active, accepted, deferred, stale, must-never-repeat |
+| `pcae project-state --json` | Integrates all five layers into a single project-state answer |
+
+**Read-only and non-authorizing.** These commands report observed governance state from committed evidence. They do not grant permission, authorize execution, invoke agents, approve adoption, permit commits, or permit pushes. All outputs are JSON to stdout — no generated cache, no committed state files, no `.pcae` storage.
+
+**Test coverage.** 183 tests across 86C–86I, including 38 integration tests validating cross-layer consistency, no-write behavior, and no authority inference. Full suite: `python -m pytest -n auto` — 7122 passed, 0 failures.
+
+For the full summary, see [docs/PHASE_85_READ_ONLY_STACK_SUMMARY.md](docs/PHASE_85_READ_ONLY_STACK_SUMMARY.md).
 
 ## CLI Examples
 
@@ -305,10 +324,13 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#current-limitations) for the ful
 | Capability and roadmap intelligence | Complete — Phase 64B Series; capability inventory, roadmap/prompt/skill intelligence |
 | Strategic governance and independent review | Complete — Phase 65A–68D; strategic lineage, IRG challenge |
 | **Execution governance activation (BR-005)** | **Complete — Phase 69A–69O; full approval → authorization → audit → activation → sandboxing → change capture → promotion → rollback chain** |
+| **Multi-agent governance design** | **Complete — Phase 82A–84K; agent discovery, routing, prompts, capture, intake, adoption, lifecycle state machine, invocation guard, storage policy, deferred tracker** |
+| **Phase 85 persistent memory design** | **Complete — Phase 85A–85F; memory model, artifact index, event timeline, decision log, risk register, project state snapshot** |
+| **Phase 86 read-only implementation** | **Complete — Phase 86A–86I; six read-only CLI commands, 183 tests, 38 integration tests, cross-layer consistency verified** |
 
 ### Next
 
-There is no currently active successor phase. Phase 69O remains the formally active phase in the authoritative roadmap registry (`_CRI_KNOWN_PHASES` requires exactly one active phase) pending an explicit, human-approved phase activation decision — this is intentional governance behavior, not an oversight (see [Phase Activation Governance](docs/ARCHITECTURE.md#current-limitations) in the architecture doc and the open item in [tasks/TODO.md](tasks/TODO.md)).
+The Phase 85 design sequence (85A–85F) and Phase 86 implementation sequence (86A–86I) are complete. The read-only project-intelligence stack is implemented and integration-tested. The recommended next phase is **86K — Phase 86 Read-Only Stack Final Verification**.
 
 ## Contributing
 
