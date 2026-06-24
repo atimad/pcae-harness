@@ -2,22 +2,24 @@
 
 ## Current Phase
 
-Phase 86A: Phase 85 Implementation Roadmap.
+Phase 86B: Phase 85 Data Model and Storage Design.
 
-86A plans the governed implementation of Phase 85 designs (85A–85F) into working PCAE functionality.
-Planning only — no implementation. 10 implementation principles (read-only first, no execution/
-adoption/commit-push authorization from memory, repo artifacts source of truth, test-backed, small
-vertical slice, snapshot generated from lower layers, permission broker remains future). 10-threat
-implementation model. Recommended dependency order: 86B data model/storage → 86C artifact index →
-86D memory snapshot → 86E timeline → 86F decision log → 86G risk register → 86H project state CLI
-→ 86I integration tests. Minimum viable scope: read-only artifact index + memory snapshot +
-project-state JSON command. Storage strategy: start with read-only command output, no persisted
-cache, defer .pcae storage to explicit phase. 7 proposed CLI commands (artifact-index, memory-
-snapshot, timeline, decision-log, risk-register, project-state, project-state explain). 6 data
-models (ArtifactRecord, MemorySnapshot, GovernanceEvent, DecisionEntry, RiskEntry,
-ProjectStateSnapshot). Test strategy: python -m pytest -n auto, 3 serial exceptions, 13 test areas.
-8 governance gates. 10 safety boundaries. 8 rollout phases. 11 implementation risks. 5 open
-questions. Recommends 86B — Phase 85 Data Model and Storage Design.
+86B defines shared data model contracts and storage boundaries for Phase 85 implementation. Design
+only — no implementation. 6 core model contracts: ArtifactRecord (19 fields), MemorySnapshot (21
+fields), GovernanceEvent (19 fields), DecisionRecord (25 fields), RiskRecord (32 fields),
+ProjectStateSnapshot (41 fields). 13 common field conventions. 11 common status values. 7 evidence
+levels. 5 freshness values. 13 data model design principles. 9 storage design principles. 15-threat
+model. Cross-model relationships documented. 8 source-of-truth/provenance rules. JSON output
+conventions (8 conventions with example envelope). Storage strategy: command-output only for first
+implementation, no cache, no .pcae storage. Read-only command-output strategy (5 rules). Generated
+cache policy (deferred, non-authoritative when introduced). .pcae storage deferral policy (deferred,
+requires gate). 48 validation rules. 15 failure cases. Example model records. Recommends 86C —
+Read-Only Artifact Index Prototype.
+
+Phase 86A: Phase 85 Implementation Roadmap (completed).
+
+86A planned the governed implementation: dependency order 86B–86I, minimum viable scope, storage
+strategy, 7 CLI commands, 6 data models, test strategy, 8 governance gates.
 
 Phase 85F: Project State Snapshot (completed, capstone of Phase 85 design sequence).
 
