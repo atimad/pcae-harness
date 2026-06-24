@@ -43,4 +43,4 @@ rules, and future implementation/test expectations. Design only — no implement
 
 - [x] Created
 - [x] In Progress
-- [ ] Complete
+- [x] Complete
