@@ -40,4 +40,4 @@ No new CLI features. No storage. No cache.
 
 - [x] Created
 - [x] In Progress
-- [ ] Complete
+- [x] Complete
