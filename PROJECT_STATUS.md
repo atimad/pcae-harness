@@ -2,7 +2,19 @@
 
 ## Current Phase
 
-Phase 87F: Adoption and Mutation Gate Dry-Run.
+Phase 87G: Commit and Push Gate Dry-Run.
+
+87G extends pcae gate-dry-run with concrete commit and push evaluation. commit_gate now includes
+commit_evaluation field (commit_status, repository_clean, staged/unstaged changes, commit message,
+human approval, task contract, lifecycle state). push_gate now includes push_evaluation field
+(push_status, branch, origin sync, ahead count, push target, raw/force push detection, human
+approval, task contract, lifecycle state). Adds optional --commit-message-present and --push-target
+CLI flags. No staging, no commit, no push, no raw push, no force push. No gate produces allow.
+authorization_granted=false for every gate. Commit/push safety notes added. 26 tests added
+(tests/test_commit_push_gate.py). Total test count: 7249 (up from 7223). Recommends 87H —
+Permission Broker Architecture Design.
+
+Phase 87F: Adoption and Mutation Gate Dry-Run (completed).
 
 87F extends pcae gate-dry-run with concrete adoption and mutation evaluation.
 adoption_approval_gate now includes adoption_evaluation field. source_mutation_gate and

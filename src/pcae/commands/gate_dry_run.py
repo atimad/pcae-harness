@@ -14,6 +14,8 @@ def run_gate_dry_run(args: argparse.Namespace) -> int:
     prompt_present = getattr(args, "prompt_present", False) or False
     adoption_artifact_present = getattr(args, "adoption_artifact_present", False) or False
     human_approved = getattr(args, "human_approved", False) or False
+    commit_message_present = getattr(args, "commit_message_present", False) or False
+    push_target = getattr(args, "push_target", None)
     data = build_gate_dry_run(
         HarnessPath.cwd().path,
         requested_action=requested_action,
@@ -22,6 +24,8 @@ def run_gate_dry_run(args: argparse.Namespace) -> int:
         prompt_present=prompt_present,
         adoption_artifact_present=adoption_artifact_present,
         human_approved=human_approved,
+        commit_message_present=commit_message_present,
+        push_target=push_target,
     )
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=False))

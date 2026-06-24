@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -405,6 +406,173 @@ def _evaluate_mutation(
     }
 
 
+def _git_porcelain(repo_root: Path) -> str | None:
+    try:
+        r = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True, text=True, cwd=repo_root, timeout=10,
+        )
+        if r.returncode == 0:
+            return r.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+    return None
+
+
+def _git_branch_name(repo_root: Path) -> str | None:
+    try:
+        r = subprocess.run(
+            ["git", "branch", "--show-current"],
+            capture_output=True, text=True, cwd=repo_root, timeout=10,
+        )
+        if r.returncode == 0:
+            return r.stdout.strip()
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+    return None
+
+
+def _git_ahead_count(repo_root: Path) -> int | None:
+    try:
+        r = subprocess.run(
+            ["git", "rev-list", "--count", "origin/main..HEAD"],
+            capture_output=True, text=True, cwd=repo_root, timeout=10,
+        )
+        if r.returncode == 0:
+            return int(r.stdout.strip())
+    except (subprocess.TimeoutExpired, FileNotFoundError, ValueError):
+        pass
+    return None
+
+
+def _evaluate_commit(
+    requested_action: str | None,
+    commit_message_present: bool,
+    human_approved: bool,
+    task_contract: dict[str, Any] | None,
+    repo_root: Path,
+    snap: dict[str, Any],
+) -> dict[str, Any]:
+    is_commit = requested_action == "commit"
+    porcelain = _git_porcelain(repo_root)
+    repo_clean = porcelain == "" if porcelain is not None else None
+    staged = porcelain is not None and any(
+        line and line[0] in "AMDRC" for line in porcelain.split("\n")
+    ) if porcelain else False
+    unstaged = porcelain is not None and any(
+        line and len(line) > 1 and line[1] in "MD" for line in porcelain.split("\n")
+    ) if porcelain else False
+
+    if not is_commit:
+        return {
+            "commit_status": "not_requested",
+            "requested_action": requested_action,
+            "repository_clean": repo_clean,
+            "staged_changes_detected": staged,
+            "unstaged_changes_detected": unstaged,
+            "commit_message_present": commit_message_present,
+            "human_approval_detected": False,
+            "task_contract_detected": task_contract is not None,
+            "task_contract_path": task_contract["path"] if task_contract else None,
+            "lifecycle_state": snap.get("current_lifecycle_state", "unknown"),
+            "check_status": "unknown",
+            "health_status": "unknown",
+            "evidence_sources": [],
+            "commit_notes": "commit not requested",
+        }
+
+    tc_detected = task_contract is not None
+    if not tc_detected:
+        status = "requested_requires_more_evidence"
+    elif not commit_message_present:
+        status = "requested_requires_more_evidence"
+    elif human_approved:
+        status = "requested_requires_human_review"
+    else:
+        status = "requested_requires_human_review"
+
+    return {
+        "commit_status": status,
+        "requested_action": "commit",
+        "repository_clean": repo_clean,
+        "staged_changes_detected": staged,
+        "unstaged_changes_detected": unstaged,
+        "commit_message_present": commit_message_present,
+        "human_approval_detected": human_approved,
+        "task_contract_detected": tc_detected,
+        "task_contract_path": task_contract["path"] if tc_detected else None,
+        "lifecycle_state": snap.get("current_lifecycle_state", "unknown"),
+        "check_status": "unknown",
+        "health_status": "unknown",
+        "evidence_sources": [task_contract["path"]] if tc_detected else [],
+        "commit_notes": f"commit_status={status}, dry_run_only=true",
+    }
+
+
+def _evaluate_push(
+    requested_action: str | None,
+    push_target: str | None,
+    human_approved: bool,
+    task_contract: dict[str, Any] | None,
+    repo_root: Path,
+    snap: dict[str, Any],
+) -> dict[str, Any]:
+    is_push = requested_action == "push"
+    branch = _git_branch_name(repo_root)
+    ahead = _git_ahead_count(repo_root)
+    if ahead is not None and ahead == 0:
+        sync = "synced"
+    elif ahead is not None:
+        sync = f"ahead_by_{ahead}"
+    else:
+        sync = "unknown"
+
+    if not is_push:
+        return {
+            "push_status": "not_requested",
+            "requested_action": requested_action,
+            "branch": branch,
+            "origin_sync_status": sync,
+            "origin_main_head_count": ahead,
+            "push_target": push_target,
+            "raw_push_detected": False,
+            "force_push_detected": False,
+            "human_approval_detected": False,
+            "task_contract_detected": task_contract is not None,
+            "task_contract_path": task_contract["path"] if task_contract else None,
+            "lifecycle_state": snap.get("current_lifecycle_state", "unknown"),
+            "push_check_status": "unknown",
+            "evidence_sources": [],
+            "push_notes": "push not requested",
+        }
+
+    tc_detected = task_contract is not None
+    if not tc_detected:
+        status = "requested_requires_more_evidence"
+    elif human_approved:
+        status = "requested_requires_human_review"
+    else:
+        status = "requested_requires_human_review"
+
+    return {
+        "push_status": status,
+        "requested_action": "push",
+        "branch": branch,
+        "origin_sync_status": sync,
+        "origin_main_head_count": ahead,
+        "push_target": push_target or "origin/main",
+        "raw_push_detected": False,
+        "force_push_detected": False,
+        "human_approval_detected": human_approved,
+        "task_contract_detected": tc_detected,
+        "task_contract_path": task_contract["path"] if tc_detected else None,
+        "lifecycle_state": snap.get("current_lifecycle_state", "unknown"),
+        "push_check_status": "unknown",
+        "evidence_sources": [task_contract["path"]] if tc_detected else [],
+        "push_notes": f"push_status={status}, dry_run_only=true",
+    }
+
+
 _HIGH_RISK_ACTIONS = {
     "backend_invocation", "prompt_send", "adoption", "storage_write", "shell_command",
 }
@@ -421,7 +589,9 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
                    requested_backend: str | None = None,
                    prompt_present: bool = False,
                    adoption_artifact_present: bool = False,
-                   human_approved: bool = False) -> dict[str, Any]:
+                   human_approved: bool = False,
+                   commit_message_present: bool = False,
+                   push_target: str | None = None) -> dict[str, Any]:
     gate_id = gate_def["gate_id"]
     risk_level = gate_def["risk_level"]
     now = datetime.now(timezone.utc).isoformat()
@@ -436,6 +606,8 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
     backend_evaluation: dict[str, Any] | None = None
     adoption_evaluation: dict[str, Any] | None = None
     mutation_evaluation: dict[str, Any] | None = None
+    commit_evaluation: dict[str, Any] | None = None
+    push_evaluation: dict[str, Any] | None = None
 
     task_contract = _detect_task_contract(repo_root)
 
@@ -519,14 +691,56 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         decision = "deny"
         reason_codes = ["rollback_not_authorized", "human_approval_required"]
     elif gate_id == "commit_gate":
-        decision = "requires_human_review"
-        reason_codes = ["human_approval_required"]
+        commit_evaluation = _evaluate_commit(
+            requested_action, commit_message_present, human_approved,
+            task_contract, repo_root, snap,
+        )
+        cs = commit_evaluation["commit_status"]
+        if cs == "not_requested":
+            decision = "requires_more_evidence"
+            reason_codes = ["commit_not_authorized", "missing_artifact_evidence"]
+        elif cs == "requested_requires_human_review":
+            decision = "requires_human_review"
+            reason_codes = ["commit_not_authorized", "human_approval_required"]
+        elif cs == "requested_requires_more_evidence":
+            decision = "requires_more_evidence"
+            reason_codes = ["commit_not_authorized", "missing_artifact_evidence"]
+        elif cs == "requested_blocked":
+            decision = "deny"
+            reason_codes = ["commit_not_authorized"]
+        else:
+            decision = "requires_human_review"
+            reason_codes = ["commit_not_authorized", "human_approval_required"]
+        for ctrl in mnr:
+            if "hook_bypass" in ctrl.get("risk_type", ""):
+                if "must_never_repeat_control_applies" not in reason_codes:
+                    reason_codes.append("must_never_repeat_control_applies")
+                break
     elif gate_id == "push_gate":
-        decision = "requires_human_review"
-        reason_codes = ["human_approval_required"]
+        push_evaluation = _evaluate_push(
+            requested_action, push_target, human_approved,
+            task_contract, repo_root, snap,
+        )
+        ps_status = push_evaluation["push_status"]
+        if ps_status == "not_requested":
+            decision = "requires_more_evidence"
+            reason_codes = ["push_not_authorized", "missing_artifact_evidence"]
+        elif ps_status == "requested_requires_human_review":
+            decision = "requires_human_review"
+            reason_codes = ["push_not_authorized", "human_approval_required"]
+        elif ps_status == "requested_requires_more_evidence":
+            decision = "requires_more_evidence"
+            reason_codes = ["push_not_authorized", "missing_artifact_evidence"]
+        elif ps_status == "requested_blocked":
+            decision = "deny"
+            reason_codes = ["push_not_authorized"]
+        else:
+            decision = "requires_human_review"
+            reason_codes = ["push_not_authorized", "human_approval_required"]
         for ctrl in mnr:
             if "raw_push" in ctrl.get("risk_type", ""):
-                reason_codes.append("must_never_repeat_control_applies")
+                if "must_never_repeat_control_applies" not in reason_codes:
+                    reason_codes.append("must_never_repeat_control_applies")
                 break
     elif gate_id in ("source_mutation_gate", "test_mutation_gate"):
         scope_for_mut = _evaluate_scope(
@@ -639,6 +853,10 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         result["adoption_evaluation"] = adoption_evaluation
     if mutation_evaluation is not None:
         result["mutation_evaluation"] = mutation_evaluation
+    if commit_evaluation is not None:
+        result["commit_evaluation"] = commit_evaluation
+    if push_evaluation is not None:
+        result["push_evaluation"] = push_evaluation
 
     return result
 
@@ -651,6 +869,8 @@ def build_gate_dry_run(
     prompt_present: bool = False,
     adoption_artifact_present: bool = False,
     human_approved: bool = False,
+    commit_message_present: bool = False,
+    push_target: str | None = None,
 ) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
@@ -668,7 +888,8 @@ def build_gate_dry_run(
         result = _evaluate_gate(gate_def, ps, rr, repo_root,
                                 requested_action, req_files,
                                 requested_backend, prompt_present,
-                                adoption_artifact_present, human_approved)
+                                adoption_artifact_present, human_approved,
+                                commit_message_present, push_target)
         gates.append(result)
 
     return {
@@ -707,6 +928,19 @@ def build_gate_dry_run(
             "requested_backend_is_not_approval": True,
             "prompt_presence_is_not_approval": True,
             "scope_match_is_not_backend_approval": True,
+            "commit_gate_dry_run_only": True,
+            "commit_gate_does_not_stage_files": True,
+            "commit_gate_does_not_create_commit": True,
+            "commit_gate_does_not_authorize_commit": True,
+            "push_gate_dry_run_only": True,
+            "push_gate_does_not_push": True,
+            "push_gate_does_not_raw_push": True,
+            "push_gate_does_not_force_push": True,
+            "push_gate_does_not_authorize_push": True,
+            "human_approval_flag_is_not_commit_authorization": True,
+            "human_approval_flag_is_not_push_authorization": True,
+            "clean_repo_is_not_commit_authorization": True,
+            "push_check_pass_is_not_push_authorization": True,
             "adoption_gate_dry_run_only": True,
             "adoption_gate_does_not_review_output": True,
             "adoption_gate_does_not_approve_output": True,

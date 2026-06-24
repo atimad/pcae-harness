@@ -4535,6 +4535,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Indicate human approval is present for adoption/mutation evaluation.",
     )
+    gate_dry_run_parser.add_argument(
+        "--commit-message-present",
+        action="store_true",
+        help="Indicate a commit message is present for commit evaluation.",
+    )
+    gate_dry_run_parser.add_argument(
+        "--push-target",
+        metavar="TARGET",
+        help="Optional push target for push evaluation (e.g., origin/main).",
+    )
     gate_dry_run_parser.set_defaults(handler=run_gate_dry_run)
 
     task_parser = subparsers.add_parser(
