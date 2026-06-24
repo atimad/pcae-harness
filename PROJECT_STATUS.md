@@ -2,7 +2,20 @@
 
 ## Current Phase
 
-Phase 86H: Project State Snapshot CLI.
+Phase 86I: Phase 85 Integration Tests.
+
+86I adds integration tests for the complete Phase 85 read-only project-intelligence stack.
+Validates all six commands together: artifact-index, memory-snapshot, governance-timeline,
+decision-log, risk-register, project-state. 38 integration tests covering: valid JSON envelopes,
+cross-layer consistency (project-state layer_summary matches lower-layer counts, evidence artifacts
+match artifact index, active/accepted/stale risks match risk register), read-only/no-storage
+behavior, no authority inference across all commands, accepted-risk separation from active risk,
+stale signal visibility, must-never-repeat visibility, next-safe-actions are recommendations only,
+forbidden actions present, high-risk authorization booleans false, deterministic counts. No new
+CLI features. No storage. No cache. Total test count: 7122 (up from 7084). Completes Phase 85
+implementation sequence (86A–86I). Recommends 86J — Phase 86 Read-Only Stack Documentation Update.
+
+Phase 86H: Project State Snapshot CLI (completed).
 
 86H implements the sixth and capstone Phase 85 read-only CLI command: `pcae project-state [--json]`.
 Emits a project-state snapshot as JSON to stdout, integrating all five read-only layers: artifact
