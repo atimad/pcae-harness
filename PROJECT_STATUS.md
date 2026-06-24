@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 86K: Phase 86 Read-Only Stack Final Verification.
+Phase 87A: Phase 87 Planning — From Read-Only Intelligence to Governed Action Gates.
+
+87A creates the planning artifact for Phase 87. Defines the safe transition from Phase 86's
+read-only project intelligence to governed action gates. Documents: starting point (Phase 86
+stack verified), observation-versus-authorization boundary, 12 design principles, 15-threat
+model, 15 candidate action gates, gate decision model (10 decisions), gate input/output
+contracts, 13 human approval boundaries, storage/cache policy, permission broker relationship,
+shell gate relationship, CLI/action relationship, 12 safety invariants, test strategy, 10-phase
+rollout roadmap (87A–87J), 7 deferred items. Planning/documentation only — no implementation,
+no source code, no tests. Recommends 87B — Action Gate Taxonomy and Decision Model.
+
+Phase 86K: Phase 86 Read-Only Stack Final Verification (completed).
 
 86K performs final verification of the completed Phase 86 read-only stack. All six commands
 verified: artifact-index (14 records), memory-snapshot, governance-timeline (484 events),
