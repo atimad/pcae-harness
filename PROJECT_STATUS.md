@@ -2,7 +2,19 @@
 
 ## Current Phase
 
-Phase 87G: Commit and Push Gate Dry-Run.
+Phase 87H: Permission Broker Architecture Design.
+
+87H defines the architecture for a future PCAE permission broker. Documents: broker role (policy
+mediation layer, deny-by-default evaluator, human-review router, audit-event producer), 14 design
+principles, 15-threat model, broker input model (19 fields), broker output model (16 fields), 10
+decision values, 13 human review actions, gate relationship (consumes evidence, does not replace
+gates), project intelligence relationship (informs, does not authorize), shell gate relationship
+(separate enforcement layer), backend/mutation/adoption/commit/push relationships, storage/cache
+policy (none in 87H), 7 audit event types, failure handling (7 conditions), 12 safety invariants,
+future CLI/API sketch, 10-phase future roadmap. Architecture/design only — no implementation,
+no source, no tests. Recommends 87I — Shell Gate Architecture Design.
+
+Phase 87G: Commit and Push Gate Dry-Run (completed).
 
 87G extends pcae gate-dry-run with concrete commit and push evaluation. commit_gate now includes
 commit_evaluation field (commit_status, repository_clean, staged/unstaged changes, commit message,
