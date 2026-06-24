@@ -2,22 +2,25 @@
 
 ## Current Phase
 
-Phase 85E: Risk Register.
+Phase 85F: Project State Snapshot (capstone of Phase 85 design sequence).
 
-85E defines the risk register design — tracks active, accepted, mitigated, deferred, blocked, and
-closed governance risks. Design only — no implementation. 22 core risk types (execution, backend
-invocation, prompt sending, capture integrity, output intake, adoption, source/test mutation, commit,
-push, rollback, permission, shell gate, memory/artifact staleness, timeline ordering, decision log,
-deferred item, accepted, human override, must-never-repeat, documentation stale signal). 32 required
-risk fields. 9 risk status values. Severity (5 levels), likelihood (5 levels), exposure (5 levels)
-model. 13 design principles. 16-threat model. 7 identity rules. 10 lifecycle rules. 7 source-of-truth
-rules. Relationships to: persistent lifecycle memory (feeds risk/blocker/forbidden/next-action
-memory), artifact index (locates source artifacts), governance event timeline (risk/blocker events),
-decision log (accepted-risk/blocked/must-never-repeat decisions), deferred item tracker (deferred
-risks). 8 must-never-repeat controls. 10 query targets. 12 update rules. 42 validation rules. 15
-failure cases. Example risk register entries. Future implementation plan (85E.1–85E.3 candidates).
-risk_register_version=0.1, implementation_status=not_started. Recommends 85F — Project State
-Snapshot.
+85F defines the project state snapshot design — the integrated answer surface that combines the
+persistent lifecycle memory (85A), artifact index (85B), governance event timeline (85C), decision
+log (85D), and risk register (85E) to answer the original project-intelligence questions. Design
+only — no implementation. 12 snapshot source layers. 26 required snapshot sections. 41 required
+snapshot fields. 7 snapshot status values. 5 freshness levels. 14 design principles. 20-threat
+model. 8 source-of-truth rules. 12 query targets answering: what phase, what approved, what denied,
+what blocked, what deferred, what rejected, what risk accepted, what needs human review, what safe
+next, what must never repeat, what evidence supports, what changed since last. 12 snapshot update
+rules. 44 validation rules. 15 failure cases. Example snapshot. Phase 85 design sequence closure:
+85A–85F complete, all draft_documented, all implementation_status=not_started. Recommends 86A —
+Phase 85 Implementation Roadmap.
+
+Phase 85E: Risk Register (completed).
+
+85E defined the risk register design: 22 risk types, 32 fields, 9 status values, severity/likelihood/
+exposure model, 8 must-never-repeat controls, 42 validation rules, 15 failure cases.
+risk_register_version=0.1, implementation_status=not_started.
 
 Phase 85D: Decision Log Integration (completed).
 
