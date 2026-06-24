@@ -136,8 +136,124 @@ _GATE_DEFS: list[dict[str, Any]] = [
 ]
 
 
+def _detect_task_contract(repo_root: Path) -> dict[str, Any] | None:
+    active_dir = repo_root / "tasks" / "active"
+    if not active_dir.is_dir():
+        return None
+    for f in sorted(active_dir.iterdir()):
+        if f.suffix == ".md" and not f.name.startswith("."):
+            allowed: list[str] = []
+            forbidden: list[str] = []
+            section = ""
+            try:
+                for line in f.read_text().splitlines():
+                    stripped = line.strip()
+                    if stripped.startswith("## Allowed Files"):
+                        section = "allowed"
+                    elif stripped.startswith("## Forbidden Files"):
+                        section = "forbidden"
+                    elif stripped.startswith("## "):
+                        section = ""
+                    elif stripped.startswith("- ") and section in ("allowed", "forbidden"):
+                        entry = stripped[2:].strip()
+                        if section == "allowed":
+                            allowed.append(entry)
+                        else:
+                            forbidden.append(entry)
+            except OSError:
+                pass
+            return {
+                "path": str(f.relative_to(repo_root)),
+                "stem": f.stem,
+                "allowed_files": allowed,
+                "forbidden_files": forbidden,
+            }
+    return None
+
+
+def _evaluate_scope(
+    repo_root: Path,
+    requested_action: str | None,
+    requested_files: list[str],
+    task_contract: dict[str, Any] | None,
+) -> dict[str, Any]:
+    import fnmatch
+
+    if not task_contract:
+        return {
+            "scope_status": "unknown",
+            "requested_files": requested_files,
+            "allowed_files": [],
+            "forbidden_files": [],
+            "matched_allowed_files": [],
+            "matched_forbidden_files": [],
+            "unknown_files": requested_files,
+            "task_contract_detected": False,
+            "task_contract_path": None,
+            "evidence_sources": [],
+            "scope_notes": "no task contract detected",
+        }
+
+    allowed_patterns = task_contract["allowed_files"]
+    forbidden_patterns = task_contract["forbidden_files"]
+
+    matched_allowed: list[str] = []
+    matched_forbidden: list[str] = []
+    unknown: list[str] = []
+
+    for rf in requested_files:
+        is_allowed = any(
+            fnmatch.fnmatch(rf, pat) or rf == pat or rf.startswith(pat.rstrip("*"))
+            for pat in allowed_patterns
+        )
+        is_forbidden = any(
+            fnmatch.fnmatch(rf, pat) or rf == pat or rf.startswith(pat.rstrip("*"))
+            for pat in forbidden_patterns
+        )
+        if is_forbidden:
+            matched_forbidden.append(rf)
+        elif is_allowed:
+            matched_allowed.append(rf)
+        else:
+            unknown.append(rf)
+
+    if not requested_files:
+        scope_status = "unknown"
+    elif matched_forbidden:
+        scope_status = "out_of_scope"
+    elif unknown:
+        scope_status = "partially_in_scope" if matched_allowed else "unknown"
+    else:
+        scope_status = "in_scope"
+
+    return {
+        "scope_status": scope_status,
+        "requested_files": requested_files,
+        "allowed_files": allowed_patterns,
+        "forbidden_files": forbidden_patterns,
+        "matched_allowed_files": matched_allowed,
+        "matched_forbidden_files": matched_forbidden,
+        "unknown_files": unknown,
+        "task_contract_detected": True,
+        "task_contract_path": task_contract["path"],
+        "evidence_sources": [task_contract["path"]],
+        "scope_notes": f"scope_status={scope_status}, requested_action={requested_action or 'default'}",
+    }
+
+
+_HIGH_RISK_ACTIONS = {
+    "backend_invocation", "prompt_send", "adoption", "storage_write", "shell_command",
+}
+_WRITE_ACTIONS = {
+    "source_mutation", "test_mutation", "docs_mutation", "commit", "push",
+    "backend_invocation", "prompt_send", "adoption", "storage_write", "shell_command",
+}
+
+
 def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
-                   rr: dict[str, Any]) -> dict[str, Any]:
+                   rr: dict[str, Any], repo_root: Path,
+                   requested_action: str | None,
+                   requested_files: list[str]) -> dict[str, Any]:
     gate_id = gate_def["gate_id"]
     risk_level = gate_def["risk_level"]
     now = datetime.now(timezone.utc).isoformat()
@@ -148,6 +264,9 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
 
     reason_codes: list[str] = []
     decision = "deny"
+    scope_evaluation: dict[str, Any] | None = None
+
+    task_contract = _detect_task_contract(repo_root)
 
     if gate_id == "permission_broker_gate":
         decision = "deny"
@@ -197,12 +316,32 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
             decision = "deny"
             reason_codes = ["missing_task_contract"]
     elif gate_id == "scope_check_gate":
-        if snap.get("current_active_phase"):
-            decision = "requires_more_evidence"
-            reason_codes = ["scope_not_authorized"]
-        else:
+        scope_evaluation = _evaluate_scope(
+            repo_root, requested_action, requested_files, task_contract,
+        )
+        ss = scope_evaluation["scope_status"]
+        if not task_contract:
             decision = "deny"
             reason_codes = ["missing_task_contract"]
+        elif ss == "out_of_scope":
+            decision = "blocked_by_scope"
+            reason_codes = ["scope_not_authorized"]
+        elif ss == "in_scope":
+            if requested_action and requested_action in _WRITE_ACTIONS:
+                decision = "requires_human_review"
+                reason_codes = ["human_approval_required"]
+            elif requested_action and requested_action in _HIGH_RISK_ACTIONS:
+                decision = "deny"
+                reason_codes = [f"{requested_action}_not_authorized"]
+            else:
+                decision = "requires_more_evidence"
+                reason_codes = ["scope_not_authorized"]
+        elif ss == "partially_in_scope":
+            decision = "blocked_by_scope"
+            reason_codes = ["scope_not_authorized"]
+        else:
+            decision = "requires_more_evidence"
+            reason_codes = ["scope_not_authorized"]
     elif gate_id == "task_start_gate":
         lifecycle = snap.get("current_lifecycle_state", "unknown")
         if lifecycle == "closed":
@@ -219,7 +358,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
     evidence_artifacts = [r.get("risk_id", "") for r in active_risks[:3]]
     evidence_risks = [r.get("risk_id", "") for r in rr.get("risks", [])[:5]]
 
-    return {
+    result: dict[str, Any] = {
         "gate_id": gate_id,
         "gate_name": gate_def["gate_name"],
         "gate_category": gate_def["gate_category"],
@@ -234,9 +373,9 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         "evidence_risks": evidence_risks,
         "allowed_scope": None,
         "denied_scope": gate_def["protected_action"],
-        "requested_action": gate_def["protected_action"],
+        "requested_action": requested_action or gate_def["protected_action"],
         "requested_actor": "dry_run_evaluator",
-        "requested_files": [],
+        "requested_files": requested_files,
         "dry_run": True,
         "enforcement_performed": False,
         "authorization_granted": False,
@@ -245,10 +384,20 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         "schema_version": "0.1",
     }
 
+    if scope_evaluation is not None:
+        result["scope_evaluation"] = scope_evaluation
 
-def build_gate_dry_run(repo_root: Path) -> dict[str, Any]:
+    return result
+
+
+def build_gate_dry_run(
+    repo_root: Path,
+    requested_action: str | None = None,
+    requested_files: list[str] | None = None,
+) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
+    req_files = requested_files or []
 
     _ai = build_artifact_index(repo_root)
     _ms = build_memory_snapshot(repo_root)
@@ -259,7 +408,8 @@ def build_gate_dry_run(repo_root: Path) -> dict[str, Any]:
 
     gates: list[dict[str, Any]] = []
     for gate_def in _GATE_DEFS:
-        result = _evaluate_gate(gate_def, ps, rr)
+        result = _evaluate_gate(gate_def, ps, rr, repo_root,
+                                requested_action, req_files)
         gates.append(result)
 
     return {
@@ -289,6 +439,13 @@ def build_gate_dry_run(repo_root: Path) -> dict[str, Any]:
             "permission_broker_not_implemented": True,
             "shell_gate_not_implemented": True,
             "storage_not_implemented": True,
+            "scope_gate_dry_run_only": True,
+            "scope_gate_does_not_authorize_mutation": True,
+            "scope_gate_does_not_authorize_commit": True,
+            "scope_gate_does_not_authorize_push": True,
+            "scope_gate_does_not_authorize_backend_invocation": True,
+            "scope_gate_does_not_authorize_shell_execution": True,
+            "scope_in_scope_is_not_overall_authorization": True,
             "backend_invocation_performed": False,
             "repo_mutation_performed": False,
             "storage_written": False,

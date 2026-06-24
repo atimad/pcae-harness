@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 87C: Read-Only Gate Evaluation Dry-Run.
+Phase 87D: Scope Gate Prototype.
+
+87D extends pcae gate-dry-run with concrete scope evaluation. scope_check_gate now includes
+scope_evaluation field: scope_status, requested/allowed/forbidden/matched/unknown files, task
+contract detection, evidence sources. Adds optional --requested-action and --requested-file
+CLI flags. Evaluates files against active task contract using fnmatch. In-scope write actions
+→ requires_human_review (never allow). Out-of-scope → blocked_by_scope. Missing contract → deny.
+authorization_granted=false for every gate. Scope-specific safety notes added. 22 tests added
+(tests/test_scope_gate.py). Total test count: 7173 (up from 7151). Recommends 87E — Backend
+Invocation Gate Dry-Run.
+
+Phase 87C: Read-Only Gate Evaluation Dry-Run (completed).
 
 87C implements the first Phase 87 dry-run gate evaluator: `pcae gate-dry-run [--json]`. Evaluates
 all 15 gates from the 87B taxonomy in dry-run mode. Reports hypothetical gate decisions as JSON

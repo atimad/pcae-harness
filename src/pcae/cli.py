@@ -4504,6 +4504,17 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON gate dry-run output.",
     )
+    gate_dry_run_parser.add_argument(
+        "--requested-action",
+        metavar="ACTION",
+        help="Optional action to evaluate (e.g., read, source_mutation, commit).",
+    )
+    gate_dry_run_parser.add_argument(
+        "--requested-file",
+        action="append",
+        metavar="PATH",
+        help="Optional file path to evaluate scope for (repeatable).",
+    )
     gate_dry_run_parser.set_defaults(handler=run_gate_dry_run)
 
     task_parser = subparsers.add_parser(
