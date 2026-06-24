@@ -2,21 +2,28 @@
 
 ## Current Phase
 
-Phase 85D: Decision Log Integration.
+Phase 85E: Risk Register.
 
-85D defines the decision log integration design — the bridge between the event timeline (85C) and
-project-state answers. Design only — no implementation. 13 core decision types (approval, denial,
-deferral, rejection, human_override, accepted_risk, permission, blocked, rollback, commit, push,
-lifecycle_closure, must_never_repeat). 25 required decision fields. 11 decision status values. 12
-design principles. 15-threat model. 7 identity rules. 10 lifecycle rules. 6 source-of-truth rules.
-Relationships to: persistent lifecycle memory (feeds approval/deferred/risk/next-action/forbidden
-memory), artifact index (locates decision artifacts), governance event timeline (decisions map to
-events), deferred item tracker (deferrals create/update tracker entries), future risk register
-(accepted-risk feeds risk register). Integration for: approval, denial, deferred, rejected, human
-override, accepted-risk, permission, must-never-repeat decisions. 10 query targets. 12 update
-rules. 42 validation rules. 15 failure cases. Example decision log entries. Future implementation
-plan (85D.1–85D.3 candidates). decision_log_version=0.1, implementation_status=not_started.
-Recommends 85E — Risk Register.
+85E defines the risk register design — tracks active, accepted, mitigated, deferred, blocked, and
+closed governance risks. Design only — no implementation. 22 core risk types (execution, backend
+invocation, prompt sending, capture integrity, output intake, adoption, source/test mutation, commit,
+push, rollback, permission, shell gate, memory/artifact staleness, timeline ordering, decision log,
+deferred item, accepted, human override, must-never-repeat, documentation stale signal). 32 required
+risk fields. 9 risk status values. Severity (5 levels), likelihood (5 levels), exposure (5 levels)
+model. 13 design principles. 16-threat model. 7 identity rules. 10 lifecycle rules. 7 source-of-truth
+rules. Relationships to: persistent lifecycle memory (feeds risk/blocker/forbidden/next-action
+memory), artifact index (locates source artifacts), governance event timeline (risk/blocker events),
+decision log (accepted-risk/blocked/must-never-repeat decisions), deferred item tracker (deferred
+risks). 8 must-never-repeat controls. 10 query targets. 12 update rules. 42 validation rules. 15
+failure cases. Example risk register entries. Future implementation plan (85E.1–85E.3 candidates).
+risk_register_version=0.1, implementation_status=not_started. Recommends 85F — Project State
+Snapshot.
+
+Phase 85D: Decision Log Integration (completed).
+
+85D defined the decision log integration design: 13 decision types, 25 fields, 11 status values,
+12 design principles, 15-threat model, 10 query targets, 42 validation rules, 15 failure cases.
+decision_log_version=0.1, implementation_status=not_started.
 
 Phase 85C: Governance Event Timeline (completed).
 
