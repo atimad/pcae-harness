@@ -401,6 +401,7 @@ from pcae.commands.memory_snapshot import run_memory_snapshot
 from pcae.commands.governance_timeline import run_governance_timeline
 from pcae.commands.decision_log import run_decision_log
 from pcae.commands.risk_register import run_risk_register
+from pcae.commands.project_state import run_project_state
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4481,6 +4482,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON risk register output.",
     )
     risk_register_parser.set_defaults(handler=run_risk_register)
+
+    project_state_parser = subparsers.add_parser(
+        "project-state",
+        help="Read-only project state snapshot integrating all layers.",
+    )
+    project_state_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON project state snapshot output.",
+    )
+    project_state_parser.set_defaults(handler=run_project_state)
 
     task_parser = subparsers.add_parser(
         "task",

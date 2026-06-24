@@ -2,7 +2,21 @@
 
 ## Current Phase
 
-Phase 86G: Risk Register Extraction.
+Phase 86H: Project State Snapshot CLI.
+
+86H implements the sixth and capstone Phase 85 read-only CLI command: `pcae project-state [--json]`.
+Emits a project-state snapshot as JSON to stdout, integrating all five read-only layers: artifact
+index (86C), memory snapshot (86D), governance timeline (86E), decision log (86F), risk register
+(86G). ProjectStateSnapshot with 42 fields per 86B design. Includes latest completed phase,
+recommended next phase, active/accepted/deferred risks, stale signals, must-never-repeat controls,
+next safe actions (recommendations only), forbidden actions, and explicit authorization booleans
+(all high-risk false). Layer summary shows aggregate counts. Read-only: no file writes, no cache,
+no .pcae storage, no authorization inference. Safety flags: project_state_is_read_only=true,
+next_safe_actions_are_recommendations_not_authorizations=true, does not authorize execution/backend/
+adoption/commit-push. 34 tests added (tests/test_project_state.py). Total test count: 7084 (up
+from 7050). Recommends 86I — Phase 85 Integration Tests.
+
+Phase 86G: Risk Register Extraction (completed).
 
 86G implements the fifth Phase 85 read-only CLI command: `pcae risk-register [--json]`. Emits
 risk records as JSON to stdout. Extracts risks from committed artifacts, governance timeline,
