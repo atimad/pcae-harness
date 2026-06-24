@@ -2,19 +2,27 @@
 
 ## Current Phase
 
-Phase 85F: Project State Snapshot (capstone of Phase 85 design sequence).
+Phase 86A: Phase 85 Implementation Roadmap.
 
-85F defines the project state snapshot design — the integrated answer surface that combines the
-persistent lifecycle memory (85A), artifact index (85B), governance event timeline (85C), decision
-log (85D), and risk register (85E) to answer the original project-intelligence questions. Design
-only — no implementation. 12 snapshot source layers. 26 required snapshot sections. 41 required
-snapshot fields. 7 snapshot status values. 5 freshness levels. 14 design principles. 20-threat
-model. 8 source-of-truth rules. 12 query targets answering: what phase, what approved, what denied,
-what blocked, what deferred, what rejected, what risk accepted, what needs human review, what safe
-next, what must never repeat, what evidence supports, what changed since last. 12 snapshot update
-rules. 44 validation rules. 15 failure cases. Example snapshot. Phase 85 design sequence closure:
-85A–85F complete, all draft_documented, all implementation_status=not_started. Recommends 86A —
-Phase 85 Implementation Roadmap.
+86A plans the governed implementation of Phase 85 designs (85A–85F) into working PCAE functionality.
+Planning only — no implementation. 10 implementation principles (read-only first, no execution/
+adoption/commit-push authorization from memory, repo artifacts source of truth, test-backed, small
+vertical slice, snapshot generated from lower layers, permission broker remains future). 10-threat
+implementation model. Recommended dependency order: 86B data model/storage → 86C artifact index →
+86D memory snapshot → 86E timeline → 86F decision log → 86G risk register → 86H project state CLI
+→ 86I integration tests. Minimum viable scope: read-only artifact index + memory snapshot +
+project-state JSON command. Storage strategy: start with read-only command output, no persisted
+cache, defer .pcae storage to explicit phase. 7 proposed CLI commands (artifact-index, memory-
+snapshot, timeline, decision-log, risk-register, project-state, project-state explain). 6 data
+models (ArtifactRecord, MemorySnapshot, GovernanceEvent, DecisionEntry, RiskEntry,
+ProjectStateSnapshot). Test strategy: python -m pytest -n auto, 3 serial exceptions, 13 test areas.
+8 governance gates. 10 safety boundaries. 8 rollout phases. 11 implementation risks. 5 open
+questions. Recommends 86B — Phase 85 Data Model and Storage Design.
+
+Phase 85F: Project State Snapshot (completed, capstone of Phase 85 design sequence).
+
+85F defined the project state snapshot design: 26 sections, 41 fields, 12 query targets, 44
+validation rules, 15 failure cases. Phase 85 design sequence complete (85A–85F).
 
 Phase 85E: Risk Register (completed).
 
