@@ -292,6 +292,119 @@ def _evaluate_backend(
     }
 
 
+def _evaluate_adoption(
+    requested_action: str | None,
+    requested_files: list[str],
+    adoption_artifact_present: bool,
+    human_approved: bool,
+    task_contract: dict[str, Any] | None,
+    scope_status: str | None,
+) -> dict[str, Any]:
+    is_adoption = requested_action == "adoption"
+    if not is_adoption:
+        return {
+            "adoption_status": "not_requested",
+            "requested_action": requested_action,
+            "requested_files": requested_files,
+            "adoption_artifact_present": adoption_artifact_present,
+            "adoption_review_detected": False,
+            "adoption_approval_detected": False,
+            "human_approval_detected": False,
+            "task_contract_detected": task_contract is not None,
+            "task_contract_path": task_contract["path"] if task_contract else None,
+            "scope_status": scope_status,
+            "evidence_sources": [],
+            "adoption_notes": "adoption not requested",
+        }
+
+    tc_detected = task_contract is not None
+    if not tc_detected:
+        status = "requested_requires_more_evidence"
+    elif not adoption_artifact_present:
+        status = "requested_requires_more_evidence"
+    elif human_approved:
+        status = "requested_requires_human_review"
+    else:
+        status = "requested_requires_human_review"
+
+    return {
+        "adoption_status": status,
+        "requested_action": requested_action,
+        "requested_files": requested_files,
+        "adoption_artifact_present": adoption_artifact_present,
+        "adoption_review_detected": False,
+        "adoption_approval_detected": False,
+        "human_approval_detected": human_approved,
+        "task_contract_detected": tc_detected,
+        "task_contract_path": task_contract["path"] if tc_detected else None,
+        "scope_status": scope_status,
+        "evidence_sources": [task_contract["path"]] if tc_detected else [],
+        "adoption_notes": f"adoption_status={status}, dry_run_only=true",
+    }
+
+
+def _evaluate_mutation(
+    requested_action: str | None,
+    requested_files: list[str],
+    human_approved: bool,
+    task_contract: dict[str, Any] | None,
+    scope_result: dict[str, Any] | None,
+) -> dict[str, Any]:
+    mutation_types = {"source_mutation": "source", "test_mutation": "test", "docs_mutation": "docs"}
+    mt = mutation_types.get(requested_action or "", "unknown")
+    is_mutation = requested_action in mutation_types
+
+    if not is_mutation:
+        return {
+            "mutation_status": "not_requested",
+            "requested_action": requested_action,
+            "requested_files": requested_files,
+            "mutation_type": mt,
+            "scope_status": None,
+            "matched_allowed_files": [],
+            "matched_forbidden_files": [],
+            "unknown_files": requested_files,
+            "human_approval_detected": False,
+            "task_contract_detected": task_contract is not None,
+            "task_contract_path": task_contract["path"] if task_contract else None,
+            "evidence_sources": [],
+            "mutation_notes": "mutation not requested",
+        }
+
+    tc_detected = task_contract is not None
+    ss = scope_result.get("scope_status") if scope_result else None
+    matched_allowed = scope_result.get("matched_allowed_files", []) if scope_result else []
+    matched_forbidden = scope_result.get("matched_forbidden_files", []) if scope_result else []
+    unknown = scope_result.get("unknown_files", requested_files) if scope_result else requested_files
+
+    if not tc_detected:
+        status = "requested_requires_more_evidence"
+    elif matched_forbidden:
+        status = "requested_blocked"
+    elif not requested_files:
+        status = "requested_requires_more_evidence"
+    elif unknown:
+        status = "requested_requires_more_evidence"
+    else:
+        status = "requested_requires_human_review"
+
+    return {
+        "mutation_status": status,
+        "requested_action": requested_action,
+        "requested_files": requested_files,
+        "mutation_type": mt,
+        "scope_status": ss,
+        "matched_allowed_files": matched_allowed,
+        "matched_forbidden_files": matched_forbidden,
+        "unknown_files": unknown,
+        "human_approval_detected": human_approved,
+        "task_contract_detected": tc_detected,
+        "task_contract_path": task_contract["path"] if tc_detected else None,
+        "evidence_sources": [task_contract["path"]] if tc_detected else [],
+        "mutation_notes": f"mutation_status={status}, mutation_type={mt}, dry_run_only=true",
+    }
+
+
 _HIGH_RISK_ACTIONS = {
     "backend_invocation", "prompt_send", "adoption", "storage_write", "shell_command",
 }
@@ -306,7 +419,9 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
                    requested_action: str | None,
                    requested_files: list[str],
                    requested_backend: str | None = None,
-                   prompt_present: bool = False) -> dict[str, Any]:
+                   prompt_present: bool = False,
+                   adoption_artifact_present: bool = False,
+                   human_approved: bool = False) -> dict[str, Any]:
     gate_id = gate_def["gate_id"]
     risk_level = gate_def["risk_level"]
     now = datetime.now(timezone.utc).isoformat()
@@ -319,6 +434,8 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
     decision = "deny"
     scope_evaluation: dict[str, Any] | None = None
     backend_evaluation: dict[str, Any] | None = None
+    adoption_evaluation: dict[str, Any] | None = None
+    mutation_evaluation: dict[str, Any] | None = None
 
     task_contract = _detect_task_contract(repo_root)
 
@@ -363,8 +480,35 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         decision = "deny"
         reason_codes = ["prompt_send_not_authorized", "human_approval_required"]
     elif gate_id == "adoption_approval_gate":
-        decision = "deny"
-        reason_codes = ["human_approval_required"]
+        scope_for_adoption = _evaluate_scope(
+            repo_root, requested_action, requested_files, task_contract,
+        ) if requested_files else None
+        adoption_evaluation = _evaluate_adoption(
+            requested_action, requested_files, adoption_artifact_present,
+            human_approved, task_contract,
+            scope_for_adoption.get("scope_status") if scope_for_adoption else None,
+        )
+        ads = adoption_evaluation["adoption_status"]
+        if ads == "not_requested":
+            decision = "requires_more_evidence"
+            reason_codes = ["human_approval_required", "missing_artifact_evidence"]
+        elif ads == "requested_requires_human_review":
+            decision = "requires_human_review"
+            reason_codes = ["human_approval_required"]
+        elif ads == "requested_requires_more_evidence":
+            decision = "requires_more_evidence"
+            reason_codes = ["human_approval_required", "missing_artifact_evidence"]
+        elif ads == "requested_blocked":
+            decision = "blocked_by_scope"
+            reason_codes = ["scope_not_authorized"]
+        else:
+            decision = "deny"
+            reason_codes = ["human_approval_required"]
+        for ctrl in mnr:
+            if "adoption" in ctrl.get("risk_type", ""):
+                if "must_never_repeat_control_applies" not in reason_codes:
+                    reason_codes.append("must_never_repeat_control_applies")
+                break
     elif gate_id == "capture_acceptance_gate":
         decision = "requires_more_evidence"
         reason_codes = ["missing_artifact_evidence"]
@@ -384,16 +528,40 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
             if "raw_push" in ctrl.get("risk_type", ""):
                 reason_codes.append("must_never_repeat_control_applies")
                 break
-    elif gate_id == "source_mutation_gate":
-        decision = "requires_human_review"
-        reason_codes = ["human_approval_required"]
-    elif gate_id == "test_mutation_gate":
-        if snap.get("current_active_phase"):
+    elif gate_id in ("source_mutation_gate", "test_mutation_gate"):
+        scope_for_mut = _evaluate_scope(
+            repo_root, requested_action, requested_files, task_contract,
+        ) if requested_files else None
+        mutation_evaluation = _evaluate_mutation(
+            requested_action, requested_files, human_approved,
+            task_contract, scope_for_mut,
+        )
+        ms = mutation_evaluation["mutation_status"]
+        if ms == "not_requested":
+            if snap.get("current_active_phase"):
+                decision = "requires_more_evidence"
+                reason_codes = ["scope_not_authorized"]
+            else:
+                decision = "deny"
+                reason_codes = ["missing_task_contract"]
+        elif ms == "requested_requires_human_review":
+            decision = "requires_human_review"
+            reason_codes = ["human_approval_required"]
+        elif ms == "requested_requires_more_evidence":
             decision = "requires_more_evidence"
+            reason_codes = ["missing_artifact_evidence"]
+        elif ms == "requested_blocked":
+            decision = "blocked_by_scope"
             reason_codes = ["scope_not_authorized"]
         else:
-            decision = "deny"
-            reason_codes = ["missing_task_contract"]
+            decision = "requires_more_evidence"
+            reason_codes = ["unknown_state"]
+        if gate_id == "source_mutation_gate":
+            if "source_mutation_not_authorized" not in reason_codes:
+                reason_codes.append("source_mutation_not_authorized")
+        else:
+            if "test_mutation_not_authorized" not in reason_codes:
+                reason_codes.append("test_mutation_not_authorized")
     elif gate_id == "scope_check_gate":
         scope_evaluation = _evaluate_scope(
             repo_root, requested_action, requested_files, task_contract,
@@ -467,6 +635,10 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         result["scope_evaluation"] = scope_evaluation
     if backend_evaluation is not None:
         result["backend_evaluation"] = backend_evaluation
+    if adoption_evaluation is not None:
+        result["adoption_evaluation"] = adoption_evaluation
+    if mutation_evaluation is not None:
+        result["mutation_evaluation"] = mutation_evaluation
 
     return result
 
@@ -477,6 +649,8 @@ def build_gate_dry_run(
     requested_files: list[str] | None = None,
     requested_backend: str | None = None,
     prompt_present: bool = False,
+    adoption_artifact_present: bool = False,
+    human_approved: bool = False,
 ) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
@@ -493,7 +667,8 @@ def build_gate_dry_run(
     for gate_def in _GATE_DEFS:
         result = _evaluate_gate(gate_def, ps, rr, repo_root,
                                 requested_action, req_files,
-                                requested_backend, prompt_present)
+                                requested_backend, prompt_present,
+                                adoption_artifact_present, human_approved)
         gates.append(result)
 
     return {
@@ -532,6 +707,19 @@ def build_gate_dry_run(
             "requested_backend_is_not_approval": True,
             "prompt_presence_is_not_approval": True,
             "scope_match_is_not_backend_approval": True,
+            "adoption_gate_dry_run_only": True,
+            "adoption_gate_does_not_review_output": True,
+            "adoption_gate_does_not_approve_output": True,
+            "adoption_gate_does_not_apply_output": True,
+            "adoption_gate_does_not_authorize_adoption": True,
+            "mutation_gate_dry_run_only": True,
+            "mutation_gate_does_not_mutate_source": True,
+            "mutation_gate_does_not_mutate_tests": True,
+            "mutation_gate_does_not_mutate_docs": True,
+            "mutation_gate_does_not_authorize_mutation": True,
+            "scope_match_is_not_mutation_approval": True,
+            "human_approval_flag_is_not_execution": True,
+            "adoption_artifact_presence_is_not_approval": True,
             "scope_gate_dry_run_only": True,
             "scope_gate_does_not_authorize_mutation": True,
             "scope_gate_does_not_authorize_commit": True,

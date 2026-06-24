@@ -4525,6 +4525,16 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Indicate a prompt is present for backend evaluation.",
     )
+    gate_dry_run_parser.add_argument(
+        "--adoption-artifact-present",
+        action="store_true",
+        help="Indicate an adoption artifact is present for adoption evaluation.",
+    )
+    gate_dry_run_parser.add_argument(
+        "--human-approved",
+        action="store_true",
+        help="Indicate human approval is present for adoption/mutation evaluation.",
+    )
     gate_dry_run_parser.set_defaults(handler=run_gate_dry_run)
 
     task_parser = subparsers.add_parser(

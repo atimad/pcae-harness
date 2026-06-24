@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 87E: Backend Invocation Gate Dry-Run.
+Phase 87F: Adoption and Mutation Gate Dry-Run.
+
+87F extends pcae gate-dry-run with concrete adoption and mutation evaluation.
+adoption_approval_gate now includes adoption_evaluation field. source_mutation_gate and
+test_mutation_gate now include mutation_evaluation field. Adds optional --adoption-artifact-present
+and --human-approved CLI flags. Evaluates adoption/source_mutation/test_mutation/docs_mutation
+requests. No adoption review/approval/execution performed. No source/test/docs files mutated.
+No gate produces allow. authorization_granted=false for every gate. Adoption/mutation-specific
+safety notes added. 27 tests added (tests/test_adoption_mutation_gate.py). Total test count:
+7223 (up from 7196). Recommends 87G — Commit and Push Gate Dry-Run.
+
+Phase 87E: Backend Invocation Gate Dry-Run (completed).
 
 87E extends pcae gate-dry-run with concrete backend invocation evaluation. backend_invocation_gate
 now includes backend_evaluation field: backend_status, requested_backend, prompt_present,
