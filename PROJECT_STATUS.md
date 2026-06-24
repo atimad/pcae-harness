@@ -2,7 +2,21 @@
 
 ## Current Phase
 
-Phase 87A: Phase 87 Planning — From Read-Only Intelligence to Governed Action Gates.
+Phase 87B: Action Gate Taxonomy and Decision Model.
+
+87B defines the formal action-gate taxonomy and decision model for Phase 87. Documents: 15 gates
+with full definitions (gate_id, category, protected action, risk level, required inputs/evidence,
+human review, default decision, must-never-repeat controls, read-only sources, forbidden side
+effects), 14 gate categories, 10 gate lifecycle states, 10 gate decision outputs (allow/deny/
+blocked/review variants), 20 gate reason codes, gate input model (18 fields), gate evidence
+requirements (10 rules), gate output model (17 fields), 15 human-review triggers, 10 deny-by-
+default rules, read-only source integration, risk-aware decision rules, must-never-repeat
+controls per gate, accepted-risk handling, storage/cache policy, permission broker relationship,
+shell gate relationship, future JSON schema sketches (GateInput, GateDecision, GateReason), 44
+validation rules, 15 failure cases, 8-phase rollout continuation. Design/documentation only —
+no implementation, no source, no tests. Recommends 87C — Read-Only Gate Evaluation Dry-Run.
+
+Phase 87A: Phase 87 Planning — From Read-Only Intelligence to Governed Action Gates (completed).
 
 87A creates the planning artifact for Phase 87. Defines the safe transition from Phase 86's
 read-only project intelligence to governed action gates. Documents: starting point (Phase 86
