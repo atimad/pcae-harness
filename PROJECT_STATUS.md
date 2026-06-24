@@ -2,15 +2,20 @@
 
 ## Current Phase
 
-Phase 86C: Read-Only Artifact Index Prototype.
+Phase 86D: Persistent Memory Snapshot Prototype.
 
-86C implements the first Phase 85 read-only CLI command: `pcae artifact-index [--json]`. Scans 14
-committed governance artifacts and emits JSON artifact records to stdout. Read-only: no file writes,
-no cache, no .pcae storage, no authorization inference. ArtifactRecord model with 19 fields per 86B
-design. JSON envelope with schema_version, generated_at, source_command, repository_root, records,
-warnings, errors, safety_notes. Safety flags: artifact_index_is_read_only=true, does not authorize
-execution/adoption/commit-push. 14 tests added (tests/test_artifact_index.py). Total test count:
-6953 (up from 6939). Recommends 86D — Persistent Memory Snapshot Prototype.
+86D implements the second Phase 85 read-only CLI command: `pcae memory-snapshot [--json]`. Emits
+a JSON memory snapshot summarizing current project governance state from committed artifacts, git
+state, task contracts, and the 86C artifact index. MemorySnapshot with 21 fields per 86B design.
+Read-only: no file writes, no cache, no .pcae storage, no authorization inference. Reuses artifact
+index internally. Safety flags: memory_snapshot_is_read_only=true, does not authorize execution/
+backend/adoption/commit-push. 16 tests added (tests/test_memory_snapshot.py). Total test count:
+6969 (up from 6953). Recommends 86E — Governance Event Timeline Extraction.
+
+Phase 86C: Read-Only Artifact Index Prototype (completed).
+
+86C implemented `pcae artifact-index [--json]`: 14 artifacts indexed, ArtifactRecord 19 fields,
+14 tests. Total tests: 6953.
 
 Phase 86B: Phase 85 Data Model and Storage Design (completed).
 

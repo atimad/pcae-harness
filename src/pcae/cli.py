@@ -397,6 +397,7 @@ from pcae.commands.status import (
     run_status_coherence,
 )
 from pcae.commands.artifact_index import run_artifact_index
+from pcae.commands.memory_snapshot import run_memory_snapshot
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4433,6 +4434,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON artifact index output.",
     )
     artifact_index_parser.set_defaults(handler=run_artifact_index)
+
+    memory_snapshot_parser = subparsers.add_parser(
+        "memory-snapshot",
+        help="Read-only memory snapshot of current project governance state.",
+    )
+    memory_snapshot_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON memory snapshot output.",
+    )
+    memory_snapshot_parser.set_defaults(handler=run_memory_snapshot)
 
     task_parser = subparsers.add_parser(
         "task",
