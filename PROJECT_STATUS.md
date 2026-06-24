@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 87B: Action Gate Taxonomy and Decision Model.
+Phase 87C: Read-Only Gate Evaluation Dry-Run.
+
+87C implements the first Phase 87 dry-run gate evaluator: `pcae gate-dry-run [--json]`. Evaluates
+all 15 gates from the 87B taxonomy in dry-run mode. Reports hypothetical gate decisions as JSON
+to stdout. No gate produces allow. Decisions: deny (high-risk/not-implemented), requires_human_review
+(write-capable), requires_more_evidence (needing context). enforcement_performed=false and
+authorization_granted=false for every gate. Reuses all six read-only layers internally. Safety
+flags: gate_dry_run_only=true, does not authorize/enforce/invoke/mutate/store. 29 tests added
+(tests/test_gate_dry_run.py). Total test count: 7151 (up from 7122). Recommends 87D — Scope Gate
+Prototype.
+
+Phase 87B: Action Gate Taxonomy and Decision Model (completed).
 
 87B defines the formal action-gate taxonomy and decision model for Phase 87. Documents: 15 gates
 with full definitions (gate_id, category, protected action, risk level, required inputs/evidence,
