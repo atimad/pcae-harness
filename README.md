@@ -1,8 +1,20 @@
 # PCAE — Policy Controlled Autonomous Execution
 
-PCAE is a governance harness for AI-assisted software development: a cross-platform Python CLI injected into Git repositories to make AI coding agent activity safe, resumable, auditable, and human-authoritative. It does not make agents trustworthy by assumption — it makes their work governable by requiring evidence at every step and refusing to proceed when that evidence is missing.
+PCAE is a governance harness for AI-assisted software engineering. It does not make AI agents trustworthy by assumption — it makes their work governable by requiring evidence at every step and refusing to proceed when that evidence is missing.
 
-For installation instructions, see [docs/INSTALLATION.md](docs/INSTALLATION.md). For the project vision and long-term direction, see [VISION.md](VISION.md). For the authoritative architecture reference, see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). For the project roadmap, see [docs/ROADMAP.md](docs/ROADMAP.md). For the adoption lifecycle summary, see [docs/ADOPTION_LIFECYCLE_SUMMARY.md](docs/ADOPTION_LIFECYCLE_SUMMARY.md). For the governance handbook, see the [Governance Handbook](docs/governance/GOVERNANCE_HANDBOOK.md). For test execution profiles, see the [Test Execution Guide](docs/testing/TEST_EXECUTION.md). For the BR-005 execution governance retrospective, see [docs/RETROSPECTIVE_BR005.md](docs/RETROSPECTIVE_BR005.md). For a detailed technical description of the architecture, governance model, and design philosophy, see the [PCAE Architecture White Paper](docs/whitepaper/PCAE_WHITEPAPER.md).
+PCAE is a work-in-progress engineering experiment. It is **not production ready**. It does not claim to solve autonomous coding. The goal is governed autonomy — giving AI agents increasing capability while maintaining auditability, scope discipline, and human authority at every boundary.
+
+**Status:** 7,278 tests passing. 87 phases completed. Governed lifecycle tooling, read-only project intelligence, dry-run action gate evaluation, and broker/shell-gate architecture documented. Enforced preflight gates and live broker/shell-gate mediation are not yet implemented.
+
+| Resource | Link |
+|----------|------|
+| Architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Installation | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
+| Demo Script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |
+| Lifecycle Diagrams | [docs/GOVERNANCE_LIFECYCLE_DIAGRAM.md](docs/GOVERNANCE_LIFECYCLE_DIAGRAM.md) |
+| Vision | [VISION.md](VISION.md) |
+| Governance Handbook | [docs/governance/GOVERNANCE_HANDBOOK.md](docs/governance/GOVERNANCE_HANDBOOK.md) |
+| White Paper | [docs/whitepaper/PCAE_WHITEPAPER.md](docs/whitepaper/PCAE_WHITEPAPER.md) |
 
 ### Architecture Diagrams
 
@@ -326,11 +338,21 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#current-limitations) for the ful
 | **Execution governance activation (BR-005)** | **Complete — Phase 69A–69O; full approval → authorization → audit → activation → sandboxing → change capture → promotion → rollback chain** |
 | **Multi-agent governance design** | **Complete — Phase 82A–84K; agent discovery, routing, prompts, capture, intake, adoption, lifecycle state machine, invocation guard, storage policy, deferred tracker** |
 | **Phase 85 persistent memory design** | **Complete — Phase 85A–85F; memory model, artifact index, event timeline, decision log, risk register, project state snapshot** |
-| **Phase 86 read-only implementation** | **Complete — Phase 86A–86I; six read-only CLI commands, 183 tests, 38 integration tests, cross-layer consistency verified** |
+| **Phase 86 read-only implementation** | **Complete — Phase 86A–86K; six read-only CLI commands, 183 tests, 38 integration tests, cross-layer consistency verified** |
+| **Phase 87 governed action gates** | **Complete — Phase 87A–87J; gate taxonomy, dry-run evaluator (15 gates), scope/backend/adoption/mutation/commit/push evaluation, permission broker architecture, shell gate architecture, integration tests** |
 
 ### Next
 
-The Phase 85 design sequence (85A–85F) and Phase 86 implementation sequence (86A–86I) are complete. The read-only project-intelligence stack is implemented and integration-tested. The recommended next phase is **86K — Phase 86 Read-Only Stack Final Verification**.
+Phase 87 (87A–87J) is complete. The governed action gate dry-run layer, permission broker architecture, and shell gate architecture are designed, implemented (dry-run only), tested, and verified. The recommended next phase is **88A — First Narrow Enforced Gate Boundary**.
+
+### Limitations
+
+- PCAE is **not production ready**
+- Permission broker and shell gate are **architecture designs, not running code**
+- Dry-run gate output is **not authorization** — it reports hypothetical decisions
+- No agent is given autonomous repo access
+- Enforced preflight gates are **not yet implemented**
+- PCAE does not claim to solve autonomous coding
 
 ## Contributing
 

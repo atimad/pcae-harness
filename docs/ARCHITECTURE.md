@@ -690,3 +690,68 @@ File:  latest.json (+ timestamped copies)
 - **This design record is read-only documentation.** It defines the concept, requirements, and schema shape but does not implement any authorization writing behavior.
 - **The schema described above is a proposal.** Phase 72S exposes this schema as a read-only command (`pcae phase runner-execution-authorization-schema`) without persisting any artifact.
 - **Human authority remains absolute.** No agent, runner, or automated system can override human authorization decisions.
+
+---
+
+## Phase 86–87 Architecture Layers (Added Post-87J)
+
+### Read-Only Project Intelligence Stack (Phase 86)
+
+Phase 86 (86A–86K) implemented six read-only CLI commands that answer governance
+questions from committed evidence:
+
+| Command | Layer | Purpose |
+|---------|-------|---------|
+| `pcae artifact-index --json` | Evidence | Governance artifact catalog |
+| `pcae memory-snapshot --json` | State | Phase, lifecycle, roadmap |
+| `pcae governance-timeline --json` | History | Ordered governance events |
+| `pcae decision-log --json` | Decisions | Recorded governance decisions |
+| `pcae risk-register --json` | Risks | Active, accepted, stale risks |
+| `pcae project-state --json` | Integrated | All layers composed |
+
+These commands report observed state. They do not grant permission, authorize
+execution, invoke agents, approve adoption, permit commits, or permit pushes.
+
+### Action Gate Dry-Run Layer (Phase 87C–87G)
+
+Phase 87 added a dry-run gate evaluator (`pcae gate-dry-run --json`) that
+evaluates 15 action gates without enforcing decisions:
+
+- **Scope gate** — evaluates file/action scope against task contracts
+- **Backend invocation gate** — evaluates proposed backend use
+- **Adoption/mutation gate** — evaluates proposed adoption and file mutation
+- **Commit/push gate** — evaluates proposed commit and push actions
+- **Plus 11 other gates** for prompt, capture, intake, rollback, storage,
+  permission broker, and shell command evaluation
+
+No gate produces `allow`. All gates report `authorization_granted=false` and
+`enforcement_performed=false`. Gate output is evidence for future broker
+decisions, not permission by itself.
+
+### Permission Broker Architecture (Phase 87H — Design Only)
+
+The permission broker is a **designed but not implemented** mediation layer
+that would receive proposed actions, read gate evidence and project intelligence,
+apply policy, return explicit decisions, and route high-risk actions to human
+review. `implementation_status=not_started`.
+
+### Shell Gate Architecture (Phase 87I — Design Only)
+
+The shell gate is a **designed but not implemented** enforcement layer that
+would mediate shell command execution based on broker decisions, command
+classification, task scope, and human approval.
+`implementation_status=not_started`.
+
+### Architecture Status Summary
+
+| Layer | Status | Phase |
+|-------|--------|-------|
+| Read-only project intelligence | **Implemented** | 86C–86K |
+| Action gate dry-run | **Implemented** (dry-run only) | 87C–87G |
+| Permission broker | **Architecture documented** | 87H |
+| Shell gate | **Architecture documented** | 87I |
+| Enforced preflight gates | Not started | Future (88+) |
+| Write-capable storage | Not started | Future |
+
+The transition path is: observe → dry-run evaluate → preflight block →
+broker decisions → shell mediation → governed execution.

@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 87J: Phase 87 Gate/Broker/Shell Architecture Integration Tests.
+Phase 87K–87O: Phase 87 Public Documentation Block.
+
+87K–87O refreshes public-facing documentation after Phase 87 completion. Updates
+docs/ARCHITECTURE.md (Phase 86–87 layers), docs/INSTALLATION.md (intelligence/gate commands).
+Creates docs/DEMO_SCRIPT.md (guided walkthrough), docs/GOVERNANCE_LIFECYCLE_DIAGRAM.md (Mermaid
+diagrams). Reframes README.md with current status, limitations, and links. Explicitly states:
+not production ready, does not solve autonomous coding, permission broker and shell gate are
+design-only. Phase 87P (LinkedIn Article Draft) intentionally deferred. Documentation-only
+batch — no source, no tests, no implementation. Recommends 88A — First Narrow Enforced Gate
+Boundary.
+
+Phase 87J: Phase 87 Gate/Broker/Shell Architecture Integration Tests (completed).
 
 87J adds integration tests for the full Phase 87 dry-run/architecture layer. 29 integration
 tests verify: gate dry-run surface (15 gates, all evaluations), specific gate evaluations

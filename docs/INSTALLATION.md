@@ -416,12 +416,46 @@ pcae inspect
 
 ---
 
+## Read-only project intelligence commands (Phase 86)
+
+After installation, six read-only commands are available:
+
+```
+pcae artifact-index --json     # Governance artifact catalog
+pcae memory-snapshot --json    # Phase, lifecycle, roadmap state
+pcae governance-timeline --json # Ordered governance events
+pcae decision-log --json       # Recorded governance decisions
+pcae risk-register --json      # Active, accepted, stale risks
+pcae project-state --json      # All layers composed
+```
+
+These commands emit JSON to stdout. They do not write files, create storage,
+or authorize actions. All output is read-only and non-authorizing.
+
+## Gate dry-run commands (Phase 87)
+
+A dry-run gate evaluator reports hypothetical action decisions:
+
+```
+pcae gate-dry-run --json
+pcae gate-dry-run --json --requested-action source_mutation --requested-file src/example.py
+pcae gate-dry-run --json --requested-action backend_invocation --requested-backend claude
+pcae gate-dry-run --json --requested-action commit --commit-message-present
+pcae gate-dry-run --json --requested-action push --push-target origin/main
+```
+
+Gate dry-run output is **not authorization**. No gate produces `allow`.
+`authorization_granted=false` for every gate. The permission broker and shell
+gate described in Phase 87 architecture documents are **not yet implemented**.
+
 ## Next steps
 
 After a successful installation, see:
 
 - [docs/ARCHITECTURE.md](ARCHITECTURE.md) — governance model, artifact chain, execution and promotion lifecycles
 - [docs/COMMANDS.md](COMMANDS.md) — full command reference
+- [docs/DEMO_SCRIPT.md](DEMO_SCRIPT.md) — guided demo walkthrough
+- [docs/GOVERNANCE_LIFECYCLE_DIAGRAM.md](GOVERNANCE_LIFECYCLE_DIAGRAM.md) — lifecycle flow diagrams
 - [docs/governance/GOVERNANCE_HANDBOOK.md](governance/GOVERNANCE_HANDBOOK.md) — governance policies and enforcement rules
 - [CONTRIBUTING.md](../CONTRIBUTING.md) — contribution workflow and testing requirements
 - [AGENTS.md](../AGENTS.md) — instructions for AI agents operating in this repository
