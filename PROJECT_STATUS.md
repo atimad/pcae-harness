@@ -2,7 +2,23 @@
 
 ## Current Phase
 
-Phase 86F: Decision Log Extraction.
+Phase 86G: Risk Register Extraction.
+
+86G implements the fifth Phase 85 read-only CLI command: `pcae risk-register [--json]`. Emits
+risk records as JSON to stdout. Extracts risks from committed artifacts, governance timeline,
+decision log, and existing layers. RiskRecord with 32 fields per 86B design. 13 risk types
+including read_only_boundary_risk, storage_boundary_risk, backend_invocation_risk,
+authority_inference_risk, raw_push_exception_risk, hook_bypass_exception_risk, stale_signal_risk,
+must_never_repeat_risk, accepted_risk, permission_broker_risk, and more. 4 risk statuses: active,
+accepted, deferred, stale_signal. Accepted risk is not treated as mitigation. Stale signals
+remain visible. Must-never-repeat controls remain visible. Read-only: no file writes, no cache,
+no .pcae storage, no authorization inference. Reuses artifact index, memory snapshot, governance
+timeline, and decision log internally. Safety flags: risk_register_is_read_only=true,
+accepted_risk_is_not_mitigation=true, does not authorize execution/backend/adoption/commit-push.
+31 tests added (tests/test_risk_register.py). Total test count: 7050 (up from 7019). Recommends
+86H — Project State Snapshot CLI.
+
+Phase 86F: Decision Log Extraction (completed).
 
 86F implements the fourth Phase 85 read-only CLI command: `pcae decision-log [--json]`. Emits
 decision records as JSON to stdout. Extracts decisions from committed artifacts, task files,

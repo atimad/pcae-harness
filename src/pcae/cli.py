@@ -400,6 +400,7 @@ from pcae.commands.artifact_index import run_artifact_index
 from pcae.commands.memory_snapshot import run_memory_snapshot
 from pcae.commands.governance_timeline import run_governance_timeline
 from pcae.commands.decision_log import run_decision_log
+from pcae.commands.risk_register import run_risk_register
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4469,6 +4470,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON decision log output.",
     )
     decision_log_parser.set_defaults(handler=run_decision_log)
+
+    risk_register_parser = subparsers.add_parser(
+        "risk-register",
+        help="Read-only risk register extraction.",
+    )
+    risk_register_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON risk register output.",
+    )
+    risk_register_parser.set_defaults(handler=run_risk_register)
 
     task_parser = subparsers.add_parser(
         "task",
