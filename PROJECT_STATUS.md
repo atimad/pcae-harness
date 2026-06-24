@@ -2,7 +2,21 @@
 
 ## Current Phase
 
-Phase 87H: Permission Broker Architecture Design.
+Phase 87I: Shell Gate Architecture Design.
+
+87I defines the architecture for a future PCAE shell gate: command mediation layer between
+approved intent and shell execution. Documents: shell gate role (command classifier, deny-by-
+default enforcement point, blocker for raw/force push and hook bypass, decision recorder), 15
+design principles, 15-threat model (SG-1 through SG-15), command taxonomy (20 command classes),
+10 command risk classes, shell gate input model (19 fields), shell gate output model (16 fields),
+10 decision values, human review model (12 actions), permission broker relationship (broker
+decides policy, shell gate controls execution), gate dry-run relationship, project intelligence
+relationship, backend/mutation/adoption/commit/push/rollback relationships, storage/cache policy
+(none in 87I), 8 audit event types, failure handling (7 conditions), 13 safety invariants,
+future CLI/wrapper sketch, 13-phase future roadmap. Architecture/design only — no implementation,
+no source, no tests. Recommends 87J — Phase 87 Gate/Broker/Shell Architecture Integration Tests.
+
+Phase 87H: Permission Broker Architecture Design (completed).
 
 87H defines the architecture for a future PCAE permission broker. Documents: broker role (policy
 mediation layer, deny-by-default evaluator, human-review router, audit-event producer), 14 design
