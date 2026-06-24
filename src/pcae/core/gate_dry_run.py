@@ -241,6 +241,57 @@ def _evaluate_scope(
     }
 
 
+_KNOWN_BACKENDS = {"claude", "claude-deepseek", "claude-kimi", "codex", "subagent"}
+
+
+def _evaluate_backend(
+    requested_backend: str | None,
+    requested_action: str | None,
+    prompt_present: bool,
+    task_contract: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if not requested_backend and requested_action != "backend_invocation":
+        return {
+            "backend_status": "not_requested",
+            "requested_backend": None,
+            "requested_action": requested_action,
+            "prompt_present": prompt_present,
+            "backend_allowed_by_scope": False,
+            "backend_approval_detected": False,
+            "human_approval_detected": False,
+            "task_contract_detected": task_contract is not None,
+            "task_contract_path": task_contract["path"] if task_contract else None,
+            "evidence_sources": [],
+            "backend_notes": "backend invocation not requested",
+        }
+
+    backend = requested_backend or "unknown"
+    tc_detected = task_contract is not None
+
+    if backend not in _KNOWN_BACKENDS and backend != "unknown":
+        status = "requested_unknown"
+    elif not tc_detected:
+        status = "requested_requires_more_evidence"
+    elif not prompt_present:
+        status = "requested_requires_more_evidence"
+    else:
+        status = "requested_requires_human_review"
+
+    return {
+        "backend_status": status,
+        "requested_backend": backend,
+        "requested_action": requested_action or "backend_invocation",
+        "prompt_present": prompt_present,
+        "backend_allowed_by_scope": False,
+        "backend_approval_detected": False,
+        "human_approval_detected": False,
+        "task_contract_detected": tc_detected,
+        "task_contract_path": task_contract["path"] if task_contract else None,
+        "evidence_sources": [task_contract["path"]] if tc_detected else [],
+        "backend_notes": f"backend={backend}, status={status}, dry_run_only=true",
+    }
+
+
 _HIGH_RISK_ACTIONS = {
     "backend_invocation", "prompt_send", "adoption", "storage_write", "shell_command",
 }
@@ -253,7 +304,9 @@ _WRITE_ACTIONS = {
 def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
                    rr: dict[str, Any], repo_root: Path,
                    requested_action: str | None,
-                   requested_files: list[str]) -> dict[str, Any]:
+                   requested_files: list[str],
+                   requested_backend: str | None = None,
+                   prompt_present: bool = False) -> dict[str, Any]:
     gate_id = gate_def["gate_id"]
     risk_level = gate_def["risk_level"]
     now = datetime.now(timezone.utc).isoformat()
@@ -265,6 +318,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
     reason_codes: list[str] = []
     decision = "deny"
     scope_evaluation: dict[str, Any] | None = None
+    backend_evaluation: dict[str, Any] | None = None
 
     task_contract = _detect_task_contract(repo_root)
 
@@ -278,8 +332,33 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         decision = "deny"
         reason_codes = ["storage_write_not_authorized"]
     elif gate_id == "backend_invocation_gate":
-        decision = "deny"
-        reason_codes = ["backend_invocation_not_authorized", "human_approval_required"]
+        backend_evaluation = _evaluate_backend(
+            requested_backend, requested_action, prompt_present, task_contract,
+        )
+        bs = backend_evaluation["backend_status"]
+        if bs == "not_requested":
+            decision = "requires_more_evidence"
+            reason_codes = ["backend_invocation_not_authorized", "missing_artifact_evidence"]
+        elif bs == "requested_requires_human_review":
+            decision = "requires_human_review"
+            reason_codes = ["backend_invocation_not_authorized", "human_approval_required"]
+        elif bs == "requested_requires_more_evidence":
+            decision = "requires_more_evidence"
+            reason_codes = ["backend_invocation_not_authorized", "missing_artifact_evidence"]
+        elif bs == "requested_blocked":
+            decision = "deny"
+            reason_codes = ["backend_invocation_not_authorized"]
+        elif bs == "requested_unknown":
+            decision = "requires_more_evidence"
+            reason_codes = ["backend_invocation_not_authorized", "unknown_state"]
+        else:
+            decision = "deny"
+            reason_codes = ["backend_invocation_not_authorized", "human_approval_required"]
+        for ctrl in mnr:
+            if "invocation" in ctrl.get("risk_type", "") or "backend" in ctrl.get("risk_type", ""):
+                if "must_never_repeat_control_applies" not in reason_codes:
+                    reason_codes.append("must_never_repeat_control_applies")
+                break
     elif gate_id == "prompt_send_gate":
         decision = "deny"
         reason_codes = ["prompt_send_not_authorized", "human_approval_required"]
@@ -386,6 +465,8 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
 
     if scope_evaluation is not None:
         result["scope_evaluation"] = scope_evaluation
+    if backend_evaluation is not None:
+        result["backend_evaluation"] = backend_evaluation
 
     return result
 
@@ -394,6 +475,8 @@ def build_gate_dry_run(
     repo_root: Path,
     requested_action: str | None = None,
     requested_files: list[str] | None = None,
+    requested_backend: str | None = None,
+    prompt_present: bool = False,
 ) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
@@ -409,7 +492,8 @@ def build_gate_dry_run(
     gates: list[dict[str, Any]] = []
     for gate_def in _GATE_DEFS:
         result = _evaluate_gate(gate_def, ps, rr, repo_root,
-                                requested_action, req_files)
+                                requested_action, req_files,
+                                requested_backend, prompt_present)
         gates.append(result)
 
     return {
@@ -439,6 +523,15 @@ def build_gate_dry_run(
             "permission_broker_not_implemented": True,
             "shell_gate_not_implemented": True,
             "storage_not_implemented": True,
+            "backend_gate_dry_run_only": True,
+            "backend_gate_does_not_invoke_backend": True,
+            "backend_gate_does_not_send_prompt": True,
+            "backend_gate_does_not_capture_output": True,
+            "backend_gate_does_not_authorize_backend_invocation": True,
+            "backend_gate_requires_human_review_for_invocation": True,
+            "requested_backend_is_not_approval": True,
+            "prompt_presence_is_not_approval": True,
+            "scope_match_is_not_backend_approval": True,
             "scope_gate_dry_run_only": True,
             "scope_gate_does_not_authorize_mutation": True,
             "scope_gate_does_not_authorize_commit": True,

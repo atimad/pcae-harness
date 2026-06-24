@@ -2,7 +2,19 @@
 
 ## Current Phase
 
-Phase 87D: Scope Gate Prototype.
+Phase 87E: Backend Invocation Gate Dry-Run.
+
+87E extends pcae gate-dry-run with concrete backend invocation evaluation. backend_invocation_gate
+now includes backend_evaluation field: backend_status, requested_backend, prompt_present,
+backend/human approval detection, task contract detection, evidence sources. Adds optional
+--requested-backend and --prompt-present CLI flags. Evaluates claude/claude-deepseek/claude-kimi/
+codex/subagent/unknown backends. No backend invoked, no prompt sent, no output captured. Backend
+with prompt → requires_human_review. Without prompt → requires_more_evidence. Unknown backend →
+requires_more_evidence. No gate produces allow. authorization_granted=false for every gate.
+Backend-specific safety notes added. 23 tests added (tests/test_backend_gate.py). Total test
+count: 7196 (up from 7173). Recommends 87F — Adoption and Mutation Gate Dry-Run.
+
+Phase 87D: Scope Gate Prototype (completed).
 
 87D extends pcae gate-dry-run with concrete scope evaluation. scope_check_gate now includes
 scope_evaluation field: scope_status, requested/allowed/forbidden/matched/unknown files, task

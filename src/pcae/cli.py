@@ -4515,6 +4515,16 @@ def build_parser() -> argparse.ArgumentParser:
         metavar="PATH",
         help="Optional file path to evaluate scope for (repeatable).",
     )
+    gate_dry_run_parser.add_argument(
+        "--requested-backend",
+        metavar="BACKEND",
+        help="Optional backend name to evaluate (e.g., claude, claude-deepseek, codex).",
+    )
+    gate_dry_run_parser.add_argument(
+        "--prompt-present",
+        action="store_true",
+        help="Indicate a prompt is present for backend evaluation.",
+    )
     gate_dry_run_parser.set_defaults(handler=run_gate_dry_run)
 
     task_parser = subparsers.add_parser(

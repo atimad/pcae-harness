@@ -10,10 +10,14 @@ from pcae.core.paths import HarnessPath
 def run_gate_dry_run(args: argparse.Namespace) -> int:
     requested_action = getattr(args, "requested_action", None)
     requested_files = getattr(args, "requested_file", None) or []
+    requested_backend = getattr(args, "requested_backend", None)
+    prompt_present = getattr(args, "prompt_present", False) or False
     data = build_gate_dry_run(
         HarnessPath.cwd().path,
         requested_action=requested_action,
         requested_files=requested_files,
+        requested_backend=requested_backend,
+        prompt_present=prompt_present,
     )
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=False))
