@@ -399,6 +399,7 @@ from pcae.commands.status import (
 from pcae.commands.artifact_index import run_artifact_index
 from pcae.commands.memory_snapshot import run_memory_snapshot
 from pcae.commands.governance_timeline import run_governance_timeline
+from pcae.commands.decision_log import run_decision_log
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4457,6 +4458,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governance timeline output.",
     )
     governance_timeline_parser.set_defaults(handler=run_governance_timeline)
+
+    decision_log_parser = subparsers.add_parser(
+        "decision-log",
+        help="Read-only decision log extraction.",
+    )
+    decision_log_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON decision log output.",
+    )
+    decision_log_parser.set_defaults(handler=run_decision_log)
 
     task_parser = subparsers.add_parser(
         "task",

@@ -2,7 +2,22 @@
 
 ## Current Phase
 
-Phase 86E: Governance Event Timeline Extraction.
+Phase 86F: Decision Log Extraction.
+
+86F implements the fourth Phase 85 read-only CLI command: `pcae decision-log [--json]`. Emits
+decision records as JSON to stdout. Extracts decisions from committed artifacts, task files,
+governance timeline, git evidence, and existing artifact/memory/timeline layers. DecisionRecord
+with 25 fields per 86B design. 7 decision types: phase_completion_decision,
+implementation_scope_decision, read_only_boundary_decision, no_storage_boundary_decision,
+no_backend_invocation_decision, no_authority_inference_decision, recommended_next_phase_decision.
+Authorization flags explicit with all high-risk flags false. Decisions are deterministic with
+stable IDs across runs. Read-only: no file writes, no cache, no .pcae storage, no authorization
+inference. Reuses artifact index, memory snapshot, and governance timeline internally. Safety
+flags: decision_log_is_read_only=true, does not authorize execution/backend/adoption/commit-push.
+28 tests added (tests/test_decision_log.py). Total test count: 7019 (up from 6991). Recommends
+86G — Risk Register Extraction.
+
+Phase 86E: Governance Event Timeline Extraction (completed).
 
 86E implements the third Phase 85 read-only CLI command: `pcae governance-timeline [--json]`. Emits
 an ordered governance event timeline as JSON to stdout. Extracts events from committed artifacts,
