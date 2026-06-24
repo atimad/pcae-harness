@@ -2,22 +2,28 @@
 
 ## Current Phase
 
-Phase 85C: Governance Event Timeline.
+Phase 85D: Decision Log Integration.
 
-85C defines the governance event timeline design — the chronological/causal layer that adds temporal
-ordering to the 85A memory model and 85B artifact index. Design only — no implementation. 33 core
-event types (phase_started/completed, artifact_created/updated, approval_requested/granted/denied,
-authorization_flag_set/cleared, backend_invocation_approved/performed, prompt_package_created,
-prompt_sent, capture_created, output_intake_completed, adoption_candidate_created/approved/executed,
-item_deferred/rejected, blocker_detected/resolved, risk_identified/mitigated, commit_created,
-push_performed, handoff_refreshed, bootstrap_profile_updated, permission_requested/allowed/blocked/
-escalated, lifecycle_closed). 19 required event fields. 12 event status values. 12 design
-principles. 15-threat model. 11 event ordering rules. 9 causality/dependency rules. 4 permission
-decision event types with 12 dedicated fields. Future direction: PCAE as Permission Broker / Shell
-Gate (future_direction_only=true, not implemented). 11 query targets. 12 timeline update rules.
-42 validation rules. 15 failure cases. Example timeline. Future implementation plan (85C.1–85C.3
-candidates). timeline_version=0.1, implementation_status=not_started. Recommends 85D — Decision
-Log Integration.
+85D defines the decision log integration design — the bridge between the event timeline (85C) and
+project-state answers. Design only — no implementation. 13 core decision types (approval, denial,
+deferral, rejection, human_override, accepted_risk, permission, blocked, rollback, commit, push,
+lifecycle_closure, must_never_repeat). 25 required decision fields. 11 decision status values. 12
+design principles. 15-threat model. 7 identity rules. 10 lifecycle rules. 6 source-of-truth rules.
+Relationships to: persistent lifecycle memory (feeds approval/deferred/risk/next-action/forbidden
+memory), artifact index (locates decision artifacts), governance event timeline (decisions map to
+events), deferred item tracker (deferrals create/update tracker entries), future risk register
+(accepted-risk feeds risk register). Integration for: approval, denial, deferred, rejected, human
+override, accepted-risk, permission, must-never-repeat decisions. 10 query targets. 12 update
+rules. 42 validation rules. 15 failure cases. Example decision log entries. Future implementation
+plan (85D.1–85D.3 candidates). decision_log_version=0.1, implementation_status=not_started.
+Recommends 85E — Risk Register.
+
+Phase 85C: Governance Event Timeline (completed).
+
+85C defined the governance event timeline design: 33 event types, 19 fields, 12 design principles,
+15-threat model, 11 ordering rules, 9 causality rules, 4 permission event types, future permission
+broker/shell gate direction. 42 validation rules, 15 failure cases. timeline_version=0.1,
+implementation_status=not_started.
 
 Phase 85B: Artifact Index (completed).
 
