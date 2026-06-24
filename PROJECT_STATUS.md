@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 87I: Shell Gate Architecture Design.
+Phase 87J: Phase 87 Gate/Broker/Shell Architecture Integration Tests.
+
+87J adds integration tests for the full Phase 87 dry-run/architecture layer. 29 integration
+tests verify: gate dry-run surface (15 gates, all evaluations), specific gate evaluations
+(scope, backend, adoption, mutation, commit, push), non-authorizing boundary (authorization_granted
+=false, enforcement_performed=false, no allow), architecture artifacts (broker and shell gate
+design-only with implementation_status=not_started), no-write/no-storage/no-backend checks, all
+read-only commands still work, determinism. Fixes scope gate test for task-contract flexibility.
+Readiness: ready_for_phase_87_public_documentation_block. Recommends 87K — Architecture Overview
+Refresh.
+
+Phase 87I: Shell Gate Architecture Design (completed).
 
 87I defines the architecture for a future PCAE shell gate: command mediation layer between
 approved intent and shell execution. Documents: shell gate role (command classifier, deny-by-
