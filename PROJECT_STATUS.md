@@ -2,19 +2,21 @@
 
 ## Current Phase
 
-Phase 86B: Phase 85 Data Model and Storage Design.
+Phase 86C: Read-Only Artifact Index Prototype.
 
-86B defines shared data model contracts and storage boundaries for Phase 85 implementation. Design
-only — no implementation. 6 core model contracts: ArtifactRecord (19 fields), MemorySnapshot (21
-fields), GovernanceEvent (19 fields), DecisionRecord (25 fields), RiskRecord (32 fields),
-ProjectStateSnapshot (41 fields). 13 common field conventions. 11 common status values. 7 evidence
-levels. 5 freshness values. 13 data model design principles. 9 storage design principles. 15-threat
-model. Cross-model relationships documented. 8 source-of-truth/provenance rules. JSON output
-conventions (8 conventions with example envelope). Storage strategy: command-output only for first
-implementation, no cache, no .pcae storage. Read-only command-output strategy (5 rules). Generated
-cache policy (deferred, non-authoritative when introduced). .pcae storage deferral policy (deferred,
-requires gate). 48 validation rules. 15 failure cases. Example model records. Recommends 86C —
-Read-Only Artifact Index Prototype.
+86C implements the first Phase 85 read-only CLI command: `pcae artifact-index [--json]`. Scans 14
+committed governance artifacts and emits JSON artifact records to stdout. Read-only: no file writes,
+no cache, no .pcae storage, no authorization inference. ArtifactRecord model with 19 fields per 86B
+design. JSON envelope with schema_version, generated_at, source_command, repository_root, records,
+warnings, errors, safety_notes. Safety flags: artifact_index_is_read_only=true, does not authorize
+execution/adoption/commit-push. 14 tests added (tests/test_artifact_index.py). Total test count:
+6953 (up from 6939). Recommends 86D — Persistent Memory Snapshot Prototype.
+
+Phase 86B: Phase 85 Data Model and Storage Design (completed).
+
+86B defined shared data model contracts: 6 models (ArtifactRecord 19 fields, MemorySnapshot 21,
+GovernanceEvent 19, DecisionRecord 25, RiskRecord 32, ProjectStateSnapshot 41). Storage strategy:
+command-output only. 48 validation rules. 15 failure cases.
 
 Phase 86A: Phase 85 Implementation Roadmap (completed).
 
