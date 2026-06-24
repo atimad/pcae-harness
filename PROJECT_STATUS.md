@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 87K–87O: Phase 87 Public Documentation Block.
+Phase 88A: First Narrow Enforced Gate Boundary.
+
+88A defines the first narrow enforced gate boundary for PCAE. Evaluates 7 candidate enforced
+gates. Recommends scope_gate_preflight as first enforcement candidate. Documents: scope gate
+preflight model (inputs/outputs), enforcement decision model (10 decisions), 10 deny-by-default
+rules, human review model (12 triggers), failure handling (7 conditions), rollback/recovery
+strategy, audit requirements (6 event types), storage/cache policy (none), future test strategy
+(13 test areas), 15 safety invariants, future roadmap (88B–88F). Design/planning only — no
+implementation, no enforcement, no source, no tests. Recommends 88B — Scope Gate Preflight
+Prototype.
+
+Phase 87K–87O: Phase 87 Public Documentation Block (completed).
 
 87K–87O refreshes public-facing documentation after Phase 87 completion. Updates
 docs/ARCHITECTURE.md (Phase 86–87 layers), docs/INSTALLATION.md (intelligence/gate commands).
