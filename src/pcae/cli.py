@@ -398,6 +398,7 @@ from pcae.commands.status import (
 )
 from pcae.commands.artifact_index import run_artifact_index
 from pcae.commands.memory_snapshot import run_memory_snapshot
+from pcae.commands.governance_timeline import run_governance_timeline
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4445,6 +4446,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON memory snapshot output.",
     )
     memory_snapshot_parser.set_defaults(handler=run_memory_snapshot)
+
+    governance_timeline_parser = subparsers.add_parser(
+        "governance-timeline",
+        help="Read-only governance event timeline extraction.",
+    )
+    governance_timeline_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON governance timeline output.",
+    )
+    governance_timeline_parser.set_defaults(handler=run_governance_timeline)
 
     task_parser = subparsers.add_parser(
         "task",

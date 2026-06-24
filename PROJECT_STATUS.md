@@ -2,7 +2,20 @@
 
 ## Current Phase
 
-Phase 86D: Persistent Memory Snapshot Prototype.
+Phase 86E: Governance Event Timeline Extraction.
+
+86E implements the third Phase 85 read-only CLI command: `pcae governance-timeline [--json]`. Emits
+an ordered governance event timeline as JSON to stdout. Extracts events from committed artifacts,
+task files, git commit history, and the existing artifact index/memory snapshot layer. GovernanceEvent
+with 19 fields per 86B design. 8 event types: phase_completed, implementation_commit_recorded,
+completion_commit_recorded, artifact_documented, command_available, tests_passed, design_documented,
+prototype_implemented. Events are deterministic with stable IDs across runs. Read-only: no file
+writes, no cache, no .pcae storage, no authorization inference. Reuses artifact index and memory
+snapshot internally. Safety flags: governance_timeline_is_read_only=true, does not authorize
+execution/backend/adoption/commit-push. 22 tests added (tests/test_governance_timeline.py). Total
+test count: 6991 (up from 6969). Recommends 86F — Decision Log Extraction.
+
+Phase 86D: Persistent Memory Snapshot Prototype (completed).
 
 86D implements the second Phase 85 read-only CLI command: `pcae memory-snapshot [--json]`. Emits
 a JSON memory snapshot summarizing current project governance state from committed artifacts, git
