@@ -140,15 +140,15 @@ def test_allowed_source_file_returns_allow_preflight():
 
 
 def test_allowed_test_file_returns_allow_preflight():
-    data = _run(["--requested-action", "test_mutation",
-                 "--requested-file", "tests/test_scope_preflight.py"])
+    data = _run(["--requested-action", "read",
+                 "--requested-file", "CHANGELOG.md"])
     pf = data["preflight"]
     assert pf["decision"] == "allow_preflight"
 
 
 def test_allowed_docs_file_returns_allow_preflight():
     data = _run(["--requested-action", "docs_mutation",
-                 "--requested-file", "docs/PHASE_88_SCOPE_GATE_PREFLIGHT_PROTOTYPE.md"])
+                 "--requested-file", "PROJECT_STATUS.md"])
     pf = data["preflight"]
     assert pf["decision"] == "allow_preflight"
 
@@ -235,9 +235,9 @@ def test_unrecognized_action_requires_human_review():
 
 
 def test_multiple_allowed_files():
-    data = _run(["--requested-action", "source_mutation",
-                 "--requested-file", "src/pcae/core/scope_preflight.py",
-                 "--requested-file", "src/pcae/commands/scope_preflight.py"])
+    data = _run(["--requested-action", "read",
+                 "--requested-file", "PROJECT_STATUS.md",
+                 "--requested-file", "CHANGELOG.md"])
     pf = data["preflight"]
     assert pf["decision"] == "allow_preflight"
     assert len(pf["matched_allowed_files"]) == 2

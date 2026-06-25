@@ -11,6 +11,7 @@ false-positive and false-negative risks.
 ## Allowed Files
 
 - tests/test_scope_preflight_review.py
+- tests/test_scope_preflight.py
 - docs/PHASE_88_SCOPE_GATE_PREFLIGHT_REVIEW.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
