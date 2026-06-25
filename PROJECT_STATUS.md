@@ -2,14 +2,28 @@
 
 ## Current Phase
 
-Phase 88L.1: Task State Reconciliation.
+Phase 88M: Scope + Backend + Mutation + Commit/Push Preflight Integration Verification (completed).
+
+88M verifies the full explicit preflight layer (scope, backend, mutation/adoption, commit, push)
+as a coherent read-only, non-authorizing governance surface. 57 integration tests added in
+`tests/test_preflight_integration_verification.py` (optimized from 102 using Python-level
+evaluators and parametrization). Tests verify: all five commands registered,
+JSON envelope consistency, safety flag consistency, all commands non-authorizing, no-write/no-storage,
+scope allow not backend authorization, backend review not mutation authorization, mutation review not
+commit authorization, commit review not push authorization, push review not push execution, negative
+paths (unknown backend, missing capture, missing commit message, raw/force push), existing
+gate-dry-run and read-only intelligence commands work. No source changes required. Readiness:
+ready_for_permission_broker_design_reconciliation. Recommends 88N — Permission Broker Design
+Reconciliation.
+
+Phase 88L.1: Task State Reconciliation (completed).
 
 88L.1 reconciles a completed legacy 88L task contract that remained under
 `tasks/active/`. Health reported the file by directory presence, while
 `pcae task transition` correctly required a structured task whose parsed status
 was the literal `active`. The completed 88L contract was closed through
 `pcae task close`, moved to `tasks/done/`, and recorded in task memory. No source
-or test changes were required. Phase 88M remains not started.
+or test changes were required.
 
 Phase 88L: Commit/Push Preflight Tests and False-Positive Review (completed).
 
