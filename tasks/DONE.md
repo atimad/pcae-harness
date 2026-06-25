@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88N.2 — Full Suite Runtime Optimization and Test-Run Lock (20260625-2332-88n-2-full-suite-runtime-optimization-and-test-run-lock)
 - 88N.1 — Task Finish Tracked-File Robustness (20260625-2303-88n-1-task-finish-tracked-file-robustness)
 - 88N — Permission Broker Design Reconciliation (20260625-2245-88n-permission-broker-design-reconciliation)
 - 88M — Scope + Backend + Mutation + Commit/Push Preflight Integration Verification (20260625-1919-88m-scope-backend-mutation-commit-push-preflight-integration-verification)
