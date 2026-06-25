@@ -2,7 +2,16 @@
 
 ## Current Phase
 
-Phase 88D: Backend Invocation Preflight Design.
+Phase 88D.1: Test Runtime Tiering and Optimization.
+
+88D.1 adds pytest markers (slow, integration, phase_closure) and three test tiers (quick,
+governance, full) to reduce development feedback time. 14 subprocess-heavy test files marked.
+Quick tier (~7,000 tests) excludes 409 slow tests for faster feedback. Full suite (7,407 tests)
+remains required for phase closure and push. docs/TESTING_STRATEGY.md documents tier model,
+bottleneck analysis, and future optimization candidates. No tests deleted. No behavior weakened.
+Recommends 88E — Backend Invocation Preflight Prototype.
+
+Phase 88D: Backend Invocation Preflight Design (completed).
 
 88D defines the backend invocation preflight boundary for PCAE. Documents 6 backend identities
 (claude, claude-deepseek, claude-kimi, codex, subagent, unknown_backend), backend invocation

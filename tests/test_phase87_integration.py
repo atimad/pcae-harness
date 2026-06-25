@@ -10,6 +10,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
+pytestmark = [pytest.mark.slow, pytest.mark.integration, pytest.mark.phase_closure]
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 EXPECTED_GATES = [

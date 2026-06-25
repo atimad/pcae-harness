@@ -32,6 +32,11 @@ packages = ["src/pcae"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "slow: marks tests that spawn subprocesses or take >1s each",
+    "integration: marks CLI integration tests that spawn pcae subprocesses",
+    "phase_closure: marks heavyweight phase-closure validation tests",
+]
 
 # Phase test selection strategy (Phase 61J):
 # Tests follow test_{phase_id}_{description} naming convention.
@@ -40,3 +45,8 @@ pythonpath = ["src"]
 #           python -m pytest -k 61i  (Phase 61I: Handoff State Refresh)
 #           python -m pytest -k 61j  (Phase 61J: Phase Test Selection Hardening)
 # Zero-collection is a validation failure — always verify selector finds > 0 tests.
+#
+# Test tiers (Phase 88D.1):
+#   quick:      python -m pytest -m "not slow and not phase_closure" -n auto
+#   governance: python -m pytest -m "integration or slow" -n auto
+#   full:       python -m pytest -n auto

@@ -5,6 +5,10 @@ import json
 from pathlib import Path
 import subprocess
 
+import pytest
+
+pytestmark = [pytest.mark.slow, pytest.mark.integration]
+
 from pcae.cli import main
 from pcae.commands.init import init_harness
 from pcae.core.paths import HarnessPath
