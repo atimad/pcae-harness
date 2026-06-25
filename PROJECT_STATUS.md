@@ -2,7 +2,17 @@
 
 ## Current Phase
 
-Phase 88H: Mutation/Adoption Preflight Prototype.
+Phase 88I: Mutation/Adoption Preflight Tests and False-Positive Review.
+
+88I adds 36 focused edge-case tests for mutation/adoption preflight and documents
+false-positive/false-negative risks. Tests cover: docs/source/test/generated-artifact mutation,
+forbidden/unknown/multi-file requests, scope allow non-authorizing, source-backend known/unknown,
+backend evidence non-authorizing, captured output missing/present/hash, adoption review/approval/
+execution separation, all 13 safety flags, no artifacts/mutation, determinism. Documents 16
+false-positive and 8 false-negative risks. No critical flaws. No source changes. Readiness:
+ready_for_commit_push_preflight_design. Recommends 88J — Commit/Push Preflight Design.
+
+Phase 88H: Mutation/Adoption Preflight Prototype (completed).
 
 88H implements `pcae preflight mutation` — explicit mutation/adoption preflight command. Evaluates
 proposed mutations and adoptions against scope, backend, task contract, captured output, diff,
