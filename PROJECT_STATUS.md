@@ -2,7 +2,19 @@
 
 ## Current Phase
 
-Phase 88E: Backend Invocation Preflight Prototype.
+Phase 88F: Backend Invocation Preflight Tests and False-Positive Review.
+
+88F adds 47 focused edge-case tests for backend invocation preflight and documents
+false-positive/false-negative risks. Tests cover: all 5 known backends recognized, unknown
+backend denial, all backends require human review, recognition not authorizing, prompt
+missing/present/hash/empty handling, file scope relationship, scope allow non-authorizing,
+scope denied blocking, multi-file combinations, unknown/high-risk actions non-authorizing,
+all safety flags false on all paths, no artifacts/mutation, determinism. Documents 11 false-
+positive risks and 7 false-negative risks. No critical flaws. No source changes. Readiness:
+ready_for_mutation_adoption_preflight_design. Recommends 88G — Mutation/Adoption Preflight
+Design.
+
+Phase 88E: Backend Invocation Preflight Prototype (completed).
 
 88E implements `pcae preflight backend` — explicit backend invocation preflight command.
 Evaluates proposed backend invocations against backend identity, task contract, prompt evidence,
