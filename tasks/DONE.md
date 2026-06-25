@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88N — Permission Broker Design Reconciliation (20260625-2245-88n-permission-broker-design-reconciliation)
 - 88M — Scope + Backend + Mutation + Commit/Push Preflight Integration Verification (20260625-1919-88m-scope-backend-mutation-commit-push-preflight-integration-verification)
 - Phase 88L.1 — Task State Reconciliation (20260625-1816-phase-88l-1-task-state-reconciliation)
 - Phase 88L Commit/Push Preflight Tests and False-Positive Review (88l-commit-push-preflight-review)
