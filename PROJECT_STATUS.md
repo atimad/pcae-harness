@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 88N: Permission Broker Design Reconciliation (active).
+
+88N reconciles the Phase 87 permission broker architecture with the concrete Phase 88 explicit
+preflight layer. Defines how a future permission broker should combine scope, backend,
+mutation/adoption, commit, push, lifecycle, risk, human-review, and task-state evidence into a
+single conservative decision model while preserving non-execution boundaries and denying by
+default. Delivers `docs/PHASE_88_PERMISSION_BROKER_RECONCILIATION.md`. Documents the known 88M
+task-finish tracked-file lifecycle bug and recommends 88N.1 — Task Finish Tracked-File
+Robustness as the immediate next phase. Design only: no source changes, no broker
+implementation, no shell gate implementation, no tests, no storage. Recommends
+88N.1 — Task Finish Tracked-File Robustness.
+
 Phase 88M: Scope + Backend + Mutation + Commit/Push Preflight Integration Verification (completed).
 
 88M verifies the full explicit preflight layer (scope, backend, mutation/adoption, commit, push)
