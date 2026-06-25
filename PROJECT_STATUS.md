@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 88B: Scope Gate Preflight Prototype.
+Phase 88C: Scope Gate Preflight Tests and False-Positive Review.
+
+88C adds 63 focused edge-case tests for the scope gate preflight prototype and documents
+false-positive/false-negative risks. Tests cover: allowed/forbidden exact and glob matching,
+allowed/forbidden conflict (forbidden wins), multiple-file combinations, unknown files/actions,
+docs/source/test action distinctions, all 6 non-scope-decidable actions, non-authorizing boundary
+verification, no-write/no-storage verification, determinism, and empty-string edge case. Documents
+9 false-positive risks and 7 false-negative risks. No critical flaws found. No source changes
+required. Readiness decision: ready_for_backend_invocation_preflight_design. Recommends 88D —
+Backend Invocation Preflight Design.
+
+Phase 88B: Scope Gate Preflight Prototype (completed).
 
 88B implements the first narrow scope gate preflight prototype. Adds `pcae preflight scope`
 command that evaluates requested action and requested files against the active task contract
