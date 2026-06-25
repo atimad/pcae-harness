@@ -2,7 +2,17 @@
 
 ## Current Phase
 
-Phase 88J: Commit/Push Preflight Design.
+Phase 88K: Commit/Push Preflight Prototype.
+
+88K implements `pcae preflight commit` and `pcae preflight push` — explicit commit/push
+preflight commands. Commit evaluates message, diff, tests, check, health, doctor evidence.
+Push evaluates target, push-check, tests, check, health, doctor, blocks raw git push and
+force push. All requests require human review. Passing all checks still requires review.
+pcae push remains governed push path. 23 decision values, 20 safety notes. authorization_granted
+=false, commit_performed=false, push_performed=false always. 33 new tests. Recommends 88L —
+Commit/Push Preflight Tests and False-Positive Review.
+
+Phase 88J: Commit/Push Preflight Design (completed).
 
 88J defines the commit/push preflight boundary for PCAE. Documents 10 commit/push actions,
 commit request model (26 fields), push request model (25 fields), preflight output model (48

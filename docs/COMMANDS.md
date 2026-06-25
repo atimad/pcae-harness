@@ -1545,3 +1545,17 @@ none of them invoke a runtime or write files.
 - `pcae preflight mutation --json --requested-action ACTION --captured-output-present --captured-output-hash HASH`
 - `pcae preflight mutation --json --requested-action ACTION --adoption-review-present --adoption-approval-present`
 - `pcae preflight mutation --json --requested-action ACTION --requested-file PATH --source-backend BACKEND`
+
+## preflight commit
+
+- `pcae preflight commit`
+- `pcae preflight commit --json`
+- `pcae preflight commit --json --commit-message MSG --diff-present --tests-present --tests-passed --pcae-check-passed --pcae-health-passed --doctor-passed`
+
+## preflight push
+
+- `pcae preflight push`
+- `pcae preflight push --json`
+- `pcae preflight push --json --push-target TARGET --push-check-passed --tests-present --tests-passed --pcae-check-passed --pcae-health-passed --doctor-passed`
+- `pcae preflight push --json --raw-git-push-requested`
+- `pcae preflight push --json --force-push-requested`

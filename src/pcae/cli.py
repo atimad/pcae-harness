@@ -406,6 +406,7 @@ from pcae.commands.gate_dry_run import run_gate_dry_run
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.mutation_preflight import run_mutation_preflight
+from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4664,6 +4665,35 @@ def build_parser() -> argparse.ArgumentParser:
         help="Backend that produced the output (e.g., claude, codex).",
     )
     preflight_mutation_parser.set_defaults(handler=run_mutation_preflight)
+
+    preflight_commit_parser = preflight_subparsers.add_parser(
+        "commit", help="Evaluate proposed commit against evidence and policy.",
+    )
+    preflight_commit_parser.add_argument("--json", action="store_true", help="JSON output.")
+    preflight_commit_parser.add_argument("--commit-message", metavar="MSG", help="Commit message.")
+    preflight_commit_parser.add_argument("--diff-present", action="store_true", help="Diff present.")
+    preflight_commit_parser.add_argument("--tests-present", action="store_true", help="Tests present.")
+    preflight_commit_parser.add_argument("--tests-passed", action="store_true", help="Tests passed.")
+    preflight_commit_parser.add_argument("--pcae-check-passed", action="store_true", help="pcae check passed.")
+    preflight_commit_parser.add_argument("--pcae-health-passed", action="store_true", help="pcae health passed.")
+    preflight_commit_parser.add_argument("--doctor-passed", action="store_true", help="pcae doctor passed.")
+    preflight_commit_parser.add_argument("--requested-file", action="append", metavar="PATH", help="File (repeatable).")
+    preflight_commit_parser.set_defaults(handler=run_commit_preflight)
+
+    preflight_push_parser = preflight_subparsers.add_parser(
+        "push", help="Evaluate proposed push against evidence and policy.",
+    )
+    preflight_push_parser.add_argument("--json", action="store_true", help="JSON output.")
+    preflight_push_parser.add_argument("--push-target", metavar="TARGET", help="Push target (e.g., origin/main).")
+    preflight_push_parser.add_argument("--push-check-passed", action="store_true", help="pcae push check passed.")
+    preflight_push_parser.add_argument("--pcae-check-passed", action="store_true", help="pcae check passed.")
+    preflight_push_parser.add_argument("--pcae-health-passed", action="store_true", help="pcae health passed.")
+    preflight_push_parser.add_argument("--doctor-passed", action="store_true", help="pcae doctor passed.")
+    preflight_push_parser.add_argument("--tests-present", action="store_true", help="Tests present.")
+    preflight_push_parser.add_argument("--tests-passed", action="store_true", help="Tests passed.")
+    preflight_push_parser.add_argument("--raw-git-push-requested", action="store_true", help="Raw git push requested.")
+    preflight_push_parser.add_argument("--force-push-requested", action="store_true", help="Force push requested.")
+    preflight_push_parser.set_defaults(handler=run_push_preflight)
 
     task_parser = subparsers.add_parser(
         "task",
