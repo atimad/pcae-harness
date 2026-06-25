@@ -1536,3 +1536,12 @@ none of them invoke a runtime or write files.
 - `pcae preflight backend --json --requested-backend BACKEND --requested-action ACTION --prompt-present`
 - `pcae preflight backend --json --requested-backend BACKEND --requested-action ACTION --prompt-present --prompt-hash HASH`
 - `pcae preflight backend --json --requested-backend BACKEND --requested-action ACTION --requested-file PATH --prompt-present --prompt-hash HASH`
+
+## preflight mutation
+
+- `pcae preflight mutation --requested-action ACTION`
+- `pcae preflight mutation --json --requested-action ACTION`
+- `pcae preflight mutation --json --requested-action ACTION --requested-file PATH`
+- `pcae preflight mutation --json --requested-action ACTION --captured-output-present --captured-output-hash HASH`
+- `pcae preflight mutation --json --requested-action ACTION --adoption-review-present --adoption-approval-present`
+- `pcae preflight mutation --json --requested-action ACTION --requested-file PATH --source-backend BACKEND`

@@ -405,6 +405,7 @@ from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
+from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4617,6 +4618,52 @@ def build_parser() -> argparse.ArgumentParser:
         help="Hash of prompt content for audit traceability.",
     )
     preflight_backend_parser.set_defaults(handler=run_backend_preflight)
+
+    preflight_mutation_parser = preflight_subparsers.add_parser(
+        "mutation",
+        help="Evaluate proposed mutation or adoption against evidence and policy.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--json", action="store_true",
+        help="Print machine-readable JSON mutation preflight output.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--requested-action", metavar="ACTION", required=True,
+        help="Mutation/adoption action to evaluate.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--requested-file", action="append", metavar="PATH",
+        help="File path for scope evaluation (repeatable).",
+    )
+    preflight_mutation_parser.add_argument(
+        "--captured-output-present", action="store_true",
+        help="Indicate captured output is present.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--captured-output-hash", metavar="HASH",
+        help="Hash of captured output for audit traceability.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--diff-present", action="store_true",
+        help="Indicate a diff/patch is present.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--diff-hash", metavar="HASH",
+        help="Hash of diff/patch content.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--adoption-review-present", action="store_true",
+        help="Indicate adoption review record is present.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--adoption-approval-present", action="store_true",
+        help="Indicate adoption approval record is present.",
+    )
+    preflight_mutation_parser.add_argument(
+        "--source-backend", metavar="BACKEND",
+        help="Backend that produced the output (e.g., claude, codex).",
+    )
+    preflight_mutation_parser.set_defaults(handler=run_mutation_preflight)
 
     task_parser = subparsers.add_parser(
         "task",

@@ -2,7 +2,20 @@
 
 ## Current Phase
 
-Phase 88G: Mutation/Adoption Preflight Design.
+Phase 88H: Mutation/Adoption Preflight Prototype.
+
+88H implements `pcae preflight mutation` — explicit mutation/adoption preflight command. Evaluates
+proposed mutations and adoptions against scope, backend, task contract, captured output, diff,
+adoption review/approval evidence, and policy. Supports 11 action values, 14 decision values,
+--requested-file, --captured-output-present/hash, --diff-present/hash, --adoption-review-present,
+--adoption-approval-present, --source-backend flags. All mutation/adoption requests require human
+review. Scope allow does not authorize mutation. Captured output presence does not authorize
+adoption. Adoption review does not authorize approval. Adoption approval does not authorize
+execution. authorization_granted=false, execution_authorized=false, mutation_performed=false
+always. 34 new tests. Recommends 88I — Mutation/Adoption Preflight Tests and False-Positive
+Review.
+
+Phase 88G: Mutation/Adoption Preflight Design (completed).
 
 88G defines the mutation/adoption preflight boundary for PCAE. Documents 10 mutation/adoption
 actions, mutation request model (18 fields), adoption request model (18 fields), preflight output
