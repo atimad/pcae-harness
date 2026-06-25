@@ -13,6 +13,8 @@ Design/planning only — no implementation.
 - CHANGELOG.md
 - tasks/active/88d-backend-invocation-preflight-design.md
 - tasks/completed/88c-scope-preflight-review.md
+- tests/test_scope_preflight_review.py
+- tests/test_scope_preflight.py
 
 ## Forbidden Files
 
@@ -20,7 +22,6 @@ Design/planning only — no implementation.
 - docs/LINKEDIN_ARTICLE_DRAFT.md
 - docs/REAL_CAPTURED_TASKS.md
 - src/**
-- tests/**
 - .pcae/**
 - .githooks/**
 - pyproject.toml

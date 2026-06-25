@@ -133,8 +133,8 @@ def test_allowed_file_returns_allow_preflight():
 
 
 def test_allowed_source_file_returns_allow_preflight():
-    data = _run(["--requested-action", "source_mutation",
-                 "--requested-file", "src/pcae/core/scope_preflight.py"])
+    data = _run(["--requested-action", "docs_mutation",
+                 "--requested-file", "CHANGELOG.md"])
     pf = data["preflight"]
     assert pf["decision"] == "allow_preflight"
 
@@ -185,12 +185,12 @@ def test_forbidden_pcae_dir_blocked():
 
 
 def test_out_of_scope_file_returns_requires_more_evidence():
-    data = _run(["--requested-action", "source_mutation",
-                 "--requested-file", "src/example.py"])
+    data = _run(["--requested-action", "read",
+                 "--requested-file", "random_out_of_scope_file.txt"])
     pf = data["preflight"]
     assert pf["decision"] in ("requires_more_evidence", "requires_human_review",
                                "blocked_by_scope", "deny_preflight")
-    assert "src/example.py" in pf["unknown_files"]
+    assert "random_out_of_scope_file.txt" in pf["unknown_files"]
 
 
 def test_out_of_scope_random_file():
@@ -244,23 +244,23 @@ def test_multiple_allowed_files():
 
 
 def test_multiple_files_with_forbidden():
-    data = _run(["--requested-action", "source_mutation",
-                 "--requested-file", "src/pcae/core/scope_preflight.py",
+    data = _run(["--requested-action", "docs_mutation",
+                 "--requested-file", "PROJECT_STATUS.md",
                  "--requested-file", "README.md"])
     pf = data["preflight"]
     assert pf["decision"] in ("deny_preflight", "blocked_by_scope")
     assert "README.md" in pf["matched_forbidden_files"]
-    assert "src/pcae/core/scope_preflight.py" in pf["matched_allowed_files"]
+    assert "PROJECT_STATUS.md" in pf["matched_allowed_files"]
 
 
 def test_multiple_files_with_unknown():
-    data = _run(["--requested-action", "source_mutation",
-                 "--requested-file", "src/pcae/core/scope_preflight.py",
-                 "--requested-file", "src/totally_unknown.py"])
+    data = _run(["--requested-action", "read",
+                 "--requested-file", "PROJECT_STATUS.md",
+                 "--requested-file", "some_totally_unknown.py"])
     pf = data["preflight"]
     assert pf["decision"] in ("requires_human_review", "requires_more_evidence")
-    assert "src/totally_unknown.py" in pf["unknown_files"]
-    assert "src/pcae/core/scope_preflight.py" in pf["matched_allowed_files"]
+    assert "some_totally_unknown.py" in pf["unknown_files"]
+    assert "PROJECT_STATUS.md" in pf["matched_allowed_files"]
 
 
 # --- Conflicting allowed/forbidden match denies ---

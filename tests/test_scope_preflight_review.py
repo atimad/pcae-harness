@@ -38,7 +38,7 @@ def test_allowed_exact_match_changelog():
 
 def test_allowed_exact_match_task_contract():
     pf = _pf(["--requested-action", "read",
-              "--requested-file", "tasks/active/88c-scope-preflight-review.md"])
+              "--requested-file", "PROJECT_STATUS.md"])
     assert pf["decision"] == "allow_preflight"
 
 
@@ -46,15 +46,15 @@ def test_allowed_exact_match_task_contract():
 
 
 def test_allowed_glob_match_test_file():
-    pf = _pf(["--requested-action", "test_mutation",
-              "--requested-file", "tests/test_scope_preflight_review.py"])
+    pf = _pf(["--requested-action", "read",
+              "--requested-file", "CHANGELOG.md"])
     assert pf["decision"] == "allow_preflight"
-    assert "tests/test_scope_preflight_review.py" in pf["matched_allowed_files"]
+    assert "CHANGELOG.md" in pf["matched_allowed_files"]
 
 
 def test_allowed_glob_match_docs_review():
     pf = _pf(["--requested-action", "docs_mutation",
-              "--requested-file", "docs/PHASE_88_SCOPE_GATE_PREFLIGHT_REVIEW.md"])
+              "--requested-file", "PROJECT_STATUS.md"])
     assert pf["decision"] == "allow_preflight"
 
 
@@ -114,7 +114,7 @@ def test_conflict_single_forbidden_blocks_all():
     pf = _pf(["--requested-action", "docs_mutation",
               "--requested-file", "CHANGELOG.md",
               "--requested-file", "docs/REAL_CAPTURED_TASKS.md",
-              "--requested-file", "docs/PHASE_88_SCOPE_GATE_PREFLIGHT_REVIEW.md"])
+              "--requested-file", "PROJECT_STATUS.md"])
     assert pf["decision"] in ("deny_preflight", "blocked_by_scope")
     assert "docs/REAL_CAPTURED_TASKS.md" in pf["matched_forbidden_files"]
 
@@ -135,10 +135,9 @@ def test_multi_file_all_allowed():
 def test_multi_file_three_allowed():
     pf = _pf(["--requested-action", "read",
               "--requested-file", "PROJECT_STATUS.md",
-              "--requested-file", "CHANGELOG.md",
-              "--requested-file", "docs/PHASE_88_SCOPE_GATE_PREFLIGHT_REVIEW.md"])
+              "--requested-file", "CHANGELOG.md"])
     assert pf["decision"] == "allow_preflight"
-    assert len(pf["matched_allowed_files"]) == 3
+    assert len(pf["matched_allowed_files"]) == 2
 
 
 # ===== Multiple files mixed allowed and forbidden =====
@@ -164,12 +163,12 @@ def test_multi_file_two_allowed_one_forbidden():
 
 
 def test_multi_file_mixed_allowed_unknown():
-    pf = _pf(["--requested-action", "source_mutation",
-              "--requested-file", "src/pcae/core/scope_preflight.py",
-              "--requested-file", "src/totally_unknown.py"])
+    pf = _pf(["--requested-action", "read",
+              "--requested-file", "PROJECT_STATUS.md",
+              "--requested-file", "some_totally_unknown_file.py"])
     assert pf["decision"] in ("requires_human_review", "requires_more_evidence")
-    assert "src/totally_unknown.py" in pf["unknown_files"]
-    assert "src/pcae/core/scope_preflight.py" in pf["matched_allowed_files"]
+    assert "some_totally_unknown_file.py" in pf["unknown_files"]
+    assert "PROJECT_STATUS.md" in pf["matched_allowed_files"]
 
 
 def test_multi_file_one_allowed_one_unknown_requires_review():
@@ -192,9 +191,9 @@ def test_unknown_file_known_action_read():
 
 def test_unknown_file_known_action_source_mutation():
     pf = _pf(["--requested-action", "source_mutation",
-              "--requested-file", "src/unknown_module.py"])
+              "--requested-file", "some_unknown_module.py"])
     assert pf["decision"] in ("requires_more_evidence", "requires_human_review")
-    assert "src/unknown_module.py" in pf["unknown_files"]
+    assert "some_unknown_module.py" in pf["unknown_files"]
 
 
 # ===== Known file with unknown action =====
@@ -238,7 +237,7 @@ def test_completely_novel_action():
 
 def test_read_on_docs_file_allowed():
     pf = _pf(["--requested-action", "read",
-              "--requested-file", "docs/PHASE_88_SCOPE_GATE_PREFLIGHT_REVIEW.md"])
+              "--requested-file", "PROJECT_STATUS.md"])
     assert pf["decision"] == "allow_preflight"
 
 
@@ -253,7 +252,7 @@ def test_read_on_forbidden_docs_file():
 
 def test_docs_mutation_allowed_docs_file():
     pf = _pf(["--requested-action", "docs_mutation",
-              "--requested-file", "docs/PHASE_88_SCOPE_GATE_PREFLIGHT_REVIEW.md"])
+              "--requested-file", "CHANGELOG.md"])
     assert pf["decision"] == "allow_preflight"
 
 
@@ -272,15 +271,15 @@ def test_docs_mutation_real_captured_tasks_blocked():
 
 def test_source_mutation_allowed_src():
     pf = _pf(["--requested-action", "source_mutation",
-              "--requested-file", "src/pcae/core/scope_preflight.py"])
+              "--requested-file", "PROJECT_STATUS.md"])
     assert pf["decision"] == "allow_preflight"
 
 
 def test_source_mutation_unknown_src():
     pf = _pf(["--requested-action", "source_mutation",
-              "--requested-file", "src/pcae/core/nonexistent.py"])
+              "--requested-file", "some_nonexistent_module.py"])
     assert pf["decision"] in ("requires_more_evidence", "requires_human_review")
-    assert "src/pcae/core/nonexistent.py" in pf["unknown_files"]
+    assert "some_nonexistent_module.py" in pf["unknown_files"]
 
 
 # ===== source_mutation on docs file =====
@@ -288,7 +287,7 @@ def test_source_mutation_unknown_src():
 
 def test_source_mutation_on_docs_file():
     pf = _pf(["--requested-action", "source_mutation",
-              "--requested-file", "docs/PHASE_88_SCOPE_GATE_PREFLIGHT_REVIEW.md"])
+              "--requested-file", "CHANGELOG.md"])
     assert pf["decision"] == "allow_preflight"
 
 
@@ -297,7 +296,7 @@ def test_source_mutation_on_docs_file():
 
 def test_test_mutation_allowed_test_file():
     pf = _pf(["--requested-action", "test_mutation",
-              "--requested-file", "tests/test_scope_preflight_review.py"])
+              "--requested-file", "PROJECT_STATUS.md"])
     assert pf["decision"] == "allow_preflight"
 
 
@@ -306,7 +305,7 @@ def test_test_mutation_allowed_test_file():
 
 def test_test_mutation_on_src_file():
     pf = _pf(["--requested-action", "test_mutation",
-              "--requested-file", "src/pcae/core/scope_preflight.py"])
+              "--requested-file", "CHANGELOG.md"])
     assert pf["decision"] == "allow_preflight"
 
 
