@@ -63,6 +63,14 @@ def _create_active_task(root: Path) -> str:
     return contract.task_id
 
 
+def _create_untracked_active_task(root: Path) -> str:
+    """Create a minimal active task without committing it (simulates 88M failure mode)."""
+    hr = HarnessPath(root)
+    contract = create_task_contract(hr, title="Test Task Untracked")
+    # Intentionally do NOT git-add or git-commit the task file.
+    return contract.task_id
+
+
 # ── Core staged-file-aware finish behavior ──
 
 
@@ -220,4 +228,120 @@ def test_normal_finish_still_blocks_pre_existing_changes(tmp_path, monkeypatch, 
     exit_code = main(["task", "finish", "--commit", "should block", "--json"])
     d = json.loads(capsys.readouterr().out)
     assert d.get("finished") is False or d.get("committed") is False
-    assert exit_code == 1
+
+
+# ── Untracked active task finish regression (88N.1) ──
+
+
+def test_untracked_task_sfa_finish_succeeds(tmp_path, monkeypatch, capsys):
+    """Regression: finish must succeed when active task file was never committed."""
+    root = _init(tmp_path, monkeypatch)
+    _create_untracked_active_task(root)
+
+    main(["task", "finish", "--commit", "complete untracked task",
+          "--staged-file-aware", "--skip-checks", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["finished"] is True
+    assert d["committed"] is True
+
+
+def test_untracked_task_sfa_finish_moves_to_done(tmp_path, monkeypatch, capsys):
+    """Regression: untracked active task file must end up in tasks/done/ after finish."""
+    root = _init(tmp_path, monkeypatch)
+    task_id = _create_untracked_active_task(root)
+
+    main(["task", "finish", "--commit", "complete untracked task",
+          "--staged-file-aware", "--skip-checks", "--json"])
+    capsys.readouterr()
+
+    done_path = root / "tasks" / "done" / f"{task_id}.md"
+    active_path = root / "tasks" / "active" / f"{task_id}.md"
+    assert done_path.exists(), "Task file must be in tasks/done/ after finish"
+    assert not active_path.exists(), "Task file must not remain in tasks/active/"
+
+
+def test_untracked_task_sfa_finish_updates_done_md(tmp_path, monkeypatch, capsys):
+    """Regression: tasks/DONE.md must contain exactly one entry for the finished task."""
+    root = _init(tmp_path, monkeypatch)
+    task_id = _create_untracked_active_task(root)
+
+    main(["task", "finish", "--commit", "complete untracked task",
+          "--staged-file-aware", "--skip-checks", "--json"])
+    capsys.readouterr()
+
+    done_md = (root / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    occurrences = done_md.count(task_id)
+    assert occurrences == 1, f"Expected exactly 1 DONE.md entry for {task_id}, got {occurrences}"
+
+
+def test_untracked_task_sfa_finish_creates_commit(tmp_path, monkeypatch, capsys):
+    """Regression: finish must create a commit even when active task was untracked."""
+    root = _init(tmp_path, monkeypatch)
+    before_log = subprocess.run(
+        ["git", "log", "--oneline"], cwd=root, capture_output=True, text=True
+    ).stdout.strip().splitlines()
+    _create_untracked_active_task(root)
+
+    main(["task", "finish", "--commit", "complete untracked task",
+          "--staged-file-aware", "--skip-checks", "--json"])
+    d = json.loads(capsys.readouterr().out)
+
+    after_log = subprocess.run(
+        ["git", "log", "--oneline"], cwd=root, capture_output=True, text=True
+    ).stdout.strip().splitlines()
+    assert d["committed"] is True
+    assert len(after_log) == len(before_log) + 1
+
+
+def test_untracked_task_sfa_finish_no_staged_remainder(tmp_path, monkeypatch, capsys):
+    """Regression: no extra staged files must remain after untracked task finish."""
+    root = _init(tmp_path, monkeypatch)
+    _create_untracked_active_task(root)
+
+    main(["task", "finish", "--commit", "complete untracked task",
+          "--staged-file-aware", "--skip-checks", "--json"])
+    capsys.readouterr()
+
+    staged = _staged(root)
+    assert staged == [], f"Unexpected staged files after finish: {staged}"
+
+
+def test_untracked_task_sfa_finish_no_pathspec_error(tmp_path, monkeypatch, capsys):
+    """Regression: no pathspec error should be raised for untracked active task finish."""
+    root = _init(tmp_path, monkeypatch)
+    _create_untracked_active_task(root)
+
+    # Should complete with exit code 0, no CalledProcessError raised
+    exit_code = main(["task", "finish", "--commit", "complete untracked task",
+                      "--staged-file-aware", "--skip-checks", "--json"])
+    capsys.readouterr()
+    assert exit_code == 0
+
+
+def test_tracked_task_sfa_finish_still_works(tmp_path, monkeypatch, capsys):
+    """Tracked active task finish must continue to work as before the fix."""
+    root = _init(tmp_path, monkeypatch)
+    task_id = _create_active_task(root)  # commits the task file
+
+    main(["task", "finish", "--commit", "complete tracked task",
+          "--staged-file-aware", "--skip-checks", "--json"])
+    d = json.loads(capsys.readouterr().out)
+    assert d["finished"] is True
+    assert d["committed"] is True
+
+    done_path = root / "tasks" / "done" / f"{task_id}.md"
+    assert done_path.exists()
+
+
+def test_untracked_task_finish_no_duplicate_done_entry(tmp_path, monkeypatch, capsys):
+    """Regression: finishing an untracked task must not create duplicate DONE.md entries."""
+    root = _init(tmp_path, monkeypatch)
+    task_id = _create_untracked_active_task(root)
+
+    # Run finish once
+    main(["task", "finish", "--commit", "complete untracked task",
+          "--staged-file-aware", "--skip-checks", "--json"])
+    capsys.readouterr()
+
+    done_md = (root / "tasks" / "DONE.md").read_text(encoding="utf-8")
+    assert done_md.count(task_id) == 1

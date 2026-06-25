@@ -225,6 +225,16 @@ def run_task_finish(args: argparse.Namespace) -> int:
 
     active_task_path = validation.active_task.path.relative_to(root.path)
 
+    # Determine whether the active task file is tracked by git *before* moving it.
+    # If it is untracked, staging the old active path after the move would fail with
+    # a pathspec error (git has no record of that path to delete).
+    _ls_check = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", str(active_task_path)],
+        cwd=root.path,
+        capture_output=True,
+    )
+    _active_task_was_tracked = _ls_check.returncode == 0
+
     try:
         result = finish_active_task(root, skip_checks=skip_checks)
     except ValueError as error:
@@ -233,7 +243,7 @@ def run_task_finish(args: argparse.Namespace) -> int:
 
     commit_hash = None
     if commit_message:
-        paths_to_stage = [str(active_task_path)]
+        paths_to_stage = [str(active_task_path)] if _active_task_was_tracked else []
         for p in result.updated_files:
             paths_to_stage.append(p.as_posix())
         paths_to_stage.append(

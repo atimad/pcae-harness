@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 88N.1: Task Finish Tracked-File Robustness (active).
+
+88N.1 fixes `pcae task finish` so it handles untracked active task contract files safely.
+Before the fix, if the active task file was never committed to git, task finish moved
+the file to `tasks/done/` and then failed with a pathspec error trying to stage the old
+active path. Fix: check git tracking before the file move; only include the old active
+path in staged paths when it was previously tracked. Adds 8 regression tests covering
+tracked and untracked finish paths, DONE.md exactly-once invariant, no-staged-remainder,
+no-pathspec-error, and no-duplicate-done-entry. Documents the 88M failure sequence, root
+cause, and corrected behavior. Recommends 88N.2 — Full Suite Runtime Optimization and
+Test-Run Lock. Source changed: yes (narrow). Tests: yes (regression only).
+
 Phase 88N: Permission Broker Design Reconciliation (active).
 
 88N reconciles the Phase 87 permission broker architecture with the concrete Phase 88 explicit
