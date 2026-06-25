@@ -2,7 +2,19 @@
 
 ## Current Phase
 
-Phase 88D.1: Test Runtime Tiering and Optimization.
+Phase 88E: Backend Invocation Preflight Prototype.
+
+88E implements `pcae preflight backend` — explicit backend invocation preflight command.
+Evaluates proposed backend invocations against backend identity, task contract, prompt evidence,
+file scope, and policy. Supports 5 known backends (claude, claude-deepseek, claude-kimi, codex,
+subagent), 11 decision values, --prompt-present, --prompt-hash, --requested-file flags.
+All backend requests require human review. Unknown backends denied. Missing prompts block.
+Scope allow does not authorize backend invocation. authorization_granted=false,
+execution_authorized=false, backend_invocation_performed=false always. Does not invoke backends,
+send prompts, capture outputs, implement broker/shell gate, or write storage. 42 new tests.
+Recommends 88F — Backend Invocation Preflight Tests and False-Positive Review.
+
+Phase 88D.1: Test Runtime Tiering and Optimization (completed).
 
 88D.1 adds pytest markers (slow, integration, phase_closure) and three test tiers (quick,
 governance, full) to reduce development feedback time. 14 subprocess-heavy test files marked.

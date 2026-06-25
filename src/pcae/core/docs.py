@@ -1549,6 +1549,14 @@ none of them invoke a runtime or write files.
 - `pcae preflight scope --json --requested-action ACTION`
 - `pcae preflight scope --json --requested-action ACTION --requested-file PATH`
 - `pcae preflight scope --json --requested-action ACTION --requested-file PATH --requested-file PATH`
+
+## preflight backend
+
+- `pcae preflight backend --requested-backend BACKEND --requested-action ACTION`
+- `pcae preflight backend --json --requested-backend BACKEND --requested-action ACTION`
+- `pcae preflight backend --json --requested-backend BACKEND --requested-action ACTION --prompt-present`
+- `pcae preflight backend --json --requested-backend BACKEND --requested-action ACTION --prompt-present --prompt-hash HASH`
+- `pcae preflight backend --json --requested-backend BACKEND --requested-action ACTION --requested-file PATH --prompt-present --prompt-hash HASH`
 """
 
 

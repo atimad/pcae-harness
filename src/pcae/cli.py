@@ -404,6 +404,7 @@ from pcae.commands.risk_register import run_risk_register
 from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
 from pcae.commands.scope_preflight import run_scope_preflight
+from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4577,6 +4578,45 @@ def build_parser() -> argparse.ArgumentParser:
         help="File path to evaluate scope for (repeatable).",
     )
     preflight_scope_parser.set_defaults(handler=run_scope_preflight)
+
+    preflight_backend_parser = preflight_subparsers.add_parser(
+        "backend",
+        help="Evaluate proposed backend invocation against evidence and policy.",
+    )
+    preflight_backend_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON backend preflight output.",
+    )
+    preflight_backend_parser.add_argument(
+        "--requested-backend",
+        metavar="BACKEND",
+        required=True,
+        help="Backend to evaluate (e.g., claude, claude-deepseek, codex).",
+    )
+    preflight_backend_parser.add_argument(
+        "--requested-action",
+        metavar="ACTION",
+        required=True,
+        help="Action to evaluate (e.g., backend_invocation, source_mutation).",
+    )
+    preflight_backend_parser.add_argument(
+        "--requested-file",
+        action="append",
+        metavar="PATH",
+        help="File path for scope evaluation (repeatable).",
+    )
+    preflight_backend_parser.add_argument(
+        "--prompt-present",
+        action="store_true",
+        help="Indicate a prompt is present for backend evaluation.",
+    )
+    preflight_backend_parser.add_argument(
+        "--prompt-hash",
+        metavar="HASH",
+        help="Hash of prompt content for audit traceability.",
+    )
+    preflight_backend_parser.set_defaults(handler=run_backend_preflight)
 
     task_parser = subparsers.add_parser(
         "task",
