@@ -604,6 +604,7 @@ from pcae.commands.review import (
 from pcae.commands.task import (
     run_doctor_git_lock,
     run_doctor_task_memory,
+    run_doctor_test_run,
     run_task_close,
     run_task_complete,
     run_task_finish,
@@ -8475,6 +8476,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     doctor_git_lock_parser.set_defaults(handler=run_doctor_git_lock)
+
+    doctor_test_run_parser = doctor_subparsers.add_parser(
+        "test-run",
+        help="Detect active expensive pytest (xdist) processes to prevent overlapping full-suite runs (Phase 88N.2).",
+    )
+    doctor_test_run_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    doctor_test_run_parser.set_defaults(handler=run_doctor_test_run)
 
     # ── pcae lifecycle ──
     from pcae.commands.lifecycle import run_lifecycle_status, run_lifecycle_next, run_lifecycle_run_gate, run_lifecycle_approve_gate, run_lifecycle_summary

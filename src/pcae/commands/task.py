@@ -942,3 +942,77 @@ def run_doctor_git_lock(args: argparse.Namespace) -> int:
         print(f"  Suggested action: {diag['suggested_action']}")
 
     return 1 if diag["status"] not in ("ok",) else 0
+
+
+def _detect_active_pytest_processes() -> list[str]:
+    """Return command lines of likely active expensive pytest (xdist) processes."""
+    import re as _re
+    import subprocess as _sp
+
+    try:
+        result = _sp.run(
+            ["ps", "aux"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+    except Exception:
+        return []
+
+    matches = []
+    for line in result.stdout.splitlines():
+        lower = line.lower()
+        # Exclude the ps aux process itself and grep lines
+        if "ps aux" in line or "grep" in line:
+            continue
+        # Exclude shell processes: they may have pytest in their eval/exec args
+        # but are not themselves running pytest. The COMMAND field (11th column)
+        # must start with a python interpreter, not a shell.
+        parts = line.split(None, 10)
+        if len(parts) < 11:
+            continue
+        command_field = parts[10]
+        cmd_lower = command_field.lower()
+        if cmd_lower.startswith(("/bin/sh", "/bin/bash", "/bin/zsh", "sh ", "bash ", "zsh ")):
+            continue
+        is_pytest = ("pytest" in cmd_lower or "py.test" in cmd_lower) or (
+            "python" in cmd_lower and "pytest" in lower
+        )
+        # Match -nauto, -n auto, -n2, -n 2, etc.
+        is_xdist = bool(_re.search(r"-n\s*(auto|\d+)", command_field))
+        if is_pytest and is_xdist:
+            matches.append(line.strip())
+    return matches
+
+
+def run_doctor_test_run(args: argparse.Namespace) -> int:
+    """Detect running expensive pytest processes to prevent overlapping full-suite runs."""
+    active = _detect_active_pytest_processes()
+    clear_to_run = len(active) == 0
+
+    diag = {
+        "check": "test_run_preflight",
+        "clear_to_run": clear_to_run,
+        "active_pytest_process_count": len(active),
+        "active_pytest_processes": active,
+        "policy": (
+            "Conservative: false positives (reporting busy when clear) are acceptable. "
+            "False negatives (reporting clear when busy) are more dangerous. "
+            "Do not kill processes automatically. Do not start tests automatically."
+        ),
+    }
+
+    if getattr(args, "json", False):
+        print(json.dumps(diag, indent=2, sort_keys=True))
+    else:
+        if clear_to_run:
+            print("Test-run preflight: clear to run.")
+            print("  No active expensive pytest (xdist) process detected.")
+        else:
+            print(f"Test-run preflight: NOT clear to run.")
+            print(f"  {len(active)} active pytest process(es) detected:")
+            for p in active:
+                print(f"    {p}")
+            print("  Wait for existing runs to complete or stop them manually.")
+
+    return 0 if clear_to_run else 1
