@@ -2,7 +2,17 @@
 
 ## Current Phase
 
-Phase 88K: Commit/Push Preflight Prototype.
+Phase 88L: Commit/Push Preflight Tests and False-Positive Review.
+
+88L adds 41 focused edge-case tests for commit/push preflight and documents
+false-positive/false-negative risks. Tests cover: commit evidence escalation chain, push
+evidence escalation chain, raw git push/force push blocking, pcae push preservation, branch/
+head/ahead/behind fields, all safety flags false on all paths, no artifacts/mutation, existing
+commands work, determinism. Documents 13 false-positive and 7 false-negative risks. No critical
+flaws. No source changes. Readiness: ready_for_integrated_preflight_verification. Recommends
+88M — Scope + Backend + Mutation + Commit/Push Preflight Integration Verification.
+
+Phase 88K: Commit/Push Preflight Prototype (completed).
 
 88K implements `pcae preflight commit` and `pcae preflight push` — explicit commit/push
 preflight commands. Commit evaluates message, diff, tests, check, health, doctor evidence.
