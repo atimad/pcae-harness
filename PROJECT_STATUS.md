@@ -2,7 +2,16 @@
 
 ## Current Phase
 
-Phase 88L: Commit/Push Preflight Tests and False-Positive Review.
+Phase 88L.1: Task State Reconciliation.
+
+88L.1 reconciles a completed legacy 88L task contract that remained under
+`tasks/active/`. Health reported the file by directory presence, while
+`pcae task transition` correctly required a structured task whose parsed status
+was the literal `active`. The completed 88L contract was closed through
+`pcae task close`, moved to `tasks/done/`, and recorded in task memory. No source
+or test changes were required. Phase 88M remains not started.
+
+Phase 88L: Commit/Push Preflight Tests and False-Positive Review (completed).
 
 88L adds 41 focused edge-case tests for commit/push preflight and documents
 false-positive/false-negative risks. Tests cover: commit evidence escalation chain, push
