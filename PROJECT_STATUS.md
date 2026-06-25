@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 88F: Backend Invocation Preflight Tests and False-Positive Review.
+Phase 88G: Mutation/Adoption Preflight Design.
+
+88G defines the mutation/adoption preflight boundary for PCAE. Documents 10 mutation/adoption
+actions, mutation request model (18 fields), adoption request model (18 fields), preflight output
+model (36 fields), 14 decision values, 17 deny-by-default rules, 16 human review triggers,
+evidence model, captured output relationship, scope/backend/diff/patch relationships, adoption
+review/approval/execution separation, commit/push relationship, broker/shell gate relationships,
+11 audit event types, 11 failure conditions, 20 safety invariants, 28 future test areas, and
+roadmap (88H–88L). Design/planning only — no implementation, no mutation, no adoption, no
+backend invocation, no source, no tests. Recommends 88H — Mutation/Adoption Preflight Prototype.
+
+Phase 88F: Backend Invocation Preflight Tests and False-Positive Review (completed).
 
 88F adds 47 focused edge-case tests for backend invocation preflight and documents
 false-positive/false-negative risks. Tests cover: all 5 known backends recognized, unknown
