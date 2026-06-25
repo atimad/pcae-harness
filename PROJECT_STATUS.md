@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 88I: Mutation/Adoption Preflight Tests and False-Positive Review.
+Phase 88J: Commit/Push Preflight Design.
+
+88J defines the commit/push preflight boundary for PCAE. Documents 10 commit/push actions,
+commit request model (26 fields), push request model (25 fields), preflight output model (48
+fields), 23 decision values, 21 deny-by-default rules, 19 human review triggers, evidence/git-
+state/diff-staging/commit-message/branch-upstream models, raw git push and force push controls
+(both forbidden), existing pcae push preservation, broker/shell gate relationships, 13 audit
+event types, 15 failure conditions, 21 safety invariants, 27 future test areas, and roadmap
+(88K–88O). Design/planning only — no implementation, no commit/push beyond phase commits and
+governed push, no source, no tests. Recommends 88K — Commit/Push Preflight Prototype.
+
+Phase 88I: Mutation/Adoption Preflight Tests and False-Positive Review (completed).
 
 88I adds 36 focused edge-case tests for mutation/adoption preflight and documents
 false-positive/false-negative risks. Tests cover: docs/source/test/generated-artifact mutation,
