@@ -2,7 +2,18 @@
 
 ## Current Phase
 
-Phase 88C: Scope Gate Preflight Tests and False-Positive Review.
+Phase 88D: Backend Invocation Preflight Design.
+
+88D defines the backend invocation preflight boundary for PCAE. Documents 6 backend identities
+(claude, claude-deepseek, claude-kimi, codex, subagent, unknown_backend), backend invocation
+request model (16 fields), preflight output model (25 fields), 11 decision values, 12
+deny-by-default rules, 14 human review triggers, prompt handling model, capture/output handling
+model, scope/broker/shell gate relationships, 6 audit event types, 9 failure conditions, 15
+safety invariants, 18 future test areas, and future roadmap (88E–88I). Design/planning only —
+no implementation, no backend invocation, no prompts, no capture, no source, no tests.
+Recommends 88E — Backend Invocation Preflight Prototype.
+
+Phase 88C: Scope Gate Preflight Tests and False-Positive Review (completed).
 
 88C adds 63 focused edge-case tests for the scope gate preflight prototype and documents
 false-positive/false-negative risks. Tests cover: allowed/forbidden exact and glob matching,
