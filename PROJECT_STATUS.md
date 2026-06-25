@@ -2,7 +2,19 @@
 
 ## Current Phase
 
-Phase 88A: First Narrow Enforced Gate Boundary.
+Phase 88B: Scope Gate Preflight Prototype.
+
+88B implements the first narrow scope gate preflight prototype. Adds `pcae preflight scope`
+command that evaluates requested action and requested files against the active task contract
+scope. Returns structured JSON with preflight decision, reason codes, scope matches, evidence,
+and safety notes. Supports 10 decision values, 11 known actions, 15 safety notes. Scope-decidable
+actions (read, docs_mutation, source_mutation, test_mutation) produce allow/deny/block decisions.
+Non-scope-decidable actions (adoption, backend_invocation, commit, push, rollback, storage_write)
+require human review. authorization_granted=false, execution_authorized=false always. Does not
+intercept shell commands, invoke backends, mutate files, implement broker/shell gate, or write
+storage. 66 new tests. Recommends 88C — Scope Gate Preflight Tests and False-Positive Review.
+
+Phase 88A: First Narrow Enforced Gate Boundary (completed).
 
 88A defines the first narrow enforced gate boundary for PCAE. Evaluates 7 candidate enforced
 gates. Recommends scope_gate_preflight as first enforcement candidate. Documents: scope gate

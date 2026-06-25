@@ -403,6 +403,7 @@ from pcae.commands.decision_log import run_decision_log
 from pcae.commands.risk_register import run_risk_register
 from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
+from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.hooks import run_hooks_install
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
@@ -4546,6 +4547,36 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional push target for push evaluation (e.g., origin/main).",
     )
     gate_dry_run_parser.set_defaults(handler=run_gate_dry_run)
+
+    preflight_parser = subparsers.add_parser(
+        "preflight",
+        help="Scope gate preflight evaluation (non-authorizing).",
+    )
+    preflight_subparsers = preflight_parser.add_subparsers(
+        dest="preflight_command", required=True,
+    )
+    preflight_scope_parser = preflight_subparsers.add_parser(
+        "scope",
+        help="Evaluate requested action and files against active task contract scope.",
+    )
+    preflight_scope_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON scope preflight output.",
+    )
+    preflight_scope_parser.add_argument(
+        "--requested-action",
+        metavar="ACTION",
+        required=True,
+        help="Action to evaluate (e.g., read, source_mutation, commit).",
+    )
+    preflight_scope_parser.add_argument(
+        "--requested-file",
+        action="append",
+        metavar="PATH",
+        help="File path to evaluate scope for (repeatable).",
+    )
+    preflight_scope_parser.set_defaults(handler=run_scope_preflight)
 
     task_parser = subparsers.add_parser(
         "task",

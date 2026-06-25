@@ -1521,3 +1521,10 @@ none of them invoke a runtime or write files.
 - `pcae strategic-continuity history --json`
 - `pcae strategic-continuity validate`
 - `pcae strategic-continuity validate --json`
+
+## preflight scope
+
+- `pcae preflight scope --requested-action ACTION`
+- `pcae preflight scope --json --requested-action ACTION`
+- `pcae preflight scope --json --requested-action ACTION --requested-file PATH`
+- `pcae preflight scope --json --requested-action ACTION --requested-file PATH --requested-file PATH`
