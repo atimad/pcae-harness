@@ -2,6 +2,20 @@
 
 ## Current Phase
 
+Phase 88Q: Shell Gate Test Matrix and False-Positive Review (completed).
+
+Systematically hardens the shell gate classifier from 88P by adding compound command
+parsing (`&&`/`||`/`;`), pipe/tee write detection, and backend/secret/environment
+classification. New constants: `_BACKEND_PROGRAMS`, `_SECRET_ACCESS_PROGRAMS`,
+`_SECRET_FILE_PREFIXES`, `_COMPOUND_OPS`, `_CATEGORY_SEVERITY`. Internal refactor:
+`_classify_command` → `_classify_single`; new wrapper `_classify_command` handles compound/
+pipe routing. New helpers: `_empty_flags`, `_split_on_operators`, `_find_tee_write_target`,
+`_most_restrictive_classification`, `_is_secret_file_access`. Adds
+`tests/test_shell_gate_matrix.py` — 287 tests across 24 test classes. Classifier-only
+boundary preserved: no execution, no shell interception, no shell wrappers, no backend
+invocation, no permission broker. Fast-green: 2,234 passed / 22.66s. Quick tier: 7,508
+passed / 2:08. Full suite: 8,220 passed, 0 failed / 27:24.
+
 Phase 88P: Shell Gate Prototype (completed).
 
 Adds `pcae shell-gate check --command "<cmd>" [--json]` — a read-only command classifier
@@ -12,8 +26,7 @@ false. Never executes the command text. New module: `src/pcae/core/shell_gate.py
 `src/pcae/cli.py`. Adds `tests/test_shell_gate.py` — 155 fast unit tests covering all major
 classification paths, all performed-flag invariants, safety notes, and the full hard-block
 surface. Fast-green tier updated: 1,947 passed / 22.60s. Quick tier: 7,221 passed / 2:11.
-Full suite: 7,933 passed, 0 failed / 28:45. Recommends 88Q — Shell Gate Test Matrix
-and False-Positive Review.
+Full suite: 7,933 passed, 0 failed / 28:45.
 
 Phase 88O.1: Scope Matching Shared Utility Reconciliation (completed).
 
