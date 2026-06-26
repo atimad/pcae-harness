@@ -10,7 +10,7 @@ Phase 88N.5 — Fast Green Validation Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
