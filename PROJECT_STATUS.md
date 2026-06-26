@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 88N.2: Full Suite Runtime Optimization and Test-Run Lock (active).
+Phase 88N.2: Full Suite Runtime Optimization and Test-Run Lock (completed).
 
 88N.2 profiles test suite runtime, documents validated tier definitions (targeted/quick/
 governance/integration/full), and adds `pcae doctor test-run` — a read-only preflight
@@ -10,8 +10,12 @@ that detects active expensive pytest (xdist) processes to prevent overlapping fu
 runs. Key profiling finding: `test_project_state.py` contains 21 subprocess-heavy CLI
 tests averaging ~8.4s each (sequential), already marked slow. Quick tier: 6,998 tests,
 ~4 minutes with `-n auto`. New command: `pcae doctor test-run [--json]`; returns
-`clear_to_run=true/false`. 13 regression tests. No persistent lock files, no test
-execution, no repo mutation. Recommends 88O — Shell Gate Design Reconciliation.
+`clear_to_run=true/false`. 14 tests in tests/test_doctor_test_run.py. No persistent
+lock files, no test execution, no repo mutation. Full suite: 7,717 passed, 2
+pre-existing failures in test_scope_preflight_review.py (confirmed pre-existing on
+88N.1 baseline; not regressions from 88N.2). Recommends 88N.3 — Scope Preflight
+Review Full-Suite Baseline Repair. 88O (Shell Gate Design Reconciliation) deferred
+until full-suite baseline is green.
 
 Phase 88N.1: Task Finish Tracked-File Robustness (active).
 
