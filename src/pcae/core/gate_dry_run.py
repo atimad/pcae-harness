@@ -178,8 +178,6 @@ def _evaluate_scope(
     requested_files: list[str],
     task_contract: dict[str, Any] | None,
 ) -> dict[str, Any]:
-    import fnmatch
-
     if not task_contract:
         return {
             "scope_status": "unknown",
@@ -195,7 +193,8 @@ def _evaluate_scope(
             "scope_notes": "no task contract detected",
         }
 
-    from pcae.core.scope_preflight import _SPF_POLICY_FORBIDDEN_FILES  # late import avoids circular dep
+    # Late import avoids circular dep: scope_preflight imports _detect_task_contract from here.
+    from pcae.core.scope_preflight import _SPF_POLICY_FORBIDDEN_FILES, _match_file
     allowed_patterns = task_contract["allowed_files"]
     task_forbidden = list(task_contract["forbidden_files"])
     policy_additions = [f for f in _SPF_POLICY_FORBIDDEN_FILES if f not in task_forbidden]
@@ -206,14 +205,8 @@ def _evaluate_scope(
     unknown: list[str] = []
 
     for rf in requested_files:
-        is_allowed = any(
-            fnmatch.fnmatch(rf, pat) or rf == pat or rf.startswith(pat.rstrip("*"))
-            for pat in allowed_patterns
-        )
-        is_forbidden = any(
-            fnmatch.fnmatch(rf, pat) or rf == pat or rf.startswith(pat.rstrip("*"))
-            for pat in forbidden_patterns
-        )
+        is_forbidden = _match_file(rf, forbidden_patterns)
+        is_allowed = _match_file(rf, list(allowed_patterns))
         if is_forbidden:
             matched_forbidden.append(rf)
         elif is_allowed:

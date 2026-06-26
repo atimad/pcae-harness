@@ -2,6 +2,22 @@
 
 ## Current Phase
 
+Phase 88O.1: Scope Matching Shared Utility Reconciliation (completed).
+
+88O.1 eliminates the scope file-pattern matching divergence between
+`gate_dry_run.py::_evaluate_scope` (which used inline `fnmatch.fnmatch or == or startswith`
+logic) and `scope_preflight.py::_match_file` (the canonical matching function already used by
+mutation preflight and backend preflight). The fix extends the existing late import in
+`_evaluate_scope` to also import `_match_file`, then replaces the two inline `any()` matching
+loops with two `_match_file(rf, patterns)` calls. No new shared module created. No other source
+files changed. Adds `tests/test_scope_matching_consistency.py` — 37 fast unit tests + 5
+subprocess integration tests covering `_match_file` semantics (exact/glob/prefix), policy-
+forbidden file enforcement across all four callers, cross-caller consistency with a mock task
+contract, and no-active-task non-authorising behavior. Documents the prefix-fallback behavior:
+patterns without trailing slash also match as prefixes (e.g., `"README.md"` matches
+`"README.md.bak"` via `startswith`). Fast-green: 1,792 passed / 31.40s. Quick tier: 7,066
+passed / 2:37. Full suite: see below. Recommends 88P — Shell Gate Prototype.
+
 Phase 88O: Shell Gate Design Reconciliation (completed).
 
 88O reconciles the Phase 87 shell gate architecture (`docs/PHASE_87_SHELL_GATE_ARCHITECTURE.md`)
