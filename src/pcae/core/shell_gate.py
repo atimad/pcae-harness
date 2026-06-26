@@ -141,6 +141,71 @@ _PIPE_RE = re.compile(r'\|')
 _SRC_EXTENSIONS: frozenset[str] = frozenset({".py", ".js", ".ts", ".go", ".rs", ".c", ".cpp", ".h", ".java"})
 _TEST_EXTENSIONS: frozenset[str] = frozenset({".py"})  # refined by path prefix
 
+# ── Backend invocation programs ────────────────────────────────────────────
+_BACKEND_PROGRAMS: frozenset[str] = frozenset({
+    "claude", "claude-deepseek", "codex",
+    "openai", "anthropic",
+    "gemini", "vertex",
+})
+
+# ── Secret access programs ─────────────────────────────────────────────────
+_SECRET_ACCESS_PROGRAMS: frozenset[str] = frozenset({
+    "security",    # macOS keychain
+    "keychain",
+    "pass",        # Unix password manager
+    "op",          # 1Password CLI
+    "gpg",         # GnuPG
+    "gopass",
+    "bitwarden", "bw",
+    "vault",       # HashiCorp Vault
+})
+
+# ── Sensitive file path prefixes (detected when read by cat/head/tail) ─────
+_SECRET_FILE_PREFIXES: tuple[str, ...] = (
+    "~/.ssh/",
+    "~/.gnupg/",
+    "~/.age/",
+    "~/.config/age/",
+    "~/.netrc",
+    "~/.aws/credentials",
+    "~/.aws/config",
+    "~/.kube/config",
+    "~/.docker/config.json",
+    "/etc/shadow",
+    "/etc/sudoers",
+)
+
+# ── Compound shell operators ───────────────────────────────────────────────
+_COMPOUND_OPS: frozenset[str] = frozenset({"&&", "||", ";"})
+
+# ── Category severity: lower = more dangerous, wins in compound/pipe ───────
+_CATEGORY_SEVERITY: dict[str, int] = {
+    "force_push": 1,
+    "destructive_filesystem": 1,
+    "policy_forbidden_file_mutation": 1,
+    "git_history_rewrite": 1,
+    "raw_git_push": 1,
+    "raw_git_commit": 1,
+    "backend_invocation": 2,
+    "prompt_send": 2,
+    "output_capture": 2,
+    "intake_adoption": 2,
+    "secret_access": 2,
+    "environment_mutation": 3,
+    "source_mutation": 3,
+    "test_mutation": 3,
+    "docs_mutation": 3,
+    "filesystem_write": 4,
+    "unknown": 5,
+    "package_install": 6,
+    "network_access": 6,
+    "test_execution": 7,
+    "pcae_governed_commit": 8,
+    "pcae_governed_push": 8,
+    "pcae_governed_lifecycle": 8,
+    "read_only_inspection": 9,
+}
+
 
 def _safe_split(command_text: str) -> list[str]:
     """Best-effort shlex split; returns raw word split on failure."""
@@ -190,11 +255,90 @@ def _is_expensive_pytest(tokens: list[str]) -> bool:
     return any(t.startswith("-n") or t == "--numprocesses" for t in tokens)
 
 
-def _classify_command(command_text: str) -> dict[str, Any]:
+def _empty_flags() -> dict[str, bool]:
+    """Return a fresh detected_flags dict with all fields False."""
+    return {
+        "read_only_detected": False,
+        "filesystem_write_detected": False,
+        "source_mutation_detected": False,
+        "test_mutation_detected": False,
+        "docs_mutation_detected": False,
+        "policy_forbidden_file_detected": False,
+        "raw_git_commit_detected": False,
+        "raw_git_push_detected": False,
+        "force_push_detected": False,
+        "history_rewrite_detected": False,
+        "destructive_filesystem_detected": False,
+        "backend_invocation_detected": False,
+        "prompt_send_detected": False,
+        "capture_detected": False,
+        "intake_adoption_detected": False,
+        "package_install_detected": False,
+        "network_access_detected": False,
+        "secret_access_detected": False,
+        "environment_mutation_detected": False,
+        "test_execution_detected": False,
+        "expensive_test_execution_detected": False,
+    }
+
+
+def _split_on_operators(tokens: list[str], ops: frozenset[str]) -> list[list[str]]:
+    """Split token list at operator tokens; return non-empty segments."""
+    segments: list[list[str]] = []
+    current: list[str] = []
+    for t in tokens:
+        if t in ops:
+            if current:
+                segments.append(current)
+            current = []
+        else:
+            current.append(t)
+    if current:
+        segments.append(current)
+    return segments or [tokens]
+
+
+def _find_tee_write_target(pipe_segments: list[list[str]]) -> str | None:
+    """Return the first file path written by tee in a pipe chain, or None."""
+    for seg in pipe_segments:
+        if not seg:
+            continue
+        if seg[0] == "tee":
+            for tok in seg[1:]:
+                if not tok.startswith("-"):
+                    return tok
+    return None
+
+
+def _most_restrictive_classification(
+    classifications: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Pick the classification with the lowest (most dangerous) category severity."""
+    if not classifications:
+        return {"command_category": "unknown", "reason_codes": ["no_segments"], "detected_flags": _empty_flags()}
+    result = classifications[0]
+    for cls in classifications[1:]:
+        sev_curr = _CATEGORY_SEVERITY.get(result["command_category"], 5)
+        sev_new = _CATEGORY_SEVERITY.get(cls["command_category"], 5)
+        if sev_new < sev_curr:
+            result = cls
+    return result
+
+
+def _is_secret_file_access(args: list[str]) -> bool:
+    """True if any argument looks like a sensitive credential file path."""
+    for arg in args:
+        for prefix in _SECRET_FILE_PREFIXES:
+            if arg.startswith(prefix) or arg == prefix.rstrip("/"):
+                return True
+    return False
+
+
+def _classify_single(command_text: str) -> dict[str, Any]:
     """
-    Core classifier.  Returns a dict with keys:
-        command_category, reason_codes, detected_flags
-    Does not touch the filesystem.  Does not call subprocesses.
+    Classify a single shell command (no compound operators or pipes).
+    Returns a dict with keys: command_category, reason_codes, detected_flags.
+    Does not touch the filesystem. Does not call subprocesses.
     """
     tokens = _safe_split(command_text)
     if not tokens:
@@ -373,6 +517,19 @@ def _classify_command(command_text: str) -> dict[str, Any]:
                     "reason_codes": ["package_install_detected"],
                     "detected_flags": flags}
 
+    # python -m pip install / python -m build / python -m pipx install
+    if program in ("python", "python3", "python3.14") and "-m" in tokens:
+        m_idx = tokens.index("-m")
+        if m_idx + 1 < len(tokens):
+            module = tokens[m_idx + 1]
+            if module in ("pip", "pip3", "pipx", "build") and (
+                m_idx + 2 < len(tokens) and tokens[m_idx + 2] in _PKG_INSTALL_VERBS
+            ):
+                flags["package_install_detected"] = True
+                return {"command_category": "package_install",
+                        "reason_codes": ["python_m_pip_install_detected"],
+                        "detected_flags": flags}
+
     # ── network programs ──────────────────────────────────────────────────
     if program in _NETWORK_PROGRAMS:
         flags["network_access_detected"] = True
@@ -396,6 +553,11 @@ def _classify_command(command_text: str) -> dict[str, Any]:
 
     # ── pure read-only programs ───────────────────────────────────────────
     if program in _READ_ONLY_PROGRAMS:
+        if _is_secret_file_access(tokens[1:]):
+            flags["secret_access_detected"] = True
+            return {"command_category": "secret_access",
+                    "reason_codes": ["secret_file_read_detected"],
+                    "detected_flags": flags}
         if _has_output_redirection(command_text):
             redir_target = _redirection_target(command_text)
             cat = _categorize_redirection_target(redir_target)
@@ -446,6 +608,53 @@ def _classify_command(command_text: str) -> dict[str, Any]:
                 "reason_codes": ["awk_read_only"],
                 "detected_flags": flags}
 
+    # ── filesystem permission/ownership modification ──────────────────────
+    if program in ("chmod", "chown", "chgrp", "chattr"):
+        flags["filesystem_write_detected"] = True
+        return {"command_category": "filesystem_write",
+                "reason_codes": [f"{program}_detected"],
+                "detected_flags": flags}
+
+    if program == "ln":
+        flags["filesystem_write_detected"] = True
+        return {"command_category": "filesystem_write",
+                "reason_codes": ["ln_detected"],
+                "detected_flags": flags}
+
+    # ── shell environment mutation ─────────────────────────────────────────
+    if program in ("export", "unset"):
+        flags["environment_mutation_detected"] = True
+        return {"command_category": "environment_mutation",
+                "reason_codes": ["shell_export_detected"],
+                "detected_flags": flags}
+
+    if program in ("source", "."):
+        flags["environment_mutation_detected"] = True
+        return {"command_category": "environment_mutation",
+                "reason_codes": ["shell_source_detected"],
+                "detected_flags": flags}
+
+    # VAR=val cmd prefix: first token is an env-var assignment
+    if "=" in program and re.match(r'^[A-Za-z_][A-Za-z0-9_]*=', program):
+        flags["environment_mutation_detected"] = True
+        return {"command_category": "environment_mutation",
+                "reason_codes": ["env_var_prefix_detected"],
+                "detected_flags": flags}
+
+    # ── backend invocation programs ───────────────────────────────────────
+    if program in _BACKEND_PROGRAMS:
+        flags["backend_invocation_detected"] = True
+        return {"command_category": "backend_invocation",
+                "reason_codes": ["backend_program_detected"],
+                "detected_flags": flags}
+
+    # ── secret access programs ────────────────────────────────────────────
+    if program in _SECRET_ACCESS_PROGRAMS:
+        flags["secret_access_detected"] = True
+        return {"command_category": "secret_access",
+                "reason_codes": ["secret_access_program_detected"],
+                "detected_flags": flags}
+
     # ── shell redirection without known program ───────────────────────────
     if _has_output_redirection(command_text):
         redir_target = _redirection_target(command_text)
@@ -465,6 +674,42 @@ def _classify_command(command_text: str) -> dict[str, Any]:
     return {"command_category": "unknown",
             "reason_codes": ["unknown_program"],
             "detected_flags": flags}
+
+
+def _classify_command(command_text: str) -> dict[str, Any]:
+    """
+    Classify a shell command, handling compound operators and pipe chains.
+    Delegates single commands to _classify_single.
+    """
+    tokens = _safe_split(command_text)
+    if not tokens:
+        return {"command_category": "unknown", "reason_codes": ["empty_command"], "detected_flags": _empty_flags()}
+
+    # Compound operators (&&, ||, ;): classify each segment, take most restrictive
+    if any(t in _COMPOUND_OPS for t in tokens):
+        segments = _split_on_operators(tokens, _COMPOUND_OPS)
+        if len(segments) > 1:
+            classifications = [_classify_single(" ".join(seg)) for seg in segments]
+            result = _most_restrictive_classification(classifications)
+            return {**result, "reason_codes": ["compound_command_detected"] + result["reason_codes"]}
+
+    # Pipe chains: detect tee write, otherwise take most restrictive segment
+    if any(t == "|" for t in tokens):
+        pipe_segments = _split_on_operators(tokens, {"|"})
+        if len(pipe_segments) > 1:
+            tee_target = _find_tee_write_target(pipe_segments)
+            if tee_target is not None:
+                cat = _categorize_redirection_target(tee_target)
+                flags = _empty_flags()
+                flags[_flag_for_category(cat)] = True
+                return {"command_category": cat,
+                        "reason_codes": ["pipe_tee_write_detected", f"tee_writes_to_{cat}"],
+                        "detected_flags": flags}
+            classifications = [_classify_single(" ".join(seg)) for seg in pipe_segments]
+            result = _most_restrictive_classification(classifications)
+            return {**result, "reason_codes": ["pipe_chain_detected"] + result["reason_codes"]}
+
+    return _classify_single(command_text)
 
 
 def _flag_for_category(cat: str) -> str:

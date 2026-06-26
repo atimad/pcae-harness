@@ -76,6 +76,8 @@ FAST_GREEN_MODULES: frozenset[str] = frozenset({
     "test_88n5_fast_green_validation",
     # 88P shell gate prototype
     "test_shell_gate",
+    # 88Q shell gate test matrix
+    "test_shell_gate_matrix",
 })
 
 
