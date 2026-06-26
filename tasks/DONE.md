@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88R.1 — Broker Test Task-Contract Decoupling (20260626-1947-88r-1-broker-test-task-contract-decoupling)
 - 88R Permission Broker Prototype (20260626-1706-88r-permission-broker-prototype)
 - 88Q Phase Completion Record (20260626-1619-88q-phase-completion-record)
 - 88Q Shell Gate Test Matrix and False-Positive Review (20260626-1533-88q-shell-gate-test-matrix-and-false-positive-review)
