@@ -10,7 +10,7 @@ Phase 88N.6 — Preflight Policy-Forbidden Consistency Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 

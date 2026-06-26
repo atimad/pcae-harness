@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 88N.6 — Preflight Policy-Forbidden Consistency Repair (20260626-0919-phase-88n-6-preflight-policy-forbidden-consistency-repair)
 - Phase 88N.5 — Fast Green Validation Architecture (20260626-0814-phase-88n-5-fast-green-validation-architecture)
 - Handoff State Refresh After 88N.4 (20260626-0752-handoff-state-refresh-after-88n-4)
 - 88N.4 — Full Suite Bottleneck Elimination (20260626-0437-88n-4-full-suite-bottleneck-elimination)
