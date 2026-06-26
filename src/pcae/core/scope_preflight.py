@@ -51,6 +51,14 @@ _SPF_DECISION_VALUES: tuple[str, ...] = (
     "unknown",
 )
 
+# Files that PCAE policy always forbids, independent of the active task contract.
+# These protect documents that agents must never modify regardless of task scope.
+_SPF_POLICY_FORBIDDEN_FILES: tuple[str, ...] = (
+    "README.md",
+    "docs/REAL_CAPTURED_TASKS.md",
+    "docs/LINKEDIN_ARTICLE_DRAFT.md",
+)
+
 _SPF_GOVERNANCE_BOUNDARIES: dict[str, bool] = {
     "scope_preflight_only": True,
     "scope_preflight_does_not_intercept_shell": True,
@@ -116,7 +124,11 @@ def _evaluate_preflight(
         }
 
     allowed_patterns = task_contract["allowed_files"]
-    forbidden_patterns = task_contract["forbidden_files"]
+    # Merge task forbidden list with PCAE policy-protected files.
+    # Policy files are always forbidden regardless of the active task contract.
+    task_forbidden = list(task_contract["forbidden_files"])
+    policy_additions = [f for f in _SPF_POLICY_FORBIDDEN_FILES if f not in task_forbidden]
+    forbidden_patterns = task_forbidden + policy_additions
 
     matched_allowed: list[str] = []
     matched_forbidden: list[str] = []
@@ -204,8 +216,8 @@ def _evaluate_preflight(
         "task_contract_detected": True,
         "task_contract_path": task_contract["path"],
         "lifecycle_state": "active",
-        "allowed_files": allowed_patterns,
-        "forbidden_files": forbidden_patterns,
+        "allowed_files": list(allowed_patterns),
+        "forbidden_files": list(forbidden_patterns),
         "matched_allowed_files": matched_allowed,
         "matched_forbidden_files": matched_forbidden,
         "unknown_files": unknown,

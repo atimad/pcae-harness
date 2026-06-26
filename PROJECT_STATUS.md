@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 88N.3: Scope Preflight Review Full-Suite Baseline Repair (completed).
+
+88N.3 repairs 2 pre-existing failures in `tests/test_scope_preflight_review.py` that
+appeared in the 88N.2 full-suite run (7,717 passed, 2 failures). Root cause:
+`docs/LINKEDIN_ARTICLE_DRAFT.md` was absent from the 88N.1 and 88N.2 task contracts'
+forbidden file lists. The scope preflight is purely task-contract-driven; without the
+file in the task forbidden list, `_evaluate_preflight` classified it as unknown rather
+than forbidden — producing `requires_more_evidence` instead of `blocked_by_scope`.
+Fix: added `_SPF_POLICY_FORBIDDEN_FILES` constant to `src/pcae/core/scope_preflight.py`
+(three PCAE governance documents always forbidden regardless of task contract: `README.md`,
+`docs/REAL_CAPTURED_TASKS.md`, `docs/LINKEDIN_ARTICLE_DRAFT.md`), merged into
+`forbidden_patterns` at evaluation time. No test changes required — tests were already
+correctly asserting the intended policy. Full suite after fix: 7,719 passed, 0 failures.
+Recommends 88O — Shell Gate Design Reconciliation.
+
 Phase 88N.2: Full Suite Runtime Optimization and Test-Run Lock (completed).
 
 88N.2 profiles test suite runtime, documents validated tier definitions (targeted/quick/
@@ -13,9 +28,7 @@ tests averaging ~8.4s each (sequential), already marked slow. Quick tier: 6,998 
 `clear_to_run=true/false`. 14 tests in tests/test_doctor_test_run.py. No persistent
 lock files, no test execution, no repo mutation. Full suite: 7,717 passed, 2
 pre-existing failures in test_scope_preflight_review.py (confirmed pre-existing on
-88N.1 baseline; not regressions from 88N.2). Recommends 88N.3 — Scope Preflight
-Review Full-Suite Baseline Repair. 88O (Shell Gate Design Reconciliation) deferred
-until full-suite baseline is green.
+88N.1 baseline; not regressions from 88N.2). Repaired in 88N.3.
 
 Phase 88N.1: Task Finish Tracked-File Robustness (active).
 
