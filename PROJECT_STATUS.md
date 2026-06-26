@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 88R: Permission Broker Prototype (completed).
+
+Implements `pcae permission-broker evaluate` — a read-only decision aggregator that
+consumes PCAE governance evidence and returns a conservative broker decision envelope.
+Evidence sources: task contract detection (internal), shell gate classification (internal),
+scope preflight (internal, when action+files given), doctor test-run (subprocess, only when
+expensive test execution detected), and explicit evidence flags for health, check, doctor,
+push-check, tests, human review, approval, and accepted risk. Decision priority chain: shell
+gate hard blocks → evidence failures → task contract → scope denial → missing evidence →
+human review gate → allow_preflight_only. 24 broker decision values in `BPE_DECISIONS`. 14
+performed/authorization flags unconditionally false. New modules: `src/pcae/core/permission_broker.py`,
+`src/pcae/commands/permission_broker.py`. CLI registration in `src/pcae/cli.py`. Adds
+`tests/test_permission_broker.py` — 150 tests (56 parametrized performed-flag invariants).
+Fast-green: 2,384 passed / 22.67s. Full suite: TBD.
+
 Phase 88Q: Shell Gate Test Matrix and False-Positive Review (completed).
 
 Systematically hardens the shell gate classifier from 88P by adding compound command

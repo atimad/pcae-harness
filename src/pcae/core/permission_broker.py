@@ -1,0 +1,415 @@
+"""
+Permission broker prototype — Phase 88R.
+
+Read-only decision aggregator.  Consumes governance evidence and returns a
+conservative broker decision envelope.  Never executes commands, invokes
+backends, sends prompts, writes storage, or grants real authorisation.
+"""
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+from pcae.core.gate_dry_run import _detect_task_contract
+from pcae.core.scope_preflight import build_scope_preflight
+from pcae.core.shell_gate import _call_doctor_test_run, _classify_command, _decide as _sg_decide
+
+
+# ── Public constant surfaces ───────────────────────────────────────────────
+
+BPE_DECISIONS: tuple[str, ...] = (
+    "allow_preflight_only",
+    "deny",
+    "requires_human_review",
+    "requires_more_evidence",
+    "blocked_by_scope",
+    "blocked_by_backend_policy",
+    "blocked_by_mutation_policy",
+    "blocked_by_commit_policy",
+    "blocked_by_push_policy",
+    "blocked_by_lifecycle_state",
+    "blocked_by_task_contract",
+    "blocked_by_risk",
+    "blocked_by_must_never_repeat",
+    "blocked_by_failed_check",
+    "blocked_by_failed_health",
+    "blocked_by_failed_doctor",
+    "blocked_by_failed_tests",
+    "blocked_by_push_check",
+    "blocked_by_raw_git_push",
+    "blocked_by_force_push",
+    "blocked_by_shell_gate",
+    "blocked_by_test_run_lock",
+    "blocked_by_conflicting_evidence",
+    "unknown",
+)
+
+BPE_HARD_BLOCK_DECISIONS: frozenset[str] = frozenset({
+    "blocked_by_scope",
+    "blocked_by_backend_policy",
+    "blocked_by_mutation_policy",
+    "blocked_by_commit_policy",
+    "blocked_by_push_policy",
+    "blocked_by_lifecycle_state",
+    "blocked_by_task_contract",
+    "blocked_by_risk",
+    "blocked_by_must_never_repeat",
+    "blocked_by_failed_check",
+    "blocked_by_failed_health",
+    "blocked_by_failed_doctor",
+    "blocked_by_failed_tests",
+    "blocked_by_push_check",
+    "blocked_by_raw_git_push",
+    "blocked_by_force_push",
+    "blocked_by_shell_gate",
+    "blocked_by_test_run_lock",
+    "blocked_by_conflicting_evidence",
+})
+
+# Actions that require an active task contract
+BPE_MUTATING_ACTIONS: frozenset[str] = frozenset({
+    "source_mutation",
+    "test_mutation",
+    "docs_mutation",
+    "filesystem_write",
+    "environment_mutation",
+    "adoption",
+    "commit",
+    "push",
+    "rollback",
+    "storage_write",
+    "backend_invocation",
+})
+
+# Shell gate decisions that map to hard broker blocks
+_SG_HARD_BLOCK_TO_BROKER: dict[str, str] = {
+    "blocked_by_raw_git_commit":         "blocked_by_shell_gate",
+    "blocked_by_raw_git_push":           "blocked_by_raw_git_push",
+    "blocked_by_force_push":             "blocked_by_force_push",
+    "blocked_by_history_rewrite":        "blocked_by_shell_gate",
+    "blocked_by_destructive_filesystem": "blocked_by_shell_gate",
+    "blocked_by_policy_forbidden_file":  "blocked_by_shell_gate",
+    "blocked_by_backend_policy":         "blocked_by_backend_policy",
+    "blocked_by_prompt_policy":          "blocked_by_shell_gate",
+    "blocked_by_adoption_policy":        "blocked_by_shell_gate",
+    "blocked_by_test_run_lock":          "blocked_by_test_run_lock",
+    "blocked_by_unknown_command":        "blocked_by_shell_gate",
+    "deny":                              "deny",
+}
+
+# Scope preflight decisions that map to broker blocks
+_SPF_BLOCK_TO_BROKER: dict[str, str] = {
+    "blocked_by_scope":                    "blocked_by_scope",
+    "deny_preflight":                      "blocked_by_scope",
+    "blocked_by_lifecycle_state":          "blocked_by_lifecycle_state",
+    "blocked_by_missing_task_contract":    "blocked_by_task_contract",
+    "blocked_by_must_never_repeat_control": "blocked_by_must_never_repeat",
+    "blocked_by_risk":                     "blocked_by_risk",
+}
+
+
+def _broker_shell_gate_evidence(
+    command_text: str,
+    active_task_detected: bool,
+    test_run_clear: bool,
+) -> dict[str, Any]:
+    """Collect shell gate evidence for the requested command."""
+    classification = _classify_command(command_text)
+    command_category = classification["command_category"]
+    classify_reason_codes = classification["reason_codes"]
+    detected_flags = classification["detected_flags"]
+    decision, decision_reason_codes = _sg_decide(
+        command_category, detected_flags, active_task_detected, test_run_clear
+    )
+    return {
+        "command_text": command_text,
+        "command_category": command_category,
+        "decision": decision,
+        "reason_codes": classify_reason_codes + decision_reason_codes,
+        "detected_flags": detected_flags,
+    }
+
+
+def _broker_decide(
+    requested_action: str,
+    task_contract: dict | None,
+    sg_evidence: dict | None,
+    scope_decision: str | None,
+    health_passed: bool | None,
+    check_passed: bool | None,
+    doctor_passed: bool | None,
+    push_check_passed: bool | None,
+    tests_passed: bool | None,
+    test_run_clear: bool | None,
+    human_review_present: bool,
+) -> tuple[str, list[str], list[str]]:
+    """
+    Returns (decision, reason_codes, missing_evidence).
+    Priority order: shell gate hard blocks → evidence failures → task contract
+    → scope denial → test run lock → missing evidence → human review
+    → allow_preflight_only.
+    """
+    reason_codes: list[str] = []
+    missing_evidence: list[str] = []
+
+    # 1. Shell gate hard blocks (checked before any evidence)
+    if sg_evidence is not None:
+        sg_decision = sg_evidence["decision"]
+        if sg_decision in _SG_HARD_BLOCK_TO_BROKER:
+            broker_block = _SG_HARD_BLOCK_TO_BROKER[sg_decision]
+            reason_codes.append(f"shell_gate_decision:{sg_decision}")
+            return broker_block, reason_codes, missing_evidence
+
+    # 2. Explicit evidence failures
+    if health_passed is False:
+        reason_codes.append("health_check_failed")
+        return "blocked_by_failed_health", reason_codes, missing_evidence
+    if check_passed is False:
+        reason_codes.append("governance_check_failed")
+        return "blocked_by_failed_check", reason_codes, missing_evidence
+    if doctor_passed is False:
+        reason_codes.append("doctor_check_failed")
+        return "blocked_by_failed_doctor", reason_codes, missing_evidence
+    if tests_passed is False:
+        reason_codes.append("tests_failed")
+        return "blocked_by_failed_tests", reason_codes, missing_evidence
+    if push_check_passed is False and requested_action == "push":
+        reason_codes.append("push_check_failed")
+        return "blocked_by_push_check", reason_codes, missing_evidence
+
+    # 3. Test run lock (when expensive test execution detected)
+    if test_run_clear is False:
+        reason_codes.append("test_run_lock_active")
+        return "blocked_by_test_run_lock", reason_codes, missing_evidence
+
+    # 4. Missing active task for mutating actions
+    if requested_action in BPE_MUTATING_ACTIONS and task_contract is None:
+        reason_codes.append("no_active_task_contract")
+        return "blocked_by_task_contract", reason_codes, missing_evidence
+
+    # 5. Scope preflight denial
+    if scope_decision is not None and scope_decision in _SPF_BLOCK_TO_BROKER:
+        broker_block = _SPF_BLOCK_TO_BROKER[scope_decision]
+        reason_codes.append(f"scope_preflight_decision:{scope_decision}")
+        return broker_block, reason_codes, missing_evidence
+
+    # 6. Collect missing evidence (informational — may upgrade to requires_more_evidence)
+    if sg_evidence is not None:
+        sg_decision = sg_evidence["decision"]
+        if sg_decision == "requires_more_evidence":
+            missing_evidence.append("additional_evidence_for_command")
+        elif sg_decision == "requires_preflight":
+            missing_evidence.append("scope_preflight_for_command")
+        elif sg_decision == "requires_active_task":
+            missing_evidence.append("active_task_for_command")
+
+    if requested_action in BPE_MUTATING_ACTIONS:
+        if health_passed is None:
+            missing_evidence.append("health_check")
+        if check_passed is None:
+            missing_evidence.append("governance_check")
+
+    if requested_action == "push" and push_check_passed is None:
+        missing_evidence.append("push_check")
+
+    if missing_evidence:
+        reason_codes.append("missing_evidence_items")
+        return "requires_more_evidence", reason_codes, missing_evidence
+
+    # 7. Human review gate
+    if sg_evidence is not None and sg_evidence["decision"] == "requires_human_review":
+        if not human_review_present:
+            reason_codes.append("shell_gate_requires_human_review")
+            return "requires_human_review", reason_codes, missing_evidence
+
+    if requested_action in (
+        "adoption", "backend_invocation", "rollback", "storage_write", "push", "commit"
+    ):
+        if not human_review_present:
+            reason_codes.append(f"action_requires_human_review:{requested_action}")
+            return "requires_human_review", reason_codes, missing_evidence
+
+    # 8. All checks pass — preflight only (not execution authorization)
+    reason_codes.append("all_provided_evidence_passes")
+    return "allow_preflight_only", reason_codes, missing_evidence
+
+
+def build_permission_broker(
+    repo_root: Path,
+    requested_action: str,
+    requested_files: list[str] | None = None,
+    requested_command: str | None = None,
+    source_backend: str | None = None,
+    commit_message: str | None = None,
+    push_target: str | None = None,
+    health_passed: bool | None = None,
+    check_passed: bool | None = None,
+    doctor_passed: bool | None = None,
+    push_check_passed: bool | None = None,
+    tests_present: bool = False,
+    tests_passed: bool | None = None,
+    human_review_present: bool = False,
+    human_approval_present: bool = False,
+    accepted_risk_present: bool = False,
+) -> dict[str, Any]:
+    """
+    Build the permission broker JSON envelope.
+
+    Never executes requested_command.  Never invokes backends.  Never sends
+    prompts.  Never writes storage.  All performed/authorization flags are
+    unconditionally false.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    files: list[str] = list(requested_files or [])
+
+    task_contract = _detect_task_contract(repo_root)
+    active_task_detected = task_contract is not None
+    task_contract_path: str | None = task_contract["path"] if task_contract else None
+
+    # Shell gate evidence (internal — no execution)
+    sg_evidence: dict[str, Any] | None = None
+    test_run_preflight_required = False
+    test_run_clear: bool | None = None
+    if requested_command:
+        classification = _classify_command(requested_command)
+        command_category = classification["command_category"]
+        detected_flags = classification["detected_flags"]
+
+        test_run_preflight_required = (
+            command_category == "test_execution"
+            and detected_flags.get("expensive_test_execution_detected", False)
+        )
+        if test_run_preflight_required:
+            test_run_clear = _call_doctor_test_run(repo_root)
+
+        decision_for_sg, decision_reason_codes = _sg_decide(
+            command_category, detected_flags, active_task_detected,
+            test_run_clear if test_run_clear is not None else True,
+        )
+        sg_evidence = {
+            "command_text": requested_command,
+            "command_category": command_category,
+            "decision": decision_for_sg,
+            "reason_codes": classification["reason_codes"] + decision_reason_codes,
+            "detected_flags": detected_flags,
+        }
+
+    # Scope preflight evidence (internal — no execution)
+    scope_decision: str | None = None
+    scope_preflight_envelope: dict[str, Any] | None = None
+    if requested_action and files:
+        scope_preflight_envelope = build_scope_preflight(repo_root, requested_action, files)
+        scope_decision = scope_preflight_envelope["preflight"].get("decision")
+
+    # Broker decision
+    broker_decision, reason_codes, missing_evidence = _broker_decide(
+        requested_action=requested_action,
+        task_contract=task_contract,
+        sg_evidence=sg_evidence,
+        scope_decision=scope_decision,
+        health_passed=health_passed,
+        check_passed=check_passed,
+        doctor_passed=doctor_passed,
+        push_check_passed=push_check_passed,
+        tests_passed=tests_passed,
+        test_run_clear=test_run_clear,
+        human_review_present=human_review_present,
+    )
+
+    hard_block_present = broker_decision in BPE_HARD_BLOCK_DECISIONS
+
+    # Evidence sources collected
+    evidence_sources: list[str] = []
+    if task_contract_path:
+        evidence_sources.append(task_contract_path)
+    if sg_evidence is not None:
+        evidence_sources.append("pcae shell-gate classifier (internal)")
+    if scope_preflight_envelope is not None:
+        evidence_sources.append("pcae preflight scope (internal)")
+    if test_run_preflight_required:
+        evidence_sources.append("pcae doctor test-run")
+    for flag_name, flag_val in [
+        ("health_passed", health_passed),
+        ("check_passed", check_passed),
+        ("doctor_passed", doctor_passed),
+        ("push_check_passed", push_check_passed),
+    ]:
+        if flag_val is not None:
+            evidence_sources.append(f"explicit:{flag_name}={flag_val}")
+
+    safety_notes: dict[str, bool] = {
+        "permission_broker_prototype_only": True,
+        "broker_does_not_execute_commands": True,
+        "broker_does_not_intercept_shell": True,
+        "broker_does_not_invoke_backends": True,
+        "broker_does_not_send_prompts": True,
+        "broker_does_not_capture_outputs": True,
+        "broker_does_not_perform_intake": True,
+        "broker_does_not_perform_adoption": True,
+        "broker_does_not_mutate_repo": True,
+        "broker_does_not_commit": True,
+        "broker_does_not_push": True,
+        "broker_does_not_write_storage": True,
+        "broker_does_not_replace_human_review": True,
+        "broker_does_not_override_hard_blocks": True,
+        "execution_authorization_not_granted": True,
+    }
+
+    broker: dict[str, Any] = {
+        "broker_type": "permission_broker_prototype",
+        "requested_action": requested_action,
+        "requested_files": files,
+        "requested_command": requested_command,
+        "source_backend": source_backend,
+        "commit_message": commit_message,
+        "push_target": push_target,
+        "decision": broker_decision,
+        "reason_codes": reason_codes,
+        "hard_block_present": hard_block_present,
+        "active_task_detected": active_task_detected,
+        "task_contract_path": task_contract_path,
+        "shell_gate_evidence": sg_evidence,
+        "scope_preflight_decision": scope_decision,
+        "test_run_preflight_required": test_run_preflight_required,
+        "test_run_clear_to_run": test_run_clear,
+        "evidence_provided": {
+            "health_passed": health_passed,
+            "check_passed": check_passed,
+            "doctor_passed": doctor_passed,
+            "push_check_passed": push_check_passed,
+            "tests_present": tests_present,
+            "tests_passed": tests_passed,
+            "human_review_present": human_review_present,
+            "human_approval_present": human_approval_present,
+            "accepted_risk_present": accepted_risk_present,
+        },
+        "evidence_sources": evidence_sources,
+        "missing_evidence": missing_evidence,
+        # Performed / authorization flags — unconditionally false (invariant)
+        "authorization_granted": False,
+        "execution_authorized": False,
+        "command_executed": False,
+        "repo_mutation_performed": False,
+        "backend_invocation_performed": False,
+        "prompt_sent": False,
+        "capture_performed": False,
+        "intake_performed": False,
+        "adoption_performed": False,
+        "commit_performed": False,
+        "push_performed": False,
+        "raw_git_push_performed": False,
+        "force_push_performed": False,
+        "storage_written": False,
+        "safety_notes": safety_notes,
+    }
+
+    return {
+        "schema_version": "0.1",
+        "generated_at": now,
+        "source_command": "pcae permission-broker evaluate",
+        "repository_root": str(repo_root),
+        "broker": broker,
+        "warnings": [],
+        "errors": [],
+    }

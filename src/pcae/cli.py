@@ -404,6 +404,7 @@ from pcae.commands.risk_register import run_risk_register
 from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
 from pcae.commands.shell_gate import run_shell_gate_check
+from pcae.commands.permission_broker import run_permission_broker_evaluate
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.mutation_preflight import run_mutation_preflight
@@ -4577,6 +4578,106 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON gate decision output.",
     )
     shell_gate_check_parser.set_defaults(handler=run_shell_gate_check)
+
+    pb_parser = subparsers.add_parser(
+        "permission-broker",
+        help="Read-only permission broker decision aggregator (Phase 88R prototype).",
+    )
+    pb_subparsers = pb_parser.add_subparsers(
+        dest="permission_broker_command", required=True,
+    )
+    pb_evaluate_parser = pb_subparsers.add_parser(
+        "evaluate",
+        help="Aggregate governance evidence and return a conservative broker decision.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--requested-action",
+        metavar="ACTION",
+        required=True,
+        help="Action to evaluate (e.g. read, source_mutation, commit, push).",
+    )
+    pb_evaluate_parser.add_argument(
+        "--requested-file",
+        action="append",
+        metavar="PATH",
+        help="File path involved in the action (repeatable).",
+    )
+    pb_evaluate_parser.add_argument(
+        "--requested-command",
+        metavar="CMD",
+        help="Shell command text to classify (not executed).",
+    )
+    pb_evaluate_parser.add_argument(
+        "--source-backend",
+        metavar="BACKEND",
+        help="Backend context for the request (informational, not invoked).",
+    )
+    pb_evaluate_parser.add_argument(
+        "--commit-message",
+        metavar="MSG",
+        help="Proposed commit message (informational).",
+    )
+    pb_evaluate_parser.add_argument(
+        "--push-target",
+        metavar="TARGET",
+        help="Proposed push target (informational, not executed).",
+    )
+    pb_evaluate_parser.add_argument(
+        "--health-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae health check passed.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--check-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae check passed.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--doctor-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae doctor passed.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--push-check-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae push check passed.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--tests-present",
+        action="store_true",
+        help="Evidence: tests are present in the project.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--tests-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: tests passed.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--human-review-present",
+        action="store_true",
+        help="Human review evidence is present for this request.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--human-approval-present",
+        action="store_true",
+        help="Human approval evidence is present for this request.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--accepted-risk-present",
+        action="store_true",
+        help="Accepted risk evidence is present for this request.",
+    )
+    pb_evaluate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON broker decision output.",
+    )
+    pb_evaluate_parser.set_defaults(handler=run_permission_broker_evaluate)
 
     preflight_parser = subparsers.add_parser(
         "preflight",
