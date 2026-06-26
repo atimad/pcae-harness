@@ -2,6 +2,28 @@
 
 ## Current Phase
 
+Phase 88O: Shell Gate Design Reconciliation (completed).
+
+88O reconciles the Phase 87 shell gate architecture (`docs/PHASE_87_SHELL_GATE_ARCHITECTURE.md`)
+with the concrete Phase 88/88N preflight layer, permission broker reconciliation, fast-green
+validation architecture, and policy-forbidden consistency work. Delivers
+`docs/PHASE_88_SHELL_GATE_RECONCILIATION.md` defining: shell gate role and non-role (§6–7),
+relationship to permission broker (§8), relationship to the five explicit preflights (§9),
+relationship to task contracts (§10), no-active-task conservative policy (§11), command
+classification taxonomy with 23 categories and risk classes (§12), decision model with 26
+decision values (§13), policies for raw git commit (§14), raw git push and force push (§15),
+destructive filesystem commands (§16), shell redirection and file writes (§17), package
+installation and environment mutation (§18), backend/network/API commands (§19),
+prompt/capture/intake/adoption (§20), test execution and test-run preflight (§21), tier-aware
+validation (§21), fast-green and full-suite integration (§22), policy-forbidden file hard blocks
+(§23), human approval and accepted-risk limits (§24), audit and evidence model (§25), known
+`gate_dry_run.py` scope matching divergence from `scope_preflight.py::_match_file` (§28), and
+future implementation roadmap 88O.1 → 88P → 88Q → 88R → 88S (§29). Design only: no source
+changes, no test changes, no shell gate implementation, no permission broker implementation, no
+backend invocation, no shell interception. Fast-green: 1,792 passed, 21.19s. Full suite deferred
+(design-only phase; prior baseline 88N.6: 7,736 passed / 0 failed). Recommends 88O.1 — Scope
+Matching Shared Utility Reconciliation.
+
 Phase 88N.6: Preflight Policy-Forbidden Consistency Repair (completed).
 
 88N.6 restores the full-suite green baseline by propagating `_SPF_POLICY_FORBIDDEN_FILES` into
