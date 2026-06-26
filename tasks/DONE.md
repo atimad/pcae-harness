@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88N.3 — Scope Preflight Review Full-Suite Baseline Repair (20260626-0348-88n-3-scope-preflight-review-full-suite-baseline-repair)
 - Handoff State Refresh After 88N.2 (20260626-0335-handoff-state-refresh-after-88n-2)
 - 88N.2 — Full Suite Runtime Optimization and Test-Run Lock (20260625-2332-88n-2-full-suite-runtime-optimization-and-test-run-lock)
 - 88N.1 — Task Finish Tracked-File Robustness (20260625-2303-88n-1-task-finish-tracked-file-robustness)
