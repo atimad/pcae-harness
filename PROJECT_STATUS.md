@@ -11,8 +11,9 @@ false. Never executes the command text. New module: `src/pcae/core/shell_gate.py
 + JSON builder), `src/pcae/commands/shell_gate.py` (CLI runner), and CLI registration in
 `src/pcae/cli.py`. Adds `tests/test_shell_gate.py` — 155 fast unit tests covering all major
 classification paths, all performed-flag invariants, safety notes, and the full hard-block
-surface. Fast-green tier updated: 1,947 passed / 22.60s. Quick tier: see below. Full suite:
-see below. Recommends 88Q — Shell Gate Test Matrix and False-Positive Review.
+surface. Fast-green tier updated: 1,947 passed / 22.60s. Quick tier: 7,221 passed / 2:11.
+Full suite: 7,933 passed, 0 failed / 28:45. Recommends 88Q — Shell Gate Test Matrix
+and False-Positive Review.
 
 Phase 88O.1: Scope Matching Shared Utility Reconciliation (completed).
 
