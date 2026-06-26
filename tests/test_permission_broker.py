@@ -3,6 +3,11 @@ Permission broker prototype tests (Phase 88R).
 
 Fast tests call build_permission_broker directly and are in the fast_green
 tier.  CLI integration tests are marked slow/integration.
+
+Phase 88R.1: tests that require active-task-present behavior use the
+tmp_task_root fixture (isolated temp repo with a minimal task contract)
+instead of live REPO_ROOT.  Tests that verify no-active-task blocking
+continue to use an explicit no-task temp root.
 """
 from __future__ import annotations
 
@@ -26,6 +31,27 @@ pytestmark = pytest.mark.fast_green
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
+# ── Fixtures ───────────────────────────────────────────────────────────────
+
+@pytest.fixture
+def tmp_task_root(tmp_path: Path) -> Path:
+    """Isolated temp repo root with a minimal active task contract.
+
+    Used only by tests that need task-present broker behavior.  Avoids
+    coupling those tests to the live REPO_ROOT active-task state.
+    """
+    active_dir = tmp_path / "tasks" / "active"
+    active_dir.mkdir(parents=True)
+    (active_dir / "test-active-task.md").write_text(
+        "## Allowed Files\n"
+        "- src/**\n"
+        "- tests/**\n"
+        "- docs/**\n"
+        "## Forbidden Files\n"
+    )
+    return tmp_path
+
+
 # ── Helpers ────────────────────────────────────────────────────────────────
 
 def _pb(
@@ -44,9 +70,10 @@ def _pb(
     source_backend: str | None = None,
     commit_message: str | None = None,
     push_target: str | None = None,
+    root: Path = REPO_ROOT,
 ) -> dict[str, Any]:
     return build_permission_broker(
-        repo_root=REPO_ROOT,
+        repo_root=root,
         requested_action=action,
         requested_files=files,
         requested_command=command,
@@ -249,32 +276,34 @@ class TestAllowPreflightOnly:
         b = _broker("read")
         assert b["decision"] == "allow_preflight_only"
 
-    def test_source_mutation_with_health_check(self):
-        b = _broker("source_mutation", files=["src/x.py"],
+    def test_source_mutation_with_health_check(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["src/x.py"],
                     health_passed=True, check_passed=True)
         assert b["decision"] == "allow_preflight_only"
 
-    def test_test_mutation_with_health_check(self):
-        b = _broker("test_mutation", files=["tests/test_x.py"],
+    def test_test_mutation_with_health_check(self, tmp_task_root):
+        b = _broker("test_mutation", root=tmp_task_root,
+                    files=["tests/test_x.py"],
                     health_passed=True, check_passed=True)
         assert b["decision"] == "allow_preflight_only"
 
-    def test_docs_mutation_with_health_check(self):
-        b = _broker("docs_mutation", files=["docs/HOWTO.md"],
+    def test_docs_mutation_with_health_check(self, tmp_task_root):
+        b = _broker("docs_mutation", root=tmp_task_root,
+                    files=["docs/HOWTO.md"],
                     health_passed=True, check_passed=True)
         assert b["decision"] == "allow_preflight_only"
 
-    def test_push_with_full_evidence_and_human_review(self):
+    def test_push_with_full_evidence_and_human_review(self, tmp_task_root):
         b = _broker(
-            "push",
+            "push", root=tmp_task_root,
             health_passed=True, check_passed=True, push_check_passed=True,
             human_review_present=True,
         )
         assert b["decision"] == "allow_preflight_only"
 
-    def test_commit_with_evidence_and_human_review(self):
+    def test_commit_with_evidence_and_human_review(self, tmp_task_root):
         b = _broker(
-            "commit", commit_message="Add feature",
+            "commit", root=tmp_task_root, commit_message="Add feature",
             health_passed=True, check_passed=True, human_review_present=True,
         )
         assert b["decision"] == "allow_preflight_only"
@@ -292,58 +321,66 @@ class TestAllowPreflightOnly:
 # ── Decision: requires_more_evidence ──────────────────────────────────────
 
 class TestRequiresMoreEvidence:
-    def test_source_mutation_missing_health(self):
-        b = _broker("source_mutation", files=["src/x.py"])
+    def test_source_mutation_missing_health(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["src/x.py"])
         assert b["decision"] == "requires_more_evidence"
 
-    def test_source_mutation_missing_check(self):
-        b = _broker("source_mutation", files=["src/x.py"], health_passed=True)
+    def test_source_mutation_missing_check(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["src/x.py"],
+                    health_passed=True)
         assert b["decision"] == "requires_more_evidence"
 
-    def test_push_missing_push_check(self):
-        b = _broker("push", health_passed=True, check_passed=True)
+    def test_push_missing_push_check(self, tmp_task_root):
+        b = _broker("push", root=tmp_task_root,
+                    health_passed=True, check_passed=True)
         assert b["decision"] == "requires_more_evidence"
         assert "push_check" in b["missing_evidence"]
 
-    def test_missing_evidence_list_populated(self):
-        b = _broker("source_mutation", files=["src/x.py"])
+    def test_missing_evidence_list_populated(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["src/x.py"])
         assert len(b["missing_evidence"]) > 0
 
-    def test_health_missing_in_evidence_list(self):
-        b = _broker("source_mutation", files=["src/x.py"])
+    def test_health_missing_in_evidence_list(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["src/x.py"])
         assert "health_check" in b["missing_evidence"]
 
-    def test_check_missing_in_evidence_list(self):
-        b = _broker("source_mutation", files=["src/x.py"], health_passed=True)
+    def test_check_missing_in_evidence_list(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["src/x.py"],
+                    health_passed=True)
         assert "governance_check" in b["missing_evidence"]
 
-    def test_hard_block_present_is_false(self):
-        b = _broker("source_mutation", files=["src/x.py"])
+    def test_hard_block_present_is_false(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["src/x.py"])
         assert b["hard_block_present"] is False
 
 
 # ── Decision: requires_human_review ───────────────────────────────────────
 
 class TestRequiresHumanReview:
-    def test_push_without_human_review(self):
-        b = _broker("push", health_passed=True, check_passed=True,
+    def test_push_without_human_review(self, tmp_task_root):
+        b = _broker("push", root=tmp_task_root,
+                    health_passed=True, check_passed=True,
                     push_check_passed=True)
         assert b["decision"] == "requires_human_review"
 
-    def test_commit_without_human_review(self):
-        b = _broker("commit", health_passed=True, check_passed=True)
+    def test_commit_without_human_review(self, tmp_task_root):
+        b = _broker("commit", root=tmp_task_root,
+                    health_passed=True, check_passed=True)
         assert b["decision"] == "requires_human_review"
 
-    def test_adoption_without_human_review(self):
-        b = _broker("adoption", health_passed=True, check_passed=True)
+    def test_adoption_without_human_review(self, tmp_task_root):
+        b = _broker("adoption", root=tmp_task_root,
+                    health_passed=True, check_passed=True)
         assert b["decision"] == "requires_human_review"
 
-    def test_rollback_without_human_review(self):
-        b = _broker("rollback", health_passed=True, check_passed=True)
+    def test_rollback_without_human_review(self, tmp_task_root):
+        b = _broker("rollback", root=tmp_task_root,
+                    health_passed=True, check_passed=True)
         assert b["decision"] == "requires_human_review"
 
-    def test_storage_write_without_human_review(self):
-        b = _broker("storage_write", health_passed=True, check_passed=True)
+    def test_storage_write_without_human_review(self, tmp_task_root):
+        b = _broker("storage_write", root=tmp_task_root,
+                    health_passed=True, check_passed=True)
         assert b["decision"] == "requires_human_review"
 
     def test_push_with_human_review_does_not_require_review(self):
@@ -351,8 +388,9 @@ class TestRequiresHumanReview:
                     push_check_passed=True, human_review_present=True)
         assert b["decision"] != "requires_human_review"
 
-    def test_hard_block_present_is_false(self):
-        b = _broker("push", health_passed=True, check_passed=True,
+    def test_hard_block_present_is_false(self, tmp_task_root):
+        b = _broker("push", root=tmp_task_root,
+                    health_passed=True, check_passed=True,
                     push_check_passed=True)
         assert b["hard_block_present"] is False
 
@@ -515,8 +553,8 @@ class TestScopePreflight:
         b = _broker("source_mutation", health_passed=True, check_passed=True)
         assert b["scope_preflight_decision"] is None
 
-    def test_policy_forbidden_file_blocked_by_scope(self):
-        b = _broker("source_mutation", files=["README.md"],
+    def test_policy_forbidden_file_blocked_by_scope(self, tmp_task_root):
+        b = _broker("source_mutation", root=tmp_task_root, files=["README.md"],
                     health_passed=True, check_passed=True)
         assert b["decision"] == "blocked_by_scope"
         assert b["hard_block_present"] is True

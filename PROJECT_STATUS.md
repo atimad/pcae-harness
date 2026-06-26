@@ -2,6 +2,20 @@
 
 ## Current Phase
 
+Phase 88R.1: Broker Test Task-Contract Decoupling (completed).
+
+Repairs `tests/test_permission_broker.py` so that 19 tests requiring active-task-present
+broker behavior use an isolated `tmp_task_root` fixture instead of live `REPO_ROOT`. Root
+cause: after `pcae task finish` returned the repo to idle, those tests received
+`blocked_by_task_contract` where they expected downstream decisions. The broker behavior was
+correct; the test design was wrong. Adds `tmp_task_root` pytest fixture (isolated temp repo
+with minimal `tasks/active/test-active-task.md`). Adds optional `root` parameter to `_pb()`
+and `_broker()` helpers. No source files changed. Broker decision priority unchanged. No
+tests deleted or skipped. Fast-green: 2,384 passed / 23s. Quick tier: 7,648 passed / 2:21.
+Full suite: 8,370 passed / 29:24, 0 failures. Adds
+`docs/PHASE_88_BROKER_TEST_TASK_CONTRACT_DECOUPLING.md`. Recommends
+88S — Broker + Shell Gate Integration Design.
+
 Phase 88R: Permission Broker Prototype (completed).
 
 Implements `pcae permission-broker evaluate` — a read-only decision aggregator that
