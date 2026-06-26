@@ -106,7 +106,6 @@ advisory
 
 - python -m pytest tests/test_shell_gate.py -q
 - python -m pytest -m fast_green -n auto
-- python -m pytest -m "not slow and not phase_closure" -n auto
 
 ## Documentation Requirements
 
