@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 88P: Shell Gate Prototype (completed).
+
+Adds `pcae shell-gate check --command "<cmd>" [--json]` — a read-only command classifier
+and gate decision envelope. Classifies shell commands into 23 categories using the 88O
+taxonomy, returns one of 26 decision values, and unconditionally keeps all performed flags
+false. Never executes the command text. New module: `src/pcae/core/shell_gate.py` (classifier
++ JSON builder), `src/pcae/commands/shell_gate.py` (CLI runner), and CLI registration in
+`src/pcae/cli.py`. Adds `tests/test_shell_gate.py` — 155 fast unit tests covering all major
+classification paths, all performed-flag invariants, safety notes, and the full hard-block
+surface. Fast-green tier updated: 1,947 passed / 22.60s. Quick tier: see below. Full suite:
+see below. Recommends 88Q — Shell Gate Test Matrix and False-Positive Review.
+
 Phase 88O.1: Scope Matching Shared Utility Reconciliation (completed).
 
 88O.1 eliminates the scope file-pattern matching divergence between

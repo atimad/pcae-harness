@@ -403,6 +403,7 @@ from pcae.commands.decision_log import run_decision_log
 from pcae.commands.risk_register import run_risk_register
 from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
+from pcae.commands.shell_gate import run_shell_gate_check
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.mutation_preflight import run_mutation_preflight
@@ -4551,6 +4552,31 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional push target for push evaluation (e.g., origin/main).",
     )
     gate_dry_run_parser.set_defaults(handler=run_gate_dry_run)
+
+    # ── pcae shell-gate (Phase 88P) ──────────────────────────────────────
+    shell_gate_parser = subparsers.add_parser(
+        "shell-gate",
+        help="Read-only shell command classifier and gate decision (Phase 88P prototype).",
+    )
+    shell_gate_subparsers = shell_gate_parser.add_subparsers(
+        dest="shell_gate_command", required=True,
+    )
+    shell_gate_check_parser = shell_gate_subparsers.add_parser(
+        "check",
+        help="Classify a shell command and return a gate decision without executing it.",
+    )
+    shell_gate_check_parser.add_argument(
+        "--command",
+        metavar="CMD",
+        required=True,
+        help="Shell command text to classify (not executed).",
+    )
+    shell_gate_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON gate decision output.",
+    )
+    shell_gate_check_parser.set_defaults(handler=run_shell_gate_check)
 
     preflight_parser = subparsers.add_parser(
         "preflight",
