@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88P — Shell Gate Prototype (20260626-1428-88p-shell-gate-prototype)
 - 88O.1 — Scope Matching Shared Utility Reconciliation (20260626-1224-88o-1-scope-matching-shared-utility-reconciliation)
 - 88O — Shell Gate Design Reconciliation (20260626-1200-88o-shell-gate-design-reconciliation)
 - Phase 88N.6 — Preflight Policy-Forbidden Consistency Repair (20260626-0919-phase-88n-6-preflight-policy-forbidden-consistency-repair)
