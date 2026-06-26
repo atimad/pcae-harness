@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 88T: Broker + Shell Gate Integration Prototype (completed).
+
+Implements first prototype integration between the permission broker and shell gate
+classifier. Changes to `src/pcae/core/permission_broker.py`: (1) Updated
+`_SG_HARD_BLOCK_TO_BROKER` with two mapping changes — `blocked_by_policy_forbidden_file`
+now maps to `blocked_by_scope` (consistent with scope preflight audit trail) and
+`blocked_by_missing_task` now maps to `blocked_by_task_contract` (promoted from
+missing-evidence to hard block); (2) Added four new constants (`_SG_ALLOW_DECISIONS`,
+`_SG_HARD_BLOCK_DECISIONS_SET`, `_SG_PERFORMED_FORBIDDEN_KEYS`, `_SG_SCHEMA_VERSION`);
+(3) Added `_check_sg_contradiction` function implementing 13 contradiction detection
+conditions per 88S §15 — schema version mismatch, performed/authorization flag True in
+sg evidence, hard block with allow decision, force push flag with wrong decision, raw
+push flag with allow decision, unknown category with allow decision, mutating action with
+allow_read_only, secret not redacted, human approval alongside hard block, accepted risk
+alongside hard block; (4) Updated `_broker_decide` priority chain to 9 levels — added
+priority 1d (requires_active_task from SG + no task → blocked_by_task_contract hard block)
+and priority 2 (contradiction detection → blocked_by_conflicting_evidence); (5) Updated
+`build_permission_broker` to build sg_evidence with six new internal fields
+(schema_version, command_text_redacted, hard_block_present, secret_access_detected, and
+redacted command text for secret-access commands), call `_check_sg_contradiction` before
+`_broker_decide`, pass `contradiction_details` to `_broker_decide`, and add 13 new audit
+fields to broker output (shell_gate_schema_version, shell_gate_command_category,
+shell_gate_command_text_hash, shell_gate_command_text_redacted, shell_gate_decision,
+shell_gate_reason_codes, shell_gate_hard_block_present, conflicting_evidence_detected,
+conflicting_evidence_details, hard_block_sources, human_review_sources, accepted_risk_noted,
+broker_mapping_reason). Secret-access command text is redacted to
+`<redacted_secret_access_command>` in sg_evidence before contradiction detection or storage.
+SHA-256 hash of command text stored for non-secret commands. All 14 performed/authorization
+flags remain unconditionally False. New test file `tests/test_broker_shell_gate_integration.py`
+— 162 fast-green integration tests (exceeds 88S minimum of 102): 14 hard-block propagation,
+8 non-hard-block handling, 7 read-only, 18 contradiction detection (including direct
+_broker_decide call to demonstrate priority 2 firing), 56 parametrized performed-flag
+invariants (14 flags × 4 decision paths), 7 secret redaction, 7 active-task boundary, 15
+audit fields, 9 decision mapping, 10 sg_evidence fields, 8 envelope invariants, 3 CLI smoke
+(slow/integration tier). No shell interception, no execution authorization, no backend
+invocation. Fast-green: 2,546 passed / 23.39s. Quick tier: 7,807 passed / 2:36. Full suite:
+8,532 passed / 1:00:48 (extended due to concurrent test run resource competition). Adds `docs/PHASE_88_BROKER_SHELL_GATE_INTEGRATION_PROTOTYPE.md`. Recommends 88U —
+Broker + Shell Gate Integration Test Expansion and Edge-Case Review.
+
 Phase 88S: Broker + Shell Gate Integration Design (completed).
 
 Design-only phase. Defines how the permission broker prototype should consume and interpret

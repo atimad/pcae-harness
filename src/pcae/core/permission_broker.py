@@ -7,6 +7,7 @@ backends, sends prompts, writes storage, or grants real authorisation.
 """
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -89,14 +90,45 @@ _SG_HARD_BLOCK_TO_BROKER: dict[str, str] = {
     "blocked_by_force_push":             "blocked_by_force_push",
     "blocked_by_history_rewrite":        "blocked_by_shell_gate",
     "blocked_by_destructive_filesystem": "blocked_by_shell_gate",
-    "blocked_by_policy_forbidden_file":  "blocked_by_shell_gate",
+    "blocked_by_policy_forbidden_file":  "blocked_by_scope",        # consistent with scope preflight
     "blocked_by_backend_policy":         "blocked_by_backend_policy",
     "blocked_by_prompt_policy":          "blocked_by_shell_gate",
     "blocked_by_adoption_policy":        "blocked_by_shell_gate",
     "blocked_by_test_run_lock":          "blocked_by_test_run_lock",
     "blocked_by_unknown_command":        "blocked_by_shell_gate",
+    "blocked_by_missing_task":           "blocked_by_task_contract", # promoted from missing-evidence
     "deny":                              "deny",
 }
+
+# Shell gate allow-type decisions (never grant execution authorization)
+_SG_ALLOW_DECISIONS: frozenset[str] = frozenset({
+    "allow_read_only",
+    "allow_governed",
+    "allow_test_execution",
+})
+
+# Shell gate decisions that imply hard_block_present=True at the shell gate level
+_SG_HARD_BLOCK_DECISIONS_SET: frozenset[str] = frozenset(_SG_HARD_BLOCK_TO_BROKER.keys())
+
+# Performed/authorization keys that must never be True in sg evidence
+_SG_PERFORMED_FORBIDDEN_KEYS: frozenset[str] = frozenset({
+    "command_executed",
+    "authorization_granted",
+    "execution_authorized",
+    "repo_mutation_performed",
+    "backend_invocation_performed",
+    "prompt_sent",
+    "capture_performed",
+    "intake_performed",
+    "adoption_performed",
+    "commit_performed",
+    "push_performed",
+    "raw_git_push_performed",
+    "force_push_performed",
+    "storage_written",
+})
+
+_SG_SCHEMA_VERSION: str = "0.1"
 
 # Scope preflight decisions that map to broker blocks
 _SPF_BLOCK_TO_BROKER: dict[str, str] = {
@@ -107,6 +139,73 @@ _SPF_BLOCK_TO_BROKER: dict[str, str] = {
     "blocked_by_must_never_repeat_control": "blocked_by_must_never_repeat",
     "blocked_by_risk":                     "blocked_by_risk",
 }
+
+
+def _check_sg_contradiction(
+    sg_evidence: dict[str, Any],
+    requested_action: str,
+    human_approval_present: bool = False,
+    accepted_risk_present: bool = False,
+) -> list[str]:
+    """
+    Detect contradictions in shell gate evidence.
+    Returns list of contradiction descriptions (empty = clean).
+    Any non-empty result should yield blocked_by_conflicting_evidence.
+    """
+    details: list[str] = []
+    sg_decision = sg_evidence.get("decision", "")
+    command_category = sg_evidence.get("command_category", "")
+    detected_flags = sg_evidence.get("detected_flags", {})
+    sg_hard_block = sg_evidence.get("hard_block_present", False)
+
+    # Schema version mismatch
+    if sg_evidence.get("schema_version") != _SG_SCHEMA_VERSION:
+        got = sg_evidence.get("schema_version")
+        details.append(f"sg_schema_version_mismatch:expected_{_SG_SCHEMA_VERSION}_got_{got}")
+
+    # Performed/authorization flags must never be True in sg evidence
+    for key in _SG_PERFORMED_FORBIDDEN_KEYS:
+        if sg_evidence.get(key) is True or detected_flags.get(key) is True:
+            details.append(f"sg_performed_flag_true:{key}")
+
+    # hard_block_present=True but decision is an allow decision
+    if sg_hard_block and sg_decision in _SG_ALLOW_DECISIONS:
+        details.append(f"sg_hard_block_with_allow_decision:{sg_decision}")
+
+    # force_push_detected=True but decision is not blocked_by_force_push
+    if detected_flags.get("force_push_detected") and sg_decision != "blocked_by_force_push":
+        details.append(f"sg_force_push_flag_but_decision:{sg_decision}")
+
+    # raw_git_push_detected=True but decision is an allow decision
+    if detected_flags.get("raw_git_push_detected") and sg_decision in _SG_ALLOW_DECISIONS:
+        details.append(f"sg_raw_git_push_flag_with_allow_decision:{sg_decision}")
+
+    # Unknown category + allow decision
+    if command_category == "unknown" and sg_decision in _SG_ALLOW_DECISIONS:
+        details.append(f"sg_unknown_category_with_allow_decision:{sg_decision}")
+
+    # Mutating broker action + allow_read_only from sg
+    if requested_action in BPE_MUTATING_ACTIONS and sg_decision == "allow_read_only":
+        details.append(f"sg_allow_read_only_for_mutating_action:{requested_action}")
+
+    # Secret access evidence not redacted
+    secret_detected = (
+        detected_flags.get("secret_access_detected")
+        or sg_evidence.get("secret_access_detected")
+    )
+    command_text = sg_evidence.get("command_text", "")
+    if secret_detected and command_text != "<redacted_secret_access_command>":
+        details.append("sg_secret_access_command_not_redacted")
+
+    # Human approval alongside sg hard block
+    if sg_hard_block and human_approval_present:
+        details.append("human_approval_alongside_sg_hard_block")
+
+    # Accepted risk alongside sg hard block
+    if sg_hard_block and accepted_risk_present:
+        details.append("accepted_risk_alongside_sg_hard_block")
+
+    return details
 
 
 def _broker_shell_gate_evidence(
@@ -143,12 +242,13 @@ def _broker_decide(
     tests_passed: bool | None,
     test_run_clear: bool | None,
     human_review_present: bool,
+    contradiction_details: list[str] | None = None,
 ) -> tuple[str, list[str], list[str]]:
     """
     Returns (decision, reason_codes, missing_evidence).
-    Priority order: shell gate hard blocks → evidence failures → task contract
-    → scope denial → test run lock → missing evidence → human review
-    → allow_preflight_only.
+    Priority: SG hard blocks → contradiction detection → evidence failures
+    → task contract → scope denial → test run lock → missing evidence
+    → human review → allow_preflight_only.
     """
     reason_codes: list[str] = []
     missing_evidence: list[str] = []
@@ -156,12 +256,25 @@ def _broker_decide(
     # 1. Shell gate hard blocks (checked before any evidence)
     if sg_evidence is not None:
         sg_decision = sg_evidence["decision"]
+
+        # 1d. requires_active_task from shell gate when no task → hard block
+        if sg_decision == "requires_active_task" and task_contract is None:
+            reason_codes.append(f"shell_gate_decision:{sg_decision}")
+            reason_codes.append("no_active_task_contract")
+            return "blocked_by_task_contract", reason_codes, missing_evidence
+
         if sg_decision in _SG_HARD_BLOCK_TO_BROKER:
             broker_block = _SG_HARD_BLOCK_TO_BROKER[sg_decision]
             reason_codes.append(f"shell_gate_decision:{sg_decision}")
             return broker_block, reason_codes, missing_evidence
 
-    # 2. Explicit evidence failures
+    # 2. Contradiction detection (immediately after SG hard blocks)
+    if contradiction_details:
+        reason_codes.append("contradictory_shell_gate_evidence")
+        reason_codes.extend(contradiction_details)
+        return "blocked_by_conflicting_evidence", reason_codes, missing_evidence
+
+    # 3. Explicit evidence failures
     if health_passed is False:
         reason_codes.append("health_check_failed")
         return "blocked_by_failed_health", reason_codes, missing_evidence
@@ -178,31 +291,32 @@ def _broker_decide(
         reason_codes.append("push_check_failed")
         return "blocked_by_push_check", reason_codes, missing_evidence
 
-    # 3. Test run lock (when expensive test execution detected)
+    # 4. Test run lock (when expensive test execution detected)
     if test_run_clear is False:
         reason_codes.append("test_run_lock_active")
         return "blocked_by_test_run_lock", reason_codes, missing_evidence
 
-    # 4. Missing active task for mutating actions
+    # 5. Missing active task for mutating actions
     if requested_action in BPE_MUTATING_ACTIONS and task_contract is None:
         reason_codes.append("no_active_task_contract")
         return "blocked_by_task_contract", reason_codes, missing_evidence
 
-    # 5. Scope preflight denial
+    # 6. Scope preflight denial
     if scope_decision is not None and scope_decision in _SPF_BLOCK_TO_BROKER:
         broker_block = _SPF_BLOCK_TO_BROKER[scope_decision]
         reason_codes.append(f"scope_preflight_decision:{scope_decision}")
         return broker_block, reason_codes, missing_evidence
 
-    # 6. Collect missing evidence (informational — may upgrade to requires_more_evidence)
+    # 7. Collect missing evidence (informational — may upgrade to requires_more_evidence)
     if sg_evidence is not None:
-        sg_decision = sg_evidence["decision"]
-        if sg_decision == "requires_more_evidence":
+        sg_dec = sg_evidence["decision"]
+        if sg_dec == "requires_more_evidence":
             missing_evidence.append("additional_evidence_for_command")
-        elif sg_decision == "requires_preflight":
+        elif sg_dec == "requires_preflight":
             missing_evidence.append("scope_preflight_for_command")
-        elif sg_decision == "requires_active_task":
-            missing_evidence.append("active_task_for_command")
+        elif sg_dec == "requires_active_task":
+            # task present (otherwise fired at 1d) — constraint is satisfied
+            pass
 
     if requested_action in BPE_MUTATING_ACTIONS:
         if health_passed is None:
@@ -217,7 +331,7 @@ def _broker_decide(
         reason_codes.append("missing_evidence_items")
         return "requires_more_evidence", reason_codes, missing_evidence
 
-    # 7. Human review gate
+    # 8. Human review gate
     if sg_evidence is not None and sg_evidence["decision"] == "requires_human_review":
         if not human_review_present:
             reason_codes.append("shell_gate_requires_human_review")
@@ -230,7 +344,7 @@ def _broker_decide(
             reason_codes.append(f"action_requires_human_review:{requested_action}")
             return "requires_human_review", reason_codes, missing_evidence
 
-    # 8. All checks pass — preflight only (not execution authorization)
+    # 9. All checks pass — preflight only (not execution authorization)
     reason_codes.append("all_provided_evidence_passes")
     return "allow_preflight_only", reason_codes, missing_evidence
 
@@ -287,13 +401,35 @@ def build_permission_broker(
             command_category, detected_flags, active_task_detected,
             test_run_clear if test_run_clear is not None else True,
         )
+        sg_hard_block = decision_for_sg in _SG_HARD_BLOCK_DECISIONS_SET
+        secret_detected = bool(detected_flags.get("secret_access_detected"))
+
+        # Redact secret-access command text before storing in evidence
+        stored_command_text = (
+            "<redacted_secret_access_command>" if secret_detected else requested_command
+        )
+
         sg_evidence = {
-            "command_text": requested_command,
+            "schema_version": _SG_SCHEMA_VERSION,
+            "command_text": stored_command_text,
+            "command_text_redacted": secret_detected,
             "command_category": command_category,
             "decision": decision_for_sg,
             "reason_codes": classification["reason_codes"] + decision_reason_codes,
             "detected_flags": detected_flags,
+            "hard_block_present": sg_hard_block,
+            "secret_access_detected": secret_detected,
         }
+
+    # Contradiction detection (before _broker_decide so it can inject at priority 2)
+    contradiction_details: list[str] = []
+    if sg_evidence is not None:
+        contradiction_details = _check_sg_contradiction(
+            sg_evidence,
+            requested_action,
+            human_approval_present=human_approval_present,
+            accepted_risk_present=accepted_risk_present,
+        )
 
     # Scope preflight evidence (internal — no execution)
     scope_decision: str | None = None
@@ -315,6 +451,7 @@ def build_permission_broker(
         tests_passed=tests_passed,
         test_run_clear=test_run_clear,
         human_review_present=human_review_present,
+        contradiction_details=contradiction_details,
     )
 
     hard_block_present = broker_decision in BPE_HARD_BLOCK_DECISIONS
@@ -324,7 +461,8 @@ def build_permission_broker(
     if task_contract_path:
         evidence_sources.append(task_contract_path)
     if sg_evidence is not None:
-        evidence_sources.append("pcae shell-gate classifier (internal)")
+        cat_label = sg_evidence.get("command_category", "unknown")
+        evidence_sources.append(f"pcae shell-gate classifier (internal) category:{cat_label}")
     if scope_preflight_envelope is not None:
         evidence_sources.append("pcae preflight scope (internal)")
     if test_run_preflight_required:
@@ -337,6 +475,32 @@ def build_permission_broker(
     ]:
         if flag_val is not None:
             evidence_sources.append(f"explicit:{flag_name}={flag_val}")
+
+    # Audit helpers
+    sg_cmd_text_hash: str | None = None
+    if sg_evidence is not None and not sg_evidence.get("command_text_redacted"):
+        raw = sg_evidence.get("command_text", "")
+        if raw:
+            sg_cmd_text_hash = hashlib.sha256(raw.encode()).hexdigest()
+
+    hard_block_sources: list[str] = []
+    if sg_evidence is not None and sg_evidence.get("hard_block_present"):
+        hard_block_sources.append("shell_gate")
+    if hard_block_present and not hard_block_sources:
+        hard_block_sources.append("broker")
+
+    human_review_sources: list[str] = [
+        rc for rc in reason_codes if "human_review" in rc or "shell_gate_requires" in rc
+    ]
+
+    broker_mapping_reason = (
+        f"sg:{sg_evidence['decision'] if sg_evidence else 'none'}"
+        f"->broker:{broker_decision}"
+    )
+
+    warnings: list[str] = []
+    if contradiction_details:
+        warnings.append(f"contradictions_detected:{len(contradiction_details)}")
 
     safety_notes: dict[str, bool] = {
         "permission_broker_prototype_only": True,
@@ -402,6 +566,32 @@ def build_permission_broker(
         "force_push_performed": False,
         "storage_written": False,
         "safety_notes": safety_notes,
+        # Audit fields (new in 88T)
+        "shell_gate_schema_version": (
+            sg_evidence.get("schema_version") if sg_evidence else None
+        ),
+        "shell_gate_command_category": (
+            sg_evidence.get("command_category") if sg_evidence else None
+        ),
+        "shell_gate_command_text_hash": sg_cmd_text_hash,
+        "shell_gate_command_text_redacted": (
+            sg_evidence.get("command_text_redacted", False) if sg_evidence else False
+        ),
+        "shell_gate_decision": (
+            sg_evidence.get("decision") if sg_evidence else None
+        ),
+        "shell_gate_reason_codes": (
+            sg_evidence.get("reason_codes", []) if sg_evidence else []
+        ),
+        "shell_gate_hard_block_present": (
+            sg_evidence.get("hard_block_present") if sg_evidence else None
+        ),
+        "conflicting_evidence_detected": bool(contradiction_details),
+        "conflicting_evidence_details": contradiction_details,
+        "hard_block_sources": hard_block_sources,
+        "human_review_sources": human_review_sources,
+        "accepted_risk_noted": accepted_risk_present,
+        "broker_mapping_reason": broker_mapping_reason,
     }
 
     return {
@@ -410,6 +600,6 @@ def build_permission_broker(
         "source_command": "pcae permission-broker evaluate",
         "repository_root": str(repo_root),
         "broker": broker,
-        "warnings": [],
+        "warnings": warnings,
         "errors": [],
     }
