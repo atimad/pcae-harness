@@ -2,6 +2,26 @@
 
 ## Current Phase
 
+Phase 88U: Broker + Shell Gate Integration Test Expansion and Edge-Case Review (completed).
+
+Pressure-tests the 88T broker + shell gate integration prototype with 120 new fast-green
+tests across 13 test classes: compound command handling (&&, ||, ; through broker),
+pipe/tee writes, environment mutation (export/unset/source/./VAR=val), network access
+(curl/wget/ssh/scp), package install (pip/python -m pip/npm), unknown command conservative
+blocking, secret access edge cases (additional credential file paths), expensive pytest
+classification (classification-only; no subprocess), CLI JSON envelope stability (slow
+tier), idle-vs-active task boundary (comprehensive), non-hard-block authorization invariant
+(parametrized), hard-block mapping consistency, and documented false positives/negatives.
+No source changes (no narrow defects found). New test file:
+`tests/test_broker_shell_gate_edge_cases.py`. Documents 3 false negatives (VAR=val secret
+not redacted, env|grep read_only, printenv read_only), 3 false positives/conservative
+behaviors (bash blocked, git reset HEAD~1 blocked, semicolon-without-spaces), 1 structural
+inconsistency ("deny" not in BPE_HARD_BLOCK_DECISIONS), and 1 redaction scope limitation
+(broker.requested_command not redacted for secret commands). Fast-green: 2,666 passed /
+25.74s. Quick tier: 7,915 passed / 2:33. Full suite: TBD. Adds
+`docs/PHASE_88_BROKER_SHELL_GATE_INTEGRATION_EDGE_CASE_REVIEW.md`. Recommends 88V —
+Broker + Shell Gate Enforcement Boundary Design.
+
 Phase 88T: Broker + Shell Gate Integration Prototype (completed).
 
 Implements first prototype integration between the permission broker and shell gate
