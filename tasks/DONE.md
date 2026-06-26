@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88T — Broker + Shell Gate Integration Prototype (20260626-2130-88t-broker-shell-gate-integration-prototype)
 - 88S — Broker + Shell Gate Integration Design (20260626-2032-88s-broker-shell-gate-integration-design)
 - 88R.1 — Broker Test Task-Contract Decoupling (20260626-1947-88r-1-broker-test-task-contract-decoupling)
 - 88R Permission Broker Prototype (20260626-1706-88r-permission-broker-prototype)
