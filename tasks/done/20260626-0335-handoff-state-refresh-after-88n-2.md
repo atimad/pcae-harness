@@ -10,7 +10,7 @@ Handoff State Refresh After 88N.2
 
 ## Status
 
-active
+done
 
 ## Mode
 
