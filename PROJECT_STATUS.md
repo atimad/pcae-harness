@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 88N.4: Full Suite Bottleneck Elimination (completed).
+
+88N.4 profiled the full-suite runtime bottleneck (29 minutes / 1,693s on M5 Pro) and
+eliminated the dominant cause: 115 tests across `test_project_state.py`,
+`test_risk_register.py`, `test_decision_log.py`, and `test_governance_timeline.py` each
+spawned an independent subprocess per assertion (7–30s each). Fix: replaced per-test
+subprocess calls with `@pytest.fixture(scope="module")` fixtures that run each
+governance command once per xdist worker and cache the result. Determinism tests now
+share two module-scoped runs (instead of 2 per test). No tests deleted, no assertions
+weakened, no tests marked slow/xfail for speed. Quick tier speedup: 5:27 → 2:21 (2.3×). Full suite: 7,719 passed in 23:20 (was 28:13 — 5-minute
+improvement, 17%). Remaining bottlenecks documented: test_agent.py
+44c capability-discovery tests (~23 × 4.5s, capsys-bound), cross-command smoke tests
+(15 tests, deferred), and 8 behavioral no-mutation tests that must keep own subprocess
+calls. Recommends 88O — Shell Gate Design Reconciliation.
+
 Phase 88N.3: Scope Preflight Review Full-Suite Baseline Repair (completed).
 
 88N.3 repairs 2 pre-existing failures in `tests/test_scope_preflight_review.py` that
