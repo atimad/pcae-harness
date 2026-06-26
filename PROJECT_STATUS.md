@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 88N.5: Fast Green Validation Architecture (completed).
+
+88N.5 defines a practical 1–2 minute normal development validation gate. Adds
+`pytest.mark.fast_green` marker (declared in `pyproject.toml`), implemented via a
+`tests/conftest.py` auto-marker (`pytest_collection_modifyitems`) that labels 36 test
+modules as `fast_green` without modifying any existing test file. Fast-green tier:
+1,792 tests, 22.85 s with `-n auto` on M5 Pro — well under the 1-minute target.
+Excludes `test_agent` (4,236 tests, 2:06, capsys-bound), `test_phase` (886 tests,
+exhaustive catalog), and 4 subprocess-heavy governance-info modules (~2:25). No tests
+deleted, no assertions weakened, no skip/xfail for speed. Adds 17 structural
+self-verification tests in `tests/test_88n5_fast_green_validation.py`. Documents tier
+model, selection criteria, and policy in
+`docs/PHASE_88_FAST_GREEN_VALIDATION_ARCHITECTURE.md`. Quick tier: 7,029 passed in ~2:29.
+Recommends 88O — Shell Gate Design Reconciliation.
+
 Phase 88N.4: Full Suite Bottleneck Elimination (completed).
 
 88N.4 profiled the full-suite runtime bottleneck (29 minutes / 1,693s on M5 Pro) and

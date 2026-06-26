@@ -36,6 +36,7 @@ markers = [
     "slow: marks tests that spawn subprocesses or take >1s each",
     "integration: marks CLI integration tests that spawn pcae subprocesses",
     "phase_closure: marks heavyweight phase-closure validation tests",
+    "fast_green: high-signal governance/core tests; normal development gate (~1-2 min with -n auto)",
 ]
 
 # Phase test selection strategy (Phase 61J):
@@ -46,7 +47,8 @@ markers = [
 #           python -m pytest -k 61j  (Phase 61J: Phase Test Selection Hardening)
 # Zero-collection is a validation failure — always verify selector finds > 0 tests.
 #
-# Test tiers (Phase 88D.1):
+# Test tiers (Phase 88N.5):
+#   fast-green: python -m pytest -m "fast_green" -n auto -ra --durations=50
 #   quick:      python -m pytest -m "not slow and not phase_closure" -n auto
 #   governance: python -m pytest -m "integration or slow" -n auto
 #   full:       python -m pytest -n auto
