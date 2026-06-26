@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 88N.6: Preflight Policy-Forbidden Consistency Repair (completed).
+
+88N.6 restores the full-suite green baseline by propagating `_SPF_POLICY_FORBIDDEN_FILES` into
+all three scope evaluation functions that previously consumed only `task_contract["forbidden_files"]`
+directly: `_evaluate_scope_for_mutation` (`mutation_preflight.py`), `_evaluate_scope_for_files`
+(`backend_preflight.py`), and `_evaluate_scope` (`gate_dry_run.py`). Root cause: the 88N.4 "zero
+failures" baseline was measured while the 88N.4 task was active — that task explicitly listed the
+three policy-forbidden governance files in its forbidden-files section, accidentally making the
+tests pass. The 88N.5 task did not list them, exposing the real gap. Fix: three-line merge pattern
+(identical to 88N.3's fix in `scope_preflight.py`) added to each function; `gate_dry_run.py` uses
+a late import to avoid the existing circular import between that module and `scope_preflight.py`.
+No test changes. No assertions weakened. No tests deleted. Fast-green architecture from 88N.5
+preserved (1,792 tests, 21.72s). Targeted preflight tests: 181 passed. Quick tier: 7,029 passed
+in 2:22. Full suite: green. Recommends 88O — Shell Gate Design Reconciliation.
+
 Phase 88N.5: Fast Green Validation Architecture (completed).
 
 88N.5 defines a practical 1–2 minute normal development validation gate. Adds

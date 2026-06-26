@@ -195,8 +195,11 @@ def _evaluate_scope(
             "scope_notes": "no task contract detected",
         }
 
+    from pcae.core.scope_preflight import _SPF_POLICY_FORBIDDEN_FILES  # late import avoids circular dep
     allowed_patterns = task_contract["allowed_files"]
-    forbidden_patterns = task_contract["forbidden_files"]
+    task_forbidden = list(task_contract["forbidden_files"])
+    policy_additions = [f for f in _SPF_POLICY_FORBIDDEN_FILES if f not in task_forbidden]
+    forbidden_patterns = task_forbidden + policy_additions
 
     matched_allowed: list[str] = []
     matched_forbidden: list[str] = []

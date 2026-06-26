@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from pcae.core.gate_dry_run import _detect_task_contract
-from pcae.core.scope_preflight import _match_file
+from pcae.core.scope_preflight import _match_file, _SPF_POLICY_FORBIDDEN_FILES
 
 
 _BPF_KNOWN_BACKENDS: tuple[str, ...] = (
@@ -79,7 +79,9 @@ def _evaluate_scope_for_files(
         }
 
     allowed_patterns = task_contract["allowed_files"]
-    forbidden_patterns = task_contract["forbidden_files"]
+    task_forbidden = list(task_contract["forbidden_files"])
+    policy_additions = [f for f in _SPF_POLICY_FORBIDDEN_FILES if f not in task_forbidden]
+    forbidden_patterns = task_forbidden + policy_additions
     matched_allowed: list[str] = []
     matched_forbidden: list[str] = []
     unknown: list[str] = []
