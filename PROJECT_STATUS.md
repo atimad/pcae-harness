@@ -2,6 +2,31 @@
 
 ## Current Phase
 
+Phase 88S: Broker + Shell Gate Integration Design (completed).
+
+Design-only phase. Defines how the permission broker prototype should consume and interpret
+shell-gate evidence in a future integration prototype phase (88T). Produces
+`docs/PHASE_88_BROKER_SHELL_GATE_INTEGRATION_DESIGN.md` (version 0.1, status draft_documented,
+implementation_status not_started). Covers: evidence flow (fields to consume, fields to reject),
+full 26-decision shell-gate → 24-decision broker mapping, category mapping for all 24
+SGP_CATEGORIES, 12-level decision priority chain for integrated broker, hard-block propagation
+rules (force push, raw git push, destructive filesystem, policy-forbidden file, test-run lock,
+unknown), non-hard-block decision handling (requires_human_review, requires_preflight,
+requires_active_task, requires_more_evidence), active-task / no-active-task behavior (read-only
+unblocked without task; mutating actions blocked without task from both SG and broker layers),
+human-approval limits (does not override hard blocks), accepted-risk limits (does not override
+hard blocks, does not satisfy human-review gate), missing shell-gate evidence behavior
+(requires_more_evidence; never allow), conflicting evidence detection (schema mismatch, performed
+flag true, allow+hard_block_present contradiction, unknown+allow contradiction → all
+blocked_by_conflicting_evidence), performed-flag invariant (all 14 unconditionally false, always),
+audit model (new fields for 88T: command category, command text hash, redacted flag, sg decision,
+sg reason codes, conflict details, hard_block_sources, human_review_sources), secret-access
+command redaction policy (SHA-256 hash; no raw text stored when secret_access_detected), security
+requirements (schema version validation, conservative handling, no trust amplification), minimum
+102-test suite for 88T, recommended implementation sequence (88T prototype → 88U validation →
+88V schema hardening), and 20 safety invariants. No source changes. No test changes. Fast-green:
+2,384 passed / 22.20s. Recommends 88T — Broker + Shell Gate Integration Prototype.
+
 Phase 88R.1: Broker Test Task-Contract Decoupling (completed).
 
 Repairs `tests/test_permission_broker.py` so that 19 tests requiring active-task-present
