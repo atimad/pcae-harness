@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### 88Y.3 — Gate Dry-Run Shared Evidence Prototype (2026-06-27)
+
+Performance optimization. Implemented `GateDryRunContext` lazy-memoized
+dataclass in new `src/pcae/core/gate_dry_run_context.py`. Modified
+`build_gate_dry_run()` and `_evaluate_gate()` to use shared context instead
+of 15× repeated `_detect_task_contract` calls and redundant git subprocess
+calls. Eliminated second `build_risk_register` cascade by deriving risk
+evidence from `project_state` snapshot. Added 20 tests for decision
+equivalence, memoization, freshness, and no-persistence. Single
+`build_gate_dry_run()` call: 20.86s→9.16s (-56%). Gate/phase87 tests:
+~990s→558s (-44%). Full suite: 34:16→25:18 (9,010 tests, -26%).
+No gate decisions changed. No persistent cache. No test deletion/skip/xfail.
+
 ### 88Y.2 — Gate Dry-Run Performance Profiling and Optimization Design (2026-06-27)
 
 Design-only phase. Profiled `build_gate_dry_run()`: 1,087 git subprocess

@@ -5,12 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from pcae.core.artifact_index import build_artifact_index
-from pcae.core.memory_snapshot import build_memory_snapshot
-from pcae.core.governance_timeline import build_governance_timeline
-from pcae.core.decision_log import build_decision_log
-from pcae.core.risk_register import build_risk_register
-from pcae.core.project_state import build_project_state
+from pcae.core.gate_dry_run_context import GateDryRunContext
 
 
 _GATE_DEFS: list[dict[str, Any]] = [
@@ -446,11 +441,11 @@ def _evaluate_commit(
     commit_message_present: bool,
     human_approved: bool,
     task_contract: dict[str, Any] | None,
-    repo_root: Path,
+    ctx: GateDryRunContext,
     snap: dict[str, Any],
 ) -> dict[str, Any]:
     is_commit = requested_action == "commit"
-    porcelain = _git_porcelain(repo_root)
+    porcelain = ctx.git_porcelain
     repo_clean = porcelain == "" if porcelain is not None else None
     staged = porcelain is not None and any(
         line and line[0] in "AMDRC" for line in porcelain.split("\n")
@@ -510,12 +505,12 @@ def _evaluate_push(
     push_target: str | None,
     human_approved: bool,
     task_contract: dict[str, Any] | None,
-    repo_root: Path,
+    ctx: GateDryRunContext,
     snap: dict[str, Any],
 ) -> dict[str, Any]:
     is_push = requested_action == "push"
-    branch = _git_branch_name(repo_root)
-    ahead = _git_ahead_count(repo_root)
+    branch = ctx.git_branch
+    ahead = ctx.git_ahead_count
     if ahead is not None and ahead == 0:
         sync = "synced"
     elif ahead is not None:
@@ -579,7 +574,7 @@ _WRITE_ACTIONS = {
 
 
 def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
-                   rr: dict[str, Any], repo_root: Path,
+                   rr: dict[str, Any], ctx: GateDryRunContext,
                    requested_action: str | None,
                    requested_files: list[str],
                    requested_backend: str | None = None,
@@ -605,7 +600,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
     commit_evaluation: dict[str, Any] | None = None
     push_evaluation: dict[str, Any] | None = None
 
-    task_contract = _detect_task_contract(repo_root)
+    task_contract = ctx.task_contract
 
     if gate_id == "permission_broker_gate":
         decision = "deny"
@@ -649,7 +644,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
         reason_codes = ["prompt_send_not_authorized", "human_approval_required"]
     elif gate_id == "adoption_approval_gate":
         scope_for_adoption = _evaluate_scope(
-            repo_root, requested_action, requested_files, task_contract,
+            ctx.repo_root, requested_action, requested_files, task_contract,
         ) if requested_files else None
         adoption_evaluation = _evaluate_adoption(
             requested_action, requested_files, adoption_artifact_present,
@@ -689,7 +684,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
     elif gate_id == "commit_gate":
         commit_evaluation = _evaluate_commit(
             requested_action, commit_message_present, human_approved,
-            task_contract, repo_root, snap,
+            task_contract, ctx, snap,
         )
         cs = commit_evaluation["commit_status"]
         if cs == "not_requested":
@@ -715,7 +710,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
     elif gate_id == "push_gate":
         push_evaluation = _evaluate_push(
             requested_action, push_target, human_approved,
-            task_contract, repo_root, snap,
+            task_contract, ctx, snap,
         )
         ps_status = push_evaluation["push_status"]
         if ps_status == "not_requested":
@@ -740,7 +735,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
                 break
     elif gate_id in ("source_mutation_gate", "test_mutation_gate"):
         scope_for_mut = _evaluate_scope(
-            repo_root, requested_action, requested_files, task_contract,
+            ctx.repo_root, requested_action, requested_files, task_contract,
         ) if requested_files else None
         mutation_evaluation = _evaluate_mutation(
             requested_action, requested_files, human_approved,
@@ -774,7 +769,7 @@ def _evaluate_gate(gate_def: dict[str, Any], ps: dict[str, Any],
                 reason_codes.append("test_mutation_not_authorized")
     elif gate_id == "scope_check_gate":
         scope_evaluation = _evaluate_scope(
-            repo_root, requested_action, requested_files, task_contract,
+            ctx.repo_root, requested_action, requested_files, task_contract,
         )
         ss = scope_evaluation["scope_status"]
         if not task_contract:
@@ -872,16 +867,20 @@ def build_gate_dry_run(
     errors: list[str] = []
     req_files = requested_files or []
 
-    _ai = build_artifact_index(repo_root)
-    _ms = build_memory_snapshot(repo_root)
-    _gt = build_governance_timeline(repo_root)
-    _dl = build_decision_log(repo_root)
-    rr = build_risk_register(repo_root)
-    ps = build_project_state(repo_root)
+    ctx = GateDryRunContext(repo_root)
+    ps = ctx.project_state
+
+    # Derive risk register evidence from project_state snapshot to avoid a
+    # second cascading build-function call (project_state already called
+    # build_risk_register internally).  _evaluate_gate only needs risk IDs.
+    snap_ps = ps.get("snapshot", {})
+    rr: dict[str, Any] = {
+        "risks": snap_ps.get("active_risks", []) + snap_ps.get("accepted_risks", []),
+    }
 
     gates: list[dict[str, Any]] = []
     for gate_def in _GATE_DEFS:
-        result = _evaluate_gate(gate_def, ps, rr, repo_root,
+        result = _evaluate_gate(gate_def, ps, rr, ctx,
                                 requested_action, req_files,
                                 requested_backend, prompt_present,
                                 adoption_artifact_present, human_approved,
