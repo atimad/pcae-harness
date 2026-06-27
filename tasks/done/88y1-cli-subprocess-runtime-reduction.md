@@ -4,7 +4,7 @@
 ## Title
 88Y.1 — CLI Subprocess Runtime Reduction
 ## Status
-active
+done
 ## Mode
 implementation
 ## Goal
