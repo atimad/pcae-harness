@@ -10,7 +10,7 @@
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -38,7 +38,6 @@ Optimize build_project_state() internal cascade using per-invocation shared evid
 - CHANGELOG.md
 - tasks/active/20260627-1816-88y-5-project-state-shared-evidence-optimization.md
 - tasks/active/**
-- tasks/done/**
 
 ## Forbidden Files
 

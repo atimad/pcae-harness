@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+### 88Y.5 — Project State Shared Evidence Optimization (2026-06-27)
+
+Performance optimization. Extended the shared evidence model from 88Y.3/88Y.4
+to the five upstream build functions by adding an optional `ctx=None` parameter
+to `build_memory_snapshot`, `build_governance_timeline`, `build_decision_log`,
+`build_risk_register`, and `build_project_state`. Updated `GateDryRunContext`
+property methods to pass `ctx=self`, so each build function is called exactly
+once per gate dry-run invocation instead of repeatedly through the cascade.
+Key finding: `build_governance_timeline`, `build_decision_log`, and
+`build_risk_register` each called their upstream build functions but never used
+the returned values — these vestigial calls are skipped entirely when ctx is
+provided. Also eliminates 4 redundant git subprocess calls inside
+`build_project_state` by deriving git data from ctx properties. Per-call runtime
+reduced from 9.16s to 3.22s (-65%); cumulative reduction from original 88Y.2
+baseline: 20.86s → 3.22s (-85%). Added 24 tests in `test_project_state_context.py`
+covering decision equivalence (8), memoization (7), freshness (2),
+no-persistence (2), backward compatibility (4), idempotency (1). Fixed one test
+in `test_gate_dry_run_context.py` tracking function to accept `ctx` kwarg.
+No gate decisions, output schema, or governance rules changed. No persistent
+cache, no global cache, no cross-invocation cache. Doc at
+`docs/PHASE_88_PROJECT_STATE_SHARED_EVIDENCE_OPTIMIZATION.md`. Next: 88Z.
+
 ### 88Y.4 — Gate Dry-Run Decision Equivalence and Performance Matrix (2026-06-27)
 
 Validation and hardening phase. Fixed None-sentinel memoization bug in

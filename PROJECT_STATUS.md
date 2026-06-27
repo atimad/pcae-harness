@@ -2,22 +2,26 @@
 
 ## Current Phase
 
-Phase 88Y.4: Gate Dry-Run Decision Equivalence and Performance Matrix (completed).
+Phase 88Y.5: Project State Shared Evidence Optimization (completed).
 
-Validation and hardening phase for the 88Y.3 GateDryRunContext optimization.
-Fixed None-sentinel memoization bug preventing caching of None-returning
-properties (task_contract, git_porcelain, git_branch, git_ahead_count).
-Expanded test matrix from 20 to 55 tests covering 14 representative scenarios.
-All decision-equivalence invariants verified: gate count (15), gate names/order,
-hard blocks, authorization/enforcement flags, audit/redaction shape.
-Memoization verified: _detect_task_contract 15→1 call, git evidence ≤3 calls
-per invocation. Freshness and no-persistence confirmed across separate
-invocations. No tests deleted/skipped/xfailed. No assertions weakened.
-No production behavior changed beyond sentinel fix. Next: 88Z Advisory
-Operator UX and Workflow Design.
+Extended the 88Y.3/88Y.4 shared evidence model to the five upstream build
+functions (build_memory_snapshot, build_governance_timeline, build_decision_log,
+build_risk_register, build_project_state). Added optional ctx parameter to each;
+GateDryRunContext now passes ctx=self when calling them, eliminating the internal
+cascade inside build_project_state(). Key finding: governance_timeline,
+decision_log, and risk_register each called upstream build functions but never
+used the returned values — these calls are skipped entirely when ctx is provided.
+Also eliminates 4 redundant git subprocess calls in project_state when ctx
+available. Per-call runtime: 9.16s → 3.22s (-65%). Cumulative reduction from
+original (88Y.2): 20.86s → 3.22s (-85%). Added 24 new tests in
+test_project_state_context.py covering decision equivalence (8), memoization
+(7), freshness (2), no-persistence (2), backward compatibility (4), idempotency
+(1). Fixed one test in test_gate_dry_run_context.py to accept new ctx kwarg.
+No gate decisions changed. No output schema changed. No persistent cache added.
+Next: 88Z Advisory Operator UX and Workflow Design.
 
-Fast-green: 3,043 passed / runtime TBD.
-Delivers `docs/PHASE_88_GATE_DRY_RUN_DECISION_EQUIVALENCE_AND_PERFORMANCE_MATRIX.md`.
+Fast-green: 3,027 passed / 178.56s. Full suite: 9,068 passed / 1059s (17:39).
+Delivers `docs/PHASE_88_PROJECT_STATE_SHARED_EVIDENCE_OPTIMIZATION.md`.
 Recommends 88Z.
 
 Advisory hardening phase. Expanded advisory test matrix from 105 to 294
