@@ -18,7 +18,7 @@ not redacted, env|grep read_only, printenv read_only), 3 false positives/conserv
 behaviors (bash blocked, git reset HEAD~1 blocked, semicolon-without-spaces), 1 structural
 inconsistency ("deny" not in BPE_HARD_BLOCK_DECISIONS), and 1 redaction scope limitation
 (broker.requested_command not redacted for secret commands). Fast-green: 2,666 passed /
-25.74s. Quick tier: 7,915 passed / 2:33. Full suite: TBD. Adds
+25.74s. Quick tier: 7,915 passed / 2:33. Full suite: 8,652 passed / 28:57. Adds
 `docs/PHASE_88_BROKER_SHELL_GATE_INTEGRATION_EDGE_CASE_REVIEW.md`. Recommends 88V —
 Broker + Shell Gate Enforcement Boundary Design.
 

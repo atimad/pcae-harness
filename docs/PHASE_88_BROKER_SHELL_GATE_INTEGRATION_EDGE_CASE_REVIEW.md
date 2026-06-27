@@ -373,12 +373,11 @@ Verified by parametrized tests across all non-hard-block commands that:
 |---|---|---|---|
 | Fast-green (`-m fast_green`) | 2,546 | 2,666 | +120 |
 | Quick (`-m "not slow and not phase_closure"`) | 7,807 | 7,915 | +108 |
-| Full suite | 8,532 | TBD | — |
-
-_(Full suite to be confirmed after background run.)_
+| Full suite | 8,532 | 8,652 | +120 |
 
 Fast-green: 2,666 passed / 25.74s.
 Quick tier: 7,915 passed / 2:33.
+Full suite: 8,652 passed / 28:57.
 
 ## 18. Safety Invariants Preserved
 
