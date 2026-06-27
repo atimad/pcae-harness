@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 88X.1 — Idle-State Full Suite Baseline Repair (2026-06-27)
+
+Baseline investigation. Confirmed 185 full-suite failures from 88X were
+not reproducible in idle state. Root cause: active task contract during
+88X run interfered with preflight tests using `subprocess.run` against
+`REPO_ROOT`. Full suite: 8,800 passed / 0 failed in 33:00. No source or
+test changes. Documented fixture pattern for future preflight hardening.
+
 ### 88X — Advisory Mode Prototype (2026-06-27)
 
 Implements the first advisory mode prototype. Adds `pcae advisory check`,

@@ -2,6 +2,19 @@
 
 ## Current Phase
 
+Phase 88X.1: Idle-State Full Suite Baseline Repair (completed).
+
+Baseline investigation phase. Confirmed the 185 full-suite failures from
+88X were not reproducible in idle repository state. Root cause: active
+task contract present during 88X full-suite run caused preflight tests
+(calling `subprocess.run` against `REPO_ROOT`) to encounter unexpected
+scope decisions. After task finish moved the contract to `tasks/done/`,
+the idle state produces 8,800 passed / 0 failed in 33:00.
+
+No test changes. No source changes. Documented fixture pattern for future
+preflight test hardening (tmp_task_root). Fast-green: 2,814 passed / ~23s.
+Full suite: 8,800 passed / 33:00. Recommends proceeding to 88Y.
+
 Phase 88X: Advisory Mode Prototype (completed).
 
 Implements the first advisory mode prototype. Adds `pcae advisory check`,

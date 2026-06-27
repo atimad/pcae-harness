@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88X.1 — Idle-State Full Suite Baseline Repair (20260627-88x1-idle-state-full-suite-baseline-repair)
 - 88X — Advisory Mode Prototype (20260627-88x-advisory-mode-prototype)
 - 88W — Advisory Enforcement Readiness Design (20260627-88w-advisory-enforcement-readiness-design)
 - 88V.1 — Secret Redaction and Deny Mapping Repair (20260627-88v1-secret-redaction-and-deny-mapping-repair)
