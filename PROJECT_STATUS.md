@@ -2,6 +2,39 @@
 
 ## Current Phase
 
+Phase 88V: Broker + Shell Gate Enforcement Boundary Design (completed).
+
+Design-only phase. Defines what must be true before PCAE can move from read-only
+command classification/aggregation into any enforcement, command gating, shell
+wrapping, or execution-control prototype. Explicitly documents that four 88U
+findings (GAP-1: VAR=val secret not redacted; GAP-2: env|grep/printenv secret
+exposure; GAP-3: broker.requested_command raw retention; GAP-4: deny mapping
+inconsistency) block enforcement until repaired. Delivers
+`docs/PHASE_88_BROKER_SHELL_GATE_ENFORCEMENT_BOUNDARY_DESIGN.md` (version 0.1,
+draft_documented, implementation_status=not_started). 30 sections: purpose,
+scope, non-goals, current state from 88T/88U, enforcement terminology (6 terms:
+classification/aggregation/gate/enforcement/advisory-gate/blocking-gate/
+execution-gate/hard-block/redaction/enforcement-blocker), read-only classifier
+boundary, advisory gate boundary, blocking gate boundary, execution gate
+boundary, what PCAE may do now (10 items), what PCAE must not do yet (14 items),
+enforcement preconditions (9 preconditions with blockers), 88U findings as
+enforcement blockers (GAP-1 through GAP-4 with root cause + required repair),
+secret redaction requirements (5 rules covering all broker-visible fields),
+requested_command redaction requirements, env/printenv/VAR=val handling
+requirements, deny mapping consistency requirements (4 rules: explicit mapping,
+hard-block consistency, fail-closed, no dormant mappings), human approval limits
+(7 permanent limits), accepted risk limits (7 permanent limits), hard-block
+non-override rules (7 rules), audit requirements (26-field minimum audit record),
+performed-flag invariants (14 flags unconditionally False), contradiction
+detection requirements (5 rules), CLI output safety requirements (10 rules),
+persistent state/cache restrictions (6 rules), shell wrapper restrictions (9
+rules), disable/rollback strategy (4 requirements), test requirements before
+enforcement (9 test sets with blockers marked), enforcement staging roadmap
+(Stages 0–6 with forbidden shortcuts), recommended next phase (88V.1 — secret
+redaction and deny mapping repair). No source changes. No test changes.
+Fast-green: 2,666 passed / ~26s (unchanged). Recommends 88V.1 — Secret
+Redaction and Deny Mapping Repair.
+
 Phase 88U: Broker + Shell Gate Integration Test Expansion and Edge-Case Review (completed).
 
 Pressure-tests the 88T broker + shell gate integration prototype with 120 new fast-green
