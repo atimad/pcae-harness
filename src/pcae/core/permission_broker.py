@@ -97,7 +97,7 @@ _SG_HARD_BLOCK_TO_BROKER: dict[str, str] = {
     "blocked_by_test_run_lock":          "blocked_by_test_run_lock",
     "blocked_by_unknown_command":        "blocked_by_shell_gate",
     "blocked_by_missing_task":           "blocked_by_task_contract", # promoted from missing-evidence
-    "deny":                              "deny",
+    "deny":                              "blocked_by_shell_gate",
 }
 
 # Shell gate allow-type decisions (never grant execution authorization)
@@ -385,6 +385,7 @@ def build_permission_broker(
     sg_evidence: dict[str, Any] | None = None
     test_run_preflight_required = False
     test_run_clear: bool | None = None
+    secret_detected = False
     if requested_command:
         classification = _classify_command(requested_command)
         command_category = classification["command_category"]
@@ -520,11 +521,18 @@ def build_permission_broker(
         "execution_authorization_not_granted": True,
     }
 
+    # Redact requested_command in the broker envelope when secret_access detected
+    # (GAP-3 repair, 88V.1). The sg_evidence.command_text is already redacted;
+    # the outer envelope field must also be redacted so serialized JSON is safe.
+    safe_requested_command: str | None = requested_command
+    if secret_detected:
+        safe_requested_command = "<redacted_secret_access_command>"
+
     broker: dict[str, Any] = {
         "broker_type": "permission_broker_prototype",
         "requested_action": requested_action,
         "requested_files": files,
-        "requested_command": requested_command,
+        "requested_command": safe_requested_command,
         "source_backend": source_backend,
         "commit_message": commit_message,
         "push_target": push_target,

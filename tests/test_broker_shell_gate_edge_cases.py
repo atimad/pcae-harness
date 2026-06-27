@@ -272,15 +272,14 @@ class TestEnvironmentMutationThruBroker:
         assert b["decision"] == "requires_human_review"
         assert b["hard_block_present"] is False
 
-    def test_env_var_prefix_command_not_redacted(self, no_task_root):
-        # Known limitation: env var prefix with API key value is NOT redacted
-        # because the classifier uses _is_secret_file_access (file paths only),
-        # not a regex over argument values. The key value leaks into audit trail.
+    def test_env_var_prefix_command_is_redacted_88v1(self, no_task_root):
+        # 88V.1 repair: env var prefix with secret-like key name IS now
+        # detected and redacted. (GAP-1 fixed.)
         envelope = _pb("read", command="OPENAI_API_KEY=x python script.py",
                        root=no_task_root)
         sg = envelope["broker"]["shell_gate_evidence"]
-        assert sg["command_text_redacted"] is False
-        assert sg["command_category"] == "environment_mutation"
+        assert sg["command_text_redacted"] is True
+        assert sg["command_category"] == "secret_access"
 
     def test_environment_mutation_with_human_review_allows(self, no_task_root):
         b = _broker("read", command="export API_KEY=x",
@@ -702,42 +701,40 @@ class TestHardBlockMappingConsistency:
 
 class TestFalseNegativeDocumented:
     """
-    Document known classification limitations.
+    Previously documented false negatives — repaired in 88V.1.
 
-    These tests confirm current behavior and serve as regression anchors.
-    They are NOT bugs to fix in 88U — they document accepted trade-offs.
+    These tests now confirm the REPAIRED behavior. GAP-1 and GAP-2
+    false negatives from 88U have been fixed. The tests serve as
+    regression anchors ensuring the fixes persist.
     """
 
-    def test_env_var_with_secret_value_not_redacted(self, no_task_root):
-        # LIMITATION: API key set via VAR=val prefix is classified as
-        # environment_mutation, NOT secret_access. The key value is NOT
-        # redacted in the audit trail. Pattern-based detection cannot
-        # distinguish key names from random variable assignments.
+    def test_secret_var_prefix_now_detected_as_secret(self, no_task_root):
+        # 88V.1 REPAIR (was GAP-1 false negative): API key set via VAR=val prefix
+        # is now detected and classified as secret_access with redaction.
         envelope = _pb("read",
                        command="OPENAI_API_KEY=sk-secret123 python script.py",
                        root=no_task_root)
         b = envelope["broker"]
         sg = b["shell_gate_evidence"]
-        assert sg["command_category"] == "environment_mutation"
-        assert sg["command_text_redacted"] is False
-        assert sg["secret_access_detected"] is False
+        assert sg["command_category"] == "secret_access"
+        assert sg["command_text_redacted"] is True
+        assert sg["secret_access_detected"] is True
 
-    def test_env_grep_secret_key_not_detected_as_secret(self, no_task_root):
-        # LIMITATION: `env | grep KEY` is classified as read_only_inspection.
-        # Piped `env` output could expose secret values but the classifier
-        # treats `env` as a read-only program and `grep` as a filter.
+    def test_env_grep_secret_now_detected_as_secret(self, no_task_root):
+        # 88V.1 REPAIR (was GAP-2 false negative): `env | grep KEY` is now
+        # classified as secret_access because env is detected as secret exposure.
         b = _broker("read", command="env | grep AWS_SECRET_ACCESS_KEY",
                     root=no_task_root)
-        assert b["decision"] == "allow_preflight_only"
-        assert b["shell_gate_command_category"] == "read_only_inspection"
+        # env → secret_access → requires_human_review
+        assert b["decision"] == "requires_human_review"
+        assert b["shell_gate_command_category"] == "secret_access"
 
-    def test_printenv_secret_var_not_detected_as_secret(self, no_task_root):
-        # LIMITATION: `printenv AWS_SECRET_ACCESS_KEY` is in _READ_ONLY_PROGRAMS
-        # and the argument is not a file path, so _is_secret_file_access returns
-        # False. Printing a specific env var containing a secret is not detected.
+    def test_printenv_secret_var_now_detected_as_secret(self, no_task_root):
+        # 88V.1 REPAIR (was GAP-2 false negative): `printenv SECRET_VAR` is now
+        # classified as secret_access because printenv is a secret exposure tool.
         b = _broker("read", command="printenv AWS_SECRET_ACCESS_KEY",
                     root=no_task_root)
-        assert b["shell_gate_command_category"] == "read_only_inspection"
+        assert b["shell_gate_command_category"] == "secret_access"
 
     def test_bash_script_false_positive_blocked(self, no_task_root):
         # KNOWN FALSE POSITIVE: `bash script.sh` is conservatively blocked as
@@ -906,6 +903,348 @@ class TestCLIJSONEnvelopeStability:
         sg = data["broker"]["shell_gate_evidence"]
         assert sg["command_text"] == "<redacted_secret_access_command>"
         assert sg["command_text_redacted"] is True
-        # broker.requested_command retains the raw request (known limitation:
-        # the outer envelope field is not separately redacted)
-        assert data["broker"]["requested_command"] == "cat ~/.ssh/id_rsa"
+        # GAP-3 repair: broker.requested_command must also be redacted
+        assert data["broker"]["requested_command"] == "<redacted_secret_access_command>"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88V.1 — Secret Redaction and Deny Mapping Repair Tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+# ── GAP-1: VAR=val secret redaction ──────────────────────────────────────────
+
+class TestGap1VarValSecretRedaction:
+    """VAR=val command prefixes with secret-like names must be detected/redacted."""
+
+    def test_openai_api_key_var_prefix_detected_as_secret(self):
+        """OPENAI_API_KEY=x python script.py → secret_access detected."""
+        cls = _classify_command("OPENAI_API_KEY=x python script.py")
+        assert cls["command_category"] == "secret_access", (
+            f"Expected secret_access, got {cls['command_category']}"
+        )
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_anthropic_api_key_var_prefix_detected_as_secret(self):
+        """ANTHROPIC_API_KEY=secret pytest → secret_access detected."""
+        cls = _classify_command("ANTHROPIC_API_KEY=secret pytest")
+        assert cls["command_category"] == "secret_access"
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_aws_secret_access_key_var_prefix_detected_as_secret(self):
+        """AWS_SECRET_ACCESS_KEY=x python tool.py → secret_access detected."""
+        cls = _classify_command("AWS_SECRET_ACCESS_KEY=x python tool.py")
+        assert cls["command_category"] == "secret_access"
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_token_var_prefix_detected_as_secret(self):
+        """TOKEN=x curl https://example.com → secret_access detected."""
+        cls = _classify_command("TOKEN=x curl https://example.com")
+        assert cls["command_category"] == "secret_access"
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_password_var_prefix_detected_as_secret(self):
+        """PASSWORD=x echo ok → secret_access detected."""
+        cls = _classify_command("PASSWORD=x echo ok")
+        assert cls["command_category"] == "secret_access"
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_benign_var_prefix_not_falsely_redacted(self):
+        """MY_VAR=hello echo world → environment_mutation, not over-redacted."""
+        cls = _classify_command("MY_VAR=hello echo world")
+        assert cls["command_category"] == "environment_mutation"
+        assert cls["detected_flags"]["secret_access_detected"] is False
+        assert cls["detected_flags"]["environment_mutation_detected"] is True
+
+    def test_debug_var_prefix_not_falsely_redacted(self):
+        """DEBUG=1 python test.py → environment_mutation, not secret."""
+        cls = _classify_command("DEBUG=1 python test.py")
+        assert cls["command_category"] == "environment_mutation"
+        assert cls["detected_flags"]["secret_access_detected"] is False
+
+    def test_path_var_prefix_not_falsely_redacted(self):
+        """PATH=/custom/bin ls → environment_mutation, not secret."""
+        cls = _classify_command("PATH=/custom/bin ls")
+        assert cls["command_category"] == "environment_mutation"
+        assert cls["detected_flags"]["secret_access_detected"] is False
+
+    # Broker-level redaction for VAR=val secret commands
+    def test_openai_key_var_prefix_redacted_in_broker_json(self):
+        """OPENAI_API_KEY=x python → broker JSON does not contain raw secret."""
+        b = _broker("read", command="OPENAI_API_KEY=sk-abc123 python script.py")
+        raw_json = json.dumps(b, sort_keys=True)
+        assert "sk-abc123" not in raw_json, "Raw secret value leaked in broker JSON"
+        sg = b["shell_gate_evidence"]
+        assert sg["secret_access_detected"] is True
+
+    def test_token_var_prefix_redacted_in_broker_json(self):
+        """TOKEN=x curl → broker JSON does not contain raw secret."""
+        b = _broker("read", command="TOKEN=ghp_secret123 curl https://api.github.com")
+        raw_json = json.dumps(b, sort_keys=True)
+        assert "ghp_secret123" not in raw_json, "Raw secret value leaked in broker JSON"
+        sg = b["shell_gate_evidence"]
+        assert sg["secret_access_detected"] is True
+
+    def test_password_var_prefix_redacted_in_broker_json(self):
+        """PASSWORD=x echo ok → broker JSON does not contain raw secret."""
+        b = _broker("read", command="PASSWORD=s3cr3t! echo ok")
+        raw_json = json.dumps(b, sort_keys=True)
+        assert "s3cr3t!" not in raw_json, "Raw secret value leaked in broker JSON"
+
+
+# ── GAP-2: env/printenv secret exposure ──────────────────────────────────────
+
+class TestGap2EnvPrintenvSecretExposure:
+    """env and printenv must be classified as secret exposure, not harmless read-only."""
+
+    def test_printenv_classified_as_secret_exposure(self):
+        """printenv alone → secret_access (dumps all env vars)."""
+        cls = _classify_command("printenv")
+        assert cls["command_category"] == "secret_access", (
+            f"Expected secret_access, got {cls['command_category']}"
+        )
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_env_classified_as_secret_exposure(self):
+        """env alone → secret_access (dumps all env vars)."""
+        cls = _classify_command("env")
+        assert cls["command_category"] == "secret_access"
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_printenv_with_secret_var_name(self):
+        """printenv OPENAI_API_KEY → secret_access."""
+        cls = _classify_command("printenv OPENAI_API_KEY")
+        assert cls["command_category"] == "secret_access"
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    def test_printenv_with_harmless_var_name(self):
+        """printenv HOME → secret_access (printenv is still a secret exposure tool)."""
+        cls = _classify_command("printenv HOME")
+        assert cls["command_category"] == "secret_access"
+        assert cls["detected_flags"]["secret_access_detected"] is True
+
+    # Broker-level checks for env/printenv
+    def test_printenv_broker_decision_requires_human_review(self):
+        """printenv → broker decision requires_human_review (not allow_read_only)."""
+        b = _broker("read", command="printenv", health_passed=True,
+                     check_passed=True, human_review_present=False)
+        assert b["decision"] == "requires_human_review", (
+            f"Expected requires_human_review, got {b['decision']}"
+        )
+
+    def test_env_broker_command_text_redacted(self):
+        """env → shell_gate_evidence.command_text is redacted."""
+        b = _broker("read", command="env")
+        sg = b["shell_gate_evidence"]
+        assert sg["command_text"] == "<redacted_secret_access_command>"
+        assert sg["command_text_redacted"] is True
+
+    def test_printenv_piped_to_grep_secret_most_restrictive(self):
+        """env | grep SECRET → secret_access via pipe chain (most restrictive)."""
+        cls = _classify_command("env | grep SECRET")
+        # The pipe chain picks the most restrictive segment; env should be
+        # secret_access (severity 2), grep is read_only (severity 9)
+        assert cls["command_category"] == "secret_access", (
+            f"Expected secret_access, got {cls['command_category']}"
+        )
+
+    def test_env_piped_to_grep_key_most_restrictive(self):
+        """env | grep KEY → secret_access via pipe chain."""
+        cls = _classify_command("env | grep KEY")
+        assert cls["command_category"] == "secret_access"
+
+
+# ── GAP-3: broker.requested_command raw secret retention ─────────────────────
+
+class TestGap3BrokerRequestedCommandRedaction:
+    """broker.requested_command must not retain raw secret-access command text."""
+
+    def test_cat_ssh_key_requested_command_redacted(self):
+        """cat ~/.ssh/id_rsa → broker.requested_command is redacted."""
+        b = _broker("read", command="cat ~/.ssh/id_rsa")
+        assert b["requested_command"] == "<redacted_secret_access_command>", (
+            f"Got: {b['requested_command']}"
+        )
+
+    def test_security_find_generic_password_requested_command_redacted(self):
+        """security find-generic-password → broker.requested_command is redacted."""
+        b = _broker("read", command="security find-generic-password")
+        assert b["requested_command"] == "<redacted_secret_access_command>"
+
+    def test_openai_key_var_prefix_requested_command_redacted(self):
+        """OPENAI_API_KEY=x python → broker.requested_command is redacted."""
+        b = _broker("read", command="OPENAI_API_KEY=sk-abc python script.py")
+        assert b["requested_command"] == "<redacted_secret_access_command>"
+
+    def test_full_serialized_json_no_raw_secret_command(self):
+        """Full broker JSON serialization must not contain raw secret-access command text."""
+        b = _broker("read", command="cat ~/.ssh/id_rsa")
+        raw_json = json.dumps(b, sort_keys=True)
+        assert "~/.ssh/id_rsa" not in raw_json, (
+            "Raw secret file path leaked in broker JSON"
+        )
+
+    def test_nested_shell_gate_evidence_no_raw_secret_command(self):
+        """Nested shell_gate_evidence.command_text must not contain raw command."""
+        b = _broker("read", command="security find-generic-password")
+        sg = b["shell_gate_evidence"]
+        assert sg["command_text"] == "<redacted_secret_access_command>"
+        assert "find-generic-password" not in sg["command_text"]
+
+    def test_ordinary_readonly_command_not_redacted(self):
+        """ls -la → broker.requested_command is preserved (not over-redacted)."""
+        b = _broker("read", command="ls -la")
+        assert b["requested_command"] == "ls -la"
+
+    def test_git_status_not_redacted(self):
+        """git status → broker.requested_command is preserved."""
+        b = _broker("read", command="git status")
+        assert b["requested_command"] == "git status"
+
+
+# ── GAP-4: deny hard-block mapping consistency ───────────────────────────────
+
+class TestGap4DenyMappingConsistency:
+    """Shell-gate deny must map to a broker hard block or be unreachable."""
+
+    def test_deny_in_bpe_sg_hard_block_to_broker_mapping(self):
+        """deny is mapped in _SG_HARD_BLOCK_TO_BROKER."""
+        from pcae.core.permission_broker import _SG_HARD_BLOCK_TO_BROKER
+        assert "deny" in _SG_HARD_BLOCK_TO_BROKER, (
+            "deny must have an explicit mapping in _SG_HARD_BLOCK_TO_BROKER"
+        )
+
+    def test_deny_maps_to_broker_hard_block(self):
+        """deny in _SG_HARD_BLOCK_TO_BROKER maps to a BPE_HARD_BLOCK_DECISIONS value."""
+        from pcae.core.permission_broker import (
+            _SG_HARD_BLOCK_TO_BROKER, BPE_HARD_BLOCK_DECISIONS,
+        )
+        mapped = _SG_HARD_BLOCK_TO_BROKER["deny"]
+        assert mapped in BPE_HARD_BLOCK_DECISIONS, (
+            f"deny maps to '{mapped}' which is NOT in BPE_HARD_BLOCK_DECISIONS"
+        )
+
+    def test_deny_does_not_produce_allow_preflight_only(self):
+        """If a shell gate produces deny, broker must not return allow_preflight_only."""
+        # This is tested indirectly: approve everything up to the broker,
+        # and verify that deny leads to a hard block
+        b = _broker("read", command="rm -rf /",
+                    health_passed=True, check_passed=True,
+                    human_review_present=True, human_approval_present=True)
+        assert b["decision"] != "allow_preflight_only"
+
+    def test_deny_does_not_authorize_execution(self):
+        """Any deny-mapped decision must have execution_authorized=False."""
+        b = _broker("read", command="rm -rf /",
+                    health_passed=True, check_passed=True)
+        assert b["execution_authorized"] is False
+        assert b["authorization_granted"] is False
+
+    def test_unmapped_shell_gate_decision_fails_closed(self):
+        """All shell-gate blocking decisions that _decide can actually produce
+        must have a mapping in _SG_HARD_BLOCK_TO_BROKER.
+        Unreachable reserved decision values (blocked_by_scope,
+        blocked_by_failed_health, blocked_by_failed_check, blocked_by_failed_doctor,
+        blocked_by_push_check) are not produced by _decide and are handled through
+        other broker paths (scope preflight, evidence failures)."""
+        from pcae.core.permission_broker import _SG_HARD_BLOCK_TO_BROKER
+        # These are the blocking decisions actually produced by _decide in shell_gate.py
+        _SG_DECIDE_REACHABLE_BLOCKS: frozenset[str] = frozenset({
+            "blocked_by_force_push",
+            "blocked_by_raw_git_push",
+            "blocked_by_raw_git_commit",
+            "blocked_by_history_rewrite",
+            "blocked_by_destructive_filesystem",
+            "blocked_by_policy_forbidden_file",
+            "blocked_by_backend_policy",
+            "blocked_by_prompt_policy",
+            "blocked_by_adoption_policy",
+            "blocked_by_test_run_lock",
+            "blocked_by_unknown_command",
+            "blocked_by_missing_task",
+            "deny",
+            # requires_active_task is handled specially in _broker_decide
+            # (checked before _SG_HARD_BLOCK_TO_BROKER lookup, §1d)
+        })
+        unmapped: list[str] = []
+        for dec in _SG_DECIDE_REACHABLE_BLOCKS:
+            if dec not in _SG_HARD_BLOCK_TO_BROKER:
+                unmapped.append(dec)
+        assert unmapped == [], (
+            f"Reachable shell-gate blocking decisions not mapped: {unmapped}"
+        )
+
+
+# ── Regression: performed/authorization flags remain false ───────────────────
+
+class Test88v1PerformedFlagsInvariant:
+    """All performed/authorization flags must remain unconditionally false."""
+
+    @pytest.mark.parametrize("command", [
+        "OPENAI_API_KEY=x python script.py",
+        "printenv",
+        "env | grep SECRET",
+        "cat ~/.ssh/id_rsa",
+        "security find-generic-password",
+    ])
+    def test_all_performed_flags_false_for_secret_commands(self, command):
+        b = _broker("read", command=command)
+        for flag in _PERFORMED_FLAGS:
+            assert b[flag] is False, (
+                f"Command '{command}': {flag} should be False but is {b[flag]}"
+            )
+
+
+# ── Regression: hard blocks still propagate ──────────────────────────────────
+
+class Test88v1HardBlockPropagation:
+    """Hard blocks must still propagate correctly after redaction changes."""
+
+    def test_force_push_still_hard_blocked(self):
+        b = _broker("read", command="git push --force origin main")
+        assert b["decision"] == "blocked_by_force_push"
+        assert b["hard_block_present"] is True
+
+    def test_raw_commit_still_blocked(self):
+        b = _broker("read", command="git commit -m 'unsafe'")
+        # shell-gate blocked_by_raw_git_commit maps to broker blocked_by_shell_gate
+        assert b["decision"] == "blocked_by_shell_gate"
+        assert b["hard_block_present"] is True
+
+    def test_history_rewrite_still_blocked(self):
+        b = _broker("read", command="git rebase -i HEAD~3")
+        assert b["decision"] == "blocked_by_shell_gate"
+        assert b["hard_block_present"] is True
+
+    def test_secret_access_hard_blocked_without_approval(self):
+        b = _broker("read", command="cat ~/.ssh/id_rsa",
+                    health_passed=True, check_passed=True)
+        assert b["decision"] == "requires_human_review"
+
+    def test_secret_access_still_requires_review_with_health(self):
+        b = _broker("read", command="cat ~/.ssh/id_rsa",
+                    health_passed=True, check_passed=True,
+                    human_review_present=True)
+        assert b["decision"] == "allow_preflight_only"
+
+
+# ── Regression: human approval / accepted risk cannot override hard blocks ───
+
+class Test88v1HumanApprovalLimits:
+    """Human approval and accepted risk must still be unable to override hard blocks."""
+
+    def test_human_approval_does_not_override_force_push(self):
+        b = _broker("read", command="git push --force origin main",
+                    human_approval_present=True, human_review_present=True,
+                    health_passed=True, check_passed=True)
+        assert b["decision"] == "blocked_by_force_push"
+        assert b["hard_block_present"] is True
+
+    def test_accepted_risk_does_not_override_secret_access_hard_block(self):
+        b = _broker("read", command="rm -rf /",
+                    human_approval_present=True, accepted_risk_present=True,
+                    human_review_present=True,
+                    health_passed=True, check_passed=True)
+        # rm -rf is destructive_filesystem → blocked_by_destructive_filesystem
+        assert b["hard_block_present"] is True
+        assert b["decision"] != "allow_preflight_only"

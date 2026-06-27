@@ -87,7 +87,7 @@ _READ_ONLY_PROGRAMS: frozenset[str] = frozenset({
     "file", "stat", "du", "df",
     "which", "type", "command",
     "date", "whoami", "id", "hostname", "uname",
-    "env", "printenv",
+    # env/printenv removed — classified as secret_access (GAP-2 repair, 88V.1)
     "diff", "cmp",
     "tree", "exa",
 })
@@ -325,6 +325,21 @@ def _most_restrictive_classification(
     return result
 
 
+# ── Secret-like environment variable name patterns (GAP-1 repair, 88V.1) ────
+_SECRET_VAR_NAME_SUBSTRINGS: tuple[str, ...] = (
+    "KEY", "SECRET", "TOKEN", "PASSWORD", "PASSWD", "CREDENTIAL",
+    "AUTH", "CERT", "PRIVATE_KEY", "ENCRYPT", "SIGNING",
+    "API_KEY", "API_SECRET", "API_TOKEN",
+    "ACCESS_KEY", "SECRET_KEY",
+)
+
+
+def _is_secret_env_var_name(name: str) -> bool:
+    """True if an environment variable name suggests it contains a secret."""
+    upper = name.upper()
+    return any(pat in upper for pat in _SECRET_VAR_NAME_SUBSTRINGS)
+
+
 def _is_secret_file_access(args: list[str]) -> bool:
     """True if any argument looks like a sensitive credential file path."""
     for arg in args:
@@ -350,7 +365,10 @@ def _classify_single(command_text: str) -> dict[str, Any]:
 
     program = tokens[0]
     # Strip leading path components (e.g. /usr/bin/git → git)
-    program = program.rsplit("/", 1)[-1]
+    # Only strip when no '=' present: VAR=val prefixes like PATH=/custom/bin
+    # must not have the path portion of the value stripped. (88V.1)
+    if "=" not in program:
+        program = program.rsplit("/", 1)[-1]
 
     reason_codes: list[str] = []
     flags: dict[str, bool] = {
@@ -634,8 +652,23 @@ def _classify_single(command_text: str) -> dict[str, Any]:
                 "reason_codes": ["shell_source_detected"],
                 "detected_flags": flags}
 
+    # ── env / printenv secret exposure (GAP-2 repair, 88V.1) ──────────────
+    if program in ("env", "printenv"):
+        flags["secret_access_detected"] = True
+        return {"command_category": "secret_access",
+                "reason_codes": ["env_printenv_secret_exposure_detected"],
+                "detected_flags": flags}
+
     # VAR=val cmd prefix: first token is an env-var assignment
     if "=" in program and re.match(r'^[A-Za-z_][A-Za-z0-9_]*=', program):
+        var_name = program.split("=", 1)[0]
+        if _is_secret_env_var_name(var_name):
+            flags["environment_mutation_detected"] = True
+            flags["secret_access_detected"] = True
+            return {"command_category": "secret_access",
+                    "reason_codes": ["env_var_prefix_secret_detected",
+                                     f"secret_var_name:{var_name}"],
+                    "detected_flags": flags}
         flags["environment_mutation_detected"] = True
         return {"command_category": "environment_mutation",
                 "reason_codes": ["env_var_prefix_detected"],

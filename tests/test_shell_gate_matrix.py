@@ -497,13 +497,20 @@ class TestEnvironmentMutation:
         assert _cat(cmd) == "environment_mutation"
 
     @pytest.mark.parametrize("cmd", [
-        "OPENAI_API_KEY=x python script.py",
         "DEBUG=1 python -m pytest",
         "PYTHONPATH=src python script.py",
+    ])
+    def test_env_var_prefix_benign(self, cmd):
+        """Non-secret VAR=val prefixes → environment_mutation."""
+        assert _cat(cmd) == "environment_mutation"
+
+    @pytest.mark.parametrize("cmd", [
+        "OPENAI_API_KEY=x python script.py",
         "API_KEY=abc123 curl https://api.example.com",
     ])
-    def test_env_var_prefix(self, cmd):
-        assert _cat(cmd) == "environment_mutation"
+    def test_env_var_prefix_secret_detected_88v1(self, cmd):
+        """Secret-like VAR=val prefixes → secret_access (88V.1 GAP-1 repair)."""
+        assert _cat(cmd) == "secret_access"
 
     @pytest.mark.parametrize("cmd", [
         "source ~/.zshrc",
@@ -523,14 +530,16 @@ class TestEnvironmentMutation:
         assert _dec("export API_KEY=secret") == "requires_human_review"
 
     def test_env_var_prefix_decision(self):
+        # 88V.1: secret-like VAR=val prefixes → secret_access → requires_human_review
         assert _dec("OPENAI_API_KEY=x python script.py") == "requires_human_review"
 
-    def test_printenv_is_read_only(self):
-        # printenv reads environment; not a write — read_only is correct
-        assert _cat("printenv") == "read_only_inspection"
+    def test_printenv_is_secret_exposure_88v1(self):
+        # 88V.1 GAP-2 repair: printenv dumps all env vars → secret_access
+        assert _cat("printenv") == "secret_access"
 
-    def test_env_no_args_is_read_only(self):
-        assert _cat("env") == "read_only_inspection"
+    def test_env_no_args_is_secret_exposure_88v1(self):
+        # 88V.1 GAP-2 repair: env dumps all env vars → secret_access
+        assert _cat("env") == "secret_access"
 
 
 # ── 15. Category matrix: unknown ─────────────────────────────────────────
@@ -830,15 +839,15 @@ class TestFalsePositiveReview:
         assert result["command_category"] in ("read_only_inspection", "filesystem_write",
                                                "policy_forbidden_file_mutation")
 
-    def test_env_without_assignment_read_only(self):
-        # 'env python script.py' — env with args is NOT an env-var assignment
-        # The token 'env' is in _READ_ONLY_PROGRAMS, so it's read_only.
-        # Acceptable: may be conservative but not dangerously permissive.
-        assert _cat("env python script.py") == "read_only_inspection"
+    def test_env_with_args_is_secret_exposure_88v1(self):
+        # 88V.1 GAP-2 repair: 'env python script.py' — env is now classified
+        # as secret_access. Previously was read_only (false negative).
+        assert _cat("env python script.py") == "secret_access"
 
-    def test_printenv_grep_read_only(self):
-        # Reading env vars is read-only; displaying them is not a write.
-        assert _cat("printenv | grep KEY") == "read_only_inspection"
+    def test_printenv_grep_secret_exposure_88v1(self):
+        # 88V.1 GAP-2 repair: printenv | grep KEY — pipe chain picks most
+        # restrictive segment; printenv → secret_access wins.
+        assert _cat("printenv | grep KEY") == "secret_access"
 
     def test_git_fetch_read_only(self):
         # git fetch is in the read-only list (doesn't modify working tree).

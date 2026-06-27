@@ -2,6 +2,27 @@
 
 ## Current Phase
 
+Phase 88V.1: Secret Redaction and Deny Mapping Repair (completed).
+
+Enforcement-readiness repair phase. Repairs the four enforcement blockers
+identified in 88U and formalized in 88V:
+- GAP-1: VAR=val secret redaction — secret-like VAR=val prefixes now detected
+  and redacted (KEY, SECRET, TOKEN, PASSWORD, CREDENTIAL, AUTH, CERT, etc.)
+- GAP-2: env/printenv secret exposure — env and printenv now classified as
+  secret_access (removed from read-only programs)
+- GAP-3: broker.requested_command raw retention — requested_command now
+  redacted when secret_access detected, including in serialized JSON
+- GAP-4: deny mapping inconsistency — shell-gate deny now maps to
+  blocked_by_shell_gate (a BPE_HARD_BLOCK_DECISIONS member)
+
+No enforcement implemented. No shell interception. No shell wrappers. No
+backend invocation. All performed/authorization flags remain false. 43 new
+fast-green tests added. Delivers
+`docs/PHASE_88_SECRET_REDACTION_AND_DENY_MAPPING_REPAIR.md` and source
+changes to `src/pcae/core/shell_gate.py` and
+`src/pcae/core/permission_broker.py`. Fast-green: 2,709 passed / ~23s
+(up from 2,666). Recommends 88W — Advisory Enforcement Readiness Design.
+
 Phase 88V: Broker + Shell Gate Enforcement Boundary Design (completed).
 
 Design-only phase. Defines what must be true before PCAE can move from read-only
