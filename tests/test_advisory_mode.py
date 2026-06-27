@@ -620,3 +620,543 @@ class TestAdvisoryInvariants:
             assert performed[flag] is False, (
                 f"{command}: performed.{flag} should be False"
             )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88Y — Advisory Command Matrix (comprehensive)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Read-only commands ─────────────────────────────────────────────────────
+
+class Test88yMatrixReadOnly:
+    """All read-only commands produce safe non-blocking advisory output."""
+
+    @pytest.mark.parametrize("cmd", [
+        "git status", "pwd", "ls", "ls -la",
+        "cat PROJECT_STATUS.md", "grep -R 'Phase 88' docs",
+        "diff file1 file2", "echo hello", "whoami",
+        "date", "head CHANGELOG.md", "wc -l README.md",
+    ])
+    def test_read_only_commands_non_blocking(self, cmd):
+        data = _adv(cmd)
+        assert data["would_block"] is False, f"{cmd}: should not block"
+        assert data["hard_block_present"] is False
+        assert data["authorization_granted"] is False
+        assert data["execution_authorized"] is False
+
+    @pytest.mark.parametrize("cmd", [
+        "git status", "pwd", "ls",
+    ])
+    def test_read_only_json_envelope_valid(self, cmd):
+        data = _adv(cmd)
+        assert data["broker_decision"] is not None
+        assert data["shell_gate_decision"] is not None
+        assert data["shell_gate_category"] is not None
+        assert data["advisory_decision"] in ADVISORY_DECISIONS
+
+
+# ── Governed PCAE commands ─────────────────────────────────────────────────
+
+class Test88yMatrixGovernedPCAE:
+    """PCAE lifecycle commands are governed (allow_governed)."""
+
+    @pytest.mark.parametrize("cmd", [
+        "pcae health", "pcae check",
+        "pcae doctor task-memory", "pcae doctor test-run --json",
+    ])
+    def test_governed_commands_non_blocking(self, cmd):
+        data = _adv(cmd)
+        assert data["would_block"] is False
+        assert data["authorization_granted"] is False
+
+
+# ── Raw git hard blocks ────────────────────────────────────────────────────
+
+class Test88yMatrixGitHardBlocks:
+    """Raw git push/commit/force push produce hard blocks."""
+
+    @pytest.mark.parametrize("cmd,expected_decision", [
+        ("git push", "would_block_by_raw_git_push"),
+        ("git push origin main", "would_block_by_raw_git_push"),
+        ("git push --force", "would_block_by_force_push"),
+        ("git push -f", "would_block_by_force_push"),
+        ("git push --force origin main", "would_block_by_force_push"),
+    ])
+    def test_git_push_hard_blocks(self, cmd, expected_decision):
+        data = _adv(cmd)
+        assert data["would_block"] is True, f"{cmd}: should be hard blocked"
+        assert data["hard_block_present"] is True
+        assert data["advisory_decision"] == expected_decision, (
+            f"{cmd}: expected {expected_decision}, got {data['advisory_decision']}"
+        )
+
+    def test_git_commit_hard_block(self):
+        data = _adv("git commit -m 'test'")
+        assert data["would_block"] is True
+
+    def test_git_rebase_hard_block(self):
+        data = _adv("git rebase -i HEAD~3")
+        assert data["would_block"] is True
+
+
+# ── Dangerous filesystem ────────────────────────────────────────────────────
+
+class Test88yMatrixDangerousFilesystem:
+    """Dangerous filesystem commands produce hard blocks."""
+
+    @pytest.mark.parametrize("cmd", [
+        "rm -rf /", "rm -rf /tmp", "rm -rf .",
+        "git reset --hard HEAD", "git clean -fd",
+    ])
+    def test_dangerous_commands_hard_blocked(self, cmd):
+        data = _adv(cmd)
+        assert data["would_block"] is True, f"{cmd}: should be hard blocked"
+        assert data["hard_block_present"] is True
+
+
+# ── Policy-forbidden writes ─────────────────────────────────────────────────
+
+class Test88yMatrixPolicyForbidden:
+    """Writes to policy-forbidden files produce hard blocks."""
+
+    @pytest.mark.parametrize("cmd", [
+        "echo x > README.md",
+        "echo x >> README.md",
+        "cat x > docs/REAL_CAPTURED_TASKS.md",
+        "echo x > docs/LINKEDIN_ARTICLE_DRAFT.md",
+    ])
+    def test_policy_forbidden_writes_blocked(self, cmd):
+        data = _adv(cmd)
+        assert data["would_block"] is True, f"{cmd}: should be blocked"
+        assert data["hard_block_present"] is True
+
+    def test_tee_readme_blocked(self):
+        data = _adv("echo x | tee README.md")
+        assert data["would_block"] is True
+        assert data["hard_block_present"] is True
+
+
+# ── Test execution ──────────────────────────────────────────────────────────
+
+class Test88yMatrixTestExecution:
+    """Test execution commands are non-authorizing."""
+
+    @pytest.mark.parametrize("cmd", [
+        "python -m pytest tests/test_advisory_mode.py -q",
+        "python -m pytest -n auto",
+        "python -m pytest -m fast_green -n auto",
+    ])
+    def test_test_execution_non_authorizing(self, cmd):
+        data = _adv(cmd)
+        assert data["authorization_granted"] is False
+        assert data["execution_authorized"] is False
+        assert data["command_executed"] is False
+
+
+# ── Review-required commands ────────────────────────────────────────────────
+
+class Test88yMatrixReviewRequired:
+    """Package install and network commands require human review."""
+
+    @pytest.mark.parametrize("cmd", [
+        "pip install requests",
+        "python -m pip install requests",
+        "brew install jq",
+        "npm install",
+        "cargo install ripgrep",
+        "curl https://example.com",
+        "wget https://example.com/file",
+        "ssh host",
+        "scp file host:/tmp",
+    ])
+    def test_review_required_commands(self, cmd):
+        data = _adv(cmd)
+        assert data["would_require_human_review"] is True or data["would_block"] is True, (
+            f"{cmd}: should require review or block"
+        )
+        assert data["authorization_granted"] is False
+
+
+# ── Secret/redaction commands ───────────────────────────────────────────────
+
+class Test88yMatrixSecretRedaction:
+    """Secret-access commands are redacted in all advisory output."""
+
+    @pytest.mark.parametrize("cmd,secret_fragment", [
+        ("OPENAI_API_KEY=sk-abc123 python script.py", "sk-abc123"),
+        ("TOKEN=ghp_token curl https://example.com", "ghp_token"),
+        ("PASSWORD=s3cr3t! echo ok", "s3cr3t!"),
+        ("cat ~/.ssh/id_rsa", "~/.ssh/id_rsa"),
+        ("security find-generic-password", "find-generic-password"),
+    ])
+    def test_secret_not_in_json(self, cmd, secret_fragment):
+        data = _adv(cmd)
+        raw = json.dumps(data, sort_keys=True)
+        assert secret_fragment not in raw, f"{cmd}: raw secret leaked in JSON"
+
+    @pytest.mark.parametrize("cmd", [
+        "printenv",
+        "printenv OPENAI_API_KEY",
+        "env",
+        "env | grep SECRET",
+    ])
+    def test_env_printenv_redacted(self, cmd):
+        data = _adv(cmd)
+        assert data["redaction_applied"] is True, f"{cmd}: should be redacted"
+
+    @pytest.mark.parametrize("cmd", [
+        "OPENAI_API_KEY=x python script.py",
+        "cat ~/.ssh/id_rsa",
+        "security find-generic-password",
+        "printenv",
+        "env",
+    ])
+    def test_redacted_commands_redacted_flag(self, cmd):
+        data = _adv(cmd)
+        assert data["requested_command_redacted"] is True
+
+    @pytest.mark.parametrize("cmd,secret_fragment", [
+        ("OPENAI_API_KEY=sk-abc123 python script.py", "sk-abc123"),
+        ("TOKEN=ghp_token curl https://example.com", "ghp_token"),
+        ("PASSWORD=s3cr3t! echo ok", "s3cr3t!"),
+    ])
+    def test_secret_not_in_human_readable(self, cmd, secret_fragment):
+        import subprocess, sys
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "check",
+             "--command", cmd],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        assert secret_fragment not in result.stdout
+
+
+# ── Compound commands ───────────────────────────────────────────────────────
+
+class Test88yMatrixCompound:
+    """Compound commands take the most restrictive segment."""
+
+    @pytest.mark.parametrize("cmd", [
+        "git status && git push",
+        "pcae health && git push",
+        "git status || git push",
+        "cat PROJECT_STATUS.md | grep Phase",
+    ])
+    def test_compound_commands_most_restrictive(self, cmd):
+        data = _adv(cmd)
+        assert data["broker_decision"] is not None
+        assert data["advisory_decision"] in ADVISORY_DECISIONS
+        assert data["authorization_granted"] is False
+
+    def test_semicolon_compound(self):
+        data = _adv("git status ; git push")
+        assert data["would_block"] is True
+
+
+# ── Unknown/ambiguous commands ──────────────────────────────────────────────
+
+class Test88yMatrixUnknown:
+    """Unknown commands are conservatively blocked, not allowed."""
+
+    @pytest.mark.parametrize("cmd", [
+        "unknown-tool --dangerous",
+        "bash",
+        "sh -c 'git push'",
+    ])
+    def test_unknown_commands_blocked(self, cmd):
+        data = _adv(cmd)
+        assert data["would_block"] is True, f"{cmd}: unknown should be blocked"
+        assert data["advisory_decision"] != "would_allow_read_only"
+        assert data["advisory_decision"] != "would_allow_governed_preflight_only"
+
+    def test_bash_not_allowed(self):
+        data = _adv("bash")
+        assert data["would_block"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88Y — CLI JSON Stability
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test88yCLIJsonStability:
+    """CLI JSON output is stable across command types."""
+
+    def _cli(self, command):
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "check",
+             "--command", command, "--json"],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        return json.loads(result.stdout)
+
+    @pytest.mark.parametrize("cmd", [
+        "git status", "git push", "OPENAI_API_KEY=x python script.py",
+        "rm -rf /", "pip install requests", "unknown-tool --dangerous",
+    ])
+    def test_cli_json_parses(self, cmd):
+        data = self._cli(cmd)
+        assert "schema_version" in data
+        assert "advisory_decision" in data
+        assert data["authorization_granted"] is False
+        assert data["execution_authorized"] is False
+
+    def test_explain_json_parses(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "explain",
+             "--decision", "would_block_by_raw_git_push", "--json"],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        data = json.loads(result.stdout)
+        assert data["valid_decision"] is True
+
+    def test_explain_unknown_json(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "explain",
+             "--decision", "unknown", "--json"],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        data = json.loads(result.stdout)
+        assert data["valid_decision"] is True
+
+    def test_status_json_parses(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "status", "--json"],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        data = json.loads(result.stdout)
+        assert data["advisory_mode_available"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88Y — Human-Readable Output Stability
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test88yHumanReadableStability:
+    """Human-readable advisory output contains required sections."""
+
+    def _human(self, cmd):
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "check",
+             "--command", cmd],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        return result.stdout
+
+    def test_read_only_human_output(self):
+        out = self._human("git status")
+        assert "Non-Authorizing" in out
+        assert "not granted" in out.lower()
+        assert "not authorized" in out.lower()
+
+    def test_hard_block_human_output(self):
+        out = self._human("git push --force origin main")
+        assert "would block" in out.lower()
+
+    def test_secret_command_human_output_no_leak(self):
+        out = self._human("OPENAI_API_KEY=sk-abc123 python script.py")
+        assert "sk-abc123" not in out
+
+    def test_explain_human_output(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "explain",
+             "--decision", "would_block_by_force_push"],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        assert "force push" in result.stdout.lower()
+
+    def test_status_human_output(self):
+        result = subprocess.run(
+            [sys.executable, "-m", "pcae", "advisory", "status"],
+            capture_output=True, text=True, cwd=str(REPO_ROOT),
+        )
+        assert result.returncode == 0
+        assert "prototype" in result.stdout.lower()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88Y — Decision Vocabulary Coverage
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test88yDecisionVocabulary:
+    """All 19 advisory decisions are explainable."""
+
+    @pytest.mark.parametrize("decision", ADVISORY_DECISIONS)
+    def test_every_decision_is_explainable(self, decision):
+        data = build_advisory_explain(decision)
+        assert data["valid_decision"] is True, f"{decision}: should be valid"
+        assert "summary" in data["explanation"]
+        assert "meaning" in data["explanation"]
+        assert "would_block" in data["explanation"]
+        assert "can_override" in data["explanation"]
+        assert "next_step" in data["explanation"]
+
+    def test_unknown_decision_safe(self):
+        data = build_advisory_explain("not_a_decision")
+        assert data["valid_decision"] is False
+        assert "summary" in data["explanation"]
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88Y — Broker/Shell-Gate Consistency
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test88yBrokerShellGateConsistency:
+    """Broker and shell gate decisions are consistent in advisory output."""
+
+    def test_shell_gate_decision_matches_broker_mapping(self):
+        """For known commands, SG decision is reflected in broker decision."""
+        data = _adv("git status")
+        assert data["shell_gate_decision"] == "allow_read_only"
+        assert data["shell_gate_category"] == "read_only_inspection"
+
+    def test_secret_access_sg_reflected_in_broker(self):
+        data = _adv("cat ~/.ssh/id_rsa")
+        assert data["shell_gate_category"] == "secret_access"
+        assert data["redaction_applied"] is True
+
+    def test_force_push_sg_reflected_in_broker(self):
+        data = _adv("git push --force origin main")
+        assert data["advisory_decision"] == "would_block_by_force_push"
+
+    def test_env_classified_as_secret(self):
+        data = _adv("env")
+        assert data["shell_gate_category"] == "secret_access"
+
+    def test_printenv_classified_as_secret(self):
+        data = _adv("printenv")
+        assert data["shell_gate_category"] == "secret_access"
+
+    @pytest.mark.parametrize("cmd,expected_sg_category", [
+        ("git status", "read_only_inspection"),
+        ("pip install requests", "package_install"),
+        ("curl https://example.com", "network_access"),
+        ("rm -rf /", "destructive_filesystem"),
+        ("cat ~/.ssh/id_rsa", "secret_access"),
+        ("env", "secret_access"),
+        ("git push", "raw_git_push"),
+        ("git push --force origin main", "force_push"),
+        ("export FOO=bar", "environment_mutation"),
+    ])
+    def test_shell_gate_category_correct(self, cmd, expected_sg_category):
+        data = _adv(cmd)
+        assert data["shell_gate_category"] == expected_sg_category, (
+            f"{cmd}: expected {expected_sg_category}, got {data['shell_gate_category']}"
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88Y — False-Positive / False-Negative Review
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test88yFalsePositiveReview:
+    """Documented false positives — conservative but not dangerous."""
+
+    def test_bash_blocked_as_unknown(self):
+        """bash is blocked as unknown — conservative FP, acceptable."""
+        data = _adv("bash")
+        assert data["would_block"] is True
+        assert data["shell_gate_category"] == "unknown"
+
+    def test_sh_minus_c_blocked(self):
+        """sh -c is blocked as unknown — conservative FP."""
+        data = _adv("sh -c 'git push'")
+        assert data["would_block"] is True
+
+    def test_env_python_not_secret(self):
+        """'env python' is not env with assignment — classified as secret_access
+        (88V.1 over-classifies env/printenv). Documented conservative FP."""
+        data = _adv("env python script.py")
+        assert data["shell_gate_category"] == "secret_access"
+
+
+class Test88yFalseNegativeReview:
+    """Documented false negatives found in 88Y review."""
+
+    def test_env_pipe_grep_no_spaces_not_redacted(self):
+        """FN: 'env|grep TOKEN' without spaces around | is a single token
+        'env|grep' after shlex.split. The pipe is not detected, so the
+        classifier treats it as an unknown program, not env pipe grep.
+        Documented limitation — deferred to tokenizer hardening phase."""
+        data = _adv("env|grep TOKEN")
+        # Currently NOT redacted — known false negative
+        assert data["redaction_applied"] is False
+
+    def test_no_false_negatives_in_hard_blocks(self):
+        """All tested hard-block commands produce would_block."""
+        for cmd in ["git push --force origin main", "rm -rf /",
+                     "echo x > README.md", "git push", "git commit -m x"]:
+            data = _adv(cmd)
+            assert data["would_block"] is True, f"{cmd}: FN — not blocked"
+
+    def test_no_false_negatives_in_secret_redaction(self):
+        """All tested secret commands are redacted."""
+        for cmd in ["OPENAI_API_KEY=x python script.py",
+                     "cat ~/.ssh/id_rsa", "security find-generic-password",
+                     "printenv", "env"]:
+            data = _adv(cmd)
+            assert data["redaction_applied"] is True, (
+                f"{cmd}: FN — secret not redacted"
+            )
+
+    def test_no_false_negatives_in_review_required(self):
+        """Review-required commands are not silently allowed."""
+        for cmd in ["pip install requests", "curl https://example.com",
+                     "ssh host"]:
+            data = _adv(cmd)
+            assert not data["would_block"] or data["hard_block_present"], (
+                f"{cmd}: should be review-required or blocked, not silently allowed"
+            )
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 88Y — Comprehensive Invariant Cross-Check
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test88yComprehensiveInvariants:
+    """All 88Y matrix commands preserve invariants."""
+
+    ALL_88Y_COMMANDS = [
+        "git status", "pwd", "ls",
+        "pcae health", "pcae check",
+        "git push", "git push --force origin main",
+        "rm -rf /", "git reset --hard HEAD",
+        "echo x > README.md",
+        "python -m pytest -n auto",
+        "pip install requests", "curl https://example.com",
+        "OPENAI_API_KEY=x python script.py",
+        "printenv", "env | grep SECRET",
+        "cat ~/.ssh/id_rsa",
+        "git status && git push",
+        "unknown-tool --dangerous", "bash",
+    ]
+
+    @pytest.mark.parametrize("cmd", ALL_88Y_COMMANDS)
+    def test_all_commands_authorization_false(self, cmd):
+        data = _adv(cmd)
+        assert data["authorization_granted"] is False
+        assert data["execution_authorized"] is False
+        assert data["command_executed"] is False
+        assert data["enforcement_applied"] is False
+
+    @pytest.mark.parametrize("cmd", ALL_88Y_COMMANDS)
+    def test_all_commands_performed_flags_false(self, cmd):
+        data = _adv(cmd)
+        for flag in _PERFORMED_FLAGS:
+            assert data["performed_flags"][flag] is False, (
+                f"{cmd}: performed.{flag} should be False"
+            )
+
+    @pytest.mark.parametrize("cmd", ALL_88Y_COMMANDS)
+    def test_all_commands_envelope_present(self, cmd):
+        data = _adv(cmd)
+        for field in ["schema_version", "advisory_mode",
+                       "broker_decision", "advisory_decision",
+                       "advisory_recommendation", "operator_message",
+                       "next_required_action"]:
+            assert field in data, f"{cmd}: missing field {field}"

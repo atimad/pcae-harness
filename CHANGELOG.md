@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 88Y — Advisory Mode Test Matrix and CLI Stability Review (2026-06-27)
+
+Advisory hardening. Expanded test matrix from 105 to 294 fast-green tests
+(+189) across 10 command categories. CLI JSON stability, human-readable
+output, decision vocabulary (all 19 values), broker/shell-gate consistency,
+and false-positive/false-negative review completed. One FN documented
+(env|grep without spaces). No source defects. Fast-green: 3,003/22.73s.
+
 ### 88X.2 — Validation Runtime Budget and Test Tier Rebalancing (2026-06-27)
 
 Profiling and documentation phase. Fast-green (2,814/24s) and quick tier

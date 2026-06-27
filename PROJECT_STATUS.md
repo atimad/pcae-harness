@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 88Y: Advisory Mode Test Matrix and CLI Stability Review (completed).
+
+Advisory hardening phase. Expanded advisory test matrix from 105 to 294
+fast-green tests (+189) across 10 command categories: read-only, governed
+PCAE, git hard blocks, dangerous filesystem, policy-forbidden writes,
+test execution, review-required, secret redaction, compound, and unknown.
+CLI JSON stability, human-readable output, decision vocabulary (all 19
+values), broker/shell-gate consistency, and false-positive/false-negative
+review completed. One false negative documented: `env|grep TOKEN` without
+spaces around `|` (shlex.split tokenizer limitation). No source defects
+found. No enforcement, shell interception, or backend invocation.
+
+Fast-green: 3,003 passed / 22.73s (up from 2,814). Delivers
+`docs/PHASE_88_ADVISORY_MODE_TEST_MATRIX.md`. Recommends 88Y.1.
+
 Phase 88X.2: Validation Runtime Budget and Test Tier Rebalancing (completed).
 
 Profiling and documentation phase. All three test tiers profiled and
