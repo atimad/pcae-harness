@@ -2,6 +2,20 @@
 
 ## Current Phase
 
+Phase 88Y.1: CLI Subprocess Runtime Reduction (completed).
+
+Test optimization phase. Converted test_phase87_integration.py from
+subprocess-based CLI calls to direct function calls (`build_gate_dry_run()`,
+`build_artifact_index()`, etc.), eliminating Python startup overhead.
+Individual test improvements: gate_dry_run_deterministic 304s→255s.
+Full suite: 8,956 passed, 34 pre-existing scope/preflight failures in
+34:16. Key finding: `build_gate_dry_run()` itself dominates runtime
+(30-120s/call) — further reduction requires production source optimization.
+
+No tests deleted/skipped/xfailed. No production behavior changed.
+Fast-green: 3,003 passed / 24.32s. Delivers
+`docs/PHASE_88_CLI_SUBPROCESS_RUNTIME_REDUCTION.md`. Recommends 88Z.
+
 Phase 88Y: Advisory Mode Test Matrix and CLI Stability Review (completed).
 
 Advisory hardening phase. Expanded advisory test matrix from 105 to 294

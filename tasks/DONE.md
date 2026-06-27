@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88Y.1 — CLI Subprocess Runtime Reduction (20260627-88y1-cli-subprocess-runtime-reduction)
 - 88Y — Advisory Mode Test Matrix and CLI Stability Review (20260627-88y-advisory-mode-test-matrix)
 - 88X.2 — Validation Runtime Budget and Test Tier Rebalancing (20260627-88x2-validation-runtime-budget-and-test-tier-rebalancing)
 - 88X.1 — Idle-State Full Suite Baseline Repair (20260627-88x1-idle-state-full-suite-baseline-repair)

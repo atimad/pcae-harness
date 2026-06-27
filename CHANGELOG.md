@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### 88Y.1 — CLI Subprocess Runtime Reduction (2026-06-27)
+
+Test optimization. Converted test_phase87_integration.py from subprocess
+CLI calls to direct function calls. Individual improvements up to 16%.
+Full suite: 8,956 passed / 34:16. build_gate_dry_run() identified as
+dominant bottleneck. No production changes, no test deletion.
+
 ### 88Y — Advisory Mode Test Matrix and CLI Stability Review (2026-06-27)
 
 Advisory hardening. Expanded test matrix from 105 to 294 fast-green tests
