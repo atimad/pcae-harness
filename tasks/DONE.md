@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 88V — Broker + Shell Gate Enforcement Boundary Design (20260627-0233-88v-broker-shell-gate-enforcement-boundary-design)
 - 88U — Broker + Shell Gate Integration Test Expansion and Edge-Case Review (20260627-0133-88u-broker-shell-gate-integration-test-expansion-and-edge-case-review)
 - 88T — Broker + Shell Gate Integration Prototype (20260626-2130-88t-broker-shell-gate-integration-prototype)
 - 88S — Broker + Shell Gate Integration Design (20260626-2032-88s-broker-shell-gate-integration-design)
