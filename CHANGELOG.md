@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### 88X — Advisory Mode Prototype (2026-06-27)
+
+Implements the first advisory mode prototype. Adds `pcae advisory check`,
+`pcae advisory explain`, and `pcae advisory status` — non-authorizing commands
+that wrap broker + shell gate infrastructure and produce would-* advisory
+decisions. New core mapper in `src/pcae/core/advisory.py` maps all 25 broker
+decisions to 19 advisory decisions. CLI handlers in `src/pcae/commands/advisory.py`.
+105 fast-green tests in `tests/test_advisory_mode.py`. All invariants preserved:
+no command execution, shell interception, wrappers, backend invocation, or
+authorization. 88V.1 secret redaction and hard-block preservation maintained.
+Fast-green: 2,814 passed (up from 2,709).
+
 ### 88W — Advisory Enforcement Readiness Design (2026-06-27)
 
 Design-only phase. Defines PCAE's advisory enforcement readiness layer.

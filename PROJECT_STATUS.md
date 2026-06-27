@@ -2,6 +2,27 @@
 
 ## Current Phase
 
+Phase 88X: Advisory Mode Prototype (completed).
+
+Implements the first advisory mode prototype. Adds `pcae advisory check`,
+`pcae advisory explain`, and `pcae advisory status`. Advisory mode wraps
+existing broker + shell gate infrastructure and produces non-authorizing
+would-* advisory decisions. 19-value advisory decision vocabulary mapping
+from all 25 broker decisions. JSON and human-readable output with full
+88V.1 secret redaction and hard-block preservation.
+
+New files: `src/pcae/core/advisory.py` (core mapper),
+`src/pcae/commands/advisory.py` (CLI handlers),
+`tests/test_advisory_mode.py` (105 fast-green tests),
+`docs/PHASE_88_ADVISORY_MODE_PROTOTYPE.md`.
+CLI registration in `src/pcae/cli.py`.
+
+All invariants preserved: no command execution, no shell interception,
+no shell wrappers, no backend invocation, no authorization, all 14
+performed flags unconditionally false. Fast-green: 2,814 passed / ~25s
+(up from 2,709). Recommends 88Y — Advisory Mode Test Matrix and CLI
+Stability Review.
+
 Phase 88W: Advisory Enforcement Readiness Design (completed).
 
 Design-only phase. Defines PCAE's advisory enforcement readiness layer —

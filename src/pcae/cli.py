@@ -405,6 +405,11 @@ from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
 from pcae.commands.shell_gate import run_shell_gate_check
 from pcae.commands.permission_broker import run_permission_broker_evaluate
+from pcae.commands.advisory import (
+    run_advisory_check,
+    run_advisory_explain,
+    run_advisory_status,
+)
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.mutation_preflight import run_mutation_preflight
@@ -4678,6 +4683,92 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON broker decision output.",
     )
     pb_evaluate_parser.set_defaults(handler=run_permission_broker_evaluate)
+
+    # ── pcae advisory (Phase 88X) ─────────────────────────────────────────
+    advisory_parser = subparsers.add_parser(
+        "advisory",
+        help="Non-authorizing advisory mode — presents would-* decisions (Phase 88X prototype).",
+    )
+    advisory_subparsers = advisory_parser.add_subparsers(
+        dest="advisory_command", required=True,
+    )
+
+    advisory_check_parser = advisory_subparsers.add_parser(
+        "check",
+        help="Evaluate a proposed command through advisory mode (never executes).",
+    )
+    advisory_check_parser.add_argument(
+        "--command", "-c",
+        metavar="CMD",
+        required=True,
+        help="Shell command text to evaluate (not executed).",
+    )
+    advisory_check_parser.add_argument(
+        "--action", "-a",
+        metavar="ACTION",
+        help="Override the requested action (default: read).",
+    )
+    advisory_check_parser.add_argument(
+        "--health-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae health check passed.",
+    )
+    advisory_check_parser.add_argument(
+        "--check-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae check passed.",
+    )
+    advisory_check_parser.add_argument(
+        "--human-review-present",
+        action="store_true",
+        help="Human review evidence is present.",
+    )
+    advisory_check_parser.add_argument(
+        "--human-approval-present",
+        action="store_true",
+        help="Human approval evidence is present.",
+    )
+    advisory_check_parser.add_argument(
+        "--accepted-risk-present",
+        action="store_true",
+        help="Accepted risk evidence is present.",
+    )
+    advisory_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON advisory output.",
+    )
+    advisory_check_parser.set_defaults(handler=run_advisory_check)
+
+    advisory_explain_parser = advisory_subparsers.add_parser(
+        "explain",
+        help="Explain an advisory decision value.",
+    )
+    advisory_explain_parser.add_argument(
+        "--decision", "-d",
+        metavar="DECISION",
+        required=True,
+        help="Advisory decision to explain.",
+    )
+    advisory_explain_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON explanation.",
+    )
+    advisory_explain_parser.set_defaults(handler=run_advisory_explain)
+
+    advisory_status_parser = advisory_subparsers.add_parser(
+        "status",
+        help="Report advisory prototype status and invariants.",
+    )
+    advisory_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON status.",
+    )
+    advisory_status_parser.set_defaults(handler=run_advisory_status)
 
     preflight_parser = subparsers.add_parser(
         "preflight",
