@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### 88X.2 — Validation Runtime Budget and Test Tier Rebalancing (2026-06-27)
+
+Profiling and documentation phase. Fast-green (2,814/24s) and quick tier
+(8,063/2:26) within targets. Full suite (8,800/33:00) bottleneck documented:
+737 subprocess-heavy slow tests. Marker policy, security-critical coverage,
+active-task interference risk, and changed-test accelerator options documented.
+No tests deleted/skipped/xfailed. No source changes.
+
 ### 88X.1 — Idle-State Full Suite Baseline Repair (2026-06-27)
 
 Baseline investigation. Confirmed 185 full-suite failures from 88X were

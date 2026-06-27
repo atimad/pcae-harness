@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 88X.2: Validation Runtime Budget and Test Tier Rebalancing (completed).
+
+Profiling and documentation phase. All three test tiers profiled and
+documented. Fast-green (2,814 tests / 24s) and quick tier (8,063 tests /
+2:26) are within target budgets. Full suite (8,800 tests / 33:00) is
+3 minutes over the 30-minute acceptable target, driven by 737 subprocess-
+heavy slow/integration/phase_closure tests. Bottleneck documented with
+recommendations for future optimization.
+
+No tests deleted, skipped, xfailed, or weakened. No marker changes made
+(tiers already well-balanced). No source changes. Documented full-suite
+active-task interference risk from 88X.1. Delivers
+`docs/PHASE_88_VALIDATION_RUNTIME_BUDGET_AND_TEST_TIER_REBALANCING.md`.
+Recommends 88Y — Advisory Mode Test Matrix and CLI Stability Review.
+
 Phase 88X.1: Idle-State Full Suite Baseline Repair (completed).
 
 Baseline investigation phase. Confirmed the 185 full-suite failures from
