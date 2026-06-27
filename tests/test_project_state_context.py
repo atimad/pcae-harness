@@ -26,7 +26,7 @@ import pcae.core.project_state as ps_module
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
-pytestmark = pytest.mark.fast_green
+pytestmark = pytest.mark.slow
 
 
 # ---------------------------------------------------------------------------

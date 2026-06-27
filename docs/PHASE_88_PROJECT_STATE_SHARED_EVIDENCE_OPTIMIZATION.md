@@ -171,8 +171,8 @@ Decision equivalence verified at two levels:
 | Single `build_project_state(ctx=ctx)` call | 3.28s |
 | `test_gate_dry_run_context.py` (55 tests) | ~266s (~4.5s/test, measured before fix) |
 | `test_gate_dry_run.py` + `test_phase87_integration.py` (59 tests) | 253.13s (~4.3s/test) |
-| `test_project_state_context.py` (24 new tests) | 119s (~5s/test) |
-| Fast-green (3,027 tests) | 178.56s |
+| `test_project_state_context.py` (24 new tests) | 119s (~5s/test, in slow tier post-correction) |
+| Fast-green (3,003 tests, post-marker correction) | ~25s |
 
 ## 16. Runtime Delta
 
@@ -195,7 +195,18 @@ Decision equivalence verified at two levels:
 
 5. **Total irreducible floor**: Approximately 2-3s due to the minimum number of git subprocess calls required per invocation (each build function's internal git calls, once each).
 
-## 18. Recommended Next Phase
+## 18. Post-Completion Marker Correction
+
+After 88Y.5 completion, a post-push inspection found that `tests/test_project_state_context.py`
+had `pytestmark = pytest.mark.fast_green` set at module level, causing fast-green runtime to
+inflate from ~25s (88Y.4 baseline) to ~119s. Root cause: the 24 new tests call real git
+subprocesses via `GateDryRunContext` and build functions; under 15-worker parallelism, git I/O
+contention causes individual tests to take 1–24s each.
+
+Correction: marker changed to `pytest.mark.slow`. Fast-green reverts to 3,003 tests / ~25s.
+The 24 tests remain in the `slow` (governance/full) tier where subprocess-heavy tests belong.
+
+## 19. Recommended Next Phase
 
 **88Z — Advisory Operator UX and Workflow Design**
 

@@ -73,6 +73,7 @@ TBD
 
 ## Acceptance Criteria
 
+- test_project_state_context.py marker corrected to slow (post-completion fix)
 - build_project_state() cascade analyzed
 - Behavior-preserving optimization implemented or bottleneck documented
 - No persistent cache, no global cache, no cross-invocation cache
