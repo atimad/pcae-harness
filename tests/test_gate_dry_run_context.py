@@ -639,9 +639,9 @@ def test_build_project_state_called_once_per_dry_run():
     original = ps_module.build_project_state
     calls = []
 
-    def tracking(repo_root):
+    def tracking(repo_root, ctx=None):
         calls.append(1)
-        return original(repo_root)
+        return original(repo_root, ctx=ctx)
 
     ps_module.build_project_state = tracking
     try:

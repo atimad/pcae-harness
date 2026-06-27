@@ -393,13 +393,14 @@ def _extract_test_events(repo_root: Path) -> list[dict[str, Any]]:
     return events
 
 
-def build_governance_timeline(repo_root: Path) -> dict[str, Any]:
+def build_governance_timeline(repo_root: Path, ctx=None) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
     all_events: list[dict[str, Any]] = []
 
-    artifact_data = build_artifact_index(repo_root)
-    _snapshot_data = build_memory_snapshot(repo_root)
+    if ctx is None:
+        _artifact_data = build_artifact_index(repo_root)
+        _snapshot_data = build_memory_snapshot(repo_root)
 
     for idx, phase_info in enumerate(_PHASE_ORDER):
         phase_events = _extract_phase_events(repo_root, phase_info, idx)

@@ -66,35 +66,35 @@ class GateDryRunContext:
     def memory_snapshot(self) -> dict[str, Any]:
         if self._memory_snapshot is None:
             from pcae.core.memory_snapshot import build_memory_snapshot
-            self._memory_snapshot = build_memory_snapshot(self.repo_root)
+            self._memory_snapshot = build_memory_snapshot(self.repo_root, ctx=self)
         return self._memory_snapshot
 
     @property
     def governance_timeline(self) -> dict[str, Any]:
         if self._governance_timeline is None:
             from pcae.core.governance_timeline import build_governance_timeline
-            self._governance_timeline = build_governance_timeline(self.repo_root)
+            self._governance_timeline = build_governance_timeline(self.repo_root, ctx=self)
         return self._governance_timeline
 
     @property
     def decision_log(self) -> dict[str, Any]:
         if self._decision_log is None:
             from pcae.core.decision_log import build_decision_log
-            self._decision_log = build_decision_log(self.repo_root)
+            self._decision_log = build_decision_log(self.repo_root, ctx=self)
         return self._decision_log
 
     @property
     def risk_register(self) -> dict[str, Any]:
         if self._risk_register is None:
             from pcae.core.risk_register import build_risk_register
-            self._risk_register = build_risk_register(self.repo_root)
+            self._risk_register = build_risk_register(self.repo_root, ctx=self)
         return self._risk_register
 
     @property
     def project_state(self) -> dict[str, Any]:
         if self._project_state is None:
             from pcae.core.project_state import build_project_state
-            self._project_state = build_project_state(self.repo_root)
+            self._project_state = build_project_state(self.repo_root, ctx=self)
         return self._project_state
 
     # -- lazy properties: task contract ---------------------------------------

@@ -435,14 +435,15 @@ def _extract_phase_decisions(repo_root: Path, phase_info: dict[str, Any]) -> lis
     return decisions
 
 
-def build_decision_log(repo_root: Path) -> dict[str, Any]:
+def build_decision_log(repo_root: Path, ctx=None) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
     all_decisions: list[dict[str, Any]] = []
 
-    _artifact_data = build_artifact_index(repo_root)
-    _snapshot_data = build_memory_snapshot(repo_root)
-    _timeline_data = build_governance_timeline(repo_root)
+    if ctx is None:
+        _artifact_data = build_artifact_index(repo_root)
+        _snapshot_data = build_memory_snapshot(repo_root)
+        _timeline_data = build_governance_timeline(repo_root)
 
     for phase_info in _PHASE_DECISIONS:
         phase_decisions = _extract_phase_decisions(repo_root, phase_info)

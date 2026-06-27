@@ -65,22 +65,29 @@ def _git_head_commit(repo_root: Path) -> str | None:
     return None
 
 
-def build_project_state(repo_root: Path) -> dict[str, Any]:
+def build_project_state(repo_root: Path, ctx=None) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
 
-    artifact_data = build_artifact_index(repo_root)
-    snapshot_data = build_memory_snapshot(repo_root)
-    timeline_data = build_governance_timeline(repo_root)
-    decision_data = build_decision_log(repo_root)
-    risk_data = build_risk_register(repo_root)
+    artifact_data = ctx.artifact_index if ctx is not None else build_artifact_index(repo_root)
+    snapshot_data = ctx.memory_snapshot if ctx is not None else build_memory_snapshot(repo_root)
+    timeline_data = ctx.governance_timeline if ctx is not None else build_governance_timeline(repo_root)
+    decision_data = ctx.decision_log if ctx is not None else build_decision_log(repo_root)
+    risk_data = ctx.risk_register if ctx is not None else build_risk_register(repo_root)
 
     mem = snapshot_data.get("snapshot", {})
 
-    repo_clean = _git_status_clean(repo_root)
-    branch = _git_branch(repo_root)
-    origin_count = _git_origin_count(repo_root)
-    head_commit = _git_head_commit(repo_root)
+    if ctx is not None:
+        porcelain = ctx.git_porcelain
+        repo_clean = (porcelain == "") if porcelain is not None else None
+        branch = ctx.git_branch
+        origin_count = ctx.git_ahead_count
+        head_commit = mem.get("last_verified_commit")
+    else:
+        repo_clean = _git_status_clean(repo_root)
+        branch = _git_branch(repo_root)
+        origin_count = _git_origin_count(repo_root)
+        head_commit = _git_head_commit(repo_root)
 
     if origin_count is not None and origin_count == 0:
         origin_sync = "synced"

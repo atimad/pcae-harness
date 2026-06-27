@@ -84,11 +84,11 @@ def _read_first_line_match(repo_root: Path, filename: str, prefix: str) -> str |
     return None
 
 
-def build_memory_snapshot(repo_root: Path) -> dict[str, Any]:
+def build_memory_snapshot(repo_root: Path, ctx=None) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
 
-    artifact_data = build_artifact_index(repo_root)
+    artifact_data = ctx.artifact_index if ctx is not None else build_artifact_index(repo_root)
     present_count = artifact_data.get("present_count", 0)
     missing_count = artifact_data.get("missing_count", 0)
 

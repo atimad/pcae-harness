@@ -265,15 +265,16 @@ _STANDING_RISKS: list[dict[str, Any]] = [
 ]
 
 
-def build_risk_register(repo_root: Path) -> dict[str, Any]:
+def build_risk_register(repo_root: Path, ctx=None) -> dict[str, Any]:
     warnings: list[str] = []
     errors: list[str] = []
     all_risks: list[dict[str, Any]] = []
 
-    _artifact_data = build_artifact_index(repo_root)
-    _snapshot_data = build_memory_snapshot(repo_root)
-    _timeline_data = build_governance_timeline(repo_root)
-    _decision_data = build_decision_log(repo_root)
+    if ctx is None:
+        _artifact_data = build_artifact_index(repo_root)
+        _snapshot_data = build_memory_snapshot(repo_root)
+        _timeline_data = build_governance_timeline(repo_root)
+        _decision_data = build_decision_log(repo_root)
 
     for entry in _STANDING_RISKS:
         risk = _make_risk(
