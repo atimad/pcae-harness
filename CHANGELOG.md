@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### 88Y.2 — Gate Dry-Run Performance Profiling and Optimization Design (2026-06-27)
+
+Design-only phase. Profiled `build_gate_dry_run()`: 1,087 git subprocess
+calls per invocation due to cascading nested build function dependencies
+(artifact_index called 32×, memory_snapshot 16×, governance_timeline 8×,
+decision_log 4×, risk_register 2×). Gate evaluation is <0.03s out of 17s.
+Designed `GateDryRunContext` with lazy-memoized properties to eliminate
+redundant computation. Expected: 88-94% runtime reduction (17s→1-2s per
+call). No production code changes. Design doc at docs/PHASE_88_GATE_DRY_RUN_
+PERFORMANCE_PROFILING_AND_OPTIMIZATION_DESIGN.md. Next: 88Y.3 prototype.
+
 ### 88Y.1 — CLI Subprocess Runtime Reduction (2026-06-27)
 
 Test optimization. Converted test_phase87_integration.py from subprocess
