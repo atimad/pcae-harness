@@ -25,6 +25,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
+# Unique sentinel to distinguish "not yet computed" from a legitimate None
+# return value (e.g. _detect_task_contract returns None for an idle repo).
+_UNSET = object()
+
 
 @dataclass
 class GateDryRunContext:
@@ -44,10 +48,10 @@ class GateDryRunContext:
     _decision_log: dict[str, Any] | None = field(default=None, init=False, repr=False)
     _risk_register: dict[str, Any] | None = field(default=None, init=False, repr=False)
     _project_state: dict[str, Any] | None = field(default=None, init=False, repr=False)
-    _task_contract: dict[str, Any] | None = field(default=None, init=False, repr=False)
-    _git_porcelain: str | None = field(default=None, init=False, repr=False)
-    _git_branch: str | None = field(default=None, init=False, repr=False)
-    _git_ahead_count: int | None = field(default=None, init=False, repr=False)
+    _task_contract: dict[str, Any] | None = field(default=_UNSET, init=False, repr=False)
+    _git_porcelain: str | None = field(default=_UNSET, init=False, repr=False)
+    _git_branch: str | None = field(default=_UNSET, init=False, repr=False)
+    _git_ahead_count: int | None = field(default=_UNSET, init=False, repr=False)
 
     # -- lazy properties: governance evidence builders ------------------------
 
@@ -98,7 +102,7 @@ class GateDryRunContext:
     @property
     def task_contract(self) -> dict[str, Any] | None:
         """Active task contract, parsed once per dry-run invocation."""
-        if self._task_contract is None:
+        if self._task_contract is _UNSET:
             from pcae.core.gate_dry_run import _detect_task_contract
             self._task_contract = _detect_task_contract(self.repo_root)
         return self._task_contract
@@ -108,21 +112,21 @@ class GateDryRunContext:
     @property
     def git_porcelain(self) -> str | None:
         """Cached ``git status --porcelain`` output."""
-        if self._git_porcelain is None:
+        if self._git_porcelain is _UNSET:
             self._git_porcelain = _git_porcelain_raw(self.repo_root)
         return self._git_porcelain
 
     @property
     def git_branch(self) -> str | None:
         """Cached ``git branch --show-current`` output."""
-        if self._git_branch is None:
+        if self._git_branch is _UNSET:
             self._git_branch = _git_branch_raw(self.repo_root)
         return self._git_branch
 
     @property
     def git_ahead_count(self) -> int | None:
         """Cached ``git rev-list --count origin/main..HEAD`` output."""
-        if self._git_ahead_count is None:
+        if self._git_ahead_count is _UNSET:
             self._git_ahead_count = _git_ahead_count_raw(self.repo_root)
         return self._git_ahead_count
 

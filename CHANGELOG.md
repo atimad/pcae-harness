@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### 88Y.4 — Gate Dry-Run Decision Equivalence and Performance Matrix (2026-06-27)
+
+Validation and hardening phase. Fixed None-sentinel memoization bug in
+`GateDryRunContext` — properties returning `None` (task_contract, git_porcelain,
+git_branch, git_ahead_count) were recomputed on every access because `None`
+doubled as the "not yet computed" sentinel. Introduced `_UNSET = object()`
+sentinel. Expanded `test_gate_dry_run_context.py` from 20 to 55 tests
+covering 14 representative scenarios (idle, source mutation, forbidden
+mutation, policy-forbidden, backend known/unknown, adoption, commit, push,
+all-flags). Decision-equivalence invariants verified across all scenarios:
+gate count=15, names/order preserved, hard blocks denied, authorization/
+enforcement always false, audit evidence shape lists, no redaction applied.
+Memoization verified: _detect_task_contract 15→1 call, git evidence ≤3
+calls per invocation. Freshness confirmed across separate invocations.
+No persistent cache, no global cache, no module-level mutable state.
+No tests deleted/skipped/xfailed. No assertions weakened. No production
+behavior changed beyond sentinel fix. Doc at docs/PHASE_88_GATE_DRY_RUN_
+DECISION_EQUIVALENCE_AND_PERFORMANCE_MATRIX.md. Next: 88Z.
+
 ### 88Y.3 — Gate Dry-Run Shared Evidence Prototype (2026-06-27)
 
 Performance optimization. Implemented `GateDryRunContext` lazy-memoized

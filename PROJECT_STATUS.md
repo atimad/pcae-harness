@@ -2,23 +2,23 @@
 
 ## Current Phase
 
-Phase 88Y.3: Gate Dry-Run Shared Evidence Prototype (completed).
+Phase 88Y.4: Gate Dry-Run Decision Equivalence and Performance Matrix (completed).
 
-Performance optimization phase. Implemented GateDryRunContext with lazy-memoized
-properties to eliminate redundant evidence computation within a single
-build_gate_dry_run() invocation. Single call: 20.86s→9.16s (-56%).
-Full suite: 34:16→25:18 (-26%) despite +20 new tests (9,010 total).
-Gate decisions, audit fields, and safety invariants preserved.
-No persistent cache. Next: 88Y.4 decision equivalence matrix or next roadmap phase.
-Full suite: 8,956 passed, 34 pre-existing scope/preflight failures in
-34:16. Key finding: `build_gate_dry_run()` itself dominates runtime
-(30-120s/call) — further reduction requires production source optimization.
+Validation and hardening phase for the 88Y.3 GateDryRunContext optimization.
+Fixed None-sentinel memoization bug preventing caching of None-returning
+properties (task_contract, git_porcelain, git_branch, git_ahead_count).
+Expanded test matrix from 20 to 55 tests covering 14 representative scenarios.
+All decision-equivalence invariants verified: gate count (15), gate names/order,
+hard blocks, authorization/enforcement flags, audit/redaction shape.
+Memoization verified: _detect_task_contract 15→1 call, git evidence ≤3 calls
+per invocation. Freshness and no-persistence confirmed across separate
+invocations. No tests deleted/skipped/xfailed. No assertions weakened.
+No production behavior changed beyond sentinel fix. Next: 88Z Advisory
+Operator UX and Workflow Design.
 
-No tests deleted/skipped/xfailed. No production behavior changed.
-Fast-green: 3,003 passed / 24.32s. Delivers
-`docs/PHASE_88_CLI_SUBPROCESS_RUNTIME_REDUCTION.md`. Recommends 88Z.
-
-Phase 88Y: Advisory Mode Test Matrix and CLI Stability Review (completed).
+Fast-green: 3,043 passed / runtime TBD.
+Delivers `docs/PHASE_88_GATE_DRY_RUN_DECISION_EQUIVALENCE_AND_PERFORMANCE_MATRIX.md`.
+Recommends 88Z.
 
 Advisory hardening phase. Expanded advisory test matrix from 105 to 294
 fast-green tests (+189) across 10 command categories: read-only, governed
