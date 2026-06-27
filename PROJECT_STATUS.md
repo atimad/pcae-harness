@@ -2,6 +2,27 @@
 
 ## Current Phase
 
+Phase 88W: Advisory Enforcement Readiness Design (completed).
+
+Design-only phase. Defines PCAE's advisory enforcement readiness layer —
+how PCAE can present broker + shell gate decisions as advisory warnings,
+recommendations, and dry-run enforcement guidance without blocking commands,
+intercepting shell execution, installing wrappers, mutating shell
+configuration, invoking backends, or granting real authorization.
+
+Delivers `docs/PHASE_88_ADVISORY_ENFORCEMENT_READINESS_DESIGN.md` (version 0.1,
+draft_documented, implementation_status=not_started). 30 sections covering
+advisory terminology, mode definition, non-role, broker/shell-gate/hard-block/
+human-approval/accepted-risk/secret-redaction/active-task/health relationships,
+advisory output JSON model, advisory decision vocabulary (20 values),
+human-readable and JSON output guidance, operator workflow, audit/logging
+boundary, dry-run-only and no-execution guarantees, disable/rollback
+expectations, future CLI sketch (pcae advisory check/explain/status), test
+requirements, and readiness checklist.
+
+No source changes. No test changes. Fast-green: 2,709 passed / ~23s (unchanged).
+Recommends 88X — Advisory Mode Prototype.
+
 Phase 88V.1: Secret Redaction and Deny Mapping Repair (completed).
 
 Enforcement-readiness repair phase. Repairs the four enforcement blockers

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### 88W — Advisory Enforcement Readiness Design (2026-06-27)
+
+Design-only phase. Defines PCAE's advisory enforcement readiness layer.
+Delivers `docs/PHASE_88_ADVISORY_ENFORCEMENT_READINESS_DESIGN.md` with
+30 sections: advisory terminology, mode definition and non-role, relationship
+to broker/shell gate/hard blocks/human approval/accepted risk/secret redaction/
+active task/health, advisory output JSON model with 40+ fields, 20-value
+advisory decision vocabulary, human-readable and JSON output guidance, operator
+workflow, audit/logging boundary, dry-run-only/no-execution guarantees,
+disable/rollback expectations, future CLI sketch (`pcae advisory check/explain/
+status`), test requirements, and readiness checklist for 88X. No source
+changes. No test changes.
+
 ### 88V.1 — Secret Redaction and Deny Mapping Repair (2026-06-27)
 
 Enforcement-readiness repair phase. Fixes four gaps documented in 88U/88V:
