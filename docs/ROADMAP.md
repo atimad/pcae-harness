@@ -1,228 +1,213 @@
 # PCAE Roadmap
 
-## Current Milestone
+> **Canonical roadmap.** This is the single source of truth for PCAE's product direction. Phase-specific plans, registry exports, and README snapshots derive from this document.
 
-PCAE has completed its first full governed backend-created output adoption lifecycle (phases 77J through 77V.1).
+## Current State (June 2026)
 
-The completed chain:
+PCAE has completed 90 phases across three major arcs:
 
-```
-backend mutation detected
-  -> mutation intake
-  -> quarantine review
-  -> adoption preflight
-  -> adoption review
-  -> adoption approval
-  -> adoption execution preflight
-  -> adoption execution / staging
-  -> commit approval
-  -> commit execution
-  -> hook-bypass reconciliation
-  -> push approval
-  -> push execution
-  -> final verification
-  -> tooling closure
-```
+| Arc | Phases | Status |
+|-----|--------|--------|
+| **Governance foundation** | 44A–68D | Complete — task contracts, runtime governance, multi-runtime, capability intelligence, strategic governance, execution governance activation (69A–69O) |
+| **Multi-agent and intelligence** | 82A–87J | Complete — agent discovery, governed action gates, dry-run evaluation, permission broker architecture, shell gate architecture |
+| **Advisory and enforcement readiness** | 88P–90B | Complete — shell gate prototype, permission broker prototype, advisory mode, dry-run simulation, enforcement readiness (threat model, audit/rollback/approval models, gate checklist, test plan, audit/rollback/approval/readiness prototypes, enforcement boundary design), full-suite baseline repair |
 
-This milestone proves that PCAE can:
-
-- capture backend-created output,
-- detect unsafe repo mutation,
-- quarantine and review the output,
-- approve adoption explicitly,
-- stage exactly one approved file,
-- approve and execute a commit,
-- reconcile hook-bypass exceptions,
-- approve and execute a governed push,
-- verify final local and remote state,
-- close the lifecycle.
+**Current phase:** 90B complete. Full suite green (9530/9530). Enforcement remains simulation-only.
 
 ## Roadmap Principles
 
-PCAE prioritizes governed autonomy over raw autonomy.
+1. **Governance before autonomy.** No agent capability is introduced until the governance infrastructure that contains it is in place.
+2. **Evidence before enforcement.** Every enforcement action must be traceable to the evidence that produced it.
+3. **Read-only before write.** Every new execution capability begins in read-only/simulation mode.
+4. **Human authority.** The human operator is the authoritative decision-maker. PCAE governs; the operator decides.
+5. **Hard blocks are non-overridable.** No human, no approval, no accepted risk can override a hard block (88V §16).
+6. **Fail closed.** Uncertainty, missing evidence, or internal error → block, never allow.
+7. **Task contracts before execution.** Every governed action is scoped by an explicit task contract.
+8. **Production v1 before full pluggability.** Deliver a coherent governed platform first. Pluggable adapters come after the core is production-ready.
+9. **One product, one roadmap.** PCAE is a single coherent product, not a collection of disconnected feature tracks.
 
-Core principles:
+---
 
-- Task contracts before execution.
-- Explicit approvals before adoption, commit, and push.
-- Artifact-backed auditability.
-- No silent backend execution.
-- No hidden output application.
-- No force push.
-- No raw push normalization.
-- Staged-file-aware governance.
-- Repeatability before multi-agent scale.
+## Production v1 Path
 
-## Near-Term Roadmap
+Production v1 is the first release of PCAE suitable for operator use in real engineering workflows. It includes a functional permission broker, governed action gates, shell gate classification, phase reporting, and outbound notification delivery.
 
-### 78 — Stabilize the Completed Lifecycle
+### 90 Series — Enforcement Boundary and Test Foundation
 
-**Purpose:** Turn the 77J-77V.1 lifecycle from a one-off success into a reusable governed path.
+| Phase | Name | Type | Purpose |
+|-------|------|------|---------|
+| **90A** | Permission Broker Enforcement Boundary Design | Design ✅ | Define broker enforcement boundary, layer responsibilities, input/output model |
+| **90B** | Full-Suite Baseline Repair | Repair ✅ | Restore full suite to green (9530/9530) |
+| **90B.1** | Roadmap Coherence and Production v1 Plan | Planning ✅ | This phase — canonical roadmap with Production v1 path |
+| **90C** | Permission Broker Enforcement Boundary Test Plan | Test planning | Define tests for the enforcement boundary defined in 90A |
 
-Candidate phases:
+### 91 Series — Permission Broker Simulation Prototype
 
-- 78A — PCAE Roadmap Documentation
-- 78B — Backend Output Lifecycle Retrospective
-- 78C — Lifecycle Command Consolidation Plan
-- 78D — Adoption Lifecycle Summary Artifact
-- 78E — Lifecycle Regression Suite
+| Phase | Name | Type | Purpose |
+|-------|------|------|---------|
+| **91A** | Permission Broker Simulation Prototype | Implementation | Build the broker as a simulation-only decision aggregator with structured output |
+| **91B** | Broker CLI and Decision Explanation | CLI/UX | `pcae broker check --command "..."`, explain decisions, JSON output |
+| **91C** | Hard-Block Policy Readiness | Hardening | Verify all hard blocks are non-overridable, document policy surface |
 
-**Expected outcome:** PCAE has a clear post-adoption roadmap and a documented lifecycle summary.
+### 92 Series — Phase Reporting and Notification
 
-### 79 — Fix Known Lifecycle Friction
+| Phase | Name | Type | Purpose |
+|-------|------|------|---------|
+| **92A** | Phase Report Artifact Model | Design | Define the durable phase report artifact schema |
+| **92B** | Pluggable Notification Foundation | Design | Define the notification adapter interface (no implementation) |
+| **92C** | Telegram Outbound Phase Report Delivery | Implementation | Send phase-finalization summaries via Telegram (outbound only) |
+| **92D** | Automatic Phase-Finalization Notification Hook | Implementation | Trigger notification on `pcae phase complete` |
 
-**Purpose:** Address the pain points discovered during the first real backend-created output adoption.
+### 93 Series — Shell Gate Hardening
 
-Known issues:
+| Phase | Name | Type | Purpose |
+|-------|------|------|---------|
+| **93A** | Narrow Shell Gate Design | Design | Design the minimal shell gate for production: which commands to classify, which to block |
+| **93B** | Narrow Shell Gate Prototype | Implementation | Implement the narrow shell gate in simulation-only mode |
 
-- Staged-file-aware commits.
-- Staged-file-aware task finish.
-- Staged-file-aware push.
-- Hook-bypass policy.
-- Artifact metadata consistency.
-- Stale task memory.
-- Approval refresh after implementation commits.
+### 94 Series — Governed Backend Invocation
 
-Candidate phases:
+| Phase | Name | Type | Purpose |
+|-------|------|------|---------|
+| **94A** | Governed Backend Invocation Design | Design | Design the backend invocation gate: when PCAE may invoke a backend, what evidence is required, how output is quarantined |
 
-- 79A — Staged-File-Aware Implementation Commit Mode
-- 79B — Staged-File-Aware pcae task finish
-- 79C — Staged-File-Aware pcae push
-- 79D — Hook-Bypass Policy Formalization
-- 79E — Artifact Metadata Consistency Validator
-- 79F — Task Memory Auto-Reconciliation
+### 95–96 Series — Production Readiness
 
-**Expected outcome:** The next real lifecycle should not require direct push exceptions, accidental commit resets, or manual task-memory cleanup.
+| Phase | Name | Type | Purpose |
+|-------|------|------|---------|
+| **95A** | Production v1 Documentation / Install / Demo | Documentation | Operator guide, install instructions, demo script |
+| **96A** | Production v1 Governance Review | Review | Final governance review before Production v1 tag |
 
-### 80 — Package Lifecycle Orchestration
+---
 
-**Purpose:** Move from many isolated phase commands to a governed lifecycle state machine.
+## Telegram Scope (Outbound Only)
 
-Candidate commands:
+Telegram integration in Production v1 is **outbound only** — PCAE sends notifications to the operator; the operator does not send commands to PCAE.
 
-```
-pcae lifecycle backend-output-adoption status
-pcae lifecycle backend-output-adoption next
-pcae lifecycle backend-output-adoption run-gate --gate review
-pcae lifecycle backend-output-adoption summary
-```
+**What Production v1 Telegram does:**
 
-Candidate phases:
+- PCAE creates durable phase report artifacts (structured JSON files).
+- On phase finalization (`pcae phase complete`), PCAE sends a short summary to a configured Telegram chat.
+- The full phase report is attached as a file/document.
+- Automatic send is enabled only after manual report delivery is confirmed stable.
 
-- 80A — Lifecycle State Machine Design
-- 80B — Lifecycle Status Command
-- 80C — Lifecycle Next-Step Recommendation
-- 80D — Lifecycle Gate Runner Dry-Run
-- 80E — Lifecycle Gate Runner With Human Approval
-- 80F — Lifecycle Final Summary Command
+**What Production v1 Telegram does NOT do:**
 
-**Expected outcome:** PCAE can identify where it is in a lifecycle and recommend the next legal governed action.
+- No inbound command reception (`/run`, `/commit`, `/push`, etc.).
+- No remote shell access.
+- No commit or push from Telegram.
+- No inbound command gateway of any kind.
+- No Telegram bot that accepts operator commands.
 
-### 81 — Run a Second Real Captured Task
+**When inbound commands may be considered (future v2+):**
 
-**Purpose:** Validate repeatability after the first lifecycle and after friction fixes.
+- Only after the permission broker and shell gate are mature and proven in production.
+- Only with explicit operator authentication and command confirmation.
+- Only with the same governance constraints as CLI commands.
+- Never as a shell replacement or remote execution mechanism.
 
-Candidate phases:
+---
 
-- 81A — Second Real Captured Task Selection
-- 81B — Second Real Captured Task Contract
-- 81C — Second Backend Capture Preflight
-- 81D — Second Backend Capture
-- 81E — Second Output Intake
-- 81F — Second Adoption Lifecycle Using Consolidated Gates
-- 81G — Second Lifecycle Final Verification
+## Future v2 / Pluggability Track
 
-Success criteria:
+Full pluggability belongs in a future version, after Production v1 is stable. The pluggability architecture will allow PCAE to be extended without modifying core governance logic.
 
-- No raw git push.
-- No accidental staged file inclusion.
-- No uncommitted tooling leftovers.
-- No ungoverned hook bypass.
-- Fewer manual phases than 77J-77V.1.
+### Notification Adapters
 
-### 82 — Agent Capability Discovery
+- Pluggable notification backends: Telegram, Slack, email, webhook, custom.
+- Common adapter interface defined in 92B.
+- Each adapter handles delivery; PCAE core handles artifact creation.
+- New adapters added without changing PCAE core.
 
-**Purpose:** Introduce multiple agents safely without letting them modify the repository.
+### Backend Adapters
 
-Candidate phases:
+- Pluggable AI backend connectors: Claude, DeepSeek, Kimi, OpenAI, local models.
+- Common adapter interface for invocation, capture, and quarantine.
+- Runtime trust assessment per adapter.
+- New backends added without changing PCAE core.
 
-- 82A — Agent Capability Registry Design
-- 82B — Agent Identity / Backend Capability Probe
-- 82C — Subagent Discovery Contract
-- 82D — Subagent Safety Profile
-- 82E — Agent Routing Dry-Run
-- 82F — Multi-Agent Task Split Dry-Run
+### Policy Modules
 
-**Expected outcome:** PCAE can discover and classify what each backend/agent can safely do before assigning work.
+- Pluggable policy modules: per-repository, per-organization, per-workflow.
+- Policy modules can define custom gate rules, custom hard blocks, custom approval chains.
+- Core governance invariants (hard blocks non-overridable, fail closed, human authority) are not overridable by policy modules.
 
-### 83 — Governed Multi-Agent Orchestration
+### Audit Storage Adapters
 
-**Purpose:** Move from single-agent capture to multi-agent task splitting, review, and merge governance.
+- Pluggable audit storage: local JSONL, remote database, cloud storage.
+- Common adapter interface for write, read, validate, rotate.
+- Audit integrity (checksum chain, tamper evidence) is guaranteed by PCAE core regardless of storage adapter.
 
-Candidate phases:
+### Multi-Agent Orchestration Plugins
 
-- 83A — Multi-Agent Task Contract
-- 83B — Agent Assignment Approval
-- 83C — Parallel Prompt Package Dry-Run
-- 83D — Multi-Agent Capture
-- 83E — Multi-Agent Output Intake
-- 83F — Conflict Detection
-- 83G — Merge Review
-- 83H — Single Approved Adoption Path
+- Pluggable orchestration strategies: sequential, parallel review, swarm, custom.
+- Agent capability discovery feeds into orchestration planner.
+- Human approval gates remain regardless of orchestration strategy.
 
-**Important rule:** Even with multiple agents, only one governed adoption path should modify the repository at a time.
+### Mobile / Operator Command Gateway (Future, Post-v2)
 
-### 84 — Persistent Memory and Project Intelligence
+- Controlled inbound Telegram commands only after broker and shell gate maturity.
+- Operator authentication required (Telegram user ID whitelist).
+- Command confirmation required (reply with "confirm" to execute).
+- No shell access, no `/run`, no commit/push from mobile.
+- All commands subject to the same governance as CLI commands.
 
-**Purpose:** Improve PCAE's ability to explain project state, risks, decisions, and next safe actions.
+### External Packaging / Release Hardening
 
-Candidate phases:
+- PyPI package, Homebrew formula, Docker image.
+- Release versioning policy.
+- Signed releases, checksum verification.
+- Upgrade/migration tooling.
 
-- 84A — Persistent Lifecycle Memory Model
-- 84B — Artifact Index
-- 84C — Governance Event Timeline
-- 84D — Decision Log Integration
-- 84E — Risk Register
-- 84F — Project State Snapshot
+---
 
-**Expected outcome:** PCAE can answer:
+## Guiding Constraints
 
-- What phase are we in?
-- What was approved?
-- What is blocked?
-- What can be safely done next?
-- What must never be repeated?
+### For All Phases
 
-### 85 — Productization and Documentation
+- Every phase begins with a governed task contract.
+- Source and test changes are scoped to the active task.
+- `pcae check` and `python -m pytest -n auto` before every commit.
+- Fast-green must not regress.
+- No raw git commit, no raw git push, no force push.
 
-**Purpose:** Prepare PCAE for explanation, demonstration, and external communication.
+### For Implementation Phases
 
-Candidate phases:
+- Begin in simulation-only / read-only mode.
+- Safety invariants (`no_execution=True`, `no_enforcement=True`, `is_authorization=False`) must be preserved.
+- Hard blocks must remain non-overridable.
+- Tests must pass before the phase is complete.
 
-- 85A — Architecture Overview Refresh
-- 85B — Installation / Usage Update
-- 85C — Demo Script
-- 85D — Governance Lifecycle Diagram
-- 85E — README Reframe
-- 85F — LinkedIn Article Draft
+### For Production v1
 
-**Expected outcome:** PCAE can be presented as a governance harness for AI-assisted software engineering, not as a finished production system.
+- Enforcement remains simulation-only until all readiness gates are satisfied (69 gates from 89J).
+- Operator must explicitly authorize any transition from simulation to enforcement.
+- Shell gate never installs wrappers or modifies shell configuration.
+- PCAE never executes commands, invokes backends without governance, or grants authorization.
 
-## Immediate Recommended Sequence
+---
 
-1. **78A** — PCAE Roadmap Documentation
-2. **78B** — Backend Output Lifecycle Retrospective
-3. **79A** — Staged-File-Aware Implementation Commit Mode
-4. **79B** — Staged-File-Aware pcae task finish
-5. **79C** — Staged-File-Aware pcae push
-6. **80A** — Lifecycle State Machine Design
-7. **81A** — Second Real Captured Task Selection
+## Historical Context
 
-**Short summary:**
+### Completed Arcs (for reference)
 
-- Now: make the lifecycle repeatable.
-- Next: automate safe next-step orchestration.
-- Then: run a second real task.
-- Then: add multi-agent discovery.
-- Then: multi-agent orchestration.
-- Finally: document and productize PCAE.
+**Governance Foundation (44A–68D):** Task contracts, runtime governance, multi-runtime registry, capability intelligence, strategic governance, execution governance activation chain (69A–69O).
+
+**Multi-Agent and Intelligence (82A–87J):** Agent capability discovery, multi-agent task contracts, governed action gates (15 gates), dry-run evaluation, permission broker architecture, shell gate architecture.
+
+**Advisory and Enforcement Readiness (88P–90B):** Shell gate prototype (88P, 88Q, 89A), permission broker prototype (88R), advisory mode (88X), dry-run simulation (89B–89E), enforcement readiness design (89G–89K), enforcement prototypes (89L–89N), enforcement boundary design (90A), full-suite baseline repair (90B).
+
+### Prior Roadmap Documents (Informational)
+
+The following documents informed this roadmap but are not canonical:
+
+- `docs/ROADMAP_REGISTRY.md` — Machine-generated phase registry from `pcae roadmap`. Regenerated on demand.
+- `docs/MULTI_AGENT_LIFECYCLE_LESSONS_ROADMAP.md` — Phase 84A deliverable. Historical context for multi-agent governance.
+- `docs/PHASE_85_IMPLEMENTATION_ROADMAP.md` — Phase 86A deliverable. Historical context for Phase 85 implementation.
+- `docs/ROADMAP_RECONCILIATION_PHASE_85_PLAN.md` — Phase 84L deliverable. Historical reconciliation plan.
+
+**Future cleanup note:** These phase-specific roadmap documents may be consolidated or archived after Production v1. They are retained for historical provenance.
+
+---
+
+*This roadmap supersedes all prior roadmap documents. The README.md Roadmap Snapshot derives from this document. Phase-specific plans reference this document as the authoritative source for PCAE's product direction.*

@@ -1,10 +1,43 @@
 # TODO
 
-## Pending
+## Production v1 Path
+
+See [docs/ROADMAP.md](../docs/ROADMAP.md) for the canonical roadmap.
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 90A | Permission Broker Enforcement Boundary Design | ✅ Complete |
+| 90B | Full-Suite Baseline Inspection and Repair | ✅ Complete |
+| 90B.1 | Roadmap Coherence and Production v1 Plan | ✅ Complete |
+| 90C | Permission Broker Enforcement Boundary Test Plan | 🔜 Next |
+| 91A | Permission Broker Simulation Prototype | Pending |
+| 91B | Broker CLI and Decision Explanation | Pending |
+| 91C | Hard-Block Policy Readiness | Pending |
+| 92A | Phase Report Artifact Model | Pending |
+| 92B | Pluggable Notification Foundation | Pending |
+| 92C | Telegram Outbound Phase Report Delivery | Pending |
+| 92D | Automatic Phase-Finalization Notification Hook | Pending |
+| 93A | Narrow Shell Gate Design | Pending |
+| 93B | Narrow Shell Gate Prototype | Pending |
+| 94A | Governed Backend Invocation Design | Pending |
+| 95A | Production v1 Documentation / Install / Demo | Pending |
+| 96A | Production v1 Governance Review | Pending |
+
+## Future v2 / Pluggability
+
+- Notification adapters (Slack, email, webhook, custom)
+- Backend adapters (OpenAI, local models, custom)
+- Policy modules (per-repo, per-org, per-workflow)
+- Audit storage adapters (remote DB, cloud storage)
+- Multi-agent orchestration plugins
+- Mobile/operator command gateway (post-broker/shell-gate maturity)
+- External packaging/release hardening (PyPI, Homebrew, Docker)
+
+## Design
 
 - Design explicit Phase Activation Governance that separates implementation approval, activation approval, commit approval, and push approval so implemented capabilities cannot be made active by inference.
 
-## Future Explorations (from Phase 32C/32D/32E/32F/32G)
+## Future Explorations
 
 - Automatic low-context detection triggering handoff.
 - Compact-risk handoff triggering.
@@ -16,12 +49,9 @@
 - Auto-detect available agents from lock history or policy configuration.
 - Orchestration-aware agent routing based on task type or governance context.
 - Heterogeneous agent governance policies (per-agent policy overrides).
-- Vendor-neutral agent flexibility: users may prefer one agent for all work, and future policy may list Claude, Codex, Kimi, DeepSeek, Perplexity, or other agents without implying fixed work-type ownership.
-- Future orchestration validation may compare generated docs, policy, and runtime commands for drift while preserving advisory user control.
-- Future handoff guidance may suggest workflow names from task metadata while keeping user agent choice authoritative.
-- Future readiness previews may explain remediation steps for failed checks without automatically mutating workflow, lock, or task state.
-- Roadmap/provenance coherence validation: detect completed features still in roadmap.
-- Stale roadmap detection: automated scan of governance docs against CHANGELOG/DONE history.
-- Governance artifact synchronization: keep PROJECT_STATUS.md, TODO.md, CHANGELOG.md coherent.
-- Orchestration narrative validation: verify agent-facing guidance matches runtime capabilities.
-- Governance drift detection for documentation artifacts beyond PROJECT_STATUS.md.
+- Vendor-neutral agent flexibility.
+- Roadmap/provenance coherence validation.
+- Stale roadmap detection.
+- Governance artifact synchronization.
+- Orchestration narrative validation.
+- Governance drift detection.

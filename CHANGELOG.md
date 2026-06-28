@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Completed Phase 90B.1 roadmap coherence and Production v1 plan ingestion.
+- Updated docs/ROADMAP.md as canonical roadmap with Production v1 path (90C–96A) and future v2/pluggability track.
+- Clarified Telegram scope: outbound only in Production v1; no inbound commands, no remote shell, no /run.
+- Updated README.md Roadmap Snapshot to reflect current state and point to canonical roadmap.
 - Completed Phase 90B full-suite baseline inspection and scope/preflight repair.
 - Investigated 188 pre-existing full-suite failures; root cause is active task contract "TBD" scope.
 - Full suite restored to 9530/9530 passed (0 failures) in 1492s. Zero source or test files changed.

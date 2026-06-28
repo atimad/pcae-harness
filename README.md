@@ -319,40 +319,41 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#current-limitations) for the ful
 
 ## Roadmap Snapshot
 
+See [docs/ROADMAP.md](docs/ROADMAP.md) for the canonical roadmap. This section summarizes the current state.
+
 ### Completed
 
-| Track | Status |
-|---|---|
-| Documentation program | Complete — architecture, commands, glossary, and governance docs generated and validated |
-| Controlled read-only invocation | Complete — Phase 48H; full evidence model implemented |
-| Multi-agent governance | Complete — Phase 49A–49Q; governance state, invariants, drift detection, lock governance |
-| Controlled write governance | Complete — Phase 50A–50K; full 11-step write governance chain |
-| Controlled execution orchestration | Complete — Phase 51A–51K; full 11-step execution orchestration chain |
-| Recovery planning | Complete — Phase 52A–52E; task, session, governance, lock, and corruption recovery |
-| Runtime hardening | Complete — Phase 52F–52I; contract, sandbox, timeout, output integrity |
-| Concurrency and multi-agent coordination | Complete — Phase 52J–52M; concurrency safety, parallel coordination, state consistency, conflict resolution |
-| Chaos engineering and resilience | Complete — Phase 52N–52Q; chaos testing, failure injection, corruption simulation, recovery validation |
-| Multi-runtime governance | Complete — Phase 55A–64H; runtime registry, trust, selection, arbitration, audit, quarantine, orchestration readiness |
-| Capability and roadmap intelligence | Complete — Phase 64B Series; capability inventory, roadmap/prompt/skill intelligence |
-| Strategic governance and independent review | Complete — Phase 65A–68D; strategic lineage, IRG challenge |
-| **Execution governance activation (BR-005)** | **Complete — Phase 69A–69O; full approval → authorization → audit → activation → sandboxing → change capture → promotion → rollback chain** |
-| **Multi-agent governance design** | **Complete — Phase 82A–84K; agent discovery, routing, prompts, capture, intake, adoption, lifecycle state machine, invocation guard, storage policy, deferred tracker** |
-| **Phase 85 persistent memory design** | **Complete — Phase 85A–85F; memory model, artifact index, event timeline, decision log, risk register, project state snapshot** |
-| **Phase 86 read-only implementation** | **Complete — Phase 86A–86K; six read-only CLI commands, 183 tests, 38 integration tests, cross-layer consistency verified** |
-| **Phase 87 governed action gates** | **Complete — Phase 87A–87J; gate taxonomy, dry-run evaluator (15 gates), scope/backend/adoption/mutation/commit/push evaluation, permission broker architecture, shell gate architecture, integration tests** |
+| Arc | Phases | Status |
+|-----|--------|--------|
+| Governance foundation | 44A–69O | Complete — task contracts through execution governance activation |
+| Multi-agent and intelligence | 82A–87J | Complete — agent discovery through governed action gates |
+| Advisory and enforcement readiness | 88P–90B | Complete — shell gate, permission broker, advisory, dry-run simulation, enforcement readiness, full-suite green (9530/9530) |
 
-### Next
+### Production v1 Path (In Progress)
 
-Phase 87 (87A–87J) is complete. The governed action gate dry-run layer, permission broker architecture, and shell gate architecture are designed, implemented (dry-run only), tested, and verified. The recommended next phase is **88A — First Narrow Enforced Gate Boundary**.
+| Series | Phases | Focus |
+|--------|--------|-------|
+| **90** | 90A–90C | Enforcement boundary and test foundation |
+| **91** | 91A–91C | Permission broker simulation prototype and CLI |
+| **92** | 92A–92D | Phase reporting, notification foundation, Telegram outbound delivery |
+| **93** | 93A–93B | Narrow shell gate design and prototype |
+| **94** | 94A | Governed backend invocation design |
+| **95–96** | 95A–96A | Documentation, install, demo, governance review |
+
+**Recommended next phase:** 90C — Permission Broker Enforcement Boundary Test Plan (requires explicit operator approval).
+
+### Future v2 / Pluggability
+
+Notification adapters, backend adapters, policy modules, audit storage adapters, multi-agent orchestration plugins, mobile command gateway (post-broker/shell-gate maturity), external packaging.
 
 ### Limitations
 
 - PCAE is **not production ready**
-- Permission broker and shell gate are **architecture designs, not running code**
-- Dry-run gate output is **not authorization** — it reports hypothetical decisions
+- Enforcement is **simulation-only** — no real blocking, no shell interception
+- Permission broker and shell gate are **simulation prototypes, not enforcement engines**
+- Dry-run/advisory output is **not authorization**
 - No agent is given autonomous repo access
-- Enforced preflight gates are **not yet implemented**
-- PCAE does not claim to solve autonomous coding
+- Telegram is **outbound only** in Production v1 — no inbound commands, no remote shell
 
 ## Contributing
 

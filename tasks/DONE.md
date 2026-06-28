@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 90B.1 — Roadmap Coherence and Production v1 Plan Ingestion (20260628-2233-90b-1-roadmap-coherence-and-production-v1-plan-ingestion)
 - 90B — Full-Suite Baseline Inspection and Scope/Preflight Repair (20260628-2019-90b-full-suite-baseline-inspection-and-scope-preflight-repair)
 - 90A — Permission Broker Enforcement Boundary Design (20260628-1922-90a-permission-broker-enforcement-boundary-design)
 - 89N — Enforcement Readiness Evidence Bundle and Gate Status Reporter (20260628-1716-phase-89n-enforcement-readiness-evidence-bundle-and-gate-status-reporter)

@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 90B.1: Roadmap Coherence and Production v1 Plan Ingestion (completed).
+
+Planning phase. Inspected existing roadmap/planning artifacts, identified
+docs/ROADMAP.md as the canonical roadmap, and updated it with a coherent
+Production v1 path (90C–96A), future v2/pluggability track, and Telegram
+scope clarification (outbound only, no remote shell, no inbound commands).
+Updated README.md Roadmap Snapshot. No competing roadmap files created.
+No implementation performed. Recommended next phase: 90C — Permission
+Broker Enforcement Boundary Test Plan (requires explicit operator approval).
+Delivers updated docs/ROADMAP.md.
+
 Phase 90B: Full-Suite Baseline Inspection and Scope/Preflight Repair (completed).
 
 Inspection and repair phase. Investigated the 188 pre-existing full-suite
