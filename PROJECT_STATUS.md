@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 89I: Enforcement Operator Approval and Accepted-Risk Policy Design (active).
+
+Design phase. Defined operator approval model with 7 principles, 5 roles
+(self-approver through administrator + "No One" for hard blocks), 5 scope types
+(single_command through session), tiered expiration (5 min to session end), and
+approval evidence schema. Defined accepted-risk policy with 4 risk levels
+(low/medium/high/critical), explicit non-overridable hard block rule. Clarified
+human review vs approval vs authorization distinction. Designed future multi-party
+approval model for Stage 4+. Documented 7 misuse/failure modes, ~43 required tests.
+Delivers docs/PHASE_89_ENFORCEMENT_OPERATOR_APPROVAL_AND_ACCEPTED_RISK_POLICY_DESIGN.md.
+Recommends 89J.
+
 Phase 89H: Enforcement Readiness Audit and Rollback Model Design (completed).
 
 Design phase. Defined audit event taxonomy (16 event types), 5 event schemas
