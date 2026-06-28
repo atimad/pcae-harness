@@ -611,3 +611,391 @@ def build_permission_broker(
         "warnings": warnings,
         "errors": [],
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 91A — Simulation-only permission broker decision model
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Decision outcomes (4-value model per 90A/90C)
+BROKER_ALLOW = "allow"
+BROKER_DENY = "deny"
+BROKER_HUMAN_REVIEW = "human_review"
+BROKER_MORE_EVIDENCE = "more_evidence"
+
+BROKER_DECISIONS_91A: tuple[str, ...] = (
+    BROKER_ALLOW,
+    BROKER_DENY,
+    BROKER_HUMAN_REVIEW,
+    BROKER_MORE_EVIDENCE,
+)
+
+# Action types the broker can evaluate
+ACTION_READ = "read"
+ACTION_SOURCE_MUTATION = "source_mutation"
+ACTION_DOCS_MUTATION = "docs_mutation"
+ACTION_TEST_MUTATION = "test_mutation"
+ACTION_BACKEND_INVOCATION = "backend_invocation"
+ACTION_COMMIT = "commit"
+ACTION_PUSH = "push"
+ACTION_ROLLBACK = "rollback"
+
+KNOWN_ACTIONS_91A: frozenset[str] = frozenset({
+    ACTION_READ,
+    ACTION_SOURCE_MUTATION,
+    ACTION_DOCS_MUTATION,
+    ACTION_TEST_MUTATION,
+    ACTION_BACKEND_INVOCATION,
+    ACTION_COMMIT,
+    ACTION_PUSH,
+    ACTION_ROLLBACK,
+})
+
+# Command classes
+CMD_READ_ONLY = "read_only"
+CMD_GOVERNED = "governed"
+CMD_RAW_GIT_COMMIT = "raw_git_commit"
+CMD_RAW_GIT_PUSH = "raw_git_push"
+CMD_FORCE_PUSH = "force_push"
+CMD_NO_VERIFY = "no_verify"
+CMD_DESTRUCTIVE_FS = "destructive_filesystem"
+CMD_BACKEND = "backend_invocation"
+CMD_UNKNOWN = "unknown"
+
+KNOWN_COMMAND_CLASSES_91A: frozenset[str] = frozenset({
+    CMD_READ_ONLY,
+    CMD_GOVERNED,
+    CMD_RAW_GIT_COMMIT,
+    CMD_RAW_GIT_PUSH,
+    CMD_FORCE_PUSH,
+    CMD_NO_VERIFY,
+    CMD_DESTRUCTIVE_FS,
+    CMD_BACKEND,
+    CMD_UNKNOWN,
+})
+
+# Hard-block command classes — non-overridable (88V §16)
+HARD_BLOCK_COMMAND_CLASSES: frozenset[str] = frozenset({
+    CMD_RAW_GIT_COMMIT,
+    CMD_RAW_GIT_PUSH,
+    CMD_FORCE_PUSH,
+    CMD_NO_VERIFY,
+    CMD_DESTRUCTIVE_FS,
+    CMD_UNKNOWN,
+})
+
+# Hard-block reason codes per command class
+HARD_BLOCK_REASONS: dict[str, str] = {
+    CMD_RAW_GIT_COMMIT: "blocked_by_raw_git_commit",
+    CMD_RAW_GIT_PUSH: "blocked_by_raw_git_push",
+    CMD_FORCE_PUSH: "blocked_by_force_push",
+    CMD_NO_VERIFY: "blocked_by_no_verify",
+    CMD_DESTRUCTIVE_FS: "blocked_by_destructive_filesystem",
+    CMD_UNKNOWN: "blocked_by_unknown_command_class",
+}
+
+# Actions that require an active task
+MUTATING_ACTIONS_91A: frozenset[str] = frozenset({
+    ACTION_SOURCE_MUTATION,
+    ACTION_DOCS_MUTATION,
+    ACTION_TEST_MUTATION,
+    ACTION_COMMIT,
+    ACTION_PUSH,
+    ACTION_ROLLBACK,
+})
+
+# Policy-forbidden files (from 88N.3, 90A)
+POLICY_FORBIDDEN_FILES_91A: frozenset[str] = frozenset({
+    "README.md",
+    "docs/REAL_CAPTURED_TASKS.md",
+    "docs/LINKEDIN_ARTICLE_DRAFT.md",
+})
+
+
+def evaluate_permission_broker(
+    *,
+    action_type: str,
+    command_class: str = CMD_UNKNOWN,
+    paths: tuple[str, ...] = (),
+    task_present: bool = False,
+    task_scope_known: bool = False,
+    allowed_paths: tuple[str, ...] = (),
+    forbidden_paths: tuple[str, ...] = (),
+    approval_present: bool = False,
+    approval_fresh: bool = True,
+    accepted_risk_present: bool = False,
+    readiness_ready: bool = False,
+    enforcement_authorized: bool = False,
+    repo_dirty: bool = False,
+    metadata: dict[str, str] | None = None,
+) -> dict[str, object]:
+    """
+    Evaluate a proposed governed action and return a simulation-only
+    permission broker decision.
+
+    Phase 91A — simulation prototype.  Never executes commands, never
+    intercepts shell, never invokes backends, never grants authorization.
+
+    Returns a dict with keys:
+      decision        — one of allow / deny / human_review / more_evidence
+      hard_block      — True if the block is non-overridable (88V §16)
+      reason_code     — primary machine-readable reason
+      reason_codes    — all reason codes (list)
+      message          — human-readable operator message
+      required_evidence — list of evidence items needed (empty if allow/deny)
+      audit_payload    — dict with audit-relevant fields
+    """
+
+    reason_codes: list[str] = []
+    required_evidence: list[str] = []
+
+    # ── 0. Validate required inputs ──────────────────────────────────────
+    if not action_type:
+        return _broker_decision(
+            BROKER_MORE_EVIDENCE, False,
+            "missing_action_type",
+            ["missing_action_type"],
+            "No action type provided. Cannot evaluate.",
+            ["action_type"],
+        )
+
+    if action_type not in KNOWN_ACTIONS_91A:
+        return _broker_decision(
+            BROKER_MORE_EVIDENCE, False,
+            "unknown_action_type",
+            ["unknown_action_type", f"action_type:{action_type}"],
+            f"Unknown action type: {action_type!r}. Cannot evaluate.",
+            ["valid_action_type"],
+        )
+
+    if command_class not in KNOWN_COMMAND_CLASSES_91A:
+        return _broker_decision(
+            BROKER_DENY, True,
+            "blocked_by_unknown_command_class",
+            ["unknown_command_class", f"command_class:{command_class}"],
+            f"Unknown or ambiguous command class: {command_class!r}. "
+            f"PCAE must fail closed on unknown commands.",
+            [],
+        )
+
+    # ── 1. Hard-block command classes (non-overridable) ──────────────────
+    if command_class in HARD_BLOCK_COMMAND_CLASSES:
+        reason = HARD_BLOCK_REASONS.get(command_class, "blocked_by_policy")
+        reason_codes.append(reason)
+        return _broker_decision(
+            BROKER_DENY, True,
+            reason,
+            reason_codes,
+            f"Hard block: {command_class}. This action is permanently "
+            f"blocked by PCAE policy. No override exists (88V §16).",
+            [],
+        )
+
+    # ── 2. Enforcement readiness gates ───────────────────────────────────
+    if not enforcement_authorized and action_type in MUTATING_ACTIONS_91A:
+        reason_codes.append("enforcement_not_authorized")
+        return _broker_decision(
+            BROKER_DENY, True,
+            "blocked_by_enforcement_not_authorized",
+            reason_codes,
+            "Enforcement is not authorized. Mutating actions are blocked.",
+            ["enforcement_authorization"],
+        )
+
+    if not readiness_ready and action_type in MUTATING_ACTIONS_91A:
+        reason_codes.append("enforcement_not_ready")
+        return _broker_decision(
+            BROKER_DENY, True,
+            "blocked_by_enforcement_not_ready",
+            reason_codes,
+            "Enforcement readiness gates are not satisfied. "
+            "Mutating actions are blocked.",
+            ["readiness_gates"],
+        )
+
+    # ── 3. Task contract checks ──────────────────────────────────────────
+    if action_type in MUTATING_ACTIONS_91A and not task_present:
+        reason_codes.append("missing_active_task")
+        return _broker_decision(
+            BROKER_DENY, True,
+            "blocked_by_missing_task",
+            reason_codes,
+            "No active task contract. Mutating actions require an active task.",
+            ["active_task_contract"],
+        )
+
+    if action_type in MUTATING_ACTIONS_91A and not task_scope_known:
+        reason_codes.append("task_scope_unknown")
+        required_evidence.append("task_scope")
+        return _broker_decision(
+            BROKER_MORE_EVIDENCE, False,
+            "task_scope_unknown",
+            reason_codes,
+            "Task contract scope is unknown or incomplete. "
+            "Cannot evaluate file scope.",
+            required_evidence,
+        )
+
+    # ── 4. Path/scope checks ─────────────────────────────────────────────
+    if paths:
+        # Check for policy-forbidden files (independent of task scope)
+        policy_forbidden = [p for p in paths if p in POLICY_FORBIDDEN_FILES_91A]
+        if policy_forbidden:
+            reason_codes.append("policy_forbidden_file")
+            reason_codes.append(f"forbidden:{','.join(policy_forbidden)}")
+            return _broker_decision(
+                BROKER_DENY, True,
+                "blocked_by_policy_forbidden_file",
+                reason_codes,
+                f"Policy-forbidden file(s) requested: "
+                f"{', '.join(policy_forbidden)}. "
+                f"These files are never mutable.",
+                [],
+            )
+
+        # Check for out-of-scope paths (when task scope is known)
+        if task_scope_known and allowed_paths:
+            out_of_scope = [
+                p for p in paths
+                if p not in allowed_paths and p not in POLICY_FORBIDDEN_FILES_91A
+            ]
+            if out_of_scope:
+                reason_codes.append("out_of_scope_path")
+                reason_codes.append(f"out_of_scope:{','.join(out_of_scope)}")
+                return _broker_decision(
+                    BROKER_DENY, True,
+                    "blocked_by_out_of_scope",
+                    reason_codes,
+                    f"Path(s) outside active task scope: "
+                    f"{', '.join(out_of_scope)}.",
+                    [],
+                )
+
+        # Check for explicitly forbidden paths
+        if forbidden_paths:
+            forbidden_matches = [p for p in paths if p in forbidden_paths]
+            if forbidden_matches:
+                reason_codes.append("forbidden_path")
+                reason_codes.append(f"forbidden:{','.join(forbidden_matches)}")
+                return _broker_decision(
+                    BROKER_DENY, True,
+                    "blocked_by_forbidden_path",
+                    reason_codes,
+                    f"Path(s) in task forbidden list: "
+                    f"{', '.join(forbidden_matches)}.",
+                    [],
+                )
+
+    # ── 5. Backend invocation check ──────────────────────────────────────
+    if command_class == CMD_BACKEND or action_type == ACTION_BACKEND_INVOCATION:
+        # Backend invocation requires human review (not a hard block)
+        reason_codes.append("backend_invocation_requires_review")
+        return _broker_decision(
+            BROKER_HUMAN_REVIEW, False,
+            "backend_invocation_requires_human_review",
+            reason_codes,
+            "Backend invocation requires human review before proceeding.",
+            ["human_review"],
+        )
+
+    # ── 6. Dirty repo check ──────────────────────────────────────────────
+    if repo_dirty and action_type in (ACTION_COMMIT, ACTION_PUSH):
+        reason_codes.append("repo_dirty")
+        return _broker_decision(
+            BROKER_MORE_EVIDENCE, False,
+            "repo_dirty_for_commit_push",
+            reason_codes,
+            "Working tree is dirty. Commit/push actions require a clean "
+            "working tree or explicit staging.",
+            ["clean_working_tree"],
+        )
+
+    # ── 7. Human review for high-risk non-hard-block actions ─────────────
+    if action_type in (ACTION_COMMIT, ACTION_PUSH, ACTION_ROLLBACK):
+        if not approval_present:
+            reason_codes.append(f"{action_type}_requires_human_review")
+            return _broker_decision(
+                BROKER_HUMAN_REVIEW, False,
+                f"{action_type}_requires_human_review",
+                reason_codes,
+                f"Action '{action_type}' requires human review and approval.",
+                ["human_approval"],
+            )
+        if not approval_fresh:
+            reason_codes.append("approval_stale")
+            return _broker_decision(
+                BROKER_HUMAN_REVIEW, False,
+                "stale_approval",
+                reason_codes,
+                "Approval is expired or revoked. Fresh approval required.",
+                ["fresh_approval"],
+            )
+
+    # ── 8. Accepted risk for reviewable non-hard-block cases ─────────────
+    if accepted_risk_present and action_type not in MUTATING_ACTIONS_91A:
+        # Accepted risk on non-mutating actions: allow with note
+        reason_codes.append("accepted_risk_noted")
+        reason_codes.append("risk_does_not_override_hard_blocks")
+
+    # ── 9. All checks pass — allow (preflight only, not authorization) ──
+    reason_codes.append("all_checks_passed")
+    return _broker_decision(
+        BROKER_ALLOW, False,
+        "allow_preflight_only",
+        reason_codes,
+        "All governance checks passed. This is a preflight-only evaluation. "
+        "PCAE does NOT authorize execution. The operator retains full authority.",
+        [],
+    )
+
+
+def _broker_decision(
+    decision: str,
+    hard_block: bool,
+    reason_code: str,
+    reason_codes: list[str],
+    message: str,
+    required_evidence: list[str],
+) -> dict[str, object]:
+    """Build a broker decision envelope (91A model).
+
+    Simulation-only.  No execution, no authorization, no enforcement.
+    """
+    import uuid
+    import hashlib
+    from datetime import datetime, timezone
+
+    event_id = f"evt-{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc).isoformat()
+    message_hash = hashlib.sha256(message.encode()).hexdigest()[:16]
+
+    return {
+        "decision": decision,
+        "hard_block": hard_block,
+        "reason_code": reason_code,
+        "reason_codes": reason_codes,
+        "message": message,
+        "required_evidence": required_evidence,
+        "audit_payload": {
+            "event_id": event_id,
+            "event_type": (
+                "enforcement.blocked" if hard_block
+                else "enforcement.gated_review" if decision == BROKER_HUMAN_REVIEW
+                else "enforcement.allowed" if decision == BROKER_ALLOW
+                else "enforcement.decision"
+            ),
+            "timestamp": now,
+            "decision": decision,
+            "hard_block": hard_block,
+            "overridable": not hard_block,
+            "reason_code": reason_code,
+            "message_hash": message_hash,
+            "required_evidence": required_evidence,
+        },
+        "simulation_only": True,
+        "no_execution": True,
+        "no_enforcement": True,
+        "authorization_granted": False,
+        "execution_authorized": False,
+        "schema_version": "1.0",
+    }

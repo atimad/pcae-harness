@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Implemented Phase 91A permission broker simulation prototype (evaluate_permission_broker).
+- Added 4-outcome decision model (allow, deny, human_review, more_evidence) with hard-block logic.
+- 55 new tests in TestBrokerDecisionModel91A; existing build_permission_broker unchanged.
+- No enforcement, shell interception, wrappers, or backend invocation.
+- Delivers docs/PHASE_91_PERMISSION_BROKER_SIMULATION_PROTOTYPE.md.
 - Completed Phase 90C permission broker enforcement boundary test plan (design-only).
 - Defined ~231 tests across 13 categories: input/output models, hard-block invariants, human review, accepted risk, fail-closed, audit evidence, fixtures, CLI.
 - Defined 9 fixture types with 38 catalog entries for isolated repos, task contracts, approvals, accepted risks, and readiness states.

@@ -24,6 +24,28 @@ from pcae.core.permission_broker import (
     BPE_HARD_BLOCK_DECISIONS,
     BPE_MUTATING_ACTIONS,
     build_permission_broker,
+    # Phase 91A imports
+    evaluate_permission_broker,
+    BROKER_ALLOW,
+    BROKER_DENY,
+    BROKER_HUMAN_REVIEW,
+    BROKER_MORE_EVIDENCE,
+    ACTION_READ,
+    ACTION_SOURCE_MUTATION,
+    ACTION_DOCS_MUTATION,
+    ACTION_BACKEND_INVOCATION,
+    ACTION_COMMIT,
+    ACTION_PUSH,
+    ACTION_ROLLBACK,
+    CMD_READ_ONLY,
+    CMD_GOVERNED,
+    CMD_RAW_GIT_COMMIT,
+    CMD_RAW_GIT_PUSH,
+    CMD_FORCE_PUSH,
+    CMD_NO_VERIFY,
+    CMD_DESTRUCTIVE_FS,
+    CMD_BACKEND,
+    CMD_UNKNOWN,
 )
 
 pytestmark = pytest.mark.fast_green
@@ -688,3 +710,646 @@ class TestPermissionBrokerCLI:
             "--source-backend", "claude",
         ])
         assert data["broker"]["source_backend"] == "claude"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 91A — Simulation-only permission broker decision model tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestBrokerDecisionModel91A:
+    """Tests for evaluate_permission_broker() — the 91A 4-outcome model."""
+
+    # ── Allow for safe in-scope actions ──────────────────────────────────
+
+    def test_allow_read_only_in_scope(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ, command_class=CMD_READ_ONLY,
+        )
+        assert result["decision"] == BROKER_ALLOW
+        assert result["hard_block"] is False
+
+    def test_allow_governed_action_with_full_evidence(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("src/pcae/core/example.py",),
+            paths=("src/pcae/core/example.py",),
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_ALLOW
+        assert result["hard_block"] is False
+
+    def test_allow_docs_mutation_in_scope(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_DOCS_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("PROJECT_STATUS.md",),
+            paths=("PROJECT_STATUS.md",),
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_ALLOW
+
+    # ── More evidence ────────────────────────────────────────────────────
+
+    def test_more_evidence_unknown_task_scope(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=False,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_MORE_EVIDENCE
+        assert result["reason_code"] == "task_scope_unknown"
+        assert "task_scope" in result["required_evidence"]
+
+    def test_more_evidence_missing_action_type(self):
+        result = evaluate_permission_broker(action_type="")
+        assert result["decision"] == BROKER_MORE_EVIDENCE
+        assert result["reason_code"] == "missing_action_type"
+        assert "action_type" in result["required_evidence"]
+
+    def test_more_evidence_unknown_action_type(self):
+        result = evaluate_permission_broker(action_type="nonexistent_action")
+        assert result["decision"] == BROKER_MORE_EVIDENCE
+        assert result["reason_code"] == "unknown_action_type"
+
+    def test_more_evidence_repo_dirty_for_commit(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_COMMIT,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            repo_dirty=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_MORE_EVIDENCE
+        assert result["reason_code"] == "repo_dirty_for_commit_push"
+
+    # ── Hard-block raw git commit ────────────────────────────────────────
+
+    def test_hard_block_raw_git_commit(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_RAW_GIT_COMMIT,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_raw_git_commit"
+
+    # ── Hard-block raw git push ──────────────────────────────────────────
+
+    def test_hard_block_raw_git_push(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH, command_class=CMD_RAW_GIT_PUSH,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_raw_git_push"
+
+    # ── Hard-block force push ────────────────────────────────────────────
+
+    def test_hard_block_force_push(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH, command_class=CMD_FORCE_PUSH,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_force_push"
+
+    def test_hard_block_force_push_not_overridable_by_approval(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH,
+            command_class=CMD_FORCE_PUSH,
+            approval_present=True,
+            approval_fresh=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_hard_block_force_push_not_overridable_by_accepted_risk(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH,
+            command_class=CMD_FORCE_PUSH,
+            accepted_risk_present=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    # ── Hard-block --no-verify ───────────────────────────────────────────
+
+    def test_hard_block_no_verify(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_COMMIT, command_class=CMD_NO_VERIFY,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_no_verify"
+
+    # ── Hard-block destructive filesystem ────────────────────────────────
+
+    def test_hard_block_destructive_filesystem(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_DESTRUCTIVE_FS,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_destructive_filesystem"
+
+    # ── Hard-block out-of-scope path ─────────────────────────────────────
+
+    def test_hard_block_out_of_scope(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("src/pcae/core/example.py",),
+            paths=("src/pcae/core/other.py",),
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_out_of_scope"
+
+    # ── Hard-block forbidden path ────────────────────────────────────────
+
+    def test_hard_block_policy_forbidden_file(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_DOCS_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("README.md", "PROJECT_STATUS.md"),
+            paths=("README.md",),
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_policy_forbidden_file"
+
+    def test_hard_block_task_forbidden_path(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("src/pcae/core/example.py",),
+            forbidden_paths=("src/pcae/core/example.py",),
+            paths=("src/pcae/core/example.py",),
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_forbidden_path"
+
+    # ── Human review for backend / non-hard-block risk ───────────────────
+
+    def test_human_review_backend_invocation(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_BACKEND_INVOCATION,
+            command_class=CMD_BACKEND,
+            task_present=True,
+            task_scope_known=True,
+        )
+        assert result["decision"] == BROKER_HUMAN_REVIEW
+        assert result["hard_block"] is False
+        assert result["reason_code"] == "backend_invocation_requires_human_review"
+
+    def test_human_review_backend_command_class(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ, command_class=CMD_BACKEND,
+        )
+        assert result["decision"] == BROKER_HUMAN_REVIEW
+
+    # ── Hard-block missing active task ───────────────────────────────────
+
+    def test_hard_block_missing_task_for_mutation(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=False,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_missing_task"
+
+    def test_allow_read_without_task(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ,
+            command_class=CMD_READ_ONLY,
+            task_present=False,
+        )
+        assert result["decision"] == BROKER_ALLOW
+
+    # ── Hard-block enforcement readiness ─────────────────────────────────
+
+    def test_hard_block_enforcement_not_ready(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("src/pcae/core/example.py",),
+            paths=("src/pcae/core/example.py",),
+            readiness_ready=False,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_enforcement_not_ready"
+
+    def test_hard_block_enforcement_not_authorized(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("src/pcae/core/example.py",),
+            paths=("src/pcae/core/example.py",),
+            readiness_ready=True,
+            enforcement_authorized=False,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_enforcement_not_authorized"
+
+    # ── Hard-block unknown command class ─────────────────────────────────
+
+    def test_hard_block_unknown_command_class(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ, command_class=CMD_UNKNOWN,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_unknown_command_class"
+
+    def test_hard_block_invalid_command_class(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ, command_class="nonexistent_class",
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    # ── Human review for high-risk non-hard-block actions ────────────────
+
+    def test_human_review_commit_requires_approval(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_COMMIT,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_HUMAN_REVIEW
+        assert result["hard_block"] is False
+
+    def test_human_review_push_requires_approval(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_HUMAN_REVIEW
+
+    def test_human_review_rollback_requires_approval(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_ROLLBACK,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_HUMAN_REVIEW
+
+    # ── Approval may allow non-hard-block reviewable cases ───────────────
+
+    def test_approval_allows_commit(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_COMMIT,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            approval_present=True,
+            approval_fresh=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_ALLOW
+        assert result["hard_block"] is False
+
+    def test_approval_allows_push(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            approval_present=True,
+            approval_fresh=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_ALLOW
+
+    # ── Approval cannot override hard block ──────────────────────────────
+
+    def test_approval_cannot_override_force_push(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH,
+            command_class=CMD_FORCE_PUSH,
+            approval_present=True,
+            approval_fresh=True,
+            task_present=True,
+            task_scope_known=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_approval_cannot_override_raw_git_push(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH,
+            command_class=CMD_RAW_GIT_PUSH,
+            approval_present=True,
+            approval_fresh=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_approval_cannot_override_destructive_fs(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_DESTRUCTIVE_FS,
+            approval_present=True,
+            approval_fresh=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_approval_cannot_override_policy_forbidden(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_DOCS_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("README.md",),
+            paths=("README.md",),
+            approval_present=True,
+            approval_fresh=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_approval_cannot_override_unknown_class(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ,
+            command_class=CMD_UNKNOWN,
+            approval_present=True,
+            approval_fresh=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    # ── Accepted risk cannot override hard block ─────────────────────────
+
+    def test_accepted_risk_cannot_override_force_push(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH,
+            command_class=CMD_FORCE_PUSH,
+            accepted_risk_present=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_accepted_risk_cannot_override_raw_git_commit(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_RAW_GIT_COMMIT,
+            accepted_risk_present=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_accepted_risk_cannot_override_missing_task(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=False,
+            accepted_risk_present=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    # ── Stale approval ───────────────────────────────────────────────────
+
+    def test_stale_approval_blocked(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_COMMIT,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            approval_present=True,
+            approval_fresh=False,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_HUMAN_REVIEW
+        assert result["reason_code"] == "stale_approval"
+
+    # ── Audit payload ────────────────────────────────────────────────────
+
+    def test_audit_payload_allow(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ, command_class=CMD_READ_ONLY,
+        )
+        audit = result["audit_payload"]
+        assert audit["event_type"] == "enforcement.allowed"
+        assert "event_id" in audit
+        assert "timestamp" in audit
+        assert audit["hard_block"] is False
+
+    def test_audit_payload_deny(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_PUSH, command_class=CMD_FORCE_PUSH,
+        )
+        audit = result["audit_payload"]
+        assert audit["event_type"] == "enforcement.blocked"
+        assert audit["hard_block"] is True
+        assert audit["overridable"] is False
+
+    def test_audit_payload_human_review(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_COMMIT,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        audit = result["audit_payload"]
+        assert audit["event_type"] == "enforcement.gated_review"
+
+    def test_audit_payload_more_evidence(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=False,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        audit = result["audit_payload"]
+        assert audit["event_type"] == "enforcement.decision"
+
+    # ── Simulation invariants ────────────────────────────────────────────
+
+    def test_simulation_only_true(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert result["simulation_only"] is True
+
+    def test_no_execution_true(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert result["no_execution"] is True
+
+    def test_no_enforcement_true(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert result["no_enforcement"] is True
+
+    def test_authorization_granted_false(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert result["authorization_granted"] is False
+
+    def test_execution_authorized_false(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert result["execution_authorized"] is False
+
+    def test_schema_version_present(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert result["schema_version"] == "1.0"
+
+    # ── Messages ─────────────────────────────────────────────────────────
+
+    def test_allow_message_states_non_authorization(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ, command_class=CMD_READ_ONLY)
+        assert "does NOT authorize" in result["message"]
+
+    def test_deny_message_states_permanent(self):
+        result = evaluate_permission_broker(action_type=ACTION_PUSH, command_class=CMD_FORCE_PUSH)
+        assert "permanently blocked" in result["message"]
+
+    # ── Reason codes ─────────────────────────────────────────────────────
+
+    def test_reason_codes_list_present(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert isinstance(result["reason_codes"], list)
+        assert len(result["reason_codes"]) > 0
+
+    def test_allow_includes_all_checks_passed(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ, command_class=CMD_READ_ONLY)
+        assert "all_checks_passed" in result["reason_codes"]
+
+    def test_deny_includes_specific_reason(self):
+        result = evaluate_permission_broker(action_type=ACTION_SOURCE_MUTATION, command_class=CMD_DESTRUCTIVE_FS)
+        assert "blocked_by_destructive_filesystem" in result["reason_codes"]
+
+    # ── Required evidence ────────────────────────────────────────────────
+
+    def test_allow_has_empty_required_evidence(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ)
+        assert result["required_evidence"] == []
+
+    def test_more_evidence_has_required_evidence(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=False,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert len(result["required_evidence"]) > 0
+
+    # ── Edge cases ───────────────────────────────────────────────────────
+
+    def test_multiple_paths_one_forbidden(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_DOCS_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("PROJECT_STATUS.md", "CHANGELOG.md", "README.md"),
+            paths=("PROJECT_STATUS.md", "README.md"),
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_multiple_paths_one_out_of_scope(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("src/pcae/core/example.py",),
+            paths=("src/pcae/core/example.py", "src/pcae/core/other.py"),
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_read_action_without_paths(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ, command_class=CMD_READ_ONLY,
+        )
+        assert result["decision"] == BROKER_ALLOW
+
+    def test_accepted_risk_on_read(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_READ,
+            command_class=CMD_READ_ONLY,
+            accepted_risk_present=True,
+        )
+        assert result["decision"] == BROKER_ALLOW
+        assert "accepted_risk_noted" in result["reason_codes"]
+
+    def test_empty_paths_mutation_allowed(self):
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_ALLOW
+
+    def test_governed_command_class_allowed(self):
+        result = evaluate_permission_broker(action_type=ACTION_READ, command_class=CMD_GOVERNED)
+        assert result["decision"] == BROKER_ALLOW

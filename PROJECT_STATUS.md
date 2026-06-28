@@ -2,6 +2,19 @@
 
 ## Current Phase
 
+Phase 91A: Permission Broker Simulation Prototype (completed).
+
+Simulation-only implementation phase. Implemented evaluate_permission_broker()
+in src/pcae/core/permission_broker.py — a 4-outcome decision model (allow,
+deny, human_review, more_evidence) with explicit hard-block logic (88V §16),
+reason codes, operator messages, and audit payloads. Covers 8 action types,
+9 command classes, and all required hard-block categories. 55 new tests in
+TestBrokerDecisionModel91A. Existing build_permission_broker unchanged.
+No enforcement, shell interception, wrappers, backend invocation, or command
+execution. All simulation invariants preserved. Recommended next phase:
+91B — Broker CLI and Decision Explanation (requires explicit operator approval).
+Delivers docs/PHASE_91_PERMISSION_BROKER_SIMULATION_PROTOTYPE.md.
+
 Phase 90C: Permission Broker Enforcement Boundary Test Plan (completed).
 
 Test planning phase. Created a comprehensive test plan for the permission broker
