@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 89F: Dry-Run Blocking Simulation Integration Readiness Review (active).
+
+Review-only phase. Assessed dry-run simulation readiness as a guarded integration
+point. CLI/JSON/UX/advisory/broker/shell-gate integration points assessed READY
+for simulation-only operator use. Future enforcement assessed NOT READY — requires
+enforcement design, audit trail, rollback plan, operator approval model, bypass
+detection, threat model, and ~200 minimum enforcement tests before any real
+blocking. Defined 16 required guardrails (6 design, 5 test, 5 infrastructure).
+Documented 5 risks and 8 deferred defects. Delivers
+docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_INTEGRATION_READINESS_REVIEW.md.
+Recommends 89G — Enforcement Readiness Threat Model and Safety Case.
+
 Phase 89E: Dry-Run Blocking Simulation UX Refinement and Operator Guidance (completed).
 
 UX refinement phase. Improved human-readable dry-run output with structured
