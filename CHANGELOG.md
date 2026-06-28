@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Implemented Phase 89M enforcement approval and accepted-risk policy model with 5 scopes, 4 risk levels.
+- Added policy classification helpers (classify_hard_block, classify_approval, classify_accepted_risk).
+- Hard-block non-overridability preserved; approval is never authorization; accepted risk never overrides hard blocks.
+- Added 62 focused tests for 89M approval/risk policy.
+- Delivers docs/PHASE_89_ENFORCEMENT_APPROVAL_RISK_POLICY_PROTOTYPE.md.
 - Implemented Phase 89L enforcement audit event model with 16 event types from 89H §6.
 - Implemented Phase 89L rollback evidence model with pre-mutation snapshots, preconditions, and limitations.
 - Both 89L modules preserve no_execution=True, no_enforcement=True invariants; hard blocks permanently non-overridable.

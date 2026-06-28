@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 89M: Enforcement Approval/Risk Policy Prototype, simulation-only (completed).
+
+Simulation-only implementation phase. Implemented approval record model
+(src/pcae/core/enforcement_approval.py) with 5 scopes, 4 risk levels,
+expiration/revocation support, and policy classification helpers. Hard-block
+non-overridability preserved (hard_block_override always False). Approval is
+never authorization (is_authorization always False). No persistent approval
+store, no enforcement, no real authorization. 62 focused tests pass. Fast-green
+3221/3221 passed. Schema version 1.0.
+Delivers docs/PHASE_89_ENFORCEMENT_APPROVAL_RISK_POLICY_PROTOTYPE.md.
+
 Phase 89L: Enforcement Audit/Rollback Prototype, simulation-only (completed).
 
 Simulation-only implementation phase. Implemented enforcement audit event model
