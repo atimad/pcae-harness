@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 92A: Phase Report Artifact Model (completed).
+
+Implementation phase. Created PhaseReport dataclass (22 fields), make/write/read
+functions, Markdown and JSON rendering, and CLI (pcae phase-report create/show).
+Writes durable artifacts to .pcae/phase-reports/ (timestamped + latest).
+Foundation for future outbound notifications (92B–92D). 33 tests pass.
+No Telegram, notification dispatch, automatic hooks, enforcement, shell
+interception, wrappers, or backend invocation. Recommended next phase:
+92B — Pluggable Notification Foundation (requires explicit operator approval).
+Delivers docs/PHASE_92_PHASE_REPORT_ARTIFACT_MODEL.md.
+
 Phase 91C: Hard-Block Policy Readiness (completed).
 
 Simulation-only hardening phase. Added HardBlockPolicy frozen dataclass and

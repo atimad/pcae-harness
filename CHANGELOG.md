@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Implemented Phase 92A phase report artifact model: PhaseReport dataclass (22 fields), write/read/ render, CLI create/show.
+- Writes durable .pcae/phase-reports/ artifacts (timestamped + latest.md/json). 33 tests pass.
+- Foundation for future outbound notifications. Delivers docs/PHASE_92_PHASE_REPORT_ARTIFACT_MODEL.md.
 - Completed Phase 91C hard-block policy readiness: HARD_BLOCK_REGISTRY with 12 entries, validate/ lookup helpers, CLI hard-blocks command.
 - HardBlockPolicy dataclass with 10 fields; all 12 blocks are non-overridable (88V §16 preserved).
 - 30 hard-block tests, 265 total broker tests. Delivers docs/PHASE_91_HARD_BLOCK_POLICY_READINESS.md.

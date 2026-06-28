@@ -411,6 +411,10 @@ from pcae.commands.permission_broker import (
     run_permission_broker_check,
     run_permission_broker_hard_blocks,
 )
+from pcae.commands.phase_reports import (
+    run_phase_report_create,
+    run_phase_report_show,
+)
 from pcae.commands.advisory import (
     run_advisory_check,
     run_advisory_explain,
@@ -4830,6 +4834,43 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON hard-block registry output.",
     )
     pb_hb_parser.set_defaults(handler=run_permission_broker_hard_blocks)
+
+    # ── pcae phase-report (Phase 92A) ────────────────────────────────────
+    pr_parser = subparsers.add_parser(
+        "phase-report",
+        help="Create and inspect local phase report artifacts.",
+    )
+    pr_subparsers = pr_parser.add_subparsers(
+        dest="phase_report_command", required=True,
+    )
+
+    pr_create_parser = pr_subparsers.add_parser(
+        "create",
+        help="Create a new phase report artifact.",
+    )
+    pr_create_parser.add_argument("--phase-id", required=True, help="Phase identifier.")
+    pr_create_parser.add_argument("--phase-name", required=True, help="Phase name.")
+    pr_create_parser.add_argument("--status", required=True, help="Phase status (completed, failed, blocked, partial, cancelled).")
+    pr_create_parser.add_argument("--summary", required=True, help="Phase summary.")
+    pr_create_parser.add_argument("--started-at", default=None, help="ISO 8601 start timestamp.")
+    pr_create_parser.add_argument("--completed-at", default="", help="ISO 8601 completion timestamp.")
+    pr_create_parser.add_argument("--files-changed", type=int, default=0, help="Number of files changed.")
+    pr_create_parser.add_argument("--tests-run", type=int, default=0, help="Number of tests run.")
+    pr_create_parser.add_argument("--pushed-status", default="", help="Push status.")
+    pr_create_parser.add_argument("--origin-main-head-count", type=int, default=0, help="origin/main..HEAD count.")
+    pr_create_parser.add_argument("--recommended-next-phase", default="", help="Recommended next phase.")
+    pr_create_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
+    pr_create_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
+    pr_create_parser.set_defaults(handler=run_phase_report_create)
+
+    pr_show_parser = pr_subparsers.add_parser(
+        "show",
+        help="Show the latest phase report.",
+    )
+    pr_show_parser.add_argument("--latest", action="store_true", default=True, help="Show latest report (default).")
+    pr_show_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
+    pr_show_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
+    pr_show_parser.set_defaults(handler=run_phase_report_show)
 
     # ── pcae advisory (Phase 88X) ─────────────────────────────────────────
     advisory_parser = subparsers.add_parser(
