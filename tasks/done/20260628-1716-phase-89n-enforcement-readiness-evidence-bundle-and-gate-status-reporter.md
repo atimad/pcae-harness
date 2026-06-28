@@ -10,7 +10,7 @@ Phase 89N — Enforcement Readiness Evidence Bundle and Gate Status Reporter
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -24,6 +24,7 @@ Add a read-only readiness reporter that gathers evidence and reports enforcement
 
 - src/pcae/core/enforcement_readiness.py
 - src/pcae/commands/enforcement_readiness.py
+- src/pcae/cli.py
 - tests/test_enforcement_readiness.py
 - tests/test_enforcement_readiness_cli.py
 - docs/PHASE_89_ENFORCEMENT_READINESS_EVIDENCE_BUNDLE_AND_GATE_STATUS_REPORTER.md
