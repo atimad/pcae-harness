@@ -26,30 +26,70 @@ from pcae.core.notifications import (
 
 def run_notify_status(args: argparse.Namespace) -> int:
     """pcae notify status [--json]"""
+    import os
+    from pcae.core.notifications import TelegramSink
+
+    # Check Telegram configuration (without printing secrets)
+    tg_token = os.environ.get("PCAE_TELEGRAM_BOT_TOKEN", "")
+    tg_chat_id = os.environ.get("PCAE_TELEGRAM_CHAT_ID", "")
+    tg_enabled = os.environ.get("PCAE_TELEGRAM_ENABLED", "").lower() in ("1", "true", "yes")
+    tg_configured = bool(tg_token and tg_chat_id)
+    tg_active = tg_enabled and tg_configured
+
+    notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
+    notify_sinks_raw = os.environ.get("PCAE_NOTIFY_SINKS", "")
+    notify_sinks = [s.strip() for s in notify_sinks_raw.split(",") if s.strip()]
+
     data = {
         "notification_foundation_available": True,
-        "phase": "92B",
-        "sinks_available": ["noop", "stdout", "filesystem", "mock"],
+        "foundation_phase": "92B",
+        "phase": "92D",
+        "sinks_available": ["noop", "stdout", "filesystem", "mock", "telegram"],
         "event_types": sorted(VALID_EVENT_TYPES),
         "severities": sorted(VALID_SEVERITIES),
-        "telegram_implemented": False,
-        "automatic_hooks": False,
-        "external_network": False,
+        "telegram_sink_available": True,
+        "telegram_configured": tg_configured,
+        "telegram_enabled": tg_active,
+        "telegram_token_present": bool(tg_token),
+        "telegram_chat_id_present": bool(tg_chat_id),
+        "auto_finalization_hook_available": True,
+        "notification_dispatch_default": "disabled",
+        "notify_enabled": notify_enabled,
+        "configured_sinks": notify_sinks,
+        "external_network_possible": tg_active,
+        "external_network_active_by_default": False,
     }
 
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=True))
     else:
         print("Notification foundation status")
-        print(f"  Available:        {data['notification_foundation_available']}")
-        print(f"  Phase:            {data['phase']}")
-        print(f"  Sinks:            {', '.join(data['sinks_available'])}")
-        print(f"  Event types:      {', '.join(data['event_types'])}")
-        print(f"  Telegram:         {data['telegram_implemented']}")
-        print(f"  Auto hooks:       {data['automatic_hooks']}")
-        print(f"  External network: {data['external_network']}")
+        print(f"  Available:              {data['notification_foundation_available']}")
+        print(f"  Foundation phase:       {data['foundation_phase']}")
+        print(f"  Current phase:          {data['phase']}")
+        print(f"  Sinks:                  {', '.join(data['sinks_available'])}")
         print()
-        print("  No Telegram, no external network, no automatic hooks.")
+        print("  Telegram sink:")
+        print(f"    Available:            {data['telegram_sink_available']}")
+        print(f"    Configured:           {data['telegram_configured']}")
+        print(f"    Enabled:              {data['telegram_enabled']}")
+        print(f"    Token:                {'present' if tg_token else 'missing'}")
+        print(f"    Chat ID:              {'present' if tg_chat_id else 'missing'}")
+        print()
+        print("  Auto finalization hook:")
+        print(f"    Available:            {data['auto_finalization_hook_available']}")
+        print(f"    Notify default:       {data['notification_dispatch_default']}")
+        print(f"    Notify enabled:       {data['notify_enabled']}")
+        if notify_sinks:
+            print(f"    Configured sinks:     {', '.join(notify_sinks)}")
+        print()
+        print("  External network:")
+        print(f"    Possible:             {data['external_network_possible']}")
+        print(f"    Active by default:    {data['external_network_active_by_default']}")
+        print()
+        print("  Telegram is available but disabled unless configured.")
+        print("  Auto finalization hook creates reports; notify dispatch is opt-in.")
+        print("  Set PCAE_NOTIFY_ENABLED=1 to enable notification dispatch.")
 
     return 0
 

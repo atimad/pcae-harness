@@ -32,15 +32,17 @@ def test_status_text():
     assert result.returncode == 0
     assert "noop" in result.stdout
     assert "filesystem" in result.stdout
-    assert "Telegram" in result.stdout
+    assert "telegram" in result.stdout.lower()
+    assert "Telegram sink" in result.stdout
 
 
 def test_status_json():
     data = _json(["status"])
     assert data["notification_foundation_available"] is True
-    assert data["telegram_implemented"] is False
-    assert data["automatic_hooks"] is False
-    assert data["external_network"] is False
+    assert data["telegram_sink_available"] is True
+    assert data["auto_finalization_hook_available"] is True
+    assert data["external_network_possible"] is False
+    assert data["external_network_active_by_default"] is False
 
 
 # ── test noop ────────────────────────────────────────────────────────────────

@@ -113,7 +113,10 @@ class PhaseReport:
         }
 
     def render_markdown(self) -> str:
-        """Render a human-readable Markdown summary."""
+        """Render a human-readable Markdown summary.
+
+        Uses "not captured" for unknown fields instead of misleading zeroes.
+        """
         lines: list[str] = []
         lines.append(f"# Phase Report: {self.phase_name}")
         lines.append("")
@@ -121,12 +124,33 @@ class PhaseReport:
         lines.append(f"- **Status:** {self.status}")
         if self.completed_at:
             lines.append(f"- **Completed:** {self.completed_at}")
-        lines.append(f"- **Files changed:** {self.files_changed}")
-        lines.append(f"- **Tests run:** {self.tests_run}")
+
+        # Files changed — show "not captured" instead of misleading 0
+        if self.files_changed > 0 or self.commits:
+            lines.append(f"- **Files changed:** {self.files_changed}")
+        else:
+            lines.append(f"- **Files changed:** not captured")
+
+        # Tests run — show "not captured" instead of misleading 0
+        if self.tests_run > 0:
+            lines.append(f"- **Tests run:** {self.tests_run}")
+        else:
+            lines.append(f"- **Tests run:** not captured")
+
+        # Commits
         if self.commits:
             lines.append(f"- **Commits:** {', '.join(self.commits)}")
-        lines.append(f"- **Pushed:** {self.pushed_status}")
-        lines.append(f"- **origin/main..HEAD:** {self.origin_main_head_count}")
+        else:
+            lines.append(f"- **Commits:** not captured")
+
+        # Push status
+        push_display = self.pushed_status if self.pushed_status else "not captured"
+        lines.append(f"- **Pushed:** {push_display}")
+
+        # origin/main..HEAD — only show if pushed
+        if self.pushed_status:
+            lines.append(f"- **origin/main..HEAD:** {self.origin_main_head_count}")
+
         lines.append("")
         lines.append("## Summary")
         lines.append("")
@@ -169,7 +193,7 @@ class PhaseReport:
             lines.append("")
 
         if self.recommended_next_phase:
-            lines.append(f"## Recommended Next Phase")
+            lines.append("## Recommended Next Phase")
             lines.append("")
             lines.append(self.recommended_next_phase)
             lines.append("")

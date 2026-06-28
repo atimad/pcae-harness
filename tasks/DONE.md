@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 92D.1 — Notification and Phase Report Status UX Repair (20260629-0017-92d-1-notification-and-phase-report-status-ux-repair)
 - 92D — Automatic Phase-Finalization Notification Hook (20260629-0003-92d-automatic-phase-finalization-notification-hook)
 - 92C — Telegram Outbound Phase Report Delivery (20260628-2356-92c-telegram-outbound-phase-report-delivery)
 - 92B — Pluggable Notification Foundation (20260628-2351-92b-pluggable-notification-foundation)

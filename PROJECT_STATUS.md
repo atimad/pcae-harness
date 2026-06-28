@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 92D.1: Notification and Phase Report Status UX Repair (completed).
+
+Corrective UX phase. Fixed pcae notify status to accurately reflect 92B/92C/92D
+state (Telegram available but disabled, auto hook available, dispatch opt-in).
+Fixed pcae phase-report show --latest to render detailed final-report output
+with "not captured" instead of misleading zeroes. Updated render_markdown()
+with unknown-vs-zero semantics. 100 related tests pass. No enforcement,
+shell, wrappers, backend, or Telegram inbound.
+Recommended next phase: 93A — Narrow Shell Gate Design.
+Delivers docs/PHASE_92_NOTIFICATION_AND_PHASE_REPORT_STATUS_UX_REPAIR.md.
+
 Phase 92D: Automatic Phase-Finalization Notification Hook (completed).
 
 Integration phase. Wired finalize_phase_report() into pcae phase complete —

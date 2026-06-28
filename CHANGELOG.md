@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 92D.1 UX repair: fixed pcae notify status accuracy and phase-report show detail.
+- notify status now shows Telegram available/configured/enabled, auto hook available, dispatch opt-in.
+- phase-report show uses "not captured" instead of misleading zeroes. Delivers docs/PHASE_92_NOTIFICATION_AND_PHASE_REPORT_STATUS_UX_REPAIR.md.
 - Completed Phase 92D automatic finalization hook: auto-creates phase reports + optional notifications on pcae phase complete.
 - Notifications disabled by default; failure is non-fatal. 16 new tests, 365 regression. Delivers docs/PHASE_92_AUTOMATIC_PHASE_FINALIZATION_NOTIFICATION_HOOK.md.
 - Implemented Phase 92C Telegram outbound delivery: TelegramSink (sendMessage + sendDocument), CLI notify send-report.
