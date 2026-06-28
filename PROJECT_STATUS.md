@@ -2,17 +2,28 @@
 
 ## Current Phase
 
-Phase 89J: Enforcement Readiness Gate Checklist and Go/No-Go Criteria (completed).
+Phase 89K: Enforcement Readiness Test Plan and Fixture Design (completed).
 
-Final readiness phase. Created formal go/no-go enforcement gate checklist: 69 gates
-across 8 dimensions (design 13, implementation 11, test 15, audit 8, rollback 5,
-operator approval 7, secret protection 5, bypass detection 5). Defined 10 absolute
-and 4 conditional must-not-proceed conditions. Provided evidence checklist and
-phase authorization requirements. Final readiness matrix: 4 of 69 gates satisfied
-(2 test + 2 secret-protection from simulation), 64 unsatisfied, 1 deferred. Overall
-assessment: 🚫 NO-GO — enforcement implementation not authorized. Operator must
-choose between 89K (test plan) or 90A (broker enforcement boundary design).
-Delivers docs/PHASE_89_ENFORCEMENT_READINESS_GATE_CHECKLIST.md.
+Test-planning phase. Created comprehensive enforcement-readiness test plan
+transforming 89G–89J threat model, audit/rollback model, approval/risk model,
+and go/no-go checklist into a concrete validation plan. Defined 25 test categories
+covering hard-block invariants through recovery from interrupted enforcement.
+Defined fixture taxonomy with 13 fixture types (command, task_contract, repo_state,
+audit_event, rollback_artifact, approval, accepted_risk, secret, shell, backend,
+failure_mode, telegram_command, json_schema). Created 237 cataloged fixtures
+across all types. Mapped all 89G safety claims, 89H audit/rollback schemas,
+89I approval/risk policies, and 89J go/no-go gates to concrete test requirements.
+Defined expected outcomes with 23 assertion types, minimum pass thresholds
+(100% for hard-block/audit/rollback/redaction categories, ≥99% overall),
+5 test execution tiers from fast-green to full enforcement suite, data isolation
+and cleanup rules, and required evidence artifacts. Estimated ~304 enforcement-
+specific tests across 25 categories. Enforcement implementation remains NOT
+authorized (69 gates: 4 satisfied, 64 unsatisfied, 1 deferred). Operator must
+choose between 89L (audit/rollback prototype) or 90A (broker enforcement
+boundary design).
+Delivers docs/PHASE_89_ENFORCEMENT_READINESS_TEST_PLAN_AND_FIXTURE_DESIGN.md.
+
+Phase 89J: Enforcement Readiness Gate Checklist and Go/No-Go Criteria (completed).
 
 Phase 89I: Enforcement Operator Approval and Accepted-Risk Policy Design (completed).
 

@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- Added Phase 89K enforcement readiness test plan and fixture design document.
+- Defined 25 enforcement test categories covering hard-block invariants through recovery from interrupted enforcement.
+- Defined fixture taxonomy with 13 fixture types: command, task_contract, repo_state, audit_event, rollback_artifact, approval, accepted_risk, secret, shell, backend, failure_mode, telegram_command, and json_schema.
+- Created 237 cataloged fixtures with schemas across all 13 fixture types.
+- Mapped all 89G safety claims, 89H audit/rollback schemas, 89I approval/risk policies, and 89J go/no-go gates to concrete test requirements.
+- Defined 23 assertion types and minimum pass thresholds (100% for hard-block/audit/rollback/redaction categories, ≥99% overall).
+- Defined 5 test execution tiers (fast-green through full enforcement suite) with CI integration.
+- Defined data isolation, cleanup rules, and required evidence artifacts.
+- Estimated ~304 enforcement-specific tests required before enforcement implementation.
+- Delivers docs/PHASE_89_ENFORCEMENT_READINESS_TEST_PLAN_AND_FIXTURE_DESIGN.md.
+
 ### 89E — Dry-Run Simulation UX Refinement and Operator Guidance (2026-06-28)
 
 Refined human-readable dry-run output with structured sections per decision type:

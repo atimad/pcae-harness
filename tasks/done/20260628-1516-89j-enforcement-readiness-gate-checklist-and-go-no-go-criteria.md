@@ -10,7 +10,7 @@
 
 ## Status
 
-active
+completed
 
 ## Mode
 
