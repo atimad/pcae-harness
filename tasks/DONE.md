@@ -2,6 +2,8 @@
 
 ## Completed
 
+- 89E — Dry-Run Blocking Simulation UX Refinement and Operator Guidance (20260628-1408-89e-dry-run-blocking-simulation-ux-refinement-and-operator-guidance)
+- 89D — Dry-Run Blocking Simulation Test Matrix and CLI Stability Review (20260628-1252-89d-dry-run-blocking-simulation-test-matrix-and-cli-stability-review)
 - 89C — Dry-Run Blocking Simulation Prototype (20260628-1217-89c-dry-run-blocking-simulation-prototype)
 - 89B — Dry-Run Blocking Simulation Design (20260628-1151-89b-dry-run-blocking-simulation-design)
 - 89A — Advisory Mode Hardening / False-Positive Repair (20260628-1107-89a-advisory-mode-hardening-false-positive-repair)
