@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 89A — Advisory Mode Hardening / False-Positive Repair (20260628-1107-89a-advisory-mode-hardening-false-positive-repair)
 - 88Z — Advisory Operator UX and Workflow Design (20260628-0941-88z-advisory-operator-ux-and-workflow-design)
 - 88Y.5 — Project State Shared Evidence Optimization (20260627-1816-88y-5-project-state-shared-evidence-optimization)
 - 88Y.1 — CLI Subprocess Runtime Reduction (20260627-88y1-cli-subprocess-runtime-reduction)
