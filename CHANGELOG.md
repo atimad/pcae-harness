@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Implemented Phase 89N enforcement readiness gate status reporter (pcae enforcement-readiness status).
+- Registered 69 readiness gates from 89J across 8 dimensions (design, implementation, test, audit, rollback, approval, secret, bypass).
+- Added read-only CLI with JSON and human-readable output; enforcement remains NOT authorized.
+- Added 70 focused tests (47 core, 23 CLI) for 89N.
+- Delivers docs/PHASE_89_ENFORCEMENT_READINESS_EVIDENCE_BUNDLE_AND_GATE_STATUS_REPORTER.md.
 - Implemented Phase 89M enforcement approval and accepted-risk policy model with 5 scopes, 4 risk levels.
 - Added policy classification helpers (classify_hard_block, classify_approval, classify_accepted_risk).
 - Hard-block non-overridability preserved; approval is never authorization; accepted risk never overrides hard blocks.

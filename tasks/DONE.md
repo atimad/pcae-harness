@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 89N — Enforcement Readiness Evidence Bundle and Gate Status Reporter (20260628-1716-89n-enforcement-readiness-evidence-bundle-and-gate-status-reporter)
 - 89M — Enforcement Approval/Risk Policy Prototype, simulation-only (20260628-1711-89m-enforcement-approval-risk-policy-prototype-simulation-only)
 - 89L — Enforcement Audit/Rollback Prototype, simulation-only (20260628-1708-89l-enforcement-audit-rollback-prototype-simulation-only)
 - 89K — Enforcement Readiness Test Plan and Fixture Design (completion) (20260628-1647-89k-enforcement-readiness-test-plan-and-fixture-design-completion)

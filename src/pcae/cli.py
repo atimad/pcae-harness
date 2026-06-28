@@ -415,6 +415,7 @@ from pcae.commands.dry_run import (
     run_dry_run_explain,
     run_dry_run_status,
 )
+from pcae.commands.enforcement_readiness import run_enforcement_readiness_status
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.mutation_preflight import run_mutation_preflight
@@ -4860,6 +4861,25 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON status.",
     )
     dry_run_status_parser.set_defaults(handler=run_dry_run_status)
+
+    # ── pcae enforcement-readiness (Phase 89N) ─────────────────────────────
+    enforcement_readiness_parser = subparsers.add_parser(
+        "enforcement-readiness",
+        help="Enforcement readiness gate status reporter (read-only, non-authorizing).",
+    )
+    enforcement_readiness_subparsers = enforcement_readiness_parser.add_subparsers(
+        dest="enforcement_readiness_command", required=True,
+    )
+    enforcement_readiness_status_parser = enforcement_readiness_subparsers.add_parser(
+        "status",
+        help="Report enforcement readiness gate status.",
+    )
+    enforcement_readiness_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON readiness report.",
+    )
+    enforcement_readiness_status_parser.set_defaults(handler=run_enforcement_readiness_status)
 
     preflight_parser = subparsers.add_parser(
         "preflight",
