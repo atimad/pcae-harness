@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89C: Dry-Run Blocking Simulation Prototype (active).
+Phase 89C: Dry-Run Blocking Simulation Prototype (completed).
 
 Implementation phase. Implemented pcae dry-run check/explain/status commands
 as designed in 89B. New core module (src/pcae/core/dry_run.py) wraps advisory
