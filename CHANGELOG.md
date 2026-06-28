@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Completed Phase 92D automatic finalization hook: auto-creates phase reports + optional notifications on pcae phase complete.
+- Notifications disabled by default; failure is non-fatal. 16 new tests, 365 regression. Delivers docs/PHASE_92_AUTOMATIC_PHASE_FINALIZATION_NOTIFICATION_HOOK.md.
 - Implemented Phase 92C Telegram outbound delivery: TelegramSink (sendMessage + sendDocument), CLI notify send-report.
 - 20 Telegram tests with mocked HTTP, 54 total notification tests. Delivers docs/PHASE_92_TELEGRAM_OUTBOUND_PHASE_REPORT_DELIVERY.md.
 - Implemented Phase 92B pluggable notification foundation: NotificationEvent/Result, 4 sinks, dispatcher, CLI notify status/test.

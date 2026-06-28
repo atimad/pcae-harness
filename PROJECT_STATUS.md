@@ -2,6 +2,19 @@
 
 ## Current Phase
 
+Phase 92D: Automatic Phase-Finalization Notification Hook (completed).
+
+Integration phase. Wired finalize_phase_report() into pcae phase complete —
+auto-creates phase report artifacts (.pcae/phase-reports/latest.md/json +
+timestamped) and optionally dispatches notifications via 92B/92C sinks.
+Notifications disabled by default (PCAE_NOTIFY_ENABLED=1 to enable).
+Notification failure is non-fatal to phase finalization. 16 new tests,
+365 total regression tests. No Telegram polling, inbound commands, remote shell,
+/run, commit/push control, enforcement, shell interception, wrappers, or
+backend invocation. Recommended next phase: 93A — Narrow Shell Gate Design
+(requires explicit operator approval).
+Delivers docs/PHASE_92_AUTOMATIC_PHASE_FINALIZATION_NOTIFICATION_HOOK.md.
+
 Phase 92C: Telegram Outbound Phase Report Delivery (completed).
 
 Implementation phase. Added TelegramSink implementing NotificationSink protocol

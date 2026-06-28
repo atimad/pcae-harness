@@ -236,3 +236,178 @@ def test_metadata_preserved():
         metadata={"operator": "test-user", "session": "s1"},
     )
     assert r.metadata["operator"] == "test-user"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D — Automatic finalization hook tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+from pcae.core.phase_reports import finalize_phase_report
+
+
+def test_finalize_creates_latest_artifacts():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="Test Phase", status="completed",
+            summary="All done.", reports_dir=Path(td),
+        )
+        assert fin["report"] is not None
+        assert fin["paths"]["latest_markdown"]
+        assert Path(fin["paths"]["latest_markdown"]).exists()
+        assert Path(fin["paths"]["latest_json"]).exists()
+
+
+def test_finalize_creates_timestamped_artifacts():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="Test Phase", status="completed",
+            summary="Done.", reports_dir=Path(td),
+        )
+        assert fin["paths"]["markdown"]
+        assert fin["paths"]["json"]
+        assert Path(fin["paths"]["markdown"]).exists()
+        assert Path(fin["paths"]["json"]).exists()
+
+
+def test_finalize_report_includes_phase_identity():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="91A", phase_name="Broker Proto", status="completed",
+            summary="Implemented.", reports_dir=Path(td),
+        )
+        content = Path(fin["paths"]["latest_markdown"]).read_text()
+        assert "91A" in content
+        assert "Broker Proto" in content
+
+
+def test_finalize_notification_skipped_by_default():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y", reports_dir=Path(td),
+        )
+        assert fin["notification_skipped"] is True
+        assert fin["notification_results"] is None
+
+
+def test_finalize_preserves_explicit_no_go():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y",
+            explicit_no_go_confirmations=["No enforcement", "No shell"],
+            reports_dir=Path(td),
+        )
+        content = Path(fin["paths"]["latest_markdown"]).read_text()
+        assert "No enforcement" in content
+
+
+def test_finalize_includes_commits():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y", commits=["abc123", "def456"],
+            pushed_status="pushed", origin_main_head_count=0,
+            reports_dir=Path(td),
+        )
+        content = Path(fin["paths"]["latest_markdown"]).read_text()
+        assert "abc123" in content
+
+
+def test_finalize_includes_next_phase():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y", recommended_next_phase="91A",
+            reports_dir=Path(td),
+        )
+        content = Path(fin["paths"]["latest_markdown"]).read_text()
+        assert "91A" in content
+
+
+def test_finalize_notification_with_filesystem_sink(monkeypatch):
+    monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+    monkeypatch.setenv("PCAE_NOTIFY_SINKS", "filesystem")
+    with tempfile.TemporaryDirectory() as td:
+        notify_dir = Path(td) / "notifications"
+        monkeypatch.setenv("PCAE_NOTIFY_OUTPUT_DIR", str(notify_dir))
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y", reports_dir=Path(td),
+        )
+        assert fin["notification_skipped"] is False
+        assert fin["notification_results"] is not None
+        assert len(fin["notification_results"]) > 0
+        assert fin["notification_results"][0].success is True
+
+
+def test_finalize_notification_with_noop_sink(monkeypatch):
+    monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+    monkeypatch.setenv("PCAE_NOTIFY_SINKS", "noop")
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y", reports_dir=Path(td),
+        )
+        assert fin["notification_skipped"] is False
+        assert fin["notification_results"][0].success is True
+
+
+def test_finalize_telegram_disabled_does_not_send(monkeypatch):
+    monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+    monkeypatch.setenv("PCAE_NOTIFY_SINKS", "telegram")
+    # No PCAE_TELEGRAM_BOT_TOKEN set → TelegramSink won't be configured
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y", reports_dir=Path(td),
+        )
+        assert fin["report"] is not None  # report still created
+        # Notification attempted but Telegram fails gracefully
+
+
+def test_finalize_notification_failure_non_fatal(monkeypatch):
+    """Report creation succeeds even if notification config is broken."""
+    monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+    monkeypatch.setenv("PCAE_NOTIFY_SINKS", "telegram")
+    # Missing token → sink disabled, but report still created
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="90A", phase_name="X", status="completed",
+            summary="Y", reports_dir=Path(td),
+        )
+        assert fin["report"] is not None
+        assert fin["report_error"] is None
+
+
+def test_finalize_report_creation_failure_handled():
+    """Invalid phase_id should not crash."""
+    fin = finalize_phase_report(
+        phase_id="", phase_name="X", status="completed",
+        summary="Y",
+    )
+    assert fin["report"] is None
+    assert fin["report_error"] is not None
+
+
+def test_finalize_with_all_fields():
+    with tempfile.TemporaryDirectory() as td:
+        fin = finalize_phase_report(
+            phase_id="92A", phase_name="Full Test", status="completed",
+            summary="Everything works.",
+            files_changed=5, tests_run=3305,
+            test_results={"fast_green": "3305/3305"},
+            governance_results={"health": "healthy", "check": "passed"},
+            commits=["abc123", "def456"],
+            pushed_status="pushed", origin_main_head_count=0,
+            explicit_no_go_confirmations=["No enforcement", "No Telegram inbound"],
+            recommended_next_phase="93A",
+            reports_dir=Path(td),
+        )
+        assert fin["report"] is not None
+        content = Path(fin["paths"]["latest_markdown"]).read_text()
+        assert "Full Test" in content
+        assert "3305" in content
+        assert "healthy" in content
+        assert "No enforcement" in content
+        assert "93A" in content

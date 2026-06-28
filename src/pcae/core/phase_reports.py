@@ -280,3 +280,135 @@ def _utc_now_iso() -> str:
 
 def is_valid_status(status: str) -> bool:
     return status in VALID_STATUSES
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D — Automatic finalization hook
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+def finalize_phase_report(
+    phase_id: str,
+    phase_name: str,
+    status: str,
+    summary: str,
+    *,
+    reports_dir: Path | None = None,
+    files_changed: int = 0,
+    tests_run: int = 0,
+    test_results: dict[str, Any] | None = None,
+    governance_results: dict[str, Any] | None = None,
+    commits: list[str] | None = None,
+    pushed_status: str = "",
+    origin_main_head_count: int = 0,
+    explicit_no_go_confirmations: list[str] | None = None,
+    recommended_next_phase: str = "",
+    **kwargs: Any,
+) -> dict[str, Any]:
+    """Create a phase report artifact and optionally dispatch notifications.
+
+    Called automatically on pcae phase complete.  Notification failure
+    is non-fatal — phase finalization always completes.
+
+    Returns a dict with:
+      report: PhaseReport (the created report)
+      paths: dict (written artifact paths)
+      notification_results: list[NotificationResult] or None
+      notification_skipped: bool
+      notification_error: str or None
+
+    Notifications are disabled by default.  Enable with:
+      PCAE_NOTIFY_ENABLED=1
+      PCAE_NOTIFY_SINKS=telegram,filesystem  (optional, default: filesystem)
+      PCAE_NOTIFY_OUTPUT_DIR=.pcae/notifications  (default)
+    """
+    import os
+    from pathlib import Path as _Path
+
+    if reports_dir is None:
+        reports_dir = _Path(".pcae/phase-reports")
+
+    # 1. Create and write the phase report
+    try:
+        report = make_phase_report(
+            phase_id=phase_id,
+            phase_name=phase_name,
+            status=status,
+            summary=summary,
+            files_changed=files_changed,
+            tests_run=tests_run,
+            test_results=test_results or {},
+            governance_results=governance_results or {},
+            commits=commits or [],
+            pushed_status=pushed_status,
+            origin_main_head_count=origin_main_head_count,
+            explicit_no_go_confirmations=explicit_no_go_confirmations or [],
+            recommended_next_phase=recommended_next_phase,
+        )
+        paths = write_phase_report(report, reports_dir)
+    except Exception as exc:
+        return {
+            "report": None,
+            "paths": {},
+            "notification_results": None,
+            "notification_skipped": True,
+            "notification_error": None,
+            "report_error": str(exc),
+        }
+
+    # 2. Optionally dispatch notifications
+    notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
+    if not notify_enabled:
+        return {
+            "report": report,
+            "paths": paths,
+            "notification_results": None,
+            "notification_skipped": True,
+            "notification_error": None,
+            "report_error": None,
+        }
+
+    # 3. Build sinks from env config
+    sink_names_raw = os.environ.get("PCAE_NOTIFY_SINKS", "filesystem")
+    sink_names = [s.strip() for s in sink_names_raw.split(",") if s.strip()]
+    output_dir = _Path(os.environ.get("PCAE_NOTIFY_OUTPUT_DIR", ".pcae/notifications"))
+
+    from pcae.core.notifications import (
+        NoopSink,
+        FilesystemSink,
+        TelegramSink,
+        dispatch,
+        phase_report_to_notification_event,
+        NotificationSink,
+    )
+
+    event = phase_report_to_notification_event(
+        report,
+        artifact_paths=[str(paths.get("latest_markdown", ""))],
+    )
+
+    sinks: list[NotificationSink] = []
+    for name in sink_names:
+        if name == "noop":
+            sinks.append(NoopSink())
+        elif name == "filesystem":
+            sinks.append(FilesystemSink(output_dir))
+        elif name == "telegram":
+            sinks.append(TelegramSink())
+
+    notification_error: str | None = None
+    notification_results = None
+    if sinks:
+        try:
+            notification_results = dispatch(event, sinks)
+        except Exception as exc:
+            notification_error = str(exc)
+
+    return {
+        "report": report,
+        "paths": paths,
+        "notification_results": notification_results,
+        "notification_skipped": False,
+        "notification_error": notification_error,
+        "report_error": None,
+    }

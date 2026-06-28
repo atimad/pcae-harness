@@ -44,6 +44,10 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         print(f"Agent lock: released (by {result.agent_id})")
     else:
         print("Agent lock: none")
+
+    # ── Phase 92D — Auto-create phase report + optional notifications ───
+    _finalize_report_and_notify(args.summary)
+
     challenge = build_irg_challenge_context(root)
     assessment = build_challenge_attention_assessment(root, surface="completion", challenge_data=challenge)
     lines = render_irg_challenge_compact_lines_with_allocation(
@@ -54,6 +58,91 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         for line in lines:
             print(line)
     return 0
+
+
+def _finalize_report_and_notify(summary: str) -> None:
+    """Create a phase report artifact and optionally dispatch notifications.
+
+    Phase 92D — automatic finalization hook.  Notification failure is
+    non-fatal.  Notifications are disabled by default.
+    """
+    import os
+    from pcae.core.phase_reports import finalize_phase_report
+
+    # Derive phase info from summary — parse phase ID and name
+    phase_id = _derive_phase_id(summary)
+    phase_name = _derive_phase_name(summary)
+
+    notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
+
+    fin = finalize_phase_report(
+        phase_id=phase_id,
+        phase_name=phase_name,
+        status="completed",
+        summary=summary,
+        recommended_next_phase=_derive_next_phase(summary),
+    )
+
+    if fin.get("report_error"):
+        print(f"Phase report: ERROR — {fin['report_error']}")
+        return
+
+    paths = fin.get("paths", {})
+    md_path = paths.get("markdown", "")
+    json_path = paths.get("json", "")
+    print(f"Phase report: created")
+    if md_path:
+        print(f"  Markdown: {md_path}")
+    if json_path:
+        print(f"  JSON:     {json_path}")
+
+    if fin.get("notification_skipped"):
+        if not notify_enabled:
+            print("Notifications: skipped (disabled — set PCAE_NOTIFY_ENABLED=1)")
+        else:
+            print("Notifications: skipped (no sinks configured)")
+        return
+
+    nresults = fin.get("notification_results") or []
+    for r in nresults:
+        status = "OK" if r.success else "FAILED"
+        print(f"  Notify [{r.sink_name}]: {status} — {r.message}")
+        if r.error:
+            print(f"    Error: {r.error}")
+
+    if fin.get("notification_error"):
+        print(f"Notifications: ERROR — {fin['notification_error']}")
+
+
+def _derive_phase_id(summary: str) -> str:
+    """Derive a phase ID from the summary text."""
+    import re
+    m = re.search(r"Phase\s+(\d+[A-Z](?:\.\d+)?)", summary)
+    if m:
+        return m.group(1)
+    return "unknown"
+
+
+def _derive_phase_name(summary: str) -> str:
+    """Derive a phase name from the summary text."""
+    import re
+    m = re.search(r"Phase\s+\d+[A-Za-z0-9.]*(?:\.\d+)?:\s*(.+?)(?:\.\s|$)", summary)
+    if m:
+        name = m.group(1).strip()
+        if len(name) > 100:
+            name = name[:97] + "..."
+        return name
+    # Fallback: use first 80 chars of summary
+    return summary[:80].rsplit(" ", 1)[0]
+
+
+def _derive_next_phase(summary: str) -> str:
+    """Derive recommended next phase from summary text."""
+    import re
+    m = re.search(r"(?:Recommended next phase|Next phase|next phase)[:\s]+(\d+[A-Z](?:\.\d+)?)", summary)
+    if m:
+        return m.group(1)
+    return ""
 
 
 def run_phase_handoff(args: argparse.Namespace) -> int:
