@@ -2,6 +2,20 @@
 
 ## Current Phase
 
+Phase 90C: Permission Broker Enforcement Boundary Test Plan (completed).
+
+Test planning phase. Created a comprehensive test plan for the permission broker
+enforcement boundary designed in 90A. Defines ~231 tests across 13 categories:
+broker input model (task contract, command class, approval, risk, readiness),
+broker output model (decisions, reason codes, audit payload), hard-block
+invariant tests, human review and accepted-risk tests, fail-closed behavior,
+audit evidence, fixture strategy (9 fixture types, 38 catalog entries), and
+CLI test strategy (~54 tests). References canonical roadmap (docs/ROADMAP.md).
+No source or test files changed. No enforcement implemented.
+Recommended next phase: 91A — Permission Broker Simulation Prototype
+(requires explicit operator approval).
+Delivers docs/PHASE_90_PERMISSION_BROKER_ENFORCEMENT_BOUNDARY_TEST_PLAN.md.
+
 Phase 90B.1: Roadmap Coherence and Production v1 Plan Ingestion (completed).
 
 Planning phase. Inspected existing roadmap/planning artifacts, identified

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Completed Phase 90C permission broker enforcement boundary test plan (design-only).
+- Defined ~231 tests across 13 categories: input/output models, hard-block invariants, human review, accepted risk, fail-closed, audit evidence, fixtures, CLI.
+- Defined 9 fixture types with 38 catalog entries for isolated repos, task contracts, approvals, accepted risks, and readiness states.
+- No source or test files changed. No enforcement implemented.
+- Delivers docs/PHASE_90_PERMISSION_BROKER_ENFORCEMENT_BOUNDARY_TEST_PLAN.md.
 - Completed Phase 90B.1 roadmap coherence and Production v1 plan ingestion.
 - Updated docs/ROADMAP.md as canonical roadmap with Production v1 path (90C–96A) and future v2/pluggability track.
 - Clarified Telegram scope: outbound only in Production v1; no inbound commands, no remote shell, no /run.
