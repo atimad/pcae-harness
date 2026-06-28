@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Completed Phase 90B full-suite baseline inspection and scope/preflight repair.
+- Investigated 188 pre-existing full-suite failures; root cause is active task contract "TBD" scope.
+- Full suite restored to 9530/9530 passed (0 failures) in 1492s. Zero source or test files changed.
+- Same root cause pattern as 88X.1: preflight integration tests subprocessing against live REPO_ROOT are sensitive to active task contract state.
+- Delivers docs/PHASE_90_FULL_SUITE_BASELINE_INSPECTION_AND_SCOPE_PREFLIGHT_REPAIR.md.
 - Completed Phase 90A Permission Broker Enforcement Boundary Design (design-only).
 - Defined enforcement boundary between permission broker, advisory, shell-gate, dry-run simulation and future enforcement path.
 - Documented 28 design sections: layer responsibilities, broker input/output model, hard-block non-overridable model, human-review model, accepted-risk model, operator-approval model, audit/rollback evidence model, fail-closed behavior, no-go conditions, and 90B repair plan.

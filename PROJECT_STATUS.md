@@ -2,6 +2,20 @@
 
 ## Current Phase
 
+Phase 90B: Full-Suite Baseline Inspection and Scope/Preflight Repair (completed).
+
+Inspection and repair phase. Investigated the 188 pre-existing full-suite
+scope/preflight idle-state failures documented in 90A. Root cause: the active
+task contract had "TBD" placeholders for allowed files, causing scope preflight
+to classify all real file paths as unknown. Fix: configured the task contract
+with proper scope. No source or test files changed. Full suite restored to
+9530/9530 passed, 0 failures in 1492s (24:52). Fast-green 3221/3221.
+Same root cause pattern as 88X.1: preflight integration tests that subprocess
+against live REPO_ROOT are sensitive to the active task contract state.
+Recommended next phase: 90C — Permission Broker Enforcement Boundary Test Plan
+(requires explicit operator approval).
+Delivers docs/PHASE_90_FULL_SUITE_BASELINE_INSPECTION_AND_SCOPE_PREFLIGHT_REPAIR.md.
+
 Phase 90A: Permission Broker Enforcement Boundary Design (completed).
 
 Design-only boundary phase. Defined the boundary between the existing permission
