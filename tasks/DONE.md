@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 89C — Dry-Run Blocking Simulation Prototype (20260628-1217-89c-dry-run-blocking-simulation-prototype)
 - 89B — Dry-Run Blocking Simulation Design (20260628-1151-89b-dry-run-blocking-simulation-design)
 - 89A — Advisory Mode Hardening / False-Positive Repair (20260628-1107-89a-advisory-mode-hardening-false-positive-repair)
 - 88Z — Advisory Operator UX and Workflow Design (20260628-0941-88z-advisory-operator-ux-and-workflow-design)
