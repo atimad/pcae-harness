@@ -2,26 +2,23 @@
 
 ## Current Phase
 
-Phase 89K: Enforcement Readiness Test Plan and Fixture Design (completed).
+Phase 89L: Enforcement Audit/Rollback Prototype, simulation-only (completed).
 
-Test-planning phase. Created comprehensive enforcement-readiness test plan
-transforming 89G–89J threat model, audit/rollback model, approval/risk model,
-and go/no-go checklist into a concrete validation plan. Defined 25 test categories
-covering hard-block invariants through recovery from interrupted enforcement.
-Defined fixture taxonomy with 13 fixture types (command, task_contract, repo_state,
-audit_event, rollback_artifact, approval, accepted_risk, secret, shell, backend,
-failure_mode, telegram_command, json_schema). Created 237 cataloged fixtures
-across all types. Mapped all 89G safety claims, 89H audit/rollback schemas,
-89I approval/risk policies, and 89J go/no-go gates to concrete test requirements.
-Defined expected outcomes with 23 assertion types, minimum pass thresholds
-(100% for hard-block/audit/rollback/redaction categories, ≥99% overall),
-5 test execution tiers from fast-green to full enforcement suite, data isolation
-and cleanup rules, and required evidence artifacts. Estimated ~304 enforcement-
-specific tests across 25 categories. Enforcement implementation remains NOT
-authorized (69 gates: 4 satisfied, 64 unsatisfied, 1 deferred). Operator must
-choose between 89L (audit/rollback prototype) or 90A (broker enforcement
-boundary design).
-Delivers docs/PHASE_89_ENFORCEMENT_READINESS_TEST_PLAN_AND_FIXTURE_DESIGN.md.
+Simulation-only implementation phase. Implemented enforcement audit event model
+(src/pcae/core/enforcement_audit.py) with 16 event types from 89H §6, all
+sub-schemas (AuditOperator, AuditCommand, AuditDecision, AuditOutcome,
+AuditRepository, AuditEvidence, AuditIntegrity, AuditHardBlock, AuditApproval,
+AuditRisk, AuditDecisionContext), and convenience constructors. Implemented
+rollback evidence model (src/pcae/core/enforcement_rollback.py) with
+PreMutationSnapshot, RollbackPreconditions, RollbackLimitations, and convenience
+constructors. Both modules preserve no_execution=True and no_enforcement=True
+invariants. Hard blocks are permanently non-overridable (88V §16). Accepted risk
+never overrides hard blocks. 87 focused tests pass (49 audit, 38 rollback).
+Fast-green 3220/3221 passed. No enforcement, no command execution, no persistent
+database, no authorization state. Schema version 1.0.
+Delivers docs/PHASE_89_ENFORCEMENT_AUDIT_ROLLBACK_PROTOTYPE.md.
+
+Phase 89K: Enforcement Readiness Test Plan and Fixture Design (completed).
 
 Phase 89J: Enforcement Readiness Gate Checklist and Go/No-Go Criteria (completed).
 

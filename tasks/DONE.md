@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 89L — Enforcement Audit/Rollback Prototype, simulation-only (20260628-1708-89l-enforcement-audit-rollback-prototype-simulation-only)
 - 89K — Enforcement Readiness Test Plan and Fixture Design (completion) (20260628-1647-89k-enforcement-readiness-test-plan-and-fixture-design-completion)
 - 89K — Enforcement Readiness Test Plan and Fixture Design (20260628-1642-89k-enforcement-readiness-test-plan-and-fixture-design)
 - 2026-06-28: 20260628-1642-89k-enforcement-readiness-test-plan-and-fixture-design

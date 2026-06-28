@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Implemented Phase 89L enforcement audit event model with 16 event types from 89H §6.
+- Implemented Phase 89L rollback evidence model with pre-mutation snapshots, preconditions, and limitations.
+- Both 89L modules preserve no_execution=True, no_enforcement=True invariants; hard blocks permanently non-overridable.
+- Added 87 focused tests (49 audit, 38 rollback) for 89L.
+- Delivers docs/PHASE_89_ENFORCEMENT_AUDIT_ROLLBACK_PROTOTYPE.md.
 - Added Phase 89K enforcement readiness test plan and fixture design document.
 - Defined 25 enforcement test categories covering hard-block invariants through recovery from interrupted enforcement.
 - Defined fixture taxonomy with 13 fixture types: command, task_contract, repo_state, audit_event, rollback_artifact, approval, accepted_risk, secret, shell, backend, failure_mode, telegram_command, and json_schema.
