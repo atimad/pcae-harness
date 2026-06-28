@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89H: Enforcement Readiness Audit and Rollback Model Design (active).
+Phase 89H: Enforcement Readiness Audit and Rollback Model Design (completed).
 
 Design phase. Defined audit event taxonomy (16 event types), 5 event schemas
 (enforcement decision, command attempt, human approval, accepted risk, hard
