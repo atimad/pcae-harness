@@ -10,7 +10,7 @@ Phase 89L — Enforcement Audit/Rollback Prototype, simulation-only
 
 ## Status
 
-active
+done
 
 ## Mode
 
