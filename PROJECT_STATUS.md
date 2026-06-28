@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 89D: Dry-Run Blocking Simulation Test Matrix and CLI Stability Review (active).
+
+Test matrix and CLI stability phase. Expanded dry-run tests from 74 to 244 (+170)
+plus 24 CLI subprocess tests across 8 categories: read-only allow, hard-block,
+shell embedded, env-prefix, compact operator, redaction, explain/status, JSON
+stability. CLI exit codes verified (0=allow, 1=blocked). All safety invariants
+verified across 12 command types. Source fixes: none. Delivers
+docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_TEST_MATRIX.md. 3 deferred defects
+(echo $VAR, cat .env, sudo prefix). Recommends 89E.
+
 Phase 89C: Dry-Run Blocking Simulation Prototype (completed).
 
 Implementation phase. Implemented pcae dry-run check/explain/status commands

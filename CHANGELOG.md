@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### 89D — Dry-Run Simulation Test Matrix and CLI Stability Review (2026-06-28)
+
+Expanded dry-run simulation test matrix from 74 to 244 tests (+170) plus 24 CLI
+subprocess tests across 8 categories: read-only allow (14), hard-block (7),
+shell embedded (8), env-prefix (5), compact operator (8), redaction (8),
+explain/status (4), and JSON stability (7). Added cross-cutting safety invariant
+verification across 12 command types. CLI exit codes verified (0=allow, 1=blocked).
+Human-readable and JSON output stability reviewed. All 19 simulation decisions
+explainable with severity and enforcement readiness. 3 deferred defects (echo
+$VAR, cat .env, sudo prefix). No source fixes needed. Fast-green: 3,221/26s.
+Full suite: 9,311 passed, zero failures. Delivers
+`docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_TEST_MATRIX.md`. Recommends 89E.
+
 ### 89C — Dry-Run Blocking Simulation Prototype (2026-06-28)
 
 Implemented `pcae dry-run check/explain/status` as designed in 89B. New

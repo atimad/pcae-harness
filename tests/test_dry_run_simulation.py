@@ -374,3 +374,386 @@ class TestSimulationCompoundCommands:
     def test_compact_compound_blocks(self):
         data = _sim("git status&&git push")
         assert data["would_block"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — A. Read-Only Allow / Safe Paths
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixReadOnly:
+    """Read-only and governed PCAE commands should not be blocked."""
+
+    @pytest.mark.parametrize("cmd", [
+        "git status",
+        "git diff",
+        "git log --oneline -5",
+        "pcae health",
+        "pcae check",
+        "pcae doctor task-memory",
+        "ls",
+        "pwd",
+        "echo hello",
+        "whoami",
+        "date",
+        "head README.md",
+        "wc README.md",
+    ])
+    def test_read_only_not_blocked(self, cmd):
+        data = _sim(cmd)
+        assert data["would_block"] is False, f"{cmd}: read-only should not be blocked"
+        assert data["simulation_severity"] in ("info", "caution"), \
+            f"{cmd}: severity should be info or caution, got {data['simulation_severity']}"
+
+    def test_pytest_dry_run_not_blocked(self):
+        data = _sim("python -m pytest tests/test_dry_run_simulation.py -q")
+        # pytest without -n auto is test execution → may require task
+        assert data["would_block"] is False or data["would_require_active_task"], \
+            "pytest should require task or be allowed, not hard blocked"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — B. Hard-Block Paths
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixHardBlocks:
+    """Hard-block commands must produce blocked severity."""
+
+    @pytest.mark.parametrize("cmd,expected_block", [
+        ("git push", "would_block_by_raw_git_push"),
+        ("git push --force", "would_block_by_force_push"),
+        ("git push -f", "would_block_by_force_push"),
+        ("git commit -m x", "would_block_by_shell_gate"),
+        ("rm -rf .", "would_block_by_shell_gate"),
+        ("echo x > README.md", "would_block_by_shell_gate"),
+    ])
+    def test_hard_block_commands_blocked(self, cmd, expected_block):
+        data = _sim(cmd)
+        assert data["would_block"] is True, f"{cmd}: should be blocked"
+        assert data["simulation_severity"] == "blocked", \
+            f"{cmd}: severity should be blocked"
+        assert data["hard_block_present"] is True
+
+    def test_git_reset_hard_blocked(self):
+        data = _sim("git reset --hard HEAD")
+        assert data["would_block"] is True
+
+    def test_force_push_has_no_governed_alternative(self):
+        data = _sim("git push --force origin main")
+        assert data["governed_alternative"] is None  # permanently blocked
+
+    def test_raw_push_has_governed_alternative(self):
+        data = _sim("git push origin main")
+        assert data["governed_alternative"] == "pcae push"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — C. Shell Embedded-Command Paths
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixShellEmbedded:
+    """Shell -c/-lc commands classify embedded commands."""
+
+    def test_bash_bare_requires_review(self):
+        data = _sim("bash")
+        assert data["shell_gate_category"] != "unknown"
+        assert data["would_block"] is False  # requires review, not blocked
+
+    def test_sh_bare_requires_review(self):
+        data = _sim("sh")
+        assert data["shell_gate_category"] != "unknown"
+
+    def test_zsh_bare_requires_review(self):
+        data = _sim("zsh")
+        assert data["shell_gate_category"] != "unknown"
+
+    def test_bash_lc_git_status_not_blocked(self):
+        data = _sim('bash -lc "git status"')
+        # Embedded git status → read_only_inspection → not blocked
+        assert data["would_block"] is False
+
+    def test_sh_c_git_status_not_blocked(self):
+        data = _sim("sh -c 'git status'")
+        assert data["would_block"] is False
+
+    def test_bash_lc_git_push_blocked(self):
+        data = _sim('bash -lc "git push"')
+        assert data["would_block"] is True
+        assert data["simulation_severity"] == "blocked"
+
+    def test_sh_c_git_push_blocked(self):
+        data = _sim("sh -c 'git push'")
+        assert data["would_block"] is True
+
+    def test_zsh_lc_git_push_force_blocked(self):
+        data = _sim("zsh -lc 'git push --force'")
+        assert data["would_block"] is True
+        assert data["hard_block_present"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — D. Env-Prefix Paths
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixEnvPrefix:
+    """env and VAR=val prefix behavior from 89A."""
+
+    def test_env_python_not_secret_access(self):
+        data = _sim("env python script.py")
+        assert data["shell_gate_category"] != "secret_access"
+
+    def test_var_x_python_environment_mutation(self):
+        data = _sim("VAR=x python script.py")
+        # VAR=x is non-secret env mutation
+        assert data["would_block"] is False  # requires review, not blocked
+
+    def test_openai_key_env_triggers_secret(self):
+        data = _sim("OPENAI_API_KEY=x python script.py")
+        assert data["redaction_applied"] is True
+        assert data["simulation_severity"] == "review_required"
+
+    def test_env_openai_key_triggers_secret(self):
+        data = _sim("env OPENAI_API_KEY=x python script.py")
+        assert data["redaction_applied"] is True
+
+    def test_env_token_x_curl_secret(self):
+        data = _sim("env TOKEN=x curl https://example.com")
+        assert data["redaction_applied"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — E. Compact Operator Paths
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixCompactOperators:
+    """Compact operators (|, &&, ||, ; without spaces) from 89A."""
+
+    def test_env_pipe_grep_token_redacted(self):
+        data = _sim("env|grep TOKEN")
+        assert data["redaction_applied"] is True
+
+    def test_env_pipe_grep_secret_redacted(self):
+        data = _sim("env|grep SECRET")
+        assert data["redaction_applied"] is True
+
+    def test_env_pipe_grep_openai_key_redacted(self):
+        data = _sim("env|grep OPENAI_API_KEY")
+        assert data["redaction_applied"] is True
+
+    def test_git_status_andand_git_push_blocked(self):
+        data = _sim("git status&&git push")
+        assert data["would_block"] is True
+
+    def test_pcae_health_andand_git_push_blocked(self):
+        data = _sim("pcae health&&git push")
+        assert data["would_block"] is True
+        assert data["simulation_severity"] == "blocked"
+
+    def test_echo_pipe_tee_readme_blocked(self):
+        data = _sim("echo x|tee README.md")
+        assert data["would_block"] is True
+
+    def test_git_status_semicolon_git_push_blocked(self):
+        data = _sim("git status;git push")
+        assert data["would_block"] is True
+
+    def test_git_status_oror_git_push_blocked(self):
+        data = _sim("git status||git push")
+        assert data["would_block"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — F. Redaction Paths
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixRedaction:
+    """Secret redaction across env, files, and programs."""
+
+    @pytest.mark.parametrize("cmd", [
+        "printenv",
+        "env",
+        "env|grep TOKEN",
+        "OPENAI_API_KEY=abc python script.py",
+        "cat ~/.ssh/id_rsa",
+        "security find-generic-password",
+    ])
+    def test_redaction_paths_redacted(self, cmd):
+        data = _sim(cmd)
+        assert data["redaction_applied"] is True, f"{cmd}: should be redacted"
+
+    def test_echo_dollar_variable_not_currently_redacted(self):
+        """echo $VAR references are shell-expanded, not classified as secret access.
+        This is a known limitation — shell expansion detection is deferred."""
+        data = _sim("echo $OPENAI_API_KEY")
+        # echo is read-only; $VAR is not detected as secret pattern
+        assert data["would_block"] is False
+
+    def test_cat_dotenv_not_currently_redacted(self):
+        """cat .env is not in _SECRET_FILE_PREFIXES. Known limitation."""
+        data = _sim("cat .env")
+        # cat is read-only unless redirected; .env not in secret file prefixes
+        assert data["would_block"] is False
+
+    def test_redacted_commands_use_sentinel(self):
+        for cmd in [
+            "OPENAI_API_KEY=x python script.py",
+            "cat ~/.ssh/id_rsa",
+        ]:
+            data = _sim(cmd)
+            assert "OPENAI_API_KEY" not in data["requested_command"]
+            assert "id_rsa" not in data.get("requested_command", "")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — G. Explain/Status Coverage
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixExplainCoverage:
+    """All 19 decisions are explainable with complete information."""
+
+    @pytest.mark.parametrize("decision", [
+        "would_allow_read_only",
+        "would_allow_governed_preflight_only",
+        "would_require_active_task",
+        "would_require_preflight",
+        "would_require_human_review",
+        "would_require_more_evidence",
+        "would_block_by_scope",
+        "would_block_by_task_contract",
+        "would_block_by_raw_git_push",
+        "would_block_by_force_push",
+        "would_block_by_shell_gate",
+        "would_block_by_test_run_lock",
+        "would_block_by_failed_health",
+        "would_block_by_failed_check",
+        "would_block_by_failed_doctor",
+        "would_block_by_push_check",
+        "would_block_by_conflicting_evidence",
+        "would_deny",
+        "unknown",
+    ])
+    def test_every_decision_explainable(self, decision):
+        data = build_simulation_explain(decision)
+        assert data["valid_decision"] is True, f"{decision}: should be valid"
+        assert "explanation" in data
+        assert "summary" in data["explanation"]
+        assert "meaning" in data["explanation"]
+
+    def test_explain_includes_severity(self):
+        data = build_simulation_explain("would_block_by_raw_git_push")
+        assert data["severity"] == "blocked"
+
+    def test_explain_includes_enforcement_readiness(self):
+        data = build_simulation_explain("would_block_by_force_push")
+        assert len(data["enforcement_readiness"]) > 0
+
+
+class Test89dMatrixStatusCoverage:
+    """Status reports all invariants and limitations."""
+
+    def test_status_all_invariants_true(self):
+        data = build_simulation_status()
+        for key, val in data["invariants"].items():
+            assert val is True, f"invariant {key} should be True"
+
+    def test_status_limitations_complete(self):
+        data = build_simulation_status()
+        lims = data["known_limitations"]
+        assert any("simulation only" in l.lower() or "no enforcement" in l.lower()
+                   for l in lims)
+        assert any("shell" in l.lower() for l in lims)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D Test Matrix — H. JSON Schema Stability
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dMatrixJsonStability:
+    """JSON output has all required fields with stable types."""
+
+    REQUIRED_CHECK_FIELDS = [
+        "schema_version", "generated_at", "simulation_mode",
+        "requested_command", "requested_command_redacted",
+        "simulation_decision", "simulation_severity",
+        "simulation_recommendation", "would_block",
+        "would_allow_read_only", "would_allow_governed_preflight_only",
+        "would_require_human_review", "would_require_preflight",
+        "would_require_more_evidence", "hard_block_present",
+        "hard_block_reason", "human_approval_relevant",
+        "accepted_risk_relevant", "redaction_applied",
+        "operator_message", "next_required_action",
+        "safety_invariants", "warnings", "errors",
+        "known_limitations",
+    ]
+
+    @pytest.mark.parametrize("field", REQUIRED_CHECK_FIELDS)
+    def test_check_json_field_present(self, field):
+        data = _sim("git status")
+        assert field in data, f"check JSON missing: {field}"
+
+    @pytest.mark.parametrize("cmd", [
+        "git status", "git push", "git push --force",
+        "OPENAI_API_KEY=x python script.py", "bash",
+        "sh -c 'git status'", "env|grep TOKEN",
+    ])
+    def test_all_cmd_types_have_complete_envelope(self, cmd):
+        data = _sim(cmd)
+        for field in self.REQUIRED_CHECK_FIELDS:
+            assert field in data, f"{cmd}: missing {field}"
+
+    def test_simulation_id_format(self):
+        for _ in range(5):
+            data = _sim("git status")
+            sid = data["simulation_id"]
+            assert sid.startswith("sim-")
+            assert len(sid) == 16  # "sim-" + 12 hex chars
+
+    def test_enforcement_stage_consistent(self):
+        for cmd in ["git status", "git push", "bash"]:
+            data = _sim(cmd)
+            assert data["enforcement_stage"] == "dry_run_simulation"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# 89D — Safety Invariant Cross-Check (All Commands)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class Test89dSafetyInvariantCrossCheck:
+    """Every command type preserves all invariants."""
+
+    ALL_COMMANDS = [
+        "git status",
+        "git push",
+        "git push --force",
+        "bash",
+        "sh -c 'git status'",
+        "sh -c 'git push'",
+        "env python",
+        "OPENAI_API_KEY=x python script.py",
+        "env|grep TOKEN",
+        "git status&&git push",
+        "echo x|tee README.md",
+        "pcae health",
+    ]
+
+    @pytest.mark.parametrize("cmd", ALL_COMMANDS)
+    def test_no_execution_invariant(self, cmd):
+        data = _sim(cmd)
+        assert data["command_executed"] is False
+        assert data["authorization_granted"] is False
+        assert data["execution_authorized"] is False
+
+    @pytest.mark.parametrize("cmd", ALL_COMMANDS)
+    def test_no_enforcement_invariant(self, cmd):
+        data = _sim(cmd)
+        assert data["enforcement_applied"] is False
+        assert data["shell_intercepted"] is False
+        assert data["wrapper_installed"] is False
+
+    @pytest.mark.parametrize("cmd", ALL_COMMANDS)
+    def test_no_backend_invariant(self, cmd):
+        data = _sim(cmd)
+        assert data["backend_invoked"] is False
+        assert data["prompt_sent"] is False
+        assert data["output_captured"] is False
+        assert data["intake_performed"] is False
+        assert data["adoption_performed"] is False
