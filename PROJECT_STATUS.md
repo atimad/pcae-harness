@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89F: Dry-Run Blocking Simulation Integration Readiness Review (active).
+Phase 89F: Dry-Run Blocking Simulation Integration Readiness Review (completed).
 
 Review-only phase. Assessed dry-run simulation readiness as a guarded integration
 point. CLI/JSON/UX/advisory/broker/shell-gate integration points assessed READY
