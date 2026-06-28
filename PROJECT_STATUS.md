@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 89C: Dry-Run Blocking Simulation Prototype (active).
+
+Implementation phase. Implemented pcae dry-run check/explain/status commands
+as designed in 89B. New core module (src/pcae/core/dry_run.py) wraps advisory
+evidence in a simulation envelope with simulation_id, severity, enforcement
+readiness, governed alternatives, and safety invariants. Human-readable output
+with SIMULATED BLOCK/REVIEW REQUIRED banners and mandatory simulation footer.
+Differentiated exit codes (0=allow, 1=blocked/deny). 74 fast-green tests. All
+authorization/enforcement/interception invariants preserved. Delivers
+docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_PROTOTYPE.md. Recommends 89D.
+
 Phase 89B: Dry-Run Blocking Simulation Design (completed).
 
 Design-only phase. Defines the dry-run blocking simulation layer bridging advisory

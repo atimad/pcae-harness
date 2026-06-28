@@ -410,6 +410,11 @@ from pcae.commands.advisory import (
     run_advisory_explain,
     run_advisory_status,
 )
+from pcae.commands.dry_run import (
+    run_dry_run_check,
+    run_dry_run_explain,
+    run_dry_run_status,
+)
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.mutation_preflight import run_mutation_preflight
@@ -4769,6 +4774,92 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON status.",
     )
     advisory_status_parser.set_defaults(handler=run_advisory_status)
+
+    # ── pcae dry-run (Phase 89C) ────────────────────────────────────────────
+    dry_run_parser = subparsers.add_parser(
+        "dry-run",
+        help="Dry-run blocking simulation — previews enforcement decisions (Phase 89C prototype).",
+    )
+    dry_run_subparsers = dry_run_parser.add_subparsers(
+        dest="dry_run_command", required=True,
+    )
+
+    dry_run_check_parser = dry_run_subparsers.add_parser(
+        "check",
+        help="Simulate enforcement evaluation of a command (never executes).",
+    )
+    dry_run_check_parser.add_argument(
+        "--command", "-c",
+        metavar="CMD",
+        required=True,
+        help="Shell command text to simulate (not executed).",
+    )
+    dry_run_check_parser.add_argument(
+        "--action", "-a",
+        metavar="ACTION",
+        help="Override the requested action (default: read).",
+    )
+    dry_run_check_parser.add_argument(
+        "--health-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae health check passed.",
+    )
+    dry_run_check_parser.add_argument(
+        "--check-passed",
+        action="store_true",
+        default=None,
+        help="Explicit evidence: pcae check passed.",
+    )
+    dry_run_check_parser.add_argument(
+        "--human-review-present",
+        action="store_true",
+        help="Human review evidence is present.",
+    )
+    dry_run_check_parser.add_argument(
+        "--human-approval-present",
+        action="store_true",
+        help="Human approval evidence is present.",
+    )
+    dry_run_check_parser.add_argument(
+        "--accepted-risk-present",
+        action="store_true",
+        help="Accepted risk evidence is present.",
+    )
+    dry_run_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON simulation output.",
+    )
+    dry_run_check_parser.set_defaults(handler=run_dry_run_check)
+
+    dry_run_explain_parser = dry_run_subparsers.add_parser(
+        "explain",
+        help="Explain a simulation decision value.",
+    )
+    dry_run_explain_parser.add_argument(
+        "--decision", "-d",
+        metavar="DECISION",
+        required=True,
+        help="Simulation decision to explain.",
+    )
+    dry_run_explain_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON explanation.",
+    )
+    dry_run_explain_parser.set_defaults(handler=run_dry_run_explain)
+
+    dry_run_status_parser = dry_run_subparsers.add_parser(
+        "status",
+        help="Report dry-run simulation prototype status and invariants.",
+    )
+    dry_run_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON status.",
+    )
+    dry_run_status_parser.set_defaults(handler=run_dry_run_status)
 
     preflight_parser = subparsers.add_parser(
         "preflight",

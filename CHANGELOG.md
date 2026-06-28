@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### 89C — Dry-Run Blocking Simulation Prototype (2026-06-28)
+
+Implemented `pcae dry-run check/explain/status` as designed in 89B. New
+`src/pcae/core/dry_run.py` wraps advisory/broker/shell-gate evidence in a
+simulation envelope with simulation_id, severity (info/caution/review_required/
+blocked/unknown), enforcement readiness, governed alternatives, and safety
+invariants. `src/pcae/commands/dry_run.py` provides CLI with human-readable
+output (SIMULATED BLOCK/REVIEW REQUIRED banners, footer) and JSON mode.
+Differentiated exit codes: 0=allow, 1=blocked/deny. Registered in cli.py as
+`pcae dry-run` group. 74 fast-green tests covering envelope structure,
+invariant fields, decision mapping, severity, hard-block preservation,
+secret redaction, explain, status, and compound commands. All 11 authorization/
+enforcement/interception fields unconditionally false. Fast-green: 3,075/24.87s.
+Delivers `docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_PROTOTYPE.md`. Recommends 89D.
+
 ### 89B — Dry-Run Blocking Simulation Design (2026-06-28)
 
 Design-only phase. Defines PCAE's dry-run blocking simulation layer — the bridge
