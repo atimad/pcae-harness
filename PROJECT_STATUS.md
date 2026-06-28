@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89A: Advisory Mode Hardening / False-Positive Repair (active).
+Phase 89A: Advisory Mode Hardening / False-Positive Repair (completed).
 
 Implementation phase. Fixed 3 false positives (bash/sh/zsh unknown, env python
 secret_access) and 1 false negative (env|grep TOKEN not redacted) from 88Y.
