@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 88Z: Advisory Operator UX and Workflow Design (active).
+
+Design-only phase. Defines the operator-facing UX for advisory mode: how humans
+read, trust, triage, explain, and act on advisory decisions. Covers UX principles,
+command behavior, message structure, severity/recommendation models, output
+formats, operator workflows, and safety boundaries. No implementation — all design.
+
 Phase 88Y.5: Project State Shared Evidence Optimization (completed).
 
 Extended the 88Y.3/88Y.4 shared evidence model to the five upstream build
