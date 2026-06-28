@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### 89E — Dry-Run Simulation UX Refinement and Operator Guidance (2026-06-28)
+
+Refined human-readable dry-run output with structured sections per decision type:
+SIMULATED BLOCK (Type/Override/Governed alternative), SIMULATED DENY (PERMANENT),
+SIMULATED REVIEW REQUIRED (GATE distinction, redaction warning), SIMULATED ALLOW
+(explicit non-authorization note), SIMULATED REQUIREMENT, and SIMULATED EVIDENCE
+REQUIRED. Fixed next-action wording (pcae dry-run explain, not advisory explain).
+Enhanced footer as active "PCAE did NOT" checklist. Source changed: _print_human_readable
+refactored into 7 focused helper functions. JSON schema, all safety invariants,
+and full test suite preserved. Fast-green: 3,221/26.67s. Full suite: 9,311 pass.
+Delivers `docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_UX_REFINEMENT.md`. Recommends 89F.
+
 ### 89D — Dry-Run Simulation Test Matrix and CLI Stability Review (2026-06-28)
 
 Expanded dry-run simulation test matrix from 74 to 244 tests (+170) plus 24 CLI

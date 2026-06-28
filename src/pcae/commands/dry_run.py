@@ -92,7 +92,7 @@ def run_dry_run_status(args: argparse.Namespace) -> int:
 
 
 def _print_human_readable(data: dict) -> None:
-    """Print human-readable simulation output (89B §19)."""
+    """Print human-readable simulation output (89B §19, refined 89E)."""
     decision = data["simulation_decision"]
     cmd = data["requested_command"]
     redacted = data["requested_command_redacted"]
@@ -101,18 +101,18 @@ def _print_human_readable(data: dict) -> None:
 
     # Severity header
     indicators = {
-        "info": "ℹ️  INFO",
-        "caution": "⚠️  CAUTION",
-        "review_required": "👁️  REVIEW REQUIRED",
+        "info": "ℹ️  INFO — SIMULATED ALLOW",
+        "caution": "⚠️  CAUTION — SIMULATED GATE",
+        "review_required": "👁️  REVIEW REQUIRED — SIMULATED GATE",
         "blocked": "🚫 SIMULATED BLOCK",
         "unknown": "❓ UNKNOWN",
     }
     header = indicators.get(severity, f"[{severity_label}]")
 
     print(f"PCAE Dry-Run Simulation — {header}")
-    print("Simulation only. No enforcement occurred.")
+    print("Simulation only. No command was executed. No enforcement occurred.")
     print()
-    print(f"  Command:       {cmd!r}" + (" (redacted)" if redacted else ""))
+    print(f"  Command:       {cmd!r}" + (" (redacted — secret material detected)" if redacted else ""))
     print(f"  Action:        {data['requested_action']}")
     if data.get("requested_files"):
         print(f"  Files:         {', '.join(data['requested_files'])}")
@@ -123,83 +123,182 @@ def _print_human_readable(data: dict) -> None:
     print(f"  Simulation:    {decision}")
     print()
 
-    # Block/review/require/allow section
+    # Decision-specific section
     if data["would_block"]:
-        print(f"  ┌─ SIMULATED BLOCK ────────────────────────────────────┐")
-        print(f"  │  SIMULATED: {decision}")
-        if data["hard_block_present"]:
-            print(f"  │  HARD BLOCK. Cannot be overridden by human approval")
-            print(f"  │  or accepted risk.")
-        print(f"  │  Under real enforcement, this command WOULD BE")
-        print(f"  │  BLOCKED. This simulation did not enforce any block.")
-        gov = data.get("governed_alternative")
-        if gov:
-            print(f"  │")
-            print(f"  │  Governed alternative: {gov}")
-        print(f"  └──────────────────────────────────────────────────────┘")
+        _print_blocked_section(data)
     elif data["would_deny"]:
-        print(f"  ┌─ SIMULATED DENY ────────────────────────────────────┐")
-        print(f"  │  SIMULATED: would_deny")
-        print(f"  │  Under real enforcement, this command would be")
-        print(f"  │  unconditionally DENIED.")
-        print(f"  └──────────────────────────────────────────────────────┘")
+        _print_deny_section(data)
     elif data["would_require_human_review"]:
-        print(f"  ┌─ REVIEW REQUIRED ───────────────────────────────────┐")
-        print(f"  │  SIMULATED: would_require_human_review")
-        print(f"  │  Under enforcement, human review would be required.")
-        print(f"  │  Human review is not authorization.")
-        print(f"  │  Human review would change outcome: {'yes' if data['human_approval_would_change_outcome'] else 'no'}")
-        print(f"  └──────────────────────────────────────────────────────┘")
+        _print_review_section(data)
     elif data["would_require_preflight"]:
-        print(f"  Would require: preflight")
+        _print_require_section("preflight", data)
     elif data["would_require_active_task"]:
-        print(f"  Would require: active task")
+        _print_require_section("active task", data)
     elif data["would_require_more_evidence"]:
-        print(f"  Would require: more evidence")
-        if data.get("missing_evidence"):
-            for item in data["missing_evidence"]:
-                print(f"    - {item}")
+        _print_evidence_section(data)
     else:
-        print(f"  Would allow: yes (preflight only, no execution)")
+        _print_allowed_section(data)
     print()
 
+    # Hard block status
     if data["hard_block_present"]:
         print(f"  Hard block:    yes — {data.get('hard_block_reason', 'policy')}")
-        print(f"  Override:      not possible (hard blocks cannot be overridden)")
+        print(f"  Override:      not possible (hard blocks cannot be overridden")
+        print(f"                 by human approval or accepted risk)")
     else:
         print(f"  Hard block:    none")
     print()
 
+    # Redaction
     if data["redaction_applied"]:
         print(f"  Redaction:     applied — {data.get('redaction_reason', 'policy')}")
+        print(f"                 No secret material is present in this output.")
     else:
         print(f"  Redaction:     not applied")
     print(f"  Safe to show:  {data['safe_to_display']}")
     print()
 
+    # Enforcement readiness
     enf = data.get("enforcement_readiness", "")
     if enf:
         print(f"  Enforcement:   {enf}")
         print()
 
-    print(f"  Next action:   {data['next_required_action']}")
+    # Next action (fix: dry-run explain, not advisory explain)
+    next_action = data.get("next_required_action", "")
+    if "pcae advisory explain" in next_action:
+        next_action = next_action.replace("pcae advisory explain", "pcae dry-run explain")
+    print(f"  Next action:   {next_action}")
     print()
+
+    # Authorization status
     print(f"  Authorization: not granted")
     print(f"  Execution:     not authorized")
     print(f"  Enforcement:   not applied")
     print(f"  Interception:  not applied")
     print()
+
+    # Footer
     print("  ────────────────────────────────────────────────────────")
-    print("  ⚠️  Dry-run simulation complete. No enforcement occurred.")
+    print("  ⚠️  Dry-run simulation complete. PCAE did NOT:")
     print()
-    print("      • No command was executed.")
-    print("      • No shell was intercepted.")
-    print("      • No authorization was granted.")
-    print("      • No enforcement was applied.")
+    print("      • Execute this command")
+    print("      • Intercept shell input")
+    print("      • Grant authorization")
+    print("      • Apply enforcement")
+    print("      • Install wrappers or modify shell configuration")
     print()
-    print("      This was a simulation of what PCAE enforcement would")
-    print("      decide. The operator retains full authority.")
+    print("      This was a simulation of what PCAE enforcement")
+    print("      would decide. The operator retains full and")
+    print("      absolute authority over all command execution.")
     print("  ────────────────────────────────────────────────────────")
+
+
+def _print_blocked_section(data: dict) -> None:
+    decision = data["simulation_decision"]
+    print(f"  ┌─ SIMULATED BLOCK ────────────────────────────────────┐")
+    print(f"  │")
+    print(f"  │  Decision: {decision}")
+    if data["hard_block_present"]:
+        print(f"  │  Type:     HARD BLOCK")
+        print(f"  │  Override: NOT POSSIBLE — hard blocks cannot be")
+        print(f"  │            overridden by human approval or accepted")
+        print(f"  │            risk.")
+    print(f"  │")
+    print(f"  │  Under real enforcement, PCAE WOULD BLOCK this")
+    print(f"  │  command. This simulation did not enforce any block.")
+    gov = data.get("governed_alternative")
+    if gov:
+        print(f"  │")
+        print(f"  │  Governed alternative: {gov}")
+    print(f"  │")
+    print(f"  └──────────────────────────────────────────────────────┘")
+
+
+def _print_deny_section(data: dict) -> None:
+    print(f"  ┌─ SIMULATED DENY ────────────────────────────────────┐")
+    print(f"  │")
+    print(f"  │  Decision: would_deny")
+    print(f"  │  Type:     PERMANENT DENY")
+    print(f"  │  Override: NONE — this decision is unconditional.")
+    print(f"  │")
+    print(f"  │  Under real enforcement, PCAE would PERMANENTLY")
+    print(f"  │  DENY this command. No workaround exists.")
+    print(f"  │")
+    print(f"  └──────────────────────────────────────────────────────┘")
+
+
+def _print_review_section(data: dict) -> None:
+    will_change = "yes" if data.get("human_approval_would_change_outcome") else "no"
+    print(f"  ┌─ SIMULATED REVIEW REQUIRED ─────────────────────────┐")
+    print(f"  │")
+    print(f"  │  Decision: would_require_human_review")
+    print(f"  │  Type:     GATE (not a block)")
+    print(f"  │")
+    print(f"  │  Under enforcement, a human operator would need to")
+    print(f"  │  review this command before it could proceed.")
+    print(f"  │")
+    print(f"  │  Review is NOT authorization. It confirms a human")
+    print(f"  │  has examined the proposed action.")
+    print(f"  │")
+    if data["redaction_applied"]:
+        print(f"  │  ⚠️  Command text was REDACTED — secret material")
+        print(f"  │     was detected. Review the redaction reason.")
+        print(f"  │")
+    print(f"  │  Review would change outcome: {will_change}")
+    print(f"  │")
+    if data.get("governed_alternative"):
+        print(f"  │  Governed alternative: {data['governed_alternative']}")
+        print(f"  │")
+    print(f"  └──────────────────────────────────────────────────────┘")
+
+
+def _print_require_section(what: str, data: dict) -> None:
+    print(f"  ┌─ SIMULATED REQUIREMENT ─────────────────────────────┐")
+    print(f"  │")
+    print(f"  │  Requirement: {what}")
+    print(f"  │")
+    print(f"  │  Under enforcement, this command would require")
+    print(f"  │  {what} before it could proceed.")
+    print(f"  │")
+    print(f"  │  This is a gate, not a block. Provide the required")
+    print(f"  │  item and re-evaluate.")
+    print(f"  │")
+    print(f"  └──────────────────────────────────────────────────────┘")
+
+
+def _print_evidence_section(data: dict) -> None:
+    print(f"  ┌─ SIMULATED EVIDENCE REQUIRED ───────────────────────┐")
+    print(f"  │")
+    print(f"  │  Decision: would_require_more_evidence")
+    print(f"  │  Type:     GATE (not a block)")
+    print(f"  │")
+    print(f"  │  Under enforcement, additional governance evidence")
+    print(f"  │  would be required before this command could proceed.")
+    missing = data.get("missing_evidence", [])
+    if missing:
+        print(f"  │")
+        print(f"  │  Missing evidence:")
+        for item in missing:
+            print(f"  │    • {item}")
+    print(f"  │")
+    print(f"  └──────────────────────────────────────────────────────┘")
+
+
+def _print_allowed_section(data: dict) -> None:
+    print(f"  ┌─ SIMULATED ALLOW ───────────────────────────────────┐")
+    print(f"  │")
+    print(f"  │  Decision: {data['simulation_decision']}")
+    print(f"  │  Type:     ALLOW (preflight only)")
+    print(f"  │")
+    print(f"  │  Under enforcement, this command would be allowed")
+    print(f"  │  to proceed. No PCAE governance concerns detected.")
+    print(f"  │")
+    print(f"  │  NOTE: Allow does NOT mean PCAE authorizes execution.")
+    print(f"  │  PCAE never grants execution authorization. The")
+    print(f"  │  operator retains full responsibility.")
+    print(f"  │")
+    print(f"  └──────────────────────────────────────────────────────┘")
 
 
 def _tri(value: object) -> bool | None:

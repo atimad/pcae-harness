@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 89E: Dry-Run Blocking Simulation UX Refinement and Operator Guidance (active).
+
+UX refinement phase. Improved human-readable dry-run output with structured
+sections for blocked (HARD BLOCK type/override), allowed (explicit non-auth
+note), review (GATE vs block distinction, redaction warning), deny (PERMANENT
+DENY), and evidence-required decisions. Fixed next-action wording (dry-run
+explain, not advisory explain). Enhanced footer as active "PCAE did NOT"
+checklist. JSON schema and all safety invariants preserved. Delivers
+docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_UX_REFINEMENT.md. Recommends 89F.
+
 Phase 89D: Dry-Run Blocking Simulation Test Matrix and CLI Stability Review (completed).
 
 Test matrix and CLI stability phase. Expanded dry-run tests from 74 to 244 (+170)
