@@ -15,3 +15,5 @@ handoffs/
 phase-queue.json
 phase-audits/
 phase-prompts/
+phase-reports/
+notifications/
