@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 89B: Dry-Run Blocking Simulation Design (active).
+
+Design-only phase. Defines the dry-run blocking simulation layer bridging advisory
+mode (Stage 1) to blocking gate (Stage 3). Simulation shows what enforcement would
+block/allow/require without enforcing, intercepting, or executing anything. Covers
+decision vocabulary, JSON/human-readable output models, severity/recommendation
+models, hard-block/human-review/missing-evidence/secret-redaction simulation behavior,
+accepted-risk/human-approval boundaries, 16 safety invariants, failure modes, and
+future test matrix (~250 tests). Recommends command namespace `pcae dry-run check`.
+Records 3 known pre-existing full-suite failures. Delivers
+docs/PHASE_89_DRY_RUN_BLOCKING_SIMULATION_DESIGN.md. Recommends 89C.
+
 Phase 89A: Advisory Mode Hardening / False-Positive Repair (completed).
 
 Implementation phase. Fixed 3 false positives (bash/sh/zsh unknown, env python
