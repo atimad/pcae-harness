@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89D: Dry-Run Blocking Simulation Test Matrix and CLI Stability Review (active).
+Phase 89D: Dry-Run Blocking Simulation Test Matrix and CLI Stability Review (completed).
 
 Test matrix and CLI stability phase. Expanded dry-run tests from 74 to 244 (+170)
 plus 24 CLI subprocess tests across 8 categories: read-only allow, hard-block,
