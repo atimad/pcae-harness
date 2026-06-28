@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89I: Enforcement Operator Approval and Accepted-Risk Policy Design (active).
+Phase 89I: Enforcement Operator Approval and Accepted-Risk Policy Design (completed).
 
 Design phase. Defined operator approval model with 7 principles, 5 roles
 (self-approver through administrator + "No One" for hard blocks), 5 scope types
