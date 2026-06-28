@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 92B — Pluggable Notification Foundation (20260628-2351-92b-pluggable-notification-foundation)
 - 92A — Phase Report Artifact Model (20260628-2346-92a-phase-report-artifact-model)
 - 91C — Hard-Block Policy Readiness (20260628-2334-91c-hard-block-policy-readiness)
 - 91B — Broker CLI and Decision Explanation (20260628-2329-91b-broker-cli-and-decision-explanation)

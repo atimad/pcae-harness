@@ -415,6 +415,10 @@ from pcae.commands.phase_reports import (
     run_phase_report_create,
     run_phase_report_show,
 )
+from pcae.commands.notifications import (
+    run_notify_status,
+    run_notify_test,
+)
 from pcae.commands.advisory import (
     run_advisory_check,
     run_advisory_explain,
@@ -4871,6 +4875,31 @@ def build_parser() -> argparse.ArgumentParser:
     pr_show_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
     pr_show_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
     pr_show_parser.set_defaults(handler=run_phase_report_show)
+
+    # ── pcae notify (Phase 92B) ──────────────────────────────────────────
+    notify_parser = subparsers.add_parser(
+        "notify",
+        help="Manual notification testing and status (no Telegram, no external network).",
+    )
+    notify_subparsers = notify_parser.add_subparsers(
+        dest="notify_command", required=True,
+    )
+
+    notify_status_parser = notify_subparsers.add_parser(
+        "status",
+        help="Show notification foundation status.",
+    )
+    notify_status_parser.add_argument("--json", action="store_true", help="Machine-readable JSON.")
+    notify_status_parser.set_defaults(handler=run_notify_status)
+
+    notify_test_parser = notify_subparsers.add_parser(
+        "test",
+        help="Send a manual test notification to a sink.",
+    )
+    notify_test_parser.add_argument("--sink", default="noop", help="Sink name: noop, stdout, filesystem, mock.")
+    notify_test_parser.add_argument("--output-dir", default=None, help="Output directory for filesystem sink.")
+    notify_test_parser.add_argument("--json", action="store_true", help="Machine-readable JSON.")
+    notify_test_parser.set_defaults(handler=run_notify_test)
 
     # ── pcae advisory (Phase 88X) ─────────────────────────────────────────
     advisory_parser = subparsers.add_parser(

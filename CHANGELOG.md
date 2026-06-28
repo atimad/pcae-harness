@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Implemented Phase 92B pluggable notification foundation: NotificationEvent/Result, 4 sinks, dispatcher, CLI notify status/test.
+- phase_report_to_notification_event() bridges 92A→92C. 34 tests pass. Delivers docs/PHASE_92_PLUGGABLE_NOTIFICATION_FOUNDATION.md.
 - Implemented Phase 92A phase report artifact model: PhaseReport dataclass (22 fields), write/read/ render, CLI create/show.
 - Writes durable .pcae/phase-reports/ artifacts (timestamped + latest.md/json). 33 tests pass.
 - Foundation for future outbound notifications. Delivers docs/PHASE_92_PHASE_REPORT_ARTIFACT_MODEL.md.

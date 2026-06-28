@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 92B: Pluggable Notification Foundation (completed).
+
+Implementation phase. Created NotificationEvent/NotificationResult dataclasses,
+NotificationSink Protocol, 4 sinks (noop, stdout, filesystem, mock), dispatch()
+with multi-sink fail-continue, and phase_report_to_notification_event() helper.
+CLI: pcae notify status/test. 34 tests pass. No Telegram, external network,
+automatic hooks, enforcement, shell interception, wrappers, or backend invocation.
+Recommended next phase: 92C — Telegram Outbound Phase Report Delivery
+(requires explicit operator approval).
+Delivers docs/PHASE_92_PLUGGABLE_NOTIFICATION_FOUNDATION.md.
+
 Phase 92A: Phase Report Artifact Model (completed).
 
 Implementation phase. Created PhaseReport dataclass (22 fields), make/write/read
