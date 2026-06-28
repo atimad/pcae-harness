@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 90A — Permission Broker Enforcement Boundary Design (20260628-1922-90a-permission-broker-enforcement-boundary-design)
 - 89N — Enforcement Readiness Evidence Bundle and Gate Status Reporter (20260628-1716-phase-89n-enforcement-readiness-evidence-bundle-and-gate-status-reporter)
 - 89M — Enforcement Approval/Risk Policy Prototype, simulation-only (20260628-1711-phase-89m-enforcement-approval-risk-policy-prototype-simulation-only)
 - 89L — Enforcement Audit/Rollback Prototype, simulation-only (20260628-1708-phase-89l-enforcement-audit-rollback-prototype-simulation-only)

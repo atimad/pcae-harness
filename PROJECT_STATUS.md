@@ -2,6 +2,20 @@
 
 ## Current Phase
 
+Phase 90A: Permission Broker Enforcement Boundary Design (completed).
+
+Design-only boundary phase. Defined the boundary between the existing permission
+broker / advisory / shell-gate / dry-run simulation layers and any future
+enforcement path. Established what the permission broker may decide, what it
+may not decide, where enforcement boundaries would sit, what inputs/outputs are
+stable, what audit/rollback/approval evidence is required, and what must remain
+simulation-only until readiness gates are satisfied. All 28 design sections
+completed. No source or test files changed. Enforcement remains NOT authorized
+(enforcement_authorized=false, enforcement_ready=false). Recommended next
+phase: 90B — Full-Suite Baseline Inspection and Scope/Preflight Repair
+(requires explicit operator approval).
+Delivers docs/PHASE_90_PERMISSION_BROKER_ENFORCEMENT_BOUNDARY_DESIGN.md.
+
 Phase 89N: Enforcement Readiness Evidence Bundle and Gate Status Reporter (completed).
 
 Simulation-only implementation phase. Implemented enforcement readiness

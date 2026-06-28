@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Completed Phase 90A Permission Broker Enforcement Boundary Design (design-only).
+- Defined enforcement boundary between permission broker, advisory, shell-gate, dry-run simulation and future enforcement path.
+- Documented 28 design sections: layer responsibilities, broker input/output model, hard-block non-overridable model, human-review model, accepted-risk model, operator-approval model, audit/rollback evidence model, fail-closed behavior, no-go conditions, and 90B repair plan.
+- Recorded known full-suite baseline issue (188 pre-existing scope/preflight idle-state failures).
+- Recommended next phase: 90B — Full-Suite Baseline Inspection and Scope/Preflight Repair.
+- Delivers docs/PHASE_90_PERMISSION_BROKER_ENFORCEMENT_BOUNDARY_DESIGN.md.
 - Implemented Phase 89N enforcement readiness gate status reporter (pcae enforcement-readiness status).
 - Registered 69 readiness gates from 89J across 8 dimensions (design, implementation, test, audit, rollback, approval, secret, bypass).
 - Added read-only CLI with JSON and human-readable output; enforcement remains NOT authorized.
