@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 91C — Hard-Block Policy Readiness (20260628-2334-91c-hard-block-policy-readiness)
 - 91B — Broker CLI and Decision Explanation (20260628-2329-91b-broker-cli-and-decision-explanation)
 - 91A — Permission Broker Simulation Prototype (20260628-2259-91a-permission-broker-simulation-prototype)
 - 90C — Permission Broker Enforcement Boundary Test Plan (20260628-2239-90c-permission-broker-enforcement-boundary-test-plan)

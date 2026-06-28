@@ -12,8 +12,8 @@ from pcae.core.paths import HarnessPath
 from pcae.core.permission_broker import (
     build_permission_broker,
     evaluate_permission_broker,
-    # Reason codes for explanation
-    _broker_decision,
+    HARD_BLOCK_REGISTRY,
+    validate_hard_block_registry,
 )
 
 
@@ -356,6 +356,70 @@ def run_permission_broker_check(args: argparse.Namespace) -> int:
         print("  The operator retains full authority.")
 
     return 0 if result["decision"] != "deny" else 0
+
+
+def run_permission_broker_hard_blocks(args: argparse.Namespace) -> int:
+    """pcae permission-broker hard-blocks [--json]"""
+    registry_issues = validate_hard_block_registry()
+
+    entries = []
+    for hb in HARD_BLOCK_REGISTRY:
+        entries.append({
+            "reason_code": hb.reason_code,
+            "category": hb.category,
+            "title": hb.title,
+            "explanation": hb.explanation,
+            "override_allowed": hb.override_allowed,
+            "approval_can_override": hb.approval_can_override,
+            "accepted_risk_can_override": hb.accepted_risk_can_override,
+            "future_enforcement_required": hb.future_enforcement_required,
+            "audit_required": hb.audit_required,
+            "readiness_implication": hb.readiness_implication,
+        })
+
+    output = {
+        "hard_block_count": len(HARD_BLOCK_REGISTRY),
+        "override_allowed_any": any(hb.override_allowed for hb in HARD_BLOCK_REGISTRY),
+        "approval_can_override_any": any(hb.approval_can_override for hb in HARD_BLOCK_REGISTRY),
+        "accepted_risk_can_override_any": any(hb.accepted_risk_can_override for hb in HARD_BLOCK_REGISTRY),
+        "all_audit_required": all(hb.audit_required for hb in HARD_BLOCK_REGISTRY),
+        "invariant_88v16_preserved": (
+            not any(hb.override_allowed for hb in HARD_BLOCK_REGISTRY)
+            and not any(hb.approval_can_override for hb in HARD_BLOCK_REGISTRY)
+            and not any(hb.accepted_risk_can_override for hb in HARD_BLOCK_REGISTRY)
+        ),
+        "registry_valid": len(registry_issues) == 0,
+        "registry_issues": registry_issues,
+        "hard_blocks": entries,
+    }
+
+    if args.json:
+        print(json.dumps(output, indent=2, sort_keys=True))
+    else:
+        print("Hard-block policy registry")
+        print(f"  Total hard blocks:   {output['hard_block_count']}")
+        print(f"  Override allowed:    {output['override_allowed_any']}")
+        print(f"  Approval override:   {output['approval_can_override_any']}")
+        print(f"  Risk override:       {output['accepted_risk_can_override_any']}")
+        print(f"  All audit required:  {output['all_audit_required']}")
+        print(f"  88V §16 preserved:   {output['invariant_88v16_preserved']}")
+        print(f"  Registry valid:      {output['registry_valid']}")
+        if registry_issues:
+            print(f"\n  Registry issues ({len(registry_issues)}):")
+            for issue in registry_issues:
+                print(f"    - {issue}")
+        print()
+        for hb in HARD_BLOCK_REGISTRY:
+            print(f"  {hb.reason_code}")
+            print(f"    Title:       {hb.title}")
+            print(f"    Explanation: {hb.explanation}")
+            print(f"    Overridable: {hb.override_allowed}")
+            print(f"    Readiness:   {hb.readiness_implication}")
+        print()
+        print("  ⚠️  All hard blocks are permanently non-overridable (88V §16).")
+        print("  No human approval, accepted risk, or operator override can bypass them.")
+
+    return 0 if not registry_issues else 1
 
 
 def _tri(value: object) -> bool | None:

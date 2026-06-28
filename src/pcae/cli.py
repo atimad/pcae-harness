@@ -409,6 +409,7 @@ from pcae.commands.permission_broker import (
     run_permission_broker_status,
     run_permission_broker_explain,
     run_permission_broker_check,
+    run_permission_broker_hard_blocks,
 )
 from pcae.commands.advisory import (
     run_advisory_check,
@@ -4817,6 +4818,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON broker check output.",
     )
     pb_check_parser.set_defaults(handler=run_permission_broker_check)
+
+    # ── pcae permission-broker hard-blocks (Phase 91C) ───────────────────
+    pb_hb_parser = pb_subparsers.add_parser(
+        "hard-blocks",
+        help="List the hard-block policy registry with non-overridability status.",
+    )
+    pb_hb_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON hard-block registry output.",
+    )
+    pb_hb_parser.set_defaults(handler=run_permission_broker_hard_blocks)
 
     # ── pcae advisory (Phase 88X) ─────────────────────────────────────────
     advisory_parser = subparsers.add_parser(

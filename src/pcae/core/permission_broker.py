@@ -8,6 +8,7 @@ backends, sends prompts, writes storage, or grants real authorisation.
 from __future__ import annotations
 
 import hashlib
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -710,6 +711,167 @@ POLICY_FORBIDDEN_FILES_91A: frozenset[str] = frozenset({
     "docs/REAL_CAPTURED_TASKS.md",
     "docs/LINKEDIN_ARTICLE_DRAFT.md",
 })
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 91C — Hard-block policy registry
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+@dataclass(frozen=True)
+class HardBlockPolicy:
+    """A single hard-block policy entry.
+
+    Describes one non-overridable block category.  Every hard block is
+    permanently non-overridable (88V §16) — no human approval, accepted
+    risk, or operator override can bypass it.
+    """
+
+    reason_code: str
+    category: str
+    title: str
+    explanation: str
+    override_allowed: bool = False
+    approval_can_override: bool = False
+    accepted_risk_can_override: bool = False
+    future_enforcement_required: bool = True
+    audit_required: bool = True
+    readiness_implication: str = ""
+
+
+# ── Hard-block registry ──────────────────────────────────────────────────────
+
+HARD_BLOCK_REGISTRY: tuple[HardBlockPolicy, ...] = (
+    HardBlockPolicy(
+        reason_code="blocked_by_raw_git_commit",
+        category="raw_git_commit",
+        title="Raw git commit is permanently blocked",
+        explanation="Direct git commit bypasses PCAE governance. Use pcae commit instead.",
+        readiness_implication="Shell gate must classify raw git commit before enforcement.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_raw_git_push",
+        category="raw_git_push",
+        title="Raw git push is permanently blocked",
+        explanation="Direct git push bypasses PCAE governance. Use pcae push instead.",
+        readiness_implication="Shell gate must classify raw git push before enforcement.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_force_push",
+        category="force_push",
+        title="Force push is permanently blocked",
+        explanation="Force push rewrites shared history and is never permitted under any circumstances.",
+        readiness_implication="Shell gate must detect all force push variants (--force, -f, +refspec, --force-with-lease, --delete).",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_no_verify",
+        category="no_verify",
+        title="The --no-verify flag is permanently blocked",
+        explanation="Bypassing hooks and governance checks with --no-verify, -n, or --no-gpg-sign is not permitted.",
+        readiness_implication="Shell gate must detect --no-verify and -n flags on git commit and git push.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_destructive_filesystem",
+        category="destructive_filesystem",
+        title="Destructive filesystem operations are permanently blocked",
+        explanation="Commands that cause irreversible data loss (rm -rf, git clean -fdx) are never permitted.",
+        readiness_implication="Shell gate must classify rm -rf, git clean, and similar destructive patterns.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_unknown_command_class",
+        category="unknown_class",
+        title="Unknown or ambiguous command class is blocked (fail-closed)",
+        explanation="PCAE must fail closed on commands it cannot classify. An explicit command class is required.",
+        readiness_implication="Shell gate classification coverage must be comprehensive before enforcement.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_out_of_scope",
+        category="out_of_scope",
+        title="Out-of-scope file paths are permanently blocked",
+        explanation="Requested files outside the active task scope are never mutable. Update the task contract or use in-scope files.",
+        readiness_implication="Scope preflight must evaluate all requested paths against the active task contract.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_policy_forbidden_file",
+        category="forbidden",
+        title="Policy-forbidden files are permanently blocked",
+        explanation="README.md, docs/REAL_CAPTURED_TASKS.md, and docs/LINKEDIN_ARTICLE_DRAFT.md are never mutable — independent of task scope.",
+        readiness_implication="Policy-forbidden file list must be enforced before task contract scope evaluation.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_forbidden_path",
+        category="task_forbidden_path",
+        title="Task-forbidden file paths are permanently blocked",
+        explanation="Files listed in the active task contract's forbidden files are never mutable for that task.",
+        readiness_implication="Task contract forbidden files must be merged with policy-forbidden files.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_missing_task",
+        category="missing_task",
+        title="Mutating actions require an active task contract",
+        explanation="Source mutation, docs mutation, commit, push, and rollback require an active task contract with defined scope.",
+        readiness_implication="Task contract detection must be reliable before enforcement.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_enforcement_not_ready",
+        category="enforcement_not_ready",
+        title="Enforcement readiness gates must be satisfied",
+        explanation="All 69 readiness gates from 89J must be satisfied before enforcement can proceed for mutating actions.",
+        readiness_implication="Enforcement readiness reporter (89N) must show all gates satisfied.",
+    ),
+    HardBlockPolicy(
+        reason_code="blocked_by_enforcement_not_authorized",
+        category="enforcement_not_authorized",
+        title="Enforcement must be explicitly authorized",
+        explanation="An operator must explicitly authorize enforcement before mutating actions can proceed. Authorization is a discrete, recorded decision.",
+        readiness_implication="Enforcement authorization must be explicit and auditable.",
+    ),
+)
+
+# Immutable lookup
+_HARD_BLOCK_BY_REASON: dict[str, HardBlockPolicy] = {
+    hb.reason_code: hb for hb in HARD_BLOCK_REGISTRY
+}
+
+HARD_BLOCK_REASON_CODES: frozenset[str] = frozenset(_HARD_BLOCK_BY_REASON)
+
+
+def get_hard_block_policy(reason_code: str) -> HardBlockPolicy | None:
+    """Look up a hard-block policy by reason code. Returns None if not found."""
+    return _HARD_BLOCK_BY_REASON.get(reason_code)
+
+
+def is_hard_block_reason(reason_code: str) -> bool:
+    """Check whether a reason code corresponds to a hard block."""
+    return reason_code in _HARD_BLOCK_BY_REASON
+
+
+def validate_hard_block_registry() -> list[str]:
+    """Validate the hard-block registry invariants. Returns list of issues (empty = valid)."""
+    issues: list[str] = []
+
+    for hb in HARD_BLOCK_REGISTRY:
+        if hb.override_allowed:
+            issues.append(f"{hb.reason_code}: override_allowed must be False")
+        if hb.approval_can_override:
+            issues.append(f"{hb.reason_code}: approval_can_override must be False")
+        if hb.accepted_risk_can_override:
+            issues.append(f"{hb.reason_code}: accepted_risk_can_override must be False")
+        if not hb.audit_required:
+            issues.append(f"{hb.reason_code}: audit_required must be True")
+        if not hb.reason_code:
+            issues.append("empty reason_code in registry entry")
+        if not hb.title:
+            issues.append(f"{hb.reason_code}: title is empty")
+        if not hb.explanation:
+            issues.append(f"{hb.reason_code}: explanation is empty")
+
+    # Check that all HARD_BLOCK_REASONS values are in the registry
+    for hb_code in HARD_BLOCK_REASONS.values():
+        if hb_code not in _HARD_BLOCK_BY_REASON:
+            issues.append(f"HARD_BLOCK_REASONS code {hb_code!r} missing from registry")
+
+    return issues
 
 
 def evaluate_permission_broker(

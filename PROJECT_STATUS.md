@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 91C: Hard-Block Policy Readiness (completed).
+
+Simulation-only hardening phase. Added HardBlockPolicy frozen dataclass and
+HARD_BLOCK_REGISTRY with 12 hard-block entries, each with 10 fields including
+non-overridability invariants (88V §16). Added validate_hard_block_registry(),
+get_hard_block_policy(), is_hard_block_reason() helpers. Added CLI:
+pcae permission-broker hard-blocks --json. 30 new tests prove all invariants.
+No enforcement, shell interception, wrappers, backend invocation, or command
+execution. Recommended next phase: 92A — Phase Report Artifact Model
+(requires explicit operator approval).
+Delivers docs/PHASE_91_HARD_BLOCK_POLICY_READINESS.md.
+
 Phase 91B: Broker CLI and Decision Explanation (completed).
 
 Simulation-only CLI phase. Added three new subcommands under pcae permission-broker:

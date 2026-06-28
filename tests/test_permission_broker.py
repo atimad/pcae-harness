@@ -46,6 +46,13 @@ from pcae.core.permission_broker import (
     CMD_DESTRUCTIVE_FS,
     CMD_BACKEND,
     CMD_UNKNOWN,
+    # Phase 91C imports
+    HardBlockPolicy,
+    HARD_BLOCK_REGISTRY,
+    get_hard_block_policy,
+    is_hard_block_reason,
+    validate_hard_block_registry,
+    HARD_BLOCK_REASON_CODES,
 )
 
 pytestmark = pytest.mark.fast_green
@@ -1353,3 +1360,240 @@ class TestBrokerDecisionModel91A:
     def test_governed_command_class_allowed(self):
         result = evaluate_permission_broker(action_type=ACTION_READ, command_class=CMD_GOVERNED)
         assert result["decision"] == BROKER_ALLOW
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 91C — Hard-block policy registry tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestHardBlockRegistry:
+    """Tests for the 91C hard-block policy registry."""
+
+    def test_registry_has_12_entries(self):
+        assert len(HARD_BLOCK_REGISTRY) == 12
+
+    def test_every_entry_has_required_fields(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert hb.reason_code, f"empty reason_code in {hb}"
+            assert hb.category, f"empty category in {hb.reason_code}"
+            assert hb.title, f"empty title in {hb.reason_code}"
+            assert hb.explanation, f"empty explanation in {hb.reason_code}"
+
+    # ── Invariant: override_allowed=false for every hard block ───────────
+
+    def test_no_override_allowed(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert hb.override_allowed is False, (
+                f"{hb.reason_code}: override_allowed must be False"
+            )
+
+    # ── Invariant: approval_can_override=false ───────────────────────────
+
+    def test_no_approval_can_override(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert hb.approval_can_override is False, (
+                f"{hb.reason_code}: approval_can_override must be False"
+            )
+
+    # ── Invariant: accepted_risk_can_override=false ──────────────────────
+
+    def test_no_accepted_risk_can_override(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert hb.accepted_risk_can_override is False, (
+                f"{hb.reason_code}: accepted_risk_can_override must be False"
+            )
+
+    # ── Invariant: audit_required=true ───────────────────────────────────
+
+    def test_all_audit_required(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert hb.audit_required is True, (
+                f"{hb.reason_code}: audit_required must be True"
+            )
+
+    # ── Invariant: every hard block has a human-readable explanation ─────
+
+    def test_every_hard_block_has_explanation(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert len(hb.title) > 5, f"{hb.reason_code}: title too short"
+            assert len(hb.explanation) > 10, f"{hb.reason_code}: explanation too short"
+
+    # ── Registry validation passes ───────────────────────────────────────
+
+    def test_registry_validation_passes(self):
+        issues = validate_hard_block_registry()
+        assert issues == [], f"Registry validation issues: {issues}"
+
+    # ── Lookup functions work ────────────────────────────────────────────
+
+    def test_get_hard_block_policy_known(self):
+        hb = get_hard_block_policy("blocked_by_force_push")
+        assert hb is not None
+        assert hb.reason_code == "blocked_by_force_push"
+        assert hb.category == "force_push"
+
+    def test_get_hard_block_policy_unknown(self):
+        hb = get_hard_block_policy("nonexistent_code")
+        assert hb is None
+
+    def test_is_hard_block_reason_true(self):
+        assert is_hard_block_reason("blocked_by_force_push") is True
+        assert is_hard_block_reason("blocked_by_raw_git_push") is True
+        assert is_hard_block_reason("blocked_by_missing_task") is True
+
+    def test_is_hard_block_reason_false(self):
+        assert is_hard_block_reason("allow_preflight_only") is False
+        assert is_hard_block_reason("task_scope_unknown") is False
+
+    # ── All 12 hard-block reason codes match registry ────────────────────
+
+    def test_all_12_reason_codes_known(self):
+        expected = {
+            "blocked_by_raw_git_commit",
+            "blocked_by_raw_git_push",
+            "blocked_by_force_push",
+            "blocked_by_no_verify",
+            "blocked_by_destructive_filesystem",
+            "blocked_by_unknown_command_class",
+            "blocked_by_out_of_scope",
+            "blocked_by_policy_forbidden_file",
+            "blocked_by_forbidden_path",
+            "blocked_by_missing_task",
+            "blocked_by_enforcement_not_ready",
+            "blocked_by_enforcement_not_authorized",
+        }
+        assert HARD_BLOCK_REASON_CODES == expected
+
+    # ── Every registry entry has readiness_implication ───────────────────
+
+    def test_every_entry_has_readiness_implication(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert hb.readiness_implication, (
+                f"{hb.reason_code}: readiness_implication is empty"
+            )
+
+    # ── future_enforcement_required is True for all entries ──────────────
+
+    def test_all_future_enforcement_required(self):
+        for hb in HARD_BLOCK_REGISTRY:
+            assert hb.future_enforcement_required is True, (
+                f"{hb.reason_code}: future_enforcement_required must be True"
+            )
+
+    # ── HardBlockPolicy is frozen ────────────────────────────────────────
+
+    def test_hard_block_policy_is_immutable(self):
+        hb = HARD_BLOCK_REGISTRY[0]
+        with pytest.raises(Exception):
+            hb.override_allowed = True  # type: ignore
+
+
+class TestHardBlockOverrideProof91C:
+    """Prove approval + accepted risk cannot override each hard block."""
+
+    HARD_BLOCK_COMMANDS: list[tuple[str, str]] = [
+        ("source_mutation", "raw_git_commit"),
+        ("push", "raw_git_push"),
+        ("push", "force_push"),
+        ("commit", "no_verify"),
+        ("source_mutation", "destructive_filesystem"),
+        ("read", "unknown"),
+    ]
+
+    def test_approval_cannot_override_each_hard_block(self):
+        for action, cmd_class in self.HARD_BLOCK_COMMANDS:
+            result = evaluate_permission_broker(
+                action_type=action,
+                command_class=cmd_class,
+                approval_present=True,
+                approval_fresh=True,
+            )
+            assert result["decision"] == BROKER_DENY, (
+                f"Approval should not override {cmd_class}"
+            )
+            assert result["hard_block"] is True
+
+    def test_accepted_risk_cannot_override_each_hard_block(self):
+        for action, cmd_class in self.HARD_BLOCK_COMMANDS:
+            result = evaluate_permission_broker(
+                action_type=action,
+                command_class=cmd_class,
+                accepted_risk_present=True,
+            )
+            assert result["decision"] == BROKER_DENY, (
+                f"Accepted risk should not override {cmd_class}"
+            )
+            assert result["hard_block"] is True
+
+    def test_approval_and_risk_together_cannot_override(self):
+        for action, cmd_class in self.HARD_BLOCK_COMMANDS:
+            result = evaluate_permission_broker(
+                action_type=action,
+                command_class=cmd_class,
+                approval_present=True,
+                approval_fresh=True,
+                accepted_risk_present=True,
+            )
+            assert result["decision"] == BROKER_DENY, (
+                f"Approval + risk should not override {cmd_class}"
+            )
+            assert result["hard_block"] is True
+
+    def test_contextual_hard_blocks_not_overridable(self):
+        """Out-of-scope, forbidden, missing task — contextual hard blocks."""
+        # out_of_scope
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=True,
+            task_scope_known=True,
+            allowed_paths=("src/pcae/core/example.py",),
+            paths=("src/pcae/core/other.py",),
+            approval_present=True,
+            approval_fresh=True,
+            accepted_risk_present=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+        # missing task
+        result = evaluate_permission_broker(
+            action_type=ACTION_SOURCE_MUTATION,
+            command_class=CMD_GOVERNED,
+            task_present=False,
+            approval_present=True,
+            approval_fresh=True,
+            accepted_risk_present=True,
+            readiness_ready=True,
+            enforcement_authorized=True,
+        )
+        assert result["decision"] == BROKER_DENY
+        assert result["hard_block"] is True
+
+    def test_fail_closed_decisions_are_never_allow(self):
+        """Fail-closed inputs never produce allow."""
+        # unknown command class
+        r1 = evaluate_permission_broker(action_type=ACTION_READ, command_class=CMD_UNKNOWN)
+        assert r1["decision"] != BROKER_ALLOW
+
+        # missing action type
+        r2 = evaluate_permission_broker(action_type="")
+        assert r2["decision"] != BROKER_ALLOW
+
+        # unknown action type
+        r3 = evaluate_permission_broker(action_type="bogus_action")
+        assert r3["decision"] != BROKER_ALLOW
+
+    def test_registry_does_not_introduce_enforcement(self):
+        """HardBlockPolicy is a pure dataclass — no execution, no enforcement."""
+        hb = HARD_BLOCK_REGISTRY[0]
+        # Verify it's just data — no methods beyond dataclass builtins
+        assert isinstance(hb.reason_code, str)
+        assert isinstance(hb.override_allowed, bool)
+        # No callable attributes except dataclass builtins
+        forbidden_attrs = {"execute", "enforce", "block", "intercept", "invoke"}
+        for attr in forbidden_attrs:
+            assert not hasattr(hb, attr), f"HardBlockPolicy must not have {attr}"

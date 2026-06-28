@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 91C hard-block policy readiness: HARD_BLOCK_REGISTRY with 12 entries, validate/ lookup helpers, CLI hard-blocks command.
+- HardBlockPolicy dataclass with 10 fields; all 12 blocks are non-overridable (88V §16 preserved).
+- 30 hard-block tests, 265 total broker tests. Delivers docs/PHASE_91_HARD_BLOCK_POLICY_READINESS.md.
 - Added Phase 91B broker CLI commands: pcae permission-broker status, explain, check.
 - Registered 24 reason codes across 4 categories (hard_block, more_evidence, human_review, allow).
 - 31 CLI tests pass; all commands support --json. Existing evaluate command unchanged.
