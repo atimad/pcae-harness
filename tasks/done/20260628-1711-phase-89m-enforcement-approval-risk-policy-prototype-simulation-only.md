@@ -10,7 +10,7 @@ Phase 89M — Enforcement Approval/Risk Policy Prototype, simulation-only
 
 ## Status
 
-active
+done
 
 ## Mode
 
