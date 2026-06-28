@@ -2,6 +2,14 @@
 
 ## Completed
 
+- 89K — Enforcement Readiness Test Plan and Fixture Design (20260628-1642-89k-enforcement-readiness-test-plan-and-fixture-design)
+- 2026-06-28: 20260628-1642-89k-enforcement-readiness-test-plan-and-fixture-design
+- 2026-06-28: 20260628-1516-89j-enforcement-readiness-gate-checklist-and-go-no-go-criteria
+- 2026-06-28: 20260628-1514-89i-enforcement-operator-approval-and-accepted-risk-policy-design
+- 2026-06-28: 20260628-1512-89h-enforcement-readiness-audit-and-rollback-model-design
+- 2026-06-28: 20260628-1459-89g-enforcement-readiness-threat-model-and-safety-case
+- 2026-06-28: 20260628-1440-89f-dry-run-blocking-simulation-integration-readiness-review
+
 - 89E — Dry-Run Blocking Simulation UX Refinement and Operator Guidance (20260628-1408-89e-dry-run-blocking-simulation-ux-refinement-and-operator-guidance)
 - 89D — Dry-Run Blocking Simulation Test Matrix and CLI Stability Review (20260628-1252-89d-dry-run-blocking-simulation-test-matrix-and-cli-stability-review)
 - 89C — Dry-Run Blocking Simulation Prototype (20260628-1217-89c-dry-run-blocking-simulation-prototype)
