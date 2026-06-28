@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89G: Enforcement Readiness Threat Model and Safety Case (active).
+Phase 89G: Enforcement Readiness Threat Model and Safety Case (completed).
 
 Analysis phase. Created comprehensive threat model and safety case for future
 PCAE enforcement. Identified 34 specific threats across 6 categories (command
