@@ -140,13 +140,14 @@ class TestCompoundCommandsThruBroker:
         assert b["decision"] == "blocked_by_raw_git_push"
         assert b["hard_block_present"] is True
 
-    def test_semicolon_without_spaces_falls_to_unknown(self, no_task_root):
-        # Without spaces, shlex.split yields "status;" as a single token →
-        # git unknown subcommand → blocked_by_shell_gate (documented limitation)
+    def test_semicolon_without_spaces_now_split_89a(self, no_task_root):
+        """89A fix: compact operator splitting now detects ; without spaces.
+        'git status; git push' is split into two segments. git push →
+        raw_git_push → hard block (most restrictive wins)."""
         b = _broker("read", command="git status; git push origin main",
                     root=no_task_root)
-        assert b["decision"] == "blocked_by_shell_gate"
-        assert b["shell_gate_command_category"] == "unknown"
+        assert b["decision"] == "blocked_by_raw_git_push"
+        assert b["hard_block_present"] is True
 
     def test_pcae_health_and_force_push_yields_force_push_block(self, no_task_root):
         b = _broker("read", command="pcae health && git push --force",
@@ -402,12 +403,12 @@ class TestUnknownCommandThruBroker:
         assert b["decision"] == "blocked_by_shell_gate"
         assert b["hard_block_present"] is True
 
-    def test_bash_script_hard_blocked(self, no_task_root):
-        # bash is not in any known program set → unknown → blocked_by_shell_gate
-        # Known false positive: legitimate bash scripts blocked conservatively
+    def test_bash_script_requires_review_89a(self, no_task_root):
+        """89A fix: bash is now a known shell. Shell with script file
+        requires human review (not hard blocked as unknown)."""
         b = _broker("read", command="bash script.sh", root=no_task_root)
-        assert b["decision"] == "blocked_by_shell_gate"
-        assert b["hard_block_present"] is True
+        assert b["decision"] != "blocked_by_shell_gate"
+        assert b["shell_gate_command_category"] != "unknown"
 
     def test_unknown_command_reason_codes(self, no_task_root):
         b = _broker("read", command="unknown-tool --dangerous", root=no_task_root)
@@ -736,13 +737,12 @@ class TestFalseNegativeDocumented:
                     root=no_task_root)
         assert b["shell_gate_command_category"] == "secret_access"
 
-    def test_bash_script_false_positive_blocked(self, no_task_root):
-        # KNOWN FALSE POSITIVE: `bash script.sh` is conservatively blocked as
-        # unknown because "bash" is not in any known program set. The classifier
-        # cannot evaluate what a bash script does without executing it.
+    def test_bash_script_false_positive_fixed_89a(self, no_task_root):
+        """89A fix: bash is recognized as known shell. The false positive
+        where bash scripts were blocked as unknown is now resolved."""
         b = _broker("read", command="bash script.sh", root=no_task_root)
-        assert b["decision"] == "blocked_by_shell_gate"
-        assert b["shell_gate_command_category"] == "unknown"
+        assert b["shell_gate_command_category"] != "unknown"
+        assert b["shell_gate_command_category"] != "backend_invocation"
 
     def test_git_soft_reset_blocked_as_unknown(self, no_task_root):
         # KNOWN FALSE POSITIVE: `git reset HEAD~1` (soft reset, no --hard/--mixed)

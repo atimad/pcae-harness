@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 89A: Advisory Mode Hardening / False-Positive Repair (active).
+
+Implementation phase. Fixed 3 false positives (bash/sh/zsh unknown, env python
+secret_access) and 1 false negative (env|grep TOKEN not redacted) from 88Y.
+Added known shells list, compact operator regex splitting, and intelligent env
+argument inspection. Shell -c/-lc embedded commands now classified directly.
+Hard blocks and secret redaction preserved. Delivers
+docs/PHASE_89_ADVISORY_MODE_HARDENING_FALSE_POSITIVE_REPAIR.md.
+Recommends 89B — Dry-Run Blocking Simulation Design.
+
 Phase 88Z: Advisory Operator UX and Workflow Design (completed).
 
 Design-only phase. Defined the operator-facing UX for advisory mode: how humans

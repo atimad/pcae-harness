@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### 89A — Advisory Mode Hardening / False-Positive Repair (2026-06-28)
+
+Fixed 3 known false positives and 1 false negative from 88Y. Added known
+shells list (bash, sh, zsh, dash, fish, ksh, tcsh, csh) so shell programs
+are recognized and require human review rather than blocked as unknown.
+Shell -c/-lc flags now extract and classify embedded commands directly,
+preserving hard blocks (sh -c 'git push' → raw_git_push). Compact operator
+regex splitting (\|\||&&|;|\|) handles operators without surrounding spaces,
+fixing env|grep TOKEN false negative (now properly split as pipe chain and
+redacted). env argument inspection differentiates program execution (env python)
+from secret variable assignment (env OPENAI_API_KEY=x cmd), fixing the
+88V.1 env/printenv over-classification. All 88V.1 secret redaction rules and
+hard-block decisions preserved. 1,054 focused tests pass; fast-green unchanged
+at ~3,001/~25s. Delivers
+`docs/PHASE_89_ADVISORY_MODE_HARDENING_FALSE_POSITIVE_REPAIR.md`. Recommends 89B.
+
 ### 88Z — Advisory Operator UX and Workflow Design (2026-06-28)
 
 Design-only phase. Defines the operator-facing UX for PCAE advisory mode:

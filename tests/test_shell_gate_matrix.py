@@ -839,10 +839,12 @@ class TestFalsePositiveReview:
         assert result["command_category"] in ("read_only_inspection", "filesystem_write",
                                                "policy_forbidden_file_mutation")
 
-    def test_env_with_args_is_secret_exposure_88v1(self):
-        # 88V.1 GAP-2 repair: 'env python script.py' — env is now classified
-        # as secret_access. Previously was read_only (false negative).
-        assert _cat("env python script.py") == "secret_access"
+    def test_env_python_not_secret_access_89a(self):
+        # 89A fix: 'env python script.py' — env is no longer over-classified
+        # as secret_access. env inspects arguments; bare program execution
+        # through env delegates to the sub-command classifier.
+        assert _cat("env python script.py") != "secret_access"
+        assert _cat("env python") != "secret_access"
 
     def test_printenv_grep_secret_exposure_88v1(self):
         # 88V.1 GAP-2 repair: printenv | grep KEY — pipe chain picks most

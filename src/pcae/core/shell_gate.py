@@ -175,8 +175,16 @@ _SECRET_FILE_PREFIXES: tuple[str, ...] = (
     "/etc/sudoers",
 )
 
+# ── Known interactive shell programs (89A) ──────────────────────────────────
+_KNOWN_SHELLS: frozenset[str] = frozenset({
+    "bash", "sh", "zsh", "dash", "fish", "ksh", "tcsh", "csh",
+})
+
 # ── Compound shell operators ───────────────────────────────────────────────
 _COMPOUND_OPS: frozenset[str] = frozenset({"&&", "||", ";"})
+
+# ── Compact operator regex (no surrounding spaces) ── 89A ───────────────────
+_COMPACT_OP_RE = re.compile(r'(\|\||&&|;|\|)')
 
 # ── Category severity: lower = more dangerous, wins in compound/pipe ───────
 _CATEGORY_SEVERITY: dict[str, int] = {
@@ -653,10 +661,67 @@ def _classify_single(command_text: str) -> dict[str, Any]:
                 "detected_flags": flags}
 
     # ── env / printenv secret exposure (GAP-2 repair, 88V.1) ──────────────
+    # 89A: inspect env arguments — env python is NOT secret_access;
+    #       env KEY=secret cmd still triggers secret detection
     if program in ("env", "printenv"):
-        flags["secret_access_detected"] = True
-        return {"command_category": "secret_access",
-                "reason_codes": ["env_printenv_secret_exposure_detected"],
+        if program == "printenv":
+            flags["secret_access_detected"] = True
+            return {"command_category": "secret_access",
+                    "reason_codes": ["printenv_secret_exposure_detected"],
+                    "detected_flags": flags}
+        # env: check arguments
+        args = tokens[1:]
+        if not args:
+            # bare env — list all env vars, could expose secrets
+            flags["secret_access_detected"] = True
+            return {"command_category": "secret_access",
+                    "reason_codes": ["env_secret_exposure_detected"],
+                    "detected_flags": flags}
+        # Check each argument for secret-like VAR=val assignments
+        has_secret_var = False
+        has_any_assignment = False
+        first_program_arg_idx = len(args)
+        for i, arg in enumerate(args):
+            if "=" in arg and re.match(r'^[A-Za-z_][A-Za-z0-9_]*=', arg):
+                has_any_assignment = True
+                var_name = arg.split("=", 1)[0]
+                if _is_secret_env_var_name(var_name):
+                    has_secret_var = True
+            else:
+                first_program_arg_idx = i
+                break
+        if has_secret_var:
+            # env KEY=secret cmd — secret access detected
+            flags["secret_access_detected"] = True
+            flags["environment_mutation_detected"] = True
+            return {"command_category": "secret_access",
+                    "reason_codes": ["env_secret_var_detected"],
+                    "detected_flags": flags}
+        if has_any_assignment and first_program_arg_idx < len(args):
+            # env VAR=val cmd — non-secret env assignment, classify the cmd
+            subcmd = " ".join(args[first_program_arg_idx:])
+            sub_result = _classify_single(subcmd)
+            sub_flags = sub_result.get("detected_flags", {})
+            merged_flags = {**flags, **sub_flags}
+            merged_flags["environment_mutation_detected"] = True
+            return {"command_category": sub_result["command_category"],
+                    "reason_codes": ["env_prefix_non_secret"] + sub_result.get("reason_codes", []),
+                    "detected_flags": merged_flags}
+        if first_program_arg_idx < len(args):
+            # env python — run program with current environment
+            # Not secret access per se; classify the target program
+            subcmd = " ".join(args[first_program_arg_idx:])
+            sub_result = _classify_single(subcmd)
+            sub_flags = sub_result.get("detected_flags", {})
+            merged_flags = {**flags, **sub_flags}
+            # Do NOT set secret_access_detected — 89A fix
+            return {"command_category": sub_result["command_category"],
+                    "reason_codes": ["env_program_runner"] + sub_result.get("reason_codes", []),
+                    "detected_flags": merged_flags}
+        # env VAR=val (no command) — environment mutation, not secret access
+        flags["environment_mutation_detected"] = True
+        return {"command_category": "environment_mutation",
+                "reason_codes": ["env_var_assignment_only"],
                 "detected_flags": flags}
 
     # VAR=val cmd prefix: first token is an env-var assignment
@@ -688,6 +753,41 @@ def _classify_single(command_text: str) -> dict[str, Any]:
                 "reason_codes": ["secret_access_program_detected"],
                 "detected_flags": flags}
 
+    # ── known interactive shells (89A) ─────────────────────────────────────
+    if program in _KNOWN_SHELLS:
+        args = tokens[1:]
+        # bare shell (no args) — interactive shell access, requires review
+        if not args:
+            return {"command_category": "network_access",
+                    "reason_codes": ["interactive_shell_bare"],
+                    "detected_flags": flags}
+        # shell -c "command" — classify the embedded command
+        if args[0] in ("-c", "-lc", "--command"):
+            if len(args) > 1:
+                # Extract and classify the embedded command
+                embedded = " ".join(args[1:])
+                # Strip outer quotes if present
+                if len(embedded) >= 2 and (
+                    (embedded.startswith('"') and embedded.endswith('"'))
+                    or (embedded.startswith("'") and embedded.endswith("'"))
+                ):
+                    embedded = embedded[1:-1]
+                if embedded.strip():
+                    sub_result = _classify_single(embedded)
+                    sub_flags = sub_result.get("detected_flags", {})
+                    merged_flags = {**flags, **sub_flags}
+                    return {"command_category": sub_result["command_category"],
+                            "reason_codes": ["shell_embedded_command"] + sub_result.get("reason_codes", []),
+                            "detected_flags": merged_flags}
+            # -c with no command text
+            return {"command_category": "unknown",
+                    "reason_codes": ["shell_c_no_command"],
+                    "detected_flags": flags}
+        # shell with other arguments (script file or flags) — requires review
+        return {"command_category": "network_access",
+                "reason_codes": ["interactive_shell_with_args"],
+                "detected_flags": flags}
+
     # ── shell redirection without known program ───────────────────────────
     if _has_output_redirection(command_text):
         redir_target = _redirection_target(command_text)
@@ -707,6 +807,20 @@ def _classify_single(command_text: str) -> dict[str, Any]:
     return {"command_category": "unknown",
             "reason_codes": ["unknown_program"],
             "detected_flags": flags}
+
+
+def _split_compact_operators(command_text: str) -> list[str]:
+    """Split a command string on compact operators (no spaces around |, &&, ||, ;).
+    Returns list of individual sub-commands for multi-segment classification."""
+    parts = _COMPACT_OP_RE.split(command_text)
+    # parts alternates: subcmd, op, subcmd, op, ...
+    # Collect only subcommands (even indices)
+    subcmds = [p.strip() for i, p in enumerate(parts) if i % 2 == 0 and p.strip()]
+    # If no operators found, parts == [command_text] and subcmds == [command_text]
+    # Detect if operators were present
+    if len(parts) <= 1:
+        return [command_text]
+    return subcmds if len(subcmds) > 1 else [command_text]
 
 
 def _classify_command(command_text: str) -> dict[str, Any]:
@@ -741,6 +855,13 @@ def _classify_command(command_text: str) -> dict[str, Any]:
             classifications = [_classify_single(" ".join(seg)) for seg in pipe_segments]
             result = _most_restrictive_classification(classifications)
             return {**result, "reason_codes": ["pipe_chain_detected"] + result["reason_codes"]}
+
+    # Compact operators (no spaces around |, &&, ||, ;) — 89A fallback
+    compact_segments = _split_compact_operators(command_text)
+    if len(compact_segments) > 1:
+        classifications = [_classify_single(seg) for seg in compact_segments]
+        result = _most_restrictive_classification(classifications)
+        return {**result, "reason_codes": ["compound_command_detected"] + result["reason_codes"]}
 
     return _classify_single(command_text)
 

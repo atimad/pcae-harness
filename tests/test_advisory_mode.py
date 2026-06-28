@@ -860,8 +860,6 @@ class Test88yMatrixUnknown:
 
     @pytest.mark.parametrize("cmd", [
         "unknown-tool --dangerous",
-        "bash",
-        "sh -c 'git push'",
     ])
     def test_unknown_commands_blocked(self, cmd):
         data = _adv(cmd)
@@ -869,9 +867,11 @@ class Test88yMatrixUnknown:
         assert data["advisory_decision"] != "would_allow_read_only"
         assert data["advisory_decision"] != "would_allow_governed_preflight_only"
 
-    def test_bash_not_allowed(self):
+    def test_bash_requires_review_not_blocked_89a(self):
+        """89A fix: bash is a known shell, requires human review (not unknown block)."""
         data = _adv("bash")
-        assert data["would_block"] is True
+        # bash requires human review, not blocked as unknown
+        assert data["shell_gate_category"] != "unknown"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1057,35 +1057,39 @@ class Test88yBrokerShellGateConsistency:
 class Test88yFalsePositiveReview:
     """Documented false positives — conservative but not dangerous."""
 
-    def test_bash_blocked_as_unknown(self):
-        """bash is blocked as unknown — conservative FP, acceptable."""
+    def test_bash_recognized_as_known_shell_89a(self):
+        """89A fix: bash is recognized as a known shell, not unknown."""
         data = _adv("bash")
-        assert data["would_block"] is True
-        assert data["shell_gate_category"] == "unknown"
+        assert data["shell_gate_category"] != "unknown"
 
-    def test_sh_minus_c_blocked(self):
-        """sh -c is blocked as unknown — conservative FP."""
+    def test_sh_minus_c_embedded_command_classified_89a(self):
+        """89A fix: sh -c 'git push' classifies the embedded command.
+        git push is raw_git_push which is a hard block."""
         data = _adv("sh -c 'git push'")
+        # git push inside sh -c → raw_git_push → would_block
         assert data["would_block"] is True
 
-    def test_env_python_not_secret(self):
-        """'env python' is not env with assignment — classified as secret_access
-        (88V.1 over-classifies env/printenv). Documented conservative FP."""
-        data = _adv("env python script.py")
-        assert data["shell_gate_category"] == "secret_access"
+    def test_env_python_no_longer_secret_access_89a(self):
+        """89A fix: 'env python' is no longer over-classified as secret_access.
+        env inspects arguments; running a program through env delegates to
+        the sub-command classifier."""
+        data = _adv("env python")
+        assert data["shell_gate_category"] != "secret_access"
+        data2 = _adv("env python script.py")
+        assert data2["shell_gate_category"] != "secret_access"
 
 
 class Test88yFalseNegativeReview:
     """Documented false negatives found in 88Y review."""
 
-    def test_env_pipe_grep_no_spaces_not_redacted(self):
-        """FN: 'env|grep TOKEN' without spaces around | is a single token
-        'env|grep' after shlex.split. The pipe is not detected, so the
-        classifier treats it as an unknown program, not env pipe grep.
-        Documented limitation — deferred to tokenizer hardening phase."""
+    def test_env_pipe_grep_no_spaces_now_redacted_89a(self):
+        """89A fix: 'env|grep TOKEN' without spaces around | is now split
+        on the compact pipe operator. The pipe chain detects env → secret_access
+        which triggers redaction. The false negative is fixed."""
         data = _adv("env|grep TOKEN")
-        # Currently NOT redacted — known false negative
-        assert data["redaction_applied"] is False
+        # 89A fix: compact operator splitting now detects the pipe,
+        # so env triggers secret_access → redaction IS applied
+        assert data["redaction_applied"] is True
 
     def test_no_false_negatives_in_hard_blocks(self):
         """All tested hard-block commands produce would_block."""
