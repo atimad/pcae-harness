@@ -101,3 +101,55 @@ def run_notify_test(args: argparse.Namespace) -> int:
                 print(f"    Error: {r.error}")
 
     return 0 if all(r.success for r in results) else 1
+
+
+def run_notify_send_report(args: argparse.Namespace) -> int:
+    """pcae notify send-report [--latest] [--json]
+
+    Reads the latest phase report and sends it via Telegram.
+    Manual command only — no automatic hooks.  No inbound commands.
+    """
+    from pcae.core.phase_reports import read_latest_report
+    from pcae.core.notifications import (
+        TelegramSink, phase_report_to_notification_event, dispatch,
+    )
+
+    reports_dir = Path(getattr(args, "reports_dir", None) or ".pcae/phase-reports")
+    report = read_latest_report(reports_dir)
+
+    if report is None:
+        msg = "No latest phase report found. Create one with: pcae phase-report create ..."
+        if args.json:
+            print(json.dumps({"error": "no_report", "message": msg}))
+        else:
+            print(f"Error: {msg}")
+        return 1
+
+    event = phase_report_to_notification_event(
+        report,
+        artifact_paths=[str(reports_dir / "latest.md")],
+    )
+
+    sink = TelegramSink()
+    results = dispatch(event, [sink])
+
+    if args.json:
+        print(json.dumps({
+            "event": event.to_dict(),
+            "results": [r.to_dict() for r in results],
+        }, indent=2, sort_keys=True))
+    else:
+        print(f"Telegram send-report: {report.phase_name}")
+        for r in results:
+            status = "OK" if r.success else "FAILED"
+            print(f"  [{status}] {r.message}")
+            if r.error:
+                print(f"    Error: {r.error}")
+        if not sink.is_configured():
+            print()
+            print("  Configure with environment variables:")
+            print("    PCAE_TELEGRAM_BOT_TOKEN")
+            print("    PCAE_TELEGRAM_CHAT_ID")
+            print("    PCAE_TELEGRAM_ENABLED=1")
+
+    return 0 if all(r.success for r in results) else 1

@@ -240,11 +240,11 @@ def test_no_external_network_calls():
         assert "api.telegram.org" not in str(result.metadata.get("event_path", ""))
 
 
-def test_no_telegram_implementation():
-    """Verify no Telegram sink exists in the module."""
-    from pcae.core import notifications
-    names = [n for n in dir(notifications) if "telegram" in n.lower()]
-    assert names == [], f"Telegram-related names found: {names}"
+def test_telegram_sink_exists_in_92c():
+    """TelegramSink exists and is importable (Phase 92C)."""
+    from pcae.core.notifications import TelegramSink, TELEGRAM_SINK_NAME
+    assert TelegramSink is not None
+    assert TELEGRAM_SINK_NAME == "telegram"
 
 
 def test_no_automatic_hook():

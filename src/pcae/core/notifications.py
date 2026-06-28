@@ -385,5 +385,196 @@ def phase_report_to_notification_event(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Telegram outbound sink — Phase 92C
+# ═══════════════════════════════════════════════════════════════════════════════
+
+TELEGRAM_SINK_NAME = "telegram"
+
+# Configuration from environment variables only
+_TELEGRAM_BOT_TOKEN_ENV = "PCAE_TELEGRAM_BOT_TOKEN"
+_TELEGRAM_CHAT_ID_ENV = "PCAE_TELEGRAM_CHAT_ID"
+_TELEGRAM_ENABLED_ENV = "PCAE_TELEGRAM_ENABLED"
+_DEFAULT_MAX_MESSAGE_CHARS = 3500
+
+
+class TelegramSink:
+    """Outbound Telegram notification sink.
+
+    Sends a short summary via sendMessage and the full report as a
+    document via sendDocument.  Uses Python standard library urllib.
+
+    Reads configuration from environment variables only:
+      PCAE_TELEGRAM_BOT_TOKEN  — Telegram Bot API token
+      PCAE_TELEGRAM_CHAT_ID    — Target chat ID
+      PCAE_TELEGRAM_ENABLED    — Optional, defaults to disabled if unset
+
+    No inbound commands.  No polling.  No remote shell.
+    """
+
+    def __init__(
+        self,
+        bot_token: str | None = None,
+        chat_id: str | None = None,
+        enabled: bool | None = None,
+        max_message_chars: int = _DEFAULT_MAX_MESSAGE_CHARS,
+        _opener: object = None,  # for test injection
+    ):
+        import os
+        self._bot_token = bot_token if bot_token is not None else os.environ.get(_TELEGRAM_BOT_TOKEN_ENV, "")
+        self._chat_id = chat_id if chat_id is not None else os.environ.get(_TELEGRAM_CHAT_ID_ENV, "")
+        self._max_message_chars = max_message_chars
+        self._opener = _opener
+
+        if enabled is None:
+            enabled_str = os.environ.get(_TELEGRAM_ENABLED_ENV, "")
+            self._enabled = enabled_str.lower() in ("1", "true", "yes")
+        else:
+            self._enabled = enabled
+
+    def is_configured(self) -> bool:
+        return bool(self._bot_token and self._chat_id)
+
+    def is_enabled(self) -> bool:
+        return self._enabled and self.is_configured()
+
+    def send(self, event: NotificationEvent) -> NotificationResult:
+        if not self.is_enabled():
+            return NotificationResult(
+                sink_name=TELEGRAM_SINK_NAME,
+                success=False,
+                message="Telegram is disabled or not configured.",
+                event_id=event.event_id,
+                attempted_at=_utc_now_iso(),
+                error="disabled_or_unconfigured",
+            )
+
+        # 1. Send summary via sendMessage
+        summary_text = self._build_summary(event)
+        msg_result = self._send_message(summary_text)
+
+        if not msg_result["ok"]:
+            return NotificationResult(
+                sink_name=TELEGRAM_SINK_NAME,
+                success=False,
+                message=f"sendMessage failed: {msg_result.get('error', 'unknown')}",
+                event_id=event.event_id,
+                attempted_at=_utc_now_iso(),
+                error=f"sendMessage: {msg_result.get('error', 'unknown')}",
+            )
+
+        # 2. Send full report document if artifact paths present
+        doc_result = {"ok": True}
+        if event.artifact_paths:
+            for path in event.artifact_paths[:1]:  # send first artifact as document
+                doc_result = self._send_document(path)
+                break
+
+        success = msg_result["ok"] and doc_result.get("ok", False)
+        return NotificationResult(
+            sink_name=TELEGRAM_SINK_NAME,
+            success=success,
+            message=(
+                "Telegram: summary sent" +
+                (", document sent" if doc_result.get("ok") else ", document failed")
+            ),
+            event_id=event.event_id,
+            attempted_at=_utc_now_iso(),
+            error=(None if success else (
+                doc_result.get("error") if not doc_result.get("ok")
+                else msg_result.get("error")
+            )),
+            metadata={
+                "send_message_ok": msg_result["ok"],
+                "send_document_ok": doc_result.get("ok", False),
+            },
+        )
+
+    def _build_summary(self, event: NotificationEvent) -> str:
+        text = f"[{event.severity.upper()}] {event.title}\n\n{event.message}"
+        if len(text) > self._max_message_chars:
+            text = text[:self._max_message_chars - 3] + "..."
+        return text
+
+    def _send_message(self, text: str) -> dict:
+        import json as _json
+        payload = {
+            "chat_id": self._chat_id,
+            "text": text,
+            "parse_mode": "Markdown",
+        }
+        return self._api_call("sendMessage", payload)
+
+    def _send_document(self, file_path: str) -> dict:
+        import json as _json
+        from pathlib import Path as _Path
+        path = _Path(file_path)
+        if not path.exists():
+            return {"ok": False, "error": f"File not found: {file_path}"}
+
+        content = path.read_bytes()
+        filename = path.name
+
+        # Multipart form-data for sendDocument
+        boundary = "pcaetelegram92c"
+        body_lines: list[bytes] = []
+        body_lines.append(f"--{boundary}".encode())
+        body_lines.append(b'Content-Disposition: form-data; name="chat_id"')
+        body_lines.append(b"")
+        body_lines.append(self._chat_id.encode())
+        body_lines.append(f"--{boundary}".encode())
+        body_lines.append(
+            f'Content-Disposition: form-data; name="document"; filename="{filename}"'.encode()
+        )
+        body_lines.append(b"Content-Type: application/octet-stream")
+        body_lines.append(b"")
+        body_lines.append(content)
+        body_lines.append(f"--{boundary}--".encode())
+
+        body = b"\r\n".join(body_lines)
+        url = f"{self._api_base()}/sendDocument"
+
+        return self._api_call_multipart(url, body, boundary)
+
+    def _api_base(self) -> str:
+        return f"https://api.telegram.org/bot{self._bot_token}"
+
+    def _api_call(self, method: str, payload: dict) -> dict:
+        import json as _json
+        from urllib.request import Request, urlopen
+        from urllib.error import URLError
+
+        url = f"{self._api_base()}/{method}"
+        data = _json.dumps(payload).encode()
+        req = Request(url, data=data, headers={"Content-Type": "application/json"})
+
+        try:
+            opener = self._opener if self._opener else urlopen
+            with opener(req) as resp:
+                return _json.loads(resp.read())
+        except URLError as exc:
+            return {"ok": False, "error": str(exc)}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+    def _api_call_multipart(self, url: str, body: bytes, boundary: str) -> dict:
+        import json as _json
+        from urllib.request import Request, urlopen
+        from urllib.error import URLError
+
+        req = Request(
+            url, data=body,
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        )
+        try:
+            opener = self._opener if self._opener else urlopen
+            with opener(req) as resp:
+                return _json.loads(resp.read())
+        except URLError as exc:
+            return {"ok": False, "error": str(exc)}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()

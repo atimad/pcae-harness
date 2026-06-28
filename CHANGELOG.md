@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Implemented Phase 92C Telegram outbound delivery: TelegramSink (sendMessage + sendDocument), CLI notify send-report.
+- 20 Telegram tests with mocked HTTP, 54 total notification tests. Delivers docs/PHASE_92_TELEGRAM_OUTBOUND_PHASE_REPORT_DELIVERY.md.
 - Implemented Phase 92B pluggable notification foundation: NotificationEvent/Result, 4 sinks, dispatcher, CLI notify status/test.
 - phase_report_to_notification_event() bridges 92A→92C. 34 tests pass. Delivers docs/PHASE_92_PLUGGABLE_NOTIFICATION_FOUNDATION.md.
 - Implemented Phase 92A phase report artifact model: PhaseReport dataclass (22 fields), write/read/ render, CLI create/show.

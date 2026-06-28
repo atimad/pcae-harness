@@ -418,6 +418,7 @@ from pcae.commands.phase_reports import (
 from pcae.commands.notifications import (
     run_notify_status,
     run_notify_test,
+    run_notify_send_report,
 )
 from pcae.commands.advisory import (
     run_advisory_check,
@@ -4900,6 +4901,15 @@ def build_parser() -> argparse.ArgumentParser:
     notify_test_parser.add_argument("--output-dir", default=None, help="Output directory for filesystem sink.")
     notify_test_parser.add_argument("--json", action="store_true", help="Machine-readable JSON.")
     notify_test_parser.set_defaults(handler=run_notify_test)
+
+    notify_send_parser = notify_subparsers.add_parser(
+        "send-report",
+        help="Send the latest phase report to Telegram (manual, outbound only).",
+    )
+    notify_send_parser.add_argument("--latest", action="store_true", default=True, help="Send latest report.")
+    notify_send_parser.add_argument("--reports-dir", default=None, help="Reports directory.")
+    notify_send_parser.add_argument("--json", action="store_true", help="Machine-readable JSON.")
+    notify_send_parser.set_defaults(handler=run_notify_send_report)
 
     # ── pcae advisory (Phase 88X) ─────────────────────────────────────────
     advisory_parser = subparsers.add_parser(

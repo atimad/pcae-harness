@@ -2,6 +2,19 @@
 
 ## Current Phase
 
+Phase 92C: Telegram Outbound Phase Report Delivery (completed).
+
+Implementation phase. Added TelegramSink implementing NotificationSink protocol
+(92B foundation). Uses sendMessage (short summary) + sendDocument (full report).
+Environment variable config only (PCAE_TELEGRAM_BOT_TOKEN, PCAE_TELEGRAM_CHAT_ID,
+PCAE_TELEGRAM_ENABLED). CLI: pcae notify send-report --latest --json. 20 new
+tests with mocked HTTP, 54 total notification tests. No Telegram polling,
+inbound commands, remote shell, /run, commit/push control, automatic hooks,
+enforcement, shell interception, wrappers, or backend invocation.
+Recommended next phase: 92D — Automatic Phase-Finalization Notification Hook
+(requires explicit operator approval).
+Delivers docs/PHASE_92_TELEGRAM_OUTBOUND_PHASE_REPORT_DELIVERY.md.
+
 Phase 92B: Pluggable Notification Foundation (completed).
 
 Implementation phase. Created NotificationEvent/NotificationResult dataclasses,
