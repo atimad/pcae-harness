@@ -2,6 +2,22 @@
 
 ## Current Phase
 
+Phase 89G: Enforcement Readiness Threat Model and Safety Case (active).
+
+Analysis phase. Created comprehensive threat model and safety case for future
+PCAE enforcement. Identified 34 specific threats across 6 categories (command
+execution, shell interception, authorization/state, secret/redaction, audit/
+recovery, future interfaces). Documented 9 abuse cases (6 intentional, 3
+accidental) and 11 failure modes. Defined 10 safety claims with verification
+status and 20 required controls. Specified 22 evidence items, ~200 minimum
+enforcement tests, audit event schema, rollback requirements, operator approval
+model, accepted-risk policy, and secret-protection requirements. Assessed
+future Telegram/mobile risks with 6 mitigations. Defined 10 absolute and 4
+conditional must-not-proceed conditions. Overall assessment: NOT READY for
+enforcement — requires 5+ design/implementation phases (89H–89M+). Delivers
+docs/PHASE_89_ENFORCEMENT_READINESS_THREAT_MODEL_AND_SAFETY_CASE.md.
+Recommends 89H — Audit and Rollback Model Design.
+
 Phase 89F: Dry-Run Blocking Simulation Integration Readiness Review (completed).
 
 Review-only phase. Assessed dry-run simulation readiness as a guarded integration
