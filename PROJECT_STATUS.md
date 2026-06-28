@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 89H: Enforcement Readiness Audit and Rollback Model Design (active).
+
+Design phase. Defined audit event taxonomy (16 event types), 5 event schemas
+(enforcement decision, command attempt, human approval, accepted risk, hard
+block), rollback artifact schema, evidence chain requirements with checksum
+chaining, integrity/tamper-evidence model, retention/rotation policy (10MB
+files, 100 max, 30-day minimum), recovery workflow (disable/degrade/re-enable),
+rollback workflow (pre-mutation snapshot + restore), 7 failure modes, and ~60
+required tests. Delivers docs/PHASE_89_ENFORCEMENT_READINESS_AUDIT_AND_ROLLBACK_MODEL_DESIGN.md.
+Recommends 89I.
+
 Phase 89G: Enforcement Readiness Threat Model and Safety Case (completed).
 
 Analysis phase. Created comprehensive threat model and safety case for future
