@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+### 88Z — Advisory Operator UX and Workflow Design (2026-06-28)
+
+Design-only phase. Defines the operator-facing UX for PCAE advisory mode:
+how human operators read, trust, triage, explain, and act on advisory decisions.
+Covers five operator personas, three operator workflows, ten UX principles,
+five severity levels, fifteen operator actions, hard-block/human-review/
+missing-evidence/secret-redaction/advisory-only messaging design, false-positive
+and false-negative handling workflows, operator next-action decision tree,
+safety invariants, and a future implementation plan mapped across 89A–89F+.
+No implementation — all design. Records known lifecycle issue: PCAE lacks a
+governed "final task close to idle" path (pcae check/commit hooks require an
+active task contract). Delivers
+`docs/PHASE_88_ADVISORY_OPERATOR_UX_AND_WORKFLOW_DESIGN.md`. Recommends 89A.
+
 ### 88Y.5 — Project State Shared Evidence Optimization (2026-06-27)
 
 Performance optimization. Extended the shared evidence model from 88Y.3/88Y.4

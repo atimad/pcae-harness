@@ -2,12 +2,17 @@
 
 ## Current Phase
 
-Phase 88Z: Advisory Operator UX and Workflow Design (active).
+Phase 88Z: Advisory Operator UX and Workflow Design (completed).
 
-Design-only phase. Defines the operator-facing UX for advisory mode: how humans
-read, trust, triage, explain, and act on advisory decisions. Covers UX principles,
-command behavior, message structure, severity/recommendation models, output
-formats, operator workflows, and safety boundaries. No implementation — all design.
+Design-only phase. Defined the operator-facing UX for advisory mode: how humans
+read, trust, triage, explain, and act on advisory decisions. Five operator personas,
+three operator workflows, ten UX principles, five severity levels, fifteen operator
+actions, messaging designs for hard blocks/human review/missing evidence/secret
+redaction/advisory-only status, false-positive/false-negative workflows, operator
+next-action decision tree, fourteen safety invariants, future implementation plan
+89A–89F+. Delivers docs/PHASE_88_ADVISORY_OPERATOR_UX_AND_WORKFLOW_DESIGN.md.
+Records known lifecycle issue: PCAE lacks governed "final task close to idle" path.
+Recommends 89A — Advisory Mode Hardening / False-Positive Repair.
 
 Phase 88Y.5: Project State Shared Evidence Optimization (completed).
 
