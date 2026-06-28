@@ -404,7 +404,12 @@ from pcae.commands.risk_register import run_risk_register
 from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
 from pcae.commands.shell_gate import run_shell_gate_check
-from pcae.commands.permission_broker import run_permission_broker_evaluate
+from pcae.commands.permission_broker import (
+    run_permission_broker_evaluate,
+    run_permission_broker_status,
+    run_permission_broker_explain,
+    run_permission_broker_check,
+)
 from pcae.commands.advisory import (
     run_advisory_check,
     run_advisory_explain,
@@ -4689,6 +4694,129 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON broker decision output.",
     )
     pb_evaluate_parser.set_defaults(handler=run_permission_broker_evaluate)
+
+    # ── pcae permission-broker status (Phase 91B) ────────────────────────
+    pb_status_parser = pb_subparsers.add_parser(
+        "status",
+        help="Show simulation-only broker status (no enforcement path is active).",
+    )
+    pb_status_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON status output.",
+    )
+    pb_status_parser.set_defaults(handler=run_permission_broker_status)
+
+    # ── pcae permission-broker explain (Phase 91B) ───────────────────────
+    pb_explain_parser = pb_subparsers.add_parser(
+        "explain",
+        help="Explain a broker reason code.",
+    )
+    pb_explain_parser.add_argument(
+        "--reason-code",
+        metavar="CODE",
+        required=True,
+        help="Reason code to explain.",
+    )
+    pb_explain_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON explanation output.",
+    )
+    pb_explain_parser.set_defaults(handler=run_permission_broker_explain)
+
+    # ── pcae permission-broker check (Phase 91B) ─────────────────────────
+    pb_check_parser = pb_subparsers.add_parser(
+        "check",
+        help="Evaluate proposed action metadata through the simulation-only broker.",
+    )
+    pb_check_parser.add_argument(
+        "--action-type",
+        metavar="ACTION",
+        default="read",
+        help="Action type: read, source_mutation, commit, push, etc.",
+    )
+    pb_check_parser.add_argument(
+        "--command-class",
+        metavar="CLASS",
+        default="unknown",
+        help="Command class: read_only, governed, raw_git_push, force_push, etc.",
+    )
+    pb_check_parser.add_argument(
+        "--path",
+        metavar="PATH",
+        action="append",
+        default=[],
+        help="Requested file path (repeatable).",
+    )
+    pb_check_parser.add_argument(
+        "--task-present",
+        action="store_true",
+        default=False,
+        help="Active task contract is present.",
+    )
+    pb_check_parser.add_argument(
+        "--task-scope-known",
+        action="store_true",
+        default=False,
+        help="Task contract scope is known.",
+    )
+    pb_check_parser.add_argument(
+        "--allowed-path",
+        metavar="PATH",
+        action="append",
+        default=[],
+        help="Path allowed by task contract (repeatable).",
+    )
+    pb_check_parser.add_argument(
+        "--forbidden-path",
+        metavar="PATH",
+        action="append",
+        default=[],
+        help="Path forbidden by task contract (repeatable).",
+    )
+    pb_check_parser.add_argument(
+        "--approval-present",
+        action="store_true",
+        default=False,
+        help="Human approval is present.",
+    )
+    pb_check_parser.add_argument(
+        "--approval-fresh",
+        action="store_true",
+        default=True,
+        help="Approval is fresh (not expired/revoked).",
+    )
+    pb_check_parser.add_argument(
+        "--accepted-risk-present",
+        action="store_true",
+        default=False,
+        help="Operator has accepted risk.",
+    )
+    pb_check_parser.add_argument(
+        "--readiness-ready",
+        action="store_true",
+        default=False,
+        help="Enforcement readiness gates are satisfied.",
+    )
+    pb_check_parser.add_argument(
+        "--enforcement-authorized",
+        action="store_true",
+        default=False,
+        help="Enforcement is explicitly authorized.",
+    )
+    pb_check_parser.add_argument(
+        "--repo-dirty",
+        action="store_true",
+        default=False,
+        help="Working tree has uncommitted changes.",
+    )
+    pb_check_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON broker check output.",
+    )
+    pb_check_parser.set_defaults(handler=run_permission_broker_check)
 
     # ── pcae advisory (Phase 88X) ─────────────────────────────────────────
     advisory_parser = subparsers.add_parser(

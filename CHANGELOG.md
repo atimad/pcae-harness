@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Added Phase 91B broker CLI commands: pcae permission-broker status, explain, check.
+- Registered 24 reason codes across 4 categories (hard_block, more_evidence, human_review, allow).
+- 31 CLI tests pass; all commands support --json. Existing evaluate command unchanged.
+- Delivers docs/PHASE_91_BROKER_CLI_AND_DECISION_EXPLANATION.md.
 - Implemented Phase 91A permission broker simulation prototype (evaluate_permission_broker).
 - Added 4-outcome decision model (allow, deny, human_review, more_evidence) with hard-block logic.
 - 55 new tests in TestBrokerDecisionModel91A; existing build_permission_broker unchanged.

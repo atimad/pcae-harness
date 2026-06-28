@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 91B: Broker CLI and Decision Explanation (completed).
+
+Simulation-only CLI phase. Added three new subcommands under pcae permission-broker:
+status (broker state), explain --reason-code (24 reason codes across 4 categories),
+and check (evaluates action metadata via evaluate_permission_broker). All commands
+support --json. 31 CLI tests pass. Existing 88R evaluate command unchanged.
+No enforcement, shell interception, wrappers, backend invocation, or command
+execution. Recommended next phase: 91C — Hard-Block Policy Readiness
+(requires explicit operator approval).
+Delivers docs/PHASE_91_BROKER_CLI_AND_DECISION_EXPLANATION.md.
+
 Phase 91A: Permission Broker Simulation Prototype (completed).
 
 Simulation-only implementation phase. Implemented evaluate_permission_broker()
