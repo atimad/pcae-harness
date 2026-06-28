@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89E: Dry-Run Blocking Simulation UX Refinement and Operator Guidance (active).
+Phase 89E: Dry-Run Blocking Simulation UX Refinement and Operator Guidance (completed).
 
 UX refinement phase. Improved human-readable dry-run output with structured
 sections for blocked (HARD BLOCK type/override), allowed (explicit non-auth
