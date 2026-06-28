@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 89B: Dry-Run Blocking Simulation Design (active).
+Phase 89B: Dry-Run Blocking Simulation Design (completed).
 
 Design-only phase. Defines the dry-run blocking simulation layer bridging advisory
 mode (Stage 1) to blocking gate (Stage 3). Simulation shows what enforcement would
