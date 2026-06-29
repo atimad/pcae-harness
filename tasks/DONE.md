@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 94V — Adapter-Specific Contract Specialization (20260629-2116-phase-94u-real-backend-adapter-preflight-artifacts)
+- Phase 94W — Real Adapter Preflight Hardening (20260629-2125-phase-94v-adapter-specific-contract-specialization)
+- Phase 94V — Adapter-Specific Contract Specialization (20260629-2125-phase-94v-adapter-specific-contract-specialization)
 - Phase 94U — Real Backend Adapter Preflight Artifacts (20260629-2116-phase-94u-real-backend-adapter-preflight-artifacts)
 - Phase 94T.1 — Phase Completion Metadata Freshness Guard (20260629-2107-phase-94t-1-phase-completion-metadata-freshness-guard)
 - Phase 94T — Real Backend Adapter Preflight CLI (20260629-2058-phase-94t-real-backend-adapter-preflight-cli)

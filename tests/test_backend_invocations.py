@@ -4463,3 +4463,219 @@ class Test94VNoExecution:
     def test_multipart_phase_id_preserved(self):
         c = create_custom_adapter_contract(backend_id="94V.1.2")
         assert c.backend_id == "94V.1.2"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94W — Real adapter preflight hardening tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ADAPTER_MODE_FUTURE_REAL,
+)
+
+
+class Test94WContractValidation:
+    """Phase 94W: hardened contract validation."""
+
+    def test_real_adapter_without_approval_blocked(self):
+        c = create_claude_cli_adapter_contract()
+        c.safety_capabilities.requires_human_approval = False
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is False
+        assert any("human_approval" in hb for hb in result["hard_blocks"])
+
+    def test_real_adapter_without_audit_blocked(self):
+        c = create_claude_cli_adapter_contract()
+        c.safety_capabilities.requires_audit = False
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is False
+
+    def test_real_adapter_without_timeout_blocked(self):
+        c = create_claude_cli_adapter_contract()
+        c.safety_capabilities.requires_timeout = False
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is False
+
+    def test_real_adapter_without_quarantine_blocked(self):
+        c = create_claude_cli_adapter_contract()
+        c.safety_capabilities.requires_output_quarantine = False
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is False
+
+    def test_real_adapter_without_no_apply_blocked(self):
+        c = create_claude_cli_adapter_contract()
+        c.safety_capabilities.supports_no_apply_guarantee = False
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is False
+
+    def test_duplicate_env_keys_warning(self):
+        c = BackendAdapterContract(
+            adapter_id="a", backend_id="test",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            required_env_keys=["KEY_A", "KEY_A"],
+        )
+        result = validate_backend_adapter_contract(c)
+        assert any("duplicate" in w for w in result["warnings"])
+
+    def test_mock_without_approval_still_valid(self):
+        c = create_mock_adapter_contract()
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is True
+
+    def test_future_real_mode_blocked(self):
+        c = BackendAdapterContract(
+            adapter_id="a", backend_id="bad",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_FUTURE_REAL,
+            supports_timeout=False,
+        )
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is False
+
+
+class Test94WPreflightValidation:
+    """Phase 94W: hardened preflight validation."""
+
+    def test_bypass_detected_hard_blocks(self):
+        c = create_claude_cli_adapter_contract()
+        r = validate_backend_adapter_preflight(c, bypass_detected=True)
+        assert r.ready is False
+        assert "bypass_permissions_detected" in r.hard_blocks
+
+    def test_no_real_backend_true_by_default(self):
+        c = create_mock_adapter_contract()
+        r = validate_backend_adapter_preflight(c)
+        assert r.no_real_backend_invoked is True
+
+    def test_no_subprocess_true_by_default(self):
+        c = create_mock_adapter_contract()
+        r = validate_backend_adapter_preflight(c)
+        assert r.no_subprocess is True
+
+    def test_no_network_true_by_default(self):
+        c = create_mock_adapter_contract()
+        r = validate_backend_adapter_preflight(c)
+        assert r.no_network is True
+
+    def test_secrets_redacted_true_by_default(self):
+        c = create_mock_adapter_contract()
+        r = validate_backend_adapter_preflight(c)
+        assert r.secrets_redacted is True
+
+    def test_disabled_adapter_blocked(self):
+        c = create_custom_adapter_contract()
+        r = validate_backend_adapter_preflight(c)
+        assert r.status == PREFLIGHT_DISABLED
+        assert r.ready is False
+
+
+class Test94WArtifactVerification:
+    """Phase 94W: hardened artifact verification."""
+
+    def test_tampered_digest_fails(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        a = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        a.record_digest = a.compute_digest()
+        a.hard_blocks = ["injected_malicious_block"]
+        result = verify_backend_adapter_preflight_artifact(a)
+        assert result["valid"] is False
+
+    def test_future_real_in_artifact_fails(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        a = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        a.invocation_mode = ADAPTER_MODE_FUTURE_REAL
+        a.record_digest = a.compute_digest()
+        result = verify_backend_adapter_preflight_artifact(a)
+        assert result["valid"] is False
+
+    def test_ready_with_hard_blocks_fails(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        a = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        a.ready = True
+        a.hard_blocks = ["some_block"]
+        a.record_digest = a.compute_digest()
+        result = verify_backend_adapter_preflight_artifact(a)
+        assert result["valid"] is False
+
+
+class Test94WCLIHardening:
+    """Phase 94W: CLI hardening tests."""
+
+    def test_preflight_missing_env_safe_text(self):
+        import subprocess, sys
+        from pathlib import Path
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight",
+             "--backend", "claude"],
+            capture_output=True, text=True,
+            cwd=Path(__file__).resolve().parent.parent, timeout=15,
+        )
+        assert r.returncode != 0
+        assert "ANTHROPIC_API_KEY" in r.stdout
+        assert "No real backend" in r.stdout
+        assert "No subprocess" in r.stdout
+
+    def test_preflight_json_no_secrets(self, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-secret-xyz")
+        import subprocess, sys, json
+        from pathlib import Path
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight",
+             "--backend", "claude", "--json"],
+            capture_output=True, text=True,
+            cwd=Path(__file__).resolve().parent.parent, timeout=15,
+        )
+        data = json.loads(r.stdout)
+        j = json.dumps(data)
+        assert "sk-ant-secret-xyz" not in j
+
+    def test_verify_tampered_artifact_cli_fails(self):
+        import subprocess, sys, json as _j
+        from pathlib import Path
+        repo = Path(__file__).resolve().parent.parent
+        # Save a valid artifact
+        subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight",
+             "--backend", "mock", "--save"],
+            capture_output=True, text=True, cwd=repo, timeout=15,
+        )
+        # Tamper the latest.json
+        latest = repo / ".pcae" / "backend-adapter-preflights" / "latest.json"
+        if latest.exists():
+            data = _j.loads(latest.read_text())
+            data["record_digest"] = "00" * 32
+            latest.write_text(_j.dumps(data))
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight-verify",
+             "--latest"],
+            capture_output=True, text=True, cwd=repo, timeout=15,
+        )
+        assert r.returncode != 0
+
+
+class Test94WNoExecution:
+    """Phase 94W: no-execution guarantees."""
+
+    def test_no_subprocess_in_hardening(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_telegram_inbound(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "getUpdates" not in source
+
+    def test_no_backend_or_apply_changed(self):
+        """Verify no backend invocation or apply execution was added."""
+        c = create_claude_cli_adapter_contract()
+        # All real adapters remain preflight-only
+        assert c.invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY
+        plan = create_backend_adapter_invocation_plan(c)
+        assert plan.executable is False

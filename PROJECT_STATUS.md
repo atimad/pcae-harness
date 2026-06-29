@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 94W: Real Adapter Preflight Hardening (completed).
+
+Hardened contract validation (5 new hard-blocks for real adapters), artifact verification
+(adapter_id, backend_type, future_real rejection, ready+hard_blocks detection),
+duplicate env key detection. 23 new tests (481 model total).
+Delivers docs/PHASE_94_REAL_ADAPTER_PREFLIGHT_HARDENING.md.
+
 Phase 94V: Adapter-Specific Contract Specialization (completed).
 
 Added 6 factory functions, backend-specific safety profiles, no-go condition lists,

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94V — Adapter-Specific Contract Specialization to Phase 94W — Real Adapter Preflight Hardening; session refreshed and governance continuity revalidated.
+- Completed Phase 94W Real Adapter Preflight Hardening. 23 new tests (481 model total).
+
 - Transitioned active task from Phase 94U — Real Backend Adapter Preflight Artifacts to Phase 94V — Adapter-Specific Contract Specialization; session refreshed and governance continuity revalidated.
 - Completed Phase 94V Adapter-Specific Contract Specialization: 6 factory functions, no-go conditions, failure mappings.
 - All real adapters preflight-only/disabled. 19 new tests (458 model total).

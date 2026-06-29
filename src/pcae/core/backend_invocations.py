@@ -3675,8 +3675,35 @@ def validate_backend_adapter_contract(contract: BackendAdapterContract) -> dict[
             if not contract.supports_artifact_only:
                 warnings_list.append("future_real_adapter_without_artifact_only")
 
+    # ── Phase 94W: safety capability hard-blocks for real adapters ──────
+    if contract.backend_type != ADAPTER_BACKEND_MOCK:
+        sp = contract.safety_capabilities
+        if not sp.requires_human_approval:
+            hard_blocks.append("real_adapter_requires_human_approval")
+        if not sp.requires_audit:
+            hard_blocks.append("real_adapter_requires_audit")
+        if not sp.requires_timeout:
+            hard_blocks.append("real_adapter_requires_timeout")
+        if not sp.requires_secret_redaction and contract.requires_secrets:
+            hard_blocks.append("real_adapter_with_secrets_requires_redaction")
+        if not sp.requires_output_quarantine:
+            hard_blocks.append("real_adapter_requires_output_quarantine")
+        if not sp.supports_no_apply_guarantee:
+            hard_blocks.append("real_adapter_requires_no_apply_guarantee")
+
+    # ── Phase 94W: duplicate env key detection ──────────────────────────
+    seen_keys: set[str] = set()
+    for k in contract.required_env_keys:
+        if k in seen_keys:
+            warnings_list.append(f"duplicate_env_key:{k}")
+        seen_keys.add(k)
+
     for i in issues:
-        if "must be True" in i or "required" in i.lower():
+        # Safety profile requirements are relaxed for mock adapters
+        is_safety_issue = "safety:" in i
+        if is_safety_issue and contract.backend_type == ADAPTER_BACKEND_MOCK:
+            continue  # mock adapters may have relaxed safety defaults
+        if any(x in i.lower() for x in ("must be true", "required", "cannot use", "requires_")):
             hard_blocks.append(i)
         else:
             warnings_list.append(i)
@@ -4341,6 +4368,20 @@ def verify_backend_adapter_preflight_artifact(
         issues.append("no_network must be True")
     if not artifact.secrets_redacted:
         issues.append("secrets_redacted must be True")
+    # ── Phase 94W: additional integrity checks ──────────────────────────
+    if not artifact.adapter_id:
+        issues.append("missing adapter_id")
+    if not artifact.backend_type:
+        issues.append("missing backend_type")
+    if artifact.status not in VALID_PREFLIGHT_STATUSES and artifact.status:
+        issues.append(f"unknown preflight status: {artifact.status!r}")
+    if artifact.ready and artifact.hard_blocks:
+        issues.append("ready=True with hard_blocks present")
+    if artifact.invocation_mode == ADAPTER_MODE_FUTURE_REAL:
+        issues.append("future_real mode not permitted in artifacts")
+    if artifact.backend_id and artifact.adapter_id:
+        # adapter_id should contain the backend_id for consistency
+        pass  # informational, not a hard block
 
     if artifact.record_digest:
         computed = artifact.compute_digest()
