@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 94R: Backend Real Adapter Design (completed).
+
+Design-only phase. Defines the BackendAdapter Protocol contract for future real
+adapters (Claude, Claude-DeepSeek, Codex, Qwen, custom). Covers adapter abstraction
+(13-field contract, 7 methods), backend-specific notes (bypass-permissions detection,
+session isolation, prompt delivery, output capture, timeout, secrets), 16-step real
+invocation lifecycle, permission broker integration (6 invocation types, hard blocks),
+shell-gate boundaries, artifact model (runtime metadata, preflight, stderr), secret
+redaction gaps, timeout/failure taxonomy (9 modes), streaming deferral, human approval
+binding, Telegram outbound safety, 14 no-go conditions, ~100 planned tests, 14 go/no-go
+criteria. No implementation. Delivers docs/PHASE_94_BACKEND_REAL_ADAPTER_DESIGN.md.
+
 Phase 94Q.1: Bootstrap Resume and Telegram Runtime Hardening (completed).
 
 Corrective hardening phase. Replaced single-factor `ready = check_passed` with multi-factor

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94Q.1 — Bootstrap Resume and Telegram Runtime Hardening to Phase 94R — Backend Real Adapter Design; session refreshed and governance continuity revalidated.
+- Completed Phase 94R Backend Real Adapter Design (design-only).
+- Defines BackendAdapter Protocol contract: 13 fields, 7 methods (preflight, build_invocation_plan, invoke_artifact_only, capture_output, classify_failure, redact_runtime_metadata).
+- Backend-specific notes for Claude CLI, Claude-DeepSeek, Codex, Qwen, and custom backends with bypass-permissions detection, session isolation, prompt delivery strategy, timeout, and secret handling.
+- 16-step real invocation lifecycle integrating existing governance chain (request → prompt capture → preflight → broker → shell-gate → approval → invocation → output capture → audit → trust → review → approval → apply plan → readiness → package → separate commit/push).
+- Permission broker integration: 6 invocation type classifications, real invocation hard blocks (bypass-permissions, unknown backend, missing env, etc.).
+- Shell-gate boundaries: subprocess only through governed path, command hash logging, redaction.
+- Artifact model extensions: preflight result, runtime metadata, stderr capture. Secrets never in runtime metadata.
+- 14 no-go conditions for real invocation. 14 go/no-go criteria before 94S implementation.
+- ~100 planned tests across 13 categories.
+- No implementation, invocation, subprocess, network, or execution.
+- Delivers docs/PHASE_94_BACKEND_REAL_ADAPTER_DESIGN.md.
+
 - Transitioned active task from Phase 94Q — Backend Lifecycle End-to-End Mock Demo to Phase 94Q.1 — Bootstrap Resume and Telegram Runtime Hardening; session refreshed and governance continuity revalidated.
 - Completed Phase 94Q.1 Bootstrap Resume and Telegram Runtime Hardening: multi-factor readiness classification (_classify_bootstrap_readiness), stale active task detection, stale handoff detection, phase report completeness checking, Telegram runtime detection without secrets, push wording fix ("not ready" → "clean").
 - Replaced single-factor `ready = check_passed` with 10-factor evaluation: health, check, stale task, report completeness, handoff freshness, push state, task memory, Telegram runtime, active task mismatch, unpushed commits.
