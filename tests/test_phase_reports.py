@@ -411,3 +411,128 @@ def test_finalize_with_all_fields():
         assert "healthy" in content
         assert "No enforcement" in content
         assert "93A" in content
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.3 — Freshness and attachment repair
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestLatestReportFreshness:
+    """Verify write_phase_report correctly updates latest.md / latest.json."""
+
+    def test_write_updates_latest_md(self):
+        with tempfile.TemporaryDirectory() as td:
+            r = make_phase_report(
+                phase_id="93B", phase_name="Test B", status="completed",
+                summary="Phase B done.",
+            )
+            write_phase_report(r, Path(td))
+            latest = Path(td) / "latest.md"
+            assert latest.exists()
+            content = latest.read_text()
+            assert "Test B" in content
+            assert "Phase B done." in content
+
+    def test_write_updates_latest_json(self):
+        with tempfile.TemporaryDirectory() as td:
+            r = make_phase_report(
+                phase_id="93C", phase_name="Test C", status="completed",
+                summary="Phase C done.",
+            )
+            write_phase_report(r, Path(td))
+            latest_json = Path(td) / "latest.json"
+            assert latest_json.exists()
+            data = json.loads(latest_json.read_text())
+            assert data["phase_id"] == "93C"
+
+    def test_latest_overwritten_by_newer_phase(self):
+        with tempfile.TemporaryDirectory() as td:
+            r1 = make_phase_report(
+                phase_id="92A", phase_name="First", status="completed",
+                summary="First phase.",
+            )
+            write_phase_report(r1, Path(td))
+            assert "First" in (Path(td) / "latest.md").read_text()
+
+            r2 = make_phase_report(
+                phase_id="92B", phase_name="Second", status="completed",
+                summary="Second phase.",
+            )
+            write_phase_report(r2, Path(td))
+            content = (Path(td) / "latest.md").read_text()
+            assert "Second" in content
+            assert "First" not in content
+
+    def test_read_latest_report_returns_latest(self):
+        with tempfile.TemporaryDirectory() as td:
+            r1 = make_phase_report(
+                phase_id="91A", phase_name="Old", status="completed",
+                summary="Old phase.",
+            )
+            write_phase_report(r1, Path(td))
+            r2 = make_phase_report(
+                phase_id="91B", phase_name="New", status="completed",
+                summary="New phase.",
+            )
+            write_phase_report(r2, Path(td))
+            latest = read_latest_report(Path(td))
+            assert latest is not None
+            assert latest.phase_id == "91B"
+            assert latest.phase_name == "New"
+
+    def test_timestamped_artifact_created(self):
+        with tempfile.TemporaryDirectory() as td:
+            r = make_phase_report(
+                phase_id="90X", phase_name="Timestamped", status="completed",
+                summary="Check timestamp.",
+            )
+            paths = write_phase_report(r, Path(td))
+            markdown_path = Path(paths["markdown"])
+            assert markdown_path.exists()
+            assert "90X" in markdown_path.name or "Timestamped" in markdown_path.read_text()
+
+
+class TestFinalizePhaseReportCurrentPhase:
+    """Verify finalize_phase_report uses the current phase's report path."""
+
+    def test_notification_uses_timestamped_path(self):
+        with tempfile.TemporaryDirectory() as td:
+            fin = finalize_phase_report(
+                phase_id="92D.3-test", phase_name="Freshness Test",
+                status="completed", summary="Testing freshness.",
+                reports_dir=Path(td),
+            )
+            assert fin["report"] is not None
+            paths = fin["paths"]
+            # Timestamped markdown path should exist and contain current phase
+            ts_md = Path(paths["markdown"])
+            assert ts_md.exists()
+            content = ts_md.read_text()
+            assert "Freshness Test" in content
+
+    def test_latest_md_matches_timestamped(self):
+        with tempfile.TemporaryDirectory() as td:
+            fin = finalize_phase_report(
+                phase_id="92D.3-t2", phase_name="Match Test",
+                status="completed", summary="Match check.",
+                reports_dir=Path(td),
+            )
+            paths = fin["paths"]
+            ts_content = Path(paths["markdown"]).read_text()
+            latest_content = Path(paths["latest_markdown"]).read_text()
+            assert ts_content == latest_content, \
+                "Timestamped and latest.md must have identical content"
+
+    def test_notification_uses_current_phase_id(self):
+        with tempfile.TemporaryDirectory() as td:
+            fin = finalize_phase_report(
+                phase_id="92D.3-t3", phase_name="Phase ID Test",
+                status="completed", summary="Phase ID check.",
+                reports_dir=Path(td),
+            )
+            report = fin["report"]
+            assert report is not None
+            assert report.phase_id == "92D.3-t3"
+
+

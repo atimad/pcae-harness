@@ -406,9 +406,12 @@ def finalize_phase_report(
         NotificationSink,
     )
 
+    # Use timestamped markdown path for attachment — guarantees the current
+    # phase report is attached (not a stale latest.md if write order changed).
+    report_path = paths.get("markdown", paths.get("latest_markdown", ""))
     event = phase_report_to_notification_event(
         report,
-        artifact_paths=[str(paths.get("latest_markdown", ""))],
+        artifact_paths=[str(report_path)] if report_path else [],
     )
 
     sinks: list[NotificationSink] = []

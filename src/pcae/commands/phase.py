@@ -63,15 +63,25 @@ def run_phase_complete(args: argparse.Namespace) -> int:
 def _finalize_report_and_notify(summary: str) -> None:
     """Create a phase report artifact and optionally dispatch notifications.
 
-    Phase 92D — automatic finalization hook.  Notification failure is
+    Phase 92D/92D.3 — automatic finalization hook.  Notification failure is
     non-fatal.  Notifications are disabled by default.
+
+    Gathers repo metadata (commits, files changed, push status) so the
+    generated report carries accurate detail instead of "not captured".
+    Uses the timestamped report path for notification attachment to ensure
+    the current phase report is attached, not a stale latest.md.
     """
     import os
     from pcae.core.phase_reports import finalize_phase_report
 
-    # Derive phase info from summary — parse phase ID and name
     phase_id = _derive_phase_id(summary)
     phase_name = _derive_phase_name(summary)
+
+    # Gather repo metadata for a richer phase report
+    commits = _gather_commits()
+    files_changed = _gather_files_changed()
+    pushed_status = _gather_pushed_status()
+    origin_count = _gather_origin_head_count()
 
     notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
 
@@ -80,6 +90,10 @@ def _finalize_report_and_notify(summary: str) -> None:
         phase_name=phase_name,
         status="completed",
         summary=summary,
+        files_changed=files_changed,
+        commits=commits,
+        pushed_status=pushed_status,
+        origin_main_head_count=origin_count,
         recommended_next_phase=_derive_next_phase(summary),
     )
 
@@ -114,6 +128,68 @@ def _finalize_report_and_notify(summary: str) -> None:
         print(f"Notifications: ERROR — {fin['notification_error']}")
 
 
+def _gather_commits() -> list[str]:
+    """Return recent commit hashes for the current branch."""
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["git", "log", "--oneline", "-5"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            return [line.split()[0] for line in result.stdout.strip().splitlines() if line]
+    except Exception:
+        pass
+    return []
+
+
+def _gather_files_changed() -> int:
+    """Count files changed since origin/main."""
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["git", "diff", "--name-only", "origin/main..HEAD"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            return len([f for f in result.stdout.strip().splitlines() if f])
+    except Exception:
+        pass
+    return 0
+
+
+def _gather_pushed_status() -> str:
+    """Check whether HEAD is pushed to origin/main."""
+    import subprocess
+    try:
+        # Check if there are unpushed commits
+        result = subprocess.run(
+            ["git", "log", "--oneline", "origin/main..HEAD"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            count = len([l for l in result.stdout.strip().splitlines() if l])
+            return "pushed" if count == 0 else "not_pushed"
+    except Exception:
+        pass
+    return ""
+
+
+def _gather_origin_head_count() -> int:
+    """Return count of commits between origin/main and HEAD."""
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["git", "rev-list", "--count", "origin/main..HEAD"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode == 0:
+            return int(result.stdout.strip())
+    except Exception:
+        pass
+    return 0
+
+
 def _derive_phase_id(summary: str) -> str:
     """Derive a phase ID from the summary text."""
     import re
@@ -124,15 +200,22 @@ def _derive_phase_id(summary: str) -> str:
 
 
 def _derive_phase_name(summary: str) -> str:
-    """Derive a phase name from the summary text."""
+    """Derive a phase name from the summary text.
+
+    Strips trailing status markers (e.g. ' — completed') to keep the name clean.
+    """
     import re
     m = re.search(r"Phase\s+\d+[A-Za-z0-9.]*(?:\.\d+)?:\s*(.+?)(?:\.\s|$)", summary)
     if m:
         name = m.group(1).strip()
+        # Strip trailing status markers
+        for suffix in (" — completed", " — failed", " — blocked", " — partial", " — cancelled"):
+            if name.endswith(suffix):
+                name = name[: -len(suffix)]
+                break
         if len(name) > 100:
             name = name[:97] + "..."
         return name
-    # Fallback: use first 80 chars of summary
     return summary[:80].rsplit(" ", 1)[0]
 
 

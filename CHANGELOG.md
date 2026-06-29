@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 92D.3 phase report freshness and Telegram attachment repair: enriched report metadata, cleaned phase name parsing.
+- _finalize_report_and_notify() now gathers commits, files changed, push status from git. Uses timestamped report path for attachment.
+- 8 new freshness tests (118 total report+notification). Delivers docs/PHASE_92_PHASE_REPORT_FRESHNESS_AND_TELEGRAM_ATTACHMENT_REPAIR.md.
 - Completed Phase 92D.2 Telegram payload compatibility repair: fixed sendMessage HTTP 400 by removing parse_mode="Markdown".
 - Switched sendMessage to use URL-encoded form data (matching known-good curl behavior). Added Telegram error description capture.
 - 10 new tests (30 total). Manual send-report verified: summary sent + document sent. Delivers docs/PHASE_92_TELEGRAM_PAYLOAD_COMPATIBILITY_REPAIR.md.

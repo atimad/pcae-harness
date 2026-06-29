@@ -179,7 +179,10 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
             "results": [r.to_dict() for r in results],
         }, indent=2, sort_keys=True))
     else:
-        print(f"Telegram send-report: {report.phase_name}")
+        print(f"Telegram send-report")
+        print(f"  Phase:   {report.phase_id} — {report.phase_name}")
+        print(f"  Status:  {report.status}")
+        print(f"  Report:  {reports_dir / 'latest.md'}")
         for r in results:
             status = "OK" if r.success else "FAILED"
             print(f"  [{status}] {r.message}")

@@ -2,6 +2,19 @@
 
 ## Current Phase
 
+Phase 92D.3: Phase Report Freshness and Telegram Attachment Repair (completed).
+
+Corrective repair for phase report freshness in 92D automatic finalization hook.
+Root cause: _finalize_report_and_notify() passed only minimal metadata to
+finalize_phase_report() — all fields (files_changed, commits, pushed_status)
+defaulted to "not captured". Phase name included trailing " — completed" suffix.
+Fix: gather repo metadata (git log, file count, push status), clean phase name
+parsing, use timestamped report path for Telegram attachment. 8 new tests
+(118 total report+notification). Manual verification: latest.md and timestamped
+report both show current phase. Telegram attachment uses timestamped path.
+No Telegram polling, inbound commands, remote shell, /run, or enforcement.
+Delivers docs/PHASE_92_PHASE_REPORT_FRESHNESS_AND_TELEGRAM_ATTACHMENT_REPAIR.md.
+
 Phase 92D.2: Telegram Payload Compatibility Repair (completed).
 
 Corrective repair for 92C/92D Telegram outbound notification path. Root cause:
