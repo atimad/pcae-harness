@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 92D.2 Telegram payload compatibility repair: fixed sendMessage HTTP 400 by removing parse_mode="Markdown".
+- Switched sendMessage to use URL-encoded form data (matching known-good curl behavior). Added Telegram error description capture.
+- 10 new tests (30 total). Manual send-report verified: summary sent + document sent. Delivers docs/PHASE_92_TELEGRAM_PAYLOAD_COMPATIBILITY_REPAIR.md.
 - Completed Phase 93B narrow shell gate prototype: simulation-only pcae shell-gate check with broker integration.
 - check_shell_gate() classifies commands via existing shell gate classifier, maps to broker inputs, calls evaluate_permission_broker().
 - No-verify flag detection with precedence override (git commit --no-verify → no_verify class).

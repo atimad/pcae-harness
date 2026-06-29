@@ -497,13 +497,15 @@ class TelegramSink:
         return text
 
     def _send_message(self, text: str) -> dict:
-        import json as _json
-        payload = {
+        # Use URL-encoded form data matching known-good curl behavior.
+        # No parse_mode — plain text avoids Markdown/HTML parse errors
+        # (e.g. [INFO] brackets in summary text break Markdown parsing).
+        from urllib.parse import urlencode
+        payload_bytes = urlencode({
             "chat_id": self._chat_id,
             "text": text,
-            "parse_mode": "Markdown",
-        }
-        return self._api_call("sendMessage", payload)
+        }).encode()
+        return self._api_call_form("sendMessage", payload_bytes)
 
     def _send_document(self, file_path: str) -> dict:
         import json as _json
@@ -542,7 +544,7 @@ class TelegramSink:
     def _api_call(self, method: str, payload: dict) -> dict:
         import json as _json
         from urllib.request import Request, urlopen
-        from urllib.error import URLError
+        from urllib.error import HTTPError, URLError
 
         url = f"{self._api_base()}/{method}"
         data = _json.dumps(payload).encode()
@@ -552,6 +554,50 @@ class TelegramSink:
             opener = self._opener if self._opener else urlopen
             with opener(req) as resp:
                 return _json.loads(resp.read())
+        except HTTPError as exc:
+            # Read Telegram error response body for detailed error description
+            error_body = ""
+            try:
+                error_body = exc.read().decode()
+                error_data = _json.loads(error_body)
+                telegram_desc = error_data.get("description", "")
+                if telegram_desc:
+                    return {"ok": False, "error": f"Telegram: {telegram_desc}", "error_body": error_body}
+            except Exception:
+                pass
+            return {"ok": False, "error": f"HTTP {exc.code}: {exc.reason}", "error_body": error_body}
+        except URLError as exc:
+            return {"ok": False, "error": str(exc)}
+        except Exception as exc:
+            return {"ok": False, "error": str(exc)}
+
+    def _api_call_form(self, method: str, payload_bytes: bytes) -> dict:
+        """Call Telegram API with URL-encoded form data (matching curl -d behavior)."""
+        import json as _json
+        from urllib.request import Request, urlopen
+        from urllib.error import HTTPError, URLError
+
+        url = f"{self._api_base()}/{method}"
+        req = Request(
+            url, data=payload_bytes,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+
+        try:
+            opener = self._opener if self._opener else urlopen
+            with opener(req) as resp:
+                return _json.loads(resp.read())
+        except HTTPError as exc:
+            error_body = ""
+            try:
+                error_body = exc.read().decode()
+                error_data = _json.loads(error_body)
+                telegram_desc = error_data.get("description", "")
+                if telegram_desc:
+                    return {"ok": False, "error": f"Telegram: {telegram_desc}", "error_body": error_body}
+            except Exception:
+                pass
+            return {"ok": False, "error": f"HTTP {exc.code}: {exc.reason}", "error_body": error_body}
         except URLError as exc:
             return {"ok": False, "error": str(exc)}
         except Exception as exc:
@@ -560,7 +606,7 @@ class TelegramSink:
     def _api_call_multipart(self, url: str, body: bytes, boundary: str) -> dict:
         import json as _json
         from urllib.request import Request, urlopen
-        from urllib.error import URLError
+        from urllib.error import HTTPError, URLError
 
         req = Request(
             url, data=body,
@@ -570,6 +616,17 @@ class TelegramSink:
             opener = self._opener if self._opener else urlopen
             with opener(req) as resp:
                 return _json.loads(resp.read())
+        except HTTPError as exc:
+            error_body = ""
+            try:
+                error_body = exc.read().decode()
+                error_data = _json.loads(error_body)
+                telegram_desc = error_data.get("description", "")
+                if telegram_desc:
+                    return {"ok": False, "error": f"Telegram: {telegram_desc}", "error_body": error_body}
+            except Exception:
+                pass
+            return {"ok": False, "error": f"HTTP {exc.code}: {exc.reason}", "error_body": error_body}
         except URLError as exc:
             return {"ok": False, "error": str(exc)}
         except Exception as exc:

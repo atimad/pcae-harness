@@ -2,6 +2,18 @@
 
 ## Current Phase
 
+Phase 92D.2: Telegram Payload Compatibility Repair (completed).
+
+Corrective repair for 92C/92D Telegram outbound notification path. Root cause:
+parse_mode="Markdown" in sendMessage payload caused HTTP 400 when phase report
+summary text contained square brackets ([INFO], [COMPLETED]). Fix: removed
+parse_mode, switched to URL-encoded form data (matching known-good curl behavior),
+added Telegram error description capture in HTTP error bodies. 10 new tests
+(30 total Telegram tests). Manual verification confirmed sendMessage +
+sendDocument success. No Telegram polling, inbound commands, remote shell,
+/run, or enforcement.
+Delivers docs/PHASE_92_TELEGRAM_PAYLOAD_COMPATIBILITY_REPAIR.md.
+
 Phase 93B: Narrow Shell Gate Prototype (completed).
 
 Simulation-only implementation phase. Implemented explicit PCAE-mediated

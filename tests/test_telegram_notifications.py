@@ -310,3 +310,227 @@ def test_telegram_sink_in_dispatcher():
     assert len(results) == 1
     assert results[0].success is True
     assert results[0].sink_name == TELEGRAM_SINK_NAME
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.2 — Telegram payload compatibility repair
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestSendMessagePayloadFormat:
+    """Verify sendMessage uses URL-encoded form data, not JSON, no parse_mode."""
+
+    def test_send_message_uses_url_encoded_form(self):
+        """sendMessage must use application/x-www-form-urlencoded."""
+        captured_req = {}
+
+        def capture_opener(req):
+            captured_req["headers"] = dict(req.headers)
+            captured_req["body"] = req.data
+            resp = MagicMock()
+            resp.read.return_value = b'{"ok": true, "result": {}}'
+            resp.__enter__ = MagicMock(return_value=resp)
+            resp.__exit__ = MagicMock(return_value=False)
+            return resp
+
+        event = _make_event(message="Hello world")
+        sink = TelegramSink(
+            bot_token="test-token", chat_id="123", enabled=True,
+            _opener=capture_opener,
+        )
+        result = sink.send(event)
+        assert result.success is True
+
+        # Verify Content-Type is URL-encoded form
+        ct = captured_req.get("headers", {}).get("Content-type", "")
+        assert "application/x-www-form-urlencoded" in ct, \
+            f"Expected urlencoded content type, got: {ct}"
+
+        # Verify chat_id and text are in the form body
+        body = captured_req.get("body", b"").decode()
+        assert "chat_id=123" in body
+        assert "Hello+world" in body or "Hello%20world" in body
+
+    def test_no_parse_mode_in_send_message(self):
+        """sendMessage must NOT include parse_mode by default."""
+        captured_body = {}
+
+        def capture_opener(req):
+            captured_body["body"] = req.data
+            resp = MagicMock()
+            resp.read.return_value = b'{"ok": true, "result": {}}'
+            resp.__enter__ = MagicMock(return_value=resp)
+            resp.__exit__ = MagicMock(return_value=False)
+            return resp
+
+        event = _make_event(message="[INFO] Brackets and *stars* in text")
+        sink = TelegramSink(
+            bot_token="test-token", chat_id="123", enabled=True,
+            _opener=capture_opener,
+        )
+        result = sink.send(event)
+        assert result.success is True
+
+        body = captured_body.get("body", b"").decode()
+        assert "parse_mode" not in body, \
+            "parse_mode must not be sent by default"
+
+    def test_markdown_brackets_dont_break(self):
+        """Text with [brackets] should send successfully (no Markdown parsing)."""
+        event = _make_event(
+            title="Phase COMPLETED: [Test] Phase",
+            message="Key: [INFO] Task [FAILED] at path/to/file",
+        )
+        sink = TelegramSink(
+            bot_token="test-token", chat_id="123", enabled=True,
+            _opener=_mock_opener({"ok": True, "result": {}}),
+        )
+        result = sink.send(event)
+        assert result.success is True
+
+    def test_send_message_success_proceeds_to_document(self):
+        """Successful sendMessage should proceed to sendDocument."""
+        with tempfile.TemporaryDirectory() as td:
+            report_path = Path(td) / "latest.md"
+            report_path.write_text("# Report")
+
+            event = _make_event(artifact_paths=[str(report_path)])
+            call_count = [0]
+
+            def counting_opener(req):
+                call_count[0] += 1
+                resp = MagicMock()
+                resp.read.return_value = b'{"ok": true, "result": {}}'
+                resp.__enter__ = MagicMock(return_value=resp)
+                resp.__exit__ = MagicMock(return_value=False)
+                return resp
+
+            sink = TelegramSink(
+                bot_token="test-token", chat_id="123", enabled=True,
+                _opener=counting_opener,
+            )
+            result = sink.send(event)
+            assert result.success is True
+            assert call_count[0] == 2  # sendMessage + sendDocument
+
+
+class TestHttpErrorBodyCapture:
+    """Verify Telegram HTTP error response bodies are captured."""
+
+    def test_http_400_error_body_captured(self):
+        """HTTP 400 response body should be read and error description surfaced."""
+        from urllib.error import HTTPError
+
+        def error_opener(req):
+            error_body = b'{"ok":false,"error_code":400,"description":"Bad Request: cannot parse entities"}'
+            exc = HTTPError(
+                "https://api.telegram.org/botX/sendMessage",
+                400, "Bad Request",
+                {}, BytesIO(error_body),
+            )
+            raise exc
+
+        event = _make_event(message="test")
+        sink = TelegramSink(
+            bot_token="test-token", chat_id="123", enabled=True,
+            _opener=error_opener,
+        )
+        result = sink.send(event)
+        assert result.success is False
+        # The Telegram description should be in the error
+        assert "parse entities" in (result.error or ""), \
+            f"Expected Telegram error description, got: {result.error}"
+
+    def test_http_error_without_body_handled(self):
+        """HTTP error without readable body should still produce useful error."""
+        from urllib.error import HTTPError
+
+        def error_opener(req):
+            exc = HTTPError(
+                "https://api.telegram.org/botX/sendMessage",
+                403, "Forbidden",
+                {}, BytesIO(b""),
+            )
+            raise exc
+
+        event = _make_event()
+        sink = TelegramSink(
+            bot_token="test-token", chat_id="123", enabled=True,
+            _opener=error_opener,
+        )
+        result = sink.send(event)
+        assert result.success is False
+        assert "403" in (result.error or "")
+
+    def test_token_not_leaked_in_error(self):
+        """Error output must not contain the bot token."""
+        from urllib.error import HTTPError
+
+        def error_opener(req):
+            error_body = b'{"ok":false,"description":"Unauthorized"}'
+            exc = HTTPError(
+                "https://api.telegram.org/botX/sendMessage",
+                401, "Unauthorized",
+                {}, BytesIO(error_body),
+            )
+            raise exc
+
+        event = _make_event()
+        sink = TelegramSink(
+            bot_token="secret-bot-token-abc123", chat_id="999", enabled=True,
+            _opener=error_opener,
+        )
+        result = sink.send(event)
+        assert result.success is False
+        assert "secret-bot-token-abc123" not in (result.error or "")
+        assert "secret-bot-token-abc123" not in (result.message or "")
+
+    def test_chat_id_not_leaked_in_error(self):
+        """Error output should not expose chat ID unless project policy allows."""
+        from urllib.error import HTTPError
+
+        def error_opener(req):
+            error_body = b'{"ok":false,"description":"Chat not found"}'
+            exc = HTTPError(
+                "https://api.telegram.org/botX/sendMessage",
+                400, "Bad Request",
+                {}, BytesIO(error_body),
+            )
+            raise exc
+
+        event = _make_event()
+        sink = TelegramSink(
+            bot_token="t", chat_id="-1001234567890", enabled=True,
+            _opener=error_opener,
+        )
+        result = sink.send(event)
+        assert result.success is False
+        # The result.error should contain the Telegram description but not chat ID
+        assert "-1001234567890" not in (result.error or ""), \
+            f"Chat ID should not be leaked in error: {result.error}"
+
+
+class TestSummaryTruncationPreserved:
+    """Verify summary truncation still works with URL-encoded payload."""
+
+    def test_truncation_still_works(self):
+        long_msg = "y" * 4000
+        event = _make_event(message=long_msg)
+        sink = TelegramSink(
+            bot_token="t", chat_id="c", enabled=True, max_message_chars=100,
+            _opener=_mock_opener({"ok": True}),
+        )
+        result = sink.send(event)
+        assert result.success is True
+
+    def test_truncation_ellipsis(self):
+        long_msg = "z" * 200
+        event = _make_event(message=long_msg)
+        sink = TelegramSink(
+            bot_token="t", chat_id="c", enabled=True, max_message_chars=10,
+            _opener=_mock_opener({"ok": True}),
+        )
+        # _build_summary should produce truncated text
+        summary = sink._build_summary(event)
+        assert len(summary) <= 10
+        assert "..." in summary
