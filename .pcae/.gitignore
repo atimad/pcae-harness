@@ -22,3 +22,4 @@ backend-invocations/
 backend-reviews/
 backend-apply-plans/
 backend-apply-readiness/
+backend-manual-apply-packages/

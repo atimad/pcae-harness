@@ -1091,4 +1091,181 @@ def run_backend_apply_plan_validate(args: argparse.Namespace) -> int:
         print()
         print("  ⚠️  Read-only validation. No apply executed. No tests run. No pcae check run.")
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94O — Manual apply package CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_manual_apply_package_show(args: argparse.Namespace) -> int:
+    """pcae backend manual-apply-package show --latest [--json]
+
+    Read-only display of latest manual apply package metadata.
+    Never executes apply, never mutates files.
+    """
+    from pcae.core.backend_invocations import read_latest_manual_apply_package
+
+    pkg = read_latest_manual_apply_package()
+    if pkg is None:
+        msg = "No manual apply packages found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps(pkg.to_dict(), indent=2))
+    else:
+        print("Manual apply package — latest")
+        print(f"  Package ID:        {pkg.package_id}")
+        print(f"  Apply plan ID:     {pkg.apply_plan_id}")
+        print(f"  Review ID:         {pkg.review_id}")
+        print(f"  Approval ID:       {pkg.approval_id}")
+        print(f"  Request ID:        {pkg.request_id}")
+        print(f"  Phase ID:          {pkg.phase_id}")
+        print(f"  Output hash:       {pkg.output_hash}")
+        print(f"  Readiness status:  {pkg.readiness_status}")
+        print(f"  Apply ready:       {pkg.apply_ready}")
+        print(f"  Rollback req:      {pkg.rollback_required}")
+        print(f"  Operations:        {len(pkg.operations)}")
+        for op in pkg.operations:
+            print(f"    - {op}")
+        if pkg.hard_blocks:
+            print(f"  Hard blocks:       {', '.join(pkg.hard_blocks)}")
+        if pkg.missing_evidence:
+            print(f"  Missing ev:        {', '.join(pkg.missing_evidence)}")
+        if pkg.warnings:
+            print(f"  Warnings:          {', '.join(pkg.warnings)}")
+        print(f"  No execution:      {pkg.no_execution_performed}")
+        print(f"  Created:           {pkg.created_at_utc}")
+        print()
+        print("  Package metadata only. No raw prompt/output content displayed.")
+        print("  ⚠️  Package generation does not execute apply.")
+    return 0
+
+
+def run_backend_manual_apply_package_create(args: argparse.Namespace) -> int:
+    """pcae backend manual-apply-package create [--apply-plan <path>] [--readiness <path>] [--json]
+
+    Creates a manual apply package from an apply plan and optional readiness assessment.
+    Persists as JSON + Markdown under .pcae/backend-manual-apply-packages/.
+    Never executes apply, never mutates source files.
+    """
+    import json as _json_mod
+    from pathlib import Path as _Path
+    from pcae.core.backend_invocations import (
+        ApplyPlan, ApplyOperation, BackendApplyReadinessAssessment,
+        ReviewArtifact, ApprovalArtifact,
+        create_backend_manual_apply_package, persist_manual_apply_package,
+        read_latest_apply_plan, read_latest_apply_readiness,
+    )
+
+    plan_path: str = getattr(args, "apply_plan", "") or ""
+    readiness_path: str = getattr(args, "readiness", "") or ""
+    review_path: str = getattr(args, "review", "") or ""
+    approval_path: str = getattr(args, "approval", "") or ""
+    operator_notes: str = getattr(args, "operator_notes", "") or ""
+    rollback_instructions: str = getattr(args, "rollback_instructions", "") or ""
+
+    # Load apply plan
+    plan: ApplyPlan | None = None
+    if plan_path:
+        p = _Path(plan_path)
+        if not p.is_file():
+            msg = f"Apply plan not found: {plan_path}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+        try:
+            data = _json_mod.loads(p.read_text())
+            plan = ApplyPlan(**{k: v for k, v in data.items()
+                                 if k in ApplyPlan.__dataclass_fields__})
+            ops_raw = data.get("operations", [])
+            plan.operations = [
+                ApplyOperation(**{k: v for k, v in od.items()
+                                   if k in ApplyOperation.__dataclass_fields__})
+                for od in ops_raw if isinstance(od, dict)
+            ]
+        except Exception as exc:
+            msg = f"Failed to load apply plan: {exc}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+    else:
+        plan = read_latest_apply_plan()
+
+    # Load readiness assessment
+    assessment: BackendApplyReadinessAssessment | None = None
+    if readiness_path:
+        rp = _Path(readiness_path)
+        if rp.is_file():
+            try:
+                rd = _json_mod.loads(rp.read_text())
+                assessment = BackendApplyReadinessAssessment.from_dict(rd)
+            except Exception:
+                pass
+    else:
+        assessment = read_latest_apply_readiness()
+
+    # Load optional review
+    review: ReviewArtifact | None = None
+    if review_path:
+        rp = _Path(review_path)
+        if rp.is_file():
+            try:
+                rd = _json_mod.loads(rp.read_text())
+                review = ReviewArtifact(**{k: v for k, v in rd.items()
+                                            if k in ReviewArtifact.__dataclass_fields__})
+            except Exception:
+                pass
+
+    # Load optional approval
+    approval: ApprovalArtifact | None = None
+    if approval_path:
+        ap = _Path(approval_path)
+        if ap.is_file():
+            try:
+                ad = _json_mod.loads(ap.read_text())
+                approval = ApprovalArtifact(**{k: v for k, v in ad.items()
+                                                if k in ApprovalArtifact.__dataclass_fields__})
+            except Exception:
+                pass
+
+    pkg = create_backend_manual_apply_package(
+        plan=plan,
+        assessment=assessment,
+        review=review,
+        approval=approval,
+        operator_notes=operator_notes,
+        rollback_instructions=rollback_instructions,
+    )
+    persist_result = persist_manual_apply_package(pkg)
+
+    if args.json:
+        print(json.dumps({
+            "package": pkg.to_dict(),
+            "persistence": persist_result,
+            "no_execution": True,
+            "no_apply": True,
+            "no_patch_parsing": True,
+            "no_source_files_modified": True,
+            "no_automatic_tests": True,
+            "no_automatic_pcae_check": True,
+        }, indent=2))
+    else:
+        print("Manual apply package created")
+        print(f"  Package ID:        {pkg.package_id}")
+        print(f"  Apply plan ID:     {pkg.apply_plan_id}")
+        print(f"  Output hash:       {pkg.output_hash}")
+        print(f"  Readiness status:  {pkg.readiness_status}")
+        print(f"  Apply ready:       {pkg.apply_ready}")
+        print(f"  Operations:        {len(pkg.operations)}")
+        if pkg.hard_blocks:
+            print(f"  Hard blocks:       {', '.join(pkg.hard_blocks)}")
+        if pkg.missing_evidence:
+            print(f"  Missing ev:        {', '.join(pkg.missing_evidence)}")
+        if persist_result.get("status") == "written":
+            print(f"  JSON:              {persist_result.get('json_path', '')}")
+            print(f"  Markdown:          {persist_result.get('md_path', '')}")
+        print()
+        print("  ✅ Package created. No apply executed. No source files modified.")
+        print("  ⚠️  Manual apply instructions are advisory — human action required.")
+    return 0
+
     return 0 if assessment.apply_ready else 1

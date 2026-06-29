@@ -2108,3 +2108,421 @@ def read_latest_apply_plan() -> ApplyPlan | None:
         return plan
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94O — Backend Manual Apply Package
+# ═══════════════════════════════════════════════════════════════════════════
+
+_MANUAL_APPLY_PACKAGES_DIR = ".pcae/backend-manual-apply-packages"
+
+_MANUAL_APPLY_SCHEMA_VERSION = "1.0"
+
+
+@dataclass
+class BackendManualApplyPackage:
+    """Human-readable evidence bundle for manual apply decision.
+
+    Bundles apply-plan, readiness assessment, review, approval, audit,
+    and operator instructions into a single artifact.  Safe defaults:
+    no_execution_performed=True, apply_ready mirrors validator output
+    but does not imply execution.  Never authorises commit, push, or
+    backend invocation.
+    """
+
+    package_id: str = ""
+    apply_plan_id: str = ""
+    readiness_assessment_id: str = ""
+    review_id: str = ""
+    approval_id: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    output_hash: str = ""
+    output_artifact_path: str = ""
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    audit_id: str = ""
+    trust_assessment_id: str = ""
+    review_state: str = ""
+    readiness_status: str = ""
+    apply_ready: bool = False
+    proposed_files: list[str] = field(default_factory=list)
+    allowed_files: list[str] = field(default_factory=list)
+    forbidden_files: list[str] = field(default_factory=list)
+    operations: list[str] = field(default_factory=list)
+    hard_blocks: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    rollback_required: bool = True
+    rollback_plan_id: str = ""
+    rollback_instructions: str = ""
+    tests_to_run: list[str] = field(default_factory=list)
+    checks_to_run: list[str] = field(default_factory=list)
+    manual_apply_instructions: str = ""
+    operator_notes: str = ""
+    no_execution_performed: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _MANUAL_APPLY_SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "package_id": self.package_id,
+            "apply_plan_id": self.apply_plan_id,
+            "readiness_assessment_id": self.readiness_assessment_id,
+            "review_id": self.review_id,
+            "approval_id": self.approval_id,
+            "request_id": self.request_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "backend_id": self.backend_id,
+            "output_hash": self.output_hash,
+            "output_artifact_path": self.output_artifact_path,
+            "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "audit_id": self.audit_id,
+            "trust_assessment_id": self.trust_assessment_id,
+            "review_state": self.review_state,
+            "readiness_status": self.readiness_status,
+            "apply_ready": self.apply_ready,
+            "proposed_files": list(self.proposed_files),
+            "allowed_files": list(self.allowed_files),
+            "forbidden_files": list(self.forbidden_files),
+            "operations": list(self.operations),
+            "hard_blocks": list(self.hard_blocks),
+            "missing_evidence": list(self.missing_evidence),
+            "warnings": list(self.warnings),
+            "rollback_required": self.rollback_required,
+            "rollback_plan_id": self.rollback_plan_id,
+            "rollback_instructions": self.rollback_instructions,
+            "tests_to_run": list(self.tests_to_run),
+            "checks_to_run": list(self.checks_to_run),
+            "manual_apply_instructions": self.manual_apply_instructions,
+            "operator_notes": self.operator_notes,
+            "no_execution_performed": self.no_execution_performed,
+            "created_at_utc": self.created_at_utc,
+            "schema_version": self.schema_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendManualApplyPackage":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+    def render_markdown(self) -> str:
+        """Render a human-readable Markdown summary of the package."""
+        lines: list[str] = []
+        lines.append(f"# Backend Manual Apply Package — {self.package_id}")
+        lines.append("")
+        lines.append("**This package is for manual human review only.**")
+        lines.append("No files were modified by this package generation.")
+        lines.append("No apply execution was performed.")
+        lines.append("No backend was invoked.")
+        lines.append("")
+        lines.append("## Summary")
+        lines.append("")
+        lines.append(f"- Package ID:           `{self.package_id}`")
+        lines.append(f"- Apply plan ID:        `{self.apply_plan_id}`")
+        lines.append(f"- Review ID:            `{self.review_id}`")
+        lines.append(f"- Approval ID:          `{self.approval_id}`")
+        lines.append(f"- Request ID:           `{self.request_id}`")
+        lines.append(f"- Phase ID:             `{self.phase_id}`")
+        lines.append(f"- Output hash:          `{self.output_hash}`")
+        lines.append(f"- Readiness status:     **{self.readiness_status}**")
+        lines.append(f"- Apply ready:          **{self.apply_ready}**")
+        lines.append(f"- Rollback required:    {self.rollback_required}")
+        lines.append(f"- Created:              {self.created_at_utc}")
+        lines.append("")
+        if self.hard_blocks:
+            lines.append("## Hard Blocks (non-overridable)")
+            lines.append("")
+            for b in self.hard_blocks:
+                lines.append(f"- ❌ `{b}`")
+            lines.append("")
+        if self.missing_evidence:
+            lines.append("## Missing Evidence")
+            lines.append("")
+            for m in self.missing_evidence:
+                lines.append(f"- ⚠️  `{m}`")
+            lines.append("")
+        if self.warnings:
+            lines.append("## Warnings")
+            lines.append("")
+            for w in self.warnings:
+                lines.append(f"- ℹ️  `{w}`")
+            lines.append("")
+        if self.proposed_files:
+            lines.append("## Proposed Files")
+            lines.append("")
+            for f in self.proposed_files:
+                lines.append(f"- `{f}`")
+            lines.append("")
+        if self.operations:
+            lines.append("## Operations (descriptive metadata only)")
+            lines.append("")
+            for op in self.operations:
+                lines.append(f"- `{op}`")
+            lines.append("")
+        lines.append("## Rollback Requirements")
+        lines.append("")
+        lines.append(f"- Rollback required: {self.rollback_required}")
+        if self.rollback_plan_id:
+            lines.append(f"- Rollback plan ID: `{self.rollback_plan_id}`")
+        if self.rollback_instructions:
+            lines.append("")
+            lines.append("**Rollback instructions:**")
+            lines.append("")
+            lines.append(self.rollback_instructions)
+        lines.append("")
+        if self.tests_to_run:
+            lines.append("## Tests to Run Manually")
+            lines.append("")
+            lines.append("⚠️  Run these tests **manually** after applying changes:")
+            lines.append("")
+            for t in self.tests_to_run:
+                lines.append(f"- `{t}`")
+            lines.append("")
+        if self.checks_to_run:
+            lines.append("## Checks to Run Manually")
+            lines.append("")
+            lines.append("⚠️  Run these checks **manually** after applying changes:")
+            lines.append("")
+            for c in self.checks_to_run:
+                lines.append(f"- `{c}`")
+            lines.append("")
+        if self.manual_apply_instructions:
+            lines.append("## Manual Apply Instructions")
+            lines.append("")
+            lines.append("⚠️  These instructions are **advisory only**.")
+            lines.append("A human operator must review and execute them manually.")
+            lines.append("")
+            lines.append(self.manual_apply_instructions)
+            lines.append("")
+        if self.operator_notes:
+            lines.append("## Operator Notes")
+            lines.append("")
+            lines.append(self.operator_notes)
+            lines.append("")
+        lines.append("## No-Execution Confirmation")
+        lines.append("")
+        lines.append(f"- `no_execution_performed`: **{self.no_execution_performed}**")
+        lines.append("- No files were modified by this package generation.")
+        lines.append("- No apply was executed.")
+        lines.append("- No commit or push was authorized.")
+        lines.append("- No backend was invoked.")
+        lines.append("- No tests or checks were run automatically.")
+        lines.append(f"- Schema version: {self.schema_version}")
+        lines.append("")
+        return "\n".join(lines)
+
+
+def _manual_apply_packages_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_MANUAL_APPLY_PACKAGES_DIR)
+
+
+def create_backend_manual_apply_package(
+    plan: "ApplyPlan | None" = None,
+    assessment: "BackendApplyReadinessAssessment | None" = None,
+    *,
+    review: "ReviewArtifact | None" = None,
+    approval: "ApprovalArtifact | None" = None,
+    operator_notes: str = "",
+    rollback_instructions: str = "",
+    manual_apply_instructions: str = "",
+    **kwargs: Any,
+) -> "BackendManualApplyPackage":
+    """Create a BackendManualApplyPackage from evidence artifacts.
+
+    Bundles apply plan + readiness assessment + review/approval metadata
+    into a human-readable package for manual operator action.
+
+    Never executes operations, never parses patches, never mutates files,
+    never invokes backends, never runs tests or pcae check, never commits
+    or pushes, never authorises commit/push.
+    """
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Extract fields from plan
+    apply_plan_id = plan.apply_plan_id if plan else ""
+    request_id = plan.request_id if plan else ""
+    phase_id = plan.phase_id if plan else ""
+    task_id = plan.task_id if plan else ""
+    backend_id = plan.backend_id if plan else ""
+    output_hash = plan.output_hash if plan else ""
+    output_artifact_path = plan.output_artifact_path if plan else ""
+    prompt_hash = plan.prompt_hash if plan else ""
+    prompt_artifact_path = plan.prompt_artifact_path if plan else ""
+    proposed_files = list(plan.proposed_files) if plan else []
+    allowed_files = list(plan.allowed_files) if plan else []
+    forbidden_files = list(plan.forbidden_files) if plan else []
+    rollback_required = plan.rollback_required if plan else True
+    rollback_plan_id = plan.rollback_plan_id if plan else ""
+    tests_to_run = list(plan.tests_to_run) if plan else []
+    checks_to_run = []  # populate from plan.check_required advisory text
+    if plan and plan.check_required:
+        checks_to_run.append("pcae check (run manually after applying)")
+    hard_blocks = list(plan.hard_blocks) if plan else []
+    missing_evidence = list(plan.missing_evidence) if plan else []
+    warnings = list(plan.warnings) if plan else []
+
+    # Render operations as descriptive strings
+    operations: list[str] = []
+    if plan:
+        for op in plan.operations:
+            operations.append(f"{op.operation_type}:{op.target_path}")
+
+    # Extract fields from review/approval
+    review_id = ""
+    approval_id = ""
+    review_state = ""
+    if plan:
+        review_id = plan.review_id
+        approval_id = plan.approval_id
+    if review:
+        review_id = review.review_id
+        review_state = review.review_state
+    if approval:
+        approval_id = approval.approval_id
+
+    # Extract fields from readiness assessment
+    readiness_assessment_id = ""
+    readiness_status = "incomplete"
+    apply_ready = False
+    if assessment:
+        readiness_assessment_id = assessment.assessment_id
+        readiness_status = assessment.status
+        apply_ready = assessment.apply_ready
+        # Merge in assessment hard blocks / missing / warnings (deduplicated)
+        for b in assessment.hard_blocks:
+            if b not in hard_blocks:
+                hard_blocks.append(b)
+        for m in assessment.missing_evidence:
+            if m not in missing_evidence:
+                missing_evidence.append(m)
+        for w in assessment.warnings:
+            if w not in warnings:
+                warnings.append(w)
+
+    # Build default manual apply instructions when not provided
+    if not manual_apply_instructions:
+        if apply_ready and not hard_blocks:
+            manual_apply_instructions = (
+                "Readiness check passed. A human operator may now:\n"
+                "1. Review the proposed files and operations listed above.\n"
+                "2. Apply changes manually using your preferred editor or tool.\n"
+                "3. Run the tests listed in 'Tests to Run Manually'.\n"
+                "4. Run the checks listed in 'Checks to Run Manually'.\n"
+                "5. Commit changes using 'pcae commit implementation' (governed).\n"
+                "6. Push using 'pcae push' (governed).\n"
+                "No automatic apply was performed by package generation."
+            )
+        elif hard_blocks:
+            manual_apply_instructions = (
+                "Hard blocks are present. Apply is NOT permitted.\n"
+                "Resolve all hard blocks before proceeding:\n"
+                + "\n".join(f"  - {b}" for b in hard_blocks)
+            )
+        else:
+            manual_apply_instructions = (
+                "Missing evidence prevents apply readiness.\n"
+                "Gather the missing evidence before proceeding:\n"
+                + "\n".join(f"  - {m}" for m in missing_evidence)
+            )
+
+    pkg = BackendManualApplyPackage(
+        package_id=f"pkg-{_uuid.uuid4().hex[:12]}",
+        apply_plan_id=apply_plan_id,
+        readiness_assessment_id=readiness_assessment_id,
+        review_id=review_id,
+        approval_id=approval_id,
+        request_id=request_id,
+        phase_id=phase_id,
+        task_id=task_id,
+        backend_id=backend_id,
+        output_hash=output_hash,
+        output_artifact_path=output_artifact_path,
+        prompt_hash=prompt_hash,
+        prompt_artifact_path=prompt_artifact_path,
+        review_state=review_state,
+        readiness_status=readiness_status,
+        apply_ready=apply_ready,
+        proposed_files=proposed_files,
+        allowed_files=allowed_files,
+        forbidden_files=forbidden_files,
+        operations=operations,
+        hard_blocks=hard_blocks,
+        missing_evidence=missing_evidence,
+        warnings=warnings,
+        rollback_required=rollback_required,
+        rollback_plan_id=rollback_plan_id,
+        rollback_instructions=rollback_instructions,
+        tests_to_run=tests_to_run,
+        checks_to_run=checks_to_run,
+        manual_apply_instructions=manual_apply_instructions,
+        operator_notes=operator_notes,
+        no_execution_performed=True,
+        created_at_utc=now,
+        **{k: v for k, v in kwargs.items()
+           if k in BackendManualApplyPackage.__dataclass_fields__},
+    )
+    return pkg
+
+
+def persist_manual_apply_package(pkg: BackendManualApplyPackage) -> dict:
+    """Persist a manual apply package as JSON + Markdown.
+
+    Writes to .pcae/backend-manual-apply-packages/ with timestamped
+    filenames and updates latest.json and latest.md pointers.
+    Never executes apply, never mutates source files.
+    """
+    import json as _json
+    import os
+    d = _manual_apply_packages_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        json_fp = d / f"{ts}-{pkg.package_id}.json"
+        md_fp = d / f"{ts}-{pkg.package_id}.md"
+        lp_json = d / "latest.json"
+        lp_md = d / "latest.md"
+
+        json_fp.write_text(_json.dumps(pkg.to_dict(), indent=2, sort_keys=True))
+        md_fp.write_text(pkg.render_markdown())
+
+        tmp_j = d / ".latest-j.tmp"
+        tmp_j.write_text(_json.dumps(pkg.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp_j), str(lp_json))
+
+        tmp_m = d / ".latest-m.tmp"
+        tmp_m.write_text(pkg.render_markdown())
+        os.replace(str(tmp_m), str(lp_md))
+
+        return {
+            "status": "written",
+            "json_path": str(json_fp),
+            "md_path": str(md_fp),
+            "latest_json": str(lp_json),
+            "latest_md": str(lp_md),
+        }
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def read_latest_manual_apply_package() -> "BackendManualApplyPackage | None":
+    """Read the latest manual apply package. Returns None if absent."""
+    import json as _json
+    lp = _manual_apply_packages_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return BackendManualApplyPackage.from_dict(data)
+    except Exception:
+        return None

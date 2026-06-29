@@ -447,6 +447,7 @@ from pcae.commands.backend import (
     run_backend_review_approve, run_backend_review_reject,
     run_backend_apply_plan_show, run_backend_apply_plan_create,
     run_backend_apply_plan_validate,
+    run_backend_manual_apply_package_show, run_backend_manual_apply_package_create,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4775,6 +4776,32 @@ def build_parser() -> argparse.ArgumentParser:
     ap_validate.add_argument("--approval", default="", help="Path to approval artifact JSON.")
     ap_validate.add_argument("--json", action="store_true")
     ap_validate.set_defaults(handler=run_backend_apply_plan_validate)
+
+    # ── pcae backend manual-apply-package (Phase 94O) ────────────────────
+    be_map = backend_sub.add_parser(
+        "manual-apply-package",
+        help="Create and show manual apply packages for human operator review.",
+    )
+    be_map_sub = be_map.add_subparsers(dest="backend_map_command", required=True)
+
+    map_show = be_map_sub.add_parser("show", help="Show latest manual apply package metadata.")
+    map_show.add_argument("--latest", action="store_true", default=True)
+    map_show.add_argument("--json", action="store_true")
+    map_show.set_defaults(handler=run_backend_manual_apply_package_show)
+
+    map_create = be_map_sub.add_parser("create", help="Create a manual apply package.")
+    map_create.add_argument("--apply-plan", default="",
+                            help="Path to apply plan JSON (omit for latest).")
+    map_create.add_argument("--readiness", default="",
+                            help="Path to readiness assessment JSON (omit for latest).")
+    map_create.add_argument("--review", default="", help="Path to review artifact JSON.")
+    map_create.add_argument("--approval", default="", help="Path to approval artifact JSON.")
+    map_create.add_argument("--operator-notes", default="",
+                            help="Optional operator notes to include in the package.")
+    map_create.add_argument("--rollback-instructions", default="",
+                            help="Optional rollback instructions to include in the package.")
+    map_create.add_argument("--json", action="store_true")
+    map_create.set_defaults(handler=run_backend_manual_apply_package_create)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
