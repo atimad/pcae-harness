@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94R — Backend Real Adapter Design to Phase 94S — Real Backend Adapter Contract Model; session refreshed and governance continuity revalidated.
+- Completed Phase 94S Real Backend Adapter Contract Model: BackendAdapterSafetyProfile, BackendAdapterContract, BackendAdapterPreflightResult, BackendAdapterInvocationPlan models.
+- Added validate_backend_adapter_contract(), validate_backend_adapter_preflight(), create_backend_adapter_invocation_plan(), classify_backend_adapter_failure().
+- Added get_default_adapter_registry() with 5 adapters (mock mock_only, claude/claude-deepseek/codex/qwen preflight_only).
+- All real adapters default to preflight-only. executable=False hard default. 49 new tests (419 model total).
+- CLI deferred to 94T. Delivers docs/PHASE_94_BACKEND_REAL_ADAPTER_CONTRACT_MODEL.md.
+
 - Transitioned active task from Phase 94Q.1 — Bootstrap Resume and Telegram Runtime Hardening to Phase 94R — Backend Real Adapter Design; session refreshed and governance continuity revalidated.
 - Completed Phase 94R Backend Real Adapter Design (design-only).
 - Defines BackendAdapter Protocol contract: 13 fields, 7 methods (preflight, build_invocation_plan, invoke_artifact_only, capture_output, classify_failure, redact_runtime_metadata).

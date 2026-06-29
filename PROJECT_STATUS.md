@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 94S: Real Backend Adapter Contract Model (completed).
+
+Implementation phase. Added BackendAdapterSafetyProfile (10 fields), BackendAdapterContract
+(14 fields), BackendAdapterPreflightResult (22 fields), BackendAdapterInvocationPlan
+(20 fields), validate_backend_adapter_contract(), validate_backend_adapter_preflight(),
+create_backend_adapter_invocation_plan(), classify_backend_adapter_failure(),
+get_default_adapter_registry() with 5 adapters. All real adapters default to
+preflight-only. executable=False hard default. 49 new tests (419 model total).
+CLI deferred to 94T. Delivers docs/PHASE_94_BACKEND_REAL_ADAPTER_CONTRACT_MODEL.md.
+
 Phase 94R: Backend Real Adapter Design (completed).
 
 Design-only phase. Defines the BackendAdapter Protocol contract for future real

@@ -3591,3 +3591,436 @@ class Test94QNoExecutionGuarantees:
         assert demo.no_file_mutation is True
         assert demo.no_subprocess is True
         assert demo.no_network is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94S — Real backend adapter contract model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import os as _os_94s
+import json as _json_94s
+
+from pcae.core.backend_invocations import (
+    BackendAdapterContract,
+    BackendAdapterSafetyProfile,
+    BackendAdapterPreflightResult,
+    BackendAdapterInvocationPlan,
+    validate_backend_adapter_contract,
+    validate_backend_adapter_preflight,
+    create_backend_adapter_invocation_plan,
+    classify_backend_adapter_failure,
+    get_default_adapter_registry,
+    ADAPTER_BACKEND_MOCK,
+    ADAPTER_BACKEND_CLAUDE_CLI,
+    PREFLIGHT_READY,
+    PREFLIGHT_BLOCKED,
+    PREFLIGHT_DISABLED,
+    PREFLIGHT_MISSING_EVIDENCE,
+    ADAPTER_MODE_MOCK_ONLY,
+    ADAPTER_MODE_PREFLIGHT_ONLY,
+    ADAPTER_MODE_DISABLED,
+    ADAPTER_MODE_FUTURE_REAL,
+    FAILURE_DISABLED,
+    FAILURE_MISSING_ENV,
+    FAILURE_BYPASS_PERMISSIONS,
+    FAILURE_TIMEOUT,
+    FAILURE_BACKEND_UNAVAILABLE,
+    FAILURE_AUTH_FAILURE,
+    FAILURE_RATE_LIMITED,
+    FAILURE_OUTPUT_MISSING,
+    FAILURE_OUTPUT_MALFORMED,
+    FAILURE_NOT_INVOKED,
+    VALID_FAILURE_CATEGORIES,
+)
+
+
+class Test94SAdapterSafetyProfile:
+    """BackendAdapterSafetyProfile: conservative defaults."""
+
+    def test_defaults_are_conservative(self):
+        sp = BackendAdapterSafetyProfile()
+        assert sp.requires_human_approval is True
+        assert sp.requires_permission_broker is True
+        assert sp.requires_shell_gate is True
+        assert sp.requires_output_quarantine is True
+        assert sp.requires_audit is True
+        assert sp.requires_timeout is True
+        assert sp.requires_secret_redaction is True
+        assert sp.requires_bypass_detection is True
+        assert sp.supports_no_apply_guarantee is True
+
+    def test_validate_flags_missing_approval(self):
+        sp = BackendAdapterSafetyProfile(requires_human_approval=False)
+        issues = sp.validate()
+        assert any("human_approval" in i for i in issues)
+
+    def test_to_dict_round_trip(self):
+        sp = BackendAdapterSafetyProfile(requires_human_approval=False)
+        d = sp.to_dict()
+        sp2 = BackendAdapterSafetyProfile.from_dict(d)
+        assert sp2.requires_human_approval is False
+        assert sp2.requires_output_quarantine is True
+
+    def test_no_secrets_in_serialization(self):
+        sp = BackendAdapterSafetyProfile()
+        j = _json_94s.dumps(sp.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+
+class Test94SAdapterContract:
+    """BackendAdapterContract: model validation and serialization."""
+
+    def test_valid_mock_contract(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-test", backend_id="mock",
+            backend_type=ADAPTER_BACKEND_MOCK,
+            invocation_mode=ADAPTER_MODE_MOCK_ONLY,
+        )
+        assert c.validate() == []
+
+    def test_real_adapter_defaults_preflight_only(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-claude", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+        )
+        assert c.invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY
+
+    def test_real_adapter_cannot_use_mock_only(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-claude", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_MOCK_ONLY,
+        )
+        issues = c.validate()
+        assert any("mock_only" in i for i in issues)
+
+    def test_unknown_backend_type_invalid(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-x", backend_id="x", backend_type="bogus",
+        )
+        issues = c.validate()
+        assert any("backend_type" in i for i in issues)
+
+    def test_unsupported_mode_invalid(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-x", backend_id="x", invocation_mode="bogus",
+        )
+        issues = c.validate()
+        assert any("invocation_mode" in i for i in issues)
+
+    def test_to_dict_round_trip(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-rt", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            required_env_keys=["ANTHROPIC_API_KEY"],
+        )
+        d = c.to_dict()
+        c2 = BackendAdapterContract.from_dict(d)
+        assert c2.adapter_id == "adapter-rt"
+        assert c2.backend_type == ADAPTER_BACKEND_CLAUDE_CLI
+        assert c2.safety_capabilities.requires_human_approval is True
+
+    def test_safety_profile_nested_round_trip(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-nested", backend_id="mock",
+            safety_capabilities=BackendAdapterSafetyProfile(
+                requires_human_approval=False,
+            ),
+        )
+        d = c.to_dict()
+        c2 = BackendAdapterContract.from_dict(d)
+        assert c2.safety_capabilities.requires_human_approval is False
+
+    def test_no_secrets_in_serialization(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-sec", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            required_env_keys=["ANTHROPIC_API_KEY"],
+        )
+        j = _json_94s.dumps(c.to_dict())
+        assert "sk-ant" not in j
+
+    def test_validate_adapter_contract_hard_blocks(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-bad", backend_id="bad",
+            backend_type="bogus", invocation_mode="bogus",
+        )
+        result = validate_backend_adapter_contract(c)
+        assert result["valid"] is False
+        assert len(result["hard_blocks"]) >= 1
+
+
+class Test94SPreflightResult:
+    """BackendAdapterPreflightResult and validate_backend_adapter_preflight."""
+
+    def test_preflight_mock_ready(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-m", backend_id="mock",
+            backend_type=ADAPTER_BACKEND_MOCK,
+            invocation_mode=ADAPTER_MODE_MOCK_ONLY,
+        )
+        r = validate_backend_adapter_preflight(c)
+        assert r.status == PREFLIGHT_READY
+        assert r.ready is True
+        assert r.no_real_backend_invoked is True
+        assert r.no_subprocess is True
+        assert r.no_network is True
+
+    def test_preflight_unknown_backend_blocked(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-x", backend_id="x", backend_type="bogus",
+        )
+        r = validate_backend_adapter_preflight(c)
+        assert r.status == PREFLIGHT_BLOCKED
+        assert r.ready is False
+        assert any("unknown_backend_type" in hb for hb in r.hard_blocks)
+
+    def test_preflight_disabled_mode(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-d", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_DISABLED,
+        )
+        r = validate_backend_adapter_preflight(c)
+        assert r.status == PREFLIGHT_DISABLED
+        assert r.ready is False
+
+    def test_preflight_missing_env(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-c", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+            required_env_keys=["MISSING_KEY_XYZ"],
+        )
+        r = validate_backend_adapter_preflight(
+            c, env_available={"MISSING_KEY_XYZ": False},
+        )
+        assert r.status in (PREFLIGHT_BLOCKED, PREFLIGHT_MISSING_EVIDENCE)
+        assert "MISSING_KEY_XYZ" in r.missing_env_keys
+
+    def test_preflight_bypass_detected_hard_block(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-bp", backend_id="mock",
+            backend_type=ADAPTER_BACKEND_MOCK,
+            invocation_mode=ADAPTER_MODE_MOCK_ONLY,
+        )
+        r = validate_backend_adapter_preflight(c, bypass_detected=True)
+        assert "bypass_permissions_detected" in r.hard_blocks
+        assert r.bypass_permissions_detected is True
+
+    def test_preflight_present_env_redacted(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-e", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+            required_env_keys=["TEST_KEY"],
+        )
+        r = validate_backend_adapter_preflight(
+            c, env_available={"TEST_KEY": True},
+        )
+        assert "TEST_KEY" in r.present_env_keys_redacted
+
+    def test_preflight_no_secrets_in_serialization(self, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-secret-value-123")
+        c = BackendAdapterContract(
+            adapter_id="adapter-sec", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+            required_env_keys=["ANTHROPIC_API_KEY"],
+        )
+        r = validate_backend_adapter_preflight(c)
+        j = _json_94s.dumps(r.to_dict())
+        assert "sk-ant-secret-value-123" not in j
+        assert r.secrets_redacted is True
+
+    def test_preflight_no_real_backend_invoked_always_true(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        assert r.no_real_backend_invoked is True
+        assert r.no_subprocess is True
+        assert r.no_network is True
+
+    def test_preflight_serialization_round_trip(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        d = r.to_dict()
+        r2 = BackendAdapterPreflightResult.from_dict(d)
+        assert r2.preflight_id == r.preflight_id
+        assert r2.status == r.status
+        assert r2.no_real_backend_invoked is True
+
+
+class Test94SInvocationPlan:
+    """BackendAdapterInvocationPlan: future-only, executable=False."""
+
+    def test_invocation_plan_executable_defaults_false(self):
+        plan = BackendAdapterInvocationPlan(invocation_plan_id="ip-test")
+        assert plan.executable is False
+
+    def test_invocation_plan_executable_true_invalid(self):
+        plan = BackendAdapterInvocationPlan(
+            invocation_plan_id="ip-exec", executable=True,
+        )
+        issues = plan.validate()
+        assert any("executable" in i for i in issues)
+
+    def test_create_invocation_plan_from_contract(self):
+        c = BackendAdapterContract(
+            adapter_id="adapter-c", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+        )
+        plan = create_backend_adapter_invocation_plan(
+            c, request_id="req-1", phase_id="94S",
+        )
+        assert plan.executable is False
+        assert plan.adapter_id == "adapter-c"
+        assert plan.backend_id == "claude"
+        assert plan.requires_human_approval is True
+        assert plan.quarantine_required is True
+
+    def test_invocation_plan_serialization_round_trip(self):
+        plan = BackendAdapterInvocationPlan(invocation_plan_id="ip-rt")
+        d = plan.to_dict()
+        plan2 = BackendAdapterInvocationPlan.from_dict(d)
+        assert plan2.executable is False
+        assert plan2.invocation_plan_id == "ip-rt"
+
+    def test_invocation_plan_no_secrets(self):
+        plan = BackendAdapterInvocationPlan(invocation_plan_id="ip-sec")
+        j = _json_94s.dumps(plan.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+
+class Test94SFailureClassification:
+    """classify_backend_adapter_failure: pure classification."""
+
+    def test_disabled_preflight_classifies_disabled(self):
+        c = BackendAdapterContract(
+            adapter_id="a", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            invocation_mode=ADAPTER_MODE_DISABLED,
+        )
+        r = validate_backend_adapter_preflight(c)
+        assert classify_backend_adapter_failure(preflight=r) == FAILURE_DISABLED
+
+    def test_bypass_classifies_bypass_permissions(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c, bypass_detected=True)
+        assert classify_backend_adapter_failure(preflight=r) == FAILURE_BYPASS_PERMISSIONS
+
+    def test_missing_env_classifies_missing_env(self):
+        c = BackendAdapterContract(
+            adapter_id="a", backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            required_env_keys=["MISSING_KEY"],
+        )
+        r = validate_backend_adapter_preflight(
+            c, env_available={"MISSING_KEY": False},
+        )
+        assert classify_backend_adapter_failure(preflight=r) == FAILURE_MISSING_ENV
+
+    def test_timeout_classifies_timeout(self):
+        assert classify_backend_adapter_failure(timeout_occurred=True) == FAILURE_TIMEOUT
+
+    def test_backend_unavailable_classifies(self):
+        assert classify_backend_adapter_failure(backend_responded=False) == FAILURE_BACKEND_UNAVAILABLE
+
+    def test_auth_failure_exit_code(self):
+        assert classify_backend_adapter_failure(exit_code=401) == FAILURE_AUTH_FAILURE
+        assert classify_backend_adapter_failure(exit_code=403) == FAILURE_AUTH_FAILURE
+
+    def test_rate_limit_exit_code(self):
+        assert classify_backend_adapter_failure(exit_code=429) == FAILURE_RATE_LIMITED
+
+    def test_output_missing_classifies(self):
+        assert classify_backend_adapter_failure(output_present=False) == FAILURE_OUTPUT_MISSING
+
+    def test_output_malformed_classifies(self):
+        assert classify_backend_adapter_failure(output_valid=False) == FAILURE_OUTPUT_MALFORMED
+
+    def test_no_invocation_returns_not_invoked(self):
+        assert classify_backend_adapter_failure() == FAILURE_NOT_INVOKED
+
+    def test_all_failure_categories_valid(self):
+        for fc in VALID_FAILURE_CATEGORIES:
+            assert fc in VALID_FAILURE_CATEGORIES
+
+
+class Test94SAdapterRegistry:
+    """get_default_adapter_registry: registry integration."""
+
+    def test_registry_has_all_backends(self):
+        reg = get_default_adapter_registry()
+        assert "mock" in reg
+        assert "claude" in reg
+        assert "claude-deepseek" in reg
+        assert "codex" in reg
+        assert "qwen" in reg
+
+    def test_mock_is_mock_only(self):
+        reg = get_default_adapter_registry()
+        assert reg["mock"].invocation_mode == ADAPTER_MODE_MOCK_ONLY
+        assert reg["mock"].backend_type == ADAPTER_BACKEND_MOCK
+
+    def test_real_adapters_are_preflight_only(self):
+        reg = get_default_adapter_registry()
+        for bid in ["claude", "claude-deepseek", "codex", "qwen"]:
+            assert reg[bid].invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY, \
+                f"{bid} should be preflight_only"
+
+    def test_claude_has_required_env(self):
+        reg = get_default_adapter_registry()
+        assert "ANTHROPIC_API_KEY" in reg["claude"].required_env_keys
+
+    def test_real_adapters_require_secrets(self):
+        reg = get_default_adapter_registry()
+        for bid in ["claude", "claude-deepseek", "codex", "qwen"]:
+            assert reg[bid].requires_secrets is True
+
+    def test_real_adapters_do_not_execute(self):
+        reg = get_default_adapter_registry()
+        for bid in ["claude", "claude-deepseek", "codex", "qwen"]:
+            c = reg[bid]
+            assert c.invocation_mode != ADAPTER_MODE_FUTURE_REAL
+            plan = create_backend_adapter_invocation_plan(c)
+            assert plan.executable is False
+
+
+class Test94SNoExecutionGuarantees:
+    """Cross-cutting no-execution guarantees for Phase 94S."""
+
+    def test_no_subprocess_in_94s_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_network_in_94s_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_telegram_inbound_in_94s(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "getUpdates" not in source
+
+    def test_multipart_phase_id_preserved(self):
+        plan = BackendAdapterInvocationPlan(
+            invocation_plan_id="ip-mp", phase_id="94S.1.2",
+        )
+        d = plan.to_dict()
+        assert d["phase_id"] == "94S.1.2"
+
+    def test_no_secrets_in_models(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        j = _json_94s.dumps(r.to_dict())
+        assert "sk-ant" not in j

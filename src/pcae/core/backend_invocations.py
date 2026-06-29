@@ -3294,3 +3294,692 @@ def read_latest_lifecycle_demo() -> BackendLifecycleDemo | None:
         return BackendLifecycleDemo.from_dict(data)
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94S — Real backend adapter contract model
+# ═══════════════════════════════════════════════════════════════════════════
+
+_ADAPTER_SCHEMA_VERSION = "1.0"
+
+# ── Backend types for adapters ──────────────────────────────────────────
+
+ADAPTER_BACKEND_MOCK = "mock"
+ADAPTER_BACKEND_CLAUDE_CLI = "claude_cli"
+ADAPTER_BACKEND_CLAUDE_DEEPSEEK_CLI = "claude_deepseek_cli"
+ADAPTER_BACKEND_CODEX = "codex"
+ADAPTER_BACKEND_QWEN = "qwen"
+ADAPTER_BACKEND_CUSTOM = "custom"
+
+VALID_ADAPTER_BACKEND_TYPES: frozenset[str] = frozenset({
+    ADAPTER_BACKEND_MOCK, ADAPTER_BACKEND_CLAUDE_CLI,
+    ADAPTER_BACKEND_CLAUDE_DEEPSEEK_CLI, ADAPTER_BACKEND_CODEX,
+    ADAPTER_BACKEND_QWEN, ADAPTER_BACKEND_CUSTOM,
+})
+
+# ── Adapter invocation modes ────────────────────────────────────────────
+
+ADAPTER_MODE_MOCK_ONLY = "mock_only"
+ADAPTER_MODE_PREFLIGHT_ONLY = "preflight_only"
+ADAPTER_MODE_ARTIFACT_ONLY = "artifact_only"
+ADAPTER_MODE_DISABLED = "disabled"
+ADAPTER_MODE_FUTURE_REAL = "future_real"
+
+VALID_ADAPTER_MODES: frozenset[str] = frozenset({
+    ADAPTER_MODE_MOCK_ONLY, ADAPTER_MODE_PREFLIGHT_ONLY,
+    ADAPTER_MODE_ARTIFACT_ONLY, ADAPTER_MODE_DISABLED,
+    ADAPTER_MODE_FUTURE_REAL,
+})
+
+REAL_ADAPTER_DEFAULT_MODE = ADAPTER_MODE_PREFLIGHT_ONLY
+
+# ── Preflight statuses ──────────────────────────────────────────────────
+
+PREFLIGHT_READY = "ready"
+PREFLIGHT_BLOCKED = "blocked"
+PREFLIGHT_MISSING_EVIDENCE = "missing_evidence"
+PREFLIGHT_DISABLED = "disabled"
+PREFLIGHT_UNSUPPORTED = "unsupported"
+PREFLIGHT_NEEDS_HUMAN_REVIEW = "needs_human_review"
+
+VALID_PREFLIGHT_STATUSES: frozenset[str] = frozenset({
+    PREFLIGHT_READY, PREFLIGHT_BLOCKED, PREFLIGHT_MISSING_EVIDENCE,
+    PREFLIGHT_DISABLED, PREFLIGHT_UNSUPPORTED, PREFLIGHT_NEEDS_HUMAN_REVIEW,
+})
+
+# ── Failure categories ──────────────────────────────────────────────────
+
+FAILURE_NOT_INVOKED = "not_invoked"
+FAILURE_DISABLED = "disabled"
+FAILURE_MISSING_ENV = "missing_env"
+FAILURE_BYPASS_PERMISSIONS = "bypass_permissions"
+FAILURE_TIMEOUT = "timeout"
+FAILURE_BACKEND_UNAVAILABLE = "backend_unavailable"
+FAILURE_AUTH_FAILURE = "auth_failure"
+FAILURE_RATE_LIMITED = "rate_limited"
+FAILURE_OUTPUT_MISSING = "output_missing"
+FAILURE_OUTPUT_MALFORMED = "output_malformed"
+FAILURE_INTERRUPTED = "interrupted"
+FAILURE_UNKNOWN = "unknown"
+
+VALID_FAILURE_CATEGORIES: frozenset[str] = frozenset({
+    FAILURE_NOT_INVOKED, FAILURE_DISABLED, FAILURE_MISSING_ENV,
+    FAILURE_BYPASS_PERMISSIONS, FAILURE_TIMEOUT, FAILURE_BACKEND_UNAVAILABLE,
+    FAILURE_AUTH_FAILURE, FAILURE_RATE_LIMITED, FAILURE_OUTPUT_MISSING,
+    FAILURE_OUTPUT_MALFORMED, FAILURE_INTERRUPTED, FAILURE_UNKNOWN,
+})
+
+
+@dataclass
+class BackendAdapterSafetyProfile:
+    """Safety capability profile for a backend adapter.
+
+    Conservative defaults: all safety requirements enabled.
+    No default may imply executable real invocation.
+    """
+
+    requires_human_approval: bool = True
+    requires_permission_broker: bool = True
+    requires_shell_gate: bool = True
+    requires_prompt_artifact: bool = True
+    requires_output_quarantine: bool = True
+    requires_audit: bool = True
+    requires_timeout: bool = True
+    requires_secret_redaction: bool = True
+    requires_bypass_detection: bool = True
+    supports_no_apply_guarantee: bool = True
+    schema_version: str = _ADAPTER_SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if not self.requires_human_approval:
+            issues.append("requires_human_approval must be True for real adapters")
+        if not self.requires_output_quarantine:
+            issues.append("requires_output_quarantine must be True")
+        if not self.requires_secret_redaction:
+            issues.append("requires_secret_redaction must be True")
+        if not self.supports_no_apply_guarantee:
+            issues.append("supports_no_apply_guarantee must be True")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "requires_human_approval": self.requires_human_approval,
+            "requires_permission_broker": self.requires_permission_broker,
+            "requires_shell_gate": self.requires_shell_gate,
+            "requires_prompt_artifact": self.requires_prompt_artifact,
+            "requires_output_quarantine": self.requires_output_quarantine,
+            "requires_audit": self.requires_audit,
+            "requires_timeout": self.requires_timeout,
+            "requires_secret_redaction": self.requires_secret_redaction,
+            "requires_bypass_detection": self.requires_bypass_detection,
+            "supports_no_apply_guarantee": self.supports_no_apply_guarantee,
+            "schema_version": self.schema_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendAdapterSafetyProfile":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class BackendAdapterContract:
+    """Serializable adapter contract for a backend.
+
+    Describes what a backend adapter supports and requires.
+    Real adapters default to preflight-only — no model default
+    may imply executable real invocation.
+    """
+
+    adapter_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ADAPTER_BACKEND_MOCK
+    display_name: str = ""
+    invocation_mode: str = REAL_ADAPTER_DEFAULT_MODE
+    supports_artifact_only: bool = False
+    supports_streaming: bool = False
+    supports_timeout: bool = False
+    supports_session_reuse: bool = False
+    requires_secrets: bool = False
+    required_env_keys: list[str] = field(default_factory=list)
+    safety_capabilities: BackendAdapterSafetyProfile = field(
+        default_factory=BackendAdapterSafetyProfile
+    )
+    schema_version: str = _ADAPTER_SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if not self.adapter_id:
+            issues.append("adapter_id is required")
+        if not self.backend_id:
+            issues.append("backend_id is required")
+        if self.backend_type not in VALID_ADAPTER_BACKEND_TYPES:
+            issues.append(f"invalid backend_type: {self.backend_type!r}")
+        if self.invocation_mode not in VALID_ADAPTER_MODES:
+            issues.append(f"invalid invocation_mode: {self.invocation_mode!r}")
+        if self.backend_type != ADAPTER_BACKEND_MOCK:
+            if self.invocation_mode == ADAPTER_MODE_MOCK_ONLY:
+                issues.append(f"real backend {self.backend_type!r} cannot use mock_only mode")
+            if self.invocation_mode == ADAPTER_MODE_FUTURE_REAL:
+                if not self.supports_timeout:
+                    issues.append("future_real mode requires supports_timeout")
+                if not self.requires_secrets:
+                    issues.append("future_real mode requires requires_secrets")
+        safety_issues = self.safety_capabilities.validate()
+        for si in safety_issues:
+            issues.append(f"safety: {si}")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "adapter_id": self.adapter_id,
+            "backend_id": self.backend_id,
+            "backend_type": self.backend_type,
+            "display_name": self.display_name,
+            "invocation_mode": self.invocation_mode,
+            "supports_artifact_only": self.supports_artifact_only,
+            "supports_streaming": self.supports_streaming,
+            "supports_timeout": self.supports_timeout,
+            "supports_session_reuse": self.supports_session_reuse,
+            "requires_secrets": self.requires_secrets,
+            "required_env_keys": list(self.required_env_keys),
+            "safety_capabilities": self.safety_capabilities.to_dict(),
+            "schema_version": self.schema_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendAdapterContract":
+        safety_data = data.get("safety_capabilities", {})
+        safety = BackendAdapterSafetyProfile.from_dict(
+            safety_data if isinstance(safety_data, dict) else {}
+        )
+        kwargs = {k: v for k, v in data.items()
+                  if k in cls.__dataclass_fields__ and k != "safety_capabilities"}
+        kwargs["safety_capabilities"] = safety
+        return cls(**kwargs)
+
+
+@dataclass
+class BackendAdapterPreflightResult:
+    """Result of adapter preflight validation.
+
+    Reports environment readiness, safety conditions, and blocking issues.
+    Never prints secret values. Never invokes real backends.
+    Always fail-closed on uncertainty.
+    """
+
+    preflight_id: str = ""
+    adapter_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ADAPTER_BACKEND_MOCK
+    status: str = PREFLIGHT_BLOCKED
+    ready: bool = False
+    missing_env_keys: list[str] = field(default_factory=list)
+    present_env_keys_redacted: list[str] = field(default_factory=list)
+    unsafe_conditions: list[str] = field(default_factory=list)
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    requires_human_approval: bool = True
+    requires_broker: bool = True
+    requires_shell_gate: bool = True
+    bypass_permissions_detected: bool = False
+    secrets_redacted: bool = True
+    no_real_backend_invoked: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _ADAPTER_SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if not self.preflight_id:
+            issues.append("preflight_id is required")
+        if self.status not in VALID_PREFLIGHT_STATUSES:
+            issues.append(f"invalid status: {self.status!r}")
+        if self.bypass_permissions_detected:
+            issues.append("bypass_permissions_detected: invocation not safe")
+        if not self.secrets_redacted:
+            issues.append("secrets_redacted must be True")
+        if not self.no_real_backend_invoked:
+            issues.append("no_real_backend_invoked must be True")
+        if not self.no_subprocess:
+            issues.append("no_subprocess must be True")
+        if not self.no_network:
+            issues.append("no_network must be True")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "preflight_id": self.preflight_id,
+            "adapter_id": self.adapter_id,
+            "backend_id": self.backend_id,
+            "backend_type": self.backend_type,
+            "status": self.status,
+            "ready": self.ready,
+            "missing_env_keys": list(self.missing_env_keys),
+            "present_env_keys_redacted": list(self.present_env_keys_redacted),
+            "unsafe_conditions": list(self.unsafe_conditions),
+            "hard_blocks": list(self.hard_blocks),
+            "warnings": list(self.warnings),
+            "requires_human_approval": self.requires_human_approval,
+            "requires_broker": self.requires_broker,
+            "requires_shell_gate": self.requires_shell_gate,
+            "bypass_permissions_detected": self.bypass_permissions_detected,
+            "secrets_redacted": self.secrets_redacted,
+            "no_real_backend_invoked": self.no_real_backend_invoked,
+            "no_subprocess": self.no_subprocess,
+            "no_network": self.no_network,
+            "created_at_utc": self.created_at_utc,
+            "schema_version": self.schema_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendAdapterPreflightResult":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class BackendAdapterInvocationPlan:
+    """Future-only invocation plan artifact.
+
+    Describes what WOULD be invoked. Never executes anything.
+    executable=False is the hard default.
+    """
+
+    invocation_plan_id: str = ""
+    adapter_id: str = ""
+    backend_id: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    invocation_mode: str = REAL_ADAPTER_DEFAULT_MODE
+    requires_human_approval: bool = True
+    requires_broker_decision: bool = True
+    requires_shell_gate_preflight: bool = True
+    timeout_seconds: int = 120
+    output_capture_required: bool = True
+    audit_required: bool = True
+    quarantine_required: bool = True
+    hard_blocks: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    executable: bool = False
+    schema_version: str = _ADAPTER_SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if not self.invocation_plan_id:
+            issues.append("invocation_plan_id is required")
+        if self.executable:
+            issues.append("executable must be False in this phase")
+        if self.invocation_mode not in VALID_ADAPTER_MODES:
+            issues.append(f"invalid invocation_mode: {self.invocation_mode!r}")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "invocation_plan_id": self.invocation_plan_id,
+            "adapter_id": self.adapter_id,
+            "backend_id": self.backend_id,
+            "request_id": self.request_id,
+            "phase_id": self.phase_id,
+            "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "invocation_mode": self.invocation_mode,
+            "requires_human_approval": self.requires_human_approval,
+            "requires_broker_decision": self.requires_broker_decision,
+            "requires_shell_gate_preflight": self.requires_shell_gate_preflight,
+            "timeout_seconds": self.timeout_seconds,
+            "output_capture_required": self.output_capture_required,
+            "audit_required": self.audit_required,
+            "quarantine_required": self.quarantine_required,
+            "hard_blocks": list(self.hard_blocks),
+            "missing_evidence": list(self.missing_evidence),
+            "warnings": list(self.warnings),
+            "executable": self.executable,
+            "schema_version": self.schema_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendAdapterInvocationPlan":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+# ── Validation helpers ──────────────────────────────────────────────────
+
+
+def validate_backend_adapter_contract(contract: BackendAdapterContract) -> dict[str, Any]:
+    """Validate a backend adapter contract. Pure model validation.
+
+    Returns dict with valid, hard_blocks, warnings.
+    Never executes, never invokes backends.
+    """
+    issues = contract.validate()
+    hard_blocks: list[str] = []
+    warnings_list: list[str] = []
+
+    if contract.backend_type not in VALID_ADAPTER_BACKEND_TYPES:
+        hard_blocks.append(f"unknown_backend_type:{contract.backend_type}")
+    if contract.invocation_mode not in VALID_ADAPTER_MODES:
+        hard_blocks.append(f"unsupported_invocation_mode:{contract.invocation_mode}")
+    if contract.backend_type != ADAPTER_BACKEND_MOCK:
+        if contract.invocation_mode == ADAPTER_MODE_MOCK_ONLY:
+            hard_blocks.append("real_backend_cannot_use_mock_only")
+        if contract.invocation_mode == ADAPTER_MODE_FUTURE_REAL:
+            if not contract.supports_timeout:
+                hard_blocks.append("future_real_requires_timeout")
+            if not contract.supports_artifact_only:
+                warnings_list.append("future_real_adapter_without_artifact_only")
+
+    for i in issues:
+        if "must be True" in i or "required" in i.lower():
+            hard_blocks.append(i)
+        else:
+            warnings_list.append(i)
+
+    return {
+        "valid": len(hard_blocks) == 0,
+        "hard_blocks": hard_blocks,
+        "warnings": warnings_list,
+    }
+
+
+def validate_backend_adapter_preflight(
+    contract: BackendAdapterContract,
+    *,
+    env_available: dict[str, bool] | None = None,
+    bypass_detected: bool = False,
+) -> BackendAdapterPreflightResult:
+    """Run adapter preflight validation. Pure model — no subprocess, no network.
+
+    Checks environment requirements, safety profile, and mode constraints.
+    Never prints secret values. Reports presence/absence only.
+    Always fail-closed.
+    """
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    preflight_id = f"apf-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    warnings_list: list[str] = []
+    missing_env: list[str] = []
+    present_env: list[str] = []
+    unsafe: list[str] = []
+
+    # ── Backend type validation ────────────────────────────────────────
+    if contract.backend_type not in VALID_ADAPTER_BACKEND_TYPES:
+        return BackendAdapterPreflightResult(
+            preflight_id=preflight_id,
+            adapter_id=contract.adapter_id,
+            backend_id=contract.backend_id,
+            backend_type=contract.backend_type,
+            status=PREFLIGHT_BLOCKED,
+            ready=False,
+            hard_blocks=[f"unknown_backend_type:{contract.backend_type}"],
+            unsafe_conditions=[f"unknown_backend_type:{contract.backend_type}"],
+            requires_human_approval=contract.safety_capabilities.requires_human_approval,
+            requires_broker=contract.safety_capabilities.requires_permission_broker,
+            requires_shell_gate=contract.safety_capabilities.requires_shell_gate,
+            no_real_backend_invoked=True,
+            no_subprocess=True,
+            no_network=True,
+            created_at_utc=now,
+        )
+
+    # ── Mode validation ────────────────────────────────────────────────
+    mode = contract.invocation_mode
+    if mode not in VALID_ADAPTER_MODES:
+        hard_blocks.append(f"unsupported_invocation_mode:{mode}")
+        unsafe.append(f"unsupported_invocation_mode:{mode}")
+
+    if mode == ADAPTER_MODE_DISABLED:
+        return BackendAdapterPreflightResult(
+            preflight_id=preflight_id,
+            adapter_id=contract.adapter_id,
+            backend_id=contract.backend_id,
+            backend_type=contract.backend_type,
+            status=PREFLIGHT_DISABLED,
+            ready=False,
+            hard_blocks=hard_blocks,
+            unsafe_conditions=unsafe,
+            requires_human_approval=contract.safety_capabilities.requires_human_approval,
+            requires_broker=contract.safety_capabilities.requires_permission_broker,
+            requires_shell_gate=contract.safety_capabilities.requires_shell_gate,
+            no_real_backend_invoked=True,
+            no_subprocess=True,
+            no_network=True,
+            created_at_utc=now,
+        )
+
+    if contract.backend_type != ADAPTER_BACKEND_MOCK and mode == ADAPTER_MODE_MOCK_ONLY:
+        hard_blocks.append("real_backend_cannot_use_mock_only")
+        unsafe.append("real_backend_cannot_use_mock_only")
+
+    # ── Bypass permissions detection ───────────────────────────────────
+    if bypass_detected:
+        hard_blocks.append("bypass_permissions_detected")
+        unsafe.append("bypass_permissions_detected")
+
+    # ── Environment validation ─────────────────────────────────────────
+    if env_available is not None:
+        for key_name, is_present in sorted(env_available.items()):
+            if is_present:
+                present_env.append(key_name)
+            else:
+                missing_env.append(key_name)
+
+    required = list(contract.required_env_keys)
+    if required:
+        for rk in required:
+            if rk not in present_env and rk not in missing_env:
+                env_val = _os.environ.get(rk, "")
+                if env_val:
+                    present_env.append(rk)
+                else:
+                    missing_env.append(rk)
+
+    if missing_env:
+        hard_blocks.append("missing_required_env")
+        unsafe.append(f"missing_env:{','.join(sorted(missing_env))}")
+
+    # ── Determine status ───────────────────────────────────────────────
+    if hard_blocks:
+        status = PREFLIGHT_BLOCKED
+        ready = False
+    elif missing_env:
+        status = PREFLIGHT_MISSING_EVIDENCE
+        ready = False
+    elif unsafe:
+        status = PREFLIGHT_NEEDS_HUMAN_REVIEW
+        ready = False
+    elif mode in (ADAPTER_MODE_MOCK_ONLY, ADAPTER_MODE_PREFLIGHT_ONLY, ADAPTER_MODE_ARTIFACT_ONLY):
+        status = PREFLIGHT_READY
+        ready = True
+    else:
+        status = PREFLIGHT_READY
+        ready = True
+
+    return BackendAdapterPreflightResult(
+        preflight_id=preflight_id,
+        adapter_id=contract.adapter_id,
+        backend_id=contract.backend_id,
+        backend_type=contract.backend_type,
+        status=status,
+        ready=ready,
+        missing_env_keys=sorted(set(missing_env)),
+        present_env_keys_redacted=sorted(set(present_env)),
+        unsafe_conditions=sorted(set(unsafe)),
+        hard_blocks=hard_blocks,
+        warnings=warnings_list,
+        requires_human_approval=contract.safety_capabilities.requires_human_approval,
+        requires_broker=contract.safety_capabilities.requires_permission_broker,
+        requires_shell_gate=contract.safety_capabilities.requires_shell_gate,
+        bypass_permissions_detected=bypass_detected,
+        secrets_redacted=True,
+        no_real_backend_invoked=True,
+        no_subprocess=True,
+        no_network=True,
+        created_at_utc=now,
+    )
+
+
+def create_backend_adapter_invocation_plan(
+    contract: BackendAdapterContract,
+    *,
+    request_id: str = "",
+    phase_id: str = "",
+    prompt_hash: str = "",
+    prompt_artifact_path: str = "",
+    **kwargs: Any,
+) -> BackendAdapterInvocationPlan:
+    """Create a future-only invocation plan. Never executes anything.
+
+    executable=False is the hard default.
+    """
+    import uuid as _uuid
+    plan_id = f"aip-{_uuid.uuid4().hex[:12]}"
+
+    plan = BackendAdapterInvocationPlan(
+        invocation_plan_id=plan_id,
+        adapter_id=contract.adapter_id,
+        backend_id=contract.backend_id,
+        request_id=request_id,
+        phase_id=phase_id,
+        prompt_hash=prompt_hash,
+        prompt_artifact_path=prompt_artifact_path,
+        invocation_mode=contract.invocation_mode,
+        requires_human_approval=contract.safety_capabilities.requires_human_approval,
+        requires_broker_decision=contract.safety_capabilities.requires_permission_broker,
+        requires_shell_gate_preflight=contract.safety_capabilities.requires_shell_gate,
+        timeout_seconds=120 if contract.supports_timeout else 0,
+        output_capture_required=contract.supports_artifact_only,
+        audit_required=contract.safety_capabilities.requires_audit,
+        quarantine_required=contract.safety_capabilities.requires_output_quarantine,
+        executable=False,
+        **{k: v for k, v in kwargs.items()
+           if k in BackendAdapterInvocationPlan.__dataclass_fields__},
+    )
+    issues = plan.validate()
+    if issues:
+        raise ValueError(f"Invalid invocation plan: {'; '.join(issues)}")
+    return plan
+
+
+def classify_backend_adapter_failure(
+    *,
+    preflight: BackendAdapterPreflightResult | None = None,
+    timeout_occurred: bool = False,
+    exit_code: int = 0,
+    output_present: bool = True,
+    output_valid: bool = True,
+    backend_responded: bool = True,
+) -> str:
+    """Classify a backend adapter failure into standard categories.
+
+    Pure classification — no execution, no subprocess, no network.
+    """
+    # Preflight-level failures
+    if preflight is not None:
+        if preflight.status == PREFLIGHT_DISABLED:
+            return FAILURE_DISABLED
+        if preflight.bypass_permissions_detected:
+            return FAILURE_BYPASS_PERMISSIONS
+        if preflight.missing_env_keys:
+            return FAILURE_MISSING_ENV
+
+    # Runtime-level failures
+    if timeout_occurred:
+        return FAILURE_TIMEOUT
+    if not backend_responded:
+        return FAILURE_BACKEND_UNAVAILABLE
+    if exit_code != 0:
+        if exit_code in (401, 403):
+            return FAILURE_AUTH_FAILURE
+        if exit_code == 429:
+            return FAILURE_RATE_LIMITED
+        return FAILURE_UNKNOWN
+
+    # Output-level failures (only checked when backend responded and exit was clean)
+    if not output_present and not output_valid:
+        return FAILURE_OUTPUT_MISSING
+    if not output_present:
+        return FAILURE_OUTPUT_MISSING
+    if not output_valid:
+        return FAILURE_OUTPUT_MALFORMED
+
+    return FAILURE_NOT_INVOKED
+
+
+def get_default_adapter_registry() -> dict[str, BackendAdapterContract]:
+    """Build the default adapter registry.
+
+    All real adapters default to preflight-only.
+    Only mock adapter is mock_only.
+    """
+    return {
+        "mock": BackendAdapterContract(
+            adapter_id="adapter-mock",
+            backend_id="mock",
+            backend_type=ADAPTER_BACKEND_MOCK,
+            display_name="Mock Backend Adapter",
+            invocation_mode=ADAPTER_MODE_MOCK_ONLY,
+            supports_artifact_only=True,
+            supports_timeout=False,
+            requires_secrets=False,
+            required_env_keys=[],
+            safety_capabilities=BackendAdapterSafetyProfile(
+                requires_human_approval=False,
+                requires_permission_broker=False,
+                requires_shell_gate=False,
+                requires_bypass_detection=False,
+            ),
+        ),
+        "claude": BackendAdapterContract(
+            adapter_id="adapter-claude-cli",
+            backend_id="claude",
+            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+            display_name="Claude CLI Adapter",
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+            supports_artifact_only=True,
+            supports_timeout=True,
+            requires_secrets=True,
+            required_env_keys=["ANTHROPIC_API_KEY"],
+        ),
+        "claude-deepseek": BackendAdapterContract(
+            adapter_id="adapter-claude-deepseek-cli",
+            backend_id="claude-deepseek",
+            backend_type=ADAPTER_BACKEND_CLAUDE_DEEPSEEK_CLI,
+            display_name="Claude-DeepSeek CLI Adapter",
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+            supports_artifact_only=True,
+            supports_timeout=True,
+            requires_secrets=True,
+            required_env_keys=["DEEPSEEK_API_KEY"],
+        ),
+        "codex": BackendAdapterContract(
+            adapter_id="adapter-codex",
+            backend_id="codex",
+            backend_type=ADAPTER_BACKEND_CODEX,
+            display_name="Codex Adapter",
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+            supports_artifact_only=False,
+            supports_timeout=True,
+            requires_secrets=True,
+            required_env_keys=["OPENAI_API_KEY"],
+        ),
+        "qwen": BackendAdapterContract(
+            adapter_id="adapter-qwen",
+            backend_id="qwen",
+            backend_type=ADAPTER_BACKEND_QWEN,
+            display_name="Qwen Adapter",
+            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+            supports_artifact_only=False,
+            supports_timeout=True,
+            requires_secrets=True,
+            required_env_keys=["QWEN_API_KEY"],
+        ),
+    }
