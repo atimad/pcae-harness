@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 94T: Real Backend Adapter Preflight CLI (completed).
+
+Implementation phase. Added `pcae backend adapter list/show/preflight` CLI commands.
+Read-only and env-presence-only — never invokes backends. Shows adapter contracts,
+safety profiles, and preflight results with redacted env presence. Fail-closed on
+unknown backends. 21 new CLI tests (189 total). Delivers
+docs/PHASE_94_BACKEND_REAL_ADAPTER_PREFLIGHT_CLI.md.
+
 Phase 94S: Real Backend Adapter Contract Model (completed).
 
 Implementation phase. Added BackendAdapterSafetyProfile (10 fields), BackendAdapterContract

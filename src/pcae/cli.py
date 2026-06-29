@@ -449,6 +449,8 @@ from pcae.commands.backend import (
     run_backend_apply_plan_validate,
     run_backend_manual_apply_package_show, run_backend_manual_apply_package_create,
     run_backend_demo_mock_lifecycle, run_backend_demo_show,
+    run_backend_adapter_list, run_backend_adapter_show,
+    run_backend_adapter_preflight,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4830,6 +4832,29 @@ def build_parser() -> argparse.ArgumentParser:
     demo_show.add_argument("--latest", action="store_true", default=True)
     demo_show.add_argument("--json", action="store_true")
     demo_show.set_defaults(handler=run_backend_demo_show)
+
+    # ── pcae backend adapter (Phase 94T) ──────────────────────────────────
+    be_adapter = backend_sub.add_parser(
+        "adapter",
+        help="Read-only backend adapter contract visibility and preflight.",
+    )
+    be_adapter_sub = be_adapter.add_subparsers(dest="backend_adapter_command", required=True)
+
+    adapter_list = be_adapter_sub.add_parser("list", help="List all adapter contracts.")
+    adapter_list.add_argument("--json", action="store_true")
+    adapter_list.set_defaults(handler=run_backend_adapter_list)
+
+    adapter_show = be_adapter_sub.add_parser("show", help="Show adapter contract details.")
+    adapter_show.add_argument("--backend", required=True, help="Backend ID (e.g., claude, mock).")
+    adapter_show.add_argument("--json", action="store_true")
+    adapter_show.set_defaults(handler=run_backend_adapter_show)
+
+    adapter_preflight = be_adapter_sub.add_parser(
+        "preflight", help="Run model-only/env-presence preflight."
+    )
+    adapter_preflight.add_argument("--backend", required=True, help="Backend ID.")
+    adapter_preflight.add_argument("--json", action="store_true")
+    adapter_preflight.set_defaults(handler=run_backend_adapter_preflight)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

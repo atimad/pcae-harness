@@ -16,6 +16,8 @@ from pcae.core.backend_invocations import (
     run_mock_lifecycle_demo,
     persist_lifecycle_demo,
     read_latest_lifecycle_demo,
+    get_default_adapter_registry,
+    validate_backend_adapter_preflight,
     INVOCATION_MODE_DRY_RUN,
     APPROVAL_PENDING,
     DEMO_COMPLETED,
@@ -1396,3 +1398,151 @@ def run_backend_demo_show(args: argparse.Namespace) -> int:
         print()
         print("  Output remains quarantined. No files modified.")
     return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94T — Real backend adapter preflight CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_adapter_list(args: argparse.Namespace) -> int:
+    """pcae backend adapter list [--json]
+
+    Read-only. Lists all adapter contracts. Never invokes backends.
+    """
+    reg = get_default_adapter_registry()
+    entries = []
+    for bid, c in sorted(reg.items()):
+        entries.append({
+            "backend_id": bid,
+            "adapter_id": c.adapter_id,
+            "backend_type": c.backend_type,
+            "invocation_mode": c.invocation_mode,
+            "supports_artifact_only": c.supports_artifact_only,
+            "requires_secrets": c.requires_secrets,
+            "display_name": c.display_name,
+        })
+
+    if args.json:
+        print(json.dumps({"adapters": entries, "count": len(entries),
+                          "no_real_backend_invoked": True}, indent=2))
+    else:
+        print(f"Backend adapter registry — {len(entries)} adapter(s)")
+        for e in entries:
+            mode_label = e["invocation_mode"]
+            secrets = "secrets" if e["requires_secrets"] else "no-secrets"
+            print(f"  {e['backend_id']:20s}  type={e['backend_type']:22s}  "
+                  f"mode={mode_label:16s}  {secrets}")
+        print()
+        print("  ⚠️  All real adapters are preflight-only. No backend invocation capability.")
+    return 0
+
+
+def run_backend_adapter_show(args: argparse.Namespace) -> int:
+    """pcae backend adapter show --backend <id> [--json]
+
+    Read-only. Shows adapter contract details. Never invokes backends.
+    """
+    backend_id: str = getattr(args, "backend", "") or ""
+    if not backend_id:
+        msg = "Missing --backend <id>"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    reg = get_default_adapter_registry()
+    if backend_id not in reg:
+        msg = f"Unknown backend: {backend_id!r}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    c = reg[backend_id]
+    safety = c.safety_capabilities
+
+    if args.json:
+        print(json.dumps({
+            "adapter": c.to_dict(),
+            "no_real_backend_invoked": True,
+            "no_subprocess": True,
+            "no_network": True,
+        }, indent=2))
+    else:
+        print(f"Backend adapter: {c.backend_id}")
+        print(f"  Adapter ID:          {c.adapter_id}")
+        print(f"  Display name:        {c.display_name}")
+        print(f"  Backend type:        {c.backend_type}")
+        print(f"  Invocation mode:     {c.invocation_mode}")
+        print(f"  Artifact only:       {c.supports_artifact_only}")
+        print(f"  Streaming:           {c.supports_streaming}")
+        print(f"  Timeout support:     {c.supports_timeout}")
+        print(f"  Session reuse:       {c.supports_session_reuse}")
+        print(f"  Requires secrets:    {c.requires_secrets}")
+        if c.required_env_keys:
+            print(f"  Required env keys:   {', '.join(c.required_env_keys)}")
+        print()
+        print("  Safety profile:")
+        print(f"    Human approval:    {safety.requires_human_approval}")
+        print(f"    Permission broker: {safety.requires_permission_broker}")
+        print(f"    Shell gate:        {safety.requires_shell_gate}")
+        print(f"    Output quarantine: {safety.requires_output_quarantine}")
+        print(f"    Audit:             {safety.requires_audit}")
+        print(f"    Timeout:           {safety.requires_timeout}")
+        print(f"    Secret redaction:  {safety.requires_secret_redaction}")
+        print(f"    Bypass detection:  {safety.requires_bypass_detection}")
+        print(f"    No-apply guarantee:{safety.supports_no_apply_guarantee}")
+        print()
+        print("  ⚠️  Read-only adapter metadata. No backend invocation capability.")
+    return 0
+
+
+def run_backend_adapter_preflight(args: argparse.Namespace) -> int:
+    """pcae backend adapter preflight --backend <id> [--json]
+
+    Model-only and env-presence-only preflight. Never invokes backends,
+    never spawns subprocess, never calls network, never prints secrets.
+    """
+    backend_id: str = getattr(args, "backend", "") or ""
+    if not backend_id:
+        msg = "Missing --backend <id>"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    reg = get_default_adapter_registry()
+    if backend_id not in reg:
+        msg = f"Unknown backend: {backend_id!r}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    contract = reg[backend_id]
+    r = validate_backend_adapter_preflight(contract)
+
+    if args.json:
+        print(json.dumps({
+            "preflight": r.to_dict(),
+            "no_real_backend_invoked": True,
+            "no_subprocess": True,
+            "no_network": True,
+        }, indent=2))
+    else:
+        print(f"Backend adapter preflight: {r.backend_id}")
+        print(f"  Status:              {r.status}")
+        print(f"  Ready:               {'yes' if r.ready else 'no'}")
+        if r.missing_env_keys:
+            print(f"  Missing env:         {', '.join(r.missing_env_keys)}")
+        if r.present_env_keys_redacted:
+            print(f"  Present env:         {', '.join(r.present_env_keys_redacted)}")
+        if r.hard_blocks:
+            print(f"  Hard blocks:         {', '.join(r.hard_blocks)}")
+        if r.unsafe_conditions:
+            print(f"  Unsafe conditions:   {', '.join(r.unsafe_conditions)}")
+        if r.warnings:
+            print(f"  Warnings:            {', '.join(r.warnings)}")
+        print(f"  Human approval:      {r.requires_human_approval}")
+        print(f"  Broker required:     {r.requires_broker}")
+        print(f"  Shell gate required: {r.requires_shell_gate}")
+        print(f"  Bypass detected:     {r.bypass_permissions_detected}")
+        print(f"  No real backend:     {r.no_real_backend_invoked}")
+        print(f"  No subprocess:       {r.no_subprocess}")
+        print(f"  No network:          {r.no_network}")
+        print()
+        print("  ⚠️  Model-only preflight. No backend was invoked.")
+    return 0 if r.ready else 1

@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 94S — Real Backend Adapter Contract Model (20260629-2022-phase-94r-backend-real-adapter-design)
+- Phase 94T — Real Backend Adapter Preflight CLI (20260629-2035-phase-94s-real-backend-adapter-contract-model)
+- Phase 94S — Real Backend Adapter Contract Model (20260629-2035-phase-94s-real-backend-adapter-contract-model)
 - Phase 94R — Backend Real Adapter Design (20260629-2022-phase-94r-backend-real-adapter-design)
 - Phase 94Q.1 — Bootstrap Resume and Telegram Runtime Hardening (20260629-2009-phase-94q-1-bootstrap-resume-and-telegram-runtime-hardening)
 - Phase 94Q — Backend Lifecycle End-to-End Mock Demo (20260629-1946-phase-94q-backend-lifecycle-end-to-end-mock-demo)

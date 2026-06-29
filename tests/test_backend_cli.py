@@ -1430,3 +1430,175 @@ class Test94QDemoCLISafety:
         gitignore = _P(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
         content = gitignore.read_text()
         assert "backend-lifecycle-demos/" in content
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94T — Real backend adapter preflight CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import json as _json_94t
+import subprocess as _sub_94t
+import sys as _sys_94t
+from pathlib import Path as _Path_94t
+
+REPO_ROOT_94T = _Path_94t(__file__).resolve().parent.parent
+
+
+def _run_94t(subcmd: list[str]) -> _sub_94t.CompletedProcess:
+    return _sub_94t.run(
+        [_sys_94t.executable, "-m", "pcae", "backend", "adapter"] + subcmd,
+        capture_output=True, text=True, cwd=REPO_ROOT_94T, timeout=15,
+    )
+
+
+def _json_94t_cmd(subcmd: list[str]) -> tuple[dict, int]:
+    r = _run_94t(subcmd + ["--json"])
+    try:
+        return _json_94t.loads(r.stdout), r.returncode
+    except Exception:
+        return {"raw": r.stdout, "stderr": r.stderr}, r.returncode
+
+
+class Test94TAdapterListCLI:
+    """pcae backend adapter list."""
+
+    def test_list_text_shows_all_adapters(self):
+        r = _run_94t(["list"])
+        assert r.returncode == 0
+        assert "mock" in r.stdout
+        assert "claude" in r.stdout
+        assert "preflight_only" in r.stdout
+        assert "No backend invocation" in r.stdout
+
+    def test_list_json_has_all_adapters(self):
+        data, rc = _json_94t_cmd(["list"])
+        assert rc == 0
+        assert data["count"] == 5
+        ids = [a["backend_id"] for a in data["adapters"]]
+        assert "mock" in ids
+        assert "claude" in ids
+        assert data["no_real_backend_invoked"] is True
+
+    def test_list_json_no_secrets(self):
+        data, rc = _json_94t_cmd(["list"])
+        assert rc == 0
+        j = _json_94t.dumps(data)
+        assert "sk-ant" not in j
+
+
+class Test94TAdapterShowCLI:
+    """pcae backend adapter show."""
+
+    def test_show_claude_text(self):
+        r = _run_94t(["show", "--backend", "claude"])
+        assert r.returncode == 0
+        assert "Claude CLI Adapter" in r.stdout
+        assert "preflight_only" in r.stdout
+        assert "ANTHROPIC_API_KEY" in r.stdout
+        assert "Human approval" in r.stdout
+
+    def test_show_mock_text(self):
+        r = _run_94t(["show", "--backend", "mock"])
+        assert r.returncode == 0
+        assert "mock_only" in r.stdout
+
+    def test_show_unknown_backend_fails(self):
+        r = _run_94t(["show", "--backend", "bogus"])
+        assert r.returncode != 0
+
+    def test_show_json(self):
+        data, rc = _json_94t_cmd(["show", "--backend", "claude"])
+        assert rc == 0
+        assert data["adapter"]["backend_id"] == "claude"
+        assert data["no_real_backend_invoked"] is True
+
+    def test_show_missing_backend_fails(self):
+        r = _run_94t(["show"])
+        assert r.returncode != 0
+
+    def test_show_no_secrets_in_json(self):
+        data, rc = _json_94t_cmd(["show", "--backend", "claude"])
+        assert rc == 0
+        j = _json_94t.dumps(data)
+        assert "sk-ant" not in j
+
+
+class Test94TAdapterPreflightCLI:
+    """pcae backend adapter preflight."""
+
+    def test_preflight_mock_ready(self):
+        r = _run_94t(["preflight", "--backend", "mock"])
+        assert r.returncode == 0
+        assert "ready" in r.stdout
+        assert "No real backend" in r.stdout
+
+    def test_preflight_claude_blocked_missing_env(self):
+        r = _run_94t(["preflight", "--backend", "claude"])
+        assert r.returncode != 0  # blocked → non-zero
+        assert "ANTHROPIC_API_KEY" in r.stdout
+        assert "No subprocess" in r.stdout
+
+    def test_preflight_unknown_backend_fails(self):
+        r = _run_94t(["preflight", "--backend", "bogus"])
+        assert r.returncode != 0
+
+    def test_preflight_missing_backend_fails(self):
+        r = _run_94t(["preflight"])
+        assert r.returncode != 0
+
+    def test_preflight_json_mock_ready(self):
+        data, rc = _json_94t_cmd(["preflight", "--backend", "mock"])
+        assert rc == 0
+        assert data["preflight"]["status"] == "ready"
+        assert data["preflight"]["ready"] is True
+        assert data["no_real_backend_invoked"] is True
+        assert data["no_subprocess"] is True
+        assert data["no_network"] is True
+
+    def test_preflight_json_claude_blocked(self):
+        data, rc = _json_94t_cmd(["preflight", "--backend", "claude"])
+        assert rc != 0
+        assert data["preflight"]["status"] in ("blocked", "missing_evidence")
+        assert data["preflight"]["ready"] is False
+        assert "ANTHROPIC_API_KEY" in data["preflight"]["missing_env_keys"]
+
+    def test_preflight_json_no_secrets(self, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-secret-value-xyz")
+        data, rc = _json_94t_cmd(["preflight", "--backend", "claude"])
+        j = _json_94t.dumps(data)
+        assert "sk-ant-secret-value-xyz" not in j
+        assert data["preflight"]["secrets_redacted"] is True
+
+    def test_preflight_no_real_backend_invoked(self):
+        data, rc = _json_94t_cmd(["preflight", "--backend", "mock"])
+        assert rc == 0
+        assert data["preflight"]["no_real_backend_invoked"] is True
+
+    def test_preflight_env_values_not_printed(self, monkeypatch):
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "secret-key-abc123")
+        r = _run_94t(["preflight", "--backend", "claude"])
+        assert "secret-key-abc123" not in r.stdout
+
+
+class Test94TAdapterCLISafety:
+    """Cross-cutting safety for 94T CLI."""
+
+    def test_no_subprocess_in_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "subprocess.run" not in source
+        assert "Popen(" not in source
+
+    def test_no_network_in_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_telegram_inbound_in_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "getUpdates" not in source

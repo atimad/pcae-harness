@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94S — Real Backend Adapter Contract Model to Phase 94T — Real Backend Adapter Preflight CLI; session refreshed and governance continuity revalidated.
+- Completed Phase 94T Real Backend Adapter Preflight CLI: pcae backend adapter list/show/preflight commands.
+- Read-only and env-presence-only. Fail-closed on unknown backends and missing env.
+- preflight never prints secret values — only env key names. 21 new CLI tests (189 total).
+- Delivers docs/PHASE_94_BACKEND_REAL_ADAPTER_PREFLIGHT_CLI.md.
+
 - Transitioned active task from Phase 94R — Backend Real Adapter Design to Phase 94S — Real Backend Adapter Contract Model; session refreshed and governance continuity revalidated.
 - Completed Phase 94S Real Backend Adapter Contract Model: BackendAdapterSafetyProfile, BackendAdapterContract, BackendAdapterPreflightResult, BackendAdapterInvocationPlan models.
 - Added validate_backend_adapter_contract(), validate_backend_adapter_preflight(), create_backend_adapter_invocation_plan(), classify_backend_adapter_failure().
