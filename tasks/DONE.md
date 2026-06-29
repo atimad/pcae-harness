@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 94L — Backend Apply Readiness Validator (20260629-1652-phase-94l-backend-apply-readiness-validator)
 - Phase 94K — Backend Apply Plan Model (20260629-1633-phase-94k-backend-apply-plan-model)
 - 92D.7 — Telegram Handoff Message Precision Tightening (20260629-92d-7-telegram-handoff-message-precision-tightening)
 - 92D.6 — Phase Completion Structured Metadata Capture (20260629-92d-6-phase-completion-structured-metadata-capture)
