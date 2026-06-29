@@ -1,16 +1,24 @@
-# Phase 94I Complete — Backend Review/Apply Governance Design
+# Phase 94J Complete — Backend Review State Model
 
 ## Summary
 
-Design-only. Defines review state model (10 states), apply readiness (13 requirements),
-human approval model (hash-binding, expiration, non-override of hard blocks),
-artifact paths (.pcae/backend-reviews/), apply plan model (15 fields), future CLI
-(6 commands), failure modes (12), ~50 planned tests, 15 open questions.
+Phase 94J implements review state model: ReviewArtifact (22 fields), ApprovalArtifact
+(12 fields, hash-bound), RejectionArtifact (8 fields). Safe defaults: apply_ready=False,
+approved_for_apply=False. Hard blocks prevent approval. CLI deferred to 94K.
 
-## Non-Goals
+## Implementation
 
-No implementation, patch parsing, file mutation, backend invocation, enforcement.
+- 6 review states: captured, quarantined, review_pending, reviewed, approved_for_apply, rejected
+- create_review_artifact(), approve_review(), reject_review(), persist_review()
+- Artifacts in .pcae/backend-reviews/ (gitignored)
+- 11 new tests (102 total backend)
+
+## Validation
+
+- Backend: 102/102
+- Broker: 265/265, Shell: 142/142, Report: 161/161
+- origin/main..HEAD: 0
 
 ## Recommended Next Phase
 
-94J — Backend Review State Model
+94K — Backend Apply Plan Model

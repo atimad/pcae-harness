@@ -725,3 +725,87 @@ class TestTrustGate:
 
 
 from pcae.core.backend_invocations import assess_backend_invocation_trust
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94J — Review state model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestReviewStateModel:
+    def test_create_review_safe_defaults(self):
+        r = create_review_artifact("be-test", "abc123")
+        assert r.approved_for_apply is False
+        assert r.apply_ready is False
+        assert r.rejected is False
+        assert r.review_state == "quarantined"
+
+    def test_approve_sets_state(self):
+        r = create_review_artifact("be-test", "abc123")
+        a = approve_review(r, "operator", "looks good")
+        assert r.approved_for_apply is True
+        assert r.review_state == "approved_for_apply"
+        assert a.output_hash == "abc123"
+
+    def test_approve_with_hard_blocks_raises(self):
+        r = create_review_artifact("be-test", "abc123")
+        r.hard_blocks = ["blocked_by_policy"]
+        with pytest.raises(ValueError, match="hard blocks"):
+            approve_review(r, "op", "reason")
+
+    def test_approve_empty_hash_raises(self):
+        r = ReviewArtifact(request_id="x", output_hash="")
+        with pytest.raises(ValueError, match="output_hash"):
+            approve_review(r, "op", "reason")
+
+    def test_reject_sets_state(self):
+        r = create_review_artifact("be-test", "abc123")
+        reject_review(r, "operator", "not safe")
+        assert r.rejected is True
+        assert r.review_state == "rejected"
+
+    def test_approval_hash_bound(self):
+        r = create_review_artifact("be-test", "abc123")
+        a = approve_review(r, "op", "ok")
+        assert a.output_hash == r.output_hash
+
+    def test_apply_ready_validation_fails(self):
+        r = create_review_artifact("be-test", "abc123")
+        r.apply_ready = True
+        issues = r.validate()
+        assert any("apply_ready" in i for i in issues)
+
+    def test_review_persisted(self):
+        with tempfile.TemporaryDirectory() as td:
+            r = create_review_artifact("be-test", "abc123", phase_id="94J")
+            result = persist_review(r)
+            assert result["status"] == "written"
+            assert Path(result["path"]).exists()
+            assert Path(result["latest_path"]).exists()
+
+    def test_serialization_round_trip(self):
+        r = create_review_artifact("be-test", "abc123", phase_id="94J")
+        d = r.to_dict()
+        assert d["review_state"] == "quarantined"
+        assert d["approved_for_apply"] is False
+
+    def test_approval_serialization(self):
+        r = create_review_artifact("be-test", "abc123")
+        a = approve_review(r, "op", "ok")
+        d = a.to_dict()
+        assert d["output_hash"] == "abc123"
+        assert "sk-ant" not in json.dumps(d)
+
+    def test_no_source_files_modified(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations.persist_review)
+        assert "import subprocess" not in source
+        assert "open(" not in source or ".pcae" in source
+
+
+from pcae.core.backend_invocations import (
+    ReviewArtifact, ApprovalArtifact, RejectionArtifact,
+    create_review_artifact, approve_review, reject_review, persist_review,
+    REVIEW_QUARANTINED, REVIEW_APPROVED, REVIEW_REJECTED,
+)

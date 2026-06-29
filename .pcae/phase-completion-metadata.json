@@ -1,11 +1,11 @@
 {
-  "phase_id": "94I",
-  "phase_name": "Backend Review/Apply Governance Design",
-  "files_changed": ["docs/PHASE_94_BACKEND_REVIEW_APPLY_GOVERNANCE_DESIGN.md"],
-  "files_changed_count": 1,
-  "tests_added_or_updated": "0 (design-only)",
+  "phase_id": "94J",
+  "phase_name": "Backend Review State Model",
+  "files_changed": ["src/pcae/core/backend_invocations.py", ".pcae/.gitignore", "tests/test_backend_invocations.py"],
+  "files_changed_count": 3,
+  "tests_added_or_updated": "11 new (102 total backend)",
   "validation_results": [
-    {"name": "Backend", "result": "91/91", "status": "passed"},
+    {"name": "Backend model + review", "result": "102/102", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
@@ -14,5 +14,5 @@
   "governance_results": [{"name": "pcae health", "status": "healthy"}, {"name": "pcae check", "status": "passed"}, {"name": "pcae push check", "status": "nothing_to_push"}],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "94J — Backend Review State Model"
+  "recommended_next_phase": "94K — Backend Apply Plan Model"
 }

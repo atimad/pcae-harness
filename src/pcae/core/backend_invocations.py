@@ -9,6 +9,7 @@ from __future__ import annotations
 import json as _json
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import Any
 
 SCHEMA_VERSION = "1.0"
@@ -1121,3 +1122,224 @@ def assess_backend_invocation_trust(
         ),
         "schema_version": SCHEMA_VERSION,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94J — Backend review state model
+# ═══════════════════════════════════════════════════════════════════════════
+
+REVIEW_CAPTURED = "captured"
+REVIEW_QUARANTINED = "quarantined"
+REVIEW_PENDING = "review_pending"
+REVIEW_REVIEWED = "reviewed"
+REVIEW_APPROVED = "approved_for_apply"
+REVIEW_REJECTED = "rejected"
+
+VALID_REVIEW_STATES: frozenset[str] = frozenset({
+    REVIEW_CAPTURED, REVIEW_QUARANTINED, REVIEW_PENDING,
+    REVIEW_REVIEWED, REVIEW_APPROVED, REVIEW_REJECTED,
+})
+
+_REVIEWS_DIR = ".pcae/backend-reviews"
+
+
+@dataclass
+class ReviewArtifact:
+    review_id: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    output_hash: str = ""
+    output_artifact_path: str = ""
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    audit_id: str = ""
+    trust_assessment_id: str = ""
+    review_state: str = REVIEW_QUARANTINED
+    operator: str = ""
+    decision: str = ""
+    decision_reason: str = ""
+    created_at_utc: str = ""
+    approved_for_apply: bool = False
+    rejected: bool = False
+    apply_ready: bool = False
+    hard_blocks: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    schema_version: str = SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues = []
+        if not self.request_id:
+            issues.append("request_id required")
+        if not self.output_hash:
+            issues.append("output_hash required")
+        if self.review_state not in VALID_REVIEW_STATES:
+            issues.append(f"invalid review_state: {self.review_state!r}")
+        if self.approved_for_apply and self.hard_blocks:
+            issues.append("cannot approve with hard blocks")
+        if self.apply_ready:
+            issues.append("apply_ready not supported in 94J")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "review_id": self.review_id, "request_id": self.request_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "backend_id": self.backend_id, "output_hash": self.output_hash,
+            "output_artifact_path": self.output_artifact_path,
+            "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "audit_id": self.audit_id,
+            "trust_assessment_id": self.trust_assessment_id,
+            "review_state": self.review_state, "operator": self.operator,
+            "decision": self.decision, "decision_reason": self.decision_reason,
+            "created_at_utc": self.created_at_utc,
+            "approved_for_apply": self.approved_for_apply,
+            "rejected": self.rejected, "apply_ready": self.apply_ready,
+            "hard_blocks": self.hard_blocks,
+            "missing_evidence": self.missing_evidence,
+            "warnings": self.warnings, "schema_version": self.schema_version,
+        }
+
+
+@dataclass
+class ApprovalArtifact:
+    approval_id: str = ""
+    review_id: str = ""
+    request_id: str = ""
+    output_hash: str = ""
+    operator: str = ""
+    reason: str = ""
+    approved_at_utc: str = ""
+    expires_at_utc: str = ""
+    hard_blocks_present: bool = False
+    accepted_risk: bool = False
+    schema_version: str = SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues = []
+        if not self.output_hash:
+            issues.append("output_hash required")
+        if not self.operator:
+            issues.append("operator required")
+        if self.hard_blocks_present:
+            issues.append("approval invalid: hard blocks present")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "approval_id": self.approval_id, "review_id": self.review_id,
+            "request_id": self.request_id, "output_hash": self.output_hash,
+            "operator": self.operator, "reason": self.reason,
+            "approved_at_utc": self.approved_at_utc,
+            "expires_at_utc": self.expires_at_utc,
+            "hard_blocks_present": self.hard_blocks_present,
+            "accepted_risk": self.accepted_risk,
+            "schema_version": self.schema_version,
+        }
+
+
+@dataclass
+class RejectionArtifact:
+    rejection_id: str = ""
+    review_id: str = ""
+    request_id: str = ""
+    output_hash: str = ""
+    operator: str = ""
+    reason: str = ""
+    rejected_at_utc: str = ""
+    schema_version: str = SCHEMA_VERSION
+
+
+def _reviews_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_REVIEWS_DIR)
+
+
+def create_review_artifact(request_id: str, output_hash: str, *, backend_id: str = "", **kwargs: Any) -> ReviewArtifact:
+    import uuid
+    now = datetime.now(timezone.utc).isoformat()
+    review = ReviewArtifact(
+        review_id=f"rv-{uuid.uuid4().hex[:12]}", request_id=request_id,
+        output_hash=output_hash, backend_id=backend_id, created_at_utc=now,
+        approved_for_apply=False, rejected=False, apply_ready=False,
+        review_state=REVIEW_QUARANTINED,
+        **{k: v for k, v in kwargs.items() if k in ReviewArtifact.__dataclass_fields__},
+    )
+    issues = review.validate()
+    if issues:
+        raise ValueError(f"Invalid review: {'; '.join(issues)}")
+    return review
+
+
+def approve_review(review: ReviewArtifact, operator: str, reason: str) -> ApprovalArtifact:
+    if review.hard_blocks:
+        raise ValueError("Cannot approve: hard blocks present")
+    if not review.output_hash:
+        raise ValueError("Missing output_hash")
+    import uuid
+    now = datetime.now(timezone.utc)
+    approval = ApprovalArtifact(
+        approval_id=f"ap-{uuid.uuid4().hex[:12]}", review_id=review.review_id,
+        request_id=review.request_id, output_hash=review.output_hash,
+        operator=operator, reason=reason, approved_at_utc=now.isoformat(),
+    )
+    issues = approval.validate()
+    if issues:
+        raise ValueError(f"Invalid approval: {'; '.join(issues)}")
+    review.review_state = REVIEW_APPROVED
+    review.approved_for_apply = True
+    review.operator = operator
+    review.decision = "approved"
+    review.decision_reason = reason
+    return approval
+
+
+def reject_review(review: ReviewArtifact, operator: str, reason: str) -> RejectionArtifact:
+    import uuid
+    now = datetime.now(timezone.utc)
+    rejection = RejectionArtifact(
+        rejection_id=f"rj-{uuid.uuid4().hex[:12]}", review_id=review.review_id,
+        request_id=review.request_id, output_hash=review.output_hash,
+        operator=operator, reason=reason, rejected_at_utc=now.isoformat(),
+    )
+    review.review_state = REVIEW_REJECTED
+    review.rejected = True
+    review.operator = operator
+    review.decision = "rejected"
+    review.decision_reason = reason
+    return rejection
+
+
+def persist_review(review: ReviewArtifact) -> dict:
+    import json as _json, os
+    d = _reviews_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{review.review_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(review.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(review.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "latest_path": str(lp)}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def read_latest_review() -> ReviewArtifact | None:
+    import json as _json
+    lp = _reviews_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return ReviewArtifact(**{k: v for k, v in data.items() if k in ReviewArtifact.__dataclass_fields__})
+    except Exception:
+        return None

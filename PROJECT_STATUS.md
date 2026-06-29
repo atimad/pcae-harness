@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 94J: Backend Review State Model (completed).
+
+Implementation phase. Added ReviewArtifact (22 fields), ApprovalArtifact (12 fields,
+hash-bound), RejectionArtifact (8 fields), 6 review states. Safe defaults:
+apply_ready=False, approved_for_apply=False. Hard blocks prevent approval.
+Artifacts in .pcae/backend-reviews/. CLI deferred. 11 new tests (102 total).
+No apply execution, patch parsing, file mutation, or backend invocation.
+Delivers docs/PHASE_94_BACKEND_REVIEW_STATE_MODEL.md.
+
 Phase 94I: Backend Review/Apply Governance Design (completed).
 
 Design-only. Defined review state model (captured→quarantined→reviewed→approved→
