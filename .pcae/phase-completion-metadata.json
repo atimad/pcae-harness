@@ -1,11 +1,11 @@
 {
-  "phase_id": "94D",
-  "phase_name": "Backend Output Artifact Capture",
-  "files_changed": ["src/pcae/core/backend_invocations.py", "tests/test_backend_invocations.py"],
-  "files_changed_count": 2,
-  "tests_added_or_updated": "11 new (51 total)",
+  "phase_id": "94E",
+  "phase_name": "Backend Invocation Dry-Run CLI",
+  "files_changed": ["src/pcae/commands/backend.py", "src/pcae/cli.py", "src/pcae/core/backend_invocations.py", "tests/test_backend_cli.py"],
+  "files_changed_count": 4,
+  "tests_added_or_updated": "14 new (65 total backend)",
   "validation_results": [
-    {"name": "Backend model + prompt + output", "result": "51/51", "status": "passed"},
+    {"name": "Backend model + CLI", "result": "65/65", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
@@ -18,5 +18,5 @@
   ],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "94E — Backend Invocation Dry-Run CLI"
+  "recommended_next_phase": "94F — Mock Backend Invocation Prototype"
 }

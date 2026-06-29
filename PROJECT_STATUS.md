@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 94E: Backend Invocation Dry-Run CLI (completed).
+
+Implementation phase. Added pcae backend list/status/plan/show --latest commands.
+All dry-run/read-only: no backend invocation, subprocess, or network. fail-closed
+for unknown backends. JSON output supported. 14 new CLI tests (65 total backend).
+No execution. Delivers docs/PHASE_94_BACKEND_INVOCATION_DRY_RUN_CLI.md.
+
 Phase 94D: Backend Output Artifact Capture (completed).
 
 Implementation phase. Added capture_backend_output_artifact(): redact secrets,

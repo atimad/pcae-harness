@@ -433,8 +433,9 @@ def make_invocation_request(
     **kwargs: Any,
 ) -> InvocationRequest:
     """Create a validated invocation request. Raises ValueError on invalid."""
+    custom_request_id = kwargs.pop("request_id", None)
     req = InvocationRequest(
-        request_id=f"be-{uuid.uuid4().hex[:12]}",
+        request_id=custom_request_id or f"be-{uuid.uuid4().hex[:12]}",
         phase_id=phase_id,
         task_id=task_id,
         backend_id=backend_id,

@@ -438,6 +438,9 @@ from pcae.commands.dry_run import (
 from pcae.commands.enforcement_readiness import run_enforcement_readiness_status
 from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
+from pcae.commands.backend import (
+    run_backend_list, run_backend_status, run_backend_plan, run_backend_show,
+)
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
 from pcae.commands.hooks import run_hooks_install
@@ -4637,6 +4640,29 @@ def build_parser() -> argparse.ArgumentParser:
     sg_audit_verify = sg_audit_sub.add_parser("verify", help="Verify audit record integrity.")
     sg_audit_verify.add_argument("--json", action="store_true")
     sg_audit_verify.set_defaults(handler=run_shell_gate_audit_verify)
+
+    # ── pcae backend (Phase 94E) ──────────────────────────────────────────
+    backend_parser = subparsers.add_parser(
+        "backend",
+        help="Read-only backend invocation dry-run (Phase 94E).",
+    )
+    backend_sub = backend_parser.add_subparsers(dest="backend_command", required=True)
+    be_list = backend_sub.add_parser("list", help="List configured backends.")
+    be_list.add_argument("--json", action="store_true")
+    be_list.set_defaults(handler=run_backend_list)
+    be_status = backend_sub.add_parser("status", help="Show backend invocation status.")
+    be_status.add_argument("--json", action="store_true")
+    be_status.set_defaults(handler=run_backend_status)
+    be_plan = backend_sub.add_parser("plan", help="Dry-run invocation readiness check.")
+    be_plan.add_argument("--backend", required=True, help="Backend ID")
+    be_plan.add_argument("--request-id", help="Request ID")
+    be_plan.add_argument("--phase-id", help="Phase ID")
+    be_plan.add_argument("--json", action="store_true")
+    be_plan.set_defaults(handler=run_backend_plan)
+    be_show = backend_sub.add_parser("show", help="Show latest invocation artifact.")
+    be_show.add_argument("--latest", action="store_true", default=True)
+    be_show.add_argument("--json", action="store_true")
+    be_show.set_defaults(handler=run_backend_show)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
