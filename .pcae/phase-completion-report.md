@@ -1,68 +1,77 @@
-# Phase 94L Completion Report — Backend Apply Readiness Validator
+# Phase 94M Completion Report — Backend Review CLI
 
 - **Status:** completed
-- **Phase:** 94L
+- **Phase:** 94M
 
 ## Implementation Summary
 
-Implemented a backend apply readiness validator that classifies whether an apply plan is ready, incomplete, blocked, or requires human review. The validator evaluates apply plans against review artifacts, approval artifacts, output hash binding, allowed/forbidden files, rollback requirements, tests/check requirements, and hard blocks.
+Phase 94M implements a safe Backend Review CLI exposing the review state model from Phase 94J. Four subcommands added: `show`, `create`, `approve`, `reject`. No apply execution, file mutation, backend invocation, subprocess, network, shell interception, or enforcement was implemented.
 
-## Readiness Assessment Model
+## Commands Delivered
 
-BackendApplyReadinessAssessment (30 fields) with statuses: ready, blocked, missing_evidence, needs_human_review, incomplete, untrusted.
+| Command | Description |
+|---------|-------------|
+| `pcae backend review show --latest` | Display review metadata (no raw content) |
+| `pcae backend review create` | Create review in `review_pending` state |
+| `pcae backend review approve` | Approve review (hash-bound, hard-block checked) |
+| `pcae backend review reject` | Reject review (hash-bound, conflict-guarded) |
 
-## Validation / Fail-Closed Behavior
+## Governance Results
 
-- Missing apply plan → blocked
-- Missing review/approval/trust → missing_evidence
-- Missing operations/rollback/tests → missing_evidence
-- apply_ready=False by default
-
-## Hard-Block Dominance Behavior
-
-Hard blocks cannot be overridden by human approval or accepted risk:
-- Output/approval hash mismatch → hard block
-- Output already applied or not quarantined → hard block
-- Forbidden file or unknown/destructive operation → hard block
-- Trust assessment blocked → hard block
-
-## Hash Binding Validation
-
-Approval must bind to the exact output_hash. Mismatch → hard block.
-
-## Apply-Ready vs Apply-Executed
-
-Even when apply_ready=True, recommended action is manual_apply_package_ready — never execute.
-The validator never applies changes, mutates files, runs tests, commits, or pushes.
-
-## Files Changed
-
-- src/pcae/core/backend_invocations.py — Model + validator + persistence
-- src/pcae/commands/backend.py — CLI runners
-- src/pcae/cli.py — Subcommand registration
-- tests/test_backend_invocations.py — 40 new tests (149 total)
-- .pcae/.gitignore — backend-apply-readiness/ directory
+- Task contract: 20260629-1721-phase-94m-backend-review-cli
+- Enforcement mode: advisory
+- `pcae health`: healthy
+- `pcae check`: passed
+- `pcae push check`: passed
 
 ## Test Results
 
-- Backend model: 137 + 40 = 149 passed
-- CLI: 12 passed
-- Broker: 265 passed
-- Shell-gate: 142 passed
-- Report/notification: 162 passed
-- Fast-green: 3441/3441 passed
-- Health: healthy, Check: passed
+- Backend model tests: 166 passed (17 new)
+- Backend CLI tests: 50 passed (29 new)
+- Permission broker tests: 265 passed
+- Shell gate tests: 142 passed
+- Phase report / notification tests: 162 passed
+- Fast-green suite: 3508/3508 passed
 
-## Commits
+## Security Properties Verified
 
-- e582ca1e — Add backend apply readiness validator
-- 416661c9 — Complete Phase 94L backend apply readiness validator
-- e9d2eb07 — Remove migrated Phase 94K active task file
+- Hard blocks prevent effective approval (cannot be overridden by operator or accepted risk)
+- Output hash binding enforced on approve and reject
+- Review ID binding enforced on approve and reject
+- Approval does not execute apply
+- Approval does not authorize commit or push
+- Output remains quarantined after approval
+- No subprocess.run, no os.system, no network calls, no shell=True in review CLI
+- JSON output contains no secrets
 
-## Confirmation: No Execution
+## No-Go Confirmation
 
-No apply execution, patch parsing, file mutation, backend invocation, subprocess, network, shell interception, wrappers, command mediation, Telegram inbound, remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push authorization, or real AI backend calls were implemented.
+- Apply execution: NOT implemented
+- Patch parsing for mutation: NOT implemented
+- Source file mutation outside .pcae/backend-reviews/: NOT implemented
+- Real backend invocation: NOT implemented
+- Subprocess execution: NOT implemented
+- Network calls: NOT implemented
+- Shell interception or wrappers: NOT implemented
+- Telegram inbound commands: NOT implemented
+- Remote shell or /run: NOT implemented
+- Enforcement: NOT implemented
+- Autonomous mutation: NOT implemented
+- Automatic apply: NOT implemented
+- Commit/push authorization: NOT implemented
+- Real AI backend calls: NOT implemented
 
-## Next Phase
+## Files Changed
 
-94M — Backend Review CLI
+- `src/pcae/core/backend_invocations.py`
+- `src/pcae/commands/backend.py`
+- `src/pcae/cli.py`
+- `tests/test_backend_invocations.py`
+- `tests/test_backend_cli.py`
+- `docs/PHASE_94_BACKEND_REVIEW_CLI.md`
+- `PROJECT_STATUS.md`
+- `CHANGELOG.md`
+
+## Recommended Next Phase
+
+94N — Backend Apply Plan CLI

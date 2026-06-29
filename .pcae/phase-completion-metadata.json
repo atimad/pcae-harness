@@ -1,28 +1,24 @@
 {
-  "phase_id": "94L",
-  "phase_name": "phase_94l_backend_apply_readiness_validator",
-  "phase_title": "Backend Apply Readiness Validator",
+  "phase_id": "94M",
+  "phase_name": "phase_94m_backend_review_cli",
+  "phase_title": "Backend Review CLI",
   "implementation_status": "completed",
-  "completed_at_utc": "2026-06-29T16:55:00Z",
-  "commits": [
-    "e582ca1e63a2fa8888df9984c7f872029800790f",
-    "416661c9ffc0151b6f7f703bc6522096bbe1f082",
-    "e9d2eb07fb6d4b646a41c4bf4db7a3b1f1a3e48f"
-  ],
+  "completed_at_utc": "2026-06-29T18:00:00Z",
+  "commits": [],
   "files_changed": [
     "src/pcae/core/backend_invocations.py",
     "src/pcae/commands/backend.py",
     "src/pcae/cli.py",
     "tests/test_backend_invocations.py",
-    ".pcae/.gitignore",
-    "docs/PHASE_94_BACKEND_APPLY_READINESS_VALIDATOR.md",
+    "tests/test_backend_cli.py",
+    "docs/PHASE_94_BACKEND_REVIEW_CLI.md",
     "PROJECT_STATUS.md",
-    "CHANGELOG.md",
-    "tasks/DONE.md"
+    "CHANGELOG.md"
   ],
-  "tests_added": 40,
-  "total_backend_tests": 149,
-  "fast_green": "3441/3441",
+  "tests_added": 46,
+  "total_backend_model_tests": 166,
+  "total_backend_cli_tests": 50,
+  "fast_green": "3508/3508",
   "regressions": {
     "broker": "265/265",
     "shell_gate": "142/142",
@@ -30,5 +26,21 @@
   },
   "health": "healthy",
   "check": "passed",
-  "recommended_next_phase": "94M — Backend Review CLI"
+  "recommended_next_phase": "94N — Backend Apply Plan CLI",
+  "no_go_confirmed": {
+    "apply_execution": false,
+    "patch_parsing": false,
+    "source_file_mutation": false,
+    "real_backend_invocation": false,
+    "subprocess_execution": false,
+    "network_calls": false,
+    "shell_interception": false,
+    "telegram_inbound": false,
+    "remote_shell": false,
+    "enforcement": false,
+    "autonomous_mutation": false,
+    "automatic_apply": false,
+    "commit_push_authorization": false,
+    "real_ai_backend_calls": false
+  }
 }

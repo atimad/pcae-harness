@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 94M: Backend Review CLI (completed).
+
+Implementation phase. Added `pcae backend review show/create/approve/reject` CLI
+commands exposing the review state model from 94J. Hash binding on all operations.
+Hard-block dominance: hard blocks prevent approval regardless of operator or accepted
+risk. Approved-for-apply does not execute apply, mutate files, or authorize commit/push.
+Output remains quarantined. 17 new model tests, 29 new CLI tests (216 total, 50 CLI).
+Delivers docs/PHASE_94_BACKEND_REVIEW_CLI.md.
+
 Phase 94L: Backend Apply Readiness Validator (completed).
 
 Implementation phase. Added BackendApplyReadinessAssessment (30 fields),

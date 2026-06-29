@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Completed Phase 94M Backend Review CLI: pcae backend review show/create/approve/reject commands.
+- Hash binding enforced on all approve/reject operations; mismatch → immediate hard-block error.
+- Hard-block dominance: approved_for_apply cannot be set when hard_blocks is non-empty; accepted risk cannot override.
+- Approval does not execute apply, mutate source files, or authorize commit/push; output remains quarantined.
+- RejectionArtifact.to_dict() and validate() added; persist_approval() and persist_rejection() persistence functions added.
+- 17 new backend model tests (166 total), 29 new backend CLI tests (50 total), fast-green 3508/3508.
+- Delivers docs/PHASE_94_BACKEND_REVIEW_CLI.md.
+- Transitioned active task from Phase 94L — Backend Apply Readiness Validator to Phase 94M — Backend Review CLI; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 94K — Backend Apply Plan Model to Phase 94L — Backend Apply Readiness Validator; session refreshed and governance continuity revalidated.
 - Completed Phase 92D.8 canonical final report artifact contract: .pcae/phase-completion-report.md as authoritative source.
 - Canonical report loaded, validated, used for latest.md and Telegram. Validation failure downgrades trust. 7 new tests (133 total).
