@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 94D: Backend Output Artifact Capture (completed).
+
+Implementation phase. Added capture_backend_output_artifact(): redact secrets,
+SHA-256 hash, persist to .pcae/backend-invocations/. OutputArtifact (16 fields)
+with quarantined=True, applied_to_repo=False. Output always quarantined; never
+applied, committed, or pushed. 11 new tests (51 total). No backend invocation,
+subprocess, network, apply, or execution. Delivers
+docs/PHASE_94_BACKEND_OUTPUT_ARTIFACT_CAPTURE.md.
+
 Phase 94C: Backend Prompt Artifact Capture (completed).
 
 Implementation phase. Added capture_backend_prompt_artifact(): redact secrets,

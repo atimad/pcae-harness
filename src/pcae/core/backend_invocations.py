@@ -635,3 +635,143 @@ def read_latest_prompt(invocation_dir: str | None = None) -> dict | None:
         return _json.loads(latest.read_text())
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94D — Output artifact capture
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class OutputArtifact:
+    """A captured, redacted, quarantined backend output artifact."""
+
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    output_hash: str = ""
+    output_artifact_path: str = ""
+    output_preview: str = ""
+    output_size_bytes: int = 0
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    created_at_utc: str = ""
+    redaction_applied: bool = False
+    quarantined: bool = True
+    applied_to_repo: bool = False
+    schema_version: str = SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "request_id": self.request_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "backend_id": self.backend_id,
+            "output_hash": self.output_hash,
+            "output_artifact_path": self.output_artifact_path,
+            "output_preview": self.output_preview,
+            "output_size_bytes": self.output_size_bytes,
+            "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "created_at_utc": self.created_at_utc,
+            "redaction_applied": self.redaction_applied,
+            "quarantined": self.quarantined,
+            "applied_to_repo": self.applied_to_repo,
+            "schema_version": self.schema_version,
+        }
+
+
+def capture_backend_output_artifact(
+    request: InvocationRequest,
+    output_text: str,
+    *,
+    invocation_dir: str | None = None,
+) -> dict[str, Any]:
+    """Capture a backend output artifact.
+
+    Redacts secrets, computes SHA-256 hash, writes timestamped artifact
+    and updates latest-output.md + latest.json.  Output is ALWAYS
+    quarantined (quarantined=True, applied_to_repo=False).
+
+    Never invokes a backend, never runs subprocess, never calls network.
+    Never applies output to source files, commits, or pushes.
+    """
+    import hashlib
+    import json as _json
+    import os
+    from datetime import datetime, timezone
+    from pathlib import Path as _Path
+
+    dir_path = _Path(invocation_dir) if invocation_dir else _ensure_invocation_dir()
+    now = datetime.now(timezone.utc)
+    ts = now.strftime("%Y%m%d-%H%M%S")
+
+    # 1. Redact and hash
+    redacted_text, redaction_applied = _redact_prompt_text(output_text)
+    output_hash = hashlib.sha256(output_text.encode()).hexdigest()
+    output_size = len(redacted_text.encode())
+
+    # 2. Write timestamped output
+    output_filename = f"{ts}-{request.request_id}-output.md"
+    output_path = dir_path / output_filename
+    output_path.write_text(redacted_text)
+
+    # 3. Build artifact metadata
+    artifact = OutputArtifact(
+        request_id=request.request_id,
+        phase_id=request.phase_id,
+        task_id=request.task_id,
+        backend_id=request.backend_id,
+        output_hash=output_hash,
+        output_artifact_path=str(output_path),
+        output_preview=redacted_text[:200] if len(redacted_text) > 200 else redacted_text,
+        output_size_bytes=output_size,
+        prompt_hash=request.prompt_hash,
+        prompt_artifact_path=request.prompt_artifact_path,
+        created_at_utc=now.isoformat(),
+        redaction_applied=redaction_applied,
+        quarantined=True,
+        applied_to_repo=False,
+    )
+
+    # 4. Write metadata JSON
+    meta_filename = f"{ts}-{request.request_id}.json"
+    meta_path = dir_path / meta_filename
+    meta_path.write_text(_json.dumps(artifact.to_dict(), indent=2, sort_keys=True))
+
+    # 5. Update latest pointers
+    latest_output = dir_path / "latest-output.md"
+    latest_json = dir_path / "latest.json"
+    latest_output.write_text(redacted_text)
+    latest_tmp = dir_path / ".latest.tmp"
+    latest_tmp.write_text(_json.dumps(artifact.to_dict(), indent=2, sort_keys=True))
+    os.replace(str(latest_tmp), str(latest_json))
+
+    return {
+        "status": "captured",
+        "request_id": request.request_id,
+        "output_hash": output_hash,
+        "output_path": str(output_path),
+        "latest_output_path": str(latest_output),
+        "latest_meta_path": str(latest_json),
+        "redaction_applied": redaction_applied,
+        "output_size_bytes": output_size,
+        "quarantined": True,
+        "applied_to_repo": False,
+        "artifact": artifact,
+    }
+
+
+def read_latest_output(invocation_dir: str | None = None) -> dict | None:
+    """Read the latest output artifact metadata. Returns None if absent."""
+    import json as _json
+    from pathlib import Path as _Path
+    dir_path = _Path(invocation_dir) if invocation_dir else _Path(_BACKEND_INVOCATION_DIR)
+    latest = dir_path / "latest.json"
+    if not latest.exists():
+        return None
+    try:
+        return _json.loads(latest.read_text())
+    except Exception:
+        return None

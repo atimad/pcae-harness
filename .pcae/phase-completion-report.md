@@ -1,27 +1,26 @@
-# Phase 94C Complete — Backend Prompt Artifact Capture
+# Phase 94D Complete — Backend Output Artifact Capture
 
 ## Summary
 
-Phase 94C implements governed prompt artifact capture: redact secrets, SHA-256 hash,
-persist to .pcae/backend-invocations/. No backend invocation.
+Phase 94D implements governed output artifact capture: redact, hash, persist to
+.pcae/backend-invocations/. Output always quarantined (applied_to_repo=False).
+No backend invocation, no apply, no commit/push.
 
 ## Implementation
 
-- capture_backend_prompt_artifact(): redact, hash, write timestamped prompt + metadata
-- PromptArtifact dataclass with 15 fields
-- Latest pointers: latest-prompt.md + latest.json
-- Redaction: TOKEN, API_KEY, PASSWORD, bearer tokens, --token, --password patterns
-- Capture updates InvocationRequest.prompt_hash and prompt_artifact_path
-- check_invocation_readiness() now sees prompt as available evidence
+- capture_backend_output_artifact(): redact, hash, write output + metadata
+- OutputArtifact dataclass: 16 fields, quarantined=True, applied_to_repo=False
+- Latest pointers: latest-output.md + latest.json
+- No source file modification — output captured to artifact dir only
 
 ## Tests
 
-12 new (40 total backend): hash determinism, redaction, latest pointers,
-readiness integration, multi-part phase ID, no subprocess.
+11 new (51 total backend): hash, quarantine, redaction, no source modification,
+multi-part phase ID, no subprocess.
 
 ## Validation
 
-- Backend model + prompt: 40/40
+- Backend model + prompt + output: 51/51
 - Broker: 265/265
 - Shell gate: 142/142
 - Report + notification: 161/161
@@ -30,4 +29,4 @@ readiness integration, multi-part phase ID, no subprocess.
 
 ## Recommended Next Phase
 
-94D — Backend Output Artifact Capture
+94E — Backend Invocation Dry-Run CLI

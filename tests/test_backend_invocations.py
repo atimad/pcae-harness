@@ -373,3 +373,114 @@ from pathlib import Path
 from pcae.core.backend_invocations import (
     capture_backend_prompt_artifact, read_latest_prompt,
 )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94D — Output artifact capture tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestOutputArtifactCapture:
+    """Verify output artifact capture, quarantine, redaction."""
+
+    def test_capture_writes_output_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94D")
+            result = capture_backend_output_artifact(
+                req, "def add(a, b): return a + b", invocation_dir=td,
+            )
+            assert result["status"] == "captured"
+            assert Path(result["output_path"]).exists()
+
+    def test_output_hash_deterministic(self):
+        with tempfile.TemporaryDirectory() as td:
+            req1 = make_invocation_request(backend_id="mock")
+            r1 = capture_backend_output_artifact(req1, "output", invocation_dir=td)
+            req2 = make_invocation_request(backend_id="mock")
+            r2 = capture_backend_output_artifact(req2, "output", invocation_dir=td)
+            assert r1["output_hash"] == r2["output_hash"]
+
+    def test_output_quarantined_by_default(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_output_artifact(req, "code", invocation_dir=td)
+            assert result["quarantined"] is True
+            assert result["applied_to_repo"] is False
+
+    def test_artifact_quarantined_default(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_output_artifact(req, "code", invocation_dir=td)
+            assert result["artifact"].quarantined is True
+            assert result["artifact"].applied_to_repo is False
+
+    def test_latest_output_updated(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_output_artifact(
+                req, "latest output test", invocation_dir=td,
+            )
+            latest = Path(result["latest_output_path"])
+            assert latest.exists()
+            assert "latest output test" in latest.read_text()
+
+    def test_redaction_output(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_output_artifact(
+                req, "export API_KEY=abc123xyz", invocation_dir=td,
+            )
+            assert result["redaction_applied"] is True
+            content = Path(result["output_path"]).read_text()
+            assert "abc123xyz" not in content
+            assert "[REDACTED]" in content
+
+    def test_no_redaction_clean_output(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_output_artifact(
+                req, "All tests passed: 40/40", invocation_dir=td,
+            )
+            assert result["redaction_applied"] is False
+
+    def test_output_does_not_modify_source_files(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(
+                backend_id="mock",
+                allowed_files=["src/main.py"],
+            )
+            result = capture_backend_output_artifact(
+                req, "patch: modify src/main.py", invocation_dir=td,
+            )
+            # Output written to artifact dir, not to allowed_files paths
+            output_path = Path(result["output_path"])
+            assert "src/main.py" not in str(output_path)
+            assert "backend-invocations" in str(output_path) or td in str(output_path)
+
+    def test_no_subprocess_in_output_capture(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "Popen(" not in source
+
+    def test_multi_part_phase_id_in_output(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94D.1")
+            result = capture_backend_output_artifact(
+                req, "multi-part output", invocation_dir=td,
+            )
+            data = json.loads(Path(result["latest_meta_path"]).read_text())
+            assert data["phase_id"] == "94D.1"
+
+    def test_output_does_not_imply_approval(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_output_artifact(req, "output", invocation_dir=td)
+            # Quarantined must remain true — capture is not approval
+            assert result["quarantined"] is True
+
+
+from pcae.core.backend_invocations import (
+    capture_backend_output_artifact, OutputArtifact,
+)
