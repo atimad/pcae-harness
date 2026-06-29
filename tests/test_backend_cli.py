@@ -1241,3 +1241,192 @@ class TestHardeningNoSubprocess:
         from pcae.commands import backend
         source = inspect.getsource(backend)
         assert "getUpdates" not in source
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Q — Backend lifecycle demo CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import json as _json_94q
+import subprocess as _sub_94q
+import sys as _sys_94q
+import tempfile as _tempfile_94q
+from pathlib import Path as _Path_94q
+
+# Use a temp directory for isolation to avoid contaminating REPO_ROOT .pcae/
+# state with demo artifacts that interfere with earlier test classes.
+_ISOLATED_DIR_94Q = _Path_94q(_tempfile_94q.mkdtemp(prefix="pcae-94q-"))
+
+
+def _run_94q(subcmd: list[str]) -> _sub_94q.CompletedProcess:
+    return _sub_94q.run(
+        [_sys_94q.executable, "-m", "pcae", "backend", "demo"] + subcmd,
+        capture_output=True, text=True, cwd=_ISOLATED_DIR_94Q, timeout=15,
+    )
+
+
+def _json_94q_cmd(subcmd: list[str]) -> tuple[dict, int]:
+    r = _run_94q(subcmd + ["--json"])
+    try:
+        return _json_94q.loads(r.stdout), r.returncode
+    except Exception:
+        return {"raw": r.stdout, "stderr": r.stderr}, r.returncode
+
+
+class Test94QDemoCLIHappyPath:
+    """Happy path: pcae backend demo mock-lifecycle."""
+
+    def test_mock_lifecycle_text_output(self):
+        r = _run_94q(["mock-lifecycle"])
+        assert r.returncode == 0
+        assert "Mock lifecycle demo" in r.stdout
+        assert "No real backend invoked" in r.stdout
+        assert "No files modified" in r.stdout
+        assert "No apply executed" in r.stdout
+        assert "Output remains quarantined" in r.stdout
+
+    def test_mock_lifecycle_json_output(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle"])
+        assert rc == 0
+        assert "demo" in data
+        assert "steps" in data
+        assert data["no_real_backend_invoked"] is True
+        assert data["no_apply_execution"] is True
+        assert data["no_file_mutation"] is True
+
+    def test_mock_lifecycle_json_demo_has_ids(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle"])
+        assert rc == 0
+        d = data["demo"]
+        assert d["demo_id"].startswith("demo-")
+        assert d["request_id"].startswith("be-")
+        assert d["audit_id"].startswith("ba-")
+        assert d["review_id"].startswith("rv-")
+        assert d["approval_id"].startswith("ap-")
+        assert d["apply_plan_id"].startswith("pl-")
+        assert d["apply_readiness_assessment_id"].startswith("ra-")
+
+    def test_mock_lifecycle_json_steps_all_present(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle"])
+        assert rc == 0
+        steps = data["steps"]
+        for key in ["plan", "mock_invocation", "audit", "trust", "review",
+                     "approval", "apply_plan", "apply_readiness"]:
+            assert key in steps, f"Missing step: {key}"
+
+
+class Test94QDemoCLINegativePath:
+    """Negative path: pcae backend demo mock-lifecycle --negative."""
+
+    def test_negative_text_output(self):
+        r = _run_94q(["mock-lifecycle", "--negative"])
+        assert r.returncode == 0
+        assert "blocked" in r.stdout.lower()
+        assert "Negative path exercised" in r.stdout
+        assert "No real backend invoked" in r.stdout
+
+    def test_negative_text_has_rejection(self):
+        r = _run_94q(["mock-lifecycle", "--negative"])
+        assert r.returncode == 0
+        assert "Rejection ID" in r.stdout
+
+    def test_negative_json_blocked_status(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle", "--negative"])
+        assert rc == 0
+        assert data["demo"]["lifecycle_status"] == "blocked"
+
+    def test_negative_json_has_hard_blocks(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle", "--negative"])
+        assert rc == 0
+        assert len(data["demo"]["hard_blocks"]) > 0
+
+    def test_negative_json_no_approval(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle", "--negative"])
+        assert rc == 0
+        assert data["demo"]["approval_id"] == ""
+
+
+class Test94QDemoCLIShow:
+    """pcae backend demo show --latest."""
+
+    def test_show_text_after_mock_lifecycle(self):
+        _run_94q(["mock-lifecycle"])
+        r = _run_94q(["show", "--latest"])
+        assert r.returncode == 0
+        assert "Latest lifecycle demo" in r.stdout
+        assert "Output remains quarantined" in r.stdout
+
+    def test_show_json_after_mock_lifecycle(self):
+        _run_94q(["mock-lifecycle"])
+        data, rc = _json_94q_cmd(["show", "--latest"])
+        assert rc == 0
+        assert "demo_id" in data
+        assert data["no_real_backend_invoked"] is True
+
+    def test_show_missing_demo_text(self):
+        r = _sub_94q.run(
+            [_sys_94q.executable, "-m", "pcae", "backend", "demo", "show", "--latest"],
+            capture_output=True, text=True,
+            cwd=_Path_94q(_tempfile_94q.mkdtemp()), timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_show_missing_demo_json(self):
+        r = _sub_94q.run(
+            [_sys_94q.executable, "-m", "pcae", "backend", "demo", "show",
+             "--latest", "--json"],
+            capture_output=True, text=True,
+            cwd=_Path_94q(_tempfile_94q.mkdtemp()), timeout=15,
+        )
+        assert r.returncode != 0
+        data = _json_94q.loads(r.stdout)
+        assert "error" in data
+
+
+class Test94QDemoCLISafety:
+    """Safety guarantees in CLI output."""
+
+    def test_json_no_secrets(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle"])
+        assert rc == 0
+        j = _json_94q.dumps(data)
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_json_no_raw_prompt_content(self):
+        data, rc = _json_94q_cmd(["mock-lifecycle"])
+        assert rc == 0
+        j = _json_94q.dumps(data)
+        assert "deterministic mock prompt" not in j.lower()
+
+    def test_text_no_secrets(self):
+        r = _run_94q(["mock-lifecycle"])
+        assert r.returncode == 0
+        assert "sk-ant" not in r.stdout.lower()
+        assert "api_key" not in r.stdout.lower()
+
+    def test_no_subprocess_in_backend_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "subprocess.run" not in source
+        assert "Popen(" not in source
+
+    def test_no_network_in_backend_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_telegram_inbound_in_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "getUpdates" not in source
+
+    def test_gitignore_has_lifecycle_demos_dir(self):
+        from pathlib import Path as _P
+        gitignore = _P(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
+        content = gitignore.read_text()
+        assert "backend-lifecycle-demos/" in content

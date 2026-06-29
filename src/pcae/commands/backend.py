@@ -13,8 +13,14 @@ from pcae.core.backend_invocations import (
     check_invocation_readiness,
     read_latest_prompt,
     read_latest_output,
+    run_mock_lifecycle_demo,
+    persist_lifecycle_demo,
+    read_latest_lifecycle_demo,
     INVOCATION_MODE_DRY_RUN,
     APPROVAL_PENDING,
+    DEMO_COMPLETED,
+    DEMO_BLOCKED,
+    DEMO_PARTIAL,
 )
 
 
@@ -1268,4 +1274,125 @@ def run_backend_manual_apply_package_create(args: argparse.Namespace) -> int:
         print("  ⚠️  Manual apply instructions are advisory — human action required.")
     return 0
 
-    return 0 if assessment.apply_ready else 1
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Q — Backend lifecycle demo CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_demo_mock_lifecycle(args: argparse.Namespace) -> int:
+    """pcae backend demo mock-lifecycle [--json] [--negative]
+
+    Runs a complete end-to-end mock backend lifecycle demo.
+    Uses mock backend only. No real backend invocation.
+    No apply execution. No file mutation. No subprocess. No network.
+    """
+    negative: bool = getattr(args, "negative", False) or False
+    phase_id: str = getattr(args, "phase_id", "94Q") or "94Q"
+    task_id: str = getattr(args, "task_id", "") or ""
+
+    demo, steps = run_mock_lifecycle_demo(
+        phase_id=phase_id,
+        task_id=task_id,
+        forbidden_path_check=negative,
+    )
+
+    persist_result = persist_lifecycle_demo(demo)
+
+    if args.json:
+        print(json.dumps({
+            "demo": demo.to_dict(),
+            "steps": {k: v for k, v in steps.items() if k != "demo"},
+            "persistence": persist_result,
+            "no_real_backend_invoked": True,
+            "no_apply_execution": True,
+            "no_file_mutation": True,
+            "no_subprocess": True,
+            "no_network": True,
+            "no_shell_interception": True,
+        }, indent=2))
+    else:
+        print(f"Mock lifecycle demo — {demo.lifecycle_status}")
+        print(f"  Demo ID:            {demo.demo_id}")
+        print(f"  Phase ID:           {demo.phase_id}")
+        print(f"  Backend:            {demo.backend_id}")
+        print(f"  Request ID:         {demo.request_id}")
+        print(f"  Prompt hash:        {demo.prompt_hash[:16]}...")
+        print(f"  Output hash:        {demo.output_hash[:16]}...")
+        print(f"  Audit ID:           {demo.audit_id}")
+        print(f"  Trust assessment:   {demo.trust_assessment_id}")
+        print(f"  Review ID:          {demo.review_id}")
+        if demo.approval_id:
+            print(f"  Approval ID:        {demo.approval_id}")
+        if demo.rejection_id:
+            print(f"  Rejection ID:       {demo.rejection_id}")
+        print(f"  Apply plan ID:      {demo.apply_plan_id}")
+        print(f"  Readiness assess:   {demo.apply_readiness_assessment_id}")
+        print(f"  Lifecycle status:   {demo.lifecycle_status}")
+        if demo.hard_blocks:
+            print(f"  Hard blocks:        {', '.join(demo.hard_blocks)}")
+        if demo.missing_evidence:
+            print(f"  Missing evidence:   {', '.join(demo.missing_evidence)}")
+        if demo.warnings:
+            print(f"  Warnings:           {', '.join(demo.warnings)}")
+        if persist_result.get("status") == "written":
+            print(f"  Artifact:           {persist_result.get('path', '')}")
+        print()
+        print("  Mock lifecycle demo completed.")
+        print("  No real backend invoked.")
+        print("  No files modified.")
+        print("  No apply executed.")
+        print("  Output remains quarantined.")
+        if negative:
+            print("  ⚠️  Negative path exercised — expected hard blocks present.")
+    return 0
+
+
+def run_backend_demo_show(args: argparse.Namespace) -> int:
+    """pcae backend demo show --latest [--json]
+
+    Shows the latest lifecycle demo summary. Read-only.
+    """
+    demo = read_latest_lifecycle_demo()
+
+    if demo is None:
+        msg = "No lifecycle demo found. Run 'pcae backend demo mock-lifecycle' first."
+        if args.json:
+            print(json.dumps({"error": msg}))
+        else:
+            print(f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps(demo.to_dict(), indent=2))
+    else:
+        print(f"Latest lifecycle demo — {demo.lifecycle_status}")
+        print(f"  Demo ID:            {demo.demo_id}")
+        print(f"  Phase ID:           {demo.phase_id}")
+        print(f"  Backend:            {demo.backend_id}")
+        print(f"  Request ID:         {demo.request_id}")
+        print(f"  Prompt hash:        {demo.prompt_hash[:16]}...")
+        print(f"  Output hash:        {demo.output_hash[:16]}...")
+        print(f"  Audit ID:           {demo.audit_id}")
+        print(f"  Trust assessment:   {demo.trust_assessment_id}")
+        print(f"  Review ID:          {demo.review_id}")
+        if demo.approval_id:
+            print(f"  Approval ID:        {demo.approval_id}")
+        if demo.rejection_id:
+            print(f"  Rejection ID:       {demo.rejection_id}")
+        print(f"  Apply plan ID:      {demo.apply_plan_id}")
+        print(f"  Readiness assess:   {demo.apply_readiness_assessment_id}")
+        print(f"  Lifecycle status:   {demo.lifecycle_status}")
+        if demo.hard_blocks:
+            print(f"  Hard blocks:        {', '.join(demo.hard_blocks)}")
+        if demo.missing_evidence:
+            print(f"  Missing evidence:   {', '.join(demo.missing_evidence)}")
+        if demo.warnings:
+            print(f"  Warnings:           {', '.join(demo.warnings)}")
+        print(f"  No real backend:    {demo.no_real_backend_invoked}")
+        print(f"  No apply:           {demo.no_apply_execution}")
+        print(f"  No file mutation:   {demo.no_file_mutation}")
+        print(f"  Created:            {demo.created_at_utc}")
+        print()
+        print("  Output remains quarantined. No files modified.")
+    return 0

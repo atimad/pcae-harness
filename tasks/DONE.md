@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 94Q — Backend Lifecycle End-to-End Mock Demo (20260629-1832-phase-94p-backend-apply-governance-hardening)
+- Phase 94P — Backend Apply Governance Hardening (20260629-1832-phase-94p-backend-apply-governance-hardening)
 - Phase 94O — Backend Manual Apply Package (20260629-1755-phase-94o-backend-manual-apply-package)
 - Phase 94N — Backend Apply Plan CLI (20260629-1741-phase-94n-backend-apply-plan-cli)
 - Phase 94M — Backend Review CLI (20260629-1721-phase-94m-backend-review-cli)

@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94P — Backend Apply Governance Hardening to Phase 94Q — Backend Lifecycle End-to-End Mock Demo; session refreshed and governance continuity revalidated.
+- Completed Phase 94Q Backend Lifecycle End-to-End Mock Demo: BackendLifecycleDemo model (28 fields), run_mock_lifecycle_demo() exercising full lifecycle, pcae backend demo mock-lifecycle/show CLI.
+- Exercises 10-step governed backend lifecycle: plan → prompt capture → mock output → audit → trust → review → approval/rejection → apply plan → apply readiness → demo summary.
+- Negative path support (--negative): forbidden path produces blocked lifecycle with rejection; approval blocked by hard blocks.
+- Persistence under .pcae/backend-lifecycle-demos/ (gitignored); atomic latest.json updates.
+- 41 new backend model tests (370 total), 20 new backend CLI tests (169 total).
+- All safety invariants preserved: no real backend invocation, no apply execution, no file mutation, no subprocess, no network, no shell interception.
+- Delivers docs/PHASE_94_BACKEND_LIFECYCLE_END_TO_END_MOCK_DEMO.md.
+- Fixed dead code in backend.py (unreachable return after return).
 - Completed Phase 94P Backend Apply Governance Hardening: validate_operation_path(), validate_operations_list(), validate_hash_chain(), validate_artifact_freshness(), read_artifact_json_safe(), ApplyOperation.path_hard_blocks().
 - Strengthened approve_review() to reject already-rejected reviews.
 - Hardened create_apply_plan() with path safety (absolute, traversal) and duplicate/conflict operation detection.

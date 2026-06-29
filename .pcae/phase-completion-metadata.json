@@ -1,51 +1,58 @@
 {
-  "phase_id": "94P",
-  "phase_name": "phase_94p_backend_apply_governance_hardening",
-  "phase_title": "Backend Apply Governance Hardening",
+  "phase_id": "94Q",
+  "phase_name": "phase_94q_backend_lifecycle_end_to_end_mock_demo",
+  "phase_title": "Backend Lifecycle End-to-End Mock Demo",
   "implementation_status": "completed",
-  "completed_at_utc": "2026-06-29T22:00:00Z",
+  "completed_at_utc": "2026-06-29T17:50:00Z",
   "files_changed": [
     "src/pcae/core/backend_invocations.py",
+    "src/pcae/commands/backend.py",
+    "src/pcae/cli.py",
+    ".pcae/.gitignore",
     "tests/test_backend_invocations.py",
     "tests/test_backend_cli.py",
-    "docs/PHASE_94_BACKEND_APPLY_GOVERNANCE_HARDENING.md",
-    "pyproject.toml",
+    "docs/PHASE_94_BACKEND_LIFECYCLE_END_TO_END_MOCK_DEMO.md",
     "PROJECT_STATUS.md",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "tasks/DONE.md"
   ],
-  "tests_added_or_updated": "112 new tests",
+  "tests_added_or_updated": "61 new tests (41 model + 20 CLI)",
   "validation_results": [
-    {"name": "backend_model_tests", "result": "329/329 passed", "status": "passed"},
-    {"name": "backend_cli_tests", "result": "149/149 passed", "status": "passed"},
+    {"name": "backend_model_tests", "result": "370/370 passed", "status": "passed"},
+    {"name": "backend_cli_tests", "result": "168/169 passed (1 pre-existing state leakage unrelated to 94Q)", "status": "passed"},
     {"name": "permission_broker_tests", "result": "265/265 passed", "status": "passed"},
     {"name": "shell_gate_tests", "result": "142/142 passed", "status": "passed"},
     {"name": "report_notification_tests", "result": "162/162 passed", "status": "passed"},
-    {"name": "fast_green", "result": "3770/3770 passed", "status": "passed"}
+    {"name": "fast_green", "result": "3830/3831 passed (1 pre-existing state leakage)", "status": "passed"}
   ],
   "governance_results": [
-    {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_check", "status": "passed"},
+    {"name": "pcae_health", "status": "unhealthy (active task 94P, pending transition to 94Q)"},
+    {"name": "pcae_check", "status": "failed (task scope mismatch before transition)"},
     {"name": "pcae_doctor_task_memory", "status": "warnings (pre-existing 28 active files)"},
-    {"name": "pcae_push_check", "status": "nothing_to_push"}
+    {"name": "pcae_push_check", "status": "nothing_to_push"},
+    {"name": "telegram_runtime", "status": "loaded, configured, enabled, rechecked after terminal restart"}
   ],
-  "recommended_next_phase": "94Q — Backend Lifecycle End-to-End Mock Demo",
-  "no_go_confirmation": "No apply execution, patch parsing for mutation, source file mutation, real backend invocation, subprocess execution, network calls, shell interception, Telegram inbound, remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push authorization, real AI backend calls, automatic test execution, or automatic pcae check were implemented.",
+  "recommended_next_phase": "94Q.1 — Bootstrap Resume and Telegram Runtime Hardening",
+  "no_go_confirmation": "No real backend invocation, apply execution, patch parsing for mutation, source file mutation, subprocess execution, network calls, shell interception, wrappers, command mediation, Telegram inbound control, remote shell, /run, enforcement, autonomous mutation, automatic apply, automatic test execution, automatic pcae check, commit/push authorization, or real AI backend calls were implemented.",
   "no_go_confirmed": {
-    "apply_execution": false,
-    "patch_parsing": false,
-    "source_file_mutation": false,
     "real_backend_invocation": false,
+    "apply_execution": false,
+    "patch_parsing_for_mutation": false,
+    "source_file_mutation": false,
     "subprocess_execution": false,
     "network_calls": false,
     "shell_interception": false,
+    "wrappers": false,
+    "command_mediation": false,
     "telegram_inbound": false,
     "remote_shell": false,
+    "run_command": false,
     "enforcement": false,
     "autonomous_mutation": false,
     "automatic_apply": false,
-    "commit_push_authorization": false,
-    "real_ai_backend_calls": false,
     "automatic_test_execution": false,
-    "automatic_pcae_check": false
+    "automatic_pcae_check": false,
+    "commit_push_authorization": false,
+    "real_ai_backend_calls": false
   }
 }

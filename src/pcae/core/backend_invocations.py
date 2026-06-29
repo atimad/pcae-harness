@@ -2834,3 +2834,463 @@ def read_artifact_json_safe(path: "_PathType | str") -> "dict[str, Any] | None":
         return data if isinstance(data, dict) else None
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Q — Backend lifecycle end-to-end mock demo
+# ═══════════════════════════════════════════════════════════════════════════
+
+_LIFECYCLE_DEMOS_DIR = ".pcae/backend-lifecycle-demos"
+_LIFECYCLE_DEMO_SCHEMA_VERSION = "1.0"
+
+# ── Demo lifecycle statuses ──────────────────────────────────────────────
+
+DEMO_COMPLETED = "completed"
+DEMO_BLOCKED = "blocked"
+DEMO_PARTIAL = "partial"
+DEMO_FAILED = "failed"
+
+VALID_DEMO_STATUSES: frozenset[str] = frozenset({
+    DEMO_COMPLETED, DEMO_BLOCKED, DEMO_PARTIAL, DEMO_FAILED,
+})
+
+
+@dataclass
+class BackendLifecycleDemo:
+    """End-to-end mock lifecycle demo summary artifact.
+
+    Exercises the full governed backend flow — plan, prompt capture,
+    mock output capture, audit, trust/readiness, review, approval,
+    apply plan, apply readiness — without real backend invocation,
+    without apply execution, without file mutation.
+
+    All safety invariants are preserved:
+    - no_real_backend_invoked = True
+    - no_apply_execution = True
+    - no_file_mutation = True
+    - no_subprocess = True
+    - no_network = True
+    - no_shell_interception = True
+    - output remains quarantined
+    """
+
+    demo_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    request_id: str = ""
+    prompt_artifact_path: str = ""
+    prompt_hash: str = ""
+    output_artifact_path: str = ""
+    output_hash: str = ""
+    audit_id: str = ""
+    trust_assessment_id: str = ""
+    review_id: str = ""
+    approval_id: str = ""
+    rejection_id: str = ""
+    apply_plan_id: str = ""
+    apply_readiness_assessment_id: str = ""
+    lifecycle_status: str = DEMO_PARTIAL
+    hard_blocks: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    no_real_backend_invoked: bool = True
+    no_apply_execution: bool = True
+    no_file_mutation: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_shell_interception: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _LIFECYCLE_DEMO_SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if not self.demo_id:
+            issues.append("demo_id is required")
+        if self.lifecycle_status not in VALID_DEMO_STATUSES:
+            issues.append(f"invalid lifecycle_status: {self.lifecycle_status!r}")
+        if not self.no_real_backend_invoked:
+            issues.append("no_real_backend_invoked must be True")
+        if not self.no_apply_execution:
+            issues.append("no_apply_execution must be True")
+        if not self.no_file_mutation:
+            issues.append("no_file_mutation must be True")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "demo_id": self.demo_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "backend_id": self.backend_id,
+            "request_id": self.request_id,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "prompt_hash": self.prompt_hash,
+            "output_artifact_path": self.output_artifact_path,
+            "output_hash": self.output_hash,
+            "audit_id": self.audit_id,
+            "trust_assessment_id": self.trust_assessment_id,
+            "review_id": self.review_id,
+            "approval_id": self.approval_id,
+            "rejection_id": self.rejection_id,
+            "apply_plan_id": self.apply_plan_id,
+            "apply_readiness_assessment_id": self.apply_readiness_assessment_id,
+            "lifecycle_status": self.lifecycle_status,
+            "hard_blocks": list(self.hard_blocks),
+            "missing_evidence": list(self.missing_evidence),
+            "warnings": list(self.warnings),
+            "no_real_backend_invoked": self.no_real_backend_invoked,
+            "no_apply_execution": self.no_apply_execution,
+            "no_file_mutation": self.no_file_mutation,
+            "no_subprocess": self.no_subprocess,
+            "no_network": self.no_network,
+            "no_shell_interception": self.no_shell_interception,
+            "created_at_utc": self.created_at_utc,
+            "schema_version": self.schema_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendLifecycleDemo":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+def _lifecycle_demos_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_LIFECYCLE_DEMOS_DIR)
+
+
+def run_mock_lifecycle_demo(
+    *,
+    phase_id: str = "94Q",
+    task_id: str = "",
+    backend_id: str = "mock",
+    prompt_text: str = "",
+    forbidden_path_check: bool = False,
+    **kwargs: Any,
+) -> tuple["BackendLifecycleDemo", dict[str, Any]]:
+    """Run a complete end-to-end mock backend lifecycle demo.
+
+    Exercises the full governed backend flow in sequence:
+    1. backend plan (InvocationRequest + readiness check)
+    2. prompt artifact capture
+    3. mock backend output capture
+    4. backend invocation audit
+    5. trust/readiness assessment
+    6. review artifact creation
+    7. approval artifact creation
+    8. apply plan creation
+    9. apply readiness validation
+    10. demo summary artifact
+
+    All steps use mock backend only. No real backend invocation.
+    No apply execution. No file mutation. No subprocess. No network.
+    No shell interception.
+
+    The forbidden_path_check flag, when True, causes the demo to exercise
+    a negative-path scenario (blocked lifecycle). When False, the demo
+    follows the happy path.
+
+    Returns (BackendLifecycleDemo, step_details_dict).
+    """
+    import hashlib
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+
+    demo_id = f"demo-{_uuid.uuid4().hex[:12]}"
+    if not task_id:
+        task_id = f"task-{_uuid.uuid4().hex[:12]}"
+
+    steps: dict[str, Any] = {}
+    hard_blocks: list[str] = []
+    missing_evidence: list[str] = []
+    warnings_list: list[str] = []
+
+    prompt = prompt_text or (
+        f"Mock lifecycle demo prompt for phase {phase_id}. "
+        f"This is a safe, deterministic mock prompt for end-to-end testing."
+    )
+
+    # ── Step 1: backend plan ─────────────────────────────────────────────
+    request = make_invocation_request(
+        backend_id=backend_id,
+        phase_id=phase_id,
+        task_id=task_id,
+        prompt_hash=hashlib.sha256(prompt.encode()).hexdigest(),
+        execution_mode=INVOCATION_MODE_DRY_RUN,
+        allowed_files=["docs/demo-output.md"],
+    )
+    reg = get_default_registry()
+    plan_readiness = check_invocation_readiness(request, reg)
+    steps["plan"] = {
+        "request_id": request.request_id,
+        "backend_id": request.backend_id,
+        "readiness_status": plan_readiness["status"],
+    }
+    if plan_readiness["status"] == READINESS_BLOCKED:
+        hard_blocks.extend(plan_readiness.get("hard_blocks", []))
+
+    # ── Step 2+3: mock backend invocation (prompt + output capture) ──────
+    mock_result = run_mock_backend_invocation(request, prompt)
+    steps["mock_invocation"] = mock_result
+
+    if mock_result.get("status") != "completed":
+        hard_blocks.append(f"mock_invocation_{mock_result.get('status', 'failed')}")
+
+    prompt_hash_val = mock_result.get("prompt_hash", "")
+    prompt_path = mock_result.get("prompt_path", "")
+    output_hash_val = mock_result.get("output_hash", "")
+    output_path = mock_result.get("output_path", "")
+
+    # ── Step 4: backend invocation audit ─────────────────────────────────
+    audit_result = persist_backend_audit(
+        event_type="mock_lifecycle_demo",
+        request=request,
+        readiness=plan_readiness,
+        prompt_result={
+            "prompt_hash": prompt_hash_val,
+            "prompt_path": prompt_path,
+            "redacted": True,
+        },
+        output_result={
+            "output_hash": output_hash_val,
+            "output_path": output_path,
+            "quarantined": True,
+            "applied_to_repo": False,
+        },
+        extra={
+            "mock_result_status": mock_result.get("status", ""),
+            "no_real_backend_invoked": True,
+            "no_subprocess": True,
+            "no_network": True,
+        },
+    )
+    steps["audit"] = audit_result
+    audit_id_val = audit_result.get("audit_id", "")
+
+    # ── Step 5: trust/readiness assessment ────────────────────────────────
+    trust_result = assess_backend_invocation_trust(
+        request=request,
+        readiness=plan_readiness,
+        prompt_meta={"prompt_hash": prompt_hash_val, "prompt_path": prompt_path},
+        output_meta={"output_hash": output_hash_val, "output_path": output_path,
+                     "quarantined": True, "applied_to_repo": False},
+        audit_meta=audit_result,
+        audit_verified=True,
+    )
+    steps["trust"] = trust_result
+    trust_id = trust_result.get("assessment_id", "")
+    if trust_result.get("hard_blocks"):
+        hard_blocks.extend(f"trust:{b}" for b in trust_result["hard_blocks"])
+    if trust_result.get("missing_evidence"):
+        missing_evidence.extend(trust_result["missing_evidence"])
+
+    # ── Step 6: review artifact creation ─────────────────────────────────
+    review = create_review_artifact(
+        request_id=request.request_id,
+        output_hash=output_hash_val,
+        backend_id=backend_id,
+        phase_id=phase_id,
+        task_id=task_id,
+        prompt_hash=prompt_hash_val,
+        prompt_artifact_path=prompt_path,
+        output_artifact_path=output_path,
+        audit_id=audit_id_val,
+        trust_assessment_id=trust_id,
+    )
+    persist_review(review)
+    steps["review"] = {"review_id": review.review_id, "review_state": review.review_state}
+
+    # ── Step 7: approval (happy path) or rejection (negative path) ────────
+    approval = None
+    rejection_id = ""
+    if forbidden_path_check:
+        # Negative path: add a forbidden operation → hard blocks prevent approval
+        review.hard_blocks.append("forbidden_path_pattern:.env")
+        review.review_state = REVIEW_QUARANTINED
+        try:
+            approve_review(review, "demo-operator", "attempted approval with hard blocks")
+        except ValueError:
+            pass  # Expected — hard blocks prevent approval
+        rejection = reject_review(review, "demo-operator", "Hard blocks present: forbidden path")
+        persist_rejection(rejection, review)
+        rejection_id = rejection.rejection_id
+        steps["approval"] = {"status": "rejected", "rejection_id": rejection_id,
+                             "reason": "forbidden_path_check"}
+    else:
+        # Happy path: approve
+        approval = approve_review(review, "demo-operator", "Mock demo approval — safe")
+        persist_approval(approval, review)
+        steps["approval"] = {"approval_id": approval.approval_id,
+                             "status": "approved"}
+
+    # ── Step 8: apply plan creation ──────────────────────────────────────
+    if forbidden_path_check:
+        ops_for_plan = [
+            ApplyOperation(
+                operation_id=f"op-{_uuid.uuid4().hex[:8]}",
+                operation_type=OP_CREATE,
+                target_path=".env",  # forbidden
+                risk_level=RISK_HIGH,
+                forbidden=True,
+            ),
+        ]
+    else:
+        ops_for_plan = [
+            ApplyOperation(
+                operation_id=f"op-{_uuid.uuid4().hex[:8]}",
+                operation_type=OP_CREATE,
+                target_path="docs/demo-output.md",
+                risk_level=RISK_LOW,
+                allowed_by_task_scope=True,
+            ),
+        ]
+
+    apply_plan = create_apply_plan(
+        review=review,
+        approval=approval,
+        operations=ops_for_plan,
+        allowed_files=["docs/demo-output.md"],
+        forbidden_files=[".env"] if forbidden_path_check else [],
+    )
+    persist_apply_plan(apply_plan)
+    steps["apply_plan"] = {
+        "apply_plan_id": apply_plan.apply_plan_id,
+        "hard_blocks": apply_plan.hard_blocks,
+        "apply_ready": apply_plan.apply_ready,
+    }
+    if apply_plan.hard_blocks:
+        hard_blocks.extend(apply_plan.hard_blocks)
+
+    # ── Step 9: apply readiness validation ───────────────────────────────
+    readiness_assessment = validate_backend_apply_readiness(
+        plan=apply_plan,
+        review=review,
+        approval=approval,
+        output_meta={
+            "output_hash": output_hash_val,
+            "output_path": output_path,
+            "quarantined": True,
+            "applied_to_repo": False,
+        },
+        trust_assessment=trust_result,
+    )
+    persist_apply_readiness(readiness_assessment)
+    steps["apply_readiness"] = {
+        "assessment_id": readiness_assessment.assessment_id,
+        "status": readiness_assessment.status,
+        "apply_ready": readiness_assessment.apply_ready,
+        "hard_blocks": readiness_assessment.hard_blocks,
+    }
+    if readiness_assessment.hard_blocks:
+        for hb in readiness_assessment.hard_blocks:
+            if hb not in hard_blocks:
+                hard_blocks.append(hb)
+    if readiness_assessment.missing_evidence:
+        for me in readiness_assessment.missing_evidence:
+            if me not in missing_evidence:
+                missing_evidence.append(me)
+    if readiness_assessment.warnings:
+        for w in readiness_assessment.warnings:
+            if w not in warnings_list:
+                warnings_list.append(w)
+
+    # ── Determine lifecycle status ───────────────────────────────────────
+    if hard_blocks:
+        lifecycle_status = DEMO_BLOCKED
+    elif missing_evidence:
+        lifecycle_status = DEMO_PARTIAL
+    elif warnings_list:
+        lifecycle_status = DEMO_COMPLETED
+    else:
+        lifecycle_status = DEMO_COMPLETED
+
+    # ── Step 10: demo summary artifact ───────────────────────────────────
+    demo = BackendLifecycleDemo(
+        demo_id=demo_id,
+        phase_id=phase_id,
+        task_id=task_id,
+        backend_id=backend_id,
+        request_id=request.request_id,
+        prompt_artifact_path=prompt_path,
+        prompt_hash=prompt_hash_val,
+        output_artifact_path=output_path,
+        output_hash=output_hash_val,
+        audit_id=audit_id_val,
+        trust_assessment_id=trust_id,
+        review_id=review.review_id,
+        approval_id=approval.approval_id if approval else "",
+        rejection_id=rejection_id,
+        apply_plan_id=apply_plan.apply_plan_id,
+        apply_readiness_assessment_id=readiness_assessment.assessment_id,
+        lifecycle_status=lifecycle_status,
+        hard_blocks=hard_blocks,
+        missing_evidence=missing_evidence,
+        warnings=warnings_list,
+        no_real_backend_invoked=True,
+        no_apply_execution=True,
+        no_file_mutation=True,
+        no_subprocess=True,
+        no_network=True,
+        no_shell_interception=True,
+        created_at_utc=now,
+        **{k: v for k, v in kwargs.items()
+           if k in BackendLifecycleDemo.__dataclass_fields__},
+    )
+
+    steps["lifecycle_status"] = lifecycle_status
+    steps["demo"] = demo.to_dict()
+
+    return demo, steps
+
+
+def persist_lifecycle_demo(demo: BackendLifecycleDemo) -> dict:
+    """Persist a lifecycle demo summary artifact.
+
+    Writes to .pcae/backend-lifecycle-demos/ with timestamped filename
+    and updates latest.json pointer.  Never executes apply, never mutates
+    source files, never invokes backends.
+    """
+    import json as _json
+    import os
+    d = _lifecycle_demos_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{demo.demo_id}.json"
+        lp = d / "latest.json"
+
+        fp.write_text(_json.dumps(demo.to_dict(), indent=2, sort_keys=True))
+
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(demo.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+
+        return {
+            "status": "written",
+            "path": str(fp),
+            "latest_path": str(lp),
+            "demo_id": demo.demo_id,
+            "lifecycle_status": demo.lifecycle_status,
+        }
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def read_latest_lifecycle_demo() -> BackendLifecycleDemo | None:
+    """Read the latest lifecycle demo. Returns None if absent or malformed."""
+    import json as _json
+    lp = _lifecycle_demos_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        if not isinstance(data, dict) or not data:
+            return None
+        return BackendLifecycleDemo.from_dict(data)
+    except Exception:
+        return None

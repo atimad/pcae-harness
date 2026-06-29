@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 94Q: Backend Lifecycle End-to-End Mock Demo (completed).
+
+Mock-only integration demo phase. Added `BackendLifecycleDemo` model (28 fields),
+`run_mock_lifecycle_demo()` exercising the full governed backend lifecycle (plan →
+prompt capture → mock output → audit → trust → review → approval/rejection →
+apply plan → apply readiness → demo summary), persistence under
+`.pcae/backend-lifecycle-demos/`, and `pcae backend demo mock-lifecycle/show` CLI.
+41 new model tests (370 total), 20 new CLI tests (169 total). All safety invariants
+preserved. No real backend invocation, no apply execution, no file mutation, no
+subprocess, no network. Delivers docs/PHASE_94_BACKEND_LIFECYCLE_END_TO_END_MOCK_DEMO.md.
+
 Phase 94P: Backend Apply Governance Hardening (completed).
 
 Hardening phase. Added `validate_operation_path()`, `validate_operations_list()`,

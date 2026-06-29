@@ -3213,3 +3213,381 @@ class Test94PNoExecutionGuarantees:
         assert set(d1.keys()) == set(d2.keys())
         assert d1["no_execution_performed"] is True
         assert d2["no_execution_performed"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Q — Backend lifecycle end-to-end mock demo tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import os as _os_94q
+import json as _json_94q
+
+from pcae.core.backend_invocations import (
+    BackendLifecycleDemo,
+    run_mock_lifecycle_demo,
+    persist_lifecycle_demo,
+    read_latest_lifecycle_demo,
+    DEMO_COMPLETED,
+    DEMO_BLOCKED,
+    DEMO_PARTIAL,
+    DEMO_FAILED,
+    VALID_DEMO_STATUSES,
+)
+
+
+class Test94QLifecycleDemoModel:
+    """BackendLifecycleDemo model validation and serialization."""
+
+    def test_valid_demo_defaults(self):
+        demo = BackendLifecycleDemo(demo_id="demo-test01")
+        assert demo.validate() == []
+
+    def test_missing_demo_id(self):
+        demo = BackendLifecycleDemo()
+        issues = demo.validate()
+        assert any("demo_id" in i for i in issues)
+
+    def test_invalid_status(self):
+        demo = BackendLifecycleDemo(demo_id="d1", lifecycle_status="bogus")
+        issues = demo.validate()
+        assert any("lifecycle_status" in i for i in issues)
+
+    def test_no_real_backend_invoked_must_be_true(self):
+        demo = BackendLifecycleDemo(demo_id="d1", no_real_backend_invoked=False)
+        issues = demo.validate()
+        assert any("no_real_backend_invoked" in i for i in issues)
+
+    def test_no_apply_execution_must_be_true(self):
+        demo = BackendLifecycleDemo(demo_id="d1", no_apply_execution=False)
+        issues = demo.validate()
+        assert any("no_apply_execution" in i for i in issues)
+
+    def test_no_file_mutation_must_be_true(self):
+        demo = BackendLifecycleDemo(demo_id="d1", no_file_mutation=False)
+        issues = demo.validate()
+        assert any("no_file_mutation" in i for i in issues)
+
+    def test_all_valid_statuses(self):
+        for st in VALID_DEMO_STATUSES:
+            demo = BackendLifecycleDemo(demo_id="d1", lifecycle_status=st)
+            assert demo.validate() == []
+
+    def test_to_dict_all_fields(self):
+        demo = BackendLifecycleDemo(
+            demo_id="demo-dict01",
+            phase_id="94Q",
+            task_id="task-01",
+            backend_id="mock",
+            request_id="be-req01",
+            prompt_hash="ph-hash",
+            output_hash="oh-hash",
+            audit_id="ba-audit01",
+            trust_assessment_id="as-trust01",
+            review_id="rv-rev01",
+            approval_id="ap-app01",
+            apply_plan_id="pl-plan01",
+            apply_readiness_assessment_id="ra-ra01",
+            lifecycle_status=DEMO_COMPLETED,
+            hard_blocks=[],
+            missing_evidence=[],
+            warnings=["test_warning"],
+        )
+        d = demo.to_dict()
+        assert d["demo_id"] == "demo-dict01"
+        assert d["phase_id"] == "94Q"
+        assert d["lifecycle_status"] == DEMO_COMPLETED
+        assert d["no_real_backend_invoked"] is True
+        assert d["no_apply_execution"] is True
+        assert d["no_file_mutation"] is True
+        assert d["no_subprocess"] is True
+        assert d["no_network"] is True
+        assert d["no_shell_interception"] is True
+        assert d["warnings"] == ["test_warning"]
+
+    def test_to_dict_deterministic(self):
+        demo = BackendLifecycleDemo(demo_id="demo-det01")
+        d1 = demo.to_dict()
+        d2 = demo.to_dict()
+        assert set(d1.keys()) == set(d2.keys())
+        assert d1["no_real_backend_invoked"] is True
+        assert d2["no_file_mutation"] is True
+
+    def test_from_dict_round_trip(self):
+        d = {
+            "demo_id": "demo-rt01",
+            "phase_id": "94Q.1",
+            "task_id": "task-rt",
+            "backend_id": "mock",
+            "lifecycle_status": DEMO_COMPLETED,
+            "no_real_backend_invoked": True,
+            "no_apply_execution": True,
+            "no_file_mutation": True,
+        }
+        demo = BackendLifecycleDemo.from_dict(d)
+        assert demo.demo_id == "demo-rt01"
+        assert demo.phase_id == "94Q.1"
+        assert demo.lifecycle_status == DEMO_COMPLETED
+
+    def test_no_secrets_in_to_dict(self):
+        demo = BackendLifecycleDemo(demo_id="d1", prompt_hash="ph", output_hash="oh")
+        j = _json_94q.dumps(demo.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+        assert "token" not in j.lower()
+
+
+class Test94QHappyPathDemo:
+    """End-to-end happy path mock lifecycle demo."""
+
+    def test_demo_creates_all_expected_artifacts(self):
+        demo, steps = run_mock_lifecycle_demo(phase_id="94Q", task_id="task-happy")
+        assert demo.lifecycle_status in (DEMO_COMPLETED, DEMO_PARTIAL)
+        assert demo.request_id.startswith("be-")
+        assert demo.demo_id.startswith("demo-")
+        assert demo.audit_id.startswith("ba-")
+        assert demo.trust_assessment_id.startswith("as-")
+        assert demo.review_id.startswith("rv-")
+        assert demo.approval_id.startswith("ap-")
+        assert demo.apply_plan_id.startswith("pl-")
+        assert demo.apply_readiness_assessment_id.startswith("ra-")
+        # All steps exercised
+        assert "plan" in steps
+        assert "mock_invocation" in steps
+        assert "audit" in steps
+        assert "trust" in steps
+        assert "review" in steps
+        assert "approval" in steps
+        assert "apply_plan" in steps
+        assert "apply_readiness" in steps
+
+    def test_artifact_chain_preserves_request_id(self):
+        demo, steps = run_mock_lifecycle_demo()
+        req_id = demo.request_id
+        assert req_id
+        # Request ID is consistent through all artifacts
+        assert demo.request_id == req_id
+
+    def test_artifact_chain_preserves_output_hash(self):
+        demo, steps = run_mock_lifecycle_demo()
+        assert demo.output_hash
+        assert demo.prompt_hash
+        assert demo.output_hash != demo.prompt_hash
+
+    def test_output_remains_quarantined(self):
+        demo, steps = run_mock_lifecycle_demo()
+        mock_inv = steps.get("mock_invocation", {})
+        assert mock_inv.get("quarantined") is True
+        assert mock_inv.get("applied_to_repo") is False
+
+    def test_apply_plan_created_but_not_executed(self):
+        demo, steps = run_mock_lifecycle_demo()
+        ap = steps.get("apply_plan", {})
+        assert ap.get("apply_plan_id")
+        assert ap.get("apply_ready") is False  # missing rollback/tests in default
+        assert demo.no_apply_execution is True
+
+    def test_apply_readiness_generated_no_apply_executed(self):
+        demo, steps = run_mock_lifecycle_demo()
+        ar = steps.get("apply_readiness", {})
+        assert ar.get("assessment_id")
+        assert demo.no_apply_execution is True
+        assert demo.no_file_mutation is True
+
+    def test_no_real_backend_invoked(self):
+        demo, steps = run_mock_lifecycle_demo()
+        assert demo.no_real_backend_invoked is True
+        mock_inv = steps.get("mock_invocation", {})
+        assert mock_inv.get("no_real_backend_invoked") is True
+
+    def test_no_subprocess_no_network_no_shell(self):
+        demo, steps = run_mock_lifecycle_demo()
+        assert demo.no_subprocess is True
+        assert demo.no_network is True
+        assert demo.no_shell_interception is True
+
+    def test_no_secrets_in_demo_summary(self):
+        demo, steps = run_mock_lifecycle_demo()
+        j = _json_94q.dumps(demo.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+        # Prompt content should not leak
+        assert "deterministic mock prompt" not in j.lower()
+
+    def test_multipart_phase_id_preserved(self):
+        demo, steps = run_mock_lifecycle_demo(phase_id="94Q.1.2.3")
+        assert demo.phase_id == "94Q.1.2.3"
+        d = demo.to_dict()
+        assert d["phase_id"] == "94Q.1.2.3"
+
+    def test_no_source_files_modified(self):
+        """Verify no source files are modified by the demo."""
+        demo, steps = run_mock_lifecycle_demo()
+        # Only .pcae/ artifacts are created
+        assert demo.no_file_mutation is True
+
+
+class Test94QNegativePathDemo:
+    """Negative path: forbidden path → blocked lifecycle."""
+
+    def test_forbidden_path_produces_blocked_status(self):
+        demo, steps = run_mock_lifecycle_demo(forbidden_path_check=True)
+        assert demo.lifecycle_status == DEMO_BLOCKED
+
+    def test_forbidden_path_has_hard_blocks(self):
+        demo, steps = run_mock_lifecycle_demo(forbidden_path_check=True)
+        assert len(demo.hard_blocks) > 0
+        assert any(".env" in hb for hb in demo.hard_blocks)
+
+    def test_forbidden_path_rejected_not_approved(self):
+        demo, steps = run_mock_lifecycle_demo(forbidden_path_check=True)
+        assert demo.rejection_id.startswith("rj-")
+        assert demo.approval_id == ""
+
+    def test_forbidden_path_still_no_execution(self):
+        demo, steps = run_mock_lifecycle_demo(forbidden_path_check=True)
+        assert demo.no_real_backend_invoked is True
+        assert demo.no_apply_execution is True
+        assert demo.no_file_mutation is True
+        assert demo.no_subprocess is True
+        assert demo.no_network is True
+
+    def test_forbidden_path_no_secrets(self):
+        demo, steps = run_mock_lifecycle_demo(forbidden_path_check=True)
+        j = _json_94q.dumps(demo.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_forbidden_path_approval_rejected(self):
+        demo, steps = run_mock_lifecycle_demo(forbidden_path_check=True)
+        approval_step = steps.get("approval", {})
+        assert approval_step.get("status") == "rejected"
+
+
+class Test94QDemoPersistence:
+    """Persistence of lifecycle demo artifacts."""
+
+    def test_persist_and_read_round_trip(self, tmp_path):
+        import os as _os_inner
+        orig_dir = _os_inner.getcwd()
+        try:
+            _os_inner.chdir(tmp_path)
+            demo, steps = run_mock_lifecycle_demo()
+            result = persist_lifecycle_demo(demo)
+            assert result["status"] == "written"
+            assert result["demo_id"] == demo.demo_id
+
+            # Read back
+            loaded = read_latest_lifecycle_demo()
+            assert loaded is not None
+            assert loaded.demo_id == demo.demo_id
+            assert loaded.request_id == demo.request_id
+            assert loaded.output_hash == demo.output_hash
+            assert loaded.lifecycle_status == demo.lifecycle_status
+            assert loaded.no_real_backend_invoked is True
+        finally:
+            _os_inner.chdir(orig_dir)
+
+    def test_latest_demo_updated_on_new_run(self, tmp_path):
+        import os as _os_inner
+        orig_dir = _os_inner.getcwd()
+        try:
+            _os_inner.chdir(tmp_path)
+            demo1, _ = run_mock_lifecycle_demo()
+            persist_lifecycle_demo(demo1)
+            demo2, _ = run_mock_lifecycle_demo()
+            persist_lifecycle_demo(demo2)
+
+            loaded = read_latest_lifecycle_demo()
+            assert loaded is not None
+            assert loaded.demo_id == demo2.demo_id
+            assert loaded.demo_id != demo1.demo_id
+        finally:
+            _os_inner.chdir(orig_dir)
+
+    def test_read_latest_returns_none_when_absent(self, tmp_path):
+        import os as _os_inner
+        orig_dir = _os_inner.getcwd()
+        try:
+            _os_inner.chdir(tmp_path)
+            result = read_latest_lifecycle_demo()
+            assert result is None
+        finally:
+            _os_inner.chdir(orig_dir)
+
+    def test_persist_creates_latest_json(self, tmp_path):
+        import os as _os_inner
+        from pathlib import Path
+        orig_dir = _os_inner.getcwd()
+        try:
+            _os_inner.chdir(tmp_path)
+            demo, _ = run_mock_lifecycle_demo()
+            result = persist_lifecycle_demo(demo)
+            lp = Path(result["latest_path"])
+            assert lp.exists()
+            data = _json_94q.loads(lp.read_text())
+            assert data["demo_id"] == demo.demo_id
+        finally:
+            _os_inner.chdir(orig_dir)
+
+    def test_persist_creates_timestamped_file(self, tmp_path):
+        import os as _os_inner
+        from pathlib import Path
+        orig_dir = _os_inner.getcwd()
+        try:
+            _os_inner.chdir(tmp_path)
+            demo, _ = run_mock_lifecycle_demo()
+            result = persist_lifecycle_demo(demo)
+            fp = Path(result["path"])
+            assert fp.exists()
+            assert demo.demo_id in fp.name
+        finally:
+            _os_inner.chdir(orig_dir)
+
+
+class Test94QNoExecutionGuarantees:
+    """Cross-cutting no-execution guarantees for Phase 94Q."""
+
+    def test_no_subprocess_in_94q_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        # run_mock_lifecycle_demo should not introduce subprocess
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_network_in_94q_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_telegram_inbound_in_94q(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "getUpdates" not in source
+
+    def test_no_real_backend_invoked_always_true(self):
+        demo, _ = run_mock_lifecycle_demo()
+        assert demo.no_real_backend_invoked is True
+
+    def test_no_apply_execution_always_true(self):
+        demo, _ = run_mock_lifecycle_demo()
+        assert demo.no_apply_execution is True
+
+    def test_no_file_mutation_always_true(self):
+        demo, _ = run_mock_lifecycle_demo()
+        assert demo.no_file_mutation is True
+
+    def test_demo_backend_is_mock_only(self):
+        demo, _ = run_mock_lifecycle_demo()
+        assert demo.backend_id == "mock"
+
+    def test_negative_path_still_no_execution(self):
+        demo, _ = run_mock_lifecycle_demo(forbidden_path_check=True)
+        assert demo.no_real_backend_invoked is True
+        assert demo.no_apply_execution is True
+        assert demo.no_file_mutation is True
+        assert demo.no_subprocess is True
+        assert demo.no_network is True

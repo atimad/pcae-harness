@@ -448,6 +448,7 @@ from pcae.commands.backend import (
     run_backend_apply_plan_show, run_backend_apply_plan_create,
     run_backend_apply_plan_validate,
     run_backend_manual_apply_package_show, run_backend_manual_apply_package_create,
+    run_backend_demo_mock_lifecycle, run_backend_demo_show,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4802,6 +4803,33 @@ def build_parser() -> argparse.ArgumentParser:
                             help="Optional rollback instructions to include in the package.")
     map_create.add_argument("--json", action="store_true")
     map_create.set_defaults(handler=run_backend_manual_apply_package_create)
+
+    # ── pcae backend demo (Phase 94Q) ──────────────────────────────────────
+    be_demo = backend_sub.add_parser(
+        "demo",
+        help="End-to-end mock backend lifecycle demo (mock only, read-only).",
+    )
+    be_demo_sub = be_demo.add_subparsers(dest="backend_demo_command", required=True)
+
+    demo_mock = be_demo_sub.add_parser(
+        "mock-lifecycle",
+        help="Run a complete end-to-end mock backend lifecycle demo.",
+    )
+    demo_mock.add_argument("--json", action="store_true")
+    demo_mock.add_argument("--negative", action="store_true",
+                           help="Exercise negative path (forbidden path → blocked lifecycle).")
+    demo_mock.add_argument("--phase-id", default="94Q",
+                           help="Phase ID for the demo.")
+    demo_mock.add_argument("--task-id", default="",
+                           help="Task ID for the demo.")
+    demo_mock.set_defaults(handler=run_backend_demo_mock_lifecycle)
+
+    demo_show = be_demo_sub.add_parser(
+        "show", help="Show the latest lifecycle demo summary."
+    )
+    demo_show.add_argument("--latest", action="store_true", default=True)
+    demo_show.add_argument("--json", action="store_true")
+    demo_show.set_defaults(handler=run_backend_demo_show)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
