@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 94Y — Real Adapter Invocation Approval Model (20260629-2140-phase-94x-real-adapter-readiness-review)
+- Phase 94Z — Real Adapter Invocation Plan Artifact (20260629-2158-phase-94y-real-adapter-invocation-approval-model)
+- Phase 94Y — Real Adapter Invocation Approval Model (20260629-2158-phase-94y-real-adapter-invocation-approval-model)
 - Phase 94X — Real Adapter Readiness Review (20260629-2140-phase-94x-real-adapter-readiness-review)
 - Phase 94W — Real Adapter Preflight Hardening (20260629-2131-phase-94w-real-adapter-preflight-hardening)
 - Phase 94V — Adapter-Specific Contract Specialization (20260629-2125-phase-94v-adapter-specific-contract-specialization)

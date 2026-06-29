@@ -24,6 +24,11 @@ from pcae.core.backend_invocations import (
     load_latest_backend_adapter_preflight_artifact,
     load_latest_real_adapter_invocation_approval,
     verify_real_adapter_invocation_approval,
+    create_real_adapter_invocation_plan,
+    load_latest_real_adapter_invocation_plan,
+    verify_real_adapter_invocation_plan,
+    persist_real_adapter_invocation_plan,
+    BackendAdapterContract,
     INVOCATION_MODE_DRY_RUN,
     APPROVAL_PENDING,
     DEMO_COMPLETED,
@@ -1685,6 +1690,57 @@ def run_backend_adapter_approval_verify(args: argparse.Namespace) -> int:
             print(f"  Status:   valid")
         else:
             print(f"Approval verification FAILED: {approval.backend_id}")
+            for issue in result["issues"]:
+                print(f"  - {issue}")
+    return 0 if result["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Z — Real adapter invocation plan CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_adapter_plan_show(args: argparse.Namespace) -> int:
+    """pcae backend adapter plan show --latest [--json]"""
+    plan = load_latest_real_adapter_invocation_plan()
+    if plan is None:
+        msg = "No invocation plan artifacts found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if args.json:
+        print(json.dumps(plan.to_dict(), indent=2))
+    else:
+        print(f"Latest invocation plan: {plan.backend_id}")
+        print(f"  Plan ID:             {plan.plan_id}")
+        print(f"  Preflight ID:        {plan.preflight_artifact_id}")
+        print(f"  Approval ID:         {plan.approval_id}")
+        print(f"  Timeout:             {plan.timeout_seconds}s")
+        print(f"  No auto-apply:       {plan.no_auto_apply}")
+        print(f"  No commit:           {plan.no_commit_authorization}")
+        print(f"  No push:             {plan.no_push_authorization}")
+        print(f"  Real allowed:        {plan.real_backend_invocation_allowed}")
+        print(f"  Execution ready:     {plan.execution_ready}")
+        if plan.hard_blocks:
+            print(f"  Hard blocks:         {', '.join(plan.hard_blocks)}")
+        print(f"  Digest:              {plan.record_digest[:16]}...")
+    return 0
+
+
+def run_backend_adapter_plan_verify(args: argparse.Namespace) -> int:
+    """pcae backend adapter plan verify --latest [--json]"""
+    plan = load_latest_real_adapter_invocation_plan()
+    if plan is None:
+        msg = "No invocation plan artifacts found to verify."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    result = verify_real_adapter_invocation_plan(plan)
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        if result["valid"]:
+            print(f"Plan verified: {plan.backend_id} — valid")
+        else:
+            print(f"Plan verification FAILED: {plan.backend_id}")
             for issue in result["issues"]:
                 print(f"  - {issue}")
     return 0 if result["valid"] else 1

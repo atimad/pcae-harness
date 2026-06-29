@@ -4756,3 +4756,286 @@ def load_latest_real_adapter_invocation_approval() -> (
         return RealAdapterInvocationApproval.from_dict(data)
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Z — Real adapter invocation plan artifact
+# ═══════════════════════════════════════════════════════════════════════════
+
+_REAL_ADAPTER_PLANS_DIR = ".pcae/real-adapter-invocation-plans"
+_PLAN_SCHEMA_VERSION = "1.0"
+
+
+@dataclass
+class RealAdapterInvocationPlan:
+    """Future artifact-only real backend invocation plan.
+
+    Binds adapter contract, invocation request, prompt, preflight, approval,
+    output quarantine, audit, timeout, broker/shell-gate expectations.
+    All execution flags default to False. Plan is model-only — never executes.
+    """
+
+    plan_id: str = ""
+    adapter_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    preflight_artifact_id: str = ""
+    preflight_artifact_path: str = ""
+    preflight_digest: str = ""
+    approval_id: str = ""
+    approval_artifact_path: str = ""
+    approval_digest: str = ""
+    invocation_mode: str = ""
+    risk_level: str = RISK_MEDIUM
+    operator: str = ""
+    output_quarantine_path: str = ""
+    audit_artifact_path: str = ""
+    timeout_seconds: int = 0
+    broker_required: bool = True
+    broker_expected_decision: str = ""
+    shell_gate_required: bool = True
+    shell_gate_expected_decision: str = ""
+    no_auto_apply: bool = True
+    no_commit_authorization: bool = True
+    no_push_authorization: bool = True
+    real_backend_invocation_allowed: bool = False
+    execution_ready: bool = False
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    created_at_utc: str = ""
+    expires_at_utc: str = ""
+    schema_version: str = _PLAN_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if not self.plan_id:
+            issues.append("plan_id is required")
+        if self.real_backend_invocation_allowed:
+            issues.append("real_backend_invocation_allowed must be False")
+        if self.execution_ready:
+            issues.append("execution_ready must be False")
+        if not self.no_auto_apply:
+            issues.append("no_auto_apply must be True")
+        if not self.no_commit_authorization:
+            issues.append("no_commit_authorization must be True")
+        if not self.no_push_authorization:
+            issues.append("no_push_authorization must be True")
+        return issues
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "plan_id": self.plan_id, "adapter_id": self.adapter_id,
+            "backend_id": self.backend_id, "backend_type": self.backend_type,
+            "request_id": self.request_id, "phase_id": self.phase_id,
+            "task_id": self.task_id, "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "preflight_artifact_id": self.preflight_artifact_id,
+            "preflight_artifact_path": self.preflight_artifact_path,
+            "preflight_digest": self.preflight_digest,
+            "approval_id": self.approval_id,
+            "approval_artifact_path": self.approval_artifact_path,
+            "approval_digest": self.approval_digest,
+            "invocation_mode": self.invocation_mode,
+            "risk_level": self.risk_level, "operator": self.operator,
+            "output_quarantine_path": self.output_quarantine_path,
+            "audit_artifact_path": self.audit_artifact_path,
+            "timeout_seconds": self.timeout_seconds,
+            "broker_required": self.broker_required,
+            "broker_expected_decision": self.broker_expected_decision,
+            "shell_gate_required": self.shell_gate_required,
+            "shell_gate_expected_decision": self.shell_gate_expected_decision,
+            "no_auto_apply": self.no_auto_apply,
+            "no_commit_authorization": self.no_commit_authorization,
+            "no_push_authorization": self.no_push_authorization,
+            "real_backend_invocation_allowed": self.real_backend_invocation_allowed,
+            "execution_ready": self.execution_ready,
+            "hard_blocks": list(self.hard_blocks),
+            "warnings": list(self.warnings),
+            "created_at_utc": self.created_at_utc,
+            "expires_at_utc": self.expires_at_utc,
+            "schema_version": self.schema_version,
+        }
+        if include_digest and self.record_digest:
+            d["record_digest"] = self.record_digest
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "RealAdapterInvocationPlan":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+def _real_adapter_plans_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_REAL_ADAPTER_PLANS_DIR)
+
+
+def create_real_adapter_invocation_plan(
+    *,
+    adapter_id: str,
+    backend_id: str,
+    backend_type: str,
+    request_id: str = "",
+    phase_id: str = "",
+    task_id: str = "",
+    prompt_hash: str = "",
+    prompt_artifact_path: str = "",
+    preflight_artifact: BackendAdapterPreflightArtifact | None = None,
+    approval_artifact: RealAdapterInvocationApproval | None = None,
+    invocation_mode: str = "",
+    risk_level: str = RISK_MEDIUM,
+    operator: str = "",
+    output_quarantine_path: str = "",
+    audit_artifact_path: str = "",
+    timeout_seconds: int = 120,
+    **kwargs: Any,
+) -> "RealAdapterInvocationPlan":
+    """Create a future-only invocation plan. Never executes anything."""
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    plan_id = f"rip-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    warnings_list: list[str] = []
+    pf_id = pf_digest = ""
+    approval_id_val = approval_digest = ""
+
+    # Validate preflight binding
+    if preflight_artifact is not None:
+        pf_id = preflight_artifact.artifact_id
+        pf_digest = preflight_artifact.record_digest or preflight_artifact.compute_digest()
+        if preflight_artifact.backend_id and preflight_artifact.backend_id != backend_id:
+            hard_blocks.append("preflight_backend_mismatch")
+        if preflight_artifact.hard_blocks:
+            hard_blocks.extend(f"preflight:{hb}" for hb in preflight_artifact.hard_blocks)
+    else:
+        hard_blocks.append("preflight_artifact_missing")
+
+    # Validate approval binding
+    if approval_artifact is not None:
+        approval_id_val = approval_artifact.approval_id
+        approval_digest = approval_artifact.record_digest or approval_artifact.compute_digest()
+        if not approval_artifact.approval_effective:
+            hard_blocks.append("approval_not_effective")
+        if approval_artifact.decision != APPROVAL_APPROVED:
+            hard_blocks.append(f"approval_decision:{approval_artifact.decision}")
+        if approval_artifact.backend_id and approval_artifact.backend_id != backend_id:
+            hard_blocks.append("approval_backend_mismatch")
+        if approval_artifact.preflight_digest and pf_digest and approval_artifact.preflight_digest != pf_digest:
+            hard_blocks.append("approval_preflight_digest_mismatch")
+    else:
+        hard_blocks.append("approval_artifact_missing")
+
+    if not prompt_hash:
+        hard_blocks.append("prompt_hash_missing")
+    if not prompt_artifact_path:
+        hard_blocks.append("prompt_artifact_path_missing")
+    if not output_quarantine_path:
+        hard_blocks.append("output_quarantine_path_missing")
+    if not audit_artifact_path:
+        hard_blocks.append("audit_artifact_path_missing")
+    if timeout_seconds <= 0:
+        hard_blocks.append("timeout_missing_or_invalid")
+    if not operator:
+        hard_blocks.append("operator_missing")
+
+    plan = RealAdapterInvocationPlan(
+        plan_id=plan_id, adapter_id=adapter_id, backend_id=backend_id,
+        backend_type=backend_type, request_id=request_id,
+        phase_id=phase_id, task_id=task_id,
+        prompt_hash=prompt_hash, prompt_artifact_path=prompt_artifact_path,
+        preflight_artifact_id=pf_id, preflight_digest=pf_digest,
+        approval_id=approval_id_val, approval_digest=approval_digest,
+        invocation_mode=invocation_mode, risk_level=risk_level,
+        operator=operator, output_quarantine_path=output_quarantine_path,
+        audit_artifact_path=audit_artifact_path,
+        timeout_seconds=timeout_seconds,
+        hard_blocks=hard_blocks, warnings=warnings_list,
+        created_at_utc=now,
+        **{k: v for k, v in kwargs.items()
+           if k in RealAdapterInvocationPlan.__dataclass_fields__},
+    )
+    issues = plan.validate()
+    if issues:
+        raise ValueError(f"Invalid plan: {'; '.join(issues)}")
+    return plan
+
+
+def validate_real_adapter_invocation_plan(
+    plan: RealAdapterInvocationPlan,
+) -> dict[str, Any]:
+    """Validate plan binding evidence. Fail-closed."""
+    hard_blocks = list(plan.hard_blocks)
+    issues = plan.validate()
+    for i in issues:
+        hard_blocks.append(i)
+    return {
+        "valid": len(hard_blocks) == 0,
+        "hard_blocks": hard_blocks,
+        "warnings": list(plan.warnings),
+    }
+
+
+def persist_real_adapter_invocation_plan(plan: RealAdapterInvocationPlan) -> dict:
+    import os
+    d = _real_adapter_plans_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    if not plan.record_digest:
+        plan.record_digest = plan.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{plan.plan_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "record_digest": plan.record_digest}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_real_adapter_invocation_plan(plan: RealAdapterInvocationPlan) -> dict:
+    issues_list: list[str] = []
+    if not plan.plan_id:
+        issues_list.append("missing plan_id")
+    if not plan.record_digest:
+        issues_list.append("missing record_digest")
+    if plan.record_digest:
+        if plan.compute_digest() != plan.record_digest:
+            issues_list.append("record_digest_mismatch")
+    if plan.real_backend_invocation_allowed:
+        issues_list.append("real_backend_invocation_allowed must be False")
+    if plan.execution_ready:
+        issues_list.append("execution_ready must be False")
+    if not plan.no_auto_apply:
+        issues_list.append("no_auto_apply must be True")
+    return {"valid": len(issues_list) == 0, "issues": issues_list, "plan_id": plan.plan_id}
+
+
+def load_latest_real_adapter_invocation_plan() -> RealAdapterInvocationPlan | None:
+    lp = _real_adapter_plans_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        if not isinstance(data, dict) or not data:
+            return None
+        return RealAdapterInvocationPlan.from_dict(data)
+    except Exception:
+        return None

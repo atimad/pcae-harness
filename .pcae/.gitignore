@@ -26,3 +26,4 @@ backend-manual-apply-packages/
 backend-lifecycle-demos/
 backend-adapter-preflights/
 real-adapter-approvals/
+real-adapter-invocation-plans/

@@ -455,6 +455,8 @@ from pcae.commands.backend import (
     run_backend_adapter_preflight_verify,
     run_backend_adapter_approval_show,
     run_backend_adapter_approval_verify,
+    run_backend_adapter_plan_show,
+    run_backend_adapter_plan_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4893,6 +4895,23 @@ def build_parser() -> argparse.ArgumentParser:
     ap_verify.add_argument("--latest", action="store_true", default=True)
     ap_verify.add_argument("--json", action="store_true")
     ap_verify.set_defaults(handler=run_backend_adapter_approval_verify)
+
+    # ── Phase 94Z: plan show/verify (create deferred to 95A) ────────────
+    adapter_plan = be_adapter_sub.add_parser(
+        "plan", help="Real adapter invocation plan artifacts."
+    )
+    adapter_plan_sub = adapter_plan.add_subparsers(
+        dest="backend_adapter_plan_command", required=True,
+    )
+    plan_show = adapter_plan_sub.add_parser("show", help="Show latest plan.")
+    plan_show.add_argument("--latest", action="store_true", default=True)
+    plan_show.add_argument("--json", action="store_true")
+    plan_show.set_defaults(handler=run_backend_adapter_plan_show)
+
+    plan_verify = adapter_plan_sub.add_parser("verify", help="Verify latest plan.")
+    plan_verify.add_argument("--latest", action="store_true", default=True)
+    plan_verify.add_argument("--json", action="store_true")
+    plan_verify.set_defaults(handler=run_backend_adapter_plan_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

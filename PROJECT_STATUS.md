@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 94Z: Real Adapter Invocation Plan Artifact (completed).
+
+RealAdapterInvocationPlan (37 fields) with SHA-256 digest. Binds adapter, request, prompt,
+preflight, approval, quarantine, audit, timeout, broker/shell-gate. All execution flags
+default False. 16 new tests (514 model total). Create deferred to 95A.
+Delivers docs/PHASE_94_REAL_ADAPTER_INVOCATION_PLAN_ARTIFACT.md.
+
 Phase 94Y: Real Adapter Invocation Approval Model (completed).
 
 RealAdapterInvocationApproval (26 fields) with SHA-256 digest. Binds to adapter, backend,

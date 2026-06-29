@@ -4876,3 +4876,145 @@ class Test94YNoExecution:
         )
         j = json.dumps(a.to_dict())
         assert "sk-ant" not in j
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Z — Real adapter invocation plan artifact tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    RealAdapterInvocationPlan,
+    create_real_adapter_invocation_plan,
+    validate_real_adapter_invocation_plan,
+    persist_real_adapter_invocation_plan,
+    verify_real_adapter_invocation_plan,
+    load_latest_real_adapter_invocation_plan,
+)
+
+
+class Test94ZPlanModel:
+    """RealAdapterInvocationPlan model and safe defaults."""
+
+    def test_safe_defaults_all_false(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-test")
+        assert plan.real_backend_invocation_allowed is False
+        assert plan.execution_ready is False
+        assert plan.no_auto_apply is True
+        assert plan.no_commit_authorization is True
+        assert plan.no_push_authorization is True
+
+    def test_real_allowed_must_be_false(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-r", real_backend_invocation_allowed=True)
+        issues = plan.validate()
+        assert any("real_backend_invocation_allowed" in i for i in issues)
+
+    def test_execution_ready_must_be_false(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-e", execution_ready=True)
+        issues = plan.validate()
+        assert any("execution_ready" in i for i in issues)
+
+    def test_no_auto_apply_must_be_true(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-a", no_auto_apply=False)
+        issues = plan.validate()
+        assert any("no_auto_apply" in i for i in issues)
+
+    def test_no_commit_must_be_true(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-c", no_commit_authorization=False)
+        issues = plan.validate()
+        assert any("no_commit" in i for i in issues)
+
+    def test_no_push_must_be_true(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-p", no_push_authorization=False)
+        issues = plan.validate()
+        assert any("no_push" in i for i in issues)
+
+    def test_serialization_round_trip(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-rt", backend_id="claude")
+        d = plan.to_dict()
+        plan2 = RealAdapterInvocationPlan.from_dict(d)
+        assert plan2.plan_id == "rip-rt"
+
+    def test_digest_verification(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-dig")
+        plan.record_digest = plan.compute_digest()
+        r = verify_real_adapter_invocation_plan(plan)
+        assert r["valid"] is True
+
+    def test_tampered_digest_fails(self):
+        plan = RealAdapterInvocationPlan(plan_id="rip-tamp")
+        plan.record_digest = plan.compute_digest()
+        plan.real_backend_invocation_allowed = True
+        r = verify_real_adapter_invocation_plan(plan)
+        assert r["valid"] is False
+
+    def test_create_blocks_without_preflight(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="bk", backend_type="mock",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        assert "preflight_artifact_missing" in plan.hard_blocks
+        assert len(plan.hard_blocks) >= 1
+
+    def test_create_blocks_without_approval(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="bk", backend_type="mock",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        assert "approval_artifact_missing" in plan.hard_blocks
+
+    def test_persist_and_load(self, tmp_path):
+        import os
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            plan = create_real_adapter_invocation_plan(
+                adapter_id="ad", backend_id="bk", backend_type="mock",
+                operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+                output_quarantine_path="/q", audit_artifact_path="/a",
+            )
+            persist = persist_real_adapter_invocation_plan(plan)
+            assert persist["status"] == "written"
+            loaded = load_latest_real_adapter_invocation_plan()
+            assert loaded is not None
+            assert loaded.plan_id == plan.plan_id
+        finally:
+            os.chdir(orig)
+
+    def test_load_absent_returns_none(self, tmp_path):
+        import os
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            assert load_latest_real_adapter_invocation_plan() is None
+        finally:
+            os.chdir(orig)
+
+
+class Test94ZPlanCLI:
+    """Plan CLI show/verify."""
+
+    def test_show_missing_handled(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "plan",
+             "show", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_gitignore_has_plans_dir(self):
+        from pathlib import Path
+        gitignore = Path(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
+        assert "real-adapter-invocation-plans/" in gitignore.read_text()
+
+
+class Test94ZPlanNoExecution:
+    """No-execution for 94Z."""
+
+    def test_no_secrets(self):
+        import json
+        plan = RealAdapterInvocationPlan(plan_id="rip-sec")
+        j = json.dumps(plan.to_dict())
+        assert "sk-ant" not in j
