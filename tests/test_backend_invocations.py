@@ -1852,3 +1852,265 @@ class Test94MMultiPartPhaseIds:
         d = r.to_dict()
         # Verify no phase ID field is truncated (not in this artifact, but check no corruption)
         assert d["rejection_id"] == "rj-mp01"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94N — Backend apply plan CLI model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ApplyPlan, ApplyOperation, read_latest_apply_plan,
+    OP_MANUAL, OP_DELETE, OP_MODIFY, OP_CREATE,
+    HIGH_RISK_OPS, VALID_OPERATIONS,
+    _APPLY_PLANS_DIR,
+)
+
+
+class Test94NReadLatestApplyPlan:
+    """read_latest_apply_plan coverage."""
+
+    def test_returns_none_when_missing(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._APPLY_PLANS_DIR
+        _bi._APPLY_PLANS_DIR = str(tmp_path / "missing-plans")
+        try:
+            assert read_latest_apply_plan() is None
+        finally:
+            _bi._APPLY_PLANS_DIR = orig
+
+    def test_returns_plan_after_persist(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        from pcae.core.backend_invocations import persist_apply_plan
+        orig = _bi._APPLY_PLANS_DIR
+        _bi._APPLY_PLANS_DIR = str(tmp_path / "plans")
+        try:
+            plan = ApplyPlan(
+                apply_plan_id="pl-rlt01", review_id="rv-rlt01",
+                output_hash="hash-rlt01", apply_ready=False,
+                rollback_required=True, check_required=True,
+            )
+            persist_apply_plan(plan)
+            loaded = read_latest_apply_plan()
+            assert loaded is not None
+            assert loaded.apply_plan_id == "pl-rlt01"
+            assert loaded.output_hash == "hash-rlt01"
+        finally:
+            _bi._APPLY_PLANS_DIR = orig
+
+    def test_roundtrip_preserves_safe_defaults(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        from pcae.core.backend_invocations import persist_apply_plan
+        orig = _bi._APPLY_PLANS_DIR
+        _bi._APPLY_PLANS_DIR = str(tmp_path / "plans-safe")
+        try:
+            plan = ApplyPlan(apply_plan_id="pl-safe", review_id="rv-safe", output_hash="h")
+            persist_apply_plan(plan)
+            loaded = read_latest_apply_plan()
+            assert loaded.apply_ready is False
+            assert loaded.rollback_required is True
+            assert loaded.check_required is True
+        finally:
+            _bi._APPLY_PLANS_DIR = orig
+
+    def test_roundtrip_preserves_operations(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        from pcae.core.backend_invocations import persist_apply_plan
+        orig = _bi._APPLY_PLANS_DIR
+        _bi._APPLY_PLANS_DIR = str(tmp_path / "plans-ops")
+        try:
+            op = ApplyOperation(operation_id="op-rt01", operation_type=OP_MANUAL, target_path="src/a.py")
+            plan = ApplyPlan(apply_plan_id="pl-ops", review_id="rv-ops", output_hash="h-ops", operations=[op])
+            persist_apply_plan(plan)
+            loaded = read_latest_apply_plan()
+            assert len(loaded.operations) == 1
+            assert loaded.operations[0].operation_type == OP_MANUAL
+            assert loaded.operations[0].target_path == "src/a.py"
+        finally:
+            _bi._APPLY_PLANS_DIR = orig
+
+    def test_roundtrip_no_secrets(self, tmp_path):
+        import json as _json
+        import pcae.core.backend_invocations as _bi
+        from pcae.core.backend_invocations import persist_apply_plan
+        orig = _bi._APPLY_PLANS_DIR
+        _bi._APPLY_PLANS_DIR = str(tmp_path / "plans-sec")
+        try:
+            plan = ApplyPlan(apply_plan_id="pl-sec", review_id="rv-sec", output_hash="h-sec")
+            persist_apply_plan(plan)
+            loaded = read_latest_apply_plan()
+            j = _json.dumps(loaded.to_dict())
+            assert "sk-ant" not in j
+            assert "api_key" not in j.lower()
+        finally:
+            _bi._APPLY_PLANS_DIR = orig
+
+
+class Test94NApplyPlanSafeDefaults:
+    """ApplyPlan safe defaults."""
+
+    def test_apply_ready_false(self):
+        plan = ApplyPlan(review_id="rv-d01", output_hash="h-d01")
+        assert plan.apply_ready is False
+
+    def test_rollback_required_true(self):
+        plan = ApplyPlan(review_id="rv-d01", output_hash="h-d01")
+        assert plan.rollback_required is True
+
+    def test_check_required_true(self):
+        plan = ApplyPlan(review_id="rv-d01", output_hash="h-d01")
+        assert plan.check_required is True
+
+    def test_hard_blocks_empty(self):
+        plan = ApplyPlan(review_id="rv-d01", output_hash="h-d01")
+        assert plan.hard_blocks == []
+
+    def test_operations_empty(self):
+        plan = ApplyPlan(review_id="rv-d01", output_hash="h-d01")
+        assert plan.operations == []
+
+
+class Test94NHighRiskOpsHardBlock:
+    """High-risk operations produce hard blocks."""
+
+    def test_delete_is_high_risk(self):
+        assert OP_DELETE in HIGH_RISK_OPS
+
+    def test_manual_is_not_high_risk(self):
+        assert OP_MANUAL not in HIGH_RISK_OPS
+
+    def test_create_is_not_high_risk(self):
+        assert OP_CREATE not in HIGH_RISK_OPS
+
+    def test_modify_is_not_high_risk(self):
+        assert OP_MODIFY not in HIGH_RISK_OPS
+
+    def test_plan_with_delete_has_hard_block(self):
+        from pcae.core.backend_invocations import ReviewArtifact, create_apply_plan
+        review = ReviewArtifact(review_id="rv-hb1", request_id="req-hb1", output_hash="h-hb1")
+        op = ApplyOperation(operation_type=OP_DELETE, target_path="src/old.py")
+        plan = create_apply_plan(review, operations=[op])
+        assert any("high_risk_op" in b for b in plan.hard_blocks)
+
+
+class Test94NApplyPlanHashBinding:
+    """Apply plan binds to review and output hash."""
+
+    def test_plan_binds_review_id(self):
+        from pcae.core.backend_invocations import ReviewArtifact, create_apply_plan
+        review = ReviewArtifact(review_id="rv-bind01", request_id="req-bind01", output_hash="h-bind01")
+        plan = create_apply_plan(review)
+        assert plan.review_id == "rv-bind01"
+        assert plan.output_hash == "h-bind01"
+
+    def test_plan_binds_approval_id(self):
+        from pcae.core.backend_invocations import ReviewArtifact, ApprovalArtifact, create_apply_plan
+        review = ReviewArtifact(review_id="rv-bind02", request_id="req-bind02", output_hash="h-bind02")
+        approval = ApprovalArtifact(approval_id="ap-bind02", review_id="rv-bind02",
+                                     request_id="req-bind02", output_hash="h-bind02",
+                                     operator="op", reason="ok")
+        plan = create_apply_plan(review, approval)
+        assert plan.approval_id == "ap-bind02"
+
+    def test_plan_missing_approval_goes_to_missing_evidence(self):
+        from pcae.core.backend_invocations import ReviewArtifact, create_apply_plan
+        review = ReviewArtifact(review_id="rv-me01", request_id="req-me01", output_hash="h-me01")
+        plan = create_apply_plan(review)
+        assert "approval" in plan.missing_evidence
+
+
+class Test94NApplyPlanValidate:
+    """validate_backend_apply_readiness with plans."""
+
+    def test_validate_plan_only_is_missing_evidence(self):
+        from pcae.core.backend_invocations import validate_backend_apply_readiness
+        plan = ApplyPlan(apply_plan_id="pl-v01", review_id="rv-v01", output_hash="h-v01")
+        assessment = validate_backend_apply_readiness(plan=plan)
+        assert assessment.apply_ready is False
+        assert assessment.status in ("blocked", "missing_evidence")
+
+    def test_validate_plan_with_hard_block_is_blocked(self):
+        from pcae.core.backend_invocations import validate_backend_apply_readiness
+        plan = ApplyPlan(
+            apply_plan_id="pl-v02", review_id="rv-v02", output_hash="h-v02",
+            hard_blocks=["forbidden_file:src/secret.py"],
+        )
+        assessment = validate_backend_apply_readiness(plan=plan)
+        assert assessment.apply_ready is False
+        assert "forbidden_file:src/secret.py" in assessment.hard_blocks
+
+    def test_validate_does_not_execute_apply(self):
+        from pcae.core.backend_invocations import validate_backend_apply_readiness
+        plan = ApplyPlan(apply_plan_id="pl-v03", review_id="rv-v03", output_hash="h-v03")
+        assessment = validate_backend_apply_readiness(plan=plan)
+        # No execution side effect — just returns assessment
+        assert hasattr(assessment, "apply_ready")
+        assert assessment.apply_ready is False
+
+    def test_validate_recommended_action_never_execute(self):
+        from pcae.core.backend_invocations import validate_backend_apply_readiness
+        plan = ApplyPlan(apply_plan_id="pl-v04", review_id="rv-v04", output_hash="h-v04")
+        assessment = validate_backend_apply_readiness(plan=plan)
+        assert "execute" not in assessment.recommended_action.lower()
+
+    def test_missing_plan_is_blocked(self):
+        from pcae.core.backend_invocations import validate_backend_apply_readiness
+        assessment = validate_backend_apply_readiness(plan=None)
+        assert assessment.apply_ready is False
+        assert "apply_plan_missing" in assessment.hard_blocks
+
+
+class Test94NMultiPartPhaseIds:
+    """Multi-part phase IDs preserved in apply plan artifacts."""
+
+    def test_multipart_phase_id_in_plan(self):
+        plan = ApplyPlan(apply_plan_id="pl-mp01", review_id="rv-mp01",
+                         output_hash="h-mp01", phase_id="94N.1.2")
+        assert plan.phase_id == "94N.1.2"
+        assert plan.to_dict()["phase_id"] == "94N.1.2"
+
+    def test_plan_preserves_multipart_phase_on_roundtrip(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        from pcae.core.backend_invocations import persist_apply_plan
+        orig = _bi._APPLY_PLANS_DIR
+        _bi._APPLY_PLANS_DIR = str(tmp_path / "plans-mp")
+        try:
+            plan = ApplyPlan(apply_plan_id="pl-mp02", review_id="rv-mp02",
+                              output_hash="h-mp02", phase_id="94N.3.4.5")
+            persist_apply_plan(plan)
+            loaded = read_latest_apply_plan()
+            assert loaded.phase_id == "94N.3.4.5"
+        finally:
+            _bi._APPLY_PLANS_DIR = orig
+
+
+class Test94NNoExecutionInModel:
+    """Apply plan model introduces no execution capability."""
+
+    def test_no_subprocess_in_core(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_network_in_core(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_patch_parsing_in_core(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "patch_parser" not in source
+        assert "parse_patch" not in source
+
+    def test_apply_plan_dirs_ignored(self):
+        from pathlib import Path
+        gitignore = Path(".pcae/.gitignore")
+        assert gitignore.exists()
+        content = gitignore.read_text()
+        assert "backend-apply-plans/" in content
+        assert "backend-apply-readiness/" in content

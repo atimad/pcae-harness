@@ -787,3 +787,308 @@ def run_backend_apply_readiness_validate(args: argparse.Namespace) -> int:
         print("  ⚠️  Read-only validation. No apply execution, no file mutation.")
 
     return 0 if assessment.apply_ready else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94N — Apply plan CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_apply_plan_show(args: argparse.Namespace) -> int:
+    """pcae backend apply-plan show --latest [--json]
+
+    Read-only display of latest apply plan metadata.
+    Never prints raw backend output or prompt content.
+    Never executes apply, never mutates files.
+    """
+    from pcae.core.backend_invocations import read_latest_apply_plan
+
+    plan = read_latest_apply_plan()
+    if plan is None:
+        msg = "No apply plans found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps(plan.to_dict(), indent=2))
+    else:
+        print("Apply plan — latest")
+        print(f"  Plan ID:         {plan.apply_plan_id}")
+        print(f"  Review ID:       {plan.review_id}")
+        print(f"  Approval ID:     {plan.approval_id}")
+        print(f"  Request ID:      {plan.request_id}")
+        print(f"  Phase ID:        {plan.phase_id}")
+        print(f"  Backend ID:      {plan.backend_id}")
+        print(f"  Output hash:     {plan.output_hash}")
+        print(f"  Apply ready:     {plan.apply_ready}")
+        print(f"  Rollback req:    {plan.rollback_required}")
+        print(f"  Check required:  {plan.check_required}")
+        print(f"  Risk level:      {plan.risk_level}")
+        print(f"  Operations:      {len(plan.operations)}")
+        for i, op in enumerate(plan.operations):
+            print(f"    [{i}] {op.operation_type}:{op.target_path}")
+        if plan.hard_blocks:
+            print(f"  Hard blocks:     {', '.join(plan.hard_blocks)}")
+        if plan.missing_evidence:
+            print(f"  Missing ev:      {', '.join(plan.missing_evidence)}")
+        if plan.warnings:
+            print(f"  Warnings:        {', '.join(plan.warnings)}")
+        print(f"  Created:         {plan.created_at_utc}")
+        print()
+        print("  Metadata only. No raw output or prompt content displayed.")
+        print("  ⚠️  apply_ready does not mean apply is executed.")
+    return 0
+
+
+def run_backend_apply_plan_create(args: argparse.Namespace) -> int:
+    """pcae backend apply-plan create [--json]
+
+    Creates an apply plan artifact bound to a review and output hash.
+    Safe defaults: apply_ready=False, rollback_required=True, check_required=True.
+    Accepts descriptive operations as metadata only — no patch parsing.
+    Never executes apply, never mutates source files.
+    """
+    import uuid as _uuid
+    from pcae.core.backend_invocations import (
+        ApplyPlan, ApplyOperation, persist_apply_plan,
+        OP_MANUAL, VALID_OPERATIONS, HIGH_RISK_OPS, RISK_MEDIUM,
+    )
+
+    review_id: str = getattr(args, "review_id", "") or ""
+    approval_id: str = getattr(args, "approval_id", "") or ""
+    request_id: str = getattr(args, "request_id", "") or ""
+    output_hash: str = getattr(args, "output_hash", "") or ""
+
+    if not review_id:
+        msg = "Missing --review-id"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not output_hash:
+        msg = "Missing --output-hash"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    phase_id: str = getattr(args, "phase_id", "") or ""
+    backend_id: str = getattr(args, "backend", "") or ""
+    ops_raw: list[str] = list(getattr(args, "operation", None) or [])
+    ops_file: str = getattr(args, "operations_file", "") or ""
+
+    # Parse descriptive operations — metadata only, no patch parsing
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+    warnings: list[str] = []
+    ops: list[ApplyOperation] = []
+
+    # Load from file if provided
+    if ops_file:
+        import json as _json_mod
+        from pathlib import Path as _Path
+        fp = _Path(ops_file)
+        if not fp.is_file():
+            msg = f"Operations file not found: {ops_file}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+        try:
+            raw_ops = _json_mod.loads(fp.read_text())
+            if isinstance(raw_ops, list):
+                ops_raw = ops_raw + [
+                    f"{o.get('operation_type', OP_MANUAL)}:{o.get('target_path', '')}"
+                    for o in raw_ops if isinstance(o, dict)
+                ]
+        except Exception as exc:
+            msg = f"Failed to load operations file: {exc}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+
+    for op_str in ops_raw:
+        # Parse "operation_type:target_path" — descriptive metadata only
+        if ":" in op_str:
+            op_type, _, target = op_str.partition(":")
+            op_type = op_type.strip()
+            target = target.strip()
+        else:
+            op_type = op_str.strip()
+            target = ""
+
+        if op_type not in VALID_OPERATIONS:
+            warnings.append(f"unknown_operation_type:{op_type}")
+            op_type = "unknown"
+
+        is_high_risk = op_type in HIGH_RISK_OPS
+        if is_high_risk:
+            hard_blocks.append(f"high_risk_op:{op_type}:{target}")
+
+        ops.append(ApplyOperation(
+            operation_id=f"op-{_uuid.uuid4().hex[:8]}",
+            operation_type=op_type,
+            target_path=target,
+            risk_level=RISK_MEDIUM,
+            allowed_by_task_scope=False,
+            forbidden=False,
+            requires_manual_review=True,
+        ))
+
+    if not approval_id:
+        missing.append("approval_id")
+    if not ops:
+        missing.append("operations")
+
+    from datetime import datetime, timezone as _tz
+    now = datetime.now(_tz.utc).isoformat()
+
+    plan = ApplyPlan(
+        apply_plan_id=f"pl-{_uuid.uuid4().hex[:12]}",
+        review_id=review_id,
+        approval_id=approval_id,
+        request_id=request_id,
+        phase_id=phase_id,
+        backend_id=backend_id,
+        output_hash=output_hash,
+        operations=ops,
+        hard_blocks=hard_blocks,
+        missing_evidence=missing,
+        warnings=warnings,
+        apply_ready=False,
+        rollback_required=True,
+        check_required=True,
+        created_at_utc=now,
+    )
+
+    persist_result = persist_apply_plan(plan)
+
+    if args.json:
+        print(json.dumps({
+            "plan": plan.to_dict(),
+            "persistence": persist_result,
+            "no_execution": True,
+            "no_apply": True,
+            "no_patch_parsing": True,
+            "no_source_files_modified": True,
+        }, indent=2))
+    else:
+        print("Apply plan created")
+        print(f"  Plan ID:         {plan.apply_plan_id}")
+        print(f"  Review ID:       {plan.review_id}")
+        print(f"  Approval ID:     {plan.approval_id}")
+        print(f"  Output hash:     {plan.output_hash}")
+        print(f"  Apply ready:     {plan.apply_ready}")
+        print(f"  Rollback req:    {plan.rollback_required}")
+        print(f"  Check required:  {plan.check_required}")
+        print(f"  Operations:      {len(ops)}")
+        if hard_blocks:
+            print(f"  Hard blocks:     {', '.join(hard_blocks)}")
+        if missing:
+            print(f"  Missing ev:      {', '.join(missing)}")
+        if persist_result.get("status") == "written":
+            print(f"  Persisted to:    {persist_result.get('path', '')}")
+        print()
+        print("  ✅ Apply plan recorded. No apply executed. No source files modified.")
+    return 0
+
+
+def run_backend_apply_plan_validate(args: argparse.Namespace) -> int:
+    """pcae backend apply-plan validate [--plan <path>] [--json]
+
+    Validates latest (or specified) apply plan for readiness.
+    Produces a BackendApplyReadinessAssessment.
+    Never executes apply, never runs tests, never runs pcae check, never mutates files.
+    """
+    import json as _json_mod
+    from pathlib import Path as _Path
+    from pcae.core.backend_invocations import (
+        ApplyPlan, ApplyOperation, ReviewArtifact, ApprovalArtifact,
+        validate_backend_apply_readiness, persist_apply_readiness,
+        read_latest_apply_plan,
+    )
+
+    plan_path: str = getattr(args, "plan", "") or ""
+    review_path: str = getattr(args, "review", "") or ""
+    approval_path: str = getattr(args, "approval", "") or ""
+
+    plan: ApplyPlan | None = None
+
+    if plan_path:
+        p = _Path(plan_path)
+        if not p.is_file():
+            msg = f"Apply plan not found: {plan_path}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+        try:
+            data = _json_mod.loads(p.read_text())
+            plan = ApplyPlan(**{k: v for k, v in data.items()
+                                 if k in ApplyPlan.__dataclass_fields__})
+            ops_raw = data.get("operations", [])
+            plan.operations = [
+                ApplyOperation(**{k: v for k, v in od.items()
+                                   if k in ApplyOperation.__dataclass_fields__})
+                for od in ops_raw if isinstance(od, dict)
+            ]
+        except Exception as exc:
+            msg = f"Failed to load apply plan: {exc}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+    else:
+        plan = read_latest_apply_plan()
+        if plan is None:
+            msg = "No apply plan found. Use --plan <path> or create one first."
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+
+    review: ReviewArtifact | None = None
+    if review_path:
+        rp = _Path(review_path)
+        if rp.is_file():
+            try:
+                rd = _json_mod.loads(rp.read_text())
+                review = ReviewArtifact(**{k: v for k, v in rd.items()
+                                            if k in ReviewArtifact.__dataclass_fields__})
+            except Exception:
+                pass
+
+    approval: ApprovalArtifact | None = None
+    if approval_path:
+        ap = _Path(approval_path)
+        if ap.is_file():
+            try:
+                ad = _json_mod.loads(ap.read_text())
+                approval = ApprovalArtifact(**{k: v for k, v in ad.items()
+                                                if k in ApprovalArtifact.__dataclass_fields__})
+            except Exception:
+                pass
+
+    assessment = validate_backend_apply_readiness(
+        plan=plan, review=review, approval=approval,
+    )
+    persist_result = persist_apply_readiness(assessment)
+
+    if args.json:
+        print(json.dumps({
+            "assessment": assessment.to_dict(),
+            "persistence": persist_result,
+            "no_execution": True,
+            "no_apply": True,
+            "no_tests_run": True,
+            "no_pcae_check_run": True,
+            "no_source_files_modified": True,
+        }, indent=2))
+    else:
+        print("Apply plan readiness validation")
+        print(f"  Assessment ID:     {assessment.assessment_id}")
+        print(f"  Plan ID:           {assessment.apply_plan_id}")
+        print(f"  Status:            {assessment.status}")
+        print(f"  Apply ready:       {assessment.apply_ready}")
+        print(f"  Trust level:       {assessment.trust_level}")
+        if assessment.hard_blocks:
+            print(f"  Hard blocks:       {', '.join(assessment.hard_blocks)}")
+        if assessment.missing_evidence:
+            print(f"  Missing evidence:  {', '.join(assessment.missing_evidence)}")
+        if assessment.warnings:
+            print(f"  Warnings:          {', '.join(assessment.warnings)}")
+        print()
+        print(f"  Recommended action: {assessment.recommended_action}")
+        if persist_result.get("status") == "written":
+            print(f"  Assessment saved:  {persist_result.get('path', '')}")
+        print()
+        print("  ⚠️  Read-only validation. No apply executed. No tests run. No pcae check run.")
+
+    return 0 if assessment.apply_ready else 1

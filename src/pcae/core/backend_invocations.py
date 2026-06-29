@@ -2081,3 +2081,30 @@ def read_latest_apply_readiness() -> BackendApplyReadinessAssessment | None:
         return BackendApplyReadinessAssessment.from_dict(data)
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94N — Apply plan read helpers
+# ═══════════════════════════════════════════════════════════════════════════
+
+def read_latest_apply_plan() -> ApplyPlan | None:
+    """Read the latest apply plan. Returns None if absent."""
+    import json as _json
+    lp = _apply_plans_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        plan = ApplyPlan(**{k: v for k, v in data.items()
+                             if k in ApplyPlan.__dataclass_fields__})
+        # Deserialize operations list
+        ops_raw = data.get("operations", [])
+        ops = []
+        for od in ops_raw:
+            if isinstance(od, dict):
+                ops.append(ApplyOperation(**{k: v for k, v in od.items()
+                                              if k in ApplyOperation.__dataclass_fields__}))
+        plan.operations = ops
+        return plan
+    except Exception:
+        return None

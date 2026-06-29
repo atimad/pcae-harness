@@ -445,6 +445,8 @@ from pcae.commands.backend import (
     run_backend_apply_readiness_validate,
     run_backend_review_show, run_backend_review_create,
     run_backend_review_approve, run_backend_review_reject,
+    run_backend_apply_plan_show, run_backend_apply_plan_create,
+    run_backend_apply_plan_validate,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4743,6 +4745,36 @@ def build_parser() -> argparse.ArgumentParser:
     rv_reject.add_argument("--reason", required=True, help="Rejection reason.")
     rv_reject.add_argument("--json", action="store_true")
     rv_reject.set_defaults(handler=run_backend_review_reject)
+
+    # ── pcae backend apply-plan (Phase 94N) ──────────────────────────────
+    be_apply_plan = backend_sub.add_parser("apply-plan", help="Manage backend apply plan artifacts.")
+    be_ap_sub = be_apply_plan.add_subparsers(dest="backend_apply_plan_command", required=True)
+
+    ap_show = be_ap_sub.add_parser("show", help="Show latest apply plan metadata.")
+    ap_show.add_argument("--latest", action="store_true", default=True)
+    ap_show.add_argument("--json", action="store_true")
+    ap_show.set_defaults(handler=run_backend_apply_plan_show)
+
+    ap_create = be_ap_sub.add_parser("create", help="Create an apply plan artifact.")
+    ap_create.add_argument("--review-id", required=True, help="Review artifact ID.")
+    ap_create.add_argument("--approval-id", default="", help="Approval artifact ID.")
+    ap_create.add_argument("--request-id", default="", help="Backend invocation request ID.")
+    ap_create.add_argument("--output-hash", required=True, help="SHA-256 hash of the output artifact.")
+    ap_create.add_argument("--phase-id", default="", help="Phase ID (multi-part IDs supported).")
+    ap_create.add_argument("--backend", default="", help="Backend ID.")
+    ap_create.add_argument("--operation", action="append", metavar="TYPE:TARGET",
+                           help="Descriptive operation metadata (e.g. manual_instruction:src/foo.py). Repeatable.")
+    ap_create.add_argument("--operations-file", default="", metavar="PATH",
+                           help="JSON file with list of {operation_type, target_path} objects.")
+    ap_create.add_argument("--json", action="store_true")
+    ap_create.set_defaults(handler=run_backend_apply_plan_create)
+
+    ap_validate = be_ap_sub.add_parser("validate", help="Validate apply plan readiness.")
+    ap_validate.add_argument("--plan", default="", help="Path to apply plan JSON (omit for latest).")
+    ap_validate.add_argument("--review", default="", help="Path to review artifact JSON.")
+    ap_validate.add_argument("--approval", default="", help="Path to approval artifact JSON.")
+    ap_validate.add_argument("--json", action="store_true")
+    ap_validate.set_defaults(handler=run_backend_apply_plan_validate)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
