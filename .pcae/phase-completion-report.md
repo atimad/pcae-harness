@@ -1,23 +1,27 @@
-# Phase 94B Complete — Backend Registry and Invocation Request Model
+# Phase 94C Complete — Backend Prompt Artifact Capture
 
 ## Summary
 
-Phase 94B implements the foundational data model for governed backend invocation:
-BackendDefinition, InvocationRequest, readiness check, and default registry.
-No backend execution.
+Phase 94C implements governed prompt artifact capture: redact secrets, SHA-256 hash,
+persist to .pcae/backend-invocations/. No backend invocation.
 
 ## Implementation
 
-- BackendDefinition: 15-field dataclass with validation
-- InvocationRequest: 16-field dataclass, no_execution_by_default=True
-- check_invocation_readiness(): fail-closed readiness assessment
-- get_default_registry(): 5 backends (claude, claude-deepseek, codex, qwen, mock)
-- make_invocation_request(): validated constructor
-- 28 tests covering serialization, registry, readiness, fail-closed, no-secret
+- capture_backend_prompt_artifact(): redact, hash, write timestamped prompt + metadata
+- PromptArtifact dataclass with 15 fields
+- Latest pointers: latest-prompt.md + latest.json
+- Redaction: TOKEN, API_KEY, PASSWORD, bearer tokens, --token, --password patterns
+- Capture updates InvocationRequest.prompt_hash and prompt_artifact_path
+- check_invocation_readiness() now sees prompt as available evidence
+
+## Tests
+
+12 new (40 total backend): hash determinism, redaction, latest pointers,
+readiness integration, multi-part phase ID, no subprocess.
 
 ## Validation
 
-- Backend model: 28/28
+- Backend model + prompt: 40/40
 - Broker: 265/265
 - Shell gate: 142/142
 - Report + notification: 161/161
@@ -26,4 +30,4 @@ No backend execution.
 
 ## Recommended Next Phase
 
-94C — Backend Prompt Artifact Capture
+94D — Backend Output Artifact Capture

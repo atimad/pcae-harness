@@ -252,3 +252,124 @@ class TestNoSecretLeak:
             j = json.dumps(b.to_dict())
             assert "sk-ant" not in j
             assert "ghp_" not in j
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94C — Prompt artifact capture tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestPromptArtifactCapture:
+    """Verify prompt artifact capture, hashing, redaction, persistence."""
+
+    def test_capture_writes_prompt_file(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_prompt_artifact(
+                req, "Write a function that adds two numbers.",
+                invocation_dir=td,
+            )
+            assert result["status"] == "captured"
+            assert Path(result["prompt_path"]).exists()
+
+    def test_prompt_hash_deterministic(self):
+        with tempfile.TemporaryDirectory() as td:
+            req1 = make_invocation_request(backend_id="mock")
+            r1 = capture_backend_prompt_artifact(req1, "hello", invocation_dir=td)
+            req2 = make_invocation_request(backend_id="mock")
+            r2 = capture_backend_prompt_artifact(req2, "hello", invocation_dir=td)
+            assert r1["prompt_hash"] == r2["prompt_hash"]
+
+    def test_prompt_hash_different_for_different_text(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            r1 = capture_backend_prompt_artifact(req, "hello A", invocation_dir=td)
+            r2 = capture_backend_prompt_artifact(req, "hello B", invocation_dir=td)
+            assert r1["prompt_hash"] != r2["prompt_hash"]
+
+    def test_latest_prompt_updated(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_prompt_artifact(
+                req, "latest test prompt", invocation_dir=td,
+            )
+            latest = Path(result["latest_prompt_path"])
+            assert latest.exists()
+            assert "latest test prompt" in latest.read_text()
+
+    def test_latest_json_updated(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94C")
+            result = capture_backend_prompt_artifact(
+                req, "json test", invocation_dir=td,
+            )
+            latest = Path(result["latest_meta_path"])
+            assert latest.exists()
+            data = json.loads(latest.read_text())
+            assert data["phase_id"] == "94C"
+
+    def test_redaction_applied_for_secrets(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_prompt_artifact(
+                req, "Use TOKEN=secret123 for auth", invocation_dir=td,
+            )
+            assert result["redaction_applied"] is True
+            content = Path(result["prompt_path"]).read_text()
+            assert "secret123" not in content
+            assert "[REDACTED]" in content
+
+    def test_redaction_not_applied_for_clean_text(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            result = capture_backend_prompt_artifact(
+                req, "Write a test for the login function.", invocation_dir=td,
+            )
+            assert result["redaction_applied"] is False
+
+    def test_request_prompt_hash_set(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            capture_backend_prompt_artifact(req, "test hash", invocation_dir=td)
+            assert len(req.prompt_hash) == 64
+
+    def test_request_prompt_artifact_path_set(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            capture_backend_prompt_artifact(req, "test path", invocation_dir=td)
+            assert req.prompt_artifact_path
+
+    def test_readiness_improves_with_prompt(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock")
+            # Before capture: missing evidence
+            r1 = check_invocation_readiness(req)
+            assert r1["status"] == READINESS_MISSING_EVIDENCE
+            # Capture prompt
+            capture_backend_prompt_artifact(req, "readiness test", invocation_dir=td)
+            # After capture: ready
+            r2 = check_invocation_readiness(req)
+            assert r2["status"] == READINESS_READY
+
+    def test_no_subprocess_execution(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "Popen(" not in source
+
+    def test_multi_part_phase_id_preserved(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94C.1")
+            result = capture_backend_prompt_artifact(
+                req, "multi-part test", invocation_dir=td,
+            )
+            data = json.loads(Path(result["latest_meta_path"]).read_text())
+            assert data["phase_id"] == "94C.1"
+
+
+import tempfile
+from pathlib import Path
+from pcae.core.backend_invocations import (
+    capture_backend_prompt_artifact, read_latest_prompt,
+)

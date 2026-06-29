@@ -1,11 +1,11 @@
 {
-  "phase_id": "94B",
-  "phase_name": "Backend Registry and Invocation Request Model",
-  "files_changed": ["src/pcae/core/backend_invocations.py", "tests/test_backend_invocations.py"],
-  "files_changed_count": 2,
-  "tests_added_or_updated": "28 new",
+  "phase_id": "94C",
+  "phase_name": "Backend Prompt Artifact Capture",
+  "files_changed": ["src/pcae/core/backend_invocations.py", "tests/test_backend_invocations.py", ".pcae/.gitignore"],
+  "files_changed_count": 3,
+  "tests_added_or_updated": "12 new (40 total)",
   "validation_results": [
-    {"name": "Backend model", "result": "28/28", "status": "passed"},
+    {"name": "Backend model + prompt", "result": "40/40", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
@@ -18,5 +18,5 @@
   ],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "94C — Backend Prompt Artifact Capture"
+  "recommended_next_phase": "94D — Backend Output Artifact Capture"
 }

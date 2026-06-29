@@ -451,3 +451,187 @@ def make_invocation_request(
     if issues:
         raise ValueError(f"Invalid invocation request: {'; '.join(issues)}")
     return req
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94C — Prompt artifact capture
+# ═══════════════════════════════════════════════════════════════════════════
+
+_BACKEND_INVOCATION_DIR = ".pcae/backend-invocations"
+
+# Re-use existing redaction from shell_gate for prompt text
+_SECRET_ENV_VAR_NAMES: frozenset[str] = frozenset({
+    "TOKEN", "API_KEY", "SECRET", "PASSWORD", "PASSWD", "PASS",
+    "AUTH", "CREDENTIAL", "KEY", "PRIVATE_KEY", "ACCESS_KEY",
+    "SECRET_KEY", "BEARER", "ANTHROPIC_API_KEY", "OPENAI_API_KEY",
+    "DEEPSEEK_API_KEY", "QWEN_API_KEY", "GITHUB_TOKEN",
+})
+_SECRET_FLAG_PATTERNS: tuple[str, ...] = (
+    "--token", "--api-key", "--secret", "--password", "--passwd",
+    "--access-key", "--secret-key", "--private-key",
+)
+
+
+def _redact_prompt_text(text: str) -> tuple[str, bool]:
+    """Redact secrets from prompt text. Returns (redacted, applied)."""
+    import re
+    redacted = text
+    did_redact = False
+    for var_name in _SECRET_ENV_VAR_NAMES:
+        pattern = re.compile(rf'\b({var_name})=(\S+)', re.IGNORECASE)
+        if pattern.search(redacted):
+            redacted = pattern.sub(r'\1=[REDACTED]', redacted)
+            did_redact = True
+    for flag in _SECRET_FLAG_PATTERNS:
+        pattern = re.compile(rf'({flag})\s+([^\s-][^\s]*)', re.IGNORECASE)
+        if pattern.search(redacted):
+            redacted = pattern.sub(r'\1 [REDACTED]', redacted)
+            did_redact = True
+    bearer = re.compile(r'(Authorization:\s*Bearer\s+)(\S+)', re.IGNORECASE)
+    if bearer.search(redacted):
+        redacted = bearer.sub(r'\1[REDACTED]', redacted)
+        did_redact = True
+    return redacted, did_redact
+
+
+@dataclass
+class PromptArtifact:
+    """A captured, redacted prompt artifact for backend invocation."""
+
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    prompt_preview: str = ""
+    prompt_size_bytes: int = 0
+    allowed_files: list[str] = field(default_factory=list)
+    forbidden_files: list[str] = field(default_factory=list)
+    expected_outputs: list[str] = field(default_factory=list)
+    created_at_utc: str = ""
+    redaction_applied: bool = False
+    schema_version: str = SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "request_id": self.request_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "backend_id": self.backend_id,
+            "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "prompt_preview": self.prompt_preview,
+            "prompt_size_bytes": self.prompt_size_bytes,
+            "allowed_files": self.allowed_files,
+            "forbidden_files": self.forbidden_files,
+            "expected_outputs": self.expected_outputs,
+            "created_at_utc": self.created_at_utc,
+            "redaction_applied": self.redaction_applied,
+            "schema_version": self.schema_version,
+        }
+
+
+def _ensure_invocation_dir() -> Path:
+    import os
+    from pathlib import Path as _Path
+    d = _Path(_BACKEND_INVOCATION_DIR)
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def capture_backend_prompt_artifact(
+    request: InvocationRequest,
+    prompt_text: str,
+    *,
+    invocation_dir: str | None = None,
+) -> dict[str, Any]:
+    """Capture a prompt artifact for a backend invocation request.
+
+    Redacts secrets, computes SHA-256 hash, writes timestamped artifact
+    and updates latest-prompt.md + latest.json.
+
+    Never invokes a backend, never runs subprocess, never calls network.
+    Returns capture result dict.
+    """
+    import hashlib
+    import json as _json
+    import os
+    from datetime import datetime, timezone
+    from pathlib import Path as _Path
+
+    dir_path = _Path(invocation_dir) if invocation_dir else _ensure_invocation_dir()
+    now = datetime.now(timezone.utc)
+    ts = now.strftime("%Y%m%d-%H%M%S")
+
+    # 1. Redact and hash
+    redacted_text, redaction_applied = _redact_prompt_text(prompt_text)
+    prompt_hash = hashlib.sha256(prompt_text.encode()).hexdigest()
+    prompt_size = len(redacted_text.encode())
+
+    # 2. Write timestamped prompt
+    prompt_filename = f"{ts}-{request.request_id}-prompt.md"
+    prompt_path = dir_path / prompt_filename
+    prompt_path.write_text(redacted_text)
+
+    # 3. Build artifact metadata
+    artifact = PromptArtifact(
+        request_id=request.request_id,
+        phase_id=request.phase_id,
+        task_id=request.task_id,
+        backend_id=request.backend_id,
+        prompt_hash=prompt_hash,
+        prompt_artifact_path=str(prompt_path),
+        prompt_preview=redacted_text[:200] if len(redacted_text) > 200 else redacted_text,
+        prompt_size_bytes=prompt_size,
+        allowed_files=request.allowed_files,
+        forbidden_files=request.forbidden_files,
+        expected_outputs=request.expected_outputs,
+        created_at_utc=now.isoformat(),
+        redaction_applied=redaction_applied,
+    )
+
+    # 4. Write timestamped metadata JSON
+    meta_filename = f"{ts}-{request.request_id}.json"
+    meta_path = dir_path / meta_filename
+    meta_path.write_text(_json.dumps(artifact.to_dict(), indent=2, sort_keys=True))
+
+    # 5. Update latest pointers
+    latest_prompt = dir_path / "latest-prompt.md"
+    latest_json = dir_path / "latest.json"
+    latest_prompt.write_text(redacted_text)
+
+    # Atomically update latest.json
+    latest_tmp = dir_path / ".latest.tmp"
+    latest_tmp.write_text(_json.dumps(artifact.to_dict(), indent=2, sort_keys=True))
+    os.replace(str(latest_tmp), str(latest_json))
+
+    # Update request with prompt data
+    request.prompt_hash = prompt_hash
+    request.prompt_artifact_path = str(prompt_path)
+
+    return {
+        "status": "captured",
+        "request_id": request.request_id,
+        "prompt_hash": prompt_hash,
+        "prompt_path": str(prompt_path),
+        "latest_prompt_path": str(latest_prompt),
+        "latest_meta_path": str(latest_json),
+        "redaction_applied": redaction_applied,
+        "prompt_size_bytes": prompt_size,
+        "artifact": artifact,
+    }
+
+
+def read_latest_prompt(invocation_dir: str | None = None) -> dict | None:
+    """Read the latest prompt artifact metadata. Returns None if absent."""
+    import json as _json
+    from pathlib import Path as _Path
+    dir_path = _Path(invocation_dir) if invocation_dir else _Path(_BACKEND_INVOCATION_DIR)
+    latest = dir_path / "latest.json"
+    if not latest.exists():
+        return None
+    try:
+        return _json.loads(latest.read_text())
+    except Exception:
+        return None

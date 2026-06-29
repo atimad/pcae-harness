@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 94C: Backend Prompt Artifact Capture (completed).
+
+Implementation phase. Added capture_backend_prompt_artifact(): redact secrets,
+SHA-256 hash, persist to .pcae/backend-invocations/ with latest-prompt.md and
+latest.json pointers. PromptArtifact dataclass (15 fields). Capture updates
+request prompt_hash and prompt_artifact_path. 12 new tests (40 total). No backend
+invocation, subprocess, network, or execution. Delivers
+docs/PHASE_94_BACKEND_PROMPT_ARTIFACT_CAPTURE.md.
+
 Phase 94B: Backend Registry and Invocation Request Model (completed).
 
 Implementation phase. Created foundational data model: BackendDefinition (15 fields),
