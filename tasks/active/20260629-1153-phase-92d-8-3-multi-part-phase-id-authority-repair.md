@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260629-1140-phase-92d-8-2-canonical-completion-artifact-refresh-guard
+20260629-1153-phase-92d-8-3-multi-part-phase-id-authority-repair
 
 ## Title
 
-Phase 92D.8.2 — Canonical Completion Artifact Refresh Guard
+Phase 92D.8.3 — Multi-Part Phase ID Authority Repair
 
 ## Status
 
@@ -18,11 +18,16 @@ corrective
 
 ## Goal
 
-Fix artifact freshness validation, commit timing, and check-name-aware comparison.
+Fix phase ID truncation and false next-phase mismatch detection.
 
 ## Allowed Files
 
+- src/pcae/core/phase_reports.py
 - src/pcae/commands/phase.py
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
+- docs/PHASE_92_MULTI_PART_PHASE_ID_AUTHORITY_REPAIR.md
+- PROJECT_STATUS.md
 
 ## Forbidden Files
 
@@ -31,7 +36,12 @@ Fix artifact freshness validation, commit timing, and check-name-aware compariso
 
 ## Allowed Zones
 
+- core
 - commands
+- tests
+- docs
+- tasks
+- config
 
 ## Forbidden Zones
 
@@ -67,4 +77,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-29T11:40:47.029933+02:00
+2026-06-29T11:53:08.782010+02:00
