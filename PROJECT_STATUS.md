@@ -2,6 +2,19 @@
 
 ## Current Phase
 
+Phase 93A: Narrow Shell Gate Design (completed).
+
+Design-only phase. Defined the narrow Production v1 shell-gate surface: 10 command
+classes, explicit PCAE-mediated check only, hard-block non-overridability (88V §16),
+fail-closed behavior, audit model with 21 fields, test strategy for 93B (~146 tests),
+go/no-go criteria. Relationship to 91A/91B/91C permission broker and 92A–92D
+phase reports and notifications defined. No shell interception, wrappers, command
+mediation, backend invocation, Telegram inbound control, remote shell, /run,
+enforcement, or command execution path was implemented.
+Recommended next phase: 93B — Narrow Shell Gate Prototype (requires explicit
+operator approval and governed task contract).
+Delivers docs/PHASE_93_NARROW_SHELL_GATE_DESIGN.md.
+
 Phase 92D.1: Notification and Phase Report Status UX Repair (completed).
 
 Corrective UX phase. Fixed pcae notify status to accurately reflect 92B/92C/92D

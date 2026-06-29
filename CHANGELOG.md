@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Completed Phase 93A narrow shell gate design: defined Production v1 shell-gate surface with 10 command classes.
+- Explicit PCAE-mediated check only; no shell interception, wrappers, or global replacement. 16-section design document.
+- Shell gate consumes 91A/91B/91C permission broker and hard-block registry; integrates with 92A–92D reports/notifications.
+- Defined audit model (21 fields), fail-closed behavior, degraded-mode behavior, test strategy (~146 tests for 93B).
+- Go/no-go criteria defined for 93B prototype. Hard-block invariant (88V §16) preserved.
+- Delivers docs/PHASE_93_NARROW_SHELL_GATE_DESIGN.md.
 - Completed Phase 92D.1 UX repair: fixed pcae notify status accuracy and phase-report show detail.
 - notify status now shows Telegram available/configured/enabled, auto hook available, dispatch opt-in.
 - phase-report show uses "not captured" instead of misleading zeroes. Delivers docs/PHASE_92_NOTIFICATION_AND_PHASE_REPORT_STATUS_UX_REPAIR.md.
