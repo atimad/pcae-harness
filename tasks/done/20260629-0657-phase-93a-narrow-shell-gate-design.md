@@ -10,7 +10,7 @@ Phase 93A — Narrow Shell Gate Design
 
 ## Status
 
-active
+completed
 
 ## Mode
 
