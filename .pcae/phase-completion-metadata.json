@@ -1,22 +1,18 @@
 {
-  "phase_id": "94G",
-  "phase_name": "Backend Invocation Audit Trail",
+  "phase_id": "94H",
+  "phase_name": "Backend Invocation Trust/Readiness Gate",
   "files_changed": ["src/pcae/core/backend_invocations.py", "src/pcae/commands/backend.py", "src/pcae/cli.py", "tests/test_backend_invocations.py"],
   "files_changed_count": 4,
-  "tests_added_or_updated": "7 new (82 total backend)",
+  "tests_added_or_updated": "9 new (91 total backend)",
   "validation_results": [
-    {"name": "Backend model + audit", "result": "82/82", "status": "passed"},
+    {"name": "Backend model + trust gate", "result": "91/91", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
     {"name": "Fast-green", "result": "3272/3272", "status": "passed"}
   ],
-  "governance_results": [
-    {"name": "pcae health", "status": "healthy"},
-    {"name": "pcae check", "status": "passed"},
-    {"name": "pcae push check", "status": "nothing_to_push"}
-  ],
+  "governance_results": [{"name": "pcae health", "status": "healthy"}, {"name": "pcae check", "status": "passed"}, {"name": "pcae push check", "status": "nothing_to_push"}],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "94H — Backend Invocation Trust/Readiness Gate"
+  "recommended_next_phase": "94I — Backend Review/Apply Governance Design"
 }

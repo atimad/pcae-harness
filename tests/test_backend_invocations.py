@@ -643,3 +643,85 @@ class TestBackendAudit:
             assert "Valid" in r.stdout or "valid" in r.stdout.lower()
         finally:
             os.chdir(orig_cwd)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94H — Trust/readiness gate tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestTrustGate:
+    def test_empty_assessment_missing(self):
+        a = assess_backend_invocation_trust()
+        assert a["status"] == "missing_evidence"
+        assert a["trust_level"] == "partial"
+
+    def test_prompt_only_is_missing(self):
+        a = assess_backend_invocation_trust(prompt_meta={"prompt_hash": "abc"})
+        assert "prompt_artifact" not in a["missing_evidence"]
+        assert "output_artifact" in a["missing_evidence"]
+
+    def test_output_not_quarantined_blocked(self):
+        a = assess_backend_invocation_trust(
+            prompt_meta={"prompt_hash": "abc"},
+            output_meta={"output_hash": "def", "quarantined": False},
+        )
+        assert a["status"] == "blocked"
+
+    def test_output_applied_blocked(self):
+        a = assess_backend_invocation_trust(
+            prompt_meta={"prompt_hash": "abc"},
+            output_meta={"output_hash": "def", "quarantined": True, "applied_to_repo": True},
+        )
+        assert a["status"] == "blocked"
+
+    def test_no_execution_false_blocked(self):
+        req = make_invocation_request(backend_id="mock")
+        req.no_execution_by_default = False
+        a = assess_backend_invocation_trust(request=req)
+        assert a["status"] == "blocked"
+
+    def test_complete_with_audit_is_ready(self):
+        a = assess_backend_invocation_trust(
+            prompt_meta={"prompt_hash": "abc"},
+            output_meta={"output_hash": "def", "quarantined": True, "applied_to_repo": False},
+            audit_meta={"event_type": "mock.run"},
+            audit_verified=True,
+        )
+        assert a["status"] == "ready"
+        assert a["trust_level"] == "complete"
+
+    def test_unverified_audit_is_partial(self):
+        a = assess_backend_invocation_trust(
+            prompt_meta={"prompt_hash": "abc"},
+            output_meta={"output_hash": "def", "quarantined": True, "applied_to_repo": False},
+            audit_meta={"event_type": "mock.run"},
+            audit_verified=False,
+        )
+        assert a["status"] == "ready"
+        assert a["trust_level"] == "partial"
+
+    def test_no_secrets_in_assessment(self):
+        a = assess_backend_invocation_trust(
+            prompt_meta={"prompt_hash": "abc"},
+        )
+        j = json.dumps(a)
+        assert "sk-ant" not in j
+
+    def test_cli_readiness(self):
+        import subprocess, sys, os
+        from pathlib import Path as _P
+        repo = _P(__file__).resolve().parent.parent
+        orig = os.getcwd()
+        os.chdir(str(repo))
+        try:
+            r = subprocess.run(
+                [sys.executable, "-m", "pcae", "backend", "readiness", "--latest"],
+                capture_output=True, text=True, timeout=15,
+            )
+            assert "Trust level" in r.stdout or "trust_level" in r.stdout
+        finally:
+            os.chdir(orig)
+
+
+from pcae.core.backend_invocations import assess_backend_invocation_trust

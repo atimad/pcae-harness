@@ -242,3 +242,51 @@ def run_backend_audit_verify(args: argparse.Namespace) -> int:
         else:
             print(f"  ✅  All records intact.")
     return 0 if result["tampered"] == 0 else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94H — Trust/readiness gate CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_readiness(args: argparse.Namespace) -> int:
+    """pcae backend readiness --latest [--json]"""
+    from pcae.core.backend_invocations import (
+        assess_backend_invocation_trust, read_latest_prompt,
+        read_latest_output, read_latest_backend_audit, verify_backend_audit,
+    )
+    prompt_meta = read_latest_prompt()
+    output_meta = read_latest_output()
+    audit_meta = read_latest_backend_audit()
+    audit_ok = verify_backend_audit().get("tampered", 1) == 0
+
+    assessment = assess_backend_invocation_trust(
+        prompt_meta=prompt_meta, output_meta=output_meta,
+        audit_meta=audit_meta, audit_verified=audit_ok,
+    )
+
+    if args.json:
+        print(json.dumps(assessment, indent=2))
+    else:
+        print("Backend invocation trust/readiness assessment")
+        print(f"  Status:           {assessment['status']}")
+        print(f"  Trust level:      {assessment['trust_level']}")
+        print(f"  Invocation ready: {assessment['backend_invocation_ready']}")
+        print()
+        print(f"  Prompt artifact:  {'present' if assessment['checks'].get('prompt_artifact_present') else 'missing'}")
+        print(f"  Output artifact:  {'present' if assessment['checks'].get('output_artifact_present') else 'missing'}")
+        print(f"  Audit record:     {'present' if assessment['checks'].get('audit_record_present') else 'missing'}")
+        print(f"  Output quarantined: {assessment['checks'].get('output_quarantined', True)}")
+        print(f"  Applied to repo:  {assessment['checks'].get('applied_to_repo', False)}")
+        if assessment["hard_blocks"]:
+            print(f"  Hard blocks:      {', '.join(assessment['hard_blocks'])}")
+        if assessment["missing_evidence"]:
+            print(f"  Missing:          {', '.join(assessment['missing_evidence'])}")
+        if assessment["warnings"]:
+            print(f"  Warnings:         {', '.join(assessment['warnings'])}")
+        print()
+        print(f"  Recommended:      {assessment['recommended_action']}")
+        print(f"  No real backend:  True")
+        print(f"  No subprocess:    True")
+        print(f"  No network:       True")
+    return 0 if not assessment["hard_blocks"] else 1

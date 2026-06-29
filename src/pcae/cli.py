@@ -441,6 +441,7 @@ from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.backend import (
     run_backend_list, run_backend_status, run_backend_plan, run_backend_show,
     run_backend_audit_show, run_backend_audit_list, run_backend_audit_verify,
+    run_backend_readiness,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4679,6 +4680,12 @@ def build_parser() -> argparse.ArgumentParser:
     ba_verify = be_audit_sub.add_parser("verify", help="Verify audit integrity.")
     ba_verify.add_argument("--json", action="store_true")
     ba_verify.set_defaults(handler=run_backend_audit_verify)
+
+    # ── pcae backend readiness (Phase 94H) ──────────────────────────────
+    be_readiness = backend_sub.add_parser("readiness", help="Assess invocation trust/readiness.")
+    be_readiness.add_argument("--latest", action="store_true", default=True)
+    be_readiness.add_argument("--json", action="store_true")
+    be_readiness.set_defaults(handler=run_backend_readiness)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

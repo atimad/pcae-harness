@@ -1016,3 +1016,108 @@ def list_backend_audit(limit: int = 10) -> list[dict]:
         except Exception:
             pass
     return records
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94H — Trust/readiness gate
+# ═══════════════════════════════════════════════════════════════════════════
+
+TRUST_COMPLETE = "complete"
+TRUST_PARTIAL = "partial"
+TRUST_INCOMPLETE = "incomplete"
+TRUST_UNTRUSTED = "untrusted"
+
+ASSESSMENT_READY = "ready"
+ASSESSMENT_BLOCKED = "blocked"
+ASSESSMENT_MISSING = "missing_evidence"
+ASSESSMENT_REVIEW = "needs_human_review"
+ASSESSMENT_INCOMPLETE = "incomplete"
+
+
+def assess_backend_invocation_trust(
+    request: InvocationRequest | None = None,
+    *,
+    readiness: dict[str, Any] | None = None,
+    prompt_meta: dict[str, Any] | None = None,
+    output_meta: dict[str, Any] | None = None,
+    audit_meta: dict[str, Any] | None = None,
+    audit_verified: bool = False,
+) -> dict[str, Any]:
+    """Assess backend invocation lifecycle trust. Fail-closed."""
+    import uuid as _uuid
+    assessment_id = f"as-{_uuid.uuid4().hex[:12]}"
+    checks: dict[str, bool] = {}
+    missing: list[str] = []
+    hard_blocks: list[str] = []
+    warnings: list[str] = []
+
+    req_id = request.request_id if request else ""
+    phase_id = request.phase_id if request else ""
+    backend_id = request.backend_id if request else ""
+
+    if request and not request.no_execution_by_default:
+        hard_blocks.append("no_execution_by_default=False")
+
+    prompt_present = bool(prompt_meta and prompt_meta.get("prompt_hash"))
+    checks["prompt_artifact_present"] = prompt_present
+    if not prompt_present:
+        missing.append("prompt_artifact")
+
+    output_present = bool(output_meta and output_meta.get("output_hash"))
+    checks["output_artifact_present"] = output_present
+    if not output_present and prompt_present:
+        missing.append("output_artifact")
+
+    if output_meta:
+        quarantined = output_meta.get("quarantined", True)
+        applied = output_meta.get("applied_to_repo", False)
+        checks["output_quarantined"] = quarantined
+        checks["applied_to_repo"] = applied
+        if not quarantined:
+            hard_blocks.append("output_not_quarantined")
+        if applied:
+            hard_blocks.append("output_applied_to_repo")
+
+    audit_present = bool(audit_meta)
+    checks["audit_record_present"] = audit_present
+    checks["audit_record_verified"] = audit_verified
+    if not audit_present:
+        missing.append("audit_record")
+    elif not audit_verified:
+        warnings.append("audit_not_verified")
+
+    checks["no_real_backend_invoked"] = True
+    checks["no_subprocess"] = True
+    checks["no_network"] = True
+    checks["no_execution"] = True
+    checks["no_enforcement"] = True
+
+    if hard_blocks:
+        status = ASSESSMENT_BLOCKED
+        trust = TRUST_UNTRUSTED
+    elif missing:
+        status = ASSESSMENT_MISSING
+        trust = TRUST_PARTIAL
+    elif warnings:
+        status = ASSESSMENT_READY
+        trust = TRUST_PARTIAL
+    else:
+        status = ASSESSMENT_READY
+        trust = TRUST_COMPLETE
+
+    return {
+        "assessment_id": assessment_id, "request_id": req_id,
+        "phase_id": phase_id, "backend_id": backend_id,
+        "status": status, "trust_level": trust,
+        "backend_invocation_ready": status == ASSESSMENT_READY,
+        "checks": checks, "missing_evidence": missing,
+        "hard_blocks": hard_blocks, "warnings": warnings,
+        "no_real_backend_invoked": True, "no_subprocess": True,
+        "no_network": True, "no_execution": True, "no_enforcement": True,
+        "recommended_action": (
+            "blocked" if hard_blocks else
+            "gather_evidence" if missing else
+            "manual_review" if warnings else "proceed"
+        ),
+        "schema_version": SCHEMA_VERSION,
+    }

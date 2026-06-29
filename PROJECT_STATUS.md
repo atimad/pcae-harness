@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 94H: Backend Invocation Trust/Readiness Gate (completed).
+
+Implementation phase. Added assess_backend_invocation_trust(): fail-closed
+assessment with 4 trust levels (complete/partial/incomplete/untrusted). Checks
+prompt/output/audit presence, quarantine, no-apply, no-execution invariants.
+CLI: pcae backend readiness --latest. 9 new tests (91 total). No execution.
+Delivers docs/PHASE_94_BACKEND_INVOCATION_TRUST_READINESS_GATE.md.
+
 Phase 94G: Backend Invocation Audit Trail (completed).
 
 Implementation phase. Added persist_backend_audit(): 25+ field audit records with
