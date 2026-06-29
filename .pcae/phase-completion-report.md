@@ -1,27 +1,31 @@
-# Phase 92D.8.4 Complete — Structured Tests Run Completeness Repair
+# Phase 93D Complete — Shell Gate Audit Persistence Design
 
 ## Summary
 
-Phase 92D.8.4 fixes the final trust issue: reports showed partial ⚠️ for missing tests_run even when structured Test Results were present. Now structured test_results satisfies the tests_run trust requirement.
+Phase 93D defines how Phase 93C audit evidence should be persisted as durable
+audit artifacts in `.pcae/shell-gate-audit/`. Design-only — no implementation.
 
-## Changes
+## Design Decisions
 
-- `assess_completeness()`: tests_run no longer marked missing when structured test_results are present
-- `render_markdown()`: shows test suite count when tests_run=0 but test_results exist
-- Report completeness can now reach complete ✅ when all other trust fields are present
+- Individual JSON files with timestamped naming
+- `latest.json` pointer (matches phase-reports convention)
+- SHA-256 per-record digest for tamper detection
+- Redacted commands only; no raw secrets persisted
+- Broker event cross-reference via broker_event_id
+- Audit persistence failure is non-fatal to shell-gate check
+- Retention: 100 max files, 30-day age limit
 
-## Tests
+## Future CLI
 
-1 new test (78 total): structured_test_results_satisfies_tests_run
+- pcae shell-gate audit show --latest
+- pcae shell-gate audit list --limit N
+- pcae shell-gate audit verify
 
-## Validation
+## Non-Goals
 
-- Report + notification: 161/161
-- Broker + shell gate: 387/387
-- Fast-green: 3272/3272
-- Health: healthy, check: passed, push: nothing_to_push
-- origin/main..HEAD: 0
+No implementation of persistence, shell interception, wrappers, enforcement,
+backend invocation, or command execution.
 
 ## Recommended Next Phase
 
-93D — Shell Gate Audit Persistence Design
+93E — Shell Gate Audit Persistence Implementation

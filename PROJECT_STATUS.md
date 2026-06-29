@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 93D: Shell Gate Audit Persistence Design (completed).
+
+Design-only phase. Defines durable audit artifact model for Phase 93C shell-gate
+audit evidence. Individual JSON files in .pcae/shell-gate-audit/ with timestamped
+naming, latest.json pointer, SHA-256 per-record digest. Redaction, integrity,
+failure-mode, CLI design (audit show/list/verify), and ~40 planned tests.
+No implementation of persistence, shell interception, enforcement, or execution.
+Delivers docs/PHASE_93_SHELL_GATE_AUDIT_PERSISTENCE_DESIGN.md.
+
 Phase 92D.8.4: Structured Tests Run Completeness Repair (completed).
 
 One-line fix: structured test_results now satisfies tests_run trust requirement.

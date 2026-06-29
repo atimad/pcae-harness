@@ -1,12 +1,13 @@
 {
-  "phase_id": "92D.8.4",
-  "phase_name": "Structured Tests Run Completeness Repair",
-  "files_changed": ["src/pcae/core/phase_reports.py", "tests/test_phase_reports.py"],
-  "files_changed_count": 2,
-  "tests_added_or_updated": "1 new",
+  "phase_id": "93D",
+  "phase_name": "Shell Gate Audit Persistence Design",
+  "files_changed": ["docs/PHASE_93_SHELL_GATE_AUDIT_PERSISTENCE_DESIGN.md"],
+  "files_changed_count": 1,
+  "tests_added_or_updated": "0 (design-only, no tests)",
   "validation_results": [
+    {"name": "Shell gate", "result": "122/122", "status": "passed"},
+    {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
-    {"name": "Broker + shell gate", "result": "387/387", "status": "passed"},
     {"name": "Fast-green", "result": "3272/3272", "status": "passed"}
   ],
   "governance_results": [
@@ -16,5 +17,5 @@
   ],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "93D"
+  "recommended_next_phase": "93E — Shell Gate Audit Persistence Implementation"
 }
