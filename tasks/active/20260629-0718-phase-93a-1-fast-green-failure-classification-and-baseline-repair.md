@@ -22,10 +22,8 @@ Investigate and classify the single fast-green failure (3304/3305) reported afte
 
 ## Allowed Files
 
-- docs/PHASE_93_FAST_GREEN_FAILURE_CLASSIFICATION.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- tasks/DONE.md
+- tasks/active/20260629-0657-phase-93a-narrow-shell-gate-design.md
+- tasks/done/20260629-0657-phase-93a-narrow-shell-gate-design.md
 
 ## Forbidden Files
 
