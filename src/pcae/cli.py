@@ -403,7 +403,12 @@ from pcae.commands.decision_log import run_decision_log
 from pcae.commands.risk_register import run_risk_register
 from pcae.commands.project_state import run_project_state
 from pcae.commands.gate_dry_run import run_gate_dry_run
-from pcae.commands.shell_gate import run_shell_gate_check
+from pcae.commands.shell_gate import (
+    run_shell_gate_check,
+    run_shell_gate_audit_show,
+    run_shell_gate_audit_list,
+    run_shell_gate_audit_verify,
+)
 from pcae.commands.permission_broker import (
     run_permission_broker_evaluate,
     run_permission_broker_status,
@@ -4604,6 +4609,29 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON gate decision output.",
     )
     shell_gate_check_parser.set_defaults(handler=run_shell_gate_check)
+
+    # ── pcae shell-gate audit (Phase 93E) ──────────────────────────────────
+    shell_gate_audit_parser = shell_gate_subparsers.add_parser(
+        "audit",
+        help="Read-only shell gate audit persistence (Phase 93E).",
+    )
+    sg_audit_sub = shell_gate_audit_parser.add_subparsers(
+        dest="shell_gate_audit_command", required=True,
+    )
+    sg_audit_show = sg_audit_sub.add_parser("show", help="Show latest audit record.")
+    sg_audit_show.add_argument("--latest", action="store_true", default=True,
+                               help="Show the most recent audit record.")
+    sg_audit_show.add_argument("--json", action="store_true")
+    sg_audit_show.set_defaults(handler=run_shell_gate_audit_show)
+
+    sg_audit_list = sg_audit_sub.add_parser("list", help="List recent audit records.")
+    sg_audit_list.add_argument("--limit", type=int, default=10, help="Max records (default 10).")
+    sg_audit_list.add_argument("--json", action="store_true")
+    sg_audit_list.set_defaults(handler=run_shell_gate_audit_list)
+
+    sg_audit_verify = sg_audit_sub.add_parser("verify", help="Verify audit record integrity.")
+    sg_audit_verify.add_argument("--json", action="store_true")
+    sg_audit_verify.set_defaults(handler=run_shell_gate_audit_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

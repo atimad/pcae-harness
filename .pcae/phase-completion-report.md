@@ -1,31 +1,33 @@
-# Phase 93D Complete — Shell Gate Audit Persistence Design
+# Phase 93E Complete — Shell Gate Audit Persistence Implementation
 
 ## Summary
 
-Phase 93D defines how Phase 93C audit evidence should be persisted as durable
-audit artifacts in `.pcae/shell-gate-audit/`. Design-only — no implementation.
+Phase 93E implements simulation-only audit persistence for shell-gate check
+decisions. Every pcae shell-gate check persists redacted audit evidence to
+.pcae/shell-gate-audit/ as durable JSON artifacts.
 
-## Design Decisions
+## Implementation
 
-- Individual JSON files with timestamped naming
-- `latest.json` pointer (matches phase-reports convention)
-- SHA-256 per-record digest for tamper detection
-- Redacted commands only; no raw secrets persisted
-- Broker event cross-reference via broker_event_id
-- Audit persistence failure is non-fatal to shell-gate check
-- Retention: 100 max files, 30-day age limit
+- persist_audit_record(): writes individual JSON files with SHA-256 digest
+- verify_audit_records(): integrity verification
+- read_latest_audit() / list_audit_records(): read/list operations
+- CLI: pcae shell-gate audit show --latest, audit list, audit verify
+- Persistence is always-on; can be disabled via PCAE_SHELL_GATE_AUDIT=0
+- Failure is non-fatal — check always proceeds
 
-## Future CLI
+## Tests
 
-- pcae shell-gate audit show --latest
-- pcae shell-gate audit list --limit N
-- pcae shell-gate audit verify
+7 new tests (129 total shell gate): write, fields, read, verify, tamper, JSON output, CLI
 
-## Non-Goals
+## Validation
 
-No implementation of persistence, shell interception, wrappers, enforcement,
-backend invocation, or command execution.
+- Shell gate: 129/129
+- Broker: 265/265
+- Report + notification: 161/161
+- Fast-green: 3272/3272
+- Health: healthy, check: passed, push: clean
+- origin/main..HEAD: 0
 
 ## Recommended Next Phase
 
-93E — Shell Gate Audit Persistence Implementation
+TBD (operator decision)

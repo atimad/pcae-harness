@@ -1509,4 +1509,206 @@ def check_shell_gate(
             "execution_authorization_not_granted": True,
             "audit_evidence_simulation_only": True,
         },
+        # Phase 93E — audit persistence
+        "audit_persistence": _persist_if_enabled(audit_evidence, repo_root),
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 93E — Audit persistence helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_AUDIT_DIR = ".pcae/shell-gate-audit"
+_AUDIT_ENV_ENABLE = "PCAE_SHELL_GATE_AUDIT"
+
+
+def _persist_if_enabled(audit_evidence: dict, repo_root: Path) -> dict:
+    """Persist audit evidence if enabled. Always returns status dict."""
+    result = persist_audit_record(audit_evidence)
+    # Detect active task for context
+    task_contract = _detect_task_contract(repo_root)
+    if task_contract and result["status"] == "written":
+        # Task ID could be added to persisted record in a future phase
+        pass
+    return result
+
+
+def _audit_enabled() -> bool:
+    """Check if audit persistence is enabled (always-on for explicit checks)."""
+    import os
+    val = os.environ.get(_AUDIT_ENV_ENABLE, "1")
+    return val.lower() in ("1", "true", "yes")
+
+
+def _audit_dir() -> Path:
+    return Path(_AUDIT_DIR)
+
+
+def persist_audit_record(record: dict) -> dict:
+    """Persist a shell-gate audit record to .pcae/shell-gate-audit/.
+
+    Returns dict with status, path, latest_path, record_digest.
+    Never raises — failures are non-fatal.
+    """
+    import hashlib
+    import json as _json
+    import os
+    from datetime import datetime, timezone
+
+    result = {"status": "skipped", "path": "", "latest_path": "", "record_digest": ""}
+
+    if not _audit_enabled():
+        result["status"] = "disabled"
+        return result
+
+    audit_id = record.get("audit_id", "unknown")
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    filename = f"{ts}-{audit_id}.json"
+
+    try:
+        audit_dir_path = _audit_dir()
+        audit_dir_path.mkdir(parents=True, exist_ok=True)
+
+        # Persisted fields only — redacted command, no raw secrets
+        persisted = {
+            "audit_id": record.get("audit_id", ""),
+            "schema_version": record.get("schema_version", "1.0"),
+            "timestamp_utc": record.get("timestamp_utc", ""),
+            "phase_id": record.get("phase_id", None),
+            "task_id": record.get("task_id", None),
+            "command_hash": record.get("command_hash", ""),
+            "redacted_command": record.get("redacted_command", ""),
+            "redaction_applied": record.get("redaction_applied", False),
+            "command_class": record.get("command_class", ""),
+            "command_category": record.get("command_category", ""),
+            "action_type": record.get("action_type", ""),
+            "decision": record.get("decision", ""),
+            "hard_block": record.get("hard_block", False),
+            "reason_code": record.get("reason_code", ""),
+            "reason_codes": record.get("reason_codes", []),
+            "required_evidence": record.get("required_evidence", []),
+            "message_summary": record.get("message_summary", ""),
+            "broker_event_id": record.get("broker_event_id", None),
+            "broker_message_hash": record.get("broker_message_hash", None),
+            "simulation_only": record.get("simulation_only", True),
+            "no_execution": record.get("no_execution", True),
+            "no_enforcement": record.get("no_enforcement", True),
+            "source": record.get("source", "shell_gate"),
+            "persisted_at": datetime.now(timezone.utc).isoformat(),
+        }
+
+        # Compute record digest (excluding digest field itself)
+        digest_input = _json.dumps(persisted, sort_keys=True, default=str)
+        record_digest = hashlib.sha256(digest_input.encode()).hexdigest()
+        persisted["record_digest"] = record_digest
+
+        file_path = audit_dir_path / filename
+        latest_path = audit_dir_path / "latest.json"
+
+        # Write record
+        file_path.write_text(_json.dumps(persisted, indent=2, sort_keys=True))
+        # Atomically update latest.json via temp file
+        tmp_path = audit_dir_path / ".latest.tmp"
+        tmp_path.write_text(_json.dumps(persisted, indent=2, sort_keys=True))
+        os.replace(str(tmp_path), str(latest_path))
+
+        result["status"] = "written"
+        result["path"] = str(file_path)
+        result["latest_path"] = str(latest_path)
+        result["record_digest"] = record_digest
+    except Exception as exc:
+        result["status"] = "failed"
+        result["error"] = str(exc)
+
+    return result
+
+
+def verify_audit_records(audit_dir: Path | None = None) -> dict:
+    """Verify integrity of all audit records.
+
+    Returns dict with total, valid, tampered, and details.
+    """
+    import json as _json
+    import hashlib
+
+    if audit_dir is None:
+        audit_dir = _audit_dir()
+
+    result = {"total": 0, "valid": 0, "tampered": 0, "missing": 0, "details": []}
+
+    if not audit_dir.exists():
+        return result
+
+    for f in sorted(audit_dir.glob("*.json")):
+        if f.name in ("latest.json", ".latest.tmp"):
+            continue
+        result["total"] += 1
+        try:
+            data = _json.loads(f.read_text())
+            stored_digest = data.pop("record_digest", None)
+            if not stored_digest:
+                result["missing"] += 1
+                result["details"].append({"file": str(f), "status": "no_digest"})
+                continue
+            digest_input = _json.dumps(data, sort_keys=True, default=str)
+            computed = hashlib.sha256(digest_input.encode()).hexdigest()
+            if computed == stored_digest:
+                result["valid"] += 1
+            else:
+                result["tampered"] += 1
+                result["details"].append({
+                    "file": str(f), "status": "tampered",
+                    "stored": stored_digest[:16], "computed": computed[:16],
+                })
+        except Exception as exc:
+            result["tampered"] += 1
+            result["details"].append({"file": str(f), "status": "error", "error": str(exc)})
+
+    return result
+
+
+def read_latest_audit(audit_dir: Path | None = None) -> dict | None:
+    """Read the latest audit record. Returns None if no records exist."""
+    import json as _json
+
+    if audit_dir is None:
+        audit_dir = _audit_dir()
+
+    latest_path = audit_dir / "latest.json"
+    if not latest_path.exists():
+        return None
+    try:
+        return _json.loads(latest_path.read_text())
+    except Exception:
+        return None
+
+
+def list_audit_records(limit: int = 10, audit_dir: Path | None = None) -> list[dict]:
+    """List recent audit records. Returns list of record summaries."""
+    import json as _json
+
+    if audit_dir is None:
+        audit_dir = _audit_dir()
+
+    if not audit_dir.exists():
+        return []
+
+    records: list[dict] = []
+    for f in sorted(audit_dir.glob("*.json"), reverse=True):
+        if f.name in ("latest.json", ".latest.tmp"):
+            continue
+        try:
+            data = _json.loads(f.read_text())
+            records.append({
+                "file": f.name,
+                "audit_id": data.get("audit_id", ""),
+                "timestamp_utc": data.get("timestamp_utc", ""),
+                "decision": data.get("decision", ""),
+                "reason_code": data.get("reason_code", ""),
+                "redacted_command": data.get("redacted_command", ""),
+            })
+            if len(records) >= limit:
+                break
+        except Exception:
+            pass
+    return records

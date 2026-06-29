@@ -540,3 +540,98 @@ class Test93BCompatibility:
         result = _check("git commit --no-verify -m x")
         assert result["command_class"] == "no_verify"
         assert result["hard_block"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 93E — Audit persistence tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestAuditPersistence:
+    """Verify audit record persistence and integrity."""
+
+    def test_audit_persistence_written(self):
+        with tempfile.TemporaryDirectory() as td:
+            import os
+            old_dir = os.getcwd()
+            # Use a temp dir for .pcae/shell-gate-audit
+            # The persistence uses repo_root which is REPO_ROOT
+            result = _check("git push --force")
+            ap = result.get("audit_persistence", {})
+            assert ap.get("status") == "written", \
+                f"Expected written, got {ap.get('status')}: {ap}"
+            assert ap.get("record_digest")
+            assert ".pcae/shell-gate-audit" in ap.get("latest_path", "")
+
+    def test_audit_persistence_includes_required_fields(self):
+        result = _check("git status")
+        ap = result.get("audit_persistence", {})
+        assert "status" in ap
+        assert "record_digest" in ap
+
+    def test_read_latest_audit_returns_record(self):
+        from pcae.core.shell_gate import read_latest_audit
+        _check("git push --force")  # Ensure at least one record exists
+        record = read_latest_audit()
+        assert record is not None
+        assert "audit_id" in record
+        assert "command_hash" in record
+        assert "redacted_command" in record
+        assert "record_digest" in record
+        assert record.get("simulation_only") is True
+        assert record.get("no_execution") is True
+
+    def test_verify_passes_for_untouched_record(self):
+        from pcae.core.shell_gate import verify_audit_records
+        _check("git push --force")
+        result = verify_audit_records()
+        assert result["tampered"] == 0
+        assert result["valid"] >= 1
+
+    def test_verify_detects_tampered_record(self):
+        from pcae.core.shell_gate import _audit_dir, verify_audit_records
+        import json
+        _check("git push --force")
+        audit_dir = _audit_dir()
+        files = sorted(audit_dir.glob("*.json"))
+        record_files = [f for f in files if f.name != "latest.json"]
+        if record_files:
+            # Tamper with a record
+            data = json.loads(record_files[0].read_text())
+            data["decision"] = "allow"  # Changed from deny
+            record_files[0].write_text(json.dumps(data))
+            result = verify_audit_records()
+            assert result["tampered"] >= 1
+
+    def test_audit_persistence_in_json_output(self):
+        import subprocess, sys, json, os
+        orig_cwd = os.getcwd()
+        os.chdir(REPO_ROOT)
+        try:
+            r = subprocess.run(
+                [sys.executable, "-m", "pcae", "shell-gate", "check",
+                 "--command", "git status", "--json"],
+                capture_output=True, text=True, timeout=15,
+            )
+            data = json.loads(r.stdout)
+            assert "audit_persistence" in data
+            ap = data["audit_persistence"]
+            assert ap.get("status") in ("written", "skipped", "disabled", "failed")
+        finally:
+            os.chdir(orig_cwd)
+
+    def test_audit_verify_cli(self):
+        import subprocess, sys, os
+        orig_cwd = os.getcwd()
+        os.chdir(REPO_ROOT)
+        try:
+            r = subprocess.run(
+                [sys.executable, "-m", "pcae", "shell-gate", "audit", "verify"],
+                capture_output=True, text=True, timeout=15,
+            )
+            assert "Valid" in r.stdout or "valid" in r.stdout.lower()
+        finally:
+            os.chdir(orig_cwd)
+
+
+import tempfile

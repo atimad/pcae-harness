@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 93E: Shell Gate Audit Persistence Implementation (completed).
+
+Simulation-only implementation. persist_audit_record() writes redacted audit
+evidence to .pcae/shell-gate-audit/ with SHA-256 record digests. CLI: pcae
+shell-gate audit show/list/verify. Always-on persistence; non-fatal on failure.
+7 new tests (129 total shell gate). No shell interception, wrappers, command
+execution, backend invocation, or enforcement. Delivers docs/PHASE_93_SHELL_GATE_AUDIT_PERSISTENCE_IMPLEMENTATION.md.
+
 Phase 93D: Shell Gate Audit Persistence Design (completed).
 
 Design-only phase. Defines durable audit artifact model for Phase 93C shell-gate
