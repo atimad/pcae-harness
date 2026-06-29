@@ -1,18 +1,17 @@
 {
-  "phase_id": "92D.6",
-  "phase_name": "Phase Completion Structured Metadata Capture",
+  "phase_id": "92D.7",
+  "phase_name": "Telegram Handoff Message Precision Tightening",
   "status": "completed",
   "files_changed": [
-    "src/pcae/core/phase_reports.py",
-    "src/pcae/commands/phase.py",
-    "tests/test_phase_reports.py",
-    "docs/PHASE_92_PHASE_COMPLETION_STRUCTURED_METADATA_CAPTURE.md",
+    "src/pcae/core/notifications.py",
+    "tests/test_telegram_notifications.py",
+    "docs/PHASE_92_TELEGRAM_HANDOFF_MESSAGE_PRECISION_TIGHTENING.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md"
   ],
-  "files_changed_count": 7,
-  "tests_added_or_updated": "5 new tests",
+  "files_changed_count": 6,
+  "tests_added_or_updated": "2 test fixes (0 new, precision refinement only)",
   "validation_results": [
     {"name": "Report + notification", "result": "149/149", "status": "passed"},
     {"name": "Broker + shell gate", "result": "387/387", "status": "passed"},
@@ -28,5 +27,5 @@
   "origin_main_head_count": 0,
   "notification_dispatch_result": "sent",
   "no_go_confirmation": "No Telegram polling, inbound commands, remote shell, /run, enforcement, shell interception, wrappers, backend invocation, or command execution path was implemented.",
-  "recommended_next_phase": "TBD (operator decision)"
+  "recommended_next_phase": "93D — Shell Gate Audit Persistence Design"
 }
