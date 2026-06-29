@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95A — Artifact-Only Real Invocation Dry-Run Boundary to Phase 95B — Claude/Claude-DeepSeek Runtime Detection Design; session refreshed and governance continuity revalidated.
+- Completed Phase 95B Claude/Claude-DeepSeek Runtime Detection Design (design-only).
+- Two subagents: runtime detection architecture, bypass/safety review.
+- Delivers docs/PHASE_95_CLAUDE_RUNTIME_DETECTION_DESIGN.md.
+
 - Transitioned active task from Phase 94Z — Real Adapter Invocation Plan Artifact to Phase 95A — Artifact-Only Real Invocation Dry-Run Boundary; session refreshed and governance continuity revalidated.
 - Completed Phase 95A Artifact-Only Real Invocation Dry-Run Boundary. 13 tests (527 model total).
 

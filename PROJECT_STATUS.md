@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 95B: Claude/Claude-DeepSeek Runtime Detection Design (completed).
+
+Design-only. Two subagents: runtime detection architecture, bypass/safety boundaries.
+Defines stat-only runtime identity model (BackendRuntimeIdentity, 24 fields), detection
+profiles for Claude/Claude-DeepSeek/Custom, fail-closed bypass boundary (4 independent
+enforcement points), 15 failure categories, shell-gate/broker integration, 10 go/no-go
+criteria. No implementation. Delivers docs/PHASE_95_CLAUDE_RUNTIME_DETECTION_DESIGN.md.
+
 Phase 95A: Artifact-Only Real Invocation Dry-Run Boundary (completed).
 
 Dry-run assessment model (40 fields) evaluates evidence chain without execution.
