@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 94F: Mock Backend Invocation Prototype (completed).
+
+Implementation phase. Added run_mock_backend_invocation(): in-process deterministic
+mock that exercises full lifecycle (readiness → prompt capture → mock output →
+quarantine). Rejects non-mock backends. 10 new tests (75 total). No real AI,
+subprocess, network, shell, or repo mutation. Delivers
+docs/PHASE_94_MOCK_BACKEND_INVOCATION_PROTOTYPE.md.
+
 Phase 94E: Backend Invocation Dry-Run CLI (completed).
 
 Implementation phase. Added pcae backend list/status/plan/show --latest commands.

@@ -484,3 +484,88 @@ class TestOutputArtifactCapture:
 from pcae.core.backend_invocations import (
     capture_backend_output_artifact, OutputArtifact,
 )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94F — Mock backend invocation prototype tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestMockBackendInvocation:
+    """Verify mock backend lifecycle."""
+
+    def test_mock_run_completes(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(
+                backend_id="mock", phase_id="94F",
+                prompt_artifact_path="dummy",  # will be set by capture
+            )
+            result = run_mock_backend_invocation(req, "Write a test.", invocation_dir=td)
+            assert result["status"] == "completed"
+
+    def test_mock_output_is_deterministic(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94F")
+            r1 = run_mock_backend_invocation(req, "hello", invocation_dir=td)
+            r2 = run_mock_backend_invocation(req, "hello", invocation_dir=td)
+            assert r1["output_hash"] == r2["output_hash"]
+
+    def test_mock_output_has_marker(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94F")
+            result = run_mock_backend_invocation(req, "test", invocation_dir=td)
+            output = Path(result["output_path"]).read_text()
+            assert "MOCK BACKEND OUTPUT" in output
+            assert "no real backend invoked" in output
+
+    def test_mock_output_quarantined(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94F")
+            result = run_mock_backend_invocation(req, "test", invocation_dir=td)
+            assert result["quarantined"] is True
+            assert result["applied_to_repo"] is False
+
+    def test_non_mock_backend_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="claude", phase_id="94F")
+            result = run_mock_backend_invocation(req, "test", invocation_dir=td)
+            assert result["status"] == "blocked"
+
+    def test_blocked_readiness_prevents_run(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", approval_state=APPROVAL_DENIED)
+            result = run_mock_backend_invocation(req, "test", invocation_dir=td)
+            assert result["status"] == "blocked"
+
+    def test_no_real_backend_flags(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94F")
+            result = run_mock_backend_invocation(req, "test", invocation_dir=td)
+            assert result["no_real_backend_invoked"] is True
+            assert result["no_subprocess"] is True
+            assert result["no_network"] is True
+
+    def test_prompt_hash_cross_referenced(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94F")
+            result = run_mock_backend_invocation(req, "cross-ref test", invocation_dir=td)
+            assert result["prompt_hash"]
+            assert len(result["prompt_hash"]) == 64
+
+    def test_no_subprocess_in_mock(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations._generate_mock_output)
+        assert "import subprocess" not in source
+        assert "subprocess.run" not in source
+        assert "Popen(" not in source
+        assert "urlopen" not in source
+
+    def test_multi_part_phase_id_in_mock(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94F.1")
+            result = run_mock_backend_invocation(req, "test", invocation_dir=td)
+            assert result["status"] == "completed"
+
+
+from pcae.core.backend_invocations import run_mock_backend_invocation

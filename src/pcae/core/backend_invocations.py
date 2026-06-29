@@ -776,3 +776,80 @@ def read_latest_output(invocation_dir: str | None = None) -> dict | None:
         return _json.loads(latest.read_text())
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94F — Mock backend invocation prototype
+# ═══════════════════════════════════════════════════════════════════════════
+
+_MOCK_OUTPUT_MARKER = "MOCK BACKEND OUTPUT — no real backend invoked"
+
+
+def _generate_mock_output(prompt_text: str, request_id: str, backend_id: str) -> str:
+    """Generate deterministic, safe mock backend output. In-process only."""
+    import hashlib
+    seed = hashlib.sha256(f"{request_id}:{prompt_text}".encode()).hexdigest()
+    return (
+        f"{_MOCK_OUTPUT_MARKER}\n\n"
+        f"Request: {request_id}\n"
+        f"Backend: {backend_id}\n"
+        f"Prompt hash: {hashlib.sha256(prompt_text.encode()).hexdigest()}\n"
+        f"Seed: {seed[:16]}\n\n"
+        f"## Mock Response\n\n"
+        f"This is a deterministic mock backend response.\n"
+        f"The prompt was {len(prompt_text)} characters.\n"
+        f"No real AI backend, subprocess, network, or shell was invoked.\n"
+    )
+
+
+def run_mock_backend_invocation(
+    request: InvocationRequest,
+    prompt_text: str,
+    *,
+    invocation_dir: str | None = None,
+) -> dict[str, Any]:
+    """Run in-process mock backend invocation lifecycle. No external calls."""
+    reg = get_default_registry()
+
+    if request.backend_id != "mock":
+        return {
+            "status": "blocked",
+            "error": f"only 'mock' backend supported, got {request.backend_id!r}",
+            "no_real_backend_invoked": True, "no_subprocess": True, "no_network": True,
+        }
+
+    readiness = check_invocation_readiness(request, reg)
+    if readiness["status"] == READINESS_BLOCKED:
+        return {
+            "status": "blocked",
+            "error": f"blocked: {'; '.join(readiness['hard_blocks'])}",
+            "no_real_backend_invoked": True, "no_subprocess": True, "no_network": True,
+        }
+
+    if not request.no_execution_by_default:
+        return {
+            "status": "blocked",
+            "error": "no_execution_by_default must be True",
+            "no_real_backend_invoked": True,
+        }
+
+    prompt_result = capture_backend_prompt_artifact(request, prompt_text, invocation_dir=invocation_dir)
+    mock_output = _generate_mock_output(prompt_text, request.request_id, request.backend_id)
+    output_result = capture_backend_output_artifact(request, mock_output, invocation_dir=invocation_dir)
+
+    return {
+        "status": "completed",
+        "request_id": request.request_id,
+        "backend_id": request.backend_id,
+        "readiness_status": readiness["status"],
+        "prompt_hash": prompt_result["prompt_hash"],
+        "prompt_path": prompt_result["prompt_path"],
+        "output_hash": output_result["output_hash"],
+        "output_path": output_result["output_path"],
+        "quarantined": output_result["quarantined"],
+        "applied_to_repo": output_result["applied_to_repo"],
+        "no_real_backend_invoked": True,
+        "no_subprocess": True,
+        "no_network": True,
+        "schema_version": SCHEMA_VERSION,
+    }
