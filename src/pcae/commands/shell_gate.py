@@ -32,7 +32,9 @@ def run_shell_gate_check(args: argparse.Namespace) -> int:
             print("Error: No command provided. Use --command <CMD>.")
         return 1
 
-    data = check_shell_gate(HarnessPath.cwd().path, command_text=command_text)
+    no_audit = bool(getattr(args, "no_audit_write", False))
+    data = check_shell_gate(HarnessPath.cwd().path, command_text=command_text,
+                            no_audit_write=no_audit)
 
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=False))

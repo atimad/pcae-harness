@@ -4608,6 +4608,11 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Print machine-readable JSON gate decision output.",
     )
+    shell_gate_check_parser.add_argument(
+        "--no-audit-write",
+        action="store_true",
+        help="Skip audit persistence for this check.",
+    )
     shell_gate_check_parser.set_defaults(handler=run_shell_gate_check)
 
     # ── pcae shell-gate audit (Phase 93E) ──────────────────────────────────

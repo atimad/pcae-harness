@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 93F: Shell Gate Audit Persistence Hardening (completed).
+
+Hardening phase: --no-audit-write flag, redaction safety (TOKEN/password/API-key
+never persisted), verify edge cases (empty/missing dir, malformed JSON), gitignore
+hygiene. 13 new tests (142 total shell gate). No shell interception, wrappers,
+execution, or enforcement. Delivers docs/PHASE_93_SHELL_GATE_AUDIT_PERSISTENCE_HARDENING.md.
+
 Phase 93E: Shell Gate Audit Persistence Implementation (completed).
 
 Simulation-only implementation. persist_audit_record() writes redacted audit

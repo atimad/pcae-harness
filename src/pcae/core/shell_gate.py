@@ -1379,6 +1379,8 @@ def _extract_paths(tokens: list[str]) -> tuple[str, ...]:
 def check_shell_gate(
     repo_root: Path,
     command_text: str,
+    *,
+    no_audit_write: bool = False,
 ) -> dict[str, object]:
     """
     Phase 93B — Narrow Shell Gate Prototype.
@@ -1509,8 +1511,11 @@ def check_shell_gate(
             "execution_authorization_not_granted": True,
             "audit_evidence_simulation_only": True,
         },
-        # Phase 93E — audit persistence
-        "audit_persistence": _persist_if_enabled(audit_evidence, repo_root),
+        # Phase 93E/93F — audit persistence (honours --no-audit-write)
+        "audit_persistence": (
+            {"status": "skipped", "path": "", "latest_path": "", "record_digest": ""}
+            if no_audit_write else _persist_if_enabled(audit_evidence, repo_root)
+        ),
     }
 
 

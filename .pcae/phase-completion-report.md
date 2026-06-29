@@ -1,27 +1,22 @@
-# Phase 93E Complete — Shell Gate Audit Persistence Implementation
+# Phase 93F Complete — Shell Gate Audit Persistence Hardening
 
 ## Summary
 
-Phase 93E implements simulation-only audit persistence for shell-gate check
-decisions. Every pcae shell-gate check persists redacted audit evidence to
-.pcae/shell-gate-audit/ as durable JSON artifacts.
+Phase 93F hardens the 93E audit persistence: --no-audit-write flag, redaction safety
+tests for persisted records, verify edge cases (empty/missing/malformed), gitignore
+hygiene verification.
 
-## Implementation
+## Changes
 
-- persist_audit_record(): writes individual JSON files with SHA-256 digest
-- verify_audit_records(): integrity verification
-- read_latest_audit() / list_audit_records(): read/list operations
-- CLI: pcae shell-gate audit show --latest, audit list, audit verify
-- Persistence is always-on; can be disabled via PCAE_SHELL_GATE_AUDIT=0
-- Failure is non-fatal — check always proceeds
-
-## Tests
-
-7 new tests (129 total shell gate): write, fields, read, verify, tamper, JSON output, CLI
+- --no-audit-write flag on pcae shell-gate check
+- Redaction safety: TOKEN, --password, --api-key patterns never persisted
+- Verify handles: empty dir, missing dir, malformed JSON
+- Gitignore hygiene: .pcae/shell-gate-audit/ verified ignored
+- 13 new tests (142 total shell gate)
 
 ## Validation
 
-- Shell gate: 129/129
+- Shell gate: 142/142
 - Broker: 265/265
 - Report + notification: 161/161
 - Fast-green: 3272/3272
@@ -30,4 +25,4 @@ decisions. Every pcae shell-gate check persists redacted audit evidence to
 
 ## Recommended Next Phase
 
-TBD (operator decision)
+TBD

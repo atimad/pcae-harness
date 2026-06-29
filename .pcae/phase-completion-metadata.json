@@ -1,11 +1,11 @@
 {
-  "phase_id": "93E",
-  "phase_name": "Shell Gate Audit Persistence Implementation",
+  "phase_id": "93F",
+  "phase_name": "Shell Gate Audit Persistence Hardening",
   "files_changed": ["src/pcae/core/shell_gate.py", "src/pcae/commands/shell_gate.py", "src/pcae/cli.py", "tests/test_shell_gate.py"],
   "files_changed_count": 4,
-  "tests_added_or_updated": "7 new",
+  "tests_added_or_updated": "13 new",
   "validation_results": [
-    {"name": "Shell gate", "result": "129/129", "status": "passed"},
+    {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
     {"name": "Fast-green", "result": "3272/3272", "status": "passed"}
