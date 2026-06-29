@@ -7,9 +7,11 @@ no subprocess, no network calls.  Simulation/validation only.
 from __future__ import annotations
 
 import json as _json
+import os as _os
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path as _PathType
 from typing import Any
 
 SCHEMA_VERSION = "1.0"
@@ -1297,6 +1299,8 @@ def create_review_artifact(request_id: str, output_hash: str, *, backend_id: str
 
 
 def approve_review(review: ReviewArtifact, operator: str, reason: str) -> ApprovalArtifact:
+    if review.rejected or review.review_state == REVIEW_REJECTED:
+        raise ValueError("Cannot approve: review is already rejected")
     if review.hard_blocks:
         raise ValueError("Cannot approve: hard blocks present")
     if not review.output_hash:
@@ -1475,6 +1479,16 @@ class ApplyOperation:
             pass
         return issues
 
+    def path_hard_blocks(self, *, forbidden_files: list[str] | None = None) -> list[str]:
+        """Return hard-block reasons for this operation's target path.
+
+        Separate from validate() so callers can collect hard blocks without
+        raising.  Path safety is enforced via hard blocks, not ValidationErrors.
+        """
+        if self.operation_type in (OP_MANUAL, OP_UNKNOWN):
+            return []
+        return validate_operation_path(self.target_path, forbidden_files=forbidden_files)
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "operation_id": self.operation_id, "operation_type": self.operation_type,
@@ -1606,11 +1620,27 @@ def create_apply_plan(
         if forbidden_files and f in forbidden_files:
             hard_blocks.append(f"forbidden_file:{f}")
 
+    seen_paths: dict[str, str] = {}
     for op in ops:
+        # Path safety hard blocks (absolute, traversal, forbidden)
+        for pb in op.path_hard_blocks(forbidden_files=list(forbidden_files) if forbidden_files else None):
+            if pb not in hard_blocks:
+                hard_blocks.append(pb)
         if op.operation_type in HIGH_RISK_OPS:
             hard_blocks.append(f"high_risk_op:{op.operation_type}:{op.target_path}")
         if op.forbidden:
             hard_blocks.append(f"forbidden_op:{op.operation_type}:{op.target_path}")
+        # Duplicate / conflicting operation detection
+        p = op.target_path
+        if p and op.operation_type not in (OP_MANUAL, OP_UNKNOWN):
+            if p in seen_paths:
+                prev = seen_paths[p]
+                if prev != op.operation_type:
+                    hard_blocks.append(f"conflicting_operations:{p}:{prev}+{op.operation_type}")
+                else:
+                    warnings.append(f"duplicate_operation:{p}:{op.operation_type}")
+            else:
+                seen_paths[p] = op.operation_type
 
     if not ops:
         missing.append("operations")
@@ -2524,5 +2554,283 @@ def read_latest_manual_apply_package() -> "BackendManualApplyPackage | None":
     try:
         data = _json.loads(lp.read_text())
         return BackendManualApplyPackage.from_dict(data)
+    except Exception:
+        return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94P — Backend apply governance hardening
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Path safety constants
+_FORBIDDEN_PATH_PATTERNS: frozenset[str] = frozenset({
+    ".env", ".git", ".pcae/session.json", ".pcae/agent-lock.json",
+    ".pcae/architecture-history.json", ".pcae/provenance-history.json",
+})
+
+
+def validate_operation_path(
+    path: str,
+    *,
+    forbidden_files: list[str] | None = None,
+    forbidden_patterns: frozenset[str] | None = None,
+) -> list[str]:
+    """Validate an operation target path for safety.
+
+    Returns a list of hard-block reason strings.  Empty list means safe.
+
+    Checks:
+    - empty path
+    - absolute path (starts with / or drive letter on Windows)
+    - parent traversal (.. in any component)
+    - matches known forbidden file patterns
+    - matches provided forbidden_files list
+
+    Never executes, mutates, or invokes anything.
+    """
+    blocks: list[str] = []
+    if not path or not path.strip():
+        blocks.append("empty_target_path")
+        return blocks
+    # Absolute path check
+    if _os.path.isabs(path):
+        blocks.append(f"absolute_path:{path}")
+    # Parent traversal
+    parts = path.replace("\\", "/").split("/")
+    if ".." in parts:
+        blocks.append(f"parent_traversal_path:{path}")
+    # Forbidden patterns
+    pats = forbidden_patterns if forbidden_patterns is not None else _FORBIDDEN_PATH_PATTERNS
+    for pat in pats:
+        if path == pat or path.endswith("/" + pat):
+            blocks.append(f"forbidden_path_pattern:{path}")
+            break
+    # Caller-supplied forbidden list
+    if forbidden_files and path in forbidden_files:
+        if not any("forbidden_file:" in b for b in blocks):
+            blocks.append(f"forbidden_file:{path}")
+    return blocks
+
+
+def validate_operations_list(
+    operations: list["ApplyOperation"],
+    *,
+    forbidden_files: list[str] | None = None,
+) -> dict[str, Any]:
+    """Validate a list of ApplyOperations for path safety and duplicates.
+
+    Returns dict with keys:
+    - hard_blocks: list of hard-block strings
+    - warnings: list of warning strings
+    - valid: bool
+
+    Checks:
+    - each target path via validate_operation_path()
+    - duplicate target paths (same path, same or different op type)
+    - conflicting operations (e.g. create + modify same target)
+
+    Never executes or mutates anything.
+    """
+    hard_blocks: list[str] = []
+    warnings: list[str] = []
+    seen_paths: dict[str, str] = {}  # path -> first operation_type
+
+    for i, op in enumerate(operations):
+        path = op.target_path
+        op_type = op.operation_type
+
+        # Path-level validation for file operations
+        if op_type not in (OP_MANUAL, OP_UNKNOWN):
+            path_blocks = validate_operation_path(path, forbidden_files=forbidden_files)
+            for pb in path_blocks:
+                hard_blocks.append(f"operation[{i}]:{pb}")
+
+        # Duplicate / conflict detection
+        if path and path in seen_paths:
+            prev_type = seen_paths[path]
+            if prev_type != op_type:
+                hard_blocks.append(f"conflicting_operations:{path}:{prev_type}+{op_type}")
+            else:
+                warnings.append(f"duplicate_operation:{path}:{op_type}")
+        elif path:
+            seen_paths[path] = op_type
+
+        # Destructive ops
+        if op_type in (OP_DELETE, OP_RENAME):
+            hard_blocks.append(f"destructive_op:{op_type}:{path}")
+
+        # Unknown operation
+        if op_type == OP_UNKNOWN:
+            hard_blocks.append(f"unknown_operation:{path}")
+
+    return {
+        "valid": len(hard_blocks) == 0,
+        "hard_blocks": hard_blocks,
+        "warnings": warnings,
+    }
+
+
+def validate_hash_chain(
+    *,
+    review: "ReviewArtifact | None" = None,
+    approval: "ApprovalArtifact | None" = None,
+    plan: "ApplyPlan | None" = None,
+    assessment: "BackendApplyReadinessAssessment | None" = None,
+    package: "BackendManualApplyPackage | None" = None,
+) -> dict[str, Any]:
+    """Validate output_hash and request_id chain across all evidence artifacts.
+
+    Hash and request mismatches are hard blocks. Human approval cannot override.
+    Accepted risk cannot override.
+
+    Returns dict with keys:
+    - valid: bool
+    - hard_blocks: list of hard-block strings
+
+    Never executes, mutates, or invokes anything.
+    """
+    hard_blocks: list[str] = []
+
+    def _nonempty(a: str, b: str) -> bool:
+        return bool(a) and bool(b)
+
+    # review ↔ approval
+    if review and approval:
+        if _nonempty(review.output_hash, approval.output_hash):
+            if review.output_hash != approval.output_hash:
+                hard_blocks.append("review_approval_output_hash_mismatch")
+        if _nonempty(review.request_id, approval.request_id):
+            if review.request_id != approval.request_id:
+                hard_blocks.append("review_approval_request_id_mismatch")
+
+    # review ↔ plan
+    if review and plan:
+        if _nonempty(review.output_hash, plan.output_hash):
+            if review.output_hash != plan.output_hash:
+                hard_blocks.append("review_plan_output_hash_mismatch")
+        if _nonempty(review.request_id, plan.request_id):
+            if review.request_id != plan.request_id:
+                hard_blocks.append("review_plan_request_id_mismatch")
+
+    # approval ↔ plan
+    if approval and plan:
+        if _nonempty(approval.output_hash, plan.output_hash):
+            if approval.output_hash != plan.output_hash:
+                hard_blocks.append("approval_plan_output_hash_mismatch")
+
+    # plan ↔ assessment
+    if plan and assessment:
+        if _nonempty(plan.apply_plan_id, assessment.apply_plan_id):
+            if plan.apply_plan_id != assessment.apply_plan_id:
+                hard_blocks.append("plan_assessment_id_mismatch")
+        if _nonempty(plan.output_hash, assessment.request_id):
+            pass  # different fields, no cross-check here
+        # request_id cross-check
+        if _nonempty(plan.request_id, assessment.request_id):
+            if plan.request_id != assessment.request_id:
+                hard_blocks.append("plan_assessment_request_id_mismatch")
+
+    # plan ↔ package
+    if plan and package:
+        if _nonempty(plan.output_hash, package.output_hash):
+            if plan.output_hash != package.output_hash:
+                hard_blocks.append("plan_package_output_hash_mismatch")
+        if _nonempty(plan.request_id, package.request_id):
+            if plan.request_id != package.request_id:
+                hard_blocks.append("plan_package_request_id_mismatch")
+        if _nonempty(plan.apply_plan_id, package.apply_plan_id):
+            if plan.apply_plan_id != package.apply_plan_id:
+                hard_blocks.append("plan_package_apply_plan_id_mismatch")
+
+    # assessment ↔ package
+    if assessment and package:
+        if _nonempty(assessment.assessment_id, package.readiness_assessment_id):
+            if assessment.assessment_id != package.readiness_assessment_id:
+                hard_blocks.append("assessment_package_id_mismatch")
+
+    return {
+        "valid": len(hard_blocks) == 0,
+        "hard_blocks": hard_blocks,
+    }
+
+
+def validate_artifact_freshness(
+    artifact: "dict[str, Any] | None",
+    *,
+    expected_output_hash: str = "",
+    expected_request_id: str = "",
+    expected_phase_id: str = "",
+    artifact_label: str = "artifact",
+) -> dict[str, Any]:
+    """Validate that a loaded artifact dict is consistent and internally coherent.
+
+    Returns dict with:
+    - valid: bool
+    - hard_blocks: list of hard-block strings
+    - missing_evidence: list of missing field strings
+
+    Checks:
+    - artifact is not None
+    - artifact is a non-empty dict
+    - output_hash matches expected if provided
+    - request_id matches expected if provided
+    - phase_id matches expected if provided
+
+    Never executes or mutates anything. Fail-closed on None/empty.
+    """
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+
+    if artifact is None:
+        hard_blocks.append(f"{artifact_label}_missing")
+        return {"valid": False, "hard_blocks": hard_blocks, "missing_evidence": missing}
+
+    if not isinstance(artifact, dict) or not artifact:
+        hard_blocks.append(f"{artifact_label}_malformed")
+        return {"valid": False, "hard_blocks": hard_blocks, "missing_evidence": missing}
+
+    if expected_output_hash:
+        stored = artifact.get("output_hash", "")
+        if not stored:
+            missing.append(f"{artifact_label}_output_hash_missing")
+        elif stored != expected_output_hash:
+            hard_blocks.append(f"{artifact_label}_output_hash_mismatch")
+
+    if expected_request_id:
+        stored = artifact.get("request_id", "")
+        if not stored:
+            missing.append(f"{artifact_label}_request_id_missing")
+        elif stored != expected_request_id:
+            hard_blocks.append(f"{artifact_label}_request_id_mismatch")
+
+    if expected_phase_id:
+        stored = artifact.get("phase_id", "")
+        if stored and stored != expected_phase_id:
+            hard_blocks.append(f"{artifact_label}_phase_id_mismatch")
+
+    return {
+        "valid": len(hard_blocks) == 0 and len(missing) == 0,
+        "hard_blocks": hard_blocks,
+        "missing_evidence": missing,
+    }
+
+
+def read_artifact_json_safe(path: "_PathType | str") -> "dict[str, Any] | None":
+    """Read a JSON artifact file, returning None on any error.
+
+    Returns None if:
+    - path does not exist
+    - file is not valid JSON
+    - file content is not a dict
+
+    Never raises, never mutates.
+    """
+    import json as _j
+    try:
+        p = _PathType(path)
+        if not p.exists():
+            return None
+        data = _j.loads(p.read_text())
+        return data if isinstance(data, dict) else None
     except Exception:
         return None

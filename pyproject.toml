@@ -32,6 +32,10 @@ packages = ["src/pcae"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+# Use loadfile distribution so tests from the same file share a worker.
+# CLI tests that share .pcae/ artifact directories are inherently stateful
+# and require sequential execution within a file.
+addopts = "--dist=loadfile"
 markers = [
     "slow: marks tests that spawn subprocesses or take >1s each",
     "integration: marks CLI integration tests that spawn pcae subprocesses",
