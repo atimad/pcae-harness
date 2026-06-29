@@ -28,8 +28,12 @@
     {"name": "pcae_check", "status": "passed"},
     {"name": "pcae_push_check", "status": "passed"}
   ],
-  "phase_commits": [],
-  "pushed_status": "not_yet_pushed",
+  "phase_commits": [
+    {"hash": "0ccfff1e196daeb713dd63700b09cc9087d2c913", "message": "Add backend apply plan CLI"},
+    {"hash": "ece0f0edec282b094e60521fa146c4fa85daa709", "message": "Complete Phase 94N backend apply plan CLI"},
+    {"hash": "11791b853c9b8074046b6795447b95f6c2bcfa90", "message": "Update task lifecycle: archive 94M, update DONE.md"}
+  ],
+  "origin_main_head_count": 0,
   "recommended_next_phase": "94O — Backend Manual Apply Package",
   "no_go_confirmation": "No apply execution, patch parsing, source file mutation, real backend invocation, subprocess, network, shell interception, Telegram inbound, remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push authorization, real AI backend calls, automatic test execution, or automatic pcae check were implemented.",
   "no_go_confirmed": {
