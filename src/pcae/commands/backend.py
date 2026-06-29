@@ -22,6 +22,8 @@ from pcae.core.backend_invocations import (
     persist_backend_adapter_preflight_artifact,
     verify_backend_adapter_preflight_artifact,
     load_latest_backend_adapter_preflight_artifact,
+    load_latest_real_adapter_invocation_approval,
+    verify_real_adapter_invocation_approval,
     INVOCATION_MODE_DRY_RUN,
     APPROVAL_PENDING,
     DEMO_COMPLETED,
@@ -1623,6 +1625,66 @@ def run_backend_adapter_preflight_verify(args: argparse.Namespace) -> int:
             print(f"  Status:       valid")
         else:
             print(f"Preflight artifact verification FAILED: {artifact.backend_id}")
+            for issue in result["issues"]:
+                print(f"  - {issue}")
+    return 0 if result["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Y — Real adapter invocation approval CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_adapter_approval_show(args: argparse.Namespace) -> int:
+    """pcae backend adapter approval show --latest [--json]
+
+    Read-only. Shows the latest persisted approval artifact.
+    Approval-create CLI is deferred to 94Z.
+    """
+    approval = load_latest_real_adapter_invocation_approval()
+    if approval is None:
+        msg = "No approval artifacts found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps(approval.to_dict(), indent=2))
+    else:
+        print(f"Latest invocation approval: {approval.backend_id}")
+        print(f"  Approval ID:         {approval.approval_id}")
+        print(f"  Decision:            {approval.decision}")
+        print(f"  Effective:           {'yes' if approval.approval_effective else 'no'}")
+        print(f"  Operator:            {approval.operator}")
+        print(f"  Prompt hash:         {approval.prompt_hash[:16] if approval.prompt_hash else 'N/A'}...")
+        print(f"  Preflight digest:    {approval.preflight_digest[:16] if approval.preflight_digest else 'N/A'}...")
+        print(f"  Hard blocks:         {approval.hard_blocks_present}")
+        print(f"  Accepted risk:       {approval.accepted_risk}")
+        print(f"  Digest:              {approval.record_digest[:16]}...")
+        print(f"  Approved at:         {approval.approved_at_utc}")
+    return 0
+
+
+def run_backend_adapter_approval_verify(args: argparse.Namespace) -> int:
+    """pcae backend adapter approval verify --latest [--json]
+
+    Read-only. Verifies the latest approval artifact integrity.
+    """
+    approval = load_latest_real_adapter_invocation_approval()
+    if approval is None:
+        msg = "No approval artifacts found to verify."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    result = verify_real_adapter_invocation_approval(approval)
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        if result["valid"]:
+            print(f"Approval artifact verified: {approval.backend_id}")
+            print(f"  Digest:   {approval.record_digest[:16]}...")
+            print(f"  Status:   valid")
+        else:
+            print(f"Approval verification FAILED: {approval.backend_id}")
             for issue in result["issues"]:
                 print(f"  - {issue}")
     return 0 if result["valid"] else 1

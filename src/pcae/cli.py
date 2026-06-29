@@ -453,6 +453,8 @@ from pcae.commands.backend import (
     run_backend_adapter_preflight,
     run_backend_adapter_preflight_show,
     run_backend_adapter_preflight_verify,
+    run_backend_adapter_approval_show,
+    run_backend_adapter_approval_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4874,6 +4876,23 @@ def build_parser() -> argparse.ArgumentParser:
     adapter_pf_verify.add_argument("--latest", action="store_true", default=True)
     adapter_pf_verify.add_argument("--json", action="store_true")
     adapter_pf_verify.set_defaults(handler=run_backend_adapter_preflight_verify)
+
+    # ── Phase 94Y: approval show/verify (create deferred to 94Z) ──────────
+    adapter_approval = be_adapter_sub.add_parser(
+        "approval", help="Real adapter invocation approval artifacts."
+    )
+    adapter_ap_sub = adapter_approval.add_subparsers(
+        dest="backend_adapter_approval_command", required=True,
+    )
+    ap_show = adapter_ap_sub.add_parser("show", help="Show latest approval.")
+    ap_show.add_argument("--latest", action="store_true", default=True)
+    ap_show.add_argument("--json", action="store_true")
+    ap_show.set_defaults(handler=run_backend_adapter_approval_show)
+
+    ap_verify = adapter_ap_sub.add_parser("verify", help="Verify latest approval.")
+    ap_verify.add_argument("--latest", action="store_true", default=True)
+    ap_verify.add_argument("--json", action="store_true")
+    ap_verify.set_defaults(handler=run_backend_adapter_approval_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

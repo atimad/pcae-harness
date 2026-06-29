@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 94Y: Real Adapter Invocation Approval Model (completed).
+
+RealAdapterInvocationApproval (26 fields) with SHA-256 digest. Binds to adapter, backend,
+request, prompt hash, preflight digest. Hard blocks → ineffective. CLI show/verify.
+Create deferred to 94Z. 17 new tests (498 model total).
+Delivers docs/PHASE_94_REAL_ADAPTER_INVOCATION_APPROVAL_MODEL.md.
+
 Phase 94X: Real Adapter Readiness Review (completed).
 
 Review/checkpoint phase. Three read-only subagents evaluated adapter readiness, governance

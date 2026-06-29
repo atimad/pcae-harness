@@ -4409,3 +4409,350 @@ def load_latest_backend_adapter_preflight_artifact() -> (
         return BackendAdapterPreflightArtifact.from_dict(data)
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Y — Real adapter invocation approval model
+# ═══════════════════════════════════════════════════════════════════════════
+
+_REAL_ADAPTER_APPROVALS_DIR = ".pcae/real-adapter-approvals"
+_APPROVAL_SCHEMA_VERSION = "1.0"
+
+# ── Decision constants ──────────────────────────────────────────────────
+
+APPROVAL_APPROVED = "approved"
+APPROVAL_REJECTED = "rejected"
+APPROVAL_EXPIRED = "expired"
+APPROVAL_REVOKED = "revoked"
+
+VALID_APPROVAL_DECISIONS: frozenset[str] = frozenset({
+    APPROVAL_APPROVED, APPROVAL_REJECTED,
+    APPROVAL_EXPIRED, APPROVAL_REVOKED,
+})
+
+
+@dataclass
+class RealAdapterInvocationApproval:
+    """Human approval for a real backend adapter invocation.
+
+    Binds to exact adapter, backend, request, prompt, preflight artifact,
+    invocation mode, risk level, and operator. Hard blocks make approval
+    ineffective. Does NOT authorize apply, commit, or push.
+    """
+
+    approval_id: str = ""
+    adapter_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    preflight_artifact_id: str = ""
+    preflight_artifact_path: str = ""
+    preflight_digest: str = ""
+    invocation_mode: str = ""
+    risk_level: str = RISK_MEDIUM
+    operator: str = ""
+    decision: str = ""
+    decision_reason: str = ""
+    approved_at_utc: str = ""
+    expires_at_utc: str = ""
+    hard_blocks_present: bool = False
+    accepted_risk: bool = False
+    approval_effective: bool = False
+    schema_version: str = _APPROVAL_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if not self.approval_id:
+            issues.append("approval_id is required")
+        if not self.operator:
+            issues.append("operator is required")
+        if not self.decision_reason:
+            issues.append("decision_reason is required")
+        if self.decision and self.decision not in VALID_APPROVAL_DECISIONS:
+            issues.append(f"invalid decision: {self.decision!r}")
+        if self.hard_blocks_present and self.approval_effective:
+            issues.append("approval_effective must be False when hard_blocks_present")
+        if self.decision == APPROVAL_APPROVED and self.hard_blocks_present:
+            issues.append("cannot approve with hard blocks present")
+        if self.accepted_risk and self.hard_blocks_present:
+            issues.append("accepted_risk cannot override hard blocks")
+        return issues
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "approval_id": self.approval_id,
+            "adapter_id": self.adapter_id,
+            "backend_id": self.backend_id,
+            "backend_type": self.backend_type,
+            "request_id": self.request_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "preflight_artifact_id": self.preflight_artifact_id,
+            "preflight_artifact_path": self.preflight_artifact_path,
+            "preflight_digest": self.preflight_digest,
+            "invocation_mode": self.invocation_mode,
+            "risk_level": self.risk_level,
+            "operator": self.operator,
+            "decision": self.decision,
+            "decision_reason": self.decision_reason,
+            "approved_at_utc": self.approved_at_utc,
+            "expires_at_utc": self.expires_at_utc,
+            "hard_blocks_present": self.hard_blocks_present,
+            "accepted_risk": self.accepted_risk,
+            "approval_effective": self.approval_effective,
+            "schema_version": self.schema_version,
+        }
+        if include_digest and self.record_digest:
+            d["record_digest"] = self.record_digest
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "RealAdapterInvocationApproval":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+def _real_adapter_approvals_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_REAL_ADAPTER_APPROVALS_DIR)
+
+
+def create_real_adapter_invocation_approval(
+    *,
+    adapter_id: str,
+    backend_id: str,
+    backend_type: str,
+    request_id: str = "",
+    prompt_hash: str = "",
+    prompt_artifact_path: str = "",
+    preflight_artifact: BackendAdapterPreflightArtifact | None = None,
+    invocation_mode: str = "",
+    risk_level: str = RISK_MEDIUM,
+    operator: str = "",
+    decision: str = "",
+    decision_reason: str = "",
+    expires_at_utc: str = "",
+    accepted_risk: bool = False,
+    **kwargs: Any,
+) -> "RealAdapterInvocationApproval":
+    """Create a real adapter invocation approval with binding.
+
+    Binds to the exact preflight artifact digest if provided.
+    Hard blocks from preflight make approval ineffective.
+    Never authorizes apply, commit, or push.
+    """
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    approval_id = f"raa-{_uuid.uuid4().hex[:12]}"
+
+    preflight_id = ""
+    preflight_path = ""
+    preflight_dig = ""
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+    approval_eff = False
+
+    if preflight_artifact is not None:
+        preflight_id = preflight_artifact.artifact_id
+        preflight_dig = preflight_artifact.record_digest or preflight_artifact.compute_digest()
+        hard_blocks = list(preflight_artifact.hard_blocks)
+        # Preflight safety invariants must hold
+        if not preflight_artifact.no_real_backend_invoked:
+            hard_blocks.append("preflight:no_real_backend_invoked=False")
+        if not preflight_artifact.no_subprocess:
+            hard_blocks.append("preflight:no_subprocess=False")
+        if not preflight_artifact.no_network:
+            hard_blocks.append("preflight:no_network=False")
+        if not preflight_artifact.secrets_redacted:
+            hard_blocks.append("preflight:secrets_redacted=False")
+    else:
+        missing.append("preflight_artifact")
+
+    if not prompt_hash:
+        missing.append("prompt_hash")
+    if not operator:
+        missing.append("operator")
+    if not decision_reason:
+        missing.append("decision_reason")
+
+    hard_blocks_present = len(hard_blocks) > 0
+
+    # Determine approval_effective
+    if decision == APPROVAL_APPROVED and not hard_blocks_present and not missing and not accepted_risk:
+        approval_eff = True
+    elif decision == APPROVAL_APPROVED and hard_blocks_present:
+        approval_eff = False  # hard blocks dominate
+
+    approval = RealAdapterInvocationApproval(
+        approval_id=approval_id,
+        adapter_id=adapter_id,
+        backend_id=backend_id,
+        backend_type=backend_type,
+        request_id=request_id,
+        prompt_hash=prompt_hash,
+        prompt_artifact_path=prompt_artifact_path,
+        preflight_artifact_id=preflight_id,
+        preflight_digest=preflight_dig,
+        invocation_mode=invocation_mode,
+        risk_level=risk_level,
+        operator=operator,
+        decision=decision,
+        decision_reason=decision_reason,
+        approved_at_utc=now,
+        expires_at_utc=expires_at_utc,
+        hard_blocks_present=hard_blocks_present,
+        accepted_risk=accepted_risk,
+        approval_effective=approval_eff,
+        **{k: v for k, v in kwargs.items()
+           if k in RealAdapterInvocationApproval.__dataclass_fields__},
+    )
+    issues = approval.validate()
+    if issues:
+        raise ValueError(f"Invalid approval: {'; '.join(issues)}")
+    return approval
+
+
+def validate_real_adapter_invocation_approval(
+    approval: RealAdapterInvocationApproval,
+    *,
+    preflight_artifact: BackendAdapterPreflightArtifact | None = None,
+    contract: BackendAdapterContract | None = None,
+) -> dict[str, Any]:
+    """Validate an approval against binding evidence. Fail-closed."""
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+    warnings_list: list[str] = []
+
+    issues = approval.validate()
+    for i in issues:
+        if "cannot" in i.lower() or "must" in i.lower():
+            hard_blocks.append(i)
+        else:
+            missing.append(i)
+
+    if not approval.prompt_hash:
+        hard_blocks.append("prompt_hash_missing")
+    if not approval.preflight_digest:
+        hard_blocks.append("preflight_digest_missing")
+    if approval.decision != APPROVAL_APPROVED:
+        hard_blocks.append(f"decision_not_approved:{approval.decision}")
+
+    # Check preflight artifact binding
+    if preflight_artifact is not None:
+        pf_digest = preflight_artifact.record_digest or preflight_artifact.compute_digest()
+        if approval.preflight_digest and approval.preflight_digest != pf_digest:
+            hard_blocks.append("preflight_digest_mismatch")
+        if approval.preflight_artifact_id and approval.preflight_artifact_id != preflight_artifact.artifact_id:
+            hard_blocks.append("preflight_artifact_id_mismatch")
+        if approval.backend_id and approval.backend_id != preflight_artifact.backend_id:
+            hard_blocks.append("backend_id_mismatch")
+
+    # Check adapter contract binding
+    if contract is not None:
+        if approval.adapter_id and approval.adapter_id != contract.adapter_id:
+            hard_blocks.append("adapter_id_mismatch")
+        if approval.backend_id and approval.backend_id != contract.backend_id:
+            hard_blocks.append("backend_contract_mismatch")
+        if approval.invocation_mode and approval.invocation_mode != contract.invocation_mode:
+            warnings_list.append("invocation_mode_mismatch")
+
+    # Hard blocks dominate
+    if approval.hard_blocks_present:
+        hard_blocks.append("hard_blocks_present")
+        if approval.accepted_risk:
+            hard_blocks.append("accepted_risk_cannot_override_hard_blocks")
+
+    valid = len(hard_blocks) == 0 and len(missing) == 0
+    return {
+        "valid": valid,
+        "hard_blocks": hard_blocks,
+        "missing_evidence": missing,
+        "warnings": warnings_list,
+        "approval_effective": approval.approval_effective and valid,
+    }
+
+
+def persist_real_adapter_invocation_approval(
+    approval: RealAdapterInvocationApproval,
+) -> dict:
+    """Persist an approval artifact with digest. Atomic latest.json."""
+    import os
+    d = _real_adapter_approvals_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+    if not approval.record_digest:
+        approval.record_digest = approval.compute_digest()
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{approval.approval_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(approval.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(approval.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {
+            "status": "written", "path": str(fp), "latest_path": str(lp),
+            "approval_id": approval.approval_id,
+            "record_digest": approval.record_digest,
+        }
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_real_adapter_invocation_approval(
+    approval: RealAdapterInvocationApproval,
+) -> dict:
+    """Verify approval artifact integrity. Fail-closed."""
+    issues_list: list[str] = []
+    if not approval.approval_id:
+        issues_list.append("missing approval_id")
+    if not approval.record_digest:
+        issues_list.append("missing record_digest")
+    if approval.record_digest:
+        computed = approval.compute_digest()
+        if computed != approval.record_digest:
+            issues_list.append("record_digest_mismatch")
+    if approval.schema_version != _APPROVAL_SCHEMA_VERSION:
+        issues_list.append(f"schema_version mismatch: {approval.schema_version!r}")
+    if approval.hard_blocks_present and approval.approval_effective:
+        issues_list.append("approval_effective=True with hard_blocks_present")
+    if approval.decision == APPROVAL_APPROVED and not approval.approval_effective and not approval.hard_blocks_present:
+        pass  # informative
+    return {
+        "valid": len(issues_list) == 0,
+        "issues": issues_list,
+        "approval_id": approval.approval_id,
+    }
+
+
+def load_latest_real_adapter_invocation_approval() -> (
+    "RealAdapterInvocationApproval | None"
+):
+    """Load the latest approval. Returns None if absent/malformed."""
+    lp = _real_adapter_approvals_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        if not isinstance(data, dict) or not data:
+            return None
+        return RealAdapterInvocationApproval.from_dict(data)
+    except Exception:
+        return None

@@ -25,3 +25,4 @@ backend-apply-readiness/
 backend-manual-apply-packages/
 backend-lifecycle-demos/
 backend-adapter-preflights/
+real-adapter-approvals/

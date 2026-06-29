@@ -4679,3 +4679,200 @@ class Test94WNoExecution:
         assert c.invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY
         plan = create_backend_adapter_invocation_plan(c)
         assert plan.executable is False
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Y — Real adapter invocation approval model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    RealAdapterInvocationApproval,
+    create_real_adapter_invocation_approval,
+    validate_real_adapter_invocation_approval,
+    persist_real_adapter_invocation_approval,
+    verify_real_adapter_invocation_approval,
+    load_latest_real_adapter_invocation_approval,
+    APPROVAL_APPROVED,
+    APPROVAL_REJECTED,
+    APPROVAL_EXPIRED,
+    APPROVAL_REVOKED,
+    BackendAdapterPreflightArtifact,
+)
+
+
+class Test94YApprovalModel:
+    """RealAdapterInvocationApproval model and validation."""
+
+    def test_approval_serialization_round_trip(self):
+        a = RealAdapterInvocationApproval(
+            approval_id="raa-test",
+            adapter_id="adapter-claude-cli",
+            backend_id="claude",
+            decision=APPROVAL_APPROVED,
+            operator="test-op",
+            decision_reason="test reason",
+            prompt_hash="abc123",
+        )
+        d = a.to_dict()
+        a2 = RealAdapterInvocationApproval.from_dict(d)
+        assert a2.approval_id == "raa-test"
+        assert a2.backend_id == "claude"
+        assert a2.approval_effective is False  # no preflight
+
+    def test_approval_digest_verification(self):
+        a = RealAdapterInvocationApproval(
+            approval_id="raa-dig", operator="op", decision_reason="r",
+            prompt_hash="ph",
+        )
+        a.record_digest = a.compute_digest()
+        r = verify_real_adapter_invocation_approval(a)
+        assert r["valid"] is True
+
+    def test_tampered_digest_fails(self):
+        a = RealAdapterInvocationApproval(
+            approval_id="raa-tamp", operator="op", decision_reason="r",
+            prompt_hash="ph",
+        )
+        a.record_digest = a.compute_digest()
+        a.decision = APPROVAL_REVOKED
+        r = verify_real_adapter_invocation_approval(a)
+        assert r["valid"] is False
+
+    def test_hard_blocks_prevent_effective(self):
+        a = create_real_adapter_invocation_approval(
+            adapter_id="ad", backend_id="bk", backend_type="mock",
+            decision=APPROVAL_APPROVED, operator="op", decision_reason="r",
+            prompt_hash="ph",
+        )
+        a.hard_blocks_present = True
+        a.approval_effective = False
+        assert a.approval_effective is False
+        issues = a.validate()
+        assert any("cannot approve" in i for i in issues)
+
+    def test_accepted_risk_cannot_override_hard_blocks(self):
+        a = create_real_adapter_invocation_approval(
+            adapter_id="ad", backend_id="bk", backend_type="mock",
+            decision=APPROVAL_APPROVED, operator="op", decision_reason="r",
+            prompt_hash="ph", accepted_risk=True,
+        )
+        a.hard_blocks_present = True
+        issues = a.validate()
+        assert any("accepted_risk" in i for i in issues)
+
+    def test_rejected_approval_not_effective(self):
+        a = create_real_adapter_invocation_approval(
+            adapter_id="ad", backend_id="bk", backend_type="mock",
+            decision=APPROVAL_REJECTED, operator="op", decision_reason="r",
+            prompt_hash="ph",
+        )
+        assert a.approval_effective is False
+
+    def test_operator_missing_invalid(self):
+        a = RealAdapterInvocationApproval(approval_id="raa-noop", decision_reason="r")
+        issues = a.validate()
+        assert any("operator" in i for i in issues)
+
+    def test_reason_missing_invalid(self):
+        a = RealAdapterInvocationApproval(approval_id="raa-nor", operator="op")
+        issues = a.validate()
+        assert any("reason" in i for i in issues)
+
+    def test_create_with_preflight_binding(self):
+        c = BackendAdapterContract(adapter_id="ad", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        pf = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        pf.record_digest = pf.compute_digest()
+        a = create_real_adapter_invocation_approval(
+            adapter_id="ad", backend_id="mock", backend_type="mock",
+            decision=APPROVAL_APPROVED, operator="op", decision_reason="r",
+            prompt_hash="ph", preflight_artifact=pf,
+        )
+        assert a.preflight_digest == pf.record_digest
+        assert a.approval_effective is True  # no hard blocks on mock
+
+
+class Test94YApprovalPersistence:
+    """Approval persistence and verification."""
+
+    def test_persist_and_load_round_trip(self, tmp_path):
+        import os
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            a = create_real_adapter_invocation_approval(
+                adapter_id="ad", backend_id="mock", backend_type="mock",
+                decision=APPROVAL_APPROVED, operator="op", decision_reason="r",
+                prompt_hash="ph",
+            )
+            persist = persist_real_adapter_invocation_approval(a)
+            assert persist["status"] == "written"
+            loaded = load_latest_real_adapter_invocation_approval()
+            assert loaded is not None
+            assert loaded.approval_id == a.approval_id
+        finally:
+            os.chdir(orig)
+
+    def test_load_absent_returns_none(self, tmp_path):
+        import os
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            assert load_latest_real_adapter_invocation_approval() is None
+        finally:
+            os.chdir(orig)
+
+
+class Test94YApprovalCLI:
+    """CLI show/verify for approvals."""
+
+    def test_show_missing_handled(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "approval",
+             "show", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_verify_missing_handled(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "approval",
+             "verify", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_gitignore_has_approvals_dir(self):
+        from pathlib import Path
+        gitignore = Path(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
+        assert "real-adapter-approvals/" in gitignore.read_text()
+
+
+class Test94YNoExecution:
+    """No-execution guarantees for 94Y."""
+
+    def test_no_subprocess_in_approval_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_network_in_approval_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_secrets_in_approval(self):
+        import json
+        a = create_real_adapter_invocation_approval(
+            adapter_id="ad", backend_id="bk", backend_type="mock",
+            decision=APPROVAL_APPROVED, operator="op", decision_reason="r",
+            prompt_hash="ph",
+        )
+        j = json.dumps(a.to_dict())
+        assert "sk-ant" not in j
