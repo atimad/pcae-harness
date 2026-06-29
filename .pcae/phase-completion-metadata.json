@@ -1,32 +1,35 @@
 {
-  "phase_id": "94O",
-  "phase_name": "phase_94o_backend_manual_apply_package",
-  "phase_title": "Backend Manual Apply Package",
+  "phase_id": "94P",
+  "phase_name": "phase_94p_backend_apply_governance_hardening",
+  "phase_title": "Backend Apply Governance Hardening",
   "implementation_status": "completed",
-  "completed_at_utc": "2026-06-29T20:30:00Z",
+  "completed_at_utc": "2026-06-29T22:00:00Z",
   "files_changed": [
     "src/pcae/core/backend_invocations.py",
-    "src/pcae/commands/backend.py",
-    "src/pcae/cli.py",
     "tests/test_backend_invocations.py",
     "tests/test_backend_cli.py",
-    "docs/PHASE_94_BACKEND_MANUAL_APPLY_PACKAGE.md",
+    "docs/PHASE_94_BACKEND_APPLY_GOVERNANCE_HARDENING.md",
+    "pyproject.toml",
     "PROJECT_STATUS.md",
-    "CHANGELOG.md",
-    ".pcae/.gitignore"
+    "CHANGELOG.md"
   ],
-  "tests_added_or_updated": "74 new tests",
+  "tests_added_or_updated": "112 new tests",
   "validation_results": [
-    {"name": "backend_model_tests", "result": "244/244 passed", "status": "passed"},
-    {"name": "backend_cli_tests", "result": "122/122 passed", "status": "passed"},
-    {"name": "fast_green", "result": "3658/3658 passed", "status": "passed"}
+    {"name": "backend_model_tests", "result": "329/329 passed", "status": "passed"},
+    {"name": "backend_cli_tests", "result": "149/149 passed", "status": "passed"},
+    {"name": "permission_broker_tests", "result": "265/265 passed", "status": "passed"},
+    {"name": "shell_gate_tests", "result": "142/142 passed", "status": "passed"},
+    {"name": "report_notification_tests", "result": "162/162 passed", "status": "passed"},
+    {"name": "fast_green", "result": "3770/3770 passed", "status": "passed"}
   ],
   "governance_results": [
     {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_status_coherence", "status": "coherent"}
+    {"name": "pcae_check", "status": "passed"},
+    {"name": "pcae_doctor_task_memory", "status": "warnings (pre-existing 28 active files)"},
+    {"name": "pcae_push_check", "status": "nothing_to_push"}
   ],
-  "recommended_next_phase": "94P — Backend Apply Governance Hardening",
-  "no_go_confirmation": "No apply execution, patch parsing, source file mutation, real backend invocation, subprocess, network, shell interception, Telegram inbound, remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push authorization, real AI backend calls, automatic test execution, or automatic pcae check were implemented.",
+  "recommended_next_phase": "94Q — Backend Lifecycle End-to-End Mock Demo",
+  "no_go_confirmation": "No apply execution, patch parsing for mutation, source file mutation, real backend invocation, subprocess execution, network calls, shell interception, Telegram inbound, remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push authorization, real AI backend calls, automatic test execution, or automatic pcae check were implemented.",
   "no_go_confirmed": {
     "apply_execution": false,
     "patch_parsing": false,

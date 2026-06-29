@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 94P: Backend Apply Governance Hardening (completed).
+
+Hardening phase. Added `validate_operation_path()`, `validate_operations_list()`,
+`validate_hash_chain()`, `validate_artifact_freshness()`, `read_artifact_json_safe()`,
+`ApplyOperation.path_hard_blocks()`. Strengthened `approve_review()` to reject
+already-rejected reviews. Hardened `create_apply_plan()` with path safety and
+duplicate/conflict detection. Added `--dist=loadfile` to pyproject.toml for parallel
+test stability. ~85 new model tests (329 total), ~27 new CLI tests (149 total).
+Fast-green: 3770/3770. Delivers docs/PHASE_94_BACKEND_APPLY_GOVERNANCE_HARDENING.md.
+
 Phase 94O: Backend Manual Apply Package (completed).
 
 Implementation phase. Added `BackendManualApplyPackage` model with JSON+Markdown

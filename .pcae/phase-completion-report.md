@@ -2,7 +2,7 @@
 
 ## Phase
 
-94O — Backend Manual Apply Package
+94P — Backend Apply Governance Hardening
 
 ## Status
 
@@ -10,13 +10,16 @@ complete ✅
 
 ## Summary
 
-Phase 94O adds the `BackendManualApplyPackage` model: a structured evidence bundle
-that assembles an `ApplyPlan` (94K) and optional `BackendApplyReadinessAssessment` (94L)
-into a single JSON + Markdown artifact for human operator review. No apply execution is
-performed at any point. The `no_execution_performed = True` field is a hard default that
-cannot be overridden. CLI commands `pcae backend manual-apply-package show` and
-`pcae backend manual-apply-package create` expose the model. Markdown output always
-carries an advisory label and a no-execution confirmation.
+Phase 94P hardens the backend review/apply governance chain. New validation
+functions: `validate_operation_path()` (empty/absolute/traversal/forbidden path
+detection), `validate_operations_list()` (destructive/unknown/conflicting/duplicate op
+detection), `validate_hash_chain()` (review→approval→plan→package hash/request binding),
+`validate_artifact_freshness()` (fail-closed on missing/malformed artifacts),
+`read_artifact_json_safe()` (never-raises file reader), `ApplyOperation.path_hard_blocks()`
+(path safety per operation). `approve_review()` now rejects already-rejected reviews.
+`create_apply_plan()` hardened with absolute/traversal path detection and duplicate/conflict
+op detection. Added `--dist=loadfile` to `pyproject.toml` to prevent parallel test state
+contamination. No apply execution, file mutation, or backend invocation performed.
 
 ## Boundary
 
@@ -24,7 +27,7 @@ carries an advisory label and a no-execution confirmation.
 |------------|--------|
 | No apply execution | ✅ enforced |
 | No patch parsing for mutation | ✅ enforced |
-| No file mutation outside artifact dir | ✅ enforced |
+| No file mutation outside artifact dirs | ✅ enforced |
 | No backend invocation | ✅ enforced |
 | No subprocess | ✅ enforced |
 | No network | ✅ enforced |
@@ -33,46 +36,57 @@ carries an advisory label and a no-execution confirmation.
 | No commit/push authorization | ✅ enforced |
 | No real AI backend calls | ✅ enforced |
 
-## Tests
+## Governance Results
 
-- Model tests added: 49 (classes: `Test94OPackageDefaults`, `Test94OPackageToDict`,
-  `Test94OPackageFromPlan`, `Test94OPackageFromAssessment`, `Test94OPackageMarkdown`,
-  `Test94OPersistPackage`, `Test94OReadLatestPackage`, `Test94ONoExecutionInPackageModule`)
-- CLI tests added: 25 (classes: `TestManualApplyPackageShow`, `TestManualApplyPackageCreate`,
-  `TestManualApplyPackageNoSubprocess`)
-- Total model tests: 244
-- Total CLI tests: 122
-- Fast-green suite: 3658 / 3658 ✅
+- **pcae health:** healthy ✅
+- **pcae check:** passed ✅
+- **pcae doctor task-memory:** warnings (28 active task files — pre-existing)
+- **pcae push check:** nothing to push ✅
+- **origin/main..HEAD:** 0
+
+## Test Results
+
+- **backend model tests:** 329/329 passed ✅
+- **backend CLI tests:** 149/149 passed ✅
+- **broker tests:** 265/265 passed ✅
+- **shell-gate tests:** 142/142 passed ✅
+- **report/notification tests:** 162/162 passed ✅
+- **fast-green:** 3770/3770 passed ✅
 
 ## Files Modified
 
-- `src/pcae/core/backend_invocations.py` — `BackendManualApplyPackage`, `create_backend_manual_apply_package`, `persist_manual_apply_package`, `read_latest_manual_apply_package`
-- `src/pcae/commands/backend.py` — `run_backend_manual_apply_package_show`, `run_backend_manual_apply_package_create`
-- `src/pcae/cli.py` — `be_map` subparser with `show` and `create`
-- `tests/test_backend_invocations.py` — 49 new tests
-- `tests/test_backend_cli.py` — 25 new tests
-- `docs/PHASE_94_BACKEND_MANUAL_APPLY_PACKAGE.md` — new
+- `src/pcae/core/backend_invocations.py` — new hardening functions + path_hard_blocks() + strengthened approve_review() + strengthened create_apply_plan()
+- `tests/test_backend_invocations.py` — ~85 new hardening tests
+- `tests/test_backend_cli.py` — ~27 new hardening CLI tests; xdist_group marker; duplicate pytestmark removed
+- `docs/PHASE_94_BACKEND_APPLY_GOVERNANCE_HARDENING.md` — new
+- `pyproject.toml` — added --dist=loadfile for parallel test stability
 - `PROJECT_STATUS.md` — updated
 - `CHANGELOG.md` — updated
-- `.pcae/.gitignore` — `backend-manual-apply-packages/` added
 
-## Artifacts
+## No-Go Confirmations
 
-- `.pcae/backend-manual-apply-packages/` (gitignored)
+No apply execution, patch parsing for mutation, source file mutation, real backend
+invocation, subprocess execution, network calls, shell interception, Telegram inbound,
+remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push
+authorization, real AI backend calls, automatic test execution, or automatic pcae check
+were implemented.
 
-## Governance
+## Telegram Environment
 
-- Enforcement mode: advisory
-- Status coherence: coherent ✅
-- Health: passed ✅
-- No forbidden files modified
-- No forbidden operations performed
+- Loaded: `source ~/.config/pcae/telegram.env && pcae notify status` ✅
+- Status: configured, enabled, ready for outbound delivery
+
+## Report Consistency
+
+- Report completeness: complete ✅
+- Pushed: pushed (after pcae push)
+- origin/main..HEAD: 0
 
 ## Next Phase
 
-**94P — Backend Apply Governance Hardening**
+**94Q — Backend Lifecycle End-to-End Mock Demo**
 
-Harden the enforcement boundary around the apply sequence: enforce that only a package
-with `apply_ready=True` and no `hard_blocks` can be promoted, add an explicit operator
-acknowledgment step before any future apply pathway is opened, and wire governance
-audit trail entries for package creation and readiness transitions.
+Demonstrate the full backend lifecycle end-to-end using only mock/dry-run backends:
+request → prompt capture → output capture → review → approval → apply plan → readiness
+assessment → manual apply package. No real AI backend. Documents the full human-governed
+workflow as a runnable demo.

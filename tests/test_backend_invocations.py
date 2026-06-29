@@ -2541,3 +2541,675 @@ class Test94ONoExecutionInPackageModule:
         from pcae.core import backend_invocations
         source = inspect.getsource(backend_invocations)
         assert "getUpdates" not in source
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94P — Backend apply governance hardening tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import os as _os_94p
+import json as _json_94p
+
+from pcae.core.backend_invocations import (
+    validate_operation_path,
+    validate_operations_list,
+    validate_hash_chain,
+    validate_artifact_freshness,
+    read_artifact_json_safe,
+    OP_CREATE, OP_MODIFY, OP_DELETE, OP_RENAME, OP_MANUAL, OP_UNKNOWN,
+    REVIEW_REJECTED, REVIEW_APPROVED,
+)
+
+
+class Test94PArtifactFreshness:
+    """validate_artifact_freshness: fail-closed on missing/malformed."""
+
+    def test_none_artifact_is_hard_block(self):
+        r = validate_artifact_freshness(None, artifact_label="review")
+        assert r["valid"] is False
+        assert "review_missing" in r["hard_blocks"]
+
+    def test_empty_dict_is_malformed_hard_block(self):
+        r = validate_artifact_freshness({}, artifact_label="plan")
+        assert r["valid"] is False
+        assert "plan_malformed" in r["hard_blocks"]
+
+    def test_non_dict_is_malformed_hard_block(self):
+        r = validate_artifact_freshness([], artifact_label="pkg")  # type: ignore
+        assert r["valid"] is False
+        assert "pkg_malformed" in r["hard_blocks"]
+
+    def test_valid_artifact_no_expected(self):
+        r = validate_artifact_freshness({"output_hash": "h1", "request_id": "rq1"})
+        assert r["valid"] is True
+        assert r["hard_blocks"] == []
+
+    def test_output_hash_mismatch_is_hard_block(self):
+        r = validate_artifact_freshness(
+            {"output_hash": "wrong"}, expected_output_hash="h1", artifact_label="approval"
+        )
+        assert r["valid"] is False
+        assert "approval_output_hash_mismatch" in r["hard_blocks"]
+
+    def test_missing_output_hash_is_missing_evidence(self):
+        r = validate_artifact_freshness(
+            {"request_id": "rq1"}, expected_output_hash="h1", artifact_label="review"
+        )
+        assert r["valid"] is False
+        assert "review_output_hash_missing" in r["missing_evidence"]
+
+    def test_request_id_mismatch_is_hard_block(self):
+        r = validate_artifact_freshness(
+            {"output_hash": "h1", "request_id": "wrong"},
+            expected_output_hash="h1", expected_request_id="rq-correct",
+            artifact_label="plan"
+        )
+        assert r["valid"] is False
+        assert "plan_request_id_mismatch" in r["hard_blocks"]
+
+    def test_phase_id_mismatch_is_hard_block(self):
+        r = validate_artifact_freshness(
+            {"phase_id": "94X"}, expected_phase_id="94P", artifact_label="pkg"
+        )
+        assert r["valid"] is False
+        assert "pkg_phase_id_mismatch" in r["hard_blocks"]
+
+    def test_phase_id_match_passes(self):
+        r = validate_artifact_freshness(
+            {"phase_id": "94P"}, expected_phase_id="94P", artifact_label="pkg"
+        )
+        assert r["valid"] is True
+
+
+class Test94PReadArtifactJsonSafe:
+    """read_artifact_json_safe: never raises, returns None on errors."""
+
+    def test_missing_file_returns_none(self, tmp_path):
+        result = read_artifact_json_safe(tmp_path / "no-such-file.json")
+        assert result is None
+
+    def test_malformed_json_returns_none(self, tmp_path):
+        f = tmp_path / "bad.json"
+        f.write_text("NOT JSON {{{")
+        result = read_artifact_json_safe(f)
+        assert result is None
+
+    def test_non_dict_json_returns_none(self, tmp_path):
+        f = tmp_path / "list.json"
+        f.write_text("[1, 2, 3]")
+        result = read_artifact_json_safe(f)
+        assert result is None
+
+    def test_valid_dict_returns_dict(self, tmp_path):
+        f = tmp_path / "ok.json"
+        f.write_text('{"key": "value"}')
+        result = read_artifact_json_safe(f)
+        assert result == {"key": "value"}
+
+    def test_empty_file_returns_none(self, tmp_path):
+        f = tmp_path / "empty.json"
+        f.write_text("")
+        result = read_artifact_json_safe(f)
+        assert result is None
+
+
+class Test94PValidateOperationPath:
+    """validate_operation_path: path safety."""
+
+    def test_empty_path_hard_blocks(self):
+        blocks = validate_operation_path("")
+        assert "empty_target_path" in blocks
+
+    def test_whitespace_only_hard_blocks(self):
+        blocks = validate_operation_path("   ")
+        assert "empty_target_path" in blocks
+
+    def test_absolute_path_hard_blocks(self):
+        blocks = validate_operation_path("/etc/passwd")
+        assert any("absolute_path" in b for b in blocks)
+
+    def test_parent_traversal_hard_blocks(self):
+        blocks = validate_operation_path("../../etc/passwd")
+        assert any("parent_traversal" in b for b in blocks)
+
+    def test_single_dotdot_hard_blocks(self):
+        blocks = validate_operation_path("src/../secret.py")
+        assert any("parent_traversal" in b for b in blocks)
+
+    def test_forbidden_file_hard_blocks(self):
+        blocks = validate_operation_path("src/foo.py", forbidden_files=["src/foo.py"])
+        assert any("forbidden_file" in b for b in blocks)
+
+    def test_safe_relative_path_passes(self):
+        blocks = validate_operation_path("src/pcae/core/foo.py")
+        assert blocks == []
+
+    def test_safe_tests_path_passes(self):
+        blocks = validate_operation_path("tests/test_foo.py")
+        assert blocks == []
+
+    def test_nested_safe_path_passes(self):
+        blocks = validate_operation_path("docs/PHASE_94.md")
+        assert blocks == []
+
+    def test_known_forbidden_env_pattern(self):
+        blocks = validate_operation_path(".env")
+        assert any("forbidden" in b for b in blocks)
+
+    def test_known_forbidden_session_json(self):
+        blocks = validate_operation_path(".pcae/session.json")
+        assert any("forbidden" in b for b in blocks)
+
+
+class Test94PValidateOperationsList:
+    """validate_operations_list: duplicates, conflicts, destructive."""
+
+    def test_empty_list_valid(self):
+        r = validate_operations_list([])
+        assert r["valid"] is True
+        assert r["hard_blocks"] == []
+
+    def test_safe_single_op_valid(self):
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="src/foo.py")
+        r = validate_operations_list([op])
+        assert r["valid"] is True
+
+    def test_duplicate_same_op_type_warns(self):
+        op1 = ApplyOperation(operation_type=OP_MODIFY, target_path="src/foo.py")
+        op2 = ApplyOperation(operation_type=OP_MODIFY, target_path="src/foo.py")
+        r = validate_operations_list([op1, op2])
+        assert any("duplicate_operation" in w for w in r["warnings"])
+
+    def test_conflicting_ops_same_path_hard_blocks(self):
+        op1 = ApplyOperation(operation_type=OP_CREATE, target_path="src/foo.py")
+        op2 = ApplyOperation(operation_type=OP_DELETE, target_path="src/foo.py")
+        r = validate_operations_list([op1, op2])
+        assert r["valid"] is False
+        assert any("conflicting_operations" in b for b in r["hard_blocks"])
+
+    def test_delete_op_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_DELETE, target_path="src/foo.py")
+        r = validate_operations_list([op])
+        assert r["valid"] is False
+        assert any("destructive_op" in b for b in r["hard_blocks"])
+
+    def test_rename_op_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_RENAME, target_path="src/foo.py")
+        r = validate_operations_list([op])
+        assert r["valid"] is False
+        assert any("destructive_op" in b for b in r["hard_blocks"])
+
+    def test_unknown_op_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_UNKNOWN, target_path="")
+        r = validate_operations_list([op])
+        assert r["valid"] is False
+        assert any("unknown_operation" in b for b in r["hard_blocks"])
+
+    def test_absolute_path_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="/etc/secret")
+        r = validate_operations_list([op])
+        assert r["valid"] is False
+        assert any("absolute_path" in b for b in r["hard_blocks"])
+
+    def test_traversal_path_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="../../secret.py")
+        r = validate_operations_list([op])
+        assert r["valid"] is False
+        assert any("parent_traversal" in b for b in r["hard_blocks"])
+
+    def test_forbidden_file_in_ops_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="src/secret.py")
+        r = validate_operations_list([op], forbidden_files=["src/secret.py"])
+        assert r["valid"] is False
+        assert any("forbidden_file" in b for b in r["hard_blocks"])
+
+    def test_manual_ops_skip_path_checks(self):
+        op = ApplyOperation(operation_type=OP_MANUAL, target_path="")
+        r = validate_operations_list([op])
+        assert "empty_target_path" not in str(r["hard_blocks"])
+
+
+class Test94PHashChain:
+    """validate_hash_chain: mismatch detection."""
+
+    def _rv(self, output_hash: str, request_id: str = "") -> ReviewArtifact:
+        return ReviewArtifact(review_id="rv-hc01", output_hash=output_hash,
+                               request_id=request_id, review_state=REVIEW_APPROVED)
+
+    def _ap(self, output_hash: str, request_id: str = "") -> ApprovalArtifact:
+        return ApprovalArtifact(approval_id="ap-hc01", output_hash=output_hash,
+                                request_id=request_id, operator="op")
+
+    def _pl(self, output_hash: str, request_id: str = "",
+             apply_plan_id: str = "pl-hc01") -> ApplyPlan:
+        return ApplyPlan(apply_plan_id=apply_plan_id, review_id="rv-hc01",
+                          output_hash=output_hash, request_id=request_id)
+
+    def test_matching_review_approval_passes(self):
+        r = validate_hash_chain(
+            review=self._rv("hash-A", "req-1"),
+            approval=self._ap("hash-A", "req-1"),
+        )
+        assert r["valid"] is True
+
+    def test_review_approval_hash_mismatch(self):
+        r = validate_hash_chain(
+            review=self._rv("hash-A"), approval=self._ap("hash-B"),
+        )
+        assert r["valid"] is False
+        assert "review_approval_output_hash_mismatch" in r["hard_blocks"]
+
+    def test_review_approval_request_id_mismatch(self):
+        r = validate_hash_chain(
+            review=self._rv("hash-A", "req-1"),
+            approval=self._ap("hash-A", "req-WRONG"),
+        )
+        assert r["valid"] is False
+        assert "review_approval_request_id_mismatch" in r["hard_blocks"]
+
+    def test_review_plan_hash_mismatch(self):
+        r = validate_hash_chain(
+            review=self._rv("hash-A"),
+            plan=self._pl("hash-B"),
+        )
+        assert r["valid"] is False
+        assert "review_plan_output_hash_mismatch" in r["hard_blocks"]
+
+    def test_review_plan_request_id_mismatch(self):
+        r = validate_hash_chain(
+            review=self._rv("hash-A", "req-1"),
+            plan=self._pl("hash-A", "req-WRONG"),
+        )
+        assert r["valid"] is False
+        assert "review_plan_request_id_mismatch" in r["hard_blocks"]
+
+    def test_approval_plan_hash_mismatch(self):
+        r = validate_hash_chain(
+            approval=self._ap("hash-A"),
+            plan=self._pl("hash-B"),
+        )
+        assert r["valid"] is False
+        assert "approval_plan_output_hash_mismatch" in r["hard_blocks"]
+
+    def test_plan_package_hash_mismatch(self):
+        plan = self._pl("hash-A", apply_plan_id="pl-pp01")
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-pp01", apply_plan_id="pl-pp01",
+            output_hash="hash-B", request_id=""
+        )
+        r = validate_hash_chain(plan=plan, package=pkg)
+        assert r["valid"] is False
+        assert "plan_package_output_hash_mismatch" in r["hard_blocks"]
+
+    def test_plan_package_request_id_mismatch(self):
+        plan = self._pl("hash-A", request_id="req-1", apply_plan_id="pl-rq01")
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-rq01", apply_plan_id="pl-rq01",
+            output_hash="hash-A", request_id="req-WRONG"
+        )
+        r = validate_hash_chain(plan=plan, package=pkg)
+        assert r["valid"] is False
+        assert "plan_package_request_id_mismatch" in r["hard_blocks"]
+
+    def test_plan_package_apply_plan_id_mismatch(self):
+        plan = self._pl("hash-A", apply_plan_id="pl-correct")
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-id01", apply_plan_id="pl-WRONG",
+            output_hash="hash-A"
+        )
+        r = validate_hash_chain(plan=plan, package=pkg)
+        assert r["valid"] is False
+        assert "plan_package_apply_plan_id_mismatch" in r["hard_blocks"]
+
+    def test_empty_hashes_skip_check(self):
+        r = validate_hash_chain(
+            review=ReviewArtifact(review_id="rv-eh", output_hash=""),
+            approval=ApprovalArtifact(approval_id="ap-eh", output_hash=""),
+        )
+        assert r["valid"] is True
+
+    def test_matching_full_chain_passes(self):
+        review = self._rv("hash-FULL", "req-full")
+        approval = self._ap("hash-FULL", "req-full")
+        plan = self._pl("hash-FULL", "req-full", apply_plan_id="pl-full")
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-full", apply_plan_id="pl-full",
+            output_hash="hash-FULL", request_id="req-full"
+        )
+        r = validate_hash_chain(review=review, approval=approval, plan=plan, package=pkg)
+        assert r["valid"] is True
+        assert r["hard_blocks"] == []
+
+
+class Test94PStateTransition:
+    """State-transition hardening."""
+
+    def test_rejected_review_cannot_be_approved(self):
+        review = ReviewArtifact(
+            review_id="rv-st01", request_id="rq-st01", output_hash="h-st01",
+            review_state=REVIEW_REJECTED, rejected=True,
+        )
+        with pytest.raises(ValueError, match="already rejected"):
+            approve_review(review, operator="op", reason="reason")
+
+    def test_hard_block_prevents_approval(self):
+        review = ReviewArtifact(
+            review_id="rv-st02", request_id="rq-st02", output_hash="h-st02",
+            hard_blocks=["forbidden_file:x.py"],
+        )
+        with pytest.raises(ValueError, match="hard blocks"):
+            approve_review(review, operator="op", reason="reason")
+
+    def test_approval_does_not_imply_apply_ready(self):
+        review = ReviewArtifact(
+            review_id="rv-st03", request_id="rq-st03", output_hash="h-st03",
+        )
+        approval = approve_review(review, operator="op", reason="ok")
+        assert review.apply_ready is False
+        assert approval.output_hash == "h-st03"
+
+    def test_apply_ready_does_not_imply_applied(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-st04", review_id="rv-st04",
+            output_hash="h-st04", apply_ready=True,
+        )
+        d = plan.to_dict()
+        assert "applied" not in d
+        assert d["apply_ready"] is True
+
+    def test_package_generation_does_not_imply_apply_ready(self):
+        plan = ApplyPlan(apply_plan_id="pl-st05", review_id="rv-st05",
+                          output_hash="h-st05")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.apply_ready is False
+        assert pkg.no_execution_performed is True
+
+    def test_approved_review_still_not_apply_ready(self):
+        review = ReviewArtifact(
+            review_id="rv-st06", request_id="rq-st06", output_hash="h-st06",
+        )
+        approve_review(review, operator="op", reason="ok")
+        assert review.approved_for_apply is True
+        assert review.apply_ready is False
+
+    def test_applied_rolled_back_states_not_in_valid_states(self):
+        from pcae.core.backend_invocations import VALID_REVIEW_STATES
+        assert "applied" not in VALID_REVIEW_STATES
+        assert "apply_failed" not in VALID_REVIEW_STATES
+        assert "rolled_back" not in VALID_REVIEW_STATES
+
+    def test_apply_ready_cannot_coexist_with_hard_blocks_in_plan(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-st07", review_id="rv-st07",
+            output_hash="h-st07", apply_ready=True,
+            hard_blocks=["forbidden_file:x"],
+        )
+        issues = plan.validate()
+        assert any("hard blocks" in i for i in issues)
+
+    def test_rejection_does_not_flip_approved(self):
+        review = ReviewArtifact(
+            review_id="rv-st08", request_id="rq-st08", output_hash="h-st08",
+        )
+        approve_review(review, operator="op", reason="ok")
+        assert review.approved_for_apply is True
+        reject_review(review, operator="op", reason="changed mind")
+        assert review.rejected is True
+        assert review.review_state == REVIEW_REJECTED
+
+
+class Test94POperationPathHardening:
+    """Path hardening in operations and plans."""
+
+    def test_absolute_path_in_operation_path_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="/etc/passwd")
+        blocks = op.path_hard_blocks()
+        assert any("absolute_path" in b for b in blocks)
+
+    def test_traversal_path_in_operation_path_hard_blocks(self):
+        op = ApplyOperation(operation_type=OP_CREATE, target_path="../../secret.py")
+        blocks = op.path_hard_blocks()
+        assert any("parent_traversal" in b for b in blocks)
+
+    def test_empty_path_for_create_fails(self):
+        op = ApplyOperation(operation_type=OP_CREATE, target_path="")
+        issues = op.validate()
+        assert any("target_path required" in i for i in issues)
+
+    def test_absolute_path_in_create_apply_plan_hard_blocks(self):
+        review = ReviewArtifact(review_id="rv-ph01", request_id="rq-ph01",
+                                 output_hash="h-ph01")
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="/etc/passwd")
+        plan = create_apply_plan(review, operations=[op])
+        assert any("absolute_path" in b for b in plan.hard_blocks)
+
+    def test_traversal_path_in_create_apply_plan_hard_blocks(self):
+        review = ReviewArtifact(review_id="rv-ph02", request_id="rq-ph02",
+                                 output_hash="h-ph02")
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="../../secret.py")
+        plan = create_apply_plan(review, operations=[op])
+        assert any("parent_traversal" in b for b in plan.hard_blocks)
+
+    def test_duplicate_op_warns_in_create_apply_plan(self):
+        review = ReviewArtifact(review_id="rv-ph03", request_id="rq-ph03",
+                                 output_hash="h-ph03")
+        op1 = ApplyOperation(operation_type=OP_MODIFY, target_path="src/foo.py")
+        op2 = ApplyOperation(operation_type=OP_MODIFY, target_path="src/foo.py")
+        plan = create_apply_plan(review, operations=[op1, op2])
+        assert any("duplicate_operation" in w for w in plan.warnings)
+
+    def test_conflicting_ops_hard_block_in_create_apply_plan(self):
+        review = ReviewArtifact(review_id="rv-ph04", request_id="rq-ph04",
+                                 output_hash="h-ph04")
+        op1 = ApplyOperation(operation_type=OP_CREATE, target_path="src/new.py")
+        op2 = ApplyOperation(operation_type=OP_DELETE, target_path="src/new.py")
+        plan = create_apply_plan(review, operations=[op1, op2])
+        assert any("conflicting_operations" in b or "high_risk_op" in b
+                   for b in plan.hard_blocks)
+
+    def test_forbidden_file_target_hard_blocks(self):
+        review = ReviewArtifact(review_id="rv-ph05", request_id="rq-ph05",
+                                 output_hash="h-ph05")
+        op = ApplyOperation(operation_type=OP_MODIFY, target_path="src/secret.py")
+        plan = create_apply_plan(review, operations=[op],
+                                  forbidden_files=["src/secret.py"])
+        assert any("forbidden_file" in b for b in plan.hard_blocks)
+
+
+class Test94PPackageHardening:
+    """Package safety: cannot hide hard blocks, no authorization implied."""
+
+    def test_package_preserves_hard_blocks_from_plan(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg01", review_id="rv-pkg01",
+                          output_hash="h-pkg01", hard_blocks=["forbidden_file:x.py"])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert "forbidden_file:x.py" in pkg.hard_blocks
+
+    def test_package_hard_blocks_visible_in_markdown(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg02", review_id="rv-pkg02",
+                          output_hash="h-pkg02", hard_blocks=["forbidden_file:y.py"])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        md = pkg.render_markdown()
+        assert "forbidden_file:y.py" in md
+
+    def test_package_hard_blocks_visible_in_to_dict(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg03", review_id="rv-pkg03",
+                          output_hash="h-pkg03", hard_blocks=["output_hash_missing"])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        d = pkg.to_dict()
+        assert "output_hash_missing" in d["hard_blocks"]
+
+    def test_package_no_commit_push_auth_in_dict(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg04", review_id="rv-pkg04",
+                          output_hash="h-pkg04")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        d = pkg.to_dict()
+        assert "commit_authorized" not in d
+        assert "push_authorized" not in d
+
+    def test_package_no_backend_invocation_auth_in_dict(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg05", review_id="rv-pkg05",
+                          output_hash="h-pkg05")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        d = pkg.to_dict()
+        assert "backend_invoked" not in d
+        assert "backend_invocation_authorized" not in d
+
+    def test_package_generation_does_not_run_tests(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg06", review_id="rv-pkg06",
+                          output_hash="h-pkg06", tests_to_run=["pytest tests/"])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        # tests_to_run preserved as advisory, not executed
+        assert "pytest tests/" in pkg.tests_to_run
+        assert pkg.no_execution_performed is True
+
+    def test_package_generation_does_not_run_pcae_check(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg07", review_id="rv-pkg07",
+                          output_hash="h-pkg07", check_required=True)
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert "pcae check" in pkg.checks_to_run[0]
+        assert pkg.no_execution_performed is True
+
+    def test_package_with_no_hard_blocks_still_no_execution(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg08", review_id="rv-pkg08",
+                          output_hash="h-pkg08")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.no_execution_performed is True
+
+    def test_package_merges_assessment_hard_blocks_cannot_hide(self):
+        from pcae.core.backend_invocations import BackendApplyReadinessAssessment
+        plan = ApplyPlan(apply_plan_id="pl-pkg09", review_id="rv-pkg09",
+                          output_hash="h-pkg09")
+        assessment = BackendApplyReadinessAssessment(
+            assessment_id="ra-pkg09", hard_blocks=["trust_assessment_blocked"]
+        )
+        pkg = create_backend_manual_apply_package(plan=plan, assessment=assessment)
+        assert "trust_assessment_blocked" in pkg.hard_blocks
+        md = pkg.render_markdown()
+        assert "trust_assessment_blocked" in md
+
+    def test_package_no_raw_prompt_content(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-pkg10", review_id="rv-pkg10",
+            output_hash="h-pkg10",
+            prompt_artifact_path=".pcae/prompts/test.md",
+        )
+        pkg = create_backend_manual_apply_package(plan=plan)
+        md = pkg.render_markdown()
+        # prompt_artifact_path stored as metadata ref, not contents
+        assert "prompt content" not in md.lower()
+        # The path itself as metadata is fine, but raw body shouldn't be there
+        # (since we never load it, it won't be there)
+        assert pkg.no_execution_performed is True
+
+    def test_package_no_secrets_in_to_dict(self):
+        plan = ApplyPlan(apply_plan_id="pl-pkg11", review_id="rv-pkg11",
+                          output_hash="h-pkg11")
+        pkg = create_backend_manual_apply_package(
+            plan=plan, operator_notes="approved by team"
+        )
+        j = _json_94p.dumps(pkg.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+
+class Test94PValidateReadinessHardening:
+    """validate_backend_apply_readiness: hash binding and hard-block dominance."""
+
+    def test_review_approval_hash_mismatch_hard_blocks(self):
+        plan = ApplyPlan(apply_plan_id="pl-vh01", review_id="rv-vh01",
+                          approval_id="ap-vh01", output_hash="hash-A")
+        review = ReviewArtifact(review_id="rv-vh01", request_id="rq-vh01",
+                                 output_hash="hash-A", review_state=REVIEW_APPROVED)
+        # Approval with mismatched hash
+        approval = ApprovalArtifact(approval_id="ap-vh01", output_hash="hash-B",
+                                     operator="op", review_id="rv-vh01")
+        assessment = validate_backend_apply_readiness(
+            plan=plan, review=review, approval=approval,
+        )
+        assert assessment.apply_ready is False
+        assert any("hash_mismatch" in b for b in assessment.hard_blocks)
+
+    def test_hard_blocks_dominate_accepted_risk(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-vh02", review_id="rv-vh02",
+            output_hash="h-vh02",
+            hard_blocks=["forbidden_file:x.py"],
+        )
+        approval = ApprovalArtifact(
+            approval_id="ap-vh02", output_hash="h-vh02",
+            operator="op", accepted_risk=True,
+        )
+        assessment = validate_backend_apply_readiness(plan=plan, approval=approval)
+        assert assessment.apply_ready is False
+        assert "forbidden_file:x.py" in assessment.hard_blocks
+
+    def test_hard_blocks_dominate_human_approval(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-vh03", review_id="rv-vh03",
+            output_hash="h-vh03",
+            hard_blocks=["output_hash_missing"],
+        )
+        review = ReviewArtifact(review_id="rv-vh03", request_id="rq-vh03",
+                                 output_hash="h-vh03", review_state=REVIEW_APPROVED,
+                                 approved_for_apply=True)
+        assessment = validate_backend_apply_readiness(plan=plan, review=review)
+        assert assessment.apply_ready is False
+
+    def test_missing_plan_returns_hard_block(self):
+        assessment = validate_backend_apply_readiness(plan=None)
+        assert assessment.apply_ready is False
+        assert "apply_plan_missing" in assessment.hard_blocks
+
+    def test_rejected_review_causes_missing_evidence(self):
+        plan = ApplyPlan(apply_plan_id="pl-vh05", review_id="rv-vh05",
+                          output_hash="h-vh05")
+        review = ReviewArtifact(review_id="rv-vh05", request_id="rq-vh05",
+                                 output_hash="h-vh05", review_state=REVIEW_REJECTED,
+                                 rejected=True)
+        assessment = validate_backend_apply_readiness(plan=plan, review=review)
+        assert assessment.apply_ready is False
+        assert any("review_not_approved" in m for m in assessment.missing_evidence)
+
+
+class Test94PNoExecutionGuarantees:
+    """Cross-cutting no-execution guarantees."""
+
+    def test_validate_operation_path_no_subprocess(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        # Ensure no subprocess was introduced in the module
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_validate_hash_chain_no_network(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_telegram_inbound_in_hardening(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "getUpdates" not in source
+
+    def test_multipart_phase_id_preserved_through_hardening(self):
+        plan = ApplyPlan(apply_plan_id="pl-mp94p", review_id="rv-mp94p",
+                          output_hash="h-mp94p", phase_id="94P.1.2.3")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.phase_id == "94P.1.2.3"
+        d = pkg.to_dict()
+        assert d["phase_id"] == "94P.1.2.3"
+
+    def test_json_output_deterministic(self):
+        plan = ApplyPlan(apply_plan_id="pl-det94p", review_id="rv-det94p",
+                          output_hash="h-det94p")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        d1 = pkg.to_dict()
+        d2 = pkg.to_dict()
+        assert set(d1.keys()) == set(d2.keys())
+        assert d1["no_execution_performed"] is True
+        assert d2["no_execution_performed"] is True

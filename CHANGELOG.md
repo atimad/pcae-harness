@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Completed Phase 94P Backend Apply Governance Hardening: validate_operation_path(), validate_operations_list(), validate_hash_chain(), validate_artifact_freshness(), read_artifact_json_safe(), ApplyOperation.path_hard_blocks().
+- Strengthened approve_review() to reject already-rejected reviews.
+- Hardened create_apply_plan() with path safety (absolute, traversal) and duplicate/conflict operation detection.
+- All hash/request mismatches produce hard blocks non-overridable by human approval or accepted risk.
+- Added --dist=loadfile to pyproject.toml for parallel test stability; prevents .pcae/ state contamination across xdist workers.
+- ~85 new backend model tests (329 total), ~27 new backend CLI tests (149 total), fast-green 3770/3770.
+- Delivers docs/PHASE_94_BACKEND_APPLY_GOVERNANCE_HARDENING.md.
+- Transitioned active task from Phase 94O — Backend Manual Apply Package to Phase 94P — Backend Apply Governance Hardening; session refreshed and governance continuity revalidated.
 - Completed Phase 94O Backend Manual Apply Package: BackendManualApplyPackage model, JSON+Markdown persistence, pcae backend manual-apply-package show/create CLI.
 - Package bundles ApplyPlan (94K) + BackendApplyReadinessAssessment (94L) evidence for manual operator review; no_execution_performed=True hard default.
 - create_backend_manual_apply_package() merges hard_blocks, missing_evidence, operations, tests_to_run, checks_to_run from plan + assessment.

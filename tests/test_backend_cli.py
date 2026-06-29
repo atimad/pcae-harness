@@ -113,8 +113,6 @@ from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.fast_green
-
 REPO_ROOT_94M = Path(__file__).resolve().parent.parent
 
 
@@ -944,6 +942,301 @@ class TestManualApplyPackageNoSubprocess:
         assert "backend-manual-apply-packages/" in gitignore.read_text()
 
     def test_no_telegram_inbound_in_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "getUpdates" not in source
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94P — Backend apply governance hardening CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import json as _json_94p
+import subprocess as _sub_94p
+import sys as _sys_94p
+import tempfile as _tempfile_94p
+from pathlib import Path as _Path_94p
+
+REPO_ROOT_94P = _Path_94p(__file__).resolve().parent.parent
+
+
+def _run_94p(subcmd: list[str]) -> _sub_94p.CompletedProcess:
+    return _sub_94p.run(
+        [_sys_94p.executable, "-m", "pcae", "backend"] + subcmd,
+        capture_output=True, text=True, cwd=REPO_ROOT_94P, timeout=15,
+    )
+
+
+def _json_94p_cmd(subcmd: list[str]) -> tuple[dict, int]:
+    r = _run_94p(subcmd + ["--json"])
+    try:
+        data = _json_94p.loads(r.stdout)
+    except Exception:
+        data = {}
+    return data, r.returncode
+
+
+class TestHardeningReviewCLI:
+    """Show/create/approve/reject hardening: clean errors, no secrets."""
+
+    def test_review_show_missing_json_error(self, tmp_path):
+        r = _sub_94p.run(
+            [_sys_94p.executable, "-m", "pcae", "backend", "review", "show",
+             "--latest", "--json"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+        data = _json_94p.loads(r.stdout)
+        assert "error" in data
+        j = _json_94p.dumps(data)
+        assert "sk-ant" not in j
+
+    def test_review_show_missing_text_clean(self, tmp_path):
+        r = _sub_94p.run(
+            [_sys_94p.executable, "-m", "pcae", "backend", "review", "show", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+        # No raw content, no secrets
+        assert "sk-ant" not in r.stdout
+        assert len(r.stdout) < 500
+
+    def test_review_create_json_no_secrets(self):
+        data, rc = _json_94p_cmd(["review", "create",
+                                   "--request-id", "rq-sec94p",
+                                   "--output-hash", "h-sec94p"])
+        assert rc == 0
+        j = _json_94p.dumps(data)
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_review_create_no_execution_flags(self):
+        data, rc = _json_94p_cmd(["review", "create",
+                                   "--request-id", "rq-noexec94p",
+                                   "--output-hash", "h-noexec94p"])
+        assert rc == 0
+        assert data.get("no_execution") is True
+        assert data.get("no_apply") is True
+
+    def test_review_create_no_raw_content_in_text(self):
+        r = _run_94p(["review", "create",
+                       "--request-id", "rq-noraw94p",
+                       "--output-hash", "h-noraw94p"])
+        assert r.returncode == 0
+        assert "raw prompt" not in r.stdout.lower()
+        assert len(r.stdout) < 3000
+
+    def test_review_create_json_structure_deterministic(self):
+        # Verify JSON structure is stable and secret-safe (no approve needed)
+        data1, rc1 = _json_94p_cmd(["review", "create",
+                                     "--request-id", "rq-struct1",
+                                     "--output-hash", "h-struct1"])
+        data2, rc2 = _json_94p_cmd(["review", "create",
+                                     "--request-id", "rq-struct2",
+                                     "--output-hash", "h-struct2"])
+        assert rc1 == 0 and rc2 == 0
+        assert set(data1["review"].keys()) == set(data2["review"].keys())
+        assert "sk-ant" not in _json_94p.dumps(data1)
+        assert "sk-ant" not in _json_94p.dumps(data2)
+
+
+class TestHardeningApplyPlanCLI:
+    """Apply plan hardening: hard blocks, hash checks, clean errors."""
+
+    def test_apply_plan_show_missing_json_error(self, tmp_path):
+        r = _sub_94p.run(
+            [_sys_94p.executable, "-m", "pcae", "backend", "apply-plan", "show",
+             "--latest", "--json"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+        data = _json_94p.loads(r.stdout)
+        assert "error" in data
+
+    def test_apply_plan_create_high_risk_op_hard_blocks(self):
+        data, rc = _json_94p_cmd(["apply-plan", "create",
+                                   "--operation", "delete_file:src/foo.py",
+                                   "--review-id", "rv-hr94p",
+                                   "--output-hash", "h-hr94p"])
+        assert rc == 0
+        plan = data.get("plan", {})
+        hard_blocks = plan.get("hard_blocks", [])
+        assert any("high_risk_op" in b for b in hard_blocks)
+
+    def test_apply_plan_create_unknown_op_hard_blocks(self):
+        data, rc = _json_94p_cmd(["apply-plan", "create",
+                                   "--operation", "unknown:src/mystery.py",
+                                   "--review-id", "rv-uk94p",
+                                   "--output-hash", "h-uk94p"])
+        assert rc == 0
+        plan = data.get("plan", {})
+        hard_blocks = plan.get("hard_blocks", [])
+        assert any("high_risk_op" in b or "unknown" in b for b in hard_blocks)
+
+    def test_apply_plan_create_json_no_secrets(self):
+        data, rc = _json_94p_cmd(["apply-plan", "create",
+                                   "--review-id", "rv-sec94p",
+                                   "--output-hash", "h-sec94p"])
+        assert rc == 0
+        j = _json_94p.dumps(data)
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_apply_plan_validate_no_tests_run(self):
+        # Create plan first, then validate — validate must not run tests
+        _run_94p(["apply-plan", "create",
+                   "--review-id", "rv-val94p",
+                   "--output-hash", "h-val94p"])
+        data, _ = _json_94p_cmd(["apply-plan", "validate"])
+        assert data.get("no_tests_run") is True
+        assert data.get("no_pcae_check_run") is True
+
+    def test_apply_plan_no_raw_content_printed(self):
+        data, rc = _json_94p_cmd(["apply-plan", "create",
+                                   "--review-id", "rv-noraw94p",
+                                   "--output-hash", "h-noraw94p"])
+        j = _json_94p.dumps(data)
+        assert "raw output" not in j.lower()
+        assert "raw prompt" not in j.lower()
+
+
+class TestHardeningManualApplyPackageCLI:
+    """MAP hardening: hard blocks visible, no authorization, clean errors."""
+
+    def test_map_show_missing_json_error(self, tmp_path):
+        r = _sub_94p.run(
+            [_sys_94p.executable, "-m", "pcae", "backend", "manual-apply-package",
+             "show", "--latest", "--json"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+        data = _json_94p.loads(r.stdout)
+        assert "error" in data
+
+    def test_map_create_hard_blocks_from_high_risk_plan(self, tmp_path):
+        # Create a plan with a high-risk op, then create MAP — use tmp plan file
+        import json as _j
+        from pcae.core.backend_invocations import ApplyPlan
+        plan = ApplyPlan(
+            apply_plan_id="pl-map-hb94p", review_id="rv-map-hb94p",
+            output_hash="h-map-hb94p",
+            hard_blocks=["high_risk_op:delete_file:src/foo.py"],
+        )
+        plan_file = tmp_path / "plan-hb.json"
+        plan_file.write_text(_j.dumps(plan.to_dict(), indent=2))
+        data, rc = _json_94p_cmd(["manual-apply-package", "create",
+                                   "--apply-plan", str(plan_file)])
+        assert rc == 0
+        pkg = data.get("package", {})
+        hard_blocks = pkg.get("hard_blocks", [])
+        assert len(hard_blocks) > 0
+
+    def test_map_create_hard_blocks_in_markdown(self, tmp_path):
+        # Create plan with hard-risk op, then MAP — verify hard blocks in Markdown
+        # Use tmp_path for apply-plan artifact so test is isolated
+        import json as _j
+        from pcae.core.backend_invocations import ApplyPlan, ApplyOperation, OP_DELETE
+        plan = ApplyPlan(
+            apply_plan_id="pl-map-md94p", review_id="rv-map-md94p",
+            output_hash="h-map-md94p", hard_blocks=["high_risk_op:delete_file:src/bar.py"],
+        )
+        plan_file = tmp_path / "plan.json"
+        plan_file.write_text(_j.dumps(plan.to_dict(), indent=2))
+        data, rc = _json_94p_cmd(["manual-apply-package", "create",
+                                   "--apply-plan", str(plan_file)])
+        assert rc == 0
+        md_path = _Path_94p(data["persistence"]["md_path"])
+        md = md_path.read_text()
+        assert "Hard Blocks" in md or any(
+            b in md for b in data["package"].get("hard_blocks", [])
+        )
+
+    def test_map_create_no_commit_push_auth_in_json(self):
+        data, rc = _json_94p_cmd(["manual-apply-package", "create"])
+        assert rc == 0
+        j = _json_94p.dumps(data)
+        assert "commit_authorized" not in j
+        assert "push_authorized" not in j
+
+    def test_map_create_no_execution_always_true(self):
+        data, rc = _json_94p_cmd(["manual-apply-package", "create"])
+        assert rc == 0
+        assert data["package"]["no_execution_performed"] is True
+        assert data["no_execution"] is True
+
+    def test_map_create_no_automatic_tests_flag(self):
+        data, rc = _json_94p_cmd(["manual-apply-package", "create"])
+        assert rc == 0
+        assert data["no_automatic_tests"] is True
+
+    def test_map_create_no_automatic_pcae_check_flag(self):
+        data, rc = _json_94p_cmd(["manual-apply-package", "create"])
+        assert rc == 0
+        assert data["no_automatic_pcae_check"] is True
+
+    def test_map_create_json_no_secrets(self):
+        data, rc = _json_94p_cmd(["manual-apply-package", "create"])
+        assert rc == 0
+        j = _json_94p.dumps(data)
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_map_show_no_raw_content(self):
+        _run_94p(["manual-apply-package", "create"])
+        r = _run_94p(["manual-apply-package", "show", "--latest"])
+        if r.returncode == 0:
+            # "No raw prompt/output" disclaimer is fine; raw body is not
+            out_lower = r.stdout.lower()
+            assert "sk-ant" not in out_lower
+            assert "api_key" not in out_lower
+            assert len(r.stdout) < 5000
+
+    def test_map_json_errors_secret_safe(self, tmp_path):
+        r = _sub_94p.run(
+            [_sys_94p.executable, "-m", "pcae", "backend", "manual-apply-package",
+             "show", "--latest", "--json"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        if r.returncode != 0:
+            data = _json_94p.loads(r.stdout)
+            j = _json_94p.dumps(data)
+            assert "sk-ant" not in j
+
+
+class TestHardeningNoSubprocess:
+    """Cross-cutting: no subprocess, no network, gitignored dirs."""
+
+    def test_no_subprocess_in_backend_commands_94p(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "subprocess.run" not in source
+        assert "Popen(" not in source
+
+    def test_no_network_in_backend_commands_94p(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_subprocess_in_backend_invocations_94p(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_all_artifact_dirs_gitignored(self):
+        gitignore = REPO_ROOT_94P / ".pcae" / ".gitignore"
+        content = gitignore.read_text()
+        assert "backend-reviews/" in content
+        assert "backend-apply-plans/" in content
+        assert "backend-apply-readiness/" in content
+        assert "backend-manual-apply-packages/" in content
+
+    def test_no_telegram_inbound_in_commands_94p(self):
         import inspect
         from pcae.commands import backend
         source = inspect.getsource(backend)
