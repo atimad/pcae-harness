@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 93B: Narrow Shell Gate Prototype (completed).
+
+Simulation-only implementation phase. Implemented explicit PCAE-mediated
+shell-gate check: pcae shell-gate check --command "..." --json. Classifies
+commands via existing shell gate classifier, maps to broker action_type/
+command_class, evaluates via evaluate_permission_broker(). 90 new tests
+(68 core + 22 CLI). Hard-block invariant (88V §16) preserved. No shell
+interception, wrappers, command mediation, backend invocation, or command
+execution. Simulation-only with no_execution/no_enforcement markers.
+Delivers docs/PHASE_93_NARROW_SHELL_GATE_PROTOTYPE.md.
+
 Phase 93A.1: Fast-Green Failure Classification and Baseline Repair (completed).
 
 Corrective classification phase. Investigated the single fast-green failure

@@ -1134,3 +1134,210 @@ def build_shell_gate(
         "errors": [],
         "safety_notes": safety_notes,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 93B — Narrow Shell Gate Prototype (broker-integrated check)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+def _has_no_verify_flag(tokens: list[str]) -> bool:
+    """Check whether command tokens contain --no-verify or -n flag."""
+    for t in tokens:
+        if t in ("--no-verify", "-n", "--no-gpg-sign"):
+            return True
+    return False
+
+
+def _detect_backend_program(program: str, tokens: list[str]) -> bool:
+    """Check whether the command invokes a known AI backend CLI."""
+    backend_names: frozenset[str] = frozenset({
+        "claude", "claude-code", "deepseek", "kimi",
+        "codex", "copilot", "cursor", "codegate",
+    })
+    return program in backend_names
+
+
+# ── Category → broker input mapping ─────────────────────────────────────────
+
+# Shell gate category → (broker action_type, broker command_class)
+_CATEGORY_TO_BROKER: dict[str, tuple[str, str]] = {
+    "read_only_inspection":        ("read",                "read_only"),
+    "test_execution":              ("read",                "read_only"),
+    "pcae_governed_lifecycle":     ("read",                "governed"),
+    "pcae_governed_commit":        ("read",                "governed"),
+    "pcae_governed_push":          ("read",                "governed"),
+    "raw_git_commit":              ("commit",              "raw_git_commit"),
+    "raw_git_push":                ("push",                "raw_git_push"),
+    "force_push":                  ("push",                "force_push"),
+    "git_history_rewrite":         ("source_mutation",     "raw_git_commit"),
+    "destructive_filesystem":      ("source_mutation",     "destructive_filesystem"),
+    "filesystem_write":            ("source_mutation",     "read_only"),
+    "source_mutation":             ("source_mutation",     "read_only"),
+    "test_mutation":               ("test_mutation",       "read_only"),
+    "docs_mutation":               ("docs_mutation",       "read_only"),
+    "policy_forbidden_file_mutation": ("docs_mutation",    "read_only"),
+    "backend_invocation":          ("backend_invocation",  "backend_invocation"),
+    "prompt_send":                 ("backend_invocation",  "backend_invocation"),
+    "output_capture":              ("backend_invocation",  "backend_invocation"),
+    "intake_adoption":             ("backend_invocation",  "backend_invocation"),
+    "package_install":             ("source_mutation",     "read_only"),
+    "network_access":              ("read",                "read_only"),
+    "secret_access":               ("read",                "read_only"),
+    "environment_mutation":        ("source_mutation",     "read_only"),
+    "unknown":                     ("read",                "unknown"),
+}
+
+
+def _map_to_broker_inputs(
+    command_category: str,
+    tokens: list[str],
+) -> tuple[str, str]:
+    """
+    Map shell gate command category and tokens to broker (action_type, command_class).
+    Applies no-verify override when --no-verify/-n is detected in git context.
+    """
+    mapping = _CATEGORY_TO_BROKER.get(
+        command_category, ("read", "unknown")
+    )
+    action_type, command_class = mapping
+
+    # No-verify override: git commit/push with --no-verify → no_verify class
+    if command_class in ("raw_git_commit", "raw_git_push") and _has_no_verify_flag(tokens):
+        command_class = "no_verify"
+
+    return action_type, command_class
+
+
+def _extract_paths(tokens: list[str]) -> tuple[str, ...]:
+    """Extract likely file/directory path arguments from command tokens."""
+    paths: list[str] = []
+    seen_double_dash = False
+    for t in tokens:
+        if t == "--":
+            seen_double_dash = True
+            continue
+        if seen_double_dash:
+            paths.append(t)
+            continue
+        if t.startswith("-"):
+            continue
+        # Heuristic: looks like a path (contains / or common extensions)
+        if "/" in t or "." in t:
+            paths.append(t)
+    return tuple(paths)
+
+
+def check_shell_gate(
+    repo_root: Path,
+    command_text: str,
+) -> dict[str, object]:
+    """
+    Phase 93B — Narrow Shell Gate Prototype.
+
+    Classify a proposed shell command, evaluate via the permission broker,
+    and return a structured simulation decision.
+
+    - Classifies the command text using the shell gate classifier
+    - Maps classification to broker action_type and command_class
+    - Calls evaluate_permission_broker() for the broker decision
+    - Never executes the command, never intercepts shell, never invokes backends
+    - Simulation only: no_execution=True, no_enforcement=True
+
+    Returns a dict with: command_text, command_category, command_class,
+    action_type, decision, hard_block, reason_code, reason_codes, message,
+    required_evidence, audit_payload, simulation_only, no_execution,
+    no_enforcement, authorization_granted, schema_version, and more.
+    """
+    from pcae.core.permission_broker import evaluate_permission_broker
+
+    # 1. Classify the command text
+    classification = _classify_command(command_text)
+    command_category: str = classification["command_category"]
+    classify_reason_codes: list[str] = classification["reason_codes"]
+    detected_flags: dict[str, bool] = classification["detected_flags"]
+
+    # 2. Tokenize for further analysis
+    tokens = _safe_split(command_text)
+
+    # 3. Map category + tokens → broker action_type and command_class
+    action_type, command_class = _map_to_broker_inputs(command_category, tokens)
+
+    # 4. Detect task contract
+    task_contract = _detect_task_contract(repo_root)
+    task_present = task_contract is not None
+
+    # 5. Extract paths from command text
+    paths = _extract_paths(tokens)
+
+    # 6. Call the permission broker
+    broker_result = evaluate_permission_broker(
+        action_type=action_type,
+        command_class=command_class,
+        paths=paths,
+        task_present=task_present,
+        task_scope_known=task_present,
+        approval_present=False,
+        approval_fresh=True,
+        accepted_risk_present=False,
+        readiness_ready=False,
+        enforcement_authorized=False,
+        repo_dirty=False,
+    )
+
+    # 7. Build shell-gate-specific output envelope
+    now = datetime.now(timezone.utc).isoformat()
+    import uuid
+    event_id = f"sg-{uuid.uuid4().hex[:12]}"
+
+    return {
+        # Shell gate metadata
+        "schema_version": "1.0",
+        "generated_at": now,
+        "source_command": "pcae shell-gate check",
+        "repository_root": str(repo_root),
+        "event_id": event_id,
+
+        # Command classification
+        "command_text": command_text,
+        "command_category": command_category,
+        "command_class": command_class,
+        "action_type": action_type,
+        "classify_reason_codes": classify_reason_codes,
+        "detected_flags": {k: v for k, v in detected_flags.items() if v},
+
+        # Extracted context
+        "extracted_paths": list(paths),
+        "active_task_detected": task_present,
+
+        # Broker decision (from evaluate_permission_broker)
+        "decision": broker_result["decision"],
+        "hard_block": broker_result["hard_block"],
+        "reason_code": broker_result["reason_code"],
+        "reason_codes": broker_result.get("reason_codes", []),
+        "message": broker_result["message"],
+        "required_evidence": broker_result.get("required_evidence", []),
+        "audit_payload": broker_result.get("audit_payload", {}),
+
+        # Simulation-only invariants
+        "simulation_only": True,
+        "no_execution": True,
+        "no_enforcement": True,
+        "authorization_granted": False,
+        "execution_authorized": False,
+        "command_executed": False,
+        "shell_intercepted": False,
+        "wrappers_installed": False,
+        "backend_invoked": False,
+
+        # Safety notes
+        "safety_notes": {
+            "shell_gate_prototype_only": True,
+            "shell_gate_does_not_execute_commands": True,
+            "shell_gate_does_not_intercept_shell": True,
+            "shell_gate_does_not_install_wrappers": True,
+            "shell_gate_does_not_invoke_backends": True,
+            "hard_blocks_non_overridable": True,
+            "execution_authorization_not_granted": True,
+        },
+    }

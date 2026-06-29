@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 93B — Narrow Shell Gate Prototype (20260629-0730-phase-93b-narrow-shell-gate-prototype)
 - 93A.1 — Fast-Green Failure Classification and Baseline Repair (20260629-93a-1-fast-green-failure-classification-and-baseline-repair)
 - 93A — Narrow Shell Gate Design (20260629-0657-phase-93a-narrow-shell-gate-design)
 - 92D.1 — Notification and Phase Report Status UX Repair (20260629-0017-92d-1-notification-and-phase-report-status-ux-repair)

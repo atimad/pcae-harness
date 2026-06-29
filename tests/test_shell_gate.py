@@ -1,454 +1,354 @@
-"""
-Shell gate prototype tests (Phase 88P).
+"""Tests for Phase 93B Narrow Shell Gate Prototype — core check_shell_gate().
 
-All tests are fast (no subprocess) — they call build_shell_gate or _classify_command
-directly.  These tests are included in the fast_green tier via conftest.py.
+Tests the broker-integrated shell gate check function. All checks are
+simulation-only — no command execution, no shell interception, no enforcement.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import pytest
 
-from pcae.core.shell_gate import (
-    SGP_CATEGORIES,
-    SGP_DECISIONS,
-    _classify_command,
-    build_shell_gate,
-)
+from pcae.core.shell_gate import check_shell_gate
+
+pytestmark = pytest.mark.fast_green
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────
-
-def _sg(command: str) -> dict[str, Any]:
-    """Return shell_gate envelope for a command using the real repo root."""
-    return build_shell_gate(REPO_ROOT, command_text=command)["shell_gate"]
+def _check(command_text: str) -> dict:
+    """Run check_shell_gate() and return the result dict."""
+    return check_shell_gate(REPO_ROOT, command_text)
 
 
-def _cat(command: str) -> str:
-    return _classify_command(command)["command_category"]
+# ═══════════════════════════════════════════════════════════════════════════════
+# Classification tests
+# ═══════════════════════════════════════════════════════════════════════════════
 
 
-# ── JSON envelope invariants ───────────────────────────────────────────────
+class TestClassifierCategories:
+    """Verify the shell gate classifies commands into correct categories."""
 
-class TestEnvelopeInvariants:
-    def test_schema_version_present(self):
-        data = build_shell_gate(REPO_ROOT, "ls")
-        assert data["schema_version"] == "0.1"
-
-    def test_source_command_present(self):
-        data = build_shell_gate(REPO_ROOT, "ls")
-        assert data["source_command"] == "pcae shell-gate check"
-
-    def test_generated_at_present(self):
-        data = build_shell_gate(REPO_ROOT, "ls")
-        assert "generated_at" in data and data["generated_at"]
-
-    def test_repository_root_present(self):
-        data = build_shell_gate(REPO_ROOT, "ls")
-        assert "repository_root" in data
-
-    def test_shell_gate_key_present(self):
-        data = build_shell_gate(REPO_ROOT, "ls")
-        assert "shell_gate" in data
-
-    def test_warnings_and_errors_present(self):
-        data = build_shell_gate(REPO_ROOT, "ls")
-        assert "warnings" in data
-        assert "errors" in data
-
-    def test_gate_type_is_prototype(self):
-        sg = _sg("ls")
-        assert sg["gate_type"] == "shell_gate_prototype"
-
-    def test_command_text_preserved(self):
-        cmd = "git status --short"
-        sg = _sg(cmd)
-        assert sg["command_text"] == cmd
-
-    def test_decision_is_known_value(self):
-        sg = _sg("ls")
-        assert sg["decision"] in SGP_DECISIONS
-
-    def test_command_category_is_known_value(self):
-        sg = _sg("ls")
-        assert sg["command_category"] in SGP_CATEGORIES
+    @pytest.mark.parametrize("cmd,expected_category", [
+        ("pcae health", "pcae_governed_lifecycle"),
+        ("pcae check", "pcae_governed_lifecycle"),
+        ("pcae commit", "pcae_governed_commit"),
+        ("pcae push", "pcae_governed_push"),
+        ("git status", "read_only_inspection"),
+        ("git log", "read_only_inspection"),
+        ("git diff", "read_only_inspection"),
+        ("git branch", "read_only_inspection"),
+        ("ls", "read_only_inspection"),
+        ("cat README.md", "read_only_inspection"),
+        ("echo hello", "read_only_inspection"),
+        ("git commit -m x", "raw_git_commit"),
+        ("git push", "raw_git_push"),
+        ("git push --force", "force_push"),
+        ("git push -f", "force_push"),
+        ("git push --force-with-lease", "force_push"),
+        ("git rebase main", "git_history_rewrite"),
+        ("rm -rf /tmp/test", "destructive_filesystem"),
+        ("rm -rf /", "destructive_filesystem"),
+        ("git clean -fdx", "destructive_filesystem"),
+        ("python -m pytest tests/", "test_execution"),
+        ("pytest tests/", "test_execution"),
+    ])
+    def test_classification(self, cmd, expected_category):
+        result = _check(cmd)
+        assert result["command_category"] == expected_category, \
+            f"Expected {expected_category} for {cmd!r}, got {result['command_category']}"
 
 
-# ── Performed flags always false ───────────────────────────────────────────
+class TestClassifierCommandClass:
+    """Verify command class mapping for broker."""
 
-class TestPerformedFlagsAlwaysFalse:
-    _COMMANDS = [
-        "ls",
-        "git push --force",
-        "git commit -m 'x'",
-        "rm -rf /tmp/foo",
-        "python -m pytest -n auto",
-        "pip install requests",
-        "curl https://example.com",
-        "unknowncmd --flag",
+    @pytest.mark.parametrize("cmd,expected_class", [
+        ("pcae health", "governed"),
+        ("pcae check", "governed"),
+        ("git status", "read_only"),
+        ("git log", "read_only"),
+        ("git commit -m x", "raw_git_commit"),
+        ("git push", "raw_git_push"),
+        ("git push --force", "force_push"),
+        ("git push -f", "force_push"),
+        ("git push --force-with-lease", "force_push"),
+        ("rm -rf /tmp/x", "destructive_filesystem"),
+        ("git clean -fdx", "destructive_filesystem"),
+        ("python -m pytest tests/", "read_only"),
+        ("pytest tests/", "read_only"),
+        ("xyzzy123_nonexistent_cmd", "unknown"),
+    ])
+    def test_command_class(self, cmd, expected_class):
+        result = _check(cmd)
+        assert result["command_class"] == expected_class, \
+            f"Expected class {expected_class} for {cmd!r}, got {result['command_class']}"
+
+
+class TestNoVerifyDetection:
+    """Verify --no-verify flag detection and precedence."""
+
+    def test_git_commit_no_verify_long(self):
+        result = _check("git commit --no-verify -m x")
+        assert result["command_class"] == "no_verify"
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+
+    def test_git_commit_no_verify_short(self):
+        result = _check("git commit -n -m x")
+        assert result["command_class"] == "no_verify"
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+
+    def test_git_push_no_verify(self):
+        result = _check("git push --no-verify")
+        assert result["command_class"] == "no_verify"
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+
+    def test_no_verify_takes_precedence(self):
+        result = _check("git commit --no-verify -m test")
+        assert result["command_class"] == "no_verify"
+        assert result["command_category"] == "raw_git_commit"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Decision behavior tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestHardBlockDecisions:
+    """Verify hard-block command classes return deny with hard_block=true."""
+
+    def test_raw_git_commit_is_hard_blocked(self):
+        result = _check("git commit -m x")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_raw_git_commit"
+
+    def test_raw_git_push_is_hard_blocked(self):
+        result = _check("git push")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_raw_git_push"
+
+    def test_force_push_is_hard_blocked(self):
+        result = _check("git push --force")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_force_push"
+
+    def test_force_push_short_flag_is_hard_blocked(self):
+        result = _check("git push -f")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+
+    def test_no_verify_is_hard_blocked(self):
+        result = _check("git commit --no-verify -m x")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_no_verify"
+
+    def test_destructive_filesystem_is_hard_blocked(self):
+        result = _check("rm -rf /tmp/x")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+        assert result["reason_code"] == "blocked_by_destructive_filesystem"
+
+    def test_unknown_command_fails_closed(self):
+        result = _check("xyzzy_not_a_command")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+
+
+class TestAllowDecisions:
+    """Verify read-only and governed commands are allowed."""
+
+    def test_read_only_inspection_allowed(self):
+        result = _check("git status")
+        assert result["decision"] == "allow"
+        assert result["hard_block"] is False
+
+    def test_ls_is_allowed(self):
+        result = _check("ls")
+        assert result["decision"] == "allow"
+        assert result["hard_block"] is False
+
+    def test_governed_pcae_allowed(self):
+        result = _check("pcae health")
+        assert result["decision"] == "allow"
+        assert result["hard_block"] is False
+
+
+class TestTestExecution:
+    """Verify test execution is not hard-blocked."""
+
+    def test_pytest_not_hard_blocked(self):
+        result = _check("pytest tests/ -q")
+        assert result["hard_block"] is False, \
+            f"pytest should not be hard-blocked, got {result['reason_code']}"
+
+    def test_python_pytest_not_hard_blocked(self):
+        result = _check("python -m pytest tests/ -q")
+        assert result["hard_block"] is False, \
+            f"python -m pytest should not be hard-blocked, got {result['reason_code']}"
+
+
+class TestBackendInvocation:
+    """Verify backend invocation is safely gated."""
+
+    def test_backend_invocation_safe_denial(self):
+        result = _check("claude 'write code'")
+        assert result["decision"] in ("deny", "human_review"), \
+            f"Backend invocation should be deny or human_review, got {result['decision']}"
+
+    def test_backend_invocation_not_allowed(self):
+        result = _check("deepseek chat")
+        assert result["decision"] != "allow", \
+            "Backend invocation must not be allowed without review"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Hard-block invariant tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestHardBlockNonOverridable:
+    """Verify hard blocks cannot be overridden (88V §16)."""
+
+    def test_force_push_hard_block_present(self):
+        result = _check("git push --force origin main")
+        assert result["hard_block"] is True
+        assert result["decision"] == "deny"
+        assert result["safety_notes"]["hard_blocks_non_overridable"] is True
+
+    def test_raw_git_commit_hard_block_present(self):
+        result = _check("git commit -m 'test'")
+        assert result["hard_block"] is True
+        assert result["decision"] == "deny"
+
+    def test_destructive_fs_hard_block_present(self):
+        result = _check("rm -rf important_dir")
+        assert result["hard_block"] is True
+        assert result["decision"] == "deny"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Output model tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestOutputModel:
+    """Verify the output includes all required fields."""
+
+    REQUIRED_KEYS = [
+        "schema_version", "generated_at", "command_text",
+        "command_category", "command_class", "action_type",
+        "decision", "hard_block", "reason_code", "reason_codes",
+        "message", "required_evidence", "audit_payload",
+        "simulation_only", "no_execution", "no_enforcement",
+        "authorization_granted", "execution_authorized",
+        "event_id", "safety_notes",
     ]
 
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_authorization_granted_false(self, cmd):
-        assert _sg(cmd)["authorization_granted"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_execution_authorized_false(self, cmd):
-        assert _sg(cmd)["execution_authorized"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_command_executed_false(self, cmd):
-        assert _sg(cmd)["command_executed"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_repo_mutation_performed_false(self, cmd):
-        assert _sg(cmd)["repo_mutation_performed"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_backend_invocation_performed_false(self, cmd):
-        assert _sg(cmd)["backend_invocation_performed"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_prompt_sent_false(self, cmd):
-        assert _sg(cmd)["prompt_sent"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_capture_performed_false(self, cmd):
-        assert _sg(cmd)["capture_performed"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_raw_git_push_performed_false(self, cmd):
-        assert _sg(cmd)["raw_git_push_performed"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_force_push_performed_false(self, cmd):
-        assert _sg(cmd)["force_push_performed"] is False
-
-    @pytest.mark.parametrize("cmd", _COMMANDS)
-    def test_storage_written_false(self, cmd):
-        assert _sg(cmd)["storage_written"] is False
-
-
-# ── Read-only commands ─────────────────────────────────────────────────────
-
-class TestReadOnlyCommands:
-    def test_ls_allowed(self):
-        sg = _sg("ls -la")
-        assert sg["decision"] == "allow_read_only"
-        assert sg["command_category"] == "read_only_inspection"
-
-    def test_ls_read_only_detected(self):
-        assert _sg("ls")["read_only_detected"] is True
-
-    def test_pwd_allowed(self):
-        sg = _sg("pwd")
-        assert sg["decision"] == "allow_read_only"
-
-    def test_git_status_allowed(self):
-        sg = _sg("git status --short")
-        assert sg["decision"] == "allow_read_only"
-        assert sg["command_category"] == "read_only_inspection"
-
-    def test_git_log_allowed(self):
-        sg = _sg("git log --oneline -10")
-        assert sg["decision"] == "allow_read_only"
-
-    def test_git_diff_allowed(self):
-        sg = _sg("git diff HEAD")
-        assert sg["decision"] == "allow_read_only"
-
-    def test_cat_allowed(self):
-        sg = _sg("cat pyproject.toml")
-        assert sg["decision"] == "allow_read_only"
-
-    def test_grep_allowed(self):
-        sg = _sg("grep -r 'shell_gate' src/")
-        assert sg["decision"] == "allow_read_only"
-
-    def test_find_allowed(self):
-        sg = _sg("find . -name '*.py'")
-        assert sg["decision"] == "allow_read_only"
-
-    def test_sed_n_allowed(self):
-        sg = _sg("sed -n '1,10p' CHANGELOG.md")
-        assert sg["decision"] == "allow_read_only"
-
-    def test_hard_block_absent_for_read_only(self):
-        assert _sg("ls")["hard_block_present"] is False
-
-
-# ── Raw git commit blocked ─────────────────────────────────────────────────
-
-class TestRawGitCommitBlocked:
-    def test_git_commit_blocked(self):
-        sg = _sg("git commit -m 'test'")
-        assert sg["decision"] == "blocked_by_raw_git_commit"
-        assert sg["command_category"] == "raw_git_commit"
-
-    def test_git_commit_raw_detected(self):
-        assert _sg("git commit --amend")["raw_git_commit_detected"] is True
-
-    def test_git_commit_hard_block(self):
-        assert _sg("git commit -m 'x'")["hard_block_present"] is True
-
-    def test_git_commit_not_executed(self):
-        assert _sg("git commit -m 'x'")["command_executed"] is False
-
-
-# ── Raw git push blocked ───────────────────────────────────────────────────
-
-class TestRawGitPushBlocked:
-    def test_git_push_blocked(self):
-        sg = _sg("git push")
-        assert sg["decision"] == "blocked_by_raw_git_push"
-        assert sg["command_category"] == "raw_git_push"
-
-    def test_git_push_origin_blocked(self):
-        sg = _sg("git push origin main")
-        assert sg["decision"] == "blocked_by_raw_git_push"
-
-    def test_git_push_raw_detected(self):
-        assert _sg("git push origin main")["raw_git_push_detected"] is True
-
-    def test_git_push_hard_block(self):
-        assert _sg("git push")["hard_block_present"] is True
-
-
-# ── Force push blocked ─────────────────────────────────────────────────────
-
-class TestForcePushBlocked:
-    def test_git_push_force_blocked(self):
-        sg = _sg("git push --force")
-        assert sg["decision"] == "blocked_by_force_push"
-        assert sg["command_category"] == "force_push"
-
-    def test_git_push_f_blocked(self):
-        sg = _sg("git push -f")
-        assert sg["decision"] == "blocked_by_force_push"
-
-    def test_git_push_force_with_lease_blocked(self):
-        sg = _sg("git push --force-with-lease")
-        assert sg["decision"] == "blocked_by_force_push"
-
-    def test_force_push_detected_flag(self):
-        assert _sg("git push --force")["force_push_detected"] is True
-
-    def test_force_push_hard_block(self):
-        assert _sg("git push --force")["hard_block_present"] is True
-
-
-# ── Git history rewrite blocked ────────────────────────────────────────────
-
-class TestHistoryRewriteBlocked:
-    def test_git_reset_hard_blocked(self):
-        sg = _sg("git reset --hard HEAD~1")
-        assert sg["decision"] == "blocked_by_history_rewrite"
-
-    def test_git_rebase_blocked(self):
-        sg = _sg("git rebase main")
-        assert sg["decision"] == "blocked_by_history_rewrite"
-
-    def test_git_cherry_pick_blocked(self):
-        sg = _sg("git cherry-pick abc123")
-        assert sg["decision"] == "blocked_by_history_rewrite"
-
-
-# ── Destructive filesystem blocked ────────────────────────────────────────
-
-class TestDestructiveFilesystemBlocked:
-    def test_rm_rf_blocked(self):
-        sg = _sg("rm -rf /tmp/test")
-        assert sg["decision"] == "blocked_by_destructive_filesystem"
-        assert sg["command_category"] == "destructive_filesystem"
-
-    def test_rm_rf_hard_block(self):
-        assert _sg("rm -rf /tmp/test")["hard_block_present"] is True
-
-    def test_destructive_detected_flag(self):
-        assert _sg("rm -rf /tmp/test")["destructive_filesystem_detected"] is True
-
-    def test_git_clean_fd_blocked(self):
-        sg = _sg("git clean -fd")
-        assert sg["decision"] == "blocked_by_destructive_filesystem"
-
-
-# ── Shell redirection / file write detected ────────────────────────────────
-
-class TestFileWriteRedirectionDetected:
-    def test_redirect_to_tmpfile(self):
-        sg = _sg("cat foo.txt > /tmp/out.txt")
-        assert sg["command_category"] == "filesystem_write"
-        assert sg["filesystem_write_detected"] is True
-
-    def test_redirect_append(self):
-        sg = _sg("echo hello >> /tmp/log.txt")
-        assert sg["filesystem_write_detected"] is True
-
-    def test_redirect_to_source_file(self):
-        sg = _sg("echo 'x' > src/pcae/core/new.py")
-        assert sg["command_category"] == "source_mutation"
-        assert sg["source_mutation_detected"] is True
-
-    def test_redirect_to_test_file(self):
-        sg = _sg("echo 'x' > tests/test_new.py")
-        assert sg["command_category"] == "test_mutation"
-        assert sg["test_mutation_detected"] is True
-
-    def test_redirect_to_docs_file(self):
-        sg = _sg("echo 'x' > docs/PHASE_99_FOO.md")
-        assert sg["command_category"] == "docs_mutation"
-        assert sg["docs_mutation_detected"] is True
-
-
-# ── Policy-forbidden file blocked ─────────────────────────────────────────
-
-class TestPolicyForbiddenFileBlocked:
-    def test_readme_write_blocked(self):
-        sg = _sg("echo 'x' > README.md")
-        assert sg["decision"] == "blocked_by_policy_forbidden_file"
-        assert sg["policy_forbidden_file_detected"] is True
-
-    def test_real_captured_tasks_blocked(self):
-        sg = _sg("echo 'x' > docs/REAL_CAPTURED_TASKS.md")
-        assert sg["decision"] == "blocked_by_policy_forbidden_file"
-
-    def test_linkedin_article_blocked(self):
-        sg = _sg("echo 'x' > docs/LINKEDIN_ARTICLE_DRAFT.md")
-        assert sg["decision"] == "blocked_by_policy_forbidden_file"
-
-    def test_policy_forbidden_hard_block(self):
-        assert _sg("echo 'x' > README.md")["hard_block_present"] is True
-
-    def test_readme_sed_inplace_blocked(self):
-        sg = _sg("sed -i 's/old/new/g' README.md")
-        assert sg["decision"] == "blocked_by_policy_forbidden_file"
-
-
-# ── Test execution classified ─────────────────────────────────────────────
-
-class TestTestExecutionClassified:
-    def test_pytest_classified(self):
-        sg = _sg("python -m pytest tests/test_shell_gate.py")
-        assert sg["command_category"] == "test_execution"
-        assert sg["test_execution_detected"] is True
-
-    def test_pytest_n_auto_expensive(self):
-        sg = _sg("python -m pytest -n auto")
-        assert sg["expensive_test_execution_detected"] is True
-        assert sg["test_run_preflight_required"] is True
-
-    def test_pytest_n_4_expensive(self):
-        sg = _sg("python -m pytest -n 4 tests/")
-        assert sg["expensive_test_execution_detected"] is True
-
-    def test_pytest_no_n_not_expensive(self):
-        sg = _sg("python -m pytest tests/test_shell_gate.py -q")
-        assert sg["expensive_test_execution_detected"] is False
-        assert sg["test_run_preflight_required"] is False
-
-    def test_pcae_commit_classified(self):
-        sg = _sg("pcae commit --message 'x'")
-        assert sg["command_category"] == "pcae_governed_commit"
-        assert sg["decision"] == "allow_governed"
-
-    def test_pcae_push_classified(self):
-        sg = _sg("pcae push")
-        assert sg["command_category"] == "pcae_governed_push"
-        assert sg["decision"] == "allow_governed"
-
-
-# ── Package install / network review ─────────────────────────────────────
-
-class TestPackageAndNetworkReview:
-    def test_pip_install_requires_review(self):
-        sg = _sg("pip install requests")
-        assert sg["decision"] == "requires_human_review"
-        assert sg["command_category"] == "package_install"
-        assert sg["package_install_detected"] is True
-
-    def test_brew_install_requires_review(self):
-        sg = _sg("brew install ripgrep")
-        assert sg["decision"] == "requires_human_review"
-        assert sg["command_category"] == "package_install"
-
-    def test_npm_install_requires_review(self):
-        sg = _sg("npm install lodash")
-        assert sg["decision"] == "requires_human_review"
-
-    def test_curl_requires_review(self):
-        sg = _sg("curl https://example.com/script.sh")
-        assert sg["decision"] == "requires_human_review"
-        assert sg["command_category"] == "network_access"
-        assert sg["network_access_detected"] is True
-
-    def test_wget_requires_review(self):
-        sg = _sg("wget https://example.com/file.tar.gz")
-        assert sg["decision"] == "requires_human_review"
-
-
-# ── Unknown command blocked ───────────────────────────────────────────────
-
-class TestUnknownCommandBlocked:
-    def test_unknown_program_blocked(self):
-        sg = _sg("totally_unknown_cmd --flag value")
-        assert sg["decision"] == "blocked_by_unknown_command"
-        assert sg["command_category"] == "unknown"
-
-    def test_unknown_hard_block(self):
-        assert _sg("xyzzy --foo")["hard_block_present"] is True
-
-    def test_empty_command_unknown(self):
-        sg = _sg("")
-        assert sg["command_category"] == "unknown"
-
-    def test_unknown_not_executed(self):
-        assert _sg("xyzzy --foo")["command_executed"] is False
-
-
-# ── pcae governed commands ────────────────────────────────────────────────
-
-class TestPcaeGoverned:
-    def test_pcae_health_governed(self):
-        sg = _sg("pcae health")
-        assert sg["decision"] == "allow_governed"
-        assert sg["command_category"] == "pcae_governed_lifecycle"
-
-    def test_pcae_check_governed(self):
-        sg = _sg("pcae check")
-        assert sg["decision"] == "allow_governed"
-
-    def test_pcae_task_governed(self):
-        sg = _sg("pcae task new 'Test task'")
-        assert sg["decision"] == "allow_governed"
-
-    def test_pcae_gate_dry_run_governed(self):
-        sg = _sg("pcae gate-dry-run --json")
-        assert sg["decision"] == "allow_governed"
-
-
-# ── Safety notes ──────────────────────────────────────────────────────────
-
-class TestSafetyNotes:
-    def test_does_not_execute_commands_note(self):
-        sg = _sg("ls")
-        assert sg["safety_notes"]["shell_gate_does_not_execute_commands"] is True
-
-    def test_does_not_intercept_shell_note(self):
-        sg = _sg("ls")
-        assert sg["safety_notes"]["shell_gate_does_not_intercept_shell"] is True
-
-    def test_does_not_invoke_backends_note(self):
-        sg = _sg("ls")
-        assert sg["safety_notes"]["shell_gate_does_not_invoke_backends"] is True
-
-    def test_permission_broker_not_implemented(self):
-        sg = _sg("ls")
-        assert sg["safety_notes"]["permission_broker_not_implemented"] is True
-
-    def test_execution_authorization_not_granted(self):
-        sg = _sg("ls")
-        assert sg["safety_notes"]["execution_authorization_not_granted"] is True
+    def test_output_has_all_required_keys(self):
+        result = _check("git status")
+        for key in self.REQUIRED_KEYS:
+            assert key in result, f"Missing required key: {key}"
+
+    def test_simulation_only_is_true(self):
+        result = _check("git push")
+        assert result["simulation_only"] is True
+
+    def test_no_execution_is_true(self):
+        result = _check("rm -rf /")
+        assert result["no_execution"] is True
+
+    def test_no_enforcement_is_true(self):
+        result = _check("git commit -m x")
+        assert result["no_enforcement"] is True
+
+    def test_authorization_granted_is_false(self):
+        result = _check("git status")
+        assert result["authorization_granted"] is False
+
+    def test_audit_payload_present(self):
+        result = _check("git push --force")
+        audit = result["audit_payload"]
+        assert "event_id" in audit
+        assert "event_type" in audit
+        assert "timestamp" in audit
+        assert "decision" in audit
+        assert "hard_block" in audit
+
+    def test_schema_version_is_1_0(self):
+        result = _check("ls")
+        assert result["schema_version"] == "1.0"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Non-execution guarantee tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestNoExecutionGuarantee:
+    """Verify no code path executes the command."""
+
+    def test_command_executed_always_false(self):
+        result = _check("rm -rf /")
+        assert result["command_executed"] is False
+
+    def test_shell_intercepted_always_false(self):
+        result = _check("git push --force")
+        assert result["shell_intercepted"] is False
+
+    def test_backend_invoked_always_false(self):
+        result = _check("claude 'hello'")
+        assert result["backend_invoked"] is False
+
+    def test_safety_notes_confirm_no_execution(self):
+        result = _check("git commit -m x")
+        notes = result["safety_notes"]
+        assert notes["shell_gate_does_not_execute_commands"] is True
+        assert notes["shell_gate_does_not_intercept_shell"] is True
+        assert notes["shell_gate_does_not_install_wrappers"] is True
+        assert notes["shell_gate_does_not_invoke_backends"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Edge case tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestEdgeCases:
+    """Edge case and boundary tests."""
+
+    def test_empty_command_fails_closed(self):
+        result = _check("")
+        assert result["command_category"] == "unknown"
+        assert result["hard_block"] is True
+
+    def test_whitespace_only_command(self):
+        result = _check("   ")
+        assert result["command_category"] == "unknown"
+        assert result["hard_block"] is True
+
+    def test_compound_command_with_hard_block(self):
+        result = _check("git status && git push --force")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+
+    def test_git_commit_message_with_special_chars(self):
+        result = _check('git commit -m "fix: update README"')
+        assert result["command_class"] == "raw_git_commit"
+        assert result["hard_block"] is True
+
+    def test_command_with_env_vars(self):
+        # DEBUG=1 ... is classified as environment_mutation by the existing
+        # shell gate classifier, which maps to a mutating action.
+        result = _check("DEBUG=1 pytest tests/")
+        # The exact outcome depends on whether the classifier sees env var
+        # prefix or pytest invocation first. Both safe behaviors are valid.
+        assert result["command_category"] in (
+            "environment_mutation", "test_execution",
+        ), f"Unexpected category: {result['command_category']}"

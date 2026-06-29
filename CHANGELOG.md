@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Completed Phase 93B narrow shell gate prototype: simulation-only pcae shell-gate check with broker integration.
+- check_shell_gate() classifies commands via existing shell gate classifier, maps to broker inputs, calls evaluate_permission_broker().
+- No-verify flag detection with precedence override (git commit --no-verify → no_verify class).
+- Updated CLI with structured output, JSON support, simulation markers. 90 new tests (68 core + 22 CLI).
+- Hard-block invariant (88V §16) preserved. No shell interception, wrappers, or command execution.
+- Delivers docs/PHASE_93_NARROW_SHELL_GATE_PROTOTYPE.md.
 - Completed Phase 93A.1 fast-green failure classification: investigated single transient failure (test_pytest_dry_run_not_blocked).
 - Root cause: transient environmental flakiness, not a code defect. Fast-green restored to 3305/3305.
 - No tests weakened, marked xfail, or skipped. Failure documented as accepted follow-up.
