@@ -948,3 +948,142 @@ class TestCanonicalReport:
                     _sh.move(cpath + ".bak", cpath)
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.8.1 — Canonical/metadata consistency guard tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestConsistencyGuard:
+    """Verify consistency checks between canonical report and metadata."""
+
+    def test_consistent_report_stays_complete(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.phase_reports import finalize_phase_report, write_canonical_report
+            import os
+            cpath = ".pcae/phase-completion-report.md"
+            old_exists = os.path.exists(cpath)
+            if old_exists:
+                import shutil as _sh
+                _sh.move(cpath, cpath + ".bak")
+            try:
+                # Canonical says 100/100, metadata says 100/100 → consistent
+                write_canonical_report(
+                    "# Phase 92D.8.1 Complete — Consistent Test\n\n"
+                    "Phase 92D.8.1 completed.\n"
+                    "Commit: abc123\n"
+                    "Validation: Fast-green: 100/100\nPushed: pushed"
+                )
+                fin = finalize_phase_report(
+                    phase_id="92D.8.1", phase_name="Consistent Test",
+                    status="completed", summary="Done.",
+                    files_changed=3, tests_run=100,
+                    test_results={"Fast-green": "100/100 (passed)"},
+                    governance_results={"health": "healthy"},
+                    commits=["abc123"], pushed_status="pushed",
+                    reports_dir=Path(td),
+                )
+                report = fin["report"]
+                assert report is not None
+                # Should still be complete (consistent)
+                assert report.report_completeness == "complete"
+            finally:
+                if os.path.exists(cpath):
+                    os.remove(cpath)
+                if old_exists:
+                    import shutil as _sh
+                    _sh.move(cpath + ".bak", cpath)
+
+    def test_mismatched_validation_downgrades(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.phase_reports import finalize_phase_report, write_canonical_report
+            import os
+            cpath = ".pcae/phase-completion-report.md"
+            old_exists = os.path.exists(cpath)
+            if old_exists:
+                import shutil as _sh
+                _sh.move(cpath, cpath + ".bak")
+            try:
+                # Canonical says 100/100 but metadata says 149/149 → mismatch
+                write_canonical_report(
+                    "# Phase 92D.8.1 Complete — Mismatch Test\n\n"
+                    "Phase 92D.8.1 completed.\n"
+                    "Fast-green: 100/100\nPushed: pushed"
+                )
+                fin = finalize_phase_report(
+                    phase_id="92D.8.1", phase_name="Mismatch Test",
+                    status="completed", summary="Done.",
+                    files_changed=3, tests_run=149,
+                    test_results={"Fast-green": "149/149 (passed)"},
+                    governance_results={"health": "healthy"},
+                    commits=["abc123"], pushed_status="pushed",
+                    reports_dir=Path(td),
+                )
+                report = fin["report"]
+                assert report is not None
+                # Should be partial (mismatch detected)
+                assert report.report_completeness in ("partial", "incomplete"), \
+                    f"Expected partial/incomplete, got {report.report_completeness}"
+                assert any("Mismatch" in w for w in report.trust_warnings), \
+                    f"Expected mismatch warning, got: {report.trust_warnings}"
+            finally:
+                if os.path.exists(cpath):
+                    os.remove(cpath)
+                if old_exists:
+                    import shutil as _sh
+                    _sh.move(cpath + ".bak", cpath)
+
+    def test_commit_not_in_canonical_warns(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.phase_reports import finalize_phase_report, write_canonical_report
+            import os
+            cpath = ".pcae/phase-completion-report.md"
+            old_exists = os.path.exists(cpath)
+            if old_exists:
+                import shutil as _sh
+                _sh.move(cpath, cpath + ".bak")
+            try:
+                # Canonical doesn't mention the phase commit
+                write_canonical_report(
+                    "# Phase 92D.8.1 Complete — Commit Test\n\n"
+                    "Phase 92D.8.1 completed.\nPushed: pushed"
+                )
+                fin = finalize_phase_report(
+                    phase_id="92D.8.1", phase_name="Commit Test",
+                    status="completed", summary="Done.",
+                    files_changed=3, tests_run=100,
+                    test_results={"fg": "100/100"},
+                    governance_results={"health": "healthy"},
+                    commits=["xyz99999"], pushed_status="pushed",
+                    reports_dir=Path(td),
+                )
+                report = fin["report"]
+                assert report is not None
+                # Phase commit not in canonical → mismatch warning
+                assert any("xyz99999" in w or "phase commit" in w.lower()
+                           for w in report.trust_warnings), \
+                    f"Expected commit mismatch warning, got: {report.trust_warnings}"
+            finally:
+                if os.path.exists(cpath):
+                    os.remove(cpath)
+                if old_exists:
+                    import shutil as _sh
+                    _sh.move(cpath + ".bak", cpath)
+
+    def test_render_includes_consistency_section(self):
+        r = make_phase_report(
+            phase_id="92D.8.1", phase_name="Render Test", status="completed",
+            summary="Done.",
+            files_changed=3, tests_run=100,
+            test_results={"fg": "100/100"},
+            governance_results={"health": "healthy"},
+            commits=["abc123"], pushed_status="pushed",
+            canonical_report_content="# Phase 92D.8.1\nDone.",
+        )
+        r.apply_trust_assessment()
+        r.trust_warnings.append("canonical report and metadata disagree")
+        r.trust_warnings.append("  Mismatch: Fast-green result: canonical=100/100 metadata=149/149")
+        r.trust_warnings.append("Manual review recommended.")
+        md = r.render_markdown()
+        assert "Report Consistency" in md
+        assert "mismatch detected" in md
+

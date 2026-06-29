@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 92D.8.1: Canonical Report Metadata Consistency Guard (completed).
+
+Consistency guard phase. Added _check_canonical_metadata_consistency() to detect
+mismatches between canonical report and structured metadata (validation totals,
+phase commits, pushed status). Mismatches explicitly downgrade trust from complete
+to partial with clear warnings. Report Consistency section added to Markdown.
+Stale metadata from prior phases detected via total mismatch. 4 new tests (160
+total). Delivers docs/PHASE_92_CANONICAL_REPORT_METADATA_CONSISTENCY_GUARD.md.
+
 Phase 92D.8: Canonical Final Report Artifact Contract (completed).
 
 Product-hardening phase. Established canonical final-report artifact contract:

@@ -324,6 +324,25 @@ class PhaseReport:
                 lines.append(f"- **Error:** {nr['error']}")
             lines.append("")
 
+        # Phase 92D.8.1 — Report Consistency section
+        consistency_warnings = [w for w in self.trust_warnings
+                                if "Mismatch" in w or "canonical report and metadata" in w
+                                or "canonical report validation failed" in w
+                                or "no canonical report artifact" in w]
+        if self.canonical_report_content or consistency_warnings:
+            lines.append("## Report Consistency")
+            lines.append("")
+            lines.append(f"- **Canonical report:** {'present' if self.canonical_report_content else 'absent'}")
+            lines.append(f"- **Metadata:** {'present' if self.commits or self.test_results or self.governance_results else 'absent'}")
+            if consistency_warnings:
+                lines.append(f"- **Status:** mismatch detected")
+                lines.append("- **Warnings:**")
+                for w in consistency_warnings:
+                    lines.append(f"  - {w}")
+            else:
+                lines.append(f"- **Status:** consistent")
+            lines.append("")
+
         lines.append("---")
         if self.canonical_report_used:
             lines.append(f"*Canonical report artifact. Schema version {self.schema_version}.*")
@@ -522,6 +541,75 @@ def is_valid_status(status: str) -> bool:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 
+def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
+    """Check consistency between canonical report and structured metadata.
+
+    Phase 92D.8.1 — downgrades trust when canonical report and metadata disagree.
+    Compares: validation totals, governance results, commit hashes, pushed status.
+    """
+    import re
+    content = report.canonical_report_content
+    if not content:
+        return
+
+    mismatches: list[str] = []
+
+    # Check validation/test result totals
+    if report.test_results:
+        for name, result in report.test_results.items():
+            # Extract the numeric result from metadata (e.g., "133/133 (passed)")
+            meta_match = re.search(r'(\d+/\d+)', str(result))
+            if meta_match:
+                meta_total = meta_match.group(1)
+                # Look for same test name and a result in canonical content
+                name_pattern = re.escape(name)
+                found = re.search(
+                    rf'{name_pattern}[:\s]*(\d+/\d+)', content, re.IGNORECASE
+                )
+                if found:
+                    canon_total = found.group(1)
+                    if canon_total != meta_total:
+                        mismatches.append(
+                            f"{name} result: canonical={canon_total} metadata={meta_total}"
+                        )
+
+    # Check pushed status
+    if report.pushed_status:
+        pat = re.search(r'(?:Pushed|Push)[:\s]+(pushed|not_pushed|nothing_to_push)',
+                        content, re.IGNORECASE)
+        if pat:
+            canon_push = pat.group(1).lower()
+            meta_push = report.pushed_status.lower()
+            if canon_push != meta_push and canon_push != "nothing_to_push":
+                mismatches.append(
+                    f"pushed_status: canonical={canon_push} metadata={meta_push}"
+                )
+
+    # Check commit hash presence
+    if report.commits:
+        phase_commit = report.commits[0][:8] if report.commits else ""
+        if phase_commit and phase_commit not in content:
+            mismatches.append(
+                f"phase commit {phase_commit} not found in canonical report"
+            )
+
+    # Apply mismatches to trust — downgrade completeness
+    if mismatches:
+        report.trust_warnings.append(
+            "canonical report and metadata disagree"
+        )
+        for m in mismatches:
+            report.trust_warnings.append(f"  Mismatch: {m}")
+        report.trust_warnings.append("Manual review recommended.")
+
+        # Explicitly downgrade: mismatch means report cannot be complete
+        if report.report_completeness == COMPLETENESS_COMPLETE:
+            report.report_completeness = COMPLETENESS_PARTIAL
+        # Add missing field if not already there
+        if "metadata_consistency" not in report.missing_trust_fields:
+            report.missing_trust_fields.append("metadata_consistency")
+
+
 def _apply_canonical_and_trust(
     report: PhaseReport,
     phase_id: str,
@@ -552,6 +640,11 @@ def _apply_canonical_and_trust(
         )
 
     report.apply_trust_assessment()
+
+    # Phase 92D.8.1 — Consistency guard: run AFTER trust assessment
+    # so mismatches can downgrade a complete report to partial/incomplete.
+    if report.canonical_report_content:
+        _check_canonical_metadata_consistency(report)
 
 
 def finalize_phase_report(

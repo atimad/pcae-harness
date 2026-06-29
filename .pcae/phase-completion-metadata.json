@@ -1,19 +1,18 @@
 {
-  "phase_id": "92D.7",
-  "phase_name": "Telegram Handoff Message Precision Tightening",
-  "status": "completed",
+  "phase_id": "92D.8.1",
+  "phase_name": "Canonical Report Metadata Consistency Guard",
   "files_changed": [
-    "src/pcae/core/notifications.py",
-    "tests/test_telegram_notifications.py",
-    "docs/PHASE_92_TELEGRAM_HANDOFF_MESSAGE_PRECISION_TIGHTENING.md",
+    "src/pcae/core/phase_reports.py",
+    "tests/test_phase_reports.py",
+    "docs/PHASE_92_CANONICAL_REPORT_METADATA_CONSISTENCY_GUARD.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md"
   ],
   "files_changed_count": 6,
-  "tests_added_or_updated": "2 test fixes (0 new, precision refinement only)",
+  "tests_added_or_updated": "4 new tests",
   "validation_results": [
-    {"name": "Report + notification", "result": "149/149", "status": "passed"},
+    {"name": "Report + notification", "result": "160/160", "status": "passed"},
     {"name": "Broker + shell gate", "result": "387/387", "status": "passed"},
     {"name": "Fast-green", "result": "3272/3272", "status": "passed"}
   ],
@@ -22,10 +21,7 @@
     {"name": "pcae check", "status": "passed"},
     {"name": "pcae push check", "status": "nothing_to_push"}
   ],
-  "phase_commits": [],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "notification_dispatch_result": "sent",
-  "no_go_confirmation": "No Telegram polling, inbound commands, remote shell, /run, enforcement, shell interception, wrappers, backend invocation, or command execution path was implemented.",
   "recommended_next_phase": "93D — Shell Gate Audit Persistence Design"
 }

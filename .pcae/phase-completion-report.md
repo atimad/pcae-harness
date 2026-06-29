@@ -1,51 +1,35 @@
-# Phase 92D.8 Complete — Canonical Final Report Artifact Contract
+# Phase 92D.8.1 Complete — Canonical Report Metadata Consistency Guard
 
 ## Summary
 
-Phase 92D.8 establishes the canonical final-report artifact contract so Claude's final terminal output and Telegram's attached Markdown report are generated from one authoritative source.
+Phase 92D.8.1 adds consistency guards between `.pcae/phase-completion-report.md` and `.pcae/phase-completion-metadata.json` so PCAE cannot mark a report as complete ✅ when the canonical Markdown and structured metadata disagree.
 
-## Canonical Report Artifact Design
+## Consistency Guard Design
 
-Two files define the canonical phase completion:
+When both canonical report and metadata are present, PCAE compares:
+- Validation/test result totals (e.g., "Fast-green: 100/100" vs metadata "149/149")
+- Phase commit hash presence in canonical report
+- Pushed status
 
-| File | Purpose |
-|------|---------|
-| `.pcae/phase-completion-report.md` | Canonical Markdown report body |
-| `.pcae/phase-completion-metadata.json` | Structured metadata (validation, governance, commits) |
+### Mismatch Severity
 
-### Flow
+| Mismatch Type | Trust Impact |
+|---------------|-------------|
+| Validation total mismatch | Trust downgraded to partial ⚠️ |
+| Phase commit not in canonical report | Trust warning added |
+| No mismatches, all consistent | Trust remains complete ✅ |
 
-1. Implementation/validation finishes
-2. Claude writes `.pcae/phase-completion-report.md` and `.pcae/phase-completion-metadata.json`
-3. `pcae phase complete` loads and validates the canonical report
-4. PCAE generates `.pcae/phase-reports/latest.md` / `latest.json`
-5. PCAE sends compact Telegram handoff text
-6. PCAE attaches the canonical Markdown report to Telegram
-7. Claude's terminal output matches or faithfully summarizes the same canonical report
+### Stale Metadata Detection
 
-### Validation Rules
-
-- Phase ID must appear in canonical report
-- Phase name fragment must appear
-- Status must appear
-- Report must be non-empty
-- No obvious stale phase mismatch (different phase ID mentioned)
-- If validation fails: trust downgraded to partial/incomplete with clear warnings
-
-### Fallback
-
-If canonical report is absent:
-- Existing metadata-based report generation is used
-- Trust warning: "no canonical report artifact — future phases must use canonical report flow"
-- Notification failure remains non-fatal
+If metadata validation totals differ from what the canonical report states, a mismatch warning is added and the report cannot be complete.
 
 ## Tests
 
-7 new tests (133 total report+notification): load nonexistent, write/load roundtrip, validate valid, validate missing phase_id, validate stale mismatch, empty invalid, canonical report flow.
+4 new tests (160 total report+notification): consistent stays complete, mismatched validation downgrades, commit not in canonical warns, render includes consistency section.
 
 ## Validation
 
-- Report + notification: 133/133
+- Report + notification: 160/160
 - Broker + shell gate: 387/387
 - Fast-green: 3272/3272
 - Health: healthy, check: passed, push: nothing_to_push
