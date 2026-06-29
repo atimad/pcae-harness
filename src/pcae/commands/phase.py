@@ -63,13 +63,12 @@ def run_phase_complete(args: argparse.Namespace) -> int:
 def _finalize_report_and_notify(summary: str) -> None:
     """Create a phase report artifact and optionally dispatch notifications.
 
-    Phase 92D/92D.3 — automatic finalization hook.  Notification failure is
-    non-fatal.  Notifications are disabled by default.
+    Phase 92D/92D.6 — automatic finalization hook with structured metadata.
+    Notification failure is non-fatal.  Notifications are disabled by default.
 
-    Gathers repo metadata (commits, files changed, push status) so the
-    generated report carries accurate detail instead of "not captured".
-    Uses the timestamped report path for notification attachment to ensure
-    the current phase report is attached, not a stale latest.md.
+    Reads .pcae/phase-completion-metadata.json if present for structured
+    phase metadata (files changed, validation results, governance results).
+    Falls back to git-derived metadata if the file is absent.
     """
     import os
     from pcae.core.phase_reports import finalize_phase_report
@@ -77,26 +76,77 @@ def _finalize_report_and_notify(summary: str) -> None:
     phase_id = _derive_phase_id(summary)
     phase_name = _derive_phase_name(summary)
 
-    # Gather repo metadata for a richer phase report
+    # Load structured metadata if available
+    meta = _load_completion_metadata()
+
+    # Use metadata values when available, fall back to git-derived values
+    files_changed_list = meta.get("files_changed", [])
+    files_changed_count = meta.get("files_changed_count", 0)
+    if not files_changed_count and files_changed_list:
+        files_changed_count = len(files_changed_list)
+
+    # If metadata provides files_changed list, use that count
+    if files_changed_count > 0:
+        files_changed = files_changed_count
+    else:
+        files_changed = _gather_files_changed()
+        files_changed = files_changed if files_changed > 0 else 0
+
+    tests_added = meta.get("tests_added_or_updated", "")
+    test_results_raw = meta.get("validation_results", [])
+    governance_raw = meta.get("governance_results", [])
+    phase_commits_meta = meta.get("phase_commits", [])
+    no_go = meta.get("no_go_confirmation", "")
+    notification_dispatch_raw = meta.get("notification_dispatch_result", "")
+
+    # Build structured test_results and governance_results from metadata
+    test_results: dict[str, Any] = {}
+    for vr in test_results_raw:
+        name = vr.get("name", "")
+        result = vr.get("result", "")
+        status = vr.get("status", "")
+        if name:
+            test_results[name] = f"{result} ({status})" if status else result
+
+    governance_results: dict[str, Any] = {}
+    for gr in governance_raw:
+        name = gr.get("name", "")
+        gstatus = gr.get("status", "")
+        if name:
+            governance_results[name] = gstatus
+
+    # Commits: prefer metadata phase_commits, fall back to git log
     commits = _gather_commits()
-    files_changed = _gather_files_changed()
-    pushed_status = _gather_pushed_status()
-    origin_count = _gather_origin_head_count()
+    if phase_commits_meta:
+        # Extract just the hashes from metadata
+        meta_hashes = [c.get("hash", "")[:8] for c in phase_commits_meta if c.get("hash")]
+        if meta_hashes:
+            commits = meta_hashes
+
+    pushed_status = meta.get("pushed_status", "") or _gather_pushed_status()
+    origin_count = meta.get("origin_main_head_count", None)
+    if origin_count is None:
+        origin_count = _gather_origin_head_count()
+
+    recommended_next = meta.get("recommended_next_phase", "") or _derive_next_phase(summary)
+    no_go_list = [no_go] if no_go else []
 
     notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
 
-    # Only pass files_changed when we have a positive count.
-    # -1 means the range was empty (pushed) — show "not captured".
     fin = finalize_phase_report(
         phase_id=phase_id,
         phase_name=phase_name,
         status="completed",
         summary=summary,
-        files_changed=files_changed if files_changed > 0 else 0,
+        files_changed=files_changed,
+        tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
+        test_results=test_results,
+        governance_results=governance_results,
         commits=commits,
         pushed_status=pushed_status,
         origin_main_head_count=origin_count,
-        recommended_next_phase=_derive_next_phase(summary),
+        explicit_no_go_confirmations=no_go_list,
+        recommended_next_phase=recommended_next,
     )
 
     if fin.get("report_error"):
@@ -255,6 +305,43 @@ def _gather_origin_head_count() -> int:
     return 0
 
 
+def _load_completion_metadata() -> dict:
+    """Load structured phase completion metadata if available.
+
+    Phase 92D.6 — reads .pcae/phase-completion-metadata.json.
+    Returns an empty dict if the file is absent or invalid.
+    The file is produced before pcae phase complete to capture
+    structured phase details (files changed, validation results, etc.).
+    """
+    import json as _json
+    from pathlib import Path
+    meta_path = Path(".pcae/phase-completion-metadata.json")
+    if not meta_path.exists():
+        return {}
+    try:
+        data = _json.loads(meta_path.read_text())
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+    return {}
+
+
+def _write_completion_metadata(meta: dict) -> bool:
+    """Write structured phase completion metadata for the next phase complete.
+
+    Phase 92D.6 — writes .pcae/phase-completion-metadata.json.
+    Returns True on success.
+    """
+    import json as _json
+    from pathlib import Path
+    meta_path = Path(".pcae/phase-completion-metadata.json")
+    try:
+        meta_path.parent.mkdir(parents=True, exist_ok=True)
+        meta_path.write_text(_json.dumps(meta, indent=2))
+        return True
+    except Exception:
+        return False
 def _derive_phase_id(summary: str) -> str:
     """Derive a phase ID from the summary text."""
     import re

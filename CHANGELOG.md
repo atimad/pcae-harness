@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 92D.6 structured metadata capture: .pcae/phase-completion-metadata.json enables complete phase reports.
+- _finalize_report_and_notify() merges structured metadata with git-derived values for files_changed, validation, governance.
+- 5 new tests (149 total). Delivers docs/PHASE_92_PHASE_COMPLETION_STRUCTURED_METADATA_CAPTURE.md.
 - Completed Phase 92D.5 Telegram phase report trust contract: completeness model, concise structured text, stale-report protection.
 - Phase reports now assess completeness (complete/partial/incomplete). Telegram text distinguishes phase commits from recent commits.
 - 15 new tests (144 total report+notification). Delivers docs/PHASE_92_TELEGRAM_PHASE_REPORT_TRUST_CONTRACT.md.

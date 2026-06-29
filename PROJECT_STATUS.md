@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 92D.6: Phase Completion Structured Metadata Capture (completed).
+
+Product-hardening phase. Added .pcae/phase-completion-metadata.json input path
+for structured phase metadata (files changed, validation results, governance
+results, commits, push status). _finalize_report_and_notify() now merges metadata
+with git-derived values. Reports can achieve complete trust state when structured
+metadata is present. 5 new tests (149 total). No Telegram polling, inbound,
+remote shell, /run, enforcement. Delivers docs/PHASE_92_PHASE_COMPLETION_STRUCTURED_METADATA_CAPTURE.md.
+
 Phase 92D.5: Telegram Phase Report Trust Contract (completed).
 
 Corrective/product-hardening phase. Made Telegram phase reports trustworthy for

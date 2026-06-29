@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 92D.6 — Phase Completion Structured Metadata Capture (20260629-92d-6-phase-completion-structured-metadata-capture)
 - 92D.5 — Telegram Phase Report Trust Contract (20260629-92d-5-telegram-phase-report-trust-contract)
 - 93C — Shell Gate Audit Evidence Model (20260629-93c-shell-gate-audit-evidence-model)
 - 92D.4 — Finalization Notification Dispatch Visibility and Runtime Env Loading (20260629-92d-4-finalization-notification-dispatch-visibility)

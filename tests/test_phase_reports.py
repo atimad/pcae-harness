@@ -728,4 +728,117 @@ class TestReportCompleteness:
         assert "Missing Trust Fields" in md
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.6 — Structured metadata capture tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestStructuredMetadataCompleteness:
+    """Verify report becomes complete when structured metadata is present."""
+
+    def test_full_metadata_produces_complete(self):
+        r = make_phase_report(
+            phase_id="92D.6", phase_name="Full Metadata", status="completed",
+            summary="Done with metadata.",
+            files_changed=5, tests_run=156,
+            test_results={
+                "Report + notification": "156/156 (passed)",
+                "Broker + shell gate": "387/387 (passed)",
+                "Fast-green": "3272/3272 (passed)",
+            },
+            governance_results={
+                "pcae health": "healthy",
+                "pcae check": "passed",
+                "pcae push check": "nothing_to_push",
+            },
+            commits=["b4c71ad6"], pushed_status="pushed",
+        )
+        state, missing, _ = r.assess_completeness()
+        assert state == "complete", f"Expected complete, got {state} with missing: {missing}"
+        assert missing == []
+
+    def test_files_changed_list_produces_count(self):
+        r = make_phase_report(
+            phase_id="92D.6", phase_name="Files Test", status="completed",
+            summary="Done.", files_changed=5,
+            tests_run=156, commits=["abc"], pushed_status="pushed",
+            test_results={"fg": "3305/3305"},
+            governance_results={"health": "healthy"},
+        )
+        md = r.render_markdown()
+        assert "**Files changed:** 5" in md
+
+
+class TestMetadataFileLoading:
+    """Verify metadata JSON file is loaded."""
+
+    def test_load_nonexistent_returns_empty(self):
+        from pcae.commands.phase import _load_completion_metadata
+        import os
+        # Ensure file doesn't exist
+        meta_path = ".pcae/phase-completion-metadata.json"
+        old_exists = os.path.exists(meta_path)
+        if old_exists:
+            import shutil
+            backup = meta_path + ".backup"
+            shutil.move(meta_path, backup)
+        try:
+            result = _load_completion_metadata()
+            assert result == {}
+        finally:
+            if old_exists:
+                import shutil
+                shutil.move(backup, meta_path)
+
+    def test_load_valid_json_returns_dict(self):
+        from pcae.commands.phase import _load_completion_metadata, _write_completion_metadata
+        import os
+        meta_path = ".pcae/phase-completion-metadata.json"
+        old_exists = os.path.exists(meta_path)
+        if old_exists:
+            import shutil
+            backup = meta_path + ".backup"
+            shutil.move(meta_path, backup)
+        try:
+            test_meta = {"phase_id": "92D.6", "files_changed": ["a.py"]}
+            _write_completion_metadata(test_meta)
+            result = _load_completion_metadata()
+            assert result.get("phase_id") == "92D.6"
+            assert result.get("files_changed") == ["a.py"]
+        finally:
+            if os.path.exists(meta_path):
+                os.remove(meta_path)
+            if old_exists:
+                import shutil
+                shutil.move(backup, meta_path)
+
+    def test_write_completion_metadata_creates_file(self):
+        from pcae.commands.phase import _write_completion_metadata
+        import os, json
+        meta_path = ".pcae/phase-completion-metadata.json"
+        old_exists = os.path.exists(meta_path)
+        if old_exists:
+            import shutil
+            backup = meta_path + ".backup"
+            shutil.move(meta_path, backup)
+        try:
+            test_meta = {
+                "phase_id": "92D.6",
+                "validation_results": [
+                    {"name": "Fast-green", "result": "3272/3272", "status": "passed"},
+                ],
+            }
+            ok = _write_completion_metadata(test_meta)
+            assert ok
+            assert os.path.exists(meta_path)
+            data = json.loads(open(meta_path).read())
+            assert data["phase_id"] == "92D.6"
+        finally:
+            if os.path.exists(meta_path):
+                os.remove(meta_path)
+            if old_exists:
+                import shutil
+                shutil.move(backup, meta_path)
+
+
 
