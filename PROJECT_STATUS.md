@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 92D.5: Telegram Phase Report Trust Contract (completed).
+
+Corrective/product-hardening phase. Made Telegram phase reports trustworthy for
+remote handoff. Added report completeness model (complete/partial/incomplete)
+with trust-critical field validation. Tightened Telegram text to concise
+structured format with phase commit distinction, completeness state, validation
+summary. Stale-report protection with cross-referencing. 15 new tests (144 total).
+Manual verification: concise text sent OK with completeness and commit distinction.
+No Telegram polling, inbound, remote shell, /run, enforcement.
+Delivers docs/PHASE_92_TELEGRAM_PHASE_REPORT_TRUST_CONTRACT.md.
+
 Phase 93C: Shell Gate Audit Evidence Model (completed).
 
 Simulation-only implementation phase. Added structured audit evidence to every

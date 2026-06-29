@@ -26,6 +26,29 @@ VALID_STATUSES: frozenset[str] = frozenset({
     "cancelled",
 })
 
+# Report completeness states (Phase 92D.5)
+COMPLETENESS_COMPLETE = "complete"
+COMPLETENESS_PARTIAL = "partial"
+COMPLETENESS_INCOMPLETE = "incomplete"
+
+VALID_COMPLETENESS: frozenset[str] = frozenset({
+    COMPLETENESS_COMPLETE,
+    COMPLETENESS_PARTIAL,
+    COMPLETENESS_INCOMPLETE,
+})
+
+# Trust-critical fields for a completed phase report
+_TRUST_CRITICAL_FIELDS: tuple[str, ...] = (
+    "phase_id", "phase_name", "status", "summary",
+)
+_NON_FATAL_TRUST_FIELDS: tuple[str, ...] = (
+    "files_changed", "tests_run", "commits", "pushed_status",
+    "test_results", "governance_results",
+)
+_FATAL_TRUST_FIELDS: tuple[str, ...] = (
+    "phase_id", "phase_name", "status",
+)
+
 _REQUIRED_FIELDS: frozenset[str] = frozenset({
     "phase_id",
     "phase_name",
@@ -65,6 +88,11 @@ class PhaseReport:
     follow_ups: list[str] = field(default_factory=list)
     recommended_next_phase: str = ""
     metadata: dict[str, Any] = field(default_factory=dict)
+    # Phase 92D.5 trust contract fields
+    report_completeness: str = ""
+    missing_trust_fields: list[str] = field(default_factory=list)
+    trust_warnings: list[str] = field(default_factory=list)
+    notification_result: dict[str, Any] = field(default_factory=dict)
 
     def validate(self) -> list[str]:
         """Return list of validation issues (empty = valid)."""
@@ -88,6 +116,62 @@ class PhaseReport:
             )
         return issues
 
+    def assess_completeness(self) -> tuple[str, list[str], list[str]]:
+        """Assess report completeness and return (state, missing_fields, warnings).
+
+        Phase 92D.5 — trust contract:
+        - complete: all trust-critical and non-fatal fields are captured
+        - partial: critical fields OK but some non-fatal fields missing
+        - incomplete: any critical field is missing, contradictory, or stale
+        """
+        missing: list[str] = []
+        warnings: list[str] = []
+
+        # Check fatal trust fields
+        if not self.phase_id:
+            missing.append("phase_id")
+        if not self.phase_name:
+            missing.append("phase_name")
+        if not self.status:
+            missing.append("status")
+
+        for field in _FATAL_TRUST_FIELDS:
+            val = getattr(self, field, None)
+            is_empty = val is None or (isinstance(val, str) and not val)
+            if is_empty and field not in missing:
+                missing.append(field)
+
+        if missing:
+            # Any critical field missing → incomplete
+            return COMPLETENESS_INCOMPLETE, missing, warnings
+
+        # Check non-fatal trust fields
+        if self.files_changed <= 0:
+            missing.append("files_changed")
+        if self.tests_run <= 0:
+            missing.append("tests_run")
+        if not self.commits:
+            missing.append("commits")
+        if not self.pushed_status:
+            missing.append("pushed_status")
+        if not self.test_results:
+            missing.append("test_results")
+        if not self.governance_results:
+            missing.append("governance_results")
+
+        if missing:
+            warnings.append(f"Missing trust fields: {', '.join(missing)}")
+            return COMPLETENESS_PARTIAL, missing, warnings
+
+        return COMPLETENESS_COMPLETE, [], []
+
+    def apply_trust_assessment(self) -> None:
+        """Run completeness assessment and store results in the report."""
+        state, missing, warnings = self.assess_completeness()
+        self.report_completeness = state
+        self.missing_trust_fields = missing
+        self.trust_warnings = warnings
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "schema_version": self.schema_version,
@@ -110,6 +194,10 @@ class PhaseReport:
             "follow_ups": self.follow_ups,
             "recommended_next_phase": self.recommended_next_phase,
             "metadata": self.metadata,
+            "report_completeness": self.report_completeness,
+            "missing_trust_fields": self.missing_trust_fields,
+            "trust_warnings": self.trust_warnings,
+            "notification_result": self.notification_result,
         }
 
     def render_markdown(self) -> str:
@@ -122,6 +210,18 @@ class PhaseReport:
         lines.append("")
         lines.append(f"- **Phase ID:** `{self.phase_id}`")
         lines.append(f"- **Status:** {self.status}")
+
+        # Phase 92D.5 — Report completeness
+        state = self.report_completeness or self.assess_completeness()[0]
+        if state == COMPLETENESS_COMPLETE:
+            lines.append(f"- **Report completeness:** complete ✅")
+        elif state == COMPLETENESS_PARTIAL:
+            lines.append(f"- **Report completeness:** partial ⚠️")
+        elif state == COMPLETENESS_INCOMPLETE:
+            lines.append(f"- **Report completeness:** incomplete ❌ Manual review required.")
+        if self.missing_trust_fields:
+            lines.append(f"- **Missing trust fields:** {', '.join(self.missing_trust_fields)}")
+
         if self.completed_at:
             lines.append(f"- **Completed:** {self.completed_at}")
 
@@ -198,6 +298,27 @@ class PhaseReport:
             lines.append("## Recommended Next Phase")
             lines.append("")
             lines.append(self.recommended_next_phase)
+            lines.append("")
+
+        # Phase 92D.5 — Trust warnings and missing fields
+        if self.missing_trust_fields or self.trust_warnings:
+            lines.append("## Missing Trust Fields")
+            lines.append("")
+            if self.missing_trust_fields:
+                lines.append(f"- **Fields:** {', '.join(self.missing_trust_fields)}")
+            for w in self.trust_warnings:
+                lines.append(f"- ⚠️ {w}")
+            lines.append("")
+
+        if self.notification_result:
+            lines.append("## Notification Dispatch")
+            lines.append("")
+            nr = self.notification_result
+            lines.append(f"- **Dispatched:** {nr.get('dispatched', False)}")
+            lines.append(f"- **Sinks:** {', '.join(nr.get('sinks', [])) or 'none'}")
+            lines.append(f"- **Success:** {nr.get('success', False)}")
+            if nr.get("error"):
+                lines.append(f"- **Error:** {nr['error']}")
             lines.append("")
 
         lines.append("---")
@@ -371,6 +492,8 @@ def finalize_phase_report(
             explicit_no_go_confirmations=explicit_no_go_confirmations or [],
             recommended_next_phase=recommended_next_phase,
         )
+        # Phase 92D.5 — Apply trust assessment
+        report.apply_trust_assessment()
         paths = write_phase_report(report, reports_dir)
     except Exception as exc:
         return {
@@ -432,6 +555,22 @@ def finalize_phase_report(
             notification_results = dispatch(event, sinks)
         except Exception as exc:
             notification_error = str(exc)
+
+    # Phase 92D.5 — Store notification result in report
+    report_sinks = [r.sink_name for r in notification_results] if notification_results else []
+    report_ok = all(r.success for r in notification_results) if notification_results else False
+    report.notification_result = {
+        "dispatched": notification_results is not None,
+        "sinks": report_sinks,
+        "success": report_ok,
+        "error": notification_error,
+    }
+
+    # Stale-report check: verify report phase_id matches event
+    if notification_results:
+        for r in notification_results:
+            r.metadata["report_phase_id"] = phase_id
+            r.metadata["report_phase_name"] = phase_name
 
     return {
         "report": report,

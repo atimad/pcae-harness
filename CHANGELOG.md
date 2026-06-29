@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 92D.5 Telegram phase report trust contract: completeness model, concise structured text, stale-report protection.
+- Phase reports now assess completeness (complete/partial/incomplete). Telegram text distinguishes phase commits from recent commits.
+- 15 new tests (144 total report+notification). Delivers docs/PHASE_92_TELEGRAM_PHASE_REPORT_TRUST_CONTRACT.md.
 - Completed Phase 93C shell gate audit evidence model: structured audit evidence for every pcae shell-gate check decision.
 - SHA-256 command hashing, secret redaction (API keys, tokens, passwords, bearer tokens), broker cross-references.
 - 32 new tests (122 total shell gate). Delivers docs/PHASE_93_SHELL_GATE_AUDIT_EVIDENCE_MODEL.md.

@@ -640,3 +640,92 @@ class TestFinalizationNotificationResult:
                     os.environ.pop("PCAE_NOTIFY_ENABLED", None)
                 os.environ.pop("PCAE_NOTIFY_SINKS", None)
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.5 — Trust contract tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestReportCompleteness:
+    """Verify report completeness assessment."""
+
+    def test_full_report_is_complete(self):
+        r = make_phase_report(
+            phase_id="92D.5", phase_name="Full Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=3305,
+            test_results={"fast_green": "3305/3305"},
+            governance_results={"health": "healthy", "check": "passed"},
+            commits=["abc123"], pushed_status="pushed",
+        )
+        state, missing, warnings = r.assess_completeness()
+        assert state == "complete"
+        assert missing == []
+
+    def test_missing_files_changed_is_partial(self):
+        r = make_phase_report(
+            phase_id="92D.5", phase_name="Partial Test", status="completed",
+            summary="Done.", tests_run=3305,
+            test_results={"fast_green": "3305/3305"},
+            governance_results={"health": "healthy"},
+            commits=["abc123"], pushed_status="pushed",
+        )
+        state, missing, warnings = r.assess_completeness()
+        assert state == "partial"
+        assert "files_changed" in missing
+
+    def test_missing_tests_run_is_partial(self):
+        r = make_phase_report(
+            phase_id="92D.5", phase_name="Partial Test", status="completed",
+            summary="Done.", files_changed=5,
+            test_results={"fast_green": "3305/3305"},
+            governance_results={"health": "healthy"},
+            commits=["abc123"], pushed_status="pushed",
+        )
+        state, missing, warnings = r.assess_completeness()
+        assert state == "partial"
+        assert "tests_run" in missing
+
+    def test_missing_phase_id_is_incomplete(self):
+        r = PhaseReport(phase_id="", phase_name="Bad", status="completed", summary="Done.")
+        state, missing, warnings = r.assess_completeness()
+        assert state == "incomplete"
+        assert "phase_id" in missing
+
+    def test_missing_status_is_incomplete(self):
+        r = PhaseReport(phase_id="92A", phase_name="Bad", status="", summary="Done.")
+        state, missing, warnings = r.assess_completeness()
+        assert state == "incomplete"
+
+    def test_apply_trust_assessment_sets_fields(self):
+        r = make_phase_report(
+            phase_id="92D.5", phase_name="Trust Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=3305,
+            test_results={"fg": "3305/3305"},
+            governance_results={"health": "healthy"},
+            commits=["abc"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        assert r.report_completeness == "complete"
+        assert r.missing_trust_fields == []
+
+    def test_render_includes_completeness(self):
+        r = make_phase_report(
+            phase_id="92D.5", phase_name="Render Test", status="completed",
+            summary="Done.",
+        )
+        r.apply_trust_assessment()
+        md = r.render_markdown()
+        assert "Report completeness" in md
+        assert "partial" in md or "complete" in md or "incomplete" in md
+
+    def test_render_includes_missing_trust_fields_section(self):
+        r = make_phase_report(
+            phase_id="92D.5", phase_name="Missing Fields", status="completed",
+            summary="Done.",
+        )
+        r.apply_trust_assessment()
+        md = r.render_markdown()
+        assert "Missing Trust Fields" in md
+
+
+

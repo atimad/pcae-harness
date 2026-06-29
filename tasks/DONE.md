@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 92D.5 — Telegram Phase Report Trust Contract (20260629-92d-5-telegram-phase-report-trust-contract)
 - 93C — Shell Gate Audit Evidence Model (20260629-93c-shell-gate-audit-evidence-model)
 - 92D.4 — Finalization Notification Dispatch Visibility and Runtime Env Loading (20260629-92d-4-finalization-notification-dispatch-visibility)
 - 92D.3 — Phase Report Freshness and Telegram Attachment Repair (20260629-92d-3-phase-report-freshness-and-telegram-attachment-repair)

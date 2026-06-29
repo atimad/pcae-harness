@@ -376,6 +376,17 @@ def phase_report_to_notification_event(
             "phase_name": report.phase_name,
             "phase_status": report.status,
             "recommended_next_phase": report.recommended_next_phase,
+            # Phase 92D.5 trust contract metadata
+            "report_completeness": report.report_completeness,
+            "missing_trust_fields": report.missing_trust_fields,
+            "trust_warnings": report.trust_warnings,
+            "pushed_status": report.pushed_status,
+            "origin_main_head_count": report.origin_main_head_count,
+            "commits": report.commits,
+            "files_changed": report.files_changed,
+            "tests_run": report.tests_run,
+            "explicit_no_go_confirmations": report.explicit_no_go_confirmations,
+            "notification_result": report.notification_result,
         },
     )
 
@@ -491,10 +502,123 @@ class TelegramSink:
         )
 
     def _build_summary(self, event: NotificationEvent) -> str:
-        text = f"[{event.severity.upper()}] {event.title}\n\n{event.message}"
+        """Build a concise, structured Telegram text summary.
+
+        Phase 92D.5 — trust contract: produces a mobile-friendly summary
+        with completeness state, validation results, commit info, and
+        notification dispatch status. The full report is in the attached document.
+        """
+        from pcae.core.phase_reports import (
+            COMPLETENESS_COMPLETE, COMPLETENESS_PARTIAL, COMPLETENESS_INCOMPLETE,
+        )
+        metadata = event.metadata or {}
+
+        phase_id = metadata.get("phase_id", "?")
+        phase_name = metadata.get("phase_name", "")
+        phase_status = metadata.get("phase_status", "")
+        next_phase = metadata.get("recommended_next_phase", "")
+        report_phase_id = metadata.get("report_phase_id", "")
+        report_phase_name = metadata.get("report_phase_name", "")
+
+        # Completeness state
+        completeness = metadata.get("report_completeness", "")
+        if completeness == COMPLETENESS_COMPLETE:
+            comp_line = "complete ✅"
+        elif completeness == COMPLETENESS_PARTIAL:
+            comp_line = "partial ⚠️"
+        elif completeness == COMPLETENESS_INCOMPLETE:
+            comp_line = "incomplete ❌ Manual review required"
+        else:
+            comp_line = "not assessed"
+
+        missing_fields = metadata.get("missing_trust_fields", [])
+
+        lines: list[str] = []
+        # Header
+        lines.append(f"PCAE Phase {phase_id} {phase_status}")
+
+        # Completeness
+        if missing_fields:
+            lines.append(f"Report: {comp_line} (missing: {', '.join(missing_fields)})")
+        else:
+            lines.append(f"Report: {comp_line}")
+
+        # Phase name
+        if phase_name:
+            lines.append(f"Name: {phase_name}")
+
+        lines.append("")
+
+        # Stale-report check
+        if report_phase_id and report_phase_id != phase_id:
+            lines.append(f"⚠️ STALE REPORT: event phase={phase_id}, report phase={report_phase_id}")
+
+        # Extract validation results from the event message
+        validation_lines = self._extract_validation_lines(event.message)
+        if validation_lines:
+            lines.append("Validation:")
+            for vl in validation_lines[:8]:  # Limit to 8 lines
+                lines.append(f"  {vl}")
+
+        # Commit info — distinguish phase commit from recent commits
+        commits = metadata.get("commits", [])
+        if commits:
+            # The first commit is typically the phase commit
+            lines.append("")
+            lines.append(f"Phase commit: {commits[0][:8]}")
+            if len(commits) > 1:
+                recent = ' '.join(c[:8] for c in commits)
+                lines.append(f"Recent commits: {recent}")
+
+        # Pushed status
+        pushed = metadata.get("pushed_status", "")
+        origin_count = metadata.get("origin_main_head_count", "")
+        if pushed:
+            lines.append(f"Pushed: {pushed}")
+        if origin_count is not None and origin_count != "":
+            lines.append(f"origin/main..HEAD: {origin_count}")
+
+        # Notification dispatch
+        lines.append("")
+        lines.append("Notification: sent via telegram")
+
+        # No-go confirmations
+        no_go = metadata.get("explicit_no_go_confirmations", [])
+        if no_go:
+            lines.append("No-go: " + "; ".join(no_go[:2]))  # Limit to 2 items
+
+        # Next phase
+        if next_phase:
+            lines.append(f"Next: {next_phase}")
+
+        lines.append("")
+        lines.append("Full report attached.")
+
+        text = "\n".join(lines)
         if len(text) > self._max_message_chars:
             text = text[:self._max_message_chars - 3] + "..."
         return text
+
+    @staticmethod
+    def _extract_validation_lines(message: str) -> list[str]:
+        """Extract validation result lines from the summary message."""
+        import re
+        results: list[str] = []
+        patterns = [
+            r'(?:shell\s*gate|Shell gate)[:\s]*(\d+/\d+)',
+            r'(?:broker|Broker)[:\s]*(\d+/\d+)',
+            r'(?:report.*?notification|Report.*?notification)[:\s]*(\d+/\d+)',
+            r'(?:fast.green|Fast.green)[:\s]*(\d+/\d+)',
+            r'(?:health|Health)[:\s]*(healthy|unhealthy)',
+            r'(?:check|Check)[:\s]*(passed|failed)',
+            r'(?:push\s*check|Push check)[:\s]*(nothing_to_push|not_ready|clean)',
+            r'(?:origin/main\.\.HEAD)[:\s]*(\d+)',
+        ]
+        for pattern in patterns:
+            m = re.search(pattern, message, re.IGNORECASE)
+            if m:
+                results.append(m.group(0))
+        return results
 
     def _send_message(self, text: str) -> dict:
         # Use URL-encoded form data matching known-good curl behavior.

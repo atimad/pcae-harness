@@ -228,13 +228,23 @@ def test_no_secret_in_result_message():
 # ── Summary message build ────────────────────────────────────────────────────
 
 def test_summary_includes_phase_info():
-    event = _make_event(title="Phase COMPLETED: Design Phase", message="Design done.")
+    event = _make_event(
+        title="Phase COMPLETED: Design Phase",
+        message="Design done.",
+        metadata={
+            "phase_id": "92A", "phase_name": "Design Phase",
+            "phase_status": "completed",
+            "report_completeness": "partial",
+            "missing_trust_fields": ["files_changed"],
+        },
+    )
     sink = TelegramSink(bot_token="t", chat_id="c", enabled=True,
                         _opener=_mock_opener({"ok": True}))
     text = sink._build_summary(event)
-    assert "COMPLETED" in text
+    assert "PCAE Phase" in text
+    assert "92A" in text
+    assert "completed" in text.lower() or "completed" in text
     assert "Design Phase" in text
-    assert "Design done." in text
 
 
 # ── No Telegram polling/inbound behavior ─────────────────────────────────────
@@ -333,7 +343,11 @@ class TestSendMessagePayloadFormat:
             resp.__exit__ = MagicMock(return_value=False)
             return resp
 
-        event = _make_event(message="Hello world")
+        event = _make_event(
+            title="Test Phase",
+            message="Everything passed. Shell gate: 122/122. Fast-green: 3272/3272.",
+            metadata={"phase_id": "93C", "phase_name": "Test", "phase_status": "completed"},
+        )
         sink = TelegramSink(
             bot_token="test-token", chat_id="123", enabled=True,
             _opener=capture_opener,
@@ -346,10 +360,10 @@ class TestSendMessagePayloadFormat:
         assert "application/x-www-form-urlencoded" in ct, \
             f"Expected urlencoded content type, got: {ct}"
 
-        # Verify chat_id and text are in the form body
+        # Verify chat_id is in the form body
         body = captured_req.get("body", b"").decode()
         assert "chat_id=123" in body
-        assert "Hello+world" in body or "Hello%20world" in body
+        assert "93C" in body
 
     def test_no_parse_mode_in_send_message(self):
         """sendMessage must NOT include parse_mode by default."""
@@ -534,3 +548,97 @@ class TestSummaryTruncationPreserved:
         summary = sink._build_summary(event)
         assert len(summary) <= 10
         assert "..." in summary
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.5 — Trust contract: Telegram text format tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestTelegramTextTrustContract:
+    """Verify Telegram text summary meets trust contract requirements."""
+
+    def test_text_includes_phase_id_and_status(self):
+        event = _make_event(
+            title="Phase COMPLETED: Test",
+            message="Done.",
+            metadata={"phase_id": "93C", "phase_status": "completed",
+                       "phase_name": "Test Phase"},
+        )
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert "PCAE Phase" in text
+        assert "93C" in text
+
+    def test_text_includes_completeness(self):
+        event = _make_event(
+            title="Test", message="Done.",
+            metadata={"phase_id": "93C", "phase_status": "completed",
+                       "report_completeness": "partial",
+                       "missing_trust_fields": ["files_changed", "tests_run"]},
+        )
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert "partial" in text
+        assert "files_changed" in text
+
+    def test_text_does_not_include_long_summary_body(self):
+        long_msg = "A" * 2000
+        event = _make_event(
+            title="Test", message=long_msg,
+            metadata={"phase_id": "93C", "phase_status": "completed"},
+        )
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        # The long message should NOT appear verbatim
+        assert "A" * 200 not in text
+        assert len(text) <= sink._max_message_chars
+
+    def test_text_distinguishes_phase_commit_from_recent(self):
+        event = _make_event(
+            title="Test", message="Done.",
+            metadata={
+                "phase_id": "93C", "phase_status": "completed",
+                "commits": ["e49b4a74", "0973b4bf", "4885d6c5"],
+            },
+        )
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert "Phase commit" in text
+        assert "e49b4a74" in text
+        assert "Recent commits" in text
+
+    def test_text_includes_notification_dispatched(self):
+        event = _make_event(
+            title="Test", message="Done.",
+            metadata={"phase_id": "93C", "phase_status": "completed"},
+        )
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert "sent via telegram" in text
+
+    def test_text_includes_full_report_attached(self):
+        event = _make_event(
+            title="Test", message="Done.",
+            metadata={"phase_id": "93C", "phase_status": "completed"},
+        )
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert "Full report attached" in text
+
+    def test_text_concise_under_800_chars(self):
+        event = _make_event(
+            title="Test", message="Done.",
+            metadata={
+                "phase_id": "93C", "phase_name": "Shell Gate Audit Evidence Model",
+                "phase_status": "completed",
+                "report_completeness": "partial",
+                "missing_trust_fields": ["files_changed"],
+                "commits": ["e49b4a74"],
+                "pushed_status": "pushed",
+                "recommended_next_phase": "TBD",
+            },
+        )
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert len(text) <= 800, f"Telegram text should be concise, got {len(text)} chars"
