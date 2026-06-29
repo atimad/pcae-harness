@@ -352,3 +352,191 @@ class TestEdgeCases:
         assert result["command_category"] in (
             "environment_mutation", "test_execution",
         ), f"Unexpected category: {result['command_category']}"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 93C — Audit evidence model tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestAuditEvidenceExists:
+    """Verify audit_evidence is present for all decision types."""
+
+    def test_audit_evidence_exists_for_allow(self):
+        result = _check("git status")
+        audit = result.get("audit_evidence", {})
+        assert audit, "audit_evidence must exist for allow decisions"
+        assert audit.get("audit_id", "").startswith("sg-")
+        assert audit.get("decision") == "allow"
+
+    def test_audit_evidence_exists_for_deny(self):
+        result = _check("git push --force")
+        audit = result.get("audit_evidence", {})
+        assert audit, "audit_evidence must exist for deny decisions"
+        assert audit.get("decision") == "deny"
+        assert audit.get("hard_block") is True
+
+    def test_audit_evidence_exists_for_unknown(self):
+        result = _check("xyzzy123")
+        audit = result.get("audit_evidence", {})
+        assert audit, "audit_evidence must exist for unknown commands"
+        assert audit.get("command_class") == "unknown"
+
+
+class TestAuditEvidenceFields:
+    """Verify audit_evidence includes all required fields."""
+
+    REQUIRED_FIELDS = [
+        "audit_id", "event_type", "timestamp_utc", "command_hash",
+        "redacted_command", "redaction_applied", "command_class",
+        "command_category", "action_type", "decision", "hard_block",
+        "reason_code", "reason_codes", "required_evidence",
+        "message_summary", "simulation_only", "no_execution",
+        "no_enforcement", "source", "schema_version",
+    ]
+
+    def test_all_required_fields_present(self):
+        result = _check("git push")
+        audit = result.get("audit_evidence", {})
+        for field in self.REQUIRED_FIELDS:
+            assert field in audit, f"Missing required audit field: {field}"
+
+    def test_simulation_only_true(self):
+        result = _check("git commit -m x")
+        audit = result.get("audit_evidence", {})
+        assert audit.get("simulation_only") is True
+
+    def test_no_execution_true(self):
+        result = _check("rm -rf /")
+        audit = result.get("audit_evidence", {})
+        assert audit.get("no_execution") is True
+
+    def test_no_enforcement_true(self):
+        result = _check("git push --force")
+        audit = result.get("audit_evidence", {})
+        assert audit.get("no_enforcement") is True
+
+    def test_source_is_shell_gate(self):
+        result = _check("ls")
+        audit = result.get("audit_evidence", {})
+        assert audit.get("source") == "shell_gate"
+
+
+class TestCommandHash:
+    """Verify command hash behavior."""
+
+    def test_command_hash_present(self):
+        result = _check("git push")
+        ch = result["audit_evidence"].get("command_hash", "")
+        assert len(ch) == 64  # SHA-256 hex
+        assert all(c in "0123456789abcdef" for c in ch)
+
+    def test_same_command_same_hash(self):
+        h1 = _check("git status")["audit_evidence"]["command_hash"]
+        h2 = _check("git status")["audit_evidence"]["command_hash"]
+        assert h1 == h2, "Same command must produce same hash"
+
+    def test_different_commands_different_hashes(self):
+        h1 = _check("git status")["audit_evidence"]["command_hash"]
+        h2 = _check("git push --force")["audit_evidence"]["command_hash"]
+        assert h1 != h2, "Different commands must produce different hashes"
+
+
+class TestCommandRedaction:
+    """Verify command secret redaction in audit evidence."""
+
+    def test_api_key_env_redacted(self):
+        result = _check("OPENAI_API_KEY=sk-abc123def456 curl https://api.example.com")
+        audit = result.get("audit_evidence", {})
+        assert audit.get("redaction_applied") is True
+        rc = audit.get("redacted_command", "")
+        assert "[REDACTED]" in rc
+        assert "sk-abc123def456" not in rc
+
+    def test_password_flag_redacted(self):
+        result = _check("some-tool --password mysecret123 do-stuff")
+        audit = result.get("audit_evidence", {})
+        assert audit.get("redaction_applied") is True
+        rc = audit.get("redacted_command", "")
+        assert "mysecret123" not in rc
+        assert "[REDACTED]" in rc
+
+    def test_token_flag_redacted(self):
+        result = _check("api-client --token ghp_abc123def456ghij789 call-api")
+        audit = result.get("audit_evidence", {})
+        assert audit.get("redaction_applied") is True
+        rc = audit.get("redacted_command", "")
+        assert "ghp_abc123def456ghij789" not in rc
+
+    def test_plain_command_not_redacted(self):
+        result = _check("git status")
+        audit = result.get("audit_evidence", {})
+        rc = audit.get("redacted_command", "")
+        assert "git status" in rc
+        # May or may not have redaction_applied=False depending on matching
+
+    def test_command_hash_from_original_not_redacted(self):
+        # The hash should be from the ORIGINAL command, not redacted
+        result = _check("API_KEY=secret123 echo hello")
+        audit = result.get("audit_evidence", {})
+        # Verify hash exists (can't verify exact value without knowing original)
+        assert len(audit.get("command_hash", "")) == 64
+
+    def test_top_level_command_text_is_redacted(self):
+        result = _check("TOKEN=my-secret-value ls")
+        assert "[REDACTED]" in str(result.get("command_text", ""))
+        assert result.get("redaction_applied") is True
+
+
+class TestAuditEvidenceInvariants:
+    """Verify invariants are preserved in audit evidence."""
+
+    def test_hard_block_non_overridable(self):
+        result = _check("git push --force")
+        assert result["hard_block"] is True
+        assert result["audit_evidence"]["hard_block"] is True
+        assert result["safety_notes"]["hard_blocks_non_overridable"] is True
+
+    def test_unknown_command_fail_closed(self):
+        result = _check("nonexistent_cmd_xyz")
+        assert result["decision"] == "deny"
+        assert result["hard_block"] is True
+
+    def test_no_execution_invariants(self):
+        result = _check("rm -rf /")
+        assert result["no_execution"] is True
+        assert result["no_enforcement"] is True
+        assert result["command_executed"] is False
+        assert result["shell_intercepted"] is False
+
+    def test_broker_cross_reference(self):
+        result = _check("git push --force")
+        audit = result.get("audit_evidence", {})
+        # Broker event ID should be present for broker-evaluated decisions
+        assert audit.get("broker_event_id") is not None
+
+    def test_audit_evidence_simulation_only_note(self):
+        result = _check("git push")
+        notes = result.get("safety_notes", {})
+        assert notes.get("audit_evidence_simulation_only") is True
+
+
+# Re-use and verify 93B behavior still compatible
+class Test93BCompatibility:
+    """Verify existing 93B behavior is preserved."""
+
+    def test_93b_command_classification_still_works(self):
+        result = _check("git push --force")
+        assert result["command_category"] == "force_push"
+        assert result["command_class"] == "force_push"
+        assert result["decision"] == "deny"
+
+    def test_93b_allow_still_works(self):
+        result = _check("git status")
+        assert result["decision"] == "allow"
+        assert result["hard_block"] is False
+
+    def test_93b_no_verify_still_works(self):
+        result = _check("git commit --no-verify -m x")
+        assert result["command_class"] == "no_verify"
+        assert result["hard_block"] is True

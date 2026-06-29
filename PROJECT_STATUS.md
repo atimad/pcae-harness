@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 93C: Shell Gate Audit Evidence Model (completed).
+
+Simulation-only implementation phase. Added structured audit evidence to every
+pcae shell-gate check decision. Audit evidence includes: audit_id, event_type,
+command_hash (SHA-256), redacted_command (secrets → [REDACTED]), command_class,
+decision, hard_block, broker cross-references, simulation markers. Secret redaction
+handles API keys, tokens, passwords, bearer tokens. 32 new tests (122 total shell
+gate). All invariants preserved. No shell interception, wrappers, command mediation,
+backend invocation, or command execution. Delivers docs/PHASE_93_SHELL_GATE_AUDIT_EVIDENCE_MODEL.md.
+
 Phase 92D.4: Finalization Notification Dispatch Visibility and Runtime Env Loading (completed).
 
 Corrective repair for notification dispatch visibility. Fixes: (1) pcae phase complete

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 93C shell gate audit evidence model: structured audit evidence for every pcae shell-gate check decision.
+- SHA-256 command hashing, secret redaction (API keys, tokens, passwords, bearer tokens), broker cross-references.
+- 32 new tests (122 total shell gate). Delivers docs/PHASE_93_SHELL_GATE_AUDIT_EVIDENCE_MODEL.md.
 - Completed Phase 92D.4 notification dispatch visibility repair: pcae phase complete now reports sent/skipped/failed.
 - pcae notify status shows context-sensitive text. files_changed shows "not captured" instead of misleading 0 after push.
 - Error redaction for token/chat ID. 11 new tests (129 total report+notification). Delivers docs/PHASE_92_FINALIZATION_NOTIFICATION_DISPATCH_VISIBILITY.md.

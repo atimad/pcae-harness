@@ -1149,6 +1149,154 @@ def _has_no_verify_flag(tokens: list[str]) -> bool:
     return False
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 93C — Audit evidence model: redaction helpers
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Patterns for secret-bearing tokens and env vars
+_SECRET_ENV_VAR_NAMES: frozenset[str] = frozenset({
+    "TOKEN", "API_KEY", "SECRET", "PASSWORD", "PASSWD", "PASS",
+    "AUTH", "CREDENTIAL", "KEY", "PRIVATE_KEY", "ACCESS_KEY",
+    "SECRET_KEY", "BEARER",
+    "PCAE_TELEGRAM_BOT_TOKEN", "OPENAI_API_KEY", "ANTHROPIC_API_KEY",
+    "GITHUB_TOKEN", "GITLAB_TOKEN", "NPM_TOKEN", "PYPI_TOKEN",
+})
+
+_SECRET_FLAG_PATTERNS: tuple[str, ...] = (
+    "--token", "--api-key", "--secret", "--password", "--passwd",
+    "--access-key", "--secret-key", "--private-key",
+    "--authorization", "--bearer",
+)
+
+
+def _looks_like_secret_value(value: str) -> bool:
+    """Heuristic check for likely secret/token/password values."""
+    if not value:
+        return False
+    # Long alphanumeric strings, JWTs, base64-encoded
+    if len(value) >= 20 and any(c.isalpha() for c in value) and any(c.isdigit() for c in value):
+        return True
+    # Starts with common token prefixes
+    if value.startswith(("sk-", "pk-", "ghp_", "gho_", "ghu_", "ghs_",
+                         "xoxb-", "xoxp-", "AKIA", "eyJ", "t.")):
+        return True
+    return False
+
+
+def _redact_command_text(command_text: str) -> tuple[str, bool]:
+    """Redact secrets from command text for audit display.
+
+    Returns (redacted_command, redaction_applied).
+    Handles:
+      - env VAR=VALUE patterns where VAR is a known secret name
+      - --flag value patterns where flag is a known secret flag
+      - Bearer token patterns in curl/HTTP commands
+    """
+    import re
+    redacted = command_text
+    did_redact = False
+
+    # Redact env var assignments: SECRET_NAME=value → SECRET_NAME=[REDACTED]
+    for var_name in _SECRET_ENV_VAR_NAMES:
+        pattern = re.compile(
+            rf'\b({var_name})=(\S+)', re.IGNORECASE
+        )
+        if pattern.search(redacted):
+            redacted = pattern.sub(rf'\1=[REDACTED]', redacted)
+            did_redact = True
+
+    # Redact --flag value: --token mytoken123 → --token [REDACTED]
+    for flag in _SECRET_FLAG_PATTERNS:
+        # Match --flag followed by a non-flag value
+        pattern = re.compile(
+            rf'({flag})\s+([^\s-][^\s]*)', re.IGNORECASE
+        )
+        if pattern.search(redacted):
+            redacted = pattern.sub(r'\1 [REDACTED]', redacted)
+            did_redact = True
+
+    # Redact Bearer tokens: Authorization: Bearer xxx → Authorization: Bearer [REDACTED]
+    bearer_pattern = re.compile(
+        r'(Authorization:\s*Bearer\s+)(\S+)', re.IGNORECASE
+    )
+    if bearer_pattern.search(redacted):
+        redacted = bearer_pattern.sub(r'\1[REDACTED]', redacted)
+        did_redact = True
+
+    return redacted, did_redact
+
+
+def _build_audit_evidence(
+    command_text: str,
+    command_category: str,
+    command_class: str,
+    action_type: str,
+    decision: str,
+    hard_block: bool,
+    reason_code: str,
+    reason_codes: list[str],
+    required_evidence: list[str],
+    message: str,
+    broker_result: dict[str, object],
+    event_id: str,
+) -> dict[str, object]:
+    """Build a structured audit evidence payload for a shell-gate decision.
+
+    Phase 93C — simulation-only.  No disk write, no persistent state.
+    Command text is redacted for secrets before inclusion.
+    """
+    import hashlib
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc).isoformat()
+
+    # Hash the original (unredacted) command for integrity
+    command_hash = hashlib.sha256(command_text.encode()).hexdigest()
+
+    # Redact command for display
+    redacted_command, redaction_applied = _redact_command_text(command_text)
+
+    # If full redaction applied but result is empty or nearly so, use placeholder
+    if not redacted_command.strip():
+        redacted_command = "<redacted_command>"
+        redaction_applied = True
+
+    broker_audit = broker_result.get("audit_payload", {})
+    broker_event_id = broker_audit.get("event_id") if isinstance(broker_audit, dict) else None
+
+    # Build broker message hash for cross-referencing
+    broker_msg = broker_result.get("message", "")
+    broker_msg_hash = (
+        hashlib.sha256(str(broker_msg).encode()).hexdigest()[:16]
+        if broker_msg else None
+    )
+
+    return {
+        "audit_id": event_id,
+        "event_type": f"shell_gate.{decision}",
+        "timestamp_utc": now,
+        "command_hash": command_hash,
+        "redacted_command": redacted_command,
+        "redaction_applied": redaction_applied,
+        "command_class": command_class,
+        "command_category": command_category,
+        "action_type": action_type,
+        "decision": decision,
+        "hard_block": hard_block,
+        "reason_code": reason_code,
+        "reason_codes": reason_codes,
+        "required_evidence": required_evidence,
+        "message_summary": message[:200] if message else "",
+        "broker_event_id": broker_event_id,
+        "broker_message_hash": broker_msg_hash,
+        "simulation_only": True,
+        "no_execution": True,
+        "no_enforcement": True,
+        "source": "shell_gate",
+        "schema_version": "1.0",
+    }
+
+
 def _detect_backend_program(program: str, tokens: list[str]) -> bool:
     """Check whether the command invokes a known AI backend CLI."""
     backend_names: frozenset[str] = frozenset({
@@ -1285,10 +1433,26 @@ def check_shell_gate(
         repo_dirty=False,
     )
 
-    # 7. Build shell-gate-specific output envelope
-    now = datetime.now(timezone.utc).isoformat()
+    # 7. Build audit evidence (Phase 93C)
     import uuid
     event_id = f"sg-{uuid.uuid4().hex[:12]}"
+    audit_evidence = _build_audit_evidence(
+        command_text=command_text,
+        command_category=command_category,
+        command_class=command_class,
+        action_type=action_type,
+        decision=broker_result["decision"],
+        hard_block=broker_result["hard_block"],
+        reason_code=broker_result["reason_code"],
+        reason_codes=broker_result.get("reason_codes", []),
+        required_evidence=broker_result.get("required_evidence", []),
+        message=broker_result.get("message", ""),
+        broker_result=broker_result,
+        event_id=event_id,
+    )
+
+    # 8. Build output envelope
+    now = datetime.now(timezone.utc).isoformat()
 
     return {
         # Shell gate metadata
@@ -1299,7 +1463,7 @@ def check_shell_gate(
         "event_id": event_id,
 
         # Command classification
-        "command_text": command_text,
+        "command_text": audit_evidence["redacted_command"],  # redacted for safety
         "command_category": command_category,
         "command_class": command_class,
         "action_type": action_type,
@@ -1318,6 +1482,10 @@ def check_shell_gate(
         "message": broker_result["message"],
         "required_evidence": broker_result.get("required_evidence", []),
         "audit_payload": broker_result.get("audit_payload", {}),
+
+        # Audit evidence (Phase 93C)
+        "audit_evidence": audit_evidence,
+        "redaction_applied": audit_evidence["redaction_applied"],
 
         # Simulation-only invariants
         "simulation_only": True,
@@ -1339,5 +1507,6 @@ def check_shell_gate(
             "shell_gate_does_not_invoke_backends": True,
             "hard_blocks_non_overridable": True,
             "execution_authorization_not_granted": True,
+            "audit_evidence_simulation_only": True,
         },
     }

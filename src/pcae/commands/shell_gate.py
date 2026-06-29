@@ -2,6 +2,7 @@
 
 Phase 88P: check — shell gate classifier (build_shell_gate)
 Phase 93B: check — broker-integrated (check_shell_gate)
+Phase 93C: check — audit evidence model
 """
 from __future__ import annotations
 
@@ -15,9 +16,9 @@ from pcae.core.paths import HarnessPath
 def run_shell_gate_check(args: argparse.Namespace) -> int:
     """pcae shell-gate check --command <CMD> [--json]
 
-    Phase 93B: Classify a proposed shell command, evaluate via the
-    permission broker, and return a structured simulation decision.
-    Never executes the command. Simulation-only.
+    Phase 93B/93C: Classify a proposed shell command, evaluate via the
+    permission broker, produce audit evidence, and return a structured
+    simulation decision.  Never executes the command.  Simulation-only.
     """
     command_text: str = getattr(args, "command", "") or ""
 
@@ -43,12 +44,13 @@ def run_shell_gate_check(args: argparse.Namespace) -> int:
         action_type = data["action_type"]
         reason_code = data["reason_code"]
         message = data["message"]
-        sim_only = data["simulation_only"]
-        no_exec = data["no_execution"]
-        no_enf = data["no_enforcement"]
+        audit = data.get("audit_evidence", {})
+        redacted = data.get("redaction_applied", False)
 
-        print("Shell gate check (simulation only — Phase 93B)")
-        print(f"  Command:            {command_text!r}")
+        print("Shell gate check (simulation only — Phase 93C)")
+        print(f"  Command:            {data['command_text']!r}")
+        if redacted:
+            print(f"  ⚠︎ Command redacted (secrets detected)")
         print(f"  Command category:   {command_category}")
         print(f"  Command class:      {command_class}")
         print(f"  Action type:        {action_type}")
@@ -63,11 +65,18 @@ def run_shell_gate_check(args: argparse.Namespace) -> int:
         if data.get("extracted_paths"):
             print(f"  Extracted paths:    {', '.join(data['extracted_paths'])}")
         print()
+        # Audit summary
+        if audit:
+            print(f"  Audit ID:           {audit.get('audit_id', '')}")
+            print(f"  Command hash:       {audit.get('command_hash', '')[:16]}...")
+            if redacted:
+                print(f"  Redaction:          applied")
+        print()
         print(f"  Message: {message}")
         print()
-        print(f"  Simulation only:    {sim_only}")
-        print(f"  No execution:       {no_exec}")
-        print(f"  No enforcement:     {no_enf}")
+        print(f"  Simulation only:    {data['simulation_only']}")
+        print(f"  No execution:       {data['no_execution']}")
+        print(f"  No enforcement:     {data['no_enforcement']}")
         print(f"  Authorization:      {data['authorization_granted']}")
         print()
         if hard_block:

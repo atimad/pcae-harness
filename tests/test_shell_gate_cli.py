@@ -178,3 +178,53 @@ class TestFastGreenMarker:
     def test_fast_green_marker_present(self):
         """This test file is marked fast_green via pyproject.toml config."""
         pass
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 93C — CLI audit evidence tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestJsonAuditEvidence:
+    """Verify JSON output includes audit_evidence."""
+
+    def test_json_includes_audit_evidence(self):
+        data = _json(["check", "--command", "git push"])
+        assert "audit_evidence" in data
+        audit = data["audit_evidence"]
+        assert audit.get("source") == "shell_gate"
+        assert audit.get("decision") == "deny"
+
+    def test_json_audit_has_command_hash(self):
+        data = _json(["check", "--command", "git status"])
+        audit = data["audit_evidence"]
+        ch = audit.get("command_hash", "")
+        assert len(ch) == 64
+
+    def test_json_audit_has_redacted_command(self):
+        data = _json(["check", "--command", "TOKEN=abc123 ls"])
+        audit = data["audit_evidence"]
+        assert audit.get("redaction_applied") is True
+
+    def test_json_audit_simulation_markers(self):
+        data = _json(["check", "--command", "git push --force"])
+        audit = data["audit_evidence"]
+        assert audit.get("simulation_only") is True
+        assert audit.get("no_execution") is True
+        assert audit.get("no_enforcement") is True
+
+
+class TestTextAuditEvidence:
+    """Verify text output includes audit summary."""
+
+    def test_text_includes_audit_id(self):
+        result = _run(["check", "--command", "git push"])
+        assert "Audit ID:" in result.stdout
+
+    def test_text_includes_command_hash(self):
+        result = _run(["check", "--command", "git status"])
+        assert "Command hash:" in result.stdout
+
+    def test_text_includes_redaction_indicator(self):
+        result = _run(["check", "--command", "API_KEY=secret123 ls"])
+        assert "redacted" in result.stdout.lower()
