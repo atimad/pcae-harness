@@ -4270,3 +4270,196 @@ class Test94UPreflightArtifactSafety:
         from pcae.core import backend_invocations
         source = inspect.getsource(backend_invocations)
         assert "getUpdates" not in source
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94V — Adapter-specific contract specialization tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    create_mock_adapter_contract,
+    create_claude_cli_adapter_contract,
+    create_claude_deepseek_cli_adapter_contract,
+    create_codex_adapter_contract,
+    create_qwen_adapter_contract,
+    create_custom_adapter_contract,
+    get_adapter_no_go_conditions,
+    get_adapter_failure_mapping,
+    ADAPTER_MODE_MOCK_ONLY,
+    ADAPTER_MODE_PREFLIGHT_ONLY,
+    ADAPTER_MODE_DISABLED,
+    ADAPTER_BACKEND_MOCK,
+    ADAPTER_BACKEND_CUSTOM,
+)
+
+
+class Test94VSpecializedContracts:
+    """Phase 94V: adapter-specific contract factories."""
+
+    def test_mock_no_secrets_no_approval(self):
+        c = create_mock_adapter_contract()
+        assert c.requires_secrets is False
+        assert c.safety_capabilities.requires_human_approval is False
+        assert c.safety_capabilities.requires_bypass_detection is False
+        assert c.invocation_mode == ADAPTER_MODE_MOCK_ONLY
+        assert c.backend_type == ADAPTER_BACKEND_MOCK
+
+    def test_claude_requires_bypass_detection(self):
+        c = create_claude_cli_adapter_contract()
+        assert c.safety_capabilities.requires_bypass_detection is True
+        assert c.safety_capabilities.requires_human_approval is True
+        assert c.safety_capabilities.requires_shell_gate is True
+        assert c.invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY
+        assert "ANTHROPIC_API_KEY" in c.required_env_keys
+
+    def test_claude_deepseek_requires_bypass_detection(self):
+        c = create_claude_deepseek_cli_adapter_contract()
+        assert c.safety_capabilities.requires_bypass_detection is True
+        assert c.safety_capabilities.requires_human_approval is True
+        assert "DEEPSEEK_API_KEY" in c.required_env_keys
+        assert c.invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY
+
+    def test_codex_preflight_only(self):
+        c = create_codex_adapter_contract()
+        assert c.invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY
+        assert c.safety_capabilities.requires_human_approval is True
+        assert c.safety_capabilities.requires_audit is True
+        assert "OPENAI_API_KEY" in c.required_env_keys
+
+    def test_qwen_preflight_only(self):
+        c = create_qwen_adapter_contract()
+        assert c.invocation_mode == ADAPTER_MODE_PREFLIGHT_ONLY
+        assert c.safety_capabilities.requires_secret_redaction is True
+        assert "QWEN_API_KEY" in c.required_env_keys
+
+    def test_custom_disabled_by_default(self):
+        c = create_custom_adapter_contract(backend_id="my-llm")
+        assert c.invocation_mode == ADAPTER_MODE_DISABLED
+        assert c.backend_type == ADAPTER_BACKEND_CUSTOM
+        assert c.safety_capabilities.requires_human_approval is True
+
+    def test_all_real_adapters_non_executable(self):
+        for factory in [
+            create_claude_cli_adapter_contract,
+            create_claude_deepseek_cli_adapter_contract,
+            create_codex_adapter_contract,
+            create_qwen_adapter_contract,
+        ]:
+            c = factory()
+            assert c.invocation_mode != "future_real", \
+                f"{c.backend_id} should not be future_real"
+
+    def test_all_real_adapters_require_audit(self):
+        for factory in [
+            create_claude_cli_adapter_contract,
+            create_claude_deepseek_cli_adapter_contract,
+            create_codex_adapter_contract,
+            create_qwen_adapter_contract,
+        ]:
+            c = factory()
+            assert c.safety_capabilities.requires_audit is True, \
+                f"{c.backend_id} should require audit"
+
+    def test_all_real_adapters_require_timeout(self):
+        for factory in [
+            create_claude_cli_adapter_contract,
+            create_claude_deepseek_cli_adapter_contract,
+            create_codex_adapter_contract,
+            create_qwen_adapter_contract,
+        ]:
+            c = factory()
+            assert c.safety_capabilities.requires_timeout is True, \
+                f"{c.backend_id} should require timeout"
+
+
+class Test94VNoGoConditions:
+    """Phase 94V: backend-specific no-go conditions."""
+
+    def test_mock_no_go_excludes_env_and_bypass(self):
+        c = create_mock_adapter_contract()
+        conditions = get_adapter_no_go_conditions(c)
+        assert "required_env_missing" not in conditions
+        assert "bypass_permissions_detected" not in conditions
+        assert "real_backend_unsafe_mode" not in conditions
+
+    def test_claude_no_go_includes_env_and_bypass(self):
+        c = create_claude_cli_adapter_contract()
+        conditions = get_adapter_no_go_conditions(c)
+        assert "required_env_missing" in conditions
+        assert "bypass_permissions_detected" in conditions
+        assert "real_backend_unsafe_mode" in conditions
+
+    def test_common_no_go_present_for_all_real(self):
+        common = [
+            "unknown_adapter", "unsupported_invocation_mode",
+            "broker_hard_block", "shell_gate_deny",
+            "human_approval_missing",
+        ]
+        for factory in [
+            create_claude_cli_adapter_contract,
+            create_codex_adapter_contract,
+        ]:
+            c = factory()
+            conditions = get_adapter_no_go_conditions(c)
+            for item in common:
+                assert item in conditions, f"{c.backend_id} missing {item}"
+
+
+class Test94VFailureMapping:
+    """Phase 94V: failure classification mapping."""
+
+    def test_mapping_includes_all_categories(self):
+        c = create_mock_adapter_contract()
+        mapping = get_adapter_failure_mapping(c)
+        for fc in VALID_FAILURE_CATEGORIES:
+            assert fc in mapping.values(), f"Missing failure category: {fc}"
+
+    def test_mapping_keys_are_readable(self):
+        c = create_mock_adapter_contract()
+        mapping = get_adapter_failure_mapping(c)
+        assert mapping["disabled"] == FAILURE_DISABLED
+        assert mapping["missing_env"] == FAILURE_MISSING_ENV
+        assert mapping["bypass_permissions"] == FAILURE_BYPASS_PERMISSIONS
+
+
+class Test94VRegistry:
+    """Phase 94V: registry uses specialized factories."""
+
+    def test_registry_uses_factories(self):
+        reg = get_default_adapter_registry()
+        mock_c = create_mock_adapter_contract()
+        claude_c = create_claude_cli_adapter_contract()
+        assert reg["mock"].adapter_id == mock_c.adapter_id
+        assert reg["claude"].adapter_id == claude_c.adapter_id
+
+    def test_registry_all_preflight_or_mock(self):
+        reg = get_default_adapter_registry()
+        for bid, c in reg.items():
+            if bid == "mock":
+                assert c.invocation_mode == ADAPTER_MODE_MOCK_ONLY
+            else:
+                assert c.invocation_mode in (ADAPTER_MODE_PREFLIGHT_ONLY, ADAPTER_MODE_DISABLED), \
+                    f"{bid} mode={c.invocation_mode!r}"
+
+
+class Test94VNoExecution:
+    """Phase 94V: no-execution guarantees."""
+
+    def test_no_subprocess_in_factories(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_secrets_in_factory_output(self):
+        import json
+        c = create_claude_cli_adapter_contract()
+        j = json.dumps(c.to_dict())
+        assert "sk-ant" not in j
+        # Env key NAMES are safe; secret VALUES must not appear
+        assert "secret-value" not in j.lower()
+
+    def test_multipart_phase_id_preserved(self):
+        c = create_custom_adapter_contract(backend_id="94V.1.2")
+        assert c.backend_id == "94V.1.2"

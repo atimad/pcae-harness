@@ -3914,74 +3914,237 @@ def classify_backend_adapter_failure(
     return FAILURE_NOT_INVOKED
 
 
-def get_default_adapter_registry() -> dict[str, BackendAdapterContract]:
-    """Build the default adapter registry.
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94V — Adapter-specific contract factories
+# ═══════════════════════════════════════════════════════════════════════════
 
-    All real adapters default to preflight-only.
+
+def _build_no_go_conditions(
+    *,
+    backend_type: str,
+    requires_env: bool,
+    requires_bypass: bool,
+) -> list[str]:
+    """Build a backend-specific no-go condition list."""
+    conditions: list[str] = [
+        "unknown_adapter",
+        "unsupported_invocation_mode",
+        "broker_hard_block",
+        "shell_gate_deny",
+        "human_approval_missing",
+        "prompt_artifact_missing",
+        "output_capture_unavailable",
+        "audit_path_unavailable",
+    ]
+    if requires_env:
+        conditions.append("required_env_missing")
+    if requires_bypass:
+        conditions.append("bypass_permissions_detected")
+    if backend_type != ADAPTER_BACKEND_MOCK:
+        conditions.extend([
+            "timeout_missing",
+            "real_backend_unsafe_mode",
+        ])
+    return sorted(set(conditions))
+
+
+def _build_failure_mapping() -> dict[str, str]:
+    """Build a standard failure-to-category mapping."""
+    return {
+        "disabled": FAILURE_DISABLED,
+        "missing_env": FAILURE_MISSING_ENV,
+        "bypass_permissions": FAILURE_BYPASS_PERMISSIONS,
+        "timeout": FAILURE_TIMEOUT,
+        "backend_unavailable": FAILURE_BACKEND_UNAVAILABLE,
+        "auth_failure": FAILURE_AUTH_FAILURE,
+        "rate_limited": FAILURE_RATE_LIMITED,
+        "output_missing": FAILURE_OUTPUT_MISSING,
+        "output_malformed": FAILURE_OUTPUT_MALFORMED,
+        "interrupted": FAILURE_INTERRUPTED,
+        "unknown": FAILURE_UNKNOWN,
+        "not_invoked": FAILURE_NOT_INVOKED,
+    }
+
+
+def create_mock_adapter_contract() -> BackendAdapterContract:
+    """Mock backend adapter — safe, no secrets, mock_only."""
+    return BackendAdapterContract(
+        adapter_id="adapter-mock",
+        backend_id="mock",
+        backend_type=ADAPTER_BACKEND_MOCK,
+        display_name="Mock Backend Adapter",
+        invocation_mode=ADAPTER_MODE_MOCK_ONLY,
+        supports_artifact_only=True,
+        supports_timeout=False,
+        requires_secrets=False,
+        required_env_keys=[],
+        safety_capabilities=BackendAdapterSafetyProfile(
+            requires_human_approval=False,
+            requires_permission_broker=False,
+            requires_shell_gate=False,
+            requires_bypass_detection=False,
+        ),
+    )
+
+
+def create_claude_cli_adapter_contract() -> BackendAdapterContract:
+    """Claude CLI adapter — preflight_only, bypass detection, env required."""
+    return BackendAdapterContract(
+        adapter_id="adapter-claude-cli",
+        backend_id="claude",
+        backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
+        display_name="Claude CLI Adapter",
+        invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+        supports_artifact_only=True,
+        supports_timeout=True,
+        requires_secrets=True,
+        required_env_keys=["ANTHROPIC_API_KEY"],
+        safety_capabilities=BackendAdapterSafetyProfile(
+            requires_human_approval=True,
+            requires_permission_broker=True,
+            requires_shell_gate=True,
+            requires_bypass_detection=True,
+            requires_timeout=True,
+            requires_secret_redaction=True,
+            requires_audit=True,
+            requires_output_quarantine=True,
+        ),
+    )
+
+
+def create_claude_deepseek_cli_adapter_contract() -> BackendAdapterContract:
+    """Claude-DeepSeek CLI adapter — preflight_only, bypass detection."""
+    return BackendAdapterContract(
+        adapter_id="adapter-claude-deepseek-cli",
+        backend_id="claude-deepseek",
+        backend_type=ADAPTER_BACKEND_CLAUDE_DEEPSEEK_CLI,
+        display_name="Claude-DeepSeek CLI Adapter",
+        invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+        supports_artifact_only=True,
+        supports_timeout=True,
+        requires_secrets=True,
+        required_env_keys=["DEEPSEEK_API_KEY"],
+        safety_capabilities=BackendAdapterSafetyProfile(
+            requires_human_approval=True,
+            requires_permission_broker=True,
+            requires_shell_gate=True,
+            requires_bypass_detection=True,
+            requires_timeout=True,
+            requires_secret_redaction=True,
+            requires_audit=True,
+            requires_output_quarantine=True,
+        ),
+    )
+
+
+def create_codex_adapter_contract() -> BackendAdapterContract:
+    """Codex adapter — preflight_only, env declaration, non-executable."""
+    return BackendAdapterContract(
+        adapter_id="adapter-codex",
+        backend_id="codex",
+        backend_type=ADAPTER_BACKEND_CODEX,
+        display_name="Codex Adapter",
+        invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+        supports_artifact_only=False,
+        supports_timeout=True,
+        requires_secrets=True,
+        required_env_keys=["OPENAI_API_KEY"],
+        safety_capabilities=BackendAdapterSafetyProfile(
+            requires_human_approval=True,
+            requires_permission_broker=True,
+            requires_shell_gate=True,
+            requires_bypass_detection=False,
+            requires_timeout=True,
+            requires_audit=True,
+            requires_secret_redaction=True,
+            requires_output_quarantine=True,
+        ),
+    )
+
+
+def create_qwen_adapter_contract() -> BackendAdapterContract:
+    """Qwen adapter — preflight_only, env declaration, non-executable."""
+    return BackendAdapterContract(
+        adapter_id="adapter-qwen",
+        backend_id="qwen",
+        backend_type=ADAPTER_BACKEND_QWEN,
+        display_name="Qwen Adapter",
+        invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
+        supports_artifact_only=False,
+        supports_timeout=True,
+        requires_secrets=True,
+        required_env_keys=["QWEN_API_KEY"],
+        safety_capabilities=BackendAdapterSafetyProfile(
+            requires_human_approval=True,
+            requires_permission_broker=True,
+            requires_shell_gate=True,
+            requires_bypass_detection=False,
+            requires_timeout=True,
+            requires_audit=True,
+            requires_secret_redaction=True,
+            requires_output_quarantine=True,
+        ),
+    )
+
+
+def create_custom_adapter_contract(
+    *,
+    backend_id: str = "custom",
+    display_name: str = "Custom Adapter",
+    required_env_keys: list[str] | None = None,
+) -> BackendAdapterContract:
+    """Custom adapter — disabled by default, requires explicit configuration."""
+    return BackendAdapterContract(
+        adapter_id=f"adapter-{backend_id}",
+        backend_id=backend_id,
+        backend_type=ADAPTER_BACKEND_CUSTOM,
+        display_name=display_name,
+        invocation_mode=ADAPTER_MODE_DISABLED,
+        supports_artifact_only=False,
+        supports_timeout=False,
+        requires_secrets=bool(required_env_keys),
+        required_env_keys=list(required_env_keys or []),
+        safety_capabilities=BackendAdapterSafetyProfile(
+            requires_human_approval=True,
+            requires_permission_broker=True,
+            requires_shell_gate=True,
+            requires_bypass_detection=True,
+            requires_timeout=True,
+            requires_audit=True,
+            requires_secret_redaction=True,
+            requires_output_quarantine=True,
+        ),
+    )
+
+
+def get_adapter_no_go_conditions(contract: BackendAdapterContract) -> list[str]:
+    """Return the backend-specific no-go condition list for a contract."""
+    return _build_no_go_conditions(
+        backend_type=contract.backend_type,
+        requires_env=bool(contract.required_env_keys),
+        requires_bypass=contract.safety_capabilities.requires_bypass_detection,
+    )
+
+
+def get_adapter_failure_mapping(
+    contract: BackendAdapterContract,  # noqa: ARG001 — reserved for future use
+) -> dict[str, str]:
+    """Return the standard failure classification mapping."""
+    return _build_failure_mapping()
+
+
+def get_default_adapter_registry() -> dict[str, BackendAdapterContract]:
+    """Build the default adapter registry using specialized factories.
+
+    All real adapters default to preflight-only or disabled.
     Only mock adapter is mock_only.
     """
     return {
-        "mock": BackendAdapterContract(
-            adapter_id="adapter-mock",
-            backend_id="mock",
-            backend_type=ADAPTER_BACKEND_MOCK,
-            display_name="Mock Backend Adapter",
-            invocation_mode=ADAPTER_MODE_MOCK_ONLY,
-            supports_artifact_only=True,
-            supports_timeout=False,
-            requires_secrets=False,
-            required_env_keys=[],
-            safety_capabilities=BackendAdapterSafetyProfile(
-                requires_human_approval=False,
-                requires_permission_broker=False,
-                requires_shell_gate=False,
-                requires_bypass_detection=False,
-            ),
-        ),
-        "claude": BackendAdapterContract(
-            adapter_id="adapter-claude-cli",
-            backend_id="claude",
-            backend_type=ADAPTER_BACKEND_CLAUDE_CLI,
-            display_name="Claude CLI Adapter",
-            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
-            supports_artifact_only=True,
-            supports_timeout=True,
-            requires_secrets=True,
-            required_env_keys=["ANTHROPIC_API_KEY"],
-        ),
-        "claude-deepseek": BackendAdapterContract(
-            adapter_id="adapter-claude-deepseek-cli",
-            backend_id="claude-deepseek",
-            backend_type=ADAPTER_BACKEND_CLAUDE_DEEPSEEK_CLI,
-            display_name="Claude-DeepSeek CLI Adapter",
-            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
-            supports_artifact_only=True,
-            supports_timeout=True,
-            requires_secrets=True,
-            required_env_keys=["DEEPSEEK_API_KEY"],
-        ),
-        "codex": BackendAdapterContract(
-            adapter_id="adapter-codex",
-            backend_id="codex",
-            backend_type=ADAPTER_BACKEND_CODEX,
-            display_name="Codex Adapter",
-            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
-            supports_artifact_only=False,
-            supports_timeout=True,
-            requires_secrets=True,
-            required_env_keys=["OPENAI_API_KEY"],
-        ),
-        "qwen": BackendAdapterContract(
-            adapter_id="adapter-qwen",
-            backend_id="qwen",
-            backend_type=ADAPTER_BACKEND_QWEN,
-            display_name="Qwen Adapter",
-            invocation_mode=ADAPTER_MODE_PREFLIGHT_ONLY,
-            supports_artifact_only=False,
-            supports_timeout=True,
-            requires_secrets=True,
-            required_env_keys=["QWEN_API_KEY"],
-        ),
+        "mock": create_mock_adapter_contract(),
+        "claude": create_claude_cli_adapter_contract(),
+        "claude-deepseek": create_claude_deepseek_cli_adapter_contract(),
+        "codex": create_codex_adapter_contract(),
+        "qwen": create_qwen_adapter_contract(),
     }
 
 

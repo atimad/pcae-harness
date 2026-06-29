@@ -2,6 +2,12 @@
 
 ## Current Phase
 
+Phase 94V: Adapter-Specific Contract Specialization (completed).
+
+Added 6 factory functions, backend-specific safety profiles, no-go condition lists,
+failure classification mappings. All real adapters preflight-only/disabled.
+19 new tests (458 model total). Delivers docs/PHASE_94_ADAPTER_SPECIFIC_CONTRACT_SPECIALIZATION.md.
+
 Phase 94U: Real Backend Adapter Preflight Artifacts (completed).
 
 Implementation phase. Added BackendAdapterPreflightArtifact with SHA-256 digest,
