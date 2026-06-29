@@ -1,19 +1,18 @@
-# Phase 92D.8.3 Complete — Multi-Part Phase ID Authority Repair
+# Phase 92D.8.4 Complete — Structured Tests Run Completeness Repair
 
 ## Summary
 
-Phase 92D.8.3 fixes two issues: (1) phase ID truncation for multi-part IDs like 92D.8.3, and (2) recommended next phase (e.g., 93D) being incorrectly treated as a current-phase mismatch.
+Phase 92D.8.4 fixes the final trust issue: reports showed partial ⚠️ for missing tests_run even when structured Test Results were present. Now structured test_results satisfies the tests_run trust requirement.
 
 ## Changes
 
-- Authoritative phase ID extraction from canonical report title only (not prose mentions)
-- Consistency checker ignores recommended next phase IDs
-- Fixed _derive_phase_id regex to support multi-part IDs (92D.8.3)
-- Phase ID parser preserves full multi-part IDs
+- `assess_completeness()`: tests_run no longer marked missing when structured test_results are present
+- `render_markdown()`: shows test suite count when tests_run=0 but test_results exist
+- Report completeness can now reach complete ✅ when all other trust fields are present
 
 ## Tests
 
-No new tests needed — existing 113 tests pass. Canonical report title-based extraction eliminates false mismatches.
+1 new test (78 total): structured_test_results_satisfies_tests_run
 
 ## Validation
 

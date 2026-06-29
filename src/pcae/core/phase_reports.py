@@ -151,7 +151,8 @@ class PhaseReport:
         # Check non-fatal trust fields
         if self.files_changed <= 0:
             missing.append("files_changed")
-        if self.tests_run <= 0:
+        # tests_run satisfied by structured test_results when present
+        if self.tests_run <= 0 and not self.test_results:
             missing.append("tests_run")
         if not self.commits:
             missing.append("commits")
@@ -236,9 +237,13 @@ class PhaseReport:
         else:
             lines.append(f"- **Files changed:** not captured")
 
-        # Tests run — show "not captured" instead of misleading 0
+        # Tests run — show "not captured" instead of misleading 0.
+        # When structured test_results exist, tests are considered captured.
         if self.tests_run > 0:
             lines.append(f"- **Tests run:** {self.tests_run}")
+        elif self.test_results:
+            count = len(self.test_results)
+            lines.append(f"- **Tests run:** {count} suite(s)")
         else:
             lines.append(f"- **Tests run:** not captured")
 

@@ -677,7 +677,7 @@ class TestReportCompleteness:
         r = make_phase_report(
             phase_id="92D.5", phase_name="Partial Test", status="completed",
             summary="Done.", files_changed=5,
-            test_results={"fast_green": "3305/3305"},
+            # No test_results → tests_run is missing
             governance_results={"health": "healthy"},
             commits=["abc123"], pushed_status="pushed",
         )
@@ -695,6 +695,22 @@ class TestReportCompleteness:
         r = PhaseReport(phase_id="92A", phase_name="Bad", status="", summary="Done.")
         state, missing, warnings = r.assess_completeness()
         assert state == "incomplete"
+
+    def test_structured_test_results_satisfies_tests_run(self):
+        r = make_phase_report(
+            phase_id="92D.8.4", phase_name="Structured Tests", status="completed",
+            summary="Done.", files_changed=3,
+            test_results={
+                "Report + notification": "161/161 (passed)",
+                "Broker + shell gate": "387/387 (passed)",
+            },
+            governance_results={"health": "healthy"},
+            commits=["abc123"], pushed_status="pushed",
+        )
+        state, missing, _ = r.assess_completeness()
+        assert state == "complete", \
+            f"Structured test_results should satisfy tests_run, got {state} missing={missing}"
+        assert "tests_run" not in missing
 
     def test_apply_trust_assessment_sets_fields(self):
         r = make_phase_report(

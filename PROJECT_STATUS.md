@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 92D.8.4: Structured Tests Run Completeness Repair (completed).
+
+One-line fix: structured test_results now satisfies tests_run trust requirement.
+Reports can achieve complete ✅ when validation results are present without a
+numeric tests_run. 1 new test (78 phase report). Delivers
+docs/PHASE_92_STRUCTURED_TESTS_RUN_COMPLETENESS_REPAIR.md.
+
 Phase 92D.8.3: Multi-Part Phase ID Authority Repair (completed).
 
 Corrective phase. Fixed: (1) phase ID truncation for multi-part IDs via authoritative

@@ -1,9 +1,9 @@
 {
-  "phase_id": "92D.8.3",
-  "phase_name": "Multi-Part Phase ID Authority Repair",
-  "files_changed": ["src/pcae/core/phase_reports.py", "src/pcae/commands/phase.py"],
+  "phase_id": "92D.8.4",
+  "phase_name": "Structured Tests Run Completeness Repair",
+  "files_changed": ["src/pcae/core/phase_reports.py", "tests/test_phase_reports.py"],
   "files_changed_count": 2,
-  "tests_added_or_updated": "0 new tests (existing pass)",
+  "tests_added_or_updated": "1 new",
   "validation_results": [
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
     {"name": "Broker + shell gate", "result": "387/387", "status": "passed"},
@@ -16,5 +16,5 @@
   ],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "93D — Shell Gate Audit Persistence Design"
+  "recommended_next_phase": "93D"
 }
