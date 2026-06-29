@@ -293,6 +293,319 @@ def run_backend_readiness(args: argparse.Namespace) -> int:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Phase 94M — Backend review CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_review_show(args: argparse.Namespace) -> int:
+    """pcae backend review show --latest [--json]
+
+    Display latest review artifact metadata only.
+    Never prints raw prompt/output content.
+    """
+    from pcae.core.backend_invocations import read_latest_review
+
+    review = read_latest_review()
+    if review is None:
+        msg = "No review artifacts found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps(review.to_dict(), indent=2))
+    else:
+        print("Backend review — latest artifact")
+        print(f"  Review ID:         {review.review_id}")
+        print(f"  Request ID:        {review.request_id}")
+        print(f"  Phase ID:          {review.phase_id}")
+        print(f"  Backend ID:        {review.backend_id}")
+        print(f"  Review state:      {review.review_state}")
+        print(f"  Output hash:       {(review.output_hash or '')[:16]}...")
+        print(f"  Approved:          {review.approved_for_apply}")
+        print(f"  Rejected:          {review.rejected}")
+        print(f"  Apply ready:       {review.apply_ready}")
+        print(f"  Operator:          {review.operator or '(none)'}")
+        print(f"  Decision:          {review.decision or '(none)'}")
+        if review.hard_blocks:
+            print(f"  Hard blocks:       {', '.join(review.hard_blocks)}")
+        if review.missing_evidence:
+            print(f"  Missing evidence:  {', '.join(review.missing_evidence)}")
+        if review.warnings:
+            print(f"  Warnings:          {', '.join(review.warnings)}")
+        print(f"  Created at:        {review.created_at_utc}")
+        print()
+        print("  ⚠️  Metadata only — no raw prompt/output content printed.")
+    return 0
+
+
+def run_backend_review_create(args: argparse.Namespace) -> int:
+    """pcae backend review create --request-id <id> --output-hash <hash> [--json]
+
+    Create a review artifact in review_pending state with safe defaults.
+    Persists under .pcae/backend-reviews/. Never applies anything.
+    """
+    from pcae.core.backend_invocations import (
+        create_review_artifact, persist_review, REVIEW_PENDING,
+    )
+
+    request_id: str = getattr(args, "request_id", "") or ""
+    output_hash: str = getattr(args, "output_hash", "") or ""
+    phase_id: str = getattr(args, "phase_id", "") or ""
+    backend_id: str = getattr(args, "backend", "") or ""
+    output_artifact_path: str = getattr(args, "output_artifact_path", "") or ""
+    prompt_hash: str = getattr(args, "prompt_hash", "") or ""
+    prompt_artifact_path: str = getattr(args, "prompt_artifact_path", "") or ""
+
+    if not request_id:
+        msg = "Missing --request-id"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not output_hash:
+        msg = "Missing --output-hash"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    try:
+        review = create_review_artifact(
+            request_id=request_id,
+            output_hash=output_hash,
+            backend_id=backend_id,
+            phase_id=phase_id,
+            output_artifact_path=output_artifact_path,
+            prompt_hash=prompt_hash,
+            prompt_artifact_path=prompt_artifact_path,
+        )
+        review.review_state = REVIEW_PENDING
+    except ValueError as exc:
+        msg = str(exc)
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    result = persist_review(review)
+    if result.get("status") != "written":
+        msg = f"Failed to persist review: {result.get('error', 'unknown')}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps({
+            "review": review.to_dict(),
+            "persistence": result,
+            "no_execution": True,
+            "no_apply": True,
+        }, indent=2))
+    else:
+        print("Backend review created")
+        print(f"  Review ID:     {review.review_id}")
+        print(f"  Request ID:    {review.request_id}")
+        print(f"  Output hash:   {(review.output_hash or '')[:16]}...")
+        print(f"  Review state:  {review.review_state}")
+        print(f"  Approved:      {review.approved_for_apply}")
+        print(f"  Rejected:      {review.rejected}")
+        print(f"  Apply ready:   {review.apply_ready}")
+        print(f"  Artifact:      {result.get('path', '')}")
+        print()
+        print("  ⚠️  Review created. No apply execution, no file mutation.")
+    return 0
+
+
+def run_backend_review_approve(args: argparse.Namespace) -> int:
+    """pcae backend review approve --review-id <id> --output-hash <hash>
+        --operator <name> --reason <text> [--json]
+
+    Create approval artifact bound to exact review_id and output_hash.
+    Hard blocks prevent effective approval. Approval does not execute apply.
+    Output remains quarantined. Never authorizes commit/push.
+    """
+    from pcae.core.backend_invocations import (
+        read_latest_review, approve_review, persist_review, persist_approval,
+    )
+
+    review_id: str = getattr(args, "review_id", "") or ""
+    output_hash: str = getattr(args, "output_hash", "") or ""
+    operator: str = getattr(args, "operator", "") or ""
+    reason: str = getattr(args, "reason", "") or ""
+
+    if not review_id:
+        msg = "Missing --review-id"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not output_hash:
+        msg = "Missing --output-hash"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not operator:
+        msg = "Missing --operator"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not reason:
+        msg = "Missing --reason"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    review = read_latest_review()
+    if review is None:
+        msg = "No review artifact found. Create one with: pcae backend review create"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    # Verify review_id binding
+    if review.review_id != review_id:
+        msg = f"Review ID mismatch: found {review.review_id!r}, expected {review_id!r}"
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    # Verify output_hash binding — hard block on mismatch
+    if review.output_hash != output_hash:
+        msg = f"Output hash mismatch — approval must bind to exact output hash"
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    # Hard blocks prevent effective approval
+    if review.hard_blocks:
+        msg = f"Cannot approve: hard blocks present: {', '.join(review.hard_blocks)}"
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    # Conflict: cannot approve a rejected review
+    if review.rejected:
+        msg = "Cannot approve: review is already rejected"
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    try:
+        approval = approve_review(review, operator, reason)
+    except ValueError as exc:
+        msg = str(exc)
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    persist_result = persist_approval(approval, review)
+    if persist_result.get("status") != "written":
+        msg = f"Failed to persist approval: {persist_result.get('error', 'unknown')}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps({
+            "approval": approval.to_dict(),
+            "review": review.to_dict(),
+            "persistence": persist_result,
+            "no_execution": True,
+            "no_apply": True,
+            "no_commit_push_authorization": True,
+            "output_remains_quarantined": True,
+        }, indent=2))
+    else:
+        print("Backend review approved")
+        print(f"  Approval ID:   {approval.approval_id}")
+        print(f"  Review ID:     {approval.review_id}")
+        print(f"  Output hash:   {(approval.output_hash or '')[:16]}...")
+        print(f"  Operator:      {approval.operator}")
+        print(f"  Review state:  {review.review_state}")
+        print(f"  Approved at:   {approval.approved_at_utc}")
+        print(f"  Artifact:      {persist_result.get('approval_path', '')}")
+        print()
+        print("  ✅ Approval recorded. Output remains quarantined.")
+        print("  ⚠️  Approval does not execute apply, authorize commit/push, or mutate files.")
+    return 0
+
+
+def run_backend_review_reject(args: argparse.Namespace) -> int:
+    """pcae backend review reject --review-id <id> --output-hash <hash>
+        --operator <name> --reason <text> [--json]
+
+    Create rejection artifact bound to exact review_id and output_hash.
+    Prevents same artifact from being both approved and rejected.
+    Never modifies source files.
+    """
+    from pcae.core.backend_invocations import (
+        read_latest_review, reject_review, persist_rejection,
+    )
+
+    review_id: str = getattr(args, "review_id", "") or ""
+    output_hash: str = getattr(args, "output_hash", "") or ""
+    operator: str = getattr(args, "operator", "") or ""
+    reason: str = getattr(args, "reason", "") or ""
+
+    if not review_id:
+        msg = "Missing --review-id"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not output_hash:
+        msg = "Missing --output-hash"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not operator:
+        msg = "Missing --operator"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if not reason:
+        msg = "Missing --reason"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    review = read_latest_review()
+    if review is None:
+        msg = "No review artifact found. Create one with: pcae backend review create"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    # Verify review_id binding
+    if review.review_id != review_id:
+        msg = f"Review ID mismatch: found {review.review_id!r}, expected {review_id!r}"
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    # Verify output_hash binding
+    if review.output_hash != output_hash:
+        msg = "Output hash mismatch — rejection must bind to exact output hash"
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    # Conflict guard: cannot reject an already-approved review
+    if review.approved_for_apply:
+        msg = "Cannot reject: review is already approved"
+        print(json.dumps({"error": msg, "hard_block": True}) if args.json else f"Error: {msg}")
+        return 1
+
+    rejection = reject_review(review, operator, reason)
+
+    issues = rejection.validate()
+    if issues:
+        msg = f"Invalid rejection: {'; '.join(issues)}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    persist_result = persist_rejection(rejection, review)
+    if persist_result.get("status") != "written":
+        msg = f"Failed to persist rejection: {persist_result.get('error', 'unknown')}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps({
+            "rejection": rejection.to_dict(),
+            "review": review.to_dict(),
+            "persistence": persist_result,
+            "no_execution": True,
+            "no_source_files_modified": True,
+        }, indent=2))
+    else:
+        print("Backend review rejected")
+        print(f"  Rejection ID:  {rejection.rejection_id}")
+        print(f"  Review ID:     {rejection.review_id}")
+        print(f"  Output hash:   {(rejection.output_hash or '')[:16]}...")
+        print(f"  Operator:      {rejection.operator}")
+        print(f"  Review state:  {review.review_state}")
+        print(f"  Rejected at:   {rejection.rejected_at_utc}")
+        print(f"  Artifact:      {persist_result.get('rejection_path', '')}")
+        print()
+        print("  ✅ Rejection recorded. No source files modified.")
+    return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Phase 94L — Apply readiness CLI
 # ═══════════════════════════════════════════════════════════════════════════
 

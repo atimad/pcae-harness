@@ -1252,6 +1252,28 @@ class RejectionArtifact:
     rejected_at_utc: str = ""
     schema_version: str = SCHEMA_VERSION
 
+    def validate(self) -> list[str]:
+        issues = []
+        if not self.output_hash:
+            issues.append("output_hash required")
+        if not self.operator:
+            issues.append("operator required")
+        if not self.reason:
+            issues.append("reason required")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "rejection_id": self.rejection_id,
+            "review_id": self.review_id,
+            "request_id": self.request_id,
+            "output_hash": self.output_hash,
+            "operator": self.operator,
+            "reason": self.reason,
+            "rejected_at_utc": self.rejected_at_utc,
+            "schema_version": self.schema_version,
+        }
+
 
 def _reviews_dir() -> Path:
     from pathlib import Path as _P
@@ -1343,6 +1365,70 @@ def read_latest_review() -> ReviewArtifact | None:
         return ReviewArtifact(**{k: v for k, v in data.items() if k in ReviewArtifact.__dataclass_fields__})
     except Exception:
         return None
+
+
+def persist_approval(approval: ApprovalArtifact, review: ReviewArtifact) -> dict:
+    """Persist an approval artifact to .pcae/backend-reviews/.
+
+    Writes timestamped approval JSON and updates latest.json with the
+    updated review state.  Never executes apply, mutates source files,
+    or authorizes commit/push.
+    """
+    import json as _json, os
+    d = _reviews_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        ap = d / f"{ts}-{approval.approval_id}.json"
+        ap.write_text(_json.dumps(approval.to_dict(), indent=2, sort_keys=True))
+        # Update latest.json with the reviewed/approved review state
+        lp = d / "latest.json"
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(review.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {
+            "status": "written",
+            "approval_path": str(ap),
+            "latest_path": str(lp),
+            "approval_id": approval.approval_id,
+            "review_state": review.review_state,
+        }
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def persist_rejection(rejection: RejectionArtifact, review: ReviewArtifact) -> dict:
+    """Persist a rejection artifact to .pcae/backend-reviews/.
+
+    Writes timestamped rejection JSON and updates latest.json with the
+    rejected review state.  Never mutates source files or authorizes anything.
+    """
+    import json as _json, os
+    d = _reviews_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        rp = d / f"{ts}-{rejection.rejection_id}.json"
+        rp.write_text(_json.dumps(rejection.to_dict(), indent=2, sort_keys=True))
+        lp = d / "latest.json"
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(review.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {
+            "status": "written",
+            "rejection_path": str(rp),
+            "latest_path": str(lp),
+            "rejection_id": rejection.rejection_id,
+            "review_state": review.review_state,
+        }
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
 
 
 # ═══════════════════════════════════════════════════════════════════════════

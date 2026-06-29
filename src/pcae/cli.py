@@ -443,6 +443,8 @@ from pcae.commands.backend import (
     run_backend_audit_show, run_backend_audit_list, run_backend_audit_verify,
     run_backend_readiness, run_backend_apply_readiness_show,
     run_backend_apply_readiness_validate,
+    run_backend_review_show, run_backend_review_create,
+    run_backend_review_approve, run_backend_review_reject,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4705,6 +4707,42 @@ def build_parser() -> argparse.ArgumentParser:
     ar_validate.add_argument("--trust", help="Path to trust assessment JSON.")
     ar_validate.add_argument("--json", action="store_true")
     ar_validate.set_defaults(handler=run_backend_apply_readiness_validate)
+
+    # ── pcae backend review (Phase 94M) ─────────────────────────────────
+    be_review = backend_sub.add_parser("review", help="Review backend output artifacts.")
+    be_rv_sub = be_review.add_subparsers(dest="backend_review_command", required=True)
+
+    rv_show = be_rv_sub.add_parser("show", help="Show latest review artifact.")
+    rv_show.add_argument("--latest", action="store_true", default=True)
+    rv_show.add_argument("--json", action="store_true")
+    rv_show.set_defaults(handler=run_backend_review_show)
+
+    rv_create = be_rv_sub.add_parser("create", help="Create a review artifact.")
+    rv_create.add_argument("--request-id", required=True, help="Backend invocation request ID.")
+    rv_create.add_argument("--output-hash", required=True, help="SHA-256 hash of the output artifact.")
+    rv_create.add_argument("--phase-id", default="", help="Phase ID.")
+    rv_create.add_argument("--backend", default="", help="Backend ID.")
+    rv_create.add_argument("--output-artifact-path", default="", help="Path to output artifact.")
+    rv_create.add_argument("--prompt-hash", default="", help="SHA-256 hash of the prompt artifact.")
+    rv_create.add_argument("--prompt-artifact-path", default="", help="Path to prompt artifact.")
+    rv_create.add_argument("--json", action="store_true")
+    rv_create.set_defaults(handler=run_backend_review_create)
+
+    rv_approve = be_rv_sub.add_parser("approve", help="Approve a review artifact.")
+    rv_approve.add_argument("--review-id", required=True, help="Review artifact ID to approve.")
+    rv_approve.add_argument("--output-hash", required=True, help="Exact output hash (must match review).")
+    rv_approve.add_argument("--operator", required=True, help="Operator name or ID.")
+    rv_approve.add_argument("--reason", required=True, help="Approval reason.")
+    rv_approve.add_argument("--json", action="store_true")
+    rv_approve.set_defaults(handler=run_backend_review_approve)
+
+    rv_reject = be_rv_sub.add_parser("reject", help="Reject a review artifact.")
+    rv_reject.add_argument("--review-id", required=True, help="Review artifact ID to reject.")
+    rv_reject.add_argument("--output-hash", required=True, help="Exact output hash (must match review).")
+    rv_reject.add_argument("--operator", required=True, help="Operator name or ID.")
+    rv_reject.add_argument("--reason", required=True, help="Rejection reason.")
+    rv_reject.add_argument("--json", action="store_true")
+    rv_reject.set_defaults(handler=run_backend_review_reject)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
