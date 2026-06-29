@@ -4024,3 +4024,249 @@ class Test94SNoExecutionGuarantees:
         r = validate_backend_adapter_preflight(c)
         j = _json_94s.dumps(r.to_dict())
         assert "sk-ant" not in j
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94U — Backend adapter preflight artifact tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import json as _json_94u
+
+from pcae.core.backend_invocations import (
+    BackendAdapterPreflightArtifact,
+    persist_backend_adapter_preflight_artifact,
+    verify_backend_adapter_preflight_artifact,
+    load_latest_backend_adapter_preflight_artifact,
+    BackendAdapterContract,
+    validate_backend_adapter_preflight,
+    ADAPTER_BACKEND_MOCK,
+    ADAPTER_BACKEND_CLAUDE_CLI,
+    ADAPTER_MODE_MOCK_ONLY,
+    ADAPTER_MODE_PREFLIGHT_ONLY,
+)
+
+
+class Test94UPreflightArtifact:
+    """BackendAdapterPreflightArtifact model, digest, persistence."""
+
+    def test_from_preflight_result(self):
+        c = BackendAdapterContract(
+            adapter_id="a", backend_id="mock",
+            backend_type=ADAPTER_BACKEND_MOCK,
+            invocation_mode=ADAPTER_MODE_MOCK_ONLY,
+        )
+        r = validate_backend_adapter_preflight(c)
+        artifact = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        assert artifact.backend_id == "mock"
+        assert artifact.status == "ready"
+        assert artifact.no_real_backend_invoked is True
+        assert artifact.no_subprocess is True
+        assert artifact.no_network is True
+        assert artifact.secrets_redacted is True
+
+    def test_compute_digest_deterministic(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        a1 = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        a2 = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        # Same preflight result, same fields → same digest
+        a1.artifact_id = a2.artifact_id = "pfa-test"
+        a1.preflight_id = a2.preflight_id = "apf-test"
+        d1 = a1.compute_digest()
+        d2 = a2.compute_digest()
+        assert d1 == d2
+        assert len(d1) == 64
+
+    def test_verify_valid_artifact(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        artifact = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        artifact.record_digest = artifact.compute_digest()
+        result = verify_backend_adapter_preflight_artifact(artifact)
+        assert result["valid"] is True
+
+    def test_verify_tampered_artifact_fails(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        artifact = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        artifact.record_digest = artifact.compute_digest()
+        # Tamper
+        artifact.status = "tampered"
+        result = verify_backend_adapter_preflight_artifact(artifact)
+        assert result["valid"] is False
+        assert any("digest" in i for i in result["issues"])
+
+    def test_verify_missing_digest_fails(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        artifact = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        # No digest set
+        result = verify_backend_adapter_preflight_artifact(artifact)
+        assert result["valid"] is False
+
+    def test_verify_missing_ids_fails(self):
+        artifact = BackendAdapterPreflightArtifact()
+        result = verify_backend_adapter_preflight_artifact(artifact)
+        assert result["valid"] is False
+
+    def test_persist_and_load_round_trip(self, tmp_path):
+        import os as _os
+        orig = _os.getcwd()
+        try:
+            _os.chdir(tmp_path)
+            c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+            r = validate_backend_adapter_preflight(c)
+            artifact = BackendAdapterPreflightArtifact.from_preflight_result(r)
+            persist = persist_backend_adapter_preflight_artifact(artifact)
+            assert persist["status"] == "written"
+            assert persist["record_digest"]
+
+            loaded = load_latest_backend_adapter_preflight_artifact()
+            assert loaded is not None
+            assert loaded.backend_id == "mock"
+            assert loaded.record_digest == persist["record_digest"]
+        finally:
+            _os.chdir(orig)
+
+    def test_latest_updated_on_new_write(self, tmp_path):
+        import os as _os
+        orig = _os.getcwd()
+        try:
+            _os.chdir(tmp_path)
+            c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+            r1 = validate_backend_adapter_preflight(c)
+            a1 = BackendAdapterPreflightArtifact.from_preflight_result(r1)
+            persist_backend_adapter_preflight_artifact(a1)
+
+            r2 = validate_backend_adapter_preflight(c)
+            a2 = BackendAdapterPreflightArtifact.from_preflight_result(r2)
+            persist_backend_adapter_preflight_artifact(a2)
+
+            loaded = load_latest_backend_adapter_preflight_artifact()
+            assert loaded is not None
+            assert loaded.preflight_id == a2.preflight_id
+        finally:
+            _os.chdir(orig)
+
+    def test_load_absent_returns_none(self, tmp_path):
+        import os as _os
+        orig = _os.getcwd()
+        try:
+            _os.chdir(tmp_path)
+            assert load_latest_backend_adapter_preflight_artifact() is None
+        finally:
+            _os.chdir(orig)
+
+    def test_no_secrets_in_artifact(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        artifact = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        j = _json_94u.dumps(artifact.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+        assert artifact.secrets_redacted is True
+
+    def test_to_dict_excludes_digest_when_requested(self):
+        c = BackendAdapterContract(adapter_id="a", backend_id="mock")
+        r = validate_backend_adapter_preflight(c)
+        artifact = BackendAdapterPreflightArtifact.from_preflight_result(r)
+        d = artifact.to_dict(include_digest=False)
+        assert "record_digest" not in d
+
+
+class Test94UPreflightArtifactCLI:
+    """CLI integration: save, show, verify via subprocess."""
+
+    def test_save_creates_artifact(self):
+        import subprocess, sys
+        from pathlib import Path
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight",
+             "--backend", "mock", "--save"],
+            capture_output=True, text=True,
+            cwd=Path(__file__).resolve().parent.parent, timeout=15,
+        )
+        assert r.returncode == 0
+        assert "Artifact saved" in r.stdout
+        assert "Digest:" in r.stdout
+
+    def test_show_latest_after_save(self):
+        import subprocess, sys
+        from pathlib import Path
+        repo = Path(__file__).resolve().parent.parent
+        subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight",
+             "--backend", "mock", "--save"],
+            capture_output=True, text=True, cwd=repo, timeout=15,
+        )
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight-show",
+             "--latest"],
+            capture_output=True, text=True, cwd=repo, timeout=15,
+        )
+        assert r.returncode == 0
+        assert "mock" in r.stdout
+
+    def test_verify_latest_after_save(self):
+        import subprocess, sys
+        from pathlib import Path
+        repo = Path(__file__).resolve().parent.parent
+        subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight",
+             "--backend", "mock", "--save"],
+            capture_output=True, text=True, cwd=repo, timeout=15,
+        )
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight-verify",
+             "--latest"],
+            capture_output=True, text=True, cwd=repo, timeout=15,
+        )
+        assert r.returncode == 0
+        assert "valid" in r.stdout.lower()
+
+    def test_show_missing_handled(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight-show",
+             "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_verify_missing_handled(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "preflight-verify",
+             "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_gitignore_has_preflights_dir(self):
+        from pathlib import Path
+        gitignore = Path(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
+        assert "backend-adapter-preflights/" in gitignore.read_text()
+
+
+class Test94UPreflightArtifactSafety:
+    """Cross-cutting safety for 94U."""
+
+    def test_no_subprocess_in_artifact_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_network_in_artifact_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_no_telegram_inbound_in_artifact_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "getUpdates" not in source

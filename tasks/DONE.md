@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 94T.1 — Phase Completion Metadata Freshness Guard (20260629-2058-phase-94t-real-backend-adapter-preflight-cli)
+- Phase 94U — Real Backend Adapter Preflight Artifacts (20260629-2107-phase-94t-1-phase-completion-metadata-freshness-guard)
+- Phase 94T.1 — Phase Completion Metadata Freshness Guard (20260629-2107-phase-94t-1-phase-completion-metadata-freshness-guard)
 - Phase 94T — Real Backend Adapter Preflight CLI (20260629-2058-phase-94t-real-backend-adapter-preflight-cli)
 - Phase 94S — Real Backend Adapter Contract Model (20260629-2035-phase-94s-real-backend-adapter-contract-model)
 - Phase 94R — Backend Real Adapter Design (20260629-2022-phase-94r-backend-real-adapter-design)

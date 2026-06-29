@@ -3983,3 +3983,225 @@ def get_default_adapter_registry() -> dict[str, BackendAdapterContract]:
             required_env_keys=["QWEN_API_KEY"],
         ),
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94U — Backend adapter preflight artifacts
+# ═══════════════════════════════════════════════════════════════════════════
+
+_ADAPTER_PREFLIGHTS_DIR = ".pcae/backend-adapter-preflights"
+_ADAPTER_PREFLIGHT_SCHEMA_VERSION = "1.0"
+
+
+@dataclass
+class BackendAdapterPreflightArtifact:
+    """Persistent, redacted, verifiable preflight artifact.
+
+    Embeds the preflight result with a deterministic digest for
+    tamper-evident verification. Never contains secret values.
+    """
+
+    artifact_id: str = ""
+    preflight_id: str = ""
+    adapter_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ""
+    invocation_mode: str = ""
+    status: str = ""
+    ready: bool = False
+    missing_env_keys: list[str] = field(default_factory=list)
+    present_env_keys_redacted: list[str] = field(default_factory=list)
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    unsafe_conditions: list[str] = field(default_factory=list)
+    requires_human_approval: bool = True
+    requires_broker: bool = True
+    requires_shell_gate: bool = True
+    no_real_backend_invoked: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    secrets_redacted: bool = True
+    created_at_utc: str = ""
+    source_command: str = ""
+    record_digest: str = ""
+    schema_version: str = _ADAPTER_PREFLIGHT_SCHEMA_VERSION
+
+    @classmethod
+    def from_preflight_result(
+        cls,
+        result: BackendAdapterPreflightResult,
+        *,
+        source_command: str = "",
+    ) -> "BackendAdapterPreflightArtifact":
+        import uuid as _uuid
+        return cls(
+            artifact_id=f"pfa-{_uuid.uuid4().hex[:12]}",
+            preflight_id=result.preflight_id,
+            adapter_id=result.adapter_id,
+            backend_id=result.backend_id,
+            backend_type=result.backend_type,
+            status=result.status,
+            ready=result.ready,
+            missing_env_keys=list(result.missing_env_keys),
+            present_env_keys_redacted=list(result.present_env_keys_redacted),
+            hard_blocks=list(result.hard_blocks),
+            warnings=list(result.warnings),
+            unsafe_conditions=list(result.unsafe_conditions),
+            requires_human_approval=result.requires_human_approval,
+            requires_broker=result.requires_broker,
+            requires_shell_gate=result.requires_shell_gate,
+            no_real_backend_invoked=result.no_real_backend_invoked,
+            no_subprocess=result.no_subprocess,
+            no_network=result.no_network,
+            secrets_redacted=result.secrets_redacted,
+            created_at_utc=result.created_at_utc,
+            source_command=source_command,
+        )
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d: dict[str, Any] = {
+            "artifact_id": self.artifact_id,
+            "preflight_id": self.preflight_id,
+            "adapter_id": self.adapter_id,
+            "backend_id": self.backend_id,
+            "backend_type": self.backend_type,
+            "invocation_mode": self.invocation_mode,
+            "status": self.status,
+            "ready": self.ready,
+            "missing_env_keys": list(self.missing_env_keys),
+            "present_env_keys_redacted": list(self.present_env_keys_redacted),
+            "hard_blocks": list(self.hard_blocks),
+            "warnings": list(self.warnings),
+            "unsafe_conditions": list(self.unsafe_conditions),
+            "requires_human_approval": self.requires_human_approval,
+            "requires_broker": self.requires_broker,
+            "requires_shell_gate": self.requires_shell_gate,
+            "no_real_backend_invoked": self.no_real_backend_invoked,
+            "no_subprocess": self.no_subprocess,
+            "no_network": self.no_network,
+            "secrets_redacted": self.secrets_redacted,
+            "created_at_utc": self.created_at_utc,
+            "source_command": self.source_command,
+            "schema_version": self.schema_version,
+        }
+        if include_digest and self.record_digest:
+            d["record_digest"] = self.record_digest
+        return d
+
+    def compute_digest(self) -> str:
+        """Compute deterministic SHA-256 digest over sorted JSON fields.
+
+        Excludes record_digest itself from the hash input.
+        """
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendAdapterPreflightArtifact":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+def _adapter_preflights_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_ADAPTER_PREFLIGHTS_DIR)
+
+
+def persist_backend_adapter_preflight_artifact(
+    artifact: BackendAdapterPreflightArtifact,
+) -> dict:
+    """Persist a preflight artifact with digest.
+
+    Writes timestamped JSON, updates latest.json atomically.
+    Never executes backends, never mutates source files.
+    """
+    import os
+    d = _adapter_preflights_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+    # Compute digest if not set
+    if not artifact.record_digest:
+        artifact.record_digest = artifact.compute_digest()
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{artifact.backend_id}-{artifact.preflight_id}.json"
+        lp = d / "latest.json"
+
+        fp.write_text(_json.dumps(artifact.to_dict(), indent=2, sort_keys=True))
+
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(artifact.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+
+        return {
+            "status": "written",
+            "path": str(fp),
+            "latest_path": str(lp),
+            "artifact_id": artifact.artifact_id,
+            "record_digest": artifact.record_digest,
+        }
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_backend_adapter_preflight_artifact(
+    artifact: BackendAdapterPreflightArtifact,
+) -> dict:
+    """Verify a preflight artifact's integrity.
+
+    Checks: digest, required IDs, schema version, safety invariants.
+    Fail-closed: any issue → valid=False.
+    """
+    issues: list[str] = []
+
+    if not artifact.artifact_id:
+        issues.append("missing artifact_id")
+    if not artifact.preflight_id:
+        issues.append("missing preflight_id")
+    if not artifact.backend_id:
+        issues.append("missing backend_id")
+    if not artifact.record_digest:
+        issues.append("missing record_digest")
+    if artifact.schema_version != _ADAPTER_PREFLIGHT_SCHEMA_VERSION:
+        issues.append(f"schema_version mismatch: {artifact.schema_version!r}")
+    if not artifact.no_real_backend_invoked:
+        issues.append("no_real_backend_invoked must be True")
+    if not artifact.no_subprocess:
+        issues.append("no_subprocess must be True")
+    if not artifact.no_network:
+        issues.append("no_network must be True")
+    if not artifact.secrets_redacted:
+        issues.append("secrets_redacted must be True")
+
+    if artifact.record_digest:
+        computed = artifact.compute_digest()
+        if computed != artifact.record_digest:
+            issues.append("record_digest mismatch")
+
+    return {
+        "valid": len(issues) == 0,
+        "issues": issues,
+        "artifact_id": artifact.artifact_id,
+    }
+
+
+def load_latest_backend_adapter_preflight_artifact() -> (
+    "BackendAdapterPreflightArtifact | None"
+):
+    """Load the latest preflight artifact. Returns None if absent/malformed."""
+    lp = _adapter_preflights_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        if not isinstance(data, dict) or not data:
+            return None
+        return BackendAdapterPreflightArtifact.from_dict(data)
+    except Exception:
+        return None

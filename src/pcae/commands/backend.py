@@ -18,6 +18,10 @@ from pcae.core.backend_invocations import (
     read_latest_lifecycle_demo,
     get_default_adapter_registry,
     validate_backend_adapter_preflight,
+    BackendAdapterPreflightArtifact,
+    persist_backend_adapter_preflight_artifact,
+    verify_backend_adapter_preflight_artifact,
+    load_latest_backend_adapter_preflight_artifact,
     INVOCATION_MODE_DRY_RUN,
     APPROVAL_PENDING,
     DEMO_COMPLETED,
@@ -1545,4 +1549,80 @@ def run_backend_adapter_preflight(args: argparse.Namespace) -> int:
         print(f"  No network:          {r.no_network}")
         print()
         print("  ⚠️  Model-only preflight. No backend was invoked.")
+    # ── Phase 94U: persist if --save ──────────────────────────────────
+    save: bool = getattr(args, "save", False) or False
+    if save:
+        artifact = BackendAdapterPreflightArtifact.from_preflight_result(
+            r, source_command=f"pcae backend adapter preflight --backend {backend_id}",
+        )
+        persist_result = persist_backend_adapter_preflight_artifact(artifact)
+        if args.json:
+            # Already printed JSON above; add persistence result
+            pass
+        else:
+            if persist_result.get("status") == "written":
+                print(f"  Artifact saved:     {persist_result.get('path', '')}")
+                print(f"  Digest:             {persist_result.get('record_digest', '')[:16]}...")
+
     return 0 if r.ready else 1
+
+
+def run_backend_adapter_preflight_show(args: argparse.Namespace) -> int:
+    """pcae backend adapter preflight show --latest [--json]
+
+    Read-only. Shows the latest persisted preflight artifact.
+    """
+    artifact = load_latest_backend_adapter_preflight_artifact()
+    if artifact is None:
+        msg = "No preflight artifacts found. Run 'pcae backend adapter preflight --backend <id> --save' first."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    if args.json:
+        print(json.dumps(artifact.to_dict(), indent=2))
+    else:
+        print(f"Latest preflight artifact: {artifact.backend_id}")
+        print(f"  Artifact ID:         {artifact.artifact_id}")
+        print(f"  Preflight ID:        {artifact.preflight_id}")
+        print(f"  Status:              {artifact.status}")
+        print(f"  Ready:               {'yes' if artifact.ready else 'no'}")
+        if artifact.missing_env_keys:
+            print(f"  Missing env:         {', '.join(artifact.missing_env_keys)}")
+        if artifact.present_env_keys_redacted:
+            print(f"  Present env:         {', '.join(artifact.present_env_keys_redacted)}")
+        if artifact.hard_blocks:
+            print(f"  Hard blocks:         {', '.join(artifact.hard_blocks)}")
+        print(f"  Digest:              {artifact.record_digest[:16]}...")
+        print(f"  No real backend:     {artifact.no_real_backend_invoked}")
+        print(f"  No subprocess:       {artifact.no_subprocess}")
+        print(f"  No network:          {artifact.no_network}")
+        print(f"  Created:             {artifact.created_at_utc}")
+    return 0
+
+
+def run_backend_adapter_preflight_verify(args: argparse.Namespace) -> int:
+    """pcae backend adapter preflight verify --latest [--json]
+
+    Read-only. Verifies the latest persisted preflight artifact integrity.
+    """
+    artifact = load_latest_backend_adapter_preflight_artifact()
+    if artifact is None:
+        msg = "No preflight artifacts found to verify."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    result = verify_backend_adapter_preflight_artifact(artifact)
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        if result["valid"]:
+            print(f"Preflight artifact verified: {artifact.backend_id}")
+            print(f"  Artifact ID:  {artifact.artifact_id}")
+            print(f"  Digest:       {artifact.record_digest[:16]}...")
+            print(f"  Status:       valid")
+        else:
+            print(f"Preflight artifact verification FAILED: {artifact.backend_id}")
+            for issue in result["issues"]:
+                print(f"  - {issue}")
+    return 0 if result["valid"] else 1

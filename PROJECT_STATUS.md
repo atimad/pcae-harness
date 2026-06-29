@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 94U: Real Backend Adapter Preflight Artifacts (completed).
+
+Implementation phase. Added BackendAdapterPreflightArtifact with SHA-256 digest,
+persist/verify/load helpers, --save flag on preflight CLI, preflight-show and
+preflight-verify commands. Atomic latest.json, tamper-evident verification.
+20 new tests (439 model total). Delivers docs/PHASE_94_BACKEND_REAL_ADAPTER_PREFLIGHT_ARTIFACTS.md.
+
 Phase 94T.1: Phase Completion Metadata Freshness Guard (completed).
 
 Corrective reporting fix. Added metadata freshness guard to `_finalize_report_and_notify()`:

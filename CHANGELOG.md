@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94T.1 — Phase Completion Metadata Freshness Guard to Phase 94U — Real Backend Adapter Preflight Artifacts; session refreshed and governance continuity revalidated.
+- Completed Phase 94U Real Backend Adapter Preflight Artifacts: BackendAdapterPreflightArtifact with digest, persist/verify/load, --save/preflight-show/preflight-verify CLI.
+- Tamper-evident SHA-256 digests over sorted JSON. 20 new tests (439 model total).
+- Delivers docs/PHASE_94_BACKEND_REAL_ADAPTER_PREFLIGHT_ARTIFACTS.md.
+
 - Transitioned active task from Phase 94T — Real Backend Adapter Preflight CLI to Phase 94T.1 — Phase Completion Metadata Freshness Guard; session refreshed and governance continuity revalidated.
 - Completed Phase 94T.1 Phase Completion Metadata Freshness Guard: fixes recurring stale-metadata bug.
 - _finalize_report_and_notify() now compares metadata phase_id against completing phase; discards stale metadata.

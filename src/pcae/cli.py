@@ -451,6 +451,8 @@ from pcae.commands.backend import (
     run_backend_demo_mock_lifecycle, run_backend_demo_show,
     run_backend_adapter_list, run_backend_adapter_show,
     run_backend_adapter_preflight,
+    run_backend_adapter_preflight_show,
+    run_backend_adapter_preflight_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4854,7 +4856,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     adapter_preflight.add_argument("--backend", required=True, help="Backend ID.")
     adapter_preflight.add_argument("--json", action="store_true")
+    adapter_preflight.add_argument("--save", action="store_true",
+                                   help="Persist preflight artifact.")
     adapter_preflight.set_defaults(handler=run_backend_adapter_preflight)
+
+    # ── Phase 94U: preflight show/verify subcommands ────────────────────
+    adapter_pf_show = be_adapter_sub.add_parser(
+        "preflight-show", help="Show latest persisted preflight artifact."
+    )
+    adapter_pf_show.add_argument("--latest", action="store_true", default=True)
+    adapter_pf_show.add_argument("--json", action="store_true")
+    adapter_pf_show.set_defaults(handler=run_backend_adapter_preflight_show)
+
+    adapter_pf_verify = be_adapter_sub.add_parser(
+        "preflight-verify", help="Verify latest preflight artifact integrity."
+    )
+    adapter_pf_verify.add_argument("--latest", action="store_true", default=True)
+    adapter_pf_verify.add_argument("--json", action="store_true")
+    adapter_pf_verify.set_defaults(handler=run_backend_adapter_preflight_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
