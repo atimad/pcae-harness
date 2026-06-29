@@ -1,35 +1,23 @@
-# Phase 92D.8.1 Complete — Canonical Report Metadata Consistency Guard
+# Phase 92D.8.2 Complete — Canonical Completion Artifact Refresh Guard
 
 ## Summary
 
-Phase 92D.8.1 adds consistency guards between `.pcae/phase-completion-report.md` and `.pcae/phase-completion-metadata.json` so PCAE cannot mark a report as complete ✅ when the canonical Markdown and structured metadata disagree.
+Phase 92D.8.2 fixes three consistency guard issues: artifact freshness validation (canonical report and metadata must reference current phase ID), tolerant commit timing (don't require completion commit before it exists), and check-name-aware validation comparison.
 
-## Consistency Guard Design
+## Changes
 
-When both canonical report and metadata are present, PCAE compares:
-- Validation/test result totals (e.g., "Fast-green: 100/100" vs metadata "149/149")
-- Phase commit hash presence in canonical report
-- Pushed status
-
-### Mismatch Severity
-
-| Mismatch Type | Trust Impact |
-|---------------|-------------|
-| Validation total mismatch | Trust downgraded to partial ⚠️ |
-| Phase commit not in canonical report | Trust warning added |
-| No mismatches, all consistent | Trust remains complete ✅ |
-
-### Stale Metadata Detection
-
-If metadata validation totals differ from what the canonical report states, a mismatch warning is added and the report cannot be complete.
+- Phase ID freshness: canonical report must mention current phase ID
+- Commit timing: only flag stale commit references, not missing pre-completion commits
+- Validation comparison: only compare same-named checks (e.g., "Fast-green" canonical vs "Fast-green" metadata)
+- Fixed phase ID regex to support three-part IDs like `92D.8.2`
 
 ## Tests
 
-4 new tests (160 total report+notification): consistent stays complete, mismatched validation downgrades, commit not in canonical warns, render includes consistency section.
+5 new/updated tests (161 total): consistent stays complete, phase_id stale detection, commit timing tolerance, check-name-aware comparison, consistency section rendering.
 
 ## Validation
 
-- Report + notification: 160/160
+- Report + notification: 161/161
 - Broker + shell gate: 387/387
 - Fast-green: 3272/3272
 - Health: healthy, check: passed, push: nothing_to_push

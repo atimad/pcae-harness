@@ -1,18 +1,11 @@
 {
-  "phase_id": "92D.8.1",
-  "phase_name": "Canonical Report Metadata Consistency Guard",
-  "files_changed": [
-    "src/pcae/core/phase_reports.py",
-    "tests/test_phase_reports.py",
-    "docs/PHASE_92_CANONICAL_REPORT_METADATA_CONSISTENCY_GUARD.md",
-    "PROJECT_STATUS.md",
-    "CHANGELOG.md",
-    "tasks/DONE.md"
-  ],
-  "files_changed_count": 6,
-  "tests_added_or_updated": "4 new tests",
+  "phase_id": "92D.8.2",
+  "phase_name": "Canonical Completion Artifact Refresh Guard",
+  "files_changed": ["src/pcae/core/phase_reports.py", "tests/test_phase_reports.py"],
+  "files_changed_count": 2,
+  "tests_added_or_updated": "1 new, 2 updated",
   "validation_results": [
-    {"name": "Report + notification", "result": "160/160", "status": "passed"},
+    {"name": "Report + notification", "result": "161/161", "status": "passed"},
     {"name": "Broker + shell gate", "result": "387/387", "status": "passed"},
     {"name": "Fast-green", "result": "3272/3272", "status": "passed"}
   ],

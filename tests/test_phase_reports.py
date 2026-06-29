@@ -1042,10 +1042,11 @@ class TestConsistencyGuard:
                 import shutil as _sh
                 _sh.move(cpath, cpath + ".bak")
             try:
-                # Canonical doesn't mention the phase commit
+                # Canonical has a DIFFERENT commit mentioned than metadata
                 write_canonical_report(
                     "# Phase 92D.8.1 Complete — Commit Test\n\n"
-                    "Phase 92D.8.1 completed.\nPushed: pushed"
+                    "Phase 92D.8.1 completed.\n"
+                    "Phase commit: abc12345\nPushed: pushed"
                 )
                 fin = finalize_phase_report(
                     phase_id="92D.8.1", phase_name="Commit Test",
@@ -1053,15 +1054,52 @@ class TestConsistencyGuard:
                     files_changed=3, tests_run=100,
                     test_results={"fg": "100/100"},
                     governance_results={"health": "healthy"},
-                    commits=["xyz99999"], pushed_status="pushed",
+                    commits=["xyz99999", "abc12345"], pushed_status="pushed",
                     reports_dir=Path(td),
                 )
                 report = fin["report"]
                 assert report is not None
-                # Phase commit not in canonical → mismatch warning
-                assert any("xyz99999" in w or "phase commit" in w.lower()
+                # Phase commit mismatch should be detected
+                assert any("phase commit" in w.lower() or "Mismatch" in w
                            for w in report.trust_warnings), \
                     f"Expected commit mismatch warning, got: {report.trust_warnings}"
+            finally:
+                if os.path.exists(cpath):
+                    os.remove(cpath)
+                if old_exists:
+                    import shutil as _sh
+                    _sh.move(cpath + ".bak", cpath)
+
+    def test_stale_phase_id_detected(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.phase_reports import finalize_phase_report, write_canonical_report
+            import os
+            cpath = ".pcae/phase-completion-report.md"
+            old_exists = os.path.exists(cpath)
+            if old_exists:
+                import shutil as _sh
+                _sh.move(cpath, cpath + ".bak")
+            try:
+                # Canonical report mentions Phase 92D.7 (STALE!)
+                write_canonical_report(
+                    "# Phase 92D.7 Complete — Old Phase\n\nPhase 92D.7 completed."
+                )
+                fin = finalize_phase_report(
+                    phase_id="92D.8.2", phase_name="Fresh Test",
+                    status="completed", summary="Done.",
+                    files_changed=3, tests_run=100,
+                    test_results={"fg": "100/100"},
+                    governance_results={"health": "healthy"},
+                    commits=["abc123"], pushed_status="pushed",
+                    reports_dir=Path(td),
+                )
+                report = fin["report"]
+                assert report is not None
+                assert report.report_completeness in ("partial", "incomplete"), \
+                    f"Stale phase_id should downgrade, got {report.report_completeness}"
+                assert any("92D.7" in w or "92D.8.2" in w
+                           for w in report.trust_warnings), \
+                    f"Expected phase_id warning, got: {report.trust_warnings}"
             finally:
                 if os.path.exists(cpath):
                     os.remove(cpath)

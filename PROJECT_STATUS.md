@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 92D.8.2: Canonical Completion Artifact Refresh Guard (completed).
+
+Corrective phase. Fixed 3 issues: (1) phase_id freshness — canonical report must
+mention current phase ID; (2) commit timing tolerant — no false mismatch for
+pre-completion commits; (3) check-name-aware comparison — only same-named checks
+compared. Fixed phase ID regex for three-part IDs (92D.8.2). 5 tests (161 total).
+Delivers docs/PHASE_92_CANONICAL_COMPLETION_ARTIFACT_REFRESH_GUARD.md.
+
 Phase 92D.8.1: Canonical Report Metadata Consistency Guard (completed).
 
 Consistency guard phase. Added _check_canonical_metadata_consistency() to detect

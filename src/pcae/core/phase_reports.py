@@ -508,7 +508,7 @@ def validate_canonical_report(
 
     # Check for stale mismatch: if content mentions a different phase ID
     import re
-    mentioned_ids = re.findall(r'Phase\s+(\d+[A-Z](?:\.\d+)?)', content)
+    mentioned_ids = re.findall(r'Phase\s+(\d+[A-Z](?:\.\d+)*)', content)
     if mentioned_ids and phase_id:
         # Check if the most prominent phase ID matches
         if phase_id not in mentioned_ids:
@@ -544,8 +544,8 @@ def is_valid_status(status: str) -> bool:
 def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
     """Check consistency between canonical report and structured metadata.
 
-    Phase 92D.8.1 — downgrades trust when canonical report and metadata disagree.
-    Compares: validation totals, governance results, commit hashes, pushed status.
+    Phase 92D.8.2 — refreshed: phase_id freshness, commit timing tolerance,
+    check-name-aware validation comparison.
     """
     import re
     content = report.canonical_report_content
@@ -554,26 +554,40 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
 
     mismatches: list[str] = []
 
-    # Check validation/test result totals
+    # ── 1. Phase ID freshness ──────────────────────────────────────────
+    current_phase_id = report.phase_id
+    mentioned_ids = re.findall(r'Phase\s+(\d+[A-Z](?:\.\d+)*)', content)
+    if current_phase_id and mentioned_ids:
+        if current_phase_id not in mentioned_ids:
+            mismatches.append(
+                f"canonical report mentions {mentioned_ids}, not current phase {current_phase_id}"
+            )
+
+    # ── 2. Check-name-aware validation comparison ──────────────────────
+    # Only compare check names that appear in BOTH canonical content and metadata
     if report.test_results:
         for name, result in report.test_results.items():
-            # Extract the numeric result from metadata (e.g., "133/133 (passed)")
             meta_match = re.search(r'(\d+/\d+)', str(result))
-            if meta_match:
-                meta_total = meta_match.group(1)
-                # Look for same test name and a result in canonical content
-                name_pattern = re.escape(name)
-                found = re.search(
-                    rf'{name_pattern}[:\s]*(\d+/\d+)', content, re.IGNORECASE
-                )
-                if found:
-                    canon_total = found.group(1)
-                    if canon_total != meta_total:
-                        mismatches.append(
-                            f"{name} result: canonical={canon_total} metadata={meta_total}"
-                        )
+            if not meta_match:
+                continue
+            meta_total = meta_match.group(1)
 
-    # Check pushed status
+            # Require the check NAME to appear near the total in canonical content
+            name_pattern = re.escape(name)
+            found = re.search(
+                rf'{name_pattern}[:\s]*(\d+/\d+)', content, re.IGNORECASE
+            )
+            if not found:
+                # Check name not found in canonical — not a mismatch, just not present
+                continue
+
+            canon_total = found.group(1)
+            if canon_total != meta_total:
+                mismatches.append(
+                    f"{name} result: canonical={canon_total} metadata={meta_total}"
+                )
+
+    # ── 3. Pushed status ───────────────────────────────────────────────
     if report.pushed_status:
         pat = re.search(r'(?:Pushed|Push)[:\s]+(pushed|not_pushed|nothing_to_push)',
                         content, re.IGNORECASE)
@@ -585,15 +599,27 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
                     f"pushed_status: canonical={canon_push} metadata={meta_push}"
                 )
 
-    # Check commit hash presence
-    if report.commits:
-        phase_commit = report.commits[0][:8] if report.commits else ""
-        if phase_commit and phase_commit not in content:
-            mismatches.append(
-                f"phase commit {phase_commit} not found in canonical report"
-            )
+    # ── 4. Commit presence (tolerant of pre-completion timing) ─────────
+    # The canonical report is written BEFORE pcae phase complete, so it
+    # may not contain the final completion commit hash. Only warn if the
+    # commit is present in metadata AND the content clearly references
+    # a different commit as the phase commit (stale reference).
+    if report.commits and len(report.commits) > 1:
+        # We have multiple commits — check if any appear to be phase commits in content
+        phase_commit = report.commits[0][:8]
+        # Look for explicit phase commit mention in content
+        commit_pattern = re.search(
+            r'(?:Phase commit|commit)[:\s]+([a-f0-9]{7,40})', content, re.IGNORECASE
+        )
+        if commit_pattern:
+            canon_commit = commit_pattern.group(1)[:8]
+            if phase_commit != canon_commit:
+                # Different commit — stale reference
+                mismatches.append(
+                    f"phase commit: canonical={canon_commit} metadata={phase_commit}"
+                )
 
-    # Apply mismatches to trust — downgrade completeness
+    # Apply mismatches to trust
     if mismatches:
         report.trust_warnings.append(
             "canonical report and metadata disagree"
@@ -601,11 +627,8 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
         for m in mismatches:
             report.trust_warnings.append(f"  Mismatch: {m}")
         report.trust_warnings.append("Manual review recommended.")
-
-        # Explicitly downgrade: mismatch means report cannot be complete
         if report.report_completeness == COMPLETENESS_COMPLETE:
             report.report_completeness = COMPLETENESS_PARTIAL
-        # Add missing field if not already there
         if "metadata_consistency" not in report.missing_trust_fields:
             report.missing_trust_fields.append("metadata_consistency")
 
