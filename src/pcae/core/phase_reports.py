@@ -202,6 +202,7 @@ class PhaseReport:
             "missing_trust_fields": self.missing_trust_fields,
             "trust_warnings": self.trust_warnings,
             "notification_result": self.notification_result,
+            "canonical_report_used": self.canonical_report_used,
         }
 
     def render_markdown(self) -> str:
@@ -334,10 +335,11 @@ class PhaseReport:
                                 if "Mismatch" in w or "canonical report and metadata" in w
                                 or "canonical report validation failed" in w
                                 or "no canonical report artifact" in w]
-        if self.canonical_report_content or consistency_warnings:
+        canon_present = bool(self.canonical_report_content) or self.canonical_report_used
+        if canon_present or consistency_warnings:
             lines.append("## Report Consistency")
             lines.append("")
-            lines.append(f"- **Canonical report:** {'present' if self.canonical_report_content else 'absent'}")
+            lines.append(f"- **Canonical report:** {'present' if canon_present else 'absent'}")
             lines.append(f"- **Metadata:** {'present' if self.commits or self.test_results or self.governance_results else 'absent'}")
             if consistency_warnings:
                 lines.append(f"- **Status:** mismatch detected")

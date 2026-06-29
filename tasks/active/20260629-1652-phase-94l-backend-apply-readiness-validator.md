@@ -24,6 +24,9 @@ Phase 94L — Backend Apply Readiness Validator
 
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- src/pcae/core/phase_reports.py
+- .pcae/phase-reports/latest.md
+- .pcae/phase-reports/latest.json
 
 ## Forbidden Files
 
@@ -56,9 +59,9 @@ advisory
 - No prompt execution
 - No source behavior changes outside task/session/handoff governance
 - No execution authorization
-- No commit
-- No push
 - No rollback
+- No new product features
+- No apply execution, patch parsing, file mutation, backend invocation, subprocess execution, network calls, shell interception, wrappers, command mediation, Telegram inbound, remote shell, enforcement, autonomous mutation, automatic apply, or real AI backend calls
 
 ## Acceptance Criteria
 

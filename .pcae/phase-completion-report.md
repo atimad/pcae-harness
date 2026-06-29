@@ -1,5 +1,8 @@
 # Phase 94L Completion Report — Backend Apply Readiness Validator
 
+- **Status:** completed
+- **Phase:** 94L
+
 ## Implementation Summary
 
 Implemented a backend apply readiness validator that classifies whether an apply plan is ready, incomplete, blocked, or requires human review. The validator evaluates apply plans against review artifacts, approval artifacts, output hash binding, allowed/forbidden files, rollback requirements, tests/check requirements, and hard blocks.
