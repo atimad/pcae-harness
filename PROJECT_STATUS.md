@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 92D.8: Canonical Final Report Artifact Contract (completed).
+
+Product-hardening phase. Established canonical final-report artifact contract:
+.pcae/phase-completion-report.md + .pcae/phase-completion-metadata.json as
+authoritative sources for both Claude terminal output and Telegram attachment.
+Canonical report is loaded, validated (phase_id, name, status, stale check),
+and used for latest.md generation and Telegram delivery. Validation failure
+downgrades trust. Absent canonical report warns. 7 new tests (133 total).
+Future phases must use the canonical flow. Delivers docs/PHASE_92_CANONICAL_FINAL_REPORT_ARTIFACT_CONTRACT.md.
+
 Phase 92D.7: Telegram Handoff Message Precision Tightening (completed).
 
 Precision tightening phase. Refined Telegram text format for remote handoff: trust

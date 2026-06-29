@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 92D.8 canonical final report artifact contract: .pcae/phase-completion-report.md as authoritative source.
+- Canonical report loaded, validated, used for latest.md and Telegram. Validation failure downgrades trust. 7 new tests (133 total).
+- Future phases must use canonical flow. Delivers docs/PHASE_92_CANONICAL_FINAL_REPORT_ARTIFACT_CONTRACT.md.
 - Completed Phase 92D.7 Telegram handoff message precision tightening: trust state at top, phase commit distinct.
 - Compact single-line validation/governance, no long summary in text. Delivers docs/PHASE_92_TELEGRAM_HANDOFF_MESSAGE_PRECISION_TIGHTENING.md.
 - Completed Phase 92D.6 structured metadata capture: .pcae/phase-completion-metadata.json enables complete phase reports.

@@ -841,4 +841,110 @@ class TestMetadataFileLoading:
                 shutil.move(backup, meta_path)
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.8 — Canonical report artifact tests
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestCanonicalReport:
+    """Verify canonical report loading and validation."""
+
+    def test_load_nonexistent_returns_none(self):
+        from pcae.core.phase_reports import load_canonical_report
+        import os
+        cpath = ".pcae/phase-completion-report.md"
+        old_exists = os.path.exists(cpath)
+        if old_exists:
+            import shutil as _sh
+            _sh.move(cpath, cpath + ".bak")
+        try:
+            result = load_canonical_report()
+            assert result is None
+        finally:
+            if old_exists:
+                import shutil as _sh
+                _sh.move(cpath + ".bak", cpath)
+
+    def test_write_and_load_canonical(self):
+        from pcae.core.phase_reports import load_canonical_report, write_canonical_report
+        import os
+        cpath = ".pcae/phase-completion-report.md"
+        old_exists = os.path.exists(cpath)
+        if old_exists:
+            import shutil as _sh
+            _sh.move(cpath, cpath + ".bak")
+        try:
+            content = "# Phase 92D.8 Complete\n\nDone."
+            ok = write_canonical_report(content)
+            assert ok
+            loaded = load_canonical_report()
+            assert loaded == content
+        finally:
+            if os.path.exists(cpath):
+                os.remove(cpath)
+            if old_exists:
+                import shutil as _sh
+                _sh.move(cpath + ".bak", cpath)
+
+    def test_validate_valid_report(self):
+        from pcae.core.phase_reports import validate_canonical_report
+        content = "# Phase 92D.8 Complete — Canonical Test\n\nPhase 92D.8 completed.\nStatus: completed"
+        is_valid, warnings = validate_canonical_report(
+            content, "92D.8", "Canonical Test", "completed"
+        )
+        assert is_valid is True, f"Expected valid, got warnings: {warnings}"
+
+    def test_validate_missing_phase_id(self):
+        from pcae.core.phase_reports import validate_canonical_report
+        content = "# Some Other Phase Complete\n\nStatus: completed"
+        is_valid, warnings = validate_canonical_report(
+            content, "92D.8", "Test", "completed"
+        )
+        assert is_valid is False
+
+    def test_validate_stale_mismatch(self):
+        from pcae.core.phase_reports import validate_canonical_report
+        content = "# Phase 92D.7 Complete\n\nPhase 92D.7 finished."
+        is_valid, warnings = validate_canonical_report(
+            content, "92D.8", "Test", "completed"
+        )
+        assert is_valid is False
+
+    def test_empty_canonical_invalid(self):
+        from pcae.core.phase_reports import validate_canonical_report
+        is_valid, warnings = validate_canonical_report(
+            "", "92D.8", "Test", "completed"
+        )
+        assert is_valid is False
+
+    def test_canonical_report_flow(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.phase_reports import finalize_phase_report, write_canonical_report
+            import os
+            cpath = ".pcae/phase-completion-report.md"
+            old_exists = os.path.exists(cpath)
+            if old_exists:
+                import shutil as _sh
+                _sh.move(cpath, cpath + ".bak")
+            try:
+                write_canonical_report("# Phase 92D.8 Complete — Canonical Test\n\nPhase 92D.8 completed.\nDone with canonical.")
+                fin = finalize_phase_report(
+                    phase_id="92D.8", phase_name="Canonical Test",
+                    status="completed", summary="Done.",
+                    files_changed=3, tests_run=100,
+                    test_results={"fg": "100/100"},
+                    governance_results={"health": "healthy"},
+                    commits=["abc123"], pushed_status="pushed",
+                    reports_dir=Path(td),
+                )
+                report = fin["report"]
+                assert report is not None
+                assert report.canonical_report_used is True
+            finally:
+                if os.path.exists(cpath):
+                    os.remove(cpath)
+                if old_exists:
+                    import shutil as _sh
+                    _sh.move(cpath + ".bak", cpath)
+
 
