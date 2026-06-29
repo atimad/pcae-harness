@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 94G: Backend Invocation Audit Trail (completed).
+
+Implementation phase. Added persist_backend_audit(): 25+ field audit records with
+SHA-256 record digests in .pcae/backend-invocations/audit/. CLI: pcae backend
+audit show/list/verify. 7 new tests (82 total backend). No execution, subprocess,
+or network. Delivers docs/PHASE_94_BACKEND_INVOCATION_AUDIT_TRAIL.md.
+
 Phase 94F: Mock Backend Invocation Prototype (completed).
 
 Implementation phase. Added run_mock_backend_invocation(): in-process deterministic

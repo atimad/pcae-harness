@@ -1,30 +1,24 @@
-# Phase 94F Complete — Mock Backend Invocation Prototype
+# Phase 94G Complete — Backend Invocation Audit Trail
 
 ## Summary
 
-Phase 94F implements a deterministic in-process mock backend that exercises
-the full invocation lifecycle: request → readiness → prompt → mock output →
-quarantine. No real AI, subprocess, network, or shell.
+Phase 94G implements local durable audit trail for backend invocation events.
+SHA-256 record digests, redacted JSON artifacts in .pcae/backend-invocations/audit/.
 
 ## Implementation
 
-- run_mock_backend_invocation(): validates mock-only, checks readiness,
-  captures prompt, generates deterministic output, captures quarantined output
-- _generate_mock_output(): deterministic, includes mock marker
-- Rejects non-mock backends, blocked readiness, no_execution_by_default=False
-- 10 new tests (75 total backend)
-
-## CLI
-
-No new CLI command — mock lifecycle exercised through Python API.
-Existing pcae backend plan provides readiness inspection.
+- persist_backend_audit(): writes audit records with 25+ fields
+- verify_backend_audit(): integrity check
+- read_latest_backend_audit() / list_backend_audit()
+- CLI: pcae backend audit show/list/verify
+- 7 new tests (82 total backend)
 
 ## Validation
 
-- Backend: 75/75
+- Backend: 82/82
 - Broker: 265/265, Shell gate: 142/142, Report: 161/161
 - origin/main..HEAD: 0
 
 ## Recommended Next Phase
 
-94G — Backend Invocation Audit Trail
+94H — Backend Invocation Trust/Readiness Gate

@@ -853,3 +853,166 @@ def run_mock_backend_invocation(
         "no_network": True,
         "schema_version": SCHEMA_VERSION,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94G — Backend invocation audit trail
+# ═══════════════════════════════════════════════════════════════════════════
+
+_BACKEND_AUDIT_DIR = ".pcae/backend-invocations/audit"
+
+
+def _audit_dir_path() -> Path:
+    from pathlib import Path as _P
+    return _P(_BACKEND_AUDIT_DIR)
+
+
+def persist_backend_audit(
+    event_type: str,
+    request: InvocationRequest,
+    *,
+    readiness: dict[str, Any] | None = None,
+    prompt_result: dict[str, Any] | None = None,
+    output_result: dict[str, Any] | None = None,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Persist a redacted backend invocation audit record.
+
+    Writes to .pcae/backend-invocations/audit/ with SHA-256 record digest.
+    Never invokes backends, never fails into execution.
+    """
+    import hashlib
+    import json as _json
+    import os
+    from datetime import datetime, timezone
+
+    audit_id = f"ba-{uuid.uuid4().hex[:12]}"
+    now = datetime.now(timezone.utc)
+    ts = now.strftime("%Y%m%d-%H%M%S")
+
+    audit_dir = _audit_dir_path()
+    try:
+        audit_dir.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+    # Build redacted audit record
+    record: dict[str, Any] = {
+        "audit_id": audit_id,
+        "timestamp_utc": now.isoformat(),
+        "event_type": event_type,
+        "request_id": request.request_id,
+        "phase_id": request.phase_id,
+        "task_id": request.task_id,
+        "backend_id": request.backend_id,
+        "execution_mode": request.execution_mode,
+        "approval_state": request.approval_state,
+        "readiness_status": readiness.get("status", "") if readiness else "",
+        "hard_blocks": readiness.get("hard_blocks", []) if readiness else [],
+        "missing_evidence": readiness.get("missing_evidence", []) if readiness else [],
+        "warnings": readiness.get("warnings", []) if readiness else [],
+        "prompt_hash": prompt_result.get("prompt_hash", "") if prompt_result else request.prompt_hash,
+        "prompt_artifact_path": prompt_result.get("prompt_path", "") if prompt_result else request.prompt_artifact_path,
+        "output_hash": output_result.get("output_hash", "") if output_result else "",
+        "output_artifact_path": output_result.get("output_path", "") if output_result else "",
+        "quarantined": output_result.get("quarantined", True) if output_result else True,
+        "applied_to_repo": output_result.get("applied_to_repo", False) if output_result else False,
+        "no_real_backend_invoked": True,
+        "no_subprocess": True,
+        "no_network": True,
+        "no_execution": True,
+        "no_enforcement": True,
+        "source": "backend_invocation",
+        "schema_version": SCHEMA_VERSION,
+    }
+    if extra:
+        record.update(extra)
+
+    # Compute digest (excluding record_digest)
+    digest_input = _json.dumps(record, sort_keys=True, default=str)
+    record_digest = hashlib.sha256(digest_input.encode()).hexdigest()
+    record["record_digest"] = record_digest
+
+    try:
+        file_path = audit_dir / f"{ts}-{audit_id}.json"
+        latest_path = audit_dir / "latest.json"
+        file_path.write_text(_json.dumps(record, indent=2, sort_keys=True))
+        tmp = audit_dir / ".latest.tmp"
+        tmp.write_text(_json.dumps(record, indent=2, sort_keys=True))
+        os.replace(str(tmp), str(latest_path))
+        return {
+            "status": "written",
+            "audit_id": audit_id,
+            "path": str(file_path),
+            "latest_path": str(latest_path),
+            "record_digest": record_digest,
+        }
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def read_latest_backend_audit() -> dict | None:
+    """Read latest backend audit record."""
+    import json as _json
+    p = _audit_dir_path() / "latest.json"
+    if not p.exists():
+        return None
+    try:
+        return _json.loads(p.read_text())
+    except Exception:
+        return None
+
+
+def verify_backend_audit() -> dict:
+    """Verify backend audit record integrity."""
+    import json as _json
+    import hashlib
+    audit_dir = _audit_dir_path()
+    result = {"total": 0, "valid": 0, "tampered": 0, "details": []}
+    if not audit_dir.exists():
+        return result
+    for f in sorted(audit_dir.glob("*.json")):
+        if f.name in ("latest.json", ".latest.tmp"):
+            continue
+        result["total"] += 1
+        try:
+            data = _json.loads(f.read_text())
+            stored = data.pop("record_digest", None)
+            if not stored:
+                result["missing"] = result.get("missing", 0) + 1
+                continue
+            inp = _json.dumps(data, sort_keys=True, default=str)
+            if hashlib.sha256(inp.encode()).hexdigest() == stored:
+                result["valid"] += 1
+            else:
+                result["tampered"] += 1
+                result["details"].append({"file": str(f), "status": "tampered"})
+        except Exception:
+            result["tampered"] += 1
+    return result
+
+
+def list_backend_audit(limit: int = 10) -> list[dict]:
+    """List recent backend audit records."""
+    import json as _json
+    audit_dir = _audit_dir_path()
+    records = []
+    if not audit_dir.exists():
+        return records
+    for f in sorted(audit_dir.glob("*.json"), reverse=True):
+        if f.name in ("latest.json", ".latest.tmp"):
+            continue
+        try:
+            data = _json.loads(f.read_text())
+            records.append({
+                "file": f.name, "audit_id": data.get("audit_id", ""),
+                "event_type": data.get("event_type", ""),
+                "backend_id": data.get("backend_id", ""),
+                "readiness_status": data.get("readiness_status", ""),
+                "timestamp_utc": data.get("timestamp_utc", ""),
+            })
+            if len(records) >= limit:
+                break
+        except Exception:
+            pass
+    return records

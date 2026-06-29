@@ -440,6 +440,7 @@ from pcae.commands.scope_preflight import run_scope_preflight
 from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.backend import (
     run_backend_list, run_backend_status, run_backend_plan, run_backend_show,
+    run_backend_audit_show, run_backend_audit_list, run_backend_audit_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4663,6 +4664,21 @@ def build_parser() -> argparse.ArgumentParser:
     be_show.add_argument("--latest", action="store_true", default=True)
     be_show.add_argument("--json", action="store_true")
     be_show.set_defaults(handler=run_backend_show)
+
+    # ── pcae backend audit (Phase 94G) ──────────────────────────────────
+    be_audit = backend_sub.add_parser("audit", help="Backend invocation audit.")
+    be_audit_sub = be_audit.add_subparsers(dest="backend_audit_command", required=True)
+    ba_show = be_audit_sub.add_parser("show", help="Show latest audit record.")
+    ba_show.add_argument("--latest", action="store_true", default=True)
+    ba_show.add_argument("--json", action="store_true")
+    ba_show.set_defaults(handler=run_backend_audit_show)
+    ba_list = be_audit_sub.add_parser("list", help="List recent audit records.")
+    ba_list.add_argument("--limit", type=int, default=10)
+    ba_list.add_argument("--json", action="store_true")
+    ba_list.set_defaults(handler=run_backend_audit_list)
+    ba_verify = be_audit_sub.add_parser("verify", help="Verify audit integrity.")
+    ba_verify.add_argument("--json", action="store_true")
+    ba_verify.set_defaults(handler=run_backend_audit_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

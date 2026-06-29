@@ -181,3 +181,64 @@ def run_backend_show(args: argparse.Namespace) -> int:
         print()
         print("  ⚠️  Metadata only — no raw prompt/output printed.")
     return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94G — Backend audit subcommands
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_audit_show(args: argparse.Namespace) -> int:
+    """pcae backend audit show --latest [--json]"""
+    from pcae.core.backend_invocations import read_latest_backend_audit
+    record = read_latest_backend_audit()
+    if not record:
+        msg = "No backend audit records found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if args.json:
+        print(json.dumps(record, indent=2))
+    else:
+        print("Backend audit — latest")
+        print(f"  Audit ID:      {record.get('audit_id', '')}")
+        print(f"  Event:         {record.get('event_type', '')}")
+        print(f"  Backend:       {record.get('backend_id', '')}")
+        print(f"  Readiness:     {record.get('readiness_status', '')}")
+        print(f"  Timestamp:     {record.get('timestamp_utc', '')}")
+        print(f"  Digest:        {(record.get('record_digest', '') or '')[:16]}...")
+    return 0
+
+
+def run_backend_audit_list(args: argparse.Namespace) -> int:
+    """pcae backend audit list [--limit N] [--json]"""
+    from pcae.core.backend_invocations import list_backend_audit
+    limit = int(getattr(args, "limit", 10) or 10)
+    records = list_backend_audit(limit=limit)
+    if args.json:
+        print(json.dumps(records, indent=2))
+    else:
+        if not records:
+            print("No backend audit records found.")
+        else:
+            print(f"Backend audit — last {len(records)} record(s)")
+            for r in records:
+                print(f"  {r['file']}  {r['event_type']:20s}  {r['backend_id']:10s}  {r['readiness_status']}")
+    return 0
+
+
+def run_backend_audit_verify(args: argparse.Namespace) -> int:
+    """pcae backend audit verify [--json]"""
+    from pcae.core.backend_invocations import verify_backend_audit
+    result = verify_backend_audit()
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"Backend audit verify")
+        print(f"  Total:    {result['total']}")
+        print(f"  Valid:    {result['valid']}")
+        print(f"  Tampered: {result['tampered']}")
+        if result["tampered"] > 0:
+            print(f"  ⚠️  {result['tampered']} tampered record(s)!")
+        else:
+            print(f"  ✅  All records intact.")
+    return 0 if result["tampered"] == 0 else 1

@@ -1,11 +1,11 @@
 {
-  "phase_id": "94F",
-  "phase_name": "Mock Backend Invocation Prototype",
-  "files_changed": ["src/pcae/core/backend_invocations.py", "tests/test_backend_invocations.py"],
-  "files_changed_count": 2,
-  "tests_added_or_updated": "10 new (75 total backend)",
+  "phase_id": "94G",
+  "phase_name": "Backend Invocation Audit Trail",
+  "files_changed": ["src/pcae/core/backend_invocations.py", "src/pcae/commands/backend.py", "src/pcae/cli.py", "tests/test_backend_invocations.py"],
+  "files_changed_count": 4,
+  "tests_added_or_updated": "7 new (82 total backend)",
   "validation_results": [
-    {"name": "Backend model + mock", "result": "75/75", "status": "passed"},
+    {"name": "Backend model + audit", "result": "82/82", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
@@ -18,5 +18,5 @@
   ],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "94G — Backend Invocation Audit Trail"
+  "recommended_next_phase": "94H — Backend Invocation Trust/Readiness Gate"
 }

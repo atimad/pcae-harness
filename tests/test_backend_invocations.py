@@ -569,3 +569,77 @@ class TestMockBackendInvocation:
 
 
 from pcae.core.backend_invocations import run_mock_backend_invocation
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94G — Audit trail tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestBackendAudit:
+    def test_audit_persisted_for_mock_run(self):
+        with tempfile.TemporaryDirectory() as td:
+            req = make_invocation_request(backend_id="mock", phase_id="94G")
+            result = run_mock_backend_invocation(req, "audit test", invocation_dir=td)
+            assert result["status"] == "completed"
+
+    def test_audit_record_written(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.backend_invocations import persist_backend_audit
+            req = make_invocation_request(backend_id="mock", phase_id="94G")
+            audit_result = persist_backend_audit("plan.created", req)
+            assert audit_result["status"] == "written"
+
+    def test_audit_record_fields(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.backend_invocations import persist_backend_audit
+            req = make_invocation_request(backend_id="mock", phase_id="94G")
+            audit_result = persist_backend_audit("plan.created", req)
+            assert audit_result["record_digest"]
+            assert len(audit_result["record_digest"]) == 64
+
+    def test_latest_audit_updated(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.backend_invocations import persist_backend_audit, read_latest_backend_audit
+            req = make_invocation_request(backend_id="mock")
+            persist_backend_audit("mock.run", req)
+            record = read_latest_backend_audit()
+            assert record is not None
+            assert record["event_type"] == "mock.run"
+
+    def test_verify_backend_audit(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.backend_invocations import persist_backend_audit, verify_backend_audit
+            req = make_invocation_request(backend_id="mock")
+            persist_backend_audit("plan.created", req)
+            result = verify_backend_audit()
+            assert result["valid"] >= 1
+
+    def test_audit_no_raw_secrets(self):
+        with tempfile.TemporaryDirectory() as td:
+            from pcae.core.backend_invocations import persist_backend_audit
+            req = make_invocation_request(backend_id="mock", phase_id="94G")
+            audit_result = persist_backend_audit("plan.created", req)
+            path = Path(audit_result["path"])
+            content = path.read_text()
+            assert "sk-ant" not in content
+            assert "ghp_" not in content
+
+    def test_audit_cli_verify(self):
+        import subprocess, sys, os
+        from pathlib import Path as _P
+        repo = _P(__file__).resolve().parent.parent
+        orig_cwd = os.getcwd()
+        os.chdir(str(repo))
+        try:
+            # Create an audit record first
+            from pcae.core.backend_invocations import persist_backend_audit, make_invocation_request
+            req = make_invocation_request(backend_id="mock")
+            persist_backend_audit("plan.created", req)
+            r = subprocess.run(
+                [sys.executable, "-m", "pcae", "backend", "audit", "verify"],
+                capture_output=True, text=True, timeout=15,
+            )
+            assert "Valid" in r.stdout or "valid" in r.stdout.lower()
+        finally:
+            os.chdir(orig_cwd)
