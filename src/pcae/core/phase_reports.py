@@ -506,13 +506,18 @@ def validate_canonical_report(
     if status and status not in content.lower():
         warnings.append(f"status '{status}' not found in canonical report")
 
-    # Check for stale mismatch: if content mentions a different phase ID
+    # Check for stale mismatch: compare title phase ID to expected
     import re
-    mentioned_ids = re.findall(r'Phase\s+(\d+[A-Z](?:\.\d+)*)', content)
-    if mentioned_ids and phase_id:
-        # Check if the most prominent phase ID matches
-        if phase_id not in mentioned_ids:
-            warnings.append(f"canonical report mentions different phase IDs: {mentioned_ids}")
+    title_match = re.search(
+        r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+)*)\b', content, re.MULTILINE
+    )
+    if title_match and phase_id:
+        title_phase_id = title_match.group(1)
+        if title_phase_id != phase_id:
+            warnings.append(
+                f"canonical report title phase_id={title_phase_id}, "
+                f"expected={phase_id}"
+            )
 
     is_valid = len(warnings) == 0
     return is_valid, warnings
@@ -555,12 +560,19 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
     mismatches: list[str] = []
 
     # ── 1. Phase ID freshness ──────────────────────────────────────────
+    # Extract current phase ID from the canonical report TITLE only.
+    # Ignore recommended next phase, historical context, and prose mentions.
     current_phase_id = report.phase_id
-    mentioned_ids = re.findall(r'Phase\s+(\d+[A-Z](?:\.\d+)*)', content)
-    if current_phase_id and mentioned_ids:
-        if current_phase_id not in mentioned_ids:
+    # Match the first H1 heading: "# Phase 92D.8.3 Complete — ..."
+    title_match = re.search(
+        r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+)*)\b', content, re.MULTILINE
+    )
+    if current_phase_id and title_match:
+        title_phase_id = title_match.group(1)
+        if title_phase_id != current_phase_id:
             mismatches.append(
-                f"canonical report mentions {mentioned_ids}, not current phase {current_phase_id}"
+                f"canonical report title phase_id={title_phase_id}, "
+                f"current phase_id={current_phase_id}"
             )
 
     # ── 2. Check-name-aware validation comparison ──────────────────────

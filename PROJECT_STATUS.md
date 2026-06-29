@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 92D.8.3: Multi-Part Phase ID Authority Repair (completed).
+
+Corrective phase. Fixed: (1) phase ID truncation for multi-part IDs via authoritative
+title-heading extraction; (2) recommended next phase no longer triggers false current-phase
+mismatch. _derive_phase_id regex now supports 92D.8.3. Delivers
+docs/PHASE_92_MULTI_PART_PHASE_ID_AUTHORITY_REPAIR.md.
+
 Phase 92D.8.2: Canonical Completion Artifact Refresh Guard (completed).
 
 Corrective phase. Fixed 3 issues: (1) phase_id freshness — canonical report must

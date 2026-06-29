@@ -345,7 +345,7 @@ def _write_completion_metadata(meta: dict) -> bool:
 def _derive_phase_id(summary: str) -> str:
     """Derive a phase ID from the summary text."""
     import re
-    m = re.search(r"Phase\s+(\d+[A-Z](?:\.\d+)?)", summary)
+    m = re.search(r"Phase\s+(\d+[A-Z](?:\.\d+)*)", summary)
     if m:
         return m.group(1)
     return "unknown"
