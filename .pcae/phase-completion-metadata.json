@@ -1,18 +1,34 @@
 {
-  "phase_id": "94K",
-  "phase_name": "Backend Apply Plan Model",
-  "files_changed": ["src/pcae/core/backend_invocations.py", ".pcae/.gitignore", "tests/test_backend_invocations.py"],
-  "files_changed_count": 3,
-  "tests_added_or_updated": "7 new (109 total backend)",
-  "validation_results": [
-    {"name": "Backend model + apply plan", "result": "109/109", "status": "passed"},
-    {"name": "Broker", "result": "265/265", "status": "passed"},
-    {"name": "Shell gate", "result": "142/142", "status": "passed"},
-    {"name": "Report + notification", "result": "161/161", "status": "passed"},
-    {"name": "Fast-green", "result": "3272/3272", "status": "passed"}
+  "phase_id": "94L",
+  "phase_name": "phase_94l_backend_apply_readiness_validator",
+  "phase_title": "Backend Apply Readiness Validator",
+  "implementation_status": "completed",
+  "completed_at_utc": "2026-06-29T16:55:00Z",
+  "commits": [
+    "e582ca1e63a2fa8888df9984c7f872029800790f",
+    "416661c9ffc0151b6f7f703bc6522096bbe1f082",
+    "e9d2eb07fb6d4b646a41c4bf4db7a3b1f1a3e48f"
   ],
-  "governance_results": [{"name": "pcae health", "status": "healthy"}, {"name": "pcae check", "status": "passed"}, {"name": "pcae push check", "status": "nothing_to_push"}],
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
-  "recommended_next_phase": "94L — Backend Apply Readiness Validator"
+  "files_changed": [
+    "src/pcae/core/backend_invocations.py",
+    "src/pcae/commands/backend.py",
+    "src/pcae/cli.py",
+    "tests/test_backend_invocations.py",
+    ".pcae/.gitignore",
+    "docs/PHASE_94_BACKEND_APPLY_READINESS_VALIDATOR.md",
+    "PROJECT_STATUS.md",
+    "CHANGELOG.md",
+    "tasks/DONE.md"
+  ],
+  "tests_added": 40,
+  "total_backend_tests": 149,
+  "fast_green": "3441/3441",
+  "regressions": {
+    "broker": "265/265",
+    "shell_gate": "142/142",
+    "report_notification": "162/162"
+  },
+  "health": "healthy",
+  "check": "passed",
+  "recommended_next_phase": "94M — Backend Review CLI"
 }
