@@ -2,6 +2,12 @@
 
 ## Current Phase
 
+Phase 95D: Claude Runtime Evidence Import CLI (completed).
+
+pcae backend adapter runtime-evidence import --from-json with secret scanning.
+_scan_for_secrets() rejects tokens/API keys/passwords. Explicit JSON-only — no live
+inspection. 10 new tests (550 model total). Delivers docs/PHASE_95_CLAUDE_RUNTIME_EVIDENCE_IMPORT_CLI.md.
+
 Phase 95C: Claude Runtime Evidence Model (completed).
 
 ClaudeRuntimeEvidence (39 fields) with SHA-256 digest. 3 runtime profiles, 4 bypass states,

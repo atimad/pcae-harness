@@ -32,6 +32,8 @@ from pcae.core.backend_invocations import (
     ArtifactOnlyRealInvocationDryRunAssessment,
     load_latest_claude_runtime_evidence,
     verify_claude_runtime_evidence,
+    import_claude_runtime_evidence_from_json,
+    persist_claude_runtime_evidence,
     ClaudeRuntimeEvidence,
     persist_artifact_only_real_invocation_dry_run_assessment,
     load_latest_artifact_only_real_invocation_dry_run_assessment,
@@ -1895,3 +1897,52 @@ def run_backend_adapter_runtime_evidence_verify(args: argparse.Namespace) -> int
         for issue in result["issues"]:
             print(f"  - {issue}")
     return 0 if result["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95D — Claude runtime evidence import CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_adapter_runtime_evidence_import(args: argparse.Namespace) -> int:
+    """pcae backend adapter runtime-evidence import --from-json <path> [--json]"""
+    json_path: str = getattr(args, "from_json", "") or ""
+    if not json_path:
+        msg = "Missing --from-json <path>"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    evidence, result = import_claude_runtime_evidence_from_json(json_path)
+    if evidence is None:
+        if args.json:
+            print(json.dumps(result, indent=2))
+        else:
+            print(f"Import failed: {result.get('error', 'unknown error')}")
+            if result.get("hard_blocks"):
+                print(f"  Hard blocks:    {', '.join(result['hard_blocks'])}")
+            if result.get("details"):
+                print(f"  Details:        {', '.join(result['details'][:3])}")
+        return 1
+
+    persist = persist_claude_runtime_evidence(evidence)
+
+    if args.json:
+        print(json.dumps({
+            "evidence": evidence.to_dict(),
+            "persistence": persist,
+            "status": "imported",
+            "no_real_backend_invoked": True,
+            "no_live_inspection": True,
+        }, indent=2))
+    else:
+        print(f"Runtime evidence imported: {evidence.backend_id}")
+        print(f"  Evidence ID:      {evidence.runtime_evidence_id}")
+        print(f"  Profile:          {evidence.runtime_profile}")
+        print(f"  Bypass state:     {evidence.bypass_permissions_state}")
+        print(f"  Evidence source:  {evidence.evidence_source}")
+        print(f"  Digest:           {evidence.record_digest[:16]}...")
+        if persist.get("status") == "written":
+            print(f"  Artifact saved:   {persist.get('path', '')}")
+        print()
+        print("  ✅ Imported from explicit JSON only. No live runtime inspection.")
+    return 0

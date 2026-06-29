@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 95C — Claude Runtime Evidence Model (20260629-2250-phase-95b-claude-claude-deepseek-runtime-detection-design)
+- Phase 95D — Claude Runtime Evidence Import CLI (20260629-2258-phase-95c-claude-runtime-evidence-model)
+- Phase 95C — Claude Runtime Evidence Model (20260629-2258-phase-95c-claude-runtime-evidence-model)
 - Phase 95B — Claude/Claude-DeepSeek Runtime Detection Design (20260629-2250-phase-95b-claude-claude-deepseek-runtime-detection-design)
 - Phase 95A — Artifact-Only Real Invocation Dry-Run Boundary (20260629-2244-phase-95a-artifact-only-real-invocation-dry-run-boundary)
 - Phase 94Z — Real Adapter Invocation Plan Artifact (20260629-2239-phase-94z-real-adapter-invocation-plan-artifact)

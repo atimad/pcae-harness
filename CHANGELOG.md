@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95C — Claude Runtime Evidence Model to Phase 95D — Claude Runtime Evidence Import CLI; session refreshed and governance continuity revalidated.
+- Completed Phase 95D Claude Runtime Evidence Import CLI. 10 tests (550 model total).
+
 - Transitioned active task from Phase 95B — Claude/Claude-DeepSeek Runtime Detection Design to Phase 95C — Claude Runtime Evidence Model; session refreshed and governance continuity revalidated.
 - Completed Phase 95C Claude Runtime Evidence Model. 13 tests (540 model total).
 

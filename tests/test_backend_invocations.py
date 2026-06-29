@@ -5275,3 +5275,164 @@ class Test95CRuntimeEvidenceCLI:
         from pathlib import Path
         g = Path(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
         assert "claude-runtime-evidence/" in g.read_text()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95D — Claude runtime evidence import CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    import_claude_runtime_evidence_from_json,
+    _scan_for_secrets,
+)
+
+
+class Test95DImport:
+    """Import CLI and secret detection."""
+
+    def test_valid_import_succeeds(self, tmp_path):
+        import json as _j
+        fp = tmp_path / "evidence.json"
+        data = {
+            "runtime_evidence_id": "re-import-test",
+            "backend_id": "claude",
+            "backend_type": "claude_cli",
+            "runtime_profile": "claude_cli",
+            "command_identity": "claude",
+            "declared_command_path": "/usr/local/bin/claude",
+            "bypass_permissions_state": "off",
+            "bypass_permissions_evidence": "operator confirmed",
+            "evidence_source": "operator_declared",
+            "timeout_seconds": 120,
+            "audit_path": "/tmp/audit.json",
+            "output_quarantine_path": "/tmp/output.md",
+        }
+        fp.write_text(_j.dumps(data))
+        evidence, result = import_claude_runtime_evidence_from_json(str(fp))
+        assert evidence is not None
+        assert result["status"] == "imported"
+
+    def test_missing_file_fails(self, tmp_path):
+        evidence, result = import_claude_runtime_evidence_from_json(str(tmp_path / "nope.json"))
+        assert evidence is None
+        assert result["status"] == "failed"
+
+    def test_malformed_json_fails(self, tmp_path):
+        fp = tmp_path / "bad.json"
+        fp.write_text("not json")
+        evidence, result = import_claude_runtime_evidence_from_json(str(fp))
+        assert evidence is None
+
+    def test_secret_value_blocked(self, tmp_path):
+        import json as _j
+        fp = tmp_path / "secret.json"
+        data = {
+            "runtime_evidence_id": "re-sec",
+            "backend_id": "claude",
+            "backend_type": "claude_cli",
+            "runtime_profile": "claude_cli",
+            "command_identity": "claude",
+            "declared_command_path": "/usr/local/bin/claude",
+            "something": "sk-ant-secret-key-12345",
+        }
+        fp.write_text(_j.dumps(data))
+        evidence, result = import_claude_runtime_evidence_from_json(str(fp))
+        assert evidence is None
+        assert "secret" in result["error"].lower()
+
+    def test_env_value_in_json_blocked(self, tmp_path):
+        import json as _j
+        fp = tmp_path / "env.json"
+        data = {
+            "runtime_evidence_id": "re-env",
+            "backend_id": "claude",
+            "ANTHROPIC_API_KEY": "sk-ant-real-secret",
+        }
+        fp.write_text(_j.dumps(data))
+        evidence, result = import_claude_runtime_evidence_from_json(str(fp))
+        assert evidence is None
+
+    def test_scan_for_secrets_detects_patterns(self):
+        findings = _scan_for_secrets({"key": "sk-ant-abc123"})
+        assert len(findings) >= 1
+        findings2 = _scan_for_secrets({"key": "clean_value"})
+        assert len(findings2) == 0
+
+    def test_import_persists_and_latest_updated(self, tmp_path):
+        import os, json as _j
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            fp = tmp_path / "ev.json"
+            data = {
+                "runtime_evidence_id": "re-persist",
+                "backend_id": "claude",
+                "backend_type": "claude_cli",
+                "runtime_profile": "claude_cli",
+                "command_identity": "claude",
+                "declared_command_path": "/usr/local/bin/claude",
+                "bypass_permissions_state": "off",
+                "bypass_permissions_evidence": "ok",
+                "evidence_source": "operator_declared",
+                "timeout_seconds": 120,
+                "audit_path": "/tmp/audit.json",
+                "output_quarantine_path": "/tmp/output.md",
+            }
+            fp.write_text(_j.dumps(data))
+            evidence, result = import_claude_runtime_evidence_from_json(str(fp))
+            assert evidence is not None
+            persist_claude_runtime_evidence(evidence)
+            loaded = load_latest_claude_runtime_evidence()
+            assert loaded is not None
+            assert loaded.runtime_evidence_id == "re-persist"
+        finally:
+            os.chdir(orig)
+
+
+class Test95DImportCLI:
+    """CLI import command."""
+
+    def test_import_valid_json_cli(self, tmp_path):
+        import subprocess, sys, json as _j
+        fp = tmp_path / "ev.json"
+        _j.dump({
+            "runtime_evidence_id": "re-cli",
+            "backend_id": "claude",
+            "backend_type": "claude_cli",
+            "runtime_profile": "claude_cli",
+            "command_identity": "claude",
+            "declared_command_path": "/usr/local/bin/claude",
+            "bypass_permissions_state": "off",
+            "bypass_permissions_evidence": "ok",
+            "evidence_source": "operator_declared",
+            "timeout_seconds": 120,
+            "audit_path": "/tmp/audit.json",
+            "output_quarantine_path": "/tmp/output.md",
+        }, fp.open("w"))
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "runtime-evidence",
+             "import", "--from-json", str(fp)],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode == 0
+        assert "imported" in r.stdout.lower()
+
+    def test_import_missing_from_json_fails(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "runtime-evidence",
+             "import"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_import_secret_blocked_cli(self, tmp_path):
+        import subprocess, sys, json as _j
+        fp = tmp_path / "sec.json"
+        _j.dump({"runtime_evidence_id": "re-sec", "token": "sk-ant-bad"}, fp.open("w"))
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "runtime-evidence",
+             "import", "--from-json", str(fp)],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0

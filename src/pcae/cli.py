@@ -462,6 +462,7 @@ from pcae.commands.backend import (
     run_backend_adapter_dry_run_verify,
     run_backend_adapter_runtime_evidence_show,
     run_backend_adapter_runtime_evidence_verify,
+    run_backend_adapter_runtime_evidence_import,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4954,6 +4955,12 @@ def build_parser() -> argparse.ArgumentParser:
     re_verify.add_argument("--latest", action="store_true", default=True)
     re_verify.add_argument("--json", action="store_true")
     re_verify.set_defaults(handler=run_backend_adapter_runtime_evidence_verify)
+
+    # ── Phase 95D: import ──────────────────────────────────────────────
+    re_import = adapter_re_sub.add_parser("import", help="Import runtime evidence from JSON.")
+    re_import.add_argument("--from-json", required=True, help="Path to JSON evidence file.")
+    re_import.add_argument("--json", action="store_true")
+    re_import.set_defaults(handler=run_backend_adapter_runtime_evidence_import)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

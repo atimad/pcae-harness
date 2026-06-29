@@ -5492,3 +5492,84 @@ def load_latest_claude_runtime_evidence() -> ClaudeRuntimeEvidence | None:
         return ClaudeRuntimeEvidence.from_dict(data) if isinstance(data, dict) and data else None
     except Exception:
         return None
+
+
+# ── Phase 95D: secret detection helper ─────────────────────────────────
+
+_SECRET_VALUE_PATTERNS: list[str] = [
+    "sk-ant-", "sk-", "Bearer ", "API_KEY=", "TOKEN=", "PASSWORD=",
+    "--api-key ", "--token ", "--password ",
+]
+
+
+def _scan_for_secrets(data: dict | list | str | Any) -> list[str]:
+    """Recursively scan a JSON-serializable structure for secret-like values.
+
+    Returns list of paths where secrets were found. Empty list = safe.
+    Never prints the actual values.
+    """
+    findings: list[str] = []
+    if isinstance(data, str):
+        lower = data.lower()
+        for pat in _SECRET_VALUE_PATTERNS:
+            if pat.lower() in lower:
+                findings.append(f"secret_pattern_detected")
+                break
+    elif isinstance(data, dict):
+        for k, v in data.items():
+            if any(p.lower() in k.lower() for p in ("token", "password", "api_key", "secret")):
+                if isinstance(v, str) and len(v) > 8:
+                    findings.append(f"secret_like_value_in_key:{k}")
+            for f in _scan_for_secrets(v):
+                findings.append(f"{k}.{f}" if "." not in f else f"{k}/{f}")
+    elif isinstance(data, list):
+        for i, item in enumerate(data):
+            for f in _scan_for_secrets(item):
+                findings.append(f"[{i}]{f}")
+    return findings
+
+
+def import_claude_runtime_evidence_from_json(json_path: str) -> tuple[
+    "ClaudeRuntimeEvidence | None", dict
+]:
+    """Import runtime evidence from an explicit JSON file.
+
+    Validates JSON shape, constructs ClaudeRuntimeEvidence, scans for
+    secrets, validates model, computes digest. Returns (evidence, result).
+    Never inspects live runtime, never executes commands, never calls network.
+    """
+    from pathlib import Path as _P
+    p = _P(json_path)
+    if not p.is_file():
+        return None, {"status": "failed", "error": f"File not found: {json_path}"}
+
+    try:
+        raw_data = _json.loads(p.read_text())
+    except Exception as exc:
+        return None, {"status": "failed", "error": f"Malformed JSON: {exc}"}
+
+    if not isinstance(raw_data, dict):
+        return None, {"status": "failed", "error": "JSON root must be a dict"}
+
+    # Scan for secrets before constructing model
+    secret_findings = _scan_for_secrets(raw_data)
+    if secret_findings:
+        return None, {"status": "blocked", "error": "secret values detected in import",
+                       "details": secret_findings[:3]}
+
+    try:
+        evidence = ClaudeRuntimeEvidence.from_dict(raw_data)
+    except Exception as exc:
+        return None, {"status": "failed", "error": f"Model construction failed: {exc}"}
+
+    # Validate
+    validation = validate_claude_runtime_evidence(evidence)
+    if not validation["valid"]:
+        return None, {"status": "blocked", "error": "validation failed",
+                       "hard_blocks": validation["hard_blocks"],
+                       "missing_evidence": validation["missing_evidence"]}
+
+    # Compute digest
+    evidence.record_digest = evidence.compute_digest()
+
+    return evidence, {"status": "imported", "runtime_evidence_id": evidence.runtime_evidence_id}
