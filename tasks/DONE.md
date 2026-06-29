@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 92D.4 — Finalization Notification Dispatch Visibility and Runtime Env Loading (20260629-92d-4-finalization-notification-dispatch-visibility)
 - 92D.3 — Phase Report Freshness and Telegram Attachment Repair (20260629-92d-3-phase-report-freshness-and-telegram-attachment-repair)
 - 92D.2 — Telegram Payload Compatibility Repair (20260629-0821-phase-92d-2-telegram-payload-compatibility-repair)
 - 93B — Narrow Shell Gate Prototype (20260629-0730-phase-93b-narrow-shell-gate-prototype)

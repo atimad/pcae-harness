@@ -87,9 +87,20 @@ def run_notify_status(args: argparse.Namespace) -> int:
         print(f"    Possible:             {data['external_network_possible']}")
         print(f"    Active by default:    {data['external_network_active_by_default']}")
         print()
-        print("  Telegram is available but disabled unless configured.")
-        print("  Auto finalization hook creates reports; notify dispatch is opt-in.")
-        print("  Set PCAE_NOTIFY_ENABLED=1 to enable notification dispatch.")
+        # Context-sensitive status text
+        if tg_active and notify_enabled:
+            print("  ✅ Telegram is configured, enabled, and ready for outbound delivery.")
+            print("  Notifications will dispatch on pcae phase complete when PCAE_NOTIFY_ENABLED=1.")
+        elif tg_configured and not tg_enabled:
+            print("  Telegram is configured but disabled (PCAE_TELEGRAM_ENABLED not set).")
+            print("  Set PCAE_TELEGRAM_ENABLED=1 to enable Telegram outbound delivery.")
+        elif notify_enabled and not tg_configured:
+            print("  Notifications are enabled but Telegram is not configured.")
+            print("  Set PCAE_TELEGRAM_BOT_TOKEN and PCAE_TELEGRAM_CHAT_ID.")
+        else:
+            print("  Telegram is available but disabled unless configured.")
+            print("  Auto finalization hook creates reports; notify dispatch is opt-in.")
+            print("  Set PCAE_NOTIFY_ENABLED=1 to enable notification dispatch.")
 
     return 0
 

@@ -85,12 +85,14 @@ def _finalize_report_and_notify(summary: str) -> None:
 
     notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
 
+    # Only pass files_changed when we have a positive count.
+    # -1 means the range was empty (pushed) — show "not captured".
     fin = finalize_phase_report(
         phase_id=phase_id,
         phase_name=phase_name,
         status="completed",
         summary=summary,
-        files_changed=files_changed,
+        files_changed=files_changed if files_changed > 0 else 0,
         commits=commits,
         pushed_status=pushed_status,
         origin_main_head_count=origin_count,
@@ -110,22 +112,72 @@ def _finalize_report_and_notify(summary: str) -> None:
     if json_path:
         print(f"  JSON:     {json_path}")
 
+    # ── Notification dispatch result ──────────────────────────────────────
+    print()
     if fin.get("notification_skipped"):
-        if not notify_enabled:
-            print("Notifications: skipped (disabled — set PCAE_NOTIFY_ENABLED=1)")
-        else:
-            print("Notifications: skipped (no sinks configured)")
+        skip_reason = _notification_skip_reason(notify_enabled)
+        print(f"Notification dispatch: skipped")
+        print(f"  Reason: {skip_reason}")
         return
 
     nresults = fin.get("notification_results") or []
+    attempted_sinks = [r.sink_name for r in nresults]
+    all_ok = all(r.success for r in nresults)
+
+    if all_ok:
+        print(f"Notification dispatch: sent")
+    else:
+        print(f"Notification dispatch: failed")
+
+    print(f"  Sinks attempted:  {', '.join(attempted_sinks) if attempted_sinks else 'none'}")
+    if md_path:
+        print(f"  Report sent:      {md_path}")
+
     for r in nresults:
         status = "OK" if r.success else "FAILED"
-        print(f"  Notify [{r.sink_name}]: {status} — {r.message}")
+        print(f"  [{r.sink_name}]: {status} — {r.message}")
         if r.error:
-            print(f"    Error: {r.error}")
+            # Redact potential secrets from error output
+            safe_error = _redact_error(r.error)
+            print(f"    Error: {safe_error}")
 
     if fin.get("notification_error"):
-        print(f"Notifications: ERROR — {fin['notification_error']}")
+        safe_err = _redact_error(fin["notification_error"])
+        print(f"  Dispatch error: {safe_err}")
+
+
+def _notification_skip_reason(notify_enabled: bool) -> str:
+    """Return a human-readable reason why notification dispatch was skipped."""
+    import os
+    if not notify_enabled:
+        return "PCAE_NOTIFY_ENABLED is not set to 1/true/yes"
+    tg_token = os.environ.get("PCAE_TELEGRAM_BOT_TOKEN", "")
+    tg_chat_id = os.environ.get("PCAE_TELEGRAM_CHAT_ID", "")
+    tg_enabled = os.environ.get("PCAE_TELEGRAM_ENABLED", "").lower() in ("1", "true", "yes")
+    sinks_raw = os.environ.get("PCAE_NOTIFY_SINKS", "")
+    sinks = [s.strip() for s in sinks_raw.split(",") if s.strip()]
+    if not sinks:
+        return "PCAE_NOTIFY_SINKS is empty (no sinks configured)"
+    if "telegram" in sinks:
+        if not tg_token or not tg_chat_id:
+            return "Telegram sink configured but token or chat ID missing"
+        if not tg_enabled:
+            return "Telegram sink configured but PCAE_TELEGRAM_ENABLED is not set"
+    return "no sinks configured or enabled"
+
+
+def _redact_error(error: str) -> str:
+    """Redact potential secrets (tokens, chat IDs) from error strings."""
+    import os
+    import re
+    safe = error
+    token = os.environ.get("PCAE_TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.environ.get("PCAE_TELEGRAM_CHAT_ID", "")
+    if token and len(token) > 8:
+        safe = safe.replace(token, "[REDACTED_TOKEN]")
+    if chat_id:
+        safe = safe.replace(chat_id, "[REDACTED_CHAT_ID]")
+    return safe
 
 
 def _gather_commits() -> list[str]:
@@ -144,9 +196,22 @@ def _gather_commits() -> list[str]:
 
 
 def _gather_files_changed() -> int:
-    """Count files changed since origin/main."""
+    """Count files changed since origin/main.
+
+    Returns -1 when the origin/main..HEAD range is empty (pushed), indicating
+    the file count cannot be determined.  The caller should treat -1 as
+    "not captured" to avoid misleading zeroes.
+    """
     import subprocess
     try:
+        # First check if we have any unpushed commits
+        ahead = subprocess.run(
+            ["git", "rev-list", "--count", "origin/main..HEAD"],
+            capture_output=True, text=True, timeout=10,
+        )
+        if ahead.returncode == 0 and int(ahead.stdout.strip() or "0") == 0:
+            return -1  # pushed — range empty, cannot determine
+
         result = subprocess.run(
             ["git", "diff", "--name-only", "origin/main..HEAD"],
             capture_output=True, text=True, timeout=10,
@@ -155,7 +220,7 @@ def _gather_files_changed() -> int:
             return len([f for f in result.stdout.strip().splitlines() if f])
     except Exception:
         pass
-    return 0
+    return -1
 
 
 def _gather_pushed_status() -> str:

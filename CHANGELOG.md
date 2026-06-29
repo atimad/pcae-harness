@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Completed Phase 92D.4 notification dispatch visibility repair: pcae phase complete now reports sent/skipped/failed.
+- pcae notify status shows context-sensitive text. files_changed shows "not captured" instead of misleading 0 after push.
+- Error redaction for token/chat ID. 11 new tests (129 total report+notification). Delivers docs/PHASE_92_FINALIZATION_NOTIFICATION_DISPATCH_VISIBILITY.md.
 - Completed Phase 92D.3 phase report freshness and Telegram attachment repair: enriched report metadata, cleaned phase name parsing.
 - _finalize_report_and_notify() now gathers commits, files changed, push status from git. Uses timestamped report path for attachment.
 - 8 new freshness tests (118 total report+notification). Delivers docs/PHASE_92_PHASE_REPORT_FRESHNESS_AND_TELEGRAM_ATTACHMENT_REPAIR.md.

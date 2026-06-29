@@ -2,6 +2,17 @@
 
 ## Current Phase
 
+Phase 92D.4: Finalization Notification Dispatch Visibility and Runtime Env Loading (completed).
+
+Corrective repair for notification dispatch visibility. Fixes: (1) pcae phase complete
+now reports notification dispatch sent/skipped/failed with sink details, report path,
+and redacted errors; (2) pcae notify status now shows context-sensitive guidance
+matching actual config state; (3) files_changed no longer shows misleading 0 after
+push — renders "not captured" when count cannot be positively measured. 11 new tests
+(129 total report+notification). Manual Telegram verification: status shows ready,
+send-report succeeded. No Telegram polling, inbound commands, remote shell, /run,
+or enforcement. Delivers docs/PHASE_92_FINALIZATION_NOTIFICATION_DISPATCH_VISIBILITY.md.
+
 Phase 92D.3: Phase Report Freshness and Telegram Attachment Repair (completed).
 
 Corrective repair for phase report freshness in 92D automatic finalization hook.

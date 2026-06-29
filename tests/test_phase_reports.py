@@ -536,3 +536,107 @@ class TestFinalizePhaseReportCurrentPhase:
             assert report.phase_id == "92D.3-t3"
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 92D.4 — Notification dispatch visibility and files_changed repair
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestFilesChangedNotCaptured:
+    """Verify files_changed=0 renders as 'not captured' not misleading zero."""
+
+    def test_files_changed_zero_shows_not_captured(self):
+        r = make_phase_report(
+            phase_id="92D.4", phase_name="Test", status="completed",
+            summary="Done.", files_changed=0, commits=["abc123"],
+        )
+        md = r.render_markdown()
+        assert "**Files changed:** not captured" in md, \
+            "files_changed=0 should show 'not captured' even with commits present"
+
+    def test_files_changed_positive_shows_number(self):
+        r = make_phase_report(
+            phase_id="92D.4", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, commits=["abc123"],
+        )
+        md = r.render_markdown()
+        assert "**Files changed:** 5" in md
+        assert "**Files changed:** not captured" not in md
+
+    def test_files_changed_zero_no_commits_shows_not_captured(self):
+        r = make_phase_report(
+            phase_id="92D.4", phase_name="Test", status="completed",
+            summary="Done.", files_changed=0,
+        )
+        md = r.render_markdown()
+        assert "**Files changed:** not captured" in md
+
+
+class TestFinalizationNotificationResult:
+    """Verify finalize_phase_report returns correct notification metadata."""
+
+    def test_notification_skipped_when_disabled(self):
+        import os
+        with tempfile.TemporaryDirectory() as td:
+            old_val = os.environ.pop("PCAE_NOTIFY_ENABLED", None)
+            try:
+                fin = finalize_phase_report(
+                    phase_id="92D.4-t1", phase_name="Skip Test",
+                    status="completed", summary="Skipping.",
+                    reports_dir=Path(td),
+                )
+                assert fin["notification_skipped"] is True
+            finally:
+                if old_val is not None:
+                    os.environ["PCAE_NOTIFY_ENABLED"] = old_val
+
+    def test_notification_failure_non_fatal(self):
+        """Notification failure should not affect report creation."""
+        import os
+        with tempfile.TemporaryDirectory() as td:
+            old_notify = os.environ.get("PCAE_NOTIFY_ENABLED")
+            old_sinks = os.environ.get("PCAE_NOTIFY_SINKS")
+            os.environ["PCAE_NOTIFY_ENABLED"] = "1"
+            os.environ["PCAE_NOTIFY_SINKS"] = "filesystem"
+            try:
+                fin = finalize_phase_report(
+                    phase_id="92D.4-t2", phase_name="NonFatal Test",
+                    status="completed", summary="Should complete.",
+                    reports_dir=Path(td),
+                )
+                assert fin["report"] is not None
+                assert fin["report_error"] is None
+                paths = fin["paths"]
+                assert Path(paths["markdown"]).exists()
+                # Notification may have succeeded or failed — but report exists
+            finally:
+                if old_notify is not None:
+                    os.environ["PCAE_NOTIFY_ENABLED"] = old_notify
+                else:
+                    os.environ.pop("PCAE_NOTIFY_ENABLED", None)
+                if old_sinks is not None:
+                    os.environ["PCAE_NOTIFY_SINKS"] = old_sinks
+                else:
+                    os.environ.pop("PCAE_NOTIFY_SINKS", None)
+
+    def test_notification_result_includes_paths(self):
+        import os
+        with tempfile.TemporaryDirectory() as td:
+            old_notify = os.environ.get("PCAE_NOTIFY_ENABLED")
+            os.environ["PCAE_NOTIFY_ENABLED"] = "1"
+            os.environ["PCAE_NOTIFY_SINKS"] = "noop"
+            try:
+                fin = finalize_phase_report(
+                    phase_id="92D.4-t3", phase_name="Path Test",
+                    status="completed", summary="Paths check.",
+                    reports_dir=Path(td),
+                )
+                assert fin["notification_skipped"] is False
+                assert fin["paths"]["markdown"]
+                assert fin["paths"]["latest_markdown"]
+            finally:
+                if old_notify is not None:
+                    os.environ["PCAE_NOTIFY_ENABLED"] = old_notify
+                else:
+                    os.environ.pop("PCAE_NOTIFY_ENABLED", None)
+                os.environ.pop("PCAE_NOTIFY_SINKS", None)
+

@@ -125,8 +125,10 @@ class PhaseReport:
         if self.completed_at:
             lines.append(f"- **Completed:** {self.completed_at}")
 
-        # Files changed — show "not captured" instead of misleading 0
-        if self.files_changed > 0 or self.commits:
+        # Files changed — show "not captured" instead of misleading 0.
+        # Only show a number when files_changed > 0 (positively measured).
+        # A zero with commits present is still misleading after push.
+        if self.files_changed > 0:
             lines.append(f"- **Files changed:** {self.files_changed}")
         else:
             lines.append(f"- **Files changed:** not captured")
