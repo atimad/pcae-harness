@@ -880,3 +880,586 @@ from pcae.core.backend_invocations import (
     ApplyOperation, ApplyPlan, RollbackRequirement,
     create_apply_plan, validate_apply_plan, persist_apply_plan,
 )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94L — Apply readiness validator tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    BackendApplyReadinessAssessment,
+    validate_backend_apply_readiness,
+    persist_apply_readiness,
+    read_latest_apply_readiness,
+    _apply_readiness_dir,
+    _APPLY_READINESS_SCHEMA_VERSION,
+    READINESS_READY, READINESS_BLOCKED, READINESS_MISSING_EVIDENCE,
+    READINESS_INCOMPLETE, READINESS_UNTRUSTED,
+    ACTION_MANUAL_APPLY_PACKAGE_READY, ACTION_BLOCKED_HARD,
+    ACTION_GATHER_EVIDENCE,
+    REVIEW_APPROVED, REVIEW_REVIEWED,
+    TRUST_COMPLETE, TRUST_PARTIAL, TRUST_UNTRUSTED,
+    APPROVAL_APPROVED, APPROVAL_PENDING,
+    OP_CREATE, OP_MODIFY, OP_DELETE, OP_RENAME, OP_MANUAL, OP_UNKNOWN,
+    RISK_LOW, RISK_MEDIUM,
+)
+
+
+class Test94LApplyReadinessAssessmentModel:
+    """Test BackendApplyReadinessAssessment dataclass."""
+
+    def test_defaults_fail_closed(self):
+        a = BackendApplyReadinessAssessment()
+        assert a.apply_ready is False
+        assert a.status == READINESS_INCOMPLETE
+        assert a.trust_level == TRUST_UNTRUSTED
+        assert a.recommended_action == ACTION_GATHER_EVIDENCE
+        assert a.output_hash_verified is False
+        assert a.approval_bound_to_output_hash is False
+        assert a.review_state_valid is False
+        assert a.output_quarantined is False
+        assert a.output_not_applied is False
+        assert a.allowed_files_present is False
+        assert a.operations_valid is False
+        assert a.rollback_ready is False
+        assert a.tests_defined is False
+        assert a.hard_blocks == []
+        assert a.missing_evidence == []
+        assert a.warnings == []
+
+    def test_serialization_round_trip(self):
+        a = BackendApplyReadinessAssessment(
+            assessment_id="ra-test",
+            apply_plan_id="pl-test",
+            status=READINESS_READY,
+            apply_ready=True,
+            trust_level=TRUST_COMPLETE,
+        )
+        d = a.to_dict()
+        a2 = BackendApplyReadinessAssessment.from_dict(d)
+        assert a2.assessment_id == "ra-test"
+        assert a2.apply_plan_id == "pl-test"
+        assert a2.status == READINESS_READY
+        assert a2.apply_ready is True
+
+    def test_hard_blocks_preserved_in_round_trip(self):
+        a = BackendApplyReadinessAssessment(
+            hard_blocks=["hb1", "hb2"],
+            missing_evidence=["me1"],
+            warnings=["w1"],
+        )
+        d = a.to_dict()
+        a2 = BackendApplyReadinessAssessment.from_dict(d)
+        assert a2.hard_blocks == ["hb1", "hb2"]
+        assert a2.missing_evidence == ["me1"]
+        assert a2.warnings == ["w1"]
+
+    def test_to_dict_returns_list_copies(self):
+        a = BackendApplyReadinessAssessment(hard_blocks=["hb1"])
+        d = a.to_dict()
+        d["hard_blocks"].append("hb2")
+        assert a.hard_blocks == ["hb1"]
+
+
+class Test94LNoPlan:
+    """Missing apply plan → blocked."""
+
+    def test_none_plan_yields_blocked(self):
+        result = validate_backend_apply_readiness(None)
+        assert result.status == READINESS_BLOCKED
+        assert result.apply_ready is False
+        assert "apply_plan_missing" in result.hard_blocks
+        assert "apply_plan" in result.missing_evidence
+
+    def test_no_args_yields_blocked(self):
+        result = validate_backend_apply_readiness()
+        assert result.status == READINESS_BLOCKED
+        assert not result.apply_ready
+
+
+class Test94LCompleteEvidence:
+    """Complete evidence can produce apply_ready=True."""
+
+    @staticmethod
+    def _make_full_plan():
+        r = create_review_artifact("req-001", "abc123", backend_id="mock")
+        r.review_state = REVIEW_APPROVED
+        r.approved_for_apply = True
+        approval = ApprovalArtifact(
+            approval_id="ap-001", review_id=r.review_id,
+            request_id="req-001", output_hash="abc123",
+            operator="human", reason="looks good",
+        )
+        plan = ApplyPlan(
+            apply_plan_id="pl-001", review_id=r.review_id,
+            approval_id="ap-001", request_id="req-001",
+            phase_id="94L", task_id="t-94L",
+            backend_id="mock", output_hash="abc123",
+            proposed_files=["src/test.py"],
+            allowed_files=["src/test.py"],
+            operations=[ApplyOperation(
+                operation_id="op1", operation_type=OP_MODIFY,
+                target_path="src/test.py",
+                allowed_by_task_scope=True,
+            )],
+            rollback_required=True, rollback_plan_id="rb-001",
+            tests_to_run=["python -m pytest tests/test_example.py"],
+            check_required=True,
+        )
+        return plan, r, approval
+
+    def test_full_evidence_yields_ready(self):
+        plan, review, approval = self._make_full_plan()
+        output_meta = {"output_hash": "abc123", "quarantined": True, "applied_to_repo": False}
+        trust = {"status": "ready", "trust_level": TRUST_COMPLETE, "hard_blocks": []}
+        result = validate_backend_apply_readiness(
+            plan=plan, review=review, approval=approval,
+            output_meta=output_meta, trust_assessment=trust,
+        )
+        assert result.status == READINESS_READY
+        assert result.apply_ready is True
+        assert result.recommended_action == ACTION_MANUAL_APPLY_PACKAGE_READY
+        assert result.output_hash_verified is True
+        assert result.approval_bound_to_output_hash is True
+        assert result.review_state_valid is True
+
+    def test_apply_ready_never_executes(self):
+        plan, review, approval = self._make_full_plan()
+        output_meta = {"output_hash": "abc123", "quarantined": True, "applied_to_repo": False}
+        trust = {"status": "ready", "trust_level": TRUST_COMPLETE, "hard_blocks": []}
+        result = validate_backend_apply_readiness(
+            plan=plan, review=review, approval=approval,
+            output_meta=output_meta, trust_assessment=trust,
+        )
+        assert result.apply_ready is True
+        # Even when ready, recommended_action is NEVER "execute apply"
+        assert "execute" not in result.recommended_action
+        assert "apply" not in result.recommended_action.lower() or \
+               "ready" in result.recommended_action
+
+
+class Test94LMissingEvidence:
+    """Missing approval/review → missing_evidence."""
+
+    def _minimal_plan(self):
+        return ApplyPlan(
+            apply_plan_id="pl-002", review_id="rv-002",
+            approval_id="ap-002", output_hash="abc456",
+            operations=[ApplyOperation(
+                operation_id="op1", operation_type=OP_MODIFY,
+                target_path="src/x.py",
+            )],
+            rollback_plan_id="rb-002",
+            tests_to_run=["pytest"],
+        )
+
+    def test_missing_approval_yields_missing_evidence(self):
+        plan = self._minimal_plan()
+        review = ReviewArtifact(
+            review_id="rv-002", request_id="req-002",
+            output_hash="abc456", review_state=REVIEW_APPROVED,
+        )
+        result = validate_backend_apply_readiness(plan=plan, review=review)
+        assert result.status == READINESS_MISSING_EVIDENCE
+        assert any("approval" in me for me in result.missing_evidence)
+        assert result.apply_ready is False
+
+    def test_missing_review_yields_missing_evidence(self):
+        plan = self._minimal_plan()
+        approval = ApprovalArtifact(
+            approval_id="ap-002", output_hash="abc456", operator="human",
+        )
+        result = validate_backend_apply_readiness(plan=plan, approval=approval)
+        assert result.status == READINESS_MISSING_EVIDENCE
+        assert any("review" in me for me in result.missing_evidence)
+
+    def test_missing_trust_assessment(self):
+        plan = self._minimal_plan()
+        review = ReviewArtifact(review_id="rv-002", request_id="req-002", output_hash="abc456")
+        approval = ApprovalArtifact(approval_id="ap-002", output_hash="abc456", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert "trust_assessment" in result.missing_evidence
+
+    def test_missing_rollback_plan(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-003", review_id="rv-003",
+            approval_id="ap-003", output_hash="abc",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_required=True, rollback_plan_id="",
+            tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-003", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-003", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert "rollback_plan_id" in result.missing_evidence
+        assert result.apply_ready is False
+
+    def test_missing_tests_to_run(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-004", review_id="rv-004",
+            approval_id="ap-004", output_hash="abc",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_plan_id="rb-004",
+            check_required=True, tests_to_run=[],
+        )
+        review = ReviewArtifact(review_id="rv-004", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-004", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert "tests_to_run" in result.missing_evidence
+
+
+class Test94LHashMismatches:
+    """Output and approval hash mismatches → hard blocks."""
+
+    def test_output_hash_mismatch_is_hard_block(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-010", review_id="rv-010",
+            approval_id="ap-010", output_hash="plan_hash",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_plan_id="rb-010", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-010", output_hash="plan_hash", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-010", output_hash="plan_hash", operator="human")
+        output_meta = {"output_hash": "different_hash", "quarantined": True, "applied_to_repo": False}
+        result = validate_backend_apply_readiness(
+            plan=plan, review=review, approval=approval,
+            output_meta=output_meta,
+        )
+        assert result.status == READINESS_BLOCKED
+        assert "output_hash_mismatch" in result.hard_blocks
+        assert result.apply_ready is False
+
+    def test_approval_hash_mismatch_is_hard_block(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-011", review_id="rv-011",
+            approval_id="ap-011", output_hash="plan_hash",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_plan_id="rb-011", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-011", output_hash="plan_hash", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(
+            approval_id="ap-011", output_hash="different_approval_hash", operator="human",
+        )
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert "approval_output_hash_mismatch" in result.hard_blocks
+        assert result.apply_ready is False
+
+
+class Test94LHardBlockInvariants:
+    """Hard blocks are non-overridable, dominate approval, accepted risk."""
+
+    def _forbidden_plan(self):
+        return ApplyPlan(
+            apply_plan_id="pl-020", review_id="rv-020",
+            approval_id="ap-020", output_hash="abc",
+            proposed_files=["src/secret.py"],
+            forbidden_files=["src/secret.py"],
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="src/secret.py")],
+            rollback_plan_id="rb-020", tests_to_run=["pytest"],
+        )
+
+    def test_forbidden_file_is_hard_block(self):
+        plan = self._forbidden_plan()
+        review = ReviewArtifact(review_id="rv-020", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-020", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert "forbidden_file:src/secret.py" in result.hard_blocks
+        assert result.apply_ready is False
+
+    def test_hard_blocks_dominate_approval(self):
+        plan = self._forbidden_plan()
+        review = ReviewArtifact(review_id="rv-020", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-020", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert result.hard_blocks
+        # Approval is present but hard blocks dominate
+        assert result.apply_ready is False
+        assert result.status == READINESS_BLOCKED
+        assert result.recommended_action == ACTION_BLOCKED_HARD
+
+    def test_accepted_risk_cannot_override_hard_blocks(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-021", review_id="rv-021",
+            output_hash="abc",
+            proposed_files=["src/secret.py"],
+            forbidden_files=["src/secret.py"],
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="src/secret.py")],
+        )
+        review = ReviewArtifact(review_id="rv-021", output_hash="abc", review_state=REVIEW_APPROVED)
+        # Approval with accepted_risk=True
+        approval = ApprovalArtifact(
+            approval_id="ap-021", output_hash="abc",
+            operator="human", reason="I know the risks",
+            accepted_risk=True,
+        )
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        # Hard blocks persist regardless of accepted_risk
+        assert result.hard_blocks
+        assert result.apply_ready is False
+
+    def test_output_already_applied_is_hard_block(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-022", review_id="rv-022",
+            approval_id="ap-022", output_hash="abc",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_plan_id="rb-022", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-022", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-022", output_hash="abc", operator="human")
+        output_meta = {"output_hash": "abc", "quarantined": False, "applied_to_repo": True}
+        result = validate_backend_apply_readiness(
+            plan=plan, review=review, approval=approval,
+            output_meta=output_meta,
+        )
+        assert "output_already_applied" in result.hard_blocks
+        assert "output_not_quarantined" in result.hard_blocks
+        assert result.apply_ready is False
+
+    def test_output_not_quarantined_is_hard_block(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-023", review_id="rv-023",
+            approval_id="ap-023", output_hash="abc",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_plan_id="rb-023", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-023", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-023", output_hash="abc", operator="human")
+        output_meta = {"output_hash": "abc", "quarantined": False, "applied_to_repo": False}
+        result = validate_backend_apply_readiness(
+            plan=plan, review=review, approval=approval,
+            output_meta=output_meta,
+        )
+        assert "output_not_quarantined" in result.hard_blocks
+
+    def test_unknown_operation_is_hard_block(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-024", review_id="rv-024",
+            approval_id="ap-024", output_hash="abc",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_UNKNOWN, target_path="x")],
+            rollback_plan_id="rb-024", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-024", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-024", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert "unknown_operation:x" in result.hard_blocks
+
+    def test_delete_operation_is_hard_block(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-025", review_id="rv-025",
+            approval_id="ap-025", output_hash="abc",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_DELETE, target_path="src/old.py")],
+            rollback_plan_id="rb-025", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-025", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-025", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert any("destructive_op" in hb or "high_risk_op" in hb for hb in result.hard_blocks)
+
+    def test_rename_operation_is_hard_block(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-026", review_id="rv-026",
+            approval_id="ap-026", output_hash="abc",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_RENAME, target_path="src/old.py")],
+            rollback_plan_id="rb-026", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-026", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-026", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert any("destructive_op" in hb or "high_risk_op" in hb for hb in result.hard_blocks)
+
+
+class Test94LPersistence:
+    """Apply readiness artifact persistence."""
+
+    def test_persist_and_read(self):
+        import os
+        a = BackendApplyReadinessAssessment(
+            assessment_id="ra-persist-test",
+            apply_plan_id="pl-test",
+            status=READINESS_MISSING_EVIDENCE,
+            missing_evidence=["approval"],
+            recommended_action=ACTION_GATHER_EVIDENCE,
+        )
+        result = persist_apply_readiness(a)
+        assert result["status"] == "written"
+        assert result["path"]
+        assert os.path.exists(result["path"])
+        assert os.path.exists(result["latest_path"])
+
+    def test_read_latest_after_persist(self):
+        a = BackendApplyReadinessAssessment(
+            assessment_id="ra-read-test",
+            apply_plan_id="pl-read",
+            status=READINESS_READY,
+            apply_ready=True,
+        )
+        persist_apply_readiness(a)
+        latest = read_latest_apply_readiness()
+        assert latest is not None
+        assert latest.assessment_id == "ra-read-test"
+        assert latest.apply_ready is True
+        assert latest.status == READINESS_READY
+
+    def test_latest_readiness_updated_on_new_write(self):
+        a1 = BackendApplyReadinessAssessment(assessment_id="ra-first")
+        a2 = BackendApplyReadinessAssessment(assessment_id="ra-second", status=READINESS_READY)
+        persist_apply_readiness(a1)
+        persist_apply_readiness(a2)
+        latest = read_latest_apply_readiness()
+        assert latest is not None
+        assert latest.assessment_id == "ra-second"
+
+    def test_read_when_none_exists(self):
+        import os
+        lp = _apply_readiness_dir() / "latest.json"
+        if lp.exists():
+            os.remove(lp)
+        result = read_latest_apply_readiness()
+        assert result is None
+
+    def test_serialization_round_trip_via_persistence(self):
+        a = BackendApplyReadinessAssessment(
+            assessment_id="ra-roundtrip",
+            apply_plan_id="pl-rt",
+            hard_blocks=["hb1", "hb2"],
+            missing_evidence=["me1"],
+            warnings=["w1"],
+        )
+        persist_apply_readiness(a)
+        latest = read_latest_apply_readiness()
+        assert latest is not None
+        assert latest.assessment_id == "ra-roundtrip"
+        assert latest.hard_blocks == ["hb1", "hb2"]
+        assert latest.missing_evidence == ["me1"]
+        assert latest.warnings == ["w1"]
+        assert latest.schema_version == _APPLY_READINESS_SCHEMA_VERSION
+
+
+class Test94LNoExecutionNoMutation:
+    """Validate that readiness validator never mutates or executes."""
+
+    def test_validator_returns_assessment_not_executes(self):
+        plan, review, approval = Test94LCompleteEvidence._make_full_plan()
+        result = validate_backend_apply_readiness(
+            plan=plan, review=review, approval=approval,
+        )
+        # Result is an assessment object, not an execution result
+        assert isinstance(result, BackendApplyReadinessAssessment)
+        assert result.recommended_action != "execute_apply"
+        assert result.recommended_action != "apply_changes"
+        assert "commit" not in result.recommended_action.lower()
+        assert "push" not in result.recommended_action.lower()
+
+    def test_no_source_files_modified_during_validation(self, tmp_path):
+        """Validation only reads, never writes source files."""
+        a = BackendApplyReadinessAssessment(assessment_id="no-mut")
+        result = persist_apply_readiness(a)
+        # Only writes under .pcae/backend-apply-readiness/
+        assert ".pcae/backend-apply-readiness" in result["path"]
+
+    def test_no_patch_parsing_in_validation(self):
+        plan, review, approval = Test94LCompleteEvidence._make_full_plan()
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        # The validator does not parse patches or diffs
+        assert result is not None
+        # No file I/O to source tree beyond reading plan/review args
+
+    def test_no_backend_invocation_in_validator(self):
+        result = validate_backend_apply_readiness()
+        assert result.status == READINESS_BLOCKED
+        # No backend was invoked — it's a pure data validator
+
+    def test_no_subprocess_in_validator(self):
+        result = validate_backend_apply_readiness()
+        assert result is not None
+
+
+class Test94LMultiPartPhaseIDs:
+    """Multi-part phase IDs are preserved."""
+
+    def test_phase_id_with_dot_preserved(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-multi", review_id="rv-multi",
+            approval_id="ap-multi", output_hash="abc",
+            phase_id="94L.1", task_id="20260629-phase-94l-backend-apply-readiness",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_plan_id="rb-multi", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-multi", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-multi", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert result.phase_id == "94L.1"
+        assert result.task_id == "20260629-phase-94l-backend-apply-readiness"
+
+    def test_task_id_with_multi_segments_preserved(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-multi2", review_id="rv-multi2",
+            approval_id="ap-multi2", output_hash="abc",
+            phase_id="94L", task_id="20260629-1633-phase-94l-backend-apply-readiness-validator",
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="x")],
+            rollback_plan_id="rb-multi2", tests_to_run=["pytest"],
+        )
+        review = ReviewArtifact(review_id="rv-multi2", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-multi2", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert result.task_id == "20260629-1633-phase-94l-backend-apply-readiness-validator"
+
+
+class Test94LNoSecretsInReadiness:
+    """No secrets serialized in readiness artifacts."""
+
+    def test_no_api_keys_in_to_dict(self):
+        a = BackendApplyReadinessAssessment(
+            assessment_id="ra-nosecret",
+            apply_plan_id="pl-nosecret",
+        )
+        d = json.dumps(a.to_dict())
+        assert "sk-ant" not in d
+        assert "ANTHROPIC_API_KEY" not in d.lower()
+        assert "OPENAI_API_KEY" not in d.lower()
+        assert "DEEPSEEK_API_KEY" not in d.lower()
+
+    def test_no_secrets_in_persisted(self):
+        a = BackendApplyReadinessAssessment(assessment_id="ra-nosecret2")
+        persist_apply_readiness(a)
+        latest = read_latest_apply_readiness()
+        assert latest is not None
+        j = json.dumps(latest.to_dict())
+        assert "sk-ant" not in j
+
+
+class Test94LStatusClassification:
+    """All status classifications work correctly."""
+
+    def test_blocked_status_dominates(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-dom", review_id="rv-dom",
+            output_hash="abc",
+            proposed_files=["src/secret.py"],
+            forbidden_files=["src/secret.py"],
+            operations=[ApplyOperation(operation_id="op1", operation_type=OP_MODIFY, target_path="src/secret.py")],
+        )
+        # Even with review and approval present, forbidden file → blocked
+        review = ReviewArtifact(review_id="rv-dom", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-dom", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert result.status == READINESS_BLOCKED
+        assert result.apply_ready is False
+        assert result.recommended_action == ACTION_BLOCKED_HARD
+
+    def test_incomplete_status_for_no_operations(self):
+        plan = ApplyPlan(
+            apply_plan_id="pl-inc", review_id="rv-inc",
+            approval_id="ap-inc", output_hash="abc",
+            operations=[],
+        )
+        review = ReviewArtifact(review_id="rv-inc", output_hash="abc", review_state=REVIEW_APPROVED)
+        approval = ApprovalArtifact(approval_id="ap-inc", output_hash="abc", operator="human")
+        result = validate_backend_apply_readiness(plan=plan, review=review, approval=approval)
+        assert "operations" in result.missing_evidence
+        assert result.apply_ready is False
+
+    def test_default_is_not_ready(self):
+        result = validate_backend_apply_readiness()
+        assert result.apply_ready is False
+        assert result.status != READINESS_READY

@@ -441,7 +441,8 @@ from pcae.commands.backend_preflight import run_backend_preflight
 from pcae.commands.backend import (
     run_backend_list, run_backend_status, run_backend_plan, run_backend_show,
     run_backend_audit_show, run_backend_audit_list, run_backend_audit_verify,
-    run_backend_readiness,
+    run_backend_readiness, run_backend_apply_readiness_show,
+    run_backend_apply_readiness_validate,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4686,6 +4687,24 @@ def build_parser() -> argparse.ArgumentParser:
     be_readiness.add_argument("--latest", action="store_true", default=True)
     be_readiness.add_argument("--json", action="store_true")
     be_readiness.set_defaults(handler=run_backend_readiness)
+
+    # ── pcae backend apply-readiness (Phase 94L) ────────────────────────
+    be_apply_readiness = backend_sub.add_parser("apply-readiness", help="Validate and show apply readiness assessments.")
+    be_ar_sub = be_apply_readiness.add_subparsers(dest="backend_apply_readiness_command", required=True)
+
+    ar_show = be_ar_sub.add_parser("show", help="Show latest apply readiness assessment.")
+    ar_show.add_argument("--latest", action="store_true", default=True)
+    ar_show.add_argument("--json", action="store_true")
+    ar_show.set_defaults(handler=run_backend_apply_readiness_show)
+
+    ar_validate = be_ar_sub.add_parser("validate", help="Validate an apply plan for readiness.")
+    ar_validate.add_argument("--plan", required=True, help="Path to apply plan JSON.")
+    ar_validate.add_argument("--review", help="Path to review artifact JSON.")
+    ar_validate.add_argument("--approval", help="Path to approval artifact JSON.")
+    ar_validate.add_argument("--output", help="Path to output artifact metadata JSON.")
+    ar_validate.add_argument("--trust", help="Path to trust assessment JSON.")
+    ar_validate.add_argument("--json", action="store_true")
+    ar_validate.set_defaults(handler=run_backend_apply_readiness_validate)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

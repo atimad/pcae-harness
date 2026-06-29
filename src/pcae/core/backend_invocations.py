@@ -1606,3 +1606,392 @@ def persist_apply_plan(plan: ApplyPlan) -> dict:
         return {"status": "written", "path": str(fp), "latest_path": str(lp)}
     except Exception as exc:
         return {"status": "failed", "error": str(exc)}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94L — Apply readiness validator
+# ═══════════════════════════════════════════════════════════════════════════
+
+READINESS_INCOMPLETE = "incomplete"
+READINESS_UNTRUSTED = "untrusted"
+
+_APPLY_READINESS_DIR = ".pcae/backend-apply-readiness"
+_APPLY_READINESS_SCHEMA_VERSION = "1.0"
+
+# Actions — strictly read-only / manual-package, never "execute apply"
+ACTION_MANUAL_APPLY_PACKAGE_READY = "manual_apply_package_ready"
+ACTION_CREATE_MANUAL_APPLY_PACKAGE = "create_manual_apply_package"
+ACTION_BLOCKED_HARD = "blocked_hard"
+ACTION_GATHER_EVIDENCE = "gather_evidence"
+ACTION_NEEDS_HUMAN_REVIEW = "needs_human_review"
+ACTION_UNTRUSTED = "untrusted"
+
+
+@dataclass
+class BackendApplyReadinessAssessment:
+    """Fail-closed readiness assessment for a backend apply plan.
+
+    Evaluates an apply plan against review, approval, output, and trust
+    evidence.  Never executes apply, never mutates files, never invokes
+    backends, never runs subprocess, never calls network.
+
+    Safe defaults: apply_ready=False, all checks start False, hard_blocks
+    dominate, human approval cannot override hard blocks, accepted risk
+    cannot override hard blocks.
+    """
+
+    assessment_id: str = ""
+    apply_plan_id: str = ""
+    review_id: str = ""
+    approval_id: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    status: str = READINESS_INCOMPLETE
+    apply_ready: bool = False
+    trust_level: str = TRUST_UNTRUSTED
+    output_hash_verified: bool = False
+    approval_bound_to_output_hash: bool = False
+    review_state_valid: bool = False
+    output_quarantined: bool = False
+    output_not_applied: bool = False
+    allowed_files_present: bool = False
+    forbidden_files_present: bool = False
+    operations_valid: bool = False
+    rollback_ready: bool = False
+    tests_defined: bool = False
+    check_required: bool = True
+    hard_blocks: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    recommended_action: str = ACTION_GATHER_EVIDENCE
+    created_at_utc: str = ""
+    schema_version: str = _APPLY_READINESS_SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "assessment_id": self.assessment_id,
+            "apply_plan_id": self.apply_plan_id,
+            "review_id": self.review_id,
+            "approval_id": self.approval_id,
+            "request_id": self.request_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "backend_id": self.backend_id,
+            "status": self.status,
+            "apply_ready": self.apply_ready,
+            "trust_level": self.trust_level,
+            "output_hash_verified": self.output_hash_verified,
+            "approval_bound_to_output_hash": self.approval_bound_to_output_hash,
+            "review_state_valid": self.review_state_valid,
+            "output_quarantined": self.output_quarantined,
+            "output_not_applied": self.output_not_applied,
+            "allowed_files_present": self.allowed_files_present,
+            "forbidden_files_present": self.forbidden_files_present,
+            "operations_valid": self.operations_valid,
+            "rollback_ready": self.rollback_ready,
+            "tests_defined": self.tests_defined,
+            "check_required": self.check_required,
+            "hard_blocks": list(self.hard_blocks),
+            "missing_evidence": list(self.missing_evidence),
+            "warnings": list(self.warnings),
+            "recommended_action": self.recommended_action,
+            "created_at_utc": self.created_at_utc,
+            "schema_version": self.schema_version,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "BackendApplyReadinessAssessment":
+        return cls(**{k: v for k, v in data.items()
+                       if k in cls.__dataclass_fields__})
+
+
+def _apply_readiness_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_APPLY_READINESS_DIR)
+
+
+def validate_backend_apply_readiness(
+    plan: ApplyPlan | None = None,
+    *,
+    review: ReviewArtifact | None = None,
+    approval: ApprovalArtifact | None = None,
+    output_meta: dict[str, Any] | None = None,
+    trust_assessment: dict[str, Any] | None = None,
+) -> BackendApplyReadinessAssessment:
+    """Validate backend apply readiness.  Fail-closed — blocks on uncertainty.
+
+    Evaluates an apply plan against review, approval, output hash binding,
+    quarantine, allowed/forbidden files, operation validity, rollback
+    readiness, and test/check requirements.
+
+    Hard blocks cannot be overridden by human approval or accepted risk.
+    Commit/push authorization is never granted.
+
+    Returns BackendApplyReadinessAssessment with apply_ready=True only when
+    all evidence is complete and no hard blocks exist.
+
+    Never executes apply, mutates files, invokes backends, runs subprocess,
+    or calls network.
+    """
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    assessment_id = f"ra-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+    warnings: list[str] = []
+
+    # ── Fail-closed: missing plan ────────────────────────────────────────
+    if plan is None:
+        return BackendApplyReadinessAssessment(
+            assessment_id=assessment_id,
+            status=READINESS_BLOCKED,
+            apply_ready=False,
+            trust_level=TRUST_UNTRUSTED,
+            hard_blocks=["apply_plan_missing"],
+            missing_evidence=["apply_plan"],
+            recommended_action=ACTION_BLOCKED_HARD,
+            created_at_utc=now,
+        )
+
+    # ── Extract plan context ─────────────────────────────────────────────
+    plan_id = plan.apply_plan_id
+    plan_review_id = plan.review_id
+    plan_approval_id = plan.approval_id
+    plan_output_hash = plan.output_hash
+    plan_phase_id = plan.phase_id
+    plan_task_id = plan.task_id
+    plan_backend_id = plan.backend_id
+    plan_request_id = plan.request_id
+
+    # ── 1. Review evidence ───────────────────────────────────────────────
+    review_present = review is not None
+    review_id = review.review_id if review else ""
+    if not review_present and not plan_review_id:
+        missing.append("review_artifact")
+    elif review is not None:
+        if review.review_id != plan_review_id:
+            hard_blocks.append("review_id_mismatch")
+        if review.review_state not in (REVIEW_APPROVED, REVIEW_REVIEWED):
+            missing.append("review_not_approved_or_reviewed")
+    elif plan_review_id:
+        missing.append("review_artifact_not_provided")
+
+    # ── 2. Approval evidence ─────────────────────────────────────────────
+    approval_present = approval is not None
+    approval_id = approval.approval_id if approval else ""
+    if not approval_present and not plan_approval_id:
+        missing.append("approval_artifact")
+    elif approval is not None:
+        if plan_approval_id and approval.approval_id != plan_approval_id:
+            hard_blocks.append("approval_id_mismatch")
+        # Hash binding: approval must bind to the exact output_hash
+        if approval.output_hash and plan_output_hash and approval.output_hash != plan_output_hash:
+            hard_blocks.append("approval_output_hash_mismatch")
+        if approval.hard_blocks_present:
+            hard_blocks.append("approval_has_hard_blocks")
+    elif plan_approval_id:
+        missing.append("approval_artifact_not_provided")
+
+    # ── 3. Output hash verification ──────────────────────────────────────
+    if not plan_output_hash:
+        hard_blocks.append("output_hash_missing")
+    elif output_meta is not None:
+        stored_hash = output_meta.get("output_hash", "")
+        if stored_hash and stored_hash != plan_output_hash:
+            hard_blocks.append("output_hash_mismatch")
+        # Quarantine check
+        quarantined = output_meta.get("quarantined", True)
+        applied = output_meta.get("applied_to_repo", False)
+        if not quarantined:
+            hard_blocks.append("output_not_quarantined")
+        if applied:
+            hard_blocks.append("output_already_applied")
+
+    # ── 4. Trust assessment integration ──────────────────────────────────
+    if trust_assessment is not None:
+        trust_status = trust_assessment.get("status", "")
+        trust_level = trust_assessment.get("trust_level", TRUST_UNTRUSTED)
+        trust_hard_blocks = trust_assessment.get("hard_blocks", [])
+        if trust_hard_blocks:
+            hard_blocks.extend(f"trust:{b}" for b in trust_hard_blocks)
+        if trust_status == ASSESSMENT_BLOCKED:
+            hard_blocks.append("trust_assessment_blocked")
+        elif trust_level == TRUST_UNTRUSTED:
+            hard_blocks.append("trust_level_untrusted")
+    else:
+        missing.append("trust_assessment")
+
+    # ── 5. File scope validation ─────────────────────────────────────────
+    proposed = list(plan.proposed_files)
+    allowed = list(plan.allowed_files)
+    forbidden = list(plan.forbidden_files)
+
+    if forbidden:
+        for f in proposed:
+            if f in forbidden:
+                hard_blocks.append(f"forbidden_file:{f}")
+    if proposed and not allowed:
+        warnings.append("allowed_files_not_defined")
+
+    # ── 6. Operation validation ──────────────────────────────────────────
+    operations = list(plan.operations)
+    if not operations:
+        missing.append("operations")
+    else:
+        for op in operations:
+            op_type = op.operation_type
+            target = op.target_path
+            if op.forbidden:
+                hard_blocks.append(f"forbidden_op:{op_type}:{target}")
+            if op_type in HIGH_RISK_OPS:
+                # delete/rename/unknown → hard block unless explicitly gated
+                hard_blocks.append(f"high_risk_op:{op_type}:{target}")
+            if op_type == OP_UNKNOWN:
+                hard_blocks.append(f"unknown_operation:{target}")
+            if op_type in (OP_DELETE, OP_RENAME):
+                hard_blocks.append(f"destructive_op:{op_type}:{target}")
+
+    # ── 7. Rollback readiness ────────────────────────────────────────────
+    if plan.rollback_required and not plan.rollback_plan_id:
+        missing.append("rollback_plan_id")
+    if plan.rollback_required:
+        warnings.append("rollback_required")
+
+    # ── 8. Tests/check requirements ──────────────────────────────────────
+    if plan.check_required and not plan.tests_to_run:
+        missing.append("tests_to_run")
+    if plan.check_required:
+        warnings.append("check_required_before_apply")
+
+    # ── 9. Hard blocks from plan ─────────────────────────────────────────
+    for hb in plan.hard_blocks:
+        if hb not in hard_blocks:
+            hard_blocks.append(hb)
+
+    # ── 10. Missing evidence from plan ───────────────────────────────────
+    for me in plan.missing_evidence:
+        if me not in missing:
+            missing.append(me)
+
+    # ── Determine status ─────────────────────────────────────────────────
+    output_hash_ok = (
+        bool(plan_output_hash)
+        and not any("output_hash" in hb for hb in hard_blocks)
+    )
+    approval_bound = (
+        approval is not None
+        and bool(approval.output_hash)
+        and approval.output_hash == plan_output_hash
+        and not any("approval" in hb for hb in hard_blocks)
+    )
+    review_valid = (
+        review is not None
+        and review.review_state in (REVIEW_APPROVED, REVIEW_REVIEWED)
+        and not review.rejected
+        and not any("review" in hb for hb in hard_blocks)
+    )
+    output_quarantined = (
+        output_meta is not None
+        and output_meta.get("quarantined", True)
+        and not output_meta.get("applied_to_repo", False)
+    )
+    output_not_applied = (
+        output_meta is None
+        or not output_meta.get("applied_to_repo", False)
+    )
+    allowed_ok = not any("forbidden_file" in hb for hb in hard_blocks)
+    ops_ok = not any(
+        "forbidden_op" in hb or "high_risk_op" in hb
+        or "unknown_operation" in hb or "destructive_op" in hb
+        for hb in hard_blocks
+    )
+    rollback_ok = "rollback_plan_id" not in missing
+    tests_ok = "tests_to_run" not in missing
+
+    if hard_blocks:
+        status = READINESS_BLOCKED
+        trust = TRUST_UNTRUSTED
+        action = ACTION_BLOCKED_HARD
+    elif missing:
+        status = READINESS_MISSING_EVIDENCE
+        trust = TRUST_PARTIAL
+        action = ACTION_GATHER_EVIDENCE
+    elif "trust_level_untrusted" in missing:
+        status = READINESS_UNTRUSTED
+        trust = TRUST_UNTRUSTED
+        action = ACTION_UNTRUSTED
+    else:
+        status = READINESS_READY
+        trust = TRUST_COMPLETE
+        action = ACTION_MANUAL_APPLY_PACKAGE_READY
+
+    return BackendApplyReadinessAssessment(
+        assessment_id=assessment_id,
+        apply_plan_id=plan_id,
+        review_id=review_id,
+        approval_id=approval_id,
+        request_id=plan_request_id,
+        phase_id=plan_phase_id,
+        task_id=plan_task_id,
+        backend_id=plan_backend_id,
+        status=status,
+        apply_ready=(status == READINESS_READY),
+        trust_level=trust,
+        output_hash_verified=output_hash_ok,
+        approval_bound_to_output_hash=approval_bound,
+        review_state_valid=review_valid,
+        output_quarantined=output_quarantined,
+        output_not_applied=output_not_applied,
+        allowed_files_present=allowed_ok,
+        forbidden_files_present=bool(plan.forbidden_files),
+        operations_valid=ops_ok,
+        rollback_ready=rollback_ok,
+        tests_defined=tests_ok,
+        check_required=plan.check_required,
+        hard_blocks=hard_blocks,
+        missing_evidence=missing,
+        warnings=warnings,
+        recommended_action=action,
+        created_at_utc=now,
+    )
+
+
+def persist_apply_readiness(assessment: BackendApplyReadinessAssessment) -> dict:
+    """Persist a readiness assessment artifact.
+
+    Writes to .pcae/backend-apply-readiness/ with timestamped file and
+    updates latest.json pointer.  Never executes apply, never mutates files.
+    """
+    import json as _json, os
+    d = _apply_readiness_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{assessment.assessment_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "latest_path": str(lp)}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def read_latest_apply_readiness() -> BackendApplyReadinessAssessment | None:
+    """Read the latest apply readiness assessment. Returns None if absent."""
+    import json as _json
+    lp = _apply_readiness_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return BackendApplyReadinessAssessment.from_dict(data)
+    except Exception:
+        return None
