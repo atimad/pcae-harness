@@ -460,6 +460,8 @@ from pcae.commands.backend import (
     run_backend_adapter_dry_run_evaluate,
     run_backend_adapter_dry_run_show,
     run_backend_adapter_dry_run_verify,
+    run_backend_adapter_runtime_evidence_show,
+    run_backend_adapter_runtime_evidence_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4938,6 +4940,20 @@ def build_parser() -> argparse.ArgumentParser:
     dr_verify.add_argument("--latest", action="store_true", default=True)
     dr_verify.add_argument("--json", action="store_true")
     dr_verify.set_defaults(handler=run_backend_adapter_dry_run_verify)
+
+    # ── Phase 95C: runtime-evidence show/verify ─────────────────────────
+    adapter_re = be_adapter_sub.add_parser(
+        "runtime-evidence", help="Claude runtime evidence artifacts."
+    )
+    adapter_re_sub = adapter_re.add_subparsers(dest="backend_adapter_re_command", required=True)
+    re_show = adapter_re_sub.add_parser("show", help="Show latest runtime evidence.")
+    re_show.add_argument("--latest", action="store_true", default=True)
+    re_show.add_argument("--json", action="store_true")
+    re_show.set_defaults(handler=run_backend_adapter_runtime_evidence_show)
+    re_verify = adapter_re_sub.add_parser("verify", help="Verify latest runtime evidence.")
+    re_verify.add_argument("--latest", action="store_true", default=True)
+    re_verify.add_argument("--json", action="store_true")
+    re_verify.set_defaults(handler=run_backend_adapter_runtime_evidence_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

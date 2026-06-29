@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 95C: Claude Runtime Evidence Model (completed).
+
+ClaudeRuntimeEvidence (39 fields) with SHA-256 digest. 3 runtime profiles, 4 bypass states,
+5 evidence sources. Fail-closed validation. CLI show/verify. No live inspection.
+13 new tests (540 model total). Create/import deferred to 95D.
+Delivers docs/PHASE_95_CLAUDE_RUNTIME_EVIDENCE_MODEL.md.
+
 Phase 95B: Claude/Claude-DeepSeek Runtime Detection Design (completed).
 
 Design-only. Two subagents: runtime detection architecture, bypass/safety boundaries.

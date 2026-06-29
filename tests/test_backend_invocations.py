@@ -5147,3 +5147,131 @@ class Test95ADryRunCLI:
         from pathlib import Path
         gitignore = Path(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
         assert "artifact-only-real-invocation-dry-runs/" in gitignore.read_text()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95C — Claude runtime evidence model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ClaudeRuntimeEvidence,
+    validate_claude_runtime_evidence,
+    persist_claude_runtime_evidence,
+    verify_claude_runtime_evidence,
+    load_latest_claude_runtime_evidence,
+    PROFILE_CLAUDE_CLI,
+    BYPASS_UNKNOWN,
+    BYPASS_OFF,
+    BYPASS_ON,
+    EVIDENCE_OPERATOR_DECLARED,
+)
+
+
+class Test95CRuntimeEvidence:
+    """ClaudeRuntimeEvidence model."""
+
+    def test_safe_defaults(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-test")
+        assert e.no_real_backend_invoked is True
+        assert e.no_adapter_executed is True
+        assert e.no_subprocess is True
+        assert e.no_network is True
+        assert e.secrets_redacted is True
+        assert e.bypass_permissions_state == BYPASS_UNKNOWN
+
+    def test_unknown_profile_blocked(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-up", runtime_profile="bogus")
+        r = validate_claude_runtime_evidence(e)
+        assert r["valid"] is False
+
+    def test_missing_command_identity_blocked(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-ci", runtime_profile=PROFILE_CLAUDE_CLI,
+                                   backend_id="claude", declared_command_path="/usr/bin/claude",
+                                   audit_path="/a", output_quarantine_path="/q", timeout_seconds=120)
+        r = validate_claude_runtime_evidence(e)
+        assert r["valid"] is False
+
+    def test_bypass_unknown_blocked(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-bu", runtime_profile=PROFILE_CLAUDE_CLI,
+                                   backend_id="claude", command_identity="claude",
+                                   declared_command_path="/usr/bin/claude",
+                                   bypass_permissions_state=BYPASS_UNKNOWN,
+                                   audit_path="/a", output_quarantine_path="/q", timeout_seconds=120)
+        r = validate_claude_runtime_evidence(e)
+        assert r["valid"] is False
+
+    def test_bypass_on_hard_blocked(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-bo", runtime_profile=PROFILE_CLAUDE_CLI,
+                                   backend_id="claude", command_identity="claude",
+                                   declared_command_path="/usr/bin/claude",
+                                   bypass_permissions_state=BYPASS_ON,
+                                   audit_path="/a", output_quarantine_path="/q", timeout_seconds=120)
+        r = validate_claude_runtime_evidence(e)
+        assert r["valid"] is False
+
+    def test_bypass_off_valid_with_evidence(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-bf", runtime_profile=PROFILE_CLAUDE_CLI,
+                                   backend_id="claude", command_identity="claude",
+                                   declared_command_path="/usr/bin/claude",
+                                   bypass_permissions_state=BYPASS_OFF,
+                                   bypass_permissions_evidence="operator confirmed bypass disabled",
+                                   evidence_source=EVIDENCE_OPERATOR_DECLARED,
+                                   audit_path="/a", output_quarantine_path="/q", timeout_seconds=120)
+        r = validate_claude_runtime_evidence(e)
+        assert r["valid"] is True
+
+    def test_serialization_round_trip(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-rt")
+        d = e.to_dict()
+        e2 = ClaudeRuntimeEvidence.from_dict(d)
+        assert e2.runtime_evidence_id == "re-rt"
+
+    def test_digest_verification(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-dig")
+        e.record_digest = e.compute_digest()
+        r = verify_claude_runtime_evidence(e)
+        assert r["valid"] is True
+
+    def test_tampered_digest_fails(self):
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-tamp")
+        e.record_digest = e.compute_digest()
+        e.no_real_backend_invoked = False
+        r = verify_claude_runtime_evidence(e)
+        assert r["valid"] is False
+
+    def test_persist_and_load(self, tmp_path):
+        import os
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            e = ClaudeRuntimeEvidence(runtime_evidence_id="re-pl")
+            e.record_digest = e.compute_digest()
+            p = persist_claude_runtime_evidence(e)
+            assert p["status"] == "written"
+            loaded = load_latest_claude_runtime_evidence()
+            assert loaded is not None
+            assert loaded.runtime_evidence_id == "re-pl"
+        finally:
+            os.chdir(orig)
+
+    def test_no_secrets(self):
+        import json
+        e = ClaudeRuntimeEvidence(runtime_evidence_id="re-sec")
+        j = json.dumps(e.to_dict())
+        assert "sk-ant" not in j
+
+
+class Test95CRuntimeEvidenceCLI:
+    def test_show_missing_handled(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "runtime-evidence",
+             "show", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_gitignore_has_runtime_evidence_dir(self):
+        from pathlib import Path
+        g = Path(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
+        assert "claude-runtime-evidence/" in g.read_text()

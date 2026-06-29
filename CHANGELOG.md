@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95B — Claude/Claude-DeepSeek Runtime Detection Design to Phase 95C — Claude Runtime Evidence Model; session refreshed and governance continuity revalidated.
+- Completed Phase 95C Claude Runtime Evidence Model. 13 tests (540 model total).
+
 - Transitioned active task from Phase 95A — Artifact-Only Real Invocation Dry-Run Boundary to Phase 95B — Claude/Claude-DeepSeek Runtime Detection Design; session refreshed and governance continuity revalidated.
 - Completed Phase 95B Claude/Claude-DeepSeek Runtime Detection Design (design-only).
 - Two subagents: runtime detection architecture, bypass/safety review.

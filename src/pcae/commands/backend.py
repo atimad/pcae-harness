@@ -30,6 +30,9 @@ from pcae.core.backend_invocations import (
     persist_real_adapter_invocation_plan,
     evaluate_artifact_only_real_invocation_dry_run,
     ArtifactOnlyRealInvocationDryRunAssessment,
+    load_latest_claude_runtime_evidence,
+    verify_claude_runtime_evidence,
+    ClaudeRuntimeEvidence,
     persist_artifact_only_real_invocation_dry_run_assessment,
     load_latest_artifact_only_real_invocation_dry_run_assessment,
     verify_artifact_only_real_invocation_dry_run_assessment,
@@ -1843,6 +1846,52 @@ def run_backend_adapter_dry_run_verify(args: argparse.Namespace) -> int:
         print(json.dumps(result, indent=2))
     else:
         print(f"Dry-run assessment verified" if result["valid"] else "Verification FAILED")
+        for issue in result["issues"]:
+            print(f"  - {issue}")
+    return 0 if result["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95C — Claude runtime evidence CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_adapter_runtime_evidence_show(args: argparse.Namespace) -> int:
+    """pcae backend adapter runtime-evidence show --latest [--json]"""
+    e = load_latest_claude_runtime_evidence()
+    if e is None:
+        msg = "No runtime evidence artifacts found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if args.json:
+        print(json.dumps(e.to_dict(), indent=2))
+    else:
+        print(f"Latest runtime evidence: {e.backend_id}")
+        print(f"  Evidence ID:         {e.runtime_evidence_id}")
+        print(f"  Profile:             {e.runtime_profile}")
+        print(f"  Command:             {e.command_identity}")
+        print(f"  Bypass state:        {e.bypass_permissions_state}")
+        print(f"  Confidence:          {e.confidence}")
+        print(f"  Evidence source:     {e.evidence_source}")
+        if e.hard_blocks:
+            print(f"  Hard blocks:         {', '.join(e.hard_blocks)}")
+        print(f"  No real backend:     {e.no_real_backend_invoked}")
+        print(f"  Digest:              {e.record_digest[:16]}...")
+    return 0
+
+
+def run_backend_adapter_runtime_evidence_verify(args: argparse.Namespace) -> int:
+    """pcae backend adapter runtime-evidence verify --latest [--json]"""
+    e = load_latest_claude_runtime_evidence()
+    if e is None:
+        msg = "No runtime evidence artifacts found to verify."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    result = verify_claude_runtime_evidence(e)
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print("Runtime evidence verified" if result["valid"] else "Verification FAILED")
         for issue in result["issues"]:
             print(f"  - {issue}")
     return 0 if result["valid"] else 1

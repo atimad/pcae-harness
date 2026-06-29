@@ -5292,3 +5292,203 @@ def load_latest_artifact_only_real_invocation_dry_run_assessment() -> (
         return ArtifactOnlyRealInvocationDryRunAssessment.from_dict(data) if isinstance(data, dict) and data else None
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 95C — Claude runtime evidence model
+# ═══════════════════════════════════════════════════════════════════════
+
+_RUNTIME_EVIDENCE_DIR = ".pcae/claude-runtime-evidence"
+_RUNTIME_EVIDENCE_SCHEMA_VERSION = "1.0"
+
+# ── Profiles ───────────────────────────────────────────────────────────
+PROFILE_CLAUDE_CLI = "claude_cli"
+PROFILE_CLAUDE_DEEPSEEK_CLI = "claude_deepseek_cli"
+PROFILE_CUSTOM_CLAUDE_COMPATIBLE = "custom_claude_compatible"
+VALID_RUNTIME_PROFILES = frozenset({PROFILE_CLAUDE_CLI, PROFILE_CLAUDE_DEEPSEEK_CLI, PROFILE_CUSTOM_CLAUDE_COMPATIBLE})
+
+# ── Bypass states ──────────────────────────────────────────────────────
+BYPASS_UNKNOWN = "unknown"
+BYPASS_OFF = "off"
+BYPASS_ON = "on"
+BYPASS_NOT_APPLICABLE = "not_applicable"
+VALID_BYPASS_STATES = frozenset({BYPASS_UNKNOWN, BYPASS_OFF, BYPASS_ON, BYPASS_NOT_APPLICABLE})
+
+# ── Evidence sources ───────────────────────────────────────────────────
+EVIDENCE_OPERATOR_DECLARED = "operator_declared"
+EVIDENCE_PCAE_CONFIG = "pcae_config"
+EVIDENCE_ARTIFACT_IMPORT = "artifact_import"
+EVIDENCE_FUTURE_STAT_ONLY = "future_stat_only_detector"
+EVIDENCE_UNKNOWN = "unknown"
+VALID_EVIDENCE_SOURCES = frozenset({EVIDENCE_OPERATOR_DECLARED, EVIDENCE_PCAE_CONFIG, EVIDENCE_ARTIFACT_IMPORT, EVIDENCE_FUTURE_STAT_ONLY, EVIDENCE_UNKNOWN})
+
+
+@dataclass
+class ClaudeRuntimeEvidence:
+    """Pure runtime evidence model for Claude/Claude-DeepSeek.
+
+    Stat-only representation. Never inspects the live system.
+    All execution flags default to safe values.
+    """
+
+    runtime_evidence_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ""
+    adapter_id: str = ""
+    runtime_profile: str = ""
+    command_identity: str = ""
+    declared_command_path: str = ""
+    declared_command_path_hash: str = ""
+    wrapper_identity: str = ""
+    wrapper_path: str = ""
+    wrapper_path_hash: str = ""
+    auth_mode: str = ""
+    required_env_keys_present_redacted: list[str] = field(default_factory=list)
+    required_env_keys_missing: list[str] = field(default_factory=list)
+    bypass_permissions_state: str = BYPASS_UNKNOWN
+    bypass_permissions_evidence: str = ""
+    session_isolation_mode: str = "stateless"
+    working_directory: str = ""
+    timeout_seconds: int = 0
+    output_capture_mode: str = ""
+    audit_path: str = ""
+    output_quarantine_path: str = ""
+    shell_gate_required: bool = True
+    shell_gate_expected_decision: str = ""
+    broker_required: bool = True
+    broker_expected_decision: str = ""
+    detected_at_utc: str = ""
+    evidence_source: str = EVIDENCE_OPERATOR_DECLARED
+    confidence: str = "low"
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    failure_category: str = ""
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    secrets_redacted: bool = True
+    schema_version: str = _RUNTIME_EVIDENCE_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["required_env_keys_present_redacted"] = list(self.required_env_keys_present_redacted)
+        d["required_env_keys_missing"] = list(self.required_env_keys_missing)
+        d["hard_blocks"] = list(self.hard_blocks)
+        d["warnings"] = list(self.warnings)
+        d["missing_evidence"] = list(self.missing_evidence)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ClaudeRuntimeEvidence":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+def _runtime_evidence_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_RUNTIME_EVIDENCE_DIR)
+
+
+def validate_claude_runtime_evidence(evidence: ClaudeRuntimeEvidence) -> dict:
+    """Validate runtime evidence. Fail-closed. Never inspects the live system."""
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+
+    if not evidence.runtime_evidence_id:
+        missing.append("runtime_evidence_id")
+    if not evidence.backend_id:
+        hard_blocks.append("backend_id_missing")
+    if evidence.runtime_profile not in VALID_RUNTIME_PROFILES:
+        hard_blocks.append(f"unknown_runtime_profile:{evidence.runtime_profile}")
+    if not evidence.command_identity:
+        hard_blocks.append("command_identity_missing")
+    if evidence.runtime_profile != PROFILE_CUSTOM_CLAUDE_COMPATIBLE:
+        if not evidence.declared_command_path:
+            hard_blocks.append("declared_command_path_missing")
+    if evidence.bypass_permissions_state == BYPASS_UNKNOWN:
+        hard_blocks.append("bypass_state_unknown")
+    elif evidence.bypass_permissions_state == BYPASS_ON:
+        hard_blocks.append("bypass_enabled")
+    if evidence.evidence_source not in VALID_EVIDENCE_SOURCES:
+        hard_blocks.append(f"unknown_evidence_source:{evidence.evidence_source}")
+    if evidence.evidence_source == EVIDENCE_UNKNOWN:
+        hard_blocks.append("evidence_source_unknown")
+    if evidence.timeout_seconds <= 0:
+        hard_blocks.append("timeout_missing_or_invalid")
+    if not evidence.audit_path:
+        hard_blocks.append("audit_path_missing")
+    if not evidence.output_quarantine_path:
+        hard_blocks.append("output_quarantine_path_missing")
+    if not evidence.no_real_backend_invoked:
+        hard_blocks.append("no_real_backend_invoked_must_be_true")
+    if not evidence.no_adapter_executed:
+        hard_blocks.append("no_adapter_executed_must_be_true")
+    if not evidence.no_subprocess:
+        hard_blocks.append("no_subprocess_must_be_true")
+    if not evidence.no_network:
+        hard_blocks.append("no_network_must_be_true")
+    if not evidence.secrets_redacted:
+        hard_blocks.append("secrets_redacted_must_be_true")
+    if evidence.confidence == "high" and evidence.evidence_source == EVIDENCE_OPERATOR_DECLARED:
+        pass  # allowed but should have explicit evidence
+    return {
+        "valid": len(hard_blocks) == 0 and len(missing) == 0,
+        "hard_blocks": hard_blocks,
+        "missing_evidence": missing,
+    }
+
+
+def persist_claude_runtime_evidence(evidence: ClaudeRuntimeEvidence) -> dict:
+    import os
+    d = _runtime_evidence_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    if not evidence.record_digest:
+        evidence.record_digest = evidence.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{evidence.runtime_evidence_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(evidence.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(evidence.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "record_digest": evidence.record_digest}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_claude_runtime_evidence(evidence: ClaudeRuntimeEvidence) -> dict:
+    issues_list: list[str] = []
+    if not evidence.runtime_evidence_id:
+        issues_list.append("missing runtime_evidence_id")
+    if not evidence.record_digest:
+        issues_list.append("missing record_digest")
+    if evidence.record_digest and evidence.compute_digest() != evidence.record_digest:
+        issues_list.append("record_digest_mismatch")
+    if evidence.schema_version != _RUNTIME_EVIDENCE_SCHEMA_VERSION:
+        issues_list.append(f"schema_version mismatch: {evidence.schema_version!r}")
+    return {"valid": len(issues_list) == 0, "issues": issues_list}
+
+
+def load_latest_claude_runtime_evidence() -> ClaudeRuntimeEvidence | None:
+    lp = _runtime_evidence_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return ClaudeRuntimeEvidence.from_dict(data) if isinstance(data, dict) and data else None
+    except Exception:
+        return None
