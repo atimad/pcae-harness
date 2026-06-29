@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Completed Phase 94N Backend Apply Plan CLI: pcae backend apply-plan show/create/validate commands.
+- Added read_latest_apply_plan() to backend_invocations.py; deserializes ApplyPlan and nested operations.
+- Descriptive operations accepted via --operation TYPE:TARGET or --operations-file; no patch parsing.
+- High-risk ops (delete_file, rename_file, unknown) produce hard blocks at create time.
+- Validate calls validate_backend_apply_readiness(); never executes apply, runs tests, or runs pcae check.
+- 29 new backend model tests (195 total), 42 new backend CLI tests (92 total), fast-green 3579/3579.
+- Delivers docs/PHASE_94_BACKEND_APPLY_PLAN_CLI.md.
+- Transitioned active task from Phase 94M — Backend Review CLI to Phase 94N — Backend Apply Plan CLI; session refreshed and governance continuity revalidated.
 - Completed Phase 94M Backend Review CLI: pcae backend review show/create/approve/reject commands.
 - Hash binding enforced on all approve/reject operations; mismatch → immediate hard-block error.
 - Hard-block dominance: approved_for_apply cannot be set when hard_blocks is non-empty; accepted risk cannot override.

@@ -1,41 +1,37 @@
 {
-  "phase_id": "94M",
-  "phase_name": "phase_94m_backend_review_cli",
-  "phase_title": "Backend Review CLI",
+  "phase_id": "94N",
+  "phase_name": "phase_94n_backend_apply_plan_cli",
+  "phase_title": "Backend Apply Plan CLI",
   "implementation_status": "completed",
-  "completed_at_utc": "2026-06-29T18:00:00Z",
+  "completed_at_utc": "2026-06-29T19:00:00Z",
   "files_changed": [
     "src/pcae/core/backend_invocations.py",
     "src/pcae/commands/backend.py",
     "src/pcae/cli.py",
     "tests/test_backend_invocations.py",
     "tests/test_backend_cli.py",
-    "docs/PHASE_94_BACKEND_REVIEW_CLI.md",
+    "docs/PHASE_94_BACKEND_APPLY_PLAN_CLI.md",
     "PROJECT_STATUS.md",
     "CHANGELOG.md"
   ],
-  "tests_added_or_updated": "46 new tests",
+  "tests_added_or_updated": "71 new tests",
   "validation_results": [
-    {"name": "backend_model_tests", "result": "166/166 passed", "status": "passed"},
-    {"name": "backend_cli_tests", "result": "50/50 passed", "status": "passed"},
+    {"name": "backend_model_tests", "result": "195/195 passed", "status": "passed"},
+    {"name": "backend_cli_tests", "result": "92/92 passed", "status": "passed"},
     {"name": "permission_broker_tests", "result": "265/265 passed", "status": "passed"},
     {"name": "shell_gate_tests", "result": "142/142 passed", "status": "passed"},
     {"name": "report_notification_tests", "result": "162/162 passed", "status": "passed"},
-    {"name": "fast_green", "result": "3508/3508 passed", "status": "passed"}
+    {"name": "fast_green", "result": "3579/3579 passed", "status": "passed"}
   ],
   "governance_results": [
     {"name": "pcae_health", "status": "healthy"},
     {"name": "pcae_check", "status": "passed"},
     {"name": "pcae_push_check", "status": "passed"}
   ],
-  "phase_commits": [
-    {"hash": "e14a73346ff16b77415cfab692e7b53703b3a996", "message": "Add backend review CLI"},
-    {"hash": "03bfd5a79e7437a8d11a318a4868487886f5f29e", "message": "Complete Phase 94M backend review CLI"},
-    {"hash": "e58a3aea82dceff5570870dbcf836df1bdeacf03", "message": "Update task lifecycle: archive 94L, update DONE.md"}
-  ],
-  "pushed_status": "pushed",
-  "recommended_next_phase": "94N — Backend Apply Plan CLI",
-  "no_go_confirmation": "No apply execution, patch parsing, source file mutation, real backend invocation, subprocess, network, shell interception, Telegram inbound, remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push authorization, or real AI backend calls were implemented.",
+  "phase_commits": [],
+  "pushed_status": "not_yet_pushed",
+  "recommended_next_phase": "94O — Backend Manual Apply Package",
+  "no_go_confirmation": "No apply execution, patch parsing, source file mutation, real backend invocation, subprocess, network, shell interception, Telegram inbound, remote shell, /run, enforcement, autonomous mutation, automatic apply, commit/push authorization, real AI backend calls, automatic test execution, or automatic pcae check were implemented.",
   "no_go_confirmed": {
     "apply_execution": false,
     "patch_parsing": false,
@@ -50,6 +46,8 @@
     "autonomous_mutation": false,
     "automatic_apply": false,
     "commit_push_authorization": false,
-    "real_ai_backend_calls": false
+    "real_ai_backend_calls": false,
+    "automatic_test_execution": false,
+    "automatic_pcae_check": false
   }
 }

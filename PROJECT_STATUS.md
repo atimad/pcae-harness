@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 94N: Backend Apply Plan CLI (completed).
+
+Implementation phase. Added `pcae backend apply-plan show/create/validate` CLI commands
+exposing the apply plan model from 94K and readiness validator from 94L. Descriptive
+operations accepted as metadata only — no patch parsing. High-risk ops (delete_file,
+rename_file, unknown) produce hard blocks. `read_latest_apply_plan()` added to model.
+Safe defaults: apply_ready=False, rollback_required=True, check_required=True.
+29 new model tests, 42 new CLI tests (195 model, 92 CLI). Fast-green: 3579/3579.
+Delivers docs/PHASE_94_BACKEND_APPLY_PLAN_CLI.md.
+
 Phase 94M: Backend Review CLI (completed).
 
 Implementation phase. Added `pcae backend review show/create/approve/reject` CLI
