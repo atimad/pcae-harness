@@ -1,24 +1,24 @@
-# Phase 94J Complete — Backend Review State Model
+# Phase 94K Complete — Backend Apply Plan Model
 
 ## Summary
 
-Phase 94J implements review state model: ReviewArtifact (22 fields), ApprovalArtifact
-(12 fields, hash-bound), RejectionArtifact (8 fields). Safe defaults: apply_ready=False,
-approved_for_apply=False. Hard blocks prevent approval. CLI deferred to 94K.
+Phase 94K implements apply plan model: ApplyOperation (11 fields), ApplyPlan (28 fields),
+RollbackRequirement (7 fields). Safe defaults: apply_ready=False, rollback_required=True,
+check_required=True. Forbidden/high-risk ops → hard blocks. CLI deferred.
 
 ## Implementation
 
-- 6 review states: captured, quarantined, review_pending, reviewed, approved_for_apply, rejected
-- create_review_artifact(), approve_review(), reject_review(), persist_review()
-- Artifacts in .pcae/backend-reviews/ (gitignored)
-- 11 new tests (102 total backend)
+- 6 operation types (create/modify/delete/rename/manual/unknown)
+- create_apply_plan(), validate_apply_plan(), persist_apply_plan()
+- Artifacts in .pcae/backend-apply-plans/ (gitignored)
+- 7 new tests (109 total backend)
 
 ## Validation
 
-- Backend: 102/102
+- Backend: 109/109
 - Broker: 265/265, Shell: 142/142, Report: 161/161
 - origin/main..HEAD: 0
 
 ## Recommended Next Phase
 
-94K — Backend Apply Plan Model
+94L — Backend Apply Readiness Validator

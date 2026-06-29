@@ -1,11 +1,11 @@
 {
-  "phase_id": "94J",
-  "phase_name": "Backend Review State Model",
+  "phase_id": "94K",
+  "phase_name": "Backend Apply Plan Model",
   "files_changed": ["src/pcae/core/backend_invocations.py", ".pcae/.gitignore", "tests/test_backend_invocations.py"],
   "files_changed_count": 3,
-  "tests_added_or_updated": "11 new (102 total backend)",
+  "tests_added_or_updated": "7 new (109 total backend)",
   "validation_results": [
-    {"name": "Backend model + review", "result": "102/102", "status": "passed"},
+    {"name": "Backend model + apply plan", "result": "109/109", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
@@ -14,5 +14,5 @@
   "governance_results": [{"name": "pcae health", "status": "healthy"}, {"name": "pcae check", "status": "passed"}, {"name": "pcae push check", "status": "nothing_to_push"}],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "94K — Backend Apply Plan Model"
+  "recommended_next_phase": "94L — Backend Apply Readiness Validator"
 }

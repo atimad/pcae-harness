@@ -1343,3 +1343,266 @@ def read_latest_review() -> ReviewArtifact | None:
         return ReviewArtifact(**{k: v for k, v in data.items() if k in ReviewArtifact.__dataclass_fields__})
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94K — Apply plan model
+# ═══════════════════════════════════════════════════════════════════════════
+
+OP_CREATE = "create_file"
+OP_MODIFY = "modify_file"
+OP_DELETE = "delete_file"
+OP_RENAME = "rename_file"
+OP_MANUAL = "manual_instruction"
+OP_UNKNOWN = "unknown"
+
+VALID_OPERATIONS: frozenset[str] = frozenset({
+    OP_CREATE, OP_MODIFY, OP_DELETE, OP_RENAME, OP_MANUAL, OP_UNKNOWN,
+})
+HIGH_RISK_OPS: frozenset[str] = frozenset({OP_DELETE, OP_RENAME, OP_UNKNOWN})
+
+_APPLY_PLANS_DIR = ".pcae/backend-apply-plans"
+
+
+@dataclass
+class ApplyOperation:
+    operation_id: str = ""
+    operation_type: str = OP_MANUAL
+    target_path: str = ""
+    source_artifact_path: str = ""
+    content_hash: str = ""
+    risk_level: str = RISK_MEDIUM
+    allowed_by_task_scope: bool = False
+    forbidden: bool = False
+    requires_manual_review: bool = True
+    notes: str = ""
+    schema_version: str = SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues = []
+        if self.operation_type not in VALID_OPERATIONS:
+            issues.append(f"invalid operation_type: {self.operation_type!r}")
+        if not self.target_path and self.operation_type not in (OP_MANUAL, OP_UNKNOWN):
+            issues.append("target_path required for file operations")
+        if self.operation_type in HIGH_RISK_OPS:
+            # High-risk ops are valid but must be hard-blocked at plan level
+            pass
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "operation_id": self.operation_id, "operation_type": self.operation_type,
+            "target_path": self.target_path, "source_artifact_path": self.source_artifact_path,
+            "content_hash": self.content_hash, "risk_level": self.risk_level,
+            "allowed_by_task_scope": self.allowed_by_task_scope,
+            "forbidden": self.forbidden, "requires_manual_review": self.requires_manual_review,
+            "notes": self.notes, "schema_version": self.schema_version,
+        }
+
+
+@dataclass
+class RollbackRequirement:
+    rollback_required: bool = True
+    rollback_plan_id: str = ""
+    rollback_evidence_required: bool = True
+    affected_files: list[str] = field(default_factory=list)
+    pre_apply_snapshot_required: bool = True
+    manual_recovery_notes: str = ""
+    schema_version: str = SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "rollback_required": self.rollback_required,
+            "rollback_plan_id": self.rollback_plan_id,
+            "rollback_evidence_required": self.rollback_evidence_required,
+            "affected_files": self.affected_files,
+            "pre_apply_snapshot_required": self.pre_apply_snapshot_required,
+            "manual_recovery_notes": self.manual_recovery_notes,
+            "schema_version": self.schema_version,
+        }
+
+
+@dataclass
+class ApplyPlan:
+    apply_plan_id: str = ""
+    review_id: str = ""
+    approval_id: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    output_hash: str = ""
+    output_artifact_path: str = ""
+    prompt_hash: str = ""
+    prompt_artifact_path: str = ""
+    proposed_files: list[str] = field(default_factory=list)
+    allowed_files: list[str] = field(default_factory=list)
+    forbidden_files: list[str] = field(default_factory=list)
+    operations: list[ApplyOperation] = field(default_factory=list)
+    risk_level: str = RISK_MEDIUM
+    hard_blocks: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    rollback_required: bool = True
+    rollback_plan_id: str = ""
+    tests_to_run: list[str] = field(default_factory=list)
+    check_required: bool = True
+    apply_ready: bool = False
+    created_at_utc: str = ""
+    schema_version: str = SCHEMA_VERSION
+
+    def validate(self) -> list[str]:
+        issues = []
+        if not self.output_hash:
+            issues.append("output_hash required")
+        if not self.review_id:
+            issues.append("review_id required")
+        if self.apply_ready and self.hard_blocks:
+            issues.append("cannot be apply_ready with hard blocks")
+        for i, op in enumerate(self.operations):
+            op_issues = op.validate()
+            for oi in op_issues:
+                issues.append(f"operation[{i}]: {oi}")
+        return issues
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "apply_plan_id": self.apply_plan_id, "review_id": self.review_id,
+            "approval_id": self.approval_id, "request_id": self.request_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "backend_id": self.backend_id, "output_hash": self.output_hash,
+            "output_artifact_path": self.output_artifact_path,
+            "prompt_hash": self.prompt_hash,
+            "prompt_artifact_path": self.prompt_artifact_path,
+            "proposed_files": self.proposed_files,
+            "allowed_files": self.allowed_files,
+            "forbidden_files": self.forbidden_files,
+            "operations": [op.to_dict() for op in self.operations],
+            "risk_level": self.risk_level, "hard_blocks": self.hard_blocks,
+            "missing_evidence": self.missing_evidence, "warnings": self.warnings,
+            "rollback_required": self.rollback_required,
+            "rollback_plan_id": self.rollback_plan_id,
+            "tests_to_run": self.tests_to_run, "check_required": self.check_required,
+            "apply_ready": self.apply_ready, "created_at_utc": self.created_at_utc,
+            "schema_version": self.schema_version,
+        }
+
+
+def _apply_plans_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_APPLY_PLANS_DIR)
+
+
+def create_apply_plan(
+    review: ReviewArtifact,
+    approval: ApprovalArtifact | None = None,
+    *,
+    operations: list[ApplyOperation] | None = None,
+    allowed_files: list[str] | None = None,
+    forbidden_files: list[str] | None = None,
+    **kwargs: Any,
+) -> ApplyPlan:
+    """Create apply plan. Safe defaults. No execution."""
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    ops = list(operations or [])
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+    warnings: list[str] = []
+
+    if not approval:
+        missing.append("approval")
+    if not review.rollback_required if hasattr(review, 'rollback_required') else True:
+        missing.append("rollback_plan")
+
+    proposed = [op.target_path for op in ops if op.target_path]
+    for f in proposed:
+        if forbidden_files and f in forbidden_files:
+            hard_blocks.append(f"forbidden_file:{f}")
+
+    for op in ops:
+        if op.operation_type in HIGH_RISK_OPS:
+            hard_blocks.append(f"high_risk_op:{op.operation_type}:{op.target_path}")
+        if op.forbidden:
+            hard_blocks.append(f"forbidden_op:{op.operation_type}:{op.target_path}")
+
+    if not ops:
+        missing.append("operations")
+
+    plan = ApplyPlan(
+        apply_plan_id=f"pl-{_uuid.uuid4().hex[:12]}",
+        review_id=review.review_id,
+        approval_id=approval.approval_id if approval else "",
+        request_id=review.request_id, phase_id=review.phase_id,
+        task_id=review.task_id, backend_id=review.backend_id,
+        output_hash=review.output_hash,
+        output_artifact_path=review.output_artifact_path,
+        prompt_hash=review.prompt_hash,
+        prompt_artifact_path=review.prompt_artifact_path,
+        proposed_files=proposed,
+        allowed_files=list(allowed_files or []),
+        forbidden_files=list(forbidden_files or []),
+        operations=ops, hard_blocks=hard_blocks,
+        missing_evidence=missing, warnings=warnings,
+        apply_ready=False, rollback_required=True, check_required=True,
+        created_at_utc=now,
+        **{k: v for k, v in kwargs.items() if k in ApplyPlan.__dataclass_fields__},
+    )
+    issues = plan.validate()
+    if issues:
+        raise ValueError(f"Invalid apply plan: {'; '.join(issues)}")
+    return plan
+
+
+def validate_apply_plan(plan: ApplyPlan) -> dict[str, Any]:
+    """Validate apply plan readiness. Fail-closed."""
+    hard_blocks = list(plan.hard_blocks)
+    missing = list(plan.missing_evidence)
+    warnings = list(plan.warnings)
+
+    if not plan.review_id:
+        missing.append("review_id")
+    if not plan.approval_id:
+        missing.append("approval_id")
+    if not plan.output_hash:
+        hard_blocks.append("output_hash_missing")
+    if plan.forbidden_files:
+        for f in plan.proposed_files:
+            if f in plan.forbidden_files:
+                hard_blocks.append(f"forbidden:{f}")
+    if not plan.operations:
+        missing.append("operations")
+    if not plan.rollback_plan_id and plan.rollback_required:
+        missing.append("rollback_plan_id")
+    if not plan.tests_to_run and plan.check_required:
+        missing.append("tests_to_run")
+
+    ready = len(hard_blocks) == 0 and len(missing) == 0
+    return {
+        "apply_ready": ready,
+        "status": "ready" if ready else "blocked" if hard_blocks else "missing_evidence",
+        "hard_blocks": hard_blocks,
+        "missing_evidence": missing,
+        "warnings": warnings,
+    }
+
+
+def persist_apply_plan(plan: ApplyPlan) -> dict:
+    """Persist apply plan artifact."""
+    import json as _json, os
+    d = _apply_plans_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{plan.apply_plan_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "latest_path": str(lp)}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}

@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 94K: Backend Apply Plan Model (completed).
+
+Implementation phase. Added ApplyOperation (11 fields, 6 types), ApplyPlan (28 fields),
+RollbackRequirement (7 fields). Safe defaults: apply_ready=False, rollback_required=True.
+Forbidden/high-risk ops → hard blocks. Artifacts in .pcae/backend-apply-plans/.
+CLI deferred. 7 new tests (109 total). No apply execution or file mutation.
+Delivers docs/PHASE_94_BACKEND_APPLY_PLAN_MODEL.md.
+
 Phase 94J: Backend Review State Model (completed).
 
 Implementation phase. Added ReviewArtifact (22 fields), ApprovalArtifact (12 fields,

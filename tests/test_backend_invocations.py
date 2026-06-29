@@ -809,3 +809,74 @@ from pcae.core.backend_invocations import (
     create_review_artifact, approve_review, reject_review, persist_review,
     REVIEW_QUARANTINED, REVIEW_APPROVED, REVIEW_REJECTED,
 )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94K — Apply plan model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class TestApplyPlanModel:
+    def test_create_plan_safe_defaults(self):
+        r = create_review_artifact("be-test", "abc123")
+        a = approve_review(r, "op", "ok")
+        plan = create_apply_plan(r, a, operations=[
+            ApplyOperation(operation_id="op1", operation_type="create_file", target_path="src/test.py"),
+        ])
+        assert plan.apply_ready is False
+        assert plan.rollback_required is True
+        assert plan.check_required is True
+
+    def test_forbidden_file_hard_blocked(self):
+        r = create_review_artifact("be-test", "abc123")
+        a = approve_review(r, "op", "ok")
+        plan = create_apply_plan(r, a, forbidden_files=["src/secret.py"], operations=[
+            ApplyOperation(operation_id="op1", target_path="src/secret.py"),
+        ])
+        assert any("forbidden" in hb for hb in plan.hard_blocks)
+
+    def test_high_risk_op_hard_blocked(self):
+        r = create_review_artifact("be-test", "abc123")
+        a = approve_review(r, "op", "ok")
+        plan = create_apply_plan(r, a, operations=[
+            ApplyOperation(operation_id="op1", operation_type="delete_file", target_path="x.py"),
+        ])
+        assert any("high_risk" in hb for hb in plan.hard_blocks)
+
+    def test_missing_approval_creates_missing(self):
+        r = create_review_artifact("be-test", "abc123")
+        plan = create_apply_plan(r, operations=[
+            ApplyOperation(operation_id="op1", target_path="src/test.py"),
+        ])
+        assert "approval" in plan.missing_evidence
+
+    def test_validate_apply_plan_blocked(self):
+        r = create_review_artifact("be-test", "abc123")
+        plan = create_apply_plan(r, operations=[
+            ApplyOperation(operation_id="op1", target_path="src/secret.py"),
+        ], forbidden_files=["src/secret.py"])
+        result = validate_apply_plan(plan)
+        assert result["apply_ready"] is False
+
+    def test_plan_persisted(self):
+        r = create_review_artifact("be-test", "abc123")
+        a = approve_review(r, "op", "ok")
+        plan = create_apply_plan(r, a, operations=[
+            ApplyOperation(operation_id="op1", target_path="src/test.py"),
+        ])
+        result = persist_apply_plan(plan)
+        assert result["status"] == "written"
+
+    def test_no_secrets_in_plan(self):
+        r = create_review_artifact("be-test", "abc123")
+        plan = create_apply_plan(r, operations=[
+            ApplyOperation(operation_id="op1", target_path="src/test.py"),
+        ])
+        j = json.dumps(plan.to_dict())
+        assert "sk-ant" not in j
+
+
+from pcae.core.backend_invocations import (
+    ApplyOperation, ApplyPlan, RollbackRequirement,
+    create_apply_plan, validate_apply_plan, persist_apply_plan,
+)
