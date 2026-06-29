@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 94N — Backend Apply Plan CLI (20260629-1741-phase-94n-backend-apply-plan-cli)
 - Phase 94M — Backend Review CLI (20260629-1721-phase-94m-backend-review-cli)
 - Phase 94L — Backend Apply Readiness Validator (20260629-1652-phase-94l-backend-apply-readiness-validator)
 - Phase 94K — Backend Apply Plan Model (20260629-1633-phase-94k-backend-apply-plan-model)

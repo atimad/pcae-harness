@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260629-1741-phase-94n-backend-apply-plan-cli
+20260629-1755-phase-94o-backend-manual-apply-package
 
 ## Title
 
-Phase 94N — Backend Apply Plan CLI
+Phase 94O — Backend Manual Apply Package
 
 ## Status
 
@@ -18,7 +18,7 @@ implementation
 
 ## Goal
 
-Implement safe Backend Apply Plan CLI: show, create, validate apply plan artifacts. Expose the apply plan model from 94K and readiness validator from 94L through CLI commands. No apply execution, no file mutation, no backend invocation.
+Implement safe Backend Manual Apply Package: model, persistence (JSON+Markdown), and CLI show/create. Package bundles evidence from apply-plan + readiness assessment into a human-readable artifact for manual operator action. No apply execution, no file mutation, no backend invocation.
 
 ## Allowed Files
 
@@ -27,12 +27,13 @@ Implement safe Backend Apply Plan CLI: show, create, validate apply plan artifac
 - src/pcae/cli.py
 - tests/test_backend_invocations.py
 - tests/test_backend_cli.py
-- docs/PHASE_94_BACKEND_APPLY_PLAN_CLI.md
+- docs/PHASE_94_BACKEND_MANUAL_APPLY_PACKAGE.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
-- tasks/active/20260629-1741-phase-94n-backend-apply-plan-cli.md
+- tasks/active/20260629-1755-phase-94o-backend-manual-apply-package.md
 - tasks/done/**
 - tasks/DONE.md
+- .pcae/.gitignore
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
 
@@ -71,7 +72,7 @@ advisory
 
 - No apply execution
 - No patch parsing for mutation
-- No file mutation outside .pcae/backend-apply-plans/ and .pcae/backend-apply-readiness/
+- No file mutation outside .pcae/backend-manual-apply-packages/
 - No backend invocation
 - No subprocess execution
 - No network calls
@@ -83,15 +84,16 @@ advisory
 - No autonomous mutation
 - No automatic apply
 - No real AI backend calls
-- No new product features beyond apply plan CLI
+- No automatic test execution
+- No automatic pcae check
+- No new product features beyond manual apply package
 
 ## Acceptance Criteria
 
-- pcae backend apply-plan show --latest handles missing cleanly
-- pcae backend apply-plan create persists artifact
-- pcae backend apply-plan validate runs readiness validator
-- Hard blocks prevent apply_ready
-- JSON output deterministic and secret-safe
+- pcae backend manual-apply-package show --latest handles missing cleanly
+- pcae backend manual-apply-package create persists JSON and Markdown
+- Package defaults no_execution_performed=True
+- JSON and Markdown are secret-safe
 - All tests pass
 
 ## Acceptance Checks
@@ -107,4 +109,4 @@ advisory
 
 ## Created Timestamp
 
-2026-06-29T17:41:52.710257+02:00
+2026-06-29T17:55:24.080047+02:00
