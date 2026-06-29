@@ -731,3 +731,220 @@ class TestApplyPlanNoSubprocess:
         content = gitignore.read_text()
         assert "backend-apply-plans/" in content
         assert "backend-apply-readiness/" in content
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94O — Backend manual apply package CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import json as _json_map
+import subprocess as _sub_map
+import sys as _sys_map
+from pathlib import Path as _Path_map
+
+REPO_ROOT_94O = _Path_map(__file__).resolve().parent.parent
+
+
+def _run_map(cmd_args: list[str]) -> _sub_map.CompletedProcess:
+    return _sub_map.run(
+        [_sys_map.executable, "-m", "pcae", "backend", "manual-apply-package"] + cmd_args,
+        capture_output=True, text=True, cwd=REPO_ROOT_94O, timeout=15,
+    )
+
+
+def _json_map_cmd(cmd_args: list[str]) -> dict:
+    r = _run_map(cmd_args + ["--json"])
+    assert r.returncode == 0, f"CLI failed: {r.stderr}\nstdout: {r.stdout}"
+    return _json_map.loads(r.stdout)
+
+
+class TestManualApplyPackageShow:
+    def test_show_missing_clean_text(self, tmp_path):
+        r = _sub_map.run(
+            [_sys_map.executable, "-m", "pcae", "backend", "manual-apply-package",
+             "show", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_show_missing_clean_json(self, tmp_path):
+        r = _sub_map.run(
+            [_sys_map.executable, "-m", "pcae", "backend", "manual-apply-package",
+             "show", "--latest", "--json"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+        data = _json_map.loads(r.stdout)
+        assert "error" in data
+
+    def test_show_after_create(self):
+        _run_map(["create"])
+        data = _json_map_cmd(["show", "--latest"])
+        assert "package_id" in data
+        assert data["no_execution_performed"] is True
+
+    def test_show_json_no_secrets(self):
+        _run_map(["create"])
+        data = _json_map_cmd(["show", "--latest"])
+        j = _json_map.dumps(data)
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_show_no_raw_content(self):
+        _run_map(["create"])
+        r = _run_map(["show", "--latest"])
+        if r.returncode == 0:
+            assert len(r.stdout) < 5000
+
+
+class TestManualApplyPackageCreate:
+    def test_create_succeeds(self):
+        data = _json_map_cmd(["create"])
+        assert "package" in data
+        assert "package_id" in data["package"]
+
+    def test_create_no_execution_performed(self):
+        data = _json_map_cmd(["create"])
+        assert data["package"]["no_execution_performed"] is True
+
+    def test_create_no_apply(self):
+        data = _json_map_cmd(["create"])
+        assert data["no_apply"] is True
+
+    def test_create_no_patch_parsing(self):
+        data = _json_map_cmd(["create"])
+        assert data["no_patch_parsing"] is True
+
+    def test_create_no_source_files_modified(self):
+        data = _json_map_cmd(["create"])
+        assert data["no_source_files_modified"] is True
+
+    def test_create_no_automatic_tests(self):
+        data = _json_map_cmd(["create"])
+        assert data["no_automatic_tests"] is True
+
+    def test_create_no_automatic_pcae_check(self):
+        data = _json_map_cmd(["create"])
+        assert data["no_automatic_pcae_check"] is True
+
+    def test_create_persists_json(self):
+        data = _json_map_cmd(["create"])
+        persist = data["persistence"]
+        assert persist["status"] == "written"
+        assert "json_path" in persist
+        assert _Path_map(persist["json_path"]).is_file()
+
+    def test_create_persists_markdown(self):
+        data = _json_map_cmd(["create"])
+        persist = data["persistence"]
+        assert "md_path" in persist
+        assert _Path_map(persist["md_path"]).is_file()
+
+    def test_create_updates_latest_json(self):
+        data = _json_map_cmd(["create"])
+        latest = _json_map.loads(_Path_map(data["persistence"]["latest_json"]).read_text())
+        assert latest["package_id"] == data["package"]["package_id"]
+        assert latest["no_execution_performed"] is True
+
+    def test_create_markdown_no_execution_confirmation(self):
+        data = _json_map_cmd(["create"])
+        md = _Path_map(data["persistence"]["md_path"]).read_text()
+        assert "No files were modified" in md
+        assert "no_execution_performed" in md
+
+    def test_create_markdown_advisory_label(self):
+        data = _json_map_cmd(["create"])
+        md = _Path_map(data["persistence"]["md_path"]).read_text()
+        assert "advisory" in md.lower() or "human" in md.lower()
+
+    def test_create_json_no_secrets(self):
+        data = _json_map_cmd(["create"])
+        j = _json_map.dumps(data)
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_create_markdown_no_secrets(self):
+        data = _json_map_cmd(["create"])
+        md = _Path_map(data["persistence"]["md_path"]).read_text()
+        assert "sk-ant" not in md
+        assert "api_key" not in md.lower()
+
+    def test_create_deterministic_structure(self):
+        d1 = _json_map_cmd(["create"])
+        d2 = _json_map_cmd(["create"])
+        assert set(d1["package"].keys()) == set(d2["package"].keys())
+
+    def test_create_with_operator_notes(self):
+        data = _json_map_cmd(["create", "--operator-notes", "reviewed and approved context"])
+        assert data["package"]["operator_notes"] == "reviewed and approved context"
+
+    def test_create_with_rollback_instructions(self):
+        data = _json_map_cmd(["create", "--rollback-instructions", "git revert HEAD"])
+        assert data["package"]["rollback_instructions"] == "git revert HEAD"
+
+    def test_create_with_apply_plan_file(self, tmp_path):
+        import json as _j
+        from pcae.core.backend_invocations import ApplyPlan
+        plan = ApplyPlan(apply_plan_id="pl-mapf01", review_id="rv-mapf01",
+                          output_hash="h-mapf01", phase_id="94O.99")
+        plan_file = tmp_path / "plan.json"
+        plan_file.write_text(_j.dumps(plan.to_dict(), indent=2))
+        data = _json_map_cmd(["create", "--apply-plan", str(plan_file)])
+        assert data["package"]["apply_plan_id"] == "pl-mapf01"
+        assert data["package"]["output_hash"] == "h-mapf01"
+        assert data["package"]["phase_id"] == "94O.99"
+
+    def test_create_multipart_phase_id_preserved(self, tmp_path):
+        import json as _j
+        from pcae.core.backend_invocations import ApplyPlan
+        plan = ApplyPlan(apply_plan_id="pl-mpmap", review_id="rv-mpmap",
+                          output_hash="h-mpmap", phase_id="94O.1.2.3")
+        plan_file = tmp_path / "plan-mp.json"
+        plan_file.write_text(_j.dumps(plan.to_dict(), indent=2))
+        data = _json_map_cmd(["create", "--apply-plan", str(plan_file)])
+        assert data["package"]["phase_id"] == "94O.1.2.3"
+
+    def test_create_with_readiness_file(self, tmp_path):
+        import json as _j
+        from pcae.core.backend_invocations import BackendApplyReadinessAssessment
+        assessment = BackendApplyReadinessAssessment(
+            assessment_id="ra-mapf01", status="blocked",
+            apply_ready=False, hard_blocks=["forbidden_file:src/x.py"],
+        )
+        r_file = tmp_path / "readiness.json"
+        r_file.write_text(_j.dumps(assessment.to_dict(), indent=2))
+        data = _json_map_cmd(["create", "--readiness", str(r_file)])
+        assert data["package"]["readiness_status"] == "blocked"
+        assert "forbidden_file:src/x.py" in data["package"]["hard_blocks"]
+
+
+class TestManualApplyPackageNoSubprocess:
+    def test_no_subprocess_in_backend_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "subprocess.run" not in source
+
+    def test_no_shell_interception(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "shell=True" not in source
+
+    def test_no_network_calls(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_manual_apply_packages_dir_ignored(self):
+        gitignore = REPO_ROOT_94O / ".pcae" / ".gitignore"
+        assert gitignore.exists()
+        assert "backend-manual-apply-packages/" in gitignore.read_text()
+
+    def test_no_telegram_inbound_in_commands(self):
+        import inspect
+        from pcae.commands import backend
+        source = inspect.getsource(backend)
+        assert "getUpdates" not in source

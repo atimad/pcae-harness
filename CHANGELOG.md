@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Completed Phase 94O Backend Manual Apply Package: BackendManualApplyPackage model, JSON+Markdown persistence, pcae backend manual-apply-package show/create CLI.
+- Package bundles ApplyPlan (94K) + BackendApplyReadinessAssessment (94L) evidence for manual operator review; no_execution_performed=True hard default.
+- create_backend_manual_apply_package() merges hard_blocks, missing_evidence, operations, tests_to_run, checks_to_run from plan + assessment.
+- Markdown rendering includes no-execution confirmation, advisory instructions, hard-blocks section; secret-safe.
+- Atomic file replacement (os.replace) for latest.json and latest.md; .pcae/backend-manual-apply-packages/ gitignored.
+- 49 new backend model tests (244 total), 25 new backend CLI tests (122 total), fast-green 3658/3658.
+- Delivers docs/PHASE_94_BACKEND_MANUAL_APPLY_PACKAGE.md.
+- Transitioned active task from Phase 94N — Backend Apply Plan CLI to Phase 94O — Backend Manual Apply Package; session refreshed and governance continuity revalidated.
 - Completed Phase 94N Backend Apply Plan CLI: pcae backend apply-plan show/create/validate commands.
 - Added read_latest_apply_plan() to backend_invocations.py; deserializes ApplyPlan and nested operations.
 - Descriptive operations accepted via --operation TYPE:TARGET or --operations-file; no patch parsing.

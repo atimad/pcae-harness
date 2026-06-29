@@ -2114,3 +2114,430 @@ class Test94NNoExecutionInModel:
         content = gitignore.read_text()
         assert "backend-apply-plans/" in content
         assert "backend-apply-readiness/" in content
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94O — Backend manual apply package model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    BackendManualApplyPackage,
+    create_backend_manual_apply_package,
+    persist_manual_apply_package,
+    read_latest_manual_apply_package,
+    _MANUAL_APPLY_PACKAGES_DIR,
+)
+
+
+class Test94OPackageDefaults:
+    """BackendManualApplyPackage safe defaults."""
+
+    def test_no_execution_performed_true(self):
+        pkg = BackendManualApplyPackage()
+        assert pkg.no_execution_performed is True
+
+    def test_apply_ready_false(self):
+        pkg = BackendManualApplyPackage()
+        assert pkg.apply_ready is False
+
+    def test_rollback_required_true(self):
+        pkg = BackendManualApplyPackage()
+        assert pkg.rollback_required is True
+
+    def test_hard_blocks_empty(self):
+        pkg = BackendManualApplyPackage()
+        assert pkg.hard_blocks == []
+
+    def test_operations_empty(self):
+        pkg = BackendManualApplyPackage()
+        assert pkg.operations == []
+
+    def test_schema_version_set(self):
+        pkg = BackendManualApplyPackage()
+        assert pkg.schema_version == "1.0"
+
+
+class Test94OPackageToDict:
+    """BackendManualApplyPackage serialization."""
+
+    def test_to_dict_has_no_execution_performed(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-td01")
+        d = pkg.to_dict()
+        assert d["no_execution_performed"] is True
+
+    def test_to_dict_does_not_imply_commit_push_authorization(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-td02")
+        d = pkg.to_dict()
+        assert "commit_authorized" not in d
+        assert "push_authorized" not in d
+        assert "authorize_commit" not in d
+        assert "authorize_push" not in d
+
+    def test_to_dict_does_not_imply_backend_invocation(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-td03")
+        d = pkg.to_dict()
+        assert "backend_invocation" not in d or d.get("no_execution_performed") is True
+
+    def test_to_dict_roundtrip(self):
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-rt01", apply_plan_id="pl-rt01",
+            output_hash="h-rt01", phase_id="94O.1",
+            no_execution_performed=True, apply_ready=False,
+        )
+        d = pkg.to_dict()
+        pkg2 = BackendManualApplyPackage.from_dict(d)
+        assert pkg2.package_id == "pkg-rt01"
+        assert pkg2.output_hash == "h-rt01"
+        assert pkg2.no_execution_performed is True
+        assert pkg2.apply_ready is False
+
+    def test_to_dict_no_secrets(self):
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-sec01", output_hash="abc", operator_notes="ok"
+        )
+        j = json.dumps(pkg.to_dict())
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+    def test_multipart_phase_id_preserved(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-mp01", phase_id="94O.2.3")
+        assert pkg.to_dict()["phase_id"] == "94O.2.3"
+
+
+class Test94OPackageFromPlan:
+    """create_backend_manual_apply_package from ApplyPlan."""
+
+    def test_binds_apply_plan_id(self):
+        plan = ApplyPlan(apply_plan_id="pl-bind01", review_id="rv-b01", output_hash="h-b01")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.apply_plan_id == "pl-bind01"
+
+    def test_binds_output_hash(self):
+        plan = ApplyPlan(apply_plan_id="pl-oh01", review_id="rv-oh01", output_hash="hash-oh01")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.output_hash == "hash-oh01"
+
+    def test_binds_request_id(self):
+        plan = ApplyPlan(apply_plan_id="pl-rq01", review_id="rv-rq01",
+                          output_hash="h-rq01", request_id="req-rq01")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.request_id == "req-rq01"
+
+    def test_no_execution_always_true(self):
+        plan = ApplyPlan(apply_plan_id="pl-ne01", review_id="rv-ne01", output_hash="h-ne01")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.no_execution_performed is True
+
+    def test_includes_operations_as_strings(self):
+        op = ApplyOperation(operation_type=OP_MANUAL, target_path="src/foo.py")
+        plan = ApplyPlan(apply_plan_id="pl-ops01", review_id="rv-ops01",
+                          output_hash="h-ops01", operations=[op])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert len(pkg.operations) == 1
+        assert "manual_instruction" in pkg.operations[0]
+        assert "src/foo.py" in pkg.operations[0]
+
+    def test_includes_hard_blocks(self):
+        plan = ApplyPlan(apply_plan_id="pl-hb01", review_id="rv-hb01",
+                          output_hash="h-hb01", hard_blocks=["forbidden_file:src/x.py"])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert "forbidden_file:src/x.py" in pkg.hard_blocks
+
+    def test_includes_missing_evidence(self):
+        plan = ApplyPlan(apply_plan_id="pl-me01", review_id="rv-me01",
+                          output_hash="h-me01", missing_evidence=["approval"])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert "approval" in pkg.missing_evidence
+
+    def test_includes_rollback_required(self):
+        plan = ApplyPlan(apply_plan_id="pl-rb01", review_id="rv-rb01",
+                          output_hash="h-rb01", rollback_required=True)
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.rollback_required is True
+
+    def test_includes_tests_to_run(self):
+        plan = ApplyPlan(apply_plan_id="pl-tr01", review_id="rv-tr01",
+                          output_hash="h-tr01", tests_to_run=["pytest tests/"])
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert "pytest tests/" in pkg.tests_to_run
+
+    def test_includes_checks_to_run_when_check_required(self):
+        plan = ApplyPlan(apply_plan_id="pl-cr01", review_id="rv-cr01",
+                          output_hash="h-cr01", check_required=True)
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert len(pkg.checks_to_run) > 0
+
+    def test_multipart_phase_id_from_plan(self):
+        plan = ApplyPlan(apply_plan_id="pl-mp01", review_id="rv-mp01",
+                          output_hash="h-mp01", phase_id="94O.3.4")
+        pkg = create_backend_manual_apply_package(plan=plan)
+        assert pkg.phase_id == "94O.3.4"
+
+
+class Test94OPackageFromAssessment:
+    """create_backend_manual_apply_package includes readiness assessment."""
+
+    def test_includes_readiness_status(self):
+        from pcae.core.backend_invocations import BackendApplyReadinessAssessment
+        plan = ApplyPlan(apply_plan_id="pl-as01", review_id="rv-as01", output_hash="h-as01")
+        assessment = BackendApplyReadinessAssessment(
+            assessment_id="ra-as01", status="blocked",
+            apply_ready=False, hard_blocks=["forbidden_file:x"],
+        )
+        pkg = create_backend_manual_apply_package(plan=plan, assessment=assessment)
+        assert pkg.readiness_status == "blocked"
+        assert pkg.readiness_assessment_id == "ra-as01"
+        assert "forbidden_file:x" in pkg.hard_blocks
+
+    def test_apply_ready_mirrors_assessment(self):
+        from pcae.core.backend_invocations import BackendApplyReadinessAssessment
+        plan = ApplyPlan(apply_plan_id="pl-ar01", review_id="rv-ar01", output_hash="h-ar01")
+        assessment = BackendApplyReadinessAssessment(
+            assessment_id="ra-ar01", status="missing_evidence", apply_ready=False,
+        )
+        pkg = create_backend_manual_apply_package(plan=plan, assessment=assessment)
+        assert pkg.apply_ready is False
+
+    def test_apply_ready_true_still_no_execution(self):
+        from pcae.core.backend_invocations import BackendApplyReadinessAssessment
+        plan = ApplyPlan(apply_plan_id="pl-ar02", review_id="rv-ar02", output_hash="h-ar02")
+        assessment = BackendApplyReadinessAssessment(
+            assessment_id="ra-ar02", status="ready", apply_ready=True,
+        )
+        pkg = create_backend_manual_apply_package(plan=plan, assessment=assessment)
+        assert pkg.apply_ready is True
+        assert pkg.no_execution_performed is True
+
+    def test_merges_hard_blocks_from_assessment(self):
+        from pcae.core.backend_invocations import BackendApplyReadinessAssessment
+        plan = ApplyPlan(apply_plan_id="pl-mhb01", review_id="rv-mhb01",
+                          output_hash="h-mhb01", hard_blocks=["plan_block"])
+        assessment = BackendApplyReadinessAssessment(
+            assessment_id="ra-mhb01", hard_blocks=["assessment_block"],
+        )
+        pkg = create_backend_manual_apply_package(plan=plan, assessment=assessment)
+        assert "plan_block" in pkg.hard_blocks
+        assert "assessment_block" in pkg.hard_blocks
+
+
+class Test94OPackageMarkdown:
+    """BackendManualApplyPackage.render_markdown() safety."""
+
+    def test_markdown_includes_no_execution_confirmation(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-md01", output_hash="h-md01")
+        md = pkg.render_markdown()
+        assert "no_execution_performed" in md
+        assert "No files were modified" in md
+
+    def test_markdown_includes_no_apply_confirmation(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-md02")
+        md = pkg.render_markdown()
+        assert "No apply" in md or "No apply was executed" in md
+
+    def test_markdown_no_raw_secrets(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-md03", operator_notes="ok")
+        md = pkg.render_markdown()
+        assert "sk-ant" not in md
+        assert "api_key" not in md.lower()
+
+    def test_markdown_includes_hard_blocks(self):
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-md04", hard_blocks=["forbidden_file:src/x.py"]
+        )
+        md = pkg.render_markdown()
+        assert "forbidden_file:src/x.py" in md
+
+    def test_markdown_includes_rollback_section(self):
+        pkg = BackendManualApplyPackage(package_id="pkg-md05", rollback_required=True)
+        md = pkg.render_markdown()
+        assert "Rollback" in md
+
+    def test_markdown_advisory_label_on_instructions(self):
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-md06", manual_apply_instructions="Step 1: do X"
+        )
+        md = pkg.render_markdown()
+        assert "advisory" in md.lower() or "human operator" in md.lower()
+
+    def test_markdown_tests_section(self):
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-md07", tests_to_run=["pytest tests/"]
+        )
+        md = pkg.render_markdown()
+        assert "pytest tests/" in md
+
+    def test_markdown_checks_section(self):
+        pkg = BackendManualApplyPackage(
+            package_id="pkg-md08", checks_to_run=["pcae check"]
+        )
+        md = pkg.render_markdown()
+        assert "pcae check" in md
+
+
+class Test94OPersistPackage:
+    """persist_manual_apply_package writes JSON + Markdown."""
+
+    def _make_pkg(self) -> BackendManualApplyPackage:
+        return BackendManualApplyPackage(
+            package_id="pkg-p01", apply_plan_id="pl-p01",
+            output_hash="h-p01", no_execution_performed=True,
+        )
+
+    def test_persist_returns_written(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = self._make_pkg()
+            result = persist_manual_apply_package(pkg)
+            assert result["status"] == "written"
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_persist_writes_json(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = self._make_pkg()
+            result = persist_manual_apply_package(pkg)
+            assert "json_path" in result
+            from pathlib import Path
+            assert Path(result["json_path"]).is_file()
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_persist_writes_markdown(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = self._make_pkg()
+            result = persist_manual_apply_package(pkg)
+            assert "md_path" in result
+            from pathlib import Path
+            assert Path(result["md_path"]).is_file()
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_persist_updates_latest_json(self, tmp_path):
+        import json as _json
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = self._make_pkg()
+            persist_manual_apply_package(pkg)
+            latest = _json.loads((tmp_path / "packages" / "latest.json").read_text())
+            assert latest["package_id"] == "pkg-p01"
+            assert latest["no_execution_performed"] is True
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_persist_updates_latest_md(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = self._make_pkg()
+            persist_manual_apply_package(pkg)
+            md = (tmp_path / "packages" / "latest.md").read_text()
+            assert "pkg-p01" in md
+            assert "No files were modified" in md
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_persist_no_secrets_in_json(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = self._make_pkg()
+            persist_manual_apply_package(pkg)
+            content = (tmp_path / "packages" / "latest.json").read_text()
+            assert "sk-ant" not in content
+            assert "api_key" not in content.lower()
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_persist_no_secrets_in_markdown(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = self._make_pkg()
+            persist_manual_apply_package(pkg)
+            content = (tmp_path / "packages" / "latest.md").read_text()
+            assert "sk-ant" not in content
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+
+class Test94OReadLatestPackage:
+    """read_latest_manual_apply_package coverage."""
+
+    def test_returns_none_when_missing(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "no-packages")
+        try:
+            assert read_latest_manual_apply_package() is None
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_returns_package_after_persist(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages")
+        try:
+            pkg = BackendManualApplyPackage(package_id="pkg-rlt01", output_hash="h-rlt01")
+            persist_manual_apply_package(pkg)
+            loaded = read_latest_manual_apply_package()
+            assert loaded is not None
+            assert loaded.package_id == "pkg-rlt01"
+            assert loaded.no_execution_performed is True
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+    def test_roundtrip_preserves_phase_id(self, tmp_path):
+        import pcae.core.backend_invocations as _bi
+        orig = _bi._MANUAL_APPLY_PACKAGES_DIR
+        _bi._MANUAL_APPLY_PACKAGES_DIR = str(tmp_path / "packages-ph")
+        try:
+            pkg = BackendManualApplyPackage(package_id="pkg-ph01", phase_id="94O.5.6")
+            persist_manual_apply_package(pkg)
+            loaded = read_latest_manual_apply_package()
+            assert loaded.phase_id == "94O.5.6"
+        finally:
+            _bi._MANUAL_APPLY_PACKAGES_DIR = orig
+
+
+class Test94ONoExecutionInPackageModule:
+    """Package module introduces no execution capability."""
+
+    def test_no_subprocess_in_core(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+
+    def test_no_network_in_core(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_manual_apply_packages_dir_in_gitignore(self):
+        from pathlib import Path
+        gitignore = Path(".pcae/.gitignore")
+        assert gitignore.exists()
+        content = gitignore.read_text()
+        assert "backend-manual-apply-packages/" in content
+
+    def test_no_telegram_inbound_in_core(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "getUpdates" not in source

@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 94O: Backend Manual Apply Package (completed).
+
+Implementation phase. Added `BackendManualApplyPackage` model with JSON+Markdown
+persistence and `pcae backend manual-apply-package show/create` CLI commands.
+Package bundles evidence from `ApplyPlan` (94K) and `BackendApplyReadinessAssessment`
+(94L) into a human-readable artifact for manual operator review.
+`no_execution_performed=True` enforced as hard default; no apply, no file mutation,
+no subprocess, no network. 49 new model tests (244 total), 25 new CLI tests (122 total).
+Fast-green: 3658/3658. Delivers docs/PHASE_94_BACKEND_MANUAL_APPLY_PACKAGE.md.
+
 Phase 94N: Backend Apply Plan CLI (completed).
 
 Implementation phase. Added `pcae backend apply-plan show/create/validate` CLI commands
