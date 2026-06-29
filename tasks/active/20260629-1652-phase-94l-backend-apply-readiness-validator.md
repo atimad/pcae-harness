@@ -22,19 +22,8 @@ Phase 94L — Backend Apply Readiness Validator
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- .pcae/.gitignore
-- src/pcae/cli.py
-- src/pcae/commands/backend.py
-- src/pcae/core/backend_invocations.py
-- tests/test_backend_invocations.py
-- docs/PHASE_94_BACKEND_APPLY_READINESS_VALIDATOR.md
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
