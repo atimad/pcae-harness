@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 93A.1 — Fast-Green Failure Classification and Baseline Repair (20260629-93a-1-fast-green-failure-classification-and-baseline-repair)
 - 93A — Narrow Shell Gate Design (20260629-93a-narrow-shell-gate-design)
 - 92D.1 — Notification and Phase Report Status UX Repair (20260629-0017-92d-1-notification-and-phase-report-status-ux-repair)
 - 92D — Automatic Phase-Finalization Notification Hook (20260629-0003-92d-automatic-phase-finalization-notification-hook)

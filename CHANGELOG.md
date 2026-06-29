@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Completed Phase 93A.1 fast-green failure classification: investigated single transient failure (test_pytest_dry_run_not_blocked).
+- Root cause: transient environmental flakiness, not a code defect. Fast-green restored to 3305/3305.
+- No tests weakened, marked xfail, or skipped. Failure documented as accepted follow-up.
+- Delivers docs/PHASE_93_FAST_GREEN_FAILURE_CLASSIFICATION.md.
 - Completed Phase 93A narrow shell gate design: defined Production v1 shell-gate surface with 10 command classes.
 - Explicit PCAE-mediated check only; no shell interception, wrappers, or global replacement. 16-section design document.
 - Shell gate consumes 91A/91B/91C permission broker and hard-block registry; integrates with 92A–92D reports/notifications.

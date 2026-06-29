@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 93A.1: Fast-Green Failure Classification and Baseline Repair (completed).
+
+Corrective classification phase. Investigated the single fast-green failure
+(3304/3305) observed after Phase 93A. Root cause: transient environmental
+flakiness — not a code defect. Failure could not be reproduced in isolation,
+with xdist, or in full suite. Fast-green restored to 3305/3305, zero failures.
+No tests weakened, marked xfail, or skipped. Failure documented as accepted
+follow-up observation.
+Delivers docs/PHASE_93_FAST_GREEN_FAILURE_CLASSIFICATION.md.
+
 Phase 93A: Narrow Shell Gate Design (completed).
 
 Design-only phase. Defined the narrow Production v1 shell-gate surface: 10 command
