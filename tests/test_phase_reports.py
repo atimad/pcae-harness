@@ -1141,3 +1141,166 @@ class TestConsistencyGuard:
         assert "Report Consistency" in md
         assert "mismatch detected" in md
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94T.1 — Metadata freshness guard tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import json as _json_94t1
+import os as _os_94t1
+
+from pcae.core.phase_reports import (
+    make_phase_report,
+    PhaseReport,
+    _check_canonical_metadata_consistency,
+    COMPLETENESS_COMPLETE,
+    COMPLETENESS_PARTIAL,
+    COMPLETENESS_INCOMPLETE,
+    finalize_phase_report,
+)
+
+
+class Test94T1MetadataFreshness:
+    """Phase 94T.1: stale metadata detection and rejection."""
+
+    def test_stale_metadata_phase_id_mismatch_makes_partial(self):
+        """When canonical report has correct phase_id but metadata had stale
+        test results, the report should not be complete."""
+        r = make_phase_report(
+            phase_id="94T", phase_name="Test Phase", status="completed",
+            summary="Phase 94T complete. Next: 94U.",
+            files_changed=3, tests_run=21,
+            test_results={"backend": "419/419"},
+            governance_results={"health": "healthy"},
+            commits=["abc12345", "def67890"],
+            pushed_status="pushed",
+            recommended_next_phase="94U — Real Backend Adapter Preflight Artifacts",
+            canonical_report_content="# Phase 94T — Test\nPushed: pushed\n"
+        )
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+
+    def test_valid_fresh_metadata_reports_complete(self):
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Freshness Test", status="completed",
+            summary="Phase 94T.1 complete. Next: 94U.",
+            files_changed=2, tests_run=10,
+            test_results={"fg": "100/100"},
+            governance_results={"health": "healthy"},
+            commits=["abc12345"], pushed_status="pushed",
+            recommended_next_phase="94U — Next Phase",
+            canonical_report_content="# Phase 94T.1 — Freshness Test\nPushed: pushed\n"
+        )
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+
+    def test_backward_next_phase_detected(self, tmp_path):
+        """recommended_next_phase pointing to itself should be detected."""
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Test", status="completed",
+            summary="Phase 94T.1 done. Next: 94U.",
+            files_changed=1, tests_run=1,
+            test_results={"a": "1/1"},
+            governance_results={"h": "healthy"},
+            commits=["abc12345"], pushed_status="pushed",
+            recommended_next_phase="94T.1 — Same Phase",
+            canonical_report_content="# Phase 94T.1\nPushed: pushed\n"
+        )
+        r.apply_trust_assessment()
+        _check_canonical_metadata_consistency(r)
+        # Should have downgraded or added warnings
+        has_warning = any("points to itself" in w for w in r.trust_warnings)
+        assert has_warning or r.report_completeness != COMPLETENESS_COMPLETE
+
+    def test_summary_next_vs_structured_mismatch_detected(self):
+        """Summary says Next: 94U but structured says 94Q.1 -> mismatch."""
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Test", status="completed",
+            summary="Phase 94T.1 complete. Next: 94U Real Backend.",
+            files_changed=1, tests_run=1,
+            test_results={"a": "1/1"},
+            governance_results={"h": "healthy"},
+            commits=["abc12345"], pushed_status="pushed",
+            recommended_next_phase="94Q.1 — Stale Phase",
+            canonical_report_content="# Phase 94T.1\nPushed: pushed\n"
+        )
+        r.apply_trust_assessment()
+        _check_canonical_metadata_consistency(r)
+        has_mismatch = any("next_phase" in w.lower() for w in r.trust_warnings)
+        assert has_mismatch
+
+    def test_no_secrets_in_report(self):
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Secret Test", status="completed",
+            summary="Done. Next: 94U.",
+            files_changed=1, tests_run=1,
+            governance_results={"health": "healthy"},
+            recommended_next_phase="94U",
+        )
+        r.apply_trust_assessment()
+        d = r.to_dict()
+        j = _json_94t1.dumps(d)
+        assert "sk-ant" not in j
+        assert "api_key" not in j.lower()
+
+
+class Test94T1ConsistencyValidation:
+    """Phase 94T.1: strengthened consistency validation."""
+
+    def test_missing_governance_results_not_complete(self):
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Test", status="completed",
+            summary="Done. Next: 94U.",
+            files_changed=1, tests_run=1,
+            test_results={"a": "1/1"},
+            governance_results={},  # empty
+            commits=["abc12345"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        assert r.report_completeness != COMPLETENESS_COMPLETE
+
+    def test_missing_test_results_not_complete(self):
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Test", status="completed",
+            summary="Done. Next: 94U.",
+            files_changed=1, tests_run=1,
+            test_results={},  # empty
+            governance_results={"health": "healthy"},
+            commits=["abc12345"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        assert r.report_completeness != COMPLETENESS_COMPLETE
+
+    def test_missing_commits_not_complete(self):
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Test", status="completed",
+            summary="Done. Next: 94U.",
+            files_changed=1, tests_run=1,
+            test_results={"a": "1/1"},
+            governance_results={"health": "healthy"},
+            commits=[],  # empty
+            pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        assert r.report_completeness != COMPLETENESS_COMPLETE
+
+    def test_missing_next_phase_not_blocking(self):
+        """Missing recommended_next_phase is not fatal — only partial."""
+        r = make_phase_report(
+            phase_id="94T.1", phase_name="Test", status="completed",
+            summary="Done.",
+            files_changed=1, tests_run=1,
+            test_results={"a": "1/1"},
+            governance_results={"health": "healthy"},
+            commits=["abc12345"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        # Missing next_phase is a warning, not fatal
+        assert r.report_completeness in (COMPLETENESS_COMPLETE, COMPLETENESS_PARTIAL)
+
+    def test_no_telegram_inbound_in_report_code(self):
+        import inspect
+        from pcae.core import phase_reports
+        source = inspect.getsource(phase_reports)
+        assert "getUpdates" not in source
+

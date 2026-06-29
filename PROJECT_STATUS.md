@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 94T.1: Phase Completion Metadata Freshness Guard (completed).
+
+Corrective reporting fix. Added metadata freshness guard to `_finalize_report_and_notify()`:
+compares metadata `phase_id` against completing phase, discards stale metadata on mismatch.
+Added backward next-phase detection and summary-to-structured next-phase consistency check
+to `_check_canonical_metadata_consistency()`. 10 new tests (172 report total).
+Fixes recurring stale-metadata Telegram bug across 94Q.1/94R/94T.
+Delivers docs/PHASE_94T1_PHASE_COMPLETION_METADATA_FRESHNESS_GUARD.md.
+
 Phase 94T: Real Backend Adapter Preflight CLI (completed).
 
 Implementation phase. Added `pcae backend adapter list/show/preflight` CLI commands.

@@ -638,6 +638,53 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
                     f"phase commit: canonical={canon_commit} metadata={phase_commit}"
                 )
 
+    # ── 5. Phase 94T.1: Summary-to-structured next-phase mismatch ────────
+    summary = report.summary
+    if summary and report.recommended_next_phase:
+        # Extract next phase from summary text (same pattern as _derive_next_phase)
+        summary_next = None
+        for pat in [
+            r'Next(?:\s+phase)?[:\s]+(\d+[A-Za-z]*(?:\.[\d]+)*)\b',
+            r'Recommended\s+next\s+phase[:\s]+(\d+[A-Za-z]*(?:\.[\d]+)*)\b',
+        ]:
+            sm = re.search(pat, summary, re.IGNORECASE)
+            if sm:
+                summary_next = sm.group(1)
+                break
+        if summary_next:
+            # Extract from structured
+            structured_match = re.match(
+                r'^(\d+[A-Za-z]*(?:\.[\d]+)*)', report.recommended_next_phase.strip()
+            )
+            if structured_match:
+                structured_phase = structured_match.group(1)
+                if summary_next != structured_phase:
+                    mismatches.append(
+                        f"next_phase: summary={summary_next} structured={structured_phase}"
+                    )
+
+    # ── 6. Phase 94T.1: Backward-pointing recommended next phase ────────
+    if report.phase_id and report.recommended_next_phase:
+        current = report.phase_id
+        next_match = re.match(
+            r'^(\d+[A-Za-z]*(?:\.[\d]+)*)', report.recommended_next_phase.strip()
+        )
+        if next_match:
+            next_num = next_match.group(1)
+            # If next phase number equals current or points backward
+            if next_num == current:
+                mismatches.append(
+                    f"recommended_next_phase={next_num} points to itself (current={current})"
+                )
+            elif (
+                len(next_num) >= 3 and len(current) >= 3
+                and next_num[:2] == current[:2]  # same series (e.g. both 94)
+                and next_num < current            # but earlier in series
+            ):
+                mismatches.append(
+                    f"recommended_next_phase={next_num} points backward from {current}"
+                )
+
     # Apply mismatches to trust
     if mismatches:
         report.trust_warnings.append(

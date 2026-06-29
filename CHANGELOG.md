@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94T — Real Backend Adapter Preflight CLI to Phase 94T.1 — Phase Completion Metadata Freshness Guard; session refreshed and governance continuity revalidated.
+- Completed Phase 94T.1 Phase Completion Metadata Freshness Guard: fixes recurring stale-metadata bug.
+- _finalize_report_and_notify() now compares metadata phase_id against completing phase; discards stale metadata.
+- Backward-pointing recommended_next_phase detection. Summary-to-structured next-phase consistency check.
+- _check_canonical_metadata_consistency() strengthened with 2 new checks (summary mismatch, self-referential next).
+- 10 new tests (172 report/notification total). Delivers docs/PHASE_94T1_PHASE_COMPLETION_METADATA_FRESHNESS_GUARD.md.
+
 - Transitioned active task from Phase 94S — Real Backend Adapter Contract Model to Phase 94T — Real Backend Adapter Preflight CLI; session refreshed and governance continuity revalidated.
 - Completed Phase 94T Real Backend Adapter Preflight CLI: pcae backend adapter list/show/preflight commands.
 - Read-only and env-presence-only. Fail-closed on unknown backends and missing env.

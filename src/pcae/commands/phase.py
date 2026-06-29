@@ -79,6 +79,36 @@ def _finalize_report_and_notify(summary: str) -> None:
     # Load structured metadata if available
     meta = _load_completion_metadata()
 
+    # ── Phase 94T.1: metadata freshness guard ───────────────────────────
+    meta_phase_id = meta.get("phase_id", "")
+    if meta_phase_id and meta_phase_id != phase_id:
+        print(f"Warning: metadata phase_id={meta_phase_id!r} does not match "
+              f"completing phase {phase_id!r}. Discarding stale metadata.")
+        meta = {}
+    elif meta:
+        # Check for backward-pointing recommended_next_phase
+        meta_next = meta.get("recommended_next_phase", "")
+        if meta_next:
+            # Extract the phase number from the recommended next
+            import re as _re
+            meta_next_num = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+)*)', meta_next.strip())
+            if meta_next_num:
+                next_num = meta_next_num.group(1)
+                # A recommended next phase should not be before/equal to current
+                # This is a heuristic — if the next phase looks like it's before
+                # the current phase alphabetically, flag it
+                if next_num == phase_id or (
+                    len(next_num) >= 2 and len(phase_id) >= 2 and
+                    next_num[:2] == phase_id[:2] and
+                    next_num < phase_id
+                ):
+                    print(f"Warning: metadata recommended_next_phase={meta_next!r} "
+                          f"appears stale (points to {next_num}, current phase is {phase_id}). "
+                          f"Ignoring stale recommended_next_phase.")
+                    # Don't discard entire meta, just clear the suspect field
+                    meta.pop("recommended_next_phase", None)
+    # ── End freshness guard ─────────────────────────────────────────────
+
     # Use metadata values when available, fall back to git-derived values
     files_changed_list = meta.get("files_changed", [])
     files_changed_count = meta.get("files_changed_count", 0)

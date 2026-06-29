@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 94T — Real Backend Adapter Preflight CLI (20260629-2035-phase-94s-real-backend-adapter-contract-model)
+- Phase 94T.1 — Phase Completion Metadata Freshness Guard (20260629-2058-phase-94t-real-backend-adapter-preflight-cli)
+- Phase 94T — Real Backend Adapter Preflight CLI (20260629-2058-phase-94t-real-backend-adapter-preflight-cli)
 - Phase 94S — Real Backend Adapter Contract Model (20260629-2035-phase-94s-real-backend-adapter-contract-model)
 - Phase 94R — Backend Real Adapter Design (20260629-2022-phase-94r-backend-real-adapter-design)
 - Phase 94Q.1 — Bootstrap Resume and Telegram Runtime Hardening (20260629-2009-phase-94q-1-bootstrap-resume-and-telegram-runtime-hardening)
