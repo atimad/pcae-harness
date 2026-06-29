@@ -2,6 +2,12 @@
 
 ## Current Phase
 
+Phase 95A: Artifact-Only Real Invocation Dry-Run Boundary (completed).
+
+Dry-run assessment model (40 fields) evaluates evidence chain without execution.
+All execution flags hard-default False. CLI evaluate/show/verify. 13 new tests
+(527 model total). Delivers docs/PHASE_95_ARTIFACT_ONLY_REAL_INVOCATION_DRY_RUN_BOUNDARY.md.
+
 Phase 94Z: Real Adapter Invocation Plan Artifact (completed).
 
 RealAdapterInvocationPlan (37 fields) with SHA-256 digest. Binds adapter, request, prompt,

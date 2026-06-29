@@ -457,6 +457,9 @@ from pcae.commands.backend import (
     run_backend_adapter_approval_verify,
     run_backend_adapter_plan_show,
     run_backend_adapter_plan_verify,
+    run_backend_adapter_dry_run_evaluate,
+    run_backend_adapter_dry_run_show,
+    run_backend_adapter_dry_run_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4912,6 +4915,29 @@ def build_parser() -> argparse.ArgumentParser:
     plan_verify.add_argument("--latest", action="store_true", default=True)
     plan_verify.add_argument("--json", action="store_true")
     plan_verify.set_defaults(handler=run_backend_adapter_plan_verify)
+
+    # ── Phase 95A: dry-run evaluate/show/verify ─────────────────────────
+    adapter_dry_run = be_adapter_sub.add_parser(
+        "dry-run", help="Artifact-only real invocation dry-run boundary."
+    )
+    adapter_dr_sub = adapter_dry_run.add_subparsers(
+        dest="backend_adapter_dry_run_command", required=True,
+    )
+    dr_eval = adapter_dr_sub.add_parser("evaluate", help="Evaluate evidence chain.")
+    dr_eval.add_argument("--plan-artifact", required=True, help="Path to plan JSON.")
+    dr_eval.add_argument("--save", action="store_true", help="Persist assessment.")
+    dr_eval.add_argument("--json", action="store_true")
+    dr_eval.set_defaults(handler=run_backend_adapter_dry_run_evaluate)
+
+    dr_show = adapter_dr_sub.add_parser("show", help="Show latest assessment.")
+    dr_show.add_argument("--latest", action="store_true", default=True)
+    dr_show.add_argument("--json", action="store_true")
+    dr_show.set_defaults(handler=run_backend_adapter_dry_run_show)
+
+    dr_verify = adapter_dr_sub.add_parser("verify", help="Verify latest assessment.")
+    dr_verify.add_argument("--latest", action="store_true", default=True)
+    dr_verify.add_argument("--json", action="store_true")
+    dr_verify.set_defaults(handler=run_backend_adapter_dry_run_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

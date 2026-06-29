@@ -5039,3 +5039,256 @@ def load_latest_real_adapter_invocation_plan() -> RealAdapterInvocationPlan | No
         return RealAdapterInvocationPlan.from_dict(data)
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95A — Artifact-only real invocation dry-run boundary
+# ═══════════════════════════════════════════════════════════════════════════
+
+_DRY_RUN_DIR = ".pcae/artifact-only-real-invocation-dry-runs"
+_DRY_RUN_SCHEMA_VERSION = "1.0"
+
+
+@dataclass
+class ArtifactOnlyRealInvocationDryRunAssessment:
+    """Dry-run readiness assessment for artifact-only real invocation.
+
+    Evaluates the complete evidence chain without executing anything.
+    All execution flags are hard-defaulted to False.
+    """
+
+    assessment_id: str = ""
+    plan_id: str = ""
+    adapter_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ""
+    request_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    prompt_hash: str = ""
+    preflight_artifact_id: str = ""
+    preflight_digest: str = ""
+    approval_id: str = ""
+    approval_digest: str = ""
+    plan_digest: str = ""
+    broker_required: bool = True
+    broker_expected_decision: str = ""
+    broker_dry_run_decision: str = ""
+    shell_gate_required: bool = True
+    shell_gate_expected_decision: str = ""
+    shell_gate_dry_run_decision: str = ""
+    output_quarantine_path: str = ""
+    audit_artifact_path: str = ""
+    timeout_seconds: int = 0
+    execution_allowed: bool = False
+    execution_ready: bool = False
+    dry_run_only: bool = True
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    deny_reasons: list[str] = field(default_factory=list)
+    evidence_chain_valid: bool = False
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_auto_apply: bool = True
+    no_commit_authorization: bool = True
+    no_push_authorization: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _DRY_RUN_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d: dict[str, Any] = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["hard_blocks"] = list(self.hard_blocks)
+        d["warnings"] = list(self.warnings)
+        d["missing_evidence"] = list(self.missing_evidence)
+        d["deny_reasons"] = list(self.deny_reasons)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArtifactOnlyRealInvocationDryRunAssessment":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+def _dry_run_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_DRY_RUN_DIR)
+
+
+def evaluate_artifact_only_real_invocation_dry_run(
+    *,
+    plan: RealAdapterInvocationPlan | None = None,
+    preflight_artifact: BackendAdapterPreflightArtifact | None = None,
+    approval_artifact: RealAdapterInvocationApproval | None = None,
+    contract: BackendAdapterContract | None = None,
+) -> ArtifactOnlyRealInvocationDryRunAssessment:
+    """Evaluate evidence chain for artifact-only real invocation. Dry-run only.
+
+    Never executes, never invokes backends, never spawns subprocess.
+    Always returns execution_allowed=False, dry_run_only=True.
+    """
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    assessment_id = f"dra-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    warnings_list: list[str] = []
+    missing: list[str] = []
+    deny: list[str] = []
+
+    # ── Plan evidence ──────────────────────────────────────────────────
+    if plan is None:
+        hard_blocks.append("invocation_plan_missing")
+    else:
+        plan_result = verify_real_adapter_invocation_plan(plan)
+        if not plan_result["valid"]:
+            hard_blocks.extend(f"plan:{i}" for i in plan_result["issues"])
+        if plan.real_backend_invocation_allowed:
+            hard_blocks.append("plan:real_backend_invocation_allowed=True")
+        if plan.execution_ready:
+            hard_blocks.append("plan:execution_ready=True")
+        if not plan.no_auto_apply:
+            hard_blocks.append("plan:no_auto_apply=False")
+        if not plan.no_commit_authorization:
+            hard_blocks.append("plan:no_commit_authorization=False")
+        if not plan.no_push_authorization:
+            hard_blocks.append("plan:no_push_authorization=False")
+
+    # ── Preflight evidence ─────────────────────────────────────────────
+    if preflight_artifact is None:
+        hard_blocks.append("preflight_artifact_missing")
+    else:
+        pf_result = verify_backend_adapter_preflight_artifact(preflight_artifact)
+        if not pf_result["valid"]:
+            hard_blocks.extend(f"preflight:{i}" for i in pf_result["issues"])
+
+    # ── Approval evidence ──────────────────────────────────────────────
+    if approval_artifact is None:
+        hard_blocks.append("approval_artifact_missing")
+    else:
+        ap_result = verify_real_adapter_invocation_approval(approval_artifact)
+        if not ap_result["valid"]:
+            hard_blocks.extend(f"approval:{i}" for i in ap_result["issues"])
+        if not approval_artifact.approval_effective:
+            hard_blocks.append("approval_not_effective")
+        if approval_artifact.decision != APPROVAL_APPROVED:
+            hard_blocks.append(f"approval_decision:{approval_artifact.decision}")
+
+    # ── Cross-artifact binding ─────────────────────────────────────────
+    if plan is not None and preflight_artifact is not None:
+        if plan.preflight_digest and preflight_artifact.record_digest:
+            if plan.preflight_digest != preflight_artifact.record_digest:
+                hard_blocks.append("plan_preflight_digest_mismatch")
+    if plan is not None and approval_artifact is not None:
+        if plan.approval_digest and approval_artifact.record_digest:
+            if plan.approval_digest != approval_artifact.record_digest:
+                hard_blocks.append("plan_approval_digest_mismatch")
+
+    # ── Plan structural checks ─────────────────────────────────────────
+    if plan is not None:
+        if not plan.output_quarantine_path:
+            missing.append("output_quarantine_path")
+        if not plan.audit_artifact_path:
+            missing.append("audit_artifact_path")
+        if plan.timeout_seconds <= 0:
+            hard_blocks.append("timeout_missing_or_invalid")
+
+    # ── Determine outcome ──────────────────────────────────────────────
+    for hb in hard_blocks:
+        deny.append(hb)
+    for m in missing:
+        deny.append(f"missing:{m}")
+
+    evidence_valid = len(hard_blocks) == 0 and len(missing) == 0
+    execution_allowed = False
+    execution_ready = False
+
+    return ArtifactOnlyRealInvocationDryRunAssessment(
+        assessment_id=assessment_id,
+        plan_id=plan.plan_id if plan else "",
+        adapter_id=plan.adapter_id if plan else "",
+        backend_id=plan.backend_id if plan else "",
+        backend_type=plan.backend_type if plan else "",
+        dry_run_only=True,
+        execution_allowed=execution_allowed,
+        execution_ready=execution_ready,
+        hard_blocks=hard_blocks,
+        warnings=warnings_list,
+        missing_evidence=missing,
+        deny_reasons=deny,
+        evidence_chain_valid=evidence_valid,
+        no_real_backend_invoked=True,
+        no_adapter_executed=True,
+        no_subprocess=True,
+        no_network=True,
+        no_auto_apply=True,
+        no_commit_authorization=True,
+        no_push_authorization=True,
+        created_at_utc=now,
+    )
+
+
+def persist_artifact_only_real_invocation_dry_run_assessment(
+    assessment: ArtifactOnlyRealInvocationDryRunAssessment,
+) -> dict:
+    import os
+    d = _dry_run_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    if not assessment.record_digest:
+        assessment.record_digest = assessment.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{assessment.assessment_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "record_digest": assessment.record_digest}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_artifact_only_real_invocation_dry_run_assessment(
+    assessment: ArtifactOnlyRealInvocationDryRunAssessment,
+) -> dict:
+    issues_list: list[str] = []
+    if not assessment.assessment_id:
+        issues_list.append("missing assessment_id")
+    if not assessment.record_digest:
+        issues_list.append("missing record_digest")
+    if assessment.record_digest and assessment.compute_digest() != assessment.record_digest:
+        issues_list.append("record_digest_mismatch")
+    if not assessment.dry_run_only:
+        issues_list.append("dry_run_only must be True")
+    if assessment.execution_allowed:
+        issues_list.append("execution_allowed must be False")
+    if not assessment.no_real_backend_invoked:
+        issues_list.append("no_real_backend_invoked must be True")
+    return {"valid": len(issues_list) == 0, "issues": issues_list}
+
+
+def load_latest_artifact_only_real_invocation_dry_run_assessment() -> (
+    "ArtifactOnlyRealInvocationDryRunAssessment | None"
+):
+    lp = _dry_run_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return ArtifactOnlyRealInvocationDryRunAssessment.from_dict(data) if isinstance(data, dict) and data else None
+    except Exception:
+        return None

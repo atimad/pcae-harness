@@ -5018,3 +5018,132 @@ class Test94ZPlanNoExecution:
         plan = RealAdapterInvocationPlan(plan_id="rip-sec")
         j = json.dumps(plan.to_dict())
         assert "sk-ant" not in j
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95A — Dry-run boundary tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyRealInvocationDryRunAssessment,
+    evaluate_artifact_only_real_invocation_dry_run,
+    persist_artifact_only_real_invocation_dry_run_assessment,
+    verify_artifact_only_real_invocation_dry_run_assessment,
+    load_latest_artifact_only_real_invocation_dry_run_assessment,
+)
+
+
+class Test95ADryRunAssessment:
+    """Dry-run assessment model and evaluation."""
+
+    def test_all_execution_flags_false(self):
+        a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-test")
+        assert a.execution_allowed is False
+        assert a.execution_ready is False
+        assert a.dry_run_only is True
+        assert a.no_real_backend_invoked is True
+        assert a.no_adapter_executed is True
+        assert a.no_subprocess is True
+        assert a.no_network is True
+
+    def test_missing_plan_blocks(self):
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=None)
+        assert a.execution_allowed is False
+        assert a.dry_run_only is True
+        assert any("plan" in hb.lower() for hb in a.hard_blocks)
+
+    def test_evaluate_with_valid_evidence(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="mock", backend_type="mock",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        plan.record_digest = plan.compute_digest()
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=plan)
+        assert a.execution_allowed is False
+        assert a.dry_run_only is True
+        assert a.no_real_backend_invoked is True
+
+    def test_serialization_round_trip(self):
+        a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-rt")
+        d = a.to_dict()
+        a2 = ArtifactOnlyRealInvocationDryRunAssessment.from_dict(d)
+        assert a2.assessment_id == "dra-rt"
+
+    def test_digest_verification(self):
+        a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-dig")
+        a.record_digest = a.compute_digest()
+        r = verify_artifact_only_real_invocation_dry_run_assessment(a)
+        assert r["valid"] is True
+
+    def test_tampered_digest_fails(self):
+        a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-tamp")
+        a.record_digest = a.compute_digest()
+        a.execution_allowed = True
+        r = verify_artifact_only_real_invocation_dry_run_assessment(a)
+        assert r["valid"] is False
+
+    def test_execution_allowed_true_fails_verify(self):
+        a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-ea", execution_allowed=True)
+        a.record_digest = a.compute_digest()
+        r = verify_artifact_only_real_invocation_dry_run_assessment(a)
+        assert r["valid"] is False
+
+    def test_persist_and_load(self, tmp_path):
+        import os
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-pl")
+            a.record_digest = a.compute_digest()
+            persist = persist_artifact_only_real_invocation_dry_run_assessment(a)
+            assert persist["status"] == "written"
+            loaded = load_latest_artifact_only_real_invocation_dry_run_assessment()
+            assert loaded is not None
+            assert loaded.assessment_id == "dra-pl"
+        finally:
+            os.chdir(orig)
+
+    def test_load_absent_returns_none(self, tmp_path):
+        import os
+        orig = os.getcwd()
+        try:
+            os.chdir(tmp_path)
+            assert load_latest_artifact_only_real_invocation_dry_run_assessment() is None
+        finally:
+            os.chdir(orig)
+
+    def test_no_secrets(self):
+        import json
+        a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-sec")
+        j = json.dumps(a.to_dict())
+        assert "sk-ant" not in j
+
+
+class Test95ADryRunCLI:
+    """CLI evaluate/show/verify."""
+
+    def test_evaluate_missing_plan_fails(self):
+        import subprocess, sys
+        from pathlib import Path
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "dry-run",
+             "evaluate", "--plan-artifact", "/nonexistent/path.json"],
+            capture_output=True, text=True,
+            cwd=Path(__file__).resolve().parent.parent, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_show_missing_handled(self, tmp_path):
+        import subprocess, sys
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "dry-run",
+             "show", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode != 0
+
+    def test_gitignore_has_dry_run_dir(self):
+        from pathlib import Path
+        gitignore = Path(__file__).resolve().parent.parent / ".pcae" / ".gitignore"
+        assert "artifact-only-real-invocation-dry-runs/" in gitignore.read_text()

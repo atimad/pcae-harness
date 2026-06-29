@@ -28,6 +28,11 @@ from pcae.core.backend_invocations import (
     load_latest_real_adapter_invocation_plan,
     verify_real_adapter_invocation_plan,
     persist_real_adapter_invocation_plan,
+    evaluate_artifact_only_real_invocation_dry_run,
+    ArtifactOnlyRealInvocationDryRunAssessment,
+    persist_artifact_only_real_invocation_dry_run_assessment,
+    load_latest_artifact_only_real_invocation_dry_run_assessment,
+    verify_artifact_only_real_invocation_dry_run_assessment,
     BackendAdapterContract,
     INVOCATION_MODE_DRY_RUN,
     APPROVAL_PENDING,
@@ -1743,4 +1748,101 @@ def run_backend_adapter_plan_verify(args: argparse.Namespace) -> int:
             print(f"Plan verification FAILED: {plan.backend_id}")
             for issue in result["issues"]:
                 print(f"  - {issue}")
+    return 0 if result["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95A — Artifact-only real invocation dry-run boundary CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_adapter_dry_run_evaluate(args: argparse.Namespace) -> int:
+    """pcae backend adapter dry-run evaluate --plan-artifact <path> [--save] [--json]
+
+    Evaluates evidence chain without executing anything.
+    """
+    from pathlib import Path as _P
+    plan_path: str = getattr(args, "plan_artifact", "") or ""
+    save: bool = getattr(args, "save", False) or False
+
+    if not plan_path:
+        msg = "Missing --plan-artifact <path>"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    p = _P(plan_path)
+    if not p.is_file():
+        msg = f"Plan artifact not found: {plan_path}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    try:
+        data = json.loads(p.read_text())
+        plan = RealAdapterInvocationPlan.from_dict(data)
+    except Exception as exc:
+        msg = f"Failed to load plan: {exc}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    assessment = evaluate_artifact_only_real_invocation_dry_run(plan=plan)
+
+    if save:
+        persist_artifact_only_real_invocation_dry_run_assessment(assessment)
+
+    if args.json:
+        print(json.dumps(assessment.to_dict(), indent=2))
+    else:
+        print(f"Dry-run assessment: {assessment.assessment_id}")
+        print(f"  Backend:             {assessment.backend_id}")
+        print(f"  Dry-run only:        {assessment.dry_run_only}")
+        print(f"  Evidence valid:      {assessment.evidence_chain_valid}")
+        print(f"  Execution allowed:   {assessment.execution_allowed}")
+        print(f"  Execution ready:     {assessment.execution_ready}")
+        if assessment.hard_blocks:
+            print(f"  Hard blocks:         {', '.join(assessment.hard_blocks)}")
+        if assessment.deny_reasons:
+            print(f"  Deny reasons:        {', '.join(assessment.deny_reasons)}")
+        print(f"  No real backend:     {assessment.no_real_backend_invoked}")
+        print(f"  No adapter executed: {assessment.no_adapter_executed}")
+        print(f"  No subprocess:       {assessment.no_subprocess}")
+        print(f"  No network:          {assessment.no_network}")
+        print()
+        print("  ⚠️  Dry-run only. No backend was invoked. No adapter was executed.")
+    return 0
+
+
+def run_backend_adapter_dry_run_show(args: argparse.Namespace) -> int:
+    """pcae backend adapter dry-run show --latest [--json]"""
+    a = load_latest_artifact_only_real_invocation_dry_run_assessment()
+    if a is None:
+        msg = "No dry-run assessments found."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    if args.json:
+        print(json.dumps(a.to_dict(), indent=2))
+    else:
+        print(f"Latest dry-run assessment: {a.backend_id}")
+        print(f"  Execution allowed:   {a.execution_allowed}")
+        print(f"  Evidence valid:      {a.evidence_chain_valid}")
+        print(f"  Dry-run only:        {a.dry_run_only}")
+        if a.hard_blocks:
+            print(f"  Hard blocks:         {', '.join(a.hard_blocks)}")
+        print(f"  Digest:              {a.record_digest[:16]}...")
+    return 0
+
+
+def run_backend_adapter_dry_run_verify(args: argparse.Namespace) -> int:
+    """pcae backend adapter dry-run verify --latest [--json]"""
+    a = load_latest_artifact_only_real_invocation_dry_run_assessment()
+    if a is None:
+        msg = "No dry-run assessments found to verify."
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+    result = verify_artifact_only_real_invocation_dry_run_assessment(a)
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"Dry-run assessment verified" if result["valid"] else "Verification FAILED")
+        for issue in result["issues"]:
+            print(f"  - {issue}")
     return 0 if result["valid"] else 1

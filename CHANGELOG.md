@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94Z — Real Adapter Invocation Plan Artifact to Phase 95A — Artifact-Only Real Invocation Dry-Run Boundary; session refreshed and governance continuity revalidated.
+- Completed Phase 95A Artifact-Only Real Invocation Dry-Run Boundary. 13 tests (527 model total).
+
 - Transitioned active task from Phase 94Y — Real Adapter Invocation Approval Model to Phase 94Z — Real Adapter Invocation Plan Artifact; session refreshed and governance continuity revalidated.
 - Completed Phase 94Z Real Adapter Invocation Plan Artifact. 16 tests (514 model total).
 
