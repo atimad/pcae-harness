@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 94A: Governed Backend Invocation Design (completed).
+
+Design-only phase. Defines backend abstraction (16-field registry), invocation
+request model (18 fields), lifecycle (11 steps), artifact model (.pcae/backend-invocations/),
+risk model (4 levels), future CLI (8 commands), failure modes, and ~60 planned tests.
+Backend output never auto-committed; always quarantined until human adoption.
+No implementation, invocation, shell interception, wrappers, or enforcement.
+Delivers docs/PHASE_94_GOVERNED_BACKEND_INVOCATION_DESIGN.md.
+
 Phase 93F: Shell Gate Audit Persistence Hardening (completed).
 
 Hardening phase: --no-audit-write flag, redaction safety (TOKEN/password/API-key

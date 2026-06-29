@@ -1,12 +1,12 @@
 {
-  "phase_id": "93F",
-  "phase_name": "Shell Gate Audit Persistence Hardening",
-  "files_changed": ["src/pcae/core/shell_gate.py", "src/pcae/commands/shell_gate.py", "src/pcae/cli.py", "tests/test_shell_gate.py"],
-  "files_changed_count": 4,
-  "tests_added_or_updated": "13 new",
+  "phase_id": "94A",
+  "phase_name": "Governed Backend Invocation Design",
+  "files_changed": ["docs/PHASE_94_GOVERNED_BACKEND_INVOCATION_DESIGN.md"],
+  "files_changed_count": 1,
+  "tests_added_or_updated": "0 (design-only)",
   "validation_results": [
-    {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
+    {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
     {"name": "Fast-green", "result": "3272/3272", "status": "passed"}
   ],
@@ -17,5 +17,5 @@
   ],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "TBD"
+  "recommended_next_phase": "94B — Governed Backend Invocation Prototype"
 }

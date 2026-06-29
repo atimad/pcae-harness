@@ -1,28 +1,33 @@
-# Phase 93F Complete — Shell Gate Audit Persistence Hardening
+# Phase 94A Complete — Governed Backend Invocation Design
 
 ## Summary
 
-Phase 93F hardens the 93E audit persistence: --no-audit-write flag, redaction safety
-tests for persisted records, verify edge cases (empty/missing/malformed), gitignore
-hygiene verification.
+Phase 94A defines how PCAE should invoke AI backends under governance.
+Design-only — no implementation.
 
-## Changes
+## Design
 
-- --no-audit-write flag on pcae shell-gate check
-- Redaction safety: TOKEN, --password, --api-key patterns never persisted
-- Verify handles: empty dir, missing dir, malformed JSON
-- Gitignore hygiene: .pcae/shell-gate-audit/ verified ignored
-- 13 new tests (142 total shell gate)
+- Backend abstraction: registry with 16 fields per backend
+- Invocation request: 18 fields including prompt_hash, broker_decision, audit_context
+- Lifecycle: prepare → validate → broker → shell-gate → review → invoke → capture → quarantine → review → apply
+- Key invariant: backend output never auto-committed; always quarantined until human adoption
+- Relationships defined to permission broker, shell gate, phase reports, Telegram
+- Artifact model: .pcae/backend-invocations/ matching existing conventions
+- Risk model: low/medium/high/critical with increasing autonomy restrictions
+
+## Non-Goals
+
+No backend invocation implementation, shell interception, wrappers, execution,
+enforcement, autonomous mutation, or Telegram inbound.
 
 ## Validation
 
-- Shell gate: 142/142
 - Broker: 265/265
+- Shell gate: 142/142
 - Report + notification: 161/161
 - Fast-green: 3272/3272
-- Health: healthy, check: passed, push: clean
 - origin/main..HEAD: 0
 
 ## Recommended Next Phase
 
-TBD
+94B — Governed Backend Invocation Prototype
