@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 94I: Backend Review/Apply Governance Design (completed).
+
+Design-only. Defined review state model (captured→quarantined→reviewed→approved→
+applied), apply readiness (13 requirements), human approval (hash-binding,
+expiration, non-override), artifact paths (.pcae/backend-reviews/), apply plan
+(15 fields), future CLI (6 commands), failure modes, ~50 planned tests.
+No implementation. Delivers docs/PHASE_94_BACKEND_REVIEW_APPLY_GOVERNANCE_DESIGN.md.
+
 Phase 94H: Backend Invocation Trust/Readiness Gate (completed).
 
 Implementation phase. Added assess_backend_invocation_trust(): fail-closed

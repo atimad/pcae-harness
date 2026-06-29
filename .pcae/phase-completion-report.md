@@ -1,32 +1,16 @@
-# Phase 94H Complete — Backend Invocation Trust/Readiness Gate
+# Phase 94I Complete — Backend Review/Apply Governance Design
 
 ## Summary
 
-Phase 94H implements assess_backend_invocation_trust(): fail-closed trust assessment.
-Checks prompt/output/audit presence, quarantine, no-apply, no-execution invariants.
-CLI: pcae backend readiness --latest.
+Design-only. Defines review state model (10 states), apply readiness (13 requirements),
+human approval model (hash-binding, expiration, non-override of hard blocks),
+artifact paths (.pcae/backend-reviews/), apply plan model (15 fields), future CLI
+(6 commands), failure modes (12), ~50 planned tests, 15 open questions.
 
-## Implementation
+## Non-Goals
 
-- assess_backend_invocation_trust(): 4 trust levels, 6 statuses, fail-closed
-- CLI: pcae backend readiness --latest [--json]
-- 9 new tests (91 total backend)
-
-## Trust Levels
-
-complete / partial / incomplete / untrusted
-
-## Fail-Closed
-
-output_not_quarantined → blocked, applied_to_repo → blocked,
-no_execution=False → blocked, missing audit → partial
-
-## Validation
-
-- Backend: 91/91
-- Broker: 265/265, Shell gate: 142/142, Report: 161/161
-- origin/main..HEAD: 0
+No implementation, patch parsing, file mutation, backend invocation, enforcement.
 
 ## Recommended Next Phase
 
-94I — Backend Review/Apply Governance Design
+94J — Backend Review State Model
