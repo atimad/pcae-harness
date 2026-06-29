@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 94Q — Backend Lifecycle End-to-End Mock Demo to Phase 94Q.1 — Bootstrap Resume and Telegram Runtime Hardening; session refreshed and governance continuity revalidated.
+- Completed Phase 94Q.1 Bootstrap Resume and Telegram Runtime Hardening: multi-factor readiness classification (_classify_bootstrap_readiness), stale active task detection, stale handoff detection, phase report completeness checking, Telegram runtime detection without secrets, push wording fix ("not ready" → "clean").
+- Replaced single-factor `ready = check_passed` with 10-factor evaluation: health, check, stale task, report completeness, handoff freshness, push state, task memory, Telegram runtime, active task mismatch, unpushed commits.
+- Bootstrap output now shows: Latest completed phase, Recommended next phase, Readiness classification with issues, Push status, Telegram runtime status.
+- New JSON fields: readiness, readiness_issues, latest_phase_report, push_check, telegram_runtime, task_memory_warnings, active_task_count.
+- 30 new tests (5 test classes), 6 pre-existing tests updated for new output format. Fast-green 3860/3861.
+- Delivers docs/PHASE_94Q1_BOOTSTRAP_RESUME_TELEGRAM_RUNTIME_HARDENING.md.
+- Completed Phase 94Q Backend Lifecycle End-to-End Mock Demo (see prior entries).
 - Transitioned active task from Phase 94P — Backend Apply Governance Hardening to Phase 94Q — Backend Lifecycle End-to-End Mock Demo; session refreshed and governance continuity revalidated.
 - Completed Phase 94Q Backend Lifecycle End-to-End Mock Demo: BackendLifecycleDemo model (28 fields), run_mock_lifecycle_demo() exercising full lifecycle, pcae backend demo mock-lifecycle/show CLI.
 - Exercises 10-step governed backend lifecycle: plan → prompt capture → mock output → audit → trust → review → approval/rejection → apply plan → apply readiness → demo summary.

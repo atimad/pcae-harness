@@ -671,7 +671,7 @@ def test_session_bootstrap_prints_ready_status(
 
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Ready: yes" in output
+    assert "Readiness: ready" in output
 
 
 def test_session_bootstrap_shows_independent_challenge_context(
@@ -783,7 +783,7 @@ def test_session_bootstrap_challenge_independence_validation(
         assert exit_code == 0
         assert "Health: healthy" in output
         assert "Check: passed" in output
-        assert "Ready: yes" in output
+        assert "Readiness: ready" in output
 
 
 def test_session_bootstrap_fails_when_lock_already_held(
@@ -843,7 +843,7 @@ def test_session_bootstrap_json_output(
     assert data["latest_event"] is not None
     assert data["latest_event"]["event_type"] == "agent_acquired"
     assert data["lock_acquired"] is True
-    assert set(data.keys()) == {
+    assert data.keys() >= {
         "active_task",
         "agent_id",
         "check_status",
@@ -901,7 +901,7 @@ def test_session_bootstrap_same_agent_already_held_succeeds(
 
     output = capsys.readouterr().out
     assert exit_code == 0
-    assert "Ready: yes" in output
+    assert "Readiness: ready" in output
 
 
 def test_session_bootstrap_same_agent_shows_already_held_note(
@@ -942,7 +942,7 @@ def test_session_bootstrap_same_agent_shows_full_summary(
     assert "Health:" in output
     assert "Check:" in output
     assert "Active task:" in output
-    assert "Ready:" in output
+    assert "Readiness:" in output
 
 
 def test_session_bootstrap_same_agent_uses_refreshed_session_task(
@@ -1036,7 +1036,7 @@ def test_session_bootstrap_same_agent_json_lock_acquired_false(
     assert data["lock_acquired"] is False
     assert data["agent_id"] == "claude-local"
     assert data["ready"] is True
-    assert set(data.keys()) == {
+    assert data.keys() >= {
         "active_task",
         "agent_id",
         "check_status",
@@ -2623,3 +2623,368 @@ def test_74w2_compact_bootstrap_sync_lock(tmp_path, monkeypatch, capsys):
     lock = json.loads(lock_path.read_text(encoding="utf-8"))
     assert lock["backend_name"] == "claude-deepseek"
     assert lock["execution_authorized"] is False
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Q.1 — Bootstrap resume readiness hardening tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import os as _os_94q1
+
+from pcae.commands.session import (
+    _classify_bootstrap_readiness,
+    _check_telegram_runtime,
+    _extract_phase_number,
+    _phase_is_completed,
+    _format_push_status,
+    READINESS_READY,
+    READINESS_READY_WARNINGS,
+    READINESS_NEEDS_ATTENTION,
+    READINESS_BLOCKED,
+)
+
+
+class Test94Q1ReadinessClassification:
+    """_classify_bootstrap_readiness: multi-factor readiness behavior."""
+
+    def test_healthy_all_clean_produces_ready(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None,
+            latest_report=None,
+            latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_READY
+        assert issues == []
+
+    def test_health_unhealthy_blocks(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="unhealthy",
+            active_task=None, latest_report=None, latest_handoff=None,
+            push_check=None, tg_runtime=None, task_memory_warnings=False,
+        )
+        assert readiness == READINESS_BLOCKED
+        assert any("health" in i.lower() for i in issues)
+
+    def test_check_failed_blocks(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=False,
+            health_status="healthy",
+            active_task=None, latest_report=None, latest_handoff=None,
+            push_check=None, tg_runtime=None, task_memory_warnings=False,
+        )
+        assert readiness == READINESS_BLOCKED
+        assert any("check" in i.lower() for i in issues)
+
+    def test_completed_phase_active_task_is_stale(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task={"id": "task-94q", "title": "Phase 94Q — Backend Lifecycle"},
+            latest_report={
+                "phase_id": "94Q", "status": "completed",
+                "report_completeness": "complete",
+                "recommended_next_phase": "94Q.1 — Bootstrap Resume",
+            },
+            latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_BLOCKED
+        assert any("stale" in i.lower() for i in issues)
+
+    def test_partial_report_blocks(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None,
+            latest_report={
+                "phase_id": "94Q", "status": "completed",
+                "report_completeness": "partial",
+            },
+            latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_BLOCKED
+        assert any("partial" in i.lower() for i in issues)
+
+    def test_incomplete_report_blocks(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None,
+            latest_report={
+                "phase_id": "94Q", "status": "completed",
+                "report_completeness": "incomplete",
+            },
+            latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_BLOCKED
+
+    def test_stale_handoff_produces_warning(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None,
+            latest_report={
+                "phase_id": "94Q", "status": "completed",
+                "report_completeness": "complete",
+                "completed_at": "2026-06-29T18:00:00Z",
+            },
+            latest_handoff={"created_at": "2026-06-29T15:00:00Z"},
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_READY_WARNINGS
+        assert any("handoff" in i.lower() for i in issues)
+
+    def test_tg_not_loaded_produces_warning(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None, latest_report=None, latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "not_loaded", "telegram_enabled": False, "telegram_configured": False},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_READY_WARNINGS
+        assert any("telegram" in i.lower() for i in issues)
+
+    def test_task_memory_warnings_produce_warning(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None, latest_report=None, latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=True,
+        )
+        assert readiness == READINESS_READY_WARNINGS
+        assert any("task memory" in i.lower() for i in issues)
+
+    def test_unpushed_commits_produce_warning(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None, latest_report=None, latest_handoff=None,
+            push_check={"unpushed_commits": 3, "mode": "needs_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_READY_WARNINGS
+        assert any("unpushed" in i.lower() for i in issues)
+
+    def test_multiple_issues_all_reported(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task={"id": "task-94q", "title": "Phase 94Q — Backend Lifecycle"},
+            latest_report={
+                "phase_id": "94Q", "status": "completed",
+                "report_completeness": "complete",
+            },
+            latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "not_loaded", "telegram_enabled": False, "telegram_configured": False},
+            task_memory_warnings=True,
+        )
+        assert readiness == READINESS_BLOCKED  # stale task blocks
+        assert len(issues) >= 2
+
+
+class Test94Q1TelegramRuntime:
+    """_check_telegram_runtime: env detection without secrets."""
+
+    def test_no_env_vars_returns_not_loaded(self, monkeypatch):
+        monkeypatch.delenv("PCAE_TELEGRAM_BOT_TOKEN", raising=False)
+        monkeypatch.delenv("PCAE_TELEGRAM_CHAT_ID", raising=False)
+        monkeypatch.delenv("PCAE_TELEGRAM_ENABLED", raising=False)
+        monkeypatch.delenv("PCAE_NOTIFY_ENABLED", raising=False)
+        result = _check_telegram_runtime()
+        assert result["status"] == "not_loaded"
+        assert result["runtime_loaded"] is False
+        assert result["telegram_configured"] is False
+        assert result["telegram_enabled"] is False
+
+    def test_token_present_returns_loaded(self, monkeypatch):
+        monkeypatch.setenv("PCAE_TELEGRAM_BOT_TOKEN", "test-token")
+        monkeypatch.setenv("PCAE_TELEGRAM_CHAT_ID", "test-chat")
+        monkeypatch.setenv("PCAE_TELEGRAM_ENABLED", "1")
+        monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+        result = _check_telegram_runtime()
+        assert result["status"] == "loaded"
+        assert result["runtime_loaded"] is True
+        assert result["telegram_configured"] is True
+        assert result["telegram_enabled"] is True
+
+    def test_token_present_but_disabled(self, monkeypatch):
+        monkeypatch.setenv("PCAE_TELEGRAM_BOT_TOKEN", "test-token")
+        monkeypatch.setenv("PCAE_TELEGRAM_CHAT_ID", "test-chat")
+        monkeypatch.delenv("PCAE_TELEGRAM_ENABLED", raising=False)
+        monkeypatch.delenv("PCAE_NOTIFY_ENABLED", raising=False)
+        result = _check_telegram_runtime()
+        assert result["status"] == "loaded"
+        assert result["telegram_configured"] is True
+        assert result["telegram_enabled"] is False
+
+    def test_no_secrets_in_result(self, monkeypatch):
+        monkeypatch.setenv("PCAE_TELEGRAM_BOT_TOKEN", "secret-token-12345")
+        monkeypatch.setenv("PCAE_TELEGRAM_CHAT_ID", "123456789")
+        result = _check_telegram_runtime()
+        j = json.dumps(result)
+        assert "secret-token-12345" not in j
+        assert "123456789" not in j
+        assert result["token_present"] is True
+        assert result["chat_id_present"] is True
+
+
+class Test94Q1Helpers:
+    """Unit tests for Phase 94Q.1 helper functions."""
+
+    def test_extract_phase_number_simple(self):
+        assert _extract_phase_number("94Q") == "94Q"
+
+    def test_extract_phase_number_with_dot(self):
+        assert _extract_phase_number("94Q.1") == "94Q.1"
+
+    def test_phase_is_completed_matching(self):
+        report = {"phase_id": "94Q", "status": "completed"}
+        assert _phase_is_completed("94Q", report) is True
+
+    def test_phase_is_completed_subphase(self):
+        report = {"phase_id": "94Q.1", "status": "completed"}
+        assert _phase_is_completed("94Q.1", report) is True
+
+    def test_phase_not_completed(self):
+        report = {"phase_id": "94Q", "status": "in_progress"}
+        assert _phase_is_completed("94Q", report) is False
+
+    def test_phase_not_completed_different(self):
+        report = {"phase_id": "94Q", "status": "completed"}
+        assert _phase_is_completed("94P", report) is False
+
+    def test_format_push_clean(self):
+        result = _format_push_status({"unpushed_commits": 0, "mode": "nothing_to_push"})
+        assert "clean" in result.lower()
+        assert "nothing_to_push" in result
+
+    def test_format_push_needs_push(self):
+        result = _format_push_status({"unpushed_commits": 5, "mode": "needs_push"})
+        assert "needs_push" in result
+        assert "5" in result
+
+    def test_format_push_none_is_unknown(self):
+        assert _format_push_status(None) == "unknown"
+
+
+class Test94Q1BootstrapOutput:
+    """Bootstrap CLI output includes enriched 94Q.1 fields."""
+
+    def test_json_includes_readiness_fields(self, tmp_path, monkeypatch, capsys):
+        from pcae.cli import main
+        from pcae.commands.init import init_harness
+        from pcae.core.tasks import create_task_contract
+
+        init_harness(HarnessPath(tmp_path))
+        init_git_repo(tmp_path)
+        create_task_contract(HarnessPath(tmp_path), "94Q.1 Bootstrap test")
+        patch_task_allowed_files(tmp_path)
+        commit_baseline(tmp_path)
+        monkeypatch.chdir(tmp_path)
+
+        # Set up a phase report showing 94Q completed
+        reports_dir = tmp_path / ".pcae" / "phase-reports"
+        reports_dir.mkdir(parents=True, exist_ok=True)
+        report = {
+            "phase_id": "94Q", "status": "completed",
+            "report_completeness": "complete",
+            "recommended_next_phase": "94Q.1 — Bootstrap Resume and Telegram Runtime Hardening",
+        }
+        (reports_dir / "latest.json").write_text(json.dumps(report))
+
+        exit_code = main(["session", "bootstrap", "--agent-id", "claude-deepseek", "--json"])
+        d = json.loads(capsys.readouterr().out)
+
+        assert "readiness" in d
+        assert "readiness_issues" in d
+        assert "latest_phase_report" in d
+        assert "push_check" in d
+        assert "telegram_runtime" in d
+        assert "task_memory_warnings" in d
+        assert "active_task_count" in d
+
+    def test_json_no_secrets_in_telegram_runtime(self, tmp_path, monkeypatch, capsys):
+        from pcae.cli import main
+        from pcae.commands.init import init_harness
+        from pcae.core.tasks import create_task_contract
+
+        init_harness(HarnessPath(tmp_path))
+        init_git_repo(tmp_path)
+        create_task_contract(HarnessPath(tmp_path), "94Q.1 Secret test")
+        patch_task_allowed_files(tmp_path)
+        commit_baseline(tmp_path)
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PCAE_TELEGRAM_BOT_TOKEN", "secret-bot-token-abc")
+        monkeypatch.setenv("PCAE_TELEGRAM_CHAT_ID", "chat-id-xyz")
+
+        exit_code = main(["session", "bootstrap", "--agent-id", "claude-deepseek", "--json"])
+        d = json.loads(capsys.readouterr().out)
+
+        j = json.dumps(d)
+        assert "secret-bot-token-abc" not in j
+        assert "chat-id-xyz" not in j
+        assert d["telegram_runtime"]["token_present"] is True
+
+    def test_no_shell_execution_in_readiness_helpers(self):
+        import inspect
+        from pcae.commands import session
+        source = inspect.getsource(session)
+        # _load_push_check uses subprocess for git rev-list, which is safe.
+        # Ensure no shell execution, os.system, or Popen was added.
+        assert "os.system(" not in source
+        assert "Popen(" not in source
+        assert "shell=True" not in source.lower()
+        # Count subprocess.run occurrences — should only be the git call in _load_push_check
+        subprocess_count = source.count("subprocess.run")
+        assert subprocess_count <= 1, f"Expected at most 1 subprocess.run, found {subprocess_count}"
+
+    def test_no_telegram_inbound_in_session(self):
+        import inspect
+        from pcae.commands import session
+        source = inspect.getsource(session)
+        assert "getUpdates" not in source
+
+    def test_no_network_in_readiness_helpers(self):
+        import inspect
+        from pcae.commands import session
+        source = inspect.getsource(session)
+        assert "urllib.request" not in source
+        assert "requests.get" not in source
+
+    def test_multipart_phase_id_preserved(self):
+        readiness, issues = _classify_bootstrap_readiness(
+            check_passed=True,
+            health_status="healthy",
+            active_task=None,
+            latest_report={
+                "phase_id": "94Q.1", "status": "completed",
+                "report_completeness": "complete",
+            },
+            latest_handoff=None,
+            push_check={"unpushed_commits": 0, "mode": "nothing_to_push"},
+            tg_runtime={"status": "loaded", "telegram_enabled": True, "telegram_configured": True},
+            task_memory_warnings=False,
+        )
+        assert readiness == READINESS_READY

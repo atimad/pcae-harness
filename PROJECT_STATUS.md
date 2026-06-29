@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 94Q.1: Bootstrap Resume and Telegram Runtime Hardening (completed).
+
+Corrective hardening phase. Replaced single-factor `ready = check_passed` with multi-factor
+`_classify_bootstrap_readiness()` evaluating health, check, stale active task, phase report
+completeness, handoff freshness, push state, task memory, and Telegram runtime. Push wording
+fixed from "not ready (nothing_to_push)" to "clean (nothing_to_push)". Bootstrap now detects
+stale active tasks when the latest phase report shows the phase is completed. Telegram runtime
+check integrated without printing secrets. 30 new tests. Fast-green: 3860/3861.
+Delivers docs/PHASE_94Q1_BOOTSTRAP_RESUME_TELEGRAM_RUNTIME_HARDENING.md.
+
 Phase 94Q: Backend Lifecycle End-to-End Mock Demo (completed).
 
 Mock-only integration demo phase. Added `BackendLifecycleDemo` model (28 fields),

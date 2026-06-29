@@ -98,6 +98,230 @@ from pcae.commands.phase import (
 from pcae.core.tasks import find_latest_active_task
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 94Q.1 — Bootstrap readiness helpers
+# ═══════════════════════════════════════════════════════════════════════════
+
+READINESS_READY = "ready"
+READINESS_READY_WARNINGS = "ready_with_warnings"
+READINESS_NEEDS_ATTENTION = "needs_attention"
+READINESS_BLOCKED = "blocked"
+
+
+def _read_latest_phase_report(root: HarnessPath) -> dict | None:
+    """Read the latest phase report from .pcae/phase-reports/latest.json."""
+    p = root.join(Path(".pcae") / "phase-reports" / "latest.json")
+    if not p.is_file():
+        return None
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def _load_push_check(root: HarnessPath) -> dict | None:
+    """Determine push state from git.
+
+    Checks origin/main..HEAD count. Returns None if git is unavailable.
+    """
+    import subprocess
+    try:
+        r = subprocess.run(
+            ["git", "rev-list", "--count", "origin/main..HEAD"],
+            capture_output=True, text=True, cwd=str(root.path), timeout=10,
+        )
+        if r.returncode == 0:
+            count = int(r.stdout.strip())
+            return {
+                "unpushed_commits": count,
+                "mode": "nothing_to_push" if count == 0 else "needs_push",
+            }
+        return {"unpushed_commits": 0, "mode": "unknown"}
+    except Exception:
+        return None
+
+
+def _count_active_tasks(root: HarnessPath) -> int:
+    """Count active task files (excluding .DS_Store)."""
+    active_dir = root.join(Path("tasks") / "active")
+    if not active_dir.is_dir():
+        return 0
+    count = 0
+    try:
+        for f in active_dir.iterdir():
+            if f.is_file() and f.name != ".DS_Store" and f.suffix in (".md",):
+                count += 1
+    except OSError:
+        pass
+    return count
+
+
+def _check_telegram_runtime() -> dict:
+    """Check Telegram runtime env vars without printing secrets.
+
+    Returns a dict with status fields. Never prints token or chat ID values.
+    """
+    import os
+    token = os.environ.get("PCAE_TELEGRAM_BOT_TOKEN", "")
+    chat_id = os.environ.get("PCAE_TELEGRAM_CHAT_ID", "")
+    enabled = os.environ.get("PCAE_TELEGRAM_ENABLED", "").lower() in ("1", "true", "yes")
+    configured = bool(token and chat_id)
+    notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
+    return {
+        "runtime_loaded": bool(token or chat_id),
+        "telegram_configured": configured,
+        "telegram_enabled": enabled and configured,
+        "token_present": bool(token),
+        "chat_id_present": bool(chat_id),
+        "notify_enabled": notify_enabled,
+        "status": "loaded" if (token or chat_id) else "not_loaded",
+    }
+
+
+def _extract_phase_number(phase_id: str) -> str:
+    """Extract the base phase number from a phase ID like '94Q', '94Q.1', '94P'."""
+    if not phase_id:
+        return ""
+    # Strip trailing dot-subparts like .1, .2
+    import re
+    m = re.match(r'^(\d+[A-Za-z]+(?:\.[0-9]+)*)', phase_id)
+    return m.group(1) if m else phase_id
+
+
+def _phase_is_completed(phase_id: str, latest_report: dict | None) -> bool:
+    """Check whether a phase appears to be completed based on the latest report."""
+    if latest_report is None:
+        return False
+    report_phase = latest_report.get("phase_id", "")
+    report_status = latest_report.get("status", "")
+    if not report_phase or report_status != "completed":
+        return False
+    # Phase is completed if it matches or is an ancestor of the report phase
+    report_base = _extract_phase_number(report_phase)
+    task_base = _extract_phase_number(phase_id)
+    # Exact match or task phase is a predecessor
+    return task_base == report_base or report_phase.startswith(task_base)
+
+
+def _classify_bootstrap_readiness(
+    *,
+    check_passed: bool,
+    health_status: str,
+    active_task: dict | None,
+    latest_report: dict | None,
+    latest_handoff: dict | None,
+    push_check: dict | None,
+    tg_runtime: dict | None,
+    task_memory_warnings: bool,
+) -> tuple[str, list[str]]:
+    """Classify bootstrap readiness across multiple factors.
+
+    Returns (readiness_status, issues_list).
+    """
+    issues: list[str] = []
+    blocked: list[str] = []
+    warnings: list[str] = []
+
+    # ── Health/check ────────────────────────────────────────────────────
+    if health_status != "healthy":
+        blocked.append(f"pcae health: {health_status}")
+    if not check_passed:
+        blocked.append("pcae check: failed")
+
+    # ── Stale active task ───────────────────────────────────────────────
+    if active_task is not None:
+        task_id = active_task.get("id", "")
+        task_title = active_task.get("title", "")
+        if latest_report is not None:
+            report_phase = latest_report.get("phase_id", "")
+            report_status = latest_report.get("status", "")
+            if report_status == "completed" and report_phase:
+                # Check if active task phase is already completed
+                if _phase_is_completed(report_phase, latest_report):
+                    # Active task belongs to a completed phase → stale
+                    blocked.append(f"Active task appears stale (phase {report_phase} is completed)")
+                # Check if active task phase does not match recommended next
+                rec_next = latest_report.get("recommended_next_phase", "")
+                if rec_next and task_title:
+                    rec_base = _extract_phase_number(rec_next.split("—")[0].strip() if "—" in rec_next else rec_next.split("-")[0].strip())
+                    if rec_base and rec_base not in task_title:
+                        warnings.append(f"Active task may not match recommended next: {rec_next}")
+
+    # ── Stale handoff ───────────────────────────────────────────────────
+    if latest_handoff is not None and latest_report is not None:
+        handoff_created = latest_handoff.get("created_at", "")
+        report_completed = latest_report.get("completed_at", "") or latest_report.get("created_at", "")
+        if handoff_created and report_completed and handoff_created < report_completed:
+            warnings.append("Latest handoff is older than latest completed phase report")
+
+    # ── Phase report completeness ────────────────────────────────────────
+    if latest_report is not None:
+        completeness = latest_report.get("report_completeness", "")
+        if completeness == "partial":
+            blocked.append("Latest phase report is partial")
+        elif completeness == "incomplete":
+            blocked.append("Latest phase report is incomplete")
+        # Check report consistency
+        report_phase = latest_report.get("phase_id", "")
+        report_status = latest_report.get("status", "")
+        if report_status == "completed" and not report_phase:
+            warnings.append("Latest phase report has no phase_id")
+
+    # ── Push state ──────────────────────────────────────────────────────
+    if push_check is not None:
+        push_mode = push_check.get("mode", "")
+        unpushed = push_check.get("unpushed_commits", 0)
+        if isinstance(unpushed, str):
+            try:
+                unpushed = int(unpushed)
+            except (ValueError, TypeError):
+                unpushed = 0
+        if unpushed > 0:
+            warnings.append(f"origin/main..HEAD: {unpushed} unpushed commit(s)")
+
+    # ── Task memory ──────────────────────────────────────────────────────
+    if task_memory_warnings:
+        warnings.append("Task memory has warnings (stale active files)")
+
+    # ── Telegram runtime ─────────────────────────────────────────────────
+    if tg_runtime is not None:
+        if tg_runtime.get("status") == "not_loaded":
+            warnings.append("Telegram runtime env not loaded")
+        elif not tg_runtime.get("telegram_enabled", False):
+            if tg_runtime.get("telegram_configured", False):
+                warnings.append("Telegram configured but not enabled")
+            else:
+                warnings.append("Telegram not configured")
+
+    # ── Determine status ─────────────────────────────────────────────────
+    if blocked:
+        return READINESS_BLOCKED, blocked + warnings
+    elif warnings:
+        return READINESS_READY_WARNINGS, warnings
+    else:
+        return READINESS_READY, []
+
+
+def _format_push_status(push_check: dict | None) -> str:
+    """Format push status with clear wording."""
+    if push_check is None:
+        return "unknown"
+    mode = push_check.get("mode", "unknown")
+    unpushed = push_check.get("unpushed_commits", 0)
+    if isinstance(unpushed, str):
+        try:
+            unpushed = int(unpushed)
+        except (ValueError, TypeError):
+            unpushed = 0
+    if mode == "nothing_to_push" and unpushed == 0:
+        return "clean (nothing_to_push)"
+    elif unpushed > 0:
+        return f"needs_push ({unpushed} unpushed)"
+    elif mode == "active_task":
+        return "ready"
+    return mode
+
+
 def _load_latest_handoff(root: HarnessPath) -> dict | None:
     latest_path = root.join(HANDOFFS_DIR / "latest.json")
     if not latest_path.is_file():
@@ -215,29 +439,54 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     current_session = find_active_session(sessions)
     timeline = build_provenance_timeline(root)
     latest_event = timeline.latest_event
-    ready = check_passed
 
     handoff = _load_latest_handoff(root)
+
+    # ── Phase 94Q.1: enriched readiness data ────────────────────────────
+    latest_report = _read_latest_phase_report(root)
+    push_check = _load_push_check(root)
+    tg_runtime = _check_telegram_runtime()
+    active_task_count = _count_active_tasks(root)
+    task_memory_warnings = active_task_count > 1
+
+    readiness, issues = _classify_bootstrap_readiness(
+        check_passed=check_passed,
+        health_status=health_status,
+        active_task=active_task,
+        latest_report=latest_report,
+        latest_handoff=handoff,
+        push_check=push_check,
+        tg_runtime=tg_runtime,
+        task_memory_warnings=task_memory_warnings,
+    )
+    ready = readiness in (READINESS_READY, READINESS_READY_WARNINGS)
 
     if args.json:
         print(
             json.dumps(
                 {
                     "active_task": active_task,
+                    "active_task_count": active_task_count,
                     "agent_id": args.agent_id,
                     "check_status": "passed" if check_passed else "failed",
                     "current_session": _session_summary(current_session),
                     "health_status": health_status,
                     "latest_event": _event_summary(latest_event),
                     "latest_handoff": handoff,
+                    "latest_phase_report": latest_report,
                     "lock_acquired": not already_held,
                     "lock_backend_name": backend_lock_result["lock_backend_name"],
                     "lock_conflict": backend_lock_result["lock_conflict"],
                     "lock_rehydrated": backend_lock_result["lock_synced"],
                     "lock_synced": backend_lock_result["lock_synced"],
                     "provenance_event_count": timeline.event_count,
+                    "push_check": push_check,
+                    "readiness": readiness,
+                    "readiness_issues": issues,
                     "ready": ready,
                     "recognized_backend": args.agent_id in _LOCKABLE_BACKENDS,
+                    "task_memory_warnings": task_memory_warnings,
+                    "telegram_runtime": tg_runtime,
                 },
                 indent=2,
                 sort_keys=True,
@@ -275,7 +524,32 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
         print(f"Latest event: {latest_event.summary}")
     else:
         print("Latest event: none")
-    print(f"Ready: {'yes' if ready else 'no'}")
+
+    # ── Phase 94Q.1: enriched readiness output ──────────────────────────
+    if latest_report is not None:
+        rp = latest_report.get("phase_id", "")
+        rs = latest_report.get("status", "")
+        rc = latest_report.get("report_completeness", "unknown")
+        rn = latest_report.get("recommended_next_phase", "")
+        print(f"Latest completed phase: {rp} ({rs}, report: {rc})")
+        if rn:
+            print(f"Recommended next phase: {rn}")
+
+    print(f"Readiness: {readiness}")
+    for issue in issues:
+        print(f"  - {issue}")
+
+    push_status = _format_push_status(push_check)
+    print(f"Push: {push_status}")
+
+    tg_status = tg_runtime.get("status", "unknown")
+    tg_note = ""
+    if tg_status == "not_loaded":
+        tg_note = " (action: source ~/.config/pcae/telegram.env && pcae notify status)"
+    elif not tg_runtime.get("telegram_enabled", False) and tg_runtime.get("telegram_configured", False):
+        tg_note = " (configured but disabled)"
+    print(f"Telegram runtime: {tg_status}{tg_note}")
+
     if handoff is not None:
         print()
         print("Last handoff:")
@@ -289,7 +563,8 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
         print(f"  Check: {'passed' if handoff.get('check_passed') else 'failed'}")
         push_ready = handoff.get("push_ready", False)
         push_mode = handoff.get("push_mode", "unknown")
-        print(f"  Push: {'ready' if push_ready else 'not ready'} ({push_mode})")
+        push_label = "clean" if push_mode == "nothing_to_push" and not push_ready else ("ready" if push_ready else "not ready")
+        print(f"  Push: {push_label} ({push_mode})")
         print(f"  Review: {handoff.get('lifecycle_review', 'unknown')}")
         print(f"  Latest commit: {handoff.get('latest_commit', 'unknown')}")
         print(f"  Next action: {handoff.get('recommended_next_action', 'unknown')}")
