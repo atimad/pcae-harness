@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 94K — Backend Apply Plan Model (20260629-1633-phase-94k-backend-apply-plan-model)
 - 92D.7 — Telegram Handoff Message Precision Tightening (20260629-92d-7-telegram-handoff-message-precision-tightening)
 - 92D.6 — Phase Completion Structured Metadata Capture (20260629-92d-6-phase-completion-structured-metadata-capture)
 - 92D.5 — Telegram Phase Report Trust Contract (20260629-92d-5-telegram-phase-report-trust-contract)

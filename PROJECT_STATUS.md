@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 94L: Backend Apply Readiness Validator (completed).
+
+Implementation phase. Added BackendApplyReadinessAssessment (30 fields),
+validate_backend_apply_readiness() fail-closed validator, persistence under
+.pcae/backend-apply-readiness/. Read-only CLI: pcae backend apply-readiness
+show/validate. 40 new tests (149 total backend). Hard blocks dominate approval;
+accepted risk cannot override hard blocks. Recommended action is always
+manual_apply_package_ready — never execute apply.
+Delivers docs/PHASE_94_BACKEND_APPLY_READINESS_VALIDATOR.md.
+
 Phase 94K: Backend Apply Plan Model (completed).
 
 Implementation phase. Added ApplyOperation (11 fields, 6 types), ApplyPlan (28 fields),
