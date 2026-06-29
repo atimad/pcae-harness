@@ -243,7 +243,7 @@ def test_summary_includes_phase_info():
     text = sink._build_summary(event)
     assert "PCAE Phase" in text
     assert "92A" in text
-    assert "completed" in text.lower() or "completed" in text
+    assert "✅" in text
     assert "Design Phase" in text
 
 
@@ -611,7 +611,10 @@ class TestTelegramTextTrustContract:
     def test_text_includes_notification_dispatched(self):
         event = _make_event(
             title="Test", message="Done.",
-            metadata={"phase_id": "93C", "phase_status": "completed"},
+            metadata={
+                "phase_id": "93C", "phase_status": "completed",
+                "notification_result": {"dispatched": True},
+            },
         )
         sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
         text = sink._build_summary(event)

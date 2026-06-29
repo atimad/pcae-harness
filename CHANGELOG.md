@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Completed Phase 92D.7 Telegram handoff message precision tightening: trust state at top, phase commit distinct.
+- Compact single-line validation/governance, no long summary in text. Delivers docs/PHASE_92_TELEGRAM_HANDOFF_MESSAGE_PRECISION_TIGHTENING.md.
 - Completed Phase 92D.6 structured metadata capture: .pcae/phase-completion-metadata.json enables complete phase reports.
 - _finalize_report_and_notify() merges structured metadata with git-derived values for files_changed, validation, governance.
 - 5 new tests (149 total). Delivers docs/PHASE_92_PHASE_COMPLETION_STRUCTURED_METADATA_CAPTURE.md.

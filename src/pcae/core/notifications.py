@@ -504,9 +504,9 @@ class TelegramSink:
     def _build_summary(self, event: NotificationEvent) -> str:
         """Build a concise, structured Telegram text summary.
 
-        Phase 92D.5 — trust contract: produces a mobile-friendly summary
-        with completeness state, validation results, commit info, and
-        notification dispatch status. The full report is in the attached document.
+        Phase 92D.7 — precision tightening: trust state near top, compact
+        validation/governance, phase commit distinct from recent commits,
+        no duplication. Full details in Markdown attachment.
         """
         from pcae.core.phase_reports import (
             COMPLETENESS_COMPLETE, COMPLETENESS_PARTIAL, COMPLETENESS_INCOMPLETE,
@@ -518,76 +518,102 @@ class TelegramSink:
         phase_status = metadata.get("phase_status", "")
         next_phase = metadata.get("recommended_next_phase", "")
         report_phase_id = metadata.get("report_phase_id", "")
-        report_phase_name = metadata.get("report_phase_name", "")
 
-        # Completeness state
+        # Trust state with icon
         completeness = metadata.get("report_completeness", "")
         if completeness == COMPLETENESS_COMPLETE:
-            comp_line = "complete ✅"
+            trust_line = "complete ✅"
         elif completeness == COMPLETENESS_PARTIAL:
-            comp_line = "partial ⚠️"
+            missing_fields = metadata.get("missing_trust_fields", [])
+            if missing_fields:
+                trust_line = f"partial ⚠️  Missing: {', '.join(missing_fields)}"
+            else:
+                trust_line = "partial ⚠️"
         elif completeness == COMPLETENESS_INCOMPLETE:
-            comp_line = "incomplete ❌ Manual review required"
+            trust_line = "incomplete ❌ Manual review required"
         else:
-            comp_line = "not assessed"
-
-        missing_fields = metadata.get("missing_trust_fields", [])
+            trust_line = "not assessed"
 
         lines: list[str] = []
-        # Header
-        lines.append(f"PCAE Phase {phase_id} {phase_status}")
 
-        # Completeness
-        if missing_fields:
-            lines.append(f"Report: {comp_line} (missing: {', '.join(missing_fields)})")
-        else:
-            lines.append(f"Report: {comp_line}")
-
-        # Phase name
+        # ── Header: phase ID + status + name ────────────────────────────
+        status_icon = "✅" if phase_status == "completed" else phase_status
+        header = f"PCAE Phase {phase_id} {status_icon}"
         if phase_name:
-            lines.append(f"Name: {phase_name}")
+            header += f"\n{phase_name}"
+        lines.append(header)
+
+        # Stale-report check (before trust)
+        if report_phase_id and report_phase_id != phase_id:
+            lines.append(f"⚠️ STALE: event phase={phase_id}, report phase={report_phase_id}")
+
+        # ── Trust state ─────────────────────────────────────────────────
+        lines.append(f"Trust: {trust_line}")
+        lines.append("")
+
+        # ── Files/Tests ─────────────────────────────────────────────────
+        files_changed = metadata.get("files_changed", 0)
+        tests_run = metadata.get("tests_run", 0)
+        if files_changed > 0:
+            lines.append(f"Files changed: {files_changed}")
+        if tests_run > 0:
+            lines.append(f"Tests added: {tests_run}")
+
+        # ── Validation (compact single-line when possible) ──────────────
+        test_results = metadata.get("test_results", {}) or {}
+        if test_results:
+            parts = [f"{name}: {val}" for name, val in test_results.items()]
+            lines.append(f"Tests: {'; '.join(parts)}")
+
+        # ── Governance (compact single-line) ────────────────────────────
+        governance = metadata.get("governance_results", {}) or {}
+        if governance:
+            parts = [f"{name} {val}" for name, val in governance.items()]
+            lines.append(f"Governance: {', '.join(parts)}")
 
         lines.append("")
 
-        # Stale-report check
-        if report_phase_id and report_phase_id != phase_id:
-            lines.append(f"⚠️ STALE REPORT: event phase={phase_id}, report phase={report_phase_id}")
-
-        # Extract validation results from the event message
-        validation_lines = self._extract_validation_lines(event.message)
-        if validation_lines:
-            lines.append("Validation:")
-            for vl in validation_lines[:8]:  # Limit to 8 lines
-                lines.append(f"  {vl}")
-
-        # Commit info — distinguish phase commit from recent commits
+        # ── Commits: phase commit distinct from recent ──────────────────
         commits = metadata.get("commits", [])
         if commits:
-            # The first commit is typically the phase commit
-            lines.append("")
             lines.append(f"Phase commit: {commits[0][:8]}")
             if len(commits) > 1:
-                recent = ' '.join(c[:8] for c in commits)
-                lines.append(f"Recent commits: {recent}")
+                recent_list = [c[:8] for c in commits[1:6]]  # skip phase commit, max 5
+                lines.append(f"Recent commits: {', '.join(recent_list)}")
+        else:
+            lines.append("Phase commit: not captured")
 
-        # Pushed status
+        # ── Push status ─────────────────────────────────────────────────
         pushed = metadata.get("pushed_status", "")
         origin_count = metadata.get("origin_main_head_count", "")
+        push_parts = []
         if pushed:
-            lines.append(f"Pushed: {pushed}")
+            push_parts.append(pushed)
         if origin_count is not None and origin_count != "":
-            lines.append(f"origin/main..HEAD: {origin_count}")
+            push_parts.append(f"origin/main..HEAD {origin_count}")
+        if push_parts:
+            lines.append(f"Push: {', '.join(push_parts)}")
 
-        # Notification dispatch
-        lines.append("")
-        lines.append("Notification: sent via telegram")
+        # ── Notification dispatch ───────────────────────────────────────
+        notif_result = metadata.get("notification_result", {}) or {}
+        dispatched = notif_result.get("dispatched", False)
+        if dispatched:
+            lines.append("Notification: sent via telegram")
+        else:
+            lines.append("Notification: skipped")
 
-        # No-go confirmations
+        # ── No-go (one line) ────────────────────────────────────────────
         no_go = metadata.get("explicit_no_go_confirmations", [])
-        if no_go:
-            lines.append("No-go: " + "; ".join(no_go[:2]))  # Limit to 2 items
+        if isinstance(no_go, list) and no_go:
+            # Take first item, truncate
+            ng_text = str(no_go[0])
+            if len(ng_text) > 120:
+                ng_text = ng_text[:117] + "..."
+            lines.append(f"No-go: {ng_text}")
+        elif isinstance(no_go, str) and no_go:
+            lines.append(f"No-go: {no_go[:120]}")
 
-        # Next phase
+        # ── Next phase ──────────────────────────────────────────────────
         if next_phase:
             lines.append(f"Next: {next_phase}")
 

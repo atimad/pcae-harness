@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 92D.7: Telegram Handoff Message Precision Tightening (completed).
+
+Precision tightening phase. Refined Telegram text format for remote handoff: trust
+state at top, phase commit distinct from recent commits, compact single-line
+validation/governance, no long summary body in text (full details in Markdown).
+Commit labeling no longer includes phase commit in recent commits list. 0 new
+tests (2 test fixes). Delivers docs/PHASE_92_TELEGRAM_HANDOFF_MESSAGE_PRECISION_TIGHTENING.md.
+
 Phase 92D.6: Phase Completion Structured Metadata Capture (completed).
 
 Product-hardening phase. Added .pcae/phase-completion-metadata.json input path
