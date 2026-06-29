@@ -1,27 +1,23 @@
-# Phase 94A Complete — Governed Backend Invocation Design
+# Phase 94B Complete — Backend Registry and Invocation Request Model
 
 ## Summary
 
-Phase 94A defines how PCAE should invoke AI backends under governance.
-Design-only — no implementation.
+Phase 94B implements the foundational data model for governed backend invocation:
+BackendDefinition, InvocationRequest, readiness check, and default registry.
+No backend execution.
 
-## Design
+## Implementation
 
-- Backend abstraction: registry with 16 fields per backend
-- Invocation request: 18 fields including prompt_hash, broker_decision, audit_context
-- Lifecycle: prepare → validate → broker → shell-gate → review → invoke → capture → quarantine → review → apply
-- Key invariant: backend output never auto-committed; always quarantined until human adoption
-- Relationships defined to permission broker, shell gate, phase reports, Telegram
-- Artifact model: .pcae/backend-invocations/ matching existing conventions
-- Risk model: low/medium/high/critical with increasing autonomy restrictions
-
-## Non-Goals
-
-No backend invocation implementation, shell interception, wrappers, execution,
-enforcement, autonomous mutation, or Telegram inbound.
+- BackendDefinition: 15-field dataclass with validation
+- InvocationRequest: 16-field dataclass, no_execution_by_default=True
+- check_invocation_readiness(): fail-closed readiness assessment
+- get_default_registry(): 5 backends (claude, claude-deepseek, codex, qwen, mock)
+- make_invocation_request(): validated constructor
+- 28 tests covering serialization, registry, readiness, fail-closed, no-secret
 
 ## Validation
 
+- Backend model: 28/28
 - Broker: 265/265
 - Shell gate: 142/142
 - Report + notification: 161/161
@@ -30,4 +26,4 @@ enforcement, autonomous mutation, or Telegram inbound.
 
 ## Recommended Next Phase
 
-94B — Governed Backend Invocation Prototype
+94C — Backend Prompt Artifact Capture

@@ -1,10 +1,11 @@
 {
-  "phase_id": "94A",
-  "phase_name": "Governed Backend Invocation Design",
-  "files_changed": ["docs/PHASE_94_GOVERNED_BACKEND_INVOCATION_DESIGN.md"],
-  "files_changed_count": 1,
-  "tests_added_or_updated": "0 (design-only)",
+  "phase_id": "94B",
+  "phase_name": "Backend Registry and Invocation Request Model",
+  "files_changed": ["src/pcae/core/backend_invocations.py", "tests/test_backend_invocations.py"],
+  "files_changed_count": 2,
+  "tests_added_or_updated": "28 new",
   "validation_results": [
+    {"name": "Backend model", "result": "28/28", "status": "passed"},
     {"name": "Broker", "result": "265/265", "status": "passed"},
     {"name": "Shell gate", "result": "142/142", "status": "passed"},
     {"name": "Report + notification", "result": "161/161", "status": "passed"},
@@ -17,5 +18,5 @@
   ],
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "recommended_next_phase": "94B — Governed Backend Invocation Prototype"
+  "recommended_next_phase": "94C — Backend Prompt Artifact Capture"
 }

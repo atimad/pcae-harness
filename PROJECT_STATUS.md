@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 94B: Backend Registry and Invocation Request Model (completed).
+
+Implementation phase. Created foundational data model: BackendDefinition (15 fields),
+InvocationRequest (16 fields, no_execution_by_default=True), check_invocation_readiness()
+(fail-closed), get_default_registry() (5 backends: claude, claude-deepseek, codex, qwen,
+mock). 28 tests. No backend execution, subprocess, or network calls. Delivers
+docs/PHASE_94_BACKEND_REGISTRY_AND_INVOCATION_REQUEST_MODEL.md.
+
 Phase 94A: Governed Backend Invocation Design (completed).
 
 Design-only phase. Defines backend abstraction (16-field registry), invocation
