@@ -7600,3 +7600,61 @@ def verify_execution_boundary_proof(proof: ExecutionBoundaryProof) -> dict:
     if proof.push_authorization_available: issues.append("push_authorization_available must be False")
     if not proof.no_execution: issues.append("no_execution must be True")
     return {"valid": len(issues) == 0, "issues": issues}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 97A — Execution readiness model constants
+# ═══════════════════════════════════════════════════════════════════════════
+
+READINESS_UNAVAILABLE = "unavailable"
+READINESS_NOT_READY = "not_ready"
+READINESS_EVIDENCE_INCOMPLETE = "evidence_incomplete"
+READINESS_APPROVAL_REQUIRED = "approval_required"
+READINESS_BLOCKED = "blocked"
+READINESS_READY_FOR_HUMAN_REVIEW = "ready_for_human_review"
+READINESS_READY_FOR_PREFLIGHT_ONLY = "ready_for_preflight_only"
+EXECUTION_READY_FUTURE_ONLY = "execution_ready"  # not available, not implemented
+
+VALID_READINESS_STATUSES: frozenset[str] = frozenset({
+    READINESS_UNAVAILABLE, READINESS_NOT_READY, READINESS_EVIDENCE_INCOMPLETE,
+    READINESS_APPROVAL_REQUIRED, READINESS_BLOCKED,
+    READINESS_READY_FOR_HUMAN_REVIEW, READINESS_READY_FOR_PREFLIGHT_ONLY,
+})
+
+READINESS_AUTHORIZED_STATUSES: frozenset[str] = frozenset()  # empty — none authorize execution
+
+EXECUTION_UNAVAILABLE_STATUSES: frozenset[str] = frozenset({
+    EXECUTION_READY_FUTURE_ONLY,
+})
+
+
+def get_current_execution_readiness() -> dict[str, Any]:
+    """Return the current execution readiness state.
+
+    Always returns unavailable — execution is not ready.
+    Evidence-only, non-authorizing.
+    """
+    return {
+        "readiness_status": READINESS_BLOCKED,
+        "execution_available": False,
+        "execution_authorized": False,
+        "apply_authorized": False,
+        "commit_authorized": False,
+        "push_authorized": False,
+        "simulation_only": True,
+        "no_execution": True,
+        "missing_evidence": [
+            "governed_backend_invocation_contract",
+            "adapter_invocation_boundary",
+            "human_approval_gate",
+            "audit_rollback_readiness",
+            "execution_preflight_prototype",
+        ],
+        "no_go_conditions": [
+            "execution_readiness_model_not_implemented",
+            "backend_invocation_never_implemented",
+            "subprocess_mediation_never_implemented",
+            "shell_mediation_never_implemented",
+        ],
+        "message": "Execution is unavailable. Readiness model is design-only."
+    }

@@ -7110,3 +7110,37 @@ class Test96GArtifactTrust:
         a.record_digest = ""
         v = verify_execution_adjacent_assessment(a)
         assert v["valid"] is False
+
+
+class Test97AExecutionReadinessModel:
+    def test_readiness_statuses_no_execute_now(self):
+        from pcae.core.backend_invocations import VALID_READINESS_STATUSES
+        assert "execute_now" not in VALID_READINESS_STATUSES
+        assert "execution_started" not in VALID_READINESS_STATUSES
+
+    def test_no_status_authorizes_execution(self):
+        from pcae.core.backend_invocations import READINESS_AUTHORIZED_STATUSES
+        assert len(READINESS_AUTHORIZED_STATUSES) == 0
+
+    def test_current_readiness_is_blocked(self):
+        from pcae.core.backend_invocations import get_current_execution_readiness
+        r = get_current_execution_readiness()
+        assert r["readiness_status"] == "blocked"
+        assert r["execution_available"] is False
+        assert r["execution_authorized"] is False
+
+    def test_current_readiness_non_authorizing(self):
+        from pcae.core.backend_invocations import get_current_execution_readiness
+        r = get_current_execution_readiness()
+        for key in ["apply_authorized", "commit_authorized", "push_authorized"]:
+            assert r[key] is False, f"{key} must be False"
+
+    def test_current_readiness_simulation_only(self):
+        from pcae.core.backend_invocations import get_current_execution_readiness
+        r = get_current_execution_readiness()
+        assert r["simulation_only"] is True
+        assert r["no_execution"] is True
+
+    def test_future_execution_ready_not_in_valid_statuses(self):
+        from pcae.core.backend_invocations import VALID_READINESS_STATUSES, EXECUTION_READY_FUTURE_ONLY
+        assert EXECUTION_READY_FUTURE_ONLY not in VALID_READINESS_STATUSES
