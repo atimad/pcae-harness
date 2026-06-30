@@ -1,17 +1,19 @@
 {
-    "phase_id": "96I",
-    "phase_name": "phase_96i_review",
-    "phase_title": "Execution-Unavailable Boundary Review",
+    "phase_id": "96J",
+    "phase_name": "phase_96j_demo_stabilization",
+    "phase_title": "Connected Chain Demo Stabilization",
     "files_changed": [
-        "docs/PHASE_96_EXECUTION_UNAVAILABLE_BOUNDARY_REVIEW.md",
+        "src/pcae/commands/backend.py",
+        "src/pcae/cli.py",
         "tests/test_backend_cli.py",
+        "docs/PHASE_96_CONNECTED_CHAIN_DEMO_STABILIZATION.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1940-phase-96i-review.md"
+        "tasks/active/20260630-1950-phase-96j-demo-stabilization.md"
     ],
-    "files_changed_count": 6,
-    "tests_added_or_updated": "5 tests_added (Test96IBoundaryReview)",
+    "files_changed_count": 8,
+    "tests_added_or_updated": "5 tests_added (Test96JConnectedDemo)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -35,7 +37,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "290/291 (1 pre-existing)",
+            "result": "295/296 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -64,17 +66,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "33376e52",
-            "subject": "Review boundary proof"
+            "hash": "45ee19a8",
+            "subject": "Stabilize connected demo"
         },
         {
-            "hash": "0f46719a",
-            "subject": "Complete boundary review"
+            "hash": "114807d9",
+            "subject": "Complete demo stabilization"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96J \u2014 Connected Chain Demo Stabilization",
-    "summary": "Phase 96I complete: Execution-Unavailable Boundary Review. 17 flags, 15 checks reviewed. 5 review tests. No execution. Recommends 96J.",
+    "recommended_next_phase": "96K \u2014 Phase 96 Connected Automation Milestone Summary",
+    "summary": "Phase 96J complete: Connected Chain Demo Stabilization. Full chain connected-demo CLI with assessment+proof. 5 tests including repeatability. No execution. Recommends 96K.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
