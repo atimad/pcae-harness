@@ -1,51 +1,107 @@
 {
-    "phase_id": "95M",
-    "phase_name": "phase_95m_fixtures",
-    "phase_title": "Artifact-Only Invocation Dry-Run Evidence Chain Fixtures",
+    "phase_id": "95M.1",
+    "phase_name": "phase_95m1_finalization_gate",
+    "phase_title": "Phase Completion Finalization Gate",
     "implementation_status": "completed",
     "phase_type": "implementation",
     "completed_at_utc": "2026-06-30T13:25:00Z",
     "files_changed": [
-        "tests/artifact_only_invocation_fixtures.py",
-        "tests/test_backend_invocations.py",
-        "tests/test_backend_cli.py",
-        "docs/PHASE_95_ARTIFACT_ONLY_INVOCATION_DRY_RUN_EVIDENCE_CHAIN_FIXTURES.md",
+        "src/pcae/core/phase_reports.py",
+        "src/pcae/commands/phase.py",
+        "src/pcae/commands/notifications.py",
+        ".pcae/skills/phase-finalization/SKILL.md",
+        "tests/test_phase_reports.py",
+        "tests/test_telegram_notifications.py",
+        "docs/PHASE_95M1_PHASE_COMPLETION_FINALIZATION_GATE.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1320-phase-95m-fixtures.md"
+        "tasks/active/20260630-1330-phase-95m1-finalization-gate.md"
     ],
-    "files_changed_count": 8,
-    "tests_added_or_updated": "29 tests_added (15 model + 11 CLI + 3 safety)",
+    "files_changed_count": 11,
+    "tests_added_or_updated": "15 tests_added (Test95M1FinalizationGate)",
     "validation_results": [
-        {"name": "report_notification_tests", "result": "107/107 passed", "status": "passed"},
-        {"name": "bootstrap_session_reporting_tests", "result": "598/598 passed", "status": "passed"},
-        {"name": "fast_green", "result": "4142/4143 passed (1 pre-existing)", "status": "passed"},
-        {"name": "backend_model_tests", "result": "631/631 passed", "status": "passed"},
-        {"name": "backend_cli_tests", "result": "209/210 passed (1 pre-existing; includes 20 new 95L CLI tests)", "status": "passed"},
-        {"name": "notification_tests", "result": "76/76 passed", "status": "passed"}
+        {
+            "name": "report_notification_tests",
+            "result": "107/107 passed",
+            "status": "passed"
+        },
+        {
+            "name": "bootstrap_session_reporting_tests",
+            "result": "598/598 passed",
+            "status": "passed"
+        },
+        {
+            "name": "fast_green",
+            "result": "4142/4143 passed (1 pre-existing)",
+            "status": "passed"
+        },
+        {
+            "name": "backend_model_tests",
+            "result": "631/631 passed",
+            "status": "passed"
+        },
+        {
+            "name": "backend_cli_tests",
+            "result": "209/210 passed (1 pre-existing; includes 20 new 95L CLI tests)",
+            "status": "passed"
+        },
+        {
+            "name": "notification_tests",
+            "result": "76/76 passed",
+            "status": "passed"
+        }
     ],
     "governance_results": [
-        {"name": "pcae_health", "status": "healthy"},
-        {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "warnings (pre-existing)"},
-        {"name": "pcae_push_check", "status": "clean (nothing_to_push)"},
-        {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
+        {
+            "name": "pcae_health",
+            "status": "healthy"
+        },
+        {
+            "name": "pcae_check",
+            "status": "passed"
+        },
+        {
+            "name": "pcae_doctor_task_memory",
+            "status": "warnings (pre-existing)"
+        },
+        {
+            "name": "pcae_push_check",
+            "status": "clean (nothing_to_push)"
+        },
+        {
+            "name": "telegram_runtime",
+            "status": "loaded, configured, enabled"
+        }
     ],
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No executable CLI command registered (dry-run/show/verify are read-only; execute is unavailable). No execute path. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "no_go_confirmed": {
-        "no_real_backend_invocation": true, "no_adapter_execution": true, "no_subprocess_execution": true,
-        "no_network_call": true, "no_shell_interception": true, "no_telegram_inbound": true,
-        "no_enforcement": true, "no_automatic_apply": true, "no_apply_execution": true,
-        "no_commit_push_authorization": true, "no_real_AI_backend_calls": true, "next_phase_not_started": true
+        "no_real_backend_invocation": true,
+        "no_adapter_execution": true,
+        "no_subprocess_execution": true,
+        "no_network_call": true,
+        "no_shell_interception": true,
+        "no_telegram_inbound": true,
+        "no_enforcement": true,
+        "no_automatic_apply": true,
+        "no_apply_execution": true,
+        "no_commit_push_authorization": true,
+        "no_real_AI_backend_calls": true,
+        "next_phase_not_started": true
     },
     "phase_commits": [
-        {"hash": "3e027150", "subject": "Add artifact-only dry-run evidence chain fixtures"},
-        {"hash": "a40b0ce9", "subject": "Complete Phase 95M evidence chain fixtures"}
+        {
+            "hash": "8624b920",
+            "subject": "Add phase completion finalization gate"
+        },
+        {
+            "hash": "0ab0dcce",
+            "subject": "Complete Phase 95M.1 finalization gate"
+        }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95N — Artifact-Only Invocation Dry-Run Evidence Chain Review",
-    "summary": "Phase 95L complete: Artifact-Only Invocation Command Boundary CLI Dry-Run. CLI commands: pcae backend invoke artifact-only dry-run/show/verify. Loads boundary, validates, prints assessment with all no-execution flags. Execute unavailable. 20 CLI tests. Recommends 95M.",
+    "recommended_next_phase": "95N \u2014 Artifact-Only Invocation Dry-Run Evidence Chain Review",
+    "summary": "Phase 95M.1 complete: Finalization Gate. Added validate_finalization_gate() blocking check before phase complete and Telegram send. 15 tests. SKILL.md v1.0.2. Recommends 95N.",
     "executive_decisions": {
         "command_boundary_model_ready": true,
         "execution_allowed": false,
