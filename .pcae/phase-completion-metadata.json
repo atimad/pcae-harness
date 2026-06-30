@@ -1,18 +1,18 @@
 {
-    "phase_id": "97B",
-    "phase_name": "phase_97b_invocation_contract",
-    "phase_title": "Governed Backend Invocation Contract Design",
+    "phase_id": "97C",
+    "phase_name": "phase_97c_adapter_boundary",
+    "phase_title": "Adapter Invocation Boundary Design",
     "files_changed": [
-        "docs/PHASE_97_GOVERNED_BACKEND_INVOCATION_CONTRACT_DESIGN.md",
+        "docs/PHASE_97_ADAPTER_INVOCATION_BOUNDARY_DESIGN.md",
         "src/pcae/core/backend_invocations.py",
         "tests/test_backend_invocations.py",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-2020-phase-97b-invocation-contract.md"
+        "tasks/active/20260630-2030-phase-97c-adapter-boundary.md"
     ],
     "files_changed_count": 7,
-    "tests_added_or_updated": "5 tests_added (Test97BInvocationContract)",
+    "tests_added_or_updated": "4 tests_added (Test97CAdapterBoundary)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -31,7 +31,7 @@
         },
         {
             "name": "backend_model_tests",
-            "result": "744/744",
+            "result": "748/748",
             "status": "passed"
         },
         {
@@ -65,17 +65,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "1a9c4aae",
-            "subject": "Design invocation contract"
+            "hash": "58696b05",
+            "subject": "Design adapter boundary"
         },
         {
-            "hash": "9fe3eda8",
-            "subject": "Complete invocation contract"
+            "hash": "c43397da",
+            "subject": "Complete adapter boundary"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "97C \u2014 Adapter Invocation Boundary Design",
-    "summary": "Phase 97B complete: Governed Backend Invocation Contract Design. 12 denial reasons, invocation/preflight schemas, fail-closed behavior. 5 tests. No execution. Recommends 97C.",
+    "recommended_next_phase": "97D \u2014 Human Approval Gate for Future Execution",
+    "summary": "Phase 97C complete: Adapter Invocation Boundary Design. 14 adapter denial reasons, identity/capability/preflight schemas. 4 tests. No execution. Recommends 97D.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
