@@ -2188,3 +2188,120 @@ def run_backend_invoke_artifact_only_verify(args: argparse.Namespace) -> int:
             for issue in v.get("issues", []):
                 print(f"  - {issue}")
     return 0 if v["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95P — Evidence chain bundle dry-run CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyInvocationEvidenceChainBundle,
+    ArtifactOnlyInvocationEvidenceChainBundleAssessment,
+    validate_artifact_only_invocation_evidence_chain_bundle,
+    verify_evidence_chain_bundle,
+    persist_evidence_chain_bundle_assessment,
+    verify_evidence_chain_bundle_assessment,
+    load_latest_evidence_chain_bundle_assessment,
+)
+
+
+def _load_bundle(path: str, args: argparse.Namespace) -> tuple:
+    from pathlib import Path as _P
+    p = _P(path)
+    if not p.is_file():
+        msg = f"Bundle is a directory: {path}" if p.is_dir() else f"Bundle file not found: {path}"
+        if getattr(args, "json", False):
+            print(json.dumps({"error": msg}))
+        else:
+            print(f"Error: {msg}")
+        return None, 1
+    try:
+        data = json.loads(p.read_text())
+        bundle = ArtifactOnlyInvocationEvidenceChainBundle.from_dict(data)
+    except Exception as exc:
+        msg = f"Failed to load bundle: {exc}"
+        if getattr(args, "json", False):
+            print(json.dumps({"error": msg}))
+        else:
+            print(f"Error: {msg}")
+        return None, 1
+    if bundle.record_digest:
+        v = verify_evidence_chain_bundle(bundle)
+        if not v["valid"]:
+            msg = f"Bundle verification failed: {v['issues']}"
+            if getattr(args, "json", False):
+                print(json.dumps({"error": msg}))
+            else:
+                print(f"Error: {msg}")
+            return None, 1
+    return bundle, 0
+
+
+def _print_bundle_assessment_text(a: ArtifactOnlyInvocationEvidenceChainBundleAssessment) -> None:
+    print(f"Bundle Assessment: {a.assessment_id}")
+    print(f"  Decision:          {a.decision}")
+    print(f"  Ready:             {'yes' if a.ready else 'no'}")
+    if a.hard_blocks:
+        print(f"  Hard blocks:       {', '.join(a.hard_blocks)}")
+    if a.missing_artifacts:
+        print(f"  Missing artifacts: {', '.join(a.missing_artifacts)}")
+    print(f"  Evidence chain:    {'ready' if a.evidence_chain_ready else 'incomplete'}")
+    print(f"  Broker/shell-gate: {'ready' if a.broker_shell_gate_ready else 'not ready'}")
+    print(f"  Execution allowed: {'yes' if a.execution_allowed else 'no'}")
+    print(f"  Execute supported: {'yes' if a.execute_supported else 'no'}")
+    print(f"  Dry-run only:      {'yes' if a.dry_run_only else 'no'}")
+    print(f"  Subprocess:        {'yes' if not a.no_subprocess else 'no'}")
+    print(f"  Network:           {'yes' if not a.no_network else 'no'}")
+    print(f"  Repo mutation:     {'yes' if not a.no_repo_mutation else 'no'}")
+    print(f"  Apply:             {'yes' if not a.no_apply else 'no'}")
+    print()
+    print("  ⚠️  Dry-run only. No backend was invoked.")
+
+
+def run_backend_invoke_artifact_only_bundle_dry_run(args: argparse.Namespace) -> int:
+    bundle_path = getattr(args, "bundle", "") or ""
+    save = getattr(args, "save", False) or False
+    if not bundle_path:
+        msg = "Missing --bundle <path>"
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return 1
+    bundle, code = _load_bundle(bundle_path, args)
+    if bundle is None:
+        return code
+    a = validate_artifact_only_invocation_evidence_chain_bundle(bundle)
+    if save:
+        persist_evidence_chain_bundle_assessment(a)
+    if getattr(args, "json", False):
+        print(json.dumps(a.to_dict(), indent=2))
+    else:
+        _print_bundle_assessment_text(a)
+    return 0
+
+
+def run_backend_invoke_artifact_only_bundle_show(args: argparse.Namespace) -> int:
+    a = load_latest_evidence_chain_bundle_assessment()
+    if a is None:
+        msg = "No latest bundle assessment found. Run a dry-run first."
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return 1
+    if getattr(args, "json", False):
+        print(json.dumps(a.to_dict(), indent=2))
+    else:
+        _print_bundle_assessment_text(a)
+    return 0
+
+
+def run_backend_invoke_artifact_only_bundle_verify(args: argparse.Namespace) -> int:
+    a = load_latest_evidence_chain_bundle_assessment()
+    if a is None:
+        msg = "No latest bundle assessment found."
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return 1
+    v = verify_evidence_chain_bundle_assessment(a)
+    if getattr(args, "json", False):
+        print(json.dumps(v, indent=2))
+    else:
+        print(f"Assessment {a.assessment_id}: {'valid ✅' if v['valid'] else 'INVALID ❌'}")
+        for issue in v.get("issues", []):
+            print(f"  - {issue}")
+    return 0 if v["valid"] else 1

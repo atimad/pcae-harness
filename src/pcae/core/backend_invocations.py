@@ -6737,7 +6737,7 @@ def verify_evidence_chain_bundle_assessment(assessment: ArtifactOnlyInvocationEv
 
 
 def load_latest_evidence_chain_bundle_assessment() -> ArtifactOnlyInvocationEvidenceChainBundleAssessment | None:
-    lp = _bundle_dir() / "latest-assessment.json"
+    lp = _bundle_dir() / "assessments" / "latest-assessment.json"
     if not lp.exists():
         return None
     try:

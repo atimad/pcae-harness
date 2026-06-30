@@ -467,6 +467,9 @@ from pcae.commands.backend import (
     run_backend_invoke_artifact_only_dry_run,
     run_backend_invoke_artifact_only_show,
     run_backend_invoke_artifact_only_verify,
+    run_backend_invoke_artifact_only_bundle_dry_run,
+    run_backend_invoke_artifact_only_bundle_show,
+    run_backend_invoke_artifact_only_bundle_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -5012,6 +5015,31 @@ def build_parser() -> argparse.ArgumentParser:
     invoke_verify.add_argument("--latest", action="store_true", default=True)
     invoke_verify.add_argument("--json", action="store_true")
     invoke_verify.set_defaults(handler=run_backend_invoke_artifact_only_verify)
+
+    # ── Phase 95P: pcae backend invoke artifact-only bundle ──────────────
+    be_invoke_bundle = be_invoke_ao_sub.add_parser(
+        "bundle", help="Evidence chain bundle dry-run (no execution)."
+    )
+    be_invoke_bundle_sub = be_invoke_bundle.add_subparsers(
+        dest="backend_invoke_bundle_command", required=True,
+    )
+    bundle_dry_run = be_invoke_bundle_sub.add_parser(
+        "dry-run", help="Load bundle, validate, print assessment."
+    )
+    bundle_dry_run.add_argument("--bundle", required=True, help="Path to bundle JSON.")
+    bundle_dry_run.add_argument("--save", action="store_true", help="Persist assessment.")
+    bundle_dry_run.add_argument("--json", action="store_true")
+    bundle_dry_run.set_defaults(handler=run_backend_invoke_artifact_only_bundle_dry_run)
+
+    bundle_show = be_invoke_bundle_sub.add_parser("show", help="Show latest assessment.")
+    bundle_show.add_argument("--latest", action="store_true", default=True)
+    bundle_show.add_argument("--json", action="store_true")
+    bundle_show.set_defaults(handler=run_backend_invoke_artifact_only_bundle_show)
+
+    bundle_verify = be_invoke_bundle_sub.add_parser("verify", help="Verify assessment.")
+    bundle_verify.add_argument("--latest", action="store_true", default=True)
+    bundle_verify.add_argument("--json", action="store_true")
+    bundle_verify.set_defaults(handler=run_backend_invoke_artifact_only_bundle_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

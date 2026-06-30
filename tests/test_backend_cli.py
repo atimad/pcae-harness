@@ -1903,3 +1903,98 @@ class Test95MFixtureCLI:
         r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
         assert "sk-ant" not in r.stdout
         assert "Bearer " not in r.stdout
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95P — Evidence chain bundle CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyInvocationEvidenceChainBundle,
+    persist_evidence_chain_bundle,
+    DECISION_ALLOW_DRY_RUN,
+    DECISION_DENY,
+    COMMAND_MODE_DRY_RUN,
+    COMMAND_MODE_EXECUTE_RESERVED,
+)
+
+
+def _write_bundle(**overrides) -> str:
+    kwargs = {
+        "bundle_id": "eb-cli-test", "phase_id": "95P", "task_id": "test",
+        "backend_id": "mock", "adapter_id": "mock",
+        "prompt_artifact_path": "/p/p.md", "prompt_artifact_digest": "abc",
+        "preflight_artifact_path": "/p/pf.json", "preflight_artifact_digest": "def",
+        "runtime_evidence_path": "/p/re.json", "runtime_evidence_digest": "ghi",
+        "approval_artifact_path": "/p/ap.json", "approval_artifact_digest": "jkl",
+        "invocation_plan_path": "/p/ip.json", "invocation_plan_digest": "mno",
+        "broker_decision_id": "bd-1", "broker_decision": DECISION_ALLOW_DRY_RUN,
+        "shell_gate_decision_id": "sg-1", "shell_gate_decision": DECISION_ALLOW_DRY_RUN,
+        "command_boundary_path": "/p/cb.json", "command_boundary_digest": "pqr",
+        "command_boundary_assessment_path": "/p/cba.json", "command_boundary_assessment_digest": "stu",
+        "output_quarantine_path": "/q", "audit_path": "/a", "timeout_seconds": 120,
+        "redaction_policy_id": "rp-1", "operator_approval_reference": "apr-1",
+        "command_mode": COMMAND_MODE_DRY_RUN,
+    }
+    kwargs.update(overrides)
+    b = ArtifactOnlyInvocationEvidenceChainBundle(**kwargs)
+    b.record_digest = b.compute_digest()
+    r = persist_evidence_chain_bundle(b)
+    return r["path"]
+
+
+class Test95PBundleCLI:
+    def test_valid_bundle_dry_run_ready(self):
+        p = _write_bundle()
+        r = _run(["invoke", "artifact-only", "bundle", "dry-run", "--bundle", p, "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["decision"] == "ready_for_dry_run_bundle"
+        assert d["ready"] is True
+
+    def test_text_output_no_execution(self):
+        p = _write_bundle()
+        r = _run(["invoke", "artifact-only", "bundle", "dry-run", "--bundle", p])
+        assert "Execution allowed" in r.stdout
+        assert "Dry-run only" in r.stdout
+        assert "Subprocess" in r.stdout
+
+    def test_missing_bundle_fails(self):
+        r = _run(["invoke", "artifact-only", "bundle", "dry-run", "--json"])
+        assert r.returncode != 0
+
+    def test_nonexistent_bundle_fails(self):
+        r = _run(["invoke", "artifact-only", "bundle", "dry-run", "--bundle", "/nonexistent.json", "--json"])
+        assert r.returncode != 0
+
+    def test_broker_deny_blocks(self):
+        p = _write_bundle(broker_decision=DECISION_DENY)
+        r = _run(["invoke", "artifact-only", "bundle", "dry-run", "--bundle", p, "--json"])
+        d = json.loads(r.stdout)
+        assert any("broker_decision:deny" in hb for hb in d["hard_blocks"])
+
+    def test_execute_reserved_blocks(self):
+        p = _write_bundle(command_mode=COMMAND_MODE_EXECUTE_RESERVED)
+        r = _run(["invoke", "artifact-only", "bundle", "dry-run", "--bundle", p, "--json"])
+        d = json.loads(r.stdout)
+        assert "execute_reserved_not_supported" in d["hard_blocks"]
+
+    def test_save_and_show(self):
+        p = _write_bundle(bundle_id="eb-show-test")
+        _run(["invoke", "artifact-only", "bundle", "dry-run", "--bundle", p, "--save"])
+        r = _run(["invoke", "artifact-only", "bundle", "show", "--latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["bundle_id"] == "eb-show-test"
+
+    def test_save_and_verify(self):
+        p = _write_bundle(bundle_id="eb-verify-test")
+        _run(["invoke", "artifact-only", "bundle", "dry-run", "--bundle", p, "--save"])
+        r = _run(["invoke", "artifact-only", "bundle", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["valid"] is True
+
+    def test_execute_unavailable(self):
+        r = _run(["invoke", "artifact-only", "bundle", "execute", "--help"])
+        assert r.returncode != 0
