@@ -15,14 +15,14 @@
         "tasks/DONE.md",
         "tasks/active/20260630-1300-phase-95k-command-boundary-model.md"
     ],
-    "files_changed_count": 8,
-    "tests_added_or_updated": "58 tests_added (Test95KCommandBoundaryModel/Validation/Persistence/Safety)",
+    "files_changed_count": 7,
+    "tests_added_or_updated": "20 tests_added (Test95LInvokeArtifactOnlyDryRun 16 + Test95LInvokeArtifactOnlySafety 4)",
     "validation_results": [
         {"name": "report_notification_tests", "result": "107/107 passed", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "598/598 passed", "status": "passed"},
         {"name": "fast_green", "result": "4142/4143 passed (1 pre-existing)", "status": "passed"},
         {"name": "backend_model_tests", "result": "631/631 passed", "status": "passed"},
-        {"name": "backend_cli_tests", "result": "188/189 passed (1 pre-existing)", "status": "passed"},
+        {"name": "backend_cli_tests", "result": "209/210 passed (1 pre-existing; includes 20 new 95L CLI tests)", "status": "passed"},
         {"name": "notification_tests", "result": "76/76 passed", "status": "passed"}
     ],
     "governance_results": [
@@ -32,7 +32,7 @@
         {"name": "pcae_push_check", "status": "clean (nothing_to_push)"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
-    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No CLI command registered. No execute path. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No executable CLI command registered (dry-run/show/verify are read-only; execute is unavailable). No execute path. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "no_go_confirmed": {
         "no_real_backend_invocation": true, "no_adapter_execution": true, "no_subprocess_execution": true,
         "no_network_call": true, "no_shell_interception": true, "no_telegram_inbound": true,
@@ -44,7 +44,7 @@
         {"hash": "e75e768b", "subject": "Complete Phase 95L dry-run CLI"}
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95L — Artifact-Only Invocation Command Boundary CLI Dry-Run",
+    "recommended_next_phase": "95M — Artifact-Only Invocation Dry-Run Evidence Chain Fixtures",
     "summary": "Phase 95L complete: Artifact-Only Invocation Command Boundary CLI Dry-Run. CLI commands: pcae backend invoke artifact-only dry-run/show/verify. Loads boundary, validates, prints assessment with all no-execution flags. Execute unavailable. 20 CLI tests. Recommends 95M.",
     "executive_decisions": {
         "command_boundary_model_ready": true,
