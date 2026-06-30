@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-Phase 95J: Artifact-Only Invocation Command Boundary Design (completed).
+Phase 95K: Artifact-Only Invocation Command Boundary Model (completed).
+
+Implemented command boundary data models and validation: ArtifactOnlyInvocationCommandBoundary (45 fields), Assessment (35 fields), 3 command modes, 6 decisions, SHA-256 digests, persistence. Hard-blocks on all 95J design rules. 58 new tests. No CLI. No execution. Recommends 95L.
 
 Design-only phase. Specified CLI structure (plan, dry-run, execute-reserved), 15 required command inputs, 21-step evidence verification order, 33 hard-block conditions, output/audit artifact structure, 23-class failure taxonomy, pre/post-invocation operator workflow, ~41-test plan, 23-criteria go/no-go table. No source changes. Recommends 95K — Command Boundary Model.
 

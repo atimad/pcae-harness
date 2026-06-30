@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 95K — Artifact-Only Invocation Command Boundary Model (20260630-XXXX-phase-95k-command-boundary-model)
 - Phase 95J — Artifact-Only Invocation Command Boundary Design (20260630-1230-phase-95j-command-boundary-design)
 - Phase 95I.1 — Phase Report Commit Attribution Hardening (20260630-XXXX-phase-95i1-commit-attribution-hardening)
 - Phase 95I — Single-Backend Artifact-Only Invocation Prototype Plan (20260630-1032-phase-95i-single-backend-artifact-only-invocation-prototype-plan)
