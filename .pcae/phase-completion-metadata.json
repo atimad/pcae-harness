@@ -1,25 +1,20 @@
 {
-    "phase_id": "95M.1",
-    "phase_name": "phase_95m1_finalization_gate",
-    "phase_title": "Phase Completion Finalization Gate",
+    "phase_id": "95N",
+    "phase_name": "phase_95n_review",
+    "phase_title": "Evidence Chain Review",
     "implementation_status": "completed",
-    "phase_type": "implementation",
-    "completed_at_utc": "2026-06-30T13:25:00Z",
+    "phase_type": "review_only",
+    "completed_at_utc": "2026-06-30T13:45:00Z",
     "files_changed": [
         "src/pcae/core/phase_reports.py",
-        "src/pcae/commands/phase.py",
-        "src/pcae/commands/notifications.py",
-        ".pcae/skills/phase-finalization/SKILL.md",
-        "tests/test_phase_reports.py",
-        "tests/test_telegram_notifications.py",
-        "docs/PHASE_95M1_PHASE_COMPLETION_FINALIZATION_GATE.md",
+        "docs/PHASE_95_ARTIFACT_ONLY_INVOCATION_DRY_RUN_EVIDENCE_CHAIN_REVIEW.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1330-phase-95m1-finalization-gate.md"
+        "tasks/active/20260630-1340-phase-95n-review.md"
     ],
-    "files_changed_count": 11,
-    "tests_added_or_updated": "15 tests_added (Test95M1FinalizationGate)",
+    "files_changed_count": 6,
+    "tests_added_or_updated": "0 tests_added (review-only)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -43,7 +38,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "209/210 passed (1 pre-existing; includes 20 new 95L CLI tests)",
+            "result": "209/210 passed (1 pre-existing)",
             "status": "passed"
         },
         {
@@ -74,7 +69,7 @@
             "status": "loaded, configured, enabled"
         }
     ],
-    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No executable CLI command registered (dry-run/show/verify are read-only; execute is unavailable). No execute path. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "no_go_confirmed": {
         "no_real_backend_invocation": true,
         "no_adapter_execution": true,
@@ -91,22 +86,21 @@
     },
     "phase_commits": [
         {
-            "hash": "8624b920",
-            "subject": "Add phase completion finalization gate"
-        },
-        {
-            "hash": "0ab0dcce",
-            "subject": "Complete Phase 95M.1 finalization gate"
+            "hash": "3303f7c7",
+            "subject": "Review artifact-only evidence chain fixtures"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95N \u2014 Artifact-Only Invocation Dry-Run Evidence Chain Review",
-    "summary": "Phase 95M.1 complete: Finalization Gate. Added validate_finalization_gate() blocking check before phase complete and Telegram send. 15 tests. SKILL.md v1.0.2. Recommends 95N.",
+    "recommended_next_phase": "95O \u2014 Artifact-Only Invocation Evidence Chain Bundle Model",
+    "summary": "Phase 95N complete: Evidence Chain Review. Review-only. All 16 go/no-go pass. Fixtures, CLI, gate ready. Recommends 95O.",
     "executive_decisions": {
-        "command_boundary_model_ready": true,
-        "execution_allowed": false,
-        "execute_supported": false,
-        "cli_registered": false
+        "evidence_chain_fixtures_ready": true,
+        "dry_run_cli_fixture_validation_ready": true,
+        "dry_run_orchestration_planning_ready": true,
+        "artifact_only_execution_ready": false,
+        "real_backend_execution_ready": false,
+        "auto_apply_ready": false,
+        "telegram_inbound_ready": false
     },
     "pushed": true,
     "pushed_status": "pushed",
