@@ -1,18 +1,21 @@
 {
-    "phase_id": "96G",
-    "phase_name": "phase_96g_trust",
-    "phase_title": "Artifact Trust / Verification Hardening",
+    "phase_id": "96H",
+    "phase_name": "phase_96h_boundary_proof",
+    "phase_title": "Execution-Unavailable Boundary Proof",
     "files_changed": [
-        "tests/test_backend_invocations.py",
+        "src/pcae/core/backend_invocations.py",
+        "src/pcae/commands/backend.py",
+        "src/pcae/cli.py",
+        ".pcae/.gitignore",
         "tests/test_backend_cli.py",
-        "docs/PHASE_96_CONNECTED_AUTOMATION_ARTIFACT_TRUST_VERIFICATION_HARDENING.md",
+        "docs/PHASE_96_EXECUTION_UNAVAILABLE_BOUNDARY_PROOF.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1920-phase-96g-trust.md"
+        "tasks/active/20260630-1930-phase-96h-boundary-proof.md"
     ],
-    "files_changed_count": 7,
-    "tests_added_or_updated": "23 tests_added (16 model + 7 CLI)",
+    "files_changed_count": 10,
+    "tests_added_or_updated": "6 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -36,7 +39,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "279/280 (1 pre-existing)",
+            "result": "285/286 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -65,17 +68,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "11aa3a06",
-            "subject": "Harden artifact trust"
+            "hash": "effbda14",
+            "subject": "Prove execution unavailable"
         },
         {
-            "hash": "f661a397",
-            "subject": "Complete artifact trust"
+            "hash": "6c568115",
+            "subject": "Complete execution proof"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96H \u2014 Execution-Unavailable Boundary Proof",
-    "summary": "Phase 96G complete: Artifact Trust / Verification Hardening. Digest determinism, tamper depth (10 flags), path safety, round-trip verification. 23 tests. No execution. Recommends 96H.",
+    "recommended_next_phase": "96I \u2014 Execution-Unavailable Boundary Review",
+    "summary": "Phase 96H complete: Execution-Unavailable Boundary Proof. ExecutionBoundaryProof with 17 availability flags, 15 proof checks. CLI proof/show/verify. 6 tests. No execution. Recommends 96I.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
