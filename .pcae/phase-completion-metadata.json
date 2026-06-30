@@ -1,7 +1,9 @@
 {
     "phase_id": "97D",
-    "phase_name": "phase_97d_human_approval_gate",
+    "phase_name": "phase_97d_approval_gate",
     "phase_title": "Human Approval Gate for Future Execution",
+    "implementation_status": "completed",
+    "phase_type": "design",
     "files_changed": [
         "docs/PHASE_97_HUMAN_APPROVAL_GATE_DESIGN.md",
         "src/pcae/core/human_approval_gate.py",
@@ -9,10 +11,11 @@
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-2100-phase-97d-human-approval-gate.md"
+        "tasks/active/20260630-2100-phase-97d-human-approval-gate.md",
+        ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 7,
-    "tests_added_or_updated": "82 tests (new file: test_human_approval_gate.py)",
+    "files_changed_count": 8,
+    "tests_added_or_updated": "82 tests_added (TestApprovalGate)",
     "validation_results": [
         {
             "name": "approval_gate_tests",
@@ -21,27 +24,27 @@
         },
         {
             "name": "report_notification_tests",
-            "result": "210/210",
+            "result": "107/107",
             "status": "passed"
         },
         {
-            "name": "session_tests",
-            "result": "144/144",
+            "name": "bootstrap_session_reporting_tests",
+            "result": "598/598",
             "status": "passed"
         },
         {
             "name": "fast_green",
-            "result": "4384/4385 (1 pre-existing: test_show_missing_artifacts)",
+            "result": "4142/4143 (1 pre-existing)",
             "status": "passed"
         },
         {
             "name": "backend_model_tests",
-            "result": "880/880 (combined backend_invocations + backend_preflight)",
+            "result": "748/748",
             "status": "passed"
         },
         {
             "name": "backend_cli_tests",
-            "result": "306/307 (1 pre-existing: test_show_missing_artifacts)",
+            "result": "295/296 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -56,29 +59,30 @@
         },
         {
             "name": "pcae_doctor_task_memory",
-            "status": "warnings (25 active, known issue)"
+            "status": "warnings"
         },
         {
             "name": "pcae_push_check",
             "status": "clean (nothing_to_push)"
         },
         {
-            "name": "telegram_notify",
-            "status": "configured, enabled, ready"
+            "name": "telegram_runtime",
+            "status": "loaded, configured, enabled"
         }
     ],
-    "no_go_confirmation": "97D is design/approval-gate only. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No enforcement. No automatic apply. No apply execution. No patch parsing. No commit/push authorization. No real AI backend calls. No executable artifact-only invocation paths. No execution enablement flags. No execution availability toggles. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation.",
-    "approval_gate_summary": {
-        "scopes_defined": 9,
-        "denial_reasons": 21,
-        "verification_checks": 25,
-        "artifact_models": ["ApprovalRequest", "ApprovalDecision", "ApprovalRevocation", "ApprovalDenial"],
-        "design_document": "docs/PHASE_97_HUMAN_APPROVAL_GATE_DESIGN.md"
-    },
-    "recommended_next_phase": "97E — Execution Audit / Rollback Readiness Design",
-    "summary": "Phase 97D complete: Human Approval Gate for Future Execution. Design-only. Defined 9 approval scopes, 21 denial reasons, 4 artifact models (ApprovalRequest, ApprovalDecision, ApprovalRevocation, ApprovalDenial), fail-closed verification (25 checks), expiry/revocation model, and audit expectations. 82 tests. All artifacts non-executing and non-authorizing. Recommends 97E.",
-    "pushed": false,
-    "pushed_status": "not_pushed",
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
+    "phase_commits": [
+        {
+            "hash": "9c5f3413",
+            "subject": "Design human approval gate"
+        }
+    ],
+    "commit_attribution": "phase_owned",
+    "recommended_next_phase": "97E \u2014 Execution Audit / Rollback Readiness Design",
+    "summary": "Phase 97D complete: Human Approval Gate for Future Execution. 9 approval scopes, 21 denial reasons, 25 verification checks. 82 approval gate tests. No execution. Recommends 97E.",
+    "pushed": true,
+    "pushed_status": "pushed",
     "origin_main_head_count": 0,
+    "notification_dispatch_result": "queued",
     "report_consistency": "consistent"
 }
