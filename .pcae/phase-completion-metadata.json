@@ -1,19 +1,16 @@
 {
-    "phase_id": "96J",
-    "phase_name": "phase_96j_demo_stabilization",
-    "phase_title": "Connected Chain Demo Stabilization",
+    "phase_id": "96K",
+    "phase_name": "phase_96k_milestone",
+    "phase_title": "Milestone Summary",
     "files_changed": [
-        "src/pcae/commands/backend.py",
-        "src/pcae/cli.py",
-        "tests/test_backend_cli.py",
-        "docs/PHASE_96_CONNECTED_CHAIN_DEMO_STABILIZATION.md",
+        "docs/PHASE_96_CONNECTED_AUTOMATION_MILESTONE_SUMMARY.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1950-phase-96j-demo-stabilization.md"
+        "tasks/active/20260630-2000-phase-96k-milestone.md"
     ],
-    "files_changed_count": 8,
-    "tests_added_or_updated": "5 tests_added (Test96JConnectedDemo)",
+    "files_changed_count": 5,
+    "tests_added_or_updated": "0 tests_added (documentation-only)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -66,17 +63,13 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "45ee19a8",
-            "subject": "Stabilize connected demo"
-        },
-        {
-            "hash": "114807d9",
-            "subject": "Complete demo stabilization"
+            "hash": "10675dde",
+            "subject": "Summarize Phase 96 milestone"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96K \u2014 Phase 96 Connected Automation Milestone Summary",
-    "summary": "Phase 96J complete: Connected Chain Demo Stabilization. Full chain connected-demo CLI with assessment+proof. 5 tests including repeatability. No execution. Recommends 96K.",
+    "recommended_next_phase": "97A \u2014 Execution Readiness Model Design",
+    "summary": "Phase 96K complete: Milestone Summary. Phase 96 closes. 10 subphases, 733 model/295 CLI tests, connected non-executing chain. Recommends 97A.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
