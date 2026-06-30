@@ -6571,3 +6571,142 @@ class Test95OBundleSafety:
         src = inspect.getsource(validate_artifact_only_invocation_evidence_chain_bundle)
         assert "urllib" not in src.lower()
         assert "http" not in src.lower()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95S — Orchestration model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyDryRunOrchestrationPlan,
+    ArtifactOnlyDryRunOrchestrationStep,
+    ArtifactOnlyDryRunOrchestrationStepResult,
+    ArtifactOnlyDryRunOrchestrationAssessment,
+    validate_artifact_only_dry_run_orchestration_plan,
+    persist_orchestration_plan,
+    verify_orchestration_plan,
+    persist_orchestration_assessment,
+    verify_orchestration_assessment,
+    ORCH_READY, ORCH_HARD_BLOCK, ORCH_UNSUPPORTED_EXECUTE,
+)
+
+
+def _valid_plan(**overrides) -> ArtifactOnlyDryRunOrchestrationPlan:
+    steps = [ArtifactOnlyDryRunOrchestrationStep(step_id=f"s{i}", step_name=name, step_order=i)
+             for i, name in enumerate((
+        "load_bundle", "verify_bundle_digest", "validate_bundle",
+        "load_boundary_assessment", "verify_boundary_assessment",
+        "aggregate_broker_shell_gate", "verify_output_quarantine",
+        "verify_audit_path", "verify_timeout", "verify_redaction_policy",
+        "verify_no_execution_flags", "produce_dry_run_summary",
+    ))]
+    kwargs = {
+        "orchestration_id": "orch-test", "phase_id": "95S", "task_id": "test",
+        "backend_id": "mock", "adapter_id": "mock",
+        "bundle_path": "/b/b.json", "bundle_digest": "abc",
+        "bundle_assessment_path": "/b/ba.json", "bundle_assessment_digest": "def",
+        "output_quarantine_path": "/q", "audit_path": "/a",
+        "timeout_seconds": 120, "redaction_policy_id": "rp-1",
+        "ordered_steps": steps,
+    }
+    kwargs.update(overrides)
+    return ArtifactOnlyDryRunOrchestrationPlan(**kwargs)
+
+
+class Test95SOrchestrationModel:
+    def test_valid_plan_ready(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan())
+        assert a.decision == ORCH_READY
+        assert a.ready is True
+
+    def test_missing_bundle_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(bundle_path="", bundle_digest=""))
+        assert "bundle_path_missing" in a.cumulative_hard_blocks
+
+    def test_missing_quarantine_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(output_quarantine_path=""))
+        assert "output_quarantine_path_missing" in a.cumulative_hard_blocks
+
+    def test_missing_timeout_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(timeout_seconds=0))
+        assert "timeout_missing_or_invalid" in a.cumulative_hard_blocks
+
+    def test_execution_allowed_true_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(execution_allowed=True))
+        assert any("execution_allowed" in hb for hb in a.cumulative_hard_blocks)
+
+    def test_no_subprocess_false_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(no_subprocess=False))
+        assert "no_subprocess=False" in a.cumulative_hard_blocks
+
+    def test_missing_steps_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(ordered_steps=[]))
+        assert "ordered_steps_missing" in a.cumulative_hard_blocks
+
+    def test_missing_required_step_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(ordered_steps=[
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s0", step_name="load_bundle", step_order=0),
+        ]))
+        assert any("missing_required_step" in hb for hb in a.cumulative_hard_blocks)
+
+    def test_duplicate_order_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(ordered_steps=[
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s0", step_name="load_bundle", step_order=0),
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s1", step_name="verify_bundle_digest", step_order=0),
+        ]))
+        assert any("duplicate_step_order" in hb for hb in a.cumulative_hard_blocks)
+
+    def test_unknown_step_blocks(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan(ordered_steps=[
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s0", step_name="invalid_step", step_order=0),
+        ]))
+        assert any("unknown_step" in hb for hb in a.cumulative_hard_blocks)
+
+    def test_digest_stable(self):
+        p = _valid_plan()
+        assert p.compute_digest() == p.compute_digest()
+
+    def test_digest_changes(self):
+        p = _valid_plan()
+        d1 = p.compute_digest()
+        p.backend_id = "changed"
+        assert p.compute_digest() != d1
+
+    def test_persist_and_verify(self):
+        p = _valid_plan()
+        p.record_digest = p.compute_digest()
+        r = persist_orchestration_plan(p)
+        assert r["status"] == "written"
+        v = verify_orchestration_plan(p)
+        assert v["valid"] is True
+
+    def test_tampered_verify_fails(self):
+        p = _valid_plan()
+        p.record_digest = p.compute_digest()
+        p.backend_id = "tampered"
+        v = verify_orchestration_plan(p)
+        assert v["valid"] is False
+
+    def test_persist_assessment(self):
+        p = _valid_plan()
+        a = validate_artifact_only_dry_run_orchestration_plan(p)
+        r = persist_orchestration_assessment(a)
+        assert r["status"] == "written"
+
+    def test_no_execution_flags(self):
+        a = validate_artifact_only_dry_run_orchestration_plan(_valid_plan())
+        assert a.execution_allowed is False
+        assert a.execute_supported is False
+        assert a.dry_run_only is True
+
+
+class Test95SOrchestrationSafety:
+    def test_no_subprocess_in_validator(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_dry_run_orchestration_plan)
+        assert "subprocess.run" not in src
+
+    def test_no_network_in_validator(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_dry_run_orchestration_plan)
+        assert "urllib" not in src.lower()

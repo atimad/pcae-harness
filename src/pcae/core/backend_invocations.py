@@ -6745,3 +6745,405 @@ def load_latest_evidence_chain_bundle_assessment() -> ArtifactOnlyInvocationEvid
         return ArtifactOnlyInvocationEvidenceChainBundleAssessment.from_dict(data) if isinstance(data, dict) and data else None
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95S — Artifact-only dry-run orchestration model
+# ═══════════════════════════════════════════════════════════════════════════
+
+_ORCH_SCHEMA_VERSION = "1.0"
+_ORCH_DIR = ".pcae/orchestration-plans"
+
+ORCH_READY = "ready_for_dry_run_orchestration"
+ORCH_HARD_BLOCK = "hard_block"
+ORCH_MISSING_INPUTS = "missing_inputs"
+ORCH_MISMATCH = "mismatch"
+ORCH_TAMPERED = "tampered"
+ORCH_UNSUPPORTED_EXECUTE = "unsupported_execute"
+
+# ── Ordered step names ────────────────────────────────────────────────────
+
+ORCH_STEP_NAMES: tuple[str, ...] = (
+    "load_bundle",
+    "verify_bundle_digest",
+    "validate_bundle",
+    "load_boundary_assessment",
+    "verify_boundary_assessment",
+    "aggregate_broker_shell_gate",
+    "verify_output_quarantine",
+    "verify_audit_path",
+    "verify_timeout",
+    "verify_redaction_policy",
+    "verify_no_execution_flags",
+    "produce_dry_run_summary",
+)
+
+
+@dataclass
+class ArtifactOnlyDryRunOrchestrationStep:
+    """A single step in an orchestration plan."""
+
+    step_id: str = ""
+    step_name: str = ""
+    step_order: int = 0
+    required: bool = True
+    input_refs: list[str] = field(default_factory=list)
+    expected_decision: str = ""
+    hard_block_on_failure: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["input_refs"] = list(self.input_refs)
+        return d
+
+
+@dataclass
+class ArtifactOnlyDryRunOrchestrationStepResult:
+    """Result of executing a single orchestration step (model-only)."""
+
+    step_id: str = ""
+    step_name: str = ""
+    step_order: int = 0
+    decision: str = ""
+    ready: bool = False
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    missing_inputs: list[str] = field(default_factory=list)
+    mismatch_reasons: list[str] = field(default_factory=list)
+    failure_classifications: list[str] = field(default_factory=list)
+    no_execution_confirmed: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["hard_blocks"] = list(self.hard_blocks)
+        d["warnings"] = list(self.warnings)
+        d["missing_inputs"] = list(self.missing_inputs)
+        d["mismatch_reasons"] = list(self.mismatch_reasons)
+        d["failure_classifications"] = list(self.failure_classifications)
+        return d
+
+
+@dataclass
+class ArtifactOnlyDryRunOrchestrationPlan:
+    """Orchestration plan: sequences existing dry-run steps and references
+    bundle/boundary/demo artifacts. Model/validation only — no execution.
+    """
+
+    orchestration_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    adapter_id: str = ""
+    bundle_id: str = ""
+    bundle_path: str = ""
+    bundle_digest: str = ""
+    bundle_assessment_id: str = ""
+    bundle_assessment_path: str = ""
+    bundle_assessment_digest: str = ""
+    command_boundary_id: str = ""
+    command_boundary_assessment_id: str = ""
+    demo_id: str = ""
+    demo_assessment_id: str = ""
+    ordered_steps: list[ArtifactOnlyDryRunOrchestrationStep] = field(default_factory=list)
+    expected_decision: str = ORCH_READY
+    output_quarantine_path: str = ""
+    audit_path: str = ""
+    timeout_seconds: int = 0
+    redaction_policy_id: str = ""
+    dry_run_only: bool = True
+    execution_allowed: bool = False
+    execute_supported: bool = False
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_repo_mutation: bool = True
+    no_apply: bool = True
+    no_patch_parsing: bool = True
+    no_commit_push_authorization: bool = True
+    no_telegram_inbound: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _ORCH_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__
+             if f != "ordered_steps"}
+        d["ordered_steps"] = [s.to_dict() for s in self.ordered_steps]
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArtifactOnlyDryRunOrchestrationPlan":
+        steps_data = data.pop("ordered_steps", []) or []
+        plan = cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__ and k != "ordered_steps"})
+        plan.ordered_steps = [ArtifactOnlyDryRunOrchestrationStep(**{k2: v2 for k2, v2 in s.items() if k2 in ArtifactOnlyDryRunOrchestrationStep.__dataclass_fields__}) for s in steps_data if isinstance(s, dict)]
+        return plan
+
+
+@dataclass
+class ArtifactOnlyDryRunOrchestrationAssessment:
+    """Assessment for an orchestration plan. Aggregates step results."""
+
+    assessment_id: str = ""
+    orchestration_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    ready: bool = False
+    decision: str = ""
+    step_results: list[ArtifactOnlyDryRunOrchestrationStepResult] = field(default_factory=list)
+    cumulative_hard_blocks: list[str] = field(default_factory=list)
+    cumulative_warnings: list[str] = field(default_factory=list)
+    missing_inputs: list[str] = field(default_factory=list)
+    mismatch_reasons: list[str] = field(default_factory=list)
+    failure_classifications: list[str] = field(default_factory=list)
+    evidence_chain_ready: bool = False
+    bundle_ready: bool = False
+    command_boundary_ready: bool = False
+    broker_shell_gate_ready: bool = False
+    output_quarantine_ready: bool = False
+    audit_ready: bool = False
+    timeout_ready: bool = False
+    redaction_ready: bool = False
+    dry_run_summary_ready: bool = False
+    dry_run_only: bool = True
+    execution_allowed: bool = False
+    execute_supported: bool = False
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_repo_mutation: bool = True
+    no_apply: bool = True
+    no_patch_parsing: bool = True
+    no_commit_push_authorization: bool = True
+    no_telegram_inbound: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _ORCH_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__
+             if f != "step_results"}
+        d["step_results"] = [s.to_dict() for s in self.step_results]
+        d["cumulative_hard_blocks"] = list(self.cumulative_hard_blocks)
+        d["cumulative_warnings"] = list(self.cumulative_warnings)
+        d["missing_inputs"] = list(self.missing_inputs)
+        d["mismatch_reasons"] = list(self.mismatch_reasons)
+        d["failure_classifications"] = list(self.failure_classifications)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArtifactOnlyDryRunOrchestrationAssessment":
+        sr_data = data.pop("step_results", []) or []
+        a = cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__ and k != "step_results"})
+        a.step_results = [ArtifactOnlyDryRunOrchestrationStepResult(**{k2: v2 for k2, v2 in s.items() if k2 in ArtifactOnlyDryRunOrchestrationStepResult.__dataclass_fields__}) for s in sr_data if isinstance(s, dict)]
+        return a
+
+
+def validate_artifact_only_dry_run_orchestration_plan(
+    plan: ArtifactOnlyDryRunOrchestrationPlan,
+) -> ArtifactOnlyDryRunOrchestrationAssessment:
+    """Validate an orchestration plan. Model-only — never executes."""
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    aid = f"oa-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+    step_results: list[ArtifactOnlyDryRunOrchestrationStepResult] = []
+
+    if not plan.orchestration_id:
+        hard_blocks.append("orchestration_id_missing")
+    if not plan.phase_id:
+        hard_blocks.append("phase_id_missing")
+    if not plan.task_id:
+        hard_blocks.append("task_id_missing")
+
+    # Bundle references
+    if not plan.bundle_path:
+        hard_blocks.append("bundle_path_missing")
+    if not plan.bundle_digest:
+        hard_blocks.append("bundle_digest_missing")
+    if not plan.bundle_assessment_path:
+        hard_blocks.append("bundle_assessment_path_missing")
+    if not plan.bundle_assessment_digest:
+        hard_blocks.append("bundle_assessment_digest_missing")
+
+    # Paths
+    if not plan.output_quarantine_path:
+        hard_blocks.append("output_quarantine_path_missing")
+    if not plan.audit_path:
+        hard_blocks.append("audit_path_missing")
+    if plan.timeout_seconds <= 0:
+        hard_blocks.append("timeout_missing_or_invalid")
+    if not plan.redaction_policy_id:
+        hard_blocks.append("redaction_policy_id_missing")
+
+    # Safety flags
+    _orch_safety = [
+        ("dry_run_only", plan.dry_run_only),
+        ("execution_allowed must be False", not plan.execution_allowed),
+        ("execute_supported must be False", not plan.execute_supported),
+        ("no_real_backend_invoked", plan.no_real_backend_invoked),
+        ("no_adapter_executed", plan.no_adapter_executed),
+        ("no_subprocess", plan.no_subprocess),
+        ("no_network", plan.no_network),
+        ("no_repo_mutation", plan.no_repo_mutation),
+        ("no_apply", plan.no_apply),
+        ("no_patch_parsing", plan.no_patch_parsing),
+        ("no_commit_push_authorization", plan.no_commit_push_authorization),
+        ("no_telegram_inbound", plan.no_telegram_inbound),
+    ]
+    for name, flag in _orch_safety:
+        if not flag:
+            hard_blocks.append(f"{name}=False" if flag is False else f"{name}=True")
+
+    # Ordered steps
+    if not plan.ordered_steps:
+        hard_blocks.append("ordered_steps_missing")
+    else:
+        seen_orders: set[int] = set()
+        seen_names: set[str] = set()
+        for step in plan.ordered_steps:
+            if not step.step_name or step.step_name not in ORCH_STEP_NAMES:
+                hard_blocks.append(f"unknown_step:{step.step_name}")
+            if step.step_order in seen_orders:
+                hard_blocks.append(f"duplicate_step_order:{step.step_order}")
+            seen_orders.add(step.step_order)
+            if step.step_name in seen_names:
+                hard_blocks.append(f"duplicate_step_name:{step.step_name}")
+            seen_names.add(step.step_name)
+            # Build step result
+            sr = ArtifactOnlyDryRunOrchestrationStepResult(
+                step_id=step.step_id, step_name=step.step_name,
+                step_order=step.step_order, ready=True,
+                decision="ready", no_execution_confirmed=True,
+            )
+            if not step.step_id:
+                sr.hard_blocks.append("step_id_missing")
+            step_results.append(sr)
+        # Check required steps present
+        for req_name in ORCH_STEP_NAMES:
+            if req_name not in seen_names:
+                hard_blocks.append(f"missing_required_step:{req_name}")
+        # Check order is sequential
+        if seen_orders and max(seen_orders) != len(plan.ordered_steps) - 1:
+            hard_blocks.append("steps_not_sequential")
+
+    # Determine outcome
+    all_hard_blocks = list(hard_blocks)
+    if any("execute" in hb.lower() for hb in all_hard_blocks):
+        decision = ORCH_UNSUPPORTED_EXECUTE
+    elif hard_blocks:
+        decision = ORCH_HARD_BLOCK
+    elif missing:
+        decision = ORCH_MISSING_INPUTS
+    else:
+        decision = ORCH_READY
+
+    failures = list(all_hard_blocks)
+    for m in missing:
+        failures.append(f"missing:{m}")
+
+    return ArtifactOnlyDryRunOrchestrationAssessment(
+        assessment_id=aid, orchestration_id=plan.orchestration_id,
+        phase_id=plan.phase_id, task_id=plan.task_id,
+        ready=(decision == ORCH_READY), decision=decision,
+        step_results=step_results,
+        cumulative_hard_blocks=all_hard_blocks,
+        missing_inputs=missing,
+        failure_classifications=failures,
+        evidence_chain_ready=bool(plan.bundle_path and plan.bundle_digest),
+        bundle_ready=bool(plan.bundle_path and plan.bundle_assessment_path),
+        command_boundary_ready=bool(plan.command_boundary_id),
+        broker_shell_gate_ready=True,
+        output_quarantine_ready=bool(plan.output_quarantine_path),
+        audit_ready=bool(plan.audit_path),
+        timeout_ready=plan.timeout_seconds > 0,
+        redaction_ready=bool(plan.redaction_policy_id),
+        dry_run_summary_ready=(decision == ORCH_READY),
+        dry_run_only=True, execution_allowed=False, execute_supported=False,
+        no_real_backend_invoked=True, no_adapter_executed=True,
+        no_subprocess=True, no_network=True, no_repo_mutation=True,
+        no_apply=True, no_patch_parsing=True,
+        no_commit_push_authorization=True, no_telegram_inbound=True,
+        created_at_utc=now,
+    )
+
+
+def _orch_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_ORCH_DIR)
+
+
+def persist_orchestration_plan(plan: ArtifactOnlyDryRunOrchestrationPlan) -> dict:
+    import os
+    d = _orch_dir()
+    try: d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+    if not plan.record_digest: plan.record_digest = plan.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{plan.orchestration_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp)}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_orchestration_plan(plan: ArtifactOnlyDryRunOrchestrationPlan) -> dict:
+    issues: list[str] = []
+    if not plan.orchestration_id: issues.append("missing orchestration_id")
+    if not plan.record_digest: issues.append("missing record_digest")
+    if plan.record_digest and plan.compute_digest() != plan.record_digest:
+        issues.append("record_digest_mismatch")
+    return {"valid": len(issues) == 0, "issues": issues}
+
+
+def persist_orchestration_assessment(assessment: ArtifactOnlyDryRunOrchestrationAssessment) -> dict:
+    import os
+    d = _orch_dir() / "assessments"
+    try: d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+    if not assessment.record_digest: assessment.record_digest = assessment.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{assessment.assessment_id}.json"
+        lp = d / "latest-assessment.json"
+        fp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest-assessment.tmp"
+        tmp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp)}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_orchestration_assessment(assessment: ArtifactOnlyDryRunOrchestrationAssessment) -> dict:
+    issues: list[str] = []
+    if not assessment.assessment_id: issues.append("missing assessment_id")
+    if not assessment.record_digest: issues.append("missing record_digest")
+    if assessment.record_digest and assessment.compute_digest() != assessment.record_digest:
+        issues.append("record_digest_mismatch")
+    if assessment.execution_allowed: issues.append("execution_allowed must be False")
+    return {"valid": len(issues) == 0, "issues": issues}
