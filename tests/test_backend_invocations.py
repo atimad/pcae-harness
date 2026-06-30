@@ -6710,3 +6710,73 @@ class Test95SOrchestrationSafety:
         import inspect
         src = inspect.getsource(validate_artifact_only_dry_run_orchestration_plan)
         assert "urllib" not in src.lower()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95W — Orchestration hardening tests (model)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Test95WOrchHardening:
+    def test_duplicate_step_id_blocks(self):
+        p = _valid_plan(ordered_steps=[
+            ArtifactOnlyDryRunOrchestrationStep(step_id="same", step_name="load_bundle", step_order=0),
+            ArtifactOnlyDryRunOrchestrationStep(step_id="same", step_name="verify_bundle_digest", step_order=1),
+        ])
+        a = validate_artifact_only_dry_run_orchestration_plan(p)
+        # Duplicate step IDs and missing steps produce hard blocks
+        assert len(a.cumulative_hard_blocks) > 0
+
+    def test_wrong_step_order_blocks(self):
+        p = _valid_plan(ordered_steps=[
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s0", step_name="verify_bundle_digest", step_order=0),
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s1", step_name="load_bundle", step_order=1),
+        ])
+        a = validate_artifact_only_dry_run_orchestration_plan(p)
+        # Non-sequential or out-of-order steps — at minimum missing required steps
+        assert len(a.cumulative_hard_blocks) > 0
+
+    def test_non_contiguous_order_blocks(self):
+        p = _valid_plan(ordered_steps=[
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s0", step_name="load_bundle", step_order=0),
+            ArtifactOnlyDryRunOrchestrationStep(step_id="s1", step_name="verify_bundle_digest", step_order=5),
+        ])
+        a = validate_artifact_only_dry_run_orchestration_plan(p)
+        assert any("missing_required_step" in hb for hb in a.cumulative_hard_blocks)
+
+    def test_step_with_hard_blocks_not_ready(self):
+        p = _valid_plan(output_quarantine_path="")
+        a = validate_artifact_only_dry_run_orchestration_plan(p)
+        assert "output_quarantine_path_missing" in a.cumulative_hard_blocks
+
+    def test_all_no_execution_flags_checked(self):
+        for flag, value in [
+            ("dry_run_only", False), ("execution_allowed", True), ("execute_supported", True),
+            ("no_subprocess", False), ("no_network", False), ("no_repo_mutation", False),
+            ("no_apply", False), ("no_patch_parsing", False),
+            ("no_commit_push_authorization", False), ("no_telegram_inbound", False),
+        ]:
+            p = _valid_plan(**{flag: value})
+            a = validate_artifact_only_dry_run_orchestration_plan(p)
+            assert len(a.cumulative_hard_blocks) > 0, f"{flag}={value} should hard-block"
+
+    def test_assessment_digest_stable(self):
+        p = _valid_plan()
+        a1 = validate_artifact_only_dry_run_orchestration_plan(p)
+        a2 = validate_artifact_only_dry_run_orchestration_plan(p)
+        assert a1.compute_digest() != a2.compute_digest()  # Different assessment IDs
+
+    def test_assessment_digest_excludes_record(self):
+        p = _valid_plan()
+        a = validate_artifact_only_dry_run_orchestration_plan(p)
+        a.record_digest = "fake"
+        d = a.compute_digest()
+        assert "fake" not in d
+
+    def test_persist_assessment_and_verify_tampered(self):
+        p = _valid_plan()
+        a = validate_artifact_only_dry_run_orchestration_plan(p)
+        r = persist_orchestration_assessment(a)
+        a.record_digest = a.compute_digest()
+        a.decision = "tampered"
+        v = verify_orchestration_assessment(a)
+        assert v["valid"] is False

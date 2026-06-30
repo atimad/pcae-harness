@@ -2151,3 +2151,72 @@ class Test95UOrchDemo:
     def test_demo_execute_unavailable(self):
         r = _run(["invoke", "artifact-only", "orchestration", "execute", "--help"])
         assert r.returncode != 0
+
+
+class Test95WOrchHardeningCLI:
+    def test_tampered_plan_digest_fails(self):
+        p = _write_orch_plan()
+        import json as _j, tempfile, os as _os
+        data = _j.loads(open(p).read())
+        data["record_digest"] = "0" * 64
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            _j.dump(data, f)
+            fp = f.name
+        try:
+            r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", fp, "--json"])
+            assert r.returncode != 0
+        finally:
+            _os.unlink(fp)
+
+    def test_invalid_json_fails(self):
+        import tempfile, os as _os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write("not json{{{")
+            fp = f.name
+        try:
+            r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", fp, "--json"])
+            assert r.returncode != 0
+        finally:
+            _os.unlink(fp)
+
+    def test_demo_text_output_all_invariants(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "demo"])
+        assert "Execution allowed" in r.stdout
+        assert "Execute supported" in r.stdout
+        assert "Dry-run only" in r.stdout
+        assert "Real backend" in r.stdout
+        assert "Subprocess" in r.stdout
+        assert "Network" in r.stdout
+        assert "Repo mutation" in r.stdout
+        assert "Apply" in r.stdout
+
+    def test_demo_json_output_no_execution(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "demo", "--json"])
+        d = json.loads(r.stdout)
+        assert d["execution_allowed"] is False
+        assert d["execute_supported"] is False
+        assert d["dry_run_only"] is True
+        assert d["subprocess"] is False
+        assert d["network"] is False
+        assert d["repo_mutation"] is False
+        assert d["apply"] is False
+
+    def test_dry_run_all_no_execution_flags(self):
+        p = _write_orch_plan()
+        r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", p, "--json"])
+        d = json.loads(r.stdout)
+        assert d["execution_allowed"] is False
+        assert d["execute_supported"] is False
+        assert d["dry_run_only"] is True
+        assert d["no_subprocess"] is True
+        assert d["no_network"] is True
+
+    def test_nonexistent_plan_fails(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", "/nonexistent/orch.json", "--json"])
+        assert r.returncode != 0
+
+    def test_directory_plan_fails(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", td, "--json"])
+            assert r.returncode != 0
