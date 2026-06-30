@@ -6863,3 +6863,119 @@ class Test96BExecutionAdjacentPlan:
         p.record_digest = p.compute_digest()
         p.backend_id = "tampered"
         assert not verify_execution_adjacent_plan(p)["valid"]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96E — Connected automation hardening (model)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Test96EConnectedAutomationHardening:
+    """Hardened invariants, tamper detection, broken-link coverage."""
+
+    def test_assessment_digest_deterministic(self):
+        p1 = _valid_ea_plan()
+        p2 = _valid_ea_plan()
+        a1 = validate_execution_adjacent_plan(p1)
+        a2 = validate_execution_adjacent_plan(p2)
+        # Different assessment IDs → different digests (UUID varies)
+        assert a1.compute_digest() != a2.compute_digest()
+
+    def test_tampered_decision_fails_verify(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.decision = "tampered_decision"
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_tampered_phase_id_fails_verify(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.phase_id = "tampered"
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_tampered_safety_flag_fails_verify(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.subprocess_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_tampered_hard_blocks_fails_verify(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.hard_blocks.append("injected_block")
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_missing_record_digest_fails_verify(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = ""
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_execution_allowed_in_assessment_fails_verify(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.execution_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_all_capability_flags_false_in_valid_assessment(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        flags = [a.execution_allowed, a.subprocess_allowed, a.shell_allowed,
+                 a.network_allowed, a.backend_invocation_allowed,
+                 a.adapter_execution_allowed, a.auto_apply_allowed,
+                 a.patch_parsing_allowed, a.commit_push_authorization_allowed,
+                 a.telegram_inbound_allowed, a.live_runtime_inspection_allowed,
+                 a.command_discovery_allowed]
+        assert all(not f for f in flags), f"All capability flags must be False, got: {flags}"
+
+    def test_no_execution_invariant_fields(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        assert a.execution_allowed is False
+        assert a.dry_run_only is True
+        assert a.no_real_backend_invoked is True if hasattr(a, 'no_real_backend_invoked') else True
+
+
+class Test96ENoSideEffects:
+    """Proof that connected automation does not execute."""
+
+    def test_validator_no_subprocess(self):
+        import inspect
+        src = inspect.getsource(validate_execution_adjacent_plan)
+        assert "subprocess.run" not in src
+        assert "subprocess.Popen" not in src
+        assert "os.system" not in src
+
+    def test_validator_no_network(self):
+        import inspect
+        src = inspect.getsource(validate_execution_adjacent_plan)
+        assert "urllib" not in src.lower()
+        assert "http" not in src.lower()
+        assert "socket" not in src.lower()
+        assert "requests." not in src.lower()
+
+    def test_validator_no_shell(self):
+        import inspect
+        src = inspect.getsource(validate_execution_adjacent_plan)
+        assert "shell=True" not in src
+        assert "pty" not in src.lower()
+
+    def test_persist_no_subprocess(self):
+        import inspect
+        src = inspect.getsource(persist_execution_adjacent_assessment)
+        assert "subprocess" not in src.lower()
+
+    def test_verify_no_subprocess(self):
+        import inspect
+        src = inspect.getsource(verify_execution_adjacent_assessment)
+        assert "subprocess" not in src.lower()

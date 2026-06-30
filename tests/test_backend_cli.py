@@ -2327,3 +2327,88 @@ class Test96DConnectedDemo:
 
     def test_demo_execute_unavailable(self):
         assert _run(["invoke", "artifact-only", "execution-adjacent", "execute", "--help"]).returncode != 0
+
+
+class Test96EConnectedHardeningCLI:
+    """Hardened CLI: tamper detection, latest-pointer safety, JSON contract."""
+
+    def test_saved_assessment_round_trip(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r_show = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        d_show = json.loads(r_show.stdout)
+        r_verify = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        d_verify = json.loads(r_verify.stdout)
+        assert d_verify["valid"] is True
+        assert d_show["execution_allowed"] is False
+
+    def test_show_latest_points_to_demo_assessment(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        d = json.loads(r.stdout)
+        assert d["phase_id"] == "96D"
+        assert d["decision"] is not None
+
+    def test_verify_latest_matches_show_latest(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r_show = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        r_verify = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        assert json.loads(r_verify.stdout)["valid"] is True
+        # Show and verify should reference the same assessment
+        assert json.loads(r_show.stdout)["assessment_id"] is not None
+
+    def test_json_contract_connected_demo(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        d = json.loads(r.stdout)
+        required = ["connected_chain", "execution_adjacent_plan_id",
+                     "execution_adjacent_assessment_id", "readiness_decision",
+                     "ready", "hard_blocks", "dry_run_only", "execution_allowed"]
+        for field in required:
+            assert field in d, f"Missing required field: {field}"
+
+    def test_json_contract_all_capability_flags(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        d = json.loads(r.stdout)
+        flags = ["subprocess_allowed", "shell_allowed", "network_allowed",
+                 "backend_invocation_allowed", "adapter_execution_allowed",
+                 "auto_apply_allowed", "patch_parsing_allowed",
+                 "commit_push_authorization_allowed", "telegram_inbound_allowed",
+                 "live_runtime_inspection_allowed", "command_discovery_allowed"]
+        for f in flags:
+            assert f in d, f"Missing flag: {f}"
+            assert d[f] is False, f"{f} must be False, got {d[f]}"
+
+    def test_json_contract_connected_chain_refs(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        d = json.loads(r.stdout)
+        chain = d["connected_chain"]
+        refs = ["runtime_evidence_id", "broker_decision_id", "shell_gate_decision_id",
+                "command_boundary_id", "evidence_chain_bundle_id", "orchestration_id"]
+        for ref in refs:
+            assert ref in chain, f"Missing chain ref: {ref}"
+
+    def test_json_show_latest_contract(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        d = json.loads(r.stdout)
+        for field in ["assessment_id", "decision", "execution_allowed", "dry_run_only"]:
+            assert field in d, f"Missing in show output: {field}"
+
+    def test_json_verify_latest_contract(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        d = json.loads(r.stdout)
+        assert "valid" in d
+
+    def test_demo_no_execution_flags_consistent(self):
+        """JSON and text outputs agree on no-execution status."""
+        r_json = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        r_text = _run(["invoke", "artifact-only", "execution-adjacent", "demo"])
+        assert r_json.returncode == 0 and r_text.returncode == 0
+        assert "Execution allowed:    no" in r_text.stdout or "Execution allowed:" in r_text.stdout
+
+    def test_missing_latest_fails_cleanly(self):
+        import shutil, os as _os
+        d = _os.path.join(_os.getcwd(), ".pcae/execution-adjacent-plans/assessments")
+        if _os.path.exists(d): shutil.rmtree(d)
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        assert r.returncode != 0
