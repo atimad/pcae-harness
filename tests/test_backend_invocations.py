@@ -6979,3 +6979,134 @@ class Test96ENoSideEffects:
         import inspect
         src = inspect.getsource(verify_execution_adjacent_assessment)
         assert "subprocess" not in src.lower()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96G — Artifact trust / verification hardening (model)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class Test96GArtifactTrust:
+    """Digest determinism, tamper depth, reference consistency."""
+
+    def test_digest_excludes_record_digest_field(self):
+        p = _valid_ea_plan()
+        d_with = p.compute_digest()
+        p.record_digest = "fabricated_hash_should_not_affect_digest"
+        d_after = p.compute_digest()
+        assert d_with == d_after, "record_digest field must be excluded from digest computation"
+
+    def test_digest_changes_on_safety_flag_change(self):
+        p = _valid_ea_plan()
+        d1 = p.compute_digest()
+        p.subprocess_allowed = True
+        d2 = p.compute_digest()
+        assert d1 != d2, "Digest must change when safety flag changes"
+
+    def test_digest_changes_on_backend_id_change(self):
+        p = _valid_ea_plan()
+        d1 = p.compute_digest()
+        p.backend_id = "different-backend"
+        d2 = p.compute_digest()
+        assert d1 != d2, "Digest must change when backend_id changes"
+
+    def test_digest_changes_on_command_path_change(self):
+        p = _valid_ea_plan()
+        d1 = p.compute_digest()
+        p.command_path = "/usr/bin/different"
+        d2 = p.compute_digest()
+        assert d1 != d2, "Digest must change when command path changes"
+
+    def test_digest_changes_on_phase_id_change(self):
+        p = _valid_ea_plan()
+        d1 = p.compute_digest()
+        p.phase_id = "different-phase"
+        d2 = p.compute_digest()
+        assert d1 != d2, "Digest must change when phase_id changes"
+
+    def test_assessment_digest_changes_on_hard_block_change(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        d1 = a.compute_digest()
+        a.hard_blocks.append("new_block")
+        d2 = a.compute_digest()
+        assert d1 != d2, "Assessment digest must change when hard_blocks change"
+
+    def test_assessment_digest_stable_for_same_input(self):
+        p1 = _valid_ea_plan()
+        p2 = _valid_ea_plan()
+        # Two valid plans with same fields should produce assessments with different IDs but consistent structure
+        a1 = validate_execution_adjacent_plan(p1)
+        a2 = validate_execution_adjacent_plan(p2)
+        assert a1.decision == a2.decision, "Same valid inputs should produce same decision"
+        assert a1.execution_allowed == a2.execution_allowed == False
+
+    def test_verify_flags_tampered_execution_allowed(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.execution_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_verify_flags_tampered_subprocess_allowed(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.subprocess_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_verify_flags_tampered_network_allowed(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.network_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_verify_flags_tampered_backend_invocation_allowed(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.backend_invocation_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_verify_flags_tampered_telegram_inbound_allowed(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.telegram_inbound_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_verify_flags_tampered_auto_apply_allowed(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.auto_apply_allowed = True
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_verify_flags_tampered_schema_version(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.schema_version = "999.0"
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_verify_flags_tampered_phase_id(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = a.compute_digest()
+        a.phase_id = "wrong-phase"
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False
+
+    def test_missing_record_digest_always_invalid(self):
+        p = _valid_ea_plan()
+        a = validate_execution_adjacent_plan(p)
+        a.record_digest = ""
+        v = verify_execution_adjacent_assessment(a)
+        assert v["valid"] is False

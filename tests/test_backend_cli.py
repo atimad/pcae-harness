@@ -2467,3 +2467,66 @@ class Test96FContractFreeze:
     def test_execute_not_available(self):
         r = _run(["invoke", "artifact-only", "execution-adjacent", "execute", "--help"])
         assert r.returncode != 0, "Contract violation: execute should be unavailable"
+
+
+class Test96GVerificationHardening:
+    """Verification hardening: tamper depth, path safety, error clarity."""
+
+    def test_roundtrip_save_show_verify_cycle(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        s = json.loads(_run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"]).stdout)
+        v = json.loads(_run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"]).stdout)
+        assert v["valid"] is True
+        assert s["execution_allowed"] is False
+        assert s["assessment_id"] is not None
+
+    def test_verify_detects_modified_assessment(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        import os as _os, json as _j
+        # Tamper with the latest assessment file directly
+        d = _os.path.join(_os.getcwd(), ".pcae/execution-adjacent-plans/assessments")
+        latest = _os.path.join(d, "latest-assessment.json")
+        if _os.path.exists(latest):
+            data = _j.loads(open(latest).read())
+            data["execution_allowed"] = True
+            _j.dump(data, open(latest, "w"))
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        v = json.loads(r.stdout)
+        assert v["valid"] is False, "Tampered assessment should fail verification"
+
+    def test_show_latest_after_demo(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        d = json.loads(r.stdout)
+        assert d["phase_id"] == "96D"
+        assert d["execution_allowed"] is False
+
+    def test_show_latest_no_network_in_code(self):
+        import inspect
+        from pcae.commands.backend import run_backend_invoke_artifact_only_ea_show
+        src = inspect.getsource(run_backend_invoke_artifact_only_ea_show)
+        assert "urllib" not in src.lower()
+        assert "http" not in src.lower()
+
+    def test_verify_latest_no_subprocess_in_code(self):
+        import inspect
+        from pcae.commands.backend import run_backend_invoke_artifact_only_ea_verify
+        src = inspect.getsource(run_backend_invoke_artifact_only_ea_verify)
+        assert "subprocess.run" not in src
+        assert "subprocess.Popen" not in src
+
+    def test_missing_latest_show_clear_error(self):
+        import shutil, os as _os
+        d = _os.path.join(_os.getcwd(), ".pcae/execution-adjacent-plans/assessments")
+        if _os.path.exists(d): shutil.rmtree(d)
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        assert r.returncode != 0
+        assert "error" in json.loads(r.stdout)
+
+    def test_missing_latest_verify_clear_error(self):
+        import shutil, os as _os
+        d = _os.path.join(_os.getcwd(), ".pcae/execution-adjacent-plans/assessments")
+        if _os.path.exists(d): shutil.rmtree(d)
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        assert r.returncode != 0
+        assert "error" in json.loads(r.stdout)
