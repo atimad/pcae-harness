@@ -1,18 +1,17 @@
 {
-    "phase_id": "96E",
-    "phase_name": "phase_96e_hardening",
-    "phase_title": "Connected Automation Hardening",
+    "phase_id": "96F",
+    "phase_name": "phase_96f_contract_freeze",
+    "phase_title": "Connected Automation Contract Freeze",
     "files_changed": [
-        "tests/test_backend_invocations.py",
+        "docs/PHASE_96_CONNECTED_AUTOMATION_CONTRACT_FREEZE.md",
         "tests/test_backend_cli.py",
-        "docs/PHASE_96_CONNECTED_AUTOMATION_HARDENING.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1900-phase-96e-hardening.md"
+        "tasks/active/20260630-1910-phase-96f-contract-freeze.md"
     ],
-    "files_changed_count": 7,
-    "tests_added_or_updated": "24 tests_added (14 model + 10 CLI)",
+    "files_changed_count": 6,
+    "tests_added_or_updated": "7 tests_added (Test96FContractFreeze)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -36,7 +35,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "265/266 (1 pre-existing)",
+            "result": "272/273 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -65,17 +64,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "230af769",
-            "subject": "Harden connected automation"
+            "hash": "886afa0b",
+            "subject": "Freeze contract"
         },
         {
-            "hash": "e1e1b343",
-            "subject": "Complete connected automation hardening"
+            "hash": "036863b3",
+            "subject": "Complete contract freeze"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96F \u2014 Connected Automation Contract Freeze",
-    "summary": "Phase 96E complete: Connected Automation Hardening. 24 tests. Tamper detection, invariant coverage, JSON contract, latest-pointer safety. No execution. Recommends 96F.",
+    "recommended_next_phase": "96G \u2014 Connected Automation Artifact Trust / Verification Hardening",
+    "summary": "Phase 96F complete: Connected Automation Contract Freeze. Frozen 9 artifacts, 13 safety invariants, 3 CLI contracts. 7 structural tests. No execution. Recommends 96G.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
