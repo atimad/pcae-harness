@@ -7710,3 +7710,53 @@ def get_backend_invocation_readiness() -> dict[str, Any]:
         ],
         "message": "Backend invocation is never authorized. Contract design only."
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 97C — Adapter invocation boundary constants
+# ═══════════════════════════════════════════════════════════════════════════
+
+ADAPTER_DENIED_MISSING_IDENTITY = "denied_missing_adapter_identity"
+ADAPTER_DENIED_INVALID_IDENTITY = "denied_invalid_adapter_identity"
+ADAPTER_DENIED_MISSING_CAPABILITY = "denied_missing_capability_declaration"
+ADAPTER_DENIED_CAPABILITY_MISMATCH = "denied_capability_mismatch"
+ADAPTER_DENIED_FORBIDDEN_OP = "denied_forbidden_operation"
+ADAPTER_DENIED_NETWORK_REQUESTED = "denied_network_requested"
+ADAPTER_DENIED_SUBPROCESS_REQUESTED = "denied_subprocess_requested"
+ADAPTER_DENIED_SHELL_REQUESTED = "denied_shell_requested"
+ADAPTER_DENIED_MUTATION_REQUESTED = "denied_mutation_requested"
+ADAPTER_DENIED_APPLY_REQUESTED = "denied_apply_requested"
+ADAPTER_DENIED_COMMIT_REQUESTED = "denied_commit_requested"
+ADAPTER_DENIED_PUSH_REQUESTED = "denied_push_requested"
+ADAPTER_DENIED_TELEGRAM_INBOUND = "denied_telegram_inbound_requested"
+ADAPTER_DENIED_SECRET_DETECTED = "denied_secret_material_detected"
+
+
+def get_adapter_invocation_boundary() -> dict[str, Any]:
+    """Return current adapter invocation boundary status.
+
+    Always denied — adapter execution is never authorized.
+    Evidence-only, non-authorizing.
+    """
+    return {
+        "adapter_execution_authorized": False,
+        "backend_invocation_authorized": False,
+        "network_authorized": False,
+        "subprocess_authorized": False,
+        "shell_authorized": False,
+        "mutation_authorized": False,
+        "apply_authorized": False,
+        "commit_authorized": False,
+        "push_authorized": False,
+        "execution_authorized": False,
+        "simulation_only": True,
+        "no_execution": True,
+        "denial_reasons": [
+            ADAPTER_DENIED_MISSING_IDENTITY,
+            ADAPTER_DENIED_MISSING_CAPABILITY,
+            ADAPTER_DENIED_SUBPROCESS_REQUESTED,
+            ADAPTER_DENIED_SHELL_REQUESTED,
+            ADAPTER_DENIED_NETWORK_REQUESTED,
+        ],
+        "message": "Adapter execution is never authorized. Boundary design only."
+    }

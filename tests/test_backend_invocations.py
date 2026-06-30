@@ -7174,3 +7174,28 @@ class Test97BInvocationContract:
     def test_denial_reasons_at_least_3(self):
         from pcae.core.backend_invocations import get_backend_invocation_readiness
         assert len(get_backend_invocation_readiness()["denial_reasons"]) >= 3
+
+
+class Test97CAdapterBoundary:
+    def test_adapter_never_authorized(self):
+        from pcae.core.backend_invocations import get_adapter_invocation_boundary
+        r = get_adapter_invocation_boundary()
+        assert r["adapter_execution_authorized"] is False
+        assert r["execution_authorized"] is False
+
+    def test_adapter_all_flags_false(self):
+        from pcae.core.backend_invocations import get_adapter_invocation_boundary
+        r = get_adapter_invocation_boundary()
+        for key in ["network_authorized", "subprocess_authorized", "shell_authorized",
+                     "mutation_authorized", "apply_authorized", "commit_authorized", "push_authorized"]:
+            assert r[key] is False
+
+    def test_adapter_simulation_only(self):
+        from pcae.core.backend_invocations import get_adapter_invocation_boundary
+        r = get_adapter_invocation_boundary()
+        assert r["simulation_only"] is True
+        assert r["no_execution"] is True
+
+    def test_adapter_denials_non_empty(self):
+        from pcae.core.backend_invocations import get_adapter_invocation_boundary
+        assert len(get_adapter_invocation_boundary()["denial_reasons"]) >= 3
