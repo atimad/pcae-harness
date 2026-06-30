@@ -1,16 +1,18 @@
 {
-    "phase_id": "96K",
-    "phase_name": "phase_96k_milestone",
-    "phase_title": "Milestone Summary",
+    "phase_id": "97A",
+    "phase_name": "phase_97a_readiness",
+    "phase_title": "Execution Readiness Model Design",
     "files_changed": [
-        "docs/PHASE_96_CONNECTED_AUTOMATION_MILESTONE_SUMMARY.md",
+        "docs/PHASE_97_EXECUTION_READINESS_MODEL_DESIGN.md",
+        "src/pcae/core/backend_invocations.py",
+        "tests/test_backend_invocations.py",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-2000-phase-96k-milestone.md"
+        "tasks/active/20260630-2010-phase-97a-readiness.md"
     ],
-    "files_changed_count": 5,
-    "tests_added_or_updated": "0 tests_added (documentation-only)",
+    "files_changed_count": 7,
+    "tests_added_or_updated": "6 tests_added (Test97AExecutionReadinessModel)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -29,7 +31,7 @@
         },
         {
             "name": "backend_model_tests",
-            "result": "733/733",
+            "result": "739/739",
             "status": "passed"
         },
         {
@@ -63,13 +65,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "10675dde",
-            "subject": "Summarize Phase 96 milestone"
+            "hash": "73f93600",
+            "subject": "Design execution readiness"
+        },
+        {
+            "hash": "48afe60a",
+            "subject": "Complete readiness design"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "97A \u2014 Execution Readiness Model Design",
-    "summary": "Phase 96K complete: Milestone Summary. Phase 96 closes. 10 subphases, 733 model/295 CLI tests, connected non-executing chain. Recommends 97A.",
+    "recommended_next_phase": "97B \u2014 Governed Backend Invocation Contract Design",
+    "summary": "Phase 97A complete: Execution Readiness Model Design. 7 readiness statuses (none authorizing), evidence/authorization categories, no-go criteria, fail-closed behavior. 6 tests. No execution. Recommends 97B.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
