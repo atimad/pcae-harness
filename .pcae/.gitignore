@@ -31,4 +31,5 @@ artifact-only-real-invocation-dry-runs/
 artifact-only-invocation-boundaries/
 evidence-chain-bundles/
 orchestration-plans/
+execution-adjacent-plans/
 claude-runtime-evidence/

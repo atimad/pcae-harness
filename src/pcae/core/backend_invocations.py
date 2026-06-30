@@ -7147,3 +7147,316 @@ def verify_orchestration_assessment(assessment: ArtifactOnlyDryRunOrchestrationA
         issues.append("record_digest_mismatch")
     if assessment.execution_allowed: issues.append("execution_allowed must be False")
     return {"valid": len(issues) == 0, "issues": issues}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96B — Execution-adjacent plan model
+# ═══════════════════════════════════════════════════════════════════════════
+
+_EA_SCHEMA_VERSION = "1.0"
+_EA_DIR = ".pcae/execution-adjacent-plans"
+
+EA_READY = "ready_for_execution_adjacent_dry_run"
+EA_HARD_BLOCK = "hard_block"
+EA_MISSING_FIELDS = "missing_fields"
+EA_MISMATCH = "mismatch"
+EA_TAMPERED = "tampered"
+EA_UNSUPPORTED_EXECUTION = "unsupported_execution"
+EA_UNSAFE_CAPABILITY = "unsafe_capability_requested"
+
+
+@dataclass
+class ExecutionAdjacentPlan:
+    """Non-executing execution-adjacent plan. Models intent without execution."""
+
+    plan_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    adapter_id: str = ""
+    orchestration_id: str = ""
+    command_identity_id: str = ""
+    command_name: str = ""
+    command_path: str = ""
+    command_digest: str = ""
+    command_args: list[str] = field(default_factory=list)
+    command_env_digest: str = ""
+    working_directory: str = ""
+    timeout_policy_id: str = ""
+    timeout_seconds: int = 0
+    kill_policy_id: str = ""
+    output_quarantine_id: str = ""
+    output_quarantine_path: str = ""
+    audit_record_id: str = ""
+    audit_path: str = ""
+    rollback_linkage_id: str = ""
+    approval_artifact_id: str = ""
+    approval_actor_id: str = ""
+    broker_decision_id: str = ""
+    broker_decision: str = ""
+    shell_gate_decision_id: str = ""
+    shell_gate_decision: str = ""
+    repo_state_id: str = ""
+    repo_clean: bool = True
+    origin_main_head_count: int = 0
+    task_scope_status: str = "in_scope"
+    dry_run_only: bool = True
+    execution_allowed: bool = False
+    subprocess_allowed: bool = False
+    shell_allowed: bool = False
+    network_allowed: bool = False
+    backend_invocation_allowed: bool = False
+    adapter_execution_allowed: bool = False
+    auto_apply_allowed: bool = False
+    patch_parsing_allowed: bool = False
+    commit_push_authorization_allowed: bool = False
+    telegram_inbound_allowed: bool = False
+    live_runtime_inspection_allowed: bool = False
+    command_discovery_allowed: bool = False
+    created_at_utc: str = ""
+    schema_version: str = _EA_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["command_args"] = list(self.command_args)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ExecutionAdjacentPlan":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class ExecutionAdjacentPlanAssessment:
+    """Validation assessment for an execution-adjacent plan."""
+
+    assessment_id: str = ""
+    plan_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    ready: bool = False
+    decision: str = ""
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    missing_fields: list[str] = field(default_factory=list)
+    mismatch_reasons: list[str] = field(default_factory=list)
+    tamper_reasons: list[str] = field(default_factory=list)
+    failure_classifications: list[str] = field(default_factory=list)
+    command_identity_ready: bool = False
+    timeout_policy_ready: bool = False
+    output_quarantine_ready: bool = False
+    audit_ready: bool = False
+    rollback_linkage_ready: bool = False
+    approval_ready: bool = False
+    broker_ready: bool = False
+    shell_gate_ready: bool = False
+    repo_state_ready: bool = False
+    task_scope_ready: bool = False
+    dry_run_only: bool = True
+    execution_allowed: bool = False
+    subprocess_allowed: bool = False
+    shell_allowed: bool = False
+    network_allowed: bool = False
+    backend_invocation_allowed: bool = False
+    adapter_execution_allowed: bool = False
+    auto_apply_allowed: bool = False
+    patch_parsing_allowed: bool = False
+    commit_push_authorization_allowed: bool = False
+    telegram_inbound_allowed: bool = False
+    live_runtime_inspection_allowed: bool = False
+    command_discovery_allowed: bool = False
+    created_at_utc: str = ""
+    schema_version: str = _EA_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["hard_blocks"] = list(self.hard_blocks)
+        d["warnings"] = list(self.warnings)
+        d["missing_fields"] = list(self.missing_fields)
+        d["mismatch_reasons"] = list(self.mismatch_reasons)
+        d["tamper_reasons"] = list(self.tamper_reasons)
+        d["failure_classifications"] = list(self.failure_classifications)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ExecutionAdjacentPlanAssessment":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+def validate_execution_adjacent_plan(
+    plan: ExecutionAdjacentPlan,
+) -> ExecutionAdjacentPlanAssessment:
+    """Validate execution-adjacent plan. Model-only — never executes."""
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    aid = f"ea-{_uuid.uuid4().hex[:12]}"
+    hb: list[str] = []
+    missing: list[str] = []
+
+    if not plan.plan_id: hb.append("plan_id_missing")
+    if not plan.phase_id: hb.append("phase_id_missing")
+    if not plan.task_id: hb.append("task_id_missing")
+    if not plan.backend_id: hb.append("backend_id_missing")
+    if not plan.adapter_id: hb.append("adapter_id_missing")
+
+    # Command identity
+    if not plan.command_name: hb.append("command_name_missing")
+    if not plan.command_path: hb.append("command_path_missing")
+    if not plan.command_digest: hb.append("command_digest_missing")
+    if not plan.command_env_digest: hb.append("command_env_digest_missing")
+    if not plan.working_directory: hb.append("working_directory_missing")
+
+    # Policies/paths
+    if not plan.timeout_policy_id: hb.append("timeout_policy_id_missing")
+    if plan.timeout_seconds <= 0: hb.append("timeout_seconds_missing_or_invalid")
+    if not plan.kill_policy_id: hb.append("kill_policy_id_missing")
+    if not plan.output_quarantine_id: hb.append("output_quarantine_id_missing")
+    if not plan.output_quarantine_path: hb.append("output_quarantine_path_missing")
+    if not plan.audit_record_id: hb.append("audit_record_id_missing")
+    if not plan.audit_path: hb.append("audit_path_missing")
+    if not plan.rollback_linkage_id: hb.append("rollback_linkage_id_missing")
+    if not plan.approval_artifact_id: hb.append("approval_artifact_id_missing")
+    if not plan.approval_actor_id: hb.append("approval_actor_id_missing")
+
+    # Broker/shell-gate
+    if not plan.broker_decision_id: hb.append("broker_decision_id_missing")
+    if not plan.broker_decision: hb.append("broker_decision_missing")
+    elif plan.broker_decision in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE):
+        hb.append(f"broker_decision:{plan.broker_decision}")
+    if not plan.shell_gate_decision_id: hb.append("shell_gate_decision_id_missing")
+    if not plan.shell_gate_decision: hb.append("shell_gate_decision_missing")
+    elif plan.shell_gate_decision in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE):
+        hb.append(f"shell_gate_decision:{plan.shell_gate_decision}")
+
+    # Repo/task
+    if not plan.repo_clean: hb.append("repo_clean=False")
+    if plan.origin_main_head_count != 0: hb.append("origin_main_head_count!=0")
+    if plan.task_scope_status != "in_scope": hb.append(f"task_scope_status:{plan.task_scope_status}")
+
+    # Dry-run
+    if not plan.dry_run_only: hb.append("dry_run_only=False")
+
+    # Capability flags — all must be False
+    _cap_flags = [
+        ("execution_allowed", plan.execution_allowed),
+        ("subprocess_allowed", plan.subprocess_allowed),
+        ("shell_allowed", plan.shell_allowed),
+        ("network_allowed", plan.network_allowed),
+        ("backend_invocation_allowed", plan.backend_invocation_allowed),
+        ("adapter_execution_allowed", plan.adapter_execution_allowed),
+        ("auto_apply_allowed", plan.auto_apply_allowed),
+        ("patch_parsing_allowed", plan.patch_parsing_allowed),
+        ("commit_push_authorization_allowed", plan.commit_push_authorization_allowed),
+        ("telegram_inbound_allowed", plan.telegram_inbound_allowed),
+        ("live_runtime_inspection_allowed", plan.live_runtime_inspection_allowed),
+        ("command_discovery_allowed", plan.command_discovery_allowed),
+    ]
+    for name, flag in _cap_flags:
+        if flag:
+            hb.append(f"{name}=True")
+
+    failures = list(hb)
+    for m in missing: failures.append(f"missing:{m}")
+    if any("execution_allowed" in f or "subprocess_allowed" in f for f in hb):
+        decision = EA_UNSAFE_CAPABILITY
+    elif hb: decision = EA_HARD_BLOCK
+    elif missing: decision = EA_MISSING_FIELDS
+    else: decision = EA_READY
+
+    return ExecutionAdjacentPlanAssessment(
+        assessment_id=aid, plan_id=plan.plan_id, phase_id=plan.phase_id, task_id=plan.task_id,
+        ready=(decision == EA_READY), decision=decision,
+        hard_blocks=hb, missing_fields=missing, failure_classifications=failures,
+        command_identity_ready=bool(plan.command_name and plan.command_path and plan.command_digest),
+        timeout_policy_ready=bool(plan.timeout_policy_id and plan.timeout_seconds > 0),
+        output_quarantine_ready=bool(plan.output_quarantine_id and plan.output_quarantine_path),
+        audit_ready=bool(plan.audit_record_id and plan.audit_path),
+        rollback_linkage_ready=bool(plan.rollback_linkage_id),
+        approval_ready=bool(plan.approval_artifact_id and plan.approval_actor_id),
+        broker_ready=(bool(plan.broker_decision) and plan.broker_decision not in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE)),
+        shell_gate_ready=(bool(plan.shell_gate_decision) and plan.shell_gate_decision not in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE)),
+        repo_state_ready=plan.repo_clean and plan.origin_main_head_count == 0,
+        task_scope_ready=(plan.task_scope_status == "in_scope"),
+        dry_run_only=True, execution_allowed=False, subprocess_allowed=False,
+        shell_allowed=False, network_allowed=False, backend_invocation_allowed=False,
+        adapter_execution_allowed=False, auto_apply_allowed=False, patch_parsing_allowed=False,
+        commit_push_authorization_allowed=False, telegram_inbound_allowed=False,
+        live_runtime_inspection_allowed=False, command_discovery_allowed=False,
+        created_at_utc=now,
+    )
+
+
+def _ea_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_EA_DIR)
+
+
+def persist_execution_adjacent_plan(plan: ExecutionAdjacentPlan) -> dict:
+    import os
+    d = _ea_dir()
+    try: d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+    if not plan.record_digest: plan.record_digest = plan.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{plan.plan_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(plan.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp)}
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+
+
+def verify_execution_adjacent_plan(plan: ExecutionAdjacentPlan) -> dict:
+    issues: list[str] = []
+    if not plan.plan_id: issues.append("missing plan_id")
+    if not plan.record_digest: issues.append("missing record_digest")
+    if plan.record_digest and plan.compute_digest() != plan.record_digest: issues.append("record_digest_mismatch")
+    return {"valid": len(issues) == 0, "issues": issues}
+
+
+def persist_execution_adjacent_assessment(assessment: ExecutionAdjacentPlanAssessment) -> dict:
+    import os
+    d = _ea_dir() / "assessments"
+    try: d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+    if not assessment.record_digest: assessment.record_digest = assessment.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{assessment.assessment_id}.json"
+        lp = d / "latest-assessment.json"
+        fp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest-assessment.tmp"
+        tmp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp)}
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+
+
+def verify_execution_adjacent_assessment(assessment: ExecutionAdjacentPlanAssessment) -> dict:
+    issues: list[str] = []
+    if not assessment.assessment_id: issues.append("missing assessment_id")
+    if not assessment.record_digest: issues.append("missing record_digest")
+    if assessment.record_digest and assessment.compute_digest() != assessment.record_digest: issues.append("record_digest_mismatch")
+    if assessment.execution_allowed: issues.append("execution_allowed must be False")
+    return {"valid": len(issues) == 0, "issues": issues}

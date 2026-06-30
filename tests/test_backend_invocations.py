@@ -6780,3 +6780,86 @@ class Test95WOrchHardening:
         a.decision = "tampered"
         v = verify_orchestration_assessment(a)
         assert v["valid"] is False
+
+
+from pcae.core.backend_invocations import (
+    ExecutionAdjacentPlan, ExecutionAdjacentPlanAssessment,
+    validate_execution_adjacent_plan, persist_execution_adjacent_plan,
+    verify_execution_adjacent_plan, persist_execution_adjacent_assessment,
+    verify_execution_adjacent_assessment,
+    EA_READY, EA_HARD_BLOCK, EA_UNSAFE_CAPABILITY,
+)
+
+
+def _valid_ea_plan(**kw):
+    defaults = {
+        "plan_id": "ea-test", "phase_id": "96B", "task_id": "test",
+        "backend_id": "mock", "adapter_id": "mock",
+        "command_name": "echo", "command_path": "/bin/echo", "command_digest": "abc",
+        "command_args": ["hello"], "command_env_digest": "env-hash",
+        "working_directory": "/tmp",
+        "timeout_policy_id": "tp-1", "timeout_seconds": 120, "kill_policy_id": "kp-1",
+        "output_quarantine_id": "oq-1", "output_quarantine_path": "/q",
+        "audit_record_id": "ar-1", "audit_path": "/a",
+        "rollback_linkage_id": "rl-1",
+        "approval_artifact_id": "aa-1", "approval_actor_id": "operator",
+        "broker_decision_id": "bd-1", "broker_decision": DECISION_ALLOW_DRY_RUN,
+        "shell_gate_decision_id": "sg-1", "shell_gate_decision": DECISION_ALLOW_DRY_RUN,
+    }
+    defaults.update(kw)
+    return ExecutionAdjacentPlan(**defaults)
+
+
+class Test96BExecutionAdjacentPlan:
+
+    def test_valid_ready(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan())
+        assert a.decision == EA_READY and a.ready
+
+    def test_missing_command_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(command_name="", command_path="", command_digest=""))
+        assert "command_name_missing" in a.hard_blocks
+
+    def test_broker_deny_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(broker_decision=DECISION_DENY))
+        assert any("broker_decision:deny" in hb for hb in a.hard_blocks)
+
+    def test_execution_allowed_true_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(execution_allowed=True))
+        assert a.decision == EA_UNSAFE_CAPABILITY
+
+    def test_subprocess_allowed_true_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(subprocess_allowed=True))
+        assert "subprocess_allowed=True" in a.hard_blocks
+
+    def test_network_allowed_true_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(network_allowed=True))
+        assert "network_allowed=True" in a.hard_blocks
+
+    def test_repo_not_clean_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(repo_clean=False))
+        assert "repo_clean=False" in a.hard_blocks
+
+    def test_origin_nonzero_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(origin_main_head_count=3))
+        assert "origin_main_head_count!=0" in a.hard_blocks
+
+    def test_dry_run_false_blocks(self):
+        a = validate_execution_adjacent_plan(_valid_ea_plan(dry_run_only=False))
+        assert "dry_run_only=False" in a.hard_blocks
+
+    def test_digest_stable(self):
+        p = _valid_ea_plan()
+        assert p.compute_digest() == p.compute_digest()
+
+    def test_persist_and_verify(self):
+        p = _valid_ea_plan()
+        p.record_digest = p.compute_digest()
+        assert persist_execution_adjacent_plan(p)["status"] == "written"
+        assert verify_execution_adjacent_plan(p)["valid"]
+
+    def test_tampered_fails(self):
+        p = _valid_ea_plan()
+        p.record_digest = p.compute_digest()
+        p.backend_id = "tampered"
+        assert not verify_execution_adjacent_plan(p)["valid"]
