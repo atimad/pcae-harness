@@ -1,17 +1,18 @@
 {
-    "phase_id": "96F",
-    "phase_name": "phase_96f_contract_freeze",
-    "phase_title": "Connected Automation Contract Freeze",
+    "phase_id": "96G",
+    "phase_name": "phase_96g_trust",
+    "phase_title": "Artifact Trust / Verification Hardening",
     "files_changed": [
-        "docs/PHASE_96_CONNECTED_AUTOMATION_CONTRACT_FREEZE.md",
+        "tests/test_backend_invocations.py",
         "tests/test_backend_cli.py",
+        "docs/PHASE_96_CONNECTED_AUTOMATION_ARTIFACT_TRUST_VERIFICATION_HARDENING.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1910-phase-96f-contract-freeze.md"
+        "tasks/active/20260630-1920-phase-96g-trust.md"
     ],
-    "files_changed_count": 6,
-    "tests_added_or_updated": "7 tests_added (Test96FContractFreeze)",
+    "files_changed_count": 7,
+    "tests_added_or_updated": "23 tests_added (16 model + 7 CLI)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -30,12 +31,12 @@
         },
         {
             "name": "backend_model_tests",
-            "result": "717/717",
+            "result": "733/733",
             "status": "passed"
         },
         {
             "name": "backend_cli_tests",
-            "result": "272/273 (1 pre-existing)",
+            "result": "279/280 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -64,17 +65,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "886afa0b",
-            "subject": "Freeze contract"
+            "hash": "11aa3a06",
+            "subject": "Harden artifact trust"
         },
         {
-            "hash": "036863b3",
-            "subject": "Complete contract freeze"
+            "hash": "f661a397",
+            "subject": "Complete artifact trust"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96G \u2014 Connected Automation Artifact Trust / Verification Hardening",
-    "summary": "Phase 96F complete: Connected Automation Contract Freeze. Frozen 9 artifacts, 13 safety invariants, 3 CLI contracts. 7 structural tests. No execution. Recommends 96G.",
+    "recommended_next_phase": "96H \u2014 Execution-Unavailable Boundary Proof",
+    "summary": "Phase 96G complete: Artifact Trust / Verification Hardening. Digest determinism, tamper depth (10 flags), path safety, round-trip verification. 23 tests. No execution. Recommends 96H.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
