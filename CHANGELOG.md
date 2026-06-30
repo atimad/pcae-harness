@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95E — Runtime Evidence to Dry-Run Integration to Phase 95F — Stat-Only Runtime Detector Prototype; session refreshed and governance continuity revalidated.
+- Completed Phase 95F Stat-Only Runtime Detector Prototype. 7 tests (563 model total).
+
 - Transitioned active task from Phase 95D — Claude Runtime Evidence Import CLI to Phase 95E — Runtime Evidence to Dry-Run Integration; session refreshed and governance continuity revalidated.
 - Completed Phase 95E Runtime Evidence to Dry-Run Integration. 6 tests (556 model total).
 

@@ -35,6 +35,8 @@ from pcae.core.backend_invocations import (
     verify_claude_runtime_evidence,
     import_claude_runtime_evidence_from_json,
     persist_claude_runtime_evidence,
+    detect_claude_runtime_evidence_stat_only,
+    ClaudeRuntimeDetectionConfig,
     ClaudeRuntimeEvidence,
     persist_artifact_only_real_invocation_dry_run_assessment,
     load_latest_artifact_only_real_invocation_dry_run_assessment,
@@ -1971,4 +1973,65 @@ def run_backend_adapter_runtime_evidence_import(args: argparse.Namespace) -> int
             print(f"  Artifact saved:   {persist.get('path', '')}")
         print()
         print("  ✅ Imported from explicit JSON only. No live runtime inspection.")
+    return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95F — Stat-only runtime detector CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def run_backend_adapter_runtime_evidence_detect_stat_only(args: argparse.Namespace) -> int:
+    """pcae backend adapter runtime-evidence detect-stat-only --config <path> [--save] [--json]"""
+    from pathlib import Path as _P
+    config_path: str = getattr(args, "config", "") or ""
+    save: bool = getattr(args, "save", False) or False
+
+    if not config_path:
+        msg = "Missing --config <path>"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    cp = _P(config_path)
+    if not cp.is_file():
+        msg = f"Config file not found: {config_path}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    try:
+        config_data = json.loads(cp.read_text())
+        config = ClaudeRuntimeDetectionConfig.from_dict(config_data)
+    except Exception as exc:
+        msg = f"Failed to load config: {exc}"
+        print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+        return 1
+
+    evidence = detect_claude_runtime_evidence_stat_only(config)
+
+    if save:
+        evidence.record_digest = evidence.compute_digest()
+        persist_claude_runtime_evidence(evidence)
+
+    if args.json:
+        print(json.dumps({
+            "evidence": evidence.to_dict(),
+            "stat_only": True,
+            "no_execution": True,
+        }, indent=2))
+    else:
+        print(f"Stat-only detection: {evidence.backend_id}")
+        print(f"  Evidence ID:       {evidence.runtime_evidence_id}")
+        print(f"  Profile:           {evidence.runtime_profile}")
+        print(f"  Command path:      {evidence.declared_command_path}")
+        print(f"  Command hash:      {evidence.declared_command_path_hash[:16] if evidence.declared_command_path_hash else 'N/A'}...")
+        print(f"  Bypass state:      {evidence.bypass_permissions_state}")
+        print(f"  Confidence:        {evidence.confidence}")
+        if evidence.hard_blocks:
+            print(f"  Hard blocks:       {', '.join(evidence.hard_blocks)}")
+        print(f"  Stat-only:         yes")
+        print(f"  Executed command:  no")
+        print(f"  Subprocess:        no")
+        print(f"  Network:           no")
+        print()
+        print("  ⚠️  Stat-only detection. No command was executed.")
     return 0

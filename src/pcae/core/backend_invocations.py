@@ -5633,3 +5633,162 @@ def import_claude_runtime_evidence_from_json(json_path: str) -> tuple[
     evidence.record_digest = evidence.compute_digest()
 
     return evidence, {"status": "imported", "runtime_evidence_id": evidence.runtime_evidence_id}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95F — Stat-only runtime detector prototype
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class ClaudeRuntimeDetectionConfig:
+    """Explicit operator-provided config for stat-only detection.
+
+    All paths must be explicit. No PATH lookup. No command auto-discovery.
+    No subprocess. No shell. No network. No live session inspection.
+    """
+
+    config_id: str = ""
+    backend_id: str = ""
+    backend_type: str = ""
+    adapter_id: str = ""
+    runtime_profile: str = ""
+    declared_command_path: str = ""
+    wrapper_path: str = ""
+    auth_mode: str = ""
+    required_env_keys_present_redacted: list[str] = field(default_factory=list)
+    required_env_keys_missing: list[str] = field(default_factory=list)
+    bypass_permissions_state: str = BYPASS_UNKNOWN
+    bypass_permissions_evidence: str = ""
+    session_isolation_mode: str = "stateless"
+    working_directory: str = ""
+    timeout_seconds: int = 0
+    output_capture_mode: str = ""
+    audit_path: str = ""
+    output_quarantine_path: str = ""
+    shell_gate_required: bool = True
+    shell_gate_expected_decision: str = ""
+    broker_required: bool = True
+    broker_expected_decision: str = ""
+    evidence_source: str = EVIDENCE_OPERATOR_DECLARED
+    schema_version: str = _RUNTIME_EVIDENCE_SCHEMA_VERSION
+
+    def to_dict(self) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["required_env_keys_present_redacted"] = list(self.required_env_keys_present_redacted)
+        d["required_env_keys_missing"] = list(self.required_env_keys_missing)
+        return d
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ClaudeRuntimeDetectionConfig":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+def detect_claude_runtime_evidence_stat_only(
+    config: ClaudeRuntimeDetectionConfig,
+) -> ClaudeRuntimeEvidence:
+    """Stat-only runtime evidence detector.
+
+    Reads only explicit configured paths using Python filesystem APIs.
+    Computes SHA-256 hashes of explicit files. Never executes, never
+    uses subprocess/which/shell/network, never auto-discovers commands.
+    """
+    import hashlib
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    evidence_id = f"re-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    warnings_list: list[str] = []
+    missing: list[str] = []
+    command_hash = ""
+    wrapper_hash = ""
+
+    # Validate profile
+    if config.runtime_profile not in VALID_RUNTIME_PROFILES:
+        hard_blocks.append(f"unknown_runtime_profile:{config.runtime_profile}")
+
+    # Stat-only filesystem inspection for explicit paths
+    if config.runtime_profile != PROFILE_CUSTOM_CLAUDE_COMPATIBLE:
+        cp = config.declared_command_path
+        if not cp:
+            hard_blocks.append("declared_command_path_missing")
+        else:
+            from pathlib import Path as _P
+            pp = _P(cp)
+            if not pp.exists():
+                hard_blocks.append("command_path_not_found")
+            elif pp.is_dir():
+                hard_blocks.append("command_path_is_directory")
+            elif not pp.is_file():
+                hard_blocks.append("command_path_not_regular_file")
+            else:
+                try:
+                    command_hash = hashlib.sha256(pp.read_bytes()).hexdigest()
+                except Exception:
+                    hard_blocks.append("command_path_unreadable")
+
+    if config.wrapper_path:
+        from pathlib import Path as _P
+        wp = _P(config.wrapper_path)
+        if not wp.exists():
+            hard_blocks.append("wrapper_path_not_found")
+        elif wp.is_dir():
+            hard_blocks.append("wrapper_path_is_directory")
+        elif not wp.is_file():
+            hard_blocks.append("wrapper_path_not_regular_file")
+        else:
+            try:
+                wrapper_hash = hashlib.sha256(wp.read_bytes()).hexdigest()
+            except Exception:
+                hard_blocks.append("wrapper_path_unreadable")
+
+    # Bypass
+    if config.bypass_permissions_state == BYPASS_UNKNOWN:
+        hard_blocks.append("bypass_state_unknown")
+    elif config.bypass_permissions_state == BYPASS_ON:
+        hard_blocks.append("bypass_enabled")
+
+    # Required fields
+    if config.timeout_seconds <= 0:
+        missing.append("timeout")
+    if not config.audit_path:
+        missing.append("audit_path")
+    if not config.output_quarantine_path:
+        missing.append("output_quarantine_path")
+
+    return ClaudeRuntimeEvidence(
+        runtime_evidence_id=evidence_id,
+        backend_id=config.backend_id,
+        backend_type=config.backend_type,
+        adapter_id=config.adapter_id,
+        runtime_profile=config.runtime_profile,
+        command_identity=config.declared_command_path,
+        declared_command_path=config.declared_command_path,
+        declared_command_path_hash=command_hash,
+        wrapper_path=config.wrapper_path,
+        wrapper_path_hash=wrapper_hash,
+        auth_mode=config.auth_mode,
+        required_env_keys_present_redacted=list(config.required_env_keys_present_redacted),
+        required_env_keys_missing=list(config.required_env_keys_missing),
+        bypass_permissions_state=config.bypass_permissions_state,
+        bypass_permissions_evidence=config.bypass_permissions_evidence,
+        timeout_seconds=config.timeout_seconds,
+        audit_path=config.audit_path,
+        output_quarantine_path=config.output_quarantine_path,
+        shell_gate_required=config.shell_gate_required,
+        shell_gate_expected_decision=config.shell_gate_expected_decision,
+        broker_required=config.broker_required,
+        broker_expected_decision=config.broker_expected_decision,
+        detected_at_utc=now,
+        evidence_source=EVIDENCE_FUTURE_STAT_ONLY,
+        confidence="medium" if not hard_blocks else "low",
+        hard_blocks=hard_blocks,
+        warnings=warnings_list,
+        missing_evidence=missing,
+        no_real_backend_invoked=True,
+        no_adapter_executed=True,
+        no_subprocess=True,
+        no_network=True,
+        secrets_redacted=True,
+    )

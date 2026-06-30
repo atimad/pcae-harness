@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 95E — Runtime Evidence to Dry-Run Integration (20260630-0117-phase-95d-claude-runtime-evidence-import-cli)
+- Phase 95F — Stat-Only Runtime Detector Prototype (20260630-0428-phase-95e-runtime-evidence-to-dry-run-integration)
+- Phase 95E — Runtime Evidence to Dry-Run Integration (20260630-0428-phase-95e-runtime-evidence-to-dry-run-integration)
 - Phase 95D — Claude Runtime Evidence Import CLI (20260630-0117-phase-95d-claude-runtime-evidence-import-cli)
 - Phase 95C — Claude Runtime Evidence Model (20260629-2258-phase-95c-claude-runtime-evidence-model)
 - Phase 95B — Claude/Claude-DeepSeek Runtime Detection Design (20260629-2250-phase-95b-claude-claude-deepseek-runtime-detection-design)

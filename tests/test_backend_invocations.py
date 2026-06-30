@@ -5552,3 +5552,115 @@ class Test95EIntegrationCLI:
         )
         assert r.returncode == 0
         assert "bypass" in r.stdout.lower() or "Runtime evidence" in r.stdout
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95F — Stat-only runtime detector tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ClaudeRuntimeDetectionConfig,
+    detect_claude_runtime_evidence_stat_only,
+)
+
+
+class Test95FDetector:
+    """Stat-only detector."""
+
+    def test_valid_config_produces_evidence(self, tmp_path):
+        # Create a temp file to hash
+        cmd = tmp_path / "fake-claude"
+        cmd.write_text("#!/bin/sh\necho mock")
+        config = ClaudeRuntimeDetectionConfig(
+            config_id="cfg-1", backend_id="claude", backend_type="claude_cli",
+            runtime_profile="claude_cli", declared_command_path=str(cmd),
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        evidence = detect_claude_runtime_evidence_stat_only(config)
+        assert evidence.runtime_evidence_id.startswith("re-")
+        assert evidence.declared_command_path_hash
+        assert evidence.no_real_backend_invoked is True
+        assert evidence.no_subprocess is True
+        assert evidence.no_network is True
+
+    def test_missing_command_path_blocks(self, tmp_path):
+        config = ClaudeRuntimeDetectionConfig(
+            config_id="cfg-2", backend_id="claude", runtime_profile="claude_cli",
+            declared_command_path=str(tmp_path / "nonexistent"),
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        evidence = detect_claude_runtime_evidence_stat_only(config)
+        assert "command_path_not_found" in evidence.hard_blocks
+
+    def test_directory_path_blocks(self, tmp_path):
+        config = ClaudeRuntimeDetectionConfig(
+            config_id="cfg-3", backend_id="claude", runtime_profile="claude_cli",
+            declared_command_path=str(tmp_path),
+            bypass_permissions_state="off", timeout_seconds=120,
+            audit_path="/a", output_quarantine_path="/q",
+        )
+        evidence = detect_claude_runtime_evidence_stat_only(config)
+        assert "command_path_is_directory" in evidence.hard_blocks
+
+    def test_bypass_unknown_blocks(self, tmp_path):
+        cmd = tmp_path / "claude"
+        cmd.write_text("mock")
+        config = ClaudeRuntimeDetectionConfig(
+            config_id="cfg-4", backend_id="claude", runtime_profile="claude_cli",
+            declared_command_path=str(cmd),
+            bypass_permissions_state="unknown", timeout_seconds=120,
+            audit_path="/a", output_quarantine_path="/q",
+        )
+        evidence = detect_claude_runtime_evidence_stat_only(config)
+        assert "bypass_state_unknown" in evidence.hard_blocks
+
+    def test_no_execution_flags_true(self, tmp_path):
+        cmd = tmp_path / "claude"
+        cmd.write_text("mock")
+        config = ClaudeRuntimeDetectionConfig(
+            config_id="cfg-5", backend_id="claude", runtime_profile="claude_cli",
+            declared_command_path=str(cmd),
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        evidence = detect_claude_runtime_evidence_stat_only(config)
+        assert evidence.no_real_backend_invoked is True
+        assert evidence.no_adapter_executed is True
+        assert evidence.no_subprocess is True
+        assert evidence.no_network is True
+        assert evidence.secrets_redacted is True
+
+    def test_no_subprocess_in_detector_code(self):
+        import inspect
+        from pcae.core import backend_invocations
+        source = inspect.getsource(backend_invocations)
+        assert "subprocess.run" not in source
+        assert "os.system(" not in source
+        assert "shutil.which" not in source
+
+
+class Test95FDetectorCLI:
+    def test_detect_stat_only_cli(self, tmp_path):
+        import subprocess, sys, json as _j
+        cmd = tmp_path / "fake-claude"
+        cmd.write_text("mock binary")
+        config_path = tmp_path / "config.json"
+        _j.dump({
+            "config_id": "cfg-cli", "backend_id": "claude",
+            "backend_type": "claude_cli", "runtime_profile": "claude_cli",
+            "declared_command_path": str(cmd),
+            "bypass_permissions_state": "off",
+            "bypass_permissions_evidence": "ok",
+            "timeout_seconds": 120, "audit_path": "/a",
+            "output_quarantine_path": "/q",
+        }, config_path.open("w"))
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "runtime-evidence",
+             "detect-stat-only", "--config", str(config_path)],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode == 0
+        assert "Stat-only" in r.stdout
+        assert "Executed command:  no" in r.stdout

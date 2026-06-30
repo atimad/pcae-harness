@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 95F: Stat-Only Runtime Detector Prototype (completed).
+
+detect_claude_runtime_evidence_stat_only() uses Python filesystem APIs only
+(Path.exists, stat, read_bytes, hashlib). No which/subprocess/PATH/search/network.
+Hashes explicit configured command/wrapper files. CLI detect-stat-only. 7 tests (563 model).
+Delivers docs/PHASE_95_STAT_ONLY_RUNTIME_DETECTOR_PROTOTYPE.md.
+
 Phase 95E: Runtime Evidence to Dry-Run Integration (completed).
 
 Extended dry-run assessment with 10 runtime evidence binding fields. evaluate() now requires

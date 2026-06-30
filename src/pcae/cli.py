@@ -463,6 +463,7 @@ from pcae.commands.backend import (
     run_backend_adapter_runtime_evidence_show,
     run_backend_adapter_runtime_evidence_verify,
     run_backend_adapter_runtime_evidence_import,
+    run_backend_adapter_runtime_evidence_detect_stat_only,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4962,6 +4963,15 @@ def build_parser() -> argparse.ArgumentParser:
     re_import.add_argument("--from-json", required=True, help="Path to JSON evidence file.")
     re_import.add_argument("--json", action="store_true")
     re_import.set_defaults(handler=run_backend_adapter_runtime_evidence_import)
+
+    # ── Phase 95F: stat-only detect ────────────────────────────────────
+    re_detect = adapter_re_sub.add_parser(
+        "detect-stat-only", help="Stat-only runtime detection from explicit config."
+    )
+    re_detect.add_argument("--config", required=True, help="Path to detection config JSON.")
+    re_detect.add_argument("--save", action="store_true", help="Persist evidence.")
+    re_detect.add_argument("--json", action="store_true")
+    re_detect.set_defaults(handler=run_backend_adapter_runtime_evidence_detect_stat_only)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
