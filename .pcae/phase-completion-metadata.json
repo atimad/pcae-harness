@@ -3,16 +3,15 @@
     "phase_name": "phase_95w_hardening",
     "phase_title": "Orchestration Hardening",
     "files_changed": [
-        "src/pcae/core/backend_invocations.py",
-        "tests/test_backend_invocations.py",
         "tests/test_backend_cli.py",
         "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_HARDENING.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1740-phase-95w-hardening.md"
+        "tasks/active/20260630-1740-phase-95w-hardening.md",
+        "tests/test_backend_invocations.py"
     ],
-    "files_changed_count": 8,
+    "files_changed_count": 7,
     "tests_added_or_updated": "15 tests_added",
     "validation_results": [
         {
@@ -66,12 +65,16 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "c6d7088e",
-            "subject": "Harden orchestration stack"
+            "hash": "33ca1fee",
+            "subject": "Harden artifact-only dry-run orchestration stack"
         },
         {
-            "hash": "22b72e36",
-            "subject": "Complete orchestration hardening"
+            "hash": "19916463",
+            "subject": "Complete Phase 95W orchestration hardening"
+        },
+        {
+            "hash": "110eef83",
+            "subject": "Finalize Phase 95W metadata"
         }
     ],
     "commit_attribution": "phase_owned",
