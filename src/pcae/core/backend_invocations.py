@@ -6336,7 +6336,7 @@ def verify_artifact_only_invocation_command_boundary_assessment(
 def load_latest_artifact_only_invocation_command_boundary_assessment() -> (
     "ArtifactOnlyInvocationCommandBoundaryAssessment | None"
 ):
-    lp = _boundary_dir() / "latest-assessment.json"
+    lp = _boundary_dir() / "assessments" / "latest-assessment.json"
     if not lp.exists():
         return None
     try:

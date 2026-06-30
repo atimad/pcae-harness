@@ -1602,3 +1602,199 @@ class Test94TAdapterCLISafety:
         from pcae.commands import backend
         source = inspect.getsource(backend)
         assert "getUpdates" not in source
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95L — Artifact-only invocation dry-run CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyInvocationCommandBoundary,
+    persist_artifact_only_invocation_command_boundary,
+    COMMAND_MODE_PLAN,
+    COMMAND_MODE_DRY_RUN,
+    COMMAND_MODE_EXECUTE_RESERVED,
+    DECISION_ALLOW_DRY_RUN,
+)
+
+def _write_boundary(**overrides):
+    """Write a valid boundary to a temp file and return path."""
+    kwargs = {
+        "boundary_id": "cb-cli-test", "phase_id": "95L", "task_id": "test",
+        "backend_id": "mock", "adapter_id": "mock-adapter",
+        "prompt_artifact_path": "/p/p.md", "prompt_artifact_digest": "abc",
+        "preflight_artifact_path": "/p/pf.json", "preflight_artifact_digest": "def",
+        "runtime_evidence_path": "/p/re.json", "runtime_evidence_digest": "ghi",
+        "approval_artifact_path": "/p/ap.json", "approval_artifact_digest": "jkl",
+        "invocation_plan_path": "/p/ip.json", "invocation_plan_digest": "mno",
+        "broker_decision_id": "bd-1", "broker_decision": DECISION_ALLOW_DRY_RUN,
+        "shell_gate_decision_id": "sg-1", "shell_gate_decision": DECISION_ALLOW_DRY_RUN,
+        "output_quarantine_path": "/q", "audit_path": "/a", "timeout_seconds": 120,
+        "redaction_policy_id": "rp-1", "operator_approval_reference": "apr-1",
+        "command_mode": COMMAND_MODE_PLAN,
+    }
+    kwargs.update(overrides)
+    b = ArtifactOnlyInvocationCommandBoundary(**kwargs)
+    b.record_digest = b.compute_digest()
+    r = persist_artifact_only_invocation_command_boundary(b)
+    return r["path"]
+
+
+class Test95LInvokeArtifactOnlyDryRun:
+    """CLI dry-run tests for artifact-only invocation command boundary."""
+
+    def test_dry_run_valid_plan_ready(self):
+        p = _write_boundary()
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["decision"] == "ready_for_plan"
+        assert d["ready"] is True
+        assert d["execution_allowed"] is False
+
+    def test_dry_run_valid_dry_run_mode_ready(self):
+        p = _write_boundary(command_mode=COMMAND_MODE_DRY_RUN)
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["decision"] == "ready_for_dry_run"
+
+    def test_dry_run_execute_reserved_hard_blocks(self):
+        p = _write_boundary(command_mode=COMMAND_MODE_EXECUTE_RESERVED)
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert "execute_reserved_not_supported" in d["hard_blocks"]
+
+    def test_dry_run_execute_requested_blocks(self):
+        p = _write_boundary(execute_requested=True)
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        d = json.loads(r.stdout)
+        assert "execute_requested=True" in d["hard_blocks"]
+
+    def test_dry_run_missing_boundary_flag(self):
+        r = _run(["invoke", "artifact-only", "dry-run", "--json"])
+        assert r.returncode != 0
+
+    def test_dry_run_nonexistent_file(self):
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", "/nonexistent/path.json", "--json"])
+        assert r.returncode != 0
+
+    def test_dry_run_directory_rejected(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            r = _run(["invoke", "artifact-only", "dry-run", "--boundary", td, "--json"])
+            assert r.returncode != 0
+
+    def test_dry_run_invalid_json(self):
+        import tempfile, os as _os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write("not json{{{{")
+            fp = f.name
+        try:
+            r = _run(["invoke", "artifact-only", "dry-run", "--boundary", fp, "--json"])
+            assert r.returncode != 0
+        finally:
+            _os.unlink(fp)
+
+    def test_dry_run_tampered_digest(self):
+        p = _write_boundary()
+        import json as _j
+        data = _j.loads(open(p).read())
+        data["record_digest"] = "0" * 64
+        import tempfile, os as _os
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            _j.dump(data, f)
+            fp = f.name
+        try:
+            r = _run(["invoke", "artifact-only", "dry-run", "--boundary", fp, "--json"])
+            assert r.returncode != 0
+        finally:
+            _os.unlink(fp)
+
+    def test_dry_run_text_output_includes_no_execution(self):
+        p = _write_boundary()
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p])
+        assert "Execution allowed:   no" in r.stdout
+        assert "Subprocess:          no" in r.stdout
+        assert "Network:             no" in r.stdout
+        assert "Dry-run only:        yes" in r.stdout
+
+    def test_dry_run_json_has_no_execution_flags(self):
+        p = _write_boundary()
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        d = json.loads(r.stdout)
+        assert d["execution_allowed"] is False
+        assert d["execute_supported"] is False
+        assert d["dry_run_only"] is True
+        assert d["no_subprocess"] is True
+        assert d["no_network"] is True
+
+    def test_dry_run_with_save_persists(self):
+        p = _write_boundary(boundary_id="cb-save-test")
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--save", "--json"])
+        assert r.returncode == 0
+        r2 = _run(["invoke", "artifact-only", "show", "--latest", "--json"])
+        assert r2.returncode == 0
+        d2 = json.loads(r2.stdout)
+        assert d2["boundary_id"] == "cb-save-test"
+
+    def test_show_no_latest_fails(self):
+        import shutil, os as _os
+        d = _os.path.join(_os.getcwd(), ".pcae/artifact-only-invocation-boundaries/assessments")
+        if _os.path.exists(d):
+            shutil.rmtree(d)
+        r = _run(["invoke", "artifact-only", "show", "--latest", "--json"])
+        assert r.returncode != 0
+
+    def test_verify_latest_valid(self):
+        p = _write_boundary(boundary_id="cb-verify-test")
+        _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--save"])
+        r = _run(["invoke", "artifact-only", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["valid"] is True
+
+    def test_execute_command_not_available(self):
+        """execute is not a recognized subcommand."""
+        r = _run(["invoke", "artifact-only", "execute", "--help"])
+        assert r.returncode != 0
+
+    def test_no_subprocess_in_cli_code(self):
+        import inspect
+        from pcae.commands.backend import run_backend_invoke_artifact_only_dry_run
+        source = inspect.getsource(run_backend_invoke_artifact_only_dry_run)
+        assert "subprocess.run" not in source
+        assert "subprocess.Popen" not in source
+
+
+class Test95LInvokeArtifactOnlySafety:
+    """No-execution invariants for the CLI."""
+
+    def test_no_backend_invocation_in_cli(self):
+        import inspect
+        from pcae.commands.backend import run_backend_invoke_artifact_only_dry_run
+        source = inspect.getsource(run_backend_invoke_artifact_only_dry_run)
+        assert "invoke_backend" not in source.lower()
+
+    def test_no_shell_in_cli(self):
+        import inspect
+        from pcae.commands.backend import run_backend_invoke_artifact_only_dry_run
+        source = inspect.getsource(run_backend_invoke_artifact_only_dry_run)
+        assert "os.system" not in source
+        assert "shell=True" not in source
+
+    def test_no_network_in_cli(self):
+        import inspect
+        from pcae.commands.backend import run_backend_invoke_artifact_only_dry_run
+        source = inspect.getsource(run_backend_invoke_artifact_only_dry_run)
+        assert "urllib" not in source.lower()
+        assert "http" not in source.lower()
+        assert "socket" not in source.lower()
+
+    def test_no_path_lookup_in_cli(self):
+        import inspect
+        from pcae.commands.backend import run_backend_invoke_artifact_only_dry_run
+        source = inspect.getsource(run_backend_invoke_artifact_only_dry_run)
+        assert "shutil.which" not in source
+        assert "PATH" not in source

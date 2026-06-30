@@ -464,6 +464,9 @@ from pcae.commands.backend import (
     run_backend_adapter_runtime_evidence_verify,
     run_backend_adapter_runtime_evidence_import,
     run_backend_adapter_runtime_evidence_detect_stat_only,
+    run_backend_invoke_artifact_only_dry_run,
+    run_backend_invoke_artifact_only_show,
+    run_backend_invoke_artifact_only_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -4972,6 +4975,43 @@ def build_parser() -> argparse.ArgumentParser:
     re_detect.add_argument("--save", action="store_true", help="Persist evidence.")
     re_detect.add_argument("--json", action="store_true")
     re_detect.set_defaults(handler=run_backend_adapter_runtime_evidence_detect_stat_only)
+
+    # ── Phase 95L: pcae backend invoke artifact-only ─────────────────────
+    be_invoke = backend_sub.add_parser(
+        "invoke",
+        help="Artifact-only invocation command boundary (dry-run only, no execution).",
+    )
+    be_invoke_sub = be_invoke.add_subparsers(dest="backend_invoke_command", required=True)
+
+    be_invoke_ao = be_invoke_sub.add_parser(
+        "artifact-only",
+        help="Artifact-only invocation boundary commands.",
+    )
+    be_invoke_ao_sub = be_invoke_ao.add_subparsers(
+        dest="backend_invoke_artifact_only_command", required=True,
+    )
+
+    invoke_dry_run = be_invoke_ao_sub.add_parser(
+        "dry-run", help="Load boundary, validate, print assessment. No execution."
+    )
+    invoke_dry_run.add_argument("--boundary", required=True, help="Path to boundary JSON artifact.")
+    invoke_dry_run.add_argument("--save", action="store_true", help="Persist assessment.")
+    invoke_dry_run.add_argument("--json", action="store_true")
+    invoke_dry_run.set_defaults(handler=run_backend_invoke_artifact_only_dry_run)
+
+    invoke_show = be_invoke_ao_sub.add_parser(
+        "show", help="Show latest persisted assessment."
+    )
+    invoke_show.add_argument("--latest", action="store_true", default=True)
+    invoke_show.add_argument("--json", action="store_true")
+    invoke_show.set_defaults(handler=run_backend_invoke_artifact_only_show)
+
+    invoke_verify = be_invoke_ao_sub.add_parser(
+        "verify", help="Verify latest assessment digest integrity."
+    )
+    invoke_verify.add_argument("--latest", action="store_true", default=True)
+    invoke_verify.add_argument("--json", action="store_true")
+    invoke_verify.set_defaults(handler=run_backend_invoke_artifact_only_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

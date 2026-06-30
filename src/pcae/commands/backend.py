@@ -2037,3 +2037,154 @@ def run_backend_adapter_runtime_evidence_detect_stat_only(args: argparse.Namespa
         print()
         print("  ⚠️  Stat-only detection. No command was executed.")
     return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95L — Artifact-only invocation dry-run CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyInvocationCommandBoundary,
+    ArtifactOnlyInvocationCommandBoundaryAssessment,
+    validate_artifact_only_invocation_command_boundary,
+    verify_artifact_only_invocation_command_boundary,
+    persist_artifact_only_invocation_command_boundary_assessment,
+    verify_artifact_only_invocation_command_boundary_assessment,
+    load_latest_artifact_only_invocation_command_boundary_assessment,
+)
+
+
+def _abort(msg: str, args: argparse.Namespace) -> int:
+    """Print an error and return exit code 1. Respects --json."""
+    if getattr(args, "json", False):
+        print(json.dumps({"error": msg}))
+    else:
+        print(f"Error: {msg}")
+    return 1
+
+
+def _load_boundary(path: str, args: argparse.Namespace) -> tuple[
+    "ArtifactOnlyInvocationCommandBoundary | None", int
+]:
+    """Load and verify a boundary artifact from an explicit path."""
+    from pathlib import Path as _P
+    p = _P(path)
+    if not p.is_file():
+        if p.is_dir():
+            return None, _abort(f"Boundary path is a directory: {path}", args)
+        return None, _abort(f"Boundary file not found: {path}", args)
+    try:
+        data = json.loads(p.read_text())
+    except Exception as exc:
+        return None, _abort(f"Invalid JSON in boundary file: {exc}", args)
+    try:
+        boundary = ArtifactOnlyInvocationCommandBoundary.from_dict(data)
+    except Exception as exc:
+        return None, _abort(f"Failed to load boundary: {exc}", args)
+    # Verify digest if present
+    if boundary.record_digest:
+        v = verify_artifact_only_invocation_command_boundary(boundary)
+        if not v["valid"]:
+            return None, _abort(f"Boundary verification failed: {v['issues']}", args)
+    return boundary, 0
+
+
+def _print_assessment_text(assessment: ArtifactOnlyInvocationCommandBoundaryAssessment) -> None:
+    """Print assessment in human-readable text format."""
+    print(f"Command Boundary Assessment: {assessment.assessment_id}")
+    print(f"  Decision:            {assessment.decision}")
+    print(f"  Ready:               {'yes' if assessment.ready else 'no'}")
+    print(f"  Command mode:        {assessment.command_mode}")
+    if assessment.hard_blocks:
+        print(f"  Hard blocks:         {', '.join(assessment.hard_blocks)}")
+    if assessment.warnings:
+        print(f"  Warnings:            {', '.join(assessment.warnings)}")
+    if assessment.missing_inputs:
+        print(f"  Missing inputs:      {', '.join(assessment.missing_inputs)}")
+    if assessment.failure_classifications:
+        print(f"  Failures:            {', '.join(assessment.failure_classifications)}")
+    print(f"  Evidence chain:      {'ready' if assessment.evidence_chain_ready else 'incomplete'}")
+    print(f"  Broker/shell-gate:   {'ready' if assessment.broker_shell_gate_ready else 'not ready'}")
+    print(f"  Quarantine:          {'ready' if assessment.output_quarantine_ready else 'missing'}")
+    print(f"  Audit:               {'ready' if assessment.audit_ready else 'missing'}")
+    print(f"  Timeout:             {'ready' if assessment.timeout_ready else 'missing'}")
+    print(f"  Execution allowed:   {'yes' if assessment.execution_allowed else 'no'}")
+    print(f"  Execute supported:   {'yes' if assessment.execute_supported else 'no'}")
+    print(f"  Dry-run only:        {'yes' if assessment.dry_run_only else 'no'}")
+    print(f"  Real backend:        {'yes' if not assessment.no_real_backend_invoked else 'no'}")
+    print(f"  Adapter executed:    {'yes' if not assessment.no_adapter_executed else 'no'}")
+    print(f"  Subprocess:          {'yes' if not assessment.no_subprocess else 'no'}")
+    print(f"  Network:             {'yes' if not assessment.no_network else 'no'}")
+    print(f"  Repo mutation:       {'yes' if not assessment.no_repo_mutation else 'no'}")
+    print(f"  Apply:               {'yes' if not assessment.no_apply else 'no'}")
+    print(f"  Patch parsing:       {'yes' if not assessment.no_patch_parsing else 'no'}")
+    print(f"  Commit/push auth:    {'yes' if not assessment.no_commit_push_authorization else 'no'}")
+    print(f"  Telegram inbound:    {'yes' if not assessment.no_telegram_inbound else 'no'}")
+    print()
+    print("  ⚠️  Dry-run only. No backend was invoked. No adapter was executed.")
+
+
+def run_backend_invoke_artifact_only_dry_run(args: argparse.Namespace) -> int:
+    """pcae backend invoke artifact-only dry-run --boundary <path> [--save] [--json]
+
+    Loads a boundary artifact, validates it, prints assessment.
+    Never executes anything.
+    """
+    boundary_path: str = getattr(args, "boundary", "") or ""
+    save: bool = getattr(args, "save", False) or False
+
+    if not boundary_path:
+        return _abort("Missing --boundary <path>", args)
+
+    boundary, code = _load_boundary(boundary_path, args)
+    if boundary is None:
+        return code
+
+    assessment = validate_artifact_only_invocation_command_boundary(boundary)
+
+    if save:
+        persist_artifact_only_invocation_command_boundary_assessment(assessment)
+
+    if getattr(args, "json", False):
+        print(json.dumps(assessment.to_dict(), indent=2))
+    else:
+        _print_assessment_text(assessment)
+    return 0
+
+
+def run_backend_invoke_artifact_only_show(args: argparse.Namespace) -> int:
+    """pcae backend invoke artifact-only show --latest [--json]
+
+    Shows the latest persisted assessment.
+    """
+    assessment = load_latest_artifact_only_invocation_command_boundary_assessment()
+    if assessment is None:
+        return _abort("No latest assessment found. Run a dry-run first.", args)
+
+    if getattr(args, "json", False):
+        print(json.dumps(assessment.to_dict(), indent=2))
+    else:
+        _print_assessment_text(assessment)
+    return 0
+
+
+def run_backend_invoke_artifact_only_verify(args: argparse.Namespace) -> int:
+    """pcae backend invoke artifact-only verify --latest [--json]
+
+    Verifies the latest assessment digest integrity.
+    """
+    assessment = load_latest_artifact_only_invocation_command_boundary_assessment()
+    if assessment is None:
+        return _abort("No latest assessment found. Run a dry-run first.", args)
+
+    v = verify_artifact_only_invocation_command_boundary_assessment(assessment)
+    if getattr(args, "json", False):
+        print(json.dumps(v, indent=2))
+    else:
+        if v["valid"]:
+            print(f"Assessment {assessment.assessment_id}: valid ✅")
+        else:
+            print(f"Assessment {assessment.assessment_id}: INVALID ❌")
+            for issue in v.get("issues", []):
+                print(f"  - {issue}")
+    return 0 if v["valid"] else 1
