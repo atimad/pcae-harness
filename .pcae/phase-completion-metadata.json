@@ -39,8 +39,11 @@
         "no_enforcement": true, "no_automatic_apply": true, "no_apply_execution": true,
         "no_commit_push_authorization": true, "no_real_AI_backend_calls": true, "next_phase_not_started": true
     },
-    "phase_commits": [],
-    "commit_attribution": "none (commits will be created during finalization)",
+    "phase_commits": [
+        {"hash": "169d4886", "subject": "Add artifact-only invocation boundary model"},
+        {"hash": "7f9b6cfd", "subject": "Complete Phase 95K command boundary model"}
+    ],
+    "commit_attribution": "phase_owned",
     "recommended_next_phase": "95L — Artifact-Only Invocation Command Boundary CLI Dry-Run",
     "summary": "Phase 95K complete: Artifact-Only Invocation Command Boundary Model. Implemented ArtifactOnlyInvocationCommandBoundary (45 fields), Assessment (35 fields), validator with all 95J hard-block rules, SHA-256 digests, persistence (6 helpers). 3 command modes: plan/dry_run (allowed), execute_reserved (hard-blocks). 58 new tests. No CLI. No execution. Recommends 95L.",
     "executive_decisions": {
