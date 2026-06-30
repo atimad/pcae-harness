@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 95N: Artifact-Only Invocation Dry-Run Evidence Chain Review (completed).
+Phase 95O: Evidence Chain Bundle Model (completed). Bundle groups all evidence into verifiable object. 24 tests. Recommends 95P.
 
 Review-only. All 16 go/no-go criteria pass. Evidence chain fixtures, CLI, and gate are ready. Recommends 95O — Evidence Chain Bundle Model.
 
