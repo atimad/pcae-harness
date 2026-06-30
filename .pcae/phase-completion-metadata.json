@@ -1,19 +1,19 @@
 {
-    "phase_id": "96B",
-    "phase_name": "phase_96b_ea_plan",
-    "phase_title": "Execution-Adjacent Plan Model",
+    "phase_id": "96C",
+    "phase_name": "phase_96c_ea_cli",
+    "phase_title": "Execution-Adjacent Plan CLI Dry-Run",
     "files_changed": [
-        "src/pcae/core/backend_invocations.py",
-        "tests/test_backend_invocations.py",
-        ".pcae/.gitignore",
-        "docs/PHASE_96_EXECUTION_ADJACENT_PLAN_MODEL.md",
+        "src/pcae/commands/backend.py",
+        "src/pcae/cli.py",
+        "tests/test_backend_cli.py",
+        "docs/PHASE_96_EXECUTION_ADJACENT_PLAN_CLI_DRY_RUN.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1810-phase-96b-ea-plan.md"
+        "tasks/active/20260630-1820-phase-96c-ea-cli.md"
     ],
     "files_changed_count": 8,
-    "tests_added_or_updated": "12 tests_added",
+    "tests_added_or_updated": "6 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -37,7 +37,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "243/244 (1 pre-existing)",
+            "result": "249/250 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -66,17 +66,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "ad738506",
-            "subject": "Add execution-adjacent plan model"
+            "hash": "a522af5e",
+            "subject": "Add execution-adjacent plan CLI"
         },
         {
-            "hash": "472d4298",
-            "subject": "Complete execution-adjacent plan model"
+            "hash": "6d0eae4b",
+            "subject": "Complete execution-adjacent plan CLI"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96C \u2014 Execution-Adjacent Plan CLI Dry-Run",
-    "summary": "Phase 96B complete: Execution-Adjacent Plan Model. 50 fields, 12 capability flags, validator. 12 tests. No CLI. No execution. Recommends 96C.",
+    "recommended_next_phase": "96D \u2014 Execution-Adjacent Plan End-to-End Demo",
+    "summary": "Phase 96C complete: Execution-Adjacent Plan CLI Dry-Run. dry-run/show/verify. 6 tests. No execution. Recommends 96D.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
