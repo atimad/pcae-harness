@@ -1,7 +1,7 @@
 {
-    "phase_id": "95K",
-    "phase_name": "phase_95k_artifact_only_invocation_command_boundary_model",
-    "phase_title": "Artifact-Only Invocation Command Boundary Model",
+    "phase_id": "95L",
+    "phase_name": "phase_95l_cli_dry_run",
+    "phase_title": "Artifact-Only Invocation Command Boundary CLI Dry-Run",
     "implementation_status": "completed",
     "phase_type": "implementation",
     "completed_at_utc": "2026-06-30T13:10:00Z",
@@ -40,12 +40,12 @@
         "no_commit_push_authorization": true, "no_real_AI_backend_calls": true, "next_phase_not_started": true
     },
     "phase_commits": [
-        {"hash": "169d4886", "subject": "Add artifact-only invocation boundary model"},
-        {"hash": "7f9b6cfd", "subject": "Complete Phase 95K command boundary model"}
+        {"hash": "4552dc91", "subject": "Add artifact-only invocation dry-run CLI"},
+        {"hash": "e75e768b", "subject": "Complete Phase 95L dry-run CLI"}
     ],
     "commit_attribution": "phase_owned",
     "recommended_next_phase": "95L — Artifact-Only Invocation Command Boundary CLI Dry-Run",
-    "summary": "Phase 95K complete: Artifact-Only Invocation Command Boundary Model. Implemented ArtifactOnlyInvocationCommandBoundary (45 fields), Assessment (35 fields), validator with all 95J hard-block rules, SHA-256 digests, persistence (6 helpers). 3 command modes: plan/dry_run (allowed), execute_reserved (hard-blocks). 58 new tests. No CLI. No execution. Recommends 95L.",
+    "summary": "Phase 95L complete: Artifact-Only Invocation Command Boundary CLI Dry-Run. CLI commands: pcae backend invoke artifact-only dry-run/show/verify. Loads boundary, validates, prints assessment with all no-execution flags. Execute unavailable. 20 CLI tests. Recommends 95M.",
     "executive_decisions": {
         "command_boundary_model_ready": true,
         "execution_allowed": false,
