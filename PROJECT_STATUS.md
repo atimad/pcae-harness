@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-Phase 95M: Artifact-Only Invocation Dry-Run Evidence Chain Fixtures (completed).
+Phase 95M.1: Phase Completion Finalization Gate (completed).
+
+Added validate_finalization_gate(): authoritative blocking check before phase complete and Telegram send. 15 tests. SKILL.md v1.0.2. Recommends 95N.
 
 Deterministic fixture builders: 1 valid chain + 23 broken variants. 29 tests (15 model + 11 CLI + 3 safety). No execution. Recommends 95N.
 
