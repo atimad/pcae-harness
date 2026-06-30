@@ -6238,3 +6238,170 @@ class Test95KCommandBoundarySafety:
         finally:
             _sys.stdout = old_stdout
         assert "artifact-only" not in output.lower() or "not recognized" in output.lower()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95M — Evidence chain fixture tests (model)
+# ═══════════════════════════════════════════════════════════════════════════
+
+from tests.artifact_only_invocation_fixtures import (
+    build_valid_boundary,
+    build_missing_prompt,
+    build_tampered_prompt_digest,
+    build_backend_mismatch,
+    build_adapter_mismatch,
+    build_runtime_evidence_digest_mismatch,
+    build_approval_ineffective,
+    build_invocation_plan_tampered,
+    build_broker_deny,
+    build_broker_hard_block,
+    build_shell_gate_deny,
+    build_shell_gate_hard_block,
+    build_missing_quarantine,
+    build_missing_audit,
+    build_missing_timeout,
+    build_execute_reserved,
+    build_execute_requested,
+    build_no_subprocess_false,
+    build_no_network_false,
+    build_no_repo_mutation_false,
+    build_no_apply_false,
+    build_no_patch_parsing_false,
+    build_no_commit_push_false,
+    build_no_telegram_inbound_false,
+    FIXTURE_BOUNDARY_ID,
+    BROKEN_FIXTURES,
+)
+
+
+class Test95MFixtureValidChain:
+    """Valid fixture chain tests."""
+
+    def test_valid_boundary_passes_validation(self):
+        b = build_valid_boundary()
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert a.ready is True
+        assert a.decision == "ready_for_dry_run"
+        assert a.execution_allowed is False
+
+    def test_valid_boundary_digest_stable(self):
+        b1 = build_valid_boundary()
+        b2 = build_valid_boundary()
+        assert b1.compute_digest() == b2.compute_digest()
+
+    def test_valid_boundary_digest_verifies(self):
+        b = build_valid_boundary()
+        v = verify_artifact_only_invocation_command_boundary(b)
+        assert v["valid"] is True
+
+    def test_valid_boundary_no_execution_flags(self):
+        b = build_valid_boundary()
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert a.no_real_backend_invoked is True
+        assert a.no_adapter_executed is True
+        assert a.no_subprocess is True
+        assert a.no_network is True
+        assert a.no_repo_mutation is True
+        assert a.no_apply is True
+        assert a.no_patch_parsing is True
+        assert a.no_commit_push_authorization is True
+        assert a.no_telegram_inbound is True
+
+    def test_valid_boundary_evidence_chain_ready(self):
+        b = build_valid_boundary()
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert a.evidence_chain_ready is True
+        assert a.broker_shell_gate_ready is True
+        assert a.output_quarantine_ready is True
+        assert a.audit_ready is True
+        assert a.timeout_ready is True
+
+    def test_valid_boundary_no_secrets_in_fixture(self):
+        b = build_valid_boundary()
+        d = b.to_dict()
+        j = json.dumps(d)
+        assert "sk-ant" not in j
+        assert "Bearer " not in j
+        assert "API_KEY" not in j
+
+
+class Test95MFixtureBrokenVariants:
+    """Each broken fixture variant produces expected hard-block."""
+
+    def test_all_broken_fixtures_have_hard_blocks(self):
+        for name, (builder, expected_hb) in BROKEN_FIXTURES.items():
+            b = builder()
+            a = validate_artifact_only_invocation_command_boundary(b)
+            assert a.ready is False, f"{name}: expected not ready"
+            assert len(a.hard_blocks) > 0, f"{name}: expected hard blocks"
+
+    def test_broken_fixtures_match_expected(self):
+        for name, (builder, expected_hb) in BROKEN_FIXTURES.items():
+            if expected_hb is None:
+                continue
+            b = builder()
+            a = validate_artifact_only_invocation_command_boundary(b)
+            assert expected_hb in a.hard_blocks, (
+                f"{name}: expected {expected_hb!r} in hard_blocks, got {a.hard_blocks}"
+            )
+
+    def test_missing_prompt_blocks(self):
+        a = validate_artifact_only_invocation_command_boundary(build_missing_prompt())
+        assert "prompt_artifact_path_missing" in a.hard_blocks
+        assert "prompt_artifact_digest_missing" in a.hard_blocks
+
+    def test_broker_deny_blocks(self):
+        a = validate_artifact_only_invocation_command_boundary(build_broker_deny())
+        assert any("broker_decision:deny" in hb for hb in a.hard_blocks)
+
+    def test_execute_reserved_blocks(self):
+        a = validate_artifact_only_invocation_command_boundary(build_execute_reserved())
+        assert "execute_reserved_not_supported" in a.hard_blocks
+
+    def test_no_subprocess_false_blocks(self):
+        a = validate_artifact_only_invocation_command_boundary(build_no_subprocess_false())
+        assert "no_subprocess=False" in a.hard_blocks
+
+    def test_no_network_false_blocks(self):
+        a = validate_artifact_only_invocation_command_boundary(build_no_network_false())
+        assert "no_network=False" in a.hard_blocks
+
+    def test_tampered_digest_fails_verification(self):
+        b = build_tampered_prompt_digest()
+        b.record_digest = build_valid_boundary().compute_digest()
+        v = verify_artifact_only_invocation_command_boundary(b)
+        assert v["valid"] is False
+        assert "record_digest_mismatch" in v["issues"]
+
+
+class Test95MFixtureSafety:
+    """Fixture generators do not execute anything."""
+
+    def test_fixture_builders_no_subprocess(self):
+        import inspect
+        from tests import artifact_only_invocation_fixtures as fix
+        src = inspect.getsource(fix)
+        assert "subprocess.run" not in src
+        assert "subprocess.Popen" not in src
+
+    def test_fixture_builders_no_network(self):
+        import inspect
+        from tests import artifact_only_invocation_fixtures as fix
+        src = inspect.getsource(fix)
+        assert "urllib" not in src.lower()
+        assert "http" not in src.lower()
+
+    def test_fixture_builders_no_shell(self):
+        import inspect
+        from tests import artifact_only_invocation_fixtures as fix
+        src = inspect.getsource(fix)
+        assert "os.system" not in src
+        assert "shell=True" not in src
+
+    def test_fixture_no_execution_flags_never_true(self):
+        """No fixture should enable execution or apply."""
+        b = build_valid_boundary()
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert a.execution_allowed is False
+        assert a.execute_supported is False
+        assert a.dry_run_only is True

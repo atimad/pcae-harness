@@ -1798,3 +1798,108 @@ class Test95LInvokeArtifactOnlySafety:
         source = inspect.getsource(run_backend_invoke_artifact_only_dry_run)
         assert "shutil.which" not in source
         assert "PATH" not in source
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95M — Evidence chain fixture CLI tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from tests.artifact_only_invocation_fixtures import (
+    build_valid_boundary,
+    build_missing_prompt,
+    build_broker_deny,
+    build_execute_reserved,
+    build_no_subprocess_false,
+    FIXTURE_BOUNDARY_ID,
+)
+from pcae.core.backend_invocations import (
+    persist_artifact_only_invocation_command_boundary,
+)
+
+
+def _write_fixture_boundary(builder=build_valid_boundary) -> str:
+    """Persist a boundary from a fixture builder and return its path."""
+    b = builder()
+    b.record_digest = b.compute_digest()
+    r = persist_artifact_only_invocation_command_boundary(b)
+    return r["path"]
+
+
+class Test95MFixtureCLI:
+    """CLI dry-run tests using evidence chain fixtures."""
+
+    def test_fixture_valid_dry_run_ready(self):
+        p = _write_fixture_boundary()
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["decision"] == "ready_for_dry_run"
+        assert d["ready"] is True
+
+    def test_fixture_text_output_no_execution(self):
+        p = _write_fixture_boundary()
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p])
+        assert "Execution allowed:   no" in r.stdout
+        assert "Dry-run only:        yes" in r.stdout
+        assert "Subprocess:          no" in r.stdout
+        assert "Network:             no" in r.stdout
+        assert "Repo mutation:       no" in r.stdout
+        assert "Apply:               no" in r.stdout
+
+    def test_fixture_json_no_execution_flags(self):
+        p = _write_fixture_boundary()
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        d = json.loads(r.stdout)
+        assert d["execution_allowed"] is False
+        assert d["execute_supported"] is False
+        assert d["dry_run_only"] is True
+
+    def test_fixture_save_and_show(self):
+        p = _write_fixture_boundary()
+        _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--save"])
+        r = _run(["invoke", "artifact-only", "show", "--latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["boundary_id"] == FIXTURE_BOUNDARY_ID
+
+    def test_fixture_save_and_verify(self):
+        p = _write_fixture_boundary()
+        _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--save"])
+        r = _run(["invoke", "artifact-only", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["valid"] is True
+
+    def test_fixture_missing_prompt_blocks_cli(self):
+        p = _write_fixture_boundary(build_missing_prompt)
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        d = json.loads(r.stdout)
+        assert "prompt_artifact_path_missing" in d["hard_blocks"]
+
+    def test_fixture_broker_deny_blocks_cli(self):
+        p = _write_fixture_boundary(build_broker_deny)
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        d = json.loads(r.stdout)
+        assert any("broker_decision:deny" in hb for hb in d["hard_blocks"])
+
+    def test_fixture_execute_reserved_blocks_cli(self):
+        p = _write_fixture_boundary(build_execute_reserved)
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        d = json.loads(r.stdout)
+        assert "execute_reserved_not_supported" in d["hard_blocks"]
+
+    def test_fixture_no_subprocess_false_blocks_cli(self):
+        p = _write_fixture_boundary(build_no_subprocess_false)
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        d = json.loads(r.stdout)
+        assert "no_subprocess=False" in d["hard_blocks"]
+
+    def test_fixture_execute_still_unavailable(self):
+        r = _run(["invoke", "artifact-only", "execute", "--help"])
+        assert r.returncode != 0
+
+    def test_fixture_cli_no_secrets_in_output(self):
+        p = _write_fixture_boundary()
+        r = _run(["invoke", "artifact-only", "dry-run", "--boundary", p, "--json"])
+        assert "sk-ant" not in r.stdout
+        assert "Bearer " not in r.stdout
