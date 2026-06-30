@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 95I.1 — Phase Report Commit Attribution Hardening (20260630-XXXX-phase-95i1-commit-attribution-hardening)
+- Phase 95I — Single-Backend Artifact-Only Invocation Prototype Plan (20260630-1032-phase-95i-single-backend-artifact-only-invocation-prototype-plan)
 - Phase 95H.1 — Phase Report Skill Hardening (20260630-0931-phase-95h-single-backend-artifact-only-invocation-readiness-review)
 - Phase 95H — Single-Backend Artifact-Only Invocation Readiness Review (20260630-0931-phase-95h-single-backend-artifact-only-invocation-readiness-review)
 - Phase 95G — Runtime Evidence Broker/Shell-Gate Integration (20260630-0836-phase-95g-runtime-evidence-broker-shell-gate-integration)

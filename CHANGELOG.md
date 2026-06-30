@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Complete Phase 95I.1 commit attribution hardening: Fixed truthiness bug where empty phase_commits [] in metadata fell through to git log -5, injecting stale prior-phase commits into the current phase report. Fixed COMPLETENESS_COMPLETE return path discarding trust warnings. Added commit ownership validation with commits.phase_owned trust warning. 7 new tests.
+- Complete Phase 95I prototype plan: Single-Backend Artifact-Only Invocation Prototype Plan. Planning/design-only. 12-section plan document covering executive decisions, prototype scope, evidence chain, CLI contract, broker/shell-gate behavior, output quarantine, operator procedure, failure classification, test plan, go/no-go table. Recommends mock rehearsal first, then Claude CLI. Next: 95J — Artifact-Only Invocation Command Boundary Design.
 - Transitioned active task from Phase 95H — Single-Backend Artifact-Only Invocation Readiness Review to Phase 95H.1 — Phase Report Skill Hardening; session refreshed and governance continuity revalidated.
 - Step 1: Repaired 95H report completeness. Step 2: Completed Phase 95H.1 Phase Report Skill Hardening.
 - Hardened phase-finalization SKILL.md v1.0.1 with forbidden patterns, agent rules, preflight checklist.
