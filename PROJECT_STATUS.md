@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 95F.2: Phase Report Authoring Skill and Completeness Enforcement (completed).
+
+Added .pcae/skills/phase-finalization/SKILL.md (7th skill). Strengthened
+assess_completeness() with key-level validation: 5 required governance keys, 3 required
+base test keys. Dotted-path missing trust fields. 11 new tests (98 report total, 87 updated).
+Delivers docs/PHASE_95F2_PHASE_REPORT_AUTHORING_SKILL_AND_COMPLETENESS_ENFORCEMENT.md.
+
 Phase 95F.1: Phase Report Skill Discovery and Authoring Protocol Design (completed).
 
 Discovery/planning only. Inspected 6 existing skills at .pcae/skills/, skill registry,

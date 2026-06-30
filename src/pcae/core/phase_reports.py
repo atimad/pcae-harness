@@ -56,6 +56,22 @@ _REQUIRED_FIELDS: frozenset[str] = frozenset({
     "summary",
 })
 
+# ── Phase 95F.2: required governance and test result keys ──────────────
+
+_REQUIRED_GOVERNANCE_KEYS: tuple[str, ...] = (
+    "pcae_health",
+    "pcae_check",
+    "pcae_doctor_task_memory",
+    "pcae_push_check",
+    "telegram_runtime",
+)
+
+_REQUIRED_BASE_TEST_RESULT_KEYS: tuple[str, ...] = (
+    "report_notification_tests",
+    "bootstrap_session_reporting_tests",
+    "fast_green",
+)
+
 # Safe filename: letters, digits, hyphens, underscores only
 _SAFE_FILENAME_RE = re.compile(r"[^a-zA-Z0-9_.-]")
 
@@ -161,7 +177,20 @@ class PhaseReport:
         if not self.test_results:
             missing.append("test_results")
         if not self.governance_results:
-            missing.append("governance_results")
+            for key in _REQUIRED_GOVERNANCE_KEYS:
+                missing.append(f"governance_results.{key}")
+        else:
+            for key in _REQUIRED_GOVERNANCE_KEYS:
+                if key not in self.governance_results:
+                    missing.append(f"governance_results.{key}")
+
+        if not self.test_results:
+            for key in _REQUIRED_BASE_TEST_RESULT_KEYS:
+                missing.append(f"test_results.{key}")
+        else:
+            for key in _REQUIRED_BASE_TEST_RESULT_KEYS:
+                if key not in self.test_results:
+                    missing.append(f"test_results.{key}")
 
         if missing:
             warnings.append(f"Missing trust fields: {', '.join(missing)}")

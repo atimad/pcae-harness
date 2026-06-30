@@ -79,7 +79,7 @@ def test_render_markdown_includes_phase_name():
 def test_render_markdown_includes_governance_results():
     r = make_phase_report(
         phase_id="90A", phase_name="X", status="completed", summary="Y",
-        governance_results={"health": "healthy", "check": "passed"},
+        governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
     )
     md = r.render_markdown()
     assert "health" in md
@@ -396,8 +396,8 @@ def test_finalize_with_all_fields():
             phase_id="92A", phase_name="Full Test", status="completed",
             summary="Everything works.",
             files_changed=5, tests_run=3305,
-            test_results={"fast_green": "3305/3305"},
-            governance_results={"health": "healthy", "check": "passed"},
+            test_results={"fast_green": "3305/3305", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc123", "def456"],
             pushed_status="pushed", origin_main_head_count=0,
             explicit_no_go_confirmations=["No enforcement", "No Telegram inbound"],
@@ -653,8 +653,8 @@ class TestReportCompleteness:
         r = make_phase_report(
             phase_id="92D.5", phase_name="Full Test", status="completed",
             summary="Done.", files_changed=5, tests_run=3305,
-            test_results={"fast_green": "3305/3305"},
-            governance_results={"health": "healthy", "check": "passed"},
+            test_results={"fast_green": "3305/3305", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc123"], pushed_status="pushed",
         )
         state, missing, warnings = r.assess_completeness()
@@ -665,8 +665,8 @@ class TestReportCompleteness:
         r = make_phase_report(
             phase_id="92D.5", phase_name="Partial Test", status="completed",
             summary="Done.", tests_run=3305,
-            test_results={"fast_green": "3305/3305"},
-            governance_results={"health": "healthy"},
+            test_results={"fast_green": "3305/3305", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc123"], pushed_status="pushed",
         )
         state, missing, warnings = r.assess_completeness()
@@ -678,7 +678,7 @@ class TestReportCompleteness:
             phase_id="92D.5", phase_name="Partial Test", status="completed",
             summary="Done.", files_changed=5,
             # No test_results → tests_run is missing
-            governance_results={"health": "healthy"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc123"], pushed_status="pushed",
         )
         state, missing, warnings = r.assess_completeness()
@@ -703,8 +703,11 @@ class TestReportCompleteness:
             test_results={
                 "Report + notification": "161/161 (passed)",
                 "Broker + shell gate": "387/387 (passed)",
+                "report_notification_tests": "100/100",
+                "bootstrap_session_reporting_tests": "100/100",
+                "fast_green": "100/100",
             },
-            governance_results={"health": "healthy"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc123"], pushed_status="pushed",
         )
         state, missing, _ = r.assess_completeness()
@@ -716,8 +719,8 @@ class TestReportCompleteness:
         r = make_phase_report(
             phase_id="92D.5", phase_name="Trust Test", status="completed",
             summary="Done.", files_changed=5, tests_run=3305,
-            test_results={"fg": "3305/3305"},
-            governance_results={"health": "healthy"},
+            test_results={"fg": "3305/3305", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc"], pushed_status="pushed",
         )
         r.apply_trust_assessment()
@@ -761,11 +764,16 @@ class TestStructuredMetadataCompleteness:
                 "Report + notification": "156/156 (passed)",
                 "Broker + shell gate": "387/387 (passed)",
                 "Fast-green": "3272/3272 (passed)",
+                "report_notification_tests": "100/100",
+                "bootstrap_session_reporting_tests": "100/100",
+                "fast_green": "100/100",
             },
             governance_results={
-                "pcae health": "healthy",
-                "pcae check": "passed",
-                "pcae push check": "nothing_to_push",
+                "pcae_health": "healthy",
+                "pcae_check": "passed",
+                "pcae_doctor_task_memory": "warnings",
+                "pcae_push_check": "nothing_to_push",
+                "telegram_runtime": "loaded",
             },
             commits=["b4c71ad6"], pushed_status="pushed",
         )
@@ -778,8 +786,8 @@ class TestStructuredMetadataCompleteness:
             phase_id="92D.6", phase_name="Files Test", status="completed",
             summary="Done.", files_changed=5,
             tests_run=156, commits=["abc"], pushed_status="pushed",
-            test_results={"fg": "3305/3305"},
-            governance_results={"health": "healthy"},
+            test_results={"fg": "3305/3305", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
         )
         md = r.render_markdown()
         assert "**Files changed:** 5" in md
@@ -948,8 +956,8 @@ class TestCanonicalReport:
                     phase_id="92D.8", phase_name="Canonical Test",
                     status="completed", summary="Done.",
                     files_changed=3, tests_run=100,
-                    test_results={"fg": "100/100"},
-                    governance_results={"health": "healthy"},
+                    test_results={"fg": "100/100", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+                    governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
                     commits=["abc123"], pushed_status="pushed",
                     reports_dir=Path(td),
                 )
@@ -993,8 +1001,8 @@ class TestConsistencyGuard:
                     phase_id="92D.8.1", phase_name="Consistent Test",
                     status="completed", summary="Done.",
                     files_changed=3, tests_run=100,
-                    test_results={"Fast-green": "100/100 (passed)"},
-                    governance_results={"health": "healthy"},
+                    test_results={"Fast-green": "100/100 (passed)", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+                    governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
                     commits=["abc123"], pushed_status="pushed",
                     reports_dir=Path(td),
                 )
@@ -1030,7 +1038,7 @@ class TestConsistencyGuard:
                     status="completed", summary="Done.",
                     files_changed=3, tests_run=149,
                     test_results={"Fast-green": "149/149 (passed)"},
-                    governance_results={"health": "healthy"},
+                    governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
                     commits=["abc123"], pushed_status="pushed",
                     reports_dir=Path(td),
                 )
@@ -1068,8 +1076,8 @@ class TestConsistencyGuard:
                     phase_id="92D.8.1", phase_name="Commit Test",
                     status="completed", summary="Done.",
                     files_changed=3, tests_run=100,
-                    test_results={"fg": "100/100"},
-                    governance_results={"health": "healthy"},
+                    test_results={"fg": "100/100", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+                    governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
                     commits=["xyz99999", "abc12345"], pushed_status="pushed",
                     reports_dir=Path(td),
                 )
@@ -1104,8 +1112,8 @@ class TestConsistencyGuard:
                     phase_id="92D.8.2", phase_name="Fresh Test",
                     status="completed", summary="Done.",
                     files_changed=3, tests_run=100,
-                    test_results={"fg": "100/100"},
-                    governance_results={"health": "healthy"},
+                    test_results={"fg": "100/100", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+                    governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
                     commits=["abc123"], pushed_status="pushed",
                     reports_dir=Path(td),
                 )
@@ -1128,8 +1136,8 @@ class TestConsistencyGuard:
             phase_id="92D.8.1", phase_name="Render Test", status="completed",
             summary="Done.",
             files_changed=3, tests_run=100,
-            test_results={"fg": "100/100"},
-            governance_results={"health": "healthy"},
+            test_results={"fg": "100/100", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc123"], pushed_status="pushed",
             canonical_report_content="# Phase 92D.8.1\nDone.",
         )
@@ -1170,8 +1178,8 @@ class Test94T1MetadataFreshness:
             phase_id="94T", phase_name="Test Phase", status="completed",
             summary="Phase 94T complete. Next: 94U.",
             files_changed=3, tests_run=21,
-            test_results={"backend": "419/419"},
-            governance_results={"health": "healthy"},
+            test_results={"backend": "419/419", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc12345", "def67890"],
             pushed_status="pushed",
             recommended_next_phase="94U — Real Backend Adapter Preflight Artifacts",
@@ -1185,8 +1193,8 @@ class Test94T1MetadataFreshness:
             phase_id="94T.1", phase_name="Freshness Test", status="completed",
             summary="Phase 94T.1 complete. Next: 94U.",
             files_changed=2, tests_run=10,
-            test_results={"fg": "100/100"},
-            governance_results={"health": "healthy"},
+            test_results={"fg": "100/100", "report_notification_tests": "100/100", "bootstrap_session_reporting_tests": "100/100", "fast_green": "100/100"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc12345"], pushed_status="pushed",
             recommended_next_phase="94U — Next Phase",
             canonical_report_content="# Phase 94T.1 — Freshness Test\nPushed: pushed\n"
@@ -1234,7 +1242,7 @@ class Test94T1MetadataFreshness:
             phase_id="94T.1", phase_name="Secret Test", status="completed",
             summary="Done. Next: 94U.",
             files_changed=1, tests_run=1,
-            governance_results={"health": "healthy"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             recommended_next_phase="94U",
         )
         r.apply_trust_assessment()
@@ -1265,7 +1273,7 @@ class Test94T1ConsistencyValidation:
             summary="Done. Next: 94U.",
             files_changed=1, tests_run=1,
             test_results={},  # empty
-            governance_results={"health": "healthy"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc12345"], pushed_status="pushed",
         )
         r.apply_trust_assessment()
@@ -1277,7 +1285,7 @@ class Test94T1ConsistencyValidation:
             summary="Done. Next: 94U.",
             files_changed=1, tests_run=1,
             test_results={"a": "1/1"},
-            governance_results={"health": "healthy"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=[],  # empty
             pushed_status="pushed",
         )
@@ -1291,7 +1299,7 @@ class Test94T1ConsistencyValidation:
             summary="Done.",
             files_changed=1, tests_run=1,
             test_results={"a": "1/1"},
-            governance_results={"health": "healthy"},
+            governance_results={"pcae_health": "healthy", "pcae_check": "passed", "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean", "telegram_runtime": "loaded"},
             commits=["abc12345"], pushed_status="pushed",
         )
         r.apply_trust_assessment()
@@ -1303,4 +1311,117 @@ class Test94T1ConsistencyValidation:
         from pcae.core import phase_reports
         source = inspect.getsource(phase_reports)
         assert "getUpdates" not in source
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95F.2 — Completeness enforcement tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class Test95F2CompletenessEnforcement:
+    """Phase 95F.2: key-level completeness validation."""
+
+    def _make_report(self, **kwargs):
+        defaults = {
+            "phase_id": "95F.2", "phase_name": "Test", "status": "completed",
+            "summary": "Done.", "files_changed": 1, "tests_run": 1,
+            "commits": ["abc123"], "pushed_status": "pushed",
+            "governance_results": {
+                "pcae_health": "healthy",
+                "pcae_check": "passed",
+                "pcae_doctor_task_memory": "warnings",
+                "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            "test_results": {
+                "report_notification_tests": "172/172",
+                "bootstrap_session_reporting_tests": "508/508",
+                "fast_green": "4097/4098",
+            },
+        }
+        defaults.update(kwargs)
+        return make_phase_report(**defaults)
+
+    def test_full_report_complete(self):
+        r = self._make_report()
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+
+    def test_missing_governance_key_makes_partial(self):
+        r = self._make_report(governance_results={
+            "pcae_health": "healthy", "pcae_check": "passed",
+        })
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_PARTIAL
+        assert any("pcae_doctor_task_memory" in m for m in r.missing_trust_fields)
+
+    def test_missing_push_check_makes_partial(self):
+        r = self._make_report(governance_results={
+            "pcae_health": "healthy", "pcae_check": "passed",
+            "pcae_doctor_task_memory": "warnings", "telegram_runtime": "loaded",
+        })
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_PARTIAL
+        assert any("pcae_push_check" in m for m in r.missing_trust_fields)
+
+    def test_missing_telegram_runtime_makes_partial(self):
+        r = self._make_report(governance_results={
+            "pcae_health": "healthy", "pcae_check": "passed",
+            "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean",
+        })
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_PARTIAL
+
+    def test_missing_report_tests_makes_partial(self):
+        r = self._make_report(test_results={
+            "bootstrap_session_reporting_tests": "508/508",
+            "fast_green": "4097/4098",
+        })
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_PARTIAL
+        assert any("report_notification_tests" in m for m in r.missing_trust_fields)
+
+    def test_missing_fast_green_makes_partial(self):
+        r = self._make_report(test_results={
+            "report_notification_tests": "172/172",
+            "bootstrap_session_reporting_tests": "508/508",
+        })
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_PARTIAL
+
+    def test_missing_bootstrap_makes_partial(self):
+        r = self._make_report(test_results={
+            "report_notification_tests": "172/172",
+            "fast_green": "4097/4098",
+        })
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_PARTIAL
+
+    def test_dotted_path_in_missing_fields(self):
+        r = self._make_report(governance_results={})
+        r.apply_trust_assessment()
+        assert any("governance_results.pcae_health" in m for m in r.missing_trust_fields)
+        assert any("governance_results.pcae_push_check" in m for m in r.missing_trust_fields)
+
+    def test_empty_governance_still_lists_all_keys(self):
+        r = self._make_report(governance_results={})
+        r.apply_trust_assessment()
+        for key in ["pcae_health", "pcae_check", "pcae_doctor_task_memory",
+                     "pcae_push_check", "telegram_runtime"]:
+            assert any(key in m for m in r.missing_trust_fields), f"Missing: {key}"
+
+    def test_empty_test_results_lists_all_base_keys(self):
+        r = self._make_report(test_results={})
+        r.apply_trust_assessment()
+        for key in ["report_notification_tests", "bootstrap_session_reporting_tests",
+                     "fast_green"]:
+            assert any(key in m for m in r.missing_trust_fields), f"Missing: {key}"
+
+    def test_skill_file_exists(self):
+        from pathlib import Path
+        skill_path = Path(__file__).resolve().parent.parent / ".pcae" / "skills" / "phase-finalization" / "SKILL.md"
+        assert skill_path.is_file(), f"Skill not found at {skill_path}"
+        content = skill_path.read_text()
+        assert "phase-finalization" in content
+        assert "Required Governance Keys" in content
 

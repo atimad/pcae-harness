@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 95F.1 — Phase Report Skill Discovery and Authoring Protocol Design (20260630-0739-phase-95f-stat-only-runtime-detector-prototype)
+- Phase 95F.2 — Phase Report Authoring Skill and Completeness Enforcement (20260630-0748-phase-95f-1-phase-report-skill-discovery-and-authoring-protocol-design)
+- Phase 95F.1 — Phase Report Skill Discovery and Authoring Protocol Design (20260630-0748-phase-95f-1-phase-report-skill-discovery-and-authoring-protocol-design)
 - Phase 95F — Stat-Only Runtime Detector Prototype (20260630-0739-phase-95f-stat-only-runtime-detector-prototype)
 - Phase 95E — Runtime Evidence to Dry-Run Integration (20260630-0428-phase-95e-runtime-evidence-to-dry-run-integration)
 - Phase 95D — Claude Runtime Evidence Import CLI (20260630-0117-phase-95d-claude-runtime-evidence-import-cli)

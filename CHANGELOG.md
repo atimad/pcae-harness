@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95F.1 — Phase Report Skill Discovery and Authoring Protocol Design to Phase 95F.2 — Phase Report Authoring Skill and Completeness Enforcement; session refreshed and governance continuity revalidated.
+- Completed Phase 95F.2 Phase Report Authoring Skill and Completeness Enforcement.
+- Added .pcae/skills/phase-finalization/SKILL.md (7th skill). 11 tests (98 report total).
+
 - Transitioned active task from Phase 95F — Stat-Only Runtime Detector Prototype to Phase 95F.1 — Phase Report Skill Discovery and Authoring Protocol Design; session refreshed and governance continuity revalidated.
 - Completed Phase 95F.1 Phase Report Skill Discovery (discovery/planning only).
 - Recommends combined Phase Report Authoring Skill + completeness enforcement (95F.2).
