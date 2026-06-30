@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-Phase 95I.1: Phase Report Commit Attribution Hardening (completed).
+Phase 95J: Artifact-Only Invocation Command Boundary Design (completed).
+
+Design-only phase. Specified CLI structure (plan, dry-run, execute-reserved), 15 required command inputs, 21-step evidence verification order, 33 hard-block conditions, output/audit artifact structure, 23-class failure taxonomy, pre/post-invocation operator workflow, ~41-test plan, 23-criteria go/no-go table. No source changes. Recommends 95K — Command Boundary Model.
 
 Hardened commit attribution: fixed truthiness bug where empty phase_commits [] fell through to git log -5. Fixed COMPLETENESS_COMPLETE discarding warnings. Added commits.phase_owned trust warning. Hardened push-state completeness: reports with not_pushed, nonzero origin, or not_ready push check are now partial. 12 new tests. 5 governed commits. Pushed. Next: 95J.
 

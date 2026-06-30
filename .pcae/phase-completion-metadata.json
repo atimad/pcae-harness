@@ -1,60 +1,27 @@
 {
-    "phase_id": "95I.1",
-    "phase_name": "phase_95i1_phase_report_commit_attribution_hardening",
-    "phase_title": "Phase Report Commit Attribution Hardening",
+    "phase_id": "95J",
+    "phase_name": "phase_95j_artifact_only_invocation_command_boundary_design",
+    "phase_title": "Artifact-Only Invocation Command Boundary Design",
     "implementation_status": "completed",
-    "phase_type": "implementation",
-    "completed_at_utc": "2026-06-30T12:15:00Z",
+    "phase_type": "design_only",
+    "completed_at_utc": "2026-06-30T12:45:00Z",
     "files_changed": [
-        "src/pcae/commands/phase.py",
-        "src/pcae/core/phase_reports.py",
-        "tests/test_phase_reports.py",
-        "docs/PHASE_95I1_PHASE_REPORT_COMMIT_ATTRIBUTION_HARDENING.md",
+        "docs/PHASE_95_ARTIFACT_ONLY_INVOCATION_COMMAND_BOUNDARY_DESIGN.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1200-phase-95i1-commit-attribution-hardening.md",
-        ".pcae/phase-completion-metadata.json",
-        ".pcae/phase-completion-report.md"
+        "tasks/active/20260630-1230-phase-95j-command-boundary-design.md",
+        ".pcae/session.json"
     ],
-    "files_changed_count": 10,
-    "tests_added_or_updated": "12 tests_added (Test95I1CommitAttributionHardening + Test95I1PushStateCompleteness)",
+    "files_changed_count": 6,
+    "tests_added_or_updated": "0 tests_added (design-only phase — no source or test changes)",
     "validation_results": [
-        {
-            "name": "report_tests",
-            "result": "114/114 passed",
-            "status": "passed"
-        },
-        {
-            "name": "backend_model_tests",
-            "result": "573/573 passed",
-            "status": "passed"
-        },
-        {
-            "name": "backend_cli_tests",
-            "result": "188/189 passed (1 pre-existing state-leakage)",
-            "status": "passed"
-        },
-        {
-            "name": "report_notification_tests",
-            "result": "107/107 passed",
-            "status": "passed"
-        },
-        {
-            "name": "notification_tests",
-            "result": "76/76 passed",
-            "status": "passed"
-        },
-        {
-            "name": "bootstrap_session_reporting_tests",
-            "result": "593/593 passed",
-            "status": "passed"
-        },
-        {
-            "name": "fast_green",
-            "result": "4084/4085 passed (1 pre-existing state-leakage)",
-            "status": "passed"
-        }
+        {"name": "report_notification_tests", "result": "107/107 passed", "status": "passed"},
+        {"name": "bootstrap_session_reporting_tests", "result": "593/593 passed", "status": "passed"},
+        {"name": "fast_green", "result": "4084/4085 passed (1 pre-existing)", "status": "passed"},
+        {"name": "backend_model_tests", "result": "573/573 passed", "status": "passed"},
+        {"name": "backend_cli_tests", "result": "188/189 passed (1 pre-existing)", "status": "passed"},
+        {"name": "notification_tests", "result": "76/76 passed", "status": "passed"}
     ],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"},
@@ -63,7 +30,7 @@
         {"name": "pcae_push_check", "status": "clean (nothing_to_push)"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
-    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. 95J not started.",
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No shell command execution. No network call. No live runtime inspection. No command path auto-discovery. No PATH lookup. No command path hashing. No shell interception. No wrappers. No command mediation. No Telegram inbound. No remote shell. No /run. No runtime enforcement. No autonomous mutation. No automatic apply. No apply execution. No patch parsing. No source file mutation. No automatic tests. No automatic pcae check. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "no_go_confirmed": {
         "no_real_backend_invocation": true,
         "no_adapter_execution": true,
@@ -73,70 +40,43 @@
         "no_live_runtime_inspection": true,
         "no_command_path_auto_discovery": true,
         "no_PATH_lookup": true,
-        "no_command_path_hashing_beyond_explicit_configured_file_paths": true,
+        "no_command_path_hashing": true,
         "no_shell_interception": true,
         "no_wrappers": true,
         "no_command_mediation": true,
         "no_telegram_inbound": true,
         "no_remote_shell": true,
         "no_run": true,
-        "no_runtime_enforcement_beyond_planning_design_documentation": true,
+        "no_runtime_enforcement": true,
         "no_autonomous_mutation": true,
         "no_automatic_apply": true,
         "no_apply_execution": true,
-        "no_patch_parsing_for_mutation": true,
-        "no_source_file_mutation_outside_scoped_docs_status_changes": true,
+        "no_patch_parsing": true,
+        "no_source_file_mutation": true,
         "no_automatic_tests": true,
         "no_automatic_pcae_check": true,
         "no_commit_push_authorization": true,
         "no_real_AI_backend_calls": true,
         "next_phase_not_started": true
     },
-    "no_go_confirmations": [
-        "No real backend invocation was implemented.",
-        "No adapter execution was implemented.",
-        "No subprocess execution was implemented.",
-        "No shell command execution was implemented.",
-        "No network call was implemented.",
-        "No live runtime inspection was implemented.",
-        "No command path auto-discovery was implemented.",
-        "No PATH lookup was implemented.",
-        "No command path hashing beyond explicit configured file paths was implemented.",
-        "No shell interception was implemented.",
-        "No wrappers were implemented.",
-        "No command mediation was implemented.",
-        "No Telegram inbound was implemented.",
-        "No remote shell was implemented.",
-        "No /run was implemented.",
-        "No runtime enforcement beyond planning/design documentation was implemented.",
-        "No autonomous mutation was implemented.",
-        "No automatic apply was implemented.",
-        "No apply execution was implemented.",
-        "No patch parsing for mutation was implemented.",
-        "No source file mutation outside scoped docs/status changes was implemented.",
-        "No automatic tests were implemented.",
-        "No automatic pcae check was implemented.",
-        "No commit/push authorization was implemented.",
-        "No real AI backend calls were implemented.",
-        "Next phase (95J) has not been started."
-    ],
-    "recommended_next_phase": "95J — Artifact-Only Invocation Command Boundary Design",
-    "recommended_next_phase_id": "95J",
-    "recommended_next_phase_name": "Artifact-Only Invocation Command Boundary Design",
-    "summary": "Phase 95I.1 complete: Phase Report Commit Attribution Hardening. Fixed truthiness bug where empty phase_commits [] fell through to git log -5, injecting stale prior-phase commits. Fixed COMPLETENESS_COMPLETE return path discarding trust warnings. Added commit ownership validation via commits.phase_owned trust warning. 7 new tests. 2 governed commits. Reports 114/114, all suites pass (1 pre-existing). Recommends 95J.",
-    "phase_commits": [
-        {"hash": "51ef8160", "subject": "Harden phase report commit attribution"},
-        {"hash": "fe8c7fcc", "subject": "Complete Phase 95I.1 commit attribution hardening"},
-        {"hash": "ca7e640b", "subject": "Finalize Phase 95I.1 metadata and canonical report"},
-        {"hash": "1f75b721", "subject": "Add phase-finalization skill and 95I prototype plan"},
-        {"hash": "c4d952c3", "subject": "Harden push-state completeness in phase reports"}
-    ],
-    "commit_attribution": "phase_owned",
+    "phase_commits": [],
+    "commit_attribution": "none (design-only phase — no commits created)",
+    "recommended_next_phase": "95K — Artifact-Only Invocation Command Boundary Model",
+    "summary": "Phase 95J complete: Artifact-Only Invocation Command Boundary Design. Design-only phase. Specified CLI structure (plan, dry-run, execute-reserved), 15 required command inputs, 21-step evidence verification order, 33 hard-block conditions, output/audit artifact structure with digest manifest, 23-class failure taxonomy, pre/post-invocation operator workflow, ~41-test plan, 23-criteria go/no-go table. 6 files changed. No source or test changes. Report 119/119, notifications 76/76. Recommends 95K.",
+    "executive_decisions": {
+        "artifact_only_invocation_command_implementation_ready": false,
+        "artifact_only_invocation_command_design_ready": true,
+        "real_backend_execution_allowed_now": false,
+        "dry_run_command_boundary_ready": true,
+        "execute_command_boundary_ready": false,
+        "auto_apply_ready": false,
+        "telegram_inbound_ready": false
+    },
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_delta": 0,
     "origin_main_head_count": 0,
     "notification_dispatch_result": "queued",
     "report_consistency": "consistent",
-    "skill_invocation_completed": true
+    "skill_invocation_completed": false
 }
