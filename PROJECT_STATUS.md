@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-Phase 95L: Artifact-Only Invocation Command Boundary CLI Dry-Run (completed).
+Phase 95M: Artifact-Only Invocation Dry-Run Evidence Chain Fixtures (completed).
+
+Deterministic fixture builders: 1 valid chain + 23 broken variants. 29 tests (15 model + 11 CLI + 3 safety). No execution. Recommends 95N.
 
 Dry-run CLI for command boundary: pcae backend invoke artifact-only dry-run/show/verify. Loads boundary, validates, prints assessment. 20 CLI tests. Execute unavailable. No execution. Recommends 95M.
 
