@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Complete Phase 95L CLI dry-run: pcae backend invoke artifact-only dry-run/show/verify. 20 CLI tests. Execute unavailable.
 - Complete Phase 95K command boundary model: ArtifactOnlyInvocationCommandBoundary (45 fields), Assessment (35 fields), validator, 3 command modes, persistent artifacts. 58 tests. No CLI. No execution.
 - Complete Phase 95J command boundary design: Specified CLI structure, evidence inputs, broker/shell-gate sequence, execution boundary, audit/quarantine artifacts, failure states, and go/no-go rules. Design only. Recommends 95K — Command Boundary Model.
 - Complete Phase 95I.1 commit attribution hardening: Fixed truthiness bug where empty phase_commits [] in metadata fell through to git log -5, injecting stale prior-phase commits into the current phase report. Fixed COMPLETENESS_COMPLETE return path discarding trust warnings. Added commit ownership validation with commits.phase_owned trust warning. 7 new tests.

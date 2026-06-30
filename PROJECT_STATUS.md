@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-Phase 95K: Artifact-Only Invocation Command Boundary Model (completed).
+Phase 95L: Artifact-Only Invocation Command Boundary CLI Dry-Run (completed).
+
+Dry-run CLI for command boundary: pcae backend invoke artifact-only dry-run/show/verify. Loads boundary, validates, prints assessment. 20 CLI tests. Execute unavailable. No execution. Recommends 95M.
 
 Implemented command boundary data models and validation: ArtifactOnlyInvocationCommandBoundary (45 fields), Assessment (35 fields), 3 command modes, 6 decisions, SHA-256 digests, persistence. Hard-blocks on all 95J design rules. 58 new tests. No CLI. No execution. Recommends 95L.
 
