@@ -20,6 +20,11 @@
             "status": "passed"
         },
         {
+            "name": "bootstrap_session_reporting_tests",
+            "result": "598/598",
+            "status": "passed"
+        },
+        {
             "name": "report_notification_tests",
             "result": "107/107",
             "status": "passed"
