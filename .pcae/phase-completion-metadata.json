@@ -1,20 +1,21 @@
 {
-    "phase_id": "95N",
-    "phase_name": "phase_95n_review",
-    "phase_title": "Evidence Chain Review",
+    "phase_id": "95O",
+    "phase_name": "phase_95o_bundle",
+    "phase_title": "Evidence Chain Bundle Model",
     "implementation_status": "completed",
-    "phase_type": "review_only",
-    "completed_at_utc": "2026-06-30T13:45:00Z",
+    "phase_type": "implementation",
     "files_changed": [
-        "src/pcae/core/phase_reports.py",
-        "docs/PHASE_95_ARTIFACT_ONLY_INVOCATION_DRY_RUN_EVIDENCE_CHAIN_REVIEW.md",
+        "src/pcae/core/backend_invocations.py",
+        "tests/test_backend_invocations.py",
+        ".pcae/.gitignore",
+        "docs/PHASE_95_ARTIFACT_ONLY_INVOCATION_EVIDENCE_CHAIN_BUNDLE_MODEL.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1340-phase-95n-review.md"
+        "tasks/active/20260630-1350-phase-95o-bundle.md"
     ],
-    "files_changed_count": 6,
-    "tests_added_or_updated": "0 tests_added (review-only)",
+    "files_changed_count": 8,
+    "tests_added_or_updated": "24 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -33,17 +34,12 @@
         },
         {
             "name": "backend_model_tests",
-            "result": "631/631 passed",
+            "result": "655/655 passed",
             "status": "passed"
         },
         {
             "name": "backend_cli_tests",
             "result": "209/210 passed (1 pre-existing)",
-            "status": "passed"
-        },
-        {
-            "name": "notification_tests",
-            "result": "76/76 passed",
             "status": "passed"
         }
     ],
@@ -86,27 +82,21 @@
     },
     "phase_commits": [
         {
-            "hash": "3303f7c7",
-            "subject": "Review artifact-only evidence chain fixtures"
+            "hash": "169dd498",
+            "subject": "Add artifact-only evidence chain bundle model"
+        },
+        {
+            "hash": "ae0bb098",
+            "subject": "Complete Phase 95O evidence chain bundle model"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95O \u2014 Artifact-Only Invocation Evidence Chain Bundle Model",
-    "summary": "Phase 95N complete: Evidence Chain Review. Review-only. All 16 go/no-go pass. Fixtures, CLI, gate ready. Recommends 95O.",
-    "executive_decisions": {
-        "evidence_chain_fixtures_ready": true,
-        "dry_run_cli_fixture_validation_ready": true,
-        "dry_run_orchestration_planning_ready": true,
-        "artifact_only_execution_ready": false,
-        "real_backend_execution_ready": false,
-        "auto_apply_ready": false,
-        "telegram_inbound_ready": false
-    },
+    "recommended_next_phase": "95P \u2014 Evidence Chain Bundle CLI Dry-Run",
+    "summary": "Phase 95O complete: Evidence Chain Bundle Model. 2 dataclasses, validator, persistence. 24 tests. No execution. Recommends 95P.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_delta": 0,
     "origin_main_head_count": 0,
     "notification_dispatch_result": "queued",
-    "report_consistency": "consistent",
-    "skill_invocation_completed": false
+    "report_consistency": "consistent"
 }
