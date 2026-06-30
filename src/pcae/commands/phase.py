@@ -125,7 +125,6 @@ def _finalize_report_and_notify(summary: str) -> None:
     tests_added = meta.get("tests_added_or_updated", "")
     test_results_raw = meta.get("validation_results", [])
     governance_raw = meta.get("governance_results", [])
-    phase_commits_meta = meta.get("phase_commits", [])
     no_go = meta.get("no_go_confirmation", "")
     notification_dispatch_raw = meta.get("notification_dispatch_result", "")
 
@@ -145,13 +144,19 @@ def _finalize_report_and_notify(summary: str) -> None:
         if name:
             governance_results[name] = gstatus
 
-    # Commits: prefer metadata phase_commits, fall back to git log
-    commits = _gather_commits()
-    if phase_commits_meta:
-        # Extract just the hashes from metadata
+    # Commits: prefer metadata phase_commits if explicitly declared.
+    # Explicit declaration (even empty list) is authoritative over git log.
+    # Only fall back to git log when the key is absent from metadata entirely.
+    commit_attribution = meta.get("commit_attribution", "")
+    if "phase_commits" in meta:
+        # Metadata explicitly declares phase commits — authoritative (may be empty)
+        phase_commits_meta = meta.get("phase_commits", [])
         meta_hashes = [c.get("hash", "")[:8] for c in phase_commits_meta if c.get("hash")]
-        if meta_hashes:
-            commits = meta_hashes
+        commits = meta_hashes  # explicitly empty → no commits for this phase
+        if not commit_attribution:
+            commit_attribution = "phase_owned" if meta_hashes else "none (no commits for this phase)"
+    else:
+        commits = _gather_commits()
 
     pushed_status = meta.get("pushed_status", "") or _gather_pushed_status()
     origin_count = meta.get("origin_main_head_count", None)
@@ -177,6 +182,7 @@ def _finalize_report_and_notify(summary: str) -> None:
         origin_main_head_count=origin_count,
         explicit_no_go_confirmations=no_go_list,
         recommended_next_phase=recommended_next,
+        commit_attribution=commit_attribution,
     )
 
     if fin.get("report_error"):

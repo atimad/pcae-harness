@@ -1425,3 +1425,134 @@ class Test95F2CompletenessEnforcement:
         assert "phase-finalization" in content
         assert "Required Governance Keys" in content
 
+
+class Test95I1CommitAttributionHardening:
+    """Phase 95I.1: phase-owned commit attribution validation."""
+
+    GOV_ALL = {
+        "pcae_health": "healthy",
+        "pcae_check": "passed",
+        "pcae_doctor_task_memory": "warnings",
+        "pcae_push_check": "clean",
+        "telegram_runtime": "loaded",
+    }
+
+    TESTS_FULL = {
+        "backend_model_tests": "573/573 passed",
+        "report_notification_tests": "107/107 passed",
+        "bootstrap_session_reporting_tests": "586/586 passed",
+        "fast_green": "4084/4085 passed",
+    }
+
+    def test_explicit_empty_phase_commits_not_overridden(self):
+        """When metadata declares phase_commits=[], commits stay empty — no git log fallback."""
+        r = make_phase_report(
+            phase_id="95I", phase_name="Test Plan", status="completed",
+            summary="Planning only — no commits.", files_changed=6, tests_run=6,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_ALL,
+            commits=[],  # explicitly empty from phase.py Fix 1
+            pushed_status="pushed",
+        )
+        r.metadata["phase_commits"] = []  # declared in metadata by phase author
+        r.apply_trust_assessment()
+        assert r.report_completeness != COMPLETENESS_COMPLETE
+        assert "commits" in r.missing_trust_fields
+
+    def test_phase_owned_commits_preserved(self):
+        """Phase-specific commits from metadata are kept and report is complete."""
+        r = make_phase_report(
+            phase_id="94Q", phase_name="Test Lifecycle", status="completed",
+            summary="Implemented backend lifecycle.", files_changed=10, tests_run=61,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_ALL,
+            commits=["abc12345", "def67890"],
+            pushed_status="pushed",
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+        assert r.commits == ["abc12345", "def67890"]
+
+    def test_missing_phase_commits_key_backward_compat(self):
+        """When phase_commits key is absent from metadata, and commits came from git log,
+        commits.phase_owned should be flagged as missing trust field."""
+        r = make_phase_report(
+            phase_id="94X", phase_name="Test", status="completed",
+            summary="Done.", files_changed=1, tests_run=1,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_ALL,
+            commits=["abc12345"],  # from git log fallback
+            pushed_status="pushed",
+        )
+        # metadata does NOT have "phase_commits" key — backward compat path
+        assert "phase_commits" not in r.metadata
+        r.apply_trust_assessment()
+        # With files_changed>0 and no phase_commits/commit_attribution in metadata,
+        # commits.phase_owned should be flagged as a trust warning
+        assert any("commits.phase_owned" in w for w in r.trust_warnings)
+
+    def test_stale_commits_from_fallback_make_report_partial(self):
+        """Commits from git log fallback (no phase_commits in metadata)
+        with files_changed>0 should trigger commits.phase_owned missing field."""
+        r = make_phase_report(
+            phase_id="95I", phase_name="Test", status="completed",
+            summary="Done.", files_changed=6, tests_run=6,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_ALL,
+            commits=["dfb235d7", "cd976e34"],  # stale — actually from prior phases
+            pushed_status="pushed",
+        )
+        # No phase_commits in metadata → commits came from git log fallback
+        r.apply_trust_assessment()
+        assert any("commits.phase_owned" in w for w in r.trust_warnings)
+
+    def test_commit_attribution_explicit_allows_files_changed(self):
+        """commit_attribution metadata field documents no-commit phases.
+        When provided, commits.phase_owned is NOT flagged even with empty commits
+        (empty commits still triggers 'commits' missing, which is separate)."""
+        r = make_phase_report(
+            phase_id="95I", phase_name="Test", status="completed",
+            summary="Planning only.", files_changed=6, tests_run=6,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_ALL,
+            commits=[],
+            pushed_status="pushed",
+        )
+        r.metadata["commit_attribution"] = "none (planning-only phase)"
+        r.apply_trust_assessment()
+        # Empty commits still triggers "commits" missing — separate from attribution
+        assert "commits" in r.missing_trust_fields
+        # But commit_attribution suppresses the commits.phase_owned warning
+        assert "commits.phase_owned" not in r.missing_trust_fields
+
+    def test_phase_commits_present_no_phase_owned_warning(self):
+        """When metadata has phase_commits with actual hashes, no warning."""
+        r = make_phase_report(
+            phase_id="95F.2", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=11,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_ALL,
+            commits=["abc12345"],
+            pushed_status="pushed",
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+        assert "commits.phase_owned" not in r.missing_trust_fields
+
+    def test_multipart_phase_id_with_phase_commits(self):
+        """Multipart phase IDs (e.g. 95H.1) work with phase_commits."""
+        r = make_phase_report(
+            phase_id="95H.1", phase_name="Test Hardening", status="completed",
+            summary="Skill hardening.", files_changed=5, tests_run=5,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_ALL,
+            commits=["cd976e34", "dfb235d7"],
+            pushed_status="pushed",
+        )
+        r.metadata["phase_commits"] = [{"hash": "cd976e34"}, {"hash": "dfb235d7"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+        assert r.commits == ["cd976e34", "dfb235d7"]
+

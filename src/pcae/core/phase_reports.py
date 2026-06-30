@@ -172,6 +172,16 @@ class PhaseReport:
             missing.append("tests_run")
         if not self.commits:
             missing.append("commits")
+        # Phase 95I.1 — commit ownership validation.
+        # If commits are present but metadata doesn't declare phase_commits
+        # or commit_attribution, warn that commit ownership is unverified.
+        # This is a trust warning, not a blocking missing field — it does
+        # not downgrade the report to partial on its own.
+        elif self.files_changed > 0:
+            md = self.metadata or {}
+            if not md.get("phase_commits") and not md.get("commit_attribution"):
+                if "commits.phase_owned not verified — no phase_commits in metadata" not in warnings:
+                    warnings.append("commits.phase_owned not verified — no phase_commits in metadata")
         if not self.pushed_status:
             missing.append("pushed_status")
         if not self.test_results:
@@ -196,7 +206,7 @@ class PhaseReport:
             warnings.append(f"Missing trust fields: {', '.join(missing)}")
             return COMPLETENESS_PARTIAL, missing, warnings
 
-        return COMPLETENESS_COMPLETE, [], []
+        return COMPLETENESS_COMPLETE, [], warnings
 
     def apply_trust_assessment(self) -> None:
         """Run completeness assessment and store results in the report."""
@@ -823,6 +833,9 @@ def finalize_phase_report(
             explicit_no_go_confirmations=explicit_no_go_confirmations or [],
             recommended_next_phase=recommended_next_phase,
         )
+        # Phase 95I.1 — commit attribution tracking
+        if kwargs.get("commit_attribution"):
+            report.metadata["commit_attribution"] = kwargs["commit_attribution"]
         # Phase 92D.5/92D.8 — Apply trust assessment with canonical report
         _apply_canonical_and_trust(report, phase_id, phase_name, status)
         paths = write_phase_report(report, reports_dir)
