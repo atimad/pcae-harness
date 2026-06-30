@@ -1,19 +1,19 @@
 {
-    "phase_id": "95T",
-    "phase_name": "phase_95t_orch_cli",
-    "phase_title": "Orchestration CLI",
+    "phase_id": "95U",
+    "phase_name": "phase_95u_demo",
+    "phase_title": "Orchestration End-to-End Demo",
     "files_changed": [
         "src/pcae/commands/backend.py",
         "src/pcae/cli.py",
         "tests/test_backend_cli.py",
-        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_CLI.md",
+        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_END_TO_END_DEMO.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1500-phase-95t-orch-cli.md"
+        "tasks/active/20260630-1505-phase-95u-demo.md"
     ],
     "files_changed_count": 8,
-    "tests_added_or_updated": "7 tests_added",
+    "tests_added_or_updated": "5 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -37,7 +37,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "231/232 (1 pre-existing)",
+            "result": "236/237 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -52,7 +52,7 @@
         },
         {
             "name": "pcae_doctor_task_memory",
-            "status": "warnings (pre-existing)"
+            "status": "warnings"
         },
         {
             "name": "pcae_push_check",
@@ -66,17 +66,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "10a322da",
-            "subject": "Add orchestration CLI"
+            "hash": "a95bc2f3",
+            "subject": "Add orchestration demo"
         },
         {
-            "hash": "01764862",
-            "subject": "Complete orchestration CLI"
+            "hash": "c632b753",
+            "subject": "Complete orchestration demo"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95U \u2014 Artifact-Only Dry-Run Orchestration End-to-End Demo",
-    "summary": "Phase 95T complete: Orchestration CLI. dry-run/show/verify. 7 tests. No execution. Recommends 95U.",
+    "recommended_next_phase": "95V \u2014 Artifact-Only Dry-Run Orchestration Review",
+    "summary": "Phase 95U complete: Orchestration Demo. 12-step end-to-end demo. 5 tests. No execution. Recommends 95V.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
