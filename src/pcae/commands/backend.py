@@ -2413,3 +2413,127 @@ def run_backend_invoke_artifact_only_bundle_demo(args: argparse.Namespace) -> in
         print()
         print("  ⚠️  Demo only. No backend was invoked. No adapter was executed.")
     return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95T — Artifact-only dry-run orchestration CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyDryRunOrchestrationPlan,
+    ArtifactOnlyDryRunOrchestrationAssessment,
+    validate_artifact_only_dry_run_orchestration_plan,
+    verify_orchestration_plan,
+    persist_orchestration_assessment,
+    verify_orchestration_assessment,
+)
+
+
+def _load_orch_plan(path: str, args: argparse.Namespace) -> tuple:
+    from pathlib import Path as _P
+    p = _P(path)
+    if not p.is_file():
+        msg = f"Plan is a directory: {path}" if p.is_dir() else f"Plan file not found: {path}"
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return None, 1
+    try:
+        data = json.loads(p.read_text())
+        plan = ArtifactOnlyDryRunOrchestrationPlan.from_dict(data)
+    except Exception as exc:
+        msg = f"Failed to load plan: {exc}"
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return None, 1
+    if plan.record_digest:
+        v = verify_orchestration_plan(plan)
+        if not v["valid"]:
+            msg = f"Plan verification failed: {v['issues']}"
+            print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+            return None, 1
+    return plan, 0
+
+
+def _load_latest_orch_assessment() -> ArtifactOnlyDryRunOrchestrationAssessment | None:
+    from pcae.core.backend_invocations import _orch_dir
+    lp = _orch_dir() / "assessments" / "latest-assessment.json"
+    if not lp.exists():
+        return None
+    try:
+        data = json.loads(lp.read_text())
+        return ArtifactOnlyDryRunOrchestrationAssessment.from_dict(data)
+    except Exception:
+        return None
+
+
+def _print_orch_assessment_text(a: ArtifactOnlyDryRunOrchestrationAssessment) -> None:
+    print(f"Orchestration Assessment: {a.assessment_id}")
+    print(f"  Decision:            {a.decision}")
+    print(f"  Ready:               {'yes' if a.ready else 'no'}")
+    if a.cumulative_hard_blocks:
+        print(f"  Hard blocks:         {', '.join(a.cumulative_hard_blocks)}")
+    print(f"  Step results:        {len(a.step_results)} step(s)")
+    for sr in a.step_results:
+        status = "ready" if sr.ready else "blocked"
+        print(f"    {sr.step_order}: {sr.step_name} — {status}")
+    print(f"  Execution allowed:   {'yes' if a.execution_allowed else 'no'}")
+    print(f"  Execute supported:   {'yes' if a.execute_supported else 'no'}")
+    print(f"  Dry-run only:        {'yes' if a.dry_run_only else 'no'}")
+    print(f"  Real backend:        {'yes' if not a.no_real_backend_invoked else 'no'}")
+    print(f"  Adapter executed:    {'yes' if not a.no_adapter_executed else 'no'}")
+    print(f"  Subprocess:          {'yes' if not a.no_subprocess else 'no'}")
+    print(f"  Network:             {'yes' if not a.no_network else 'no'}")
+    print(f"  Repo mutation:       {'yes' if not a.no_repo_mutation else 'no'}")
+    print(f"  Apply:               {'yes' if not a.no_apply else 'no'}")
+    print(f"  Patch parsing:       {'yes' if not a.no_patch_parsing else 'no'}")
+    print(f"  Commit/push auth:    {'yes' if not a.no_commit_push_authorization else 'no'}")
+    print(f"  Telegram inbound:    {'yes' if not a.no_telegram_inbound else 'no'}")
+    print()
+    print("  ⚠️  Dry-run only. No backend was invoked.")
+
+
+def run_backend_invoke_artifact_only_orch_dry_run(args: argparse.Namespace) -> int:
+    plan_path = getattr(args, "plan", "") or ""
+    save = getattr(args, "save", False) or False
+    if not plan_path:
+        msg = "Missing --plan <path>"
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return 1
+    plan, code = _load_orch_plan(plan_path, args)
+    if plan is None:
+        return code
+    a = validate_artifact_only_dry_run_orchestration_plan(plan)
+    if save:
+        persist_orchestration_assessment(a)
+    if getattr(args, "json", False):
+        print(json.dumps(a.to_dict(), indent=2))
+    else:
+        _print_orch_assessment_text(a)
+    return 0
+
+
+def run_backend_invoke_artifact_only_orch_show(args: argparse.Namespace) -> int:
+    a = _load_latest_orch_assessment()
+    if a is None:
+        msg = "No latest orchestration assessment found."
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return 1
+    if getattr(args, "json", False):
+        print(json.dumps(a.to_dict(), indent=2))
+    else:
+        _print_orch_assessment_text(a)
+    return 0
+
+
+def run_backend_invoke_artifact_only_orch_verify(args: argparse.Namespace) -> int:
+    a = _load_latest_orch_assessment()
+    if a is None:
+        msg = "No latest orchestration assessment found."
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return 1
+    v = verify_orchestration_assessment(a)
+    if getattr(args, "json", False):
+        print(json.dumps(v, indent=2))
+    else:
+        print(f"Assessment {a.assessment_id}: {'valid ✅' if v['valid'] else 'INVALID ❌'}")
+        for issue in v.get("issues", []):
+            print(f"  - {issue}")
+    return 0 if v["valid"] else 1

@@ -471,6 +471,9 @@ from pcae.commands.backend import (
     run_backend_invoke_artifact_only_bundle_show,
     run_backend_invoke_artifact_only_bundle_verify,
     run_backend_invoke_artifact_only_bundle_demo,
+    run_backend_invoke_artifact_only_orch_dry_run,
+    run_backend_invoke_artifact_only_orch_show,
+    run_backend_invoke_artifact_only_orch_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -5048,6 +5051,31 @@ def build_parser() -> argparse.ArgumentParser:
     bundle_demo.add_argument("--save", action="store_true", help="Persist assessment.")
     bundle_demo.add_argument("--json", action="store_true")
     bundle_demo.set_defaults(handler=run_backend_invoke_artifact_only_bundle_demo)
+
+    # ── Phase 95T: orchestration ─────────────────────────────────────────
+    be_invoke_orch = be_invoke_ao_sub.add_parser(
+        "orchestration", help="Dry-run orchestration (no execution)."
+    )
+    be_invoke_orch_sub = be_invoke_orch.add_subparsers(
+        dest="backend_invoke_orch_command", required=True,
+    )
+    orch_dry_run = be_invoke_orch_sub.add_parser(
+        "dry-run", help="Load plan, validate, print assessment."
+    )
+    orch_dry_run.add_argument("--plan", required=True, help="Path to orchestration plan JSON.")
+    orch_dry_run.add_argument("--save", action="store_true")
+    orch_dry_run.add_argument("--json", action="store_true")
+    orch_dry_run.set_defaults(handler=run_backend_invoke_artifact_only_orch_dry_run)
+
+    orch_show = be_invoke_orch_sub.add_parser("show", help="Show latest assessment.")
+    orch_show.add_argument("--latest", action="store_true", default=True)
+    orch_show.add_argument("--json", action="store_true")
+    orch_show.set_defaults(handler=run_backend_invoke_artifact_only_orch_show)
+
+    orch_verify = be_invoke_orch_sub.add_parser("verify", help="Verify assessment.")
+    orch_verify.add_argument("--latest", action="store_true", default=True)
+    orch_verify.add_argument("--json", action="store_true")
+    orch_verify.set_defaults(handler=run_backend_invoke_artifact_only_orch_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

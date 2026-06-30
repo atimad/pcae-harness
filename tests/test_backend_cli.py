@@ -2047,3 +2047,76 @@ class Test95QBundleDemo:
         """execute is not a recognized bundle subcommand."""
         r = _run(["invoke", "artifact-only", "bundle", "execute", "--help"])
         assert r.returncode != 0
+from pcae.core.backend_invocations import (
+    ArtifactOnlyDryRunOrchestrationPlan,
+    ArtifactOnlyDryRunOrchestrationStep,
+    persist_orchestration_plan,
+)
+
+
+def _write_orch_plan(**overrides) -> str:
+    steps = [ArtifactOnlyDryRunOrchestrationStep(step_id=f"s{i}", step_name=name, step_order=i)
+             for i, name in enumerate((
+        "load_bundle", "verify_bundle_digest", "validate_bundle",
+        "load_boundary_assessment", "verify_boundary_assessment",
+        "aggregate_broker_shell_gate", "verify_output_quarantine",
+        "verify_audit_path", "verify_timeout", "verify_redaction_policy",
+        "verify_no_execution_flags", "produce_dry_run_summary",
+    ))]
+    kwargs = {
+        "orchestration_id": "orch-cli-test", "phase_id": "95T", "task_id": "test",
+        "backend_id": "mock", "adapter_id": "mock",
+        "bundle_path": "/b/b.json", "bundle_digest": "abc",
+        "bundle_assessment_path": "/b/ba.json", "bundle_assessment_digest": "def",
+        "output_quarantine_path": "/q", "audit_path": "/a",
+        "timeout_seconds": 120, "redaction_policy_id": "rp-1",
+        "ordered_steps": steps,
+    }
+    kwargs.update(overrides)
+    p = ArtifactOnlyDryRunOrchestrationPlan(**kwargs)
+    p.record_digest = p.compute_digest()
+    r = persist_orchestration_plan(p)
+    return r["path"]
+
+
+class Test95TOrchCLI:
+    def test_valid_dry_run_ready(self):
+        p = _write_orch_plan()
+        r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", p, "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["decision"] == "ready_for_dry_run_orchestration"
+
+    def test_missing_plan_fails(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--json"])
+        assert r.returncode != 0
+
+    def test_missing_step_blocks(self):
+        p = _write_orch_plan(ordered_steps=[])
+        r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", p, "--json"])
+        d = json.loads(r.stdout)
+        assert "ordered_steps_missing" in d["cumulative_hard_blocks"]
+
+    def test_text_no_execution(self):
+        p = _write_orch_plan()
+        r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", p])
+        assert "Execution allowed" in r.stdout
+        assert "Dry-run only" in r.stdout
+
+    def test_save_and_show(self):
+        p = _write_orch_plan(orchestration_id="orch-show-test")
+        _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", p, "--save"])
+        r = _run(["invoke", "artifact-only", "orchestration", "show", "--latest", "--json"])
+        assert r.returncode == 0
+
+    def test_save_and_verify(self):
+        p = _write_orch_plan(orchestration_id="orch-verify-test")
+        _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", p, "--save"])
+        r = _run(["invoke", "artifact-only", "orchestration", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["valid"] is True
+
+    def test_execute_unavailable(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "execute", "--help"])
+        assert r.returncode != 0
