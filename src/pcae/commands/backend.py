@@ -30,6 +30,7 @@ from pcae.core.backend_invocations import (
     persist_real_adapter_invocation_plan,
     evaluate_artifact_only_real_invocation_dry_run,
     ArtifactOnlyRealInvocationDryRunAssessment,
+    RealAdapterInvocationPlan,
     load_latest_claude_runtime_evidence,
     verify_claude_runtime_evidence,
     import_claude_runtime_evidence_from_json,
@@ -1789,7 +1790,26 @@ def run_backend_adapter_dry_run_evaluate(args: argparse.Namespace) -> int:
         print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
         return 1
 
-    assessment = evaluate_artifact_only_real_invocation_dry_run(plan=plan)
+    # ── Load runtime evidence if provided (Phase 95E) ──────────────────
+    runtime_ev: ClaudeRuntimeEvidence | None = None
+    re_path: str = getattr(args, "runtime_evidence", "") or ""
+    if re_path:
+        rp = _P(re_path)
+        if not rp.is_file():
+            msg = f"Runtime evidence not found: {re_path}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+        try:
+            re_data = json.loads(rp.read_text())
+            runtime_ev = ClaudeRuntimeEvidence.from_dict(re_data)
+        except Exception as exc:
+            msg = f"Failed to load runtime evidence: {exc}"
+            print(json.dumps({"error": msg}) if args.json else f"Error: {msg}")
+            return 1
+
+    assessment = evaluate_artifact_only_real_invocation_dry_run(
+        plan=plan, runtime_evidence=runtime_ev,
+    )
 
     if save:
         persist_artifact_only_real_invocation_dry_run_assessment(assessment)
@@ -1807,6 +1827,12 @@ def run_backend_adapter_dry_run_evaluate(args: argparse.Namespace) -> int:
             print(f"  Hard blocks:         {', '.join(assessment.hard_blocks)}")
         if assessment.deny_reasons:
             print(f"  Deny reasons:        {', '.join(assessment.deny_reasons)}")
+        if assessment.runtime_evidence_id:
+            print(f"  Runtime evidence:    {assessment.runtime_evidence_id} "
+                  f"({'valid' if assessment.runtime_evidence_valid else 'invalid'})")
+            print(f"  Bypass state:        {assessment.runtime_bypass_permissions_state}")
+        else:
+            print(f"  Runtime evidence:    missing")
         print(f"  No real backend:     {assessment.no_real_backend_invoked}")
         print(f"  No adapter executed: {assessment.no_adapter_executed}")
         print(f"  No subprocess:       {assessment.no_subprocess}")

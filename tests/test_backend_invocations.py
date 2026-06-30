@@ -5436,3 +5436,119 @@ class Test95DImportCLI:
             capture_output=True, text=True, cwd=tmp_path, timeout=15,
         )
         assert r.returncode != 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95E — Runtime evidence to dry-run integration tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+class Test95EIntegration:
+    """Runtime evidence integration into dry-run assessment."""
+
+    def test_dry_run_without_runtime_evidence_blocks(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=plan)
+        assert "runtime_evidence_missing" in a.hard_blocks
+
+    def test_dry_run_with_valid_runtime_evidence(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="adapter-claude-cli", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+            timeout_seconds=120,
+        )
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-int", backend_id="claude",
+            backend_type="claude_cli", adapter_id="adapter-claude-cli",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/local/bin/claude",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            evidence_source="operator_declared",
+            timeout_seconds=120, audit_path="/q", output_quarantine_path="/q",
+            record_digest="0000",
+        )
+        re_ev.record_digest = re_ev.compute_digest()
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=plan, runtime_evidence=re_ev)
+        assert a.runtime_evidence_id == "re-int"
+        assert a.runtime_bypass_permissions_state == "off"
+        assert a.execution_allowed is False  # still dry-run only
+
+    def test_runtime_bypass_on_blocks(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-bp", backend_id="claude",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/local/bin/claude",
+            bypass_permissions_state="on", timeout_seconds=120,
+            audit_path="/a", output_quarantine_path="/q",
+        )
+        re_ev.record_digest = re_ev.compute_digest()
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=plan, runtime_evidence=re_ev)
+        assert "runtime:bypass_enabled" in a.hard_blocks or any("bypass" in hb for hb in a.hard_blocks)
+
+    def test_runtime_backend_mismatch_blocks(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-mm", backend_id="claude-deepseek",
+            runtime_profile="claude_deepseek_cli", command_identity="claude-deepseek",
+            declared_command_path="/usr/local/bin/claude-deepseek",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        re_ev.record_digest = re_ev.compute_digest()
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=plan, runtime_evidence=re_ev)
+        assert "runtime_backend_mismatch" in a.hard_blocks
+
+    def test_no_secrets_in_assessment(self):
+        import json
+        a = ArtifactOnlyRealInvocationDryRunAssessment(assessment_id="dra-sec")
+        j = json.dumps(a.to_dict())
+        assert "sk-ant" not in j
+
+
+class Test95EIntegrationCLI:
+    def test_evaluate_with_runtime_evidence_cli(self, tmp_path):
+        import subprocess, sys, json as _j
+        # Create plan
+        plan_path = tmp_path / "plan.json"
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="adapter-claude-cli", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+            timeout_seconds=120,
+        )
+        _j.dump(plan.to_dict(), plan_path.open("w"))
+        # Create runtime evidence
+        re_path = tmp_path / "re.json"
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-cli-int", backend_id="claude",
+            backend_type="claude_cli", adapter_id="adapter-claude-cli",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/local/bin/claude",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            evidence_source="operator_declared",
+            timeout_seconds=120, audit_path="/q", output_quarantine_path="/q",
+        )
+        re_ev.record_digest = re_ev.compute_digest()
+        _j.dump(re_ev.to_dict(), re_path.open("w"))
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "adapter", "dry-run",
+             "evaluate", "--plan-artifact", str(plan_path),
+             "--runtime-evidence", str(re_path)],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
+        assert r.returncode == 0
+        assert "bypass" in r.stdout.lower() or "Runtime evidence" in r.stdout

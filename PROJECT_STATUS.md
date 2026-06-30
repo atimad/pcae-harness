@@ -2,6 +2,12 @@
 
 ## Current Phase
 
+Phase 95E: Runtime Evidence to Dry-Run Integration (completed).
+
+Extended dry-run assessment with 10 runtime evidence binding fields. evaluate() now requires
+runtime evidence for real adapter plans. Cross-binding checks. CLI --runtime-evidence.
+6 new tests (556 model total). Delivers docs/PHASE_95_RUNTIME_EVIDENCE_TO_DRY_RUN_INTEGRATION.md.
+
 Phase 95D: Claude Runtime Evidence Import CLI (completed).
 
 pcae backend adapter runtime-evidence import --from-json with secret scanning.

@@ -5095,6 +5095,16 @@ class ArtifactOnlyRealInvocationDryRunAssessment:
     no_auto_apply: bool = True
     no_commit_authorization: bool = True
     no_push_authorization: bool = True
+    # ── Phase 95E: runtime evidence binding ───────────────────────────
+    runtime_evidence_id: str = ""
+    runtime_evidence_path: str = ""
+    runtime_evidence_digest: str = ""
+    runtime_profile: str = ""
+    runtime_bypass_permissions_state: str = ""
+    runtime_evidence_valid: bool = False
+    runtime_evidence_source: str = ""
+    runtime_failure_category: str = ""
+    runtime_hard_blocks: list[str] = field(default_factory=list)
     created_at_utc: str = ""
     schema_version: str = _DRY_RUN_SCHEMA_VERSION
     record_digest: str = ""
@@ -5105,6 +5115,7 @@ class ArtifactOnlyRealInvocationDryRunAssessment:
         d["warnings"] = list(self.warnings)
         d["missing_evidence"] = list(self.missing_evidence)
         d["deny_reasons"] = list(self.deny_reasons)
+        d["runtime_hard_blocks"] = list(self.runtime_hard_blocks)
         if not include_digest:
             d.pop("record_digest", None)
         return d
@@ -5131,6 +5142,7 @@ def evaluate_artifact_only_real_invocation_dry_run(
     preflight_artifact: BackendAdapterPreflightArtifact | None = None,
     approval_artifact: RealAdapterInvocationApproval | None = None,
     contract: BackendAdapterContract | None = None,
+    runtime_evidence: ClaudeRuntimeEvidence | None = None,
 ) -> ArtifactOnlyRealInvocationDryRunAssessment:
     """Evaluate evidence chain for artifact-only real invocation. Dry-run only.
 
@@ -5203,6 +5215,46 @@ def evaluate_artifact_only_real_invocation_dry_run(
         if plan.timeout_seconds <= 0:
             hard_blocks.append("timeout_missing_or_invalid")
 
+    # ── Runtime evidence validation (Phase 95E) ──────────────────────
+    re_id = re_digest = re_profile = re_bypass = re_source = re_failure = ""
+    re_valid = False
+    re_hard_blocks: list[str] = []
+    if runtime_evidence is not None:
+        re_id = runtime_evidence.runtime_evidence_id
+        re_digest = runtime_evidence.record_digest or runtime_evidence.compute_digest()
+        re_profile = runtime_evidence.runtime_profile
+        re_bypass = runtime_evidence.bypass_permissions_state
+        re_source = runtime_evidence.evidence_source
+        re_valid_result = validate_claude_runtime_evidence(runtime_evidence)
+        re_valid = re_valid_result["valid"]
+        re_hard_blocks = list(re_valid_result.get("hard_blocks", []))
+        re_failure = runtime_evidence.failure_category or ""
+        if not re_valid:
+            hard_blocks.extend(f"runtime:{hb}" for hb in re_hard_blocks)
+        # Cross-binding checks
+        if plan is not None:
+            if plan.backend_id and runtime_evidence.backend_id and plan.backend_id != runtime_evidence.backend_id:
+                hard_blocks.append("runtime_backend_mismatch")
+            if plan.adapter_id and runtime_evidence.adapter_id and plan.adapter_id != runtime_evidence.adapter_id:
+                hard_blocks.append("runtime_adapter_mismatch")
+            if plan.timeout_seconds and runtime_evidence.timeout_seconds and plan.timeout_seconds != runtime_evidence.timeout_seconds:
+                hard_blocks.append("runtime_timeout_mismatch")
+            if plan.audit_artifact_path and runtime_evidence.audit_path and plan.audit_artifact_path != runtime_evidence.audit_path:
+                hard_blocks.append("runtime_audit_path_mismatch")
+            if plan.output_quarantine_path and runtime_evidence.output_quarantine_path and plan.output_quarantine_path != runtime_evidence.output_quarantine_path:
+                hard_blocks.append("runtime_quarantine_path_mismatch")
+        if not runtime_evidence.no_real_backend_invoked:
+            hard_blocks.append("runtime:no_real_backend_invoked=False")
+        if not runtime_evidence.no_subprocess:
+            hard_blocks.append("runtime:no_subprocess=False")
+        if not runtime_evidence.no_network:
+            hard_blocks.append("runtime:no_network=False")
+        if not runtime_evidence.no_adapter_executed:
+            hard_blocks.append("runtime:no_adapter_executed=False")
+    else:
+        hard_blocks.append("runtime_evidence_missing")
+        re_failure = "runtime_evidence_missing"
+
     # ── Determine outcome ──────────────────────────────────────────────
     for hb in hard_blocks:
         deny.append(hb)
@@ -5234,6 +5286,14 @@ def evaluate_artifact_only_real_invocation_dry_run(
         no_auto_apply=True,
         no_commit_authorization=True,
         no_push_authorization=True,
+        runtime_evidence_id=re_id,
+        runtime_evidence_digest=re_digest,
+        runtime_profile=re_profile,
+        runtime_bypass_permissions_state=re_bypass,
+        runtime_evidence_valid=re_valid,
+        runtime_evidence_source=re_source,
+        runtime_failure_category=re_failure,
+        runtime_hard_blocks=re_hard_blocks,
         created_at_utc=now,
     )
 

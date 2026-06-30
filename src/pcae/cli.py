@@ -4928,6 +4928,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     dr_eval = adapter_dr_sub.add_parser("evaluate", help="Evaluate evidence chain.")
     dr_eval.add_argument("--plan-artifact", required=True, help="Path to plan JSON.")
+    dr_eval.add_argument("--runtime-evidence", default="", help="Path to runtime evidence JSON.")
     dr_eval.add_argument("--save", action="store_true", help="Persist assessment.")
     dr_eval.add_argument("--json", action="store_true")
     dr_eval.set_defaults(handler=run_backend_adapter_dry_run_evaluate)
