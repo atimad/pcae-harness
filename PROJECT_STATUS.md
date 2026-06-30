@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 95O: Evidence Chain Bundle Model (completed). Bundle groups all evidence into verifiable object. 24 tests. Recommends 95P.
+Phase 95R: Orchestration Readiness Review (completed). Review-only. All go/no-go pass. Recommends 95S — Orchestration Model.
 
 Review-only. All 16 go/no-go criteria pass. Evidence chain fixtures, CLI, and gate are ready. Recommends 95O — Evidence Chain Bundle Model.
 
