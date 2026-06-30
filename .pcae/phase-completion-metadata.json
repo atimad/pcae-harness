@@ -1,16 +1,19 @@
 {
-    "phase_id": "95V",
-    "phase_name": "phase_95v_review",
-    "phase_title": "Orchestration Review",
+    "phase_id": "95W",
+    "phase_name": "phase_95w_hardening",
+    "phase_title": "Orchestration Hardening",
     "files_changed": [
-        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_REVIEW.md",
+        "src/pcae/core/backend_invocations.py",
+        "tests/test_backend_invocations.py",
+        "tests/test_backend_cli.py",
+        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_HARDENING.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1515-phase-95v-review.md"
+        "tasks/active/20260630-1740-phase-95w-hardening.md"
     ],
-    "files_changed_count": 5,
-    "tests_added_or_updated": "0 tests_added (review-only)",
+    "files_changed_count": 8,
+    "tests_added_or_updated": "15 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -29,12 +32,12 @@
         },
         {
             "name": "backend_model_tests",
-            "result": "673/673",
+            "result": "691/691",
             "status": "passed"
         },
         {
             "name": "backend_cli_tests",
-            "result": "236/237 (1 pre-existing)",
+            "result": "243/244 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -64,12 +67,16 @@
     "phase_commits": [
         {
             "hash": "c6d7088e",
-            "subject": "Review orchestration stack"
+            "subject": "Harden orchestration stack"
+        },
+        {
+            "hash": "22b72e36",
+            "subject": "Complete orchestration hardening"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95W \u2014 Artifact-Only Dry-Run Orchestration Hardening",
-    "summary": "Phase 95V complete: Orchestration Review. All go/no-go pass. Recommends 95W.",
+    "recommended_next_phase": "95X \u2014 Artifact-Only Dry-Run Stack Final Readiness Review",
+    "summary": "Phase 95W complete: Orchestration Hardening. 15 tests, all invariants checked. No execution. Recommends 95X.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
