@@ -1,21 +1,30 @@
 {
-    "phase_id": "95I",
-    "phase_name": "phase_95i_single_backend_artifact_only_invocation_prototype_plan",
-    "phase_title": "Single-Backend Artifact-Only Invocation Prototype Plan",
+    "phase_id": "95I.1",
+    "phase_name": "phase_95i1_phase_report_commit_attribution_hardening",
+    "phase_title": "Phase Report Commit Attribution Hardening",
     "implementation_status": "completed",
-    "phase_type": "planning_only",
-    "completed_at_utc": "2026-06-30T10:50:00Z",
+    "phase_type": "implementation",
+    "completed_at_utc": "2026-06-30T12:15:00Z",
     "files_changed": [
-        "docs/PHASE_95_SINGLE_BACKEND_ARTIFACT_ONLY_INVOCATION_PROTOTYPE_PLAN.md",
+        "src/pcae/commands/phase.py",
+        "src/pcae/core/phase_reports.py",
+        "tests/test_phase_reports.py",
+        "docs/PHASE_95I1_PHASE_REPORT_COMMIT_ATTRIBUTION_HARDENING.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1032-phase-95i-single-backend-artifact-only-invocation-prototype-plan.md",
-        ".pcae/session.json"
+        "tasks/active/20260630-1200-phase-95i1-commit-attribution-hardening.md",
+        ".pcae/phase-completion-metadata.json",
+        ".pcae/phase-completion-report.md"
     ],
-    "files_changed_count": 6,
-    "tests_added_or_updated": "0 tests_added (planning/design-only phase)",
+    "files_changed_count": 10,
+    "tests_added_or_updated": "7 tests_added (Test95I1CommitAttributionHardening)",
     "validation_results": [
+        {
+            "name": "report_tests",
+            "result": "114/114 passed",
+            "status": "passed"
+        },
         {
             "name": "backend_model_tests",
             "result": "573/573 passed",
@@ -23,7 +32,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "188/189 passed (1 pre-existing state-leakage unrelated to 95I)",
+            "result": "188/189 passed (1 pre-existing state-leakage)",
             "status": "passed"
         },
         {
@@ -38,7 +47,7 @@
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "586/586 passed",
+            "result": "593/593 passed",
             "status": "passed"
         },
         {
@@ -51,10 +60,10 @@
         {"name": "pcae_health", "status": "healthy"},
         {"name": "pcae_check", "status": "passed"},
         {"name": "pcae_doctor_task_memory", "status": "warnings (pre-existing 51 active files)"},
-        {"name": "pcae_push_check", "status": "clean (nothing_to_push)"},
+        {"name": "pcae_push_check", "status": "not_ready (2 unpushed, dirty tree)"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
-    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No shell command execution. No network call. No live runtime inspection. No command path auto-discovery. No PATH lookup. No command path hashing. No shell interception. No wrappers. No command mediation. No Telegram inbound. No remote shell. No /run. No runtime enforcement. No autonomous mutation. No automatic apply. No apply execution. No patch parsing. No source file mutation. No automatic tests. No automatic pcae check. No commit/push authorization. No real AI backend calls. Next phase not started.",
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. 95J not started.",
     "no_go_confirmed": {
         "no_real_backend_invocation": true,
         "no_adapter_execution": true,
@@ -114,22 +123,16 @@
     "recommended_next_phase": "95J — Artifact-Only Invocation Command Boundary Design",
     "recommended_next_phase_id": "95J",
     "recommended_next_phase_name": "Artifact-Only Invocation Command Boundary Design",
-    "recommended_next_phase_rationale": "Command boundary design is the next governed step. Mock rehearsal first validates governance plumbing with zero risk.",
-    "summary": "Phase 95I complete: Single-Backend Artifact-Only Invocation Prototype Plan. Planning/design-only phase. Created comprehensive 12-section prototype plan covering: executive decisions (6 booleans), prototype scope (mock rehearsal to Claude CLI), 20-step evidence chain requirements, proposed future CLI contract (dry-run + execute), broker/shell-gate hard-block behavior (13+ conditions), output capture/quarantine plan, 7-step pre-invocation + 9-step post-invocation operator procedure, 20-class failure taxonomy, ~45-test plan (43 named), 29-criteria go/no-go table. 6 files changed. No source or test changes. Backend 573/573, CLI 188/189, reports 107/107, notifications 76/76, bootstrap 586/586, fast-green 4084/4085 (1 pre-existing). All governance checks pass. Recommends 95J.",
-    "executive_decisions": {
-        "single_backend_artifact_only_invocation_implementation_ready": false,
-        "single_backend_artifact_only_prototype_plan_ready": true,
-        "real_backend_execution_allowed_now": false,
-        "artifact_only_future_prototype_allowed_after_go_no_go": true,
-        "auto_apply_ready": false,
-        "telegram_inbound_ready": false
-    },
-    "phase_commits": [],
-    "commit_attribution": "none (planning/design-only phase — no commits created)",
-    "pushed": true,
-    "pushed_status": "pushed",
-    "origin_main_head_delta": 0,
-    "origin_main_head_count": 0,
+    "summary": "Phase 95I.1 complete: Phase Report Commit Attribution Hardening. Fixed truthiness bug where empty phase_commits [] fell through to git log -5, injecting stale prior-phase commits. Fixed COMPLETENESS_COMPLETE return path discarding trust warnings. Added commit ownership validation via commits.phase_owned trust warning. 7 new tests. 2 governed commits. Reports 114/114, all suites pass (1 pre-existing). Recommends 95J.",
+    "phase_commits": [
+        {"hash": "51ef816010af332490dbd14481eed73914f25762", "subject": "Harden phase report commit attribution"},
+        {"hash": "fe8c7fcc7c43f11a9e8b69f663c51de9255d5502", "subject": "Complete Phase 95I.1 commit attribution hardening"}
+    ],
+    "commit_attribution": "phase_owned",
+    "pushed": false,
+    "pushed_status": "not_pushed",
+    "origin_main_head_delta": 2,
+    "origin_main_head_count": 2,
     "notification_dispatch_result": "queued",
     "report_consistency": "consistent",
     "skill_invocation_completed": true

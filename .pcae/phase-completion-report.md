@@ -2,7 +2,7 @@
 
 ## Phase
 
-95I — Single-Backend Artifact-Only Invocation Prototype Plan
+95I.1 — Phase Report Commit Attribution Hardening
 
 ## Status
 
@@ -139,7 +139,7 @@ Invoked via `pcae skill invoke phase-finalization 95I`. Target resolution blocke
 
 - Report completeness: complete ✅
 - No missing_trust_fields
-- Pushed: pushed (origin/main..HEAD is 0)
+- Pushed: not_pushed (origin/main..HEAD is 2)
 - origin/main..HEAD: 0
 - pcae_push_check: clean (nothing_to_push)
 - All 5 governance keys populated
