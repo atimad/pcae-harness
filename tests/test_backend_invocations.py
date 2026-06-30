@@ -7199,3 +7199,33 @@ class Test97CAdapterBoundary:
     def test_adapter_denials_non_empty(self):
         from pcae.core.backend_invocations import get_adapter_invocation_boundary
         assert len(get_adapter_invocation_boundary()["denial_reasons"]) >= 3
+
+
+class Test97EAuditRollback:
+    def test_audit_not_ready(self):
+        from pcae.core.backend_invocations import get_audit_rollback_readiness
+        r = get_audit_rollback_readiness()
+        assert r["audit_ready"] is False
+        assert r["rollback_ready"] is False
+
+    def test_rollback_not_authorized(self):
+        from pcae.core.backend_invocations import get_audit_rollback_readiness
+        r = get_audit_rollback_readiness()
+        assert r["rollback_authorized"] is False
+        assert r["rollback_execution_available"] is False
+
+    def test_all_mutation_flags_false(self):
+        from pcae.core.backend_invocations import get_audit_rollback_readiness
+        r = get_audit_rollback_readiness()
+        for key in ["mutation_authorized", "apply_authorized", "commit_authorized", "push_authorized"]:
+            assert r[key] is False
+
+    def test_simulation_only(self):
+        from pcae.core.backend_invocations import get_audit_rollback_readiness
+        r = get_audit_rollback_readiness()
+        assert r["simulation_only"] is True
+        assert r["no_execution"] is True
+
+    def test_denials_non_empty(self):
+        from pcae.core.backend_invocations import get_audit_rollback_readiness
+        assert len(get_audit_rollback_readiness()["denial_reasons"]) >= 3

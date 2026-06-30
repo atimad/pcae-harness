@@ -7760,3 +7760,48 @@ def get_adapter_invocation_boundary() -> dict[str, Any]:
         ],
         "message": "Adapter execution is never authorized. Boundary design only."
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 97E — Execution audit / rollback readiness constants
+# ═══════════════════════════════════════════════════════════════════════════
+
+AUDIT_DENIED_MISSING_READINESS = "denied_missing_audit_readiness"
+AUDIT_DENIED_MISSING_ROLLBACK = "denied_missing_rollback_readiness"
+AUDIT_DENIED_MISSING_SNAPSHOT = "denied_missing_pre_execution_snapshot"
+AUDIT_DENIED_MISSING_OUTPUT_POLICY = "denied_missing_output_capture_policy"
+AUDIT_DENIED_MISSING_REDACTION = "denied_missing_redaction_policy"
+AUDIT_DENIED_ROLLBACK_INCOMPLETE = "denied_rollback_plan_incomplete"
+AUDIT_DENIED_STORAGE_UNAVAILABLE = "denied_audit_storage_unavailable"
+
+ABORT_BEFORE_BACKEND = "aborted_before_backend_invocation"
+ABORT_BEFORE_ADAPTER = "aborted_before_adapter_execution"
+ABORT_BEFORE_OUTPUT = "aborted_before_output_capture"
+ABORT_BEFORE_APPLY = "aborted_before_apply"
+
+
+def get_audit_rollback_readiness() -> dict[str, Any]:
+    """Return current audit/rollback readiness.
+
+    Always not ready — audit/rollback readiness is design-only.
+    Evidence-only, non-authorizing.
+    """
+    return {
+        "audit_ready": False,
+        "rollback_ready": False,
+        "rollback_execution_available": False,
+        "rollback_authorized": False,
+        "mutation_authorized": False,
+        "apply_authorized": False,
+        "commit_authorized": False,
+        "push_authorized": False,
+        "execution_authorized": False,
+        "simulation_only": True,
+        "no_execution": True,
+        "denial_reasons": [
+            AUDIT_DENIED_MISSING_READINESS,
+            AUDIT_DENIED_MISSING_ROLLBACK,
+            AUDIT_DENIED_MISSING_SNAPSHOT,
+        ],
+        "message": "Audit and rollback readiness are design-only. No execution."
+    }
