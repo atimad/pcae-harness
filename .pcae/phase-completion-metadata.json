@@ -60,7 +60,8 @@
         "next_phase_not_started": true
     },
     "phase_commits": [
-        {"hash": "1f9e4697", "subject": "Design artifact-only invocation command boundary"}
+        {"hash": "1f9e4697", "subject": "Design artifact-only invocation command boundary"},
+        {"hash": "7aaa5028", "subject": "Complete Phase 95J command boundary design"}
     ],
     "commit_attribution": "phase_owned",
     "recommended_next_phase": "95K — Artifact-Only Invocation Command Boundary Model",
