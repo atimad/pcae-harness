@@ -7658,3 +7658,55 @@ def get_current_execution_readiness() -> dict[str, Any]:
         ],
         "message": "Execution is unavailable. Readiness model is design-only."
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 97B — Governed backend invocation contract constants
+# ═══════════════════════════════════════════════════════════════════════════
+
+INVOCATION_DENIED_MISSING_READINESS = "denied_missing_readiness"
+INVOCATION_DENIED_MISSING_APPROVAL = "denied_missing_approval"
+INVOCATION_DENIED_INVALID_BACKEND = "denied_invalid_backend_identity"
+INVOCATION_DENIED_INVALID_ADAPTER = "denied_invalid_adapter_identity"
+INVOCATION_DENIED_SCOPE = "denied_scope_violation"
+INVOCATION_DENIED_VERIFICATION = "denied_artifact_verification_failed"
+INVOCATION_DENIED_NO_ROLLBACK = "denied_no_rollback_readiness"
+INVOCATION_DENIED_NO_AUDIT = "denied_no_audit_readiness"
+INVOCATION_DENIED_EXECUTION_UNAVAILABLE = "denied_execution_unavailable"
+INVOCATION_DENIED_BYPASS = "denied_bypass_permissions"
+INVOCATION_DENIED_UNKNOWN_SCHEMA = "denied_unknown_schema"
+INVOCATION_DENIED_CONFLICTING_FLAGS = "denied_conflicting_safety_flags"
+
+VALID_INVOCATION_DENIAL_REASONS: frozenset[str] = frozenset({
+    INVOCATION_DENIED_MISSING_READINESS, INVOCATION_DENIED_MISSING_APPROVAL,
+    INVOCATION_DENIED_INVALID_BACKEND, INVOCATION_DENIED_INVALID_ADAPTER,
+    INVOCATION_DENIED_SCOPE, INVOCATION_DENIED_VERIFICATION,
+    INVOCATION_DENIED_NO_ROLLBACK, INVOCATION_DENIED_NO_AUDIT,
+    INVOCATION_DENIED_EXECUTION_UNAVAILABLE, INVOCATION_DENIED_BYPASS,
+    INVOCATION_DENIED_UNKNOWN_SCHEMA, INVOCATION_DENIED_CONFLICTING_FLAGS,
+})
+
+
+def get_backend_invocation_readiness() -> dict[str, Any]:
+    """Return current backend invocation readiness.
+
+    Always denied — backend invocation is never authorized.
+    Evidence-only, non-authorizing.
+    """
+    return {
+        "backend_invocation_authorized": False,
+        "adapter_execution_authorized": False,
+        "mutation_authorized": False,
+        "apply_authorized": False,
+        "commit_authorized": False,
+        "push_authorized": False,
+        "execution_authorized": False,
+        "simulation_only": True,
+        "no_execution": True,
+        "denial_reasons": [
+            INVOCATION_DENIED_EXECUTION_UNAVAILABLE,
+            INVOCATION_DENIED_MISSING_READINESS,
+            INVOCATION_DENIED_MISSING_APPROVAL,
+        ],
+        "message": "Backend invocation is never authorized. Contract design only."
+    }

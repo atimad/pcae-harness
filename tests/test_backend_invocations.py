@@ -7144,3 +7144,33 @@ class Test97AExecutionReadinessModel:
     def test_future_execution_ready_not_in_valid_statuses(self):
         from pcae.core.backend_invocations import VALID_READINESS_STATUSES, EXECUTION_READY_FUTURE_ONLY
         assert EXECUTION_READY_FUTURE_ONLY not in VALID_READINESS_STATUSES
+
+
+class Test97BInvocationContract:
+    def test_invocation_never_authorized(self):
+        from pcae.core.backend_invocations import get_backend_invocation_readiness
+        r = get_backend_invocation_readiness()
+        assert r["backend_invocation_authorized"] is False
+        assert r["execution_authorized"] is False
+        assert r["adapter_execution_authorized"] is False
+
+    def test_invocation_all_mutation_flags_false(self):
+        from pcae.core.backend_invocations import get_backend_invocation_readiness
+        r = get_backend_invocation_readiness()
+        for key in ["mutation_authorized", "apply_authorized", "commit_authorized", "push_authorized"]:
+            assert r[key] is False
+
+    def test_invocation_simulation_only(self):
+        from pcae.core.backend_invocations import get_backend_invocation_readiness
+        r = get_backend_invocation_readiness()
+        assert r["simulation_only"] is True
+        assert r["no_execution"] is True
+
+    def test_denial_reasons_all_valid(self):
+        from pcae.core.backend_invocations import get_backend_invocation_readiness, VALID_INVOCATION_DENIAL_REASONS
+        for reason in get_backend_invocation_readiness()["denial_reasons"]:
+            assert reason in VALID_INVOCATION_DENIAL_REASONS
+
+    def test_denial_reasons_at_least_3(self):
+        from pcae.core.backend_invocations import get_backend_invocation_readiness
+        assert len(get_backend_invocation_readiness()["denial_reasons"]) >= 3
