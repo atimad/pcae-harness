@@ -1,19 +1,19 @@
 {
-    "phase_id": "95S",
-    "phase_name": "phase_95s_orchestration",
-    "phase_title": "Dry-Run Orchestration Model",
+    "phase_id": "95T",
+    "phase_name": "phase_95t_orch_cli",
+    "phase_title": "Orchestration CLI",
     "files_changed": [
-        "src/pcae/core/backend_invocations.py",
-        "tests/test_backend_invocations.py",
-        ".pcae/.gitignore",
-        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_MODEL.md",
+        "src/pcae/commands/backend.py",
+        "src/pcae/cli.py",
+        "tests/test_backend_cli.py",
+        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_CLI.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1450-phase-95s-orch-model.md"
+        "tasks/active/20260630-1500-phase-95t-orch-cli.md"
     ],
     "files_changed_count": 8,
-    "tests_added_or_updated": "18 tests_added",
+    "tests_added_or_updated": "7 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -37,7 +37,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "224/225 (1 pre-existing)",
+            "result": "231/232 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -66,17 +66,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "0aed9d4e",
-            "subject": "Add artifact-only dry-run orchestration model"
+            "hash": "10a322da",
+            "subject": "Add orchestration CLI"
         },
         {
-            "hash": "9c05cdcc",
-            "subject": "Complete Phase 95S orchestration model"
+            "hash": "01764862",
+            "subject": "Complete orchestration CLI"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95T \u2014 Artifact-Only Dry-Run Orchestration CLI",
-    "summary": "Phase 95S complete: Orchestration Model. 4 dataclasses, 12-step validator, persistence. 18 tests. No CLI. No execution. Recommends 95T.",
+    "recommended_next_phase": "95U \u2014 Artifact-Only Dry-Run Orchestration End-to-End Demo",
+    "summary": "Phase 95T complete: Orchestration CLI. dry-run/show/verify. 7 tests. No execution. Recommends 95U.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
