@@ -44,7 +44,7 @@
         {"hash": "a40b0ce9", "subject": "Complete Phase 95M evidence chain fixtures"}
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95M — Artifact-Only Invocation Dry-Run Evidence Chain Fixtures",
+    "recommended_next_phase": "95N — Artifact-Only Invocation Dry-Run Evidence Chain Review",
     "summary": "Phase 95L complete: Artifact-Only Invocation Command Boundary CLI Dry-Run. CLI commands: pcae backend invoke artifact-only dry-run/show/verify. Loads boundary, validates, prints assessment with all no-execution flags. Execute unavailable. 20 CLI tests. Recommends 95M.",
     "executive_decisions": {
         "command_boundary_model_ready": true,
