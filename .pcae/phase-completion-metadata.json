@@ -1,22 +1,21 @@
 {
-    "phase_id": "95P",
-    "phase_name": "phase_95p_bundle_cli",
-    "phase_title": "Bundle CLI Dry-Run",
+    "phase_id": "95Q",
+    "phase_name": "phase_95q_demo",
+    "phase_title": "Bundle End-to-End Dry-Run Demo",
     "implementation_status": "completed",
     "phase_type": "implementation",
     "files_changed": [
-        "src/pcae/core/backend_invocations.py",
         "src/pcae/commands/backend.py",
         "src/pcae/cli.py",
         "tests/test_backend_cli.py",
-        "docs/PHASE_95_EVIDENCE_CHAIN_BUNDLE_CLI_DRY_RUN.md",
+        "docs/PHASE_95_EVIDENCE_CHAIN_BUNDLE_END_TO_END_DRY_RUN_DEMO.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1420-phase-95p-bundle-cli.md"
+        "tasks/active/20260630-1435-phase-95q-demo.md"
     ],
-    "files_changed_count": 9,
-    "tests_added_or_updated": "9 tests_added",
+    "files_changed_count": 8,
+    "tests_added_or_updated": "6 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -40,7 +39,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "218/219 passed (1 pre-existing)",
+            "result": "224/225 passed (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -66,20 +65,20 @@
             "status": "loaded, configured, enabled"
         }
     ],
-    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No executable CLI command registered. No execute path. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No execute path. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "b0abfd65",
-            "subject": "Add evidence chain bundle dry-run CLI"
+            "hash": "f59a1c33",
+            "subject": "Add evidence chain bundle dry-run demo"
         },
         {
-            "hash": "3c0d3eee",
-            "subject": "Complete Phase 95P bundle CLI dry-run"
+            "hash": "f26b21a2",
+            "subject": "Complete Phase 95Q end-to-end dry-run demo"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95Q \u2014 Evidence Chain Bundle End-to-End Dry-Run Demo",
-    "summary": "Phase 95P complete: Bundle CLI Dry-Run. pcae backend invoke artifact-only bundle dry-run/show/verify. 9 tests. No execution. Recommends 95Q.",
+    "recommended_next_phase": "95R \u2014 Artifact-Only Dry-Run Orchestration Readiness Review",
+    "summary": "Phase 95Q complete: Bundle End-to-End Dry-Run Demo. pcae backend invoke artifact-only bundle demo. 6 tests. No execution. Recommends 95R.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
