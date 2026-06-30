@@ -2581,3 +2581,54 @@ class Test96HBoundaryProof:
         from pcae.commands.backend import run_backend_execution_boundary_proof
         src = inspect.getsource(run_backend_execution_boundary_proof)
         assert "subprocess.run" not in src
+
+
+class Test96IBoundaryReview:
+    """Review hardening: flag completeness, tamper, authorization audit."""
+
+    def test_proof_all_17_flags_present(self):
+        r = _run(["execution-boundary", "proof", "--json"])
+        d = json.loads(r.stdout)
+        expected = ["execution_available", "backend_invocation_available",
+                     "adapter_execution_available", "subprocess_execution_available",
+                     "shell_execution_available", "network_call_available",
+                     "telegram_inbound_available", "telegram_polling_available",
+                     "remote_shell_available", "run_command_available",
+                     "enforcement_available", "automatic_apply_available",
+                     "apply_execution_available", "patch_parsing_available",
+                     "commit_authorization_available", "push_authorization_available",
+                     "real_ai_backend_calls_available"]
+        for f in expected:
+            assert f in d, f"Missing flag: {f}"
+            assert d[f] is False, f"{f} must be False"
+
+    def test_proof_checks_not_empty(self):
+        r = _run(["execution-boundary", "proof", "--json"])
+        d = json.loads(r.stdout)
+        assert len(d["proof_checks"]) >= 10, "At least 10 proof checks expected"
+
+    def test_proof_no_execution_true(self):
+        r = _run(["execution-boundary", "proof", "--json"])
+        d = json.loads(r.stdout)
+        assert d["no_execution"] is True
+        assert d["simulation_only"] is True
+
+    def test_proof_not_authorizing(self):
+        """Proof artifact must not contain authorization/permission fields."""
+        r = _run(["execution-boundary", "proof", "--json"])
+        d = json.loads(r.stdout)
+        forbidden = ["approved", "authorized", "permission_granted", "execution_token"]
+        for key in forbidden:
+            assert key not in d, f"Proof must not contain authorization field: {key}"
+
+    def test_proof_verify_tampered_fails(self):
+        _run(["execution-boundary", "proof", "--save"])
+        import os as _os, json as _j
+        d = _os.path.join(_os.getcwd(), ".pcae/execution-boundary-proof")
+        lp = _os.path.join(d, "latest.json")
+        if _os.path.exists(lp):
+            data = _j.loads(open(lp).read())
+            data["execution_available"] = True
+            _j.dump(data, open(lp, "w"))
+        r = _run(["execution-boundary", "proof", "--verify-latest", "--json"])
+        assert json.loads(r.stdout)["valid"] is False
