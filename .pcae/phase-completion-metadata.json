@@ -1,22 +1,22 @@
 {
-    "phase_id": "95L",
-    "phase_name": "phase_95l_cli_dry_run",
-    "phase_title": "Artifact-Only Invocation Command Boundary CLI Dry-Run",
+    "phase_id": "95M",
+    "phase_name": "phase_95m_fixtures",
+    "phase_title": "Artifact-Only Invocation Dry-Run Evidence Chain Fixtures",
     "implementation_status": "completed",
     "phase_type": "implementation",
-    "completed_at_utc": "2026-06-30T13:10:00Z",
+    "completed_at_utc": "2026-06-30T13:25:00Z",
     "files_changed": [
-        "src/pcae/core/backend_invocations.py",
+        "tests/artifact_only_invocation_fixtures.py",
         "tests/test_backend_invocations.py",
-        ".pcae/.gitignore",
-        "docs/PHASE_95_ARTIFACT_ONLY_INVOCATION_COMMAND_BOUNDARY_MODEL.md",
+        "tests/test_backend_cli.py",
+        "docs/PHASE_95_ARTIFACT_ONLY_INVOCATION_DRY_RUN_EVIDENCE_CHAIN_FIXTURES.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1300-phase-95k-command-boundary-model.md"
+        "tasks/active/20260630-1320-phase-95m-fixtures.md"
     ],
-    "files_changed_count": 7,
-    "tests_added_or_updated": "20 tests_added (Test95LInvokeArtifactOnlyDryRun 16 + Test95LInvokeArtifactOnlySafety 4)",
+    "files_changed_count": 8,
+    "tests_added_or_updated": "29 tests_added (15 model + 11 CLI + 3 safety)",
     "validation_results": [
         {"name": "report_notification_tests", "result": "107/107 passed", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "598/598 passed", "status": "passed"},
@@ -40,8 +40,8 @@
         "no_commit_push_authorization": true, "no_real_AI_backend_calls": true, "next_phase_not_started": true
     },
     "phase_commits": [
-        {"hash": "4552dc91", "subject": "Add artifact-only invocation dry-run CLI"},
-        {"hash": "e75e768b", "subject": "Complete Phase 95L dry-run CLI"}
+        {"hash": "3e027150", "subject": "Add artifact-only dry-run evidence chain fixtures"},
+        {"hash": "a40b0ce9", "subject": "Complete Phase 95M evidence chain fixtures"}
     ],
     "commit_attribution": "phase_owned",
     "recommended_next_phase": "95M — Artifact-Only Invocation Dry-Run Evidence Chain Fixtures",
