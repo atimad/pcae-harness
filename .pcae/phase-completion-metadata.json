@@ -1,16 +1,16 @@
 {
-    "phase_id": "96C",
-    "phase_name": "phase_96c_ea_cli",
-    "phase_title": "Execution-Adjacent Plan CLI Dry-Run",
+    "phase_id": "96D",
+    "phase_name": "phase_96d_connected_demo",
+    "phase_title": "Connected Execution-Adjacent Demo",
     "files_changed": [
         "src/pcae/commands/backend.py",
         "src/pcae/cli.py",
         "tests/test_backend_cli.py",
-        "docs/PHASE_96_EXECUTION_ADJACENT_PLAN_CLI_DRY_RUN.md",
+        "docs/PHASE_96_CONNECTED_EXECUTION_ADJACENT_PLAN_END_TO_END_DRY_RUN_DEMO.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1820-phase-96c-ea-cli.md"
+        "tasks/active/20260630-1830-phase-96d-connected-demo.md"
     ],
     "files_changed_count": 8,
     "tests_added_or_updated": "6 tests_added",
@@ -37,7 +37,7 @@
         },
         {
             "name": "backend_cli_tests",
-            "result": "249/250 (1 pre-existing)",
+            "result": "255/256 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -66,17 +66,17 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "a522af5e",
-            "subject": "Add execution-adjacent plan CLI"
+            "hash": "2b9ae44d",
+            "subject": "Add connected demo"
         },
         {
-            "hash": "6d0eae4b",
-            "subject": "Complete execution-adjacent plan CLI"
+            "hash": "6a2a4617",
+            "subject": "Complete connected demo"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96D \u2014 Execution-Adjacent Plan End-to-End Demo",
-    "summary": "Phase 96C complete: Execution-Adjacent Plan CLI Dry-Run. dry-run/show/verify. 6 tests. No execution. Recommends 96D.",
+    "recommended_next_phase": "96E \u2014 Connected Automation Hardening",
+    "summary": "Phase 96D complete: Connected Execution-Adjacent Demo. Full connected chain demo: runtime\u2192broker\u2192boundary\u2192bundle\u2192orchestration\u2192EA plan\u2192assessment. 6 tests. No execution. Recommends 96E.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
