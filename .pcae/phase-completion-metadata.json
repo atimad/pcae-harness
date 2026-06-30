@@ -61,7 +61,8 @@
     },
     "phase_commits": [
         {"hash": "1f9e4697", "subject": "Design artifact-only invocation command boundary"},
-        {"hash": "7aaa5028", "subject": "Complete Phase 95J command boundary design"}
+        {"hash": "7aaa5028", "subject": "Complete Phase 95J command boundary design"},
+        {"hash": "9a528aef", "subject": "Finalize Phase 95J metadata with both commits"}
     ],
     "commit_attribution": "phase_owned",
     "recommended_next_phase": "95K — Artifact-Only Invocation Command Boundary Model",
