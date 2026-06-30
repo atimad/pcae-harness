@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95H — Single-Backend Artifact-Only Invocation Readiness Review to Phase 95H.1 — Phase Report Skill Hardening; session refreshed and governance continuity revalidated.
+- Step 1: Repaired 95H report completeness. Step 2: Completed Phase 95H.1 Phase Report Skill Hardening.
+- Hardened phase-finalization SKILL.md v1.0.1 with forbidden patterns, agent rules, preflight checklist.
+- Delivers docs/PHASE_95H1_PHASE_REPORT_SKILL_HARDENING.md.
+
 - Transitioned active task from Phase 95G — Runtime Evidence Broker/Shell-Gate Integration to Phase 95H — Single-Backend Artifact-Only Invocation Readiness Review; session refreshed and governance continuity revalidated.
 - Completed Phase 95H Single-Backend Artifact-Only Invocation Readiness Review (review-only).
 - Delivers docs/PHASE_95_SINGLE_BACKEND_ARTIFACT_ONLY_INVOCATION_READINESS_REVIEW.md.

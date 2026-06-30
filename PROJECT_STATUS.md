@@ -2,6 +2,12 @@
 
 ## Current Phase
 
+Phase 95H.1: Phase Report Skill Hardening (completed).
+
+Hardened phase-finalization SKILL.md v1.0.1: added 12 forbidden final report patterns,
+11 agent-specific rules, preflight checklist, post-completion verification. No code changes.
+Delivers docs/PHASE_95H1_PHASE_REPORT_SKILL_HARDENING.md.
+
 Phase 95H: Single-Backend Artifact-Only Invocation Readiness Review (completed).
 
 Review-only. Executive decision: invocation NOT ready, prototype planning ready. Evidence

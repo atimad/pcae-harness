@@ -2,7 +2,8 @@
 
 ## Completed
 
-- Phase 95H — Single-Backend Artifact-Only Invocation Readiness Review (20260630-0836-phase-95g-runtime-evidence-broker-shell-gate-integration)
+- Phase 95H.1 — Phase Report Skill Hardening (20260630-0931-phase-95h-single-backend-artifact-only-invocation-readiness-review)
+- Phase 95H — Single-Backend Artifact-Only Invocation Readiness Review (20260630-0931-phase-95h-single-backend-artifact-only-invocation-readiness-review)
 - Phase 95G — Runtime Evidence Broker/Shell-Gate Integration (20260630-0836-phase-95g-runtime-evidence-broker-shell-gate-integration)
 - Phase 95F.2 — Phase Report Authoring Skill and Completeness Enforcement (20260630-0800-phase-95f-2-phase-report-authoring-skill-and-completeness-enforcement)
 - Phase 95F.1 — Phase Report Skill Discovery and Authoring Protocol Design (20260630-0748-phase-95f-1-phase-report-skill-discovery-and-authoring-protocol-design)
