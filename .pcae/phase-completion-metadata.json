@@ -1,42 +1,43 @@
 {
-    "phase_id": "95R",
-    "phase_name": "phase_95r_review",
-    "phase_title": "Orchestration Readiness Review",
-    "implementation_status": "completed",
-    "phase_type": "review_only",
+    "phase_id": "95S",
+    "phase_name": "phase_95s_orchestration",
+    "phase_title": "Dry-Run Orchestration Model",
     "files_changed": [
-        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_READINESS_REVIEW.md",
+        "src/pcae/core/backend_invocations.py",
+        "tests/test_backend_invocations.py",
+        ".pcae/.gitignore",
+        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_ORCHESTRATION_MODEL.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1440-phase-95r-review.md"
+        "tasks/active/20260630-1450-phase-95s-orch-model.md"
     ],
-    "files_changed_count": 5,
-    "tests_added_or_updated": "0 tests_added (review-only)",
+    "files_changed_count": 8,
+    "tests_added_or_updated": "18 tests_added",
     "validation_results": [
         {
             "name": "report_notification_tests",
-            "result": "107/107 passed",
+            "result": "107/107",
             "status": "passed"
         },
         {
             "name": "bootstrap_session_reporting_tests",
-            "result": "598/598 passed",
+            "result": "598/598",
             "status": "passed"
         },
         {
             "name": "fast_green",
-            "result": "4142/4143 passed (1 pre-existing)",
+            "result": "4142/4143 (1 pre-existing)",
             "status": "passed"
         },
         {
             "name": "backend_model_tests",
-            "result": "655/655 passed",
+            "result": "673/673",
             "status": "passed"
         },
         {
             "name": "backend_cli_tests",
-            "result": "224/225 passed (1 pre-existing)",
+            "result": "224/225 (1 pre-existing)",
             "status": "passed"
         }
     ],
@@ -59,19 +60,23 @@
         },
         {
             "name": "telegram_runtime",
-            "status": "loaded, configured, enabled"
+            "status": "loaded"
         }
     ],
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "203e1376",
-            "subject": "Review artifact-only dry-run orchestration readiness"
+            "hash": "0aed9d4e",
+            "subject": "Add artifact-only dry-run orchestration model"
+        },
+        {
+            "hash": "9c05cdcc",
+            "subject": "Complete Phase 95S orchestration model"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "95S \u2014 Artifact-Only Dry-Run Orchestration Model",
-    "summary": "Phase 95R complete: Orchestration Readiness Review. Review-only. All go/no-go pass. Recommends 95S.",
+    "recommended_next_phase": "95T \u2014 Artifact-Only Dry-Run Orchestration CLI",
+    "summary": "Phase 95S complete: Orchestration Model. 4 dataclasses, 12-step validator, persistence. 18 tests. No CLI. No execution. Recommends 95T.",
     "pushed": true,
     "pushed_status": "pushed",
     "origin_main_head_count": 0,
