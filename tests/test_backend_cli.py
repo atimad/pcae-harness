@@ -2412,3 +2412,58 @@ class Test96EConnectedHardeningCLI:
         if _os.path.exists(d): shutil.rmtree(d)
         r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
         assert r.returncode != 0
+
+
+class Test96FContractFreeze:
+    """Structural contract freeze tests for connected automation."""
+
+    def test_demo_json_all_required_top_level_fields(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        d = json.loads(r.stdout)
+        required = ["connected_chain", "execution_adjacent_plan_id",
+                     "execution_adjacent_assessment_id", "readiness_decision",
+                     "ready", "hard_blocks", "dry_run_only", "execution_allowed",
+                     "verification_status"]
+        for field in required:
+            assert field in d, f"Contract violation: missing {field}"
+
+    def test_demo_json_all_capability_flags_false(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        d = json.loads(r.stdout)
+        for flag in ["subprocess_allowed", "shell_allowed", "network_allowed",
+                      "backend_invocation_allowed", "adapter_execution_allowed",
+                      "auto_apply_allowed", "patch_parsing_allowed",
+                      "commit_push_authorization_allowed", "telegram_inbound_allowed",
+                      "live_runtime_inspection_allowed", "command_discovery_allowed"]:
+            assert d[flag] is False, f"Contract violation: {flag} is {d[flag]}"
+
+    def test_demo_json_connected_chain_has_all_refs(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        chain = json.loads(r.stdout)["connected_chain"]
+        for ref in ["runtime_evidence_id", "broker_decision_id", "shell_gate_decision_id",
+                     "command_boundary_id", "evidence_chain_bundle_id", "orchestration_id",
+                     "runtime_evidence_digest", "command_boundary_decision",
+                     "evidence_chain_bundle_decision", "orchestration_decision"]:
+            assert ref in chain, f"Contract violation: missing chain ref {ref}"
+
+    def test_show_latest_contract_fields(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        d = json.loads(r.stdout)
+        for field in ["assessment_id", "decision", "execution_allowed", "dry_run_only",
+                       "subprocess_allowed", "shell_allowed", "network_allowed"]:
+            assert field in d, f"Contract violation: show missing {field}"
+
+    def test_verify_latest_contract_fields(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        d = json.loads(r.stdout)
+        assert "valid" in d, "Contract violation: verify missing 'valid'"
+
+    def test_demo_exit_code_zero_on_valid(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        assert r.returncode == 0, "Contract violation: demo exit code != 0"
+
+    def test_execute_not_available(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "execute", "--help"])
+        assert r.returncode != 0, "Contract violation: execute should be unavailable"
