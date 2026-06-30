@@ -2284,3 +2284,46 @@ class Test96CEACLI:
 
     def test_execute_unavailable(self):
         assert _run(["invoke", "artifact-only", "execution-adjacent", "execute", "--help"]).returncode != 0
+
+
+class Test96DConnectedDemo:
+    def test_demo_text_output(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo"])
+        assert r.returncode == 0
+        assert "Connected Execution-Adjacent" in r.stdout
+        assert "Runtime evidence" in r.stdout
+        assert "Broker decision" in r.stdout
+        assert "Orchestration" in r.stdout
+
+    def test_demo_json_output(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["dry_run_only"] is True
+        assert d["execution_allowed"] is False
+        assert "connected_chain" in d
+        assert d["connected_chain"]["runtime_evidence_id"] == "re-fixture-001"
+
+    def test_demo_all_capability_flags_false(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--json"])
+        d = json.loads(r.stdout)
+        for flag in ["subprocess_allowed", "shell_allowed", "network_allowed",
+                      "backend_invocation_allowed", "adapter_execution_allowed",
+                      "auto_apply_allowed", "patch_parsing_allowed",
+                      "commit_push_authorization_allowed", "telegram_inbound_allowed",
+                      "live_runtime_inspection_allowed", "command_discovery_allowed"]:
+            assert d[flag] is False, f"{flag} should be False"
+
+    def test_demo_save_and_show(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        assert r.returncode == 0
+
+    def test_demo_save_and_verify(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        assert json.loads(r.stdout)["valid"] is True
+
+    def test_demo_execute_unavailable(self):
+        assert _run(["invoke", "artifact-only", "execution-adjacent", "execute", "--help"]).returncode != 0

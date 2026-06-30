@@ -478,6 +478,7 @@ from pcae.commands.backend import (
     run_backend_invoke_artifact_only_ea_dry_run,
     run_backend_invoke_artifact_only_ea_show,
     run_backend_invoke_artifact_only_ea_verify,
+    run_backend_invoke_artifact_only_ea_demo,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -5104,6 +5105,11 @@ def build_parser() -> argparse.ArgumentParser:
     ea_verify.add_argument("--latest", action="store_true", default=True)
     ea_verify.add_argument("--json", action="store_true")
     ea_verify.set_defaults(handler=run_backend_invoke_artifact_only_ea_verify)
+
+    ea_demo = be_invoke_ea_sub.add_parser("demo", help="Connected end-to-end dry-run demo.")
+    ea_demo.add_argument("--save", action="store_true")
+    ea_demo.add_argument("--json", action="store_true")
+    ea_demo.set_defaults(handler=run_backend_invoke_artifact_only_ea_demo)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

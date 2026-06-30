@@ -2710,3 +2710,137 @@ def run_backend_invoke_artifact_only_ea_verify(args: argparse.Namespace) -> int:
         print(f"Assessment {a.assessment_id}: {'valid ✅' if v['valid'] else 'INVALID ❌'}")
         for i in v.get("issues", []): print(f"  - {i}")
     return 0 if v["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96D — Connected execution-adjacent end-to-end dry-run demo
+# ═══════════════════════════════════════════════════════════════════════════
+
+def run_backend_invoke_artifact_only_ea_demo(args: argparse.Namespace) -> int:
+    """pcae backend invoke artifact-only execution-adjacent demo [--save] [--json]
+
+    Connected end-to-end dry-run demo: runtime evidence → broker/shell-gate →
+    command boundary → bundle → orchestration → execution-adjacent plan →
+    assessment → save → show → verify. Never executes.
+    """
+    import uuid
+    from pcae.core.backend_invocations import (
+        ExecutionAdjacentPlan, validate_execution_adjacent_plan,
+        persist_execution_adjacent_assessment, verify_execution_adjacent_assessment,
+        DECISION_ALLOW_DRY_RUN as DA,
+    )
+    save = getattr(args, "save", False) or False
+
+    # ── Phase 95 evidence references (deterministic fixture-based) ───────
+    chain = {
+        "phase_id": "96D", "task_id": "connected-demo",
+        "backend_id": "mock", "adapter_id": "mock",
+        "runtime_evidence_id": "re-fixture-001",
+        "runtime_evidence_digest": "sha256:re-fixture",
+        "broker_decision_id": "bd-fixture",
+        "broker_decision": DA,
+        "shell_gate_decision_id": "sg-fixture",
+        "shell_gate_decision": DA,
+        "command_boundary_id": "cb-fixture-valid",
+        "command_boundary_assessment_id": "cba-fixture",
+        "command_boundary_decision": "ready_for_dry_run",
+        "evidence_chain_bundle_id": "eb-fixture",
+        "evidence_chain_bundle_assessment_id": "eba-fixture",
+        "evidence_chain_bundle_decision": "ready_for_dry_run_bundle",
+        "orchestration_id": "orch-fixture",
+        "orchestration_assessment_id": "oa-fixture",
+        "orchestration_decision": "ready_for_dry_run_orchestration",
+    }
+
+    # ── Execution-adjacent plan ──────────────────────────────────────────
+    plan = ExecutionAdjacentPlan(
+        plan_id=f"ea-demo-{uuid.uuid4().hex[:8]}",
+        phase_id="96D", task_id="connected-demo",
+        backend_id="mock", adapter_id="mock",
+        orchestration_id=chain["orchestration_id"],
+        command_name="echo", command_path="/bin/echo", command_digest="sha256:echo",
+        command_args=["Connected", "dry-run", "demo"],
+        command_env_digest="sha256:env-demo",
+        working_directory="/tmp",
+        timeout_policy_id="tp-demo", timeout_seconds=120, kill_policy_id="kp-demo",
+        output_quarantine_id="oq-demo", output_quarantine_path="/demo/quarantine",
+        audit_record_id="ar-demo", audit_path="/demo/audit",
+        rollback_linkage_id="rl-demo",
+        approval_artifact_id="aa-demo", approval_actor_id="operator",
+        broker_decision_id=chain["broker_decision_id"],
+        broker_decision=chain["broker_decision"],
+        shell_gate_decision_id=chain["shell_gate_decision_id"],
+        shell_gate_decision=chain["shell_gate_decision"],
+    )
+    plan.record_digest = plan.compute_digest()
+
+    # ── Validate ─────────────────────────────────────────────────────────
+    assessment = validate_execution_adjacent_plan(plan)
+    assessment.record_digest = assessment.compute_digest()
+
+    saved_path = ""
+    if save:
+        r = persist_execution_adjacent_assessment(assessment)
+        saved_path = r.get("path", "")
+
+    verify_result = verify_execution_adjacent_assessment(assessment)
+
+    # ── Output ───────────────────────────────────────────────────────────
+    if getattr(args, "json", False):
+        print(json.dumps({
+            "connected_chain": chain,
+            "execution_adjacent_plan_id": plan.plan_id,
+            "execution_adjacent_assessment_id": assessment.assessment_id,
+            "readiness_decision": assessment.decision,
+            "ready": assessment.ready,
+            "hard_blocks": assessment.hard_blocks,
+            "warnings": assessment.warnings,
+            "missing_fields": assessment.missing_fields,
+            "failure_classifications": assessment.failure_classifications,
+            "verification_status": "valid" if verify_result["valid"] else "invalid",
+            "saved_assessment_path": saved_path,
+            "latest_pointer_status": "updated" if saved_path else "not_saved",
+            "dry_run_only": True, "execution_allowed": False,
+            "subprocess_allowed": False, "shell_allowed": False,
+            "network_allowed": False, "backend_invocation_allowed": False,
+            "adapter_execution_allowed": False, "auto_apply_allowed": False,
+            "patch_parsing_allowed": False, "commit_push_authorization_allowed": False,
+            "telegram_inbound_allowed": False,
+            "live_runtime_inspection_allowed": False,
+            "command_discovery_allowed": False,
+            "no_execution_guarantee": True,
+        }, indent=2))
+    else:
+        print("Connected Execution-Adjacent End-to-End Dry-Run Demo")
+        print(f"  Phase 95 Evidence:")
+        print(f"    Runtime evidence:     {chain['runtime_evidence_id']}")
+        print(f"    Broker decision:      {chain['broker_decision_id']} → {chain['broker_decision']}")
+        print(f"    Shell-gate decision:  {chain['shell_gate_decision_id']} → {chain['shell_gate_decision']}")
+        print(f"    Command boundary:     {chain['command_boundary_id']} → {chain['command_boundary_decision']}")
+        print(f"    Bundle:               {chain['evidence_chain_bundle_id']} → {chain['evidence_chain_bundle_decision']}")
+        print(f"    Orchestration:        {chain['orchestration_id']} → {chain['orchestration_decision']}")
+        print(f"  Execution-Adjacent Plan:")
+        print(f"    Plan:                 {plan.plan_id}")
+        print(f"    Assessment:           {assessment.assessment_id}")
+        print(f"    Decision:             {assessment.decision}")
+        print(f"    Ready:                {'yes' if assessment.ready else 'no'}")
+        print(f"    Verification:         {'valid ✅' if verify_result['valid'] else 'INVALID ❌'}")
+        if saved_path:
+            print(f"    Saved:                {saved_path}")
+        print(f"  Capability Flags:")
+        print(f"    Execution allowed:    no")
+        print(f"    Subprocess allowed:   no")
+        print(f"    Shell allowed:        no")
+        print(f"    Network allowed:      no")
+        print(f"    Backend invocation:   no")
+        print(f"    Adapter execution:    no")
+        print(f"    Auto-apply allowed:   no")
+        print(f"    Patch parsing:        no")
+        print(f"    Commit/push auth:     no")
+        print(f"    Telegram inbound:     no")
+        print(f"    Live runtime inspect: no")
+        print(f"    Command discovery:    no")
+        print(f"    Dry-run only:         yes")
+        print()
+        print("  ⚠️  Connected dry-run demo. No backend was invoked. Chain is non-executing.")
+    return 0
