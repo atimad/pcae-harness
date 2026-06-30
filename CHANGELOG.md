@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95F — Stat-Only Runtime Detector Prototype to Phase 95F.1 — Phase Report Skill Discovery and Authoring Protocol Design; session refreshed and governance continuity revalidated.
+- Completed Phase 95F.1 Phase Report Skill Discovery (discovery/planning only).
+- Recommends combined Phase Report Authoring Skill + completeness enforcement (95F.2).
+- Delivers docs/PHASE_95F1_PHASE_REPORT_SKILL_DISCOVERY.md.
+
 - Transitioned active task from Phase 95E — Runtime Evidence to Dry-Run Integration to Phase 95F — Stat-Only Runtime Detector Prototype; session refreshed and governance continuity revalidated.
 - Completed Phase 95F Stat-Only Runtime Detector Prototype. 7 tests (563 model total).
 

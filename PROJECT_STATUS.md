@@ -2,6 +2,14 @@
 
 ## Current Phase
 
+Phase 95F.1: Phase Report Skill Discovery and Authoring Protocol Design (completed).
+
+Discovery/planning only. Inspected 6 existing skills at .pcae/skills/, skill registry,
+completeness validation code. Found: no phase-finalization skill exists, skills are CLI-invoked
+not auto-loaded, assess_completeness() checks dict presence not individual keys. Recommends
+combined 95F.2: Phase Report Authoring Skill + completeness enforcement. No implementation.
+Delivers docs/PHASE_95F1_PHASE_REPORT_SKILL_DISCOVERY.md.
+
 Phase 95F: Stat-Only Runtime Detector Prototype (completed).
 
 detect_claude_runtime_evidence_stat_only() uses Python filesystem APIs only
