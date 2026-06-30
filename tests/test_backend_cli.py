@@ -1998,3 +1998,52 @@ class Test95PBundleCLI:
     def test_execute_unavailable(self):
         r = _run(["invoke", "artifact-only", "bundle", "execute", "--help"])
         assert r.returncode != 0
+
+
+class Test95QBundleDemo:
+    """End-to-end bundle demo tests."""
+
+    def test_demo_text_output(self):
+        r = _run(["invoke", "artifact-only", "bundle", "demo"])
+        assert r.returncode == 0
+        assert "Demo only" in r.stdout
+        assert "Dry-run only" in r.stdout
+        assert "Bundle ready" in r.stdout
+        assert "Execution allowed" in r.stdout
+
+    def test_demo_json_output(self):
+        r = _run(["invoke", "artifact-only", "bundle", "demo", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["demo_only"] is True
+        assert d["execution_allowed"] is False
+        assert d["subprocess"] is False
+        assert d["network"] is False
+
+    def test_demo_save_and_show(self):
+        _run(["invoke", "artifact-only", "bundle", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "bundle", "show", "--latest", "--json"])
+        assert r.returncode == 0
+
+    def test_demo_save_and_verify(self):
+        _run(["invoke", "artifact-only", "bundle", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "bundle", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["valid"] is True
+
+    def test_demo_no_execution_flags_json(self):
+        r = _run(["invoke", "artifact-only", "bundle", "demo", "--json"])
+        d = json.loads(r.stdout)
+        assert d["execution_allowed"] is False
+        assert d["execute_supported"] is False
+        assert d["real_backend_invoked"] is False
+        assert d["subprocess"] is False
+        assert d["network"] is False
+        assert d["repo_mutation"] is False
+        assert d["apply"] is False
+
+    def test_demo_execute_unavailable(self):
+        """execute is not a recognized bundle subcommand."""
+        r = _run(["invoke", "artifact-only", "bundle", "execute", "--help"])
+        assert r.returncode != 0

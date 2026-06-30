@@ -2305,3 +2305,111 @@ def run_backend_invoke_artifact_only_bundle_verify(args: argparse.Namespace) -> 
         for issue in v.get("issues", []):
             print(f"  - {issue}")
     return 0 if v["valid"] else 1
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95Q — Evidence chain bundle end-to-end dry-run demo
+# ═══════════════════════════════════════════════════════════════════════════
+
+def run_backend_invoke_artifact_only_bundle_demo(args: argparse.Namespace) -> int:
+    """pcae backend invoke artifact-only bundle demo [--save] [--json]
+
+    End-to-end dry-run demo: valid fixture → bundle → validate → assessment.
+    Never executes anything.
+    """
+    from tests.artifact_only_invocation_fixtures import build_valid_boundary
+    from pcae.core.backend_invocations import (
+        ArtifactOnlyInvocationEvidenceChainBundle,
+        validate_artifact_only_invocation_evidence_chain_bundle,
+        persist_evidence_chain_bundle_assessment,
+        DECISION_ALLOW_DRY_RUN,
+        COMMAND_MODE_DRY_RUN,
+    )
+    import uuid
+
+    save = getattr(args, "save", False) or False
+
+    # Build valid fixture chain
+    boundary = build_valid_boundary()
+
+    # Construct bundle from fixture
+    bundle = ArtifactOnlyInvocationEvidenceChainBundle(
+        bundle_id=f"eb-demo-{uuid.uuid4().hex[:8]}",
+        phase_id="95Q", task_id="demo",
+        backend_id=boundary.backend_id,
+        adapter_id=boundary.adapter_id,
+        prompt_artifact_path=boundary.prompt_artifact_path,
+        prompt_artifact_digest=boundary.prompt_artifact_digest,
+        preflight_artifact_path=boundary.preflight_artifact_path,
+        preflight_artifact_digest=boundary.preflight_artifact_digest,
+        runtime_evidence_path=boundary.runtime_evidence_path,
+        runtime_evidence_digest=boundary.runtime_evidence_digest,
+        approval_artifact_path=boundary.approval_artifact_path,
+        approval_artifact_digest=boundary.approval_artifact_digest,
+        invocation_plan_path=boundary.invocation_plan_path,
+        invocation_plan_digest=boundary.invocation_plan_digest,
+        broker_decision_id=boundary.broker_decision_id,
+        broker_decision=boundary.broker_decision,
+        shell_gate_decision_id=boundary.shell_gate_decision_id,
+        shell_gate_decision=boundary.shell_gate_decision,
+        command_boundary_path="/demo/cb.json",
+        command_boundary_digest="sha256:demo",
+        command_boundary_assessment_path="/demo/cba.json",
+        command_boundary_assessment_digest="sha256:demo-assessment",
+        output_quarantine_path=boundary.output_quarantine_path,
+        audit_path=boundary.audit_path,
+        timeout_seconds=boundary.timeout_seconds,
+        redaction_policy_id=boundary.redaction_policy_id,
+        operator_approval_reference=boundary.operator_approval_reference,
+        command_mode=COMMAND_MODE_DRY_RUN,
+    )
+    bundle.record_digest = bundle.compute_digest()
+
+    assessment = validate_artifact_only_invocation_evidence_chain_bundle(bundle)
+
+    if save:
+        persist_evidence_chain_bundle_assessment(assessment)
+
+    if getattr(args, "json", False):
+        import json as _json
+        print(_json.dumps({
+            "demo_only": True,
+            "dry_run_only": True,
+            "execution_allowed": False,
+            "execute_supported": False,
+            "real_backend_invoked": False,
+            "adapter_executed": False,
+            "subprocess": False,
+            "shell_command": False,
+            "network": False,
+            "repo_mutation": False,
+            "apply": False,
+            "patch_parsing": False,
+            "commit_push_authorized": False,
+            "telegram_inbound": False,
+            "bundle_ready": assessment.ready,
+            "assessment_ready": assessment.ready,
+            "decision": assessment.decision,
+            "assessment": assessment.to_dict(),
+        }, indent=2))
+    else:
+        print("Evidence Chain Bundle End-to-End Dry-Run Demo")
+        print(f"  Demo only:          yes")
+        print(f"  Dry-run only:       yes")
+        print(f"  Bundle ready:       {'yes' if assessment.ready else 'no'}")
+        print(f"  Decision:           {assessment.decision}")
+        print(f"  Execution allowed:  {'yes' if assessment.execution_allowed else 'no'}")
+        print(f"  Execute supported:  {'yes' if assessment.execute_supported else 'no'}")
+        print(f"  Real backend:       {'yes' if not assessment.no_real_backend_invoked else 'no'}")
+        print(f"  Adapter executed:   {'yes' if not assessment.no_adapter_executed else 'no'}")
+        print(f"  Subprocess:         {'yes' if not assessment.no_subprocess else 'no'}")
+        print(f"  Shell command:      no")
+        print(f"  Network:            {'yes' if not assessment.no_network else 'no'}")
+        print(f"  Repo mutation:      {'yes' if not assessment.no_repo_mutation else 'no'}")
+        print(f"  Apply:              {'yes' if not assessment.no_apply else 'no'}")
+        print(f"  Patch parsing:      {'yes' if not assessment.no_patch_parsing else 'no'}")
+        print(f"  Commit/push auth:   {'yes' if not assessment.no_commit_push_authorization else 'no'}")
+        print(f"  Telegram inbound:   {'yes' if not assessment.no_telegram_inbound else 'no'}")
+        print()
+        print("  ⚠️  Demo only. No backend was invoked. No adapter was executed.")
+    return 0

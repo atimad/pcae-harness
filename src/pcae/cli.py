@@ -470,6 +470,7 @@ from pcae.commands.backend import (
     run_backend_invoke_artifact_only_bundle_dry_run,
     run_backend_invoke_artifact_only_bundle_show,
     run_backend_invoke_artifact_only_bundle_verify,
+    run_backend_invoke_artifact_only_bundle_demo,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -5040,6 +5041,13 @@ def build_parser() -> argparse.ArgumentParser:
     bundle_verify.add_argument("--latest", action="store_true", default=True)
     bundle_verify.add_argument("--json", action="store_true")
     bundle_verify.set_defaults(handler=run_backend_invoke_artifact_only_bundle_verify)
+
+    bundle_demo = be_invoke_bundle_sub.add_parser(
+        "demo", help="End-to-end dry-run demo using valid fixture chain."
+    )
+    bundle_demo.add_argument("--save", action="store_true", help="Persist assessment.")
+    bundle_demo.add_argument("--json", action="store_true")
+    bundle_demo.set_defaults(handler=run_backend_invoke_artifact_only_bundle_demo)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",
