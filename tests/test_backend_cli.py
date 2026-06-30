@@ -2120,3 +2120,34 @@ class Test95TOrchCLI:
     def test_execute_unavailable(self):
         r = _run(["invoke", "artifact-only", "orchestration", "execute", "--help"])
         assert r.returncode != 0
+
+
+class Test95UOrchDemo:
+    def test_demo_text_output(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "demo"])
+        assert r.returncode == 0
+        assert "Demo only" in r.stdout
+        assert "Orchestration ready" in r.stdout
+
+    def test_demo_json_output(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "demo", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["demo_only"] is True
+        assert d["execution_allowed"] is False
+        assert len(d["steps"]) == 12
+
+    def test_demo_save_and_show(self):
+        _run(["invoke", "artifact-only", "orchestration", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "orchestration", "show", "--latest", "--json"])
+        assert r.returncode == 0
+
+    def test_demo_save_and_verify(self):
+        _run(["invoke", "artifact-only", "orchestration", "demo", "--save"])
+        r = _run(["invoke", "artifact-only", "orchestration", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        assert json.loads(r.stdout)["valid"] is True
+
+    def test_demo_execute_unavailable(self):
+        r = _run(["invoke", "artifact-only", "orchestration", "execute", "--help"])
+        assert r.returncode != 0

@@ -2537,3 +2537,69 @@ def run_backend_invoke_artifact_only_orch_verify(args: argparse.Namespace) -> in
         for issue in v.get("issues", []):
             print(f"  - {issue}")
     return 0 if v["valid"] else 1
+
+
+def run_backend_invoke_artifact_only_orch_demo(args: argparse.Namespace) -> int:
+    """pcae backend invoke artifact-only orchestration demo [--save] [--json]"""
+    from pcae.core.backend_invocations import (
+        ArtifactOnlyDryRunOrchestrationPlan,
+        ArtifactOnlyDryRunOrchestrationStep,
+        validate_artifact_only_dry_run_orchestration_plan,
+        persist_orchestration_assessment,
+    )
+    import uuid
+    save = getattr(args, "save", False) or False
+    steps = [ArtifactOnlyDryRunOrchestrationStep(step_id=f"s{i}", step_name=name, step_order=i)
+             for i, name in enumerate((
+        "load_bundle", "verify_bundle_digest", "validate_bundle",
+        "load_boundary_assessment", "verify_boundary_assessment",
+        "aggregate_broker_shell_gate", "verify_output_quarantine",
+        "verify_audit_path", "verify_timeout", "verify_redaction_policy",
+        "verify_no_execution_flags", "produce_dry_run_summary",
+    ))]
+    plan = ArtifactOnlyDryRunOrchestrationPlan(
+        orchestration_id=f"orch-demo-{uuid.uuid4().hex[:8]}",
+        phase_id="95U", task_id="demo", backend_id="mock", adapter_id="mock",
+        bundle_path="/demo/bundle.json", bundle_digest="sha256:demo",
+        bundle_assessment_path="/demo/bundle-assessment.json", bundle_assessment_digest="sha256:demo-assessment",
+        output_quarantine_path="/demo/quarantine", audit_path="/demo/audit",
+        timeout_seconds=120, redaction_policy_id="rp-demo",
+        ordered_steps=steps,
+    )
+    plan.record_digest = plan.compute_digest()
+    a = validate_artifact_only_dry_run_orchestration_plan(plan)
+    if save:
+        persist_orchestration_assessment(a)
+    if getattr(args, "json", False):
+        print(json.dumps({
+            "demo_only": True, "dry_run_only": True,
+            "execution_allowed": False, "execute_supported": False,
+            "real_backend_invoked": False, "adapter_executed": False,
+            "subprocess": False, "shell_command": False, "network": False,
+            "repo_mutation": False, "apply": False, "patch_parsing": False,
+            "commit_push_authorized": False, "telegram_inbound": False,
+            "orchestration_ready": a.ready, "bundle_ready": a.bundle_ready,
+            "boundary_ready": a.command_boundary_ready,
+            "assessment_ready": a.ready, "decision": a.decision,
+            "steps": [{"order": s.step_order, "name": s.step_name, "ready": s.ready} for s in a.step_results],
+            "cumulative_hard_blocks": a.cumulative_hard_blocks,
+        }, indent=2))
+    else:
+        print("Orchestration End-to-End Dry-Run Demo")
+        print(f"  Demo only:           yes")
+        print(f"  Dry-run only:        yes")
+        print(f"  Orchestration ready: {'yes' if a.ready else 'no'}")
+        print(f"  Decision:            {a.decision}")
+        print(f"  Ordered steps:")
+        for s in a.step_results:
+            print(f"    {s.step_order}: {s.step_name} — {'ready' if s.ready else 'blocked'}")
+        print(f"  Execution allowed:   {'yes' if a.execution_allowed else 'no'}")
+        print(f"  Execute supported:   {'yes' if a.execute_supported else 'no'}")
+        print(f"  Real backend:        no")
+        print(f"  Subprocess:          no")
+        print(f"  Network:             no")
+        print(f"  Repo mutation:       no")
+        print(f"  Apply:               no")
+        print()
+        print("  ⚠️  Demo only. No backend was invoked.")
+    return 0
