@@ -475,6 +475,9 @@ from pcae.commands.backend import (
     run_backend_invoke_artifact_only_orch_show,
     run_backend_invoke_artifact_only_orch_verify,
     run_backend_invoke_artifact_only_orch_demo,
+    run_backend_invoke_artifact_only_ea_dry_run,
+    run_backend_invoke_artifact_only_ea_show,
+    run_backend_invoke_artifact_only_ea_verify,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -5082,6 +5085,25 @@ def build_parser() -> argparse.ArgumentParser:
     orch_demo.add_argument("--save", action="store_true")
     orch_demo.add_argument("--json", action="store_true")
     orch_demo.set_defaults(handler=run_backend_invoke_artifact_only_orch_demo)
+
+    # ── Phase 96C: execution-adjacent ────────────────────────────────────
+    be_invoke_ea = be_invoke_ao_sub.add_parser(
+        "execution-adjacent", help="Execution-adjacent plan dry-run (no execution)."
+    )
+    be_invoke_ea_sub = be_invoke_ea.add_subparsers(dest="backend_invoke_ea_command", required=True)
+    ea_dry_run = be_invoke_ea_sub.add_parser("dry-run", help="Load plan, validate, print assessment.")
+    ea_dry_run.add_argument("--plan", required=True)
+    ea_dry_run.add_argument("--save", action="store_true")
+    ea_dry_run.add_argument("--json", action="store_true")
+    ea_dry_run.set_defaults(handler=run_backend_invoke_artifact_only_ea_dry_run)
+    ea_show = be_invoke_ea_sub.add_parser("show", help="Show latest assessment.")
+    ea_show.add_argument("--latest", action="store_true", default=True)
+    ea_show.add_argument("--json", action="store_true")
+    ea_show.set_defaults(handler=run_backend_invoke_artifact_only_ea_show)
+    ea_verify = be_invoke_ea_sub.add_parser("verify", help="Verify assessment.")
+    ea_verify.add_argument("--latest", action="store_true", default=True)
+    ea_verify.add_argument("--json", action="store_true")
+    ea_verify.set_defaults(handler=run_backend_invoke_artifact_only_ea_verify)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

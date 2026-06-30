@@ -2220,3 +2220,67 @@ class Test95WOrchHardeningCLI:
         with tempfile.TemporaryDirectory() as td:
             r = _run(["invoke", "artifact-only", "orchestration", "dry-run", "--plan", td, "--json"])
             assert r.returncode != 0
+from pcae.core.backend_invocations import (
+    ExecutionAdjacentPlan, persist_execution_adjacent_plan,
+    DECISION_ALLOW_DRY_RUN, DECISION_DENY,
+)
+
+
+def _write_ea_plan(**overrides) -> str:
+    kwargs = {
+        "plan_id": "ea-cli-test", "phase_id": "96C", "task_id": "test",
+        "backend_id": "mock", "adapter_id": "mock",
+        "command_name": "echo", "command_path": "/bin/echo", "command_digest": "abc",
+        "command_args": ["hello"], "command_env_digest": "env-hash",
+        "working_directory": "/tmp",
+        "timeout_policy_id": "tp-1", "timeout_seconds": 120, "kill_policy_id": "kp-1",
+        "output_quarantine_id": "oq-1", "output_quarantine_path": "/q",
+        "audit_record_id": "ar-1", "audit_path": "/a",
+        "rollback_linkage_id": "rl-1",
+        "approval_artifact_id": "aa-1", "approval_actor_id": "operator",
+        "broker_decision_id": "bd-1", "broker_decision": DECISION_ALLOW_DRY_RUN,
+        "shell_gate_decision_id": "sg-1", "shell_gate_decision": DECISION_ALLOW_DRY_RUN,
+    }
+    kwargs.update(overrides)
+    p = ExecutionAdjacentPlan(**kwargs)
+    p.record_digest = p.compute_digest()
+    r = persist_execution_adjacent_plan(p)
+    return r["path"]
+
+
+class Test96CEACLI:
+    def test_valid_dry_run_ready(self):
+        p = _write_ea_plan()
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "dry-run", "--plan", p, "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["decision"] == "ready_for_execution_adjacent_dry_run"
+
+    def test_text_no_execution(self):
+        p = _write_ea_plan()
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "dry-run", "--plan", p])
+        assert "Execution allowed" in r.stdout
+        assert "Subprocess allowed" in r.stdout
+        assert "Dry-run only" in r.stdout
+
+    def test_execution_allowed_true_blocks(self):
+        p = _write_ea_plan(execution_allowed=True)
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "dry-run", "--plan", p, "--json"])
+        d = json.loads(r.stdout)
+        assert "unsafe_capability" in d["decision"] or "execution_allowed=True" in str(d["hard_blocks"])
+
+    def test_save_and_show(self):
+        p = _write_ea_plan(plan_id="ea-show-test")
+        _run(["invoke", "artifact-only", "execution-adjacent", "dry-run", "--plan", p, "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "show", "--latest", "--json"])
+        assert r.returncode == 0
+
+    def test_save_and_verify(self):
+        p = _write_ea_plan(plan_id="ea-verify-test")
+        _run(["invoke", "artifact-only", "execution-adjacent", "dry-run", "--plan", p, "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        assert r.returncode == 0
+        assert json.loads(r.stdout)["valid"] is True
+
+    def test_execute_unavailable(self):
+        assert _run(["invoke", "artifact-only", "execution-adjacent", "execute", "--help"]).returncode != 0

@@ -2603,3 +2603,110 @@ def run_backend_invoke_artifact_only_orch_demo(args: argparse.Namespace) -> int:
         print()
         print("  ⚠️  Demo only. No backend was invoked.")
     return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96C — Execution-adjacent plan CLI dry-run
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ExecutionAdjacentPlan,
+    ExecutionAdjacentPlanAssessment,
+    validate_execution_adjacent_plan,
+    verify_execution_adjacent_plan,
+    persist_execution_adjacent_assessment,
+    verify_execution_adjacent_assessment,
+)
+
+
+def _load_ea_plan(path: str, args: argparse.Namespace) -> tuple:
+    from pathlib import Path as _P
+    p = _P(path)
+    if not p.is_file():
+        msg = f"Plan is a directory: {path}" if p.is_dir() else f"Plan file not found: {path}"
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return None, 1
+    try:
+        data = json.loads(p.read_text())
+        plan = ExecutionAdjacentPlan.from_dict(data)
+    except Exception as exc:
+        msg = f"Failed to load plan: {exc}"
+        print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+        return None, 1
+    if plan.record_digest:
+        v = verify_execution_adjacent_plan(plan)
+        if not v["valid"]:
+            msg = f"Plan verification failed: {v['issues']}"
+            print(json.dumps({"error": msg}) if getattr(args, "json", False) else f"Error: {msg}")
+            return None, 1
+    return plan, 0
+
+
+def _load_latest_ea_assessment() -> ExecutionAdjacentPlanAssessment | None:
+    from pcae.core.backend_invocations import _ea_dir
+    lp = _ea_dir() / "assessments" / "latest-assessment.json"
+    if not lp.exists(): return None
+    try:
+        return ExecutionAdjacentPlanAssessment.from_dict(json.loads(lp.read_text()))
+    except Exception:
+        return None
+
+
+def _print_ea_assessment(a: ExecutionAdjacentPlanAssessment) -> None:
+    print(f"Execution-Adjacent Assessment: {a.assessment_id}")
+    print(f"  Decision:                {a.decision}")
+    print(f"  Ready:                   {'yes' if a.ready else 'no'}")
+    if a.hard_blocks: print(f"  Hard blocks:             {', '.join(a.hard_blocks)}")
+    print(f"  Execution allowed:       {'yes' if a.execution_allowed else 'no'}")
+    print(f"  Subprocess allowed:      {'yes' if a.subprocess_allowed else 'no'}")
+    print(f"  Shell allowed:           {'yes' if a.shell_allowed else 'no'}")
+    print(f"  Network allowed:         {'yes' if a.network_allowed else 'no'}")
+    print(f"  Backend invocation:      {'yes' if a.backend_invocation_allowed else 'no'}")
+    print(f"  Adapter execution:       {'yes' if a.adapter_execution_allowed else 'no'}")
+    print(f"  Auto-apply allowed:      {'yes' if a.auto_apply_allowed else 'no'}")
+    print(f"  Patch parsing allowed:   {'yes' if a.patch_parsing_allowed else 'no'}")
+    print(f"  Commit/push auth:        {'yes' if a.commit_push_authorization_allowed else 'no'}")
+    print(f"  Telegram inbound:        {'yes' if a.telegram_inbound_allowed else 'no'}")
+    print(f"  Live runtime inspection: {'yes' if a.live_runtime_inspection_allowed else 'no'}")
+    print(f"  Command discovery:       {'yes' if a.command_discovery_allowed else 'no'}")
+    print(f"  Dry-run only:            {'yes' if a.dry_run_only else 'no'}")
+    print()
+    print("  ⚠️  Dry-run only. No backend was invoked.")
+
+
+def run_backend_invoke_artifact_only_ea_dry_run(args: argparse.Namespace) -> int:
+    plan_path = getattr(args, "plan", "") or ""
+    save = getattr(args, "save", False) or False
+    if not plan_path:
+        print(json.dumps({"error": "Missing --plan <path>"}) if getattr(args, "json", False) else "Error: Missing --plan <path>")
+        return 1
+    plan, code = _load_ea_plan(plan_path, args)
+    if plan is None: return code
+    a = validate_execution_adjacent_plan(plan)
+    if save: persist_execution_adjacent_assessment(a)
+    if getattr(args, "json", False): print(json.dumps(a.to_dict(), indent=2))
+    else: _print_ea_assessment(a)
+    return 0
+
+
+def run_backend_invoke_artifact_only_ea_show(args: argparse.Namespace) -> int:
+    a = _load_latest_ea_assessment()
+    if a is None:
+        print(json.dumps({"error": "No latest assessment found."}) if getattr(args, "json", False) else "Error: No latest assessment found.")
+        return 1
+    if getattr(args, "json", False): print(json.dumps(a.to_dict(), indent=2))
+    else: _print_ea_assessment(a)
+    return 0
+
+
+def run_backend_invoke_artifact_only_ea_verify(args: argparse.Namespace) -> int:
+    a = _load_latest_ea_assessment()
+    if a is None:
+        print(json.dumps({"error": "No latest assessment found."}) if getattr(args, "json", False) else "Error: No latest assessment found.")
+        return 1
+    v = verify_execution_adjacent_assessment(a)
+    if getattr(args, "json", False): print(json.dumps(v, indent=2))
+    else:
+        print(f"Assessment {a.assessment_id}: {'valid ✅' if v['valid'] else 'INVALID ❌'}")
+        for i in v.get("issues", []): print(f"  - {i}")
+    return 0 if v["valid"] else 1
