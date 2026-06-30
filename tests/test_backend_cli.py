@@ -2632,3 +2632,42 @@ class Test96IBoundaryReview:
             _j.dump(data, open(lp, "w"))
         r = _run(["execution-boundary", "proof", "--verify-latest", "--json"])
         assert json.loads(r.stdout)["valid"] is False
+
+
+class Test96JConnectedDemo:
+    def test_connected_demo_json_output(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "connected-demo", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["dry_run_only"] is True
+        assert d["execution_allowed"] is False
+        assert "connected_chain" in d
+        assert "boundary_proof_status" in d
+
+    def test_connected_demo_text_output(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "connected-demo"])
+        assert r.returncode == 0
+        assert "Connected Chain Stabilized Demo" in r.stdout
+        assert "Assessment" in r.stdout
+        assert "Proof" in r.stdout
+
+    def test_connected_demo_all_capability_flags_false(self):
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "connected-demo", "--json"])
+        flags = json.loads(r.stdout)["capability_flags"]
+        for k, v in flags.items():
+            assert v is False, f"{k} must be False"
+
+    def test_connected_demo_repeatability(self):
+        r1 = _run(["invoke", "artifact-only", "execution-adjacent", "connected-demo", "--json"])
+        r2 = _run(["invoke", "artifact-only", "execution-adjacent", "connected-demo", "--json"])
+        d1, d2 = json.loads(r1.stdout), json.loads(r2.stdout)
+        assert d1["dry_run_only"] == d2["dry_run_only"]
+        assert d1["execution_allowed"] == d2["execution_allowed"] == False
+        assert d1["connected_chain"]["runtime_evidence_id"] == d2["connected_chain"]["runtime_evidence_id"]
+
+    def test_connected_demo_save_and_verify(self):
+        _run(["invoke", "artifact-only", "execution-adjacent", "connected-demo", "--save"])
+        r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
+        assert json.loads(r.stdout)["valid"] is True
+        rp = _run(["execution-boundary", "proof", "--verify-latest", "--json"])
+        assert json.loads(rp.stdout)["valid"] is True

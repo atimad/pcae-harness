@@ -480,6 +480,7 @@ from pcae.commands.backend import (
     run_backend_invoke_artifact_only_ea_verify,
     run_backend_invoke_artifact_only_ea_demo,
     run_backend_execution_boundary_proof,
+    run_backend_invoke_artifact_only_connected_demo,
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
@@ -5123,6 +5124,14 @@ def build_parser() -> argparse.ArgumentParser:
     ebp_proof.add_argument("--show-latest", action="store_true")
     ebp_proof.add_argument("--verify-latest", action="store_true")
     ebp_proof.set_defaults(handler=run_backend_execution_boundary_proof)
+
+    # ── Phase 96J: connected-demo ────────────────────────────────────────
+    be_invoke_connected = be_invoke_ea_sub.add_parser(
+        "connected-demo", help="Full connected chain stabilized demo."
+    )
+    be_invoke_connected.add_argument("--save", action="store_true")
+    be_invoke_connected.add_argument("--json", action="store_true")
+    be_invoke_connected.set_defaults(handler=run_backend_invoke_artifact_only_connected_demo)
 
     pb_parser = subparsers.add_parser(
         "permission-broker",

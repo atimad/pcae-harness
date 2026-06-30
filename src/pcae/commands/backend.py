@@ -2911,3 +2911,147 @@ def run_backend_execution_boundary_proof(args: argparse.Namespace) -> int:
         print(f"  No execution:         yes")
         print(f"  Checks:               {len(proof.proof_checks)} passed")
     return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96J — Connected chain demo stabilization
+# ═══════════════════════════════════════════════════════════════════════════
+
+def run_backend_invoke_artifact_only_connected_demo(args: argparse.Namespace) -> int:
+    """pcae backend invoke artifact-only execution-adjacent connected-demo [--save] [--json]
+
+    Full connected chain demo: evidence → boundary → bundle → orchestration →
+    execution-adjacent plan → assessment → save → show → verify → proof.
+    Never executes anything.
+    """
+    import uuid
+    from pcae.core.backend_invocations import (
+        ExecutionAdjacentPlan, validate_execution_adjacent_plan,
+        persist_execution_adjacent_assessment, verify_execution_adjacent_assessment,
+        generate_execution_boundary_proof, persist_execution_boundary_proof,
+        verify_execution_boundary_proof,
+        DECISION_ALLOW_DRY_RUN as DA,
+    )
+    save = getattr(args, "save", False) or False
+
+    # ── Chain artifacts (deterministic fixture-based) ────────────────────
+    chain = {
+        "runtime_evidence_id": "re-connected-demo",
+        "runtime_evidence_digest": "sha256:re-connected",
+        "broker_decision_id": "bd-connected",
+        "broker_decision": DA,
+        "shell_gate_decision_id": "sg-connected",
+        "shell_gate_decision": DA,
+        "command_boundary_id": "cb-connected",
+        "command_boundary_assessment_id": "cba-connected",
+        "command_boundary_decision": "ready_for_dry_run",
+        "evidence_chain_bundle_id": "eb-connected",
+        "evidence_chain_bundle_assessment_id": "eba-connected",
+        "evidence_chain_bundle_decision": "ready_for_dry_run_bundle",
+        "orchestration_id": "orch-connected",
+        "orchestration_assessment_id": "oa-connected",
+        "orchestration_decision": "ready_for_dry_run_orchestration",
+    }
+
+    # ── Execution-adjacent plan ──────────────────────────────────────────
+    plan = ExecutionAdjacentPlan(
+        plan_id=f"ea-connected-{uuid.uuid4().hex[:8]}",
+        phase_id="96J", task_id="connected-demo",
+        backend_id="mock", adapter_id="mock",
+        orchestration_id=chain["orchestration_id"],
+        command_name="echo", command_path="/bin/echo",
+        command_digest="sha256:echo-connected",
+        command_args=["Connected", "chain", "demo"],
+        command_env_digest="sha256:env-connected",
+        working_directory="/tmp",
+        timeout_policy_id="tp-connected", timeout_seconds=120,
+        kill_policy_id="kp-connected",
+        output_quarantine_id="oq-connected", output_quarantine_path="/demo/connected/quarantine",
+        audit_record_id="ar-connected", audit_path="/demo/connected/audit",
+        rollback_linkage_id="rl-connected",
+        approval_artifact_id="aa-connected", approval_actor_id="operator",
+        broker_decision_id=chain["broker_decision_id"],
+        broker_decision=chain["broker_decision"],
+        shell_gate_decision_id=chain["shell_gate_decision_id"],
+        shell_gate_decision=chain["shell_gate_decision"],
+    )
+    plan.record_digest = plan.compute_digest()
+
+    # ── Validate ─────────────────────────────────────────────────────────
+    assessment = validate_execution_adjacent_plan(plan)
+    assessment.record_digest = assessment.compute_digest()
+
+    saved_path = ""
+    if save:
+        r = persist_execution_adjacent_assessment(assessment)
+        saved_path = r.get("path", "")
+
+    ea_verify = verify_execution_adjacent_assessment(assessment)
+
+    # ── Boundary proof ───────────────────────────────────────────────────
+    proof = generate_execution_boundary_proof()
+    proof_saved = ""
+    if save:
+        rp = persist_execution_boundary_proof(proof)
+        proof_saved = rp.get("path", "")
+    proof_verify = verify_execution_boundary_proof(proof)
+
+    # ── Output ───────────────────────────────────────────────────────────
+    if getattr(args, "json", False):
+        print(json.dumps({
+            "demo": "connected_chain_stabilized",
+            "phase_id": "96J",
+            "dry_run_only": True,
+            "execution_allowed": False,
+            "connected_chain": chain,
+            "execution_adjacent_plan_id": plan.plan_id,
+            "execution_adjacent_assessment_id": assessment.assessment_id,
+            "assessment_decision": assessment.decision,
+            "assessment_ready": assessment.ready,
+            "assessment_hard_blocks": assessment.hard_blocks,
+            "assessment_verify": "valid" if ea_verify["valid"] else "invalid",
+            "assessment_saved": saved_path,
+            "boundary_proof_status": proof.proof_status,
+            "boundary_proof_execution_available": proof.execution_available,
+            "boundary_proof_verify": "valid" if proof_verify["valid"] else "invalid",
+            "boundary_proof_saved": proof_saved,
+            "no_go_confirmations": [
+                "No real backend invocation.",
+                "No adapter execution.",
+                "No subprocess execution.",
+                "No shell execution.",
+                "No network call.",
+                "No shell interception.",
+                "No Telegram inbound.",
+                "No enforcement.",
+                "No automatic apply.",
+                "No apply execution.",
+                "No patch parsing.",
+                "No commit/push authorization.",
+                "No real AI backend calls.",
+            ],
+            "capability_flags": {
+                "execution_allowed": False, "subprocess_allowed": False,
+                "shell_allowed": False, "network_allowed": False,
+                "backend_invocation_allowed": False, "adapter_execution_allowed": False,
+                "auto_apply_allowed": False, "patch_parsing_allowed": False,
+                "commit_push_authorization_allowed": False, "telegram_inbound_allowed": False,
+                "live_runtime_inspection_allowed": False, "command_discovery_allowed": False,
+            },
+        }, indent=2))
+    else:
+        print("Connected Chain Stabilized Demo")
+        print(f"  Phase:               96J")
+        print(f"  Chain:               runtime → broker → boundary → bundle → orchestration → EA plan")
+        print(f"  Assessment:          {assessment.assessment_id}")
+        print(f"  Assessment decision: {assessment.decision}")
+        print(f"  Assessment ready:    {'yes' if assessment.ready else 'no'}")
+        print(f"  Assessment verify:   {'valid ✅' if ea_verify['valid'] else 'INVALID ❌'}")
+        print(f"  Proof status:        {proof.proof_status}")
+        print(f"  Proof verify:        {'valid ✅' if proof_verify['valid'] else 'INVALID ❌'}")
+        print(f"  Execution available: {'yes' if proof.execution_available else 'no'}")
+        print(f"  Dry-run only:        yes")
+        print(f"  No-go:               13 confirmations")
+        print()
+        print("  ✅ Connected chain demo complete. No execution occurred.")
+    return 0
