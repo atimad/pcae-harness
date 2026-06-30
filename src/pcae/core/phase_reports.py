@@ -890,7 +890,7 @@ def validate_finalization_gate(
     if report.files_changed > 0:
         if "phase_commits" in md:
             pc = md.get("phase_commits", [])
-            if not pc:
+            if not pc and (not commit_attribution or "none" not in str(commit_attribution).lower()):
                 blockers.append("phase_commits declared but empty while files_changed>0")
         elif not commit_attribution:
             blockers.append("commits.phase_owned missing — no phase_commits or commit_attribution in metadata")

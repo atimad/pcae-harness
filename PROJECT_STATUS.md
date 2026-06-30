@@ -2,7 +2,9 @@
 
 ## Current Phase
 
-Phase 95M.1: Phase Completion Finalization Gate (completed).
+Phase 95N: Artifact-Only Invocation Dry-Run Evidence Chain Review (completed).
+
+Review-only. All 16 go/no-go criteria pass. Evidence chain fixtures, CLI, and gate are ready. Recommends 95O — Evidence Chain Bundle Model.
 
 Added validate_finalization_gate(): authoritative blocking check before phase complete and Telegram send. 15 tests. SKILL.md v1.0.2. Recommends 95N.
 
