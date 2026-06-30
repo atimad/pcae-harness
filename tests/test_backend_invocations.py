@@ -6405,3 +6405,169 @@ class Test95MFixtureSafety:
         assert a.execution_allowed is False
         assert a.execute_supported is False
         assert a.dry_run_only is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95O — Evidence chain bundle model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyInvocationEvidenceChainBundle,
+    ArtifactOnlyInvocationEvidenceChainBundleAssessment,
+    validate_artifact_only_invocation_evidence_chain_bundle,
+    persist_evidence_chain_bundle,
+    verify_evidence_chain_bundle,
+    load_latest_evidence_chain_bundle,
+    persist_evidence_chain_bundle_assessment,
+    verify_evidence_chain_bundle_assessment,
+    load_latest_evidence_chain_bundle_assessment,
+    BUNDLE_READY,
+    BUNDLE_HARD_BLOCK,
+    BUNDLE_MISSING_ARTIFACTS,
+    BUNDLE_TAMPERED,
+    BUNDLE_UNSUPPORTED_EXECUTE,
+    COMMAND_MODE_DRY_RUN,
+    COMMAND_MODE_EXECUTE_RESERVED,
+    DECISION_ALLOW_DRY_RUN,
+    DECISION_DENY,
+    DECISION_HARD_BLOCK,
+)
+
+
+def _valid_bundle(**overrides) -> ArtifactOnlyInvocationEvidenceChainBundle:
+    kwargs = {
+        "bundle_id": "eb-test-001", "phase_id": "95O", "task_id": "test",
+        "backend_id": "mock", "adapter_id": "mock",
+        "prompt_artifact_path": "/p/p.md", "prompt_artifact_digest": "abc",
+        "preflight_artifact_path": "/p/pf.json", "preflight_artifact_digest": "def",
+        "runtime_evidence_path": "/p/re.json", "runtime_evidence_digest": "ghi",
+        "approval_artifact_path": "/p/ap.json", "approval_artifact_digest": "jkl",
+        "invocation_plan_path": "/p/ip.json", "invocation_plan_digest": "mno",
+        "broker_decision_id": "bd-1", "broker_decision": DECISION_ALLOW_DRY_RUN,
+        "shell_gate_decision_id": "sg-1", "shell_gate_decision": DECISION_ALLOW_DRY_RUN,
+        "command_boundary_path": "/p/cb.json", "command_boundary_digest": "pqr",
+        "command_boundary_assessment_path": "/p/cba.json", "command_boundary_assessment_digest": "stu",
+        "output_quarantine_path": "/q", "audit_path": "/a", "timeout_seconds": 120,
+        "redaction_policy_id": "rp-1", "operator_approval_reference": "apr-1",
+        "command_mode": COMMAND_MODE_DRY_RUN,
+    }
+    kwargs.update(overrides)
+    return ArtifactOnlyInvocationEvidenceChainBundle(**kwargs)
+
+
+class Test95OBundleModel:
+    def test_valid_bundle_ready(self):
+        b = _valid_bundle()
+        a = validate_artifact_only_invocation_evidence_chain_bundle(b)
+        assert a.decision == BUNDLE_READY
+        assert a.ready is True
+
+    def test_digest_stable(self):
+        b = _valid_bundle()
+        assert b.compute_digest() == b.compute_digest()
+
+    def test_digest_changes(self):
+        b = _valid_bundle()
+        d1 = b.compute_digest()
+        b.backend_id = "claude"
+        assert b.compute_digest() != d1
+
+    def test_missing_prompt_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(prompt_artifact_path="", prompt_artifact_digest=""))
+        assert "prompt_artifact_path_missing" in a.hard_blocks
+
+    def test_missing_preflight_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(preflight_artifact_path="", preflight_artifact_digest=""))
+        assert "preflight_artifact_path_missing" in a.hard_blocks
+
+    def test_missing_runtime_evidence_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(runtime_evidence_path="", runtime_evidence_digest=""))
+        assert "runtime_evidence_path_missing" in a.hard_blocks
+
+    def test_missing_approval_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(approval_artifact_path="", approval_artifact_digest=""))
+        assert "approval_artifact_path_missing" in a.hard_blocks
+
+    def test_missing_invocation_plan_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(invocation_plan_path="", invocation_plan_digest=""))
+        assert "invocation_plan_path_missing" in a.hard_blocks
+
+    def test_broker_deny_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(broker_decision=DECISION_DENY))
+        assert any("broker_decision:deny" in hb for hb in a.hard_blocks)
+
+    def test_broker_hard_block_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(broker_decision=DECISION_HARD_BLOCK))
+        assert any("broker_decision:hard_block" in hb for hb in a.hard_blocks)
+
+    def test_shell_gate_deny_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(shell_gate_decision=DECISION_DENY))
+        assert any("shell_gate_decision:deny" in hb for hb in a.hard_blocks)
+
+    def test_missing_command_boundary_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(command_boundary_path="", command_boundary_digest=""))
+        assert "command_boundary_path_missing" in a.hard_blocks
+
+    def test_missing_quarantine_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(output_quarantine_path=""))
+        assert "output_quarantine_path_missing" in a.hard_blocks
+
+    def test_missing_audit_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(audit_path=""))
+        assert "audit_path_missing" in a.hard_blocks
+
+    def test_timeout_zero_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(timeout_seconds=0))
+        assert "timeout_missing_or_invalid" in a.hard_blocks
+
+    def test_execute_reserved_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(command_mode=COMMAND_MODE_EXECUTE_RESERVED))
+        assert "execute_reserved_not_supported" in a.hard_blocks
+
+    def test_execution_allowed_true_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(execution_allowed=True))
+        assert "execution_allowed=True" in a.hard_blocks
+
+    def test_no_subprocess_false_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(no_subprocess=False))
+        assert "no_subprocess=False" in a.hard_blocks
+
+    def test_no_network_false_blocks(self):
+        a = validate_artifact_only_invocation_evidence_chain_bundle(_valid_bundle(no_network=False))
+        assert "no_network=False" in a.hard_blocks
+
+
+class Test95OBundlePersistence:
+    def test_persist_and_verify(self):
+        b = _valid_bundle()
+        b.record_digest = b.compute_digest()
+        r = persist_evidence_chain_bundle(b)
+        assert r["status"] == "written"
+        v = verify_evidence_chain_bundle(b)
+        assert v["valid"] is True
+
+    def test_tampered_verify_fails(self):
+        b = _valid_bundle()
+        b.record_digest = b.compute_digest()
+        b.backend_id = "tampered"
+        v = verify_evidence_chain_bundle(b)
+        assert v["valid"] is False
+
+    def test_persist_assessment(self):
+        b = _valid_bundle()
+        a = validate_artifact_only_invocation_evidence_chain_bundle(b)
+        r = persist_evidence_chain_bundle_assessment(a)
+        assert r["status"] == "written"
+
+
+class Test95OBundleSafety:
+    def test_no_subprocess_in_validator(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_invocation_evidence_chain_bundle)
+        assert "subprocess.run" not in src
+
+    def test_no_network_in_validator(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_invocation_evidence_chain_bundle)
+        assert "urllib" not in src.lower()
+        assert "http" not in src.lower()

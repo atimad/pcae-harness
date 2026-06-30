@@ -6344,3 +6344,404 @@ def load_latest_artifact_only_invocation_command_boundary_assessment() -> (
         return ArtifactOnlyInvocationCommandBoundaryAssessment.from_dict(data) if isinstance(data, dict) and data else None
     except Exception:
         return None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95O — Artifact-only invocation evidence chain bundle model
+# ═══════════════════════════════════════════════════════════════════════════
+
+_BUNDLE_SCHEMA_VERSION = "1.0"
+_BUNDLE_DIR = ".pcae/evidence-chain-bundles"
+
+BUNDLE_READY = "ready_for_dry_run_bundle"
+BUNDLE_HARD_BLOCK = "hard_block"
+BUNDLE_MISSING_ARTIFACTS = "missing_artifacts"
+BUNDLE_MISMATCH = "mismatch"
+BUNDLE_TAMPERED = "tampered"
+BUNDLE_UNSUPPORTED_EXECUTE = "unsupported_execute"
+
+
+@dataclass
+class ArtifactOnlyInvocationEvidenceChainBundle:
+    """Deterministic bundle grouping all evidence artifacts into one verifiable object.
+
+    Model/validation only. No execution, no CLI, no orchestration.
+    """
+
+    bundle_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    adapter_id: str = ""
+    command_mode: str = COMMAND_MODE_DRY_RUN
+    prompt_artifact_path: str = ""
+    prompt_artifact_digest: str = ""
+    preflight_artifact_path: str = ""
+    preflight_artifact_digest: str = ""
+    runtime_evidence_path: str = ""
+    runtime_evidence_digest: str = ""
+    approval_artifact_path: str = ""
+    approval_artifact_digest: str = ""
+    invocation_plan_path: str = ""
+    invocation_plan_digest: str = ""
+    broker_decision_id: str = ""
+    broker_decision_digest: str = ""
+    broker_decision: str = ""
+    shell_gate_decision_id: str = ""
+    shell_gate_decision_digest: str = ""
+    shell_gate_decision: str = ""
+    command_boundary_path: str = ""
+    command_boundary_digest: str = ""
+    command_boundary_assessment_path: str = ""
+    command_boundary_assessment_digest: str = ""
+    output_quarantine_path: str = ""
+    audit_path: str = ""
+    timeout_seconds: int = 0
+    redaction_policy_id: str = ""
+    operator_approval_reference: str = ""
+    dry_run_only: bool = True
+    execution_allowed: bool = False
+    execute_supported: bool = False
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_repo_mutation: bool = True
+    no_apply: bool = True
+    no_patch_parsing: bool = True
+    no_commit_push_authorization: bool = True
+    no_telegram_inbound: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _BUNDLE_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArtifactOnlyInvocationEvidenceChainBundle":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class ArtifactOnlyInvocationEvidenceChainBundleAssessment:
+    """Validation assessment for an evidence chain bundle."""
+
+    assessment_id: str = ""
+    bundle_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    ready: bool = False
+    decision: str = ""
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    missing_artifacts: list[str] = field(default_factory=list)
+    mismatch_reasons: list[str] = field(default_factory=list)
+    tamper_reasons: list[str] = field(default_factory=list)
+    failure_classifications: list[str] = field(default_factory=list)
+    evidence_chain_ready: bool = False
+    command_boundary_ready: bool = False
+    broker_shell_gate_ready: bool = False
+    output_quarantine_ready: bool = False
+    audit_ready: bool = False
+    timeout_ready: bool = False
+    redaction_ready: bool = False
+    dry_run_only: bool = True
+    execution_allowed: bool = False
+    execute_supported: bool = False
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_repo_mutation: bool = True
+    no_apply: bool = True
+    no_patch_parsing: bool = True
+    no_commit_push_authorization: bool = True
+    no_telegram_inbound: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _BUNDLE_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["hard_blocks"] = list(self.hard_blocks)
+        d["warnings"] = list(self.warnings)
+        d["missing_artifacts"] = list(self.missing_artifacts)
+        d["mismatch_reasons"] = list(self.mismatch_reasons)
+        d["tamper_reasons"] = list(self.tamper_reasons)
+        d["failure_classifications"] = list(self.failure_classifications)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArtifactOnlyInvocationEvidenceChainBundleAssessment":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+def validate_artifact_only_invocation_evidence_chain_bundle(
+    bundle: ArtifactOnlyInvocationEvidenceChainBundle,
+) -> ArtifactOnlyInvocationEvidenceChainBundleAssessment:
+    """Validate an evidence chain bundle against all 95O rules.
+
+    Model-only — never executes, never invokes backends.
+    """
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    assessment_id = f"eba-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    warnings_list: list[str] = []
+    missing: list[str] = []
+    mismatches: list[str] = []
+    tampered: list[str] = []
+    failures: list[str] = []
+
+    if not bundle.bundle_id:
+        hard_blocks.append("bundle_id_missing")
+    if not bundle.phase_id:
+        hard_blocks.append("phase_id_missing")
+    if not bundle.task_id:
+        hard_blocks.append("task_id_missing")
+    if not bundle.backend_id:
+        hard_blocks.append("backend_id_missing")
+    if not bundle.adapter_id:
+        hard_blocks.append("adapter_id_missing")
+
+    # Artifact paths and digests
+    _bundle_artifacts = [
+        ("prompt_artifact", bundle.prompt_artifact_path, bundle.prompt_artifact_digest),
+        ("preflight_artifact", bundle.preflight_artifact_path, bundle.preflight_artifact_digest),
+        ("runtime_evidence", bundle.runtime_evidence_path, bundle.runtime_evidence_digest),
+        ("approval_artifact", bundle.approval_artifact_path, bundle.approval_artifact_digest),
+        ("invocation_plan", bundle.invocation_plan_path, bundle.invocation_plan_digest),
+    ]
+    for name, path, digest in _bundle_artifacts:
+        if not path:
+            hard_blocks.append(f"{name}_path_missing")
+        if not digest:
+            hard_blocks.append(f"{name}_digest_missing")
+
+    # Broker/shell-gate
+    if not bundle.broker_decision_id:
+        hard_blocks.append("broker_decision_id_missing")
+    if not bundle.broker_decision:
+        hard_blocks.append("broker_decision_missing")
+    elif bundle.broker_decision in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE):
+        hard_blocks.append(f"broker_decision:{bundle.broker_decision}")
+
+    if not bundle.shell_gate_decision_id:
+        hard_blocks.append("shell_gate_decision_id_missing")
+    if not bundle.shell_gate_decision:
+        hard_blocks.append("shell_gate_decision_missing")
+    elif bundle.shell_gate_decision in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE):
+        hard_blocks.append(f"shell_gate_decision:{bundle.shell_gate_decision}")
+
+    # Command boundary
+    if not bundle.command_boundary_path:
+        hard_blocks.append("command_boundary_path_missing")
+    if not bundle.command_boundary_digest:
+        hard_blocks.append("command_boundary_digest_missing")
+    if not bundle.command_boundary_assessment_path:
+        hard_blocks.append("command_boundary_assessment_path_missing")
+    if not bundle.command_boundary_assessment_digest:
+        hard_blocks.append("command_boundary_assessment_digest_missing")
+
+    # Paths
+    if not bundle.output_quarantine_path:
+        hard_blocks.append("output_quarantine_path_missing")
+    if not bundle.audit_path:
+        hard_blocks.append("audit_path_missing")
+    if bundle.timeout_seconds <= 0:
+        hard_blocks.append("timeout_missing_or_invalid")
+    if not bundle.redaction_policy_id:
+        hard_blocks.append("redaction_policy_id_missing")
+    if not bundle.operator_approval_reference:
+        hard_blocks.append("operator_approval_reference_missing")
+
+    # Command mode
+    if bundle.command_mode not in VALID_COMMAND_MODES:
+        hard_blocks.append(f"unknown_command_mode:{bundle.command_mode}")
+    if bundle.command_mode == COMMAND_MODE_EXECUTE_RESERVED:
+        hard_blocks.append("execute_reserved_not_supported")
+    if bundle.execution_allowed:
+        hard_blocks.append("execution_allowed=True")
+    if bundle.execute_supported:
+        hard_blocks.append("execute_supported=True")
+    if not bundle.dry_run_only:
+        hard_blocks.append("dry_run_only=False")
+
+    # Safety flags
+    _safety = [
+        ("no_real_backend_invoked", bundle.no_real_backend_invoked),
+        ("no_adapter_executed", bundle.no_adapter_executed),
+        ("no_subprocess", bundle.no_subprocess),
+        ("no_network", bundle.no_network),
+        ("no_repo_mutation", bundle.no_repo_mutation),
+        ("no_apply", bundle.no_apply),
+        ("no_patch_parsing", bundle.no_patch_parsing),
+        ("no_commit_push_authorization", bundle.no_commit_push_authorization),
+        ("no_telegram_inbound", bundle.no_telegram_inbound),
+    ]
+    for name, flag in _safety:
+        if not flag:
+            hard_blocks.append(f"{name}=False")
+
+    # Determine outcome
+    if hard_blocks:
+        if any("execute" in hb for hb in hard_blocks):
+            decision = BUNDLE_UNSUPPORTED_EXECUTE
+        else:
+            decision = BUNDLE_HARD_BLOCK
+        ready = False
+    elif missing:
+        decision = BUNDLE_MISSING_ARTIFACTS
+        ready = False
+    elif mismatches:
+        decision = BUNDLE_MISMATCH
+        ready = False
+    elif tampered:
+        decision = BUNDLE_TAMPERED
+        ready = False
+    else:
+        decision = BUNDLE_READY
+        ready = True
+
+    for hb in hard_blocks:
+        failures.append(hb)
+    for m in missing:
+        failures.append(f"missing:{m}")
+
+    return ArtifactOnlyInvocationEvidenceChainBundleAssessment(
+        assessment_id=assessment_id,
+        bundle_id=bundle.bundle_id,
+        phase_id=bundle.phase_id,
+        task_id=bundle.task_id,
+        ready=ready, decision=decision,
+        hard_blocks=hard_blocks, warnings=warnings_list,
+        missing_artifacts=missing, mismatch_reasons=mismatches, tamper_reasons=tampered,
+        failure_classifications=failures,
+        evidence_chain_ready=(bool(bundle.prompt_artifact_path) and bool(bundle.prompt_artifact_digest) and bool(bundle.preflight_artifact_path) and bool(bundle.preflight_artifact_digest) and bool(bundle.runtime_evidence_path) and bool(bundle.runtime_evidence_digest) and bool(bundle.approval_artifact_path) and bool(bundle.approval_artifact_digest) and bool(bundle.invocation_plan_path) and bool(bundle.invocation_plan_digest)),
+        command_boundary_ready=(bool(bundle.command_boundary_path) and bool(bundle.command_boundary_digest) and bool(bundle.command_boundary_assessment_path) and bool(bundle.command_boundary_assessment_digest)),
+        broker_shell_gate_ready=(bool(bundle.broker_decision) and bundle.broker_decision not in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE) and bool(bundle.shell_gate_decision) and bundle.shell_gate_decision not in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE)),
+        output_quarantine_ready=bool(bundle.output_quarantine_path),
+        audit_ready=bool(bundle.audit_path),
+        timeout_ready=bundle.timeout_seconds > 0,
+        redaction_ready=bool(bundle.redaction_policy_id),
+        execution_allowed=False, execute_supported=False, dry_run_only=True,
+        no_real_backend_invoked=True, no_adapter_executed=True,
+        no_subprocess=True, no_network=True, no_repo_mutation=True,
+        no_apply=True, no_patch_parsing=True,
+        no_commit_push_authorization=True, no_telegram_inbound=True,
+        schema_version=_BUNDLE_SCHEMA_VERSION, created_at_utc=now,
+    )
+
+
+def _bundle_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_BUNDLE_DIR)
+
+
+def persist_evidence_chain_bundle(bundle: ArtifactOnlyInvocationEvidenceChainBundle) -> dict:
+    import os
+    d = _bundle_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    if not bundle.record_digest:
+        bundle.record_digest = bundle.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{bundle.bundle_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(bundle.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(bundle.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "record_digest": bundle.record_digest}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_evidence_chain_bundle(bundle: ArtifactOnlyInvocationEvidenceChainBundle) -> dict:
+    issues: list[str] = []
+    if not bundle.bundle_id:
+        issues.append("missing bundle_id")
+    if not bundle.record_digest:
+        issues.append("missing record_digest")
+    if bundle.record_digest and bundle.compute_digest() != bundle.record_digest:
+        issues.append("record_digest_mismatch")
+    return {"valid": len(issues) == 0, "issues": issues}
+
+
+def load_latest_evidence_chain_bundle() -> ArtifactOnlyInvocationEvidenceChainBundle | None:
+    lp = _bundle_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return ArtifactOnlyInvocationEvidenceChainBundle.from_dict(data) if isinstance(data, dict) and data else None
+    except Exception:
+        return None
+
+
+def persist_evidence_chain_bundle_assessment(assessment: ArtifactOnlyInvocationEvidenceChainBundleAssessment) -> dict:
+    import os
+    d = _bundle_dir() / "assessments"
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    if not assessment.record_digest:
+        assessment.record_digest = assessment.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{assessment.assessment_id}.json"
+        lp = d / "latest-assessment.json"
+        fp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest-assessment.tmp"
+        tmp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "record_digest": assessment.record_digest}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_evidence_chain_bundle_assessment(assessment: ArtifactOnlyInvocationEvidenceChainBundleAssessment) -> dict:
+    issues: list[str] = []
+    if not assessment.assessment_id:
+        issues.append("missing assessment_id")
+    if not assessment.record_digest:
+        issues.append("missing record_digest")
+    if assessment.record_digest and assessment.compute_digest() != assessment.record_digest:
+        issues.append("record_digest_mismatch")
+    if assessment.execution_allowed:
+        issues.append("execution_allowed must be False")
+    return {"valid": len(issues) == 0, "issues": issues}
+
+
+def load_latest_evidence_chain_bundle_assessment() -> ArtifactOnlyInvocationEvidenceChainBundleAssessment | None:
+    lp = _bundle_dir() / "latest-assessment.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return ArtifactOnlyInvocationEvidenceChainBundleAssessment.from_dict(data) if isinstance(data, dict) and data else None
+    except Exception:
+        return None

@@ -29,4 +29,5 @@ real-adapter-approvals/
 real-adapter-invocation-plans/
 artifact-only-real-invocation-dry-runs/
 artifact-only-invocation-boundaries/
+evidence-chain-bundles/
 claude-runtime-evidence/
