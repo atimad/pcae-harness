@@ -32,4 +32,5 @@ artifact-only-invocation-boundaries/
 evidence-chain-bundles/
 orchestration-plans/
 execution-adjacent-plans/
+execution-boundary-proof/
 claude-runtime-evidence/

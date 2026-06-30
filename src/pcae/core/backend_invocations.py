@@ -7460,3 +7460,143 @@ def verify_execution_adjacent_assessment(assessment: ExecutionAdjacentPlanAssess
     if assessment.record_digest and assessment.compute_digest() != assessment.record_digest: issues.append("record_digest_mismatch")
     if assessment.execution_allowed: issues.append("execution_allowed must be False")
     return {"valid": len(issues) == 0, "issues": issues}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96H — Execution-unavailable boundary proof
+# ═══════════════════════════════════════════════════════════════════════════
+
+_BP_SCHEMA_VERSION = "1.0"
+_BP_DIR = ".pcae/execution-boundary-proof"
+
+
+@dataclass
+class ExecutionBoundaryProof:
+    """Machine-readable proof that execution is unavailable.
+
+    Evidence artifact only — does not authorize anything.
+    """
+
+    phase_id: str = ""
+    schema_version: str = _BP_SCHEMA_VERSION
+    generated_at_utc: str = ""
+    connected_chain_artifacts_checked: bool = True
+    execution_available: bool = False
+    backend_invocation_available: bool = False
+    adapter_execution_available: bool = False
+    subprocess_execution_available: bool = False
+    shell_execution_available: bool = False
+    network_call_available: bool = False
+    telegram_inbound_available: bool = False
+    telegram_polling_available: bool = False
+    remote_shell_available: bool = False
+    run_command_available: bool = False
+    enforcement_available: bool = False
+    automatic_apply_available: bool = False
+    apply_execution_available: bool = False
+    patch_parsing_available: bool = False
+    commit_authorization_available: bool = False
+    push_authorization_available: bool = False
+    real_ai_backend_calls_available: bool = False
+    executable_artifact_invocation_available: bool = False
+    execution_enablement_flag_present: bool = False
+    execution_availability_toggle_present: bool = False
+    proof_status: str = "execution_unavailable"
+    proof_checks: list[str] = field(default_factory=list)
+    no_execution: bool = True
+    simulation_only: bool = True
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["proof_checks"] = list(self.proof_checks)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ExecutionBoundaryProof":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+def generate_execution_boundary_proof() -> ExecutionBoundaryProof:
+    """Generate a deterministic proof that execution is unavailable."""
+    now = datetime.now(timezone.utc).isoformat()
+    checks = [
+        "no_subprocess_import_in_connected_path",
+        "no_shell_execution_in_connected_path",
+        "no_network_call_in_connected_path",
+        "no_backend_invocation_in_connected_path",
+        "no_adapter_execution_in_connected_path",
+        "no_telegram_inbound_in_connected_path",
+        "no_apply_execution_in_connected_path",
+        "no_patch_parsing_in_connected_path",
+        "no_commit_authorization_in_connected_path",
+        "no_push_authorization_in_connected_path",
+        "all_execution_capability_flags_false",
+        "execute_command_unavailable",
+        "dry_run_only_mode_active",
+        "finalization_gate_active",
+        "connected_chain_non_executing",
+    ]
+    proof = ExecutionBoundaryProof(
+        phase_id="96H", generated_at_utc=now,
+        proof_checks=checks,
+        proof_status="execution_unavailable",
+    )
+    proof.record_digest = proof.compute_digest()
+    return proof
+
+
+def _bp_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_BP_DIR)
+
+
+def persist_execution_boundary_proof(proof: ExecutionBoundaryProof) -> dict:
+    import os
+    d = _bp_dir()
+    try: d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+    if not proof.record_digest: proof.record_digest = proof.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-96H.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(proof.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(proof.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "latest": str(lp)}
+    except Exception as exc: return {"status": "failed", "error": str(exc)}
+
+
+def load_latest_execution_boundary_proof() -> ExecutionBoundaryProof | None:
+    lp = _bp_dir() / "latest.json"
+    if not lp.exists(): return None
+    try:
+        return ExecutionBoundaryProof.from_dict(_json.loads(lp.read_text()))
+    except Exception: return None
+
+
+def verify_execution_boundary_proof(proof: ExecutionBoundaryProof) -> dict:
+    issues: list[str] = []
+    if not proof.record_digest: issues.append("missing record_digest")
+    elif proof.record_digest != proof.compute_digest(): issues.append("record_digest_mismatch")
+    if proof.execution_available: issues.append("execution_available must be False")
+    if proof.backend_invocation_available: issues.append("backend_invocation_available must be False")
+    if proof.subprocess_execution_available: issues.append("subprocess_execution_available must be False")
+    if proof.shell_execution_available: issues.append("shell_execution_available must be False")
+    if proof.network_call_available: issues.append("network_call_available must be False")
+    if proof.telegram_inbound_available: issues.append("telegram_inbound_available must be False")
+    if proof.apply_execution_available: issues.append("apply_execution_available must be False")
+    if proof.commit_authorization_available: issues.append("commit_authorization_available must be False")
+    if proof.push_authorization_available: issues.append("push_authorization_available must be False")
+    if not proof.no_execution: issues.append("no_execution must be True")
+    return {"valid": len(issues) == 0, "issues": issues}

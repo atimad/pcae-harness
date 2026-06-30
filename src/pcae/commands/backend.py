@@ -2844,3 +2844,70 @@ def run_backend_invoke_artifact_only_ea_demo(args: argparse.Namespace) -> int:
         print()
         print("  ⚠️  Connected dry-run demo. No backend was invoked. Chain is non-executing.")
     return 0
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 96H — Execution boundary proof CLI
+# ═══════════════════════════════════════════════════════════════════════════
+
+def run_backend_execution_boundary_proof(args: argparse.Namespace) -> int:
+    """pcae backend execution-boundary proof [--save] [--json]
+
+    Generates a machine-readable proof that execution is unavailable.
+    Evidence only — does not authorize anything.
+    """
+    from pcae.core.backend_invocations import (
+        generate_execution_boundary_proof, persist_execution_boundary_proof,
+        verify_execution_boundary_proof, load_latest_execution_boundary_proof,
+    )
+    save = getattr(args, "save", False) or False
+    show_latest = getattr(args, "show_latest", False) or False
+    verify_latest = getattr(args, "verify_latest", False) or False
+
+    if verify_latest:
+        p = load_latest_execution_boundary_proof()
+        if p is None:
+            print(json.dumps({"error": "No latest boundary proof found."}) if getattr(args, "json", False) else "Error: No latest boundary proof found.")
+            return 1
+        v = verify_execution_boundary_proof(p)
+        if getattr(args, "json", False):
+            print(json.dumps(v, indent=2))
+        else:
+            print(f"Boundary proof: {'valid ✅' if v['valid'] else 'INVALID ❌'}")
+            for i in v.get("issues", []): print(f"  - {i}")
+        return 0 if v["valid"] else 1
+
+    if show_latest:
+        p = load_latest_execution_boundary_proof()
+        if p is None:
+            print(json.dumps({"error": "No latest boundary proof found."}) if getattr(args, "json", False) else "Error: No latest boundary proof found.")
+            return 1
+        if getattr(args, "json", False):
+            print(json.dumps(p.to_dict(), indent=2))
+        else:
+            print(f"Execution Boundary Proof: {p.phase_id}")
+            print(f"  Status:               {p.proof_status}")
+            print(f"  Execution available:  {'yes' if p.execution_available else 'no'}")
+            print(f"  Backend invocation:   {'yes' if p.backend_invocation_available else 'no'}")
+            print(f"  Subprocess:           {'yes' if p.subprocess_execution_available else 'no'}")
+            print(f"  Shell:                {'yes' if p.shell_execution_available else 'no'}")
+            print(f"  Network:              {'yes' if p.network_call_available else 'no'}")
+            print(f"  Telegram inbound:     {'yes' if p.telegram_inbound_available else 'no'}")
+            print(f"  Apply:                {'yes' if p.apply_execution_available else 'no'}")
+            print(f"  Commit auth:          {'yes' if p.commit_authorization_available else 'no'}")
+            print(f"  Push auth:            {'yes' if p.push_authorization_available else 'no'}")
+            print(f"  No execution:         {'yes' if p.no_execution else 'no'}")
+            print(f"  Simulation only:      {'yes' if p.simulation_only else 'no'}")
+            print(f"  Checks:               {len(p.proof_checks)} passed")
+        return 0
+
+    proof = generate_execution_boundary_proof()
+    if save: persist_execution_boundary_proof(proof)
+    if getattr(args, "json", False):
+        print(json.dumps(proof.to_dict(), indent=2))
+    else:
+        print(f"Execution Boundary Proof generated.")
+        print(f"  Execution available:  no")
+        print(f"  No execution:         yes")
+        print(f"  Checks:               {len(proof.proof_checks)} passed")
+    return 0

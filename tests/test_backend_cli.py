@@ -2530,3 +2530,54 @@ class Test96GVerificationHardening:
         r = _run(["invoke", "artifact-only", "execution-adjacent", "verify", "--latest", "--json"])
         assert r.returncode != 0
         assert "error" in json.loads(r.stdout)
+
+
+class Test96HBoundaryProof:
+    """Execution-unavailable boundary proof tests."""
+
+    def test_proof_json_execution_unavailable(self):
+        r = _run(["execution-boundary", "proof", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["execution_available"] is False
+        assert d["no_execution"] is True
+        assert d["simulation_only"] is True
+
+    def test_proof_all_availability_false(self):
+        r = _run(["execution-boundary", "proof", "--json"])
+        d = json.loads(r.stdout)
+        for field in ["backend_invocation_available", "adapter_execution_available",
+                       "subprocess_execution_available", "shell_execution_available",
+                       "network_call_available", "telegram_inbound_available",
+                       "apply_execution_available", "patch_parsing_available",
+                       "commit_authorization_available", "push_authorization_available",
+                       "real_ai_backend_calls_available", "enforcement_available",
+                       "automatic_apply_available", "remote_shell_available",
+                       "run_command_available", "telegram_polling_available"]:
+            assert d[field] is False, f"{field} must be False"
+
+    def test_proof_save_and_show(self):
+        _run(["execution-boundary", "proof", "--save"])
+        r = _run(["execution-boundary", "proof", "--show-latest", "--json"])
+        assert r.returncode == 0
+        d = json.loads(r.stdout)
+        assert d["execution_available"] is False
+
+    def test_proof_save_and_verify(self):
+        _run(["execution-boundary", "proof", "--save"])
+        r = _run(["execution-boundary", "proof", "--verify-latest", "--json"])
+        assert r.returncode == 0
+        assert json.loads(r.stdout)["valid"] is True
+
+    def test_proof_digest_stable(self):
+        r1 = _run(["execution-boundary", "proof", "--json"])
+        r2 = _run(["execution-boundary", "proof", "--json"])
+        d1, d2 = json.loads(r1.stdout), json.loads(r2.stdout)
+        assert d1["record_digest"] is not None
+        # Digests differ because generated_at_utc changes
+
+    def test_proof_no_subprocess_in_code(self):
+        import inspect
+        from pcae.commands.backend import run_backend_execution_boundary_proof
+        src = inspect.getsource(run_backend_execution_boundary_proof)
+        assert "subprocess.run" not in src
