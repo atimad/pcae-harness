@@ -1,16 +1,16 @@
 {
-    "phase_id": "95X",
-    "phase_name": "phase_95x_final_review",
-    "phase_title": "Final Readiness Review",
+    "phase_id": "96A",
+    "phase_name": "phase_96a_execution_adjacent_design",
+    "phase_title": "Execution-Adjacent Boundary Design",
     "files_changed": [
-        "docs/PHASE_95_ARTIFACT_ONLY_DRY_RUN_STACK_FINAL_READINESS_REVIEW.md",
+        "docs/PHASE_96_EXECUTION_ADJACENT_BOUNDARY_DESIGN.md",
         "PROJECT_STATUS.md",
         "CHANGELOG.md",
         "tasks/DONE.md",
-        "tasks/active/20260630-1750-phase-95x-final-review.md"
+        "tasks/active/20260630-1800-phase-96a-design.md"
     ],
     "files_changed_count": 5,
-    "tests_added_or_updated": "0 tests_added (review-only)",
+    "tests_added_or_updated": "0 tests_added (design-only)",
     "validation_results": [
         {
             "name": "report_notification_tests",
@@ -63,19 +63,20 @@
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. Next phase not started.",
     "phase_commits": [
         {
-            "hash": "e7a149a2",
-            "subject": "Review dry-run stack final readiness"
+            "hash": "8a80a1fd",
+            "subject": "Design execution-adjacent boundary"
         }
     ],
     "commit_attribution": "phase_owned",
-    "recommended_next_phase": "96A \u2014 Execution-Adjacent Boundary Design",
-    "summary": "Phase 95X complete: Final Readiness Review. Phase 95 closure recommended. 22 phases reviewed. All go/no-go pass. Recommends 96A.",
+    "recommended_next_phase": "96B \u2014 Execution-Adjacent Plan Model",
+    "summary": "Phase 96A complete: Execution-Adjacent Boundary Design. Defined execution-adjacent space, 13 prohibited-action categories, 5 approval rules, 21 fail-closed conditions. Recommends 96B.",
     "executive_decisions": {
-        "phase_95_dry_run_stack_complete": true,
-        "artifact_only_dry_run_stack_ready": true,
-        "phase_95_can_close": true,
+        "execution_adjacent_design_ready": true,
         "artifact_only_execution_ready": false,
-        "real_backend_execution_ready": false
+        "real_backend_execution_ready": false,
+        "subprocess_mediation_ready": false,
+        "auto_apply_ready": false,
+        "telegram_inbound_ready": false
     },
     "pushed": true,
     "pushed_status": "pushed",
