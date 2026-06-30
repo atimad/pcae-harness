@@ -5802,3 +5802,437 @@ class Test95GDryRunIntegration:
         a = evaluate_artifact_only_real_invocation_dry_run(plan=plan)
         j = json.dumps(a.to_dict())
         assert "sk-ant" not in j
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95K — Artifact-only invocation command boundary model tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    ArtifactOnlyInvocationCommandBoundary,
+    ArtifactOnlyInvocationCommandBoundaryAssessment,
+    validate_artifact_only_invocation_command_boundary,
+    persist_artifact_only_invocation_command_boundary,
+    verify_artifact_only_invocation_command_boundary,
+    load_latest_artifact_only_invocation_command_boundary,
+    persist_artifact_only_invocation_command_boundary_assessment,
+    verify_artifact_only_invocation_command_boundary_assessment,
+    load_latest_artifact_only_invocation_command_boundary_assessment,
+    COMMAND_MODE_PLAN,
+    COMMAND_MODE_DRY_RUN,
+    COMMAND_MODE_EXECUTE_RESERVED,
+    BOUNDARY_READY_FOR_PLAN,
+    BOUNDARY_READY_FOR_DRY_RUN,
+    BOUNDARY_HARD_BLOCK,
+    BOUNDARY_UNSUPPORTED_EXECUTE,
+    DECISION_DENY,
+    DECISION_HARD_BLOCK,
+    DECISION_ALLOW_DRY_RUN,
+)
+
+
+def _valid_boundary(**overrides) -> ArtifactOnlyInvocationCommandBoundary:
+    """Build a fully valid plan-mode boundary for tests."""
+    kwargs = {
+        "boundary_id": "cb-test-001",
+        "phase_id": "95K",
+        "task_id": "20260630-test",
+        "backend_id": "mock",
+        "adapter_id": "mock-adapter",
+        "prompt_artifact_path": "/p/prompt.md",
+        "prompt_artifact_digest": "abc123",
+        "preflight_artifact_path": "/p/preflight.json",
+        "preflight_artifact_digest": "def456",
+        "runtime_evidence_path": "/p/runtime.json",
+        "runtime_evidence_digest": "ghi789",
+        "approval_artifact_path": "/p/approval.json",
+        "approval_artifact_digest": "jkl012",
+        "invocation_plan_path": "/p/plan.json",
+        "invocation_plan_digest": "mno345",
+        "broker_decision_id": "bd-001",
+        "broker_decision": DECISION_ALLOW_DRY_RUN,
+        "shell_gate_decision_id": "sg-001",
+        "shell_gate_decision": DECISION_ALLOW_DRY_RUN,
+        "output_quarantine_path": "/q",
+        "audit_path": "/a",
+        "timeout_seconds": 120,
+        "redaction_policy_id": "rp-001",
+        "operator_approval_reference": "approval-001",
+        "command_mode": COMMAND_MODE_PLAN,
+    }
+    kwargs.update(overrides)
+    return ArtifactOnlyInvocationCommandBoundary(**kwargs)
+
+
+class Test95KCommandBoundaryModel:
+    """Model structure and digest tests."""
+
+    def test_valid_plan_boundary_round_trip(self):
+        b = _valid_boundary()
+        d = b.to_dict()
+        b2 = ArtifactOnlyInvocationCommandBoundary.from_dict(d)
+        assert b2.boundary_id == b.boundary_id
+        assert b2.backend_id == "mock"
+        assert b2.command_mode == COMMAND_MODE_PLAN
+
+    def test_all_safety_flags_default_true(self):
+        b = ArtifactOnlyInvocationCommandBoundary()
+        assert b.no_real_backend_invoked is True
+        assert b.no_adapter_executed is True
+        assert b.no_subprocess is True
+        assert b.no_network is True
+        assert b.no_repo_mutation is True
+        assert b.no_apply is True
+        assert b.no_patch_parsing is True
+        assert b.no_commit_push_authorization is True
+        assert b.no_telegram_inbound is True
+        assert b.dry_run_only is True
+        assert b.execute_requested is False
+
+    def test_digest_stable(self):
+        b = _valid_boundary()
+        d1 = b.compute_digest()
+        d2 = b.compute_digest()
+        assert d1 == d2
+        assert len(d1) == 64  # SHA-256 hex
+
+    def test_digest_changes_on_field_change(self):
+        b = _valid_boundary()
+        d1 = b.compute_digest()
+        b.backend_id = "claude"
+        d2 = b.compute_digest()
+        assert d1 != d2
+
+    def test_digest_excludes_record_digest(self):
+        b = _valid_boundary()
+        b.record_digest = "fakesomething"
+        d = b.compute_digest()
+        # record_digest is excluded in compute_digest, so setting it shouldn't change hash
+        assert "fakesomething" not in d
+
+    def test_from_dict_ignores_unknown_fields(self):
+        d = _valid_boundary().to_dict()
+        d["extra_field"] = "should be ignored"
+        b = ArtifactOnlyInvocationCommandBoundary.from_dict(d)
+        assert not hasattr(b, "extra_field")
+
+    def test_assessment_defaults(self):
+        a = ArtifactOnlyInvocationCommandBoundaryAssessment()
+        assert a.execution_allowed is False
+        assert a.execute_supported is False
+        assert a.dry_run_only is True
+        assert a.ready is False
+
+    def test_assessment_digest_stable(self):
+        a = ArtifactOnlyInvocationCommandBoundaryAssessment(assessment_id="a1")
+        d1 = a.compute_digest()
+        d2 = a.compute_digest()
+        assert d1 == d2
+
+
+class Test95KCommandBoundaryValidation:
+    """Validation rules from 95J design."""
+
+    def test_valid_plan_returns_ready_for_plan(self):
+        b = _valid_boundary(command_mode=COMMAND_MODE_PLAN)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert a.decision == BOUNDARY_READY_FOR_PLAN
+        assert a.ready is True
+        assert a.execution_allowed is False
+        assert a.execute_supported is False
+
+    def test_valid_dry_run_returns_ready_for_dry_run(self):
+        b = _valid_boundary(command_mode=COMMAND_MODE_DRY_RUN)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert a.decision == BOUNDARY_READY_FOR_DRY_RUN
+        assert a.ready is True
+
+    def test_execute_reserved_hard_blocks(self):
+        b = _valid_boundary(command_mode=COMMAND_MODE_EXECUTE_RESERVED)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert a.decision == BOUNDARY_UNSUPPORTED_EXECUTE
+        assert a.ready is False
+        assert "execute_reserved_not_supported" in a.hard_blocks
+
+    def test_execute_requested_true_hard_blocks(self):
+        b = _valid_boundary(execute_requested=True)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "execute_requested=True" in a.hard_blocks
+
+    def test_missing_backend_blocks(self):
+        b = _valid_boundary(backend_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "backend_id_missing" in a.hard_blocks
+
+    def test_missing_adapter_blocks(self):
+        b = _valid_boundary(adapter_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "adapter_id_missing" in a.hard_blocks
+
+    def test_missing_prompt_path_blocks(self):
+        b = _valid_boundary(prompt_artifact_path="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "prompt_artifact_path_missing" in a.hard_blocks
+
+    def test_missing_prompt_digest_blocks(self):
+        b = _valid_boundary(prompt_artifact_digest="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "prompt_artifact_digest_missing" in a.hard_blocks
+
+    def test_missing_preflight_path_blocks(self):
+        b = _valid_boundary(preflight_artifact_path="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "preflight_artifact_path_missing" in a.hard_blocks
+
+    def test_missing_preflight_digest_blocks(self):
+        b = _valid_boundary(preflight_artifact_digest="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "preflight_artifact_digest_missing" in a.hard_blocks
+
+    def test_missing_runtime_evidence_path_blocks(self):
+        b = _valid_boundary(runtime_evidence_path="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "runtime_evidence_path_missing" in a.hard_blocks
+
+    def test_missing_runtime_evidence_digest_blocks(self):
+        b = _valid_boundary(runtime_evidence_digest="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "runtime_evidence_digest_missing" in a.hard_blocks
+
+    def test_missing_approval_path_blocks(self):
+        b = _valid_boundary(approval_artifact_path="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "approval_artifact_path_missing" in a.hard_blocks
+
+    def test_missing_approval_digest_blocks(self):
+        b = _valid_boundary(approval_artifact_digest="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "approval_artifact_digest_missing" in a.hard_blocks
+
+    def test_missing_invocation_plan_path_blocks(self):
+        b = _valid_boundary(invocation_plan_path="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "invocation_plan_path_missing" in a.hard_blocks
+
+    def test_missing_invocation_plan_digest_blocks(self):
+        b = _valid_boundary(invocation_plan_digest="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "invocation_plan_digest_missing" in a.hard_blocks
+
+    def test_broker_deny_blocks(self):
+        b = _valid_boundary(broker_decision=DECISION_DENY)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert any("broker_decision:deny" in hb for hb in a.hard_blocks)
+
+    def test_broker_hard_block_blocks(self):
+        b = _valid_boundary(broker_decision=DECISION_HARD_BLOCK)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert any("broker_decision:hard_block" in hb for hb in a.hard_blocks)
+
+    def test_shell_gate_deny_blocks(self):
+        b = _valid_boundary(shell_gate_decision=DECISION_DENY)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert any("shell_gate_decision:deny" in hb for hb in a.hard_blocks)
+
+    def test_shell_gate_hard_block_blocks(self):
+        b = _valid_boundary(shell_gate_decision=DECISION_HARD_BLOCK)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert any("shell_gate_decision:hard_block" in hb for hb in a.hard_blocks)
+
+    def test_missing_quarantine_path_blocks(self):
+        b = _valid_boundary(output_quarantine_path="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "output_quarantine_path_missing" in a.hard_blocks
+
+    def test_missing_audit_path_blocks(self):
+        b = _valid_boundary(audit_path="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "audit_path_missing" in a.hard_blocks
+
+    def test_timeout_zero_blocks(self):
+        b = _valid_boundary(timeout_seconds=0)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "timeout_missing_or_invalid" in a.hard_blocks
+
+    def test_timeout_negative_blocks(self):
+        b = _valid_boundary(timeout_seconds=-1)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "timeout_missing_or_invalid" in a.hard_blocks
+
+    def test_redaction_policy_missing_blocks(self):
+        b = _valid_boundary(redaction_policy_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "redaction_policy_id_missing" in a.hard_blocks
+
+    def test_operator_approval_missing_blocks(self):
+        b = _valid_boundary(operator_approval_reference="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "operator_approval_reference_missing" in a.hard_blocks
+
+    def test_no_real_backend_invoked_false_blocks(self):
+        b = _valid_boundary(no_real_backend_invoked=False)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "no_real_backend_invoked=False" in a.hard_blocks
+
+    def test_no_subprocess_false_blocks(self):
+        b = _valid_boundary(no_subprocess=False)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "no_subprocess=False" in a.hard_blocks
+
+    def test_no_network_false_blocks(self):
+        b = _valid_boundary(no_network=False)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "no_network=False" in a.hard_blocks
+
+    def test_no_apply_false_blocks(self):
+        b = _valid_boundary(no_apply=False)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "no_apply=False" in a.hard_blocks
+
+    def test_unknown_command_mode_blocks(self):
+        b = _valid_boundary(command_mode="invalid_mode")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert any("unknown_command_mode" in hb for hb in a.hard_blocks)
+
+    def test_dry_run_only_false_blocks(self):
+        b = _valid_boundary(dry_run_only=False)
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "dry_run_only=False" in a.hard_blocks
+
+    def test_boundary_id_missing_blocks(self):
+        b = _valid_boundary(boundary_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "boundary_id_missing" in a.hard_blocks
+
+    def test_phase_id_missing_blocks(self):
+        b = _valid_boundary(phase_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "phase_id_missing" in a.hard_blocks
+
+    def test_task_id_missing_blocks(self):
+        b = _valid_boundary(task_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "task_id_missing" in a.hard_blocks
+
+    def test_broker_decision_id_missing_blocks(self):
+        b = _valid_boundary(broker_decision_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "broker_decision_id_missing" in a.hard_blocks
+
+    def test_shell_gate_decision_id_missing_blocks(self):
+        b = _valid_boundary(shell_gate_decision_id="")
+        a = validate_artifact_only_invocation_command_boundary(b)
+        assert "shell_gate_decision_id_missing" in a.hard_blocks
+
+
+class Test95KCommandBoundaryPersistence:
+    """Persistence and verification tests."""
+
+    def test_persist_and_load_boundary(self, tmp_path):
+        import os as _os
+        b = _valid_boundary()
+        b.record_digest = b.compute_digest()
+        result = persist_artifact_only_invocation_command_boundary(b)
+        assert result["status"] == "written"
+
+    def test_verify_valid_boundary(self):
+        b = _valid_boundary()
+        b.record_digest = b.compute_digest()
+        v = verify_artifact_only_invocation_command_boundary(b)
+        assert v["valid"] is True
+
+    def test_verify_tampered_boundary_fails(self):
+        b = _valid_boundary()
+        b.record_digest = b.compute_digest()
+        b.backend_id = "tampered"
+        v = verify_artifact_only_invocation_command_boundary(b)
+        assert v["valid"] is False
+        assert "record_digest_mismatch" in v["issues"]
+
+    def test_persist_and_load_assessment(self, tmp_path):
+        b = _valid_boundary()
+        a = validate_artifact_only_invocation_command_boundary(b)
+        a.record_digest = a.compute_digest()
+        result = persist_artifact_only_invocation_command_boundary_assessment(a)
+        assert result["status"] == "written"
+
+    def test_verify_assessment_execution_allowed_must_be_false(self):
+        a = ArtifactOnlyInvocationCommandBoundaryAssessment(
+            assessment_id="a1", execution_allowed=True,
+        )
+        a.record_digest = a.compute_digest()
+        v = verify_artifact_only_invocation_command_boundary_assessment(a)
+        assert v["valid"] is False
+        assert "execution_allowed must be False" in v["issues"]
+
+    def test_verify_assessment_execute_supported_must_be_false(self):
+        a = ArtifactOnlyInvocationCommandBoundaryAssessment(
+            assessment_id="a1", execute_supported=True,
+        )
+        a.record_digest = a.compute_digest()
+        v = verify_artifact_only_invocation_command_boundary_assessment(a)
+        assert v["valid"] is False
+        assert "execute_supported must be False" in v["issues"]
+
+    def test_load_nonexistent_returns_none(self):
+        import shutil, os as _os
+        d = _os.path.join(_os.getcwd(), ".pcae/artifact-only-invocation-boundaries")
+        if _os.path.exists(d):
+            shutil.rmtree(d)
+        result = load_latest_artifact_only_invocation_command_boundary()
+        assert result is None
+
+    def test_load_nonexistent_assessment_returns_none(self):
+        import shutil, os as _os
+        d = _os.path.join(_os.getcwd(), ".pcae/artifact-only-invocation-boundaries/assessments")
+        if _os.path.exists(d):
+            shutil.rmtree(d)
+        result = load_latest_artifact_only_invocation_command_boundary_assessment()
+        assert result is None
+
+
+class Test95KCommandBoundarySafety:
+    """No-execution invariants."""
+
+    def test_no_subprocess_in_code(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_invocation_command_boundary)
+        # "subprocess" in docstring is OK — check for actual subprocess calls
+        assert "subprocess.run" not in src
+        assert "subprocess.Popen" not in src
+
+    def test_no_network_in_code(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_invocation_command_boundary)
+        assert "urllib" not in src.lower()
+        assert "http" not in src.lower()
+        assert "socket" not in src.lower()
+
+    def test_no_shell_in_code(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_invocation_command_boundary)
+        assert "os.system" not in src
+        assert "shell=True" not in src
+
+    def test_no_backend_invocation_in_code(self):
+        import inspect
+        src = inspect.getsource(validate_artifact_only_invocation_command_boundary)
+        assert "invoke_backend" not in src.lower()
+        assert "subprocess.run" not in src
+        assert "subprocess.Popen" not in src
+
+    def test_no_cli_registration(self):
+        """Verify no CLI command was registered for artifact-only invoke."""
+        from pcae.cli import main as _cli_main
+        import io, sys as _sys
+        old_stdout = _sys.stdout
+        try:
+            _sys.stdout = io.StringIO()
+            try:
+                _cli_main()
+            except SystemExit:
+                pass
+            output = _sys.stdout.getvalue()
+        finally:
+            _sys.stdout = old_stdout
+        assert "artifact-only" not in output.lower() or "not recognized" in output.lower()

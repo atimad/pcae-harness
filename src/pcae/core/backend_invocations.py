@@ -5906,3 +5906,441 @@ def evaluate_runtime_evidence_shell_gate_decision(
 
     return {"decision": decision, "hard_blocks": hard_blocks, "missing_evidence": missing,
             "allow_dry_run_only": True, "no_execution": True}
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95K — Artifact-only invocation command boundary model
+# ═══════════════════════════════════════════════════════════════════════════
+
+_BOUNDARY_SCHEMA_VERSION = "1.0"
+_BOUNDARY_DIR = ".pcae/artifact-only-invocation-boundaries"
+
+# ── Command modes ─────────────────────────────────────────────────────────
+
+COMMAND_MODE_PLAN = "plan"
+COMMAND_MODE_DRY_RUN = "dry_run"
+COMMAND_MODE_EXECUTE_RESERVED = "execute_reserved"
+
+VALID_COMMAND_MODES: frozenset[str] = frozenset({
+    COMMAND_MODE_PLAN, COMMAND_MODE_DRY_RUN, COMMAND_MODE_EXECUTE_RESERVED,
+})
+
+# ── Boundary decisions ─────────────────────────────────────────────────────
+
+BOUNDARY_READY_FOR_PLAN = "ready_for_plan"
+BOUNDARY_READY_FOR_DRY_RUN = "ready_for_dry_run"
+BOUNDARY_HARD_BLOCK = "hard_block"
+BOUNDARY_UNSUPPORTED_EXECUTE = "unsupported_execute"
+BOUNDARY_MISSING_INPUTS = "missing_inputs"
+BOUNDARY_MISMATCH = "mismatch"
+
+
+@dataclass
+class ArtifactOnlyInvocationCommandBoundary:
+    """Command boundary input model for artifact-only backend invocation.
+
+    Translates the 95J design into deterministic Python data model.
+    No execution capability — validation and planning only.
+    """
+
+    boundary_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    backend_id: str = ""
+    adapter_id: str = ""
+    prompt_artifact_path: str = ""
+    prompt_artifact_digest: str = ""
+    preflight_artifact_path: str = ""
+    preflight_artifact_digest: str = ""
+    runtime_evidence_path: str = ""
+    runtime_evidence_digest: str = ""
+    approval_artifact_path: str = ""
+    approval_artifact_digest: str = ""
+    invocation_plan_path: str = ""
+    invocation_plan_digest: str = ""
+    broker_decision_id: str = ""
+    broker_decision: str = ""
+    shell_gate_decision_id: str = ""
+    shell_gate_decision: str = ""
+    output_quarantine_path: str = ""
+    audit_path: str = ""
+    timeout_seconds: int = 0
+    redaction_policy_id: str = ""
+    operator_approval_reference: str = ""
+    command_mode: str = COMMAND_MODE_PLAN
+    execute_requested: bool = False
+    dry_run_only: bool = True
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_repo_mutation: bool = True
+    no_apply: bool = True
+    no_patch_parsing: bool = True
+    no_commit_push_authorization: bool = True
+    no_telegram_inbound: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _BOUNDARY_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArtifactOnlyInvocationCommandBoundary":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+@dataclass
+class ArtifactOnlyInvocationCommandBoundaryAssessment:
+    """Validation assessment for a command boundary.
+
+    Always returns execution_allowed=False.  Execute is unsupported in 95K.
+    """
+
+    assessment_id: str = ""
+    boundary_id: str = ""
+    phase_id: str = ""
+    task_id: str = ""
+    command_mode: str = ""
+    ready: bool = False
+    decision: str = ""
+    hard_blocks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    missing_inputs: list[str] = field(default_factory=list)
+    mismatch_reasons: list[str] = field(default_factory=list)
+    failure_classifications: list[str] = field(default_factory=list)
+    execution_allowed: bool = False
+    execute_supported: bool = False
+    dry_run_only: bool = True
+    broker_shell_gate_ready: bool = False
+    output_quarantine_ready: bool = False
+    audit_ready: bool = False
+    timeout_ready: bool = False
+    evidence_chain_ready: bool = False
+    no_real_backend_invoked: bool = True
+    no_adapter_executed: bool = True
+    no_subprocess: bool = True
+    no_network: bool = True
+    no_repo_mutation: bool = True
+    no_apply: bool = True
+    no_patch_parsing: bool = True
+    no_commit_push_authorization: bool = True
+    no_telegram_inbound: bool = True
+    created_at_utc: str = ""
+    schema_version: str = _BOUNDARY_SCHEMA_VERSION
+    record_digest: str = ""
+
+    def to_dict(self, *, include_digest: bool = True) -> dict[str, Any]:
+        d = {f: getattr(self, f) for f in self.__dataclass_fields__}
+        d["hard_blocks"] = list(self.hard_blocks)
+        d["warnings"] = list(self.warnings)
+        d["missing_inputs"] = list(self.missing_inputs)
+        d["mismatch_reasons"] = list(self.mismatch_reasons)
+        d["failure_classifications"] = list(self.failure_classifications)
+        if not include_digest:
+            d.pop("record_digest", None)
+        return d
+
+    def compute_digest(self) -> str:
+        import hashlib
+        d = self.to_dict(include_digest=False)
+        canonical = _json.dumps(d, sort_keys=True, default=str)
+        return hashlib.sha256(canonical.encode()).hexdigest()
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ArtifactOnlyInvocationCommandBoundaryAssessment":
+        return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+
+
+def validate_artifact_only_invocation_command_boundary(
+    boundary: ArtifactOnlyInvocationCommandBoundary,
+) -> ArtifactOnlyInvocationCommandBoundaryAssessment:
+    """Validate a command boundary against all 95K rules.
+
+    Model-only validation — never executes, never invokes backends,
+    never spawns subprocess.  Always returns execution_allowed=False.
+    """
+    import uuid as _uuid
+    now = datetime.now(timezone.utc).isoformat()
+    assessment_id = f"cba-{_uuid.uuid4().hex[:12]}"
+
+    hard_blocks: list[str] = []
+    warnings_list: list[str] = []
+    missing: list[str] = []
+    mismatches: list[str] = []
+    failures: list[str] = []
+
+    # ── Identity fields ──────────────────────────────────────────────────
+    if not boundary.boundary_id:
+        hard_blocks.append("boundary_id_missing")
+    if not boundary.phase_id:
+        hard_blocks.append("phase_id_missing")
+    if not boundary.task_id:
+        hard_blocks.append("task_id_missing")
+
+    # ── Backend/adapter ───────────────────────────────────────────────────
+    if not boundary.backend_id:
+        hard_blocks.append("backend_id_missing")
+    if not boundary.adapter_id:
+        hard_blocks.append("adapter_id_missing")
+
+    # ── Artifact paths and digests ────────────────────────────────────────
+    _required_artifacts = [
+        ("prompt_artifact", boundary.prompt_artifact_path, boundary.prompt_artifact_digest),
+        ("preflight_artifact", boundary.preflight_artifact_path, boundary.preflight_artifact_digest),
+        ("runtime_evidence", boundary.runtime_evidence_path, boundary.runtime_evidence_digest),
+        ("approval_artifact", boundary.approval_artifact_path, boundary.approval_artifact_digest),
+        ("invocation_plan", boundary.invocation_plan_path, boundary.invocation_plan_digest),
+    ]
+    for name, path, digest in _required_artifacts:
+        if not path:
+            hard_blocks.append(f"{name}_path_missing")
+        if not digest:
+            hard_blocks.append(f"{name}_digest_missing")
+
+    # ── Broker / shell-gate decisions ─────────────────────────────────────
+    if not boundary.broker_decision_id:
+        hard_blocks.append("broker_decision_id_missing")
+    if not boundary.broker_decision:
+        hard_blocks.append("broker_decision_missing")
+    elif boundary.broker_decision in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE):
+        hard_blocks.append(f"broker_decision:{boundary.broker_decision}")
+
+    if not boundary.shell_gate_decision_id:
+        hard_blocks.append("shell_gate_decision_id_missing")
+    if not boundary.shell_gate_decision:
+        hard_blocks.append("shell_gate_decision_missing")
+    elif boundary.shell_gate_decision in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE):
+        hard_blocks.append(f"shell_gate_decision:{boundary.shell_gate_decision}")
+
+    # ── Paths and timeout ─────────────────────────────────────────────────
+    if not boundary.output_quarantine_path:
+        hard_blocks.append("output_quarantine_path_missing")
+    if not boundary.audit_path:
+        hard_blocks.append("audit_path_missing")
+    if boundary.timeout_seconds <= 0:
+        hard_blocks.append("timeout_missing_or_invalid")
+    if not boundary.redaction_policy_id:
+        hard_blocks.append("redaction_policy_id_missing")
+    if not boundary.operator_approval_reference:
+        hard_blocks.append("operator_approval_reference_missing")
+
+    # ── Command mode ──────────────────────────────────────────────────────
+    if boundary.command_mode not in VALID_COMMAND_MODES:
+        hard_blocks.append(f"unknown_command_mode:{boundary.command_mode}")
+    if boundary.command_mode == COMMAND_MODE_EXECUTE_RESERVED:
+        hard_blocks.append("execute_reserved_not_supported")
+    if boundary.execute_requested:
+        hard_blocks.append("execute_requested=True")
+    if not boundary.dry_run_only:
+        hard_blocks.append("dry_run_only=False")
+
+    # ── Safety invariants ─────────────────────────────────────────────────
+    _safety_checks = [
+        ("no_real_backend_invoked", boundary.no_real_backend_invoked),
+        ("no_adapter_executed", boundary.no_adapter_executed),
+        ("no_subprocess", boundary.no_subprocess),
+        ("no_network", boundary.no_network),
+        ("no_repo_mutation", boundary.no_repo_mutation),
+        ("no_apply", boundary.no_apply),
+        ("no_patch_parsing", boundary.no_patch_parsing),
+        ("no_commit_push_authorization", boundary.no_commit_push_authorization),
+        ("no_telegram_inbound", boundary.no_telegram_inbound),
+    ]
+    for name, flag in _safety_checks:
+        if not flag:
+            hard_blocks.append(f"{name}=False")
+
+    # ── Determine outcome ─────────────────────────────────────────────────
+    if hard_blocks:
+        if any("execute" in hb for hb in hard_blocks):
+            decision = BOUNDARY_UNSUPPORTED_EXECUTE
+        else:
+            decision = BOUNDARY_HARD_BLOCK
+        ready = False
+    elif missing:
+        decision = BOUNDARY_MISSING_INPUTS
+        ready = False
+    elif mismatches:
+        decision = BOUNDARY_MISMATCH
+        ready = False
+    elif boundary.command_mode == COMMAND_MODE_PLAN:
+        decision = BOUNDARY_READY_FOR_PLAN
+        ready = True
+    elif boundary.command_mode == COMMAND_MODE_DRY_RUN:
+        decision = BOUNDARY_READY_FOR_DRY_RUN
+        ready = True
+    else:
+        decision = BOUNDARY_HARD_BLOCK
+        ready = False
+
+    # Build failure classifications
+    for hb in hard_blocks:
+        failures.append(hb)
+    for m in missing:
+        failures.append(f"missing:{m}")
+
+    return ArtifactOnlyInvocationCommandBoundaryAssessment(
+        assessment_id=assessment_id,
+        boundary_id=boundary.boundary_id,
+        phase_id=boundary.phase_id,
+        task_id=boundary.task_id,
+        command_mode=boundary.command_mode,
+        ready=ready,
+        decision=decision,
+        hard_blocks=hard_blocks,
+        warnings=warnings_list,
+        missing_inputs=missing,
+        mismatch_reasons=mismatches,
+        failure_classifications=failures,
+        execution_allowed=False,
+        execute_supported=False,
+        dry_run_only=True,
+        broker_shell_gate_ready=(
+            boundary.broker_decision not in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE)
+            and bool(boundary.broker_decision)
+            and boundary.shell_gate_decision not in (DECISION_DENY, DECISION_HARD_BLOCK, DECISION_MISSING_EVIDENCE)
+            and bool(boundary.shell_gate_decision)
+        ),
+        output_quarantine_ready=bool(boundary.output_quarantine_path),
+        audit_ready=bool(boundary.audit_path),
+        timeout_ready=boundary.timeout_seconds > 0,
+        evidence_chain_ready=(
+            bool(boundary.prompt_artifact_path) and bool(boundary.prompt_artifact_digest)
+            and bool(boundary.preflight_artifact_path) and bool(boundary.preflight_artifact_digest)
+            and bool(boundary.runtime_evidence_path) and bool(boundary.runtime_evidence_digest)
+            and bool(boundary.approval_artifact_path) and bool(boundary.approval_artifact_digest)
+            and bool(boundary.invocation_plan_path) and bool(boundary.invocation_plan_digest)
+        ),
+        no_real_backend_invoked=True,
+        no_adapter_executed=True,
+        no_subprocess=True,
+        no_network=True,
+        no_repo_mutation=True,
+        no_apply=True,
+        no_patch_parsing=True,
+        no_commit_push_authorization=True,
+        no_telegram_inbound=True,
+        created_at_utc=now,
+    )
+
+
+def _boundary_dir() -> Path:
+    from pathlib import Path as _P
+    return _P(_BOUNDARY_DIR)
+
+
+def persist_artifact_only_invocation_command_boundary(
+    boundary: ArtifactOnlyInvocationCommandBoundary,
+) -> dict:
+    import os
+    d = _boundary_dir()
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    if not boundary.record_digest:
+        boundary.record_digest = boundary.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{boundary.boundary_id}.json"
+        lp = d / "latest.json"
+        fp.write_text(_json.dumps(boundary.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest.tmp"
+        tmp.write_text(_json.dumps(boundary.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "record_digest": boundary.record_digest}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_artifact_only_invocation_command_boundary(
+    boundary: ArtifactOnlyInvocationCommandBoundary,
+) -> dict:
+    issues_list: list[str] = []
+    if not boundary.boundary_id:
+        issues_list.append("missing boundary_id")
+    if not boundary.record_digest:
+        issues_list.append("missing record_digest")
+    if boundary.record_digest and boundary.compute_digest() != boundary.record_digest:
+        issues_list.append("record_digest_mismatch")
+    if boundary.schema_version != _BOUNDARY_SCHEMA_VERSION:
+        issues_list.append(f"schema_version mismatch: {boundary.schema_version!r}")
+    return {"valid": len(issues_list) == 0, "issues": issues_list}
+
+
+def load_latest_artifact_only_invocation_command_boundary() -> (
+    "ArtifactOnlyInvocationCommandBoundary | None"
+):
+    lp = _boundary_dir() / "latest.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return ArtifactOnlyInvocationCommandBoundary.from_dict(data) if isinstance(data, dict) and data else None
+    except Exception:
+        return None
+
+
+def persist_artifact_only_invocation_command_boundary_assessment(
+    assessment: ArtifactOnlyInvocationCommandBoundaryAssessment,
+) -> dict:
+    import os
+    d = _boundary_dir() / "assessments"
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+    if not assessment.record_digest:
+        assessment.record_digest = assessment.compute_digest()
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    try:
+        fp = d / f"{ts}-{assessment.assessment_id}.json"
+        lp = d / "latest-assessment.json"
+        fp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        tmp = d / ".latest-assessment.tmp"
+        tmp.write_text(_json.dumps(assessment.to_dict(), indent=2, sort_keys=True))
+        os.replace(str(tmp), str(lp))
+        return {"status": "written", "path": str(fp), "record_digest": assessment.record_digest}
+    except Exception as exc:
+        return {"status": "failed", "error": str(exc)}
+
+
+def verify_artifact_only_invocation_command_boundary_assessment(
+    assessment: ArtifactOnlyInvocationCommandBoundaryAssessment,
+) -> dict:
+    issues_list: list[str] = []
+    if not assessment.assessment_id:
+        issues_list.append("missing assessment_id")
+    if not assessment.record_digest:
+        issues_list.append("missing record_digest")
+    if assessment.record_digest and assessment.compute_digest() != assessment.record_digest:
+        issues_list.append("record_digest_mismatch")
+    if assessment.execution_allowed:
+        issues_list.append("execution_allowed must be False")
+    if assessment.execute_supported:
+        issues_list.append("execute_supported must be False")
+    return {"valid": len(issues_list) == 0, "issues": issues_list}
+
+
+def load_latest_artifact_only_invocation_command_boundary_assessment() -> (
+    "ArtifactOnlyInvocationCommandBoundaryAssessment | None"
+):
+    lp = _boundary_dir() / "latest-assessment.json"
+    if not lp.exists():
+        return None
+    try:
+        data = _json.loads(lp.read_text())
+        return ArtifactOnlyInvocationCommandBoundaryAssessment.from_dict(data) if isinstance(data, dict) and data else None
+    except Exception:
+        return None
