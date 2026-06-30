@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Design Phase 97D — Human Approval Gate for Future Execution. Design-only. Defines approval gate conceptual model with 9 scopes, 21 denial reasons, 4 artifact models (ApprovalRequest, ApprovalDecision, ApprovalRevocation, ApprovalDenial), fail-closed verification (25 checks), expiry/revocation model, and audit expectations. All artifacts non-executing and non-authorizing. 82 tests. No execution, no enforcement, no backend/adapter invocation, no apply/commit/push authorization. Recommends 97E — Execution Audit / Rollback Readiness Design.
+- Design Phase 97C — Adapter Invocation Boundary Design. Design-only. Defined adapter identity, capability, request/preflight, and denial boundary. 14 adapter-specific denial reasons. 4 tests. No execution.
+- Design Phase 97B — Governed Backend Invocation Contract Design. Design-only. Defined governed backend invocation request, preflight, and denial contracts. No execution.
+- Design Phase 97A — Execution Readiness Model Design. Design-only. Defined 8 readiness statuses, evidence categories, authorization categories, no-go criteria, fail-closed behavior. No execution.
+- Complete Phase 96K milestone summary: connected automation chain complete. 10 phases (96A-96K). Repeatable, verifiable, non-executing.
 - Complete Phase 95L CLI dry-run: pcae backend invoke artifact-only dry-run/show/verify. 20 CLI tests. Execute unavailable.
 - Complete Phase 95K command boundary model: ArtifactOnlyInvocationCommandBoundary (45 fields), Assessment (35 fields), validator, 3 command modes, persistent artifacts. 58 tests. No CLI. No execution.
 - Complete Phase 95J command boundary design: Specified CLI structure, evidence inputs, broker/shell-gate sequence, execution boundary, audit/quarantine artifacts, failure states, and go/no-go rules. Design only. Recommends 95K — Command Boundary Model.

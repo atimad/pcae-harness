@@ -2,6 +2,21 @@
 
 ## Completed
 
+- Phase 97D — Human Approval Gate for Future Execution (20260630-2100-phase-97d-human-approval-gate)
+- Phase 97C — Adapter Invocation Boundary Design (20260630-2030-phase-97c-adapter-boundary)
+- Phase 97B — Governed Backend Invocation Contract Design (20260630-2020-phase-97b-invocation-contract)
+- Phase 97A — Execution Readiness Model Design (20260630-2010-phase-97a-readiness)
+- Phase 96K — Connected Automation Milestone Summary (20260630-2000-phase-96k-milestone)
+- Phase 96J — Connected Chain Demo Stabilization (20260630-1950-phase-96j-demo-stabilization)
+- Phase 96I — Execution-Unavailable Boundary Review (20260630-1940-phase-96i-review)
+- Phase 96H — Execution-Unavailable Boundary Proof (20260630-1930-phase-96h-boundary-proof)
+- Phase 96G — Connected Automation Artifact Trust Verification Hardening (20260630-1920-phase-96g-trust)
+- Phase 96F — Connected Automation Contract Freeze (20260630-1910-phase-96f-contract-freeze)
+- Phase 96E — Connected Automation Hardening (20260630-1900-phase-96e-hardening)
+- Phase 96D — Connected Chain Demo (20260630-1830-phase-96d-connected-demo)
+- Phase 96C — Execution-Adjacent Plan CLI Dry-Run (20260630-1820-phase-96c-ea-cli)
+- Phase 96B — Execution-Adjacent Plan Model (20260630-1810-phase-96b-ea-plan)
+- Phase 96A — Execution-Adjacent Boundary Design (20260630-1800-phase-96a-design)
 - Phase 95K — Artifact-Only Invocation Command Boundary Model (20260630-XXXX-phase-95k-command-boundary-model)
 - Phase 95J — Artifact-Only Invocation Command Boundary Design (20260630-1230-phase-95j-command-boundary-design)
 - Phase 95I.1 — Phase Report Commit Attribution Hardening (20260630-XXXX-phase-95i1-commit-attribution-hardening)

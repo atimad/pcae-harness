@@ -2,6 +2,21 @@
 
 ## Current Phase
 
+Phase 97D — Human Approval Gate for Future Execution (completed). Design-only.
+
+Designs the human approval gate for future governed execution phases. Defines approval
+request/decision schemas, scope model (9 scopes), 21 denial reasons, expiry/revocation
+model, fail-closed verification (25 checks), and artifact models (ApprovalRequest,
+ApprovalDecision, ApprovalRevocation, ApprovalDenial). All artifacts are non-executing
+and non-authorizing in the current system. No execution, no enforcement, no backend
+invocation, no adapter execution, no apply/commit/push authorization.
+
+82 tests. Design document: docs/PHASE_97_HUMAN_APPROVAL_GATE_DESIGN.md.
+Model: src/pcae/core/human_approval_gate.py.
+Tests: tests/test_human_approval_gate.py.
+
+Recommends 97E — Execution Audit / Rollback Readiness Design.
+
 Phase 95R: Orchestration Readiness Review (completed). Review-only. All go/no-go pass. Recommends 95S — Orchestration Model.
 
 Review-only. All 16 go/no-go criteria pass. Evidence chain fixtures, CLI, and gate are ready. Recommends 95O — Evidence Chain Bundle Model.
