@@ -18,7 +18,7 @@
         ".pcae/phase-completion-report.md"
     ],
     "files_changed_count": 10,
-    "tests_added_or_updated": "7 tests_added (Test95I1CommitAttributionHardening)",
+    "tests_added_or_updated": "12 tests_added (Test95I1CommitAttributionHardening + Test95I1PushStateCompleteness)",
     "validation_results": [
         {
             "name": "report_tests",
@@ -128,7 +128,8 @@
         {"hash": "51ef8160", "subject": "Harden phase report commit attribution"},
         {"hash": "fe8c7fcc", "subject": "Complete Phase 95I.1 commit attribution hardening"},
         {"hash": "ca7e640b", "subject": "Finalize Phase 95I.1 metadata and canonical report"},
-        {"hash": "1f75b721", "subject": "Add phase-finalization skill and 95I prototype plan"}
+        {"hash": "1f75b721", "subject": "Add phase-finalization skill and 95I prototype plan"},
+        {"hash": "c4d952c3", "subject": "Harden push-state completeness in phase reports"}
     ],
     "commit_attribution": "phase_owned",
     "pushed": true,
