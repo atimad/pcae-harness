@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 95G — Runtime Evidence Broker/Shell-Gate Integration to Phase 95H — Single-Backend Artifact-Only Invocation Readiness Review; session refreshed and governance continuity revalidated.
+- Completed Phase 95H Single-Backend Artifact-Only Invocation Readiness Review (review-only).
+- Delivers docs/PHASE_95_SINGLE_BACKEND_ARTIFACT_ONLY_INVOCATION_READINESS_REVIEW.md.
+
 - Transitioned active task from Phase 95F.2 — Phase Report Authoring Skill and Completeness Enforcement to Phase 95G — Runtime Evidence Broker/Shell-Gate Integration; session refreshed and governance continuity revalidated.
 - Completed Phase 95G Runtime Evidence Broker/Shell-Gate Integration. 10 tests (573 model total).
 
