@@ -184,6 +184,19 @@ class PhaseReport:
                     warnings.append("commits.phase_owned not verified — no phase_commits in metadata")
         if not self.pushed_status:
             missing.append("pushed_status")
+        # Phase 95I.1 — push-state completeness hardening.
+        # A final report must not claim "complete" when unpushed or dirty.
+        if self.pushed_status and self.pushed_status not in ("pushed", "clean", "nothing_to_push"):
+            if "pushed_status" not in missing:
+                missing.append("pushed_status")
+        if self.origin_main_head_count > 0:
+            missing.append("origin_main_head")
+        # governance_results.pcae_push_check must indicate clean state
+        if self.governance_results:
+            push_check = self.governance_results.get("pcae_push_check", "")
+            if push_check and push_check not in ("clean", "nothing_to_push", "clean (nothing_to_push)"):
+                if "governance_results.pcae_push_check" not in missing:
+                    missing.append("governance_results.pcae_push_check")
         if not self.test_results:
             missing.append("test_results")
         if not self.governance_results:

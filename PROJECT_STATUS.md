@@ -4,7 +4,7 @@
 
 Phase 95I.1: Phase Report Commit Attribution Hardening (completed).
 
-Hardened commit attribution in phase reports. Fixed truthiness bug in `phase_commits` handling ([] was treated as falsy, causing git log fallback with stale prior-phase commits). Fixed COMPLETENESS_COMPLETE return path discarding trust warnings. Added 7 tests. No source changes beyond phase.py and phase_reports.py. Next: 95J.
+Hardened commit attribution: fixed truthiness bug where empty phase_commits [] fell through to git log -5. Fixed COMPLETENESS_COMPLETE discarding warnings. Added commits.phase_owned trust warning. Hardened push-state completeness: reports with not_pushed, nonzero origin, or not_ready push check are now partial. 12 new tests. 5 governed commits. Pushed. Next: 95J.
 
 Planning/design-only phase. Created detailed prototype plan with: executive decisions (6 booleans), prototype scope with recommended first backend candidate (mock rehearsal → Claude CLI), 20-step evidence chain, proposed future CLI contract (dry-run + execute), broker/shell-gate hard-block behavior, output capture/quarantine plan, 7-step pre-invocation + 9-step post-invocation operator procedure, 20-class failure taxonomy, ~45-test plan, 29-criteria go/no-go table. No source changes. No real backend invocation. Recommends 95J — Artifact-Only Invocation Command Boundary Design.
 

@@ -60,7 +60,7 @@
         {"name": "pcae_health", "status": "healthy"},
         {"name": "pcae_check", "status": "passed"},
         {"name": "pcae_doctor_task_memory", "status": "warnings (pre-existing 51 active files)"},
-        {"name": "pcae_push_check", "status": "not_ready (2 unpushed, dirty tree)"},
+        {"name": "pcae_push_check", "status": "clean (nothing_to_push)"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization. No real AI backend calls. 95J not started.",
@@ -125,14 +125,16 @@
     "recommended_next_phase_name": "Artifact-Only Invocation Command Boundary Design",
     "summary": "Phase 95I.1 complete: Phase Report Commit Attribution Hardening. Fixed truthiness bug where empty phase_commits [] fell through to git log -5, injecting stale prior-phase commits. Fixed COMPLETENESS_COMPLETE return path discarding trust warnings. Added commit ownership validation via commits.phase_owned trust warning. 7 new tests. 2 governed commits. Reports 114/114, all suites pass (1 pre-existing). Recommends 95J.",
     "phase_commits": [
-        {"hash": "51ef816010af332490dbd14481eed73914f25762", "subject": "Harden phase report commit attribution"},
-        {"hash": "fe8c7fcc7c43f11a9e8b69f663c51de9255d5502", "subject": "Complete Phase 95I.1 commit attribution hardening"}
+        {"hash": "51ef8160", "subject": "Harden phase report commit attribution"},
+        {"hash": "fe8c7fcc", "subject": "Complete Phase 95I.1 commit attribution hardening"},
+        {"hash": "ca7e640b", "subject": "Finalize Phase 95I.1 metadata and canonical report"},
+        {"hash": "1f75b721", "subject": "Add phase-finalization skill and 95I prototype plan"}
     ],
     "commit_attribution": "phase_owned",
-    "pushed": false,
-    "pushed_status": "not_pushed",
-    "origin_main_head_delta": 2,
-    "origin_main_head_count": 2,
+    "pushed": true,
+    "pushed_status": "pushed",
+    "origin_main_head_delta": 0,
+    "origin_main_head_count": 0,
     "notification_dispatch_result": "queued",
     "report_consistency": "consistent",
     "skill_invocation_completed": true

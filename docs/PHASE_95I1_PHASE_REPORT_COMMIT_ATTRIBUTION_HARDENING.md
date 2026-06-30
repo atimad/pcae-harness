@@ -8,7 +8,15 @@ recommended_next_phase = 95J — Artifact-Only Invocation Command Boundary Desig
 
 ## 1. Purpose
 
-Hardened PCAE phase report commit attribution so reports no longer list stale prior-phase commits as current-phase commits. The root cause was a truthiness bug: `phase_commits: []` in metadata (explicitly empty, meaning "no commits for this phase") was treated as falsy, causing `_gather_commits()` to fall back to `git log -5` and inject commits from prior phases. Additionally, the `COMPLETENESS_COMPLETE` return path in `assess_completeness()` discarded accumulated trust warnings.
+Hardened PCAE phase report commit attribution so reports no longer list stale prior-phase commits as current-phase commits. Also hardened push-state completeness so final reports cannot claim `complete ✅` when push state is not ready.
+
+### Commit Attribution Fix
+
+The root cause was a truthiness bug: `phase_commits: []` in metadata (explicitly empty, meaning "no commits for this phase") was treated as falsy, causing `_gather_commits()` to fall back to `git log -5` and inject commits from prior phases. Additionally, the `COMPLETENESS_COMPLETE` return path in `assess_completeness()` discarded accumulated trust warnings.
+
+### Push-State Completeness Hardening
+
+A final report must not be marked `complete ✅` while `pushed_status` is `not_pushed`, `origin_main_head_count` is nonzero, or `governance_results.pcae_push_check` is `not_ready`. These conditions now make the report partial with appropriate dotted-path missing trust fields.
 
 ## 2. Root Cause
 

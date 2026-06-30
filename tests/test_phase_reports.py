@@ -1556,3 +1556,105 @@ class Test95I1CommitAttributionHardening:
         assert r.report_completeness == COMPLETENESS_COMPLETE
         assert r.commits == ["cd976e34", "dfb235d7"]
 
+
+class Test95I1PushStateCompleteness:
+    """Phase 95I.1: push-state completeness hardening.
+
+    A final report must NOT claim complete when push state is not ready.
+    """
+
+    GOV_ALL = {
+        "pcae_health": "healthy",
+        "pcae_check": "passed",
+        "pcae_doctor_task_memory": "warnings",
+        "pcae_push_check": "clean (nothing_to_push)",
+        "telegram_runtime": "loaded",
+    }
+
+    TESTS_ALL = {
+        "report_notification_tests": "1/1",
+        "bootstrap_session_reporting_tests": "1/1",
+        "fast_green": "1/1",
+    }
+
+    def test_not_pushed_makes_partial(self):
+        """Report with pushed_status=not_pushed must be partial."""
+        r = make_phase_report(
+            phase_id="95I.1", phase_name="Test", status="completed",
+            summary="Done.", files_changed=1, tests_run=1,
+            test_results=self.TESTS_ALL,
+            governance_results=self.GOV_ALL,
+            commits=["abc12345"],
+            pushed_status="not_pushed",  # should not be complete
+            origin_main_head_count=2,
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness != COMPLETENESS_COMPLETE
+        assert "pushed_status" in r.missing_trust_fields
+
+    def test_nonzero_origin_makes_partial(self):
+        """Report with origin_main_head_count > 0 must be partial."""
+        r = make_phase_report(
+            phase_id="95I.1", phase_name="Test", status="completed",
+            summary="Done.", files_changed=1, tests_run=1,
+            test_results=self.TESTS_ALL,
+            governance_results=self.GOV_ALL,
+            commits=["abc12345"],
+            pushed_status="pushed",  # pushed but origin still shows unpushed
+            origin_main_head_count=5,
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness != COMPLETENESS_COMPLETE
+        assert "origin_main_head" in r.missing_trust_fields
+
+    def test_pcae_push_check_not_ready_makes_partial(self):
+        """Report with pcae_push_check=not_ready must be partial."""
+        gov = dict(self.GOV_ALL)
+        gov["pcae_push_check"] = "not_ready (2 unpushed, dirty tree)"
+        r = make_phase_report(
+            phase_id="95I.1", phase_name="Test", status="completed",
+            summary="Done.", files_changed=1, tests_run=1,
+            test_results=self.TESTS_ALL,
+            governance_results=gov,
+            commits=["abc12345"],
+            pushed_status="not_pushed",
+            origin_main_head_count=2,
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness != COMPLETENESS_COMPLETE
+        assert "governance_results.pcae_push_check" in r.missing_trust_fields
+
+    def test_clean_pushed_report_complete(self):
+        """Clean pushed report with all fields must remain complete."""
+        r = make_phase_report(
+            phase_id="95I.1", phase_name="Test", status="completed",
+            summary="Done.", files_changed=1, tests_run=1,
+            test_results=self.TESTS_ALL,
+            governance_results=self.GOV_ALL,
+            commits=["abc12345"],
+            pushed_status="pushed",
+            origin_main_head_count=0,
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+
+    def test_pushed_nothing_to_push_is_complete(self):
+        """pushed_status='clean' with origin 0 and clean push check is complete."""
+        gov = dict(self.GOV_ALL)
+        r = make_phase_report(
+            phase_id="95I.1", phase_name="Test", status="completed",
+            summary="Done.", files_changed=1, tests_run=1,
+            test_results=self.TESTS_ALL,
+            governance_results=gov,
+            commits=["abc12345"],
+            pushed_status="pushed",
+            origin_main_head_count=0,
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}]
+        r.apply_trust_assessment()
+        assert r.report_completeness == COMPLETENESS_COMPLETE
+
