@@ -5105,6 +5105,12 @@ class ArtifactOnlyRealInvocationDryRunAssessment:
     runtime_evidence_source: str = ""
     runtime_failure_category: str = ""
     runtime_hard_blocks: list[str] = field(default_factory=list)
+    # ── Phase 95G: broker/shell-gate runtime evidence decisions ────────
+    runtime_broker_decision: str = ""
+    runtime_broker_hard_blocks: list[str] = field(default_factory=list)
+    runtime_shell_gate_decision: str = ""
+    runtime_shell_gate_hard_blocks: list[str] = field(default_factory=list)
+    runtime_broker_shell_gate_ready: bool = False
     created_at_utc: str = ""
     schema_version: str = _DRY_RUN_SCHEMA_VERSION
     record_digest: str = ""
@@ -5116,6 +5122,8 @@ class ArtifactOnlyRealInvocationDryRunAssessment:
         d["missing_evidence"] = list(self.missing_evidence)
         d["deny_reasons"] = list(self.deny_reasons)
         d["runtime_hard_blocks"] = list(self.runtime_hard_blocks)
+        d["runtime_broker_hard_blocks"] = list(self.runtime_broker_hard_blocks)
+        d["runtime_shell_gate_hard_blocks"] = list(self.runtime_shell_gate_hard_blocks)
         if not include_digest:
             d.pop("record_digest", None)
         return d
@@ -5296,6 +5304,22 @@ def evaluate_artifact_only_real_invocation_dry_run(
         runtime_hard_blocks=re_hard_blocks,
         created_at_utc=now,
     )
+    # ── Broker/shell-gate runtime evidence decisions (95G) ──────────────
+    broker_dec = evaluate_runtime_evidence_broker_decision(
+        plan=plan, runtime_evidence=runtime_evidence,
+    )
+    sg_dec = evaluate_runtime_evidence_shell_gate_decision(
+        plan=plan, runtime_evidence=runtime_evidence,
+    )
+    assessment.runtime_broker_decision = broker_dec["decision"]
+    assessment.runtime_broker_hard_blocks = broker_dec["hard_blocks"]
+    assessment.runtime_shell_gate_decision = sg_dec["decision"]
+    assessment.runtime_shell_gate_hard_blocks = sg_dec["hard_blocks"]
+    assessment.runtime_broker_shell_gate_ready = (
+        broker_dec["decision"] == DECISION_ALLOW_DRY_RUN
+        and sg_dec["decision"] == DECISION_ALLOW_DRY_RUN
+    )
+    return assessment
 
 
 def persist_artifact_only_real_invocation_dry_run_assessment(
@@ -5792,3 +5816,93 @@ def detect_claude_runtime_evidence_stat_only(
         no_network=True,
         secrets_redacted=True,
     )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95G — Runtime evidence broker/shell-gate integration
+# ═══════════════════════════════════════════════════════════════════════════
+
+DECISION_ALLOW_DRY_RUN = "allow_dry_run"
+DECISION_DENY = "deny"
+DECISION_HARD_BLOCK = "hard_block"
+DECISION_MISSING_EVIDENCE = "missing_evidence"
+
+
+def evaluate_runtime_evidence_broker_decision(
+    *,
+    plan: RealAdapterInvocationPlan | None = None,
+    runtime_evidence: ClaudeRuntimeEvidence | None = None,
+) -> dict[str, Any]:
+    """Dry-run broker decision for runtime evidence. Model-only, never executes."""
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+
+    if runtime_evidence is None:
+        hard_blocks.append("runtime_evidence_missing")
+    else:
+        ver = validate_claude_runtime_evidence(runtime_evidence)
+        if not ver["valid"]:
+            hard_blocks.extend(f"runtime:{hb}" for hb in ver.get("hard_blocks", []))
+        if runtime_evidence.bypass_permissions_state in (BYPASS_UNKNOWN, BYPASS_ON):
+            hard_blocks.append(f"bypass_{runtime_evidence.bypass_permissions_state}")
+        if runtime_evidence.runtime_profile not in VALID_RUNTIME_PROFILES:
+            hard_blocks.append(f"unknown_profile:{runtime_evidence.runtime_profile}")
+        if runtime_evidence.evidence_source == EVIDENCE_UNKNOWN:
+            hard_blocks.append("evidence_source_unknown")
+        if not runtime_evidence.no_real_backend_invoked:
+            hard_blocks.append("no_real_backend_invoked=False")
+        if not runtime_evidence.no_subprocess:
+            hard_blocks.append("no_subprocess=False")
+        if plan is not None and runtime_evidence is not None:
+            if plan.backend_id and runtime_evidence.backend_id and plan.backend_id != runtime_evidence.backend_id:
+                hard_blocks.append("broker_backend_mismatch")
+            if plan.adapter_id and runtime_evidence.adapter_id and plan.adapter_id != runtime_evidence.adapter_id:
+                hard_blocks.append("broker_adapter_mismatch")
+
+    if hard_blocks:
+        decision = DECISION_HARD_BLOCK
+    elif missing:
+        decision = DECISION_MISSING_EVIDENCE
+    else:
+        decision = DECISION_ALLOW_DRY_RUN
+
+    return {"decision": decision, "hard_blocks": hard_blocks, "missing_evidence": missing,
+            "allow_dry_run_only": True, "no_execution": True}
+
+
+def evaluate_runtime_evidence_shell_gate_decision(
+    *,
+    plan: RealAdapterInvocationPlan | None = None,
+    runtime_evidence: ClaudeRuntimeEvidence | None = None,
+) -> dict[str, Any]:
+    """Dry-run shell-gate decision for runtime evidence. Model-only, never executes."""
+    hard_blocks: list[str] = []
+    missing: list[str] = []
+
+    if runtime_evidence is None:
+        hard_blocks.append("runtime_evidence_missing")
+    else:
+        if not runtime_evidence.shell_gate_required:
+            missing.append("shell_gate_required=False")
+        if not runtime_evidence.shell_gate_expected_decision:
+            missing.append("shell_gate_expected_decision_missing")
+        if not runtime_evidence.declared_command_path and runtime_evidence.runtime_profile != "custom_claude_compatible":
+            hard_blocks.append("command_path_missing")
+        if not runtime_evidence.declared_command_path_hash and runtime_evidence.runtime_profile != "custom_claude_compatible":
+            hard_blocks.append("command_path_hash_missing")
+        if not runtime_evidence.no_subprocess:
+            hard_blocks.append("no_subprocess=False")
+        if not runtime_evidence.no_network:
+            hard_blocks.append("no_network=False")
+        if runtime_evidence.bypass_permissions_state in (BYPASS_UNKNOWN, BYPASS_ON):
+            hard_blocks.append(f"bypass_{runtime_evidence.bypass_permissions_state}")
+
+    if hard_blocks:
+        decision = DECISION_HARD_BLOCK
+    elif missing:
+        decision = DECISION_MISSING_EVIDENCE
+    else:
+        decision = DECISION_ALLOW_DRY_RUN
+
+    return {"decision": decision, "hard_blocks": hard_blocks, "missing_evidence": missing,
+            "allow_dry_run_only": True, "no_execution": True}

@@ -5664,3 +5664,141 @@ class Test95FDetectorCLI:
         assert r.returncode == 0
         assert "Stat-only" in r.stdout
         assert "Executed command:  no" in r.stdout
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95G — Runtime evidence broker/shell-gate integration tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.backend_invocations import (
+    evaluate_runtime_evidence_broker_decision,
+    evaluate_runtime_evidence_shell_gate_decision,
+    DECISION_ALLOW_DRY_RUN,
+    DECISION_HARD_BLOCK,
+    DECISION_MISSING_EVIDENCE,
+)
+
+
+class Test95GBrokerDecision:
+    """Broker runtime evidence decisions."""
+
+    def test_missing_runtime_evidence_hard_blocks(self):
+        r = evaluate_runtime_evidence_broker_decision(runtime_evidence=None)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+    def test_bypass_unknown_hard_blocks(self):
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-br", backend_id="claude",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/bin/claude",
+            bypass_permissions_state="unknown",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        r = evaluate_runtime_evidence_broker_decision(runtime_evidence=re_ev)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+    def test_bypass_on_hard_blocks(self):
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-bon", backend_id="claude",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/bin/claude",
+            bypass_permissions_state="on",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        r = evaluate_runtime_evidence_broker_decision(runtime_evidence=re_ev)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+    def test_backend_mismatch_hard_blocks(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-mm", backend_id="claude-deepseek",
+            runtime_profile="claude_cli", command_identity="claude-deepseek",
+            declared_command_path="/usr/bin/claude-deepseek",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        re_ev.record_digest = re_ev.compute_digest()
+        r = evaluate_runtime_evidence_broker_decision(plan=plan, runtime_evidence=re_ev)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+    def test_no_execution_false_blocks(self):
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-ne", backend_id="claude",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/bin/claude",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+            no_real_backend_invoked=False,
+        )
+        r = evaluate_runtime_evidence_broker_decision(runtime_evidence=re_ev)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+
+class Test95GShellGateDecision:
+    """Shell-gate runtime evidence decisions."""
+
+    def test_missing_runtime_evidence_hard_blocks(self):
+        r = evaluate_runtime_evidence_shell_gate_decision(runtime_evidence=None)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+    def test_missing_command_path_blocks(self):
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-sg", backend_id="claude",
+            runtime_profile="claude_cli", command_identity="claude",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+        )
+        r = evaluate_runtime_evidence_shell_gate_decision(runtime_evidence=re_ev)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+    def test_no_subprocess_false_hard_blocks(self):
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-ns", backend_id="claude",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/bin/claude",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            timeout_seconds=120, audit_path="/a", output_quarantine_path="/q",
+            no_subprocess=False,
+        )
+        r = evaluate_runtime_evidence_shell_gate_decision(runtime_evidence=re_ev)
+        assert r["decision"] == DECISION_HARD_BLOCK
+
+
+class Test95GDryRunIntegration:
+    """Dry-run assessment includes broker/shell-gate decisions."""
+
+    def test_dry_run_includes_broker_sg_decisions(self):
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="adapter-claude-cli", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        re_ev = ClaudeRuntimeEvidence(
+            runtime_evidence_id="re-int", backend_id="claude",
+            backend_type="claude_cli", adapter_id="adapter-claude-cli",
+            runtime_profile="claude_cli", command_identity="claude",
+            declared_command_path="/usr/bin/claude",
+            bypass_permissions_state="off", bypass_permissions_evidence="ok",
+            evidence_source="operator_declared",
+            timeout_seconds=120, audit_path="/q", output_quarantine_path="/q",
+        )
+        re_ev.record_digest = re_ev.compute_digest()
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=plan, runtime_evidence=re_ev)
+        assert hasattr(a, "runtime_broker_decision")
+        assert hasattr(a, "runtime_shell_gate_decision")
+        assert a.execution_allowed is False
+
+    def test_no_secrets_in_assessment(self):
+        import json
+        plan = create_real_adapter_invocation_plan(
+            adapter_id="ad", backend_id="claude", backend_type="claude_cli",
+            operator="op", prompt_hash="ph", prompt_artifact_path="/p",
+            output_quarantine_path="/q", audit_artifact_path="/a",
+        )
+        a = evaluate_artifact_only_real_invocation_dry_run(plan=plan)
+        j = json.dumps(a.to_dict())
+        assert "sk-ant" not in j

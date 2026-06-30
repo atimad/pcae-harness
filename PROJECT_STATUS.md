@@ -2,6 +2,13 @@
 
 ## Current Phase
 
+Phase 95G: Runtime Evidence Broker/Shell-Gate Integration (completed).
+
+evaluate_runtime_evidence_broker_decision() and evaluate_runtime_evidence_shell_gate_decision().
+Dry-run decisions checking bypass, backend/adapter mismatch, command path/hash, no-execution flags.
+Integrated into dry-run assessment. 10 new tests (573 model total).
+Delivers docs/PHASE_95_RUNTIME_EVIDENCE_BROKER_SHELL_GATE_INTEGRATION.md.
+
 Phase 95F.2: Phase Report Authoring Skill and Completeness Enforcement (completed).
 
 Added .pcae/skills/phase-finalization/SKILL.md (7th skill). Strengthened

@@ -1833,6 +1833,8 @@ def run_backend_adapter_dry_run_evaluate(args: argparse.Namespace) -> int:
             print(f"  Runtime evidence:    {assessment.runtime_evidence_id} "
                   f"({'valid' if assessment.runtime_evidence_valid else 'invalid'})")
             print(f"  Bypass state:        {assessment.runtime_bypass_permissions_state}")
+            print(f"  Broker decision:     {assessment.runtime_broker_decision}")
+            print(f"  Shell-gate decision: {assessment.runtime_shell_gate_decision}")
         else:
             print(f"  Runtime evidence:    missing")
         print(f"  No real backend:     {assessment.no_real_backend_invoked}")
