@@ -788,6 +788,165 @@ def _apply_canonical_and_trust(
         _check_canonical_metadata_consistency(report)
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 95M.1 — Finalization gate
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_MIN_NO_GO_COUNT = 11
+_MIN_NO_GO_PREFIX = "No "
+
+
+def validate_finalization_gate(
+    *,
+    phase_id: str,
+    report: "PhaseReport",
+    metadata: dict[str, Any] | None = None,
+    pushed_status: str = "",
+    origin_main_head_count: int = 0,
+    governance_results: dict[str, Any] | None = None,
+    test_results: dict[str, Any] | None = None,
+    no_go_confirmations: list[str] | None = None,
+    recommended_next_phase: str = "",
+    commit_attribution: str = "",
+) -> dict[str, Any]:
+    """Authoritative finalization gate for phase completion and Telegram send.
+
+    Must pass before:
+    - pcae phase complete marks report as complete
+    - Telegram send-report sends final report
+    - Next phase recommendation is accepted
+
+    Returns a dict with finalizable, blockers, warnings, diagnostics.
+    Fail-closed: if any blocker is present, finalizable=False.
+    """
+    blockers: list[str] = []
+    warnings: list[str] = []
+    md = metadata or {}
+    gov = governance_results or {}
+    tests = test_results or {}
+    no_go = no_go_confirmations or []
+
+    # ── Top-level trust ──────────────────────────────────────────────────
+    if report.files_changed <= 0:
+        blockers.append("files_changed missing or zero")
+    if report.tests_run <= 0 and not tests:
+        blockers.append("tests_run missing or zero")
+    if not gov:
+        blockers.append("governance_results missing")
+    else:
+        for key in _REQUIRED_GOVERNANCE_KEYS:
+            if key not in gov:
+                blockers.append(f"governance_results.{key} missing")
+    if not tests:
+        blockers.append("test_results missing")
+    else:
+        for key in _REQUIRED_BASE_TEST_RESULT_KEYS:
+            if key not in tests:
+                blockers.append(f"test_results.{key} missing")
+
+    # ── No-go confirmations ──────────────────────────────────────────────
+    no_go_text = md.get("no_go_confirmation", "")
+    if not no_go_text and not no_go:
+        blockers.append("no_go_confirmations missing")
+    else:
+        # Count from metadata text, or from explicit list
+        no_count = 0
+        if isinstance(no_go_text, str) and no_go_text:
+            no_count = no_go_text.count(_MIN_NO_GO_PREFIX)
+        if no_count == 0 and no_go:
+            # Count items from the explicit list parameter
+            no_count = len([item for item in no_go if str(item).startswith(_MIN_NO_GO_PREFIX)])
+        if no_count < _MIN_NO_GO_COUNT:
+            blockers.append(
+                f"no_go_confirmations too short ({no_count} items, "
+                f"require {_MIN_NO_GO_COUNT}+ separate items each starting with 'No ')"
+            )
+
+    # ── Recommended next phase ───────────────────────────────────────────
+    if not recommended_next_phase:
+        blockers.append("recommended_next_phase missing as structured metadata")
+    else:
+        import re as _re
+        rn_match = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+)*)', recommended_next_phase.strip())
+        if rn_match:
+            rn_num = rn_match.group(1)
+            if rn_num == phase_id:
+                blockers.append(
+                    f"recommended_next_phase points to current phase ({rn_num}) — must point forward"
+                )
+
+    # ── Push state ───────────────────────────────────────────────────────
+    if pushed_status and pushed_status not in ("pushed", "clean", "nothing_to_push"):
+        blockers.append(f"pushed_status is {pushed_status!r}, not pushed/clean")
+    if origin_main_head_count > 0:
+        blockers.append(f"origin/main..HEAD is {origin_main_head_count}, not 0")
+
+    # ── Governance push check ────────────────────────────────────────────
+    push_check = gov.get("pcae_push_check", "")
+    if push_check and "clean" not in push_check and "nothing_to_push" not in push_check:
+        blockers.append(f"pcae_push_check is {push_check!r}, not clean")
+
+    # ── Phase-owned commits ──────────────────────────────────────────────
+    if report.files_changed > 0:
+        if "phase_commits" in md:
+            pc = md.get("phase_commits", [])
+            if not pc:
+                blockers.append("phase_commits declared but empty while files_changed>0")
+        elif not commit_attribution:
+            blockers.append("commits.phase_owned missing — no phase_commits or commit_attribution in metadata")
+
+    # ── Stale commit detection ───────────────────────────────────────────
+    if report.commits and report.files_changed > 0:
+        if "phase_commits" not in md and not commit_attribution:
+            blockers.append(
+                "commits may be stale prior-phase commits — no phase_commits in metadata "
+                "and no commit_attribution"
+            )
+    # Check commit count vs summary
+    summary_commit_count = _extract_commit_count_from_summary(report.summary)
+    if summary_commit_count is not None and len(report.commits) != summary_commit_count:
+        blockers.append(
+            f"commit count mismatch: summary says {summary_commit_count}, "
+            f"structured list has {len(report.commits)}"
+        )
+
+    # ── Report consistency ───────────────────────────────────────────────
+    if report.report_completeness != COMPLETENESS_COMPLETE:
+        blockers.append(
+            f"report completeness is {report.report_completeness!r}, not complete"
+        )
+    missing_fields = getattr(report, "missing_trust_fields", []) or []
+    if missing_fields:
+        blockers.append(f"missing trust fields: {', '.join(missing_fields)}")
+
+    # ── Determine outcome ────────────────────────────────────────────────
+    finalizable = len(blockers) == 0
+
+    return {
+        "finalizable": finalizable,
+        "blockers": blockers,
+        "warnings": warnings,
+        "phase_id": phase_id,
+        "recommended_next_phase": recommended_next_phase,
+        "pushed_status": pushed_status,
+        "origin_main_head_count": origin_main_head_count,
+        "phase_owned_commits": bool(md.get("phase_commits")),
+        "commit_attribution": commit_attribution,
+        "missing_trust_fields": missing_fields,
+        "report_completeness": report.report_completeness,
+    }
+
+
+def _extract_commit_count_from_summary(summary: str) -> int | None:
+    """Extract governed commit count from summary text. Returns None if ambiguous."""
+    import re as _re
+    # Match patterns like "2 governed commits" or "3 governed commits"
+    m = _re.search(r'(\d+)\s+governed\s+commit', summary)
+    if m:
+        return int(m.group(1))
+    return None
+
+
 def finalize_phase_report(
     phase_id: str,
     phase_name: str,

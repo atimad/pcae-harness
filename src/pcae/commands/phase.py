@@ -189,6 +189,31 @@ def _finalize_report_and_notify(summary: str) -> None:
         print(f"Phase report: ERROR — {fin['report_error']}")
         return
 
+    # ── Phase 95M.1 — Finalization gate ──────────────────────────────────
+    from pcae.core.phase_reports import validate_finalization_gate
+    report = fin.get("report")
+    if report is not None:
+        gate = validate_finalization_gate(
+            phase_id=phase_id,
+            report=report,
+            metadata=meta,
+            pushed_status=pushed_status,
+            origin_main_head_count=origin_count,
+            governance_results=governance_results,
+            test_results=test_results,
+            no_go_confirmations=no_go_list,
+            recommended_next_phase=recommended_next,
+            commit_attribution=commit_attribution,
+        )
+        if not gate["finalizable"]:
+            print("Phase report: BLOCKED by finalization gate")
+            print(f"  Finalizable: no")
+            for blocker in gate["blockers"]:
+                print(f"  Blocker: {blocker}")
+            print()
+            print("  Phase completion refused. Repair the report before retrying.")
+            return
+
     paths = fin.get("paths", {})
     md_path = paths.get("markdown", "")
     json_path = paths.get("json", "")

@@ -176,6 +176,37 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
             print(f"Error: {msg}")
         return 1
 
+    # ── Phase 95M.1 — Finalization gate before Telegram send ─────────────
+    from pcae.core.phase_reports import validate_finalization_gate
+    from pcae.commands.phase import _load_completion_metadata as _lcm
+    meta = _lcm()
+    gate = validate_finalization_gate(
+        phase_id=report.phase_id,
+        report=report,
+        metadata=meta,
+        pushed_status=report.pushed_status,
+        origin_main_head_count=report.origin_main_head_count,
+        governance_results=report.governance_results,
+        test_results=report.test_results,
+        no_go_confirmations=report.explicit_no_go_confirmations,
+        recommended_next_phase=report.recommended_next_phase,
+        commit_attribution=meta.get("commit_attribution", ""),
+    )
+    if not gate["finalizable"]:
+        if args.json:
+            print(json.dumps({
+                "error": "finalization_gate_failed",
+                "finalizable": False,
+                "blockers": gate["blockers"],
+                "message": "Report is not finalizable. Repair before sending.",
+            }, indent=2))
+        else:
+            print("Telegram send-report: BLOCKED by finalization gate")
+            print("  Report is not finalizable. Repair before sending.")
+            for blocker in gate["blockers"]:
+                print(f"  Blocker: {blocker}")
+        return 1
+
     event = phase_report_to_notification_event(
         report,
         artifact_paths=[str(reports_dir / "latest.md")],

@@ -14,7 +14,7 @@ workflow
 
 ## Skill Version
 
-1.0.1
+1.0.2
 
 ## Skill Status
 
@@ -154,9 +154,11 @@ Verify that:
 - No-go confirmations must be explicit and complete for safety-sensitive phases.
 - Documentation-only phases still require design-safe regressions and governance evidence.
 - **Skill-only is not trusted; CLI completeness enforcement is the source of truth.**
+- **Phase 95M.1: The finalization gate is authoritative.** If the gate fails, stop and repair before Telegram or next phase. Never rely on summary text for required fields. Structured metadata is the source of truth. Telegram final report must only be sent after the gate passes.
 
 ## Workflow
 
+0. **Run the finalization gate**: `validate_finalization_gate()` must return `finalizable=True` before proceeding. If it fails, stop and repair. Do not send Telegram. Do not start next phase.
 1. Verify phase_id matches the completing phase — never reuse stale metadata.
 2. Run all required validation suites before writing metadata.
 3. Write `.pcae/phase-completion-metadata.json` with all mandatory trust fields.

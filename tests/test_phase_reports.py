@@ -1658,3 +1658,202 @@ class Test95I1PushStateCompleteness:
         r.apply_trust_assessment()
         assert r.report_completeness == COMPLETENESS_COMPLETE
 
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 95M.1 — Finalization gate tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from pcae.core.phase_reports import (
+    validate_finalization_gate,
+)
+
+
+class Test95M1FinalizationGate:
+    """Finalization gate blocks incomplete/inconsistent reports."""
+
+    GOV_FULL = {
+        "pcae_health": "healthy", "pcae_check": "passed",
+        "pcae_doctor_task_memory": "warnings",
+        "pcae_push_check": "clean (nothing_to_push)",
+        "telegram_runtime": "loaded, configured, enabled",
+    }
+    TESTS_FULL = {
+        "report_notification_tests": "1/1 passed",
+        "bootstrap_session_reporting_tests": "1/1 passed",
+        "fast_green": "1/1 passed",
+    }
+
+    def _valid_report(self, **kw):
+        commits_val = kw.pop("commits", ["abc12345", "def67890"])
+        summary_val = kw.pop("summary", "Done. 2 governed commits.")
+        r = make_phase_report(
+            phase_id="95M.1", phase_name="Test", status="completed",
+            summary=summary_val, files_changed=5, tests_run=5,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_FULL,
+            commits=commits_val,
+            pushed_status="pushed", origin_main_head_count=0,
+            **kw,
+        )
+        r.apply_trust_assessment()
+        return r
+
+    def _gate(self, report, **kw):
+        meta = kw.pop("metadata", {})
+        return validate_finalization_gate(
+            phase_id="95M.1", report=report, metadata=meta,
+            pushed_status=kw.pop("pushed_status", "pushed"),
+            origin_main_head_count=kw.pop("origin_main_head_count", 0),
+            governance_results=kw.pop("governance_results", self.GOV_FULL),
+            test_results=kw.pop("test_results", self.TESTS_FULL),
+            no_go_confirmations=kw.pop("no_go_confirmations", [
+                "No real backend invocation.", "No adapter execution.",
+                "No subprocess execution.", "No network call.",
+                "No shell interception.", "No Telegram inbound.",
+                "No enforcement.", "No automatic apply.",
+                "No apply execution.", "No commit/push authorization.",
+                "No real AI backend calls.", "Next phase not started.",
+            ]),
+            recommended_next_phase=kw.pop("recommended_next_phase", "95N"),
+            commit_attribution=kw.pop("commit_attribution", "phase_owned"),
+            **kw,
+        )
+
+    def test_complete_report_passes_gate(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        g = self._gate(r, metadata=r.metadata)
+        assert g["finalizable"] is True, f"Blockers: {g['blockers']}"
+
+    def test_not_pushed_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        g = self._gate(r, pushed_status="not_pushed", metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("pushed_status" in b for b in g["blockers"])
+
+    def test_nonzero_origin_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        g = self._gate(r, origin_main_head_count=2, metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("origin/main..HEAD" in b for b in g["blockers"])
+
+    def test_push_check_not_ready_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        gov = dict(self.GOV_FULL)
+        gov["pcae_push_check"] = "not_ready (dirty tree)"
+        g = self._gate(r, governance_results=gov, metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("pcae_push_check" in b for b in g["blockers"])
+
+    def test_missing_recommended_next_phase_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        g = self._gate(r, recommended_next_phase="", metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("recommended_next_phase" in b for b in g["blockers"])
+
+    def test_self_referencing_next_phase_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        g = self._gate(r, recommended_next_phase="95M.1 — Same Phase", metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("points to current phase" in b for b in g["blockers"])
+
+    def test_abbreviated_no_go_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        meta = dict(r.metadata)
+        meta["no_go_confirmation"] = "No real backend invocation or execution."
+        g = self._gate(r, metadata=meta)
+        assert g["finalizable"] is False
+        assert any("no_go_confirmations too short" in b for b in g["blockers"])
+
+    def test_full_no_go_passes(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        meta = dict(r.metadata)
+        meta["no_go_confirmation"] = (
+            "No real backend invocation. No adapter execution. "
+            "No subprocess execution. No network call. "
+            "No shell interception. No Telegram inbound. "
+            "No enforcement. No automatic apply. "
+            "No apply execution. No commit/push authorization. "
+            "No real AI backend calls. Next phase not started."
+        )
+        g = self._gate(r, metadata=meta)
+        assert g["finalizable"] is True
+
+    def test_stale_commits_without_attribution_fails(self):
+        r = self._valid_report(commits=["dfb235d7", "cd976e34"])
+        g = self._gate(r, commit_attribution="", metadata={})
+        assert g["finalizable"] is False
+        assert any("stale" in b or "phase_commits" in b for b in g["blockers"])
+
+    def test_phase_owned_commits_passes(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        g = self._gate(r, metadata=r.metadata)
+        assert g["finalizable"] is True
+
+    def test_missing_governance_key_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        gov = dict(self.GOV_FULL)
+        del gov["pcae_health"]
+        g = self._gate(r, governance_results=gov, metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("pcae_health" in b for b in g["blockers"])
+
+    def test_missing_test_key_fails(self):
+        r = self._valid_report()
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}, {"hash": "def67890"}]
+        tests = dict(self.TESTS_FULL)
+        del tests["fast_green"]
+        g = self._gate(r, test_results=tests, metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("fast_green" in b for b in g["blockers"])
+
+    def test_commit_count_mismatch_fails(self):
+        r = self._valid_report(
+            summary="Done. 5 governed commits.",
+            commits=["abc12345"],
+        )
+        r.metadata["phase_commits"] = [{"hash": "abc12345"}]
+        g = self._gate(r, metadata=r.metadata)
+        assert g["finalizable"] is False
+        assert any("commit count mismatch" in b for b in g["blockers"])
+
+    def test_empty_phase_commits_with_files_changed_fails(self):
+        r = self._valid_report(commits=[])
+        meta = {"phase_commits": []}
+        g = self._gate(r, commit_attribution="", metadata=meta)
+        assert g["finalizable"] is False
+        assert any("phase_commits" in b for b in g["blockers"])
+
+    def test_multipart_phase_id_passes(self):
+        r = make_phase_report(
+            phase_id="95H.1", phase_name="Test", status="completed",
+            summary="Done. 2 governed commits.", files_changed=5, tests_run=5,
+            test_results=self.TESTS_FULL,
+            governance_results=self.GOV_FULL,
+            commits=["cd976e34", "dfb235d7"],
+            pushed_status="pushed", origin_main_head_count=0,
+        )
+        r.metadata["phase_commits"] = [{"hash": "cd976e34"}, {"hash": "dfb235d7"}]
+        r.apply_trust_assessment()
+        g = validate_finalization_gate(
+            phase_id="95H.1", report=r, metadata=r.metadata,
+            pushed_status="pushed", origin_main_head_count=0,
+            governance_results=self.GOV_FULL, test_results=self.TESTS_FULL,
+            no_go_confirmations=["No real backend invocation.", "No adapter execution.",
+                "No subprocess execution.", "No network call.", "No shell interception.",
+                "No Telegram inbound.", "No enforcement.", "No automatic apply.",
+                "No apply execution.", "No commit/push authorization.",
+                "No real AI backend calls.", "Next phase not started."],
+            recommended_next_phase="95I", commit_attribution="phase_owned",
+        )
+        assert g["finalizable"] is True
