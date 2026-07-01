@@ -4,7 +4,7 @@
 ## Title
 Phase 96F — Connected Automation Contract Freeze
 ## Status
-active
+done
 ## Mode
 contract_freeze
 ## Allowed Files

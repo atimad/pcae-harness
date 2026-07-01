@@ -4,7 +4,7 @@
 ## Title
 Phase 96K — Connected Automation Milestone Summary
 ## Status
-active
+done
 ## Mode
 documentation
 ## Allowed Files

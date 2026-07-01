@@ -4,7 +4,7 @@
 ## Title
 Phase 97B — Governed Backend Invocation Contract Design
 ## Status
-active
+done
 ## Mode
 design
 ## Allowed Files
