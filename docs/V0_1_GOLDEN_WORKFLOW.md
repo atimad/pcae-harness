@@ -44,6 +44,18 @@ git repository, and the built sdist no longer includes local `.claude`/
 source ~/.config/pcae/telegram.env   # optional — skip if not using Telegram
 ```
 
+### Optional: agent/session bootstrap
+
+`pcae session bootstrap --agent-id <id>` (or `--compact` for a read-only,
+lock-free variant) composes health, active-task, provenance, push-readiness,
+and Telegram-runtime status into a single call — useful as an agent's
+start-of-session command, in addition to (not instead of) the
+start-of-phase checks in step 1 below. Not required for the golden
+workflow, but supported and tested (`tests/test_session.py`); see `pcae
+session bootstrap --help` and `pcae session continuity-check --help` for
+the full flag set. (Identified in Phase 106G's post-RC audit as real,
+tested infrastructure previously missing from this document.)
+
 ## Supported Golden Workflow
 
 ### 1. Start-of-session / start-of-phase
@@ -134,7 +146,15 @@ by default on incomplete trust (105D); use `--allow-partial-report` to
 override (still never dispatches Telegram for a partial report). Useful
 for re-dispatching a corrected, complete report after `pcae push`, once
 `.pcae/phase-completion-metadata.json` has been updated to reflect the
-real post-push state.
+real post-push state. This is why both commands exist side by side:
+`task finish --commit` is the one integrated step of the golden workflow
+(runs pre-push, correctly defers dispatch), while `phase complete` is the
+separate, explicit step used *after* push to send the final, corrected
+report — they are not interchangeable, and neither one supersedes the
+other in v0.1. (Phase 106G's post-RC audit found the two commands'
+finalize logic is implemented independently rather than shared, and
+recommends unifying them in a future phase — see
+`docs/PHASE_106_POST_RC_SYSTEM_INSPECTION_LIFECYCLE_CONNECTIVITY_AUDIT.md`.)
 
 ### 6. Post-completion verification
 

@@ -2,6 +2,42 @@
 
 ## Current Phase
 
+Phase 106G — v0.1 Post-RC System Inspection / Lifecycle Connectivity Audit
+(completed).
+
+Post-RC inspection/audit only — no runtime enforcement, autonomous
+execution, backend/adapter invocation, shell mediation, rollback
+execution, Telegram inbound, or apply/commit/push authorization beyond the
+existing governed lifecycle was added; no execution enablement flag or
+toggle was added; no new tag was created. Inspected the actual v0.1
+lifecycle (not just its documentation): bootstrap commands, task/phase
+finalize paths, report-trust gates, push-check, and Telegram dispatch.
+Found the bootstrap command family (`pcae session bootstrap` and
+siblings) is real, mature, and well-tested but was entirely absent from
+`docs/RELEASE_SCOPE_V0_1.md`/`docs/V0_1_GOLDEN_WORKFLOW.md` — added a
+small, targeted mention to the golden workflow. Empirically reproduced
+(by calling the real validator functions directly, not by reading
+docstrings) a genuine trust-gate asymmetry: `pcae task finish --commit`'s
+Telegram-dispatch gate omits the OLD (95M.1) schema's full completeness
+check that `pcae phase complete`'s gate has included since Phase 105D, so
+a report with e.g. `files_changed=0` would be correctly refused by `phase
+complete` but would dispatch via `task finish --commit` — the golden
+workflow's actual recommended path. Documented this and five other
+findings (a `bootstrap_session_reporting_tests` naming/documentation
+mismatch, the `phase-finalization` skill's structural inability to
+resolve any bare phase code, a stale-but-inert notification idempotency
+marker, and the `phase complete`/`task finish` finalize-logic duplication)
+in `docs/PHASE_106_POST_RC_SYSTEM_INSPECTION_LIFECYCLE_CONNECTIVITY_AUDIT.md`.
+None of the findings compromise the non-execution boundary or the release
+artifacts; `v0.1.0-rc1` remains suitable for external trial use with the
+trust-gate asymmetry documented as a known caveat. 20 new tests
+(`tests/test_post_rc_system_inspection_v0_1.py`). v0.1.0-rc1 remains
+non-executing by design; v0.2 remains the autonomy target.
+
+Recommends 106H — v0.1 RC Audit Findings Repair.
+
+## Phase 106F Complete
+
 Phase 106F — v0.1 RC Tag / Release Artifact Finalization (completed).
 
 Release artifact finalization only — no product/runtime behavior
