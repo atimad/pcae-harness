@@ -1,0 +1,248 @@
+"""Phase 105A — Phase Report Trust Gate Implementation.
+
+Non-executing, non-authorizing. Pure validation logic for phase completion
+report trust. Detects missing required fields, disallowed placeholders,
+and classifies reports as complete/partial/invalid.
+"""
+from __future__ import annotations
+from dataclasses import dataclass, field
+from typing import Any, Mapping, Sequence
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Required Field Definitions
+# ═══════════════════════════════════════════════════════════════════════════
+
+REQUIRED_REPORT_FIELDS: tuple[str, ...] = (
+    "phase_id",
+    "status",
+    "files_changed",
+    "tests_run",
+    "commits",
+    "pushed",
+    "summary",
+    "recommended_next_phase",
+)
+
+REQUIRED_GOVERNANCE_FIELDS: tuple[str, ...] = (
+    "pcae_health",
+    "pcae_check",
+    "pcae_doctor_task_memory",
+    "pcae_push_check",
+    "telegram_runtime",
+)
+
+REQUIRED_TEST_FIELDS: tuple[str, ...] = (
+    "report_notification_tests",
+    "bootstrap_session_reporting_tests",
+    "fast_green",
+)
+
+DISALLOWED_PLACEHOLDER_VALUES: tuple[str, ...] = (
+    "TBD",
+    "pending",
+    "not captured",
+    "unknown",
+)
+
+COMPLETENESS_COMPLETE = "complete"
+COMPLETENESS_PARTIAL = "partial"
+COMPLETENESS_INVALID = "invalid"
+
+ISSUE_TYPE_MISSING = "missing_field"
+ISSUE_TYPE_PLACEHOLDER = "placeholder"
+ISSUE_TYPE_EMPTY = "empty_value"
+
+
+@dataclass(frozen=False)
+class PhaseReportTrustIssue:
+    field: str
+    issue_type: str
+    detail: str
+
+    def to_dict(self) -> dict[str, str]:
+        return {"field": self.field, "issue_type": self.issue_type, "detail": self.detail}
+
+
+@dataclass(frozen=False)
+class PhaseReportTrustResult:
+    complete: bool = False
+    status: str = COMPLETENESS_INVALID
+    missing_fields: list[str] = field(default_factory=list)
+    placeholder_fields: list[str] = field(default_factory=list)
+    empty_fields: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    all_issues: list[PhaseReportTrustIssue] = field(default_factory=list)
+    repair_required: bool = True
+    can_be_active_latest: bool = False
+    summary: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "complete": self.complete,
+            "status": self.status,
+            "missing_fields": sorted(self.missing_fields),
+            "placeholder_fields": sorted(self.placeholder_fields),
+            "empty_fields": sorted(self.empty_fields),
+            "warnings": list(self.warnings),
+            "repair_required": self.repair_required,
+            "can_be_active_latest": self.can_be_active_latest,
+            "summary": self.summary,
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Validation Logic
+# ═══════════════════════════════════════════════════════════════════════════
+
+def _is_placeholder(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str):
+        stripped = value.strip()
+        if not stripped:
+            return True
+        if stripped in DISALLOWED_PLACEHOLDER_VALUES:
+            return True
+    return False
+
+
+def _is_empty(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str) and value.strip() == "":
+        return True
+    if isinstance(value, (list, tuple, dict)) and len(value) == 0:
+        return True
+    return False
+
+
+def validate_phase_report_trust(report: Mapping[str, Any]) -> PhaseReportTrustResult:
+    """Validate a candidate phase report for trust completeness.
+
+    Non-executing. Non-authorizing. Pure validation.
+    """
+    issues: list[PhaseReportTrustIssue] = []
+
+    # ── Required top-level fields ──
+    for field in REQUIRED_REPORT_FIELDS:
+        value = report.get(field)
+        if _is_empty(value):
+            issues.append(PhaseReportTrustIssue(field, ISSUE_TYPE_MISSING, f"{field} is missing or empty"))
+        elif _is_placeholder(value):
+            issues.append(PhaseReportTrustIssue(field, ISSUE_TYPE_PLACEHOLDER, f"{field} has disallowed placeholder: {value!r}"))
+
+    # ── Required governance fields ──
+    gov = report.get("governance_results")
+    if isinstance(gov, Mapping):
+        for field in REQUIRED_GOVERNANCE_FIELDS:
+            value = gov.get(field)
+            if _is_empty(value):
+                issues.append(PhaseReportTrustIssue(f"governance_results.{field}", ISSUE_TYPE_MISSING, f"governance_results.{field} is missing or empty"))
+            elif _is_placeholder(value):
+                issues.append(PhaseReportTrustIssue(f"governance_results.{field}", ISSUE_TYPE_PLACEHOLDER, f"governance_results.{field} has disallowed placeholder: {value!r}"))
+    else:
+        for field in REQUIRED_GOVERNANCE_FIELDS:
+            issues.append(PhaseReportTrustIssue(f"governance_results.{field}", ISSUE_TYPE_MISSING, "governance_results is missing (not a Mapping)"))
+
+    # ── Required test fields ──
+    tests = report.get("test_results")
+    if isinstance(tests, Mapping):
+        for field in REQUIRED_TEST_FIELDS:
+            value = tests.get(field)
+            if _is_empty(value):
+                issues.append(PhaseReportTrustIssue(f"test_results.{field}", ISSUE_TYPE_MISSING, f"test_results.{field} is missing or empty"))
+            elif _is_placeholder(value):
+                issues.append(PhaseReportTrustIssue(f"test_results.{field}", ISSUE_TYPE_PLACEHOLDER, f"test_results.{field} has disallowed placeholder: {value!r}"))
+    else:
+        for field in REQUIRED_TEST_FIELDS:
+            issues.append(PhaseReportTrustIssue(f"test_results.{field}", ISSUE_TYPE_MISSING, "test_results is missing (not a Mapping)"))
+
+    # ── Stale recommendation check ──
+    rec = str(report.get("recommended_next_phase", ""))
+    if rec and "Recommends 102D" in rec:
+        issues.append(PhaseReportTrustIssue("recommended_next_phase", ISSUE_TYPE_PLACEHOLDER, "stale recommendation wording detected"))
+
+    # ── Commits TBD check ──
+    commits = report.get("commits")
+    if isinstance(commits, str) and commits.strip() == "TBD":
+        issues.append(PhaseReportTrustIssue("commits", ISSUE_TYPE_PLACEHOLDER, "commits is TBD"))
+    elif isinstance(commits, (list, tuple)) and len(commits) == 0:
+        issues.append(PhaseReportTrustIssue("commits", ISSUE_TYPE_EMPTY, "commits is empty list"))
+
+    # ── Compose result ──
+    missing = [i.field for i in issues if i.issue_type == ISSUE_TYPE_MISSING]
+    placeholders = [i.field for i in issues if i.issue_type == ISSUE_TYPE_PLACEHOLDER]
+    empties = [i.field for i in issues if i.issue_type == ISSUE_TYPE_EMPTY]
+
+    has_critical = len(missing) > 0
+    has_placeholder = len(placeholders) > 0
+
+    if has_critical:
+        status = COMPLETENESS_INVALID
+    elif has_placeholder:
+        status = COMPLETENESS_PARTIAL
+    else:
+        status = COMPLETENESS_COMPLETE
+
+    result = PhaseReportTrustResult(
+        complete=(status == COMPLETENESS_COMPLETE),
+        status=status,
+        missing_fields=missing,
+        placeholder_fields=placeholders,
+        empty_fields=empties,
+        all_issues=issues,
+        repair_required=has_critical or has_placeholder,
+        can_be_active_latest=(status == COMPLETENESS_COMPLETE),
+    )
+
+    if has_critical:
+        result.summary = f"Report is INVALID: {len(missing)} missing field(s). Repair required."
+    elif has_placeholder:
+        result.summary = f"Report is PARTIAL: {len(placeholders)} placeholder(s). Repair required."
+    else:
+        result.summary = "Report is COMPLETE. All trust fields present."
+
+    if not has_critical and not has_placeholder:
+        result.warnings.append("No missing or placeholder fields detected.")
+
+    return result
+
+
+def select_active_phase_report(
+    reports: Sequence[Mapping[str, Any]],
+    phase_id: str | None = None,
+) -> tuple[Mapping[str, Any] | None, PhaseReportTrustResult | None]:
+    """Select the active/latest complete report for a given phase.
+
+    Returns (selected_report, validation_result).
+    selected_report is None if no suitable report found.
+    """
+    # Filter by phase_id if provided
+    candidates = list(reports)
+    if phase_id:
+        candidates = [r for r in candidates if str(r.get("phase_id", "")) == phase_id]
+
+    if not candidates:
+        return None, None
+
+    # Score each candidate
+    scored: list[tuple[Mapping[str, Any], PhaseReportTrustResult]] = []
+    for r in candidates:
+        v = validate_phase_report_trust(r)
+        scored.append((r, v))
+
+    # Prefer complete reports
+    completes = [(r, v) for r, v in scored if v.complete]
+    if completes:
+        return completes[-1]  # last complete in input order (stable)
+
+    # Fall back to latest partial with repair guidance
+    partials = [(r, v) for r, v in scored if v.status == COMPLETENESS_PARTIAL]
+    if partials:
+        latest = partials[-1]
+        latest[1].can_be_active_latest = False
+        latest[1].repair_required = True
+        return latest
+
+    # Nothing usable
+    return None, scored[-1][1] if scored else None

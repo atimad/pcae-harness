@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Phase 105A — Phase Report Trust Gate Implementation. Implemented report-trust validator: detect missing fields, reject TBD/pending/not captured, classify complete/partial/invalid, select active/latest. 37 tests. Non-executing. Recommends 105B — CLI Integration.
 - **Phase 104 Consolidation Milestone Complete** — Phase 104E milestone summary closing the consolidation mini-track. 4 subphases (104A.1 audit + 104B registry + 104C shared contract + 104D report-trust design). Recommends 105A — Phase Report Trust Gate Implementation.
 - Phase 104D — Runtime Enforcement Report Trust Automation Gap Closure Design. Design-only. Mandatory report trust schema, disallowed placeholders, canonical selection model, validation model, repair decision model. 22 tests. Consolidation mini-track (104B–D) complete. No runtime enforcement. No execution. Recommends 104E — Consolidation Milestone Summary.
 - Phase 104C — Runtime Enforcement Shared Safety/Authorization Contract Design. Shared constants module: 12 auth flags, 5 safety flags, RE-NOGO mappings, validation helpers. 23 tests. Consolidates flag duplication across 3 models. No runtime enforcement. No execution. Recommends 104D — Report Trust Automation Gap Closure.

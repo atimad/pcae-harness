@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 105A — Phase Report Trust Gate Implementation (20260701-1730-phase-105a-phase-report-trust-gate-implementation)
 - Phase 104E — Consolidation Milestone Summary (20260701-1725-phase-104e-runtime-enforcement-consolidation-milestone-summary)
 - Phase 104D — Report Trust Automation Gap Closure Design (20260701-1715-phase-104d-runtime-enforcement-report-trust-automation-gap-closure-design)
 - Phase 104C — Shared Safety/Authorization Contract Design (20260701-1710-phase-104c-runtime-enforcement-shared-safety-authorization-contract-design)
