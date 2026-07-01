@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 99A — Governed Execution Attempt Boundary Design (completed).
+
+Design-only. Defines governed execution attempt boundary: 14 attempt states, 26
+denial reasons, hard no-go model, prerequisite model, denial/abort/fail-closed
+semantics. GovernedExecutionAttemptBoundary dataclass. 20 tests. No execution
+boundary exists. All 12 auth flags remain False. Design-only — no implementation.
+
+Recommends 99B — Governed Execution Attempt Contract Freeze.
+
 ## Phase 98 Milestone Complete
 
 Phase 98E — Governed Execution Preflight Milestone Summary (completed).

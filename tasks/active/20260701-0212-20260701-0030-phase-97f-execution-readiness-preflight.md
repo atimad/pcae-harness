@@ -48,6 +48,8 @@ implementation
 - docs/PHASE_98_GOVERNED_EXECUTION_PREFLIGHT_ARTIFACT_TRUST_HARDENING.md
 - docs/PHASE_98_GOVERNED_EXECUTION_PREFLIGHT_BOUNDARY_REVIEW.md
 - docs/PHASE_98_GOVERNED_EXECUTION_PREFLIGHT_MILESTONE_SUMMARY.md
+- docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_BOUNDARY_DESIGN.md
+- tests/test_governed_execution_attempt_boundary.py
 - tests/test_governed_execution_preflight_artifact_trust.py
 - .pcae/phase-completion-metadata.json
 - .pcae/execution-readiness-preflight/**

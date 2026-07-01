@@ -9336,3 +9336,270 @@ def verify_governed_execution_preflight_prototype(
         "decision": prototype.decision,
         "no_execution_confirmed": prototype.no_execution and not prototype.execution_available,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 99A — Governed execution attempt boundary design
+# ═══════════════════════════════════════════════════════════════════════════
+
+_GEA_SCHEMA_VERSION = "1.0"
+
+# ── Attempt states ─────────────────────────────────────────────────────
+GEA_UNAVAILABLE = "unavailable"
+GEA_NOT_REQUESTED = "not_requested"
+GEA_REQUEST_DRAFTED = "request_drafted"
+GEA_PREFLIGHT_REQUIRED = "preflight_required"
+GEA_PREFLIGHT_FAILED = "preflight_failed"
+GEA_APPROVAL_REQUIRED = "approval_required"
+GEA_AUDIT_REQUIRED = "audit_required"
+GEA_ROLLBACK_REQUIRED = "rollback_required"
+GEA_DENIED = "denied"
+GEA_ABORTED_BEFORE_EXECUTION = "aborted_before_execution"
+GEA_BLOCKED_BY_NO_GO = "blocked_by_no_go"
+GEA_BLOCKED_BY_MISSING_EVIDENCE = "blocked_by_missing_evidence"
+GEA_BLOCKED_BY_FAILED_VERIFICATION = "blocked_by_failed_verification"
+GEA_READY_FOR_DESIGN_REVIEW_ONLY = "ready_for_design_review_only"
+
+# Future-only — never available
+GEA_EXECUTING_FUTURE = "executing"
+GEA_EXECUTED_FUTURE = "executed"
+GEA_RUNNING_FUTURE = "running"
+GEA_INVOKED_FUTURE = "invoked"
+GEA_APPLIED_FUTURE = "applied"
+GEA_COMMITTED_FUTURE = "committed"
+GEA_PUSHED_FUTURE = "pushed"
+GEA_SUCCESS_FUTURE = "success"
+GEA_EXECUTION_COMPLETE_FUTURE = "execution_complete"
+
+VALID_GEA_STATES: frozenset[str] = frozenset({
+    GEA_UNAVAILABLE, GEA_NOT_REQUESTED, GEA_REQUEST_DRAFTED,
+    GEA_PREFLIGHT_REQUIRED, GEA_PREFLIGHT_FAILED,
+    GEA_APPROVAL_REQUIRED, GEA_AUDIT_REQUIRED, GEA_ROLLBACK_REQUIRED,
+    GEA_DENIED, GEA_ABORTED_BEFORE_EXECUTION,
+    GEA_BLOCKED_BY_NO_GO, GEA_BLOCKED_BY_MISSING_EVIDENCE,
+    GEA_BLOCKED_BY_FAILED_VERIFICATION, GEA_READY_FOR_DESIGN_REVIEW_ONLY,
+})
+
+UNAVAILABLE_GEA_STATES: frozenset[str] = frozenset({
+    GEA_EXECUTING_FUTURE, GEA_EXECUTED_FUTURE, GEA_RUNNING_FUTURE,
+    GEA_INVOKED_FUTURE, GEA_APPLIED_FUTURE, GEA_COMMITTED_FUTURE,
+    GEA_PUSHED_FUTURE, GEA_SUCCESS_FUTURE, GEA_EXECUTION_COMPLETE_FUTURE,
+})
+
+# ── Denial reasons ─────────────────────────────────────────────────────
+GEA_DENIED_MISSING_PHASE97 = "denied_missing_phase97_preflight"
+GEA_DENIED_INVALID_PHASE97 = "denied_invalid_phase97_preflight"
+GEA_DENIED_MISSING_PHASE98 = "denied_missing_phase98_preflight"
+GEA_DENIED_INVALID_PHASE98 = "denied_invalid_phase98_preflight"
+GEA_DENIED_NO_GO_PRESENT = "denied_no_go_present"
+GEA_DENIED_MISSING_APPROVAL = "denied_missing_human_approval"
+GEA_DENIED_APPROVAL_EXPIRED = "denied_approval_expired"
+GEA_DENIED_APPROVAL_REVOKED = "denied_approval_revoked"
+GEA_DENIED_MISSING_AUDIT = "denied_missing_audit_readiness"
+GEA_DENIED_MISSING_ROLLBACK = "denied_missing_rollback_readiness"
+GEA_DENIED_FAILED_VERIFICATION = "denied_failed_artifact_verification"
+GEA_DENIED_FAILED_REF_VALIDATION = "denied_failed_reference_validation"
+GEA_DENIED_UNKNOWN_SCHEMA = "denied_unknown_schema"
+GEA_DENIED_CONFLICTING_FLAGS = "denied_conflicting_safety_flags"
+GEA_DENIED_UNSAFE_AUTH_FLAG = "denied_unsafe_authorization_flag"
+GEA_DENIED_BACKEND_REQUESTED = "denied_requested_backend_invocation"
+GEA_DENIED_ADAPTER_REQUESTED = "denied_requested_adapter_execution"
+GEA_DENIED_SUBPROCESS_REQUESTED = "denied_requested_subprocess"
+GEA_DENIED_SHELL_REQUESTED = "denied_requested_shell"
+GEA_DENIED_NETWORK_REQUESTED = "denied_requested_network"
+GEA_DENIED_TELEGRAM_INBOUND = "denied_requested_telegram_inbound"
+GEA_DENIED_APPLY_REQUESTED = "denied_requested_apply"
+GEA_DENIED_ROLLBACK_EXEC_REQUESTED = "denied_requested_rollback_execution"
+GEA_DENIED_COMMIT_PUSH_REQUESTED = "denied_requested_commit_push"
+GEA_DENIED_BYPASS_PERMISSIONS = "denied_bypass_permissions"
+GEA_DENIED_SECRET_DETECTED = "denied_secret_material_detected"
+
+VALID_GEA_DENIAL_REASONS: frozenset[str] = frozenset({
+    GEA_DENIED_MISSING_PHASE97, GEA_DENIED_INVALID_PHASE97,
+    GEA_DENIED_MISSING_PHASE98, GEA_DENIED_INVALID_PHASE98,
+    GEA_DENIED_NO_GO_PRESENT, GEA_DENIED_MISSING_APPROVAL,
+    GEA_DENIED_APPROVAL_EXPIRED, GEA_DENIED_APPROVAL_REVOKED,
+    GEA_DENIED_MISSING_AUDIT, GEA_DENIED_MISSING_ROLLBACK,
+    GEA_DENIED_FAILED_VERIFICATION, GEA_DENIED_FAILED_REF_VALIDATION,
+    GEA_DENIED_UNKNOWN_SCHEMA, GEA_DENIED_CONFLICTING_FLAGS,
+    GEA_DENIED_UNSAFE_AUTH_FLAG,
+    GEA_DENIED_BACKEND_REQUESTED, GEA_DENIED_ADAPTER_REQUESTED,
+    GEA_DENIED_SUBPROCESS_REQUESTED, GEA_DENIED_SHELL_REQUESTED,
+    GEA_DENIED_NETWORK_REQUESTED, GEA_DENIED_TELEGRAM_INBOUND,
+    GEA_DENIED_APPLY_REQUESTED, GEA_DENIED_ROLLBACK_EXEC_REQUESTED,
+    GEA_DENIED_COMMIT_PUSH_REQUESTED,
+    GEA_DENIED_BYPASS_PERMISSIONS, GEA_DENIED_SECRET_DETECTED,
+})
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GovernedExecutionAttemptBoundary — design-only, non-executing
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class GovernedExecutionAttemptBoundary:
+    """Design-only model for a future governed execution attempt boundary.
+
+    Non-executing, non-authorizing, evidence-only. No attempt is possible
+    in the current system — this is a design artifact for future phases.
+    """
+
+    schema_version: str = _GEA_SCHEMA_VERSION
+    attempt_boundary_id: str = ""
+    phase_id: str = "99A"
+    task_id: str = ""
+    generated_at_utc: str = ""
+
+    attempt_state: str = GEA_UNAVAILABLE
+    attempt_decision: str = GEA_DENIED
+
+    phase97_preflight_ref: str = ""
+    phase97_preflight_digest: str = ""
+    phase98_preflight_ref: str = ""
+    phase98_preflight_digest: str = ""
+
+    approval_ref: str = ""
+    audit_readiness_ref: str = ""
+    rollback_readiness_ref: str = ""
+    backend_contract_ref: str = ""
+    adapter_boundary_ref: str = ""
+    artifact_verification_ref: str = ""
+    no_go_review_ref: str = ""
+    execution_boundary_proof_ref: str = ""
+
+    hard_no_go_conditions: list[str] = field(default_factory=list)
+    missing_prerequisites: list[str] = field(default_factory=list)
+    failed_checks: list[str] = field(default_factory=list)
+    denial_reasons: list[str] = field(default_factory=list)
+    abort_reasons: list[str] = field(default_factory=list)
+    evidence_refs: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    execution_available: bool = False
+    execution_authorized: bool = False
+    backend_invocation_authorized: bool = False
+    adapter_execution_authorized: bool = False
+    network_authorized: bool = False
+    subprocess_authorized: bool = False
+    shell_authorized: bool = False
+    mutation_authorized: bool = False
+    apply_authorized: bool = False
+    rollback_authorized: bool = False
+    commit_authorized: bool = False
+    push_authorized: bool = False
+
+    simulation_only: bool = True
+    no_execution: bool = True
+    evidence_only: bool = True
+    non_authorizing: bool = True
+    design_only: bool = True
+
+    digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if self.schema_version != _GEA_SCHEMA_VERSION:
+            issues.append(f"unknown schema_version: {self.schema_version!r}")
+        if self.attempt_state not in VALID_GEA_STATES:
+            issues.append(f"invalid attempt_state: {self.attempt_state!r}")
+        if self.attempt_state in UNAVAILABLE_GEA_STATES:
+            issues.append(f"attempt_state {self.attempt_state!r} is future-only")
+        if self.execution_available:
+            issues.append("execution_available must be False")
+        if self.execution_authorized:
+            issues.append("execution_authorized must be False")
+        if self.push_authorized:
+            issues.append("push_authorized must be False")
+        if not self.simulation_only:
+            issues.append("simulation_only must be True")
+        if not self.no_execution:
+            issues.append("no_execution must be True")
+        if not self.design_only:
+            issues.append("design_only must be True")
+        for reason in self.denial_reasons:
+            if reason not in VALID_GEA_DENIAL_REASONS:
+                issues.append(f"unknown denial_reason: {reason!r}")
+        return issues
+
+    def compute_digest(self) -> str:
+        payload = {
+            "schema_version": self.schema_version,
+            "attempt_boundary_id": self.attempt_boundary_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "attempt_state": self.attempt_state,
+            "attempt_decision": self.attempt_decision,
+            "phase97_preflight_ref": self.phase97_preflight_ref,
+            "phase97_preflight_digest": self.phase97_preflight_digest,
+            "phase98_preflight_ref": self.phase98_preflight_ref,
+            "phase98_preflight_digest": self.phase98_preflight_digest,
+            "denial_reasons": sorted(self.denial_reasons),
+            "abort_reasons": sorted(self.abort_reasons),
+            "hard_no_go_conditions": sorted(self.hard_no_go_conditions),
+            "missing_prerequisites": sorted(self.missing_prerequisites),
+            "failed_checks": sorted(self.failed_checks),
+            "warnings": sorted(self.warnings),
+            "evidence_refs": sorted(self.evidence_refs),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+        }
+        canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "attempt_boundary_id": self.attempt_boundary_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "attempt_state": self.attempt_state,
+            "attempt_decision": self.attempt_decision,
+            "phase97_preflight_ref": self.phase97_preflight_ref,
+            "phase97_preflight_digest": self.phase97_preflight_digest,
+            "phase98_preflight_ref": self.phase98_preflight_ref,
+            "phase98_preflight_digest": self.phase98_preflight_digest,
+            "approval_ref": self.approval_ref,
+            "audit_readiness_ref": self.audit_readiness_ref,
+            "rollback_readiness_ref": self.rollback_readiness_ref,
+            "backend_contract_ref": self.backend_contract_ref,
+            "adapter_boundary_ref": self.adapter_boundary_ref,
+            "artifact_verification_ref": self.artifact_verification_ref,
+            "no_go_review_ref": self.no_go_review_ref,
+            "execution_boundary_proof_ref": self.execution_boundary_proof_ref,
+            "hard_no_go_conditions": sorted(self.hard_no_go_conditions),
+            "missing_prerequisites": sorted(self.missing_prerequisites),
+            "failed_checks": sorted(self.failed_checks),
+            "denial_reasons": sorted(self.denial_reasons),
+            "abort_reasons": sorted(self.abort_reasons),
+            "evidence_refs": sorted(self.evidence_refs),
+            "warnings": sorted(self.warnings),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+            "digest": self.digest,
+        }
