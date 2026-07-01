@@ -2,6 +2,18 @@
 
 ## Completed
 
+- Task Memory Backlog Repair (95O-104E bookkeeping) (20260701-2022-task-memory-backlog-repair-95o-104e-bookkeeping)
+- Phase 97E — Execution Audit / Rollback Readiness Design (20260701-0010-phase-97e-audit-rollback)
+- Phase 95X — Final Readiness Review (20260630-1750-phase-95x-final-review)
+- Phase 95W — Orchestration Hardening (20260630-1740-phase-95w-hardening)
+- Phase 95V — Orchestration Review (20260630-1515-phase-95v-review)
+- Phase 95U — Orchestration End-to-End Demo (20260630-1505-phase-95u-demo)
+- Untitled task (20260630-1500-phase-95t-orch-cli)
+- Untitled task (20260630-1450-phase-95s-orch-model)
+- Untitled task (20260630-1440-phase-95r-review)
+- Phase 95Q — Bundle End-to-End Dry-Run Demo (20260630-1435-phase-95q-demo)
+- Untitled task (20260630-1420-phase-95p-bundle-cli)
+- Phase 95O — Evidence Chain Bundle Model (20260630-1350-phase-95o-bundle)
 - Phase 105B — Phase Report Trust Gate CLI / Finalization Integration (20260701-2001-phase-105b-phase-report-trust-gate-cli-finalization-integration)
 - Phase 105A — Phase Report Trust Gate Implementation (20260701-1730-phase-105a-phase-report-trust-gate-implementation)
 - Phase 104E — Consolidation Milestone Summary (20260701-1725-phase-104e-runtime-enforcement-consolidation-milestone-summary)
