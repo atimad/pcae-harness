@@ -425,6 +425,7 @@ from pcae.commands.permission_broker import (
 from pcae.commands.phase_reports import (
     run_phase_report_create,
     run_phase_report_show,
+    run_phase_report_trust,
 )
 from pcae.commands.notifications import (
     run_notify_status,
@@ -5500,7 +5501,19 @@ def build_parser() -> argparse.ArgumentParser:
     pr_show_parser.add_argument("--latest", action="store_true", default=True, help="Show latest report (default).")
     pr_show_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
     pr_show_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
+    pr_show_parser.add_argument("--trust", action="store_true", help="Include Phase 105B trust gate assessment.")
     pr_show_parser.set_defaults(handler=run_phase_report_show)
+
+    pr_trust_parser = pr_subparsers.add_parser(
+        "trust",
+        help="Validate phase report trust completeness (Phase 105B). Read-only.",
+    )
+    pr_trust_parser.add_argument("--metadata", default=None, help="Validate a specific structured metadata JSON file.")
+    pr_trust_parser.add_argument("--report", default=None, help="Validate a specific report file (JSON supported; Markdown returns an unsupported message).")
+    pr_trust_parser.add_argument("--phase-id", default=None, help="Filter/select by phase ID (prefers complete over partial for the same phase).")
+    pr_trust_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
+    pr_trust_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
+    pr_trust_parser.set_defaults(handler=run_phase_report_trust)
 
     # ── pcae notify (Phase 92B) ──────────────────────────────────────────
     notify_parser = subparsers.add_parser(

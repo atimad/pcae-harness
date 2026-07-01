@@ -214,6 +214,24 @@ def _finalize_report_and_notify(summary: str) -> None:
             print("  Phase completion refused. Repair the report before retrying.")
             return
 
+        # ── Phase 105B — Trust gate (advisory only) ──────────────────────
+        # The 95M.1 gate above is the authoritative, hard-fail finalization
+        # gate for this codebase's original report schema. The 105A/105B
+        # trust gate validates a related but independently-evolved schema
+        # (see phase_report_trust.adapt_report_for_trust_check). It is
+        # surfaced here as a warning only; making it a second hard gate is
+        # deferred to 105C pending schema reconciliation.
+        from pcae.core.phase_report_trust import (
+            adapt_report_for_trust_check,
+            validate_phase_report_trust,
+        )
+        trust_result = validate_phase_report_trust(
+            adapt_report_for_trust_check(report.to_dict())
+        )
+        print(f"Trust gate (105B, advisory): {trust_result.status}")
+        if not trust_result.complete:
+            print(f"  {trust_result.summary}")
+
     paths = fin.get("paths", {})
     md_path = paths.get("markdown", "")
     json_path = paths.get("json", "")

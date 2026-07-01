@@ -5,6 +5,7 @@ report trust. Detects missing required fields, disallowed placeholders,
 and classifies reports as complete/partial/invalid.
 """
 from __future__ import annotations
+import re
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
@@ -206,6 +207,52 @@ def validate_phase_report_trust(report: Mapping[str, Any]) -> PhaseReportTrustRe
         result.warnings.append("No missing or placeholder fields detected.")
 
     return result
+
+
+def adapt_report_for_trust_check(raw: Mapping[str, Any]) -> dict[str, Any]:
+    """Normalize a raw report/metadata JSON mapping into the shape expected
+    by :func:`validate_phase_report_trust`.
+
+    Phase 105B — bridges two report schemas that evolved independently in
+    this codebase: the durable ``PhaseReport`` artifact
+    (``core/phase_reports.py``, e.g. ``.pcae/phase-reports/latest.json``)
+    and the pre-completion ``.pcae/phase-completion-metadata.json`` draft.
+    Field name differences (``pushed_status`` vs ``pushed``,
+    ``files_changed_count`` vs ``files_changed``, ``phase_commits`` vs
+    ``commits``) and shape differences (``governance_results``/
+    ``test_results`` as a list of ``{"name", "status"}`` records vs a
+    mapping) are reconciled here. Read-only, pure, no I/O.
+    """
+    out: dict[str, Any] = dict(raw)
+
+    if not out.get("pushed") and out.get("pushed_status"):
+        out["pushed"] = out["pushed_status"]
+
+    if not out.get("files_changed") and out.get("files_changed_count"):
+        out["files_changed"] = out["files_changed_count"]
+
+    if not out.get("commits") and out.get("phase_commits"):
+        out["commits"] = [
+            c.get("hash", "")[:8]
+            for c in out["phase_commits"]
+            if isinstance(c, Mapping) and c.get("hash")
+        ]
+
+    if not out.get("tests_run") and out.get("tests_added_or_updated"):
+        match = re.match(r"\s*(\d+)", str(out["tests_added_or_updated"]))
+        if match:
+            out["tests_run"] = int(match.group(1))
+
+    for key in ("governance_results", "test_results"):
+        value = out.get(key)
+        if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+            out[key] = {
+                item.get("name", ""): item.get("status", item.get("result", ""))
+                for item in value
+                if isinstance(item, Mapping) and item.get("name")
+            }
+
+    return out
 
 
 def select_active_phase_report(
