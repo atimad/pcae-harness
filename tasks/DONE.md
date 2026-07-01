@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 106A (20260701-2221-sync-final-pushed-state-metadata-for-106a)
 - Phase 106A — v0.1 Release Scope Freeze (20260701-2208-phase-106a-v0-1-release-scope-freeze)
 - Sync final pushed-state metadata for 105D (20260701-2205-sync-final-pushed-state-metadata-for-105d)
 - Phase 105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration (20260701-2134-phase-105d-phase-report-trust-gate-hard-fail-push-check-integration)
