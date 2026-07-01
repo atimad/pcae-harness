@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Commit remaining task-memory repair files (20260701-2022-commit-remaining-task-memory-repair-files)
 - Task Memory Backlog Repair (95O-104E bookkeeping) (20260701-2022-task-memory-backlog-repair-95o-104e-bookkeeping)
 - Phase 97E — Execution Audit / Rollback Readiness Design (20260701-0010-phase-97e-audit-rollback)
 - Phase 95X — Final Readiness Review (20260630-1750-phase-95x-final-review)
