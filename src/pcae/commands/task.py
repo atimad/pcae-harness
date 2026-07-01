@@ -359,6 +359,13 @@ def run_task_finish(args: argparse.Namespace) -> int:
                 protected_preserved = False
                 sfa_warnings.append(f"Protected staged file '{pp}' blob changed after commit.")
 
+    # ── Phase 105C — report-trust validation + notification dispatch ────────
+    # Only runs when a commit was actually made (mirrors "pcae task finish
+    # --commit" being the real phase-closing workflow this integrates with).
+    report_integration: dict | None = None
+    if commit_message:
+        report_integration = _finalize_task_report_and_notify(commit_hash)
+
     if args.json:
         data = {
             "acceptance_checks": [
@@ -395,6 +402,21 @@ def run_task_finish(args: argparse.Namespace) -> int:
             data["backend_invocation_performed"] = False
             data["runner_execute_performed"] = False
             data["execution_authorized"] = False
+        if report_integration is not None:
+            data["report_trust"] = report_integration.get("trust")
+            data["repair_required"] = (
+                report_integration.get("trust", {}).get("repair_required")
+                if report_integration.get("trust")
+                else None
+            )
+            data["notification_dispatch"] = {
+                "status": report_integration.get("notification_status", report_integration["status"]),
+                "reason": report_integration.get("notification_reason") or report_integration.get("message"),
+                "sinks": report_integration.get("notification_sinks", []),
+            }
+            data["telegram_runtime"] = "outbound-only"
+            data["report_path"] = report_integration.get("report_path")
+            data["metadata_path"] = report_integration.get("metadata_path")
         print(json.dumps(data, indent=2, sort_keys=True))
     else:
         print(f"Finished task: {result.completed_task.task_id}")
@@ -417,8 +439,245 @@ def run_task_finish(args: argparse.Namespace) -> int:
             print("Warnings:")
             for warning in list(result.warnings) + sfa_warnings:
                 print(f"  - {warning}")
+        if report_integration is not None:
+            _print_report_integration_human(report_integration)
 
     return 0
+
+
+def _print_report_integration_human(report_integration: dict) -> None:
+    """Phase 105C — human-readable report-trust/notification summary for
+    `pcae task finish --commit`. Always states the Telegram outbound-only
+    boundary explicitly."""
+    status = report_integration["status"]
+    print()
+    if status in ("no_metadata", "invalid_metadata"):
+        print(f"Report finalization: skipped ({report_integration['message']})")
+        return
+
+    trust = report_integration.get("trust") or {}
+    print(f"Report trust: {trust.get('status', 'unknown')}")
+    print(f"Repair required: {'yes' if trust.get('repair_required') else 'no'}")
+
+    if status == "skipped_duplicate":
+        print(f"Report notification: skipped ({report_integration['message']})")
+    elif status == "report_error":
+        print(f"Report finalization: ERROR — {report_integration['message']}")
+    else:
+        notif_status = report_integration.get("notification_status", "skipped")
+        print(f"Report notification: {notif_status}")
+        reason = report_integration.get("notification_reason")
+        if reason:
+            print(f"  Reason: {reason}")
+    print("Telegram: outbound-only")
+
+
+def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
+    """Phase 105C — finalize the phase-completion report, run the 105A/105B
+    report-trust validator, and dispatch outbound notifications (Telegram)
+    from `.pcae/phase-completion-metadata.json` during `pcae task finish
+    --commit`.
+
+    This is the actual PCAE phase-closing workflow; `pcae phase complete`
+    already does this (via `finalize_phase_report`) but is not part of that
+    workflow in day-to-day use. Warning-only: never raises, never blocks
+    task finish. Read-only except for the local report/notification
+    artifacts it creates — the same ones `pcae phase complete` creates for
+    the same metadata file.
+    """
+    import os
+    from pathlib import Path as _Path
+
+    from pcae.core.phase_report_trust import (
+        adapt_report_for_trust_check,
+        validate_phase_report_trust,
+    )
+    from pcae.core.phase_reports import finalize_phase_report, read_latest_report
+
+    meta_path = _Path(".pcae/phase-completion-metadata.json")
+    if not meta_path.exists():
+        return {
+            "status": "no_metadata",
+            "message": (
+                "no .pcae/phase-completion-metadata.json found — skipping "
+                "report finalization and notification dispatch"
+            ),
+        }
+
+    try:
+        meta = json.loads(meta_path.read_text())
+    except json.JSONDecodeError as exc:
+        return {"status": "invalid_metadata", "message": f"invalid JSON in {meta_path}: {exc}"}
+    if not isinstance(meta, dict):
+        return {"status": "invalid_metadata", "message": f"{meta_path} is not a JSON object"}
+
+    phase_id = meta.get("phase_id", "")
+    if not phase_id:
+        return {"status": "no_metadata", "message": f"{meta_path} is missing phase_id — skipping"}
+
+    phase_name = meta.get("phase_name") or meta.get("phase_title") or phase_id
+    status = meta.get("status") or "completed"
+    summary = meta.get("summary") or f"Phase {phase_id} completed via pcae task finish."
+
+    governance_raw = meta.get("governance_results", [])
+    governance_results: dict = {}
+    if isinstance(governance_raw, list):
+        for entry in governance_raw:
+            name = entry.get("name", "") if isinstance(entry, dict) else ""
+            if name:
+                governance_results[name] = entry.get("status", "")
+    elif isinstance(governance_raw, dict):
+        governance_results = dict(governance_raw)
+
+    test_results = meta.get("test_results", {})
+    test_results = dict(test_results) if isinstance(test_results, dict) else {}
+    if not test_results:
+        for entry in meta.get("validation_results", []):
+            name = entry.get("name", "") if isinstance(entry, dict) else ""
+            if name:
+                vresult = entry.get("result", "")
+                vstatus = entry.get("status", "")
+                test_results[name] = f"{vresult} ({vstatus})" if vstatus else vresult
+
+    files_changed = meta.get("files_changed_count") or 0
+    fc_list = meta.get("files_changed")
+    if not files_changed and isinstance(fc_list, list):
+        files_changed = len(fc_list)
+    elif isinstance(fc_list, int):
+        files_changed = fc_list
+
+    tests_added = meta.get("tests_added_or_updated", "")
+    tests_run = (
+        int(tests_added.split()[0])
+        if tests_added and tests_added.split()[0].isdigit()
+        else 0
+    )
+
+    commit_attribution = meta.get("commit_attribution", "")
+    if "phase_commits" in meta:
+        commits = [
+            c.get("hash", "")[:8]
+            for c in meta.get("phase_commits", [])
+            if isinstance(c, dict) and c.get("hash")
+        ]
+        if not commit_attribution:
+            commit_attribution = "phase_owned" if commits else "none (no commits for this phase)"
+    elif commit_hash:
+        commits = [commit_hash[:8]]
+    else:
+        commits = []
+
+    pushed_status = meta.get("pushed_status", "")
+    origin_count = meta.get("origin_main_head_count", 0)
+    recommended_next = meta.get("recommended_next_phase", "")
+    no_go_text = meta.get("no_go_confirmation", "")
+    no_go_list = [no_go_text] if no_go_text else []
+
+    # Idempotency guard: skip dispatch if the same phase_id + commit was
+    # already successfully dispatched by a prior finalization (e.g. an
+    # earlier `pcae phase complete` for the same metadata). A dedicated
+    # marker file is used rather than `PhaseReport.notification_result`,
+    # because `finalize_phase_report()` writes the report artifact *before*
+    # attempting dispatch, so the persisted report never reflects the
+    # dispatch outcome.
+    marker_path = _Path(".pcae/phase-reports/.last-notified.json")
+    already_sent = False
+    if commit_hash and marker_path.exists():
+        try:
+            marker = json.loads(marker_path.read_text())
+        except json.JSONDecodeError:
+            marker = {}
+        marker_commit = marker.get("commit", "")
+        already_sent = bool(
+            marker.get("phase_id") == phase_id
+            and marker_commit
+            and (commit_hash.startswith(marker_commit) or marker_commit.startswith(commit_hash))
+        )
+    if already_sent:
+        existing = read_latest_report(_Path(".pcae/phase-reports"))
+        trust_result = (
+            validate_phase_report_trust(adapt_report_for_trust_check(existing.to_dict()))
+            if existing
+            else validate_phase_report_trust({})
+        )
+        return {
+            "status": "skipped_duplicate",
+            "message": (
+                f"report for phase {phase_id} at commit {commit_hash} was "
+                "already dispatched — skipping duplicate send"
+            ),
+            "trust": trust_result.to_dict(),
+            "phase_id": phase_id,
+        }
+
+    notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
+
+    fin = finalize_phase_report(
+        phase_id=phase_id,
+        phase_name=phase_name,
+        status=status,
+        summary=summary,
+        files_changed=files_changed,
+        tests_run=tests_run,
+        test_results=test_results,
+        governance_results=governance_results,
+        commits=commits,
+        pushed_status=pushed_status,
+        origin_main_head_count=origin_count,
+        explicit_no_go_confirmations=no_go_list,
+        recommended_next_phase=recommended_next,
+        commit_attribution=commit_attribution,
+    )
+
+    if fin.get("report_error"):
+        return {
+            "status": "report_error",
+            "message": fin["report_error"],
+            "phase_id": phase_id,
+        }
+
+    report = fin.get("report")
+    paths = fin.get("paths") or {}
+
+    # Trust-validate the actual finalized report (which now carries the
+    # derived commits/pushed_status/etc.), not the raw metadata file — the
+    # metadata alone is often intentionally incomplete (e.g. commits are
+    # derived from commit_hash, not stored in the file).
+    trust_result = validate_phase_report_trust(
+        adapt_report_for_trust_check(report.to_dict())
+    ) if report else validate_phase_report_trust({})
+
+    result = {
+        "status": "finalized",
+        "phase_id": phase_id,
+        "trust": trust_result.to_dict(),
+        "report_completeness": report.report_completeness if report else "",
+        "report_path": paths.get("markdown", ""),
+        "metadata_path": str(meta_path),
+    }
+
+    if fin.get("notification_skipped"):
+        result["notification_status"] = "skipped"
+        result["notification_reason"] = (
+            "PCAE_NOTIFY_ENABLED is not set to 1/true/yes"
+            if not notify_enabled
+            else "notification sinks not fully configured"
+        )
+    else:
+        nresults = fin.get("notification_results") or []
+        all_ok = bool(nresults) and all(r.success for r in nresults)
+        result["notification_status"] = "sent" if all_ok else "failed"
+        result["notification_sinks"] = [r.sink_name for r in nresults]
+        if fin.get("notification_error"):
+            result["notification_reason"] = fin["notification_error"]
+        if all_ok and commit_hash:
+            marker_path.parent.mkdir(parents=True, exist_ok=True)
+            marker_path.write_text(json.dumps({
+                "phase_id": phase_id,
+                "commit": commit_hash[:8],
+            }))
+
+    return result
 
 
 def run_task_finish_recover(args: argparse.Namespace) -> int:
