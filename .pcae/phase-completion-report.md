@@ -1,76 +1,72 @@
-# Phase Report: v0.1 Release Candidate
+# Phase Report: v0.1 RC Tag / Release Artifact Finalization
 
-- **Phase ID:** `106E`
+- **Phase ID:** `106F`
 - **Status:** completed
-- **Report completeness:** complete
-- **Files changed:** 5
-- **Tests run:** 29
-- **Commits:** b00f1a34, 934fd15e
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
+- **Files changed:** 15
+- **Tests run:** 20
+- **Commits:** fc044a6b, 6ab706ad, d155dddc, bf7ef684
+- **Pushed:** not_pushed (pending final task-finish commit + push)
+- **origin/main..HEAD:** 1
 
 ## Summary
 
-Phase 106E: Release-candidate preparation and readiness review only; no
-product/runtime behavior implemented or changed. Created
-`docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md` (release scope/non-execution
-boundary confirmation, included/excluded capabilities, golden workflow,
-install/packaging status, test baseline, governance baseline, notification
-baseline, known limitations, release blockers [none], tag readiness,
-post-phase manual tag instructions, v0.2 boundary, final go/no-go: **GO**),
-`docs/RELEASE_NOTES_V0_1_DRAFT.md` (candidate-draft release notes), and
-`docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md` (formal readiness
-review: purpose/scope/non-goals, release evidence from 106A–106D, current
-validation baseline, install/build/smoke status, docs-alignment review
-across `README.md`/`docs/RELEASE_SCOPE_V0_1.md`/
-`docs/V0_1_GOLDEN_WORKFLOW.md`/`docs/INSTALLATION.md`/
-`docs/V0_1_CLEAN_SMOKE_TEST.md` — no non-execution-boundary violations
-found, README test/phase-count staleness retained as a known, non-blocking
-limitation — decision: **Ready to tag v0.1.0-rc1 after operator
-approval**). Reviewed `pyproject.toml`: version `0.1.0` is already the
-correct base for a `v0.1.0-rc1` pre-release tag; no version bump
-performed. No tag created — deferred to Phase 106F pending explicit
-operator approval. 29 new tests
-(`tests/test_release_candidate_v0_1.py`). Non-executing. No autonomous
-execution. Recommends 106F.
-
-**Correction note:** during this phase's own `pcae task finish --commit`
-run, `.pcae/phase-completion-metadata.json` still held Phase 106D's
-content at the moment the command ran (this phase's metadata rewrite had
-not yet happened), causing an incorrectly-attributed Telegram notification
-(106D's summary content, sent under 106E's finish commit hash). This file
-and the metadata JSON now hold 106E's correct content; a corrected,
-accurately-attributed dispatch follows after `pcae push`, per the
-established idempotency-key design (`phase_id`+`commit` pair in
-`.pcae/phase-reports/.last-notified.json`) — since this dispatch will use
-`phase_id=106E` with a new final commit hash, it is guaranteed distinct
-from the erroneous `106D`/`f61dcb46` entry and will send correctly.
+Phase 106F: Release artifact finalization only; no product/runtime
+behavior implemented or changed. All pre-tag hard gates verified green
+before tagging: clean working tree, `origin/main..HEAD`=0, active/latest
+(106E) phase report trust complete, `pcae health`/`check`/`doctor
+task-memory`/`push check` all green, fast-green 4390/4390,
+`report_notification_tests`/`bootstrap_session_reporting_tests` present,
+no existing local/remote `v0.1.0-rc1`, release checklist/notes/readiness
+docs present, no forbidden safety claims. Rebuilt sdist/wheel from the
+tag-ready state in a throwaway venv (scratch directory, not committed);
+wheel smoke-installed cleanly. Documented the governed-tag-command gap
+(no `pcae tag`/`release` CLI command exists). **Created and pushed the
+annotated `v0.1.0-rc1` tag** (`git tag -a`/`git push origin
+v0.1.0-rc1` — the only raw git operations in this phase, scoped to
+exactly one tag), pointing at commit
+`d155dddcf56e7ec17ed558f234d6148799192290` (tag object
+`b47ce1817a697eab6bee8ef158ba50d96e57c3bb`), verified present on origin.
+No other tag created; no final `v0.1.0` tag exists. Updated
+`docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md`,
+`docs/RELEASE_NOTES_V0_1_DRAFT.md`,
+`docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md`, and
+`docs/RELEASE_HANDOFF_V0_1_RC1.md` to reflect the tag. Added
+`docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md` (this phase's own
+tag-creation record) and `docs/RELEASE_HANDOFF_V0_1_RC1.md`. 20 new tests
+(`tests/test_release_artifact_v0_1_rc1.py`), plus 1 pre-existing 106E
+test corrected for the now-accurate tag state. Non-executing. No
+autonomous execution. Recommends 107A.
 
 ## Governance Results
 
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
+- **pcae_push_check:** pending final commit
 - **telegram_runtime:** loaded, configured, enabled
 
 ## Test Results
 
-- **release_candidate_tests:** 29/29 (passed)
-- **focused_release_candidate_group:** 109/109 (passed)
+- **release_artifact_tests:** 20/20 (passed)
+- **focused_release_candidate_group:** 129/129 (passed)
 - **release_lifecycle_regression:** 421/421 (passed)
 - **combined_regression:** 2220/2220 (passed)
 - **fast_green:** 4390/4390 (fully green) (passed)
 - **report_notification_tests:** 219/219 (passed, unchanged this phase)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
+- **sdist_wheel_build:** succeeded (passed)
+- **wheel_smoke_install:** succeeded (passed)
+- **tag_creation:** v0.1.0-rc1 created (passed)
+- **tag_push:** v0.1.0-rc1 pushed (passed)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging command behavior. No shell execution beyond existing lifecycle/test/packaging command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No git tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106F.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote operations needed for the approved tag push. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle except the approved `v0.1.0-rc1` tag push (documented gap: no governed tag command exists). No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing (no existing signing convention in this repository; none introduced). No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No final `v0.1.0` tag created — only `v0.1.0-rc1`. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 107A.
 
 ## Recommended Next Phase
 
-106F — v0.1 RC Tag / Release Artifact Finalization
+107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*

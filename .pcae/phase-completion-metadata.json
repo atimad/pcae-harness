@@ -1,26 +1,34 @@
 {
-    "phase_id": "106E", "phase_name": "phase_106e_v0_1_release_candidate", "phase_title": "v0.1 Release Candidate",
+    "phase_id": "106F", "phase_name": "phase_106f_v0_1_rc_tag_release_artifact_finalization", "phase_title": "v0.1 RC Tag / Release Artifact Finalization",
     "status": "completed",
-    "summary": "Release-candidate preparation and readiness review only; no product/runtime behavior implemented or changed. Created docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md, docs/RELEASE_NOTES_V0_1_DRAFT.md, and docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md. Readiness review reviewed release evidence from 106A-106D, current validation baseline, install/build/smoke status, and docs-alignment across README.md/RELEASE_SCOPE_V0_1.md/V0_1_GOLDEN_WORKFLOW.md/INSTALLATION.md/V0_1_CLEAN_SMOKE_TEST.md -- no non-execution-boundary violations found; README test/phase-count staleness retained as a known, non-blocking limitation. Reviewed pyproject.toml version (0.1.0): already correct base for a v0.1.0-rc1 pre-release tag, no version bump performed. Decision: Ready to tag v0.1.0-rc1 after operator approval. No tag created -- deferred to Phase 106F. 29 new tests. Non-executing.",
-    "files_changed_count": 5, "tests_added_or_updated": "29 tests added",
+    "summary": "Release artifact finalization only; no product/runtime behavior implemented or changed. All pre-tag hard gates verified green before tagging: clean working tree, origin/main..HEAD=0, active/latest (106E) phase report trust complete, pcae health/check/doctor task-memory/push check all green, fast_green 4390/4390, report_notification_tests/bootstrap_session_reporting_tests present, no existing local/remote v0.1.0-rc1, release checklist/notes/readiness docs present, no forbidden safety claims. Rebuilt sdist/wheel from the tag-ready state in a throwaway venv (scratch directory, not committed); wheel smoke-installed cleanly (pip show reported version 0.1.0). Documented the governed-tag-command gap (no pcae tag/release CLI command exists). Created and pushed the annotated v0.1.0-rc1 tag (git tag -a / git push origin v0.1.0-rc1 -- the only raw git operations in this phase, scoped to exactly one tag), pointing at commit d155dddcf56e7ec17ed558f234d6148799192290 (tag object b47ce1817a697eab6bee8ef158ba50d96e57c3bb), verified present on origin. No other tag created; no final v0.1.0 tag exists. Updated RELEASE_CANDIDATE_V0_1_CHECKLIST.md, RELEASE_NOTES_V0_1_DRAFT.md, PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md, and RELEASE_HANDOFF_V0_1_RC1.md to reflect the tag. 20 new tests plus 1 pre-existing 106E test corrected for the now-accurate tag state. Non-executing.",
+    "files_changed_count": 15, "tests_added_or_updated": "20 tests added, 1 pre-existing test corrected",
     "phase_commits": [
-        {"hash": "b00f1a3434dcd42d941f737a91bdb63dd37115fc", "message": "Add 106E task contract"},
-        {"hash": "934fd15ef6d0a55a91b3ebff9da5538d5c057052", "message": "Prepare v0.1 release candidate"}
+        {"hash": "fc044a6b4fd49699692f5c8ccf801ffaee73f7d2", "message": "Add 106F task contract"},
+        {"hash": "6ab706ad447180e2c057a112b41783b00f7197af", "message": "Finalize v0.1 RC tag artifacts"},
+        {"hash": "d155dddcf56e7ec17ed558f234d6148799192290", "message": "Record 106F pre-tag finalization progress"},
+        {"hash": "bf7ef68476cbd42dbb7bb9b0b17e52933af0a9b3", "message": "Complete Phase 106F v0.1 RC finalization"}
     ],
-    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
+    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "checklist_doc": "docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md",
-    "notes_doc": "docs/RELEASE_NOTES_V0_1_DRAFT.md",
-    "readiness_doc": "docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md",
-    "note": "Pre-push draft. Report will be corrected and re-dispatched after pcae push resolves final push state, per the established 105C.1/105D pattern. During this phase's own task-finish run, .pcae/phase-completion-metadata.json still held 106D's stale content at the moment `pcae task finish --commit` ran, causing an incorrectly-attributed notification (phase_id 106D content sent under the new 106E finish commit hash) -- this file now corrects that content; a final, correctly-attributed dispatch will follow after push, matching the self-healing idempotency-key design (phase_id+commit pair in .last-notified.json).",
+    "tag_name": "v0.1.0-rc1",
+    "tagged_commit": "d155dddcf56e7ec17ed558f234d6148799192290",
+    "tag_object_hash": "b47ce1817a697eab6bee8ef158ba50d96e57c3bb",
+    "finalization_doc": "docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md",
+    "handoff_doc": "docs/RELEASE_HANDOFF_V0_1_RC1.md",
+    "note": "Pre-push draft. Report will be corrected and re-dispatched after pcae push resolves final push state, per the established 105C.1/105D/106D/106E pattern. Metadata written BEFORE running task finish this time (unlike the 106E mistake), and validation_results below explicitly include report_notification_tests and bootstrap_session_reporting_tests entries (the field missed in 106E's first metadata draft, which caused an incomplete-trust rejection there).",
     "validation_results": [
-        {"name": "release_candidate_tests", "result": "29/29", "status": "passed"},
-        {"name": "focused_release_candidate_group", "result": "109/109", "status": "passed"},
+        {"name": "release_artifact_tests", "result": "20/20", "status": "passed"},
+        {"name": "focused_release_candidate_group", "result": "129/129", "status": "passed"},
         {"name": "release_lifecycle_regression", "result": "421/421", "status": "passed"},
         {"name": "combined_regression", "result": "2220/2220", "status": "passed"},
         {"name": "fast_green", "result": "4390/4390 (fully green)", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
-        {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"}
+        {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
+        {"name": "sdist_wheel_build", "result": "succeeded", "status": "passed"},
+        {"name": "wheel_smoke_install", "result": "succeeded", "status": "passed"},
+        {"name": "tag_creation", "result": "v0.1.0-rc1 created", "status": "passed"},
+        {"name": "tag_push", "result": "v0.1.0-rc1 pushed", "status": "passed"}
     ],
     "test_results": {
         "report_notification_tests": "219/219 (passed, unchanged this phase)",
@@ -30,10 +38,10 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging command behavior. No shell execution beyond existing lifecycle/test/packaging command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No git tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106F.",
-    "recommended_next_phase": "106F — v0.1 RC Tag / Release Artifact Finalization"
+    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote operations needed for the approved tag push. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle except the approved v0.1.0-rc1 tag push (documented gap: no governed tag command exists). No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing (no existing signing convention in this repository; none introduced). No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No final v0.1.0 tag created -- only v0.1.0-rc1. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 107A.",
+    "recommended_next_phase": "107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis"
 }
