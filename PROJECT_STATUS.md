@@ -2,7 +2,24 @@
 
 ## Current Phase
 
-Phase 97G — Execution Readiness Preflight Contract Freeze (completed).
+Phase 97H — Execution Readiness Preflight Artifact Trust Hardening (completed).
+
+Hardens artifact trust, tamper detection, reference validation, latest-pointer
+safety, and no-execution guarantees for 97F/97G preflight artifacts. 67 new
+trust hardening tests: digest coverage (13), tamper detection (13), auth flag
+trust (6), reference validation (5), latest/show/verify safety (8), verification
+error contract (9), 97G contract preservation (5), 97G.1 report trust preservation
+(1), no-execution guards (6).
+
+Test-only — no source changes. 202 total preflight tests (63 97F + 72 97G + 67 97H).
+All 12 authorization flags remain False. Execution remains unavailable.
+
+Design document: docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_ARTIFACT_TRUST_HARDENING.md.
+Tests: tests/test_execution_readiness_preflight_artifact_trust.py.
+
+Recommends 97I — Execution Readiness Preflight Boundary Review.
+
+Phase 97G.1 — Preflight Contract Freeze Report Trust Repair (completed).
 
 Freezes the 97F execution readiness preflight contract. 72 contract-freeze
 tests assert structural stability of: 28 top-level JSON fields, 12 authorization
