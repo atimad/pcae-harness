@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260701-1044-phase-99e-governed-execution-attempt-milestone-summary-transition-planning
+20260701-1149-phase-100a-execution-capable-boundary-prerequisite-gap-analysis
 
 ## Title
 
-Phase 99E — Governed Execution Attempt Milestone Summary / Transition Planning
+Phase 100A — Execution-Capable Boundary Prerequisite Gap Analysis
 
 ## Status
 
@@ -18,11 +18,11 @@ implementation
 
 ## Goal
 
-Summarize, close, and transition the Phase 99 governed execution attempt boundary milestone. Milestone summary only.
+Analyze and document what is still missing before PCAE can define, design, or implement an execution-capable boundary. Design/analysis-only.
 
 ## Allowed Files
 
-- docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_MILESTONE_SUMMARY.md
+- docs/PHASE_100_EXECUTION_CAPABLE_BOUNDARY_PREREQUISITE_GAP_ANALYSIS.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
@@ -64,8 +64,7 @@ advisory
 
 ## Acceptance Criteria
 
-- Milestone summary document complete
-- All 395 attempt boundary tests pass
+- Prerequisite gap analysis document complete
 
 ## Acceptance Checks
 
@@ -78,4 +77,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-01T10:44:24.069541+02:00
+2026-07-01T11:49:51.376441+02:00
