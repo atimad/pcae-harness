@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 101C — Runtime Enforcement Evidence Bundle Contract Freeze (completed).
+Phase 101D — Runtime Enforcement Evidence Bundle Artifact Trust Hardening (completed).
 
 Contract-freeze only. Freezes the 99A GovernedExecutionAttemptBoundary contract:
 33 top-level JSON fields, 14 attempt states, 26 denial reasons, 12 authorization
