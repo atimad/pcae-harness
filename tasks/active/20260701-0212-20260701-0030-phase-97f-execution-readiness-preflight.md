@@ -40,6 +40,7 @@ implementation
 - tests/test_execution_readiness_preflight_artifact_trust.py
 - docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_ARTIFACT_TRUST_HARDENING.md
 - docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_BOUNDARY_REVIEW.md
+- docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_MILESTONE_SUMMARY.md
 - .pcae/phase-completion-metadata.json
 - .pcae/execution-readiness-preflight/**
 - .pcae/handoffs/**
