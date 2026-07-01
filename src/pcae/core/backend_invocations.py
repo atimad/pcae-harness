@@ -9875,6 +9875,258 @@ class NoGoEnforcementEvidence:
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# RuntimeEnforcementCoordinator — design-only, non-executing, non-authorizing
+# Phase 103A — Runtime Enforcement Coordinator Contract Design
+# ═══════════════════════════════════════════════════════════════════════════
+
+_REC_SCHEMA_VERSION = "1.0"
+
+REC_STATUS_UNAVAILABLE = "unavailable"
+REC_STATUS_NOT_STARTED = "not_started"
+REC_STATUS_INPUT_COLLECTION_FAILED = "input_collection_failed"
+REC_STATUS_EVIDENCE_BUNDLE_UNAVAILABLE = "evidence_bundle_unavailable"
+REC_STATUS_DECISION_UNAVAILABLE = "decision_unavailable"
+REC_STATUS_PREREQUISITES_FAILED = "prerequisites_failed"
+REC_STATUS_BLOCKED = "blocked"
+REC_STATUS_DENIED = "denied"
+REC_STATUS_FAIL_CLOSED = "fail_closed"
+REC_STATUS_DESIGN_REVIEW = "ready_for_design_review_only"
+
+VALID_REC_STATUSES: frozenset[str] = frozenset({
+    REC_STATUS_UNAVAILABLE, REC_STATUS_NOT_STARTED,
+    REC_STATUS_INPUT_COLLECTION_FAILED, REC_STATUS_EVIDENCE_BUNDLE_UNAVAILABLE,
+    REC_STATUS_DECISION_UNAVAILABLE, REC_STATUS_PREREQUISITES_FAILED,
+    REC_STATUS_BLOCKED, REC_STATUS_DENIED, REC_STATUS_FAIL_CLOSED,
+    REC_STATUS_DESIGN_REVIEW,
+})
+
+REC_RESULT_DENIED = "denied"
+REC_RESULT_FAIL_CLOSED = "fail_closed"
+REC_RESULT_BLOCKED_MISSING_BUNDLE = "blocked_by_missing_evidence_bundle"
+REC_RESULT_BLOCKED_MISSING_DECISION = "blocked_by_missing_decision"
+REC_RESULT_BLOCKED_BUNDLE_VERIFICATION = "blocked_by_failed_bundle_verification"
+REC_RESULT_BLOCKED_DECISION_VERIFICATION = "blocked_by_failed_decision_verification"
+REC_RESULT_BLOCKED_NO_GO = "blocked_by_no_go"
+REC_RESULT_BLOCKED_APPROVAL = "blocked_by_missing_approval"
+REC_RESULT_BLOCKED_AUDIT = "blocked_by_missing_audit"
+REC_RESULT_BLOCKED_ROLLBACK = "blocked_by_missing_rollback"
+REC_RESULT_BLOCKED_REPORT_TRUST = "blocked_by_report_trust_failure"
+REC_RESULT_BLOCKED_NOTIFICATION_TRUST = "blocked_by_notification_trust_failure"
+REC_RESULT_BLOCKED_UNSUPPORTED_SURFACE = "blocked_by_unsupported_surface"
+REC_RESULT_BLOCKED_FUTURE_ONLY = "blocked_by_future_only_step"
+REC_RESULT_EVIDENCE_ONLY = "evidence_only"
+REC_RESULT_DESIGN_REVIEW = "design_review_only"
+
+VALID_REC_RESULTS: frozenset[str] = frozenset({
+    REC_RESULT_DENIED, REC_RESULT_FAIL_CLOSED,
+    REC_RESULT_BLOCKED_MISSING_BUNDLE, REC_RESULT_BLOCKED_MISSING_DECISION,
+    REC_RESULT_BLOCKED_BUNDLE_VERIFICATION, REC_RESULT_BLOCKED_DECISION_VERIFICATION,
+    REC_RESULT_BLOCKED_NO_GO, REC_RESULT_BLOCKED_APPROVAL,
+    REC_RESULT_BLOCKED_AUDIT, REC_RESULT_BLOCKED_ROLLBACK,
+    REC_RESULT_BLOCKED_REPORT_TRUST, REC_RESULT_BLOCKED_NOTIFICATION_TRUST,
+    REC_RESULT_BLOCKED_UNSUPPORTED_SURFACE, REC_RESULT_BLOCKED_FUTURE_ONLY,
+    REC_RESULT_EVIDENCE_ONLY, REC_RESULT_DESIGN_REVIEW,
+})
+
+REC_STEP_LOAD_BUNDLE = "load_evidence_bundle"
+REC_STEP_VERIFY_BUNDLE = "verify_bundle_digest"
+REC_STEP_LOAD_DECISION = "load_decision_artifact"
+REC_STEP_VERIFY_DECISION = "verify_decision_digest"
+REC_STEP_COMPARE_BINDING = "compare_bundle_decision_binding"
+REC_STEP_EVAL_NO_GO = "evaluate_no_go"
+REC_STEP_EVAL_APPROVAL = "evaluate_approval"
+REC_STEP_EVAL_AUDIT = "evaluate_audit"
+REC_STEP_EVAL_ROLLBACK = "evaluate_rollback"
+REC_STEP_EVAL_REPORT_TRUST = "evaluate_report_trust"
+REC_STEP_EVAL_NOTIFICATION_TRUST = "evaluate_notification_trust"
+REC_STEP_EVAL_SCOPE = "evaluate_scope_binding"
+REC_STEP_EVAL_IDENTITY = "evaluate_identity_binding"
+REC_STEP_EVAL_SURFACE = "evaluate_requested_surface"
+REC_STEP_DENY_UNSUPPORTED = "deny_unsupported_surface"
+REC_STEP_PRODUCE = "produce_coordinator_artifact"
+
+ALL_REC_STEPS: tuple[str, ...] = (
+    REC_STEP_LOAD_BUNDLE, REC_STEP_VERIFY_BUNDLE, REC_STEP_LOAD_DECISION,
+    REC_STEP_VERIFY_DECISION, REC_STEP_COMPARE_BINDING, REC_STEP_EVAL_NO_GO,
+    REC_STEP_EVAL_APPROVAL, REC_STEP_EVAL_AUDIT, REC_STEP_EVAL_ROLLBACK,
+    REC_STEP_EVAL_REPORT_TRUST, REC_STEP_EVAL_NOTIFICATION_TRUST,
+    REC_STEP_EVAL_SCOPE, REC_STEP_EVAL_IDENTITY, REC_STEP_EVAL_SURFACE,
+    REC_STEP_DENY_UNSUPPORTED, REC_STEP_PRODUCE,
+)
+
+
+@dataclass
+class RuntimeEnforcementCoordinator:
+    """Design-only model for a future runtime enforcement coordinator.
+
+    Non-executing, non-authorizing, evidence-only. Orchestrates loading
+    evidence bundles and decision artifacts, evaluating prerequisites,
+    and producing a coordinator artifact. Does not enforce.
+    """
+
+    schema_version: str = _REC_SCHEMA_VERSION
+    coordinator_id: str = ""
+    phase_id: str = "103A"
+    task_id: str = ""
+    generated_at_utc: str = ""
+
+    source_evidence_bundle_ref: str = ""
+    source_evidence_bundle_digest: str = ""
+    source_decision_ref: str = ""
+    source_decision_digest: str = ""
+
+    coordinator_status: str = REC_STATUS_NOT_STARTED
+    coordinator_result: str = REC_RESULT_DENIED
+    coordinator_reason: str = ""
+
+    requested_surface: list[str] = field(default_factory=list)
+    evaluated_inputs: list[str] = field(default_factory=list)
+    missing_inputs: list[str] = field(default_factory=list)
+    stale_inputs: list[str] = field(default_factory=list)
+    tampered_inputs: list[str] = field(default_factory=list)
+    contradictory_inputs: list[str] = field(default_factory=list)
+    triggered_no_go_conditions: list[str] = field(default_factory=list)
+    denied_steps: list[str] = field(default_factory=list)
+    blocked_steps: list[str] = field(default_factory=list)
+    skipped_steps: list[str] = field(default_factory=list)
+    future_only_steps: list[str] = field(default_factory=list)
+    unsupported_requests: list[str] = field(default_factory=list)
+    denial_reasons: list[str] = field(default_factory=list)
+    fail_closed_reasons: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    execution_available: bool = False
+    execution_authorized: bool = False
+    backend_invocation_authorized: bool = False
+    adapter_execution_authorized: bool = False
+    network_authorized: bool = False
+    subprocess_authorized: bool = False
+    shell_authorized: bool = False
+    mutation_authorized: bool = False
+    apply_authorized: bool = False
+    rollback_authorized: bool = False
+    commit_authorized: bool = False
+    push_authorized: bool = False
+
+    simulation_only: bool = True
+    no_execution: bool = True
+    evidence_only: bool = True
+    non_authorizing: bool = True
+    design_only: bool = True
+
+    digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if self.schema_version != _REC_SCHEMA_VERSION:
+            issues.append(f"unknown schema_version: {self.schema_version!r}")
+        if self.coordinator_status not in VALID_REC_STATUSES:
+            issues.append(f"invalid coordinator_status: {self.coordinator_status!r}")
+        if self.coordinator_result not in VALID_REC_RESULTS:
+            issues.append(f"invalid coordinator_result: {self.coordinator_result!r}")
+        if self.execution_available:
+            issues.append("execution_available must be False")
+        if self.execution_authorized:
+            issues.append("execution_authorized must be False")
+        if self.push_authorized:
+            issues.append("push_authorized must be False")
+        if not self.simulation_only:
+            issues.append("simulation_only must be True")
+        if not self.no_execution:
+            issues.append("no_execution must be True")
+        if not self.design_only:
+            issues.append("design_only must be True")
+        return issues
+
+    def compute_digest(self) -> str:
+        payload = {
+            "schema_version": self.schema_version,
+            "coordinator_id": self.coordinator_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "source_evidence_bundle_ref": self.source_evidence_bundle_ref,
+            "source_evidence_bundle_digest": self.source_evidence_bundle_digest,
+            "source_decision_ref": self.source_decision_ref,
+            "source_decision_digest": self.source_decision_digest,
+            "coordinator_status": self.coordinator_status,
+            "coordinator_result": self.coordinator_result,
+            "coordinator_reason": self.coordinator_reason,
+            "requested_surface": sorted(self.requested_surface),
+            "evaluated_inputs": sorted(self.evaluated_inputs),
+            "missing_inputs": sorted(self.missing_inputs),
+            "stale_inputs": sorted(self.stale_inputs),
+            "tampered_inputs": sorted(self.tampered_inputs),
+            "contradictory_inputs": sorted(self.contradictory_inputs),
+            "triggered_no_go_conditions": sorted(self.triggered_no_go_conditions),
+            "denied_steps": sorted(self.denied_steps),
+            "blocked_steps": sorted(self.blocked_steps),
+            "skipped_steps": sorted(self.skipped_steps),
+            "future_only_steps": sorted(self.future_only_steps),
+            "unsupported_requests": sorted(self.unsupported_requests),
+            "denial_reasons": sorted(self.denial_reasons),
+            "fail_closed_reasons": sorted(self.fail_closed_reasons),
+            "warnings": sorted(self.warnings),
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+        }
+        canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "coordinator_id": self.coordinator_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "source_evidence_bundle_ref": self.source_evidence_bundle_ref,
+            "source_evidence_bundle_digest": self.source_evidence_bundle_digest,
+            "source_decision_ref": self.source_decision_ref,
+            "source_decision_digest": self.source_decision_digest,
+            "coordinator_status": self.coordinator_status,
+            "coordinator_result": self.coordinator_result,
+            "coordinator_reason": self.coordinator_reason,
+            "requested_surface": sorted(self.requested_surface),
+            "evaluated_inputs": sorted(self.evaluated_inputs),
+            "missing_inputs": sorted(self.missing_inputs),
+            "stale_inputs": sorted(self.stale_inputs),
+            "tampered_inputs": sorted(self.tampered_inputs),
+            "contradictory_inputs": sorted(self.contradictory_inputs),
+            "triggered_no_go_conditions": sorted(self.triggered_no_go_conditions),
+            "denied_steps": sorted(self.denied_steps),
+            "blocked_steps": sorted(self.blocked_steps),
+            "skipped_steps": sorted(self.skipped_steps),
+            "future_only_steps": sorted(self.future_only_steps),
+            "unsupported_requests": sorted(self.unsupported_requests),
+            "denial_reasons": sorted(self.denial_reasons),
+            "fail_closed_reasons": sorted(self.fail_closed_reasons),
+            "warnings": sorted(self.warnings),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+            "digest": self.digest,
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # RuntimeEnforcementEvidenceBundle — design-only, non-executing
 # Phase 101B — Runtime Enforcement Evidence Bundle Contract Design
 # ═══════════════════════════════════════════════════════════════════════════
