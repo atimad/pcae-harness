@@ -7,7 +7,7 @@
         {"hash": "b00f1a3434dcd42d941f737a91bdb63dd37115fc", "message": "Add 106E task contract"},
         {"hash": "934fd15ef6d0a55a91b3ebff9da5538d5c057052", "message": "Prepare v0.1 release candidate"}
     ],
-    "pushed_status": "not_pushed", "origin_main_head_count": 3, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "checklist_doc": "docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md",
     "notes_doc": "docs/RELEASE_NOTES_V0_1_DRAFT.md",
@@ -18,7 +18,9 @@
         {"name": "focused_release_candidate_group", "result": "109/109", "status": "passed"},
         {"name": "release_lifecycle_regression", "result": "421/421", "status": "passed"},
         {"name": "combined_regression", "result": "2220/2220", "status": "passed"},
-        {"name": "fast_green", "result": "4390/4390 (fully green)", "status": "passed"}
+        {"name": "fast_green", "result": "4390/4390 (fully green)", "status": "passed"},
+        {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
+        {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"}
     ],
     "test_results": {
         "report_notification_tests": "219/219 (passed, unchanged this phase)",
@@ -28,7 +30,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
