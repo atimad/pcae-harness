@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 105C.1 (20260701-2127-sync-final-pushed-state-metadata-for-105c-1)
 - Phase 105C.1 — Task Finish Report Notification Ordering / Completeness Repair (20260701-2121-phase-105c-1-task-finish-report-notification-ordering-completeness-repair)
 - Phase 105C — Task Finish Report Trust / Telegram Notification Integration (20260701-2046-phase-105c-task-finish-report-trust-telegram-notification-integration)
 - Commit remaining task-memory repair files (20260701-2022-commit-remaining-task-memory-repair-files)
