@@ -10,6 +10,7 @@
         {"name": "99a_plus_99b_combined", "result": "199/199", "status": "passed"},
         {"name": "preflight_prototype_attempt_combined_regression", "result": "1044/1044", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
+        {"name": "bootstrap_session_reporting_tests", "result": "144/144", "status": "passed"},
         {"name": "approval_gate_tests", "result": "82/82", "status": "passed"},
         {"name": "backend_session_regression", "result": "1209 passed, 3 pre-existing", "status": "passed_with_pre_existing"},
         {"name": "fast_green", "result": "4387/4390 (3 pre-existing)", "status": "passed_with_pre_existing"}
@@ -30,6 +31,6 @@
     "recommended_next_phase": "99C — Governed Execution Attempt Artifact Trust Hardening",
     "summary": "Phase 99B complete: Governed Execution Attempt Contract Freeze. Contract-freeze only. 33 JSON fields, 14 attempt states, 26 denial reasons, 12 auth flags (all False), SHA-256 digest. 179 contract-freeze tests. No source changes. Recommends 99C.",
     "pushed": true, "pushed_status": "pushed", "origin_main_head_count": 0,
-    "notification_dispatch_result": "pending", "report_consistency": "consistent",
+    "notification_dispatch_result": "dispatched", "report_consistency": "consistent",
     "report_notification_tests_present": true, "bootstrap_session_reporting_tests_present": true
 }
