@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 99B finalization commit (20260701-0919-99b-finalization-commit)
 - Final 99B cleanup (20260701-0918-final-99b-cleanup)
 - Post-99B task cleanup (20260701-0918-post-99b-task-cleanup)
 - Phase 99B — Governed Execution Attempt Contract Freeze (20260701-0911-phase-99b-governed-execution-attempt-contract-freeze)
