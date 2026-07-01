@@ -9872,3 +9872,187 @@ class NoGoEnforcementEvidence:
             "design_only": self.design_only,
             "digest": self.digest,
         }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# RuntimeEnforcementEvidenceBundle — design-only, non-executing
+# Phase 101B — Runtime Enforcement Evidence Bundle Contract Design
+# ═══════════════════════════════════════════════════════════════════════════
+
+_REEB_SCHEMA_VERSION = "1.0"
+
+REEB_STATUS_UNAVAILABLE = "unavailable"
+REEB_STATUS_NOT_COLLECTED = "not_collected"
+REEB_STATUS_INCOMPLETE = "incomplete"
+REEB_STATUS_COLLECTED = "collected"
+REEB_STATUS_INVALID = "invalid"
+REEB_STATUS_BLOCKED_BY_NO_GO = "blocked_by_no_go"
+REEB_STATUS_BLOCKED_BY_MISSING = "blocked_by_missing_required_evidence"
+REEB_STATUS_BLOCKED_BY_VERIFICATION = "blocked_by_failed_verification"
+REEB_STATUS_READY_FOR_DESIGN_REVIEW = "ready_for_design_review_only"
+
+VALID_REEB_STATUSES: frozenset[str] = frozenset({
+    REEB_STATUS_UNAVAILABLE, REEB_STATUS_NOT_COLLECTED, REEB_STATUS_INCOMPLETE,
+    REEB_STATUS_COLLECTED, REEB_STATUS_INVALID,
+    REEB_STATUS_BLOCKED_BY_NO_GO, REEB_STATUS_BLOCKED_BY_MISSING,
+    REEB_STATUS_BLOCKED_BY_VERIFICATION, REEB_STATUS_READY_FOR_DESIGN_REVIEW,
+})
+
+REEB_DECISION_DENIED = "denied"
+REEB_DECISION_FAIL_CLOSED = "fail_closed"
+REEB_DECISION_BLOCKED = "blocked"
+REEB_DECISION_EVIDENCE_ONLY = "evidence_only"
+REEB_DECISION_DESIGN_REVIEW = "design_review_only"
+
+VALID_REEB_DECISIONS: frozenset[str] = frozenset({
+    REEB_DECISION_DENIED, REEB_DECISION_FAIL_CLOSED, REEB_DECISION_BLOCKED,
+    REEB_DECISION_EVIDENCE_ONLY, REEB_DECISION_DESIGN_REVIEW,
+})
+
+
+@dataclass
+class RuntimeEnforcementEvidenceBundle:
+    """Design-only model for a future runtime enforcement evidence bundle.
+
+    Non-executing, non-authorizing, evidence-only. Collects references, digests,
+    and trust statuses from the PCAE evidence stack. Does not enforce.
+    """
+
+    schema_version: str = _REEB_SCHEMA_VERSION
+    evidence_bundle_id: str = ""
+    phase_id: str = "101B"
+    task_id: str = ""
+    generated_at_utc: str = ""
+
+    bundle_status: str = REEB_STATUS_NOT_COLLECTED
+    bundle_decision: str = REEB_DECISION_DENIED
+
+    required_evidence: list[str] = field(default_factory=list)
+    missing_required_evidence: list[str] = field(default_factory=list)
+    evidence_refs: list[str] = field(default_factory=list)
+    evidence_digests: list[str] = field(default_factory=list)
+
+    no_go_evidence_ref: str = ""
+    no_go_evidence_digest: str = ""
+    no_go_conditions: list[str] = field(default_factory=list)
+    approval_ref: str = ""
+    audit_readiness_ref: str = ""
+    rollback_readiness_ref: str = ""
+    report_trust_ref: str = ""
+    notification_trust_ref: str = ""
+    denial_reasons: list[str] = field(default_factory=list)
+    fail_closed_reasons: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    execution_available: bool = False
+    execution_authorized: bool = False
+    backend_invocation_authorized: bool = False
+    adapter_execution_authorized: bool = False
+    network_authorized: bool = False
+    subprocess_authorized: bool = False
+    shell_authorized: bool = False
+    mutation_authorized: bool = False
+    apply_authorized: bool = False
+    rollback_authorized: bool = False
+    commit_authorized: bool = False
+    push_authorized: bool = False
+
+    simulation_only: bool = True
+    no_execution: bool = True
+    evidence_only: bool = True
+    non_authorizing: bool = True
+    design_only: bool = True
+
+    digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if self.schema_version != _REEB_SCHEMA_VERSION:
+            issues.append(f"unknown schema_version: {self.schema_version!r}")
+        if self.bundle_status not in VALID_REEB_STATUSES:
+            issues.append(f"invalid bundle_status: {self.bundle_status!r}")
+        if self.bundle_decision not in VALID_REEB_DECISIONS:
+            issues.append(f"invalid bundle_decision: {self.bundle_decision!r}")
+        if self.execution_available:
+            issues.append("execution_available must be False")
+        if self.execution_authorized:
+            issues.append("execution_authorized must be False")
+        if self.push_authorized:
+            issues.append("push_authorized must be False")
+        if not self.simulation_only:
+            issues.append("simulation_only must be True")
+        if not self.no_execution:
+            issues.append("no_execution must be True")
+        if not self.design_only:
+            issues.append("design_only must be True")
+        return issues
+
+    def compute_digest(self) -> str:
+        payload = {
+            "schema_version": self.schema_version,
+            "evidence_bundle_id": self.evidence_bundle_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "bundle_status": self.bundle_status,
+            "bundle_decision": self.bundle_decision,
+            "required_evidence": sorted(self.required_evidence),
+            "missing_required_evidence": sorted(self.missing_required_evidence),
+            "evidence_refs": sorted(self.evidence_refs),
+            "evidence_digests": sorted(self.evidence_digests),
+            "no_go_conditions": sorted(self.no_go_conditions),
+            "denial_reasons": sorted(self.denial_reasons),
+            "fail_closed_reasons": sorted(self.fail_closed_reasons),
+            "warnings": sorted(self.warnings),
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+        }
+        canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "evidence_bundle_id": self.evidence_bundle_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "bundle_status": self.bundle_status,
+            "bundle_decision": self.bundle_decision,
+            "required_evidence": sorted(self.required_evidence),
+            "missing_required_evidence": sorted(self.missing_required_evidence),
+            "evidence_refs": sorted(self.evidence_refs),
+            "evidence_digests": sorted(self.evidence_digests),
+            "no_go_evidence_ref": self.no_go_evidence_ref,
+            "no_go_evidence_digest": self.no_go_evidence_digest,
+            "no_go_conditions": sorted(self.no_go_conditions),
+            "approval_ref": self.approval_ref,
+            "audit_readiness_ref": self.audit_readiness_ref,
+            "rollback_readiness_ref": self.rollback_readiness_ref,
+            "report_trust_ref": self.report_trust_ref,
+            "notification_trust_ref": self.notification_trust_ref,
+            "denial_reasons": sorted(self.denial_reasons),
+            "fail_closed_reasons": sorted(self.fail_closed_reasons),
+            "warnings": sorted(self.warnings),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+            "digest": self.digest,
+        }
