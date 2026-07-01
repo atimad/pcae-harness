@@ -8707,3 +8707,632 @@ def verify_execution_readiness_preflight(
         "preflight_status": preflight.preflight_status,
         "no_execution_confirmed": preflight.no_execution and not preflight.execution_available,
     }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 98A — First governed execution preflight prototype
+# ═══════════════════════════════════════════════════════════════════════════
+
+_GEP_SCHEMA_VERSION = "1.0"
+
+# ── Prototype statuses ─────────────────────────────────────────────────
+
+GEP_UNAVAILABLE = "unavailable"
+GEP_BLOCKED = "blocked"
+GEP_EVIDENCE_INCOMPLETE = "evidence_incomplete"
+GEP_APPROVAL_REQUIRED = "approval_required"
+GEP_AUDIT_REQUIRED = "audit_required"
+GEP_ROLLBACK_REQUIRED = "rollback_required"
+GEP_VERIFICATION_FAILED = "verification_failed"
+GEP_READY_FOR_PREFLIGHT_REVIEW = "ready_for_preflight_review"
+GEP_PREFLIGHT_ONLY = "preflight_only"
+
+VALID_GEP_STATUSES: frozenset[str] = frozenset({
+    GEP_UNAVAILABLE, GEP_BLOCKED, GEP_EVIDENCE_INCOMPLETE,
+    GEP_APPROVAL_REQUIRED, GEP_AUDIT_REQUIRED, GEP_ROLLBACK_REQUIRED,
+    GEP_VERIFICATION_FAILED, GEP_READY_FOR_PREFLIGHT_REVIEW, GEP_PREFLIGHT_ONLY,
+})
+
+# ── Prototype decisions ────────────────────────────────────────────────
+
+GEP_DECISION_DENY = "deny"
+GEP_DECISION_BLOCK = "block"
+GEP_DECISION_REQUIRE_EVIDENCE = "require_evidence"
+GEP_DECISION_REQUIRE_APPROVAL = "require_approval"
+GEP_DECISION_REQUIRE_AUDIT_READINESS = "require_audit_readiness"
+GEP_DECISION_REQUIRE_ROLLBACK_READINESS = "require_rollback_readiness"
+GEP_DECISION_REQUIRE_VERIFICATION = "require_verification"
+GEP_DECISION_READY_FOR_REVIEW_ONLY = "ready_for_review_only"
+
+VALID_GEP_DECISIONS: frozenset[str] = frozenset({
+    GEP_DECISION_DENY, GEP_DECISION_BLOCK, GEP_DECISION_REQUIRE_EVIDENCE,
+    GEP_DECISION_REQUIRE_APPROVAL, GEP_DECISION_REQUIRE_AUDIT_READINESS,
+    GEP_DECISION_REQUIRE_ROLLBACK_READINESS, GEP_DECISION_REQUIRE_VERIFICATION,
+    GEP_DECISION_READY_FOR_REVIEW_ONLY,
+})
+
+# ── Future-only / unavailable decisions ────────────────────────────────
+
+GEP_DECISION_EXECUTE_FUTURE = "execute"
+GEP_DECISION_RUN_FUTURE = "run"
+GEP_DECISION_INVOKE_FUTURE = "invoke"
+GEP_DECISION_APPLY_FUTURE = "apply"
+GEP_DECISION_COMMIT_FUTURE = "commit"
+GEP_DECISION_PUSH_FUTURE = "push"
+GEP_DECISION_EXECUTION_READY_FUTURE = "execution_ready"
+GEP_DECISION_INVOCATION_AUTHORIZED_FUTURE = "invocation_authorized"
+
+UNAVAILABLE_GEP_DECISIONS: frozenset[str] = frozenset({
+    GEP_DECISION_EXECUTE_FUTURE, GEP_DECISION_RUN_FUTURE,
+    GEP_DECISION_INVOKE_FUTURE, GEP_DECISION_APPLY_FUTURE,
+    GEP_DECISION_COMMIT_FUTURE, GEP_DECISION_PUSH_FUTURE,
+    GEP_DECISION_EXECUTION_READY_FUTURE, GEP_DECISION_INVOCATION_AUTHORIZED_FUTURE,
+})
+
+# ── Artifact paths ──────────────────────────────────────────────────────
+
+_GEP_ARTIFACT_DIR = ".pcae/governed-execution-preflight"
+_GEP_LATEST = "latest.json"
+
+
+def _gep_dir_path() -> Path:
+    from pathlib import Path as _P
+    return _P(_GEP_ARTIFACT_DIR)
+
+
+def _gep_latest_path() -> Path:
+    return _gep_dir_path() / _GEP_LATEST
+
+
+def _gep_timestamped_path(ts: str) -> Path:
+    return _gep_dir_path() / f"{ts}.json"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GovernedExecutionPreflightPrototype — main prototype dataclass
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class GovernedExecutionPreflightPrototype:
+    """Non-executing governed execution preflight prototype.
+
+    Consumes a Phase 97 ExecutionReadinessPreflight and produces a richer
+    future-execution preflight decision artifact. Fails closed.
+    All authorization flags remain False in the current system.
+    """
+
+    schema_version: str = _GEP_SCHEMA_VERSION
+    prototype_id: str = ""
+    phase_id: str = "98A"
+    task_id: str = ""
+    generated_at_utc: str = ""
+
+    # ── Source preflight reference ──────────────────────────────────────
+    source_preflight_ref: str = ""
+    source_preflight_digest: str = ""
+    source_preflight_status: str = ""
+    source_readiness_status: str = ""
+    source_no_go_conditions: list[str] = field(default_factory=list)
+    source_missing_evidence: list[str] = field(default_factory=list)
+    source_failed_checks: list[str] = field(default_factory=list)
+    consumed_evidence_refs: list[str] = field(default_factory=list)
+
+    # ── Prerequisite summaries ──────────────────────────────────────────
+    prerequisite_summary: str = ""
+    approval_summary: str = ""
+    audit_summary: str = ""
+    rollback_summary: str = ""
+    backend_contract_summary: str = ""
+    adapter_boundary_summary: str = ""
+    artifact_verification_summary: str = ""
+    execution_boundary_summary: str = ""
+
+    # ── Prototype decision ──────────────────────────────────────────────
+    prototype_status: str = GEP_BLOCKED
+    decision: str = GEP_DECISION_BLOCK
+    decision_reasons: list[str] = field(default_factory=list)
+    no_go_conditions: list[str] = field(default_factory=list)
+    missing_prerequisites: list[str] = field(default_factory=list)
+    failed_prerequisites: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    # ── Authorization summary — all False in current system ────────────
+    execution_available: bool = False
+    execution_authorized: bool = False
+    backend_invocation_authorized: bool = False
+    adapter_execution_authorized: bool = False
+    network_authorized: bool = False
+    subprocess_authorized: bool = False
+    shell_authorized: bool = False
+    mutation_authorized: bool = False
+    apply_authorized: bool = False
+    rollback_authorized: bool = False
+    commit_authorized: bool = False
+    push_authorized: bool = False
+
+    # ── Safety invariants ──────────────────────────────────────────────
+    simulation_only: bool = True
+    no_execution: bool = True
+    evidence_only: bool = True
+    non_authorizing: bool = True
+
+    # ── Digest ─────────────────────────────────────────────────────────
+    digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if self.schema_version != _GEP_SCHEMA_VERSION:
+            issues.append(f"unknown schema_version: {self.schema_version!r}")
+        if self.prototype_status not in VALID_GEP_STATUSES:
+            issues.append(f"invalid prototype_status: {self.prototype_status!r}")
+        if self.decision not in VALID_GEP_DECISIONS:
+            issues.append(f"invalid decision: {self.decision!r}")
+        if self.decision in UNAVAILABLE_GEP_DECISIONS:
+            issues.append(f"decision {self.decision!r} is future-only and unavailable")
+        if self.execution_available:
+            issues.append("execution_available must be False")
+        if self.execution_authorized:
+            issues.append("execution_authorized must be False")
+        if self.backend_invocation_authorized:
+            issues.append("backend_invocation_authorized must be False")
+        if self.adapter_execution_authorized:
+            issues.append("adapter_execution_authorized must be False")
+        if self.network_authorized:
+            issues.append("network_authorized must be False")
+        if self.subprocess_authorized:
+            issues.append("subprocess_authorized must be False")
+        if self.shell_authorized:
+            issues.append("shell_authorized must be False")
+        if self.mutation_authorized:
+            issues.append("mutation_authorized must be False")
+        if self.apply_authorized:
+            issues.append("apply_authorized must be False")
+        if self.rollback_authorized:
+            issues.append("rollback_authorized must be False")
+        if self.commit_authorized:
+            issues.append("commit_authorized must be False")
+        if self.push_authorized:
+            issues.append("push_authorized must be False")
+        if not self.simulation_only:
+            issues.append("simulation_only must be True")
+        if not self.no_execution:
+            issues.append("no_execution must be True")
+        if not self.evidence_only:
+            issues.append("evidence_only must be True")
+        if not self.non_authorizing:
+            issues.append("non_authorizing must be True")
+        return issues
+
+    def compute_digest(self) -> str:
+        payload = {
+            "schema_version": self.schema_version,
+            "prototype_id": self.prototype_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "source_preflight_ref": self.source_preflight_ref,
+            "source_preflight_digest": self.source_preflight_digest,
+            "source_preflight_status": self.source_preflight_status,
+            "source_readiness_status": self.source_readiness_status,
+            "source_no_go_conditions": sorted(self.source_no_go_conditions),
+            "source_missing_evidence": sorted(self.source_missing_evidence),
+            "source_failed_checks": sorted(self.source_failed_checks),
+            "consumed_evidence_refs": sorted(self.consumed_evidence_refs),
+            "prerequisite_summary": self.prerequisite_summary,
+            "approval_summary": self.approval_summary,
+            "audit_summary": self.audit_summary,
+            "rollback_summary": self.rollback_summary,
+            "backend_contract_summary": self.backend_contract_summary,
+            "adapter_boundary_summary": self.adapter_boundary_summary,
+            "artifact_verification_summary": self.artifact_verification_summary,
+            "execution_boundary_summary": self.execution_boundary_summary,
+            "prototype_status": self.prototype_status,
+            "decision": self.decision,
+            "decision_reasons": sorted(self.decision_reasons),
+            "no_go_conditions": sorted(self.no_go_conditions),
+            "missing_prerequisites": sorted(self.missing_prerequisites),
+            "failed_prerequisites": sorted(self.failed_prerequisites),
+            "warnings": sorted(self.warnings),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+        }
+        canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "prototype_id": self.prototype_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "source_preflight_ref": self.source_preflight_ref,
+            "source_preflight_digest": self.source_preflight_digest,
+            "source_preflight_status": self.source_preflight_status,
+            "source_readiness_status": self.source_readiness_status,
+            "source_no_go_conditions": sorted(self.source_no_go_conditions),
+            "source_missing_evidence": sorted(self.source_missing_evidence),
+            "source_failed_checks": sorted(self.source_failed_checks),
+            "consumed_evidence_refs": sorted(self.consumed_evidence_refs),
+            "prerequisite_summary": self.prerequisite_summary,
+            "approval_summary": self.approval_summary,
+            "audit_summary": self.audit_summary,
+            "rollback_summary": self.rollback_summary,
+            "backend_contract_summary": self.backend_contract_summary,
+            "adapter_boundary_summary": self.adapter_boundary_summary,
+            "artifact_verification_summary": self.artifact_verification_summary,
+            "execution_boundary_summary": self.execution_boundary_summary,
+            "prototype_status": self.prototype_status,
+            "decision": self.decision,
+            "decision_reasons": sorted(self.decision_reasons),
+            "no_go_conditions": sorted(self.no_go_conditions),
+            "missing_prerequisites": sorted(self.missing_prerequisites),
+            "failed_prerequisites": sorted(self.failed_prerequisites),
+            "warnings": sorted(self.warnings),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "digest": self.digest,
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "GovernedExecutionPreflightPrototype":
+        auth = data.get("authorization_summary", {})
+        return cls(
+            schema_version=data.get("schema_version", _GEP_SCHEMA_VERSION),
+            prototype_id=data.get("prototype_id", ""),
+            phase_id=data.get("phase_id", "98A"),
+            task_id=data.get("task_id", ""),
+            generated_at_utc=data.get("generated_at_utc", ""),
+            source_preflight_ref=data.get("source_preflight_ref", ""),
+            source_preflight_digest=data.get("source_preflight_digest", ""),
+            source_preflight_status=data.get("source_preflight_status", ""),
+            source_readiness_status=data.get("source_readiness_status", ""),
+            source_no_go_conditions=data.get("source_no_go_conditions", []),
+            source_missing_evidence=data.get("source_missing_evidence", []),
+            source_failed_checks=data.get("source_failed_checks", []),
+            consumed_evidence_refs=data.get("consumed_evidence_refs", []),
+            prerequisite_summary=data.get("prerequisite_summary", ""),
+            approval_summary=data.get("approval_summary", ""),
+            audit_summary=data.get("audit_summary", ""),
+            rollback_summary=data.get("rollback_summary", ""),
+            backend_contract_summary=data.get("backend_contract_summary", ""),
+            adapter_boundary_summary=data.get("adapter_boundary_summary", ""),
+            artifact_verification_summary=data.get("artifact_verification_summary", ""),
+            execution_boundary_summary=data.get("execution_boundary_summary", ""),
+            prototype_status=data.get("prototype_status", GEP_BLOCKED),
+            decision=data.get("decision", GEP_DECISION_BLOCK),
+            decision_reasons=data.get("decision_reasons", []),
+            no_go_conditions=data.get("no_go_conditions", []),
+            missing_prerequisites=data.get("missing_prerequisites", []),
+            failed_prerequisites=data.get("failed_prerequisites", []),
+            warnings=data.get("warnings", []),
+            execution_available=auth.get("execution_available", False),
+            execution_authorized=auth.get("execution_authorized", False),
+            backend_invocation_authorized=auth.get("backend_invocation_authorized", False),
+            adapter_execution_authorized=auth.get("adapter_execution_authorized", False),
+            network_authorized=auth.get("network_authorized", False),
+            subprocess_authorized=auth.get("subprocess_authorized", False),
+            shell_authorized=auth.get("shell_authorized", False),
+            mutation_authorized=auth.get("mutation_authorized", False),
+            apply_authorized=auth.get("apply_authorized", False),
+            rollback_authorized=auth.get("rollback_authorized", False),
+            commit_authorized=auth.get("commit_authorized", False),
+            push_authorized=auth.get("push_authorized", False),
+            simulation_only=data.get("simulation_only", True),
+            no_execution=data.get("no_execution", True),
+            evidence_only=data.get("evidence_only", True),
+            non_authorizing=data.get("non_authorizing", True),
+            digest=data.get("digest", ""),
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Prototype builder — consumes Phase 97 preflight
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def build_governed_execution_preflight_prototype(
+    *,
+    source_preflight: ExecutionReadinessPreflight | None = None,
+    task_id: str = "",
+    phase_id: str = "98A",
+    load_latest: bool = True,
+) -> GovernedExecutionPreflightPrototype:
+    """Build a governed execution preflight prototype consuming a 97F preflight.
+
+    Non-executing, non-authorizing, fail-closed.
+    """
+    import uuid
+    now = datetime.now(timezone.utc)
+    prototype_id = f"gep-{uuid.uuid4().hex[:12]}"
+    generated_at = now.isoformat()
+
+    # Load source preflight if needed
+    if source_preflight is None and load_latest:
+        source_preflight = load_latest_execution_readiness_preflight()
+
+    # ── Handle missing/invalid source ──────────────────────────────────
+    if source_preflight is None:
+        proto = GovernedExecutionPreflightPrototype(
+            schema_version=_GEP_SCHEMA_VERSION,
+            prototype_id=prototype_id,
+            phase_id=phase_id,
+            task_id=task_id,
+            generated_at_utc=generated_at,
+            prototype_status=GEP_UNAVAILABLE,
+            decision=GEP_DECISION_BLOCK,
+            decision_reasons=["source_preflight_missing"],
+            missing_prerequisites=["source_preflight"],
+            warnings=["No Phase 97 preflight artifact found. Run: pcae execution-readiness preflight --save"],
+            simulation_only=True, no_execution=True,
+            evidence_only=True, non_authorizing=True,
+        )
+        proto.digest = proto.compute_digest()
+        return proto
+
+    # Validate source preflight
+    source_issues = source_preflight.validate()
+    source_verification = verify_execution_readiness_preflight(source_preflight)
+
+    # ── Consume source evidence ─────────────────────────────────────────
+    prototype = GovernedExecutionPreflightPrototype(
+        schema_version=_GEP_SCHEMA_VERSION,
+        prototype_id=prototype_id,
+        phase_id=phase_id,
+        task_id=task_id,
+        generated_at_utc=generated_at,
+        source_preflight_ref=source_preflight.preflight_id,
+        source_preflight_digest=source_preflight.digest,
+        source_preflight_status=source_preflight.preflight_status,
+        source_readiness_status=source_preflight.readiness_status,
+        source_no_go_conditions=list(source_preflight.no_go_conditions),
+        source_missing_evidence=list(source_preflight.missing_evidence),
+        source_failed_checks=list(source_preflight.failed_checks),
+        consumed_evidence_refs=list(source_preflight.evidence_refs),
+    )
+
+    # ── Check source safety invariants ──────────────────────────────────
+    blocker_reasons: list[str] = []
+
+    # Source validation
+    if source_issues:
+        blocker_reasons.append(f"source_validation_failed: {'; '.join(source_issues[:3])}")
+    if not source_verification.get("valid", False):
+        blocker_reasons.append("source_verification_failed")
+
+    # Source no-go conditions
+    if source_preflight.no_go_conditions:
+        blocker_reasons.append(
+            f"source_has_{len(source_preflight.no_go_conditions)}_no_go_conditions"
+        )
+        prototype.no_go_conditions = list(source_preflight.no_go_conditions)
+
+    # Source authorization check
+    auth = source_preflight.to_dict().get("authorization_summary", {})
+    for flag_name, flag_value in auth.items():
+        if flag_value:
+            blocker_reasons.append(f"source_{flag_name}_is_true")
+            break
+
+    # Source safety check
+    if not source_preflight.no_execution:
+        blocker_reasons.append("source_no_execution_is_false")
+    if not source_preflight.simulation_only:
+        blocker_reasons.append("source_simulation_only_is_false")
+    if source_preflight.execution_available:
+        blocker_reasons.append("source_execution_available_is_true")
+
+    # ── Prerequisite evaluation ─────────────────────────────────────────
+    missing_prereqs: list[str] = []
+    failed_prereqs: list[str] = []
+
+    # Evidence
+    if source_preflight.missing_evidence:
+        missing_prereqs.append(
+            f"missing_evidence: {', '.join(source_preflight.missing_evidence[:5])}"
+        )
+
+    # Approval
+    if source_preflight.approval_status in (PREFLIGHT_APPROVAL_REQUIRED, PREFLIGHT_BLOCKED):
+        missing_prereqs.append("human_approval_required")
+        prototype.approval_summary = "approval_required"
+    else:
+        prototype.approval_summary = source_preflight.approval_status
+
+    # Audit
+    if source_preflight.audit_readiness_status in (PREFLIGHT_AUDIT_REQUIRED, PREFLIGHT_BLOCKED):
+        missing_prereqs.append("audit_readiness_required")
+        prototype.audit_summary = "audit_required"
+    else:
+        prototype.audit_summary = source_preflight.audit_readiness_status
+
+    # Rollback
+    if source_preflight.rollback_readiness_status in (PREFLIGHT_ROLLBACK_REQUIRED, PREFLIGHT_BLOCKED):
+        missing_prereqs.append("rollback_readiness_required")
+        prototype.rollback_summary = "rollback_required"
+    else:
+        prototype.rollback_summary = source_preflight.rollback_readiness_status
+
+    # Failed checks
+    if source_preflight.failed_checks:
+        failed_prereqs.extend(source_preflight.failed_checks[:5])
+
+    # ── Determine prototype status and decision ─────────────────────────
+    if blocker_reasons:
+        prototype.prototype_status = GEP_BLOCKED
+        prototype.decision = GEP_DECISION_BLOCK
+    elif source_verification.get("valid") and source_issues:
+        prototype.prototype_status = GEP_VERIFICATION_FAILED
+        prototype.decision = GEP_DECISION_REQUIRE_VERIFICATION
+    elif source_preflight.missing_evidence:
+        prototype.prototype_status = GEP_EVIDENCE_INCOMPLETE
+        prototype.decision = GEP_DECISION_REQUIRE_EVIDENCE
+    elif source_preflight.approval_status in (PREFLIGHT_APPROVAL_REQUIRED,):
+        prototype.prototype_status = GEP_APPROVAL_REQUIRED
+        prototype.decision = GEP_DECISION_REQUIRE_APPROVAL
+    elif source_preflight.audit_readiness_status in (PREFLIGHT_AUDIT_REQUIRED,):
+        prototype.prototype_status = GEP_AUDIT_REQUIRED
+        prototype.decision = GEP_DECISION_REQUIRE_AUDIT_READINESS
+    elif source_preflight.rollback_readiness_status in (PREFLIGHT_ROLLBACK_REQUIRED,):
+        prototype.prototype_status = GEP_ROLLBACK_REQUIRED
+        prototype.decision = GEP_DECISION_REQUIRE_ROLLBACK_READINESS
+    elif source_preflight.artifact_verification_status == PREFLIGHT_FAILED_VERIFICATION:
+        prototype.prototype_status = GEP_VERIFICATION_FAILED
+        prototype.decision = GEP_DECISION_REQUIRE_VERIFICATION
+    elif missing_prereqs:
+        prototype.prototype_status = GEP_EVIDENCE_INCOMPLETE
+        prototype.decision = GEP_DECISION_REQUIRE_EVIDENCE
+    else:
+        prototype.prototype_status = GEP_READY_FOR_PREFLIGHT_REVIEW
+        prototype.decision = GEP_DECISION_READY_FOR_REVIEW_ONLY
+
+    # ── Fill in remaining fields ────────────────────────────────────────
+    prototype.decision_reasons = blocker_reasons
+    prototype.missing_prerequisites = sorted(missing_prereqs)
+    prototype.failed_prerequisites = sorted(failed_prereqs)
+    prototype.prerequisite_summary = (
+        f"{len(missing_prereqs)} missing, {len(failed_prereqs)} failed"
+    )
+    prototype.backend_contract_summary = source_preflight.backend_invocation_contract_status
+    prototype.adapter_boundary_summary = source_preflight.adapter_boundary_status
+    prototype.artifact_verification_summary = source_preflight.artifact_verification_status
+    prototype.execution_boundary_summary = source_preflight.execution_boundary_proof_status
+
+    # Safety invariants
+    prototype.simulation_only = True
+    prototype.no_execution = True
+    prototype.evidence_only = True
+    prototype.non_authorizing = True
+
+    # Warnings
+    warnings_list: list[str] = [
+        "execution_remains_unavailable",
+        "prototype_is_evidence_only_and_non_authorizing",
+    ]
+    if blocker_reasons:
+        warnings_list.append(f"blocked: {'; '.join(blocker_reasons[:3])}")
+    if missing_prereqs:
+        warnings_list.append(f"missing_prerequisites: {len(missing_prereqs)}")
+    prototype.warnings = sorted(warnings_list)
+
+    prototype.digest = prototype.compute_digest()
+    return prototype
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Prototype persistence and verification
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def save_governed_execution_preflight_prototype(
+    prototype: GovernedExecutionPreflightPrototype,
+) -> Path:
+    dir_path = _gep_dir_path()
+    dir_path.mkdir(parents=True, exist_ok=True)
+    prototype.digest = prototype.compute_digest()
+    payload = prototype.to_dict()
+    canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    ts_path = _gep_timestamped_path(ts)
+    ts_path.write_text(canonical, encoding="utf-8")
+    latest_path = _gep_latest_path()
+    latest_path.write_text(canonical, encoding="utf-8")
+    return ts_path
+
+
+def load_latest_governed_execution_preflight_prototype() -> GovernedExecutionPreflightPrototype | None:
+    latest_path = _gep_latest_path()
+    if not latest_path.exists():
+        return None
+    try:
+        raw = latest_path.read_text(encoding="utf-8")
+        data = _json.loads(raw)
+        return GovernedExecutionPreflightPrototype.from_dict(data)
+    except (_json.JSONDecodeError, KeyError, TypeError):
+        return None
+
+
+def verify_governed_execution_preflight_prototype(
+    prototype: GovernedExecutionPreflightPrototype | None = None,
+    *,
+    expected_digest: str | None = None,
+) -> dict[str, Any]:
+    issues: list[str] = []
+    if prototype is None:
+        return {
+            "valid": False,
+            "issues": ["no_prototype_artifact_found"],
+            "prototype_present": False,
+        }
+    if prototype.schema_version != _GEP_SCHEMA_VERSION:
+        issues.append(f"unknown schema_version: {prototype.schema_version!r}")
+    if expected_digest is not None:
+        if prototype.digest != expected_digest:
+            issues.append("digest_mismatch")
+    elif prototype.digest:
+        computed = prototype.compute_digest()
+        if computed != prototype.digest:
+            issues.append("digest_mismatch: computed_differs_from_stored")
+    validate_issues = prototype.validate()
+    issues.extend(validate_issues)
+    if not prototype.simulation_only:
+        issues.append("simulation_only must be True")
+    if not prototype.no_execution:
+        issues.append("no_execution must be True")
+    if not prototype.evidence_only:
+        issues.append("evidence_only must be True")
+    if not prototype.non_authorizing:
+        issues.append("non_authorizing must be True")
+    auth_checks = [
+        ("execution_available", prototype.execution_available),
+        ("execution_authorized", prototype.execution_authorized),
+        ("push_authorized", prototype.push_authorized),
+    ]
+    for flag_name, flag_value in auth_checks:
+        if flag_value:
+            issues.append(f"{flag_name} must be False")
+    if prototype.decision in UNAVAILABLE_GEP_DECISIONS:
+        issues.append(f"decision {prototype.decision!r} is future-only")
+    return {
+        "valid": len(issues) == 0,
+        "issues": issues,
+        "prototype_present": True,
+        "prototype_id": prototype.prototype_id,
+        "digest": prototype.digest,
+        "prototype_status": prototype.prototype_status,
+        "decision": prototype.decision,
+        "no_execution_confirmed": prototype.no_execution and not prototype.execution_available,
+    }

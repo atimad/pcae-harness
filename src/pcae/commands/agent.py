@@ -3822,6 +3822,101 @@ def run_execution_readiness_preflight_verify(args: argparse.Namespace) -> int:
     return 0 if result["valid"] else 1
 
 
+def run_governed_execution_preflight(args: argparse.Namespace) -> int:
+    """Handle `pcae governed-execution preflight`."""
+    from pcae.core.backend_invocations import (
+        build_governed_execution_preflight_prototype,
+        save_governed_execution_preflight_prototype,
+    )
+    prototype = build_governed_execution_preflight_prototype(
+        task_id=getattr(args, "task_id", "") or "",
+    )
+    if args.save:
+        save_governed_execution_preflight_prototype(prototype)
+    if args.json:
+        print(json.dumps(prototype.to_dict(), indent=2, sort_keys=True))
+        return 0
+    print("Governed execution preflight prototype")
+    print(f"  Prototype ID:     {prototype.prototype_id}")
+    print(f"  Phase:            {prototype.phase_id}")
+    print(f"  Generated:        {prototype.generated_at_utc}")
+    print()
+    print(f"  Status:           {prototype.prototype_status}")
+    print(f"  Decision:         {prototype.decision}")
+    print()
+    if prototype.decision_reasons:
+        print("Decision reasons:")
+        for r in prototype.decision_reasons:
+            print(f"  - {r}")
+    print()
+    if prototype.missing_prerequisites:
+        print(f"Missing prerequisites ({len(prototype.missing_prerequisites)}):")
+        for mp in prototype.missing_prerequisites:
+            print(f"  - {mp}")
+    print()
+    if prototype.no_go_conditions:
+        print(f"No-go conditions ({len(prototype.no_go_conditions)}):")
+        for ng in prototype.no_go_conditions:
+            print(f"  - {ng}")
+    print()
+    print(f"  Source preflight:  {prototype.source_preflight_ref[:16]}...")
+    print(f"  no_execution:      {prototype.no_execution}")
+    print(f"  evidence_only:     {prototype.evidence_only}")
+    print(f"  non_authorizing:   {prototype.non_authorizing}")
+    print(f"  Digest:            {prototype.digest[:16]}...")
+    print()
+    print("Prototype is evidence-only and non-authorizing. No execution occurs.")
+    return 0
+
+
+def run_governed_execution_preflight_show(args: argparse.Namespace) -> int:
+    """Handle `pcae governed-execution show`."""
+    from pcae.core.backend_invocations import (
+        load_latest_governed_execution_preflight_prototype,
+    )
+    prototype = load_latest_governed_execution_preflight_prototype()
+    if args.json:
+        if prototype is None:
+            print(json.dumps({"error": "no_prototype_artifact_found"}, indent=2))
+        else:
+            print(json.dumps(prototype.to_dict(), indent=2, sort_keys=True))
+        return 0
+    if prototype is None:
+        print("No governed execution preflight prototype found.")
+        print("Run: pcae governed-execution preflight --save")
+        return 1
+    print("Latest governed execution preflight prototype")
+    print(f"  Prototype ID:  {prototype.prototype_id}")
+    print(f"  Status:        {prototype.prototype_status}")
+    print(f"  Decision:      {prototype.decision}")
+    print(f"  Digest:        {prototype.digest[:16]}...")
+    return 0
+
+
+def run_governed_execution_preflight_verify(args: argparse.Namespace) -> int:
+    """Handle `pcae governed-execution verify`."""
+    from pcae.core.backend_invocations import (
+        load_latest_governed_execution_preflight_prototype,
+        verify_governed_execution_preflight_prototype,
+    )
+    prototype = load_latest_governed_execution_preflight_prototype()
+    result = verify_governed_execution_preflight_prototype(prototype)
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["valid"] else 1
+    if not result.get("prototype_present"):
+        print("No prototype artifact found.")
+        return 1
+    print("Prototype verification")
+    print(f"  Valid:           {'yes' if result['valid'] else 'NO'}")
+    print(f"  No-execution:    {'confirmed' if result.get('no_execution_confirmed') else 'FAILED'}")
+    if result["issues"]:
+        print(f"Issues ({len(result['issues'])}):")
+        for issue in result["issues"]:
+            print(f"  - {issue}")
+    return 0 if result["valid"] else 1
+
+
 def run_adapter_registry_design(args: argparse.Namespace) -> int:
     data = build_adapter_registry_design()
     if args.json:

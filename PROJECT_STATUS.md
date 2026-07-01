@@ -1,8 +1,22 @@
 # Project Status
 
-## Current Phase — Phase 97 Milestone Complete
+## Current Phase
 
-Phase 97J — Execution Readiness Preflight Milestone Summary / Transition Planning (completed).
+Phase 98A — First Governed Execution Preflight Prototype (completed).
+
+Prototypes the first governed execution preflight workflow consuming Phase 97
+preflight evidence. `GovernedExecutionPreflightPrototype` dataclass (34 JSON
+fields), 9 statuses, 8 valid + 8 future-only decisions, SHA-256 digest,
+fail-closed behavior. CLI: `pcae governed-execution preflight/show/verify`.
+25 tests. All 12 authorization flags remain False. Execution remains unavailable.
+
+Design doc: docs/PHASE_98_FIRST_GOVERNED_EXECUTION_PREFLIGHT_PROTOTYPE.md.
+Model: src/pcae/core/backend_invocations.py.
+Tests: tests/test_governed_execution_preflight_prototype.py.
+
+Recommends 98B — Governed Execution Preflight Contract Freeze.
+
+Phase 97J — Execution Readiness Preflight Milestone Summary (completed).
 
 Milestone summary closing the Phase 97 execution-readiness/preflight track.
 Documents 10 completed subphases (97A–97I), final capability statement,

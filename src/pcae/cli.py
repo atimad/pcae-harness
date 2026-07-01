@@ -46,6 +46,9 @@ from pcae.commands.agent import (
     run_execution_readiness_preflight,
     run_execution_readiness_preflight_show,
     run_execution_readiness_preflight_verify,
+    run_governed_execution_preflight,
+    run_governed_execution_preflight_show,
+    run_governed_execution_preflight_verify,
     run_adapter_registry_design,
     run_roadmap_generation_design,
     run_roadmap_evidence,
@@ -2002,6 +2005,32 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON governed execution dry-run output.",
     )
     governed_execution_dry_run_parser.set_defaults(handler=run_governed_execution_dry_run)
+
+    # ── governed-execution preflight (98A) ────────────────────────────────
+    ge_parser = subparsers.add_parser(
+        "governed-execution",
+        help="Governed execution preflight prototype (Phase 98A). Non-executing.",
+    )
+    ge_subparsers = ge_parser.add_subparsers(dest="ge_command")
+
+    ge_preflight_parser = ge_subparsers.add_parser(
+        "preflight",
+        help="Run governed execution preflight prototype. Non-executing.",
+    )
+    ge_preflight_parser.add_argument("--json", action="store_true")
+    ge_preflight_parser.add_argument("--save", action="store_true")
+    ge_preflight_parser.add_argument("--task-id", default="")
+    ge_preflight_parser.set_defaults(handler=run_governed_execution_preflight)
+
+    ge_show_parser = ge_subparsers.add_parser("show", help="Show latest prototype.")
+    ge_show_parser.add_argument("--latest", action="store_true", default=True)
+    ge_show_parser.add_argument("--json", action="store_true")
+    ge_show_parser.set_defaults(handler=run_governed_execution_preflight_show)
+
+    ge_verify_parser = ge_subparsers.add_parser("verify", help="Verify latest prototype.")
+    ge_verify_parser.add_argument("--latest", action="store_true", default=True)
+    ge_verify_parser.add_argument("--json", action="store_true")
+    ge_verify_parser.set_defaults(handler=run_governed_execution_preflight_verify)
 
     invocation_contracts_parser = subparsers.add_parser(
         "invocation-contracts",
