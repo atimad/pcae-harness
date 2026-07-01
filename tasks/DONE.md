@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 99B — Governed Execution Attempt Contract Freeze (20260701-0911-phase-99b-governed-execution-attempt-contract-freeze)
+- Phase 97G — Execution Readiness Preflight Contract Freeze (20260701-0212-20260701-0030-phase-97f-execution-readiness-preflight)
 - Phase 97F — Execution Readiness Preflight Dry-Run (20260701-0030-phase-97f-execution-readiness-preflight)
 - Phase 97D — Human Approval Gate for Future Execution (20260630-2100-phase-97d-human-approval-gate)
 - Phase 97C — Adapter Invocation Boundary Design (20260630-2030-phase-97c-adapter-boundary)

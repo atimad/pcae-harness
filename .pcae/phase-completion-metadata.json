@@ -1,77 +1,29 @@
 {
-    "phase_id": "97F",
-    "phase_name": "phase_97f_execution_readiness_preflight",
-    "phase_title": "Execution Readiness Preflight Dry-Run",
-    "files_changed": [
-        "src/pcae/core/backend_invocations.py",
-        "src/pcae/commands/agent.py",
-        "src/pcae/cli.py",
-        "tests/test_execution_readiness_preflight.py",
-        "docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_DRY_RUN.md",
-        "PROJECT_STATUS.md",
-        "CHANGELOG.md",
-        "tasks/DONE.md",
-        "tasks/active/20260701-0030-phase-97f-execution-readiness-preflight.md"
-    ],
-    "files_changed_count": 9,
-    "tests_added_or_updated": "63 tests added (test_execution_readiness_preflight.py: TestPreflightStatusConstants, TestPreflightNonExecuting, TestPreflightEvidenceAggregation, TestPreflightNoGoConditions, TestPreflightValidation, TestDigestDeterminism, TestPreflightPersistence, TestPreflightVerification, TestNoCallGuards, TestAuthorizationFlags, TestFailClosedBehavior, TestSchemaVersion)",
+    "phase_id": "99B",
+    "phase_name": "phase_99b_governed_execution_attempt_contract_freeze",
+    "phase_title": "Governed Execution Attempt Contract Freeze",
+    "files_changed": ["docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_CONTRACT_FREEZE.md", "tests/test_governed_execution_attempt_contract.py", "PROJECT_STATUS.md", "CHANGELOG.md", "tasks/DONE.md", ".pcae/phase-completion-metadata.json", ".pcae/phase-completion-report.md"],
+    "files_changed_count": 7,
+    "tests_added_or_updated": "179 tests added (test_governed_execution_attempt_contract.py)",
     "validation_results": [
-        {
-            "name": "97f_preflight_tests",
-            "result": "63/63",
-            "status": "passed"
-        },
-        {
-            "name": "approval_gate_tests",
-            "result": "82/82",
-            "status": "passed"
-        },
-        {
-            "name": "backend_model_cli_tests",
-            "result": "1065/1068 (3 pre-existing failures: Test94UPreflightArtifact, Test94UPreflightArtifactCLI, TestBackendShow)",
-            "status": "passed_with_pre_existing"
-        },
-        {
-            "name": "report_notification_tests",
-            "result": "171/171",
-            "status": "passed"
-        },
-        {
-            "name": "fast_green",
-            "result": "4387/4390 (3 pre-existing failures: Test94UPreflightArtifact, Test94UPreflightArtifactCLI, TestBackendShow)",
-            "status": "passed_with_pre_existing"
-        }
+        {"name": "99b_contract_freeze_tests", "result": "179/179", "status": "passed"},
+        {"name": "99a_plus_99b_combined", "result": "199/199", "status": "passed"},
+        {"name": "preflight_prototype_attempt_combined_regression", "result": "1044/1044", "status": "passed"},
+        {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
+        {"name": "approval_gate_tests", "result": "82/82", "status": "passed"},
+        {"name": "backend_session_regression", "result": "1209 passed, 3 pre-existing", "status": "passed_with_pre_existing"},
+        {"name": "fast_green", "result": "4387/4390 (3 pre-existing)", "status": "passed_with_pre_existing"}
     ],
     "governance_results": [
-        {
-            "name": "pcae_health",
-            "status": "healthy"
-        },
-        {
-            "name": "pcae_check",
-            "status": "passed"
-        },
-        {
-            "name": "pcae_doctor_task_memory",
-            "status": "warnings"
-        },
-        {
-            "name": "pcae_push_check",
-            "status": "clean (nothing_to_push)"
-        },
-        {
-            "name": "telegram_runtime",
-            "status": "loaded, configured, enabled"
-        }
+        {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
+        {"name": "pcae_doctor_task_memory", "status": "warnings"}, {"name": "pcae_push_check", "status": "clean"},
+        {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
-    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No enforcement. No automatic apply. No apply execution. No patch parsing. No commit/push authorization. No real AI backend calls. No executable artifact-only invocation paths. No execution enablement flags. No execution availability toggles. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Execution remains unavailable. All authorization flags remain False. Next phase not started.",
-    "phase_commits": [],
-    "commit_attribution": "pending",
-    "recommended_next_phase": "97G — Execution Readiness Preflight Contract Freeze",
-    "summary": "Phase 97F complete: Execution Readiness Preflight Dry-Run. Non-executing preflight combining 97A–97E evidence into integrated readiness assessment. ExecutionReadinessPreflight dataclass (52 fields), SHA-256 digest, 10 preflight statuses (6 future-only), 29 no-go conditions, 10 evidence categories. CLI: pcae execution-readiness preflight/show/verify. 63 new tests. Fail-closed: all 12 authorization flags remain False. No execution. 3 pre-existing fast-green failures unchanged. Recommends 97G.",
-    "pushed": false,
-    "pushed_status": "not_pushed",
-    "origin_main_head_count": 0,
-    "notification_dispatch_result": "pending",
-    "report_consistency": "consistent"
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No enforcement. No automatic apply. No apply execution. No patch parsing. No commit/push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram remains outbound-only. Execution remains unavailable. All authorization flags remain False. Contract-freeze only — no source changes.",
+    "commit_attribution": "phase_owned",
+    "recommended_next_phase": "99C — Governed Execution Attempt Artifact Trust Hardening",
+    "summary": "Phase 99B complete: Governed Execution Attempt Contract Freeze. Contract-freeze only. 33 JSON fields, 14 attempt states, 26 denial reasons, 12 auth flags (all False), SHA-256 digest. 179 contract-freeze tests. No source changes. Recommends 99C.",
+    "pushed": false, "pushed_status": "pending", "origin_main_head_count": 0,
+    "notification_dispatch_result": "pending", "report_consistency": "consistent",
+    "report_notification_tests_present": true, "bootstrap_session_reporting_tests_present": true
 }

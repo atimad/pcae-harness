@@ -2,76 +2,91 @@
 
 ## Phase
 
-97D — Human Approval Gate for Future Execution
+99B — Governed Execution Attempt Contract Freeze
 
 ## Status
 
-complete (design-only)
+complete (contract-freeze only)
 
 ## Summary
 
-Phase 97D is a design-only phase that defines the human approval gate for future governed execution phases. It specifies how human approval would eventually be requested, scoped, recorded, verified, expired, revoked, denied, audited, and separated from backend invocation, adapter execution, apply, commit, and push authorization. No execution, no enforcement.
+Contract-freeze only. Freezes the Phase 99A `GovernedExecutionAttemptBoundary`
+contract. No source changes to the implementation — the 99A dataclass, states,
+denial reasons, and digest computation remain exactly as-is. Adds 179
+contract-freeze tests and comprehensive documentation.
 
-### Approval Gate Design
+### Frozen Contract
 
 | Aspect | Coverage |
-|--------|----------|
-| Approval scopes defined | 9 (readiness_review, backend_invocation_preflight_review, adapter_invocation_preflight_review, backend_invocation, adapter_execution, output_review, apply, commit, push) |
-| Denial reasons defined | 21 |
-| Verification checks | 25 (fail-closed) |
-| Artifact models | 4 (ApprovalRequest, ApprovalDecision, ApprovalRevocation, ApprovalDenial) |
-| Role definitions | 14 roles (operator, request, decision, artifact, scope, evidence chain, readiness, backend request, adapter request, phase/task contract, verifier, revocation, denial, audit) |
+|---|---|
+| Top-level JSON fields | 33 |
+| Valid attempt states | 14 |
+| Future-only states | 9 |
+| Denial reasons | 26 |
+| Authorization flags | 12 (all False) |
+| Safety flags | 5 (all True) |
+| Digest algorithm | SHA-256 (64-char hex) |
 
-### Key Design Decisions
+### Key Contract Decisions
 
-1. **Approval is evidence/intent, not execution authorization.** All artifacts are non-executing and non-authorizing in current phase.
-2. **Scopes are independent and non-transitive.** Backend invocation approval does not authorize apply. Apply approval does not authorize commit. Commit approval does not authorize push.
-3. **Even "approved" decisions are non-executing.** `execution_available: false`, `execution_authorized: false` regardless of decision value.
-4. **Approval cannot override no-go conditions.** `no_override_no_go: true` is forced immutable.
-5. **Approval is non-transferable.** Bound to operator, task, phase, and artifact digest.
-6. **Verification is fail-closed.** Any mismatch or missing field denies verification.
+1. **All 12 auth flags remain False.** Execution remains unavailable.
+2. **Hard no-go conditions are non-overridable.** Approval, audit, rollback, preflight refs cannot override.
+3. **Digest excludes ref fields** (approval_ref, audit_readiness_ref, etc.) per 99A implementation.
+4. **Authorization_summary in digest has only 3 of 12 flags** — known design characteristic.
+5. **Denial/abort/fail-closed paths are evidence-only and non-authorizing.**
+6. **Future-only states fail validate() with "future-only".**
 
 ### Implementation
 
-- **Model**: `src/pcae/core/human_approval_gate.py` — Constants, ApprovalRequest, ApprovalDecision, ApprovalRevocation, ApprovalDenial, ApprovalVerificationResult, verify_approval()
-- **Tests**: `tests/test_human_approval_gate.py` — 82 tests, all passing
-- **Design doc**: `docs/PHASE_97_HUMAN_APPROVAL_GATE_DESIGN.md`
+- **Document**: `docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_CONTRACT_FREEZE.md` — comprehensive contract freeze document
+- **Tests**: `tests/test_governed_execution_attempt_contract.py` — 179 contract-freeze tests
+- **No source changes** — contract frozen as-is from 99A
 
 ### Test Results
 
-| Suite | Result |
-|-------|--------|
-| Approval gate tests | 82/82 passed |
-| Backend model + preflight | 880/880 passed |
-| Backend CLI | 306/307 (1 pre-existing: test_show_missing_artifacts) |
-| Report/notification/telegram | 210/210 passed |
-| Session tests | 144/144 passed |
-| Fast-green | 4384/4385 (1 pre-existing) |
+| Suite | Result | Status |
+|---|---|---|
+| 99B contract freeze tests | 179/179 | passed |
+| 99A + 99B combined | 199/199 | passed |
+| Preflight/prototype/attempt combined regression | 1044/1044 | passed |
+| Report trust regression | 219/219 | passed |
+| Approval gate regression | 82/82 | passed |
+| Backend/session regression | 1209 passed, 3 pre-existing | passed_with_pre_existing |
+| Fast-green | 4387/4390 (3 pre-existing) | passed_with_pre_existing |
+
+Pre-existing failures: Test94UPreflightArtifact, Test94UPreflightArtifactCLI, TestBackendShow.
 
 ### Governance
 
 | Check | Result |
-|-------|--------|
+|---|---|
 | pcae health | healthy |
 | pcae check | passed |
-| pcae task-memory | warnings (25 active, known issue) |
+| pcae doctor task-memory | warnings (stale task cleanup done) |
 | pcae push check | clean (nothing_to_push) |
 | Telegram notify | configured, enabled, ready |
+| report_notification_tests in metadata | present (219/219) |
+| bootstrap_session_reporting_tests in metadata | present |
+| Report completeness | complete |
 
 ### No-Go Confirmation
 
-No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network calls. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No enforcement. No automatic apply. No apply execution. No patch parsing. No commit/push authorization. No real AI backend calls. No executable artifact-only invocation paths. No execution enablement flags. No execution availability toggles. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation.
+No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No enforcement. No automatic apply. No apply execution. No patch parsing. No commit/push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution.
+
+Telegram remains outbound-only. Execution remains unavailable. All authorization flags remain False.
 
 ### Files Changed
 
-1. `docs/PHASE_97_HUMAN_APPROVAL_GATE_DESIGN.md` (new) — Design document
-2. `src/pcae/core/human_approval_gate.py` (new) — Model code
-3. `tests/test_human_approval_gate.py` (new) — 82 tests
-4. `PROJECT_STATUS.md` (updated) — Current phase updated to 97D
-5. `CHANGELOG.md` (updated) — 97D entry added
-6. `tasks/DONE.md` (updated) — 97D + 97A/97B/97C/96 entries added
-7. `tasks/active/20260630-2100-phase-97d-human-approval-gate.md` (new) — Task contract
+1. `docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_CONTRACT_FREEZE.md` (new)
+2. `tests/test_governed_execution_attempt_contract.py` (new)
+3. `PROJECT_STATUS.md` (updated)
+4. `CHANGELOG.md` (updated)
+5. `tasks/DONE.md` (updated)
+6. `.pcae/phase-completion-metadata.json` (updated)
+7. `.pcae/phase-completion-report.md` (this file, updated)
 
 ### Recommended Next Phase
 
-97E — Execution Audit / Rollback Readiness Design
+**99C — Governed Execution Attempt Artifact Trust Hardening**
+
+Test-only phase. Trust hardening of the 99A/99B attempt boundary. No execution. No source changes required.

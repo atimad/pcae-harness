@@ -2,14 +2,25 @@
 
 ## Current Phase
 
+Phase 99B — Governed Execution Attempt Contract Freeze (completed).
+
+Contract-freeze only. Freezes the 99A GovernedExecutionAttemptBoundary contract:
+33 top-level JSON fields, 14 attempt states, 26 denial reasons, 12 authorization
+flags (all False), 5 safety flags (all True), SHA-256 digest, hard no-go
+semantics, prerequisite semantics, denial/abort/fail-closed semantics.
+179 contract-freeze tests + 20 99A design tests = 199 combined. No source changes.
+No execution boundary exists. All auth flags remain False.
+
+Recommends 99C — Governed Execution Attempt Artifact Trust Hardening.
+
+## Phase 99A Complete
+
 Phase 99A — Governed Execution Attempt Boundary Design (completed).
 
 Design-only. Defines governed execution attempt boundary: 14 attempt states, 26
 denial reasons, hard no-go model, prerequisite model, denial/abort/fail-closed
 semantics. GovernedExecutionAttemptBoundary dataclass. 20 tests. No execution
 boundary exists. All 12 auth flags remain False. Design-only — no implementation.
-
-Recommends 99B — Governed Execution Attempt Contract Freeze.
 
 ## Phase 98 Milestone Complete
 
