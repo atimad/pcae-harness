@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260701-1036-phase-99d-governed-execution-attempt-boundary-review
+20260701-1044-phase-99e-governed-execution-attempt-milestone-summary-transition-planning
 
 ## Title
 
-Phase 99D — Governed Execution Attempt Boundary Review
+Phase 99E — Governed Execution Attempt Milestone Summary / Transition Planning
 
 ## Status
 
@@ -18,11 +18,11 @@ implementation
 
 ## Goal
 
-Review, validate, and document the governed execution attempt boundary created in 99A, frozen in 99B, repaired through 99B.1/99B.2, and trust-hardened in 99C. Boundary review only.
+Summarize, close, and transition the Phase 99 governed execution attempt boundary milestone. Milestone summary only.
 
 ## Allowed Files
 
-- docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_BOUNDARY_REVIEW.md
+- docs/PHASE_99_GOVERNED_EXECUTION_ATTEMPT_MILESTONE_SUMMARY.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
@@ -38,8 +38,6 @@ Review, validate, and document the governed execution attempt boundary created i
 
 ## Allowed Zones
 
-- core
-- tests
 - docs
 - tasks
 - config
@@ -66,7 +64,7 @@ advisory
 
 ## Acceptance Criteria
 
-- Boundary review document complete
+- Milestone summary document complete
 - All 395 attempt boundary tests pass
 
 ## Acceptance Checks
@@ -80,4 +78,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-01T10:36:27.892476+02:00
+2026-07-01T10:44:24.069541+02:00

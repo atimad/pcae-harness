@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 99D — Governed Execution Attempt Boundary Review (20260701-1036-phase-99d-governed-execution-attempt-boundary-review)
 - Phase 99C — Governed Execution Attempt Artifact Trust Hardening (20260701-1025-phase-99c-governed-execution-attempt-artifact-trust-hardening)
 - Phase 99B.2 — Repair Repair-Phase Report Trust Completeness (20260701-1019-phase-99b-2-repair-repair-phase-report-trust-completeness)
 - Phase 99B.1 finalization commit (20260701-0939-phase-99b-1-finalization-commit)
