@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 102D — Runtime Enforcement Decision Engine Boundary Review (20260701-1610-phase-102d-runtime-enforcement-decision-engine-boundary-review)
 - Phase 102C.1 — Fast-Green Completion Repair (20260701-1605-phase-102c1-fast-green-completion-repair)
 - Phase 102C — Runtime Enforcement Decision Engine Artifact Trust Hardening (20260701-1600-phase-102c-runtime-enforcement-decision-engine-artifact-trust-hardening)
 - Phase 102B.2 — Repair Report-Trust Repair Metadata Completeness (20260701-1550-phase-102b2-report-trust-repair)
