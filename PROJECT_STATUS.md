@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 106H — v0.1 RC Audit Findings Repair (in progress).
+Phase 106H — v0.1 RC Audit Findings Repair (completed).
 
 Repairs the trust-gate asymmetry Phase 106G's audit found and
 empirically reproduced between `pcae task finish --commit` and `pcae
@@ -14,11 +14,20 @@ helper, `apply_old_schema_gate()`, to `core/phase_report_trust.py`
 `commands/task.py::_finalize_task_report_and_notify` and
 `commands/phase.py::_finalize_report_and_notify` to use it — closing the
 gap without weakening `phase complete`'s existing hard-fail behavior and
-without changing any already-passing test's expectations. `pcae task
-finish --commit` remains the preferred v0.1 golden-workflow completion
-command; `pcae phase complete` remains available as the documented,
-lower-level, post-push corrected-re-dispatch path. This entry will be
-updated with final validation/commit details once complete.
+without changing any already-passing test's expectations (full
+`test_phase.py`/`test_phase_report_trust_hard_fail.py`/`test_task.py`
+suites pass unchanged, 1281/1281). Updated two pre-existing test fixtures
+to include `commit_attribution` — a field every real phase-completion
+metadata file in this project already sets. `pcae task finish --commit`
+remains the preferred v0.1 golden-workflow completion command; `pcae
+phase complete` remains available as the documented, lower-level,
+post-push corrected-re-dispatch path — neither is deprecated. 20 new
+tests (`tests/test_rc_audit_findings_repair.py`). Fast-green remains
+4390/4390 fully green. No new tag created. No runtime enforcement. No
+autonomous execution. v0.1.0-rc1 remains non-executing by design; v0.2
+remains the autonomy target.
+
+Recommends 106I — v0.1 RC End-to-End Verification / Full Phase Check.
 
 ## Phase 106G Complete
 
