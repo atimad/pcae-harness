@@ -1,17 +1,17 @@
-# Phase Report: Task Finish Report Trust / Telegram Notification Integration
+# Phase Report: Task Finish Report Notification Ordering / Completeness Repair
 
-- **Phase ID:** `105C`
+- **Phase ID:** `105C.1`
 - **Status:** completed
-- **Report completeness:** complete ✅
+- **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
 - **Files changed:** 6
-- **Tests run:** 19
-- **Commits:** 771eca89
+- **Tests run:** 22
+- **Commits:** 7e8c7955
 - **Pushed:** not_pushed (pending final task-finish commit + push)
-- **origin/main..HEAD:** 8
+- **origin/main..HEAD:** 1
 
 ## Summary
 
-Phase 105C: Integrated phase report finalization, 105A/105B report-trust validation, and Telegram outbound dispatch into `pcae task finish --commit`, closing the gap where the real phase-closing workflow never triggered report/notification creation (only `pcae phase complete` did). Warning-only; hard-fail deferred to 105D. Idempotency guard via `.pcae/phase-reports/.last-notified.json`. `pcae phase complete` unchanged. 19 new tests. Non-executing, non-authorizing. No runtime enforcement. No execution. Recommends 105D.
+Phase 105C.1: Repaired a real defect in 105C — `pcae task finish --commit` dispatched Telegram before final push state was known, so 105C's own completion report was sent partial (missing `pushed_status`, `origin_main_head`, `governance_results.pcae_push_check`). Added `_apply_push_state_gate()`, folding the OLD (95M.1) schema's push-state-aware fields into the 105A/105B trust result used for the dispatch decision. Partial/incomplete reports are still finalized (written, visible) but Telegram/any sink is suppressed (`skipped_incomplete`); the idempotency marker is only written on an actual successful send, so a later complete finalization can still send. `pcae phase complete` unchanged. 22 new tests. Non-executing, non-authorizing. No runtime enforcement. No execution. Recommends 105D.
 
 ## Governance Results
 
@@ -23,16 +23,16 @@ Phase 105C: Integrated phase report finalization, 105A/105B report-trust validat
 
 ## Test Results
 
-- **105c_task_finish_report_trust_notification_tests:** 19/19 (passed)
-- **task_lifecycle_regression:** 144/144 (passed)
+- **105c1_task_finish_notification_ordering_tests:** 22/22 (passed)
+- **task_finish_report_trust_notification_tests:** 19/19 (passed)
 - **report_notification_tests:** 219/219 (passed)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **combined_regression (preflight/artifact/trust/contract/readiness/boundary/attempt/no_go/runtime_enforcement/evidence_bundle/decision/coordinator):** 2191/2191 (passed)
+- **task_lifecycle_regression:** 328/328 (passed)
 - **fast_green:** 4387/4390 (3 pre-existing) (passed_with_pre_existing)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Task finish now finalizes/trust-validates/dispatches reports automatically; warning-only, hard-fail deferred to 105D. Recommends 105D.
+No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Task finish now correctly suppresses dispatch until final push state is known; hard-fail still deferred to 105D. Recommends 105D.
 
 ## Recommended Next Phase
 

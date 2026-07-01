@@ -2,6 +2,27 @@
 
 ## Current Phase
 
+Phase 105C.1 — Task Finish Report Notification Ordering / Completeness Repair (completed).
+
+Repairs a real defect in 105C: `pcae task finish --commit` dispatched
+Telegram before final push state (`pushed_status`, `origin_main_head`,
+`governance_results.pcae_push_check`) was known, so 105C's own completion
+report was sent partial (missing those three fields) even though the repo
+was later pushed/clean. Root cause: dispatch was gated only on the 105A/105B
+trust schema, which doesn't check push-state semantics (`pushed_status =
+"not_pushed"` is a valid non-placeholder string). Added
+`_apply_push_state_gate()`: folds the OLD (95M.1) schema's push-state
+missing fields into the trust result used for the dispatch decision. Partial
+reports are now finalized/written (visible) but never dispatched as final
+("skipped_incomplete"); the idempotency marker is only written on an actual
+successful send, so a later complete finalization can still send. `pcae
+phase complete` unchanged. 22 new tests. Non-executing, non-authorizing. No
+runtime enforcement. No execution.
+
+Recommends 105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration.
+
+## Phase 105C Complete
+
 Phase 105C — Task Finish Report Trust / Telegram Notification Integration (completed).
 
 Integrated phase report finalization, 105A/105B report-trust validation, and
