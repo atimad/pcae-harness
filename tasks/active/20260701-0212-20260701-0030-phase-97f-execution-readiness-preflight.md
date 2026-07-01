@@ -36,6 +36,7 @@ implementation
 - docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_CONTRACT_FREEZE.md
 - tests/test_execution_readiness_preflight.py
 - tests/test_execution_readiness_preflight_contract.py
+- tests/test_phase_reports.py
 - .pcae/phase-completion-metadata.json
 - .pcae/execution-readiness-preflight/**
 - .pcae/handoffs/**

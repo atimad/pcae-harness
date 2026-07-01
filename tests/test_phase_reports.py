@@ -1857,3 +1857,232 @@ class Test95M1FinalizationGate:
             recommended_next_phase="95I", commit_attribution="phase_owned",
         )
         assert g["finalizable"] is True
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 97G.1 — Report trust completeness repair
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestReportTrustCompleteness:
+    """Canonical report trust metadata must include required base test result keys."""
+
+    REQUIRED_KEYS = (
+        "report_notification_tests",
+        "bootstrap_session_reporting_tests",
+        "fast_green",
+    )
+
+    def test_required_base_test_result_keys_are_defined(self):
+        """_REQUIRED_BASE_TEST_RESULT_KEYS must contain the 3 expected keys."""
+        from pcae.core.phase_reports import _REQUIRED_BASE_TEST_RESULT_KEYS
+        for key in self.REQUIRED_KEYS:
+            assert key in _REQUIRED_BASE_TEST_RESULT_KEYS, (
+                f"{key!r} missing from _REQUIRED_BASE_TEST_RESULT_KEYS"
+            )
+
+    def test_completeness_partial_when_report_notification_missing(self):
+        """Missing report_notification_tests -> partial, not complete."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=5,
+            test_results={
+                "bootstrap_session_reporting_tests": "1/1",
+                "fast_green": "1/1",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            commits=["abc123"], pushed_status="pushed",
+        )
+        state, missing, _ = r.assess_completeness()
+        assert state == "partial", f"Expected partial, got {state!r}"
+        assert "test_results.report_notification_tests" in missing
+
+    def test_completeness_partial_when_bootstrap_session_missing(self):
+        """Missing bootstrap_session_reporting_tests -> partial, not complete."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=5,
+            test_results={
+                "report_notification_tests": "1/1",
+                "fast_green": "1/1",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            commits=["abc123"], pushed_status="pushed",
+        )
+        state, missing, _ = r.assess_completeness()
+        assert state == "partial", f"Expected partial, got {state!r}"
+        assert "test_results.bootstrap_session_reporting_tests" in missing
+
+    def test_completeness_complete_when_all_trust_keys_present(self):
+        """All 3 required test result keys present -> complete."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=5,
+            test_results={
+                "report_notification_tests": "171/171 (passed)",
+                "bootstrap_session_reporting_tests": "134/134 (passed)",
+                "fast_green": "4387/4390 (passed_with_pre_existing)",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded, configured, enabled",
+            },
+            commits=["90983388"], pushed_status="pushed",
+        )
+        state, missing, _ = r.assess_completeness()
+        assert state == "complete", f"Expected complete, got {state!r}; missing: {missing}"
+
+    def test_validate_finalization_gate_blocks_missing_report_notification(self):
+        """validate_finalization_gate must block when report_notification_tests missing."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=5,
+            test_results={
+                "bootstrap_session_reporting_tests": "1/1",
+                "fast_green": "1/1",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            commits=["abc123"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        g = validate_finalization_gate(
+            phase_id="97G", report=r, pushed_status="pushed",
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            test_results={
+                "bootstrap_session_reporting_tests": "1/1",
+                "fast_green": "1/1",
+            },
+            no_go_confirmations=[
+                "No real backend invocation.", "No adapter execution.",
+                "No subprocess execution.", "No shell execution.",
+                "No network call.", "No shell interception.",
+                "No Telegram inbound.", "No enforcement.",
+                "No automatic apply.", "No apply execution.",
+                "No commit/push authorization.",
+            ],
+            recommended_next_phase="97H", commit_attribution="phase_owned",
+        )
+        assert g["finalizable"] is False
+        assert any("test_results.report_notification_tests" in b for b in g["blockers"])
+
+    def test_validate_finalization_gate_blocks_missing_bootstrap_session(self):
+        """validate_finalization_gate must block when bootstrap_session_reporting_tests missing."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=5,
+            test_results={
+                "report_notification_tests": "1/1",
+                "fast_green": "1/1",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            commits=["abc123"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        g = validate_finalization_gate(
+            phase_id="97G", report=r, pushed_status="pushed",
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            test_results={
+                "report_notification_tests": "1/1",
+                "fast_green": "1/1",
+            },
+            no_go_confirmations=[
+                "No real backend invocation.", "No adapter execution.",
+                "No subprocess execution.", "No shell execution.",
+                "No network call.", "No shell interception.",
+                "No Telegram inbound.", "No enforcement.",
+                "No automatic apply.", "No apply execution.",
+                "No commit/push authorization.",
+            ],
+            recommended_next_phase="97H", commit_attribution="phase_owned",
+        )
+        assert g["finalizable"] is False
+        assert any("test_results.bootstrap_session_reporting_tests" in b for b in g["blockers"])
+
+    def test_grouped_regression_suite_does_not_replace_canonical_keys(self):
+        """Grouped suites like 'full_regression_suite' do not satisfy required keys."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=5,
+            test_results={
+                "full_regression_suite": "1453/1456",
+                "fast_green": "1/1",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            commits=["abc123"], pushed_status="pushed",
+        )
+        state, missing, _ = r.assess_completeness()
+        assert state == "partial"
+        assert "test_results.report_notification_tests" in missing
+        assert "test_results.bootstrap_session_reporting_tests" in missing
+
+    def test_text_report_includes_trust_fields_when_present(self):
+        """to_markdown includes test result keys when present."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Trust Test", status="completed",
+            summary="Trust fields present.", files_changed=5, tests_run=5,
+            test_results={
+                "report_notification_tests": "171/171 (passed)",
+                "bootstrap_session_reporting_tests": "134/134 (passed)",
+                "fast_green": "4387/4390 (passed_with_pre_existing)",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "warnings", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            commits=["90983388"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        md = r.render_markdown()
+        assert "report_notification_tests" in md
+        assert "bootstrap_session_reporting_tests" in md
+        assert "171/171" in md
+        assert "134/134" in md
+
+    def test_no_false_complete_when_trust_field_missing(self):
+        """report_completeness must NOT be 'complete' when a trust field is missing."""
+        r = make_phase_report(
+            phase_id="97G", phase_name="Test", status="completed",
+            summary="Done.", files_changed=5, tests_run=5,
+            test_results={
+                "report_notification_tests": "1/1",
+            },
+            governance_results={
+                "pcae_health": "healthy", "pcae_check": "passed",
+                "pcae_doctor_task_memory": "ok", "pcae_push_check": "clean",
+                "telegram_runtime": "loaded",
+            },
+            commits=["abc123"], pushed_status="pushed",
+        )
+        r.apply_trust_assessment()
+        assert r.report_completeness != "complete"
+        assert r.report_completeness == "partial"
