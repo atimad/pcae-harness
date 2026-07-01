@@ -10,7 +10,7 @@ Phase 101A — Runtime Enforcement Readiness Architecture Design
 
 ## Status
 
-active
+done
 
 ## Mode
 
