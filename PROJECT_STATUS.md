@@ -2,6 +2,27 @@
 
 ## Current Phase
 
+Phase 106A — v0.1 Release Scope Freeze (completed).
+
+Documentation-only scope freeze. Created `docs/RELEASE_SCOPE_V0_1.md`
+defining PCAE v0.1 — Governed AI Coding Lifecycle Harness: non-executing by
+design, governs AI-assisted coding lifecycle, does not autonomously
+execute, mediate shell, invoke real AI backends, apply patches
+automatically, perform rollback execution, or provide Telegram inbound
+control. Documents included capabilities (task/phase lifecycle, report
+trust validator/CLI/hard-fail gates, task-finish integration, no-go
+registry, shared safety/authorization contract, Telegram outbound),
+excluded capabilities, the supported golden workflow (verified against the
+live CLI), experimental/internal commands, release blockers (3 pre-existing
+fast-green failures, README/ROADMAP staleness, no clean-install validation
+— none classified as must-fix-before-freeze), the current validation
+baseline, and the v0.2 full-autonomy roadmap boundary. 16 new tests. No
+runtime enforcement. No autonomous execution.
+
+Recommends 106B — Release-Critical Warning / Fast-Green Triage.
+
+## Phase 105D Complete
+
 Phase 105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration (completed).
 
 Moves PCAE from warning-only report-trust validation to hard-fail:
