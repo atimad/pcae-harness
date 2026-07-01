@@ -2,6 +2,28 @@
 
 ## Current Phase
 
+Phase 106C — Golden Workflow Stabilization (completed).
+
+Documentation/testing-only phase. Created `docs/V0_1_GOLDEN_WORKFLOW.md`:
+the concrete, command-verified v0.1 operator workflow — start-of-phase,
+implementation, pre-finalization, finalization (report/notify/commit/
+push), and post-completion verification — with required commands
+(`pcae health/check/doctor task-memory/push check/phase-report trust
+and show --trust/notify status/skill invoke phase-finalization`, governed
+commit, `task finish --commit`), optional diagnostics, and an explicit
+unsupported-flows list (raw git commit/push, `--no-verify`, force push,
+shell mediation, Telegram inbound, rollback execution). Every command was
+verified against the live CLI (`--help`), not invented. Updated
+`docs/RELEASE_SCOPE_V0_1.md` to reference the golden workflow as a
+required release artifact. 32 new tests
+(`tests/test_v0_1_golden_workflow.py`), including lightweight `--help`
+availability checks with no side effects. No runtime enforcement. No
+autonomous execution.
+
+Recommends 106D — Packaging / Installation / Clean-Smoke Test.
+
+## Phase 106B Complete
+
 Phase 106B — Release-Critical Warning / Fast-Green Triage (completed).
 
 Triaged and **fixed** the 3 fast-green failures carried since before 105A:

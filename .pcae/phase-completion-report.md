@@ -1,17 +1,17 @@
-# Phase Report: Release-Critical Warning / Fast-Green Triage
+# Phase Report: Golden Workflow Stabilization
 
-- **Phase ID:** `106B`
+- **Phase ID:** `106C`
 - **Status:** completed
 - **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
-- **Files changed:** 6
-- **Tests run:** 22
-- **Commits:** 3210a3b0
+- **Files changed:** 3
+- **Tests run:** 32
+- **Commits:** 5acc62b8
 - **Pushed:** not_pushed (pending final task-finish commit + push)
 - **origin/main..HEAD:** 1
 
 ## Summary
 
-Phase 106B: Triaged and **fixed** the 3 fast-green failures carried since before 105A. `Test94UPreflightArtifact`/`Test94UPreflightArtifactCLI` root cause: `core/backend_invocations.py` defined `VALID_PREFLIGHT_STATUSES` twice at module scope for two unrelated features — the later definition silently shadowed the 94U-era one, so adapter preflight artifacts validated against the wrong status set. Renamed the 94U constant to `VALID_ADAPTER_PREFLIGHT_STATUSES`. `TestBackendShow::test_show_missing_artifacts` root cause: this long-lived local checkout has 4,760+ real, gitignored `.pcae/backend-invocations/` artifacts accumulated over years of dogfooding, not a product defect — isolated the test to a `tmp_path` cwd. **Fast-green is now fully green: 4390/4390.** `pcae_doctor_task_memory` clean. `docs/RELEASE_SCOPE_V0_1.md` updated to reflect the resolved disposition. 22 tests added/updated. Non-executing, non-authorizing. No runtime enforcement. No execution. Recommends 106C.
+Phase 106C: Documented and command-verified the v0.1 golden workflow. `docs/V0_1_GOLDEN_WORKFLOW.md` turns `docs/RELEASE_SCOPE_V0_1.md`'s scope into a concrete, repeatable operator sequence: start-of-phase (`pcae health/check/doctor task-memory/notify status/phase-report show --latest --trust/phase-report trust --json`), task/phase setup (`pcae task new`), implementation (stay within task-contract scope, no raw commit/push), pre-finalization (`pcae check/phase-report trust --json/push check`), finalization (`pcae skill invoke phase-finalization/commit implementation/task finish --commit/push check/push`), and post-completion verification. Documents required vs. optional-diagnostic commands and an explicit unsupported-flows list (raw git commit/push, `--no-verify`, force push, shell mediation, Telegram inbound, rollback execution). Every command verified via `--help`/direct invocation against the live CLI, none invented. Updated `docs/RELEASE_SCOPE_V0_1.md` to reference the golden workflow as a required release artifact. Documentation/testing-only; no product code changed. 32 new tests. Non-executing, non-authorizing. No runtime enforcement. No execution. Recommends 106D.
 
 ## Governance Results
 
@@ -23,23 +23,21 @@ Phase 106B: Triaged and **fixed** the 3 fast-green failures carried since before
 
 ## Test Results
 
-- **known_failure_repro_fix:** 22/22 (passed)
-- **test_backend_invocations_full_suite:** 761/761 (passed)
-- **test_backend_cli_full_suite:** 307/307 (passed)
-- **focused_release_triage_tests:** 209/209 (passed)
+- **golden_workflow_tests:** 32/32 (passed)
+- **focused_golden_workflow_tests:** 201/201 (passed)
 - **release_lifecycle_regression:** 404/404 (passed)
 - **report_notification_tests:** 219/219 (passed)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 - **combined_regression:** 2220/2220 (passed)
-- **fast_green:** 4390/4390 (fully green, no known failures) (passed)
+- **fast_green:** 4390/4390 (fully green) (passed)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test command behavior. No shell execution beyond existing lifecycle/test command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106C.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test command behavior. No shell execution beyond existing lifecycle/test command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106D.
 
 ## Recommended Next Phase
 
-106C — Golden Workflow Stabilization
+106D — Packaging / Installation / Clean-Smoke Test
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*
