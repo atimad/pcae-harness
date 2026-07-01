@@ -331,11 +331,14 @@ class TestFinalizationIntegration:
 
         assert exit_code == 0
         assert "Phase report: BLOCKED" not in output
-        assert "Trust gate (105B, advisory): complete" in output
+        assert "Trust gate (105D): complete" in output
 
-    def test_finalization_warns_on_partial_without_blocking(
+    def test_finalization_hard_fails_on_partial(
         self, tmp_path: Path, monkeypatch, capsys,
     ) -> None:
+        # Phase 105D: partial reports (e.g. TBD fast_green) now hard-fail
+        # pcae phase complete by default. This used to be advisory-only
+        # (105B); 105D makes it authoritative for the command's exit code.
         _init_repo(tmp_path)
         monkeypatch.chdir(tmp_path)
         meta = _finalizable_metadata()
@@ -351,11 +354,9 @@ class TestFinalizationIntegration:
         exit_code = main(["phase", "complete", "--summary", "Phase 205A: done."])
         output = capsys.readouterr().out
 
-        # Old (95M.1) gate only checks field presence, not placeholder
-        # content, so completion is not blocked by the new advisory gate.
-        assert exit_code == 0
-        assert "Phase report: BLOCKED" not in output
-        assert "Trust gate (105B, advisory): partial" in output
+        assert exit_code == 1
+        assert "Trust gate (105D): partial" in output
+        assert "Phase completion refused" in output
 
 
 # ── Group G: No-execution guards ────────────────────────────────────────────

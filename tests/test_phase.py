@@ -27,7 +27,7 @@ def test_phase_complete_records_phase_completed_provenance(
     init_git_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["phase", "complete", "--summary", "Finished Phase 32A"])
+    exit_code = main(["phase", "complete", "--summary", "Finished Phase 32A", "--allow-partial-report"])
 
     capsys.readouterr()
     assert exit_code == 0
@@ -46,7 +46,7 @@ def test_phase_complete_releases_lock_and_records_agent_released(
     acquire_agent_lock(root, "claude-local")
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["phase", "complete", "--summary", "Phase done with lock"])
+    exit_code = main(["phase", "complete", "--summary", "Phase done with lock", "--allow-partial-report"])
 
     capsys.readouterr()
     assert exit_code == 0
@@ -65,7 +65,7 @@ def test_phase_complete_without_lock_succeeds(
     init_git_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["phase", "complete", "--summary", "No lock held"])
+    exit_code = main(["phase", "complete", "--summary", "No lock held", "--allow-partial-report"])
 
     output = capsys.readouterr().out
     assert exit_code == 0
@@ -80,7 +80,7 @@ def test_phase_complete_prints_summary_output(
     init_git_repo(tmp_path)
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["phase", "complete", "--summary", "Completed Phase 32B"])
+    exit_code = main(["phase", "complete", "--summary", "Completed Phase 32B", "--allow-partial-report"])
 
     output = capsys.readouterr().out
     assert exit_code == 0
@@ -99,7 +99,7 @@ def test_phase_complete_with_lock_prints_released(
     acquire_agent_lock(root, "claude-local")
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["phase", "complete", "--summary", "Phase done"])
+    exit_code = main(["phase", "complete", "--summary", "Phase done", "--allow-partial-report"])
 
     output = capsys.readouterr().out
     assert exit_code == 0
@@ -147,7 +147,7 @@ def test_phase_complete_shows_independent_challenge_context(
     )
     monkeypatch.chdir(tmp_path)
 
-    exit_code = main(["phase", "complete", "--summary", "Completed Phase 32B"])
+    exit_code = main(["phase", "complete", "--summary", "Completed Phase 32B", "--allow-partial-report"])
 
     output = capsys.readouterr().out
     assert exit_code == 0
@@ -164,7 +164,7 @@ def test_phase_complete_phase_completed_captures_agent_id(
     acquire_agent_lock(root, "claude-local")
     monkeypatch.chdir(tmp_path)
 
-    main(["phase", "complete", "--summary", "Lock held at record time"])
+    main(["phase", "complete", "--summary", "Lock held at record time", "--allow-partial-report"])
 
     capsys.readouterr()
     history = read_provenance_history(root)
@@ -315,7 +315,7 @@ def test_phase_start_then_complete_round_trip(
 
     start_code = main(["phase", "start", "--agent-id", "claude-local"])
     capsys.readouterr()
-    complete_code = main(["phase", "complete", "--summary", "Round trip done"])
+    complete_code = main(["phase", "complete", "--summary", "Round trip done", "--allow-partial-report"])
     capsys.readouterr()
 
     assert start_code == 0
@@ -552,7 +552,7 @@ def test_phase_lifecycle_challenge_independence_validation(
             "build_irg_challenge_context",
             (lambda harness_root, payload=scenario: payload),
         )
-        exit_code = main(["phase", "complete", "--summary", "Phase done"])
+        exit_code = main(["phase", "complete", "--summary", "Phase done", "--allow-partial-report"])
         output = capsys.readouterr().out
         assert exit_code == 0
         assert "Phase complete." in output

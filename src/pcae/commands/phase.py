@@ -46,7 +46,11 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         print("Agent lock: none")
 
     # ── Phase 92D — Auto-create phase report + optional notifications ───
-    _finalize_report_and_notify(args.summary)
+    # Phase 105D — trust-hard-fail: exit code now reflects report trust.
+    allow_partial_report = getattr(args, "allow_partial_report", False)
+    finalizable = _finalize_report_and_notify(
+        args.summary, allow_partial_report=allow_partial_report,
+    )
 
     challenge = build_irg_challenge_context(root)
     assessment = build_challenge_attention_assessment(root, surface="completion", challenge_data=challenge)
@@ -57,10 +61,10 @@ def run_phase_complete(args: argparse.Namespace) -> int:
         print()
         for line in lines:
             print(line)
-    return 0
+    return 0 if finalizable else 1
 
 
-def _finalize_report_and_notify(summary: str) -> None:
+def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = False) -> bool:
     """Create a phase report artifact and optionally dispatch notifications.
 
     Phase 92D/92D.6 — automatic finalization hook with structured metadata.
@@ -69,6 +73,12 @@ def _finalize_report_and_notify(summary: str) -> None:
     Reads .pcae/phase-completion-metadata.json if present for structured
     phase metadata (files changed, validation results, governance results).
     Falls back to git-derived metadata if the file is absent.
+
+    Phase 105D — returns True if the report is trust-complete (95M.1 gate
+    finalizable AND 105A/105B+push-state trust complete) or
+    `allow_partial_report` was passed; False otherwise (hard-fail). Telegram
+    dispatch is suppressed whenever trust is incomplete, regardless of
+    `allow_partial_report` — a partial report is never sent as final.
     """
     import os
     from pcae.core.phase_reports import finalize_phase_report
@@ -168,7 +178,17 @@ def _finalize_report_and_notify(summary: str) -> None:
 
     notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
 
-    fin = finalize_phase_report(
+    # Phase 105D — build a trial report (no I/O: no write, no dispatch) to
+    # decide hard-fail/dispatch-suppression *before* finalize_phase_report()
+    # runs (which writes the report and may dispatch in the same call).
+    from pcae.core.phase_reports import (
+        _apply_canonical_and_trust,
+        make_phase_report,
+        validate_finalization_gate,
+    )
+    from pcae.core.phase_report_trust import compute_final_trust
+
+    trial_report = make_phase_report(
         phase_id=phase_id,
         phase_name=phase_name,
         status="completed",
@@ -182,55 +202,98 @@ def _finalize_report_and_notify(summary: str) -> None:
         origin_main_head_count=origin_count,
         explicit_no_go_confirmations=no_go_list,
         recommended_next_phase=recommended_next,
+    )
+    trial_report.metadata["commit_attribution"] = commit_attribution
+    _apply_canonical_and_trust(trial_report, phase_id, phase_name, "completed")
+
+    gate = validate_finalization_gate(
+        phase_id=phase_id,
+        report=trial_report,
+        metadata=meta,
+        pushed_status=pushed_status,
+        origin_main_head_count=origin_count,
+        governance_results=governance_results,
+        test_results=test_results,
+        no_go_confirmations=no_go_list,
+        recommended_next_phase=recommended_next,
         commit_attribution=commit_attribution,
     )
+    trust_result = compute_final_trust(
+        trial_report.to_dict(), old_schema_missing_fields=trial_report.missing_trust_fields,
+    )
 
-    if fin.get("report_error"):
-        print(f"Phase report: ERROR — {fin['report_error']}")
-        return
+    # Dispatch is suppressed whenever EITHER trust schema is incomplete,
+    # regardless of --allow-partial-report — a partial report is never sent
+    # as final. (The two schemas can disagree: e.g. files_changed=0 is a
+    # valid non-empty int under 105A/105B's presence check, but the OLD
+    # schema's `assess_completeness()` treats <=0 as missing.)
+    dispatch_allowed = gate["finalizable"] and trust_result.complete
+    # Command hard-fails (nonzero exit) unless explicitly overridden.
+    finalizable = dispatch_allowed or allow_partial_report
 
-    # ── Phase 95M.1 — Finalization gate ──────────────────────────────────
-    from pcae.core.phase_reports import validate_finalization_gate
-    report = fin.get("report")
-    if report is not None:
-        gate = validate_finalization_gate(
+    suppressed_notify_enabled = None
+    if not dispatch_allowed and notify_enabled:
+        suppressed_notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED")
+        os.environ["PCAE_NOTIFY_ENABLED"] = ""
+    try:
+        fin = finalize_phase_report(
             phase_id=phase_id,
-            report=report,
-            metadata=meta,
+            phase_name=phase_name,
+            status="completed",
+            summary=summary,
+            files_changed=files_changed,
+            tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
+            test_results=test_results,
+            governance_results=governance_results,
+            commits=commits,
             pushed_status=pushed_status,
             origin_main_head_count=origin_count,
-            governance_results=governance_results,
-            test_results=test_results,
-            no_go_confirmations=no_go_list,
+            explicit_no_go_confirmations=no_go_list,
             recommended_next_phase=recommended_next,
             commit_attribution=commit_attribution,
         )
-        if not gate["finalizable"]:
-            print("Phase report: BLOCKED by finalization gate")
-            print(f"  Finalizable: no")
-            for blocker in gate["blockers"]:
-                print(f"  Blocker: {blocker}")
+    finally:
+        if suppressed_notify_enabled is not None:
+            os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
+
+    if fin.get("report_error"):
+        print(f"Phase report: ERROR — {fin['report_error']}")
+        return False
+
+    # ── Phase 95M.1 — Finalization gate ──────────────────────────────────
+    report = fin.get("report")
+    if not gate["finalizable"]:
+        print("Phase report: BLOCKED by finalization gate")
+        print(f"  Finalizable: no")
+        for blocker in gate["blockers"]:
+            print(f"  Blocker: {blocker}")
+        if allow_partial_report:
+            print("  --allow-partial-report: phase completion proceeds despite blockers.")
+        else:
             print()
             print("  Phase completion refused. Repair the report before retrying.")
-            return
 
-        # ── Phase 105B — Trust gate (advisory only) ──────────────────────
-        # The 95M.1 gate above is the authoritative, hard-fail finalization
-        # gate for this codebase's original report schema. The 105A/105B
-        # trust gate validates a related but independently-evolved schema
-        # (see phase_report_trust.adapt_report_for_trust_check). It is
-        # surfaced here as a warning only; making it a second hard gate is
-        # deferred to 105C pending schema reconciliation.
-        from pcae.core.phase_report_trust import (
-            adapt_report_for_trust_check,
-            validate_phase_report_trust,
-        )
-        trust_result = validate_phase_report_trust(
-            adapt_report_for_trust_check(report.to_dict())
-        )
-        print(f"Trust gate (105B, advisory): {trust_result.status}")
-        if not trust_result.complete:
-            print(f"  {trust_result.summary}")
+    # ── Phase 105D — Trust gate (hard-fail by default) ───────────────────
+    # The 95M.1 gate above is this codebase's original, independently
+    # evolved report schema. The 105A/105B trust gate (with the 105C.1
+    # push-state fold applied via compute_final_trust) validates a related
+    # but distinct schema. Phase 105D makes both hard-fail by default;
+    # --allow-partial-report is the explicit, logged override.
+    print(f"Trust gate (105D): {trust_result.status}")
+    if not trust_result.complete:
+        print(f"  {trust_result.summary}")
+        if trust_result.missing_fields:
+            print(f"  Missing fields: {', '.join(trust_result.missing_fields)}")
+        if trust_result.placeholder_fields:
+            print(f"  Placeholder fields: {', '.join(trust_result.placeholder_fields)}")
+        print(f"  Repair required: {'yes' if trust_result.repair_required else 'no'}")
+        print(f"  Can be active/latest: {'yes' if trust_result.can_be_active_latest else 'no'}")
+        if allow_partial_report:
+            print("  --allow-partial-report: phase completion proceeds despite incomplete trust.")
+        else:
+            print()
+            print("  Phase completion refused: report trust is incomplete. Repair the report, "
+                  "or pass --allow-partial-report to override (not recommended).")
 
     paths = fin.get("paths", {})
     md_path = paths.get("markdown", "")
@@ -244,10 +307,15 @@ def _finalize_report_and_notify(summary: str) -> None:
     # ── Notification dispatch result ──────────────────────────────────────
     print()
     if fin.get("notification_skipped"):
-        skip_reason = _notification_skip_reason(notify_enabled)
+        skip_reason = (
+            "report trust is incomplete — Telegram is never sent as a "
+            "partial/pre-final report"
+            if not dispatch_allowed
+            else _notification_skip_reason(notify_enabled)
+        )
         print(f"Notification dispatch: skipped")
         print(f"  Reason: {skip_reason}")
-        return
+        return finalizable
 
     nresults = fin.get("notification_results") or []
     attempted_sinks = [r.sink_name for r in nresults]
@@ -273,6 +341,8 @@ def _finalize_report_and_notify(summary: str) -> None:
     if fin.get("notification_error"):
         safe_err = _redact_error(fin["notification_error"])
         print(f"  Dispatch error: {safe_err}")
+
+    return finalizable
 
 
 def _notification_skip_reason(notify_enabled: bool) -> str:

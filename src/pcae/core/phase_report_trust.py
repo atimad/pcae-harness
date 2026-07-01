@@ -293,3 +293,71 @@ def select_active_phase_report(
 
     # Nothing usable
     return None, scored[-1][1] if scored else None
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 105D — Push-state gate (originally 105C.1, promoted to shared core)
+# ═══════════════════════════════════════════════════════════════════════════
+
+# Fields the OLD (95M.1, `core/phase_reports.py`) report-trust schema uses to
+# signal that final push state (push status / origin-ahead-count / push
+# check) is not yet known. This (105A/105B) schema does not check these
+# semantically on its own — a `pushed_status` of "not_pushed" is a valid
+# non-placeholder string, so it alone reports "complete". Folding these into
+# a trust result via `apply_push_state_gate` is what prevents a pre-push
+# report from being treated as a final, dispatch-ready trusted handoff.
+PUSH_STATE_FIELDS: tuple[str, ...] = (
+    "pushed_status",
+    "origin_main_head",
+    "governance_results.pcae_push_check",
+)
+
+
+def apply_push_state_gate(
+    trust_result: PhaseReportTrustResult,
+    missing_trust_fields: Sequence[str] | None,
+) -> None:
+    """Downgrade a trust result to partial when the OLD schema's push-state
+    fields (e.g. `PhaseReport.missing_trust_fields`) show final push state is
+    still pending. Mutates `trust_result` in place. No-op if
+    `missing_trust_fields` is empty/None or contains no push-state fields.
+    """
+    if not missing_trust_fields:
+        return
+    pending = [f for f in missing_trust_fields if f in PUSH_STATE_FIELDS]
+    if not pending:
+        return
+    trust_result.missing_fields = sorted(set(trust_result.missing_fields) | set(pending))
+    trust_result.complete = False
+    trust_result.can_be_active_latest = False
+    trust_result.repair_required = True
+    if trust_result.status == COMPLETENESS_COMPLETE:
+        trust_result.status = COMPLETENESS_PARTIAL
+    trust_result.summary = (
+        f"Report is PARTIAL: final push state pending ({', '.join(pending)}). "
+        "Repair required."
+    )
+
+
+def compute_final_trust(
+    report: Mapping[str, Any],
+    *,
+    push_state_aware: bool = True,
+    old_schema_missing_fields: Sequence[str] | None = None,
+) -> PhaseReportTrustResult:
+    """Compute the combined trust result used for dispatch/hard-fail
+    decisions (Phase 105D). Adapts and validates `report` with the 105A/105B
+    validator, then optionally folds in the OLD schema's push-state fields.
+
+    `old_schema_missing_fields` should be the OLD (95M.1) schema's
+    `missing_trust_fields` list when available (e.g. `PhaseReport.
+    missing_trust_fields`, or a loaded report dict's `"missing_trust_fields"`
+    key) — the 105A/105B schema alone cannot detect push-state pendingness.
+    """
+    trust_result = validate_phase_report_trust(adapt_report_for_trust_check(report))
+    if push_state_aware:
+        fields = old_schema_missing_fields
+        if fields is None and isinstance(report, Mapping):
+            fields = report.get("missing_trust_fields")
+        apply_push_state_gate(trust_result, fields)
+    return trust_result

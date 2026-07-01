@@ -447,39 +447,24 @@ def run_task_finish(args: argparse.Namespace) -> int:
 
 # Phase 105C.1 — fields the OLD (95M.1) report-trust schema uses to signal
 # that final push state (push status / origin-ahead-count / push-check) is
-# not yet known. The 105A/105B trust schema does not check these
-# semantically (a `pushed_status` of "not_pushed" is a valid non-placeholder
-# string, so it alone reports "complete") — folding these into the trust
-# result here is what prevents a pre-push report from being dispatched as a
-# final trusted Telegram handoff.
-_PUSH_STATE_FIELDS: tuple[str, ...] = (
-    "pushed_status",
-    "origin_main_head",
-    "governance_results.pcae_push_check",
-)
+# not yet known. Promoted to `core/phase_report_trust.py` in Phase 105D so
+# `commands/push.py` can share it too; these names are kept as aliases for
+# backward compatibility (existing tests import `_apply_push_state_gate`
+# directly from this module).
+from pcae.core.phase_report_trust import PUSH_STATE_FIELDS as _PUSH_STATE_FIELDS  # noqa: E402
 
 
 def _apply_push_state_gate(trust_result, report) -> None:
     """Phase 105C.1 — downgrade a 105A/105B trust result to partial when the
     OLD schema's push-state fields (`report.missing_trust_fields`) show
-    final push state is still pending. Mutates `trust_result` in place."""
+    final push state is still pending. Mutates `trust_result` in place.
+    Thin wrapper around `core.phase_report_trust.apply_push_state_gate`
+    (Phase 105D)."""
+    from pcae.core.phase_report_trust import apply_push_state_gate
+
     if report is None:
         return
-    from pcae.core.phase_report_trust import COMPLETENESS_COMPLETE, COMPLETENESS_PARTIAL
-
-    pending = [f for f in (report.missing_trust_fields or []) if f in _PUSH_STATE_FIELDS]
-    if not pending:
-        return
-    trust_result.missing_fields = sorted(set(trust_result.missing_fields) | set(pending))
-    trust_result.complete = False
-    trust_result.can_be_active_latest = False
-    trust_result.repair_required = True
-    if trust_result.status == COMPLETENESS_COMPLETE:
-        trust_result.status = COMPLETENESS_PARTIAL
-    trust_result.summary = (
-        f"Report is PARTIAL: final push state pending ({', '.join(pending)}). "
-        "Repair required."
-    )
+    apply_push_state_gate(trust_result, report.missing_trust_fields)
 
 
 def _print_report_integration_human(report_integration: dict) -> None:

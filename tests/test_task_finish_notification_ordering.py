@@ -404,7 +404,9 @@ class TestExistingBehaviorPreservation:
         root = _init_repo(tmp_path)
         monkeypatch.chdir(tmp_path)
 
-        exit_code = main(["phase", "complete", "--summary", "Phase 205Q: done."])
+        exit_code = main([
+            "phase", "complete", "--summary", "Phase 205Q: done.", "--allow-partial-report",
+        ])
         output = capsys.readouterr().out
 
         assert exit_code == 0

@@ -6254,6 +6254,15 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         help="Summary of the completed phase.",
     )
+    phase_complete_parser.add_argument(
+        "--allow-partial-report",
+        action="store_true",
+        help=(
+            "Phase 105D: proceed with phase completion even when the report "
+            "trust gate is incomplete/invalid. Telegram dispatch is still "
+            "suppressed for incomplete reports regardless of this flag."
+        ),
+    )
     phase_complete_parser.set_defaults(handler=run_phase_complete)
 
     phase_start_parser = phase_subparsers.add_parser(

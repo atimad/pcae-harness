@@ -330,7 +330,9 @@ class TestPhaseCompletePreservation:
         root = _init_repo(tmp_path)
         monkeypatch.chdir(tmp_path)
 
-        exit_code = main(["phase", "complete", "--summary", "Phase 205C-PC: done."])
+        exit_code = main([
+            "phase", "complete", "--summary", "Phase 205C-PC: done.", "--allow-partial-report",
+        ])
         output = capsys.readouterr().out
 
         assert exit_code == 0
@@ -352,7 +354,7 @@ class TestPhaseCompletePreservation:
 
         assert exit_code == 0
         assert "Phase report: BLOCKED" not in output
-        assert "Trust gate (105B, advisory):" in output
+        assert "Trust gate (105D): complete" in output
 
 
 # ── Group F: No-execution guards ─────────────────────────────────────────────

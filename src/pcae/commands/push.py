@@ -29,6 +29,52 @@ class PushReadiness:
     lifecycle_review_required: bool
     lifecycle_review_passed: bool
     lifecycle_review_reason: str
+    phase_report_trust_status: str
+    phase_report_trust_repair_required: bool
+    phase_report_trust_missing_fields: tuple[str, ...]
+    phase_report_trust_placeholder_fields: tuple[str, ...]
+
+
+def _assess_phase_report_trust(root: HarnessPath) -> dict:
+    """Phase 105D — validate the latest phase report's CONTENT completeness
+    (105A/105B schema) as a push-check gate.
+
+    Deliberately does NOT apply the 105C.1 push-state fold: task finish
+    legitimately writes pushed_status/origin_main_head/pcae_push_check as
+    pending before every push, and push-check already gates on live git
+    state via its own unpushed-commit-count/clean-tree checks. Requiring
+    the report to already claim "pushed" here would make push-check
+    permanently unpassable for the normal task-finish-then-push sequence.
+    See docs/PHASE_105_PHASE_REPORT_TRUST_HARD_FAIL_PUSH_CHECK_INTEGRATION.md.
+    """
+    latest_path = root.path / ".pcae" / "phase-reports" / "latest.json"
+    if not latest_path.exists():
+        return {
+            "status": "skipped", "repair_required": False,
+            "missing_fields": [], "placeholder_fields": [],
+        }
+    try:
+        data = json.loads(latest_path.read_text())
+    except json.JSONDecodeError:
+        return {
+            "status": "skipped", "repair_required": False,
+            "missing_fields": [], "placeholder_fields": [],
+        }
+    if not isinstance(data, dict):
+        return {
+            "status": "skipped", "repair_required": False,
+            "missing_fields": [], "placeholder_fields": [],
+        }
+
+    from pcae.core.phase_report_trust import compute_final_trust
+
+    trust = compute_final_trust(data, push_state_aware=False)
+    return {
+        "status": "passed" if trust.complete else "failed",
+        "repair_required": trust.repair_required,
+        "missing_fields": trust.missing_fields,
+        "placeholder_fields": trust.placeholder_fields,
+    }
 
 
 def assess_push_readiness(root: HarnessPath) -> PushReadiness:
@@ -38,6 +84,7 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
     health = build_health_data(root)
     check_result = run_checks(root)
     diagnostics = diagnose_task_memory(root)
+    phase_report_trust = _assess_phase_report_trust(root)
 
     clean = not changes
     from pcae.core.health import is_healthy
@@ -77,6 +124,13 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
         ready = False
         mode = "not_ready"
 
+    # Phase 105D — a partial/placeholder-containing phase report blocks
+    # push readiness (content completeness only; see
+    # `_assess_phase_report_trust` for why push-state fields are excluded).
+    if phase_report_trust["status"] == "failed" and ready:
+        ready = False
+        mode = "not_ready"
+
     return PushReadiness(
         branch=branch,
         clean=clean,
@@ -92,6 +146,10 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
         lifecycle_review_required=review_required,
         lifecycle_review_passed=review_passed,
         lifecycle_review_reason=review_reason,
+        phase_report_trust_status=phase_report_trust["status"],
+        phase_report_trust_repair_required=phase_report_trust["repair_required"],
+        phase_report_trust_missing_fields=tuple(phase_report_trust["missing_fields"]),
+        phase_report_trust_placeholder_fields=tuple(phase_report_trust["placeholder_fields"]),
     )
 
 
@@ -393,6 +451,10 @@ def _readiness_dict(readiness: PushReadiness) -> dict:
         "lifecycle_review_reason": readiness.lifecycle_review_reason,
         "lifecycle_review_required": readiness.lifecycle_review_required,
         "mode": readiness.mode,
+        "phase_report_trust": readiness.phase_report_trust_status,
+        "phase_report_trust_repair_required": readiness.phase_report_trust_repair_required,
+        "phase_report_trust_missing_fields": list(readiness.phase_report_trust_missing_fields),
+        "phase_report_trust_placeholder_fields": list(readiness.phase_report_trust_placeholder_fields),
         "push_action_required": blocked,
         "push_blocked": blocked,
         "push_noop": noop,
@@ -421,6 +483,13 @@ def _print_readiness(readiness: PushReadiness, json_mode: bool) -> None:
         enforcement = "passed" if readiness.lifecycle_review_passed else "failed"
         review_line += f" (required, {enforcement})"
     print(review_line)
+    print(f"  Phase report trust: {readiness.phase_report_trust_status}")
+    if readiness.phase_report_trust_status == "failed":
+        print(f"    Repair required: {'yes' if readiness.phase_report_trust_repair_required else 'no'}")
+        if readiness.phase_report_trust_missing_fields:
+            print(f"    Missing fields: {', '.join(readiness.phase_report_trust_missing_fields)}")
+        if readiness.phase_report_trust_placeholder_fields:
+            print(f"    Placeholder fields: {', '.join(readiness.phase_report_trust_placeholder_fields)}")
     print(f"  Mode: {readiness.mode}")
     print()
     if readiness.ready:
@@ -441,6 +510,8 @@ def _print_readiness(readiness: PushReadiness, json_mode: bool) -> None:
             reasons.append("task memory has errors")
         if readiness.lifecycle_review_required and not readiness.lifecycle_review_passed:
             reasons.append(readiness.lifecycle_review_reason)
+        if readiness.phase_report_trust_status == "failed":
+            reasons.append("latest phase report trust is incomplete (partial/placeholder content)")
         print("Not ready to push:")
         for reason in reasons:
             print(f"  - {reason}")
