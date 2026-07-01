@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Final 99B cleanup (20260701-0918-final-99b-cleanup)
 - Post-99B task cleanup (20260701-0918-post-99b-task-cleanup)
 - Phase 99B — Governed Execution Attempt Contract Freeze (20260701-0911-phase-99b-governed-execution-attempt-contract-freeze)
 - Phase 97G — Execution Readiness Preflight Contract Freeze (20260701-0212-20260701-0030-phase-97f-execution-readiness-preflight)
