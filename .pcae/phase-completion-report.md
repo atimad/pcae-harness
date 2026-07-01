@@ -1,12 +1,13 @@
 # Phase Report: Runtime Enforcement Decision Engine Contract Freeze
 
-- **Phase ID:** `102B`
+- **Phase ID:** `102B` / `102B.1` (report trust repair)
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Files changed:** 6
+- **102B.1 repair:** governance trust fields completed, 102A task status fixed
+- **Files changed:** 6 (102B) + 3 (102B.1 repair)
 - **Tests added:** 161 (contract freeze)
 - **Tests combined:** 183 (22 from 102A + 161 from 102B)
-- **Commits:** e27dfb793cd604d6fc962c3867bed23979e49069
+- **Commits:** e27dfb79, 7d1e55a0, 073a50d7 (102B) + TBD (102B.1)
 - **Pushed:** pushed ✅
 - **origin/main..HEAD:** 0
 

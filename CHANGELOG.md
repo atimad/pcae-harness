@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Phase 102B.1 — Runtime Enforcement Decision Engine Contract Freeze Report Trust Repair. Report trust repair only. Repaired missing governance trust fields (pcae_health, pcae_check, pcae_doctor_task_memory, pcae_push_check, telegram_runtime) from 102B canonical report/metadata. Fixed 102A task status. No source/model changes. No runtime enforcement. No execution. Recommends 102C — Artifact Trust Hardening.
 - Phase 102B — Runtime Enforcement Decision Engine Contract Freeze. Contract-freeze only. Freezes the 102A RuntimeEnforcementDecision contract: 39 fields, 9 statuses, 12 blocking results, 22 fail-closed rules, SHA-256 digest, evidence-bundle input semantics, no-go propagation, report/notification trust, 12 authorization flags (all False), 5 safety flags (all True), compatibility rules, no-execution guards. 161 contract freeze tests. No source changes. No runtime enforcement. No execution. All auth flags remain False. Execution remains unavailable. Recommends 102C — Artifact Trust Hardening.
 - Phase 102A — Runtime Enforcement Decision Engine Contract Design. Design-only. RuntimeEnforcementDecision dataclass: 39 fields, 9 statuses, 12 blocking results, SHA-256 digest, 22 fail-closed rules. 22 tests. No runtime enforcement exists. Execution remains unavailable. All auth flags remain False. Design-only — no implementation. Recommends 102B — Contract Freeze.
 
