@@ -28,13 +28,13 @@
         {"name": "pcae_doctor_task_memory", "status": "warnings"},
         {"name": "pcae_push_check", "status": "clean"}
     ],
-    "governance_results": {
-        "pcae_health": "healthy",
-        "pcae_check": "passed",
-        "pcae_doctor_task_memory": "warnings",
-        "pcae_push_check": "clean",
-        "telegram_runtime": "loaded, configured, enabled"
-    },
+    "governance_results": [
+        {"name": "pcae_health", "status": "healthy"},
+        {"name": "pcae_check", "status": "passed"},
+        {"name": "pcae_doctor_task_memory", "status": "warnings"},
+        {"name": "pcae_push_check", "status": "clean"},
+        {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
+    ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
     "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Contract freeze only. Recommends 102C.",
     "recommended_next_phase": "102C — Runtime Enforcement Decision Engine Artifact Trust Hardening",
