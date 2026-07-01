@@ -10,7 +10,7 @@ Phase 105A — Phase Report Trust Gate Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
