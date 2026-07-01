@@ -1,17 +1,17 @@
-# Phase Report: Golden Workflow Stabilization
+# Phase Report: Packaging / Installation / Clean-Smoke Test
 
-- **Phase ID:** `106C`
+- **Phase ID:** `106D`
 - **Status:** completed
 - **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
-- **Files changed:** 3
-- **Tests run:** 32
-- **Commits:** 5acc62b8
+- **Files changed:** 8
+- **Tests run:** 20
+- **Commits:** 3d332a38
 - **Pushed:** not_pushed (pending final task-finish commit + push)
 - **origin/main..HEAD:** 1
 
 ## Summary
 
-Phase 106C: Documented and command-verified the v0.1 golden workflow. `docs/V0_1_GOLDEN_WORKFLOW.md` turns `docs/RELEASE_SCOPE_V0_1.md`'s scope into a concrete, repeatable operator sequence: start-of-phase (`pcae health/check/doctor task-memory/notify status/phase-report show --latest --trust/phase-report trust --json`), task/phase setup (`pcae task new`), implementation (stay within task-contract scope, no raw commit/push), pre-finalization (`pcae check/phase-report trust --json/push check`), finalization (`pcae skill invoke phase-finalization/commit implementation/task finish --commit/push check/push`), and post-completion verification. Documents required vs. optional-diagnostic commands and an explicit unsupported-flows list (raw git commit/push, `--no-verify`, force push, shell mediation, Telegram inbound, rollback execution). Every command verified via `--help`/direct invocation against the live CLI, none invented. Updated `docs/RELEASE_SCOPE_V0_1.md` to reference the golden workflow as a required release artifact. Documentation/testing-only; no product code changed. 32 new tests. Non-executing, non-authorizing. No runtime enforcement. No execution. Recommends 106D.
+Phase 106D: Validated PCAE v0.1 packaging/install readiness in throwaway virtual environments outside this repository. Editable install, non-editable local install, and `python -m build` (sdist + wheel) all succeeded; the `pcae` console script and all required golden-workflow commands resolved correctly. Found and fixed 2 release-critical defects: (1) `pcae health`/`pcae check` crashed with an unhandled `subprocess.CalledProcessError` traceback outside a git repository — added a narrowly-scoped catch in `cli.py::main()` for `git`-prefixed subprocess failures (an initial fix using a new custom exception type broke 40 existing tests that already caught the raw exception type themselves — corrected before finalizing, fast-green re-confirmed 4390/4390); (2) the sdist swept in the entire repository by default (44,399 files, ~6.4MB, including local `.claude/settings.local.json` and `.pcae/session.json`) while the wheel was already correctly scoped — added an explicit `[tool.hatch.build.targets.sdist]` include list (now 117 files, ~1.1MB). Verified the golden workflow smoke-tests cleanly against a fresh `git clone` and that Telegram is safely skippable when unconfigured. No packaging blockers remain. 20 new tests. Non-executing, non-authorizing. No runtime enforcement. No execution. Recommends 106E.
 
 ## Governance Results
 
@@ -23,9 +23,13 @@ Phase 106C: Documented and command-verified the v0.1 golden workflow. `docs/V0_1
 
 ## Test Results
 
-- **golden_workflow_tests:** 32/32 (passed)
-- **focused_golden_workflow_tests:** 201/201 (passed)
-- **release_lifecycle_regression:** 404/404 (passed)
+- **packaging_smoke_tests:** 20/20 (passed)
+- **editable_install:** succeeded (passed)
+- **non_editable_install:** succeeded (passed)
+- **build_artifact_sdist_wheel:** succeeded (passed)
+- **golden_workflow_smoke_fresh_clone:** succeeded (passed)
+- **focused_golden_workflow_tests:** 80/80 (passed)
+- **release_lifecycle_regression:** 459/459 (passed)
 - **report_notification_tests:** 219/219 (passed)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 - **combined_regression:** 2220/2220 (passed)
@@ -33,11 +37,11 @@ Phase 106C: Documented and command-verified the v0.1 golden workflow. `docs/V0_1
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test command behavior. No shell execution beyond existing lifecycle/test command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106D.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging command behavior. No shell execution beyond existing lifecycle/test/packaging command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106E.
 
 ## Recommended Next Phase
 
-106D — Packaging / Installation / Clean-Smoke Test
+106E — v0.1 Release Candidate
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*

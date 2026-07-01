@@ -2,6 +2,34 @@
 
 ## Current Phase
 
+Phase 106D — Packaging / Installation / Clean-Smoke Test (completed).
+
+Validated PCAE v0.1 packaging/install readiness in throwaway virtual
+environments outside this repository: editable install, non-editable local
+install, and `python -m build` (sdist + wheel) all succeeded; the `pcae`
+console script resolved correctly in every mode, and all required
+golden-workflow commands (`health/check/doctor task-memory/push check/
+phase-report trust/phase-report show --trust/notify status/task finish/
+commit implementation/skill invoke`) responded correctly to `--help`.
+Found and fixed 2 release-critical defects: (1) `pcae health`/`pcae check`
+crashed with an unhandled traceback outside a git repository — added a
+narrowly-scoped `subprocess.CalledProcessError` catch in `cli.py::main()`
+for `git`-prefixed commands specifically (a first attempt using a new
+custom exception type broke 40 existing tests that already caught the raw
+exception type themselves — corrected before finalizing); (2) the sdist
+swept in the entire repository by default (44,399 files, including local
+`.claude/`/`.pcae/` state) while the wheel was already correctly scoped —
+added an explicit `[tool.hatch.build.targets.sdist]` include list (now 117
+files). Verified the golden workflow smoke-tests cleanly against a fresh
+`git clone`, and that Telegram is safely, silently skippable when
+unconfigured. No packaging blockers remain. 20 new tests
+(`tests/test_packaging_installation_smoke_v0_1.py`). No runtime
+enforcement. No autonomous execution.
+
+Recommends 106E — v0.1 Release Candidate.
+
+## Phase 106C Complete
+
 Phase 106C — Golden Workflow Stabilization (completed).
 
 Documentation/testing-only phase. Created `docs/V0_1_GOLDEN_WORKFLOW.md`:

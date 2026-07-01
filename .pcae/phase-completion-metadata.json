@@ -1,17 +1,21 @@
 {
-    "phase_id": "106C", "phase_name": "phase_106c_golden_workflow_stabilization", "phase_title": "Golden Workflow Stabilization",
+    "phase_id": "106D", "phase_name": "phase_106d_packaging_installation_clean_smoke_test", "phase_title": "Packaging / Installation / Clean-Smoke Test",
     "status": "completed",
-    "summary": "Documented and command-verified the v0.1 golden workflow: docs/V0_1_GOLDEN_WORKFLOW.md defines start-of-phase, implementation, pre-finalization, finalization (report/notify/commit/push), and post-completion verification, with required vs optional-diagnostic commands and an explicit unsupported-flows list. Every command verified against the live CLI, none invented. Updated docs/RELEASE_SCOPE_V0_1.md to reference it as a required release artifact. Documentation/testing-only. 32 new tests. Recommends 106D.",
-    "files_changed_count": 3, "tests_added_or_updated": "32 tests added",
-    "phase_commits": [{"hash": "5acc62b870a36f2f228cfbe417ef2df6417bd499", "message": "Stabilize v0.1 golden workflow"}],
-    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
+    "summary": "Validated PCAE v0.1 packaging/install readiness: editable install, non-editable local install, and python -m build (sdist+wheel) all succeeded in throwaway venvs. Fixed 2 release-critical defects: pcae health/check crashed outside a git repo (now fails cleanly via a narrowly-scoped subprocess.CalledProcessError catch in cli.py main()); sdist swept in the entire repo by default (44,399 files incl. .claude/.pcae state), now scoped to 117 files via explicit sdist include list. Golden workflow smoke-tested against a fresh clone; Telegram confirmed safely skippable. No packaging blockers remain. 20 new tests. Recommends 106E.",
+    "files_changed_count": 8, "tests_added_or_updated": "20 tests added",
+    "phase_commits": [{"hash": "3d332a38e39c7c5abce55789edfefad19fb4f2c2", "message": "Validate v0.1 packaging and clean smoke test"}],
+    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "golden_workflow_doc": "docs/V0_1_GOLDEN_WORKFLOW.md",
-    "note": "Corrected dispatch, sent after pcae push resolved final push state. The earlier pcae task finish --commit run for this same phase correctly reported skipped_incomplete instead of dispatching partial, and pcae push check correctly passed despite the pre-push report (both demonstrating preserved 105C.1/105D behavior). Documentation/testing-only phase: no product code (src/pcae) changed.",
+    "packaging_doc": "docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md",
+    "note": "This metadata intentionally reflects pre-push state (pushed_status=not_pushed) at task-finish time; pcae push check correctly passes on content completeness regardless (105D design). A corrected complete dispatch follows after pcae push. Two release-critical packaging defects found and fixed (see summary); an initial fix attempt for the git-repo crash broke 40 existing tests and was corrected before finalizing (fast-green re-confirmed 4390/4390 after correction).",
     "validation_results": [
-        {"name": "golden_workflow_tests", "result": "32/32", "status": "passed"},
-        {"name": "focused_golden_workflow_tests", "result": "201/201", "status": "passed"},
-        {"name": "release_lifecycle_regression", "result": "404/404", "status": "passed"},
+        {"name": "packaging_smoke_tests", "result": "20/20", "status": "passed"},
+        {"name": "editable_install", "result": "succeeded", "status": "passed"},
+        {"name": "non_editable_install", "result": "succeeded", "status": "passed"},
+        {"name": "build_artifact_sdist_wheel", "result": "succeeded", "status": "passed"},
+        {"name": "golden_workflow_smoke_fresh_clone", "result": "succeeded", "status": "passed"},
+        {"name": "focused_golden_workflow_tests", "result": "80/80", "status": "passed"},
+        {"name": "release_lifecycle_regression", "result": "459/459", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
         {"name": "combined_regression", "result": "2220/2220", "status": "passed"},
@@ -25,10 +29,10 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test command behavior. No shell execution beyond existing lifecycle/test command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106D.",
-    "recommended_next_phase": "106D — Packaging / Installation / Clean-Smoke Test"
+    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging command behavior. No shell execution beyond existing lifecycle/test/packaging command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106E.",
+    "recommended_next_phase": "106E — v0.1 Release Candidate"
 }
