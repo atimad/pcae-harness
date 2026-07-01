@@ -1,16 +1,19 @@
 {
-    "phase_id": "105B", "phase_name": "phase_105b_phase_report_trust_gate_cli_finalization_integration", "phase_title": "Phase Report Trust Gate CLI / Finalization Integration",
-    "files_changed_count": 11, "tests_added_or_updated": "34 tests added",
-    "phase_commits": [{"hash": "cbd005f4113d33c0518883ef37a1f38b7cd3fc00", "message": "Integrate phase report trust gate CLI"}],
-    "pushed_status": "not_pushed", "origin_main_head_count": 3, "commit_attribution": "phase_owned",
+    "phase_id": "105C", "phase_name": "phase_105c_task_finish_report_trust_telegram_notification_integration", "phase_title": "Task Finish Report Trust / Telegram Notification Integration",
+    "status": "completed",
+    "summary": "Integrated phase report finalization, 105A/105B report-trust validation, and Telegram outbound dispatch into pcae task finish --commit, closing the gap where the real phase-closing workflow never triggered report/notification creation. Warning-only; hard-fail deferred to 105D. 19 new tests. Recommends 105D.",
+    "files_changed_count": 6, "tests_added_or_updated": "19 tests added",
+    "phase_commits": [{"hash": "771eca891b45e31841fe056b686dfd89a887bdd1", "message": "Integrate task finish report trust notification"}],
+    "pushed_status": "not_pushed", "origin_main_head_count": 8, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "cli_module": "src/pcae/commands/phase_reports.py",
-    "note": "CLI/finalization-adjacent integration of the 105A trust validator. Finalization integration is advisory-only (warning line in pcae phase complete); hard-fail finalization deferred to 105C pending reconciliation with the pre-existing 95M.1 report-trust schema (see docs/PHASE_105_PHASE_REPORT_TRUST_GATE_CLI_FINALIZATION_INTEGRATION.md, 'Residual risks').",
+    "integration_module": "src/pcae/commands/task.py",
+    "note": "Task-finish workflow now finalizes/trust-validates/dispatches the phase report automatically when .pcae/phase-completion-metadata.json exists. pcae phase complete unchanged. Idempotency via .pcae/phase-reports/.last-notified.json marker.",
     "validation_results": [
-        {"name": "105b_trust_gate_cli_tests", "result": "34/34", "status": "passed"},
+        {"name": "105c_task_finish_report_trust_notification_tests", "result": "19/19", "status": "passed"},
+        {"name": "task_lifecycle_regression", "result": "144/144", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
-        {"name": "combined_regression", "result": "2172/2172", "status": "passed"},
+        {"name": "combined_regression", "result": "2191/2191", "status": "passed"},
         {"name": "fast_green", "result": "4387/4390 (3 pre-existing)", "status": "passed_with_pre_existing"}
     ],
     "test_results": {
@@ -19,16 +22,12 @@
         "fast_green": "4387/4390 (passed_with_pre_existing, 3 pre-existing)"
     },
     "pre_existing_failures": ["Test94UPreflightArtifact", "Test94UPreflightArtifactCLI", "TestBackendShow"],
-    "governance_checks": [
-        {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "errors (pre-existing, unrelated to 105B)"}, {"name": "pcae_push_check", "status": "pending final commit"}
-    ],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "errors (pre-existing, unrelated to 105B — phases 95O-104E task/DONE.md bookkeeping backlog)"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Trust gate CLI-reachable; finalization integration is warning-only, not a hard gate. Recommends 105C.",
-    "recommended_next_phase": "105C — Phase Report Trust Gate Finalization Hard-Fail / Push-Check Integration"
+    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Task finish now finalizes/trust-validates/dispatches reports automatically; warning-only, hard-fail deferred to 105D. Recommends 105D.",
+    "recommended_next_phase": "105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration"
 }

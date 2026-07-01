@@ -2,6 +2,23 @@
 
 ## Current Phase
 
+Phase 105C — Task Finish Report Trust / Telegram Notification Integration (completed).
+
+Integrated phase report finalization, 105A/105B report-trust validation, and
+Telegram outbound dispatch into the actual day-to-day phase-closing workflow:
+`pcae task finish --commit`. Root cause: `finalize_phase_report()` (report
+build + Telegram dispatch) was only ever called from `pcae phase complete`,
+which the real workflow doesn't use — `pcae task finish --commit` now calls
+it too, warning-only (repair-required signal, no hard block), with a
+dedicated idempotency marker (`.pcae/phase-reports/.last-notified.json`) to
+avoid duplicate sends for the same phase+commit. `pcae phase complete`
+unchanged. 19 new tests. Non-executing, non-authorizing. No runtime
+enforcement. No execution.
+
+Recommends 105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration.
+
+## Phase 105B Complete
+
 Phase 105B — Phase Report Trust Gate CLI / Finalization Integration (completed).
 
 Added `pcae phase-report trust` (validate a phase report's trust completeness
