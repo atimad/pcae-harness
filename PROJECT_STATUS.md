@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 99B.1 — Telegram Notification Delivery / Phase Report Trust Repair (completed).
+Phase 99B.2 — Repair Repair-Phase Report Trust Completeness (completed).
 
 Contract-freeze only. Freezes the 99A GovernedExecutionAttemptBoundary contract:
 33 top-level JSON fields, 14 attempt states, 26 denial reasons, 12 authorization
