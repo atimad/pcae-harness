@@ -2,6 +2,9 @@
 
 ## Completed
 
+- Phase 102B — Runtime Enforcement Decision Engine Contract Freeze (20260701-1630-phase-102b-runtime-enforcement-decision-engine-contract-freeze)
+- Phase 102A — Runtime Enforcement Decision Engine Contract Design (20260701-1625-phase-102a-runtime-enforcement-decision-engine-contract-design)
+
 - Phase 101F — Runtime Enforcement Evidence Bundle Milestone Summary / Transition Planning (20260701-1551-phase-101f-runtime-enforcement-evidence-bundle-milestone-summary-transition-planning)
 - Phase 101E — Runtime Enforcement Evidence Bundle Boundary Review (20260701-1547-phase-101e-runtime-enforcement-evidence-bundle-boundary-review)
 - Phase 101D — Runtime Enforcement Evidence Bundle Artifact Trust Hardening (20260701-1507-phase-101d-runtime-enforcement-evidence-bundle-artifact-trust-hardening)
