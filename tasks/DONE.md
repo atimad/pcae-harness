@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 105B — Phase Report Trust Gate CLI / Finalization Integration (20260701-2001-phase-105b-phase-report-trust-gate-cli-finalization-integration)
 - Phase 105A — Phase Report Trust Gate Implementation (20260701-1730-phase-105a-phase-report-trust-gate-implementation)
 - Phase 104E — Consolidation Milestone Summary (20260701-1725-phase-104e-runtime-enforcement-consolidation-milestone-summary)
 - Phase 104D — Report Trust Automation Gap Closure Design (20260701-1715-phase-104d-runtime-enforcement-report-trust-automation-gap-closure-design)

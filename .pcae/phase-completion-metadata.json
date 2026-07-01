@@ -1,15 +1,16 @@
 {
-    "phase_id": "105A", "phase_name": "phase_105a_phase_report_trust_gate_implementation", "phase_title": "Phase Report Trust Gate Implementation",
-    "files_changed_count": 8, "tests_added_or_updated": "37 tests added",
-    "phase_commits": [{"hash": "e1b71a6f99a56986eb8f837cfdc00f4235a8135f", "message": "Implement phase report trust gate"}],
-    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
+    "phase_id": "105B", "phase_name": "phase_105b_phase_report_trust_gate_cli_finalization_integration", "phase_title": "Phase Report Trust Gate CLI / Finalization Integration",
+    "files_changed_count": 11, "tests_added_or_updated": "34 tests added",
+    "phase_commits": [{"hash": "cbd005f4113d33c0518883ef37a1f38b7cd3fc00", "message": "Integrate phase report trust gate CLI"}],
+    "pushed_status": "not_pushed", "origin_main_head_count": 3, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "validator_api": {"required_report_fields": 8, "required_governance_fields": 5, "required_test_fields": 3, "disallowed_placeholders": 4},
-    "note": "Validator implemented but NOT yet wired into pcae phase complete — that is 105B scope. This partial/complete cycle demonstrates the exact gap 105A+105B address.",
+    "cli_module": "src/pcae/commands/phase_reports.py",
+    "note": "CLI/finalization-adjacent integration of the 105A trust validator. Finalization integration is advisory-only (warning line in pcae phase complete); hard-fail finalization deferred to 105C pending reconciliation with the pre-existing 95M.1 report-trust schema (see docs/PHASE_105_PHASE_REPORT_TRUST_GATE_CLI_FINALIZATION_INTEGRATION.md, 'Residual risks').",
     "validation_results": [
-        {"name": "105a_trust_gate_tests", "result": "37/37", "status": "passed"},
+        {"name": "105b_trust_gate_cli_tests", "result": "34/34", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
+        {"name": "combined_regression", "result": "2172/2172", "status": "passed"},
         {"name": "fast_green", "result": "4387/4390 (3 pre-existing)", "status": "passed_with_pre_existing"}
     ],
     "test_results": {
@@ -20,14 +21,14 @@
     "pre_existing_failures": ["Test94UPreflightArtifact", "Test94UPreflightArtifactCLI", "TestBackendShow"],
     "governance_checks": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "warnings"}, {"name": "pcae_push_check", "status": "clean"}
+        {"name": "pcae_doctor_task_memory", "status": "errors (pre-existing, unrelated to 105B)"}, {"name": "pcae_push_check", "status": "pending final commit"}
     ],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "warnings"}, {"name": "pcae_push_check", "status": "clean"},
+        {"name": "pcae_doctor_task_memory", "status": "errors (pre-existing, unrelated to 105B — phases 95O-104E task/DONE.md bookkeeping backlog)"}, {"name": "pcae_push_check", "status": "pending final commit"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Trust gate implemented. Recommends 105B.",
-    "recommended_next_phase": "105B — Phase Report Trust Gate CLI / Finalization Integration"
+    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Trust gate CLI-reachable; finalization integration is warning-only, not a hard gate. Recommends 105C.",
+    "recommended_next_phase": "105C — Phase Report Trust Gate Finalization Hard-Fail / Push-Check Integration"
 }

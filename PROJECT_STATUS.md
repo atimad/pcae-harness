@@ -2,6 +2,23 @@
 
 ## Current Phase
 
+Phase 105B — Phase Report Trust Gate CLI / Finalization Integration (completed).
+
+Added `pcae phase-report trust` (validate a phase report's trust completeness
+from CLI; supports `--metadata`, `--report`, `--phase-id`, `--reports-dir`,
+`--json`) and `pcae phase-report show --trust`. Added
+`adapt_report_for_trust_check` to bridge field-name/shape differences between
+the pre-existing (95M.1, hard-gating) and 105A (advisory) report-trust
+schemas. Surfaced a warning-only "Trust gate (105B, advisory)" line in
+`pcae phase complete`; hard-fail finalization enforcement deferred to 105C
+pending schema reconciliation (documented as a residual risk). 34 new tests.
+Non-executing, non-authorizing. No runtime enforcement. No execution.
+
+Recommends 105C — Phase Report Trust Gate Finalization Hard-Fail / Push-Check
+Integration.
+
+## Phase 105A Complete
+
 Phase 105A — Phase Report Trust Gate Implementation (completed).
 
 Implemented 104D report-trust validator: 8 required fields, 5 governance fields,
