@@ -29,6 +29,21 @@ pcae = "pcae.cli:main"
 [tool.hatch.build.targets.wheel]
 packages = ["src/pcae"]
 
+# Phase 106D: without an explicit sdist scope, hatchling's default sdist
+# swept in the entire repository checkout (44,399 files, ~6.4MB, including
+# local-only .claude/ settings and .pcae/ runtime state such as
+# session.json/provenance-history.json) — found via a clean packaging
+# smoke test. The wheel (the artifact most installs actually use) was
+# already correctly scoped via `packages` above; this restricts the sdist
+# to the same essentials needed to build and run the package from source.
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/pcae",
+  "README.md",
+  "LICENSE",
+  "pyproject.toml",
+]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]

@@ -27,6 +27,22 @@ Every governance command (`pcae check`, `pcae health`, `pcae task new`, etc.) re
 
 PCAE has no runtime dependencies beyond the Python standard library. The only optional dependencies are `pytest` and `pytest-xdist`, used for running the test suite.
 
+## v0.1 notes
+
+PCAE v0.1 is positioned as **"PCAE v0.1 — Governed AI Coding Lifecycle
+Harness"**: non-executing by design. Installing it (editable or
+non-editable — both are validated in Phase 106D) gives you the `pcae`
+console script and governed lifecycle commands (task contracts, commit/push
+governance, report-trust validation and hard-fail gates); it does not
+install or enable any code-execution, backend-invocation, or shell-mediation
+capability. Outbound Telegram notification (`~/.config/pcae/telegram.env`)
+is entirely optional — every command works with it unset; see
+`pcae notify status` for current configuration state. For the exact,
+command-verified v0.1 operator workflow, see
+[docs/V0_1_GOLDEN_WORKFLOW.md](V0_1_GOLDEN_WORKFLOW.md); for a
+copy-pasteable clean-install verification sequence, see
+[docs/V0_1_CLEAN_SMOKE_TEST.md](V0_1_CLEAN_SMOKE_TEST.md).
+
 ---
 
 ## Scenario 1 — Brand-new repository

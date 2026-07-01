@@ -287,10 +287,12 @@ the golden workflow end-to-end.
 - [x] Golden workflow documented and command-verified (106C — see
       `docs/V0_1_GOLDEN_WORKFLOW.md`, the required release artifact for
       the v0.1 operator workflow)
-- [ ] Golden workflow smoke-tested from a genuinely clean checkout
-      (candidate: 106D)
+- [x] Golden workflow smoke-tested from a genuinely clean checkout (106D
+      — see `docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md`)
+- [x] Clean-install validation performed (106D — editable, non-editable,
+      and built sdist/wheel install all verified; 2 packaging defects
+      found and fixed)
 - [ ] README.md / ROADMAP.md brought current with actual state
-- [ ] Clean-install validation performed
 - [ ] v0.1 tag/release notes drafted
 
 ## v0.2 Full-Autonomy Roadmap Boundary
@@ -331,7 +333,26 @@ the exact v0.1 operator workflow: start-of-phase, implementation,
 pre-finalization, finalization (report/notify/commit/push), and
 post-completion verification, with required vs. optional commands and the
 unsupported-flows list. Every command in it was verified against the live
-CLI in Phase 106C.
+CLI in Phase 106C, and smoke-tested from a genuinely clean checkout in
+Phase 106D.
+
+## Packaging / Install / Clean-Smoke-Test Status (106D)
+
+**Clean install: passed.** Editable install, non-editable local install,
+and built sdist/wheel (`python -m build`) were all verified in throwaway
+virtual environments outside this repository. Two release-critical
+packaging defects were found and fixed:
+
+1. `pcae health`/`pcae check` crashed with an unhandled traceback when run
+   outside a git repository (now fails with a clear one-line error).
+2. The sdist swept in the entire repository checkout by default (44,399
+   files, including local `.claude/` settings and `.pcae/` runtime state)
+   — the wheel was already correctly scoped; the sdist now is too (117
+   files, `src/pcae` + `README.md` + `LICENSE` + `pyproject.toml`).
+
+No remaining packaging blockers before a v0.1 release candidate. See
+`docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md` and
+`docs/V0_1_CLEAN_SMOKE_TEST.md`.
 
 ## Recommended Next Phases
 
@@ -343,6 +364,14 @@ fast-green failures were root-caused and fixed (fast-green now 4390/4390);
 **106C — Golden Workflow Stabilization — complete.** The v0.1 golden
 workflow is documented and command-verified. See
 `docs/V0_1_GOLDEN_WORKFLOW.md`.
+
+**106D — Packaging / Installation / Clean-Smoke Test — complete.**
+Packaging metadata, editable/non-editable install, and build artifacts
+verified in clean environments; 2 defects found and fixed. See
+`docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md`.
+
+**106E — v0.1 Release Candidate** (recommended next). Prepare the release
+candidate with a final checklist, release notes, and tag-readiness review.
 
 **106D — Packaging / Installation / Clean-Smoke Test** (recommended next).
 Validate installation/packaging and run the golden workflow from a

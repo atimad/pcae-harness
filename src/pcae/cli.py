@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import subprocess
 from collections.abc import Sequence
 
 from pcae.commands.analytics import run_analytics_risk, run_analytics_trends
@@ -9790,4 +9791,23 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    return args.handler(args)
+    try:
+        return args.handler(args)
+    except subprocess.CalledProcessError as exc:
+        # Phase 106D: clean-install smoke testing found that running a
+        # governed command outside a git repository raised an unhandled
+        # subprocess traceback (e.g. `git status` exits 128 when cwd is not
+        # a repository) instead of a clear error. Several existing call
+        # sites already catch CalledProcessError themselves (e.g.
+        # core/provenance.py's `_safe_git_branch`), so this is narrowly
+        # scoped to only the specific "git command failed outside a repo"
+        # case that was actually uncaught, rather than a custom exception
+        # type that would have bypassed those existing handlers.
+        cmd = exc.cmd if isinstance(exc.cmd, (list, tuple)) else [exc.cmd]
+        if cmd and str(cmd[0]) == "git":
+            import sys as _sys
+
+            print(f"Error: git command failed: {' '.join(str(c) for c in cmd)}", file=_sys.stderr)
+            print("PCAE requires a git repository. Run 'pcae init' first.", file=_sys.stderr)
+            return 1
+        raise

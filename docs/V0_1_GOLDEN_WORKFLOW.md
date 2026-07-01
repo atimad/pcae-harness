@@ -28,9 +28,15 @@ commands or product behavior are added in this phase.
   `PCAE_TELEGRAM_ENABLED`, `PCAE_NOTIFY_ENABLED`, `PCAE_NOTIFY_SINKS`).
   Telegram is entirely optional — every step below works with it unset.
 
-Clean-install validation from a fresh checkout is **not** performed in
-this phase; it is the explicit subject of the recommended next phase
-(106D — Packaging / Installation / Clean-Smoke Test).
+Clean-install validation from a fresh checkout was performed in Phase
+106D (editable install, non-editable install, and built sdist/wheel, all
+in throwaway virtual environments) — see
+`docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md` and
+`docs/V0_1_CLEAN_SMOKE_TEST.md` for the exact commands and results. Two
+packaging defects found during that validation are fixed as of 106D:
+`pcae health`/`pcae check` now fail cleanly (not with a crash) outside a
+git repository, and the built sdist no longer includes local `.claude`/
+`.pcae` state.
 
 ## Environment Setup
 
@@ -275,6 +281,8 @@ anticipated or reserved for in this document.
 
 ## Recommended Next Phase
 
-106D — Packaging / Installation / Clean-Smoke Test. Validate installation/
-packaging and run this golden workflow from a genuinely clean checkout
-before cutting a v0.1 release candidate.
+106D — Packaging / Installation / Clean-Smoke Test — **complete**. See
+`docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md`.
+
+106E — v0.1 Release Candidate (recommended next). Prepare the release
+candidate with a final checklist, release notes, and tag-readiness review.
