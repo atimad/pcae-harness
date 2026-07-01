@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 106H: v0.1 RC Audit Findings Repair (20260702-0121-phase-106h-v0-1-rc-audit-findings-repair)
 - Sync final pushed-state metadata for 106G (20260702-0109-sync-final-pushed-state-metadata-for-106g)
 - Phase 106G: v0.1 Post-RC System Inspection / Lifecycle Connectivity Audit (20260702-0054-phase-106g-v0-1-post-rc-system-inspection-lifecycle-connectivity-audit)
 - Sync final pushed-state metadata for 106F (20260702-0038-sync-final-pushed-state-metadata-for-106f)

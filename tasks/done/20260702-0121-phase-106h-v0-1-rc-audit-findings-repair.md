@@ -10,7 +10,7 @@ Phase 106H: v0.1 RC Audit Findings Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -36,6 +36,8 @@ Repair the trust-gate asymmetry between pcae task finish --commit and pcae phase
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
