@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Post-99B session finalization (20260701-0919-post-99b-session-finalization)
 - 99B finalization commit (20260701-0919-99b-finalization-commit)
 - Final 99B cleanup (20260701-0918-final-99b-cleanup)
 - Post-99B task cleanup (20260701-0918-post-99b-task-cleanup)
