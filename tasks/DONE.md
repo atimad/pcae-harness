@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 106C (20260701-2314-sync-final-pushed-state-metadata-for-106c)
 - Phase 106C — Golden Workflow Stabilization (20260701-2301-phase-106c-golden-workflow-stabilization)
 - Sync final pushed-state metadata for 106B (20260701-2246-sync-final-pushed-state-metadata-for-106b)
 - Phase 106B — Release-Critical Warning / Fast-Green Triage (20260701-2229-phase-106b-release-critical-warning-fast-green-triage)
