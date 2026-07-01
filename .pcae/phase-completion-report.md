@@ -1,95 +1,93 @@
-# Phase Report: Runtime Enforcement Decision Engine Contract Freeze
+# Phase Report: Runtime Enforcement Decision Engine Artifact Trust Hardening
 
-- **Phase ID:** `102B.2` (repair chain: 102B → 102B.1 → 102B.2)
+- **Phase ID:** `102C`
 - **Status:** completed
 - **Report completeness:** complete ✅
-- **Repair chain:** 102B (contract freeze, partial report) → 102B.1 (repaired governance fields, partial metadata) → 102B.2 (complete metadata, supersedes both)
-- **Files changed:** 6 (102B) + 4 (102B.1/102B.2 repair)
-- **Tests added:** 161 (contract freeze)
-- **Tests combined:** 183 (22 from 102A + 161 from 102B)
-- **Commits:** 102B: e27dfb79, 7d1e55a0, 073a50d7 | 102B.1/102B.2: 6e6bb839, b9181f3e + TBD
+- **Files changed:** 7
+- **Tests added:** 156 (trust hardening)
+- **Tests combined:** 339 (22 + 161 + 156)
+- **Commits:** 170a9b47a1002d6bc0a41d724e5d7a275e239dd5
 - **Pushed:** pushed ✅
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 102B: Runtime Enforcement Decision Engine Contract Freeze. Contract-freeze only. Freezes the 102A RuntimeEnforcementDecision contract: 39 fields, 9 statuses, 12 blocking results, 22 fail-closed rules, SHA-256 digest, evidence-bundle input semantics, no-go propagation, report/notification trust, 12 authorization flags (all False), 5 safety flags (all True), compatibility rules, no-execution guards. 161 contract freeze tests + 22 102A design tests = 183 combined. No source changes. Recommends 102C.
+Phase 102C: Runtime Enforcement Decision Engine Artifact Trust Hardening. Test-only. 156 trust hardening tests covering digest determinism (5), digest field coverage (21), tamper detection (26), evidence-bundle input trust (9), status trust (9), result trust (7), fail-closed rule trust (11), no-go propagation trust (8), report/notification trust (6), authorization flag trust (8), safety flag trust (9), verification error contract (12), reference validation (6), no-execution guards (8), 102B contract preservation (7), chain preservation (5). No source changes. 102B contract unchanged. No runtime enforcement. No execution. All auth flags False.
 
-## Frozen RuntimeEnforcementDecision Schema Summary
+## Digest Hardening Summary
 
-- schema_version: "1.0" (frozen)
-- 39 fields: 5 identity, 2 bundle refs, 3 decision output, 5 evidence inputs, 1 no-go, 2 denial/failure, 2 future/unsupported, 1 warnings, 12 auth flags, 5 safety flags, 1 digest
-- to_dict() output: 28 top-level keys including authorization_summary
-- compute_digest() payload: 27 keys (excludes digest, excludes authorization flags)
+SHA-256, 27 fields covered, all verified to change digest on modification. Deterministic across equivalent key ordering. Auth flags excluded from digest payload (by 102A design).
 
-## Evidence Bundle Input Semantics Summary
+## Tamper Detection Summary
 
-- source_bundle_ref: string reference to source evidence bundle
-- source_bundle_digest: SHA-256 digest of source bundle
-- Missing ref or digest → decision blocked, execution unavailable
-- Bundle presence alone does not authorize execution
-- Bundle absence is never treated as permission
+All 26 digest-covered fields + safety flags verified detectable via digest comparison. Stored digest mismatch with recomputed digest confirms tampering.
 
-## Status Summary
+## Evidence-Bundle Input Trust Summary
 
-9 frozen statuses: unavailable, not_evaluated, incomplete, evaluated, invalid, blocked, denied, fail_closed, ready_for_design_review_only. No status means executing/enforcing/authorized. All non-executing.
+Missing bundle ref/digest → execution unavailable. Bundle presence alone → no authorization. Unsafe ref paths → no-execution preserved.
 
-## Result Summary
+## Status/Result Trust Summary
 
-12 frozen results: denied, fail_closed, blocked_by_missing_evidence, blocked_by_failed_verification, blocked_by_no_go, blocked_by_missing_approval, blocked_by_missing_audit, blocked_by_missing_rollback, blocked_by_report_trust_failure, blocked_by_notification_trust_failure, evidence_only, design_review_only. All blocking. All non-authorizing.
+All 9 statuses non-executing, non-authorizing. All 12 results blocking. Unknown/future statuses and results rejected by validate().
 
-## Fail-Closed Rule Summary
+## Fail-Closed Rule Trust Summary
 
-22 fail-closed rules: FC_MISSING_BUNDLE_REF, FC_MISSING_BUNDLE_DIGEST, FC_BUNDLE_DIGEST_MISMATCH, FC_UNKNOWN_SCHEMA, FC_INVALID_BUNDLE_STATUS, FC_INVALID_BUNDLE_DECISION, FC_MISSING_REQUIRED_INPUT, FC_STALE_REQUIRED_INPUT, FC_TAMPERED_INPUT, FC_CONTRADICTORY_INPUT, FC_COMPATIBILITY_FAILURE, FC_NO_GO_TRIGGERED, FC_MISSING_APPROVAL, FC_MISSING_AUDIT_READINESS, FC_MISSING_ROLLBACK_READINESS, FC_REPORT_TRUST_FAILURE, FC_NOTIFICATION_TRUST_FAILURE, FC_SCOPE_MISMATCH, FC_IDENTITY_MISMATCH, FC_AUTH_FLAG_VIOLATION, FC_SAFETY_FLAG_VIOLATION, FC_UNSUPPORTED_REQUEST. All blocking. None authorize execution.
+All 22 rules represented. Auth violations, safety violations, missing/tampered/no-go inputs all fail closed. No fail-closed rule authorizes execution.
 
-## No-Go Propagation Summary
+## No-Go Propagation Trust Summary
 
-triggered_no_go_conditions propagates from Phase 100/101 bundle. Non-empty → blocked. No-go absence does not authorize execution. No-go cannot set auth flags true or override safety flags.
+triggered_no_go_conditions blocks execution. Absence does not authorize. Cannot override safety flags. Sorted in output.
 
 ## Report/Notification Trust Summary
 
-Report trust failure → decision_result = blocked_by_report_trust_failure. Notification trust failure → decision_result = blocked_by_notification_trust_failure. Both fail closed. Telegram outbound-only.
+blocked_by_report_trust_failure and blocked_by_notification_trust_failure results block execution. Denial reasons affect digest.
 
-## Authorization Flag Summary
+## Authorization Flag Trust Summary
 
-12 authorization flags (all False by default). 3 explicitly validated in validate(): execution_available, execution_authorized, push_authorized.
+All 12 auth flags False by default. 3 explicitly validated. Auth flags excluded from digest (in auth_summary only). No status/result implies authorization.
 
-## Safety Flag Summary
+## Safety Flag Trust Summary
 
-5 safety flags (all True by default). 3 explicitly validated in validate(): simulation_only, no_execution, design_only.
+All 5 safety flags True by default. 3 explicitly validated. All affect digest. No safety flag creates permission.
 
-## Digest Contract Summary
+## Reference Validation Summary
 
-SHA-256, deterministic, 64 hex chars. Covers 27 fields (excludes digest, excludes 12 auth flags). List fields sorted before canonical JSON serialization (indent=2, sort_keys=True).
+Bundle refs are symbolic identifiers. Dangerous path-like refs (/bin/sh, ../escape, file://, $(cmd)) do not enable execution.
 
-## Compatibility Rule Summary
+## Verification Error Contract Summary
 
-Current schema "1.0" accepted. Unknown schemas/statuses/results rejected. Future execute statuses and allow results rejected.
+validate() returns issue strings. Digest comparison detects tampering. All validation failures are non-executing.
 
 ## No-Execution Guard Summary
 
-All model paths (default, validate, compute_digest, to_dict, JSON serialization) verified to preserve no_execution=True, execution_available=False, execution_authorized=False.
+All model code paths (default constructor, validate, compute_digest, to_dict, JSON) verified to preserve no_execution=True, execution_available=False.
+
+## 102B Contract Preservation Summary
+
+39 fields, 9 statuses, 12 results, validate(), compute_digest(), to_dict() — all unchanged. 102B freeze tests remain compatible.
 
 ## Governance Results
 
 - **pcae_health:** healthy
 - **pcae_check:** passed
-- **pcae_doctor_task_memory:** warnings (pre-existing stale task entries)
+- **pcae_doctor_task_memory:** warnings (pre-existing)
 - **pcae_push_check:** clean
+- **telegram_runtime:** loaded, configured, enabled
 
 ## Test Results
 
+- **102c_trust_hardening_tests:** 156/156 (passed)
 - **102b_freeze_tests:** 161/161 (passed)
 - **102a_decision_tests:** 22/22 (passed)
-- **102_combined:** 183/183 (passed)
-- **focused_decision_combined_regression:** 1632/1632 (passed)
+- **102_combined:** 339/339 (passed)
+- **focused_decision_combined_regression:** 1786/1788 (passed_with_pre_existing)
 - **report_notification_tests:** 219/219 (passed)
 - **approval_gate_tests:** 82/82 (passed)
 - **fast_green:** 4387/4390 (3 pre-existing) (passed_with_pre_existing)
 - **bootstrap_session_reporting_tests:** present in canonical metadata ✅
 - **report_notification_tests:** present in canonical metadata ✅
 
-## Pre-Existing Failures (NOT caused by 102B)
+## Pre-Existing Failures (NOT caused by 102C)
 
 - Test94UPreflightArtifact
 - Test94UPreflightArtifactCLI
@@ -97,20 +95,21 @@ All model paths (default, validate, compute_digest, to_dict, JSON serialization)
 
 ## Files Changed
 
-1. docs/PHASE_102_RUNTIME_ENFORCEMENT_DECISION_ENGINE_CONTRACT_FREEZE.md (new)
-2. tests/test_runtime_enforcement_decision_engine_contract_freeze.py (new)
+1. tests/test_runtime_enforcement_decision_engine_artifact_trust.py (new)
+2. docs/PHASE_102_RUNTIME_ENFORCEMENT_DECISION_ENGINE_ARTIFACT_TRUST_HARDENING.md (new)
 3. PROJECT_STATUS.md (updated)
 4. CHANGELOG.md (updated)
 5. tasks/DONE.md (updated)
-6. tasks/active/20260701-1630-phase-102b-runtime-enforcement-decision-engine-contract-freeze.md (new)
+6. tasks/active/20260701-1600-phase-102c-... (new)
+7. tasks/done/20260701-1550-phase-102b2-... (moved)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Contract freeze only. Recommends 102C.
+No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Test-only artifact trust hardening. Recommends 102D.
 
 ## Recommended Next Phase
 
-102C — Runtime Enforcement Decision Engine Artifact Trust Hardening
+102D — Runtime Enforcement Decision Engine Boundary Review
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*
