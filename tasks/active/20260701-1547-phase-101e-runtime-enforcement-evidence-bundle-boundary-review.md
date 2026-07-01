@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260701-1507-phase-101d-runtime-enforcement-evidence-bundle-artifact-trust-hardening
+20260701-1547-phase-101e-runtime-enforcement-evidence-bundle-boundary-review
 
 ## Title
 
-Phase 101D — Runtime Enforcement Evidence Bundle Artifact Trust Hardening
+Phase 101E — Runtime Enforcement Evidence Bundle Boundary Review
 
 ## Status
 
@@ -18,14 +18,11 @@ implementation
 
 ## Goal
 
-Harden artifact trust for evidence bundle. Test-only. No source changes.
+Review, validate, and document the 101A-101D evidence bundle layer. Boundary review only.
 
 ## Allowed Files
 
-- docs/PHASE_101_RUNTIME_ENFORCEMENT_EVIDENCE_BUNDLE_ARTIFACT_TRUST_HARDENING.md
-- tests/test_runtime_enforcement_evidence_bundle_artifact_trust.py
-- tests/test_runtime_enforcement_evidence_bundle_contract.py
-- tests/test_runtime_enforcement_evidence_bundle_contract_freeze.py
+- docs/PHASE_101_RUNTIME_ENFORCEMENT_EVIDENCE_BUNDLE_BOUNDARY_REVIEW.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
@@ -41,8 +38,6 @@ Harden artifact trust for evidence bundle. Test-only. No source changes.
 
 ## Allowed Zones
 
-- core
-- tests
 - docs
 - tasks
 - config
@@ -69,7 +64,7 @@ advisory
 
 ## Acceptance Criteria
 
-- All trust hardening tests pass
+- Boundary review complete
 
 ## Acceptance Checks
 
@@ -81,4 +76,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-01T15:07:54.735694+02:00
+2026-07-01T15:47:15.313631+02:00

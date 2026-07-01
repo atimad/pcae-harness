@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 101D — Runtime Enforcement Evidence Bundle Artifact Trust Hardening (20260701-1507-phase-101d-runtime-enforcement-evidence-bundle-artifact-trust-hardening)
 - Phase 101C — Runtime Enforcement Evidence Bundle Contract Freeze (20260701-1417-phase-101c-runtime-enforcement-evidence-bundle-contract-freeze)
 - Phase 101B — Runtime Enforcement Evidence Bundle Contract Design (20260701-1405-phase-101b-runtime-enforcement-evidence-bundle-contract-design)
 - Phase 101A — Runtime Enforcement Readiness Architecture Design (20260701-1330-phase-101a-runtime-enforcement-readiness-architecture-design)
