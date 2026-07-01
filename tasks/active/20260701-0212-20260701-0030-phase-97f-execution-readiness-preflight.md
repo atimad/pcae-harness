@@ -6,7 +6,7 @@
 
 ## Title
 
-20260701-0030-phase-97f-execution-readiness-preflight
+Phase 97G — Execution Readiness Preflight Contract Freeze
 
 ## Status
 
@@ -33,7 +33,9 @@ implementation
 - src/pcae/commands/agent.py
 - src/pcae/core/backend_invocations.py
 - docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_DRY_RUN.md
+- docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_CONTRACT_FREEZE.md
 - tests/test_execution_readiness_preflight.py
+- tests/test_execution_readiness_preflight_contract.py
 - .pcae/phase-completion-metadata.json
 - .pcae/execution-readiness-preflight/**
 - .pcae/handoffs/**

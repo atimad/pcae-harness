@@ -2,6 +2,23 @@
 
 ## Current Phase
 
+Phase 97G — Execution Readiness Preflight Contract Freeze (completed).
+
+Freezes the 97F execution readiness preflight contract. 72 contract-freeze
+tests assert structural stability of: 28 top-level JSON fields, 12 authorization
+flags (all False), 10 preflight statuses, 29 no-go conditions, 10 evidence
+categories, SHA-256 digest behavior, CLI contract (preflight/show/verify),
+latest/show/verify semantics, and compatibility rules.
+
+No source changes — contract frozen as-is from 97F implementation.
+Total: 135 preflight tests (63 97F + 72 97G).
+
+Design document: docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_CONTRACT_FREEZE.md.
+Contract tests: tests/test_execution_readiness_preflight_contract.py.
+
+All 12 authorization flags remain False. Execution remains unavailable.
+Recommends 97H — Execution Readiness Preflight Artifact Trust Hardening.
+
 Phase 97F — Execution Readiness Preflight Dry-Run (completed). Implementation.
 
 Implements a non-executing execution readiness preflight dry-run that combines
