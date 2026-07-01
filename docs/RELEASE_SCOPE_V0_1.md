@@ -232,37 +232,45 @@ autonomous coding; or able to grant execution authorization of any kind.
   `pcae_push_check`) to already say "pushed" (105D design decision, to
   avoid deadlocking the normal task-finish-then-push sequence) — it only
   checks report *content* completeness.
-- 3 pre-existing fast-green failures remain unfixed (see Release Blockers).
+- **(106B, resolved)** The 3 previously-known fast-green failures were
+  triaged and fixed in Phase 106B — see
+  `docs/PHASE_106_RELEASE_CRITICAL_WARNING_FAST_GREEN_TRIAGE.md`. Fast-green
+  is now fully green (4390/4390). This bullet is retained as a record of a
+  limitation that existed at 106A and no longer exists.
 
 ## Release Blockers
 
 | Item | Classification |
 |---|---|
-| 3 pre-existing fast-green failures (`Test94UPreflightArtifact`, `Test94UPreflightArtifactCLI`, `TestBackendShow`) | **Must document before v0.1** (triage/fix recommended for 106B, not blocking scope freeze itself) |
+| 3 fast-green failures (`Test94UPreflightArtifact`, `Test94UPreflightArtifactCLI`, `TestBackendShow`) | **Resolved (106B)** — root-caused and fixed; fast-green is fully green |
 | `pcae_doctor_task_memory` state | Currently **clean** — no blocker |
 | Install/packaging state (no `pip install pcae` / PyPI artifact verified in this phase) | **Must document before v0.1** — installation is `docs/INSTALLATION.md` source-checkout based; not validated as a clean-install smoke test in this phase |
 | README/ROADMAP staleness (test counts, phase counts) | **Must document before v0.1**; recommend fixing before public release, not blocking internal scope freeze |
-| Golden workflow not independently smoke-tested end-to-end as a single scripted run (only exercised command-by-command in this phase) | **Must document before v0.1** — recommend a dedicated smoke-test phase (candidate: 106C) |
+| Golden workflow not independently smoke-tested end-to-end as a single scripted run (only exercised command-by-command as of 106A) | **Must document before v0.1** — recommend a dedicated smoke-test phase (candidate: 106C) |
 | Telegram configuration reliance (`~/.config/pcae/telegram.env`, user-specific, not part of the repo) | **Must document before v0.1** — Telegram is optional; golden workflow must work with it entirely unset |
 | Hard-fail coverage is `pcae phase complete` + `pcae push check` only; `pcae task finish --commit` remains warning-only pre-push by design (105C.1/105D) | Not a blocker — documented, intentional design |
-| No release-grade "zero hidden failures" test run performed (fast-green has 3 known failures) | **Must document before v0.1**; do not claim full green |
+| Release-grade "zero hidden failures" test run | **Resolved (106B)** — fast-green now has zero known failures |
 
-Nothing above is classified **must fix before v0.1** in this phase — 106A
-is scope freeze, not remediation. 106B (recommended next) should re-triage
-the fast-green failures specifically and decide fix-vs-document-permanently.
+As of 106B, nothing remains classified **must fix before v0.1** beyond
+what's already resolved. 106C (recommended next) should scripted-smoke-test
+the golden workflow end-to-end.
 
-## Validation Baseline (as of 106A)
+## Validation Baseline (as of 106B)
 
 | Check | Result |
 |---|---|
+| 106B fast-green failure repro/fix | 22/22 passed (all 3 known failures now pass) |
+| Focused release-triage tests | see `tests/test_release_critical_triage_v0_1.py` |
+| `test_backend_invocations.py` full suite | 761/761 passed |
+| `test_backend_cli.py` full suite | 307/307 passed |
 | 105D trust hard-fail tests | 29/29 passed |
 | `test_phase.py` full suite | 886/886 passed |
 | Focused hard-fail/push-check tests | 360/360 passed |
-| Push-check/task lifecycle regression | 472/472 passed |
+| Push-check/task lifecycle regression | 404/404 passed |
 | `report_notification_tests` | 219/219 passed |
 | `bootstrap_session_reporting_tests` | present_in_canonical_metadata |
 | Combined regression (preflight/artifact/trust/contract/readiness/boundary/attempt/no_go/runtime_enforcement/evidence_bundle/decision/coordinator) | 2220/2220 passed |
-| Fast-green | 4387/4390 (3 pre-existing: `Test94UPreflightArtifact`, `Test94UPreflightArtifactCLI`, `TestBackendShow`) |
+| Fast-green | **4390/4390 — fully green, no known failures** |
 | `pcae health` | healthy |
 | `pcae check` | passed |
 | `pcae doctor task-memory` | clean |
@@ -275,7 +283,7 @@ the fast-green failures specifically and decide fix-vs-document-permanently.
 - [x] Task-finish report/notification integration (105C/105C.1)
 - [x] Hard-fail trust gates for `phase complete` / `push check` (105D)
 - [x] v0.1 scope frozen in writing (this document)
-- [ ] Fast-green 3 pre-existing failures triaged (106B)
+- [x] Fast-green fully green, 3 known failures fixed (106B)
 - [ ] Golden workflow scripted end-to-end smoke test (candidate: 106C)
 - [ ] README.md / ROADMAP.md brought current with actual state
 - [ ] Clean-install validation performed
@@ -314,10 +322,12 @@ design → implementation → freeze → hardening → review passes for:
 
 ## Recommended Next Phases
 
-**106B — Release-Critical Warning / Fast-Green Triage.** Classify or fix
-the 3 pre-existing fast-green failures and confirm task-memory remains
-clean before golden-workflow smoke-testing and packaging work.
+**106B — Release-Critical Warning / Fast-Green Triage — complete.** The 3
+fast-green failures were root-caused and fixed (fast-green now 4390/4390);
+`pcae doctor task-memory` confirmed clean. See
+`docs/PHASE_106_RELEASE_CRITICAL_WARNING_FAST_GREEN_TRIAGE.md`.
 
-Beyond 106B: a golden-workflow smoke-test phase (candidate 106C) and a
+**106C — Golden Workflow Stabilization** (recommended next). Script and
+smoke-test the v0.1 golden workflow end-to-end, followed by a
 documentation-accuracy pass (README/ROADMAP reconciliation) before any
 v0.1 tag is cut.

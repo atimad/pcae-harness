@@ -83,8 +83,18 @@ class TestBackendPlan:
 
 
 class TestBackendShow:
-    def test_show_missing_artifacts(self):
-        r = _run(["show", "--latest"])
+    def test_show_missing_artifacts(self, tmp_path):
+        # Phase 106B: run in an isolated cwd, not REPO_ROOT. `_run()`'s
+        # cwd=REPO_ROOT is shared with tests that legitimately dogfog real
+        # backend invocations against this repo's own .pcae/ state; a
+        # long-lived local checkout accumulates real (gitignored) artifacts
+        # there over time, which made this "no artifacts" assumption false
+        # in this specific working tree while still holding on a fresh
+        # clone/CI checkout. Isolating this test removes that dependency.
+        r = subprocess.run(
+            [sys.executable, "-m", "pcae", "backend", "show", "--latest"],
+            capture_output=True, text=True, cwd=tmp_path, timeout=15,
+        )
         assert r.returncode != 0
 
     def test_show_no_secrets_in_output(self):

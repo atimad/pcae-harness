@@ -57,7 +57,9 @@ def test_lists_supported_golden_workflow(doc_text):
 
 def test_includes_validation_baseline(doc_text):
     assert "## Validation Baseline" in doc_text
-    assert "4387/4390" in doc_text
+    # Phase 106B fixed the 3 known fast-green failures; the baseline now
+    # reflects a fully-green fast-green run rather than 4387/4390.
+    assert "4390/4390" in doc_text
 
 
 def test_includes_three_pre_existing_fast_green_failures(doc_text):

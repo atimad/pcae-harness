@@ -3343,7 +3343,16 @@ PREFLIGHT_DISABLED = "disabled"
 PREFLIGHT_UNSUPPORTED = "unsupported"
 PREFLIGHT_NEEDS_HUMAN_REVIEW = "needs_human_review"
 
-VALID_PREFLIGHT_STATUSES: frozenset[str] = frozenset({
+# Phase 106B: renamed from VALID_PREFLIGHT_STATUSES, which collided at
+# module scope with an unrelated, later-defined VALID_PREFLIGHT_STATUSES
+# (see below in this file). Since both were referenced only as module
+# globals, the later definition silently shadowed this one at runtime,
+# so BackendAdapterPreflightResult.validate() and
+# verify_backend_adapter_preflight_artifact() were validating against the
+# wrong status set — any adapter preflight result created here (which
+# only ever produces PREFLIGHT_READY et al.) was flagged as
+# "unknown preflight status: 'ready'".
+VALID_ADAPTER_PREFLIGHT_STATUSES: frozenset[str] = frozenset({
     PREFLIGHT_READY, PREFLIGHT_BLOCKED, PREFLIGHT_MISSING_EVIDENCE,
     PREFLIGHT_DISABLED, PREFLIGHT_UNSUPPORTED, PREFLIGHT_NEEDS_HUMAN_REVIEW,
 })
@@ -3536,7 +3545,7 @@ class BackendAdapterPreflightResult:
         issues: list[str] = []
         if not self.preflight_id:
             issues.append("preflight_id is required")
-        if self.status not in VALID_PREFLIGHT_STATUSES:
+        if self.status not in VALID_ADAPTER_PREFLIGHT_STATUSES:
             issues.append(f"invalid status: {self.status!r}")
         if self.bypass_permissions_detected:
             issues.append("bypass_permissions_detected: invocation not safe")
@@ -4374,7 +4383,7 @@ def verify_backend_adapter_preflight_artifact(
         issues.append("missing adapter_id")
     if not artifact.backend_type:
         issues.append("missing backend_type")
-    if artifact.status not in VALID_PREFLIGHT_STATUSES and artifact.status:
+    if artifact.status not in VALID_ADAPTER_PREFLIGHT_STATUSES and artifact.status:
         issues.append(f"unknown preflight status: {artifact.status!r}")
     if artifact.ready and artifact.hard_blocks:
         issues.append("ready=True with hard_blocks present")
