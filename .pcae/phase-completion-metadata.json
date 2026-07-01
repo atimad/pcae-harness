@@ -1,12 +1,12 @@
 {
-    "phase_id": "104C", "phase_name": "phase_104c_shared_safety_authorization_contract_design", "phase_title": "Runtime Enforcement Shared Safety/Authorization Contract Design",
-    "files_changed_count": 8, "tests_added_or_updated": "23 tests added",
-    "phase_commits": [{"hash": "e73211dd4579241250e096647532754a3e3fb268", "message": "Design shared runtime enforcement safety authorization contract"}],
+    "phase_id": "104D", "phase_name": "phase_104d_report_trust_automation_gap_closure_design", "phase_title": "Runtime Enforcement Report Trust Automation Gap Closure Design",
+    "files_changed_count": 7, "tests_added_or_updated": "22 tests added",
+    "phase_commits": [{"hash": "7f55e585888195d2bc7fa353e78bbc26ccd215ae", "message": "Design phase report trust automation gap closure"}],
     "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
-    "shared_constants_module": "src/pcae/core/runtime_enforcement_safety_authorization.py",
-    "consolidation": {"auth_flags": 12, "safety_flags": 5, "re_nogo_mappings": 17, "duplication_addressed": "21 test files + 3 models → 1 shared module"},
+    "consolidation_mini_track": {"104B": "no-go registry", "104C": "shared safety/auth", "104D": "report-trust automation"},
+    "mandatory_schema": {"fields": 16, "disallowed_placeholders": ["TBD", "pending", "not captured"], "models": ["selection", "validation", "repair"]},
     "validation_results": [
-        {"name": "104c_shared_contract_tests", "result": "23/23", "status": "passed"},
+        {"name": "104d_report_trust_design_tests", "result": "22/22", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
         {"name": "fast_green", "result": "4387/4390 (3 pre-existing)", "status": "passed_with_pre_existing"}
@@ -27,6 +27,6 @@
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Shared contract design. Recommends 104D.",
-    "recommended_next_phase": "104D — Runtime Enforcement Report Trust Automation Gap Closure Design"
+    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Report-trust automation design. Recommends 104E.",
+    "recommended_next_phase": "104E — Runtime Enforcement Consolidation Milestone Summary / Transition Planning"
 }
