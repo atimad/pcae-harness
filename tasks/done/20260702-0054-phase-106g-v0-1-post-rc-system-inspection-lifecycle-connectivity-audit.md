@@ -10,7 +10,7 @@ Phase 106G: v0.1 Post-RC System Inspection / Lifecycle Connectivity Audit
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -29,6 +29,8 @@ Audit v0.1.0-rc1 lifecycle connectivity: bootstrap commands, task/phase/report t
 - tasks/DONE.md
 - docs/V0_1_GOLDEN_WORKFLOW.md
 - docs/RELEASE_HANDOFF_V0_1_RC1.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
