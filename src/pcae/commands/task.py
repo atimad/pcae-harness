@@ -516,9 +516,14 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
 
     from pcae.core.phase_report_trust import (
         adapt_report_for_trust_check,
+        apply_old_schema_gate,
         validate_phase_report_trust,
     )
-    from pcae.core.phase_reports import finalize_phase_report, read_latest_report
+    from pcae.core.phase_reports import (
+        finalize_phase_report,
+        read_latest_report,
+        validate_finalization_gate,
+    )
 
     meta_path = _Path(".pcae/phase-completion-metadata.json")
     if not meta_path.exists():
@@ -665,10 +670,29 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
     trial_report.metadata["commit_attribution"] = commit_attribution
     _apply_canonical_and_trust(trial_report, phase_id, phase_name, status)
 
+    # Phase 106H — fold in the OLD (95M.1) schema's full finalization gate
+    # (files_changed>0, no-go confirmation count, etc.), the same check
+    # `pcae phase complete` has required since Phase 105D. Without this,
+    # `dispatch_allowed` below would only reflect the 105A/105B schema plus
+    # push-state fields, and could dispatch a report `phase complete` would
+    # correctly refuse (the asymmetry found in Phase 106G's audit).
+    gate = validate_finalization_gate(
+        phase_id=phase_id,
+        report=trial_report,
+        metadata=meta,
+        pushed_status=pushed_status,
+        origin_main_head_count=origin_count,
+        governance_results=governance_results,
+        test_results=test_results,
+        no_go_confirmations=no_go_list,
+        recommended_next_phase=recommended_next,
+        commit_attribution=commit_attribution,
+    )
     trial_trust = validate_phase_report_trust(
         adapt_report_for_trust_check(trial_report.to_dict())
     )
     _apply_push_state_gate(trial_trust, trial_report)
+    apply_old_schema_gate(trial_trust, gate)
     dispatch_allowed = trial_trust.complete
 
     # Suppress dispatch (but still finalize/write the report) when the
@@ -717,6 +741,23 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
         adapt_report_for_trust_check(report.to_dict())
     ) if report else validate_phase_report_trust({})
     _apply_push_state_gate(trust_result, report)
+    if report is not None:
+        # Phase 106H — same OLD-schema gate fold-in as the trial-report
+        # check above, applied here to the persisted report so the
+        # returned/printed "trust" status matches the dispatch decision.
+        final_gate = validate_finalization_gate(
+            phase_id=phase_id,
+            report=report,
+            metadata=meta,
+            pushed_status=pushed_status,
+            origin_main_head_count=origin_count,
+            governance_results=governance_results,
+            test_results=test_results,
+            no_go_confirmations=no_go_list,
+            recommended_next_phase=recommended_next,
+            commit_attribution=commit_attribution,
+        )
+        apply_old_schema_gate(trust_result, final_gate)
 
     result = {
         "status": "finalized",

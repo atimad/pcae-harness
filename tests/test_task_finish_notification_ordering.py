@@ -65,6 +65,7 @@ def _write_metadata(tmp_path: Path, **overrides) -> dict:
             "No network. No Telegram inbound. No apply. No commit authorization. "
             "No push authorization. No rollback. No adapter execution."
         ),
+        "commit_attribution": "phase_owned",
         "pushed_status": "pushed",
         "origin_main_head_count": 0,
         "recommended_next_phase": "205C2 — Next Phase",

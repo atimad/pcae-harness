@@ -339,6 +339,40 @@ def apply_push_state_gate(
     )
 
 
+def apply_old_schema_gate(
+    trust_result: PhaseReportTrustResult,
+    gate: Mapping[str, Any] | None,
+) -> None:
+    """Downgrade a trust result to incomplete when the OLD (95M.1)
+    finalization gate (`core.phase_reports.validate_finalization_gate`)
+    found blockers the 105A/105B schema alone does not catch — e.g.
+    `files_changed<=0`, an insufficient no-go confirmation count.
+
+    Phase 106H: closes the `pcae task finish --commit` /
+    `pcae phase complete` trust-gate asymmetry found in Phase 106G's
+    audit, by giving both call sites a single shared function to fold the
+    OLD schema's full completeness check into the 105A/105B result, the
+    same way `apply_push_state_gate` already folds in push-state fields.
+    Mutates `trust_result` in place. No-op if `gate` is None or the gate
+    is already finalizable.
+    """
+    if not gate or gate.get("finalizable", True):
+        return
+    blockers = [str(b) for b in gate.get("blockers", [])]
+    trust_result.missing_fields = sorted(
+        set(trust_result.missing_fields) | {f"old_schema_gate: {b}" for b in blockers}
+    )
+    trust_result.complete = False
+    trust_result.can_be_active_latest = False
+    trust_result.repair_required = True
+    if trust_result.status == COMPLETENESS_COMPLETE:
+        trust_result.status = COMPLETENESS_PARTIAL
+    trust_result.summary = (
+        f"Report is PARTIAL: OLD (95M.1) finalization gate found "
+        f"{len(blockers)} blocker(s). Repair required."
+    )
+
+
 def compute_final_trust(
     report: Mapping[str, Any],
     *,

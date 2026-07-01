@@ -186,7 +186,7 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
         make_phase_report,
         validate_finalization_gate,
     )
-    from pcae.core.phase_report_trust import compute_final_trust
+    from pcae.core.phase_report_trust import apply_old_schema_gate, compute_final_trust
 
     trial_report = make_phase_report(
         phase_id=phase_id,
@@ -221,13 +221,20 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     trust_result = compute_final_trust(
         trial_report.to_dict(), old_schema_missing_fields=trial_report.missing_trust_fields,
     )
+    # Phase 106H — fold `gate` into `trust_result` via the same shared
+    # helper `pcae task finish --commit` now uses, instead of a separate
+    # boolean AND. Behaviorally identical (below), but removes the
+    # possibility of the two commands' combination logic drifting apart
+    # again, which is what caused the asymmetry found in Phase 106G's
+    # audit. (The two schemas can disagree: e.g. `files_changed=0` is a
+    # valid non-empty int under 105A/105B's presence check, but the OLD
+    # schema's `assess_completeness()` treats `<=0` as missing.)
+    apply_old_schema_gate(trust_result, gate)
 
     # Dispatch is suppressed whenever EITHER trust schema is incomplete,
     # regardless of --allow-partial-report — a partial report is never sent
-    # as final. (The two schemas can disagree: e.g. files_changed=0 is a
-    # valid non-empty int under 105A/105B's presence check, but the OLD
-    # schema's `assess_completeness()` treats <=0 as missing.)
-    dispatch_allowed = gate["finalizable"] and trust_result.complete
+    # as final.
+    dispatch_allowed = trust_result.complete
     # Command hard-fails (nonzero exit) unless explicitly overridden.
     finalizable = dispatch_allowed or allow_partial_report
 
