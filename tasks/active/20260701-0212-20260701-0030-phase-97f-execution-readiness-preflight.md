@@ -45,6 +45,8 @@ implementation
 - tests/test_governed_execution_preflight_prototype.py
 - tests/test_governed_execution_preflight_contract.py
 - docs/PHASE_98_GOVERNED_EXECUTION_PREFLIGHT_CONTRACT_FREEZE.md
+- docs/PHASE_98_GOVERNED_EXECUTION_PREFLIGHT_ARTIFACT_TRUST_HARDENING.md
+- tests/test_governed_execution_preflight_artifact_trust.py
 - .pcae/phase-completion-metadata.json
 - .pcae/execution-readiness-preflight/**
 - .pcae/handoffs/**
