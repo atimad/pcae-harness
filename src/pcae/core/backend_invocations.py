@@ -10056,3 +10056,200 @@ class RuntimeEnforcementEvidenceBundle:
             "design_only": self.design_only,
             "digest": self.digest,
         }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# RuntimeEnforcementDecision — design-only, non-executing, non-authorizing
+# Phase 102A — Runtime Enforcement Decision Engine Contract Design
+# ═══════════════════════════════════════════════════════════════════════════
+
+_RED_SCHEMA_VERSION = "1.0"
+
+RED_STATUS_UNAVAILABLE = "unavailable"
+RED_STATUS_NOT_EVALUATED = "not_evaluated"
+RED_STATUS_INCOMPLETE = "incomplete"
+RED_STATUS_EVALUATED = "evaluated"
+RED_STATUS_INVALID = "invalid"
+RED_STATUS_BLOCKED = "blocked"
+RED_STATUS_DENIED = "denied"
+RED_STATUS_FAIL_CLOSED = "fail_closed"
+RED_STATUS_DESIGN_REVIEW = "ready_for_design_review_only"
+
+VALID_RED_STATUSES: frozenset[str] = frozenset({
+    RED_STATUS_UNAVAILABLE, RED_STATUS_NOT_EVALUATED, RED_STATUS_INCOMPLETE,
+    RED_STATUS_EVALUATED, RED_STATUS_INVALID, RED_STATUS_BLOCKED,
+    RED_STATUS_DENIED, RED_STATUS_FAIL_CLOSED, RED_STATUS_DESIGN_REVIEW,
+})
+
+RED_RESULT_DENIED = "denied"
+RED_RESULT_FAIL_CLOSED = "fail_closed"
+RED_RESULT_BLOCKED_MISSING_EVIDENCE = "blocked_by_missing_evidence"
+RED_RESULT_BLOCKED_VERIFICATION = "blocked_by_failed_verification"
+RED_RESULT_BLOCKED_NO_GO = "blocked_by_no_go"
+RED_RESULT_BLOCKED_APPROVAL = "blocked_by_missing_approval"
+RED_RESULT_BLOCKED_AUDIT = "blocked_by_missing_audit"
+RED_RESULT_BLOCKED_ROLLBACK = "blocked_by_missing_rollback"
+RED_RESULT_BLOCKED_REPORT_TRUST = "blocked_by_report_trust_failure"
+RED_RESULT_BLOCKED_NOTIFICATION_TRUST = "blocked_by_notification_trust_failure"
+RED_RESULT_EVIDENCE_ONLY = "evidence_only"
+RED_RESULT_DESIGN_REVIEW = "design_review_only"
+
+VALID_RED_RESULTS: frozenset[str] = frozenset({
+    RED_RESULT_DENIED, RED_RESULT_FAIL_CLOSED,
+    RED_RESULT_BLOCKED_MISSING_EVIDENCE, RED_RESULT_BLOCKED_VERIFICATION,
+    RED_RESULT_BLOCKED_NO_GO, RED_RESULT_BLOCKED_APPROVAL,
+    RED_RESULT_BLOCKED_AUDIT, RED_RESULT_BLOCKED_ROLLBACK,
+    RED_RESULT_BLOCKED_REPORT_TRUST, RED_RESULT_BLOCKED_NOTIFICATION_TRUST,
+    RED_RESULT_EVIDENCE_ONLY, RED_RESULT_DESIGN_REVIEW,
+})
+
+
+@dataclass
+class RuntimeEnforcementDecision:
+    """Design-only model for a future runtime enforcement decision.
+
+    Non-executing, non-authorizing, evidence-only. Evaluates an evidence bundle
+    and produces a decision artifact. Does not enforce.
+    """
+
+    schema_version: str = _RED_SCHEMA_VERSION
+    decision_engine_id: str = ""
+    phase_id: str = "102A"
+    task_id: str = ""
+    generated_at_utc: str = ""
+
+    source_bundle_ref: str = ""
+    source_bundle_digest: str = ""
+    decision_status: str = RED_STATUS_NOT_EVALUATED
+    decision_result: str = RED_RESULT_DENIED
+    decision_reason: str = ""
+
+    evaluated_inputs: list[str] = field(default_factory=list)
+    missing_inputs: list[str] = field(default_factory=list)
+    stale_inputs: list[str] = field(default_factory=list)
+    tampered_inputs: list[str] = field(default_factory=list)
+    contradictory_inputs: list[str] = field(default_factory=list)
+    triggered_no_go_conditions: list[str] = field(default_factory=list)
+    denial_reasons: list[str] = field(default_factory=list)
+    fail_closed_reasons: list[str] = field(default_factory=list)
+    future_only_decisions: list[str] = field(default_factory=list)
+    unsupported_requests: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    execution_available: bool = False
+    execution_authorized: bool = False
+    backend_invocation_authorized: bool = False
+    adapter_execution_authorized: bool = False
+    network_authorized: bool = False
+    subprocess_authorized: bool = False
+    shell_authorized: bool = False
+    mutation_authorized: bool = False
+    apply_authorized: bool = False
+    rollback_authorized: bool = False
+    commit_authorized: bool = False
+    push_authorized: bool = False
+
+    simulation_only: bool = True
+    no_execution: bool = True
+    evidence_only: bool = True
+    non_authorizing: bool = True
+    design_only: bool = True
+
+    digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if self.schema_version != _RED_SCHEMA_VERSION:
+            issues.append(f"unknown schema_version: {self.schema_version!r}")
+        if self.decision_status not in VALID_RED_STATUSES:
+            issues.append(f"invalid decision_status: {self.decision_status!r}")
+        if self.decision_result not in VALID_RED_RESULTS:
+            issues.append(f"invalid decision_result: {self.decision_result!r}")
+        if self.execution_available:
+            issues.append("execution_available must be False")
+        if self.execution_authorized:
+            issues.append("execution_authorized must be False")
+        if self.push_authorized:
+            issues.append("push_authorized must be False")
+        if not self.simulation_only:
+            issues.append("simulation_only must be True")
+        if not self.no_execution:
+            issues.append("no_execution must be True")
+        if not self.design_only:
+            issues.append("design_only must be True")
+        return issues
+
+    def compute_digest(self) -> str:
+        payload = {
+            "schema_version": self.schema_version,
+            "decision_engine_id": self.decision_engine_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "source_bundle_ref": self.source_bundle_ref,
+            "source_bundle_digest": self.source_bundle_digest,
+            "decision_status": self.decision_status,
+            "decision_result": self.decision_result,
+            "decision_reason": self.decision_reason,
+            "evaluated_inputs": sorted(self.evaluated_inputs),
+            "missing_inputs": sorted(self.missing_inputs),
+            "stale_inputs": sorted(self.stale_inputs),
+            "tampered_inputs": sorted(self.tampered_inputs),
+            "contradictory_inputs": sorted(self.contradictory_inputs),
+            "triggered_no_go_conditions": sorted(self.triggered_no_go_conditions),
+            "denial_reasons": sorted(self.denial_reasons),
+            "fail_closed_reasons": sorted(self.fail_closed_reasons),
+            "future_only_decisions": sorted(self.future_only_decisions),
+            "unsupported_requests": sorted(self.unsupported_requests),
+            "warnings": sorted(self.warnings),
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+        }
+        canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "decision_engine_id": self.decision_engine_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "source_bundle_ref": self.source_bundle_ref,
+            "source_bundle_digest": self.source_bundle_digest,
+            "decision_status": self.decision_status,
+            "decision_result": self.decision_result,
+            "decision_reason": self.decision_reason,
+            "evaluated_inputs": sorted(self.evaluated_inputs),
+            "missing_inputs": sorted(self.missing_inputs),
+            "stale_inputs": sorted(self.stale_inputs),
+            "tampered_inputs": sorted(self.tampered_inputs),
+            "contradictory_inputs": sorted(self.contradictory_inputs),
+            "triggered_no_go_conditions": sorted(self.triggered_no_go_conditions),
+            "denial_reasons": sorted(self.denial_reasons),
+            "fail_closed_reasons": sorted(self.fail_closed_reasons),
+            "future_only_decisions": sorted(self.future_only_decisions),
+            "unsupported_requests": sorted(self.unsupported_requests),
+            "warnings": sorted(self.warnings),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+            "digest": self.digest,
+        }
