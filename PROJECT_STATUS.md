@@ -2,6 +2,15 @@
 
 ## Current Phase
 
+Phase 98B — Governed Execution Preflight Contract Freeze (completed).
+
+Contract-freeze only. 50 tests asserting structural stability of 34 JSON fields,
+9 statuses, 8 valid + 8 future-only decisions, SHA-256 digest, CLI contract,
+latest/show/verify semantics, and compatibility rules. No source changes — contract
+frozen as-is from 98A. 75 prototype tests total. All 12 auth flags remain False.
+
+Recommends 98C — Governed Execution Preflight Artifact Trust Hardening.
+
 Phase 98A — First Governed Execution Preflight Prototype (completed).
 
 Prototypes the first governed execution preflight workflow consuming Phase 97
