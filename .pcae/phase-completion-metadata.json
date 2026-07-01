@@ -4,10 +4,10 @@
     "summary": "Validated PCAE v0.1 packaging/install readiness: editable install, non-editable local install, and python -m build (sdist+wheel) all succeeded in throwaway venvs. Fixed 2 release-critical defects: pcae health/check crashed outside a git repo (now fails cleanly via a narrowly-scoped subprocess.CalledProcessError catch in cli.py main()); sdist swept in the entire repo by default (44,399 files incl. .claude/.pcae state), now scoped to 117 files via explicit sdist include list. Golden workflow smoke-tested against a fresh clone; Telegram confirmed safely skippable. No packaging blockers remain. 20 new tests. Recommends 106E.",
     "files_changed_count": 8, "tests_added_or_updated": "20 tests added",
     "phase_commits": [{"hash": "3d332a38e39c7c5abce55789edfefad19fb4f2c2", "message": "Validate v0.1 packaging and clean smoke test"}],
-    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "packaging_doc": "docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md",
-    "note": "This metadata intentionally reflects pre-push state (pushed_status=not_pushed) at task-finish time; pcae push check correctly passes on content completeness regardless (105D design). A corrected complete dispatch follows after pcae push. Two release-critical packaging defects found and fixed (see summary); an initial fix attempt for the git-repo crash broke 40 existing tests and was corrected before finalizing (fast-green re-confirmed 4390/4390 after correction).",
+    "note": "Corrected dispatch, sent after pcae push resolved final push state. The earlier pcae task finish --commit run for this same phase correctly reported skipped_incomplete instead of dispatching partial, and pcae push check correctly passed despite the pre-push report (both demonstrating preserved 105C.1/105D behavior). Two release-critical packaging defects found and fixed (see summary); an initial fix attempt for the git-repo crash broke 40 existing tests and was corrected before finalizing (fast-green re-confirmed 4390/4390 after correction).",
     "validation_results": [
         {"name": "packaging_smoke_tests", "result": "20/20", "status": "passed"},
         {"name": "editable_install", "result": "succeeded", "status": "passed"},
@@ -29,7 +29,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
