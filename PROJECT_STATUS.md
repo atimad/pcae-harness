@@ -2,6 +2,31 @@
 
 ## Current Phase
 
+Phase 105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration (completed).
+
+Moves PCAE from warning-only report-trust validation to hard-fail:
+`pcae phase complete` now hard-fails by default (exit 1) if the report
+trust gate is incomplete/invalid (both the OLD 95M.1 schema and the
+105A/105B schema, including the 105C.1 push-state fold), with an explicit,
+logged `--allow-partial-report` opt-out — Telegram dispatch is still
+suppressed for incomplete reports regardless of the flag. `pcae push check`
+gained a `phase_report_trust: passed/failed/skipped` gate that validates
+the latest report's CONTENT completeness (missing fields, disallowed
+placeholders) — deliberately *not* requiring pushed_status/origin_main_head/
+pcae_push_check to already say "pushed", since that would make push-check
+permanently unpassable for the normal task-finish-then-push sequence.
+`pcae task finish --commit` is unchanged: still warning-only pre-push, per
+105C.1. Promoted `apply_push_state_gate`/`PUSH_STATE_FIELDS`/
+`compute_final_trust` to `core/phase_report_trust.py` so both commands
+share one implementation. Updated 9 pre-existing `test_phase.py` fixtures
+and 3 pre-existing 105B/105C/105C.1 tests that exercised now-legitimately-
+hard-failing partial completions. 29 new tests. Non-executing,
+non-authorizing. No runtime enforcement. No execution.
+
+Recommends 106A — v0.1 Release Scope Freeze.
+
+## Phase 105C.1 Complete
+
 Phase 105C.1 — Task Finish Report Notification Ordering / Completeness Repair (completed).
 
 Repairs a real defect in 105C: `pcae task finish --commit` dispatched

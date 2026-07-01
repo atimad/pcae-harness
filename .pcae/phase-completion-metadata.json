@@ -1,19 +1,21 @@
 {
-    "phase_id": "105C.1", "phase_name": "phase_105c1_task_finish_report_notification_ordering_completeness_repair", "phase_title": "Task Finish Report Notification Ordering / Completeness Repair",
+    "phase_id": "105D", "phase_name": "phase_105d_phase_report_trust_gate_hard_fail_push_check_integration", "phase_title": "Phase Report Trust Gate Hard-Fail / Push-Check Integration",
     "status": "completed",
-    "summary": "Repaired 105C: pcae task finish --commit dispatched Telegram before final push state (pushed_status, origin_main_head, pcae_push_check) was known, sending 105C's own completion report partial. Added _apply_push_state_gate() folding the OLD schema's push-state fields into the dispatch decision; partial reports are finalized (written, visible) but never dispatched as final. This is the corrected, push-state-complete dispatch, sent after pcae push. 22 new tests. Recommends 105D.",
-    "files_changed_count": 6, "tests_added_or_updated": "22 tests added",
-    "phase_commits": [{"hash": "7e8c79559e80d561129786559874a70037e2ea82", "message": "Repair task finish notification ordering"}],
-    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
+    "summary": "Made incomplete phase reports lifecycle-blocking: pcae phase complete now hard-fails by default when report trust is incomplete/invalid (with --allow-partial-report opt-out that still never dispatches Telegram for a partial report); pcae push check gained a content-completeness phase_report_trust gate that deliberately excludes push-state fields to avoid deadlocking the normal task-finish-then-push sequence; pcae task finish --commit unchanged (warning-only pre-push, per 105C.1). 29 new tests. Recommends 106A.",
+    "files_changed_count": 11, "tests_added_or_updated": "29 tests added",
+    "phase_commits": [{"hash": "995a5ea639dd59d6fbb5206c04c1e232e49cefaa", "message": "Integrate phase report trust hard fail"}],
+    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "integration_module": "src/pcae/commands/task.py",
-    "note": "Corrected dispatch, sent after pcae push resolved final push state (pushed_status=pushed, origin_main_head_count=0, pcae_push_check=clean). The earlier pcae task finish --commit run for this same phase correctly reported skipped_incomplete instead of dispatching partial, demonstrating the repair.",
+    "integration_modules": ["src/pcae/commands/phase.py", "src/pcae/commands/push.py", "src/pcae/commands/task.py"],
+    "note": "This metadata intentionally reflects pre-push state (pushed_status=not_pushed) to demonstrate that pcae push check's phase_report_trust gate does NOT block on push-state fields (by design, to avoid deadlocking the normal task-finish-then-push sequence) -- only pcae task finish --commit's Telegram dispatch is push-state gated (unchanged from 105C.1). A corrected complete dispatch for phase complete follows after pcae push.",
     "validation_results": [
-        {"name": "105c1_task_finish_notification_ordering_tests", "result": "22/22", "status": "passed"},
-        {"name": "task_finish_report_trust_notification_tests", "result": "19/19", "status": "passed"},
+        {"name": "105d_phase_report_trust_hard_fail_tests", "result": "29/29", "status": "passed"},
+        {"name": "test_phase_full_suite", "result": "886/886", "status": "passed"},
+        {"name": "focused_hard_fail_push_check_tests", "result": "360/360", "status": "passed"},
+        {"name": "push_check_task_lifecycle_regression", "result": "472/472", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
-        {"name": "task_lifecycle_regression", "result": "328/328", "status": "passed"},
+        {"name": "combined_regression", "result": "2220/2220", "status": "passed"},
         {"name": "fast_green", "result": "4387/4390 (3 pre-existing)", "status": "passed_with_pre_existing"}
     ],
     "test_results": {
@@ -24,10 +26,10 @@
     "pre_existing_failures": ["Test94UPreflightArtifact", "Test94UPreflightArtifactCLI", "TestBackendShow"],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Task finish now correctly suppresses dispatch until final push state is known; hard-fail still deferred to 105D. Recommends 105D.",
-    "recommended_next_phase": "105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration"
+    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test command behavior. No shell execution beyond existing lifecycle/test command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Incomplete reports cannot pass final trust gates. Recommends 106A.",
+    "recommended_next_phase": "106A — v0.1 Release Scope Freeze"
 }
