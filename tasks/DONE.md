@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 106F: v0.1 RC Tag / Release Artifact Finalization (20260702-0016-phase-106f-v0-1-rc-tag-release-artifact-finalization)
 - Correct and finalize 106E phase-completion metadata (20260702-0008-correct-and-finalize-106e-phase-completion-metadata)
 - Phase 106E: v0.1 Release Candidate (20260701-2349-phase-106e-v0-1-release-candidate)
 - Sync final pushed-state metadata for 106D (20260701-2345-sync-final-pushed-state-metadata-for-106d)

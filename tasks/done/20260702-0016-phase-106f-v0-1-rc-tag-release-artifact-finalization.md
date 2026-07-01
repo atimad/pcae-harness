@@ -10,7 +10,7 @@ Phase 106F: v0.1 RC Tag / Release Artifact Finalization
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -32,6 +32,8 @@ Verify pre-tag gates, rebuild release artifacts, create and push the approved v0
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -43,6 +45,7 @@ Verify pre-tag gates, rebuild release artifacts, create and push the approved v0
 - docs
 - tests
 - tasks
+- config
 
 ## Forbidden Zones
 
