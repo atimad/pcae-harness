@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 106E — v0.1 Release Candidate (completed).
+
+Release-candidate preparation and readiness review only — no product/
+runtime behavior implemented or changed. Created
+`docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md` (release scope/non-execution
+boundary confirmation, included/excluded capabilities, golden workflow,
+install/packaging status, test baseline, governance baseline, notification
+baseline, known limitations, release blockers [none], tag readiness,
+post-phase manual tag instructions, v0.2 boundary, final go/no-go: **GO**),
+`docs/RELEASE_NOTES_V0_1_DRAFT.md` (candidate-draft release notes:
+positioning, highlights, installation summary, safety boundary, known
+limitations, what is not included, v0.2 autonomy preview, recommended tag
+`v0.1.0-rc1`), and
+`docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md` (the formal readiness
+review: purpose/scope/non-goals, release evidence from 106A–106D, current
+validation baseline, install/build/smoke status, docs-alignment review
+across `README.md`/`docs/RELEASE_SCOPE_V0_1.md`/
+`docs/V0_1_GOLDEN_WORKFLOW.md`/`docs/INSTALLATION.md`/
+`docs/V0_1_CLEAN_SMOKE_TEST.md` — no non-execution-boundary violations
+found, README test/phase-count staleness retained as a known, non-blocking
+limitation — CLI/support status, safety/no-go review, remaining risks
+[none blocking], and the decision: **Ready to tag v0.1.0-rc1 after
+operator approval**). Reviewed `pyproject.toml`: version `0.1.0` is
+already the correct base for a `v0.1.0-rc1` pre-release tag; no version
+bump performed (the `-rc1` suffix lives in the tag name, not the static
+package version). No tag was created — tag creation is deferred to Phase
+106F, after explicit operator approval. 29 new tests
+(`tests/test_release_candidate_v0_1.py`). Fast-green remains 4390/4390
+fully green; `report_notification_tests`/`bootstrap_session_reporting_tests`
+remain present in canonical metadata. No runtime enforcement. No
+autonomous execution. No real backend invocation. No adapter execution.
+No Telegram inbound. No shell mediation. No rollback execution. No
+apply/commit/push authorization changes beyond the existing governed
+lifecycle. No execution enablement flag or toggle. v0.1 remains
+non-executing by design. v0.2 remains the autonomy target.
+
+Recommends 106F — v0.1 RC Tag / Release Artifact Finalization.
+
+## Phase 106D Complete
+
 Phase 106D — Packaging / Installation / Clean-Smoke Test (completed).
 
 Validated PCAE v0.1 packaging/install readiness in throwaway virtual

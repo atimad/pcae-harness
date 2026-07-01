@@ -1,17 +1,50 @@
-# Phase Report: Packaging / Installation / Clean-Smoke Test
+# Phase Report: v0.1 Release Candidate
 
-- **Phase ID:** `106D`
+- **Phase ID:** `106E`
 - **Status:** completed
 - **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
-- **Files changed:** 8
-- **Tests run:** 20
-- **Commits:** 3d332a38
+- **Files changed:** 5
+- **Tests run:** 29
+- **Commits:** b00f1a34, 934fd15e
 - **Pushed:** not_pushed (pending final task-finish commit + push)
-- **origin/main..HEAD:** 1
+- **origin/main..HEAD:** 3
 
 ## Summary
 
-Phase 106D: Validated PCAE v0.1 packaging/install readiness in throwaway virtual environments outside this repository. Editable install, non-editable local install, and `python -m build` (sdist + wheel) all succeeded; the `pcae` console script and all required golden-workflow commands resolved correctly. Found and fixed 2 release-critical defects: (1) `pcae health`/`pcae check` crashed with an unhandled `subprocess.CalledProcessError` traceback outside a git repository — added a narrowly-scoped catch in `cli.py::main()` for `git`-prefixed subprocess failures (an initial fix using a new custom exception type broke 40 existing tests that already caught the raw exception type themselves — corrected before finalizing, fast-green re-confirmed 4390/4390); (2) the sdist swept in the entire repository by default (44,399 files, ~6.4MB, including local `.claude/settings.local.json` and `.pcae/session.json`) while the wheel was already correctly scoped — added an explicit `[tool.hatch.build.targets.sdist]` include list (now 117 files, ~1.1MB). Verified the golden workflow smoke-tests cleanly against a fresh `git clone` and that Telegram is safely skippable when unconfigured. No packaging blockers remain. 20 new tests. Non-executing, non-authorizing. No runtime enforcement. No execution. Recommends 106E.
+Phase 106E: Release-candidate preparation and readiness review only; no
+product/runtime behavior implemented or changed. Created
+`docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md` (release scope/non-execution
+boundary confirmation, included/excluded capabilities, golden workflow,
+install/packaging status, test baseline, governance baseline, notification
+baseline, known limitations, release blockers [none], tag readiness,
+post-phase manual tag instructions, v0.2 boundary, final go/no-go: **GO**),
+`docs/RELEASE_NOTES_V0_1_DRAFT.md` (candidate-draft release notes), and
+`docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md` (formal readiness
+review: purpose/scope/non-goals, release evidence from 106A–106D, current
+validation baseline, install/build/smoke status, docs-alignment review
+across `README.md`/`docs/RELEASE_SCOPE_V0_1.md`/
+`docs/V0_1_GOLDEN_WORKFLOW.md`/`docs/INSTALLATION.md`/
+`docs/V0_1_CLEAN_SMOKE_TEST.md` — no non-execution-boundary violations
+found, README test/phase-count staleness retained as a known, non-blocking
+limitation — decision: **Ready to tag v0.1.0-rc1 after operator
+approval**). Reviewed `pyproject.toml`: version `0.1.0` is already the
+correct base for a `v0.1.0-rc1` pre-release tag; no version bump
+performed. No tag created — deferred to Phase 106F pending explicit
+operator approval. 29 new tests
+(`tests/test_release_candidate_v0_1.py`). Non-executing. No autonomous
+execution. Recommends 106F.
+
+**Correction note:** during this phase's own `pcae task finish --commit`
+run, `.pcae/phase-completion-metadata.json` still held Phase 106D's
+content at the moment the command ran (this phase's metadata rewrite had
+not yet happened), causing an incorrectly-attributed Telegram notification
+(106D's summary content, sent under 106E's finish commit hash). This file
+and the metadata JSON now hold 106E's correct content; a corrected,
+accurately-attributed dispatch follows after `pcae push`, per the
+established idempotency-key design (`phase_id`+`commit` pair in
+`.pcae/phase-reports/.last-notified.json`) — since this dispatch will use
+`phase_id=106E` with a new final commit hash, it is guaranteed distinct
+from the erroneous `106D`/`f61dcb46` entry and will send correctly.
 
 ## Governance Results
 
@@ -23,25 +56,21 @@ Phase 106D: Validated PCAE v0.1 packaging/install readiness in throwaway virtual
 
 ## Test Results
 
-- **packaging_smoke_tests:** 20/20 (passed)
-- **editable_install:** succeeded (passed)
-- **non_editable_install:** succeeded (passed)
-- **build_artifact_sdist_wheel:** succeeded (passed)
-- **golden_workflow_smoke_fresh_clone:** succeeded (passed)
-- **focused_golden_workflow_tests:** 80/80 (passed)
-- **release_lifecycle_regression:** 459/459 (passed)
-- **report_notification_tests:** 219/219 (passed)
-- **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
+- **release_candidate_tests:** 29/29 (passed)
+- **focused_release_candidate_group:** 109/109 (passed)
+- **release_lifecycle_regression:** 421/421 (passed)
 - **combined_regression:** 2220/2220 (passed)
 - **fast_green:** 4390/4390 (fully green) (passed)
+- **report_notification_tests:** 219/219 (passed, unchanged this phase)
+- **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging command behavior. No shell execution beyond existing lifecycle/test/packaging command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106E.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging command behavior. No shell execution beyond existing lifecycle/test/packaging command behavior. No network call outside the existing Telegram outbound notification path. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No git tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106F.
 
 ## Recommended Next Phase
 
-106E — v0.1 Release Candidate
+106F — v0.1 RC Tag / Release Artifact Finalization
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*
