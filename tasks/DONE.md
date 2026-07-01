@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 106D (20260701-2345-sync-final-pushed-state-metadata-for-106d)
 - Phase 106D — Packaging / Installation / Clean-Smoke Test (20260701-2319-phase-106d-packaging-installation-clean-smoke-test)
 - Sync final pushed-state metadata for 106C (20260701-2314-sync-final-pushed-state-metadata-for-106c)
 - Phase 106C — Golden Workflow Stabilization (20260701-2301-phase-106c-golden-workflow-stabilization)
