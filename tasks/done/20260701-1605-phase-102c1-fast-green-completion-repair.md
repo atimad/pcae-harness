@@ -10,7 +10,7 @@ Phase 102C.1 — Runtime Enforcement Decision Engine Artifact Trust Fast-Green C
 
 ## Status
 
-active
+completed
 
 ## Mode
 

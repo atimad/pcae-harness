@@ -10,7 +10,7 @@ Phase 103A — Runtime Enforcement Coordinator Contract Design
 
 ## Status
 
-active
+completed
 
 ## Mode
 

@@ -10,7 +10,7 @@ Phase 104C — Runtime Enforcement Shared Safety/Authorization Contract Design
 
 ## Status
 
-active
+completed
 
 ## Mode
 
