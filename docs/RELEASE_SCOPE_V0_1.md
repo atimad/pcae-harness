@@ -284,7 +284,11 @@ the golden workflow end-to-end.
 - [x] Hard-fail trust gates for `phase complete` / `push check` (105D)
 - [x] v0.1 scope frozen in writing (this document)
 - [x] Fast-green fully green, 3 known failures fixed (106B)
-- [ ] Golden workflow scripted end-to-end smoke test (candidate: 106C)
+- [x] Golden workflow documented and command-verified (106C — see
+      `docs/V0_1_GOLDEN_WORKFLOW.md`, the required release artifact for
+      the v0.1 operator workflow)
+- [ ] Golden workflow smoke-tested from a genuinely clean checkout
+      (candidate: 106D)
 - [ ] README.md / ROADMAP.md brought current with actual state
 - [ ] Clean-install validation performed
 - [ ] v0.1 tag/release notes drafted
@@ -320,6 +324,15 @@ design → implementation → freeze → hardening → review passes for:
   delivery.
 - A release-grade test suite with no hidden/pre-existing failures.
 
+## Golden Workflow
+
+`docs/V0_1_GOLDEN_WORKFLOW.md` is the required release artifact defining
+the exact v0.1 operator workflow: start-of-phase, implementation,
+pre-finalization, finalization (report/notify/commit/push), and
+post-completion verification, with required vs. optional commands and the
+unsupported-flows list. Every command in it was verified against the live
+CLI in Phase 106C.
+
 ## Recommended Next Phases
 
 **106B — Release-Critical Warning / Fast-Green Triage — complete.** The 3
@@ -327,7 +340,11 @@ fast-green failures were root-caused and fixed (fast-green now 4390/4390);
 `pcae doctor task-memory` confirmed clean. See
 `docs/PHASE_106_RELEASE_CRITICAL_WARNING_FAST_GREEN_TRIAGE.md`.
 
-**106C — Golden Workflow Stabilization** (recommended next). Script and
-smoke-test the v0.1 golden workflow end-to-end, followed by a
-documentation-accuracy pass (README/ROADMAP reconciliation) before any
-v0.1 tag is cut.
+**106C — Golden Workflow Stabilization — complete.** The v0.1 golden
+workflow is documented and command-verified. See
+`docs/V0_1_GOLDEN_WORKFLOW.md`.
+
+**106D — Packaging / Installation / Clean-Smoke Test** (recommended next).
+Validate installation/packaging and run the golden workflow from a
+genuinely clean checkout, followed by a documentation-accuracy pass
+(README/ROADMAP reconciliation) before any v0.1 tag is cut.
