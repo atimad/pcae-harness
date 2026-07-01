@@ -9603,3 +9603,272 @@ class GovernedExecutionAttemptBoundary:
             "design_only": self.design_only,
             "digest": self.digest,
         }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# NoGoEnforcementEvidence — design-only, non-executing, non-authorizing
+# Phase 100B — Execution Boundary No-Go Enforcement Model
+# ═══════════════════════════════════════════════════════════════════════════
+
+_NGE_SCHEMA_VERSION = "1.0"
+
+# ── No-go categories (17) ────────────────────────────────────────────────
+NGE_CATEGORY_ARTIFACT_TRUST = "artifact_trust"
+NGE_CATEGORY_PREREQUISITE = "prerequisite"
+NGE_CATEGORY_AUTHORIZATION_FLAG = "authorization_flag"
+NGE_CATEGORY_SAFETY_FLAG = "safety_flag"
+NGE_CATEGORY_APPROVAL = "approval"
+NGE_CATEGORY_AUDIT = "audit"
+NGE_CATEGORY_ROLLBACK = "rollback"
+NGE_CATEGORY_BACKEND_ADAPTER = "backend_adapter"
+NGE_CATEGORY_SHELL_SUBPROCESS_NETWORK = "shell_subprocess_network"
+NGE_CATEGORY_MUTATION_APPLY = "mutation_apply"
+NGE_CATEGORY_COMMIT_PUSH = "commit_push"
+NGE_CATEGORY_REPORT_NOTIFICATION = "report_notification"
+NGE_CATEGORY_OPERATOR_RUNTIME_MODE = "operator_runtime_mode"
+NGE_CATEGORY_SECRET_EXPOSURE = "secret_exposure"
+NGE_CATEGORY_COMPATIBILITY_SCHEMA = "compatibility_schema"
+NGE_CATEGORY_STALE_REPLAY = "stale_replay"
+NGE_CATEGORY_UNKNOWN_UNSUPPORTED = "unknown_unsupported"
+
+VALID_NGE_CATEGORIES: frozenset[str] = frozenset({
+    NGE_CATEGORY_ARTIFACT_TRUST, NGE_CATEGORY_PREREQUISITE,
+    NGE_CATEGORY_AUTHORIZATION_FLAG, NGE_CATEGORY_SAFETY_FLAG,
+    NGE_CATEGORY_APPROVAL, NGE_CATEGORY_AUDIT, NGE_CATEGORY_ROLLBACK,
+    NGE_CATEGORY_BACKEND_ADAPTER, NGE_CATEGORY_SHELL_SUBPROCESS_NETWORK,
+    NGE_CATEGORY_MUTATION_APPLY, NGE_CATEGORY_COMMIT_PUSH,
+    NGE_CATEGORY_REPORT_NOTIFICATION, NGE_CATEGORY_OPERATOR_RUNTIME_MODE,
+    NGE_CATEGORY_SECRET_EXPOSURE, NGE_CATEGORY_COMPATIBILITY_SCHEMA,
+    NGE_CATEGORY_STALE_REPLAY, NGE_CATEGORY_UNKNOWN_UNSUPPORTED,
+})
+
+# ── Severities (6) ───────────────────────────────────────────────────────
+NGE_SEVERITY_CRITICAL_BLOCKER = "critical_blocker"
+NGE_SEVERITY_HARD_BLOCKER = "hard_blocker"
+NGE_SEVERITY_MISSING_PREREQUISITE = "missing_prerequisite"
+NGE_SEVERITY_TRUST_FAILURE = "trust_failure"
+NGE_SEVERITY_UNSUPPORTED_REQUEST = "unsupported_request"
+NGE_SEVERITY_REPORTING_FAILURE = "reporting_failure"
+
+VALID_NGE_SEVERITIES: frozenset[str] = frozenset({
+    NGE_SEVERITY_CRITICAL_BLOCKER, NGE_SEVERITY_HARD_BLOCKER,
+    NGE_SEVERITY_MISSING_PREREQUISITE, NGE_SEVERITY_TRUST_FAILURE,
+    NGE_SEVERITY_UNSUPPORTED_REQUEST, NGE_SEVERITY_REPORTING_FAILURE,
+})
+
+# ── Evaluation statuses ──────────────────────────────────────────────────
+NGE_STATUS_DENIED = "denied"
+NGE_STATUS_BLOCKED = "blocked"
+NGE_STATUS_EVIDENCE_INCOMPLETE = "evidence_incomplete"
+
+VALID_NGE_STATUSES: frozenset[str] = frozenset({
+    NGE_STATUS_DENIED, NGE_STATUS_BLOCKED, NGE_STATUS_EVIDENCE_INCOMPLETE,
+})
+
+# ── Evaluation decisions ─────────────────────────────────────────────────
+NGE_DECISION_BLOCKED = "blocked"
+NGE_DECISION_DENY = "deny"
+
+VALID_NGE_DECISIONS: frozenset[str] = frozenset({
+    NGE_DECISION_BLOCKED, NGE_DECISION_DENY,
+})
+
+# ── 30 no-go condition identifiers (from 100A gap analysis) ──────────────
+NGE_MISSING_PHASE97_PREFLIGHT = "MISSING_PHASE97_PREFLIGHT"
+NGE_MISSING_PHASE98_PREFLIGHT = "MISSING_PHASE98_PREFLIGHT"
+NGE_MISSING_PHASE99_ATTEMPT = "MISSING_PHASE99_ATTEMPT"
+NGE_ARTIFACT_TAMPERED = "ARTIFACT_TAMPERED"
+NGE_UNKNOWN_SCHEMA = "UNKNOWN_SCHEMA"
+NGE_STALE_ARTIFACT = "STALE_ARTIFACT"
+NGE_AUTH_FLAG_TRUE = "AUTH_FLAG_TRUE"
+NGE_NO_EXECUTION_FALSE = "NO_EXECUTION_FALSE"
+NGE_SIMULATION_ONLY_FALSE = "SIMULATION_ONLY_FALSE"
+NGE_EVIDENCE_ONLY_FALSE = "EVIDENCE_ONLY_FALSE"
+NGE_NON_AUTHORIZING_FALSE = "NON_AUTHORIZING_FALSE"
+NGE_MISSING_APPROVAL_ENFORCEMENT = "MISSING_APPROVAL_ENFORCEMENT"
+NGE_MISSING_AUDIT_PERSISTENCE = "MISSING_AUDIT_PERSISTENCE"
+NGE_MISSING_ROLLBACK_PLAN = "MISSING_ROLLBACK_PLAN"
+NGE_MISSING_DENIAL_ENFORCEMENT = "MISSING_DENIAL_ENFORCEMENT"
+NGE_MISSING_BACKEND_ALLOWLIST = "MISSING_BACKEND_ALLOWLIST"
+NGE_MISSING_ADAPTER_ALLOWLIST = "MISSING_ADAPTER_ALLOWLIST"
+NGE_MISSING_SHELL_BOUNDARY = "MISSING_SHELL_BOUNDARY"
+NGE_MISSING_OUTPUT_CAPTURE = "MISSING_OUTPUT_CAPTURE"
+NGE_MISSING_SECRET_REDACTION = "MISSING_SECRET_REDACTION"
+NGE_MISSING_TIMEOUT_ABORT = "MISSING_TIMEOUT_ABORT"
+NGE_MISSING_REPORT_COMPLETENESS = "MISSING_REPORT_COMPLETENESS"
+NGE_MISSING_NOTIFICATION_VISIBILITY = "MISSING_NOTIFICATION_VISIBILITY"
+NGE_BYPASS_PERMISSIONS = "BYPASS_PERMISSIONS"
+NGE_RAW_GIT_OR_FORCE = "RAW_GIT_OR_FORCE"
+NGE_TELEGRAM_INBOUND = "TELEGRAM_INBOUND"
+NGE_AUTOMATIC_APPLY = "AUTOMATIC_APPLY"
+NGE_ROLLBACK_WITHOUT_GOVERNANCE = "ROLLBACK_WITHOUT_GOVERNANCE"
+NGE_PREMATURE_BACKEND_INVOCATION = "PREMATURE_BACKEND_INVOCATION"
+NGE_EVIDENCE_AS_AUTHORIZATION = "EVIDENCE_AS_AUTHORIZATION"
+
+VALID_NGE_CONDITIONS: frozenset[str] = frozenset({
+    NGE_MISSING_PHASE97_PREFLIGHT, NGE_MISSING_PHASE98_PREFLIGHT,
+    NGE_MISSING_PHASE99_ATTEMPT, NGE_ARTIFACT_TAMPERED,
+    NGE_UNKNOWN_SCHEMA, NGE_STALE_ARTIFACT, NGE_AUTH_FLAG_TRUE,
+    NGE_NO_EXECUTION_FALSE, NGE_SIMULATION_ONLY_FALSE,
+    NGE_EVIDENCE_ONLY_FALSE, NGE_NON_AUTHORIZING_FALSE,
+    NGE_MISSING_APPROVAL_ENFORCEMENT, NGE_MISSING_AUDIT_PERSISTENCE,
+    NGE_MISSING_ROLLBACK_PLAN, NGE_MISSING_DENIAL_ENFORCEMENT,
+    NGE_MISSING_BACKEND_ALLOWLIST, NGE_MISSING_ADAPTER_ALLOWLIST,
+    NGE_MISSING_SHELL_BOUNDARY, NGE_MISSING_OUTPUT_CAPTURE,
+    NGE_MISSING_SECRET_REDACTION, NGE_MISSING_TIMEOUT_ABORT,
+    NGE_MISSING_REPORT_COMPLETENESS, NGE_MISSING_NOTIFICATION_VISIBILITY,
+    NGE_BYPASS_PERMISSIONS, NGE_RAW_GIT_OR_FORCE,
+    NGE_TELEGRAM_INBOUND, NGE_AUTOMATIC_APPLY,
+    NGE_ROLLBACK_WITHOUT_GOVERNANCE, NGE_PREMATURE_BACKEND_INVOCATION,
+    NGE_EVIDENCE_AS_AUTHORIZATION,
+})
+
+
+@dataclass
+class NoGoEnforcementEvidence:
+    """Design-only model for no-go enforcement evidence.
+
+    Non-executing, non-authorizing, evidence-only. Defines how hard no-go
+    conditions block any future execution-capable boundary. No runtime
+    enforcement exists. No execution is enabled.
+    """
+
+    schema_version: str = _NGE_SCHEMA_VERSION
+    no_go_evaluation_id: str = ""
+    phase_id: str = "100B"
+    task_id: str = ""
+    generated_at_utc: str = ""
+
+    evaluation_status: str = NGE_STATUS_DENIED
+    evaluation_decision: str = NGE_DECISION_BLOCKED
+
+    source_gap_analysis_ref: str = ""
+    phase97_preflight_ref: str = ""
+    phase98_preflight_ref: str = ""
+    phase99_attempt_boundary_ref: str = ""
+
+    checked_no_go_conditions: list[str] = field(default_factory=list)
+    triggered_no_go_conditions: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    failed_checks: list[str] = field(default_factory=list)
+    denial_reasons: list[str] = field(default_factory=list)
+    override_attempts: list[str] = field(default_factory=list)
+    unknown_conditions: list[str] = field(default_factory=list)
+    unsupported_requests: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    # All 12 auth flags — must remain False
+    execution_available: bool = False
+    execution_authorized: bool = False
+    backend_invocation_authorized: bool = False
+    adapter_execution_authorized: bool = False
+    network_authorized: bool = False
+    subprocess_authorized: bool = False
+    shell_authorized: bool = False
+    mutation_authorized: bool = False
+    apply_authorized: bool = False
+    rollback_authorized: bool = False
+    commit_authorized: bool = False
+    push_authorized: bool = False
+
+    # All 5 safety flags — must remain True
+    simulation_only: bool = True
+    no_execution: bool = True
+    evidence_only: bool = True
+    non_authorizing: bool = True
+    design_only: bool = True
+
+    digest: str = ""
+
+    def validate(self) -> list[str]:
+        issues: list[str] = []
+        if self.schema_version != _NGE_SCHEMA_VERSION:
+            issues.append(f"unknown schema_version: {self.schema_version!r}")
+        if self.evaluation_status not in VALID_NGE_STATUSES:
+            issues.append(f"invalid evaluation_status: {self.evaluation_status!r}")
+        if self.evaluation_decision not in VALID_NGE_DECISIONS:
+            issues.append(f"invalid evaluation_decision: {self.evaluation_decision!r}")
+        if self.execution_available:
+            issues.append("execution_available must be False")
+        if self.execution_authorized:
+            issues.append("execution_authorized must be False")
+        if self.push_authorized:
+            issues.append("push_authorized must be False")
+        if not self.simulation_only:
+            issues.append("simulation_only must be True")
+        if not self.no_execution:
+            issues.append("no_execution must be True")
+        if not self.design_only:
+            issues.append("design_only must be True")
+        for condition in self.triggered_no_go_conditions:
+            if condition not in VALID_NGE_CONDITIONS:
+                issues.append(f"unknown no-go condition: {condition!r}")
+        return issues
+
+    def compute_digest(self) -> str:
+        payload = {
+            "schema_version": self.schema_version,
+            "no_go_evaluation_id": self.no_go_evaluation_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "evaluation_status": self.evaluation_status,
+            "evaluation_decision": self.evaluation_decision,
+            "triggered_no_go_conditions": sorted(self.triggered_no_go_conditions),
+            "checked_no_go_conditions": sorted(self.checked_no_go_conditions),
+            "missing_evidence": sorted(self.missing_evidence),
+            "failed_checks": sorted(self.failed_checks),
+            "denial_reasons": sorted(self.denial_reasons),
+            "unknown_conditions": sorted(self.unknown_conditions),
+            "unsupported_requests": sorted(self.unsupported_requests),
+            "warnings": sorted(self.warnings),
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+        }
+        canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": self.schema_version,
+            "no_go_evaluation_id": self.no_go_evaluation_id,
+            "phase_id": self.phase_id, "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "evaluation_status": self.evaluation_status,
+            "evaluation_decision": self.evaluation_decision,
+            "source_gap_analysis_ref": self.source_gap_analysis_ref,
+            "phase97_preflight_ref": self.phase97_preflight_ref,
+            "phase98_preflight_ref": self.phase98_preflight_ref,
+            "phase99_attempt_boundary_ref": self.phase99_attempt_boundary_ref,
+            "checked_no_go_conditions": sorted(self.checked_no_go_conditions),
+            "triggered_no_go_conditions": sorted(self.triggered_no_go_conditions),
+            "missing_evidence": sorted(self.missing_evidence),
+            "failed_checks": sorted(self.failed_checks),
+            "denial_reasons": sorted(self.denial_reasons),
+            "override_attempts": sorted(self.override_attempts),
+            "unknown_conditions": sorted(self.unknown_conditions),
+            "unsupported_requests": sorted(self.unsupported_requests),
+            "warnings": sorted(self.warnings),
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "evidence_only": self.evidence_only,
+            "non_authorizing": self.non_authorizing,
+            "design_only": self.design_only,
+            "digest": self.digest,
+        }
