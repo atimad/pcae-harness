@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 99B.1 finalization commit (20260701-0939-phase-99b-1-finalization-commit)
 - 99B.1 finalization (20260701-0939-99b-1-finalization)
 - 99B.1 final commit (20260701-0938-99b-1-final-commit)
 - Phase 99B.1 — Telegram Notification Delivery / Phase Report Trust Repair (20260701-0938-phase-99b-1-telegram-notification-delivery-phase-report-trust-repair)
