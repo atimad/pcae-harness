@@ -20,10 +20,16 @@
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No enforcement. No automatic apply. No apply execution. No patch parsing. No commit/push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram remains outbound-only. Execution remains unavailable. All authorization flags remain False. Contract-freeze only — no source changes.",
+    "phase_commits": [
+        {"hash": "cbb511d6", "subject": "Freeze governed execution attempt contract"},
+        {"hash": "2cdc645b", "subject": "Complete Phase 99B governed execution attempt contract freeze"},
+        {"hash": "dd30a813", "subject": "Repair task memory status for stale done tasks"},
+        {"hash": "d901e24d", "subject": "Add execution-readiness-preflight to gitignore"}
+    ],
     "commit_attribution": "phase_owned",
     "recommended_next_phase": "99C — Governed Execution Attempt Artifact Trust Hardening",
     "summary": "Phase 99B complete: Governed Execution Attempt Contract Freeze. Contract-freeze only. 33 JSON fields, 14 attempt states, 26 denial reasons, 12 auth flags (all False), SHA-256 digest. 179 contract-freeze tests. No source changes. Recommends 99C.",
-    "pushed": false, "pushed_status": "pending", "origin_main_head_count": 0,
+    "pushed": true, "pushed_status": "pushed", "origin_main_head_count": 0,
     "notification_dispatch_result": "pending", "report_consistency": "consistent",
     "report_notification_tests_present": true, "bootstrap_session_reporting_tests_present": true
 }
