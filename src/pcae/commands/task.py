@@ -445,6 +445,43 @@ def run_task_finish(args: argparse.Namespace) -> int:
     return 0
 
 
+# Phase 105C.1 — fields the OLD (95M.1) report-trust schema uses to signal
+# that final push state (push status / origin-ahead-count / push-check) is
+# not yet known. The 105A/105B trust schema does not check these
+# semantically (a `pushed_status` of "not_pushed" is a valid non-placeholder
+# string, so it alone reports "complete") — folding these into the trust
+# result here is what prevents a pre-push report from being dispatched as a
+# final trusted Telegram handoff.
+_PUSH_STATE_FIELDS: tuple[str, ...] = (
+    "pushed_status",
+    "origin_main_head",
+    "governance_results.pcae_push_check",
+)
+
+
+def _apply_push_state_gate(trust_result, report) -> None:
+    """Phase 105C.1 — downgrade a 105A/105B trust result to partial when the
+    OLD schema's push-state fields (`report.missing_trust_fields`) show
+    final push state is still pending. Mutates `trust_result` in place."""
+    if report is None:
+        return
+    from pcae.core.phase_report_trust import COMPLETENESS_COMPLETE, COMPLETENESS_PARTIAL
+
+    pending = [f for f in (report.missing_trust_fields or []) if f in _PUSH_STATE_FIELDS]
+    if not pending:
+        return
+    trust_result.missing_fields = sorted(set(trust_result.missing_fields) | set(pending))
+    trust_result.complete = False
+    trust_result.can_be_active_latest = False
+    trust_result.repair_required = True
+    if trust_result.status == COMPLETENESS_COMPLETE:
+        trust_result.status = COMPLETENESS_PARTIAL
+    trust_result.summary = (
+        f"Report is PARTIAL: final push state pending ({', '.join(pending)}). "
+        "Repair required."
+    )
+
+
 def _print_report_integration_human(report_integration: dict) -> None:
     """Phase 105C — human-readable report-trust/notification summary for
     `pcae task finish --commit`. Always states the Telegram outbound-only
@@ -458,6 +495,8 @@ def _print_report_integration_human(report_integration: dict) -> None:
     trust = report_integration.get("trust") or {}
     print(f"Report trust: {trust.get('status', 'unknown')}")
     print(f"Repair required: {'yes' if trust.get('repair_required') else 'no'}")
+    if trust.get("missing_fields"):
+        print(f"  Missing fields: {', '.join(trust['missing_fields'])}")
 
     if status == "skipped_duplicate":
         print(f"Report notification: skipped ({report_integration['message']})")
@@ -469,6 +508,8 @@ def _print_report_integration_human(report_integration: dict) -> None:
         reason = report_integration.get("notification_reason")
         if reason:
             print(f"  Reason: {reason}")
+        if notif_status == "skipped_incomplete":
+            print("  Run final push/report completion path before dispatch.")
     print("Telegram: outbound-only")
 
 
@@ -600,6 +641,7 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
             if existing
             else validate_phase_report_trust({})
         )
+        _apply_push_state_gate(trust_result, existing)
         return {
             "status": "skipped_duplicate",
             "message": (
@@ -612,7 +654,15 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
 
     notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
 
-    fin = finalize_phase_report(
+    # Phase 105C.1 — build a trial report (no I/O: no write, no dispatch) to
+    # learn push-state-aware completeness *before* deciding whether this
+    # finalization is allowed to dispatch as a final trusted report. This is
+    # what 105C was missing: it dispatched whenever notifications were
+    # enabled, without checking whether pushed_status/origin_main_head/
+    # pcae_push_check indicated final push state had actually been reached.
+    from pcae.core.phase_reports import _apply_canonical_and_trust, make_phase_report
+
+    trial_report = make_phase_report(
         phase_id=phase_id,
         phase_name=phase_name,
         status=status,
@@ -626,8 +676,43 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
         origin_main_head_count=origin_count,
         explicit_no_go_confirmations=no_go_list,
         recommended_next_phase=recommended_next,
-        commit_attribution=commit_attribution,
     )
+    trial_report.metadata["commit_attribution"] = commit_attribution
+    _apply_canonical_and_trust(trial_report, phase_id, phase_name, status)
+
+    trial_trust = validate_phase_report_trust(
+        adapt_report_for_trust_check(trial_report.to_dict())
+    )
+    _apply_push_state_gate(trial_trust, trial_report)
+    dispatch_allowed = trial_trust.complete
+
+    # Suppress dispatch (but still finalize/write the report) when the
+    # report is not yet dispatch-ready — e.g. final push state is pending.
+    # Prefer skip over sending a partial report labeled as final.
+    suppressed_notify_enabled = None
+    if not dispatch_allowed and notify_enabled:
+        suppressed_notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED")
+        os.environ["PCAE_NOTIFY_ENABLED"] = ""
+    try:
+        fin = finalize_phase_report(
+            phase_id=phase_id,
+            phase_name=phase_name,
+            status=status,
+            summary=summary,
+            files_changed=files_changed,
+            tests_run=tests_run,
+            test_results=test_results,
+            governance_results=governance_results,
+            commits=commits,
+            pushed_status=pushed_status,
+            origin_main_head_count=origin_count,
+            explicit_no_go_confirmations=no_go_list,
+            recommended_next_phase=recommended_next,
+            commit_attribution=commit_attribution,
+        )
+    finally:
+        if suppressed_notify_enabled is not None:
+            os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
 
     if fin.get("report_error"):
         return {
@@ -646,6 +731,7 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
     trust_result = validate_phase_report_trust(
         adapt_report_for_trust_check(report.to_dict())
     ) if report else validate_phase_report_trust({})
+    _apply_push_state_gate(trust_result, report)
 
     result = {
         "status": "finalized",
@@ -655,6 +741,15 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
         "report_path": paths.get("markdown", ""),
         "metadata_path": str(meta_path),
     }
+
+    if not dispatch_allowed:
+        result["notification_status"] = "skipped_incomplete"
+        result["notification_reason"] = (
+            "report is not final push-state complete — "
+            f"missing: {', '.join(trust_result.missing_fields)}. "
+            "Run final push/report completion path before dispatch."
+        )
+        return result
 
     if fin.get("notification_skipped"):
         result["notification_status"] = "skipped"
