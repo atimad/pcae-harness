@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 106B — Release-Critical Warning / Fast-Green Triage (20260701-2229-phase-106b-release-critical-warning-fast-green-triage)
 - Sync final pushed-state metadata for 106A (20260701-2221-sync-final-pushed-state-metadata-for-106a)
 - Phase 106A — v0.1 Release Scope Freeze (20260701-2208-phase-106a-v0-1-release-scope-freeze)
 - Sync final pushed-state metadata for 105D (20260701-2205-sync-final-pushed-state-metadata-for-105d)

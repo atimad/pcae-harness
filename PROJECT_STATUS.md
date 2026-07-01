@@ -2,6 +2,29 @@
 
 ## Current Phase
 
+Phase 106B — Release-Critical Warning / Fast-Green Triage (completed).
+
+Triaged and **fixed** the 3 fast-green failures carried since before 105A:
+`Test94UPreflightArtifact`/`Test94UPreflightArtifactCLI` (root cause: a
+module-level name collision in `core/backend_invocations.py` — two
+unrelated features both defined `VALID_PREFLIGHT_STATUSES`; the later
+definition silently shadowed the 94U-era one, so adapter preflight
+artifacts were validated against the wrong status set and always flagged
+`"unknown preflight status: 'ready'"`. Renamed the 94U constant to
+`VALID_ADAPTER_PREFLIGHT_STATUSES`), and `TestBackendShow::test_show_missing_artifacts`
+(root cause: this long-lived local working tree has 4,760+ real, gitignored
+`.pcae/backend-invocations/` artifacts accumulated from years of legitimate
+dogfooding — not a product defect; isolated the test to a `tmp_path` cwd
+instead of `cwd=REPO_ROOT`). **Fast-green is now fully green: 4390/4390.**
+`pcae doctor task-memory` confirmed clean; no other release-critical
+warnings found. `docs/RELEASE_SCOPE_V0_1.md` updated to reflect the
+resolved disposition. 22 tests added/updated (2 fixed + 20 new triage
+tests). No runtime enforcement. No autonomous execution.
+
+Recommends 106C — Golden Workflow Stabilization.
+
+## Phase 106A Complete
+
 Phase 106A — v0.1 Release Scope Freeze (completed).
 
 Documentation-only scope freeze. Created `docs/RELEASE_SCOPE_V0_1.md`
