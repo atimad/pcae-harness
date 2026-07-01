@@ -4,10 +4,10 @@
     "summary": "Made incomplete phase reports lifecycle-blocking: pcae phase complete now hard-fails by default when report trust is incomplete/invalid (with --allow-partial-report opt-out that still never dispatches Telegram for a partial report); pcae push check gained a content-completeness phase_report_trust gate that deliberately excludes push-state fields to avoid deadlocking the normal task-finish-then-push sequence; pcae task finish --commit unchanged (warning-only pre-push, per 105C.1). 29 new tests. Recommends 106A.",
     "files_changed_count": 11, "tests_added_or_updated": "29 tests added",
     "phase_commits": [{"hash": "995a5ea639dd59d6fbb5206c04c1e232e49cefaa", "message": "Integrate phase report trust hard fail"}],
-    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "integration_modules": ["src/pcae/commands/phase.py", "src/pcae/commands/push.py", "src/pcae/commands/task.py"],
-    "note": "This metadata intentionally reflects pre-push state (pushed_status=not_pushed) to demonstrate that pcae push check's phase_report_trust gate does NOT block on push-state fields (by design, to avoid deadlocking the normal task-finish-then-push sequence) -- only pcae task finish --commit's Telegram dispatch is push-state gated (unchanged from 105C.1). A corrected complete dispatch for phase complete follows after pcae push.",
+    "note": "Corrected dispatch, sent after pcae push resolved final push state. The earlier pcae task finish --commit run for this same phase correctly reported skipped_incomplete instead of dispatching partial (demonstrating 105C.1's preserved behavior), and pcae push check correctly passed despite the pre-push report (demonstrating 105D's deliberate content-only push-check gate).",
     "validation_results": [
         {"name": "105d_phase_report_trust_hard_fail_tests", "result": "29/29", "status": "passed"},
         {"name": "test_phase_full_suite", "result": "886/886", "status": "passed"},
@@ -26,7 +26,7 @@
     "pre_existing_failures": ["Test94UPreflightArtifact", "Test94UPreflightArtifactCLI", "TestBackendShow"],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
