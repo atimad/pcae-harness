@@ -2,11 +2,11 @@
 
 ## Task ID
 
-20260701-1300-phase-100e-execution-boundary-no-go-boundary-review
+20260701-1318-phase-100f-execution-boundary-no-go-milestone-summary-transition-planning
 
 ## Title
 
-Phase 100E — Execution Boundary No-Go Boundary Review
+Phase 100F — Execution Boundary No-Go Milestone Summary / Transition Planning
 
 ## Status
 
@@ -18,11 +18,11 @@ implementation
 
 ## Goal
 
-Review, validate, and document the Phase 100A-100D no-go layer. Boundary review only.
+Summarize, close, and transition the Phase 100 execution-boundary no-go track. Milestone summary only.
 
 ## Allowed Files
 
-- docs/PHASE_100_EXECUTION_BOUNDARY_NO_GO_BOUNDARY_REVIEW.md
+- docs/PHASE_100_EXECUTION_BOUNDARY_NO_GO_MILESTONE_SUMMARY.md
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
@@ -38,8 +38,6 @@ Review, validate, and document the Phase 100A-100D no-go layer. Boundary review 
 
 ## Allowed Zones
 
-- core
-- tests
 - docs
 - tasks
 - config
@@ -66,7 +64,7 @@ advisory
 
 ## Acceptance Criteria
 
-- Boundary review complete
+- Milestone summary complete
 
 ## Acceptance Checks
 
@@ -78,4 +76,4 @@ advisory
 
 ## Created Timestamp
 
-2026-07-01T13:00:17.101904+02:00
+2026-07-01T13:18:32.104008+02:00
