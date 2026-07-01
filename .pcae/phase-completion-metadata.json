@@ -4,10 +4,10 @@
     "summary": "Triaged and fixed the 3 fast-green failures carried since before 105A: a VALID_PREFLIGHT_STATUSES module-level name collision in core/backend_invocations.py (renamed the 94U constant to VALID_ADAPTER_PREFLIGHT_STATUSES), and TestBackendShow::test_show_missing_artifacts depending on accumulated local .pcae/backend-invocations/ state (isolated to tmp_path). Fast-green is now fully green: 4390/4390. pcae_doctor_task_memory clean. docs/RELEASE_SCOPE_V0_1.md updated. 22 tests added/updated. Recommends 106C.",
     "files_changed_count": 6, "tests_added_or_updated": "22 tests added/updated",
     "phase_commits": [{"hash": "3210a3b037db83e38d0cee057820dc3555fcabba", "message": "Triage v0.1 release critical fast-green status"}],
-    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "triage_doc": "docs/PHASE_106_RELEASE_CRITICAL_WARNING_FAST_GREEN_TRIAGE.md",
-    "note": "This metadata intentionally reflects pre-push state (pushed_status=not_pushed) at task-finish time; pcae push check correctly passes on content completeness regardless (105D design). A corrected complete dispatch follows after pcae push. All 3 previously pre-existing fast-green failures are now FIXED (not merely documented) -- fast_green is fully green, 4390/4390.",
+    "note": "Corrected dispatch, sent after pcae push resolved final push state. The earlier pcae task finish --commit run for this same phase correctly reported skipped_incomplete instead of dispatching partial, and pcae push check correctly passed despite the pre-push report (both demonstrating preserved 105C.1/105D behavior). All 3 previously pre-existing fast-green failures are now FIXED (not merely documented) -- fast_green is fully green, 4390/4390.",
     "validation_results": [
         {"name": "known_failure_repro_fix", "result": "22/22", "status": "passed"},
         {"name": "test_backend_invocations_full_suite", "result": "761/761", "status": "passed"},
@@ -27,7 +27,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
