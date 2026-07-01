@@ -168,3 +168,10 @@ Operator reviews `docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md`,
 approved, proceed to **Phase 106F — v0.1 RC Tag / Release Artifact
 Finalization**, which creates the approved `v0.1.0-rc1` tag and finalizes
 release artifacts. No tag is created in 106E.
+
+**Update (106F):** the operator approved proceeding, and Phase 106F
+created and pushed the `v0.1.0-rc1` tag (commit
+`d155dddcf56e7ec17ed558f234d6148799192290`). See
+`docs/RELEASE_HANDOFF_V0_1_RC1.md` and
+`docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md` for the full
+tag-creation record. No `v0.1.0` final release tag exists.

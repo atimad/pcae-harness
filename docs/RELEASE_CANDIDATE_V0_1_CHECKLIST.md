@@ -164,23 +164,25 @@ accepted known limitations above (none blocking).
 - No version bump is required before tagging — `0.1.0` is the correct
   base version for a `v0.1.0-rc1` pre-release tag; the `-rc1` suffix lives
   in the tag name, not in `pyproject.toml`'s static version field.
-- **Tag is not created in this phase.** Tag creation is deferred to Phase
-  106F, after explicit operator approval.
+- **Tag created and pushed in Phase 106F.** `v0.1.0-rc1` now exists
+  locally and on `origin`, pointing at commit
+  `d155dddcf56e7ec17ed558f234d6148799192290`. See
+  `docs/RELEASE_HANDOFF_V0_1_RC1.md` and
+  `docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md` for full detail.
 
-## Post-Phase Manual Tag Instructions
+## Post-Phase Manual Tag Instructions (Completed in 106F)
 
-After reviewing this checklist, the release notes draft
-(`docs/RELEASE_NOTES_V0_1_DRAFT.md`), and the readiness review
-(`docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md`), the operator may
-approve tagging. If approved, Phase 106F should:
+Phase 106F, after operator approval, completed the following:
 
-1. Confirm `origin/main..HEAD` is `0` (nothing unpushed).
-2. Create an annotated tag: `git tag -a v0.1.0-rc1 -m "PCAE v0.1.0-rc1"`.
-3. Push the tag: `git push origin v0.1.0-rc1`.
-4. Publish `docs/RELEASE_NOTES_V0_1_DRAFT.md` content (promoted from
-   draft) alongside the tag, e.g. as a GitHub Release description.
+1. Confirmed `origin/main..HEAD` was `0` (nothing unpushed) before
+   tagging.
+2. Created an annotated tag: `git tag -a v0.1.0-rc1 -m "PCAE v0.1.0-rc1"`.
+3. Pushed the tag: `git push origin v0.1.0-rc1`.
+4. Did **not** publish a GitHub Release or promote the release notes
+   draft — that remains an optional operator action (see
+   `docs/RELEASE_HANDOFF_V0_1_RC1.md`'s "What to Do Next").
 
-None of the above is performed in Phase 106E.
+No `v0.1.0` final release tag exists or was created.
 
 ## v0.2 Autonomy Boundary
 
@@ -193,7 +195,8 @@ Roadmap Boundary" section (unchanged in 106E).
 
 ## Final Go/No-Go Status
 
-**GO** — Ready to prepare `v0.1.0-rc1` for tagging, pending explicit
-operator approval in Phase 106F. See
-`docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md` for the full
-readiness review and decision rationale.
+**GO — tagged.** `v0.1.0-rc1` was created and pushed in Phase 106F after
+operator approval. See
+`docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md` for the readiness
+review and `docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md` for the
+tag-creation record.

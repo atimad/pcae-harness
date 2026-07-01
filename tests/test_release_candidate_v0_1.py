@@ -95,8 +95,14 @@ def test_checklist_includes_go_no_go_status(checklist_text):
     assert "GO" in checklist_text
 
 
-def test_checklist_does_not_create_tag(checklist_text):
-    assert "Tag is not created in this phase" in checklist_text
+def test_checklist_reflects_tag_state(checklist_text):
+    # As of Phase 106F, the tag has been created and pushed; the checklist
+    # is updated to reflect that rather than asserting it is not created.
+    assert "v0.1.0-rc1" in checklist_text
+    assert (
+        "Tag created and pushed in Phase 106F" in checklist_text
+        or "Tag is not created in this phase" in checklist_text
+    )
 
 
 def test_checklist_names_recommended_tag(checklist_text):

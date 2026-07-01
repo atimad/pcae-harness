@@ -153,9 +153,11 @@ git tag -a v0.1.0-rc1 -m "PCAE v0.1.0-rc1"
 ```
 
 - **Result:** created.
-- **Tagged commit:** see `docs/RELEASE_HANDOFF_V0_1_RC1.md` for the exact
-  commit hash (`git rev-parse v0.1.0-rc1` / `git rev-parse HEAD`
-  confirmed identical at tag-creation time).
+- **Tagged commit:** `d155dddcf56e7ec17ed558f234d6148799192290` ("Record
+  106F pre-tag finalization progress" — confirmed identical to `HEAD` at
+  tag-creation time via `git rev-parse v0.1.0-rc1^{commit}` vs. `git
+  rev-parse HEAD`). Tag object hash (annotated tag):
+  `b47ce1817a697eab6bee8ef158ba50d96e57c3bb`.
 - No other tag was created.
 
 ## Tag Push Result
@@ -165,12 +167,16 @@ git push origin v0.1.0-rc1
 ```
 
 - **Result:** pushed.
-- Verified via `git ls-remote --tags origin v0.1.0-rc1` (present on
-  origin after push) and `git rev-list --count origin/main..HEAD` (`0`,
-  unchanged by a tag push — tags do not affect branch ahead/behind
-  counts).
-- No branch was pushed with raw git in this phase; no force push was
-  used; no other tag was pushed.
+- Verified via `git ls-remote --tags origin v0.1.0-rc1` →
+  `b47ce1817a697eab6bee8ef158ba50d96e57c3bb refs/tags/v0.1.0-rc1`
+  (present on origin after push, matching the local annotated tag object
+  hash) and `git rev-list --count origin/main..HEAD` (`0`, unchanged by a
+  tag push — tags do not affect branch ahead/behind counts).
+- No branch was pushed with raw git in this phase — the `main` branch was
+  pushed exclusively via `pcae push --staged-file-aware` (governed);
+  `git push origin v0.1.0-rc1` was used only for the tag itself, per this
+  phase's operating rules. No force push was used; no other tag was
+  pushed.
 
 ## Release Artifact Status
 

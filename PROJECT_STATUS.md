@@ -2,22 +2,32 @@
 
 ## Current Phase
 
-Phase 106F — v0.1 RC Tag / Release Artifact Finalization (in progress).
+Phase 106F — v0.1 RC Tag / Release Artifact Finalization (completed).
 
-Release artifact finalization only. Created
-`docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md` (pre-tag gate
-results — all passed; governed-tag-command gap documented; tag creation/
+Release artifact finalization only — no product/runtime behavior
+implemented or changed. All pre-tag hard gates passed (clean working
+tree, `origin/main..HEAD`=0, active/latest phase report trust complete,
+health/check/task-memory/push-check all green, fast-green 4390/4390,
+`report_notification_tests`/`bootstrap_session_reporting_tests` present,
+no existing local/remote `v0.1.0-rc1`, all required docs present, no
+forbidden safety claims). Rebuilt sdist/wheel from the tag-ready state in
+a throwaway venv (scratch directory, not committed); wheel smoke-installed
+cleanly. Created `docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md`
+(pre-tag gate results, documented governed-tag-command gap, tag creation/
 push results) and `docs/RELEASE_HANDOFF_V0_1_RC1.md` (the `v0.1.0-rc1`
-handoff: tagged commit, install/build/smoke status, validation baseline,
-golden workflow/release notes pointers, non-execution boundary, v0.2
-boundary, how to verify the tag locally/from origin). Rebuilt sdist/wheel
-from the tag-ready state in a throwaway venv (scratch directory, not
-committed). Re-ran focused release-candidate/packaging/golden-workflow
-tests (109/109), release/lifecycle regression (421/421), combined
-regression (2220/2220), and fast-green (4390/4390 fully green) before
-tagging. 20 new tests (`tests/test_release_artifact_v0_1_rc1.py`). No
-runtime enforcement. No autonomous execution. This entry will be updated
-with the final tag/push result once `v0.1.0-rc1` is created.
+handoff document). **Created and pushed the `v0.1.0-rc1` annotated tag**,
+pointing at commit `d155dddcf56e7ec17ed558f234d6148799192290` — verified
+identical to `HEAD` at tag-creation time and present on `origin` after
+push. No other tag was created; no final `v0.1.0` tag exists. Updated
+`docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md`, `docs/RELEASE_NOTES_V0_1_DRAFT.md`,
+and `docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md` to reflect the
+tag. 20 new tests (`tests/test_release_artifact_v0_1_rc1.py`). No runtime
+enforcement. No autonomous execution. No real backend invocation. No
+Telegram inbound. v0.1 remains non-executing by design. v0.2 remains the
+autonomy target.
+
+Recommends 107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap
+Analysis.
 
 ## Phase 106E Complete
 

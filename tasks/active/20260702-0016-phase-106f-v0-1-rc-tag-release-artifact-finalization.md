@@ -28,6 +28,7 @@ Verify pre-tag gates, rebuild release artifacts, create and push the approved v0
 - docs/RELEASE_NOTES_V0_1_DRAFT.md
 - docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md
 - tests/test_release_artifact_v0_1_rc1.py
+- tests/test_release_candidate_v0_1.py
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md

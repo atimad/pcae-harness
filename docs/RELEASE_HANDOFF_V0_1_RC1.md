@@ -6,15 +6,17 @@
 
 ## Commit Hash Tagged
 
-The tag points at the commit produced by this phase's "Finalize v0.1 RC
-tag artifacts" governed commit (the tag-ready state confirmed by Phase
-106F's pre-tag gate results — see
-`docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md`). The exact commit
-hash is recorded in that document and in this phase's completion report;
-verify at any time with:
+- **Tagged commit:** `d155dddcf56e7ec17ed558f234d6148799192290`
+  ("Record 106F pre-tag finalization progress" — the clean, fully-pushed
+  tag-ready state confirmed by Phase 106F's pre-tag gate results; see
+  `docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md`).
+- **Tag object hash (annotated tag):** `b47ce1817a697eab6bee8ef158ba50d96e57c3bb`
+
+Verify at any time with:
 
 ```bash
-git rev-parse v0.1.0-rc1
+git rev-parse v0.1.0-rc1^{commit}   # d155dddcf56e7ec17ed558f234d6148799192290
+git rev-parse v0.1.0-rc1            # b47ce1817a697eab6bee8ef158ba50d96e57c3bb (tag object)
 ```
 
 ## Release Status

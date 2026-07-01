@@ -6,9 +6,10 @@ PCAE v0.1 — Governed AI Coding Lifecycle Harness
 
 ## Release Status
 
-**Candidate draft.** Prepared in Phase 106E for operator review. Not yet
-tagged or published — tag creation is a separate, explicitly-approved
-follow-up (Phase 106F).
+**Candidate draft.** Prepared in Phase 106E for operator review. Tag
+`v0.1.0-rc1` was created and pushed in Phase 106F, after operator
+approval; this notes document remains a draft — it has not been
+published as a GitHub Release description or promoted elsewhere.
 
 ## Positioning
 
@@ -138,5 +139,6 @@ will be built on top of.
 
 ## Recommended Tag Name
 
-`v0.1.0-rc1` — not created in this phase; requires explicit operator
-approval (see `docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md`).
+`v0.1.0-rc1` — created and pushed in Phase 106F, after operator approval.
+See `docs/RELEASE_HANDOFF_V0_1_RC1.md` for the exact tagged commit and
+how to verify the tag locally or from origin.
