@@ -2,6 +2,25 @@
 
 ## Current Phase
 
+Phase 106F — v0.1 RC Tag / Release Artifact Finalization (in progress).
+
+Release artifact finalization only. Created
+`docs/PHASE_106_V0_1_RC_TAG_ARTIFACT_FINALIZATION.md` (pre-tag gate
+results — all passed; governed-tag-command gap documented; tag creation/
+push results) and `docs/RELEASE_HANDOFF_V0_1_RC1.md` (the `v0.1.0-rc1`
+handoff: tagged commit, install/build/smoke status, validation baseline,
+golden workflow/release notes pointers, non-execution boundary, v0.2
+boundary, how to verify the tag locally/from origin). Rebuilt sdist/wheel
+from the tag-ready state in a throwaway venv (scratch directory, not
+committed). Re-ran focused release-candidate/packaging/golden-workflow
+tests (109/109), release/lifecycle regression (421/421), combined
+regression (2220/2220), and fast-green (4390/4390 fully green) before
+tagging. 20 new tests (`tests/test_release_artifact_v0_1_rc1.py`). No
+runtime enforcement. No autonomous execution. This entry will be updated
+with the final tag/push result once `v0.1.0-rc1` is created.
+
+## Phase 106E Complete
+
 Phase 106E — v0.1 Release Candidate (completed).
 
 Release-candidate preparation and readiness review only — no product/
