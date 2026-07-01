@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 105D (20260701-2205-sync-final-pushed-state-metadata-for-105d)
 - Phase 105D — Phase Report Trust Gate Hard-Fail / Push-Check Integration (20260701-2134-phase-105d-phase-report-trust-gate-hard-fail-push-check-integration)
 - Sync final pushed-state metadata for 105C.1 (20260701-2127-sync-final-pushed-state-metadata-for-105c-1)
 - Phase 105C.1 — Task Finish Report Notification Ordering / Completeness Repair (20260701-2121-phase-105c-1-task-finish-report-notification-ordering-completeness-repair)
