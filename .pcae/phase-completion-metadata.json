@@ -1,13 +1,13 @@
 {
-    "phase_id": "104E", "phase_name": "phase_104e_consolidation_milestone_summary", "phase_title": "Runtime Enforcement Consolidation Milestone Summary / Transition Planning",
-    "files_changed_count": 7, "tests_added_or_updated": "12 tests added",
-    "phase_commits": [{"hash": "181c6d18d37cc03b797d1b042bfb5a8304da7dd9", "message": "Summarize runtime enforcement consolidation milestone"}],
+    "phase_id": "105A", "phase_name": "phase_105a_phase_report_trust_gate_implementation", "phase_title": "Phase Report Trust Gate Implementation",
+    "files_changed_count": 8, "tests_added_or_updated": "37 tests added",
+    "phase_commits": [{"hash": "e1b71a6f99a56986eb8f837cfdc00f4235a8135f", "message": "Implement phase report trust gate"}],
     "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
-    "track_closed": "Phase 104 — Runtime Enforcement Consolidation",
-    "subphases": ["104A.1", "104B", "104C", "104D"],
-    "transition_decision": "Implement report-trust gate before further execution-readiness work",
+    "validator_module": "src/pcae/core/phase_report_trust.py",
+    "validator_api": {"required_report_fields": 8, "required_governance_fields": 5, "required_test_fields": 3, "disallowed_placeholders": 4},
+    "note": "Validator implemented but NOT yet wired into pcae phase complete — that is 105B scope. This partial/complete cycle demonstrates the exact gap 105A+105B address.",
     "validation_results": [
-        {"name": "104e_milestone_tests", "result": "12/12", "status": "passed"},
+        {"name": "105a_trust_gate_tests", "result": "37/37", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
         {"name": "fast_green", "result": "4387/4390 (3 pre-existing)", "status": "passed_with_pre_existing"}
@@ -28,6 +28,6 @@
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Phase 104 consolidation closed. Recommends 105A.",
-    "recommended_next_phase": "105A — Phase Report Trust Gate Implementation"
+    "no_go_confirmation": "No runtime enforcement. No real backend invocation. No adapter execution. No subprocess execution. No shell execution. No network call. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No automatic apply. No apply execution. No patch parsing. No commit authorization. No push authorization. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. Telegram outbound-only. Execution unavailable. All auth flags False. Trust gate implemented. Recommends 105B.",
+    "recommended_next_phase": "105B — Phase Report Trust Gate CLI / Finalization Integration"
 }
