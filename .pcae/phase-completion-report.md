@@ -1,77 +1,74 @@
-# Phase Report: v0.1 Post-RC System Inspection / Lifecycle Connectivity Audit
+# Phase Report: v0.1 RC Audit Findings Repair
 
-- **Phase ID:** `106G`
+- **Phase ID:** `106H`
 - **Status:** completed
-- **Report completeness:** complete
-- **Files changed:** 6
+- **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
+- **Files changed:** 8
 - **Tests run:** 20
-- **Commits:** 9e3af3a5, 99e40cd6
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Commits:** 4a137fb9, 913ae24c
+- **Pushed:** not_pushed (pending final task-finish commit + push)
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 106G: Post-RC inspection/audit only; no product/runtime behavior
-implemented or changed beyond one tiny, findings-driven doc addition.
-Inspected `v0.1.0-rc1` as a running system rather than as documentation:
-enumerated the bootstrap command family (`pcae session bootstrap`/
-`start`/`end`/`write`/`read`/`update`/`continuity-check` — one coherent,
-well-tested family, no top-level `pcae bootstrap`), traced the actual
-task-finish/phase-complete/push-check/Telegram dispatch call graph, and
-empirically reproduced (by calling the real validator functions directly)
-a genuine trust-gate asymmetry: `pcae task finish --commit`'s
-Telegram-dispatch gate uses only the 105A/105B trust schema plus
-push-state fields, while `pcae phase complete`'s gate (since 105D)
-additionally requires the OLD 95M.1 schema's full completeness check
-(e.g. `files_changed>0`) — a synthetic `files_changed=0` report is
-dispatched by `task finish --commit` but correctly refused by `phase
-complete`, with no existing regression test for this case. Also found:
-`bootstrap_session_reporting_tests` is a required trust-schema field name
-with no correspondingly-named test file (the capability is tested,
-scattered across many files); `pcae skill invoke phase-finalization <ID>`
-cannot resolve a bare phase code for any phase in this project's history
-(static roadmap registry, not derived from `tasks/done/`);
-`.pcae/phase-reports/.last-notified.json` still holds stale content from
-the corrected 106E dispatch mistake (documented, not hand-edited, to
-avoid fabricating dispatch history); and `phase complete`/`task finish`
-implement independently-diverging finalize logic rather than sharing one
-implementation. None of the findings compromise the non-execution
-boundary, the safety/authorization contract, or the release artifacts.
-Added a small `pcae session bootstrap` mention and a `phase
-complete`-vs-`task finish` clarity note to `docs/V0_1_GOLDEN_WORKFLOW.md`
-(the only source/doc changes beyond this audit's own new documents).
-`v0.1.0-rc1` remains suitable for external trial use with the trust-gate
-asymmetry documented as a known caveat; no new tag created. 20 new tests
-(`tests/test_post_rc_system_inspection_v0_1.py`). Non-executing. No
-autonomous execution. Recommends 106H.
+Phase 106H: Repairs the trust-gate asymmetry Phase 106G's audit found and
+empirically reproduced between `pcae task finish --commit` and `pcae
+phase complete`: `task finish --commit`'s dispatch gate previously
+omitted the OLD (95M.1) schema's full completeness check
+(`files_changed>0`, no-go confirmation count, etc.) that `phase
+complete`'s gate has required since Phase 105D — a synthetic
+`files_changed=0` report would dispatch via `task finish --commit` but be
+correctly refused by `phase complete`. Added a shared helper,
+`apply_old_schema_gate()`, to `core/phase_report_trust.py` (mirroring the
+existing `apply_push_state_gate()`), and wired both
+`commands/task.py::_finalize_task_report_and_notify` and
+`commands/phase.py::_finalize_report_and_notify` through it, closing the
+gap without weakening `phase complete`'s existing hard-fail behavior and
+without changing any already-passing test's expectations (full
+`test_phase.py`/`test_phase_report_trust_hard_fail.py`/`test_task.py`
+suites pass unchanged, 1281/1281). Updated two pre-existing test fixtures
+(`tests/test_task_finish_report_trust_notification.py`,
+`tests/test_task_finish_notification_ordering.py`) to include
+`commit_attribution` — a field every real phase-completion metadata file
+in this project already sets, which these older, pre-106H fixtures had
+omitted. `pcae task finish --commit` remains the preferred v0.1
+golden-workflow completion command; `pcae phase complete` remains
+available as the documented, lower-level, post-push corrected-re-dispatch
+path — neither is deprecated. Added
+`docs/PHASE_106_RC_AUDIT_FINDINGS_REPAIR.md`. 20 new regression tests
+(`tests/test_rc_audit_findings_repair.py`), including direct CLI
+reproduction/verification of both commands' incomplete-report and
+complete-report paths. No new tag created. Non-executing. No autonomous
+execution. Recommends 106I.
 
 ## Governance Results
 
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
+- **pcae_push_check:** pending final commit
 - **telegram_runtime:** loaded, configured, enabled
 
 ## Test Results
 
-- **post_rc_audit_tests:** 20/20 (passed)
-- **focused_release_candidate_group:** 137/137 (passed)
+- **rc_audit_findings_repair_tests:** 20/20 (passed)
+- **focused_audit_finding_repair_group:** 161/161 (passed)
 - **bootstrap_session_report_regression:** 358/358 (passed)
 - **release_lifecycle_regression:** 421/421 (passed)
 - **combined_regression:** 2240/2240 (passed)
 - **fast_green:** 4390/4390 (fully green) (passed)
 - **report_notification_tests:** 219/219 (passed, unchanged this phase)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **empirical_trust_gate_asymmetry_reproduction:** confirmed (documented)
+- **broader_phase_task_regression_no_regressions:** 1281/1281 (passed)
+- **empirical_asymmetry_repro_before_and_after_fix:** confirmed_closed (documented)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106H.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106I.
 
 ## Recommended Next Phase
 
-106H — v0.1 RC Audit Findings Repair
+106I — v0.1 RC End-to-End Verification / Full Phase Check
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*
