@@ -9,7 +9,7 @@
         {"hash": "d155dddcf56e7ec17ed558f234d6148799192290", "message": "Record 106F pre-tag finalization progress"},
         {"hash": "bf7ef68476cbd42dbb7bb9b0b17e52933af0a9b3", "message": "Complete Phase 106F v0.1 RC finalization"}
     ],
-    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "tag_name": "v0.1.0-rc1",
     "tagged_commit": "d155dddcf56e7ec17ed558f234d6148799192290",
@@ -38,7 +38,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
