@@ -4,10 +4,10 @@
     "summary": "Froze PCAE v0.1 release scope: docs/RELEASE_SCOPE_V0_1.md defines PCAE v0.1 -- Governed AI Coding Lifecycle Harness, non-executing by design. Documents included/excluded capabilities, the supported golden workflow, experimental/internal commands, safety/forbidden claims, known limitations, release blockers, validation baseline, release checklist, and the v0.2 full-autonomy roadmap boundary. Documentation-only; no code changes. 16 new tests. Recommends 106B.",
     "files_changed_count": 2, "tests_added_or_updated": "16 tests added",
     "phase_commits": [{"hash": "e63d13ccfc0bea118e2548cd8700da1d5ef68c5a", "message": "Freeze v0.1 release scope"}],
-    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "release_scope_doc": "docs/RELEASE_SCOPE_V0_1.md",
-    "note": "This metadata intentionally reflects pre-push state (pushed_status=not_pushed) at task-finish time; pcae push check correctly passes on content completeness regardless (105D design). A corrected complete dispatch follows after pcae push. Documentation-only phase: no source files (src/pcae) changed.",
+    "note": "Corrected dispatch, sent after pcae push resolved final push state. The earlier pcae task finish --commit run for this same phase correctly reported skipped_incomplete instead of dispatching partial, and pcae push check correctly passed despite the pre-push report (both demonstrating preserved 105C.1/105D behavior). Documentation-only phase: no source files (src/pcae) changed.",
     "validation_results": [
         {"name": "release_scope_v0_1_tests", "result": "16/16", "status": "passed"},
         {"name": "focused_release_scope_tests", "result": "197/197", "status": "passed"},
@@ -25,7 +25,7 @@
     "pre_existing_failures": ["Test94UPreflightArtifact", "Test94UPreflightArtifactCLI", "TestBackendShow"],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
