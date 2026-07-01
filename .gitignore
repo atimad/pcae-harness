@@ -6,5 +6,6 @@ dist/
 build/
 .DS_Store
 .pcae/approvals/
+.pcae/execution-readiness-preflight/
 docs/REAL_CAPTURED_TASKS.md
 docs/REAL_CAPTURED_TASKS.md

@@ -37,6 +37,7 @@ Freeze the governed execution attempt boundary contract from Phase 99A. Contract
 - tasks/done/**
 - src/pcae/core/backend_invocations.py
 - src/pcae/cli.py
+- .gitignore
 
 ## Forbidden Files
 
@@ -50,6 +51,7 @@ Freeze the governed execution attempt boundary contract from Phase 99A. Contract
 - docs
 - tasks
 - config
+- unclassified
 
 ## Forbidden Zones
 
