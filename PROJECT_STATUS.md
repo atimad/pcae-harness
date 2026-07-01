@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 99B — Governed Execution Attempt Contract Freeze (completed).
+Phase 99B.1 — Telegram Notification Delivery / Phase Report Trust Repair (completed).
 
 Contract-freeze only. Freezes the 99A GovernedExecutionAttemptBoundary contract:
 33 top-level JSON fields, 14 attempt states, 26 denial reasons, 12 authorization
@@ -12,6 +12,18 @@ semantics, prerequisite semantics, denial/abort/fail-closed semantics.
 No execution boundary exists. All auth flags remain False.
 
 Recommends 99C — Governed Execution Attempt Artifact Trust Hardening.
+
+## Phase 99B.1 Complete
+
+Phase 99B.1 — Telegram Notification Delivery / Phase Report Trust Repair (completed).
+
+Narrow repair phase. Root cause: `pcae phase complete` was not called during Phase
+99B, so the canonical phase report was never created and the Telegram notification
+was never dispatched. Repair: created canonical Phase 99B phase report via `pcae
+phase complete`, dispatched Telegram notification via `pcae notify send-report
+--latest` with PCAE_NOTIFY_ENABLED=1, enriched metadata with
+bootstrap_session_reporting_tests. Telegram outbound delivery confirmed working.
+No execution.
 
 ## Phase 99A Complete
 
