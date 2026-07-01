@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 106G (20260702-0109-sync-final-pushed-state-metadata-for-106g)
 - Phase 106G: v0.1 Post-RC System Inspection / Lifecycle Connectivity Audit (20260702-0054-phase-106g-v0-1-post-rc-system-inspection-lifecycle-connectivity-audit)
 - Sync final pushed-state metadata for 106F (20260702-0038-sync-final-pushed-state-metadata-for-106f)
 - Phase 106F: v0.1 RC Tag / Release Artifact Finalization (20260702-0016-phase-106f-v0-1-rc-tag-release-artifact-finalization)

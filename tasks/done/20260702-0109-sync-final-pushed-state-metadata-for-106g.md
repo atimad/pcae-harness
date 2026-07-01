@@ -10,7 +10,7 @@ Sync final pushed-state metadata for 106G
 
 ## Status
 
-active
+done
 
 ## Mode
 
