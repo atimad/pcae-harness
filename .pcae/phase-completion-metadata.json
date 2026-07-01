@@ -4,10 +4,10 @@
     "summary": "Documented and command-verified the v0.1 golden workflow: docs/V0_1_GOLDEN_WORKFLOW.md defines start-of-phase, implementation, pre-finalization, finalization (report/notify/commit/push), and post-completion verification, with required vs optional-diagnostic commands and an explicit unsupported-flows list. Every command verified against the live CLI, none invented. Updated docs/RELEASE_SCOPE_V0_1.md to reference it as a required release artifact. Documentation/testing-only. 32 new tests. Recommends 106D.",
     "files_changed_count": 3, "tests_added_or_updated": "32 tests added",
     "phase_commits": [{"hash": "5acc62b870a36f2f228cfbe417ef2df6417bd499", "message": "Stabilize v0.1 golden workflow"}],
-    "pushed_status": "not_pushed", "origin_main_head_count": 1, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "golden_workflow_doc": "docs/V0_1_GOLDEN_WORKFLOW.md",
-    "note": "This metadata intentionally reflects pre-push state (pushed_status=not_pushed) at task-finish time; pcae push check correctly passes on content completeness regardless (105D design). A corrected complete dispatch follows after pcae push. Documentation/testing-only phase: no product code (src/pcae) changed.",
+    "note": "Corrected dispatch, sent after pcae push resolved final push state. The earlier pcae task finish --commit run for this same phase correctly reported skipped_incomplete instead of dispatching partial, and pcae push check correctly passed despite the pre-push report (both demonstrating preserved 105C.1/105D behavior). Documentation/testing-only phase: no product code (src/pcae) changed.",
     "validation_results": [
         {"name": "golden_workflow_tests", "result": "32/32", "status": "passed"},
         {"name": "focused_golden_workflow_tests", "result": "201/201", "status": "passed"},
@@ -25,7 +25,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
