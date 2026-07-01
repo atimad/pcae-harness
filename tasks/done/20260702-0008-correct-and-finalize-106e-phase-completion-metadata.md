@@ -10,7 +10,7 @@ Correct and finalize 106E phase-completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
