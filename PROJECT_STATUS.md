@@ -2,6 +2,26 @@
 
 ## Current Phase
 
+Phase 106H — v0.1 RC Audit Findings Repair (in progress).
+
+Repairs the trust-gate asymmetry Phase 106G's audit found and
+empirically reproduced between `pcae task finish --commit` and `pcae
+phase complete`: `task finish --commit`'s dispatch gate omitted the OLD
+(95M.1) schema's full completeness check (`files_changed>0`, etc.) that
+`phase complete`'s gate has required since Phase 105D. Added a shared
+helper, `apply_old_schema_gate()`, to `core/phase_report_trust.py`
+(mirroring the existing `apply_push_state_gate()`), and wired both
+`commands/task.py::_finalize_task_report_and_notify` and
+`commands/phase.py::_finalize_report_and_notify` to use it — closing the
+gap without weakening `phase complete`'s existing hard-fail behavior and
+without changing any already-passing test's expectations. `pcae task
+finish --commit` remains the preferred v0.1 golden-workflow completion
+command; `pcae phase complete` remains available as the documented,
+lower-level, post-push corrected-re-dispatch path. This entry will be
+updated with final validation/commit details once complete.
+
+## Phase 106G Complete
+
 Phase 106G — v0.1 Post-RC System Inspection / Lifecycle Connectivity Audit
 (completed).
 
