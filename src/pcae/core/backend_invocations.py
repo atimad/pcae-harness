@@ -6,6 +6,7 @@ no subprocess, no network calls.  Simulation/validation only.
 
 from __future__ import annotations
 
+import hashlib
 import json as _json
 import os as _os
 import uuid
@@ -7804,4 +7805,905 @@ def get_audit_rollback_readiness() -> dict[str, Any]:
             AUDIT_DENIED_MISSING_SNAPSHOT,
         ],
         "message": "Audit and rollback readiness are design-only. No execution."
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Phase 97F — Execution readiness preflight dry-run
+# ═══════════════════════════════════════════════════════════════════════════
+
+_PREFLIGHT_SCHEMA_VERSION = "1.0"
+
+# ── Preflight statuses ──────────────────────────────────────────────────
+
+PREFLIGHT_UNAVAILABLE = "unavailable"
+PREFLIGHT_NOT_READY = "not_ready"
+PREFLIGHT_BLOCKED = "blocked"
+PREFLIGHT_EVIDENCE_INCOMPLETE = "evidence_incomplete"
+PREFLIGHT_APPROVAL_REQUIRED = "approval_required"
+PREFLIGHT_AUDIT_REQUIRED = "audit_required"
+PREFLIGHT_ROLLBACK_REQUIRED = "rollback_required"
+PREFLIGHT_FAILED_VERIFICATION = "failed_verification"
+PREFLIGHT_READY_FOR_HUMAN_REVIEW = "ready_for_human_review"
+PREFLIGHT_READY_FOR_PREFLIGHT_ONLY = "ready_for_preflight_only"
+
+# Future-only — never available, never implemented
+PREFLIGHT_EXECUTION_READY_FUTURE_ONLY = "execution_ready"
+PREFLIGHT_EXECUTE_NOW_FUTURE_ONLY = "execute_now"
+PREFLIGHT_INVOKE_NOW_FUTURE_ONLY = "invoke_now"
+PREFLIGHT_APPLY_NOW_FUTURE_ONLY = "apply_now"
+PREFLIGHT_COMMIT_NOW_FUTURE_ONLY = "commit_now"
+PREFLIGHT_PUSH_NOW_FUTURE_ONLY = "push_now"
+
+VALID_PREFLIGHT_STATUSES: frozenset[str] = frozenset({
+    PREFLIGHT_UNAVAILABLE,
+    PREFLIGHT_NOT_READY,
+    PREFLIGHT_BLOCKED,
+    PREFLIGHT_EVIDENCE_INCOMPLETE,
+    PREFLIGHT_APPROVAL_REQUIRED,
+    PREFLIGHT_AUDIT_REQUIRED,
+    PREFLIGHT_ROLLBACK_REQUIRED,
+    PREFLIGHT_FAILED_VERIFICATION,
+    PREFLIGHT_READY_FOR_HUMAN_REVIEW,
+    PREFLIGHT_READY_FOR_PREFLIGHT_ONLY,
+})
+
+# Statuses that are available for current use (non-future)
+CURRENT_PREFLIGHT_STATUSES: frozenset[str] = frozenset({
+    PREFLIGHT_UNAVAILABLE,
+    PREFLIGHT_NOT_READY,
+    PREFLIGHT_BLOCKED,
+    PREFLIGHT_EVIDENCE_INCOMPLETE,
+    PREFLIGHT_APPROVAL_REQUIRED,
+    PREFLIGHT_AUDIT_REQUIRED,
+    PREFLIGHT_ROLLBACK_REQUIRED,
+    PREFLIGHT_FAILED_VERIFICATION,
+    PREFLIGHT_READY_FOR_HUMAN_REVIEW,
+    PREFLIGHT_READY_FOR_PREFLIGHT_ONLY,
+})
+
+# Statuses that are NEVER authorized — execution is never available
+UNAVAILABLE_PREFLIGHT_STATUSES: frozenset[str] = frozenset({
+    PREFLIGHT_EXECUTION_READY_FUTURE_ONLY,
+    PREFLIGHT_EXECUTE_NOW_FUTURE_ONLY,
+    PREFLIGHT_INVOKE_NOW_FUTURE_ONLY,
+    PREFLIGHT_APPLY_NOW_FUTURE_ONLY,
+    PREFLIGHT_COMMIT_NOW_FUTURE_ONLY,
+    PREFLIGHT_PUSH_NOW_FUTURE_ONLY,
+})
+
+# ── Evidence ref categories ─────────────────────────────────────────────
+
+EVIDENCE_READINESS_MODEL = "readiness_model"
+EVIDENCE_BACKEND_CONTRACT = "backend_invocation_contract"
+EVIDENCE_ADAPTER_BOUNDARY = "adapter_invocation_boundary"
+EVIDENCE_HUMAN_APPROVAL_GATE = "human_approval_gate"
+EVIDENCE_AUDIT_READINESS = "audit_readiness"
+EVIDENCE_ROLLBACK_READINESS = "rollback_readiness"
+EVIDENCE_ARTIFACT_VERIFICATION = "artifact_verification"
+EVIDENCE_EXECUTION_BOUNDARY_PROOF = "execution_boundary_proof"
+EVIDENCE_PHASE_FINALIZATION = "phase_finalization_context"
+EVIDENCE_ACTIVE_TASK = "active_task_contract"
+
+ALL_EVIDENCE_CATEGORIES: frozenset[str] = frozenset({
+    EVIDENCE_READINESS_MODEL,
+    EVIDENCE_BACKEND_CONTRACT,
+    EVIDENCE_ADAPTER_BOUNDARY,
+    EVIDENCE_HUMAN_APPROVAL_GATE,
+    EVIDENCE_AUDIT_READINESS,
+    EVIDENCE_ROLLBACK_READINESS,
+    EVIDENCE_ARTIFACT_VERIFICATION,
+    EVIDENCE_EXECUTION_BOUNDARY_PROOF,
+    EVIDENCE_PHASE_FINALIZATION,
+    EVIDENCE_ACTIVE_TASK,
+})
+
+# ── No-go condition constants ───────────────────────────────────────────
+
+NOGO_MISSING_READINESS = "missing_execution_readiness"
+NOGO_MISSING_BACKEND_CONTRACT = "missing_backend_invocation_contract"
+NOGO_MISSING_ADAPTER_BOUNDARY = "missing_adapter_boundary"
+NOGO_MISSING_APPROVAL = "missing_human_approval"
+NOGO_EXPIRED_APPROVAL = "expired_or_revoked_approval"
+NOGO_MISSING_AUDIT = "missing_audit_readiness"
+NOGO_MISSING_ROLLBACK = "missing_rollback_readiness"
+NOGO_FAILED_VERIFICATION = "failed_artifact_verification"
+NOGO_MISSING_BOUNDARY_PROOF = "missing_execution_boundary_proof"
+NOGO_STALE_POINTER = "stale_latest_pointer"
+NOGO_UNKNOWN_SCHEMA = "unknown_schema_version"
+NOGO_CONFLICTING_FLAGS = "conflicting_safety_flags"
+NOGO_FORBIDDEN_PATH = "forbidden_path_or_scope"
+NOGO_SECRET_DETECTED = "secret_material_detected"
+NOGO_NETWORK_REQUESTED = "network_requested"
+NOGO_SUBPROCESS_REQUESTED = "subprocess_requested"
+NOGO_SHELL_REQUESTED = "shell_requested"
+NOGO_TELEGRAM_INBOUND = "telegram_inbound_requested"
+NOGO_APPLY_REQUESTED = "apply_requested_without_governance"
+NOGO_ROLLBACK_EXEC_REQUESTED = "rollback_execution_requested"
+NOGO_COMMIT_PUSH_REQUESTED = "commit_or_push_requested"
+NOGO_RAW_GIT = "raw_git_path_detected"
+NOGO_NO_VERIFY = "no_verify_attempt"
+NOGO_FORCE_PUSH = "force_push_attempt"
+NOGO_BYPASS_PERMISSIONS = "bypass_permissions_detected"
+
+VALID_NOGO_CONDITIONS: frozenset[str] = frozenset({
+    NOGO_MISSING_READINESS,
+    NOGO_MISSING_BACKEND_CONTRACT,
+    NOGO_MISSING_ADAPTER_BOUNDARY,
+    NOGO_MISSING_APPROVAL,
+    NOGO_EXPIRED_APPROVAL,
+    NOGO_MISSING_AUDIT,
+    NOGO_MISSING_ROLLBACK,
+    NOGO_FAILED_VERIFICATION,
+    NOGO_MISSING_BOUNDARY_PROOF,
+    NOGO_STALE_POINTER,
+    NOGO_UNKNOWN_SCHEMA,
+    NOGO_CONFLICTING_FLAGS,
+    NOGO_FORBIDDEN_PATH,
+    NOGO_SECRET_DETECTED,
+    NOGO_NETWORK_REQUESTED,
+    NOGO_SUBPROCESS_REQUESTED,
+    NOGO_SHELL_REQUESTED,
+    NOGO_TELEGRAM_INBOUND,
+    NOGO_APPLY_REQUESTED,
+    NOGO_ROLLBACK_EXEC_REQUESTED,
+    NOGO_COMMIT_PUSH_REQUESTED,
+    NOGO_RAW_GIT,
+    NOGO_NO_VERIFY,
+    NOGO_FORCE_PUSH,
+    NOGO_BYPASS_PERMISSIONS,
+    # Upstream conditions from 97A readiness model (passthrough)
+    "execution_readiness_model_not_implemented",
+    "backend_invocation_never_implemented",
+    "subprocess_mediation_never_implemented",
+    "shell_mediation_never_implemented",
+})
+
+# ── Artifact paths ──────────────────────────────────────────────────────
+
+_PREFLIGHT_ARTIFACT_DIR = ".pcae/execution-readiness-preflight"
+_PREFLIGHT_LATEST = "latest.json"
+
+
+def _preflight_dir_path() -> Path:
+    from pathlib import Path as _P
+    return _P(_PREFLIGHT_ARTIFACT_DIR)
+
+
+def _preflight_latest_path() -> Path:
+    return _preflight_dir_path() / _PREFLIGHT_LATEST
+
+
+def _preflight_timestamped_path(ts: str) -> Path:
+    return _preflight_dir_path() / f"{ts}.json"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ExecutionReadinessPreflight — main preflight result dataclass
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class ExecutionReadinessPreflight:
+    """Integrated readiness preflight combining 97A–97E evidence.
+
+    Deterministic, evidence-only, non-executing, non-authorizing.
+    All authorization flags are always False in the current system.
+    """
+
+    schema_version: str = _PREFLIGHT_SCHEMA_VERSION
+    preflight_id: str = ""
+    phase_id: str = "97F"
+    task_id: str = ""
+    generated_at_utc: str = ""
+
+    # ── Core statuses ──────────────────────────────────────────────────
+    readiness_status: str = READINESS_BLOCKED
+    preflight_status: str = PREFLIGHT_BLOCKED
+    evidence_status: str = READINESS_EVIDENCE_INCOMPLETE
+
+    # ── Domain statuses ─────────────────────────────────────────────────
+    backend_invocation_contract_status: str = PREFLIGHT_NOT_READY
+    adapter_boundary_status: str = PREFLIGHT_NOT_READY
+    approval_status: str = PREFLIGHT_APPROVAL_REQUIRED
+    audit_readiness_status: str = PREFLIGHT_AUDIT_REQUIRED
+    rollback_readiness_status: str = PREFLIGHT_ROLLBACK_REQUIRED
+    artifact_verification_status: str = PREFLIGHT_FAILED_VERIFICATION
+    execution_boundary_proof_status: str = PREFLIGHT_NOT_READY
+
+    # ── Aggregated results ─────────────────────────────────────────────
+    no_go_conditions: list[str] = field(default_factory=list)
+    missing_evidence: list[str] = field(default_factory=list)
+    failed_checks: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+    # ── Evidence references ─────────────────────────────────────────────
+    evidence_refs: list[str] = field(default_factory=list)
+    approval_refs: list[str] = field(default_factory=list)
+    audit_refs: list[str] = field(default_factory=list)
+    rollback_refs: list[str] = field(default_factory=list)
+    proof_refs: list[str] = field(default_factory=list)
+
+    # ── Authorization summary — all False in current system ────────────
+    execution_available: bool = False
+    execution_authorized: bool = False
+    backend_invocation_authorized: bool = False
+    adapter_execution_authorized: bool = False
+    network_authorized: bool = False
+    subprocess_authorized: bool = False
+    shell_authorized: bool = False
+    mutation_authorized: bool = False
+    apply_authorized: bool = False
+    rollback_authorized: bool = False
+    commit_authorized: bool = False
+    push_authorized: bool = False
+
+    # ── Safety invariants ──────────────────────────────────────────────
+    simulation_only: bool = True
+    no_execution: bool = True
+
+    # ── Digest ─────────────────────────────────────────────────────────
+    digest: str = ""
+
+    def validate(self) -> list[str]:
+        """Validate preflight invariants. Fail-closed."""
+        issues: list[str] = []
+        if self.schema_version != _PREFLIGHT_SCHEMA_VERSION:
+            issues.append(f"unknown schema_version: {self.schema_version!r}")
+        if self.preflight_status not in VALID_PREFLIGHT_STATUSES:
+            issues.append(f"invalid preflight_status: {self.preflight_status!r}")
+        if self.execution_available:
+            issues.append("execution_available must be False")
+        if self.execution_authorized:
+            issues.append("execution_authorized must be False")
+        if self.backend_invocation_authorized:
+            issues.append("backend_invocation_authorized must be False")
+        if self.adapter_execution_authorized:
+            issues.append("adapter_execution_authorized must be False")
+        if self.network_authorized:
+            issues.append("network_authorized must be False")
+        if self.subprocess_authorized:
+            issues.append("subprocess_authorized must be False")
+        if self.shell_authorized:
+            issues.append("shell_authorized must be False")
+        if self.mutation_authorized:
+            issues.append("mutation_authorized must be False")
+        if self.apply_authorized:
+            issues.append("apply_authorized must be False")
+        if self.rollback_authorized:
+            issues.append("rollback_authorized must be False")
+        if self.commit_authorized:
+            issues.append("commit_authorized must be False")
+        if self.push_authorized:
+            issues.append("push_authorized must be False")
+        if not self.simulation_only:
+            issues.append("simulation_only must be True")
+        if not self.no_execution:
+            issues.append("no_execution must be True")
+        for cond in self.no_go_conditions:
+            if cond not in VALID_NOGO_CONDITIONS:
+                issues.append(f"unknown no_go_condition: {cond!r}")
+        # Future-only statuses must never appear as current status
+        if self.preflight_status in UNAVAILABLE_PREFLIGHT_STATUSES:
+            issues.append(
+                f"preflight_status {self.preflight_status!r} is future-only and unavailable"
+            )
+        return issues
+
+    def compute_digest(self) -> str:
+        """Compute SHA-256 digest over all fields except digest itself."""
+        payload = _canonical_preflight_dict(self)
+        payload.pop("digest", None)
+        canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+        return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+    def to_dict(self) -> dict[str, Any]:
+        result = {
+            "schema_version": self.schema_version,
+            "preflight_id": self.preflight_id,
+            "phase_id": self.phase_id,
+            "task_id": self.task_id,
+            "generated_at_utc": self.generated_at_utc,
+            "readiness_status": self.readiness_status,
+            "preflight_status": self.preflight_status,
+            "evidence_status": self.evidence_status,
+            "backend_invocation_contract_status": self.backend_invocation_contract_status,
+            "adapter_boundary_status": self.adapter_boundary_status,
+            "approval_status": self.approval_status,
+            "audit_readiness_status": self.audit_readiness_status,
+            "rollback_readiness_status": self.rollback_readiness_status,
+            "artifact_verification_status": self.artifact_verification_status,
+            "execution_boundary_proof_status": self.execution_boundary_proof_status,
+            "no_go_conditions": sorted(self.no_go_conditions),
+            "missing_evidence": sorted(self.missing_evidence),
+            "failed_checks": sorted(self.failed_checks),
+            "warnings": sorted(self.warnings),
+            "evidence_refs": self.evidence_refs,
+            "approval_refs": self.approval_refs,
+            "audit_refs": self.audit_refs,
+            "rollback_refs": self.rollback_refs,
+            "proof_refs": self.proof_refs,
+            "authorization_summary": {
+                "execution_available": self.execution_available,
+                "execution_authorized": self.execution_authorized,
+                "backend_invocation_authorized": self.backend_invocation_authorized,
+                "adapter_execution_authorized": self.adapter_execution_authorized,
+                "network_authorized": self.network_authorized,
+                "subprocess_authorized": self.subprocess_authorized,
+                "shell_authorized": self.shell_authorized,
+                "mutation_authorized": self.mutation_authorized,
+                "apply_authorized": self.apply_authorized,
+                "rollback_authorized": self.rollback_authorized,
+                "commit_authorized": self.commit_authorized,
+                "push_authorized": self.push_authorized,
+            },
+            "simulation_only": self.simulation_only,
+            "no_execution": self.no_execution,
+            "digest": self.digest,
+        }
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "ExecutionReadinessPreflight":
+        auth = data.get("authorization_summary", {})
+        return cls(
+            schema_version=data.get("schema_version", _PREFLIGHT_SCHEMA_VERSION),
+            preflight_id=data.get("preflight_id", ""),
+            phase_id=data.get("phase_id", "97F"),
+            task_id=data.get("task_id", ""),
+            generated_at_utc=data.get("generated_at_utc", ""),
+            readiness_status=data.get("readiness_status", READINESS_BLOCKED),
+            preflight_status=data.get("preflight_status", PREFLIGHT_BLOCKED),
+            evidence_status=data.get("evidence_status", READINESS_EVIDENCE_INCOMPLETE),
+            backend_invocation_contract_status=data.get(
+                "backend_invocation_contract_status", PREFLIGHT_NOT_READY
+            ),
+            adapter_boundary_status=data.get(
+                "adapter_boundary_status", PREFLIGHT_NOT_READY
+            ),
+            approval_status=data.get("approval_status", PREFLIGHT_APPROVAL_REQUIRED),
+            audit_readiness_status=data.get(
+                "audit_readiness_status", PREFLIGHT_AUDIT_REQUIRED
+            ),
+            rollback_readiness_status=data.get(
+                "rollback_readiness_status", PREFLIGHT_ROLLBACK_REQUIRED
+            ),
+            artifact_verification_status=data.get(
+                "artifact_verification_status", PREFLIGHT_FAILED_VERIFICATION
+            ),
+            execution_boundary_proof_status=data.get(
+                "execution_boundary_proof_status", PREFLIGHT_NOT_READY
+            ),
+            no_go_conditions=data.get("no_go_conditions", []),
+            missing_evidence=data.get("missing_evidence", []),
+            failed_checks=data.get("failed_checks", []),
+            warnings=data.get("warnings", []),
+            evidence_refs=data.get("evidence_refs", []),
+            approval_refs=data.get("approval_refs", []),
+            audit_refs=data.get("audit_refs", []),
+            rollback_refs=data.get("rollback_refs", []),
+            proof_refs=data.get("proof_refs", []),
+            execution_available=auth.get("execution_available", False),
+            execution_authorized=auth.get("execution_authorized", False),
+            backend_invocation_authorized=auth.get("backend_invocation_authorized", False),
+            adapter_execution_authorized=auth.get("adapter_execution_authorized", False),
+            network_authorized=auth.get("network_authorized", False),
+            subprocess_authorized=auth.get("subprocess_authorized", False),
+            shell_authorized=auth.get("shell_authorized", False),
+            mutation_authorized=auth.get("mutation_authorized", False),
+            apply_authorized=auth.get("apply_authorized", False),
+            rollback_authorized=auth.get("rollback_authorized", False),
+            commit_authorized=auth.get("commit_authorized", False),
+            push_authorized=auth.get("push_authorized", False),
+            simulation_only=data.get("simulation_only", True),
+            no_execution=data.get("no_execution", True),
+            digest=data.get("digest", ""),
+        )
+
+
+def _canonical_preflight_dict(preflight: ExecutionReadinessPreflight) -> dict[str, Any]:
+    """Return a canonical dict representation for digest computation."""
+    return {
+        "schema_version": preflight.schema_version,
+        "preflight_id": preflight.preflight_id,
+        "phase_id": preflight.phase_id,
+        "task_id": preflight.task_id,
+        "generated_at_utc": preflight.generated_at_utc,
+        "readiness_status": preflight.readiness_status,
+        "preflight_status": preflight.preflight_status,
+        "evidence_status": preflight.evidence_status,
+        "backend_invocation_contract_status": preflight.backend_invocation_contract_status,
+        "adapter_boundary_status": preflight.adapter_boundary_status,
+        "approval_status": preflight.approval_status,
+        "audit_readiness_status": preflight.audit_readiness_status,
+        "rollback_readiness_status": preflight.rollback_readiness_status,
+        "artifact_verification_status": preflight.artifact_verification_status,
+        "execution_boundary_proof_status": preflight.execution_boundary_proof_status,
+        "no_go_conditions": sorted(preflight.no_go_conditions),
+        "missing_evidence": sorted(preflight.missing_evidence),
+        "failed_checks": sorted(preflight.failed_checks),
+        "warnings": sorted(preflight.warnings),
+        "evidence_refs": sorted(preflight.evidence_refs),
+        "approval_refs": sorted(preflight.approval_refs),
+        "audit_refs": sorted(preflight.audit_refs),
+        "rollback_refs": sorted(preflight.rollback_refs),
+        "proof_refs": sorted(preflight.proof_refs),
+        "authorization_summary": {
+            "execution_available": preflight.execution_available,
+            "execution_authorized": preflight.execution_authorized,
+            "backend_invocation_authorized": preflight.backend_invocation_authorized,
+            "adapter_execution_authorized": preflight.adapter_execution_authorized,
+            "network_authorized": preflight.network_authorized,
+            "subprocess_authorized": preflight.subprocess_authorized,
+            "shell_authorized": preflight.shell_authorized,
+            "mutation_authorized": preflight.mutation_authorized,
+            "apply_authorized": preflight.apply_authorized,
+            "rollback_authorized": preflight.rollback_authorized,
+            "commit_authorized": preflight.commit_authorized,
+            "push_authorized": preflight.push_authorized,
+        },
+        "simulation_only": preflight.simulation_only,
+        "no_execution": preflight.no_execution,
+        "digest": preflight.digest,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Preflight builder — aggregates 97A–97E evidence
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+_UNSET = object()
+
+
+def build_execution_readiness_preflight(
+    *,
+    task_id: str = "",
+    phase_id: str = "97F",
+    readiness_data: dict[str, Any] | None = _UNSET,
+    backend_data: dict[str, Any] | None = _UNSET,
+    adapter_data: dict[str, Any] | None = _UNSET,
+    approval_data: dict[str, Any] | None = _UNSET,
+    audit_data: dict[str, Any] | None = _UNSET,
+    custom_evidence: dict[str, Any] | None = None,
+    active_task_contract: str | None = None,
+    phase_finalization_present: bool = False,
+) -> ExecutionReadinessPreflight:
+    """Build an integrated execution readiness preflight combining 97A–97E evidence.
+
+    Deterministic, evidence-only, non-executing, non-authorizing.
+    Fails closed: any missing required evidence → blocked with no-go conditions.
+
+    Args:
+        task_id: Active task ID for contextualization.
+        phase_id: Phase performing the preflight (default: 97F).
+        readiness_data: From get_current_execution_readiness() (97A).
+        backend_data: From get_backend_invocation_readiness() (97B).
+        adapter_data: From get_adapter_invocation_boundary() (97C).
+        approval_data: Approval gate status dict (97D).
+        audit_data: From get_audit_rollback_readiness() (97E).
+        custom_evidence: Optional additional evidence for extensibility.
+        active_task_contract: Path to active task contract file.
+        phase_finalization_present: Whether .pcae/phase-completion-metadata.json exists.
+
+    Returns:
+        ExecutionReadinessPreflight with aggregated evidence, no-go conditions,
+        and fail-closed authorization flags.
+    """
+    import uuid
+    now = datetime.now(timezone.utc)
+    preflight_id = f"erp-{uuid.uuid4().hex[:12]}"
+    generated_at = now.isoformat()
+
+    # ── Gather evidence from 97A–97E models ─────────────────────────────
+    # _UNSET sentinel → use default getter.  Explicit None → evidence missing.
+    if readiness_data is _UNSET:
+        readiness_data = get_current_execution_readiness()
+    if backend_data is _UNSET:
+        backend_data = get_backend_invocation_readiness()
+    if adapter_data is _UNSET:
+        adapter_data = get_adapter_invocation_boundary()
+    if audit_data is _UNSET:
+        audit_data = get_audit_rollback_readiness()
+    # approval_data defaults to None (missing evidence) when not provided
+    if approval_data is _UNSET:
+        approval_data = None
+
+    # ── Build evidence presence map ─────────────────────────────────────
+    evidence_present: dict[str, bool] = {}
+    missing_evidence: list[str] = []
+    evidence_refs: list[str] = []
+
+    # 97A — readiness model
+    if readiness_data:
+        evidence_present[EVIDENCE_READINESS_MODEL] = True
+        evidence_refs.append("model:execution_readiness_97a")
+    else:
+        evidence_present[EVIDENCE_READINESS_MODEL] = False
+        missing_evidence.append(EVIDENCE_READINESS_MODEL)
+
+    # 97B — backend invocation contract
+    if backend_data:
+        evidence_present[EVIDENCE_BACKEND_CONTRACT] = True
+        evidence_refs.append("model:backend_invocation_contract_97b")
+    else:
+        evidence_present[EVIDENCE_BACKEND_CONTRACT] = False
+        missing_evidence.append(EVIDENCE_BACKEND_CONTRACT)
+
+    # 97C — adapter invocation boundary
+    if adapter_data:
+        evidence_present[EVIDENCE_ADAPTER_BOUNDARY] = True
+        evidence_refs.append("model:adapter_invocation_boundary_97c")
+    else:
+        evidence_present[EVIDENCE_ADAPTER_BOUNDARY] = False
+        missing_evidence.append(EVIDENCE_ADAPTER_BOUNDARY)
+
+    # 97D — human approval gate
+    if approval_data:
+        evidence_present[EVIDENCE_HUMAN_APPROVAL_GATE] = True
+        evidence_refs.append("model:human_approval_gate_97d")
+    else:
+        evidence_present[EVIDENCE_HUMAN_APPROVAL_GATE] = False
+        missing_evidence.append(EVIDENCE_HUMAN_APPROVAL_GATE)
+
+    # 97E — audit/rollback readiness
+    if audit_data:
+        evidence_present[EVIDENCE_AUDIT_READINESS] = True
+        evidence_present[EVIDENCE_ROLLBACK_READINESS] = True
+        evidence_refs.append("model:audit_rollback_readiness_97e")
+    else:
+        evidence_present[EVIDENCE_AUDIT_READINESS] = False
+        evidence_present[EVIDENCE_ROLLBACK_READINESS] = False
+        missing_evidence.append(EVIDENCE_AUDIT_READINESS)
+        missing_evidence.append(EVIDENCE_ROLLBACK_READINESS)
+
+    # Active task contract
+    if active_task_contract:
+        evidence_present[EVIDENCE_ACTIVE_TASK] = True
+        evidence_refs.append(f"file:{active_task_contract}")
+    else:
+        evidence_present[EVIDENCE_ACTIVE_TASK] = False
+        missing_evidence.append(EVIDENCE_ACTIVE_TASK)
+
+    # Phase finalization context
+    if phase_finalization_present:
+        evidence_present[EVIDENCE_PHASE_FINALIZATION] = True
+        evidence_refs.append("file:.pcae/phase-completion-metadata.json")
+    else:
+        evidence_present[EVIDENCE_PHASE_FINALIZATION] = False
+        missing_evidence.append(EVIDENCE_PHASE_FINALIZATION)
+
+    # ── Determine evidence status ───────────────────────────────────────
+    if not any(evidence_present.values()):
+        evidence_status = READINESS_EVIDENCE_INCOMPLETE
+    elif all(evidence_present.values()):
+        evidence_status = "complete"
+    else:
+        evidence_status = READINESS_EVIDENCE_INCOMPLETE
+
+    # ── Aggregate no-go conditions ──────────────────────────────────────
+    no_go: list[str] = []
+
+    # From 97A readiness
+    if readiness_data:
+        no_go.extend(readiness_data.get("no_go_conditions", []))
+    if not evidence_present.get(EVIDENCE_READINESS_MODEL, False):
+        no_go.append(NOGO_MISSING_READINESS)
+
+    # From 97B backend contract
+    if not evidence_present.get(EVIDENCE_BACKEND_CONTRACT, False):
+        no_go.append(NOGO_MISSING_BACKEND_CONTRACT)
+
+    # From 97C adapter boundary
+    if not evidence_present.get(EVIDENCE_ADAPTER_BOUNDARY, False):
+        no_go.append(NOGO_MISSING_ADAPTER_BOUNDARY)
+
+    # From 97D approval gate
+    if not evidence_present.get(EVIDENCE_HUMAN_APPROVAL_GATE, False):
+        no_go.append(NOGO_MISSING_APPROVAL)
+    elif approval_data:
+        approval_decision = approval_data.get("decision", "")
+        if approval_decision in ("expired", "revoked"):
+            no_go.append(NOGO_EXPIRED_APPROVAL)
+
+    # From 97E audit/rollback
+    if not evidence_present.get(EVIDENCE_AUDIT_READINESS, False):
+        no_go.append(NOGO_MISSING_AUDIT)
+    if not evidence_present.get(EVIDENCE_ROLLBACK_READINESS, False):
+        no_go.append(NOGO_MISSING_ROLLBACK)
+
+    # No artifact verification yet
+    no_go.append(NOGO_FAILED_VERIFICATION)
+
+    # No execution boundary proof yet
+    no_go.append(NOGO_MISSING_BOUNDARY_PROOF)
+
+    # Deduplicate
+    no_go = sorted(set(no_go))
+
+    # ── Aggregate failed checks ─────────────────────────────────────────
+    failed_checks: list[str] = []
+    if not evidence_present.get(EVIDENCE_READINESS_MODEL, False):
+        failed_checks.append("check:readiness_model_missing")
+    if not evidence_present.get(EVIDENCE_BACKEND_CONTRACT, False):
+        failed_checks.append("check:backend_invocation_contract_missing")
+    if not evidence_present.get(EVIDENCE_ADAPTER_BOUNDARY, False):
+        failed_checks.append("check:adapter_boundary_missing")
+    if not evidence_present.get(EVIDENCE_HUMAN_APPROVAL_GATE, False):
+        failed_checks.append("check:human_approval_gate_missing")
+    if not evidence_present.get(EVIDENCE_AUDIT_READINESS, False):
+        failed_checks.append("check:audit_readiness_missing")
+    if not evidence_present.get(EVIDENCE_ROLLBACK_READINESS, False):
+        failed_checks.append("check:rollback_readiness_missing")
+    if not evidence_present.get(EVIDENCE_ACTIVE_TASK, False):
+        failed_checks.append("check:active_task_contract_missing")
+    if not evidence_present.get(EVIDENCE_PHASE_FINALIZATION, False):
+        failed_checks.append("check:phase_finalization_context_missing")
+
+    # ── Determine domain statuses ───────────────────────────────────────
+    backend_status = (
+        PREFLIGHT_BLOCKED
+        if NOGO_MISSING_BACKEND_CONTRACT in no_go
+        else PREFLIGHT_NOT_READY
+    )
+    adapter_status = (
+        PREFLIGHT_BLOCKED
+        if NOGO_MISSING_ADAPTER_BOUNDARY in no_go
+        else PREFLIGHT_NOT_READY
+    )
+    approval_domain_status = (
+        PREFLIGHT_APPROVAL_REQUIRED
+        if NOGO_MISSING_APPROVAL in no_go or NOGO_EXPIRED_APPROVAL in no_go
+        else PREFLIGHT_NOT_READY
+    )
+    audit_domain_status = (
+        PREFLIGHT_AUDIT_REQUIRED
+        if NOGO_MISSING_AUDIT in no_go
+        else PREFLIGHT_NOT_READY
+    )
+    rollback_domain_status = (
+        PREFLIGHT_ROLLBACK_REQUIRED
+        if NOGO_MISSING_ROLLBACK in no_go
+        else PREFLIGHT_NOT_READY
+    )
+    verification_status = (
+        PREFLIGHT_FAILED_VERIFICATION
+        if NOGO_FAILED_VERIFICATION in no_go
+        else PREFLIGHT_NOT_READY
+    )
+    proof_status = (
+        PREFLIGHT_NOT_READY
+        if NOGO_MISSING_BOUNDARY_PROOF in no_go
+        else PREFLIGHT_NOT_READY
+    )
+
+    # ── Determine readiness status from 97A ────────────────────────────
+    readiness_status = readiness_data.get(
+        "readiness_status", READINESS_BLOCKED
+    ) if readiness_data else READINESS_BLOCKED
+
+    # ── Determine overall preflight status (fail-closed) ───────────────
+    if no_go:
+        # Determine the most severe status from no-go conditions
+        if NOGO_FAILED_VERIFICATION in no_go:
+            preflight_status = PREFLIGHT_FAILED_VERIFICATION
+        elif NOGO_MISSING_READINESS in no_go:
+            preflight_status = PREFLIGHT_EVIDENCE_INCOMPLETE
+        elif NOGO_MISSING_BACKEND_CONTRACT in no_go or NOGO_MISSING_ADAPTER_BOUNDARY in no_go:
+            preflight_status = PREFLIGHT_BLOCKED
+        elif NOGO_MISSING_APPROVAL in no_go or NOGO_EXPIRED_APPROVAL in no_go:
+            preflight_status = PREFLIGHT_APPROVAL_REQUIRED
+        elif NOGO_MISSING_AUDIT in no_go:
+            preflight_status = PREFLIGHT_AUDIT_REQUIRED
+        elif NOGO_MISSING_ROLLBACK in no_go:
+            preflight_status = PREFLIGHT_ROLLBACK_REQUIRED
+        else:
+            preflight_status = PREFLIGHT_BLOCKED
+    elif missing_evidence:
+        preflight_status = PREFLIGHT_EVIDENCE_INCOMPLETE
+    elif evidence_status == READINESS_EVIDENCE_INCOMPLETE:
+        preflight_status = PREFLIGHT_EVIDENCE_INCOMPLETE
+    elif approval_data and approval_data.get(
+        "decision", ""
+    ) in ("approved",):
+        preflight_status = PREFLIGHT_READY_FOR_HUMAN_REVIEW
+    else:
+        preflight_status = PREFLIGHT_READY_FOR_PREFLIGHT_ONLY
+
+    # ── Collect warnings ───────────────────────────────────────────────
+    warnings_list: list[str] = []
+    if missing_evidence:
+        warnings_list.append(
+            f"missing_evidence: {', '.join(sorted(missing_evidence))}"
+        )
+    if no_go:
+        warnings_list.append(f"no_go_conditions: {len(no_go)} active")
+    warnings_list.append("execution_remains_unavailable")
+    warnings_list.append("preflight_is_evidence_only_non_authorizing")
+
+    # ── Build preflight ────────────────────────────────────────────────
+    preflight = ExecutionReadinessPreflight(
+        schema_version=_PREFLIGHT_SCHEMA_VERSION,
+        preflight_id=preflight_id,
+        phase_id=phase_id,
+        task_id=task_id,
+        generated_at_utc=generated_at,
+        readiness_status=readiness_status,
+        preflight_status=preflight_status,
+        evidence_status=evidence_status,
+        backend_invocation_contract_status=backend_status,
+        adapter_boundary_status=adapter_status,
+        approval_status=approval_domain_status,
+        audit_readiness_status=audit_domain_status,
+        rollback_readiness_status=rollback_domain_status,
+        artifact_verification_status=verification_status,
+        execution_boundary_proof_status=proof_status,
+        no_go_conditions=sorted(no_go),
+        missing_evidence=sorted(missing_evidence),
+        failed_checks=sorted(failed_checks),
+        warnings=sorted(warnings_list),
+        evidence_refs=sorted(evidence_refs),
+        approval_refs=sorted(approval_data.get("refs", [])) if approval_data else [],
+        audit_refs=sorted(audit_data.get("denial_reasons", [])) if audit_data else [],
+        rollback_refs=sorted(audit_data.get("denial_reasons", [])) if audit_data else [],
+        proof_refs=[],
+        # All authorization flags remain False
+        execution_available=False,
+        execution_authorized=False,
+        backend_invocation_authorized=False,
+        adapter_execution_authorized=False,
+        network_authorized=False,
+        subprocess_authorized=False,
+        shell_authorized=False,
+        mutation_authorized=False,
+        apply_authorized=False,
+        rollback_authorized=False,
+        commit_authorized=False,
+        push_authorized=False,
+        simulation_only=True,
+        no_execution=True,
+    )
+    preflight.digest = preflight.compute_digest()
+    return preflight
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Preflight persistence and verification
+# ═══════════════════════════════════════════════════════════════════════════
+
+
+def save_execution_readiness_preflight(
+    preflight: ExecutionReadinessPreflight,
+) -> Path:
+    """Save preflight to .pcae/execution-readiness-preflight/.
+
+    Writes both latest.json and a timestamped copy.
+    Never executes, never invokes backends, never mutates source.
+    """
+    dir_path = _preflight_dir_path()
+    dir_path.mkdir(parents=True, exist_ok=True)
+
+    # Recompute digest before saving
+    preflight.digest = preflight.compute_digest()
+    payload = preflight.to_dict()
+
+    canonical = _json.dumps(payload, indent=2, sort_keys=True, ensure_ascii=False)
+
+    # Write timestamped copy
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    ts_path = _preflight_timestamped_path(ts)
+    ts_path.write_text(canonical, encoding="utf-8")
+
+    # Write latest
+    latest_path = _preflight_latest_path()
+    latest_path.write_text(canonical, encoding="utf-8")
+
+    return ts_path
+
+
+def load_latest_execution_readiness_preflight() -> ExecutionReadinessPreflight | None:
+    """Load the latest preflight artifact.
+
+    Returns None if no artifact exists.
+    Never executes, never invokes backends, never mutates source.
+    """
+    latest_path = _preflight_latest_path()
+    if not latest_path.exists():
+        return None
+    try:
+        raw = latest_path.read_text(encoding="utf-8")
+        data = _json.loads(raw)
+        return ExecutionReadinessPreflight.from_dict(data)
+    except (_json.JSONDecodeError, KeyError, TypeError):
+        return None
+
+
+def verify_execution_readiness_preflight(
+    preflight: ExecutionReadinessPreflight | None = None,
+    *,
+    expected_digest: str | None = None,
+) -> dict[str, Any]:
+    """Verify a preflight artifact.
+
+    Checks schema version, digest, safety flags, authorization flags,
+    no-go conditions, missing evidence, and fail-closed invariants.
+
+    Returns dict with valid=False for any verified issue.
+    Never executes, never invokes backends, never mutates source.
+    """
+    issues: list[str] = []
+
+    if preflight is None:
+        return {
+            "valid": False,
+            "issues": ["no_preflight_artifact_found"],
+            "preflight_present": False,
+        }
+
+    # Schema version check
+    if preflight.schema_version != _PREFLIGHT_SCHEMA_VERSION:
+        issues.append(
+            f"unknown schema_version: {preflight.schema_version!r} "
+            f"(expected {_PREFLIGHT_SCHEMA_VERSION!r})"
+        )
+
+    # Digest check
+    if expected_digest is not None:
+        if preflight.digest != expected_digest:
+            issues.append("digest_mismatch: tampered or stale artifact")
+    elif preflight.digest:
+        computed = preflight.compute_digest()
+        if computed != preflight.digest:
+            issues.append("digest_mismatch: computed_digest_differs_from_stored")
+
+    # Validate invariants
+    validate_issues = preflight.validate()
+    issues.extend(validate_issues)
+
+    # Check safety flags
+    if not preflight.simulation_only:
+        issues.append("simulation_only must be True")
+    if not preflight.no_execution:
+        issues.append("no_execution must be True")
+
+    # Check authorization flags
+    auth_checks = [
+        ("execution_available", preflight.execution_available),
+        ("execution_authorized", preflight.execution_authorized),
+        ("backend_invocation_authorized", preflight.backend_invocation_authorized),
+        ("adapter_execution_authorized", preflight.adapter_execution_authorized),
+        ("network_authorized", preflight.network_authorized),
+        ("subprocess_authorized", preflight.subprocess_authorized),
+        ("shell_authorized", preflight.shell_authorized),
+        ("mutation_authorized", preflight.mutation_authorized),
+        ("apply_authorized", preflight.apply_authorized),
+        ("rollback_authorized", preflight.rollback_authorized),
+        ("commit_authorized", preflight.commit_authorized),
+        ("push_authorized", preflight.push_authorized),
+    ]
+    for flag_name, flag_value in auth_checks:
+        if flag_value:
+            issues.append(f"{flag_name} must be False")
+
+    # Check preflight status is not future-only
+    if preflight.preflight_status in UNAVAILABLE_PREFLIGHT_STATUSES:
+        issues.append(
+            f"preflight_status {preflight.preflight_status!r} is future-only and unavailable"
+        )
+
+    # Contradictory status check
+    if preflight.preflight_status == PREFLIGHT_READY_FOR_PREFLIGHT_ONLY:
+        if preflight.no_go_conditions:
+            issues.append(
+                "contradictory: ready_for_preflight_only with active no_go_conditions"
+            )
+
+    return {
+        "valid": len(issues) == 0,
+        "issues": issues,
+        "preflight_present": True,
+        "preflight_id": preflight.preflight_id,
+        "digest": preflight.digest,
+        "preflight_status": preflight.preflight_status,
+        "no_execution_confirmed": preflight.no_execution and not preflight.execution_available,
     }

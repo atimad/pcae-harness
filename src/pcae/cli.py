@@ -43,6 +43,9 @@ from pcae.commands.agent import (
     run_governed_execution_dry_run,
     run_invocation_contracts,
     run_execution_readiness,
+    run_execution_readiness_preflight,
+    run_execution_readiness_preflight_show,
+    run_execution_readiness_preflight_verify,
     run_adapter_registry_design,
     run_roadmap_generation_design,
     run_roadmap_evidence,
@@ -2013,7 +2016,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     execution_readiness_parser = subparsers.add_parser(
         "execution-readiness",
-        help="Assess PCAE readiness for future real runtime execution (Phase 44Y).",
+        help="Assess PCAE readiness for future real runtime execution (Phase 44Y/97A).",
     )
     execution_readiness_parser.add_argument(
         "--json",
@@ -2021,6 +2024,71 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON execution readiness output.",
     )
     execution_readiness_parser.set_defaults(handler=run_execution_readiness)
+    er_subparsers = execution_readiness_parser.add_subparsers(
+        dest="execution_readiness_command",
+    )
+
+    # ── execution-readiness preflight ────────────────────────────────────
+    er_preflight_parser = er_subparsers.add_parser(
+        "preflight",
+        help="Run execution readiness preflight dry-run (Phase 97F). Non-executing.",
+    )
+    er_preflight_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON preflight output.",
+    )
+    er_preflight_parser.add_argument(
+        "--save",
+        action="store_true",
+        help="Save preflight artifact to .pcae/execution-readiness-preflight/.",
+    )
+    er_preflight_parser.add_argument(
+        "--task-id",
+        default="",
+        help="Active task ID for preflight contextualization.",
+    )
+    er_preflight_parser.set_defaults(handler=run_execution_readiness_preflight)
+
+    # ── execution-readiness preflight show ───────────────────────────────
+    er_preflight_show_parser = er_subparsers.add_parser(
+        "show",
+        help="Show the latest execution readiness preflight artifact.",
+    )
+    er_preflight_show_parser.add_argument(
+        "--latest",
+        action="store_true",
+        default=True,
+        help="Show the latest preflight (default).",
+    )
+    er_preflight_show_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON output.",
+    )
+    er_preflight_show_parser.set_defaults(
+        handler=run_execution_readiness_preflight_show
+    )
+
+    # ── execution-readiness preflight verify ─────────────────────────────
+    er_preflight_verify_parser = er_subparsers.add_parser(
+        "verify",
+        help="Verify the latest execution readiness preflight artifact integrity.",
+    )
+    er_preflight_verify_parser.add_argument(
+        "--latest",
+        action="store_true",
+        default=True,
+        help="Verify the latest preflight (default).",
+    )
+    er_preflight_verify_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON verification output.",
+    )
+    er_preflight_verify_parser.set_defaults(
+        handler=run_execution_readiness_preflight_verify
+    )
 
     adapter_registry_design_parser = subparsers.add_parser(
         "adapter-registry-design",

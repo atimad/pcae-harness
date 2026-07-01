@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Phase 97F — Execution Readiness Preflight Dry-Run. Implementation. Non-executing preflight combining 97A–97E evidence into integrated readiness assessment. New `ExecutionReadinessPreflight` dataclass (52 fields), SHA-256 digest, 10 preflight statuses, 29 no-go conditions, 10 evidence categories. CLI: `pcae execution-readiness preflight/show/verify`. 63 tests. Fail-closed: all 12 authorization flags remain False. No execution, no backend/adapter invocation, no subprocess/shell/network. Recommends 97G — Execution Readiness Preflight Contract Freeze.
+- Transitioned active task from Phase 97F — Execution Readiness Preflight Dry-Run to 20260701-0030-phase-97f-execution-readiness-preflight; session refreshed and governance continuity revalidated.
 - Design Phase 97D — Human Approval Gate for Future Execution. Design-only. Defines approval gate conceptual model with 9 scopes, 21 denial reasons, 4 artifact models (ApprovalRequest, ApprovalDecision, ApprovalRevocation, ApprovalDenial), fail-closed verification (25 checks), expiry/revocation model, and audit expectations. All artifacts non-executing and non-authorizing. 82 tests. No execution, no enforcement, no backend/adapter invocation, no apply/commit/push authorization. Recommends 97E — Execution Audit / Rollback Readiness Design.
 - Design Phase 97C — Adapter Invocation Boundary Design. Design-only. Defined adapter identity, capability, request/preflight, and denial boundary. 14 adapter-specific denial reasons. 4 tests. No execution.
 - Design Phase 97B — Governed Backend Invocation Contract Design. Design-only. Defined governed backend invocation request, preflight, and denial contracts. No execution.

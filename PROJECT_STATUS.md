@@ -2,20 +2,42 @@
 
 ## Current Phase
 
+Phase 97F — Execution Readiness Preflight Dry-Run (completed). Implementation.
+
+Implements a non-executing execution readiness preflight dry-run that combines
+Phase 97A–97E models into one integrated readiness assessment. Produces a
+deterministic, evidence-only preflight result evaluating readiness, backend
+invocation contract, adapter boundary, human approval gate, audit readiness,
+rollback readiness, artifact verification, and no-go conditions.
+
+New model `ExecutionReadinessPreflight` (52 fields) with SHA-256 digest,
+10 preflight statuses (6 future-only/unavailable), 29 no-go conditions,
+10 evidence categories. Fail-closed: all 12 authorization flags remain False.
+
+CLI: `pcae execution-readiness preflight [--json] [--save]`,
+`pcae execution-readiness show [--latest] [--json]`,
+`pcae execution-readiness verify [--latest] [--json]`.
+
+63 tests. Design document: docs/PHASE_97_EXECUTION_READINESS_PREFLIGHT_DRY_RUN.md.
+Model: src/pcae/core/backend_invocations.py (new section ~500 lines).
+CLI: src/pcae/commands/agent.py + src/pcae/cli.py.
+Tests: tests/test_execution_readiness_preflight.py.
+
+Dry-run preflight only. No execution, no enforcement, no backend invocation,
+no adapter execution, no subprocess/shell/network calls, no apply/commit/push
+authorization.
+
+All authorization flags remain False. Execution remains unavailable.
+
+Recommends 97G — Execution Readiness Preflight Contract Freeze.
+
+Phase 97E — Execution Audit / Rollback Readiness Design (completed). Design-only.
+
+Defines audit denial reasons (7), abort/failure states (12), rollback requirements,
+and `get_audit_rollback_readiness()`. All artifacts are non-executing and
+non-authorizing. 5 tests. Recommends 97F.
+
 Phase 97D — Human Approval Gate for Future Execution (completed). Design-only.
-
-Designs the human approval gate for future governed execution phases. Defines approval
-request/decision schemas, scope model (9 scopes), 21 denial reasons, expiry/revocation
-model, fail-closed verification (25 checks), and artifact models (ApprovalRequest,
-ApprovalDecision, ApprovalRevocation, ApprovalDenial). All artifacts are non-executing
-and non-authorizing in the current system. No execution, no enforcement, no backend
-invocation, no adapter execution, no apply/commit/push authorization.
-
-82 tests. Design document: docs/PHASE_97_HUMAN_APPROVAL_GATE_DESIGN.md.
-Model: src/pcae/core/human_approval_gate.py.
-Tests: tests/test_human_approval_gate.py.
-
-Recommends 97E — Execution Audit / Rollback Readiness Design.
 
 Phase 95R: Orchestration Readiness Review (completed). Review-only. All go/no-go pass. Recommends 95S — Orchestration Model.
 

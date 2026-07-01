@@ -3647,6 +3647,181 @@ def run_execution_readiness(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_execution_readiness_preflight(args: argparse.Namespace) -> int:
+    """Handle `pcae execution-readiness preflight`.
+
+    Build an integrated readiness preflight combining 97A–97E evidence.
+    Non-executing, non-authorizing, evidence-only dry-run.
+    """
+    from pcae.core.backend_invocations import (
+        build_execution_readiness_preflight,
+        save_execution_readiness_preflight,
+    )
+
+    preflight = build_execution_readiness_preflight(
+        task_id=args.task_id if hasattr(args, "task_id") and args.task_id else "",
+    )
+
+    if args.save:
+        save_execution_readiness_preflight(preflight)
+
+    if args.json:
+        print(json.dumps(preflight.to_dict(), indent=2, sort_keys=True))
+        return 0
+
+    # Human-readable output
+    print("Execution readiness preflight")
+    print(f"  Preflight ID:    {preflight.preflight_id}")
+    print(f"  Phase:           {preflight.phase_id}")
+    print(f"  Generated:       {preflight.generated_at_utc}")
+    print()
+    print("Status:")
+    print(f"  Readiness:       {preflight.readiness_status}")
+    print(f"  Preflight:       {preflight.preflight_status}")
+    print(f"  Evidence:        {preflight.evidence_status}")
+    print()
+    print("Domain statuses:")
+    print(f"  Backend:         {preflight.backend_invocation_contract_status}")
+    print(f"  Adapter:         {preflight.adapter_boundary_status}")
+    print(f"  Approval:        {preflight.approval_status}")
+    print(f"  Audit:           {preflight.audit_readiness_status}")
+    print(f"  Rollback:        {preflight.rollback_readiness_status}")
+    print(f"  Verification:    {preflight.artifact_verification_status}")
+    print(f"  Boundary proof:  {preflight.execution_boundary_proof_status}")
+    print()
+    if preflight.no_go_conditions:
+        print(f"No-go conditions ({len(preflight.no_go_conditions)}):")
+        for ng in preflight.no_go_conditions:
+            print(f"  - {ng}")
+    else:
+        print("No-go conditions: none")
+    print()
+    if preflight.missing_evidence:
+        print(f"Missing evidence ({len(preflight.missing_evidence)}):")
+        for me in preflight.missing_evidence:
+            print(f"  - {me}")
+    else:
+        print("Missing evidence: none")
+    print()
+    if preflight.failed_checks:
+        print(f"Failed checks ({len(preflight.failed_checks)}):")
+        for fc in preflight.failed_checks:
+            print(f"  - {fc}")
+    print()
+    print("Authorization summary (all False):")
+    print(f"  execution_available:               {preflight.execution_available}")
+    print(f"  execution_authorized:              {preflight.execution_authorized}")
+    print(f"  backend_invocation_authorized:     {preflight.backend_invocation_authorized}")
+    print(f"  adapter_execution_authorized:      {preflight.adapter_execution_authorized}")
+    print(f"  network_authorized:                {preflight.network_authorized}")
+    print(f"  subprocess_authorized:             {preflight.subprocess_authorized}")
+    print(f"  shell_authorized:                  {preflight.shell_authorized}")
+    print(f"  mutation_authorized:               {preflight.mutation_authorized}")
+    print(f"  apply_authorized:                  {preflight.apply_authorized}")
+    print(f"  rollback_authorized:               {preflight.rollback_authorized}")
+    print(f"  commit_authorized:                 {preflight.commit_authorized}")
+    print(f"  push_authorized:                   {preflight.push_authorized}")
+    print()
+    print(f"  simulation_only:                   {preflight.simulation_only}")
+    print(f"  no_execution:                      {preflight.no_execution}")
+    print()
+    print(f"Digest: {preflight.digest}")
+    print()
+    if preflight.warnings:
+        for w in preflight.warnings:
+            print(f"  ⚠ {w}")
+    print()
+    print(
+        "Execution readiness preflight is evidence-only and non-authorizing. "
+        "No execution occurs. No backends are invoked. "
+        "All authorization flags remain False."
+    )
+    return 0
+
+
+def run_execution_readiness_preflight_show(args: argparse.Namespace) -> int:
+    """Handle `pcae execution-readiness preflight show`.
+
+    Display the latest preflight artifact.
+    Non-executing, non-authorizing.
+    """
+    from pcae.core.backend_invocations import (
+        ExecutionReadinessPreflight,
+        load_latest_execution_readiness_preflight,
+    )
+
+    preflight = load_latest_execution_readiness_preflight()
+
+    if args.json:
+        if preflight is None:
+            print(json.dumps({"error": "no_preflight_artifact_found"}, indent=2))
+        else:
+            print(json.dumps(preflight.to_dict(), indent=2, sort_keys=True))
+        return 0
+
+    if preflight is None:
+        print("No preflight artifact found.")
+        print("Run: pcae execution-readiness preflight --save")
+        return 1
+
+    print("Latest execution readiness preflight")
+    print(f"  Preflight ID:    {preflight.preflight_id}")
+    print(f"  Phase:           {preflight.phase_id}")
+    print(f"  Generated:       {preflight.generated_at_utc}")
+    print(f"  Schema version:  {preflight.schema_version}")
+    print()
+    print(f"  Readiness:       {preflight.readiness_status}")
+    print(f"  Preflight:       {preflight.preflight_status}")
+    print(f"  Evidence:        {preflight.evidence_status}")
+    print()
+    if preflight.no_go_conditions:
+        print(f"No-go conditions ({len(preflight.no_go_conditions)}):")
+        for ng in preflight.no_go_conditions:
+            print(f"  - {ng}")
+    print()
+    print(f"  Digest:          {preflight.digest}")
+    print(f"  No-execution:    {preflight.no_execution}")
+    return 0
+
+
+def run_execution_readiness_preflight_verify(args: argparse.Namespace) -> int:
+    """Handle `pcae execution-readiness preflight verify`.
+
+    Verify the latest preflight artifact integrity and safety invariants.
+    Non-executing, non-authorizing.
+    """
+    from pcae.core.backend_invocations import (
+        load_latest_execution_readiness_preflight,
+        verify_execution_readiness_preflight,
+    )
+
+    preflight = load_latest_execution_readiness_preflight()
+    result = verify_execution_readiness_preflight(preflight)
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result["valid"] else 1
+
+    if not result.get("preflight_present"):
+        print("No preflight artifact found.")
+        print("Run: pcae execution-readiness preflight --save")
+        return 1
+
+    print("Preflight verification")
+    print(f"  Preflight ID:        {result.get('preflight_id', 'N/A')}")
+    print(f"  Valid:               {'yes' if result['valid'] else 'NO'}")
+    print(f"  No-execution:        {'confirmed' if result.get('no_execution_confirmed') else 'FAILED'}")
+    print()
+    if result["issues"]:
+        print(f"Issues ({len(result['issues'])}):")
+        for issue in result["issues"]:
+            print(f"  ✗ {issue}")
+    else:
+        print("No issues detected.")
+    print()
+    return 0 if result["valid"] else 1
+
+
 def run_adapter_registry_design(args: argparse.Namespace) -> int:
     data = build_adapter_registry_design()
     if args.json:
