@@ -1,68 +1,67 @@
-# Phase Report: v0.1 RC End-to-End Verification / Full Phase Check
+# Phase Report: v0.1 Documentation Alignment / Public Narrative Prep
 
-- **Phase ID:** `106I`
+- **Phase ID:** `106J`
 - **Status:** completed
-- **Report completeness:** complete
-- **Files changed:** 6
-- **Tests run:** 20
-- **Commits:** 18ae07fc, ae79c348
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
+- **Files changed:** 10
+- **Tests run:** 19
+- **Commits:** 564d0135, 42c3aa70
+- **Pushed:** not_pushed (pending final task-finish commit + push)
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 106I: Post-repair end-to-end verification only; no product/runtime
-behavior implemented or changed. Confirmed the Phase 106H trust-gate
-repair holds via live CLI reproduction, not just unit tests: built an
-isolated scratch repository and ran the real installed `pcae` binary —
-`task finish --commit` correctly suppresses dispatch (`Report
-notification: skipped_incomplete`) and `phase complete` correctly
-hard-fails (exit 1, `Phase completion refused`) with matching blocker
-text for an incomplete (`files_changed=0`) report, while both correctly
-proceed (exit 0, `Trust gate (105D): complete`) for a genuinely complete
-report — proving the two commands' trust behavior now agrees end-to-end.
-Re-ran the full required validation baseline: fast-green 4390/4390 fully
-green, combined regression 2240/2240, bootstrap/session/report regression
-358/358, phase/task lifecycle regression 1497/1497, release-glob
-regression 77/77. Verified `v0.1.0-rc1` still exists locally and on
-origin, no final `v0.1.0` tag exists, `origin/main..HEAD`=0, working tree
-clean throughout. Re-checked every golden-workflow command against live
-`--help` output — no missing or stale commands found. Added
-`docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md`. No new
-release-impacting findings; all 106G findings are either repaired (106H)
-or remain accurately documented, low-severity, deferred items — full
-documentation alignment deferred to 106J. 20 new tests
-(`tests/test_v0_1_rc_end_to_end_verification.py`). No new tag created.
-Non-executing. No autonomous execution. Recommends 106J.
+Phase 106J: Documentation alignment and public-narrative preparation
+only; no LinkedIn article written or committed to this repository; no
+product/runtime behavior implemented or changed. Aligned `README.md`
+(added `v0.1.0-rc1` status, current test count, links to release docs —
+previously had zero v0.1 mentions and cited stale "7,278 tests / 87
+phases"), `docs/RELEASE_SCOPE_V0_1.md` (marked README staleness and the
+trust-gate asymmetry as resolved, checked off release-checklist items
+through 106J), `docs/V0_1_GOLDEN_WORKFLOW.md` (replaced the stale
+"recommends unifying" note with a verified trust-gate-symmetry paragraph
+citing 106H/106I, replaced the stale 106E-era "recommended next phase"
+section), `docs/RELEASE_HANDOFF_V0_1_RC1.md` (added a "Post-RC
+Verification (106G–106I)" section with current baseline numbers),
+`docs/RELEASE_NOTES_V0_1_DRAFT.md` and
+`docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md` (added the audit-repair-verify
+cycle to highlights/known-limitations). Created
+`docs/PUBLIC_NARRATIVE_BRIEF_V0_1.md` (factual source material for a
+later external LinkedIn article: project summary, problem statement,
+what v0.1 achieved/does not do, honest positioning, article angles/tones,
+citable facts, no-claims/avoid list) and
+`docs/PHASE_106_DOCUMENTATION_ALIGNMENT_PUBLIC_NARRATIVE_PREP.md` (the
+alignment record). 19 new tests
+(`tests/test_documentation_alignment_public_narrative_v0_1.py`).
+Non-executing. No autonomous execution. Recommends 106K.
 
 ## Governance Results
 
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
+- **pcae_push_check:** pending final commit
 - **telegram_runtime:** loaded, configured, enabled
 
 ## Test Results
 
-- **focused_end_to_end_verification_tests:** 20/20 (passed)
-- **focused_verification_group:** 181/181 (passed)
+- **documentation_alignment_tests:** 19/19 (passed)
+- **focused_documentation_alignment_group:** 145/145 (passed)
+- **documentation_release_tests:** 148/148 (passed)
 - **bootstrap_session_report_regression:** 358/358 (passed)
-- **phase_task_lifecycle_regression:** 1497/1497 (passed)
-- **release_lifecycle_regression:** 77/77 (passed)
+- **release_lifecycle_regression:** 1574/1574 (passed)
 - **combined_regression:** 2240/2240 (passed)
 - **fast_green:** 4390/4390 (fully green) (passed)
 - **report_notification_tests:** 219/219 (passed, unchanged this phase)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **live_cli_trust_gate_symmetry_reproduction:** confirmed_symmetric (documented)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106J.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs verification command behavior. No shell execution beyond existing lifecycle/test/docs verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No LinkedIn article written or committed to this repository. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106K.
 
 ## Recommended Next Phase
 
-106J — v0.1 Documentation Alignment / Public Narrative Prep
+106K — v0.1 Public Article Drafting Support / Effectiveness Evaluation Framework
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*
