@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 106K: v0.1 Effectiveness Evaluation Framework / External Article Source Packet (20260702-0842-phase-106k-v0-1-effectiveness-evaluation-framework-external-article-source-packet)
 - Sync final pushed-state metadata for 106J.1 (20260702-0837-sync-final-pushed-state-metadata-for-106j-1)
 - Phase 106J.1: Public Narrative Artifact Hygiene Repair (20260702-0809-phase-106j-1-public-narrative-artifact-hygiene-repair)
 - Sync final pushed-state metadata for 106J (20260702-0600-sync-final-pushed-state-metadata-for-106j)

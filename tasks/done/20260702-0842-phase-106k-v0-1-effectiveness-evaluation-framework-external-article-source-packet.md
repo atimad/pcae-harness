@@ -10,7 +10,7 @@ Phase 106K: v0.1 Effectiveness Evaluation Framework / External Article Source Pa
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -28,6 +28,8 @@ Create a committed effectiveness evaluation framework for PCAE v0.1 and generate
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
