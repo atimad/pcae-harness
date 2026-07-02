@@ -4,10 +4,13 @@ PCAE is a governance harness for AI-assisted software engineering. It does not m
 
 PCAE is a work-in-progress engineering experiment. It is **not production ready**. It does not claim to solve autonomous coding. The goal is governed autonomy — giving AI agents increasing capability while maintaining auditability, scope discipline, and human authority at every boundary.
 
-**Status:** 7,278 tests passing. 87 phases completed. Governed lifecycle tooling, read-only project intelligence, dry-run action gate evaluation, and broker/shell-gate architecture documented. Enforced preflight gates and live broker/shell-gate mediation are not yet implemented.
+**Status:** `v0.1.0-rc1` tagged and pushed — a governed, **non-executing** AI coding lifecycle harness. 12,900+ tests passing (fast-green gate: 4390/4390 fully green). Governed lifecycle tooling, read-only project intelligence, dry-run action gate evaluation, and broker/shell-gate architecture documented. Enforced preflight gates and live broker/shell-gate mediation are not yet implemented — v0.1 does not execute code, invoke a real AI backend, or mediate a shell on an agent's behalf. See [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) for the frozen v0.1 scope, [docs/V0_1_GOLDEN_WORKFLOW.md](docs/V0_1_GOLDEN_WORKFLOW.md) for the supported operator workflow, and [docs/RELEASE_HANDOFF_V0_1_RC1.md](docs/RELEASE_HANDOFF_V0_1_RC1.md) for the release-candidate handoff. Governed autonomy (real backend invocation, runtime enforcement) is the **v0.2** target — not yet implemented.
 
 | Resource | Link |
 |----------|------|
+| **v0.1 Release Scope** | [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) |
+| **v0.1 Golden Workflow** | [docs/V0_1_GOLDEN_WORKFLOW.md](docs/V0_1_GOLDEN_WORKFLOW.md) |
+| **v0.1 Release Handoff** | [docs/RELEASE_HANDOFF_V0_1_RC1.md](docs/RELEASE_HANDOFF_V0_1_RC1.md) |
 | Architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Installation | [docs/INSTALLATION.md](docs/INSTALLATION.md) |
 | Demo Script | [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) |

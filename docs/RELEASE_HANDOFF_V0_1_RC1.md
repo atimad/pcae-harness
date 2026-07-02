@@ -59,6 +59,31 @@ forbidden safety claims.
 | `pcae doctor task-memory` | clean |
 | `pcae push check` | clean |
 
+## Post-RC Verification (106G–106I)
+
+After tagging, `v0.1.0-rc1` went through a post-RC inspection/repair/
+verification cycle before documentation alignment:
+
+- **106G** — post-RC lifecycle connectivity audit. Found a real trust-gate
+  asymmetry: `pcae task finish --commit`'s Telegram-dispatch gate omitted
+  a completeness check `pcae phase complete`'s gate had required since
+  105D. See `docs/PHASE_106_POST_RC_SYSTEM_INSPECTION_LIFECYCLE_CONNECTIVITY_AUDIT.md`.
+- **106H** — repaired the asymmetry via a shared helper
+  (`apply_old_schema_gate()`); both commands now enforce the same
+  combined trust gate. See `docs/PHASE_106_RC_AUDIT_FINDINGS_REPAIR.md`.
+- **106I** — re-verified the repair through the live installed `pcae`
+  binary (not just unit tests) in an isolated scratch repository: both
+  commands agree exactly on dispatch/hard-fail decisions and blocker
+  text for the same report. See
+  `docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md`.
+
+Current baseline after this cycle (106I): fast-green **4390/4390 fully
+green**, combined regression **2240/2240**, `report_notification_tests`
+**219/219**, `bootstrap_session_reporting_tests`
+**present_in_canonical_metadata**, `pcae health`/`check`/`doctor
+task-memory`/`push check` all green. No new tag was created during this
+cycle — `v0.1.0-rc1` is unchanged from the tag recorded above.
+
 ## Golden Workflow Pointer
 
 `docs/V0_1_GOLDEN_WORKFLOW.md` — the command-verified operator workflow
@@ -75,16 +100,20 @@ phase).
 
 ## Known Limitations
 
-- `README.md`'s headline test/phase counts predate the current repo
-  state (documentation-currency item, not a functional defect).
 - Two independent report-trust schemas exist internally (legacy 95M.1,
-  105A/105B); not unified in v0.1.
+  105A/105B); the schemas themselves remain distinct, though their
+  *combination logic* is now shared between `task finish --commit` and
+  `phase complete` (106H) — not a full unification, but no longer a
+  source of divergence between the two commands.
 - `pcae push check`'s report-trust gate checks content completeness
   only, not push-state fields, by deliberate design.
 - Package version is static in `pyproject.toml` (`0.1.0`), not derived
   from git tags — the `-rc1` qualifier lives in the tag name only.
 - Release artifacts (sdist/wheel) are built and verified but not
   published to any index or attached to a GitHub Release in this phase.
+- `docs/ROADMAP.md` (an internal planning artifact, not a release-facing
+  document) remains stale relative to actual repo state — `README.md`
+  was brought current in Phase 106J.
 
 ## Non-Execution Boundary
 

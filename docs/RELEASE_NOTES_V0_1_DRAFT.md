@@ -56,6 +56,12 @@ on the agent's behalf. Human authority remains final at every step.
 - **Shared safety/authorization contract** — 12 authorization flags (all
   `False`) and 5 safety flags (all `True`) consolidated across the
   evidence/decision/coordinator layers.
+- **Post-RC audit, repair, and verification** — a dedicated post-tag
+  audit found a real trust-gate asymmetry between `pcae task finish
+  --commit` and `pcae phase complete`; it was repaired via a shared
+  helper and re-verified through the live CLI (not just unit tests) —
+  both commands now agree exactly on report-trust and dispatch
+  decisions.
 
 ## Installation Summary
 
@@ -104,16 +110,17 @@ pcae push check && pcae push --staged-file-aware
 
 ## Known Limitations
 
-- `README.md`'s headline test/phase counts predate the current repo
-  state; tracked as a documentation-currency item, not a functional
-  defect.
 - Two independent report-trust schemas exist internally (legacy 95M.1 and
-  105A/105B); not unified in v0.1.
+  105A/105B); their combination logic is now shared between `task finish
+  --commit` and `phase complete` (Phase 106H), but the schemas
+  themselves remain distinct, not fully unified.
 - `pcae push check`'s report-trust gate checks content completeness only,
   not push-state fields, by deliberate design (avoids deadlocking the
   normal task-finish-then-push sequence).
 - Package version is static in `pyproject.toml`, not derived from git
   tags.
+- `docs/ROADMAP.md` (internal planning artifact) remains stale relative
+  to actual repo state; `README.md` was brought current in Phase 106J.
 
 ## What Is Not Included
 

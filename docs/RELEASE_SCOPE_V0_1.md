@@ -218,11 +218,12 @@ autonomous coding; or able to grant execution authorization of any kind.
 
 ## Known Limitations
 
-- `README.md` and `docs/ROADMAP.md` are stale relative to actual repo
-  state (README cites "7,278 tests / 87 phases," ROADMAP cites "90 phases
-  / June 2026" — actual state at this phase is 106A, ~13,000+ tests). Not
-  fixed in this phase (out of 106A's scope: documentation-content freeze,
-  not documentation-accuracy repair); tracked as a release blocker below.
+- `docs/ROADMAP.md` remains stale relative to actual repo state (cites
+  "90 phases / June 2026"). Not fixed as of 106J (documentation-alignment
+  scope; `docs/ROADMAP.md` is an internal planning artifact, not a
+  public/release-facing document, and was judged lower priority than
+  `README.md`, which **was** corrected in Phase 106J — see
+  `docs/PHASE_106_DOCUMENTATION_ALIGNMENT_PUBLIC_NARRATIVE_PREP.md`).
 - Two independent, overlapping report-trust schemas exist in this
   codebase (the pre-existing 95M.1 `assess_completeness()` schema and the
   105A/105B `validate_phase_report_trust()` schema) — documented across
@@ -245,10 +246,10 @@ autonomous coding; or able to grant execution authorization of any kind.
 | 3 fast-green failures (`Test94UPreflightArtifact`, `Test94UPreflightArtifactCLI`, `TestBackendShow`) | **Resolved (106B)** — root-caused and fixed; fast-green is fully green |
 | `pcae_doctor_task_memory` state | Currently **clean** — no blocker |
 | Install/packaging state (no `pip install pcae` / PyPI artifact verified in this phase) | **Must document before v0.1** — installation is `docs/INSTALLATION.md` source-checkout based; not validated as a clean-install smoke test in this phase |
-| README/ROADMAP staleness (test counts, phase counts) | **Must document before v0.1**; recommend fixing before public release, not blocking internal scope freeze |
-| Golden workflow not independently smoke-tested end-to-end as a single scripted run (only exercised command-by-command as of 106A) | **Must document before v0.1** — recommend a dedicated smoke-test phase (candidate: 106C) |
+| README staleness (test counts, phase counts) | **Resolved (106J)** — `README.md` now cites the current test count and `v0.1.0-rc1`; `docs/ROADMAP.md` remains a lower-priority internal planning artifact, not release-blocking |
+| Golden workflow not independently smoke-tested end-to-end as a single scripted run (only exercised command-by-command as of 106A) | **Resolved (106C/106D)** — documented and fresh-clone smoke-tested |
 | Telegram configuration reliance (`~/.config/pcae/telegram.env`, user-specific, not part of the repo) | **Must document before v0.1** — Telegram is optional; golden workflow must work with it entirely unset |
-| Hard-fail coverage is `pcae phase complete` + `pcae push check` only; `pcae task finish --commit` remains warning-only pre-push by design (105C.1/105D) | Not a blocker — documented, intentional design |
+| `pcae task finish --commit`'s Telegram-dispatch trust gate was weaker than `pcae phase complete`'s (a report `phase complete` would refuse could dispatch via `task finish`) | **Resolved (106H)**, **verified via live CLI (106I)** — both commands now share `apply_old_schema_gate()` and agree on dispatch/hard-fail decisions; `task finish --commit` still never blocks *task* completion (only report dispatch), by design |
 | Release-grade "zero hidden failures" test run | **Resolved (106B)** — fast-green now has zero known failures |
 
 As of 106B, nothing remains classified **must fix before v0.1** beyond
@@ -292,8 +293,18 @@ the golden workflow end-to-end.
 - [x] Clean-install validation performed (106D — editable, non-editable,
       and built sdist/wheel install all verified; 2 packaging defects
       found and fixed)
-- [ ] README.md / ROADMAP.md brought current with actual state
-- [ ] v0.1 tag/release notes drafted
+- [x] README.md brought current with actual state (106J — cites
+      `v0.1.0-rc1` and the current test count; `docs/ROADMAP.md` remains
+      a lower-priority internal planning artifact)
+- [x] v0.1 tag/release notes drafted and tag created (106E draft, 106F
+      tag `v0.1.0-rc1` created and pushed)
+- [x] Post-RC lifecycle connectivity audit performed (106G)
+- [x] Audit findings repaired — trust-gate asymmetry closed via a shared
+      helper (106H)
+- [x] Post-repair end-to-end verification, including live CLI
+      reproduction (106I)
+- [x] Full documentation set aligned with verified post-repair state
+      (106J — this document)
 
 ## v0.2 Full-Autonomy Roadmap Boundary
 

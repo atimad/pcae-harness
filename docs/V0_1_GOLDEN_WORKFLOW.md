@@ -151,10 +151,21 @@ real post-push state. This is why both commands exist side by side:
 (runs pre-push, correctly defers dispatch), while `phase complete` is the
 separate, explicit step used *after* push to send the final, corrected
 report — they are not interchangeable, and neither one supersedes the
-other in v0.1. (Phase 106G's post-RC audit found the two commands'
-finalize logic is implemented independently rather than shared, and
-recommends unifying them in a future phase — see
-`docs/PHASE_106_POST_RC_SYSTEM_INSPECTION_LIFECYCLE_CONNECTIVITY_AUDIT.md`.)
+other in v0.1.
+
+**Trust-gate symmetry (106G/106H/106I).** Phase 106G's post-RC audit
+found that `task finish --commit`'s dispatch gate and `phase complete`'s
+gate were implemented independently and could disagree (a report `phase
+complete` would refuse could dispatch via `task finish`). Phase 106H
+closed this by giving both commands a single shared helper
+(`apply_old_schema_gate()`); Phase 106I re-verified the fix through the
+live CLI, not just unit tests — both commands now agree exactly on
+whether a report is dispatch-ready and on the blocker text shown to the
+operator. Neither command can mark or dispatch a report as final while
+required fields are missing under either trust schema. See
+`docs/PHASE_106_RC_AUDIT_FINDINGS_REPAIR.md` and
+`docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md` for the
+full repair and verification record.
 
 ### 6. Post-completion verification
 
@@ -299,10 +310,12 @@ governance — see `docs/RELEASE_SCOPE_V0_1.md`'s "v0.2 Full-Autonomy
 Roadmap Boundary") would introduce new workflow steps of its own; none are
 anticipated or reserved for in this document.
 
-## Recommended Next Phase
+## Phase History (This Document)
 
-106D — Packaging / Installation / Clean-Smoke Test — **complete**. See
-`docs/PHASE_106_PACKAGING_INSTALLATION_CLEAN_SMOKE_TEST.md`.
-
-106E — v0.1 Release Candidate (recommended next). Prepare the release
-candidate with a final checklist, release notes, and tag-readiness review.
+This golden workflow was authored in Phase 106C, smoke-tested in 106D,
+and its `phase complete`/`task finish` clarity notes were added/repaired
+across 106G (bootstrap mention, initial clarity note), 106H (trust-gate
+repair), and 106I (live-CLI verification). `v0.1.0-rc1` was tagged and
+pushed in 106F. See `docs/RELEASE_HANDOFF_V0_1_RC1.md` for the current
+release-candidate state and `docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md`
+for the latest full-lifecycle verification record.

@@ -127,13 +127,19 @@ for the exact commands and outputs captured during 106E).
 
 ## Known Limitations
 
-- `README.md` test-count/phase-count figures predate the current state
-  (tracked since 106A as a known limitation, not a release blocker for
-  scope-freeze purposes; reviewed for release-claim consistency in 106E —
-  see `docs/PHASE_106_V0_1_RELEASE_CANDIDATE_READINESS.md`).
+- `README.md` test-count/phase-count figures were brought current in
+  Phase 106J (now cites `v0.1.0-rc1` and the current test count);
+  `docs/ROADMAP.md` remains a lower-priority internal planning artifact.
 - Two independent, overlapping report-trust schemas exist in this
   codebase (the pre-existing 95M.1 `assess_completeness()` schema and the
-  105A/105B `validate_phase_report_trust()` schema) — not unified in v0.1.
+  105A/105B `validate_phase_report_trust()` schema) — their combination
+  logic is now shared between `task finish --commit` and `phase complete`
+  (Phase 106H), but the schemas themselves are not fully unified.
+- A trust-gate asymmetry between `task finish --commit` and `phase
+  complete` was found post-tag by Phase 106G's audit and repaired in
+  Phase 106H, then re-verified via live CLI in Phase 106I — see
+  `docs/PHASE_106_RC_AUDIT_FINDINGS_REPAIR.md` and
+  `docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md`.
 - `pcae push check`'s phase-report-trust gate deliberately checks report
   *content* completeness only, not push-state fields (105D design
   decision, to avoid deadlocking the normal task-finish-then-push
