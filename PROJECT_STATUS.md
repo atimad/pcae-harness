@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 106K — v0.1 Effectiveness Evaluation Framework / External Article
+Source Packet (completed).
+
+Creates a committed effectiveness evaluation framework and article
+source material only under ignored local storage — does not commit
+LinkedIn article material, does not write the final LinkedIn article in
+the repo; no runtime enforcement, autonomous execution, backend/adapter
+invocation, shell mediation, rollback execution, Telegram inbound, or
+apply/commit/push authorization beyond the existing governed lifecycle
+was added; no execution enablement flag or toggle was added; no new tag
+was created. Added `docs/V0_1_EFFECTIVENESS_EVALUATION_FRAMEWORK.md`:
+evaluation thesis (trusted completion per unit of human supervision, not
+raw speed), baseline (AI coding without PCAE) vs. treatment (with PCAE
+v0.1), when PCAE should help vs. is likely overkill, measurable metrics,
+a 100-point scoring rubric (task correctness 20, test/regression safety
+20, scope control 15, report/handoff quality 15, commit/release hygiene
+10, human supervision cost 10, time efficiency 5, documentation quality
+5), sample evaluation tasks, a controlled-comparison method, longitudinal
+real-project metrics computable from this project's own phase history,
+expected advantages/disadvantages, and an interpretation guide. Wrote a
+factual LinkedIn article source packet
+(`v0.1-linkedin-source-packet.md`) — project summary, milestone facts,
+concrete examples of issues PCAE caught (partial report trust fields,
+notification ordering, the 106G/106H/106I trust-gate asymmetry cycle,
+106B fast-green triage, the 106J.1 hygiene self-correction), article
+angles/tones, a no-claims/avoid list, and candidate titles — **only**
+under `.pcae-local/article-drafts/`, verified untracked and ignored
+(`git ls-files`/`git check-ignore`) before phase completion; never
+committed. Updated `docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md`
+to confirm the 106J.1 convention held in practice. 18 new tests
+(`tests/test_v0_1_effectiveness_evaluation_framework.py`). Re-confirmed
+fast-green 4390/4390 fully green, combined regression 2255/2255,
+release/lifecycle regression 1574/1574, bootstrap/session/report
+regression 358/358. `v0.1.0-rc1` remains non-executing by design; v0.2
+remains the deferred autonomy target.
+
+No automatic next repo phase. Next human workflow: use the untracked
+article source packet to draft the LinkedIn article outside the repo,
+rewrite for tone/audience externally, then return to 107A — v0.2 Full
+Autonomy Roadmap / Execution Capability Gap Analysis.
+
+## Phase 106J.1 Complete
+
 Phase 106J.1 — Public Narrative Artifact Hygiene Repair (completed).
 
 Public narrative artifact hygiene only — removes article-support scratch

@@ -123,14 +123,21 @@ writes, or depends on `.pcae-local/`'s contents or structure.
 2. Any LinkedIn article draft should be written under
    `.pcae-local/article-drafts/`, not `docs/`, and never committed via a
    governed commit command.
-3. A committed **effectiveness evaluation framework** (if built in 106K)
-   is a different kind of artifact — it evaluates whether PCAE's
-   governance claims hold up, which *is* product/release-relevant — and
-   may be committed to `docs/` if it documents durable, factual
-   evaluation criteria rather than article framing.
+3. A committed **effectiveness evaluation framework** is a different
+   kind of artifact — it evaluates whether PCAE's governance claims hold
+   up, which *is* product/release-relevant — and may be committed to
+   `docs/` if it documents durable, factual evaluation criteria rather
+   than article framing.
 4. If a future phase needs to re-derive narrative facts, it should pull
    them from the durable release docs (the table above), not recreate a
    second copy of them in a new tracked brief.
+
+**Confirmed in Phase 106K:** this convention held up in practice.
+`docs/V0_1_EFFECTIVENESS_EVALUATION_FRAMEWORK.md` (methodology, not an
+article) was committed to `docs/`, while a factual article source
+packet (`v0.1-linkedin-source-packet.md`) was written only under
+`.pcae-local/article-drafts/` and never committed — verified untracked
+via `git ls-files`/`git check-ignore` before phase completion.
 
 ## Release Impact
 
