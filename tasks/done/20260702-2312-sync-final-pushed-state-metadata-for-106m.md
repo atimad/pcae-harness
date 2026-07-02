@@ -10,7 +10,7 @@ Sync final pushed-state metadata for 106M
 
 ## Status
 
-active
+done
 
 ## Mode
 
