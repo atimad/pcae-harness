@@ -10,7 +10,7 @@ Sync final pushed-state metadata for 107C
 
 ## Status
 
-active
+done
 
 ## Mode
 
