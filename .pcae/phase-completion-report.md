@@ -1,74 +1,68 @@
-# Phase Report: v0.1 RC Audit Findings Repair
+# Phase Report: v0.1 RC End-to-End Verification / Full Phase Check
 
-- **Phase ID:** `106H`
+- **Phase ID:** `106I`
 - **Status:** completed
-- **Report completeness:** complete
-- **Files changed:** 8
+- **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
+- **Files changed:** 6
 - **Tests run:** 20
-- **Commits:** 4a137fb9, 913ae24c
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Commits:** 18ae07fc, ae79c348
+- **Pushed:** not_pushed (pending final task-finish commit + push)
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 106H: Repairs the trust-gate asymmetry Phase 106G's audit found and
-empirically reproduced between `pcae task finish --commit` and `pcae
-phase complete`: `task finish --commit`'s dispatch gate previously
-omitted the OLD (95M.1) schema's full completeness check
-(`files_changed>0`, no-go confirmation count, etc.) that `phase
-complete`'s gate has required since Phase 105D — a synthetic
-`files_changed=0` report would dispatch via `task finish --commit` but be
-correctly refused by `phase complete`. Added a shared helper,
-`apply_old_schema_gate()`, to `core/phase_report_trust.py` (mirroring the
-existing `apply_push_state_gate()`), and wired both
-`commands/task.py::_finalize_task_report_and_notify` and
-`commands/phase.py::_finalize_report_and_notify` through it, closing the
-gap without weakening `phase complete`'s existing hard-fail behavior and
-without changing any already-passing test's expectations (full
-`test_phase.py`/`test_phase_report_trust_hard_fail.py`/`test_task.py`
-suites pass unchanged, 1281/1281). Updated two pre-existing test fixtures
-(`tests/test_task_finish_report_trust_notification.py`,
-`tests/test_task_finish_notification_ordering.py`) to include
-`commit_attribution` — a field every real phase-completion metadata file
-in this project already sets, which these older, pre-106H fixtures had
-omitted. `pcae task finish --commit` remains the preferred v0.1
-golden-workflow completion command; `pcae phase complete` remains
-available as the documented, lower-level, post-push corrected-re-dispatch
-path — neither is deprecated. Added
-`docs/PHASE_106_RC_AUDIT_FINDINGS_REPAIR.md`. 20 new regression tests
-(`tests/test_rc_audit_findings_repair.py`), including direct CLI
-reproduction/verification of both commands' incomplete-report and
-complete-report paths. No new tag created. Non-executing. No autonomous
-execution. Recommends 106I.
+Phase 106I: Post-repair end-to-end verification only; no product/runtime
+behavior implemented or changed. Confirmed the Phase 106H trust-gate
+repair holds via live CLI reproduction, not just unit tests: built an
+isolated scratch repository and ran the real installed `pcae` binary —
+`task finish --commit` correctly suppresses dispatch (`Report
+notification: skipped_incomplete`) and `phase complete` correctly
+hard-fails (exit 1, `Phase completion refused`) with matching blocker
+text for an incomplete (`files_changed=0`) report, while both correctly
+proceed (exit 0, `Trust gate (105D): complete`) for a genuinely complete
+report — proving the two commands' trust behavior now agrees end-to-end.
+Re-ran the full required validation baseline: fast-green 4390/4390 fully
+green, combined regression 2240/2240, bootstrap/session/report regression
+358/358, phase/task lifecycle regression 1497/1497, release-glob
+regression 77/77. Verified `v0.1.0-rc1` still exists locally and on
+origin, no final `v0.1.0` tag exists, `origin/main..HEAD`=0, working tree
+clean throughout. Re-checked every golden-workflow command against live
+`--help` output — no missing or stale commands found. Added
+`docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md`. No new
+release-impacting findings; all 106G findings are either repaired (106H)
+or remain accurately documented, low-severity, deferred items — full
+documentation alignment deferred to 106J. 20 new tests
+(`tests/test_v0_1_rc_end_to_end_verification.py`). No new tag created.
+Non-executing. No autonomous execution. Recommends 106J.
 
 ## Governance Results
 
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
+- **pcae_push_check:** pending final commit
 - **telegram_runtime:** loaded, configured, enabled
 
 ## Test Results
 
-- **rc_audit_findings_repair_tests:** 20/20 (passed)
-- **focused_audit_finding_repair_group:** 161/161 (passed)
+- **focused_end_to_end_verification_tests:** 20/20 (passed)
+- **focused_verification_group:** 181/181 (passed)
 - **bootstrap_session_report_regression:** 358/358 (passed)
-- **release_lifecycle_regression:** 421/421 (passed)
+- **phase_task_lifecycle_regression:** 1497/1497 (passed)
+- **release_lifecycle_regression:** 77/77 (passed)
 - **combined_regression:** 2240/2240 (passed)
 - **fast_green:** 4390/4390 (fully green) (passed)
 - **report_notification_tests:** 219/219 (passed, unchanged this phase)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **broader_phase_task_regression_no_regressions:** 1281/1281 (passed)
-- **empirical_asymmetry_repro_before_and_after_fix:** confirmed_closed (documented)
+- **live_cli_trust_gate_symmetry_reproduction:** confirmed_symmetric (documented)
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106I.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106J.
 
 ## Recommended Next Phase
 
-106I — v0.1 RC End-to-End Verification / Full Phase Check
+106J — v0.1 Documentation Alignment / Public Narrative Prep
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*

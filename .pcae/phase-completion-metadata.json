@@ -1,27 +1,27 @@
 {
-    "phase_id": "106H", "phase_name": "phase_106h_v0_1_rc_audit_findings_repair", "phase_title": "v0.1 RC Audit Findings Repair",
+    "phase_id": "106I", "phase_name": "phase_106i_v0_1_rc_end_to_end_verification_full_phase_check", "phase_title": "v0.1 RC End-to-End Verification / Full Phase Check",
     "status": "completed",
-    "summary": "Repairs the trust-gate asymmetry Phase 106G's audit found and empirically reproduced between pcae task finish --commit and pcae phase complete: task finish --commit's dispatch gate previously omitted the OLD (95M.1) schema's full completeness check (files_changed>0, no-go confirmation count, etc.) that phase complete's gate has required since Phase 105D -- a synthetic files_changed=0 report would dispatch via task finish --commit but be correctly refused by phase complete. Added a shared helper, apply_old_schema_gate(), to core/phase_report_trust.py (mirroring the existing apply_push_state_gate()), and wired both commands/task.py::_finalize_task_report_and_notify and commands/phase.py::_finalize_report_and_notify through it, closing the gap without weakening phase complete's existing hard-fail behavior and without changing any already-passing test's expectations (full test_phase.py/test_phase_report_trust_hard_fail.py/test_task.py suites pass unchanged, 1281/1281). Updated two pre-existing test fixtures to include commit_attribution -- a field every real phase-completion metadata file in this project already sets, which these older, pre-106H fixtures had omitted. pcae task finish --commit remains the preferred v0.1 golden-workflow completion command; pcae phase complete remains available as the documented, lower-level, post-push corrected-re-dispatch path -- neither is deprecated. Added docs/PHASE_106_RC_AUDIT_FINDINGS_REPAIR.md. 20 new regression tests including direct CLI reproduction/verification of both commands' incomplete-report and complete-report paths. No new tag created. Non-executing.",
-    "files_changed_count": 8, "tests_added_or_updated": "20 tests added, 2 pre-existing test fixtures corrected",
+    "summary": "Post-repair end-to-end verification only; no product/runtime behavior implemented or changed. Confirmed the Phase 106H trust-gate repair holds via live CLI reproduction, not just unit tests: built an isolated scratch repository and ran the real installed pcae binary -- task finish --commit correctly suppresses dispatch (Report notification: skipped_incomplete) and phase complete correctly hard-fails (exit 1, Phase completion refused) with matching blocker text for an incomplete (files_changed=0) report, while both correctly proceed (exit 0, Trust gate (105D): complete) for a genuinely complete report -- proving the two commands' trust behavior now agrees end-to-end. Re-ran the full required validation baseline: fast-green 4390/4390 fully green, combined regression 2240/2240, bootstrap/session/report regression 358/358, phase/task lifecycle regression 1497/1497, release-glob regression 77/77. Verified v0.1.0-rc1 still exists locally and on origin, no final v0.1.0 tag exists, origin/main..HEAD=0, working tree clean throughout. Re-checked every golden-workflow command against live --help output -- no missing or stale commands found. No new release-impacting findings; all 106G findings are either repaired (106H) or remain accurately documented, low-severity, deferred items -- full documentation alignment deferred to 106J. 20 new tests. No new tag created. Non-executing.",
+    "files_changed_count": 6, "tests_added_or_updated": "20 tests added",
     "phase_commits": [
-        {"hash": "4a137fb962c20cf2643606014da3c90f697a649c", "message": "Add 106H task contract"},
-        {"hash": "913ae24c8b40106a12be55fd2457852973f45fc0", "message": "Repair v0.1 RC trust gate asymmetry"}
+        {"hash": "18ae07fc100bc4f8767329d21483d9ae5790cdae", "message": "Add 106I task contract"},
+        {"hash": "ae79c34889e2a03fad3b3f5b8c4be0b87aca63e5", "message": "Verify v0.1 RC end-to-end lifecycle"}
     ],
-    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
+    "pushed_status": "not_pushed", "origin_main_head_count": 2, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "repair_doc": "docs/PHASE_106_RC_AUDIT_FINDINGS_REPAIR.md",
-    "note": "Pre-push draft. Report will be corrected and re-dispatched after pcae push resolves final push state, per the established 105C.1/105D/106D-106G pattern. Metadata written BEFORE running task finish, with validation_results explicitly including report_notification_tests and bootstrap_session_reporting_tests entries.",
+    "verification_doc": "docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md",
+    "note": "Pre-push draft. Report will be corrected and re-dispatched after pcae push resolves final push state, per the established 105C.1/105D/106D-106H pattern. Metadata written BEFORE running task finish, with validation_results explicitly including report_notification_tests and bootstrap_session_reporting_tests entries.",
     "validation_results": [
-        {"name": "rc_audit_findings_repair_tests", "result": "20/20", "status": "passed"},
-        {"name": "focused_audit_finding_repair_group", "result": "161/161", "status": "passed"},
+        {"name": "focused_end_to_end_verification_tests", "result": "20/20", "status": "passed"},
+        {"name": "focused_verification_group", "result": "181/181", "status": "passed"},
         {"name": "bootstrap_session_report_regression", "result": "358/358", "status": "passed"},
-        {"name": "release_lifecycle_regression", "result": "421/421", "status": "passed"},
+        {"name": "phase_task_lifecycle_regression", "result": "1497/1497", "status": "passed"},
+        {"name": "release_lifecycle_regression", "result": "77/77", "status": "passed"},
         {"name": "combined_regression", "result": "2240/2240", "status": "passed"},
         {"name": "fast_green", "result": "4390/4390 (fully green)", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"},
-        {"name": "broader_phase_task_regression_no_regressions", "result": "1281/1281", "status": "passed"},
-        {"name": "empirical_asymmetry_repro_before_and_after_fix", "result": "confirmed_closed", "status": "documented"}
+        {"name": "live_cli_trust_gate_symmetry_reproduction", "result": "confirmed_symmetric", "status": "documented"}
     ],
     "test_results": {
         "report_notification_tests": "219/219 (passed, unchanged this phase)",
@@ -31,10 +31,10 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106I.",
-    "recommended_next_phase": "106I — v0.1 RC End-to-End Verification / Full Phase Check"
+    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/packaging/tag verification command behavior. No shell execution beyond existing lifecycle/test/packaging/tag verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106J.",
+    "recommended_next_phase": "106J — v0.1 Documentation Alignment / Public Narrative Prep"
 }
