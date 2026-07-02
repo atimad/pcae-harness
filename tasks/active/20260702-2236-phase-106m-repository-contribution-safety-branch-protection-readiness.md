@@ -43,6 +43,7 @@ Document and, if possible, apply GitHub branch protection for main; establish PR
 - tests
 - tasks
 - config
+- unclassified
 
 ## Forbidden Zones
 
