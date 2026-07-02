@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 106J — v0.1 Documentation Alignment / Public Narrative Prep
+(completed).
+
+Documentation alignment and public-narrative preparation only — no
+LinkedIn article written or committed to this repository; no runtime
+enforcement, autonomous execution, backend/adapter invocation, shell
+mediation, rollback execution, Telegram inbound, or apply/commit/push
+authorization beyond the existing governed lifecycle was added; no
+execution enablement flag or toggle was added; no new tag was created.
+Aligned `README.md` (added `v0.1.0-rc1` status, current test count,
+links to release docs — previously had zero v0.1 mentions and cited
+stale "7,278 tests / 87 phases"), `docs/RELEASE_SCOPE_V0_1.md` (marked
+README staleness and the trust-gate asymmetry as resolved),
+`docs/V0_1_GOLDEN_WORKFLOW.md` (replaced a stale "recommends unifying"
+note with a verified trust-gate-symmetry paragraph citing 106H/106I),
+`docs/RELEASE_HANDOFF_V0_1_RC1.md` (added a "Post-RC Verification
+(106G–106I)" section), and `docs/RELEASE_NOTES_V0_1_DRAFT.md`/
+`docs/RELEASE_CANDIDATE_V0_1_CHECKLIST.md` (added the audit-repair-verify
+cycle). Created `docs/PUBLIC_NARRATIVE_BRIEF_V0_1.md` (factual source
+material for a later external LinkedIn article — project summary,
+problem statement, what v0.1 does/does not do, article angles/tones,
+citable facts, and a no-claims/avoid list) and
+`docs/PHASE_106_DOCUMENTATION_ALIGNMENT_PUBLIC_NARRATIVE_PREP.md` (the
+alignment record). Re-confirmed fast-green 4390/4390 fully green,
+combined regression 2240/2240, release/lifecycle regression 1574/1574,
+bootstrap/session/report regression 358/358. 19 new tests
+(`tests/test_documentation_alignment_public_narrative_v0_1.py`).
+`v0.1.0-rc1` remains non-executing by design; v0.2 remains the deferred
+autonomy target.
+
+Recommends 106K — v0.1 Public Article Drafting Support / Effectiveness
+Evaluation Framework.
+
+## Phase 106I Complete
+
 Phase 106I — v0.1 RC End-to-End Verification / Full Phase Check
 (completed).
 
