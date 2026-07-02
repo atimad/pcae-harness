@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 106I: v0.1 RC End-to-End Verification / Full Phase Check (20260702-0150-phase-106i-v0-1-rc-end-to-end-verification-full-phase-check)
 - Finish Phase 106H commit and sync pushed-state metadata (20260702-0145-finish-phase-106h-commit-and-sync-pushed-state-metadata)
 - Phase 106H: v0.1 RC Audit Findings Repair (20260702-0121-phase-106h-v0-1-rc-audit-findings-repair)
 - Sync final pushed-state metadata for 106G (20260702-0109-sync-final-pushed-state-metadata-for-106g)

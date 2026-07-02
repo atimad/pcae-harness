@@ -10,7 +10,7 @@ Phase 106I: v0.1 RC End-to-End Verification / Full Phase Check
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -29,6 +29,8 @@ Run a full post-repair end-to-end verification of v0.1.0-rc1 across bootstrap, t
 - tasks/DONE.md
 - docs/V0_1_GOLDEN_WORKFLOW.md
 - docs/RELEASE_HANDOFF_V0_1_RC1.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
