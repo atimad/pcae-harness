@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 107C — Execution Readiness No-Go Gate Freeze (completed).
+
+Freezes the canonical no-go gates (`NG-001` through `NG-025`) that must
+block any future execution attempt, before any enforcement or execution
+implementation begins in Phase 108A. Each gate defines ID, Name,
+Condition, Rationale, Required Remediation, Recoverable (yes/no), Human
+Override Allowed (uniformly `no` by default), Related Invariant
+(`INV-001`–`INV-010` from 107B), Related Component (from
+`docs/V0_2_AUTONOMY_CONTRACT.md`), and Current Implementation Status
+(always "not enforced / future" in this phase). Restates the hard
+fail-closed rule: missing evidence, ambiguity, an unavailable permission
+broker, an unavailable audit boundary, an unavailable rollback-readiness
+boundary, or an unavailable execution boundary must all resolve to
+denial. 107C is contract/freeze only; it does not implement runtime
+enforcement, autonomous execution, shell/subprocess mediation, backend
+invocation, adapter execution, Telegram inbound, durable audit storage,
+rollback execution, emergency stop, an execution enablement flag/toggle,
+automatic apply, patch execution, or no-go gate runtime enforcement
+itself. `v0.1.0-rc1` remains non-executing by design; v0.2 remains the
+autonomy target (Level 3, not Level 4/5). GitHub Release for
+`v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+Added `docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md` and
+`docs/PHASE_107_EXECUTION_READINESS_NO_GO_GATE_FREEZE.md`. 270 new tests
+(`tests/test_v0_2_execution_readiness_no_go_gates.py`). No new tag; no
+final `v0.1.0` tag; no new GitHub Release; no PyPI/GitHub Packages
+publication; `.pcae-local/` remains ignored; no article/source-packet
+material committed.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 107D — PR-Compatible Governed Development Workflow Design
+(not started).
+
+## Phase 107B Complete
+
 Phase 107B — v0.2 Autonomy Contract Freeze (completed).
 
 Freezes the v0.2 autonomy contract — the Level 3 target (Governed
