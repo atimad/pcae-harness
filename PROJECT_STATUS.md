@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 107B — v0.2 Autonomy Contract Freeze (completed).
+
+Freezes the v0.2 autonomy contract — the Level 3 target (Governed
+Human-Approved Bounded Execution), ten architectural invariants
+(INV-001 through INV-010), the canonical execution lifecycle (`PLANNED
+-> READY -> AWAITING_HUMAN_APPROVAL -> AUTHORIZED -> EXECUTING ->
+{COMPLETED | FAILED | ABORTED}`), and twelve components (Permission
+Broker, Execution Boundary, Human Approval Gate, Shell/Subprocess/
+Network Boundary, Backend Invocation Boundary, Adapter Invocation
+Boundary, Audit Boundary, Rollback Readiness Boundary, Emergency Stop
+Boundary, Execution Enablement Model, No-Go Registry, PR/Branch
+Protection Workflow) — each with Purpose/Responsibilities/Current
+Status, all marked "Not implemented" where appropriate — before any
+enforcement or execution implementation begins. 107B is contract/freeze
+only; it does not implement runtime enforcement, autonomous execution,
+shell mediation, subprocess mediation, backend invocation, adapter
+execution, Telegram inbound, durable audit storage, rollback execution,
+emergency stop, an execution enablement flag/toggle, automatic apply, or
+patch execution. `v0.1.0-rc1` remains non-executing by design; v0.2
+remains the autonomy target (Level 3, not Level 4/5). GitHub Release for
+`v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+Added `docs/V0_2_AUTONOMY_CONTRACT.md` (the frozen contract) and
+`docs/PHASE_107_V0_2_AUTONOMY_CONTRACT_FREEZE.md`. 51 new tests
+(`tests/test_v0_2_autonomy_contract.py`). No new tag; no final `v0.1.0`
+tag; no new GitHub Release; no PyPI/GitHub Packages publication;
+`.pcae-local/` remains ignored; no article/source-packet material
+committed.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 107C — Execution Readiness No-Go Gate Freeze (not started).
+
+## Phase 107A Complete
+
 Phase 107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (completed).
 
 Starts the v0.2 autonomy track by producing a roadmap and execution
