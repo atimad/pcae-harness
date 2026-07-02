@@ -8,8 +8,12 @@ PCAE v0.1 — Governed AI Coding Lifecycle Harness
 
 **Candidate draft.** Prepared in Phase 106E for operator review. Tag
 `v0.1.0-rc1` was created and pushed in Phase 106F, after operator
-approval; this notes document remains a draft — it has not been
-published as a GitHub Release description or promoted elsewhere.
+approval. This document's content was promoted into the published
+GitHub Release body in Phase 106L — see
+`docs/RELEASE_NOTES_V0_1_RC1.md` for the exact published text and
+https://github.com/atimad/pcae-harness/releases/tag/v0.1.0-rc1 for the
+live release page. This draft itself remains the internal working
+version.
 
 ## Positioning
 

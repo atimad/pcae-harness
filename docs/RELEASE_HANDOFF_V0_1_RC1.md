@@ -24,6 +24,21 @@ git rev-parse v0.1.0-rc1            # b47ce1817a697eab6bee8ef158ba50d96e57c3bb (
 **Release candidate**, tagged and pushed to origin. Not a final release.
 No `v0.1.0` tag exists.
 
+## GitHub Release Publication
+
+A GitHub Release for `v0.1.0-rc1` was published in Phase 106L, marked
+**prerelease**, with the built sdist (`pcae_harness-0.1.0.tar.gz`) and
+wheel (`pcae_harness-0.1.0-py3-none-any.whl`) attached as release assets
+— checksums confirmed to match exactly between the local build and the
+uploaded GitHub assets. No new tag was created for this publication; the
+existing `v0.1.0-rc1` tag was used as-is. See
+`docs/PHASE_106_RC_GITHUB_RELEASE_PUBLICATION.md` for full details.
+
+- **Release URL:** https://github.com/atimad/pcae-harness/releases/tag/v0.1.0-rc1
+- **Prerelease:** yes
+- **PyPI publication:** not performed.
+- **GitHub Packages publication:** not performed.
+
 ## Release Scope
 
 PCAE v0.1 is a governed, **non-executing** AI coding lifecycle harness —
@@ -94,9 +109,9 @@ verification.
 
 `docs/RELEASE_NOTES_V0_1_DRAFT.md` — positioning, highlights,
 installation summary, safety boundary, known limitations, what is not
-included, and the v0.2 autonomy preview. Promote this draft's content
-when publishing a GitHub Release for this tag (not performed in this
-phase).
+included, and the v0.2 autonomy preview. This draft's content was
+promoted into the published GitHub Release body in Phase 106L; see also
+`docs/RELEASE_NOTES_V0_1_RC1.md` for the exact release-body text.
 
 ## Known Limitations
 
@@ -109,8 +124,9 @@ phase).
   only, not push-state fields, by deliberate design.
 - Package version is static in `pyproject.toml` (`0.1.0`), not derived
   from git tags — the `-rc1` qualifier lives in the tag name only.
-- Release artifacts (sdist/wheel) are built and verified but not
-  published to any index or attached to a GitHub Release in this phase.
+- Release artifacts (sdist/wheel) are attached to the GitHub Release for
+  `v0.1.0-rc1` (106L) but are not published to any package index (e.g.
+  PyPI); `pip install pcae-harness` remains unavailable.
 - `docs/ROADMAP.md` (an internal planning artifact, not a release-facing
   document) remains stale relative to actual repo state — `README.md`
   was brought current in Phase 106J.
@@ -152,11 +168,12 @@ git rev-parse v0.1.0-rc1
 
 ## What to Do Next
 
-1. Review this handoff document and `docs/RELEASE_NOTES_V0_1_DRAFT.md`.
-2. Optionally publish a GitHub Release for `v0.1.0-rc1` (not performed in
-   this phase — requires explicit operator request per this phase's
-   operating rules).
-3. Optionally publish the built sdist/wheel to a package index.
+1. Review this handoff document, `docs/RELEASE_NOTES_V0_1_DRAFT.md`, and
+   `docs/RELEASE_NOTES_V0_1_RC1.md`.
+2. GitHub Release for `v0.1.0-rc1` is published (106L) — see the
+   publication section above.
+3. Optionally publish the built sdist/wheel to a package index (not
+   performed in 106L; distinct, not-yet-requested action).
 4. Use `v0.1.0-rc1` for external validation before considering a final
    `v0.1.0` tag — no final `v0.1.0` tag exists or was created by this
    phase.

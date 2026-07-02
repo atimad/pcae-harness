@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 106L — v0.1 RC GitHub Release Publication (completed).
+
+Publishes a GitHub Release for the already-created `v0.1.0-rc1` tag and
+attaches verified Python release artifacts (sdist + wheel) — no new tag,
+no final `v0.1.0`, no PyPI publication, no GitHub Packages publication,
+no v0.2 work; no runtime enforcement, autonomous execution, backend/
+adapter invocation, shell mediation, rollback execution, Telegram
+inbound, or apply/commit/push authorization beyond the existing governed
+lifecycle was added; no execution enablement flag or toggle was added.
+All pre-publication gates passed (clean tree, `origin/main..HEAD` = 0,
+tag present locally and on origin, no prior GitHub Release, `gh auth`
+usable, health/check/task-memory/push all clean, latest phase report
+trust complete, fast_green 4390/4390). Rebuilt sdist
+(`pcae_harness-0.1.0.tar.gz`) and wheel
+(`pcae_harness-0.1.0-py3-none-any.whl`) from current `main`, computed
+SHA256 checksums, smoke-installed the wheel in a throwaway virtualenv
+(passed). Published the GitHub Release for `v0.1.0-rc1` (prerelease)
+with both artifacts attached — checksums confirmed to match between the
+local build and the uploaded GitHub assets. Added
+`docs/PHASE_106_RC_GITHUB_RELEASE_PUBLICATION.md` and
+`docs/RELEASE_NOTES_V0_1_RC1.md`; updated
+`docs/RELEASE_HANDOFF_V0_1_RC1.md` and
+`docs/RELEASE_NOTES_V0_1_DRAFT.md` to point at the published release. 
+See `docs/PHASE_106_RC_GITHUB_RELEASE_PUBLICATION.md` for the full
+pre-publication gate table, artifact checksums, and release verification
+details.
+
+Release URL: https://github.com/atimad/pcae-harness/releases/tag/v0.1.0-rc1
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap
+Analysis (roadmap/gap analysis only, not implementation).
+
+## Phase 106K Complete
+
 Phase 106K — v0.1 Effectiveness Evaluation Framework / External Article
 Source Packet (completed).
 
