@@ -63,19 +63,44 @@ lifecycle frozen in 107B; it operationalizes them into gate form.
 
 ## Validation Note: Parallel Test Execution
 
-All test groups for this phase were run with `-n auto` where compatible.
-One combined-regression glob (the `execution-readiness preflight show/
-verify` artifact-trust tests, pre-existing and unrelated to this phase)
-is known from 106L/106M/107A/107B to fail only under `-n auto` due to
-xdist workers writing the same `.pcae/` CLI-subprocess artifact file
-concurrently — a filesystem-collision xdist-safety issue in those
-existing tests, not something this phase's own new tests introduced or
-could reasonably fix within scope (the fix would mean changing how
-several pre-existing preflight tests manage shared CLI-invoked state,
-which is out of scope for a contract/freeze phase). Per this phase's
-validation policy, that specific group was re-run sequentially and
-confirmed to pass; every other group ran under `-n auto` as instructed,
-without falling back to sequential execution.
+All test groups for this phase were run with `-n auto`. The focused
+group (345 tests), documentation/release group (772 tests), and release/
+lifecycle regression group (1497 tests) all passed cleanly under `-n
+auto` with no fallback needed.
+
+The combined-regression glob failed under `-n auto`: 11 tests across
+four pre-existing files —
+`tests/test_execution_readiness_preflight_artifact_trust.py`,
+`tests/test_governed_execution_preflight_artifact_trust.py`,
+`tests/test_governed_execution_preflight_contract.py`, and
+`tests/test_execution_readiness_preflight_contract.py` — with 2565 other
+tests in the same run passing. Investigation (per this phase's
+validation policy): the failures are concentrated in tests that
+subprocess-invoke `pcae execution-readiness preflight --save` /
+`show --json` / `verify --json` (and the `governed-execution`
+equivalents) against the same repository working directory; under
+`-n auto`, multiple xdist workers run these CLI subprocesses
+concurrently against the same `.pcae/` "latest artifact" file, so one
+worker's `show`/`verify` can read a different worker's freshly-written
+(or not-yet-written) artifact — a filesystem-collision xdist-safety
+issue in how these existing tests share CLI-invoked state, not a fixed
+port, global process-state, or order-dependency issue. This is the same
+root cause already identified and confirmed unrelated to phase content
+in 106L, 106M, 107A, and 107B.
+
+Fixing this within scope would mean giving each of these pre-existing
+tests (spread across four files not touched by this phase's task
+contract) an isolated working directory or `.pcae/` artifact namespace
+per test — a real, non-trivial change to existing preflight-contract
+test infrastructure that is out of scope for a contract/freeze phase
+whose own task contract covers only the no-go-gates doc, phase doc, and
+their tests. Per the validation policy's explicit fallback, this exact
+group (the four files above, 242 tests) was re-run sequentially (no
+`-n auto`) and **all 242 passed** with zero failures, confirming the
+tests themselves are correct and only unsafe under this specific
+parallel-execution pattern. `-n auto` was not removed from any other
+group; only this one pre-existing, previously-identified group required
+the sequential fallback.
 
 ## No-Go Confirmations
 
