@@ -1,39 +1,29 @@
 {
-    "phase_id": "106M", "phase_name": "phase_106m_repository_contribution_safety_branch_protection_readiness", "phase_title": "Repository Contribution Safety / Branch Protection Readiness",
+    "phase_id": "107A", "phase_name": "phase_107a_v0_2_full_autonomy_roadmap_execution_capability_gap_analysis", "phase_title": "v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis",
     "status": "completed",
-    "summary": "Applies GitHub branch protection to main and establishes a PR-first contribution workflow, after the v0.1 RC GitHub Release publication (106L). Applied (not merely documented) transitional branch protection via gh api: 1 required approving PR review with stale-review dismissal, required conversation resolution, force pushes blocked, branch deletion blocked, admin enforcement left off for this transitional period, no required status checks yet (the existing governance CI check was identified and documented as a future candidate, not enabled as a merge gate). Verified live: the subsequent governed push in this same phase was logged by GitHub as an admin-only bypass of the PR-required rule, confirming protection is genuinely active. Added docs/PHASE_106_REPOSITORY_CONTRIBUTION_SAFETY_BRANCH_PROTECTION.md and docs/CONTRIBUTOR_WORKFLOW.md; updated CONTRIBUTING.md with a new Branch Protection and Pull Request Workflow section; added .github/pull_request_template.md and .github/CODEOWNERS (@atimad). 27 new tests. No new tag; no final v0.1.0 tag; no new GitHub Release; no PyPI/GitHub Packages publication; .pcae-local/ remains ignored; no article/source-packet material committed. v0.1.0-rc1 remains non-executing by design; v0.2 remains the autonomy target.",
-    "files_changed_count": 8, "tests_added_or_updated": "27 tests added",
+    "summary": "Starts the v0.2 autonomy track by producing a roadmap and execution capability gap analysis for moving PCAE from a governed, non-executing lifecycle harness (v0.1) to a future governed autonomous execution system (v0.2). Roadmap/gap-analysis only -- no runtime enforcement, autonomous execution, Telegram inbound, backend invocation, adapter execution, shell mediation, or rollback execution added; no apply/commit/push authorization changes beyond the existing governed lifecycle and the already-applied GitHub branch protection; no execution enablement flag or toggle added. v0.1.0-rc1 remains non-executing by design; v0.2 is the autonomy target. GitHub Release for v0.1.0-rc1 (prerelease) and branch protection on main are unchanged. Added docs/V0_2_AUTONOMY_ROADMAP.md (six autonomy levels; Level 0 = v0.1; Level 3 = recommended v0.2 target, human-approved bounded execution; staged 17-phase roadmap 107B-115A; 17 hard no-go conditions; release criteria) and docs/PHASE_107_V0_2_EXECUTION_CAPABILITY_GAP_ANALYSIS.md (present-vs-missing capability matrix, risk analysis, dependency graph, implementation order, test strategy, branch-protected-main implications for v0.2 development). Updated docs/RELEASE_HANDOFF_V0_1_RC1.md pointer. 24 new tests. Verified live: the governed push in this phase was again logged by GitHub as an admin-only bypass of the PR-required rule, confirming no unexpected branch-protection impact.",
+    "files_changed_count": 6, "tests_added_or_updated": "24 tests added",
     "phase_commits": [
-        {"hash": "ae0927987b27391513c4c4716770658edd24f11a", "message": "Add 106M task contract"},
-        {"hash": "cf65fb4b574d3968518008c6ce73788adae51700", "message": "Add unclassified zone to 106M task contract for .github/CODEOWNERS scope"},
-        {"hash": "26c6ffb2160a49dda70db97675da66f026c428bb", "message": "Add repository contribution safety and branch protection readiness"}
+        {"hash": "0d95d3cb44c88dd08117643d7add1790d25f15c9", "message": "Add 107A task contract"},
+        {"hash": "8431a46b6d7587a7dba91d6605eeeb63b2808254", "message": "Define v0.2 autonomy roadmap and gap analysis"}
     ],
     "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "branch_protection_applied": true,
-    "branch_protection_settings": {
-        "required_approving_review_count": 1,
-        "dismiss_stale_reviews": true,
-        "require_code_owner_reviews": false,
-        "require_last_push_approval": false,
-        "enforce_admins": false,
-        "allow_force_pushes": false,
-        "allow_deletions": false,
-        "required_conversation_resolution": true,
-        "required_status_checks": null
-    },
+    "v0_2_autonomy_level_target": "Level 3 (human-approved bounded execution)",
+    "v0_2_recommended_phase_sequence": ["107B", "107C", "107D", "108A", "108B", "108C", "109A", "109B", "109C", "110A", "110B", "111A", "112A", "113A", "114A", "115A"],
+    "branch_protection_unchanged": true,
+    "branch_protection_live_verified_again": true,
     "github_release_v0_1_0_rc1_unchanged": true,
     "pypi_publication": false,
     "github_packages_publication": false,
     "new_tag_created": false,
     "final_v0_1_0_tag_created": false,
-    "note": "Post-push corrected metadata. Report is written after pcae push resolved final push state, per the established 105C.1/105D/106D-106L pattern. Metadata includes validation_results with report_notification_tests and bootstrap_session_reporting_tests entries.",
+    "note": "Post-push corrected metadata. Report is written after pcae push resolved final push state, per the established 105C.1/105D/106D-106M pattern. Metadata includes validation_results with report_notification_tests and bootstrap_session_reporting_tests entries.",
     "validation_results": [
-        {"name": "contribution_safety_tests", "result": "27/27", "status": "passed"},
-        {"name": "focused_contribution_safety_group", "result": "139/139", "status": "passed"},
-        {"name": "documentation_release_tests", "result": "375/375", "status": "passed"},
-        {"name": "bootstrap_session_report_regression", "result": "214/214", "status": "passed"},
-        {"name": "release_lifecycle_regression", "result": "2005/2005", "status": "passed"},
+        {"name": "v0_2_roadmap_tests", "result": "24/24", "status": "passed"},
+        {"name": "focused_v0_2_roadmap_group", "result": "192/192", "status": "passed"},
+        {"name": "documentation_release_tests", "result": "399/399", "status": "passed"},
+        {"name": "release_lifecycle_regression", "result": "1825/1825", "status": "passed"},
         {"name": "combined_regression", "result": "5293/5293", "status": "passed"},
         {"name": "fast_green", "result": "4390/4390 (fully green)", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
@@ -45,7 +35,7 @@
         "fast_green": "4390/4390 (fully green, no known failures)"
     },
     "pre_existing_failures": [
-        "10 tests in the combined-regression glob (execution-readiness preflight show/verify artifact-trust tests) fail only under pytest -n auto due to parallel workers writing the same .pcae/ CLI-subprocess artifact concurrently; confirmed pre-existing and unrelated to 106M by a clean serial rerun (5293/5293 passed with no -n auto), consistent with the same finding in 106L."
+        "10 tests in the combined-regression glob (execution-readiness preflight show/verify artifact-trust tests) fail only under pytest -n auto due to parallel workers writing the same .pcae/ CLI-subprocess artifact concurrently; confirmed pre-existing and unrelated to 107A by a clean serial rerun (5293/5293 passed with no -n auto), consistent with the same finding in 106L/106M."
     ],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
@@ -53,6 +43,6 @@
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs/GitHub-protection command behavior. No shell execution beyond existing lifecycle/test/docs/GitHub-protection command behavior. No network call outside the existing Telegram outbound notification path, ordinary git remote verification, and the explicit GitHub branch-protection API calls performed in this phase. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond documenting the PR-protected workflow. No push authorization changes beyond GitHub branch protection. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No final v0.1.0 tag created. No new GitHub Release. No PyPI publication. No GitHub Packages publication. .pcae-local/ remains ignored. No LinkedIn article or source packet committed. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. GitHub Release for v0.1.0-rc1 unchanged (prerelease, sdist+wheel attached). Branch protection applied to main: PR review required, force-push/deletion blocked, conversation resolution required, admin enforcement off (transitional).",
-    "recommended_next_phase": "107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (roadmap/gap analysis only, not implementation)"
+    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs/git-remote-verification command behavior. No shell execution beyond existing lifecycle/test/docs/git-remote-verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote/GitHub verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle and already-applied GitHub branch protection. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No final v0.1.0 tag created. No new GitHub Release. No PyPI publication. No GitHub Packages publication. .pcae-local/ remains ignored. No LinkedIn article or source packet committed. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. GitHub Release for v0.1.0-rc1 unchanged (prerelease, sdist+wheel attached). Branch protection on main unchanged: PR review required, force-push/deletion blocked, conversation resolution required, admin enforcement off (transitional) -- re-verified live via this phase's own governed push.",
+    "recommended_next_phase": "107B — v0.2 Autonomy Contract Freeze"
 }
