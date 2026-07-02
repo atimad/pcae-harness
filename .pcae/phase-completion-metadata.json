@@ -7,7 +7,7 @@
         {"hash": "18ae07fc100bc4f8767329d21483d9ae5790cdae", "message": "Add 106I task contract"},
         {"hash": "ae79c34889e2a03fad3b3f5b8c4be0b87aca63e5", "message": "Verify v0.1 RC end-to-end lifecycle"}
     ],
-    "pushed_status": "not_pushed", "origin_main_head_count": 2, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "verification_doc": "docs/PHASE_106_RC_END_TO_END_VERIFICATION_FULL_PHASE_CHECK.md",
     "note": "Pre-push draft. Report will be corrected and re-dispatched after pcae push resolves final push state, per the established 105C.1/105D/106D-106H pattern. Metadata written BEFORE running task finish, with validation_results explicitly including report_notification_tests and bootstrap_session_reporting_tests entries.",
@@ -31,7 +31,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
