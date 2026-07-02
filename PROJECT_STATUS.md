@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 106M — Repository Contribution Safety / Branch Protection Readiness (completed).
+
+Applies GitHub branch protection to `main` and establishes a PR-first
+contribution workflow, following the v0.1 RC GitHub Release publication
+(106L). 106M is repository contribution safety / branch protection
+readiness; it does not implement runtime enforcement, does not add
+autonomous execution, does not add Telegram inbound, does not add
+backend invocation, does not add adapter execution, does not add shell
+mediation, does not add rollback execution, and does not add apply/
+commit/push authorization changes beyond GitHub branch protection itself
+and the documented PR workflow; no execution enablement flag or toggle
+was added. `v0.1.0-rc1` remains non-executing by design; v0.2 remains the
+autonomy target. GitHub Release for `v0.1.0-rc1` (prerelease, sdist +
+wheel attached) is unchanged from 106L; PyPI and GitHub Packages remain
+unused.
+
+Applied (not merely documented) transitional branch protection on `main`
+via `gh api`: 1 required approving PR review with stale-review dismissal,
+required conversation resolution, force pushes blocked, branch deletion
+blocked, admin enforcement left off for this transitional period, no
+required status checks yet (a real, stable existing CI check named
+`governance` was identified and documented as a future candidate, not
+enabled as a merge gate in this phase). Added
+`docs/PHASE_106_REPOSITORY_CONTRIBUTION_SAFETY_BRANCH_PROTECTION.md` and
+`docs/CONTRIBUTOR_WORKFLOW.md`; updated `CONTRIBUTING.md` with a new
+"Branch Protection & Pull Request Workflow" section (renumbering later
+sections). Added `.github/pull_request_template.md` and
+`.github/CODEOWNERS` (`@atimad`). 27 new tests
+(`tests/test_repository_contribution_safety_branch_protection.py`). No
+new tag created; no final `v0.1.0` tag; no new GitHub Release; no PyPI/
+GitHub Packages publication; `.pcae-local/` remains ignored; no article/
+source-packet material committed.
+
+See `docs/PHASE_106_REPOSITORY_CONTRIBUTION_SAFETY_BRANCH_PROTECTION.md`
+for the full before/after branch protection state, threat model, and
+residual risks.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap
+Analysis (roadmap/gap analysis only, not implementation).
+
+## Phase 106L Complete
+
 Phase 106L — v0.1 RC GitHub Release Publication (completed).
 
 Publishes a GitHub Release for the already-created `v0.1.0-rc1` tag and

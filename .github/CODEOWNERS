@@ -1,0 +1,5 @@
+# Minimal CODEOWNERS (Phase 106M). See docs/PHASE_106_REPOSITORY_CONTRIBUTION_SAFETY_BRANCH_PROTECTION.md.
+# Code-owner review is documented here but not yet required by branch
+# protection (require_code_owner_reviews: false) — see that document's
+# "Residual Risks" section.
+* @atimad

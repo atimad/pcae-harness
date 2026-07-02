@@ -66,7 +66,41 @@ All three must pass before beginning any implementation work.
 
 ---
 
-## 3. Contribution Workflow
+## 3. Branch Protection & Pull Request Workflow
+
+`main` is a GitHub-protected branch (Phase 106M). This means, for every
+contributor without repository admin status:
+
+- **No direct pushes to `main`.** Work on a branch and open a pull
+  request.
+- **At least one approving review is required** before a PR can merge;
+  stale approvals are dismissed when new commits are pushed.
+- **All review conversations must be resolved** before merge.
+- **Force pushes and deletion of `main` are blocked** at the GitHub
+  level.
+- Never use `--no-verify` on any git operation, and never force-push a
+  protected branch.
+
+Before opening a PR, run:
+
+```
+pcae health
+pcae check
+pcae doctor task-memory
+pcae push check
+python -m pytest -n auto
+```
+
+For the full, explicit contributor checklist (branch protection state,
+release/publication boundaries, the v0.1 non-executing boundary, and
+what requires dedicated maintainer approval), see
+[docs/CONTRIBUTOR_WORKFLOW.md](docs/CONTRIBUTOR_WORKFLOW.md). Use the
+pull request template (`.github/pull_request_template.md`) to describe
+your change's scope and confirm it preserves these boundaries.
+
+---
+
+## 4. Contribution Workflow
 
 **Step 1 — Create a task**
 
@@ -89,7 +123,7 @@ zone dependency rules. Violations are reported by `pcae check`.
 **Step 3 — Update documentation**
 
 Documentation is not optional. Every behavior-visible change requires a
-corresponding documentation update. See Section 6 for the full list.
+corresponding documentation update. See Section 7 for the full list.
 
 **Step 4 — Run validation**
 
@@ -108,7 +142,7 @@ changed, and what governance impacts (if any) the change carries.
 
 ---
 
-## 4. Governance Requirements
+## 5. Governance Requirements
 
 PCAE is a governance framework. Every contribution is held to the same
 governance standards that PCAE enforces in the repos it governs.
@@ -144,7 +178,7 @@ execution shortcuts around this chain are not accepted.
 
 ---
 
-## 5. Testing Requirements
+## 6. Testing Requirements
 
 For the complete testing guide covering all validation profiles, benchmark
 numbers, battery-mode options, slow test discovery, and parallel safety
@@ -188,7 +222,7 @@ that state unchanged after the test runs.
 
 ---
 
-## 6. Documentation Requirements
+## 7. Documentation Requirements
 
 The following documentation artifacts must be updated when a contribution
 changes behavior that is visible through the PCAE CLI or governance model:
@@ -208,7 +242,7 @@ same contribution.
 
 ---
 
-## 7. Coding Standards
+## 8. Coding Standards
 
 **Maintain backward compatibility**
 
@@ -238,13 +272,13 @@ leaves a command untested is incomplete.
 
 ---
 
-## 8. Pull Request Expectations
+## 9. Pull Request Expectations
 
 A pull request is ready for review when:
 
 - **Tests pass.** `pcae health`, `pcae check`, and `python -m pytest -n auto`
   all pass cleanly.
-- **Documentation is updated.** Every affected artifact listed in Section 6
+- **Documentation is updated.** Every affected artifact listed in Section 7
   has been updated. `CHANGELOG.md` has a new entry.
 - **Governance impacts are documented.** If the contribution changes
   enforcement behavior, adds new execution paths, or modifies the evidence
@@ -255,7 +289,7 @@ Pull requests that do not meet these criteria will be returned for revision.
 
 ---
 
-## 9. License
+## 10. License
 
 PCAE is licensed under the Apache License 2.0.
 
