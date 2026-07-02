@@ -1,40 +1,38 @@
-# Phase Report: v0.1 Effectiveness Evaluation Framework / External Article Source Packet
+# Phase Report: v0.1 RC GitHub Release Publication
 
-- **Phase ID:** `106K`
+- **Phase ID:** `106L`
 - **Status:** completed
 - **Report completeness:** complete
-- **Files changed:** 6
-- **Tests run:** 18
-- **Commits:** 4fea9378, 56e7c25c
+- **Files changed:** 8
+- **Tests run:** 26
+- **Commits:** 58b7a077, e081d568
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 106K: Creates a committed effectiveness evaluation framework and
-article source material only under ignored local storage; does not
-commit LinkedIn article material; does not write the final LinkedIn
-article in the repo; no product/runtime behavior implemented or changed.
-Added `docs/V0_1_EFFECTIVENESS_EVALUATION_FRAMEWORK.md`: evaluation
-thesis (trusted completion per unit of human supervision, not raw
-speed), baseline (AI coding without PCAE) vs. treatment (with PCAE
-v0.1), when PCAE should help vs. is likely overkill, measurable metrics,
-a 100-point scoring rubric, 5 sample evaluation task shapes, a
-controlled-comparison method, longitudinal real-project metrics
-computable from this project's own phase history, expected
-advantages/disadvantages, and an interpretation guide. Wrote a factual
-LinkedIn article source packet (project summary, milestone facts,
-concrete examples of issues PCAE caught — partial report trust fields,
-notification ordering, the 106G/106H/106I trust-gate asymmetry cycle,
-106B fast-green triage, the 106J.1 hygiene self-correction — angles/
-tones, no-claims/avoid list, candidate titles) only under
-`.pcae-local/article-drafts/v0.1-linkedin-source-packet.md`, verified
-untracked and ignored via `git ls-files`/`git check-ignore` before phase
-completion; never committed. Updated
-`docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md` confirming
-the 106J.1 convention held in practice. 18 new tests
-(`tests/test_v0_1_effectiveness_evaluation_framework.py`). No new tag
-created. Non-executing. Recommends external article work, then 107A.
+Phase 106L: Publishes a GitHub Release for the already-created
+`v0.1.0-rc1` tag and attaches verified Python release artifacts (sdist +
+wheel) — no new tag, no final `v0.1.0`, no PyPI publication, no GitHub
+Packages publication, no v0.2 work. All pre-publication gates passed
+(clean tree, `origin/main..HEAD` = 0, tag present locally and on origin,
+no prior GitHub Release, `gh auth` usable, health/check/task-memory/push
+all clean, latest phase report trust complete, fast_green 4390/4390).
+Rebuilt sdist (`pcae_harness-0.1.0.tar.gz`,
+sha256 `f9b52572298b999d1e78a8b4725642bbbb441eb569f8a21c3c723c1c67ff994e`)
+and wheel (`pcae_harness-0.1.0-py3-none-any.whl`,
+sha256 `6c0b896a945beb9b81d28a869dc3a7f3bbc51c8b26f4dc2d1d2a79543f6ccf7d`)
+from current `main`, smoke-installed the wheel in a throwaway virtualenv
+(passed). Published the GitHub Release for `v0.1.0-rc1` (prerelease)
+with both artifacts attached — checksums confirmed to match between the
+local build and the uploaded GitHub assets:
+https://github.com/atimad/pcae-harness/releases/tag/v0.1.0-rc1. Added
+`docs/PHASE_106_RC_GITHUB_RELEASE_PUBLICATION.md` and
+`docs/RELEASE_NOTES_V0_1_RC1.md`; updated
+`docs/RELEASE_HANDOFF_V0_1_RC1.md` and
+`docs/RELEASE_NOTES_V0_1_DRAFT.md`. 26 new tests
+(`tests/test_v0_1_rc_github_release_publication.py`). No new tag
+created. Non-executing. Recommends 107A (roadmap/gap analysis only).
 
 ## Governance Results
 
@@ -46,23 +44,38 @@ created. Non-executing. Recommends external article work, then 107A.
 
 ## Test Results
 
-- **effectiveness_evaluation_framework_tests:** 18/18 (passed)
-- **focused_effectiveness_hygiene_group:** 40/40 (passed)
-- **documentation_release_tests:** 169/169 (passed)
-- **bootstrap_session_report_regression:** 358/358 (passed)
-- **release_lifecycle_regression:** 1574/1574 (passed)
-- **combined_regression:** 2255/2255 (passed)
+- **release_publication_tests:** 26/26 (passed)
+- **focused_release_publication_group:** 161/161 (passed)
+- **documentation_release_tests:** 348/348 (passed)
+- **bootstrap_session_report_regression:** 214/214 (passed)
+- **release_lifecycle_regression:** 1600/1600 (passed)
+- **combined_regression:** 5293/5293 (passed, serial — see note below)
 - **fast_green:** 4390/4390 (fully green) (passed)
 - **report_notification_tests:** 219/219 (passed, unchanged this phase)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 
+**Note on combined regression:** the same glob run under `pytest -n auto`
+showed 10 failures confined to `execution-readiness preflight
+show/verify` artifact-trust tests; these are pre-existing xdist
+parallel-worker collisions on a shared `.pcae/` CLI-subprocess artifact
+file, unrelated to this phase — confirmed by a clean serial rerun
+(5293/5293 passed, no `-n auto`).
+
+## GitHub Release Publication
+
+- **Release URL:** https://github.com/atimad/pcae-harness/releases/tag/v0.1.0-rc1
+- **Prerelease:** true
+- **Assets:** `pcae_harness-0.1.0.tar.gz`, `pcae_harness-0.1.0-py3-none-any.whl`
+- **PyPI publication:** not performed
+- **GitHub Packages publication:** not performed
+
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs verification command behavior. No shell execution beyond existing lifecycle/test/docs verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No LinkedIn article or article source packet committed. `.pcae-local/` remains ignored. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. No automatic next repo phase recommended; next human workflow is external article drafting, then 107A.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs/build/release-publication command behavior. No shell execution beyond existing lifecycle/test/docs/build/release-publication command behavior. No network call outside the existing Telegram outbound notification path, ordinary git remote verification, and the explicit GitHub Release publication operation. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing beyond release-artifact checksums. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No final `v0.1.0` tag created. No PyPI publication. No GitHub Packages publication. `.pcae-local/` remains ignored. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. GitHub Release publication complete for `v0.1.0-rc1`.
 
 ## Recommended Next Phase
 
-107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (no automatic next repo phase; draft the LinkedIn article externally from the untracked source packet first)
+107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (roadmap/gap analysis only, not implementation)
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*

@@ -1,25 +1,30 @@
 {
-    "phase_id": "106K", "phase_name": "phase_106k_v0_1_effectiveness_evaluation_framework_external_article_source_packet", "phase_title": "v0.1 Effectiveness Evaluation Framework / External Article Source Packet",
+    "phase_id": "106L", "phase_name": "phase_106l_v0_1_rc_github_release_publication", "phase_title": "v0.1 RC GitHub Release Publication",
     "status": "completed",
-    "summary": "Creates a committed effectiveness evaluation framework and article source material only under ignored local storage; does not commit LinkedIn article material; does not write the final LinkedIn article in the repo; no product/runtime behavior implemented or changed. Added docs/V0_1_EFFECTIVENESS_EVALUATION_FRAMEWORK.md: evaluation thesis (trusted completion per unit of human supervision, not raw speed), baseline (AI coding without PCAE) vs treatment (with PCAE v0.1), when PCAE should help vs is likely overkill, measurable metrics, a 100-point scoring rubric, 5 sample evaluation task shapes, a controlled-comparison method, longitudinal real-project metrics computable from this project's own phase history, expected advantages/disadvantages, and an interpretation guide. Wrote a factual LinkedIn article source packet (project summary, milestone facts, concrete examples of issues PCAE caught -- partial report trust fields, notification ordering, the 106G/106H/106I trust-gate asymmetry cycle, 106B fast-green triage, the 106J.1 hygiene self-correction -- angles/tones, no-claims/avoid list, candidate titles) only under .pcae-local/article-drafts/v0.1-linkedin-source-packet.md, verified untracked and ignored via git ls-files/git check-ignore before phase completion; never committed. Updated docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md confirming the 106J.1 convention held in practice. 18 new tests. No new tag created. Non-executing.",
-    "files_changed_count": 6, "tests_added_or_updated": "18 tests added",
+    "summary": "Publishes a GitHub Release for the already-created v0.1.0-rc1 tag and attaches verified Python release artifacts (sdist + wheel) -- no new tag, no final v0.1.0, no PyPI publication, no GitHub Packages publication, no v0.2 work; no runtime enforcement, autonomous execution, backend/adapter invocation, shell mediation, rollback execution, Telegram inbound, or apply/commit/push authorization beyond the existing governed lifecycle was added; no execution enablement flag or toggle was added. All pre-publication gates passed (clean tree, origin/main..HEAD=0, tag present locally and on origin, no prior GitHub Release, gh auth usable, health/check/task-memory/push all clean, latest phase report trust complete, fast_green 4390/4390). Rebuilt sdist (pcae_harness-0.1.0.tar.gz) and wheel (pcae_harness-0.1.0-py3-none-any.whl) from current main, computed SHA256 checksums, smoke-installed the wheel in a throwaway virtualenv (passed). Published the GitHub Release for v0.1.0-rc1 (prerelease) with both artifacts attached -- checksums confirmed to match between the local build and the uploaded GitHub assets: https://github.com/atimad/pcae-harness/releases/tag/v0.1.0-rc1. Added docs/PHASE_106_RC_GITHUB_RELEASE_PUBLICATION.md and docs/RELEASE_NOTES_V0_1_RC1.md; updated docs/RELEASE_HANDOFF_V0_1_RC1.md and docs/RELEASE_NOTES_V0_1_DRAFT.md. 26 new tests. No new tag created. Non-executing.",
+    "files_changed_count": 8, "tests_added_or_updated": "26 tests added",
     "phase_commits": [
-        {"hash": "4fea93788c5359145d98b70d9cacfd972f0f7632", "message": "Add 106K task contract"},
-        {"hash": "56e7c25c849574010e79df5adc859b8e70a3b323", "message": "Add v0.1 effectiveness evaluation framework"}
+        {"hash": "58b7a077212a81167e790b11eeda509596a756c8", "message": "Add 106L task contract"},
+        {"hash": "e081d568b5639a8034ab194fd73cc47716c7f9f4", "message": "Publish v0.1 RC GitHub Release documentation"}
     ],
     "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "evaluation_framework_doc": "docs/V0_1_EFFECTIVENESS_EVALUATION_FRAMEWORK.md",
-    "local_article_packet_path": ".pcae-local/article-drafts/v0.1-linkedin-source-packet.md",
-    "local_article_packet_tracked": false,
-    "note": "Pre-push draft. Report will be corrected and re-dispatched after pcae push resolves final push state, per the established 105C.1/105D/106D-106J.1 pattern. Metadata written BEFORE running task finish, with validation_results explicitly including report_notification_tests and bootstrap_session_reporting_tests entries.",
+    "release_url": "https://github.com/atimad/pcae-harness/releases/tag/v0.1.0-rc1",
+    "release_prerelease": true,
+    "release_assets": [
+        {"name": "pcae_harness-0.1.0.tar.gz", "sha256": "f9b52572298b999d1e78a8b4725642bbbb441eb569f8a21c3c723c1c67ff994e"},
+        {"name": "pcae_harness-0.1.0-py3-none-any.whl", "sha256": "6c0b896a945beb9b81d28a869dc3a7f3bbc51c8b26f4dc2d1d2a79543f6ccf7d"}
+    ],
+    "pypi_publication": false,
+    "github_packages_publication": false,
+    "note": "Post-push corrected metadata. Report is written after pcae push resolved final push state, per the established 105C.1/105D/106D-106K pattern. Metadata includes validation_results with report_notification_tests and bootstrap_session_reporting_tests entries.",
     "validation_results": [
-        {"name": "effectiveness_evaluation_framework_tests", "result": "18/18", "status": "passed"},
-        {"name": "focused_effectiveness_hygiene_group", "result": "40/40", "status": "passed"},
-        {"name": "documentation_release_tests", "result": "169/169", "status": "passed"},
-        {"name": "bootstrap_session_report_regression", "result": "358/358", "status": "passed"},
-        {"name": "release_lifecycle_regression", "result": "1574/1574", "status": "passed"},
-        {"name": "combined_regression", "result": "2255/2255", "status": "passed"},
+        {"name": "release_publication_tests", "result": "26/26", "status": "passed"},
+        {"name": "focused_release_publication_group", "result": "161/161", "status": "passed"},
+        {"name": "documentation_release_tests", "result": "348/348", "status": "passed"},
+        {"name": "bootstrap_session_report_regression", "result": "214/214", "status": "passed"},
+        {"name": "release_lifecycle_regression", "result": "1600/1600", "status": "passed"},
+        {"name": "combined_regression", "result": "5293/5293", "status": "passed"},
         {"name": "fast_green", "result": "4390/4390 (fully green)", "status": "passed"},
         {"name": "report_notification_tests", "result": "219/219", "status": "passed"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"}
@@ -29,13 +34,15 @@
         "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
         "fast_green": "4390/4390 (fully green, no known failures)"
     },
-    "pre_existing_failures": [],
+    "pre_existing_failures": [
+        "10 tests in the combined-regression glob (execution-readiness preflight show/verify artifact-trust tests) fail only under pytest -n auto due to parallel workers writing the same .pcae/ CLI-subprocess artifact concurrently; confirmed pre-existing and unrelated to 106L by a clean serial rerun (5293/5293 passed with no -n auto)."
+    ],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
         {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs verification command behavior. No shell execution beyond existing lifecycle/test/docs verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No LinkedIn article or article source packet committed. .pcae-local/ remains ignored. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. No automatic next repo phase recommended; next human workflow is external article drafting, then 107A.",
-    "recommended_next_phase": "107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (no automatic next repo phase; draft the LinkedIn article externally from the untracked source packet first)"
+    "no_go_confirmation": "No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs/build/release-publication command behavior. No shell execution beyond existing lifecycle/test/docs/build/release-publication command behavior. No network call outside the existing Telegram outbound notification path, ordinary git remote verification, and the explicit GitHub Release publication operation. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No /run. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing beyond release-artifact checksums. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No final v0.1.0 tag created. No PyPI publication. No GitHub Packages publication. .pcae-local/ remains ignored. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. GitHub Release publication complete for v0.1.0-rc1.",
+    "recommended_next_phase": "107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (roadmap/gap analysis only, not implementation)"
 }
