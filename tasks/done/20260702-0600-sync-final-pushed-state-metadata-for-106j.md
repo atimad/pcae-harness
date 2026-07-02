@@ -10,7 +10,7 @@ Sync final pushed-state metadata for 106J
 
 ## Status
 
-active
+done
 
 ## Mode
 
