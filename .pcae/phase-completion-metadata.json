@@ -7,7 +7,7 @@
         {"hash": "4fea93788c5359145d98b70d9cacfd972f0f7632", "message": "Add 106K task contract"},
         {"hash": "56e7c25c849574010e79df5adc859b8e70a3b323", "message": "Add v0.1 effectiveness evaluation framework"}
     ],
-    "pushed_status": "not_pushed", "origin_main_head_count": 2, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "evaluation_framework_doc": "docs/V0_1_EFFECTIVENESS_EVALUATION_FRAMEWORK.md",
     "local_article_packet_path": ".pcae-local/article-drafts/v0.1-linkedin-source-packet.md",
@@ -32,7 +32,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
