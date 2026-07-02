@@ -10,7 +10,7 @@ Phase 106J: v0.1 Documentation Alignment / Public Narrative Prep
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -35,6 +35,8 @@ Align README/release docs with verified v0.1.0-rc1 post-repair state and prepare
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 

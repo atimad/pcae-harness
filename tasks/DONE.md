@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 106J: v0.1 Documentation Alignment / Public Narrative Prep (20260702-0530-phase-106j-v0-1-documentation-alignment-public-narrative-prep)
 - Sync final pushed-state metadata for 106I (20260702-0216-sync-final-pushed-state-metadata-for-106i)
 - Phase 106I: v0.1 RC End-to-End Verification / Full Phase Check (20260702-0150-phase-106i-v0-1-rc-end-to-end-verification-full-phase-check)
 - Finish Phase 106H commit and sync pushed-state metadata (20260702-0145-finish-phase-106h-commit-and-sync-pushed-state-metadata)
