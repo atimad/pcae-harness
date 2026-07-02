@@ -2,6 +2,36 @@
 
 ## Current Phase
 
+Phase 106I — v0.1 RC End-to-End Verification / Full Phase Check
+(completed).
+
+Post-repair end-to-end verification only — no runtime enforcement,
+autonomous execution, backend/adapter invocation, shell mediation,
+rollback execution, Telegram inbound, or apply/commit/push authorization
+beyond the existing governed lifecycle was added; no execution
+enablement flag or toggle was added; no new tag was created. Confirmed
+the Phase 106H trust-gate repair holds via live CLI reproduction (not
+just unit tests): built an isolated scratch repository and ran the real
+installed `pcae` binary — `task finish --commit` correctly suppresses
+dispatch and `phase complete` correctly hard-fails (exit 1) with matching
+blocker text for an incomplete (`files_changed=0`) report, while both
+correctly proceed for a genuinely complete report. Re-ran the full
+required validation baseline: fast-green 4390/4390 fully green, combined
+regression 2240/2240, bootstrap/session/report regression 358/358,
+phase/task lifecycle regression 1497/1497, release-glob regression
+77/77. Verified `v0.1.0-rc1` still exists locally and on origin, no final
+`v0.1.0` tag exists, `origin/main..HEAD`=0, working tree clean throughout.
+Re-checked every golden-workflow command against live `--help` output —
+no missing or stale commands found. No new release-impacting findings;
+all 106G findings are either repaired (106H) or remain accurately
+documented, low-severity, deferred items. 20 new tests
+(`tests/test_v0_1_rc_end_to_end_verification.py`). `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the deferred autonomy target.
+
+Recommends 106J — v0.1 Documentation Alignment / Public Narrative Prep.
+
+## Phase 106H Complete
+
 Phase 106H — v0.1 RC Audit Findings Repair (completed).
 
 Repairs the trust-gate asymmetry Phase 106G's audit found and
