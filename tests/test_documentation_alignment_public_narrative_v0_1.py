@@ -1,9 +1,19 @@
 """Tests for Phase 106J — v0.1 Documentation Alignment / Public Narrative
-Prep. Documentation-focused: verifies the alignment document and public
-narrative brief exist, are internally consistent, and make only the
-allowed safety claims. No network/GitHub access; no LinkedIn article
-content is exercised or expected here (deliberately not written in this
-repository). Non-executing.
+Prep. Documentation-focused: verifies the alignment document exists and
+is internally consistent, and that the durable release docs it aligned
+remain accurate. No network/GitHub access; no LinkedIn article content
+is exercised or expected here (deliberately not written in this
+repository).
+
+Phase 106J.1 note: this file originally also tested
+`docs/PUBLIC_NARRATIVE_BRIEF_V0_1.md`'s content. That file was removed
+in Phase 106J.1 as a documentation-hygiene repair (article-support
+source material does not belong in tracked product docs — see
+`docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md` and
+`tests/test_public_narrative_artifact_hygiene.py`, which now covers its
+absence). The brief-content tests were removed accordingly; this file
+now covers only the alignment document and the durable docs it touched.
+Non-executing.
 """
 
 from __future__ import annotations
@@ -16,7 +26,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 ALIGNMENT_DOC_PATH = (
     REPO_ROOT / "docs" / "PHASE_106_DOCUMENTATION_ALIGNMENT_PUBLIC_NARRATIVE_PREP.md"
 )
-NARRATIVE_BRIEF_PATH = REPO_ROOT / "docs" / "PUBLIC_NARRATIVE_BRIEF_V0_1.md"
 README_PATH = REPO_ROOT / "README.md"
 GOLDEN_WORKFLOW_PATH = REPO_ROOT / "docs" / "V0_1_GOLDEN_WORKFLOW.md"
 RELEASE_SCOPE_PATH = REPO_ROOT / "docs" / "RELEASE_SCOPE_V0_1.md"
@@ -26,11 +35,6 @@ RELEASE_HANDOFF_PATH = REPO_ROOT / "docs" / "RELEASE_HANDOFF_V0_1_RC1.md"
 @pytest.fixture(scope="module")
 def alignment_text() -> str:
     return ALIGNMENT_DOC_PATH.read_text()
-
-
-@pytest.fixture(scope="module")
-def brief_text() -> str:
-    return NARRATIVE_BRIEF_PATH.read_text()
 
 
 @pytest.fixture(scope="module")
@@ -57,75 +61,8 @@ def test_documentation_alignment_doc_exists():
     assert ALIGNMENT_DOC_PATH.is_file()
 
 
-def test_public_narrative_brief_exists():
-    assert NARRATIVE_BRIEF_PATH.is_file()
-
-
-def test_brief_states_v0_1_non_executing_by_design(brief_text):
-    lowered = brief_text.lower()
-    assert "non-executing" in lowered
-
-
-def test_brief_states_v0_2_is_autonomy_target(brief_text):
-    assert "v0.2" in brief_text
-    assert "autonomy" in brief_text.lower()
-
-
-def test_brief_states_v0_1_0_rc1_was_tagged(brief_text):
-    assert "v0.1.0-rc1" in brief_text
-    assert "tagged" in brief_text.lower()
-
-
-def test_brief_mentions_fast_green_4390(brief_text):
-    assert "4390/4390" in brief_text
-
-
-def test_brief_mentions_report_trust_hard_fail_gates(brief_text):
-    lowered = brief_text.lower()
-    assert "report-trust hard-fail gates" in lowered
-
-
-def test_brief_mentions_golden_workflow(brief_text):
-    assert "golden workflow" in brief_text.lower()
-
-
-def test_brief_mentions_telegram_outbound_only(brief_text):
-    lowered = brief_text.lower()
-    assert "telegram" in lowered
-    assert "outbound" in lowered
-
-
-def test_brief_has_no_claims_avoid_list(brief_text):
-    assert "No-Claims / Avoid List" in brief_text
-
-
-def test_brief_does_not_claim_autonomous_execution(brief_text):
-    lowered = brief_text.lower()
-    assert "say pcae is autonomous" in lowered
-    forbidden = [
-        "pcae is autonomous.\n\n",
-        "pcae autonomously executes code",
-    ]
-    for phrase in forbidden:
-        assert phrase not in lowered
-
-
-def test_brief_does_not_claim_runtime_enforcement_implemented(brief_text):
-    lowered = brief_text.lower()
-    assert "no runtime enforcement" in lowered
-    assert "runtime enforcement is implemented" not in lowered
-
-
-def test_brief_does_not_claim_shell_mediation_exists(brief_text):
-    lowered = brief_text.lower()
-    assert "no shell mediation" in lowered
-    assert "safely controls shell commands" in lowered  # part of avoid list
-
-
-def test_brief_does_not_claim_telegram_inbound_exists(brief_text):
-    normalized = " ".join(brief_text.split()).lower()
-    assert "no telegram inbound" in normalized
-    assert "there is no inbound handler" in normalized
+def test_alignment_doc_documents_106j1_amendment(alignment_text):
+    assert "106J.1" in alignment_text
 
 
 def test_readme_or_release_docs_reference_v0_1_0_rc1(readme_text, release_handoff_text):

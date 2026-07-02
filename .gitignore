@@ -9,3 +9,8 @@ build/
 .pcae/execution-readiness-preflight/
 docs/REAL_CAPTURED_TASKS.md
 docs/REAL_CAPTURED_TASKS.md
+
+# Local/private PCAE working artifacts (article drafts, public-narrative
+# scratch notes, evaluation working notes) — never committed. See
+# docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md.
+.pcae-local/

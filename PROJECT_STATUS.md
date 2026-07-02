@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 106J.1 — Public Narrative Artifact Hygiene Repair (completed).
+
+Public narrative artifact hygiene only — removes article-support scratch
+material from tracked docs; does not write the LinkedIn article; no
+runtime enforcement, autonomous execution, backend/adapter invocation,
+shell mediation, rollback execution, Telegram inbound, or apply/commit/
+push authorization beyond the existing governed lifecycle was added; no
+execution enablement flag or toggle was added; no new tag was created.
+Removed `docs/PUBLIC_NARRATIVE_BRIEF_V0_1.md` (committed in 106J) —
+article-support source material does not belong in the tracked product/
+release doc set; every durable fact it cited already lives independently
+in `README.md`/`docs/RELEASE_SCOPE_V0_1.md`/`docs/RELEASE_HANDOFF_V0_1_RC1.md`.
+Added `.pcae-local/` to `.gitignore` as the ignored local workspace for
+future article drafts, public-narrative source material, and evaluation
+working notes (verified ignored via `git check-ignore`; no files created
+inside it). Added `docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md`
+(rationale, what was removed, durable-facts preservation table, ignored
+local workspace convention, future article-artifact policy). Added an
+amendment note to `docs/PHASE_106_DOCUMENTATION_ALIGNMENT_PUBLIC_NARRATIVE_PREP.md`
+pointing to this repair while preserving its historical record.
+Replaced brief-dependent tests in
+`tests/test_documentation_alignment_public_narrative_v0_1.py` with tests
+against the alignment document itself; added
+`tests/test_public_narrative_artifact_hygiene.py` (12 tests) verifying
+the brief's absence, `.pcae-local/` ignore behavior, no other tracked
+article-support files, and durable release-doc integrity. Re-confirmed
+fast-green 4390/4390 fully green. `v0.1.0-rc1` remains non-executing by
+design; v0.2 remains the deferred autonomy target.
+
+Recommends 106K — v0.1 Effectiveness Evaluation Framework / External
+Article Source Packet.
+
+## Phase 106J Complete
+
 Phase 106J — v0.1 Documentation Alignment / Public Narrative Prep
 (completed).
 

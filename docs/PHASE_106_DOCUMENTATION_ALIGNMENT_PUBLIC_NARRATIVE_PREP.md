@@ -1,5 +1,15 @@
 # Phase 106J — v0.1 Documentation Alignment / Public Narrative Prep
 
+> **Amendment (106J.1):** `docs/PUBLIC_NARRATIVE_BRIEF_V0_1.md`, created
+> in this phase and referenced throughout this document, was removed in
+> Phase 106J.1 as a documentation-hygiene repair — article-support source
+> material does not belong in the tracked product/release doc set. See
+> `docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md` for the
+> full rationale and the durable facts that remain in the release docs.
+> The rest of this document is preserved as an accurate historical record
+> of what 106J did; links below to the removed brief are historical, not
+> live.
+
 ## Purpose
 
 Align the full PCAE v0.1 documentation set with the verified post-repair
