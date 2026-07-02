@@ -10,7 +10,7 @@ Phase 107B: v0.2 Autonomy Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 

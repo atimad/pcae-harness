@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 107B: v0.2 Autonomy Contract Freeze (20260703-0001-phase-107b-v0-2-autonomy-contract-freeze)
 - Sync final pushed-state metadata for 107A (20260702-2349-sync-final-pushed-state-metadata-for-107a)
 - Phase 107A: v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (20260702-2316-phase-107a-v0-2-full-autonomy-roadmap-execution-capability-gap-analysis)
 - Sync final pushed-state metadata for 106M (20260702-2312-sync-final-pushed-state-metadata-for-106m)
