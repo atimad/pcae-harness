@@ -7,7 +7,7 @@
         {"hash": "564d0135b414d542eab260736205a8e6babcd39c", "message": "Add 106J task contract"},
         {"hash": "42c3aa70fcf380204d54d2340adf9942a368070e", "message": "Align v0.1 documentation and public narrative brief"}
     ],
-    "pushed_status": "not_pushed", "origin_main_head_count": 2, "commit_attribution": "phase_owned",
+    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
     "alignment_doc": "docs/PHASE_106_DOCUMENTATION_ALIGNMENT_PUBLIC_NARRATIVE_PREP.md",
     "narrative_brief": "docs/PUBLIC_NARRATIVE_BRIEF_V0_1.md",
@@ -31,7 +31,7 @@
     "pre_existing_failures": [],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "pending final commit"},
+        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
