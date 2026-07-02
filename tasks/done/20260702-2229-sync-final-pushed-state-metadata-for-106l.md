@@ -10,7 +10,7 @@ Sync final pushed-state metadata for 106L
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 106L (20260702-2229-sync-final-pushed-state-metadata-for-106l)
 - Phase 106L: v0.1 RC GitHub Release Publication (20260702-2144-phase-106l-v0-1-rc-github-release-publication)
 - Sync final pushed-state metadata for 106K (20260702-0911-sync-final-pushed-state-metadata-for-106k)
 - Phase 106K: v0.1 Effectiveness Evaluation Framework / External Article Source Packet (20260702-0842-phase-106k-v0-1-effectiveness-evaluation-framework-external-article-source-packet)
