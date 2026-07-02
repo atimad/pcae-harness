@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 106J.1: Public Narrative Artifact Hygiene Repair (20260702-0809-phase-106j-1-public-narrative-artifact-hygiene-repair)
 - Sync final pushed-state metadata for 106J (20260702-0600-sync-final-pushed-state-metadata-for-106j)
 - Phase 106J: v0.1 Documentation Alignment / Public Narrative Prep (20260702-0530-phase-106j-v0-1-documentation-alignment-public-narrative-prep)
 - Sync final pushed-state metadata for 106I (20260702-0216-sync-final-pushed-state-metadata-for-106i)

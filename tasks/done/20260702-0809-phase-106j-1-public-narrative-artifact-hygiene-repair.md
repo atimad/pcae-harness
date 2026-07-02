@@ -10,7 +10,7 @@ Phase 106J.1: Public Narrative Artifact Hygiene Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -31,6 +31,8 @@ Remove the committed public narrative brief from tracked docs, add an ignored .p
 - PROJECT_STATUS.md
 - CHANGELOG.md
 - tasks/DONE.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
