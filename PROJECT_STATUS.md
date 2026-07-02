@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (completed).
+
+Starts the v0.2 autonomy track by producing a roadmap and execution
+capability gap analysis for moving PCAE from a governed, non-executing
+lifecycle harness (v0.1) to a future governed autonomous execution
+system (v0.2). 107A is roadmap/gap-analysis only; it does not implement
+runtime enforcement, does not add autonomous execution, does not add
+Telegram inbound, does not add backend invocation, does not add adapter
+execution, does not add shell mediation, does not add rollback
+execution, and does not add apply/commit/push authorization beyond the
+existing governed lifecycle and the already-applied GitHub branch
+protection; no execution enablement flag or toggle was added.
+`v0.1.0-rc1` remains non-executing by design; v0.2 is the autonomy
+target. GitHub Release for `v0.1.0-rc1` exists (prerelease, unchanged);
+`main` remains branch-protected transitionally (unchanged).
+
+Added `docs/V0_2_AUTONOMY_ROADMAP.md`: defines six autonomy levels
+(Level 0 = v0.1, non-executing; Level 3 = recommended v0.2 target,
+human-approved bounded execution; Level 5 = broad multi-agent autonomy,
+explicitly not a v0.2 goal), the v0.1 baseline of inherited
+capabilities, v0.2 goals/non-goals, required execution and governance
+capabilities, contribution/PR-workflow adaptations, a staged 17-phase
+roadmap (107B–115A), safety prerequisites, 17 hard no-go conditions,
+validation strategy, and release criteria. Added
+`docs/PHASE_107_V0_2_EXECUTION_CAPABILITY_GAP_ANALYSIS.md`: enumerates
+capabilities already present from v0.1 (governed lifecycle, report
+trust, no-go registry, shared safety/authorization contract, evidence-
+only permission-broker/shell-gate/evidence-bundle/decision-engine/
+coordinator artifacts, GitHub Release, branch protection) versus still
+missing for autonomy (real permission broker enforcement, shell/
+subprocess mediation, backend/adapter invocation boundaries, human
+approval enforcement, durable audit persistence, rollback governance,
+emergency stop, execution sandboxing, output capture/redaction), a risk
+analysis, dependency graph, implementation order, test strategy, and the
+branch-protected-`main` implications for v0.2 development itself. 24 new
+tests (`tests/test_v0_2_autonomy_roadmap.py`). No new tag; no final
+`v0.1.0` tag; no new GitHub Release; no PyPI/GitHub Packages
+publication; `.pcae-local/` remains ignored; no article/source-packet
+material committed.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 107B — v0.2 Autonomy Contract Freeze (freeze the v0.2
+contract before implementing any enforcement or execution capability;
+not started).
+
+## Phase 106M Complete
+
 Phase 106M — Repository Contribution Safety / Branch Protection Readiness (completed).
 
 Applies GitHub branch protection to `main` and establishes a PR-first

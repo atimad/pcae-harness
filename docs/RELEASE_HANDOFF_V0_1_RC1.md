@@ -177,6 +177,9 @@ git rev-parse v0.1.0-rc1
 4. Use `v0.1.0-rc1` for external validation before considering a final
    `v0.1.0` tag — no final `v0.1.0` tag exists or was created by this
    phase.
-5. When ready to plan v0.2, proceed to **107A — v0.2 Full Autonomy
-   Roadmap / Execution Capability Gap Analysis** (recommended next phase;
-   not started in this phase).
+5. **107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap
+   Analysis is complete.** See `docs/V0_2_AUTONOMY_ROADMAP.md` and
+   `docs/PHASE_107_V0_2_EXECUTION_CAPABILITY_GAP_ANALYSIS.md`. The next
+   repo track is the staged v0.2 autonomy roadmap (107B onward); no
+   execution capability has been added — v0.1.0-rc1 remains
+   non-executing by design.
