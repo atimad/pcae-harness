@@ -1,54 +1,54 @@
-# Phase Report: Public Narrative Artifact Hygiene Repair
+# Phase Report: v0.1 Effectiveness Evaluation Framework / External Article Source Packet
 
-- **Phase ID:** `106J.1`
+- **Phase ID:** `106K`
 - **Status:** completed
-- **Report completeness:** complete
-- **Files changed:** 8
-- **Tests run:** 15
-- **Commits:** 344d79a9, de95d8e2
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Report completeness:** pending final push state (pushed_status, origin_main_head, pcae_push_check) — this file is a pre-push draft, see note
+- **Files changed:** 6
+- **Tests run:** 18
+- **Commits:** 4fea9378, 56e7c25c
+- **Pushed:** not_pushed (pending final task-finish commit + push)
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 106J.1: Public narrative artifact hygiene only; does not write the
-LinkedIn article; no product/runtime behavior implemented or changed.
-Removed `docs/PUBLIC_NARRATIVE_BRIEF_V0_1.md` (committed in 106J) —
-article-support source material does not belong in the tracked product/
-release doc set; every durable fact it cited (v0.1.0-rc1 tagged,
-fast-green 4390/4390, non-executing by design, v0.2 autonomy target)
-already lives independently in `README.md`/`docs/RELEASE_SCOPE_V0_1.md`/
-`docs/RELEASE_HANDOFF_V0_1_RC1.md`. Added `.pcae-local/` to `.gitignore`
-as the ignored local workspace for future article drafts, public-
-narrative source material, and evaluation working notes (verified
-ignored via `git check-ignore`; no files created inside it). Added
-`docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md` (rationale,
-what was removed, durable-facts preservation table, ignored local
-workspace convention, future article-artifact policy). Added an
-amendment note to
-`docs/PHASE_106_DOCUMENTATION_ALIGNMENT_PUBLIC_NARRATIVE_PREP.md`
-preserving its historical record. Replaced brief-content-dependent tests
-in `tests/test_documentation_alignment_public_narrative_v0_1.py` with
-tests against the alignment document and durable release docs; added
-`tests/test_public_narrative_artifact_hygiene.py` (15 tests) verifying
-the brief's absence, `.pcae-local/` ignore behavior, no other tracked
-article-support files, and durable release-doc integrity. No LinkedIn
-article or article source packet committed. No new tag created.
-Non-executing. Recommends 106K.
+Phase 106K: Creates a committed effectiveness evaluation framework and
+article source material only under ignored local storage; does not
+commit LinkedIn article material; does not write the final LinkedIn
+article in the repo; no product/runtime behavior implemented or changed.
+Added `docs/V0_1_EFFECTIVENESS_EVALUATION_FRAMEWORK.md`: evaluation
+thesis (trusted completion per unit of human supervision, not raw
+speed), baseline (AI coding without PCAE) vs. treatment (with PCAE
+v0.1), when PCAE should help vs. is likely overkill, measurable metrics,
+a 100-point scoring rubric, 5 sample evaluation task shapes, a
+controlled-comparison method, longitudinal real-project metrics
+computable from this project's own phase history, expected
+advantages/disadvantages, and an interpretation guide. Wrote a factual
+LinkedIn article source packet (project summary, milestone facts,
+concrete examples of issues PCAE caught — partial report trust fields,
+notification ordering, the 106G/106H/106I trust-gate asymmetry cycle,
+106B fast-green triage, the 106J.1 hygiene self-correction — angles/
+tones, no-claims/avoid list, candidate titles) only under
+`.pcae-local/article-drafts/v0.1-linkedin-source-packet.md`, verified
+untracked and ignored via `git ls-files`/`git check-ignore` before phase
+completion; never committed. Updated
+`docs/PHASE_106_PUBLIC_NARRATIVE_ARTIFACT_HYGIENE_REPAIR.md` confirming
+the 106J.1 convention held in practice. 18 new tests
+(`tests/test_v0_1_effectiveness_evaluation_framework.py`). No new tag
+created. Non-executing. Recommends external article work, then 107A.
 
 ## Governance Results
 
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
+- **pcae_push_check:** pending final commit
 - **telegram_runtime:** loaded, configured, enabled
 
 ## Test Results
 
-- **public_narrative_hygiene_tests:** 15/15 (passed)
-- **documentation_alignment_tests_rewritten:** 7/7 (passed)
-- **documentation_release_tests:** 151/151 (passed)
+- **effectiveness_evaluation_framework_tests:** 18/18 (passed)
+- **focused_effectiveness_hygiene_group:** 40/40 (passed)
+- **documentation_release_tests:** 169/169 (passed)
 - **bootstrap_session_report_regression:** 358/358 (passed)
 - **release_lifecycle_regression:** 1574/1574 (passed)
 - **combined_regression:** 2255/2255 (passed)
@@ -58,11 +58,11 @@ Non-executing. Recommends 106K.
 
 ## No-Go Confirmations
 
-No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs verification command behavior. No shell execution beyond existing lifecycle/test/docs verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No LinkedIn article or article source packet committed. `.pcae-local/` is ignored. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. Recommends 106K.
+No runtime enforcement. No autonomous execution. No real backend invocation. No adapter execution. No subprocess execution beyond existing lifecycle/test/docs verification command behavior. No shell execution beyond existing lifecycle/test/docs verification command behavior. No network call outside the existing Telegram outbound notification path and ordinary git remote verification. No shell interception. No Telegram inbound. No Telegram polling. No remote shell. No `/run`. No automatic apply. No apply execution. No patch parsing for execution. No commit authorization changes beyond existing governed lifecycle. No push authorization changes beyond existing governed lifecycle. No real AI backend calls. No executable artifact-only invocation path. No execution enablement flag. No execution availability toggle. No cryptographic signing. No remote attestation. No database-backed audit storage. No shell mediation. No rollback execution. No file mutation rollback. No automatic restore. No git reset/checkout/revert execution. No new tag created. No LinkedIn article or article source packet committed. `.pcae-local/` remains ignored. Telegram outbound-only. Execution unavailable. All auth flags False. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target. No automatic next repo phase recommended; next human workflow is external article drafting, then 107A.
 
 ## Recommended Next Phase
 
-106K — v0.1 Effectiveness Evaluation Framework / External Article Source Packet
+107A — v0.2 Full Autonomy Roadmap / Execution Capability Gap Analysis (no automatic next repo phase; draft the LinkedIn article externally from the untracked source packet first)
 
 ---
 *Report generated by PCAE Phase 92A. Schema version 1.0.*
