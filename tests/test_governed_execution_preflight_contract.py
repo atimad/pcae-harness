@@ -49,7 +49,8 @@ def source_preflight():
 
 
 @pytest.fixture
-def clean_artifact_dir():
+def clean_artifact_dir(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
     import shutil
     d = _gep_dir_path()
     if d.exists(): shutil.rmtree(d)
@@ -378,9 +379,9 @@ class TestDigestFreeze:
 
 
 class TestCLIContractFreeze:
-    def test_json_shape_stable(self):
+    def test_json_shape_stable(self, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "preflight", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -389,9 +390,9 @@ class TestCLIContractFreeze:
         for field in FROZEN_TOP_LEVEL_FIELDS:
             assert field in data, f"CLI JSON missing: {field!r}"
 
-    def test_json_auth_flags_all_false(self):
+    def test_json_auth_flags_all_false(self, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "preflight", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -401,9 +402,9 @@ class TestCLIContractFreeze:
         for flag, val in auth.items():
             assert val is False
 
-    def test_save_writes_to_expected_path(self, clean_artifact_dir):
+    def test_save_writes_to_expected_path(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -411,9 +412,9 @@ class TestCLIContractFreeze:
         latest = _gep_latest_path()
         assert latest.exists()
 
-    def test_show_and_verify_same_artifact(self, clean_artifact_dir):
+    def test_show_and_verify_same_artifact(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -430,9 +431,9 @@ class TestCLIContractFreeze:
         v_data = _json.loads(r_v.stdout)
         assert s_data["prototype_id"] == v_data.get("prototype_id", "")
 
-    def test_cli_does_not_execute(self, clean_artifact_dir):
+    def test_cli_does_not_execute(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         for cmd in (
             ["governed-execution", "preflight", "--json"],
             ["governed-execution", "preflight", "--save"],
@@ -463,9 +464,9 @@ class TestLatestShowVerifyFreeze:
         s = str(_gep_latest_path())
         assert not s.startswith("http")
 
-    def test_show_no_artifact_fails(self, clean_artifact_dir):
+    def test_show_no_artifact_fails(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "show", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -473,9 +474,9 @@ class TestLatestShowVerifyFreeze:
         data = _json.loads(r.stdout)
         assert "error" in data or "no_prototype" in str(data).lower()
 
-    def test_verify_no_artifact_fails(self, clean_artifact_dir):
+    def test_verify_no_artifact_fails(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "verify", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,

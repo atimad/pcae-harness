@@ -44,7 +44,8 @@ def source_preflight():
 
 
 @pytest.fixture
-def clean_artifact_dir():
+def clean_artifact_dir(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
     import shutil
     d = _gep_dir_path()
     if d.exists(): shutil.rmtree(d)
@@ -245,9 +246,9 @@ class TestTamperDetectionHardening:
 
 
 class TestAuthorizationFlagTrustHardening:
-    def test_cli_json_all_flags_false(self):
+    def test_cli_json_all_flags_false(self, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "preflight", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -256,9 +257,9 @@ class TestAuthorizationFlagTrustHardening:
         for flag, val in auth.items():
             assert val is False
 
-    def test_show_json_all_flags_false(self, clean_artifact_dir):
+    def test_show_json_all_flags_false(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -271,9 +272,9 @@ class TestAuthorizationFlagTrustHardening:
         for flag, val in auth.items():
             assert val is False
 
-    def test_text_output_non_authorizing(self):
+    def test_text_output_non_authorizing(self, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "governed-execution", "preflight"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -489,9 +490,9 @@ class TestNoExecutionGuardHardening:
         p = build_governed_execution_preflight_prototype(source_preflight=source_preflight, load_latest=False)
         assert len(p.compute_digest()) == 64
 
-    def test_cli_paths_never_execute(self, clean_artifact_dir):
+    def test_cli_paths_never_execute(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         for cmd in (
             ["governed-execution", "preflight", "--json"],
             ["governed-execution", "preflight", "--save"],

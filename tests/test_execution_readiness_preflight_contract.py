@@ -99,8 +99,9 @@ def fresh_preflight():
 
 
 @pytest.fixture
-def clean_artifact_dir():
-    """Ensure clean artifact directory."""
+def clean_artifact_dir(monkeypatch, tmp_path):
+    """Ensure clean artifact directory, isolated per test to avoid xdist collisions on the shared repo-relative artifact path."""
+    monkeypatch.chdir(tmp_path)
     import shutil
     dir_path = _preflight_dir_path()
     if dir_path.exists():
@@ -656,11 +657,11 @@ class TestDigestFreeze:
 class TestCLIContractFreeze:
     """CLI behavior is frozen — JSON shape, exit codes, safety."""
 
-    def test_preflight_json_output_has_all_top_level_fields(self):
+    def test_preflight_json_output_has_all_top_level_fields(self, tmp_path):
         """CLI --json output must contain all frozen top-level fields."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -670,11 +671,11 @@ class TestCLIContractFreeze:
         for field in FROZEN_TOP_LEVEL_FIELDS:
             assert field in data, f"CLI JSON missing field: {field!r}"
 
-    def test_preflight_json_auth_flags_all_false(self):
+    def test_preflight_json_auth_flags_all_false(self, tmp_path):
         """CLI --json output must have all authorization flags False."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -684,11 +685,11 @@ class TestCLIContractFreeze:
         for flag in FROZEN_AUTH_FIELDS:
             assert auth[flag] is False, f"CLI JSON auth {flag} must be False"
 
-    def test_preflight_text_output_includes_required_facts(self):
+    def test_preflight_text_output_includes_required_facts(self, tmp_path):
         """CLI text output must include key facts: no-execution, digest, status."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -699,11 +700,11 @@ class TestCLIContractFreeze:
         assert "digest" in out.lower()
         assert "Preflight" in out
 
-    def test_preflight_save_writes_to_expected_path(self, clean_artifact_dir):
+    def test_preflight_save_writes_to_expected_path(self, clean_artifact_dir, tmp_path):
         """--save must write to .pcae/execution-readiness-preflight/."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -713,11 +714,11 @@ class TestCLIContractFreeze:
         data = _json.loads(latest.read_text())
         assert "preflight_id" in data
 
-    def test_show_latest_after_save_works(self, clean_artifact_dir):
+    def test_show_latest_after_save_works(self, clean_artifact_dir, tmp_path):
         """show --latest reads the same artifact saved by --save."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -730,11 +731,11 @@ class TestCLIContractFreeze:
         data = _json.loads(r.stdout)
         assert "preflight_id" in data
 
-    def test_verify_latest_after_save_works(self, clean_artifact_dir):
+    def test_verify_latest_after_save_works(self, clean_artifact_dir, tmp_path):
         """verify --latest after --save should produce a result."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -748,22 +749,22 @@ class TestCLIContractFreeze:
         assert "no_execution_confirmed" in data
         assert data["no_execution_confirmed"] is True
 
-    def test_show_no_artifact_fails_clearly(self, clean_artifact_dir):
+    def test_show_no_artifact_fails_clearly(self, clean_artifact_dir, tmp_path):
         """show --latest with no artifact must fail with clear message."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "show"],
             capture_output=True, text=True, cwd=repo, timeout=15,
         )
         assert r.returncode != 0 or "no preflight" in (r.stdout + r.stderr).lower()
 
-    def test_verify_no_artifact_fails_clearly(self, clean_artifact_dir):
+    def test_verify_no_artifact_fails_clearly(self, clean_artifact_dir, tmp_path):
         """verify --latest with no artifact must fail clearly."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "verify", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -772,11 +773,11 @@ class TestCLIContractFreeze:
         assert data["valid"] is False
         assert not data.get("preflight_present", True)
 
-    def test_cli_does_not_execute_anything(self, clean_artifact_dir):
+    def test_cli_does_not_execute_anything(self, clean_artifact_dir, tmp_path):
         """CLI commands must not execute backends, adapters, or mutation."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         for cmd in (
             ["execution-readiness", "preflight", "--json"],
             ["execution-readiness", "preflight", "--save"],
@@ -815,11 +816,11 @@ class TestLatestShowVerifyFreeze:
         loaded = load_latest_execution_readiness_preflight()
         assert loaded.preflight_id == p.preflight_id
 
-    def test_show_and_verify_resolve_same_artifact(self, clean_artifact_dir):
+    def test_show_and_verify_resolve_same_artifact(self, clean_artifact_dir, tmp_path):
         """show and verify resolve the same latest artifact."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -973,11 +974,11 @@ class TestNoExecutionGuard:
         assert "Popen" not in d_str
         assert "check_output" not in d_str
 
-    def test_all_authorization_flags_remain_false_in_cli_output(self):
+    def test_all_authorization_flags_remain_false_in_cli_output(self, tmp_path):
         """Every CLI path must output all auth flags as False."""
         import subprocess, sys
         from pathlib import Path
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,

@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 107D — Parallel Validation Hardening (completed).
+
+Makes PCAE's validation pipeline fully `pytest-xdist` compatible by
+eliminating the known parallel-execution artifact collision documented in
+Phase 107C's Validation Note (11 tests across 4 pre-existing files). Root
+cause: subprocess- and in-process-invoked CLI tests in
+`tests/test_execution_readiness_preflight_artifact_trust.py`,
+`tests/test_governed_execution_preflight_artifact_trust.py`,
+`tests/test_governed_execution_preflight_contract.py`, and
+`tests/test_execution_readiness_preflight_contract.py` resolved a relative
+`.pcae/` artifact path against the real, shared repository root instead of
+an isolated per-test directory, so concurrent xdist workers could race on
+the same file. Fixed by isolating all 31 affected subprocess invocations to
+`tmp_path` and all 4 `clean_artifact_dir` fixtures via
+`monkeypatch.chdir(tmp_path)`. No production code in `src/pcae/` changed.
+Test/validation infrastructure hardening only — no runtime enforcement,
+autonomous execution, or execution capability added.
+
+Investigated and ruled out two additional apparent failure clusters found
+during full-suite validation, neither an xdist defect: 186 failures tied to
+no active task contract being present at run time (environmental
+precondition, reproduced identically under serial execution, resolved once
+this phase's own task was created), and a handful of import/collection
+failures caused by an investigation shell session being `cd`'d into
+`tests/` (not a code defect).
+
+Added `docs/PHASE_107_PARALLEL_VALIDATION_HARDENING.md`. All 242 tests in
+the previously-affected group pass cleanly and repeatably under `-n auto`
+(verified across 6 total clean runs). `fast_green` marker: 4390/4390
+(matches documented baseline). Release/lifecycle regression group
+(`test_task*`, `test_phase*`, `test_notifications*`,
+`test_telegram_notifications.py`): 1458/1458. No test count regression, no
+coverage reduction, no test disabled or removed.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 107E — PR-Compatible Governed Development Workflow Design
+(not started).
+
+## Phase 107C Complete
+
 Phase 107C — Execution Readiness No-Go Gate Freeze (completed).
 
 Freezes the canonical no-go gates (`NG-001` through `NG-025`) that must

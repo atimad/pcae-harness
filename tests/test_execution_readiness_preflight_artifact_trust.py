@@ -41,7 +41,8 @@ from pcae.core.backend_invocations import (
 
 
 @pytest.fixture
-def clean_artifact_dir():
+def clean_artifact_dir(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
     import shutil
     dir_path = _preflight_dir_path()
     if dir_path.exists():
@@ -372,9 +373,9 @@ class TestTamperDetectionHardening:
 class TestAuthorizationFlagTrustHardening:
     """Authorization flags must never be true, never implied, never overridable."""
 
-    def test_text_output_never_says_execution_ready(self):
+    def test_text_output_never_says_execution_ready(self, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -383,9 +384,9 @@ class TestAuthorizationFlagTrustHardening:
         assert "execution ready" not in r.stdout.lower()
         assert "invoke now" not in r.stdout.lower()
 
-    def test_json_output_never_implies_authorization(self):
+    def test_json_output_never_implies_authorization(self, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -397,9 +398,9 @@ class TestAuthorizationFlagTrustHardening:
         assert data["execution_available"] is False if "execution_available" in data else True
         assert data["no_execution"] is True
 
-    def test_show_output_never_implies_authorization(self, clean_artifact_dir):
+    def test_show_output_never_implies_authorization(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -413,9 +414,9 @@ class TestAuthorizationFlagTrustHardening:
         for flag, val in auth.items():
             assert val is False, f"Show auth flag {flag} must be False"
 
-    def test_verify_output_never_implies_authorization(self, clean_artifact_dir):
+    def test_verify_output_never_implies_authorization(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -534,9 +535,9 @@ class TestLatestShowVerifySafetyHardening:
         path_str = str(latest)
         assert not path_str.startswith("/") or ".pcae" in path_str
 
-    def test_missing_latest_fails_clearly(self, clean_artifact_dir):
+    def test_missing_latest_fails_clearly(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         r = subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "show", "--json"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -552,9 +553,9 @@ class TestLatestShowVerifySafetyHardening:
         loaded = load_latest_execution_readiness_preflight()
         assert loaded is None  # should return None for invalid JSON
 
-    def test_show_and_verify_same_artifact(self, clean_artifact_dir):
+    def test_show_and_verify_same_artifact(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -731,9 +732,9 @@ class TestNoExecutionGuardHardening:
         d = p.compute_digest()
         assert len(d) == 64
 
-    def test_cli_preflight_never_executes(self):
+    def test_cli_preflight_never_executes(self, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         for cmd in (
             ["execution-readiness", "preflight", "--json"],
             ["execution-readiness", "preflight", "--save"],
@@ -744,9 +745,9 @@ class TestNoExecutionGuardHardening:
             )
             assert r.returncode == 0
 
-    def test_cli_show_never_executes(self, clean_artifact_dir):
+    def test_cli_show_never_executes(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
@@ -758,9 +759,9 @@ class TestNoExecutionGuardHardening:
         # show returns 0 on success or non-zero when no artifact
         # Either is fine — what matters is no execution was attempted
 
-    def test_cli_verify_never_executes(self, clean_artifact_dir):
+    def test_cli_verify_never_executes(self, clean_artifact_dir, tmp_path):
         import subprocess, sys
-        repo = Path(__file__).resolve().parent.parent
+        repo = tmp_path
         subprocess.run(
             [sys.executable, "-m", "pcae", "execution-readiness", "preflight", "--save"],
             capture_output=True, text=True, cwd=repo, timeout=15,
