@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 108C: Permission Broker Policy Composition & Hardening (20260703-1008-phase-108c-permission-broker-policy-composition-hardening)
 - Sync final pushed-state metadata for 108B (20260703-0955-sync-final-pushed-state-metadata-for-108b)
 - Phase 108B: Permission Broker Policy Rule Framework (20260703-0934-phase-108b-permission-broker-policy-rule-framework)
 - Sync final pushed-state metadata for 108A (20260703-0927-sync-final-pushed-state-metadata-for-108a)
