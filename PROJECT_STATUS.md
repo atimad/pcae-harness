@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 109A — Permission Broker Command-Path Integration Design (completed).
+
+Designs the first command-path integration architecture for the
+Permission Broker while preserving PCAE's current non-executing
+guarantees — architecture/design only, no source code in `src/pcae/`
+touched (this phase's task contract excludes the `core`/`commands`/`cli`
+zones entirely, structurally enforcing that boundary). Freezes an
+eight-stage canonical flow (AI Agent → Permission Broker → Command
+Boundary → Execution Boundary → Human Approval Gate → Shell/Backend/
+Adapter Boundary → Audit Boundary → Rollback Boundary), explicitly
+naming "Command Boundary" as a design pattern every integration point
+follows independently rather than inventing an eleventh `COMP-NNN`
+component. Freezes eleven canonical command categories (Read-only,
+Repository inspection, Documentation mutation, Source mutation, Test
+execution, Git lifecycle, shell execution, Backend invocation, Adapter
+invocation, Network, High-risk), each with examples, risk level, broker
+involvement, future approval requirement, and current implementation
+status — candidly stating that shell-class actions an AI agent's own
+tooling issues are entirely unmediated by any PCAE component today, the
+single largest gap this design exists to eventually close. Documents
+seven integration points (`pcae commit implementation`, `pcae push`,
+shell/subprocess/backend/adapter mediation, a future unified execution
+API) with current status, future integration, and rationale — none
+connected. Specifies the broker interaction contract (input/output using
+the existing, unmodified `PermissionBrokerRequest`/`PermissionBrokerDecision`
+models, decision lifecycle mapped onto 107B's canonical execution
+lifecycle, required metadata, unchanged 108B/C policy evaluation order,
+fail-closed failure behavior, and audit expectations exclusively
+reserved for the future Audit Boundary). Demonstrates compatibility with
+the Autonomy Contract, No-Go Gates, Local Governance (108E), Branch
+Protection (106M/107E), and existing lifecycle commands. Explains how
+command-path integration would strengthen repository protection, and how
+it differs from hooks and branch protection.
+
+Added `docs/V0_2_PERMISSION_BROKER_COMMAND_PATH_INTEGRATION.md` and
+`docs/PHASE_109_PERMISSION_BROKER_COMMAND_PATH_INTEGRATION_DESIGN.md`. 86
+new tests (`tests/test_permission_broker_command_path_design.py`).
+Focused design+broker group (566), governance/autonomy group (1054), and
+release/lifecycle regression group (1458) all passed under `-n auto`;
+`fast_green` 4390/4390 (matches documented baseline). No group required a
+sequential fallback. No broker command-path integration, runtime
+execution, shell mediation, subprocess mediation, backend invocation,
+adapter invocation, execution enablement, execution capability, audit
+persistence, rollback execution, emergency stop, Telegram inbound,
+automatic apply, command execution, Permission Broker enforcement, shell
+boundary implementation, or backend boundary implementation implemented.
+`v0.1.0-rc1` remains non-executing by design; v0.2 remains the autonomy
+target. GitHub Release for `v0.1.0-rc1` and branch protection on `main`
+are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 109B — First Command-Path Integration Prototype (Disabled by
+Default) (not started).
+
+## Phase 108E Complete
+
 Phase 108E — Local Governance Bootstrap & Pre-Push Hardening (completed).
 
 Strengthens PCAE's local governance bootstrap so contributors and AI
