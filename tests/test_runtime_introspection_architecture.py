@@ -489,9 +489,18 @@ def test_recommended_next_phase_is_111b(introspection_text, phase_doc_text):
 
 
 def test_no_introspection_module_added_to_core():
+    """As of 111A (architecture/design only), no implementation module
+    existed. `runtime_introspection.py` itself was intentionally,
+    legitimately added by the very next phase, 111B (Runtime
+    Introspection Prototype) -- excluded here rather than left to
+    perpetually fail once that phase landed, mirroring how 110D/110C's
+    equivalent guards never collided with 110E's later
+    `runtime_registry.py` by design. The remaining forbidden names
+    (a hypothetical one-object-per-file split this design never called
+    for) remain valid: 111B implemented every object in one module."""
     core_dir = REPO_ROOT / "src" / "pcae" / "core"
     forbidden_names = {
-        "runtime_introspection.py", "introspection.py", "runtime_info.py",
+        "introspection.py", "runtime_info.py",
         "registry_info.py", "plugin_info.py", "health_info.py",
         "governance_info.py", "runtime_state_info.py",
     }

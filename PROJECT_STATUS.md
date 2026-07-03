@@ -2,6 +2,90 @@
 
 ## Current Phase
 
+Phase 111B — Runtime Introspection Prototype (Observation-Only) (completed).
+
+Implementation phase. Implements the first observation-only Runtime
+Introspection prototype: in-process, read-only data structures/
+functions exposing Runtime, Registry, Plugin, Capability, Health,
+Version, Governance, and RuntimeState metadata, integrated with the
+passive Runtime Registry (110E/110F). No CLI command yet — `pcae
+runtime inspect` is explicitly deferred to 111C.
+
+**`src/pcae/core/runtime_introspection.py` added.** Eight of 111A's
+eleven introspection objects implemented: `RegistryInfo`/`PluginInfo`
+are direct type aliases of 110E/110F's `RegistrySnapshot`/
+`PluginDescriptor` (no duplicate dataclasses); `RuntimeInfo`,
+`CapabilityInfo`, `HealthInfo`, `VersionInfo`, `GovernanceInfo`,
+`RuntimeStateInfo` are new frozen dataclasses, each grounded in an
+already-existing source. `SessionInfo`/`TaskInfo`/`PhaseInfo`
+deliberately deferred — outside this phase's own goal-statement scope,
+and each already has a materially different (filesystem-backed)
+existing precedent.
+
+**Eight functions mirror 111A's API 1:1:** `get_runtime()`,
+`get_registry()`, `get_plugins()`, `get_capabilities()`, `get_health()`,
+`get_governance()`, `get_state()`, `get_version()`. `get_registry()`/
+`get_plugins()` proven to delegate exactly to
+`RuntimeRegistry.registry_health()`/`.list_plugins()` — no new
+computation. `get_capabilities()` enumerates the full ten-class frozen
+taxonomy (110B §3), pairing each with declaring plugin IDs and an
+`undeclarable` flag (`execute`/`enforce` only).
+
+**Registry integration never mutates/loads/instantiates/invokes:** an
+adversarial test registers a plugin with a manifest-smuggled callable
+canary that raises if ever called — every introspection function
+exercised against it, none raises. `register_metadata(` confirmed
+absent from the module's source.
+
+**Health/status/governance snapshots:** `get_health()` composes live
+registry data with frozen constants (`execution_availability`
+`"unavailable"`, `current_runtime_state` `"Observed"`,
+`current_maximum_plugin_capability` `"observe"`); `runtime_status`
+honestly reports `"not_implemented"` rather than fabricating "healthy"
+for a nonexistent live Runtime. `get_state()` restates 110A §8's
+eight-state model verbatim. `get_governance()` reads
+`permission_broker_foundation`'s status constant (never a live broker
+call) and `command_path_observation.INTEGRATION_REGISTRY`'s length
+(4).
+
+**Immutability:** every new dataclass is `frozen=True`; `PluginInfo`
+inherits 110F's manifest-immutability hardening transparently
+(re-tested through this new layer).
+
+**No CLI added, confirmed directly** (no `argparse`/`add_parser` in
+the module; no `runtime-inspect`/`runtime_introspection` reference in
+`cli.py`).
+
+Added `docs/PHASE_111_RUNTIME_INTROSPECTION_PROTOTYPE.md`. One 111A
+test updated (`test_no_introspection_module_added_to_core` — the
+module's own existence is now the expected, intentional outcome of
+this phase, not a violation). `docs/ROADMAP.md` evaluated, no change
+needed. 74 new tests (1 skip until `pcae task finish` moves the task
+contract to `tasks/done/`) (`tests/test_runtime_introspection_prototype.py`).
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No CLI introspection command, `pcae runtime inspect`, REST endpoint,
+web UI, daemon, background worker, plugin loading, plugin
+instantiation, plugin invocation, dependency injection, runtime
+execution, command authorization, command denial, behavior-changing
+integration, shell mediation, backend invocation, adapter invocation,
+execution enablement, execution capability, Permission Broker
+enforcement, audit persistence, rollback execution, emergency stop,
+Telegram inbound, or automatic apply implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub
+Release for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 111C — Runtime Inspect CLI (not started).
+
+## Phase 111A Complete
+
 Phase 111A — Runtime Introspection Architecture (completed).
 
 Architecture/design phase only — no introspection implementation, CLI
