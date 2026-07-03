@@ -2,6 +2,109 @@
 
 ## Current Phase
 
+Phase 110B — Runtime Plugin Contract Freeze (completed).
+
+Contract/freeze phase only — no plugin loading, plugin registry
+implementation, dependency injection framework, or execution capability
+introduced; no file under `src/pcae/` touched. Turns the ten plugin
+categories 110A named into stable, versionable contracts.
+
+**Plugin Contract Model:** eighteen standard fields frozen (Plugin ID,
+Plugin type, Purpose, Responsibilities, Inputs, Outputs, Lifecycle
+hooks, Capability declaration, Configuration model, Health reporting,
+Versioning, Compatibility rules, Security boundaries, Evidence
+requirements, Failure behavior, Approval requirements, Audit
+expectations, Current implementation status). No contract may claim
+`implemented` for field 18 — only `not_implemented`,
+`foundation_implemented`, or `partially_implemented`.
+
+**All 10 plugin category contracts frozen** (`docs/PCAE_RUNTIME_PLUGIN_CONTRACTS.md`):
+Intent Source, Policy, Decision, Approval, Execution Adapter, Audit,
+Notification, Storage, Identity, Context — each with allowed/forbidden
+responsibilities, input/output schema descriptions, lifecycle
+requirements, security/no-go constraints, failure behavior, current
+status.
+
+**Plugin Capability Taxonomy (10 classes, frozen):** `observe`,
+`advise`, `approve`, `deny`, `enforce`, `execute`, `audit`, `notify`,
+`store`, `rollback_prepare`. Current maximum capability actually
+exercised by any real PCAE code path today: **`observe`**. `enforce`
+and `execute` remain undeclarable by any plugin.
+
+**Plugin Lifecycle States (8, frozen):** `defined → registered →
+configured → healthy → available`, branching to `disabled → failed →
+retired`. Contracts only — no runtime plugin lifecycle implementation
+exists.
+
+**Compatibility/versioning rules, and 10 security boundaries** (fail-closed,
+least privilege, no implicit execution, no self-authorization, no
+hidden network access, no secret leakage, no untracked mutation, no
+bypass of human approval, no bypass of the Permission Broker, no bypass
+of audit requirements) frozen — eight of ten directly restate guarantees
+already verified in code (108B/108C/108D/109D).
+
+**Roadmap updated** (`docs/ROADMAP.md`) with a new "Long-Term Runtime
+Vision" section: PCAE is a governed automation runtime where every
+capability is modular, pluggable, connected, observable, automatable,
+and governed. Intent sources (Claude, Codex, DeepSeek, Telegram, future
+REST APIs, VS Code extensions, web UIs) and execution targets (shell,
+git, filesystem, backend agents, network calls, cloud runners) are both
+plugins — the Runtime privileges none of them. Execution is not the
+center of PCAE; it is one governed plugin capability inside the
+runtime. New Roadmap Principle 10: **Pluggable first. Connected second.
+Automated third. Executable last.**
+
+Added `docs/PCAE_RUNTIME_PLUGIN_CONTRACTS.md`, `docs/PHASE_110_RUNTIME_PLUGIN_CONTRACT_FREEZE.md`.
+155 new tests (1 skip until `pcae task finish` moves the task contract to
+`tasks/done/`) (`tests/test_runtime_plugin_contracts.py`) — a pure
+documentation-verification suite. Focused tests (288, combining this
+phase's suite with `test_runtime_architecture.py`), governance/autonomy
+group (1924), and the collectible portion of release/lifecycle
+regression (1429 — `test_task*`, `test_phase.py`, `test_phase_report_trust_*`,
+`test_phase_reports*`, `test_notifications*`, `test_telegram_notifications.py`)
+all passed under `-n auto`; `fast_green` 4390/4390 (matches documented
+baseline). No group required a sequential fallback.
+
+**Validation finding (documented, not a regression):** two pre-existing
+files in the release/lifecycle regression command,
+`test_phase85_integration.py` and `test_phase87_integration.py` (68
+tests), did not complete within a practical time budget this phase —
+confirmed via live process inspection to be genuinely executing (not
+deadlocked), reproducible identically under both `-n auto` and serial
+execution. Root cause: these files invoke governance-info commands
+(`pcae decision-log --json`, `pcae project-state --json`) that have
+become very slow — multiple minutes per invocation — due to the
+accumulated session history (110+ phases, 850+ provenance events) this
+long-running governed session has produced. This is a pre-existing
+environmental condition unrelated to 110B's changes (110B touches no
+`src/pcae/` file and no test file other than its own new one) and is
+outside this phase's task-contract scope to repair. Also noted: the
+literal file `tests/test_bootstrap_session_reporting.py` referenced in
+this phase's validation command does not exist anywhere in this
+repository.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**.
+
+No plugin loading, plugin registry implementation, dependency injection
+framework, runtime execution, command authorization, command denial,
+behavior-changing integration, shell mediation, subprocess mediation,
+backend invocation, adapter invocation, execution enablement, execution
+capability, Permission Broker enforcement, audit persistence, rollback
+execution, emergency stop, Telegram inbound, REST server, web server,
+daemon, background workers, automatic apply, or command execution
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains
+the autonomy target. GitHub Release for `v0.1.0-rc1` and branch
+protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 110C — Runtime Plugin Registry Design (not started).
+
+## Phase 110A Complete
+
 Phase 110A — PCAE Runtime Architecture & Plugin Model (completed).
 
 Architecture/freeze phase only — no execution capability introduced, no

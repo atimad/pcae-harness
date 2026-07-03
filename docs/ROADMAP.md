@@ -25,6 +25,66 @@ PCAE has completed 90 phases across three major arcs:
 7. **Task contracts before execution.** Every governed action is scoped by an explicit task contract.
 8. **Production v1 before full pluggability.** Deliver a coherent governed platform first. Pluggable adapters come after the core is production-ready.
 9. **One product, one roadmap.** PCAE is a single coherent product, not a collection of disconnected feature tracks.
+10. **Pluggable first. Connected second. Automated third. Executable last.** (Phase 110B) Every capability enters the runtime as a defined, pluggable contract before it is wired into the pipeline; it is wired into the pipeline before it is automated; it is automated before it is ever made executable. No capability skips a stage in this ordering, mirroring how no intent may skip a stage in the Runtime Pipeline itself (`docs/PCAE_RUNTIME_ARCHITECTURE.md`, 110A).
+
+---
+
+## Long-Term Runtime Vision (Phase 110B)
+
+PCAE is a governed automation runtime where every capability is
+**modular, pluggable, connected, observable, automatable, and
+governed** — the same six qualities frozen as Runtime Principles in
+`docs/PCAE_RUNTIME_ARCHITECTURE.md` (110A), restated here as the
+product's long-term direction rather than a purely architectural
+concern.
+
+**Intent sources are plugins.** Claude, Codex, DeepSeek, Telegram, a
+future REST API, a VS Code extension, or a web UI are all, structurally,
+Intent Source Plugins (`docs/PCAE_PLUGIN_MODEL.md` §1;
+`docs/PCAE_RUNTIME_PLUGIN_CONTRACTS.md` §2.1, 110B). None of them is
+architecturally privileged over any other — each produces a well-formed
+intent and hands it to the Runtime exactly like every other Intent
+Source Plugin, and the Runtime does not know or care which one produced
+a given intent beyond what the intent's own Identity resolution (§2.9)
+records.
+
+**Execution targets are Execution Adapter Plugins.** Shell, git, the
+filesystem, backend agents, network calls, and cloud runners are all,
+structurally, Execution Adapter Plugins (`docs/PCAE_PLUGIN_MODEL.md`
+§5; `docs/PCAE_RUNTIME_PLUGIN_CONTRACTS.md` §2.5, 110B). None of them is
+privileged over any other either — each is a mediated boundary an
+already-authorized intent may pass through, never a direct,
+unmediated path.
+
+**The PCAE Runtime does not privilege any one agent or execution
+mechanism.** Its role is to normalize intent, evaluate policy, route
+decisions, require approval where needed, preserve audit evidence,
+prepare rollback, and only then allow bounded execution through
+controlled adapters — the seven-stage Runtime Pipeline
+(`docs/PCAE_RUNTIME_ARCHITECTURE.md` §2, 110A), unchanged by this
+roadmap update.
+
+**Execution is not the center of PCAE. Execution is one governed
+plugin capability inside the runtime** — one of ten plugin categories
+(`docs/PCAE_PLUGIN_MODEL.md`, 110A), and, per the capability taxonomy
+(`docs/PCAE_RUNTIME_PLUGIN_CONTRACTS.md` §3, 110B), one of the two
+capability classes (`enforce`, `execute`) that remain undeclarable by
+any plugin today. The current maximum capability actually exercised by
+any real PCAE code path is `observe` — nothing more.
+
+> **Pluggable first. Connected second. Automated third. Executable
+> last.**
+
+This ordering is not a schedule commitment for specific future phases —
+no phase number is promised by this section — it is a standing
+constraint on the *sequence* any future capability must follow,
+regardless of when it is built. A capability that has not yet been
+defined as a pluggable contract cannot be connected to the Runtime
+Pipeline; a capability that is not yet connected cannot be automated; a
+capability that is not yet automated is never made executable. This is
+consistent with, and does not relax, every existing No-Go list in this
+project: naming a long-term vision is not the same as scheduling its
+execution-capable phases, and none are scheduled by this update.
 
 ---
 
