@@ -2,6 +2,88 @@
 
 ## Current Phase
 
+Phase 111D — Runtime Inspect CLI Verification & Compatibility (completed).
+
+Verification/hardening phase. Proves `pcae runtime inspect` (111C) is
+stable, read-only, backward-compatible with the Runtime Introspection
+architecture (111A/111B) and the Runtime Registry (110A–110F),
+performant, and incapable of introducing execution behavior. **No
+source code changes** — a full re-read of both
+`src/pcae/commands/runtime_inspect.py` and
+`src/pcae/core/runtime_introspection.py` found no defect requiring a
+fix (unlike 110F's manifest-immutability finding); both files confirmed
+unchanged by `git status`.
+
+**CLI verified stable:** all three output modes (default, `--json`,
+`--verbose`) reconfirmed functional; each proven byte-identical across
+repeated invocations; cross-mode consistency confirmed on the three
+load-bearing facts.
+
+**JSON schema frozen as a stable observation contract:** eight
+top-level keys and every section's exact field set now explicit, tested
+constants — populating the registry confirmed to change list contents
+only, never the key set.
+
+**Read-only guarantees re-verified:** no registry/runtime/plugin/
+metadata mutation (identity-checked, not just equality-checked); 110F's
+manifest-immutability hardening reconfirmed to survive the full CLI
+path; no `PermissionBroker.evaluate()` call (AST call-site check across
+both files); no plugin loading/instantiation/invocation (`dir()` sweep
+across three modules); no command execution; an end-to-end adversarial
+canary test run through the real `_build_snapshot()` → `json.dumps()`
+path.
+
+**Compatibility cross-checked against every phase named (110A–111C,
+109C):** pipeline stages against 110A doc text, capability classes
+against 110B doc text, 110C doc existence, 110D API names, 110E/110F
+module presence, 111A domain names, 111B function signatures
+unmodified, 111C CLI wiring still registered, 109C's four `INT-NNN`
+entries unaffected.
+
+**Performance verified:** `--verbose` completes well under a 2s smoke
+threshold; no filesystem scanning, network access, or dynamic plugin
+discovery anywhere in either module; `_build_snapshot()`'s AST
+confirmed to contain zero explicit loop statements (comprehensions
+only); ten repeated calls show no cross-invocation accumulation.
+
+**Security verified:** no secret-shaped terms in any output mode; no
+environment variable access; registry section never contains the live
+internal dict (identity-checked); every JSON value recursively
+confirmed non-callable; manifest field still absent everywhere; 111C's
+import allowlist reconfirmed unchanged.
+
+Added `docs/PHASE_111_RUNTIME_INSPECT_VERIFICATION.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 55 new tests (1 skip until `pcae task
+finish` moves the task contract to `tasks/done/`)
+(`tests/test_runtime_inspect_verification.py`).
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No new CLI functionality, runtime behavior changes, plugin loading,
+plugin instantiation, plugin invocation, runtime execution, command
+authorization, command denial, shell mediation, backend invocation,
+adapter invocation, execution enablement, execution capability,
+Permission Broker enforcement, audit persistence, rollback execution,
+emergency stop, Telegram inbound, REST endpoint, web UI, daemon,
+background worker, or automatic apply implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub
+Release for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 111R — Runtime Architecture Review (not started). This
+should be a deliberate architectural checkpoint before beginning the
+Runtime Context track, assessing cohesion, separation of
+responsibilities, extensibility, modularity, and adherence to the core
+principles established across 110A–111D, without introducing new
+functionality.
+
+## Phase 111C Complete
+
 Phase 111C — Runtime Inspect CLI (completed).
 
 Implementation phase. Adds the first official Runtime CLI inspection
