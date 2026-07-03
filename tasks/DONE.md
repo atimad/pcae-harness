@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 111D: Runtime Inspect CLI Verification & Compatibility (20260703-2011-phase-111d-runtime-inspect-cli-verification-compatibility)
 - Sync final pushed-state metadata for 111C (20260703-1946-sync-final-pushed-state-metadata-for-111c)
 - Phase 111C: Runtime Inspect CLI (20260703-1923-phase-111c-runtime-inspect-cli)
 - Sync final pushed-state metadata for 111B (20260703-1913-sync-final-pushed-state-metadata-for-111b)
