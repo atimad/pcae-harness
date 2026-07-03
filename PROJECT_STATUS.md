@@ -2,6 +2,101 @@
 
 ## Current Phase
 
+Phase 111R — Runtime Architecture Review (completed).
+
+Review/documentation phase only — no source behavior changes, no
+Runtime Context, no execution capability introduced; no file under
+`src/pcae/` touched. A deliberate architectural checkpoint across the
+nine phases (110A–111D) that built the PCAE Runtime subsystem, before
+starting the Runtime Context track. Every finding was produced by a
+runnable check against live source, live CLI output, or live doc text
+— not by re-summarizing what each prior phase already claimed about
+itself.
+
+**Responsibility separation reviewed:** Runtime, Registry, Plugins,
+Introspection, Runtime Inspect CLI, Permission Broker, and Observation
+Integration each verified against their actual, live public code
+surface (not documentation) — no responsibility creep found in any.
+
+**Dependency direction verified acyclic:** `runtime_registry.py` and
+`permission_broker_foundation.py` confirmed zero-dependency leaves;
+full import graph traced and confirmed one-directional; broker
+isolation confirmed (no awareness of Runtime/Registry/Introspection
+anywhere in `permission_broker_foundation.py`).
+
+**Plugin isolation/extensibility reviewed:** all twelve example future
+plugins (Claude/Codex/DeepSeek/Telegram/REST/VS Code intent sources,
+Shell/Git/Filesystem/Backend adapters, Notification providers,
+Audit/storage providers) confirmed to map onto the ten already-frozen
+categories with no code change required to register their metadata.
+
+**Registry and Introspection purity reconfirmed** via direct `dir()`
+inspection and source re-reading, not re-trust of prior phases' claims.
+
+**Runtime Inspect CLI reviewed:** output usefulness, JSON stability,
+machine/human readability, safety all reconfirmed; long-term
+usefulness for AI agents flagged Medium risk (always-empty
+plugin/capability sections due to no cross-invocation persistence — a
+direct, correct consequence of 110E's design, not a defect).
+
+**Safety invariants reconfirmed live** — including a fresh
+`PermissionBroker().evaluate()` call reconfirming
+`execution_unavailable` — no invariant has weakened at any point across
+110A–111D.
+
+**Runtime Context (112A) readiness assessed:** Session/Task/Phase have
+real precedents but are not yet introspection-modeled (111B deferral);
+Intent/Approval/Broker-decision/Evidence have no persistence model at
+all today — flagged as the central open design question 112A must
+resolve explicitly, not inherit implicitly from the Registry's
+in-memory-only choice.
+
+**Seven-item risk register, none Blocker:** two Strengths (ten-category
+taxonomy comfortably covers all named future plugins; Registry's
+implementation pattern is a proven, reusable template), five Low/Medium
+risks (CLI layering leak around Introspection; manifest-exclusion
+convention living in the CLI layer rather than enforced at the
+Introspection layer; always-empty plugin/capability CLI output;
+undesigned persistence for Intent/Approval/Decision/Evidence; naming
+overlap with ~30 unrelated pre-existing `pcae runtime-*` advisory
+commands).
+
+**Recommendation: Proceed to 112A**, with one condition — 112A's own
+phase brief should explicitly require a documented Persistence Model
+decision for each of Intent, Approval, Broker decision, and Evidence,
+mirroring 110E's own explicit choice for the Registry.
+
+Added `docs/PCAE_RUNTIME_ARCHITECTURE_REVIEW.md`,
+`docs/PHASE_111_RUNTIME_ARCHITECTURE_REVIEW.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 143 new tests (1 skip until `pcae task
+finish` moves the task contract to `tasks/done/`)
+(`tests/test_runtime_architecture_review.py`) — a pure documentation-
+verification suite.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No source behavior changes, Runtime Context, runtime execution, plugin
+loading, plugin instantiation, plugin invocation, dependency injection,
+command authorization, command denial, shell mediation, backend
+invocation, adapter invocation, execution enablement, execution
+capability, Permission Broker enforcement, audit persistence, rollback
+execution, emergency stop, Telegram inbound, REST endpoint, web UI,
+daemon, background worker, or automatic apply implemented. `v0.1.0-rc1`
+remains non-executing by design; v0.2 remains the autonomy target.
+GitHub Release for `v0.1.0-rc1` and branch protection on `main` are
+unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 112A — Runtime Context Architecture (not started), with the
+persistence-model condition stated above.
+
+## Phase 111D Complete
+
 Phase 111D — Runtime Inspect CLI Verification & Compatibility (completed).
 
 Verification/hardening phase. Proves `pcae runtime inspect` (111C) is
