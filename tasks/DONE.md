@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 112B.1: Planning & Bootstrap Consistency Hardening (20260703-2240-phase-112b-1-planning-bootstrap-consistency-hardening)
 - Fix 112B contract test false positive after task archival (20260703-2220-fix-112b-contract-test-false-positive-after-task-archival)
 - Sync final pushed-state metadata for 112B (20260703-2219-sync-final-pushed-state-metadata-for-112b-2)
 - Sync final pushed-state metadata for 112B (20260703-2218-sync-final-pushed-state-metadata-for-112b)
