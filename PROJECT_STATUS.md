@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 109C — Observation Integration Hardening & Multi-Path Expansion (completed).
+
+Hardens and generalizes the observation-only integration pattern
+established by 109B (`pcae health`) across three additional read-only
+command paths — `pcae check`, `pcae doctor task-memory`, and
+`pcae push check` — and introduces a canonical Integration ID registry.
+Each new call site follows the identical shape 109B established: the
+command computes its result exactly as before, calls
+`pcae.core.command_path_observation.observe()` as a bare expression
+inside a local `try`/`except Exception: pass` (defense in depth on top
+of `observe()`'s own internal guard), and proceeds using only values
+computed before the observation call. `run_push_check()` is integrated;
+`run_push()` — the real, mutating push command — is not, verified
+directly by a source-inspection test.
+
+`src/pcae/core/command_path_observation.py` gains
+`IntegrationRegistryEntry`, `INTEGRATION_REGISTRY` (INT-001 `pcae health`,
+INT-002 `pcae check`, INT-003 `pcae doctor task-memory`, INT-004
+`pcae push check`), `INTEGRATION_IDS`, and `get_integration()`. IDs are
+bookkeeping only — never read by `observe()` or by any integrated
+command. `observe()` itself is unmodified since 109B.
+
+Proven directly, per command: captured stdout and exit code are
+byte-identical whether `observe()` returns `ALLOW`, `DENY`,
+`HUMAN_REVIEW`, `None`, or raises an exception. `pcae check`'s scope
+enforcement and `pcae push check`'s readiness computation are shown to
+be fully independent of the broker's decision by forcing opposite
+decisions and asserting identical output. `permission_broker_foundation.py`
+itself was not touched — 108A–108D isolation and behavior guarantees
+remain unmodified, and 108D's `test_broker_not_imported_by_lifecycle_command_modules`
+still passes because the new call sites import through the
+`command_path_observation` indirection layer, never the broker module
+directly. INT-001 (`pcae health`) was re-verified unaffected — 109B's
+22-test suite still passes unmodified.
+
+Added `docs/PHASE_109_OBSERVATION_INTEGRATION_HARDENING.md`. 47 new
+tests (`tests/test_permission_broker_observation_hardening.py`). Focused
+integration group (`test_permission_broker*.py`, `test_health.py`,
+`test_check.py`, `test_task.py`, `test_push*.py`, 886 tests), governance/
+autonomy group (572 tests), and release/lifecycle regression group (197
+tests) all passed under `-n auto`; `fast_green` 4390/4390 (matches
+documented baseline). No group required a sequential fallback.
+
+**Execution Integration Status:** Observed command paths: **4**
+(`pcae health`, `pcae check`, `pcae doctor task-memory`,
+`pcae push check` — all observation-only). Behavior-changing paths:
+**0**. Authorized paths: **0**. Execution-capable paths: **0**. Current
+execution capability: **Execution unavailable**.
+
+No runtime execution, shell mediation, subprocess mediation, backend
+invocation, adapter invocation, execution enablement, execution
+capability, Permission Broker enforcement, audit persistence, rollback
+execution, emergency stop, Telegram inbound, automatic apply, command
+execution, command blocking, command authorization, or behavior change
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains
+the autonomy target. GitHub Release for `v0.1.0-rc1` and branch
+protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 109D — Observation Integration Verification & Compatibility
+(not started).
+
+## Phase 109B Complete
+
 Phase 109B — First Command-Path Integration Prototype (Observation-Only, Disabled by Default) (completed).
 
 Implements the first Permission Broker command-path integration

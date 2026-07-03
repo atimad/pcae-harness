@@ -6,6 +6,7 @@ import json
 import subprocess
 
 from pcae.core.check import run_checks
+from pcae.core.command_path_observation import observe
 from pcae.core.git_status import read_git_branch, read_git_changes
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
@@ -156,6 +157,24 @@ def assess_push_readiness(root: HarnessPath) -> PushReadiness:
 def run_push_check(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     readiness = assess_push_readiness(root)
+
+    # Phase 109C (INT-004): observation-only Permission Broker
+    # consultation, scoped deliberately to `push check` (read-only
+    # readiness assessment), never `pcae push` itself. The decision is
+    # discarded — it must never change this command's output or exit
+    # code. See docs/PHASE_109_OBSERVATION_INTEGRATION_HARDENING.md.
+    try:
+        observe(
+            action_type="read",
+            execution_class="none",
+            requested_component="COMP-001",
+            requested_capability="pcae_push_check",
+            evidence_available=True,
+            approval_present=True,
+        )
+    except Exception:
+        pass
+
     _print_readiness(readiness, args.json)
     return 0 if readiness.ready or readiness.mode == "nothing_to_push" else 1
 

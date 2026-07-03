@@ -4,6 +4,7 @@ import argparse
 import json
 
 from pcae.core.check import run_checks
+from pcae.core.command_path_observation import observe
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
 from pcae.core.session import SessionUpdate, update_session_snapshot, write_session_snapshot
@@ -1150,6 +1151,23 @@ def run_doctor_task_memory(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     fix = getattr(args, "fix", False)
     dry_run = getattr(args, "dry_run", False)
+
+    # Phase 109C (INT-003): observation-only Permission Broker
+    # consultation. Applies uniformly to both the diagnostic and --fix
+    # invocation modes; the decision is deliberately discarded — it
+    # must never change this command's behavior. See
+    # docs/PHASE_109_OBSERVATION_INTEGRATION_HARDENING.md.
+    try:
+        observe(
+            action_type="read",
+            execution_class="none",
+            requested_component="COMP-001",
+            requested_capability="pcae_doctor_task_memory",
+            evidence_available=True,
+            approval_present=True,
+        )
+    except Exception:
+        pass
 
     if fix:
         result = repair_task_memory(root, dry_run=dry_run)

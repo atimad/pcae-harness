@@ -5,6 +5,7 @@ import json
 
 from pcae.core.agent import build_agent_lock_state
 from pcae.core.check import CheckResult, run_checks
+from pcae.core.command_path_observation import observe
 from pcae.core.git_status import GitChange, read_git_changes
 from pcae.core.paths import HarnessPath
 from pcae.core.session import session_continuity_status
@@ -13,6 +14,23 @@ from pcae.core.session import session_continuity_status
 def run_check(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     result = run_checks(root)
+
+    # Phase 109C (INT-002): observation-only Permission Broker
+    # consultation. The decision is deliberately discarded — it must
+    # never change this command's output or exit code. See
+    # docs/PHASE_109_OBSERVATION_INTEGRATION_HARDENING.md.
+    try:
+        observe(
+            action_type="read",
+            execution_class="none",
+            requested_component="COMP-001",
+            requested_capability="pcae_check",
+            task_id=result.active_task_id,
+            evidence_available=True,
+            approval_present=True,
+        )
+    except Exception:
+        pass
 
     if args.json:
         print(json.dumps(check_json_data(root, result), indent=2, sort_keys=True))
