@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 107E — PR-Compatible Governed Development Workflow Design (completed).
+
+Designs and freezes the governed development workflow PCAE follows in a
+branch-protected repository, before any execution capability is
+implemented. Freezes seven repository roles (Repository Owner, Maintainer,
+Contributor, Human Reviewer, PCAE, AI Coding Agent, Permission Broker
+(future)), the canonical Task → Feature Branch → Implementation →
+Validation → Review → Approval → Merge → Main development flow, branch
+policy (protected `main`, feature branches, a design-only release-branch
+placeholder, and the current transitional posture — admin enforcement off,
+1 required review, conversation resolution required, force-push/deletion
+blocked), the AI participation model (a frozen "may" list and "may not"
+list, current status "not implemented" beyond assistive preparation), the
+Git-Approval-vs-Execution-Approval distinction (an explicit extension of
+INV-008), PR requirements, a governance-command mapping table, and a
+future-integration design for the Permission Broker, Human Approval Gate,
+Execution Boundary, Audit Boundary, and Rollback Readiness Boundary.
+Design/freeze only — no runtime enforcement, execution capability,
+permission broker enforcement, shell mediation, backend invocation, adapter
+execution, Telegram inbound, audit storage, rollback execution, emergency
+stop implementation, execution enablement, PR automation, GitHub Actions
+changes, GitHub API integration, automatic PR creation, automatic merge,
+automatic approval, merge queues, or branch creation automation
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains the
+autonomy target. GitHub Release for `v0.1.0-rc1` and branch protection on
+`main` are unchanged.
+
+Added `docs/V0_2_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md` and
+`docs/PHASE_107_PR_COMPATIBLE_GOVERNED_DEVELOPMENT_WORKFLOW.md`. 120 new
+tests (`tests/test_v0_2_pr_compatible_governed_workflow.py`). Focused group
+(441 tests), documentation/release group (246 tests), and release/lifecycle
+regression group (1458 tests) all passed under `-n auto`; `fast_green`
+4390/4390 (matches documented baseline). No group required a sequential
+fallback — Phase 107D's parallel-validation hardening held with no new
+xdist collision observed. No new tag; no new GitHub Release; no PyPI/GitHub
+Packages publication.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 108A — Permission Broker Enforcement Implementation (not
+started).
+
+## Phase 107D Complete
+
 Phase 107D — Parallel Validation Hardening (completed).
 
 Makes PCAE's validation pipeline fully `pytest-xdist` compatible by
