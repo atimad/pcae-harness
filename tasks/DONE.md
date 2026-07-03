@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 109A (20260703-1216-sync-final-pushed-state-metadata-for-109a)
 - Phase 109A: Permission Broker Command-Path Integration Design (20260703-1155-phase-109a-permission-broker-command-path-integration-design)
 - Sync final pushed-state metadata for 108E (20260703-1138-sync-final-pushed-state-metadata-for-108e)
 - Phase 108E: Local Governance Bootstrap & Pre-Push Hardening (20260703-1112-phase-108e-local-governance-bootstrap-pre-push-hardening)
