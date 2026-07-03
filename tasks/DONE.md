@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 109C: Observation Integration Hardening & Multi-Path Expansion (20260703-1308-phase-109c-observation-integration-hardening-multi-path-expansion)
 - Sync final pushed-state metadata for 109B (20260703-1245-sync-final-pushed-state-metadata-for-109b)
 - Phase 109B: First Command-Path Integration Prototype (20260703-1223-phase-109b-first-command-path-integration-prototype)
 - Sync final pushed-state metadata for 109A (20260703-1216-sync-final-pushed-state-metadata-for-109a)
