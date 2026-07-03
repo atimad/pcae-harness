@@ -2,6 +2,96 @@
 
 ## Current Phase
 
+Phase 110D — Runtime Registry Contract Freeze & Resolution Semantics (completed).
+
+Contract/freeze phase only — no registry implementation, plugin
+loading, discovery execution, dependency injection framework, or
+execution capability introduced; no file under `src/pcae/` touched.
+Freezes the canonical Runtime Registry contract before any registry
+implementation begins: API surface, capability namespace conventions,
+resolution outcome semantics, plugin selection strategies,
+compatibility rules, lifecycle interaction model, and failure behavior.
+
+**Core principle restated, unchanged:** Runtime orchestrates. Registry
+resolves. Plugins implement. Pluggable first. Connected second.
+Automated third. Executable last. Discoverable always.
+
+**Canonical Registry API (9 operations, design only, frozen):**
+`RegisterPlugin()`, `UnregisterPlugin()`, `DiscoverCapabilities()`,
+`ResolveCapability()`, `ListPlugins()`, `GetPluginMetadata()`,
+`GetPluginHealth()`, `ValidateCompatibility()`,
+`ListCapabilityProviders()`. No signature, interface, or implementation
+of any operation exists.
+
+**Capability Namespace Conventions (18 illustrative namespaces, frozen):**
+dotted `domain.action` convention spanning all ten plugin categories
+(e.g. `intent.receive`, `policy.evaluate`, `decision.observe`,
+`approval.request`, `execution.shell`, `audit.write`,
+`notification.send`, `storage.read`, `identity.resolve`,
+`context.session`). No namespace validator or grammar implemented.
+
+**Resolution Semantics (9 outcomes, frozen):** `Resolved`,
+`MultipleCandidates`, `NoProvider`, `Incompatible`, `Disabled`,
+`Unavailable`, `HealthRejected`, `VersionRejected`, `PolicyRejected` —
+each documented with meaning and Runtime consequence; no outcome-
+computation algorithm implemented.
+
+**Plugin Selection Semantics (7 strategies, design only, frozen):**
+`HighestPriority`, `HighestVersion`, `Healthiest`, `PolicyPreferred`,
+`UserPreferred`, `ManualSelection`, `FirstCompatible`. No selection
+algorithm or default strategy implemented; selection remains the
+Runtime's responsibility, never the Registry's.
+
+**Compatibility Rules (5 dimensions, frozen):** runtime version, plugin
+version, manifest version, contract version, capability version. Future
+migration policy explicitly named as an open question, not defined.
+
+**Plugin Lifecycle Interaction (observation only, frozen):** Registry
+observes `Registered`, `Available`, `Unavailable`, `Disabled`,
+`Deprecated`, `Removed`; never executes a transition.
+
+**Registry/Runtime/Plugin responsibilities restated as contract,
+unchanged from 110A/110B/110C** — no responsibility added, removed, or
+reworded.
+
+**Failure Behavior (4 scenarios, frozen):** no provider → no execution;
+multiple providers → no automatic execution; Registry unavailable →
+execution unavailable; manifest invalid/compatibility failure → plugin
+unavailable. Every scenario resolves toward less execution capability,
+never more.
+
+Added `docs/PCAE_RUNTIME_REGISTRY_CONTRACT.md`,
+`docs/PHASE_110_RUNTIME_REGISTRY_CONTRACT_FREEZE.md`. `docs/ROADMAP.md`
+was evaluated and found to already state the relevant long-term vision
+(110B) completely — no change needed, matching 110C's own evaluation
+outcome. 173 new tests (1 skip until `pcae task finish` moves the task
+contract to `tasks/done/`) (`tests/test_runtime_registry_contract.py`)
+— a pure documentation-verification suite.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged). No dynamic runtime context implemented.
+
+No registry implementation, plugin loading, plugin discovery execution,
+dependency injection framework, runtime execution, command
+authorization, command denial, behavior-changing integration, shell
+mediation, subprocess mediation, backend invocation, adapter invocation,
+execution enablement, execution capability, Permission Broker
+enforcement, audit persistence, rollback execution, emergency stop,
+Telegram inbound, REST server, web server, daemon, background workers,
+automatic apply, or command execution implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub
+Release for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 110E — Runtime Registry Prototype (Observation-Only) (not
+started).
+
+## Phase 110C Complete
+
 Phase 110C — Runtime Service Registry & Plugin Discovery Architecture (completed).
 
 Architecture/design phase only — no registry implementation, plugin
