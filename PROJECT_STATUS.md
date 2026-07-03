@@ -2,6 +2,87 @@
 
 ## Current Phase
 
+Phase 110E — Runtime Registry Prototype (Observation-Only) (completed).
+
+Implementation phase — the first 110-series phase to touch
+`src/pcae/`. Implements a passive Runtime Registry prototype that owns,
+queries, and validates plugin metadata only. No plugin loading, plugin
+instantiation, plugin invocation, dependency injection, or execution
+capability introduced.
+
+**New principle frozen, alongside 110C's "Discoverable always":**
+Metadata precedes behavior.
+
+**`src/pcae/core/runtime_registry.py` added.** `PluginDescriptor` (a
+frozen, inert data record — eight fields mapping to 110B/110C contract
+fields: plugin id, plugin type, version, capability list, lifecycle
+state, health state, implementation status, manifest) and
+`RuntimeRegistry` (a passive in-memory metadata store — one private
+dict, no I/O, no subprocess, no network, no dynamic import).
+
+**Registry API (5 of 110D's 9 canonical operations implemented,
+metadata-only):** `register_metadata()` (fails closed, never raises,
+rejects duplicate IDs and invalid descriptors without storing
+anything), `list_plugins()`, `list_capabilities()`, `find_capability()`
+(unfiltered `ListCapabilityProviders()` view), `get_plugin_metadata()`.
+Deliberately not implemented this phase: `UnregisterPlugin()`,
+`ResolveCapability()` (requires Runtime-side selection behavior),
+`GetPluginHealth()` as a live signal, `ValidateCompatibility()` as a
+gating check — each would be behavior, not metadata.
+
+**Introspection (no CLI added, permitted by the brief):**
+`list_plugins()`, `get_plugin_metadata()`, `list_capabilities()`,
+`find_capability()`, `registry_health()` (returns a `RegistrySnapshot`:
+plugin/capability counts, registry status, aggregate metadata validity
+— no behavioral health field).
+
+**Validation:** `validate_descriptor()` — pure function checking
+plugin_id presence, plugin_type/lifecycle_state/health_state/
+implementation_status against frozen vocabularies (`implemented` never
+permitted), semantic version format, duplicate capability declarations,
+`enforce`/`execute` hard-rejected as undeclarable, and manifest/
+descriptor field consistency. Shared by `register_metadata()`
+(pre-store admission gate) and `RuntimeRegistry.validate_consistency()`
+(post-store read-only re-scan, `RegistryValidationReport`) — proven by
+tests that every field of the report stays empty even after attempting
+duplicate/invalid registrations, since nothing invalid is ever stored.
+
+Added `docs/PHASE_110_RUNTIME_REGISTRY_PROTOTYPE.md`. `docs/ROADMAP.md`
+evaluated and found to already state the relevant long-term vision
+(110B) completely — no change needed, matching 110C's/110D's own
+evaluation outcome. 110 new tests
+(`tests/test_runtime_registry_prototype.py`, 1 skip until `pcae task
+finish` moves the task contract to `tasks/done/`) — functional coverage
+plus module-isolation tests (AST-based import allowlist restricting the
+module to `__future__`/`re`/`dataclasses`/`typing`; source-text scans
+confirming no `subprocess`/`eval`/`exec`/`__import__`/file-I/O/network
+call anywhere in the file), mirroring 108A's isolation guarantee for
+`permission_broker_foundation.py`.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No plugin loading, plugin instantiation, plugin invocation, dependency
+injection, runtime execution, command authorization, command denial,
+behavior-changing integration, shell mediation, subprocess mediation,
+backend invocation, adapter invocation, execution enablement, execution
+capability, Permission Broker enforcement, audit persistence, rollback
+execution, emergency stop, Telegram inbound, REST server, web server,
+daemon, background workers, automatic apply, or command execution
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains
+the autonomy target. GitHub Release for `v0.1.0-rc1` and branch
+protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 110F — Runtime Registry Verification & Compatibility (not
+started).
+
+## Phase 110D Complete
+
 Phase 110D — Runtime Registry Contract Freeze & Resolution Semantics (completed).
 
 Contract/freeze phase only — no registry implementation, plugin
