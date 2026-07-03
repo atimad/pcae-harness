@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 108A (20260703-0927-sync-final-pushed-state-metadata-for-108a)
 - Phase 108A: Permission Broker Foundation (20260703-0905-phase-108a-permission-broker-foundation)
 - Sync final pushed-state metadata for 107E (20260703-0857-sync-final-pushed-state-metadata-for-107e)
 - Phase 107E: PR-Compatible Governed Development Workflow Design (20260703-0837-phase-107e-pr-compatible-governed-development-workflow-design)
