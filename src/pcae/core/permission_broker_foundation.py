@@ -198,16 +198,43 @@ def build_permission_broker_request(
 
 
 @dataclass(frozen=True)
+class ReasonChainLink:
+    """One link in a decision's machine-readable reason chain:
+    Policy ID -> No-Go ID(s) -> Invariant ID(s) -> Component ID(s). One
+    link per policy rule that contributed to the final decision (Phase
+    108C). For a single-cause decision, `PermissionBrokerDecision.reason_chain`
+    has exactly one link; for a multi-cause decision (e.g. two
+    simultaneously-triggered DENY rules), it has one link per contributor,
+    in registry order.
+    """
+
+    policy_id: str
+    no_go_ids: tuple[str, ...]
+    invariant_ids: tuple[str, ...]
+    component_ids: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class PermissionBrokerDecision:
     """The broker's evaluation result. Never an execution authorization.
 
     `evaluated_policy_ids` lists every policy rule the registry ran for
     this request (all of them, always — rules evaluate independently and
-    are never short-circuited). `triggered_policy_ids` lists only the
-    rules whose condition fired. `causing_policy_id` names the single
-    rule whose result was selected by decision composition (`None` when
-    no rule triggered, i.e. the ALLOW default) — this is what makes the
-    broker explainable (Phase 108B).
+    are never short-circuited). `triggered_policy_ids` lists every rule
+    whose condition fired, regardless of whether it determined the final
+    decision. `causing_policy_id` names the single, primary rule (first
+    in registry order among those matching the winning decision category)
+    — kept for simple single-cause explainability and Phase 108B backward
+    compatibility. `causing_policy_ids` (Phase 108C) lists *every* rule
+    that contributed to the winning category, preserving all relevant
+    causes when multiple rules agree on the same outcome (e.g. two
+    simultaneously-triggered DENY rules). `matched_no_go_ids`,
+    `matched_invariants`, `matched_component_ids`, and
+    `required_remediation` are the order-preserving, deduplicated union
+    across every contributing rule — not just the primary one.
+    `reason_chain` is the same information restructured as one
+    `ReasonChainLink` per contributing rule. `precedence_reason` states,
+    in one sentence, which precedence rule decided the outcome.
     """
 
     decision: str
@@ -222,6 +249,9 @@ class PermissionBrokerDecision:
     evaluated_policy_ids: tuple[str, ...] = ()
     triggered_policy_ids: tuple[str, ...] = ()
     causing_policy_id: str | None = None
+    causing_policy_ids: tuple[str, ...] = ()
+    reason_chain: tuple[ReasonChainLink, ...] = ()
+    precedence_reason: str = ""
 
 
 def _decision(
@@ -237,6 +267,9 @@ def _decision(
     evaluated_policy_ids: tuple[str, ...] = (),
     triggered_policy_ids: tuple[str, ...] = (),
     causing_policy_id: str | None = None,
+    causing_policy_ids: tuple[str, ...] = (),
+    reason_chain: tuple[ReasonChainLink, ...] = (),
+    precedence_reason: str = "",
 ) -> PermissionBrokerDecision:
     return PermissionBrokerDecision(
         decision=decision,
@@ -251,7 +284,22 @@ def _decision(
         evaluated_policy_ids=evaluated_policy_ids,
         triggered_policy_ids=triggered_policy_ids,
         causing_policy_id=causing_policy_id,
+        causing_policy_ids=causing_policy_ids,
+        reason_chain=reason_chain,
+        precedence_reason=precedence_reason,
     )
+
+
+def _dedup_ordered(*sequences: tuple[str, ...]) -> tuple[str, ...]:
+    """Order-preserving, deduplicated concatenation of ID tuples."""
+    seen: set[str] = set()
+    out: list[str] = []
+    for seq in sequences:
+        for item in seq:
+            if item not in seen:
+                seen.add(item)
+                out.append(item)
+    return tuple(out)
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -544,6 +592,43 @@ DEFAULT_POLICY_RULES: tuple[PolicyRule, ...] = (
 POLICY_IDS: tuple[str, ...] = tuple(rule.policy_id for rule in DEFAULT_POLICY_RULES)
 
 
+_VALID_RESULT_DECISIONS = frozenset(DECISION_VALUES)
+
+
+def _sanitize_result(rule: PolicyRule, raw: object) -> PolicyResult:
+    """Fail-closed guard against a malformed or failing `PolicyRule`
+    (Phase 108C, design principle 1: "if anything is unknown,
+    unavailable, or unsupported: Decision = DENY").
+
+    A rule that raised an exception (`raw is None` here — the caller
+    already caught it), returned something other than a `PolicyResult`,
+    or returned `triggered=True` with a `decision` outside
+    ALLOW/DENY/HUMAN_REVIEW is never silently ignored and never treated
+    as a pass-through ALLOW — it is converted into a DENY-triggering
+    result, still labeled with the rule's own `policy_id` when available.
+    """
+    policy_id = getattr(rule, "policy_id", None) or "POL-000"
+
+    if isinstance(raw, PolicyResult):
+        if not raw.triggered or raw.decision in _VALID_RESULT_DECISIONS:
+            return raw
+        policy_id = raw.policy_id or policy_id
+
+    return PolicyResult(
+        policy_id=policy_id,
+        triggered=True,
+        decision=DECISION_DENY,
+        decision_reason="invalid_policy_result",
+        matched_no_go_ids=("NG-024",),
+        matched_invariants=("INV-004",),
+        matched_component_ids=("COMP-001",),
+        required_remediation=(
+            "Repair the malfunctioning policy rule; fail-closed until "
+            "it returns a valid PolicyResult with a recognized decision.",
+        ),
+    )
+
+
 class PolicyRegistry:
     """Holds the canonical set of policy rules and evaluates all of them.
 
@@ -561,23 +646,94 @@ class PolicyRegistry:
 
     def evaluate_all(self, request: PermissionBrokerRequest) -> tuple[PolicyResult, ...]:
         """Evaluate every registered rule independently. Never
-        short-circuits; every rule always runs."""
-        return tuple(rule.evaluate(request) for rule in self._rules)
+        short-circuits; every rule always runs. A rule that raises or
+        returns a malformed result never crashes evaluation or is
+        silently dropped — it is sanitized into a fail-closed DENY."""
+        results: list[PolicyResult] = []
+        for rule in self._rules:
+            try:
+                raw = rule.evaluate(request)
+            except Exception:
+                raw = None
+            results.append(_sanitize_result(rule, raw))
+        return tuple(results)
 
 
-def _compose(
-    triggered: tuple[PolicyResult, ...],
-) -> PolicyResult | None:
-    """Decision composition: DENY > HUMAN_REVIEW > ALLOW, fail closed.
+def _compose(results: tuple[PolicyResult, ...]) -> PermissionBrokerDecision:
+    """Centralized decision composition — the single place a
+    `PermissionBrokerDecision` is ever assembled from policy results.
 
-    Returns the single triggered result that determines the outcome, or
-    None if nothing triggered (the ALLOW default).
+    Precedence: DENY > HUMAN_REVIEW > ALLOW, fail closed. When multiple
+    rules trigger the same winning category, every one of their
+    `matched_no_go_ids` / `matched_invariants` / `matched_component_ids`
+    / `required_remediation` is preserved (order-preserving, deduplicated
+    union) — "all relevant causes preserved" (Phase 108C, objective 3).
+    `causing_policy_id` names the first contributor in registry order
+    (108B compatibility); `causing_policy_ids` names every contributor.
+    An empty `results` tuple (no policy was evaluated at all) cannot
+    vouch for ALLOW and fails closed to DENY.
     """
+    evaluated_ids = tuple(r.policy_id for r in results)
+    triggered = tuple(r for r in results if r.triggered)
+    triggered_ids = tuple(r.policy_id for r in triggered)
+
+    if not results:
+        return _decision(
+            DECISION_DENY,
+            "no_applicable_policy",
+            matched_no_go_ids=("NG-009",),
+            matched_invariants=("INV-004",),
+            required_remediation=(
+                "Register at least one policy rule before evaluating "
+                "requests; an empty registry cannot vouch for ALLOW.",
+            ),
+            precedence_reason="fail_closed_no_policies_registered",
+        )
+
     for decision_value in (DECISION_DENY, DECISION_HUMAN_REVIEW):
-        for result in triggered:
-            if result.decision == decision_value:
-                return result
-    return None
+        matching = tuple(r for r in triggered if r.decision == decision_value)
+        if not matching:
+            continue
+        primary = matching[0]
+        plural = "y" if len(matching) == 1 else "ies"
+        return _decision(
+            decision_value,
+            primary.decision_reason or decision_value.lower(),
+            matched_no_go_ids=_dedup_ordered(*(r.matched_no_go_ids for r in matching)),
+            matched_invariants=_dedup_ordered(*(r.matched_invariants for r in matching)),
+            matched_component_ids=_dedup_ordered(*(r.matched_component_ids for r in matching)),
+            required_remediation=_dedup_ordered(*(r.required_remediation for r in matching)),
+            requires_human=any(r.requires_human for r in matching),
+            simulation_only=primary.simulation_only,
+            evaluated_policy_ids=evaluated_ids,
+            triggered_policy_ids=triggered_ids,
+            causing_policy_id=primary.policy_id,
+            causing_policy_ids=tuple(r.policy_id for r in matching),
+            reason_chain=tuple(
+                ReasonChainLink(
+                    policy_id=r.policy_id,
+                    no_go_ids=r.matched_no_go_ids,
+                    invariant_ids=r.matched_invariants,
+                    component_ids=r.matched_component_ids,
+                )
+                for r in matching
+            ),
+            precedence_reason=(
+                f"{decision_value.lower()}_precedence: {len(matching)} "
+                f"{decision_value}-triggering polic{plural} present"
+            ),
+        )
+
+    # Nothing triggered: policy would allow this if execution existed.
+    # Never an executable authorization (INV-008).
+    return _decision(
+        DECISION_ALLOW,
+        "policy_would_allow_if_execution_existed",
+        matched_invariants=("INV-008",),
+        evaluated_policy_ids=evaluated_ids,
+        triggered_policy_ids=triggered_ids,
+        precedence_reason="allow_default: no policy triggered a block",
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -624,38 +780,8 @@ class PermissionBroker:
                 required_remediation=(
                     "Submit a valid PermissionBrokerRequest instance.",
                 ),
+                precedence_reason="fail_closed_invalid_request",
             )
 
         results = self._registry.evaluate_all(request)
-        triggered = tuple(r for r in results if r.triggered)
-        evaluated_ids = tuple(r.policy_id for r in results)
-        triggered_ids = tuple(r.policy_id for r in triggered)
-
-        composed = _compose(triggered)
-
-        if composed is None:
-            # No policy triggered a block: policy would allow this if
-            # execution existed. Never an executable authorization
-            # (INV-008).
-            return _decision(
-                DECISION_ALLOW,
-                "policy_would_allow_if_execution_existed",
-                matched_invariants=("INV-008",),
-                evaluated_policy_ids=evaluated_ids,
-                triggered_policy_ids=triggered_ids,
-                causing_policy_id=None,
-            )
-
-        return _decision(
-            composed.decision,  # type: ignore[arg-type]
-            composed.decision_reason,  # type: ignore[arg-type]
-            matched_no_go_ids=composed.matched_no_go_ids,
-            matched_invariants=composed.matched_invariants,
-            required_remediation=composed.required_remediation,
-            requires_human=composed.requires_human,
-            simulation_only=composed.simulation_only,
-            matched_component_ids=composed.matched_component_ids,
-            evaluated_policy_ids=evaluated_ids,
-            triggered_policy_ids=triggered_ids,
-            causing_policy_id=composed.policy_id,
-        )
+        return _compose(results)

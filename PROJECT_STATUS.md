@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 108C — Permission Broker Policy Composition & Hardening (completed).
+
+Hardens the Permission Broker policy framework so decision composition is
+deterministic, explainable, modular, and future-pluggable, while
+preserving all 108A/108B public behavior unchanged — 108A's 60 tests and
+108B's 63 tests are unmodified and pass unchanged against the hardened
+implementation. Decision composition is now fully centralized in one
+function (`_compose`); `PermissionBroker.evaluate()` is a two-line
+structural guard plus delegation. Multiple simultaneously-triggered
+policies of the same category now have "all relevant causes preserved":
+`matched_no_go_ids`, `matched_invariants`, `matched_component_ids`, and
+`required_remediation` become an order-preserving, deduplicated union
+across every contributing rule, not just the first. New explainability
+fields: `causing_policy_ids` (plural, all contributors) and
+`reason_chain` (one `ReasonChainLink` — Policy ID → No-Go ID(s) →
+Invariant ID(s) → Component ID(s) — per contributor, machine-readable and
+directly testable) and `precedence_reason` (one sentence naming which
+precedence rule decided the outcome). Two genuine fail-closed hardenings,
+neither exercised by any prior test: an empty/misconfigured policy
+registry (zero rules evaluated) now denies (`NG-009`/`INV-004`,
+`no_applicable_policy`) instead of defaulting to ALLOW; a policy rule that
+raises an exception, returns a non-`PolicyResult`, or returns an
+unrecognized decision value is sanitized into a `DENY`
+(`NG-024`/`INV-004`, `invalid_policy_result`) by a new
+`PolicyRegistry.evaluate_all()` guard, never crashing evaluation and
+never silently ignored. Modularity/pluggability re-verified under
+hardening: a 13-rule custom registry works with zero broker changes; the
+module's isolation from shell/backend/adapter/Telegram is re-checked with
+`adapter` and `subprocess` now explicit in the forbidden-import list.
+
+Added `docs/PHASE_108_PERMISSION_BROKER_POLICY_COMPOSITION_HARDENING.md`.
+48 new tests
+(`tests/test_permission_broker_policy_composition_hardening.py`); combined
+with the existing permission-broker test files, 436 tests pass under
+`-n auto`. Focused broker group (436), governance/autonomy group (1027),
+and release/lifecycle regression group (1458) all passed under `-n auto`;
+`fast_green` 4390/4390 (matches documented baseline). No group required a
+sequential fallback. No runtime execution, shell mediation, subprocess
+mediation, backend invocation, adapter invocation, Telegram inbound, audit
+persistence, rollback execution, emergency stop implementation, execution
+enablement, execution capability, command execution, shell/backend/adapter
+boundary integration, or automatic apply implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub Release
+for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 108D — Permission Broker Verification & Compatibility (not
+started).
+
+## Phase 108B Complete
+
 Phase 108B — Permission Broker Policy Rule Framework (completed).
 
 Transforms the Permission Broker from a broker containing hardcoded
