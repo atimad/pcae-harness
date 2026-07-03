@@ -2,6 +2,94 @@
 
 ## Current Phase
 
+Phase 110F — Runtime Registry Verification & Compatibility (completed).
+
+Verification/hardening phase. Proves the passive Runtime Registry
+prototype (110E) remains metadata-only, non-executing, compatible with
+109A-109D and 110A-110D, fails safe under every malformed/duplicate/
+unknown input, and exposes enough read-only metadata for introspection.
+One narrow hardening fix included (manifest immutability, below); no
+new registry capability, plugin loading, instantiation, invocation, or
+execution capability added.
+
+**Metadata-only boundary re-verified:** `PluginDescriptor` field types
+inspected directly (none `Callable`/module-reference); no method on
+`RuntimeRegistry` matches load/instantiate/invoke vocabulary (`dir()`
+sweep, not a hand-picked list); a fresh registry's own `__dict__`
+confirmed to hold exactly one plain-dict attribute.
+
+**Contract compatibility verified against live doc/module text:** all
+ten `PLUGIN_CATEGORIES`, eight `LIFECYCLE_STATES`, ten
+`CAPABILITY_CLASSES`, three `IMPLEMENTATION_STATUSES` cross-checked
+against `docs/PCAE_RUNTIME_PLUGIN_CONTRACTS.md`'s actual text; the five
+110D API operations this prototype claims confirmed present in
+`docs/PCAE_RUNTIME_REGISTRY_CONTRACT.md`; 109C's `INTEGRATION_REGISTRY`
+reconfirmed unchanged (exactly 4 entries); `PermissionBroker().evaluate()`
+(108A) reconfirmed unaffected, still `execution_unavailable`.
+
+**Resolution semantics re-tested and extended:** registered/missing
+capability lookup, duplicate plugin ID and duplicate capability
+rejection, invalid/incompatible descriptor rejection — plus new
+coverage: every health state and lifecycle state (including
+`unhealthy`/`disabled`/`failed`/`retired`) confirmed registerable as
+inert data, and `find_capability()` confirmed to deliberately not
+filter by health/lifecycle (that would be `ResolveCapability()`
+behavior, out of scope).
+
+**Fail-safe behavior verified:** 7-descriptor malformed-field sweep and
+an 8-corruption single-field sweep both confirm rejection-never-crash;
+"no provider" returns `()` not a fallback; "multiple providers" remain
+unfiltered candidates (`RuntimeRegistry` confirmed to have no
+`select_candidate`/`resolve_capability`/`choose_provider` method); an
+empty registry (the closest analogue to "registry unavailable") never
+implies execution; `execute`/`enforce` remain unregisterable under any
+plugin ID.
+
+**Introspection readiness verified:** registered plugin count,
+capability list, full plugin metadata, health/lifecycle status, and
+validation status all confirmed exposed via existing read methods; no
+CLI added (`argparse`/`add_parser` confirmed absent from the module).
+
+**Hardening — manifest immutability:** `PluginDescriptor.manifest` is
+now a `MappingProxyType` snapshot taken at construction
+(`__post_init__` + `object.__setattr__`), closing an aliasing gap where
+a caller-held manifest dict reference could mutate already-registered
+metadata even though the dataclass itself is frozen. Shallow copy,
+deliberately not deep (documented limitation).
+
+Added `docs/PHASE_110_RUNTIME_REGISTRY_VERIFICATION.md`. `docs/ROADMAP.md`
+evaluated and found to need no change — verification/hardening adds no
+new principle or architecture, matching 110C's/110D's/110E's own
+evaluation outcome. 68 new tests
+(`tests/test_runtime_registry_verification.py`, 1 skip until `pcae
+task finish` moves the task contract to `tasks/done/`); one-line update
+to `tests/test_runtime_registry_prototype.py`'s isolation allowlist
+(`types` added).
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No plugin loading, plugin instantiation, plugin invocation, callable
+references, module references, import path references, dependency
+injection, runtime execution, command authorization, command denial,
+behavior-changing integration, shell mediation, subprocess mediation,
+backend invocation, adapter invocation, execution enablement, execution
+capability, Permission Broker enforcement, audit persistence, rollback
+execution, emergency stop, Telegram inbound, REST server, web server,
+daemon, background workers, automatic apply, command execution, or
+runtime context implementation implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub
+Release for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 111A — Runtime Introspection Architecture (not started).
+
+## Phase 110E Complete
+
 Phase 110E — Runtime Registry Prototype (Observation-Only) (completed).
 
 Implementation phase — the first 110-series phase to touch

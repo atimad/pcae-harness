@@ -51,7 +51,15 @@ capability remains `observe` (110B §3) — this module does not change
 either ceiling, and structurally cannot, since it holds no executable
 reference to anything.
 
+110F hardening (verification phase, no new behavior): `PluginDescriptor.manifest`
+is now stored as an immutable `MappingProxyType` wrapping a shallow
+copy taken at construction time, closing an aliasing gap where a
+caller-held reference to the original manifest dict could otherwise
+mutate what the registry has already stored, even though the
+dataclass itself is frozen.
+
 See `docs/PHASE_110_RUNTIME_REGISTRY_PROTOTYPE.md`,
+`docs/PHASE_110_RUNTIME_REGISTRY_VERIFICATION.md` (110F),
 `docs/PCAE_RUNTIME_SERVICE_REGISTRY.md` (110C), and
 `docs/PCAE_RUNTIME_REGISTRY_CONTRACT.md` (110D).
 """
@@ -60,6 +68,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import Mapping
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -166,6 +175,17 @@ class PluginDescriptor:
       name, Compatible runtime version, Dependencies). No schema is
       enforced beyond the cross-field consistency checks
       `validate_descriptor()` performs (§ below).
+
+    110F hardening: `manifest` is converted, at construction time, into
+    a `MappingProxyType` wrapping a *shallow copy* of whatever was
+    passed in. `@dataclass(frozen=True)` alone only prevents
+    *reassigning* `descriptor.manifest` — without this, the dict object
+    the field points at would remain independently mutable, and would
+    be the exact same object a caller's own reference points at (alias
+    mutation risk). This closes that gap: mutating a manifest dict after
+    constructing a descriptor from it, or attempting to mutate
+    `descriptor.manifest` directly, can never change what the registry
+    has stored.
     """
 
     plugin_id: str
@@ -176,6 +196,9 @@ class PluginDescriptor:
     health_state: str = "unknown"
     implementation_status: str = "not_implemented"
     manifest: Mapping[str, object] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "manifest", MappingProxyType(dict(self.manifest)))
 
 
 @dataclass(frozen=True)

@@ -571,7 +571,7 @@ def module_imports() -> list[str]:
 
 
 def test_module_imports_only_stdlib(module_imports):
-    stdlib_allowed = {"__future__", "re", "dataclasses", "typing"}
+    stdlib_allowed = {"__future__", "re", "dataclasses", "typing", "types"}
     for name in module_imports:
         top = name.split(".")[0]
         assert top in stdlib_allowed, f"non-stdlib import: {name}"
