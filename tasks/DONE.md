@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 109B: First Command-Path Integration Prototype (20260703-1223-phase-109b-first-command-path-integration-prototype)
 - Sync final pushed-state metadata for 109A (20260703-1216-sync-final-pushed-state-metadata-for-109a)
 - Phase 109A: Permission Broker Command-Path Integration Design (20260703-1155-phase-109a-permission-broker-command-path-integration-design)
 - Sync final pushed-state metadata for 108E (20260703-1138-sync-final-pushed-state-metadata-for-108e)
