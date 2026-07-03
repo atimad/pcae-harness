@@ -2,6 +2,74 @@
 
 ## Current Phase
 
+Phase 109D — Observation Integration Verification & Compatibility (completed).
+
+Verification-only phase: re-proves, under one dedicated 87-test suite,
+that every observation-only integration completed across 109B (INT-001)
+and 109C (INT-002 through INT-004) still holds its guarantees, without
+touching any file under `src/pcae/`. Per-integration: broker consulted,
+decision discarded, output/exit-code/control-flow/lifecycle/governance
+unchanged, re-verified directly for all four IDs across `ALLOW`, `DENY`,
+`HUMAN_REVIEW`, `None`, and raised-exception broker responses.
+Compatibility re-verified against 107B (INV-001..010, COMP-001..010
+unchanged), 107C (NG-001..025 unchanged), 108A–108D (12 policy rules, 10
+components, AST-import isolation, lifecycle modules never import the
+broker directly), 108E (`.githooks/pre-push` unchanged), and 109A
+(design doc and all prior 109-series phase docs still present) — no
+architectural drift. Isolation reconfirmed: every decision reports
+`implementation_status == "execution_unavailable"` unconditionally
+(including for capabilities with no real integration, e.g.
+`shell_exec`); `PermissionBroker.evaluate()` has zero filesystem side
+effects; integrated commands contain no write-capable calls. Fail-safe
+behavior verified for every broker response the brief specifies,
+including two not previously exercised: a malformed `PolicyRule` result
+sanitizes to fail-closed `DENY` (108C's `_sanitize_result()`, unmodified
+and re-confirmed), and an empty policy registry fails closed to `DENY`
+(`_compose()`'s documented behavior, unmodified) — in both cases,
+command output/exit code remain unchanged when that real decision
+reaches `observe()`'s caller. Five malformed-object shapes (string, int,
+dict, list, arbitrary object) verified not to change any of the four
+commands' output either. Integration ID registry verified unique,
+documented, correctly mapped, and referenced by this phase's own test
+suite; unregistered IDs (`INT-005`, `""`) confirmed to return `None`.
+Updated safety case confirms observation cannot accidentally become
+enforcement (every call site's `observe()` call is a bare,
+never-assigned expression), cannot bypass governance (`pcae check`'s
+scope enforcement re-proven independent of the broker's decision), and
+remains fully reversible (`run_push()` confirmed to contain no
+`observe()` call at all).
+
+Added `docs/PHASE_109_OBSERVATION_INTEGRATION_VERIFICATION.md`. 87 new
+tests (`tests/test_permission_broker_observation_verification.py`).
+Focused integration group (973, combining `test_permission_broker*.py`,
+`test_health.py`, `test_check.py`, `test_task.py`, `test_push*.py`),
+governance/autonomy group (572), and release/lifecycle regression group
+(197) all passed under `-n auto`; `fast_green` 4390/4390 (matches
+documented baseline — the new verification suite is not part of
+`fast_green`'s curated fixed module list, consistent with how 109B's 22
+and 109C's 47 new tests were also excluded). No group required a
+sequential fallback.
+
+**Execution Integration Status:** Observed command paths: **4**
+(`pcae health`, `pcae check`, `pcae doctor task-memory`,
+`pcae push check` — all observation-only, unchanged). Behavior-changing
+paths: **0**. Authorized paths: **0**. Execution-capable paths: **0**.
+Current execution capability: **Execution unavailable**.
+
+No new command-path integration, runtime execution, shell mediation,
+subprocess mediation, backend invocation, adapter invocation, execution
+enablement, execution capability, Permission Broker enforcement, audit
+persistence, rollback execution, emergency stop, Telegram inbound,
+automatic apply, command execution, command authorization, command
+denial, or behavior change implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub
+Release for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 110A — Advisory Decision Architecture Design (not started).
+
+## Phase 109C Complete
+
 Phase 109C — Observation Integration Hardening & Multi-Path Expansion (completed).
 
 Hardens and generalizes the observation-only integration pattern
