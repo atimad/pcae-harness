@@ -2,6 +2,61 @@
 
 ## Current Phase
 
+Phase 108A — Permission Broker Foundation (completed).
+
+Implements the foundational Permission Broker for PCAE as an isolated
+policy-evaluation subsystem — the first implementation phase after the
+governance architecture (107A–107E) was frozen. Adds
+`src/pcae/core/permission_broker_foundation.py`: a stateless
+`PermissionBroker` class with `evaluate(request) -> decision`, a frozen
+`PermissionBrokerRequest` model (request_id, timestamp, action_type,
+execution_class, task_id, phase_id, requested_component,
+requested_capability, requested_resource, evidence_available,
+approval_present, simulation_only), and a frozen `PermissionBrokerDecision`
+model (decision, decision_reason, matched_no_go_ids, matched_invariants,
+required_remediation, requires_human, simulation_only,
+implementation_status). Fail-closed: unknown action types, unsupported
+execution classes, unrecognized components, missing task contracts, and
+missing evidence all resolve to `DENY`; missing human approval resolves to
+`HUMAN_REVIEW`; a real (non-simulation) execution attempt always denies
+because no execution boundary exists. Every decision — including `ALLOW`
+— carries `implementation_status="execution_unavailable"`; `ALLOW` means
+only "policy would allow this if execution existed" (`INV-008`), never an
+executable authorization. The module is fully isolated: no dependency on
+`shell_gate`, `backend_invocations`, `notifications`, or any other
+execution-adjacent module — verified by a dedicated AST-based test
+asserting every import resolves to the Python standard library only.
+
+Freezes ten canonical component IDs (`COMP-001`–`COMP-010`) mapping to the
+components already named in `docs/V0_2_AUTONOMY_CONTRACT.md`. Additively
+references these IDs in `docs/V0_2_AUTONOMY_CONTRACT.md` (component section
+headers) and `docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md` (gate detail
+sections and the Gate Index table) without altering either document's
+frozen substance. Maps broker decisions to 6 of the 25 frozen `NG-NNN`
+gates (`NG-001`, `NG-008`, `NG-015`, `NG-023`, `NG-024`, `NG-025`) and 5 of
+the 10 frozen `INV-NNN` invariants (`INV-001`–`INV-004`, `INV-008`,
+`INV-009`) — the remaining 19 gates describe conditions this foundation
+does not yet evaluate and remain future-phase responsibility.
+
+Added `docs/PHASE_108_PERMISSION_BROKER_FOUNDATION.md`. 60 new tests
+(`tests/test_permission_broker_foundation.py`); combined with the existing
+permission-broker test files, 325 tests pass under `-n auto`. Focused
+broker group (325), autonomy/governance group (1027), and release/
+lifecycle regression group (1458) all passed under `-n auto`; `fast_green`
+4390/4390 (matches documented baseline). No group required a sequential
+fallback. No runtime execution, shell mediation, subprocess mediation,
+backend invocation, adapter invocation, Telegram inbound, audit
+persistence, rollback execution, emergency stop implementation, execution
+enablement, execution capability, command execution, or automatic apply
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains the
+autonomy target. GitHub Release for `v0.1.0-rc1` and branch protection on
+`main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 108B — Permission Broker Policy Engine (not started).
+
+## Phase 107E Complete
+
 Phase 107E — PR-Compatible Governed Development Workflow Design (completed).
 
 Designs and freezes the governed development workflow PCAE follows in a

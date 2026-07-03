@@ -219,9 +219,13 @@ reach `AUTHORIZED` without an explicit human approval recorded at
 ## Components
 
 For each component: **Purpose**, **Responsibilities**, **Current
-Status**.
+Status**. Ten of the twelve components below (all except No-Go Registry
+and PR / Branch Protection Workflow) have a canonical `COMP-NNN` ID, frozen
+by Phase 108A alongside the Permission Broker foundation implementation
+(`src/pcae/core/permission_broker_foundation.py`) — see
+`docs/PHASE_108_PERMISSION_BROKER_FOUNDATION.md`.
 
-### Permission Broker
+### Permission Broker (COMP-001)
 
 - **Purpose:** Decide, for any proposed action, whether it is `allow`,
   `deny`, or `human_review`.
@@ -234,7 +238,7 @@ Status**.
   `docs/PHASE_91_PERMISSION_BROKER_SIMULATION_PROTOTYPE.md`), but it does
   not gate any real action. Real implementation is Phase 108A.
 
-### Execution Boundary
+### Execution Boundary (COMP-002)
 
 - **Purpose:** The single code path through which any mediated action
   may actually run.
@@ -244,7 +248,7 @@ Status**.
   in this codebase today; PCAE has no code path that executes
   agent-authored commands or invokes a real backend.
 
-### Human Approval Gate
+### Human Approval Gate (COMP-003)
 
 - **Purpose:** Require and record an explicit human approval before an
   action can move from `AWAITING_HUMAN_APPROVAL` to `AUTHORIZED`.
@@ -254,7 +258,7 @@ Status**.
 - **Current Status:** **Not implemented.** Enforcement of this gate is
   Phase 111A.
 
-### Shell/Subprocess/Network Boundary
+### Shell/Subprocess/Network Boundary (COMP-004)
 
 - **Purpose:** Mediate every shell command, subprocess invocation, or
   network call that is part of a mediated execution action.
@@ -266,7 +270,7 @@ Status**.
   enforced gate. Design is Phase 109A; prototype (disabled by default)
   is 109B; hardening is 109C.
 
-### Backend Invocation Boundary
+### Backend Invocation Boundary (COMP-005)
 
 - **Purpose:** Mediate any real AI backend call PCAE itself makes.
 - **Responsibilities:** Route backend calls through the permission broker
@@ -276,7 +280,7 @@ Status**.
   exists anywhere in this codebase (RE-NOGO-003). Implementation
   (disabled by default) is Phase 110A.
 
-### Adapter Invocation Boundary
+### Adapter Invocation Boundary (COMP-006)
 
 - **Purpose:** Mediate any adapter execution (e.g., a runtime adapter
   acting on PCAE's behalf).
@@ -286,7 +290,7 @@ Status**.
   evidence-only (RE-NOGO-004). Implementation (disabled by default) is
   Phase 110B.
 
-### Audit Boundary
+### Audit Boundary (COMP-007)
 
 - **Purpose:** Produce a durable, queryable audit artifact for every
   execution decision and lifecycle-state transition.
@@ -298,7 +302,7 @@ Status**.
   is not durable execution audit persistence (RE-NOGO-009).
   Implementation is Phase 112A.
 
-### Rollback Readiness Boundary
+### Rollback Readiness Boundary (COMP-008)
 
 - **Purpose:** Confirm a concrete, validated rollback plan exists for a
   specific action *before* that action can be authorized.
@@ -309,7 +313,7 @@ Status**.
   Boundary" note are evidence-only design tracks. Design is Phase 113A;
   this remains design-only, not rollback execution.
 
-### Emergency Stop Boundary
+### Emergency Stop Boundary (COMP-009)
 
 - **Purpose:** Halt an in-progress mediated execution at any point,
   overriding any prior authorization.
@@ -318,7 +322,7 @@ Status**.
 - **Current Status:** **Not implemented.** No abort mechanism exists
   today (RE-NOGO-015). Implementation is Phase 114A.
 
-### Execution Enablement Model
+### Execution Enablement Model (COMP-010)
 
 - **Purpose:** Gate whether execution is possible at all, independent of
   any single action's authorization.

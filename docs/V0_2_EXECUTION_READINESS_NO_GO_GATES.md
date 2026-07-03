@@ -82,7 +82,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-002.
-- **Related Component:** Execution Boundary.
+- **Related Component:** Execution Boundary (COMP-002).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-002 — Task Scope Does Not Authorize Action
@@ -97,7 +97,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-002.
-- **Related Component:** Execution Boundary.
+- **Related Component:** Execution Boundary (COMP-002).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-003 — Phase State Invalid
@@ -114,7 +114,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-002.
-- **Related Component:** Execution Boundary.
+- **Related Component:** Execution Boundary (COMP-002).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-004 — `pcae health` Not Healthy
@@ -130,7 +130,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-009.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-005 — `pcae check` Not Passed
@@ -143,7 +143,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-009.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-006 — Task-Memory Not Clean
@@ -157,7 +157,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-009.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-007 — Push-Check Not Clean
@@ -171,7 +171,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-009.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-008 — Missing Human Approval
@@ -186,7 +186,7 @@ Each gate below is defined with exactly these fields:
 - **Human Override Allowed:** no (approval itself is the human action;
   there is no "override" of the requirement to have one).
 - **Related Invariant:** INV-003.
-- **Related Component:** Human Approval Gate.
+- **Related Component:** Human Approval Gate (COMP-003).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-009 — Permission Broker Unavailable
@@ -201,7 +201,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-004.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-010 — Permission Broker Denial
@@ -216,7 +216,7 @@ Each gate below is defined with exactly these fields:
   denied action as submitted).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-004.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-011 — Permission Broker Uncertainty
@@ -233,7 +233,7 @@ Each gate below is defined with exactly these fields:
 - **Human Override Allowed:** no (the human's `human_review` decision
   *is* the resolution path, not an override of this gate).
 - **Related Invariant:** INV-004.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-012 — Rollback Readiness Missing
@@ -247,7 +247,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-006.
-- **Related Component:** Rollback Readiness Boundary.
+- **Related Component:** Rollback Readiness Boundary (COMP-008).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-013 — Audit Readiness Missing
@@ -262,7 +262,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-005.
-- **Related Component:** Audit Boundary.
+- **Related Component:** Audit Boundary (COMP-007).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-014 — Emergency Stop Active
@@ -281,7 +281,7 @@ Each gate below is defined with exactly these fields:
   deliberate human action, not an "override" of the block while it's
   active).
 - **Related Invariant:** INV-007.
-- **Related Component:** Emergency Stop Boundary.
+- **Related Component:** Emergency Stop Boundary (COMP-009).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-015 — Unsupported Execution Class
@@ -298,7 +298,7 @@ Each gate below is defined with exactly these fields:
   execution class is explicitly added in a future phase).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-001.
-- **Related Component:** Execution Boundary.
+- **Related Component:** Execution Boundary (COMP-002).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-016 — Unknown Shell/Subprocess/Network Action
@@ -314,7 +314,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes (after policy coverage is added).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-001.
-- **Related Component:** Shell/Subprocess/Network Boundary.
+- **Related Component:** Shell/Subprocess/Network Boundary (COMP-004).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-017 — Unknown Backend
@@ -327,7 +327,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes (after policy coverage is added).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-001.
-- **Related Component:** Backend Invocation Boundary.
+- **Related Component:** Backend Invocation Boundary (COMP-005).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-018 — Unknown Adapter
@@ -341,7 +341,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes (after policy coverage is added).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-001.
-- **Related Component:** Adapter Invocation Boundary.
+- **Related Component:** Adapter Invocation Boundary (COMP-006).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-019 — Protected Branch / PR Policy Conflict
@@ -401,7 +401,7 @@ Each gate below is defined with exactly these fields:
 - **Human Override Allowed:** no (enabling it is the designed path, not
   an "override" of this gate).
 - **Related Invariant:** INV-010.
-- **Related Component:** Execution Enablement Model.
+- **Related Component:** Execution Enablement Model (COMP-010).
 - **Current Implementation Status:** not enforced / future (there is
   currently no flag to check; its absence itself satisfies this gate's
   fail-closed condition).
@@ -420,7 +420,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** no (for this contract's scope).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-001.
-- **Related Component:** Execution Boundary.
+- **Related Component:** Execution Boundary (COMP-002).
 - **Current Implementation Status:** not enforced / future (there is
   categorically no inbound handler in `core/notifications.py` today;
   this gate documents the requirement that none be added without a
@@ -438,7 +438,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes.
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-009.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-024 — Policy Ambiguity
@@ -455,7 +455,7 @@ Each gate below is defined with exactly these fields:
 - **Recoverable:** yes (after the conflict is resolved).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-004.
-- **Related Component:** Permission Broker.
+- **Related Component:** Permission Broker (COMP-001).
 - **Current Implementation Status:** not enforced / future.
 
 ### NG-025 — Execution Boundary Unavailable
@@ -474,38 +474,38 @@ Each gate below is defined with exactly these fields:
   verified, in a future phase).
 - **Human Override Allowed:** no.
 - **Related Invariant:** INV-001.
-- **Related Component:** Execution Boundary.
+- **Related Component:** Execution Boundary (COMP-002).
 - **Current Implementation Status:** not enforced / future.
 
 ## Gate Index
 
-| ID | Name | Related Invariant | Related Component |
-|---|---|---|---|
-| NG-001 | Missing active task contract | INV-002 | Execution Boundary |
-| NG-002 | Task scope does not authorize action | INV-002 | Execution Boundary |
-| NG-003 | Phase state invalid | INV-002 | Execution Boundary |
-| NG-004 | `pcae health` not healthy | INV-009 | Permission Broker |
-| NG-005 | `pcae check` not passed | INV-009 | Permission Broker |
-| NG-006 | Task-memory not clean | INV-009 | Permission Broker |
-| NG-007 | Push-check not clean | INV-009 | Permission Broker |
-| NG-008 | Missing human approval | INV-003 | Human Approval Gate |
-| NG-009 | Permission broker unavailable | INV-004 | Permission Broker |
-| NG-010 | Permission broker denial | INV-004 | Permission Broker |
-| NG-011 | Permission broker uncertainty | INV-004 | Permission Broker |
-| NG-012 | Rollback readiness missing | INV-006 | Rollback Readiness Boundary |
-| NG-013 | Audit readiness missing | INV-005 | Audit Boundary |
-| NG-014 | Emergency stop active | INV-007 | Emergency Stop Boundary |
-| NG-015 | Unsupported execution class | INV-001 | Execution Boundary |
-| NG-016 | Unknown shell/subprocess/network action | INV-001 | Shell/Subprocess/Network Boundary |
-| NG-017 | Unknown backend | INV-001 | Backend Invocation Boundary |
-| NG-018 | Unknown adapter | INV-001 | Adapter Invocation Boundary |
-| NG-019 | Protected branch / PR policy conflict | INV-001 | PR / Branch Protection Workflow |
-| NG-020 | No-go registry mismatch | INV-009 | No-Go Registry |
-| NG-021 | Execution enablement unavailable/default-off | INV-010 | Execution Enablement Model |
-| NG-022 | Telegram inbound/out-of-band command attempted | INV-001 | Execution Boundary |
-| NG-023 | Missing evidence | INV-009 | Permission Broker |
-| NG-024 | Policy ambiguity | INV-004 | Permission Broker |
-| NG-025 | Execution boundary unavailable | INV-001 | Execution Boundary |
+| ID | Name | Related Invariant | Related Component | Component ID |
+|---|---|---|---|---|
+| NG-001 | Missing active task contract | INV-002 | Execution Boundary | COMP-002 |
+| NG-002 | Task scope does not authorize action | INV-002 | Execution Boundary | COMP-002 |
+| NG-003 | Phase state invalid | INV-002 | Execution Boundary | COMP-002 |
+| NG-004 | `pcae health` not healthy | INV-009 | Permission Broker | COMP-001 |
+| NG-005 | `pcae check` not passed | INV-009 | Permission Broker | COMP-001 |
+| NG-006 | Task-memory not clean | INV-009 | Permission Broker | COMP-001 |
+| NG-007 | Push-check not clean | INV-009 | Permission Broker | COMP-001 |
+| NG-008 | Missing human approval | INV-003 | Human Approval Gate | COMP-003 |
+| NG-009 | Permission broker unavailable | INV-004 | Permission Broker | COMP-001 |
+| NG-010 | Permission broker denial | INV-004 | Permission Broker | COMP-001 |
+| NG-011 | Permission broker uncertainty | INV-004 | Permission Broker | COMP-001 |
+| NG-012 | Rollback readiness missing | INV-006 | Rollback Readiness Boundary | COMP-008 |
+| NG-013 | Audit readiness missing | INV-005 | Audit Boundary | COMP-007 |
+| NG-014 | Emergency stop active | INV-007 | Emergency Stop Boundary | COMP-009 |
+| NG-015 | Unsupported execution class | INV-001 | Execution Boundary | COMP-002 |
+| NG-016 | Unknown shell/subprocess/network action | INV-001 | Shell/Subprocess/Network Boundary | COMP-004 |
+| NG-017 | Unknown backend | INV-001 | Backend Invocation Boundary | COMP-005 |
+| NG-018 | Unknown adapter | INV-001 | Adapter Invocation Boundary | COMP-006 |
+| NG-019 | Protected branch / PR policy conflict | INV-001 | PR / Branch Protection Workflow | — |
+| NG-020 | No-go registry mismatch | INV-009 | No-Go Registry | — |
+| NG-021 | Execution enablement unavailable/default-off | INV-010 | Execution Enablement Model | COMP-010 |
+| NG-022 | Telegram inbound/out-of-band command attempted | INV-001 | Execution Boundary | COMP-002 |
+| NG-023 | Missing evidence | INV-009 | Permission Broker | COMP-001 |
+| NG-024 | Policy ambiguity | INV-004 | Permission Broker | COMP-001 |
+| NG-025 | Execution boundary unavailable | INV-001 | Execution Boundary | COMP-002 |
 
 ## Default Human-Override Posture
 
