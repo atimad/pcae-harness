@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 108D — Permission Broker Verification & Compatibility (completed).
+
+Verifies and hardens Permission Broker compatibility after 108A
+(foundation), 108B (policy rule framework), and 108C (composition
+hardening) — without wiring the broker into execution, shell, commit,
+push, backend, adapter, Telegram, CI, or PR automation paths. Adds no new
+broker behavior; the task contract for this phase deliberately excludes
+the `core` zone, structurally enforcing that
+`src/pcae/core/permission_broker_foundation.py` was not touched.
+Strengthens the test surface: broker import allowlist re-verified via AST
+(`__future__`, `uuid`, `dataclasses`, `datetime` only); new direct
+confirmation that `src/pcae/commands/commit.py`, `push.py`, `task.py`,
+`phase.py`, and `src/pcae/cli.py` contain no reference at all to
+`permission_broker_foundation` or `PermissionBroker(` — the broker remains
+completely unwired from every real command path, now permanently
+testable rather than a one-time manual finding. Cross-references the
+broker's `NG-`/`INV-` outputs directly against the *actual current text*
+of `docs/V0_2_EXECUTION_READINESS_NO_GO_GATES.md` and
+`docs/V0_2_AUTONOMY_CONTRACT.md` (parsed for every `NG-NNN`/`INV-NNN`
+occurrence) rather than only against hardcoded expected sets, confirming
+no drift. Re-verifies decision composition (multi-cause DENY/HUMAN_REVIEW,
+precedence, order-preserving dedup, `causing_policy_ids`, `reason_chain`,
+`precedence_reason`, remediation preservation) against the real 12-rule
+default registry, and re-confirms every fail-closed path (malformed rule,
+raising rule, empty registry, unknown action, missing evidence, policy
+ambiguity) resolves only to DENY or HUMAN_REVIEW, never ALLOW.
+`tests/test_permission_broker_foundation.py` (108A, 60 tests),
+`tests/test_permission_broker_policy_rule_framework.py` (108B, 63 tests),
+and `tests/test_permission_broker_policy_composition_hardening.py` (108C,
+48 tests) all remain unmodified and pass unchanged.
+
+Added `docs/PHASE_108_PERMISSION_BROKER_VERIFICATION_COMPATIBILITY.md`.
+44 new tests
+(`tests/test_permission_broker_verification_compatibility.py`); combined
+with the existing permission-broker test files, 480 tests pass under
+`-n auto`. Focused broker group (480), governance/autonomy group (1054),
+and release/lifecycle regression group (1458) all passed under `-n auto`;
+`fast_green` 4390/4390 (matches documented baseline). No group required a
+sequential fallback. This phase follows a read-only repository protection
+inspection performed immediately beforehand (no files modified), which
+found branch protection/CODEOWNERS/CI configuration transitional but safe
+to proceed on; none of its documented gaps (admin bypass, no required CI
+status checks, opt-in pre-commit hook) were touched by this phase, since
+108D is broker verification only. No runtime execution, shell mediation,
+subprocess mediation, backend invocation, adapter invocation, Telegram
+inbound, audit persistence, rollback execution, emergency stop
+implementation, execution enablement, execution availability toggle,
+no-go runtime enforcement, automatic apply, patch execution, PR creation,
+PR merge, approval automation, required CI status-check changes, branch
+protection changes, hook auto-install, or pre-push hook implemented.
+`v0.1.0-rc1` remains non-executing by design; v0.2 remains the autonomy
+target. GitHub Release for `v0.1.0-rc1` and branch protection on `main`
+are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 108E — Local Hook / Pre-Push Governance Hardening (not
+started).
+
+## Phase 108C Complete
+
 Phase 108C — Permission Broker Policy Composition & Hardening (completed).
 
 Hardens the Permission Broker policy framework so decision composition is
