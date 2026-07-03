@@ -1,11 +1,11 @@
 {
-    "phase_id": "109B", "phase_name": "phase_109b_first_command_path_integration_prototype", "phase_title": "First Command-Path Integration Prototype (Observation-Only, Disabled by Default)",
+    "phase_id": "109C", "phase_name": "phase_109c_observation_integration_hardening_multi_path_expansion", "phase_title": "Observation Integration Hardening & Multi-Path Expansion",
     "status": "completed",
-    "summary": "Implements the first Permission Broker command-path integration prototype while preserving PCAE's current non-executing guarantees. Integrates exactly one command path -- pcae health -- in observation mode only: run_health() now calls a new pcae.core.command_path_observation.observe() helper, which constructs a PermissionBrokerRequest and asks PermissionBroker.evaluate() for a decision, but the decision is immediately discarded -- never assigned, never read, never used for control flow. observe() can never raise (internal try/except); the call site in health.py wraps the call again for defense in depth. Proven directly: pcae health's captured stdout and exit code are byte-identical whether observe() returns ALLOW, DENY, HUMAN_REVIEW, None, or raises an exception. tests/test_health.py's 14 pre-existing tests are unmodified and pass unchanged. permission_broker_foundation.py itself was not touched -- not in this phase's task contract's allowed files -- so its own 108A-108D isolation and behavior guarantees (171 tests) remain unmodified. No other command path was integrated. Added docs/PHASE_109_FIRST_COMMAND_PATH_INTEGRATION_PROTOTYPE.md, including a new Execution Integration Status report section intended as a canonical, reusable format for future phases. 22 new tests. Focused integration group (602), governance/autonomy group (1140), and release/lifecycle regression group (1458) all passed under -n auto; fast_green 4390/4390 (matches documented baseline, now exercising the new integration transparently across dozens of existing pcae health invocations throughout the suite). No group required a sequential fallback.",
-    "files_changed_count": 6, "tests_added_or_updated": "22 tests added",
+    "summary": "Hardens and generalizes the observation-only integration pattern established by 109B (pcae health) across three additional read-only command paths -- pcae check, pcae doctor task-memory, and pcae push check -- while preserving PCAE's current non-executing guarantees. Each new call site follows the identical shape 109B established: the command computes its result exactly as before, calls observe() as a bare expression inside a local try/except Exception: pass, and proceeds using only values computed before the observation call. run_push_check() is integrated; run_push() (the real, mutating push command) is not -- verified directly by a source-inspection test asserting 'observe(' never appears in its source. src/pcae/core/command_path_observation.py gains a canonical Integration ID registry (IntegrationRegistryEntry, INTEGRATION_REGISTRY, INTEGRATION_IDS, get_integration()) covering INT-001 (pcae health), INT-002 (pcae check), INT-003 (pcae doctor task-memory), and INT-004 (pcae push check) -- bookkeeping only, never read by observe() or by any integrated command. observe() itself is unmodified since 109B. Proven directly, per command: captured stdout and exit code are byte-identical whether observe() returns ALLOW, DENY, HUMAN_REVIEW, None, or raises an exception. pcae check's scope enforcement and pcae push check's readiness computation are shown independent of the broker's decision by forcing opposite decisions and asserting identical output. permission_broker_foundation.py was not touched -- 108A-108D isolation and behavior guarantees remain unmodified, and 108D's test_broker_not_imported_by_lifecycle_command_modules still passes because the new call sites import through the command_path_observation indirection layer, never the broker module directly. INT-001 (pcae health) re-verified unaffected -- 109B's 22-test suite still passes unmodified. Added docs/PHASE_109_OBSERVATION_INTEGRATION_HARDENING.md. 47 new tests. Focused integration group (886), governance/autonomy group (572), and release/lifecycle regression group (197) all passed under -n auto; fast_green 4390/4390 (matches documented baseline). No group required a sequential fallback.",
+    "files_changed_count": 8, "tests_added_or_updated": "47 tests added",
     "phase_commits": [
-        {"hash": "85d22e1c3ebbdd06eac9e3865788c7041ca4f450", "message": "Prototype first broker command-path integration"},
-        {"hash": "e127922a7bcbfda3a130dfb2ecb8e51855b91806", "message": "Complete Phase 109B observation-only integration prototype"}
+        {"hash": "053108fe6ae203fce13cf4d1a79f6a537d04e1c5", "message": "Harden observation-only command-path integration"},
+        {"hash": "5dfdddaed9bcadf67001babe2539da24d304d6f4", "message": "Complete Phase 109C observation integration hardening"}
     ],
     "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
@@ -19,18 +19,18 @@
     "github_packages_publication": false,
     "new_tag_created": false,
     "final_v0_1_0_tag_created": false,
-    "note": "Post-push corrected metadata. Report is written after pcae push resolved final push state, per the established 105C.1/105D/106D-109B pattern.",
+    "note": "Post-push corrected metadata. Report is written after pcae push resolved final push state, per the established 105C.1/105D/106D-109B/109C pattern.",
     "execution_integration_status": {
-        "integrated_command_paths": 1,
-        "connected_boundaries": 0,
-        "behavior_changing_integrations": 0,
-        "execution_capable_integrations": 0,
+        "observed_command_paths": 4,
+        "behavior_changing_paths": 0,
+        "authorized_paths": 0,
+        "execution_capable_paths": 0,
         "current_execution_capability": "Execution unavailable"
     },
     "validation_results": [
-        {"name": "focused_integration_group", "result": "602/602", "status": "passed", "note": "test_permission_broker_command_path_prototype.py + test_permission_broker*.py + test_health.py, run with -n auto"},
-        {"name": "governance_autonomy_group", "result": "1140/1140", "status": "passed", "note": "run with -n auto"},
-        {"name": "release_lifecycle_regression", "result": "1458/1458", "status": "passed", "note": "run with -n auto (test_task*, test_phase*, test_notifications*, test_telegram_notifications.py)"},
+        {"name": "focused_integration_group", "result": "886/886", "status": "passed", "note": "test_permission_broker*.py + test_health.py + test_check.py + test_task.py + test_push*.py, run with -n auto"},
+        {"name": "governance_autonomy_group", "result": "572/572", "status": "passed", "note": "test_v0_2_autonomy_contract.py + test_v0_2_autonomy_roadmap.py + test_governance_timeline.py + test_execution_boundary_no_go_*.py + test_runtime_enforcement_no_go_registry_contract.py + test_v0_2_execution_readiness_no_go_gates.py, run with -n auto"},
+        {"name": "release_lifecycle_regression", "result": "197/197", "status": "passed", "note": "test_lifecycle_*.py + test_release_*.py + test_v0_1_rc_github_release_publication.py, run with -n auto"},
         {"name": "fast_green", "result": "4390/4390", "status": "passed", "note": "run with -n auto, matches documented baseline exactly"},
         {"name": "report_notification_tests", "result": "present_in_canonical_metadata", "status": "present"},
         {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"}
@@ -47,6 +47,6 @@
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No runtime execution. No shell mediation. No subprocess mediation. No backend invocation. No adapter invocation. No execution enablement. No execution capability. No Permission Broker enforcement. No audit persistence. No rollback execution. No emergency stop. No Telegram inbound. No automatic apply. No command execution. No command blocking. No command authorization. No behavior change. implementation_status remains unconditionally execution_unavailable on every decision. The broker's decision is consulted but discarded -- never used for authorization, denial, or control flow. permission_broker_foundation.py itself unchanged. No no-go gate runtime enforcement. No commit/push authorization changes beyond the existing governed lifecycle. No real AI backend calls. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target (Level 3, not Level 4/5). GitHub Release for v0.1.0-rc1 and branch protection on main are unchanged. No new tag created. No new GitHub Release. No PyPI publication. No GitHub Packages publication. Next phase not started.",
-    "recommended_next_phase": "109C — Command-Path Integration Hardening"
+    "no_go_confirmation": "No runtime execution. No shell mediation. No subprocess mediation. No backend invocation. No adapter invocation. No execution enablement. No execution capability. No Permission Broker enforcement. No audit persistence. No rollback execution. No emergency stop. No Telegram inbound. No automatic apply. No command execution. No command blocking. No command authorization. No behavior change. implementation_status remains unconditionally execution_unavailable on every decision. The broker's decision is consulted but discarded at all four integrated command paths -- never used for authorization, denial, or control flow. permission_broker_foundation.py itself unchanged. No no-go gate runtime enforcement. No commit/push authorization changes beyond the existing governed lifecycle. No real AI backend calls. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target (Level 3, not Level 4/5). GitHub Release for v0.1.0-rc1 and branch protection on main are unchanged. No new tag created. No new GitHub Release. No PyPI publication. No GitHub Packages publication. Next phase not started.",
+    "recommended_next_phase": "109D — Observation Integration Verification & Compatibility"
 }
