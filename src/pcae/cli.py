@@ -403,6 +403,7 @@ from pcae.commands.status import (
     run_roadmap_next,
     run_status_coherence,
 )
+from pcae.commands.runtime_inspect import run_runtime_inspect
 from pcae.commands.artifact_index import run_artifact_index
 from pcae.commands.memory_snapshot import run_memory_snapshot
 from pcae.commands.governance_timeline import run_governance_timeline
@@ -1335,6 +1336,22 @@ def build_parser() -> argparse.ArgumentParser:
     runtime_snapshot_validate_restore_parser.set_defaults(
         handler=run_runtime_snapshot_validate_restore
     )
+
+    runtime_inspect_parser = runtime_subparsers.add_parser(
+        "inspect",
+        help="Show a read-only Runtime Introspection operational snapshot.",
+    )
+    runtime_inspect_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON runtime inspection output.",
+    )
+    runtime_inspect_parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Include plugin metadata, capability, and observation integration detail.",
+    )
+    runtime_inspect_parser.set_defaults(handler=run_runtime_inspect)
 
     orchestration_parser = subparsers.add_parser(
         "orchestration",

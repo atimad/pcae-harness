@@ -2,6 +2,83 @@
 
 ## Current Phase
 
+Phase 111C — Runtime Inspect CLI (completed).
+
+Implementation phase. Adds the first official Runtime CLI inspection
+command, `pcae runtime inspect`, exposing 111B's observation-only
+Runtime Introspection model as a safe, read-only operational snapshot.
+No runtime behavior change, no plugin loading/instantiation/invocation,
+no Permission Broker evaluation, no execution capability.
+
+**`src/pcae/commands/runtime_inspect.py` added; `src/pcae/cli.py`
+wired** with a new `runtime inspect` subcommand (sibling to the
+existing `runtime snapshot` family) supporting `--json` and
+`--verbose`. Constructs one fresh, empty `RuntimeRegistry()` per
+invocation (no persistence exists anywhere in this codebase, 110E) and
+calls all eight 111B `get_*()` functions against it.
+
+**Human output:** eleven labeled lines (Runtime status/state,
+Execution capability, Maximum plugin capability, Registry status,
+Plugin/capability counts, Observation integrations, Permission Broker
+status, Governance posture, Runtime principles) — not a raw dict dump.
+`--verbose` adds plugin metadata, capability declarations, the four
+`INT-NNN` observation integrations, and current limitations.
+
+**JSON output (`--json`):** eight top-level keys (`runtime`,
+`registry`, `plugins`, `capabilities`, `health`, `governance`, `state`,
+`version`), stable/deterministic across invocations (verified
+byte-identical on repeat calls). `PluginDescriptor.manifest` (open,
+untyped field) is deliberately excluded from all output — verified
+directly with a planted manifest key that never appears in the
+serialized snapshot.
+
+**Safety verified:** no mutation (repeat snapshot calls identical); no
+`PermissionBroker.evaluate()` call (AST-based call-site check, not
+substring search — the module's own docstring legitimately names it in
+prose); no plugin loading/instantiation/invocation (source scan +
+always-empty live output); no subprocess/network/file-write/env-var
+access; module import isolation (AST allowlist: `argparse`, `json`,
+plus three already-frozen internal modules only).
+
+**Compatibility verified:** `runtime_introspection.py` (111B)
+unmodified; `runtime_registry.py` (110E/110F) remains metadata-only
+(fresh registry still exactly one `_plugins` attribute after use);
+`command_path_observation.py` (109C) still exactly 4 `INT-NNN`
+entries; Permission Broker decisions still `execution_unavailable`
+(live re-check); existing `pcae health`/`pcae check` still run to
+completion.
+
+Added `docs/PHASE_111_RUNTIME_INSPECT_CLI.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 46 new tests (1 skip until `pcae task
+finish` moves the task contract to `tasks/done/`)
+(`tests/test_runtime_inspect_cli.py`), using this repo's established
+in-process `pcae.cli.main()` + `capsys` CLI-testing pattern.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged — `pcae runtime inspect` is a display command, not added to
+`INTEGRATION_REGISTRY`). Behavior-changing paths: **0**. Authorized
+paths: **0**. Execution-capable paths: **0**. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed** (unchanged). Current maximum plugin capability:
+**`observe`** (unchanged).
+
+No runtime behavior change, plugin loading, plugin instantiation,
+plugin invocation, dependency injection, runtime execution, command
+authorization, command denial, behavior-changing integration, shell
+mediation, backend invocation, adapter invocation, execution
+enablement, execution capability, Permission Broker enforcement, audit
+persistence, rollback execution, emergency stop, Telegram inbound,
+REST endpoint, web UI, daemon, background worker, or automatic apply
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains
+the autonomy target. GitHub Release for `v0.1.0-rc1` and branch
+protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 111D — Runtime Inspect CLI Verification & Compatibility
+(not started).
+
+## Phase 111B Complete
+
 Phase 111B — Runtime Introspection Prototype (Observation-Only) (completed).
 
 Implementation phase. Implements the first observation-only Runtime
