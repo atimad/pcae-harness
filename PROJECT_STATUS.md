@@ -2,6 +2,86 @@
 
 ## Current Phase
 
+Phase 112C — Runtime Context Prototype (Observation-Only) (completed).
+
+Implementation phase — the first live Runtime Context object model,
+using the contracts frozen in 112A and 112B, while preserving every
+non-executing guarantee established through 112B.1. Runtime Context
+represents the Runtime's current operational state; it does not
+execute anything.
+
+Added `src/pcae/core/runtime_context.py`: all twelve objects 112A §3
+froze, implemented as inert, immutable (frozen dataclass) data records
+— `RuntimeContext`, `RuntimeSession`, `TaskContext`, `PhaseContext`,
+`IntentContext`, `BrokerDecisionContext`, `ApprovalContext`,
+`EvidenceContext`, `ObservationContext`, plus future stubs
+`ExecutionContext`, `AuditContext`, `RollbackContext`. The module
+imports only `dataclasses`/`typing` — no broker, no registry, no
+shell, no subprocess, no network.
+
+**Every identity is fail-closed:** every object with a real identity
+concept (`session_id` through `observation_id`, plus the three future
+placeholders) requires a non-empty identity string at construction,
+raising `ValueError` immediately otherwise — enforcing 112B §7's
+"Identity is immutable and precedes state" invariant at the one point
+it can be enforced. `RuntimeContext` itself has no independent identity
+(112B §2).
+
+**Composition, not one giant structure:** `RuntimeContext` contains a
+`RuntimeSession`, which contains `TaskContext`/`ObservationContext`
+objects; `PhaseContext` contains `IntentContext` objects; the chain
+composes down through `BrokerDecisionContext` → `ApprovalContext` →
+`EvidenceContext`. `TaskContext` references its `phase_id` rather than
+nesting a `PhaseContext` copy, since Task:Phase cardinality is
+many-to-one (112B §6/§8.1).
+
+**Deliberate, documented deviation from this phase's own brief:** the
+brief's relationship diagram used 112A's pre-resolution ordering
+(Approval before Broker Decision); this implementation uses 112B's
+*resolved* order (Broker Decision before Approval, per 112B §8.2's own
+citation of 110A §5/§8) since objective 1 asked for an implementation
+"exactly matching the contracts frozen in 112B" — reverting to the
+brief's diagram would have silently discarded 112B's resolution work.
+
+**Lifecycle representation only:** every object carries a
+`lifecycle_stage` field (112A §4's six-stage vocabulary). The only
+implemented transition, `observe_context()`, moves `Created`/
+`Initialized` to `Observed`, returning a new immutable instance; no
+`complete()`/`archive()`/`update()` method exists on any class.
+
+**Ownership and persistence represented, never enforced:** every class
+carries class-level `OWNERSHIP` (112B §4) and `PERSISTENCE_BUCKET`
+(112B §5's four buckets) constants, transcribed directly from the
+frozen contract.
+
+**Repaired three stale forward-looking guard tests** (in 111R/112A/112B's
+own test files) that asserted `runtime_context.py` must not exist —
+their intended outcome, not a regression, since this phase's own goal
+was to create exactly that module. Also fixed one latent glob bug (112B's
+own `*phase-112b*` also matched 112B.1's task contract) found during
+this pass.
+
+Added `docs/PHASE_112_RUNTIME_CONTEXT_PROTOTYPE.md`. 105 new tests
+(`tests/test_runtime_context.py`). Focused tests (997), governance/
+autonomy group (2714), and the full release/lifecycle regression suite
+including the two known-slow phase85/phase87 integration files
+(1497/1497) all passed under `-n auto`; fast_green 4389/4390 (one
+pre-existing, unrelated failure —
+`test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked`
+— confirmed present on clean HEAD before this phase's own changes;
+depends on live repo/task state rather than being a hermetic unit
+test; out of this phase's scope to repair).
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 112D — Runtime Context Verification & Compatibility (not
+started).
+
+## Phase 112B.1 Complete
+
 Phase 112B.1 — Planning & Bootstrap Consistency Hardening (completed).
 
 Governance/planning/bootstrap hygiene phase only — no Runtime Context

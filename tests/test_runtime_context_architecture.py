@@ -482,9 +482,14 @@ def test_recommended_next_phase_is_112b(context_text, phase_doc_text):
 
 
 def test_no_context_module_added_to_core():
+    """`runtime_context.py` itself is deliberately excluded from this
+    guard: 112C (Runtime Context Prototype) legitimately created it,
+    combining all twelve objects into one module rather than twelve
+    per-object files -- this test's job is to guard against exactly
+    those still-nonexistent per-object files, not the real module."""
     core_dir = REPO_ROOT / "src" / "pcae" / "core"
     forbidden_names = {
-        "runtime_context.py", "task_context.py", "phase_context.py",
+        "task_context.py", "phase_context.py",
         "intent_context.py", "approval_context.py", "broker_decision_context.py",
         "evidence_context.py", "observation_context.py", "execution_context.py",
         "audit_context.py", "rollback_context.py", "runtime_session.py",

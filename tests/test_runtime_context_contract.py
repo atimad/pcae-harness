@@ -498,9 +498,14 @@ def test_recommended_next_phase_is_112c(contract_text, phase_doc_text):
 
 
 def test_no_context_module_added_to_core():
+    """`runtime_context.py` itself is deliberately excluded from this
+    guard: 112C (Runtime Context Prototype) legitimately created it,
+    combining all twelve objects into one module rather than twelve
+    per-object files -- this test's job is to guard against exactly
+    those still-nonexistent per-object files, not the real module."""
     core_dir = REPO_ROOT / "src" / "pcae" / "core"
     forbidden_names = {
-        "runtime_context.py", "task_context.py", "phase_context.py",
+        "task_context.py", "phase_context.py",
         "intent_context.py", "approval_context.py", "broker_decision_context.py",
         "evidence_context.py", "observation_context.py", "execution_context.py",
         "audit_context.py", "rollback_context.py", "runtime_session.py",
@@ -518,9 +523,16 @@ def test_no_new_directory_added_for_context():
 def test_task_contract_excludes_src_pcae():
     """This phase's task contract must not list any src/pcae/ file as
     allowed -- confirming the design-only boundary was respected at the
-    governance layer, not just by convention."""
+    governance layer, not just by convention.
+
+    Uses `*phase-112b-runtime*`, not the looser `*phase-112b*`, because
+    the latter also matches 112B.1's task contract
+    (`*phase-112b-1-planning*` contains "112b" as a substring) -- a
+    same-class bug as the one already fixed once in this file (scoping
+    a substring check to the wrong span); this is scoping the glob
+    itself precisely instead."""
     done_dir = REPO_ROOT / "tasks" / "done"
-    matches = list(done_dir.glob("*phase-112b*"))
+    matches = list(done_dir.glob("*phase-112b-runtime*"))
     if not matches:
         pytest.skip("112B task contract not yet moved to tasks/done/ (phase still in progress)")
     contract_text_ = matches[0].read_text()

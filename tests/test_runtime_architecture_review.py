@@ -377,10 +377,15 @@ def test_no_runtime_context_module_added_to_core():
     """`context.py` is deliberately excluded from this forbidden set --
     it already exists as an unrelated, pre-existing module (`pcae
     context`/`pcae continuity`), predating this entire 110-111 series
-    arc, not a sign that Runtime Context (112A) has been implemented."""
+    arc, not a sign that Runtime Context (112A) has been implemented.
+
+    `runtime_context.py` is also deliberately excluded as of 112C
+    (Runtime Context Prototype), which legitimately created it -- this
+    111R-era guard predates that phase and must not treat its intended
+    outcome as a regression."""
     core_dir = REPO_ROOT / "src" / "pcae" / "core"
     forbidden_names = {
-        "runtime_context.py", "session_info.py",
+        "session_info.py",
         "task_info.py", "phase_info.py", "intent.py", "approval.py",
         "broker_decision.py", "evidence.py",
     }
