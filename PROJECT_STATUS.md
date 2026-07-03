@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 112B.1 — Planning & Bootstrap Consistency Hardening (completed).
+
+Governance/planning/bootstrap hygiene phase only — no Runtime Context
+implementation, runtime execution, or execution capability introduced.
+Repairs `tasks/TODO.md`, which had presented a stale 90-series roadmap
+as current work long after it was superseded by the 107–112-series
+arc, and hardens `pcae session bootstrap --compact` so a stale
+planning artifact cannot mislead a new session again.
+
+**Finding, corrected:** direct inspection found `pcae session
+bootstrap` never actually read `tasks/TODO.md` before this phase —
+the "stale TODO" observation preceding this phase was a
+human/agent-level inference from reading the file directly, not
+tool behavior. This phase fixes both halves: the artifact itself and
+the tool's blindness to that class of drift.
+
+**Source-of-truth precedence frozen** (documented in
+`docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md` §2):
+active task contract > phase prompt > `PROJECT_STATUS.md` > canonical
+roadmap docs > `tasks/TODO.md` > `tasks/DONE.md` > stale handoff
+snippets.
+
+**Bootstrap hardened:** the compact bootstrap prompt now prints an
+explicit `Recommended next phase: ...` line (extracted from
+`PROJECT_STATUS.md`'s own inline sentence — previously computed but
+never surfaced in the compact path) and an explicit `Planning note:
+...` line comparing `tasks/TODO.md`'s own "🔜 Next" marker against the
+current phase, stating which source is authoritative and why the
+other was ignored when they disagree. A new operational rule states
+the same precedence directly: "tasks/TODO.md is informational
+planning notes only; it never outranks PROJECT_STATUS.md's current
+phase or recommended next phase."
+
+**`tasks/TODO.md` repaired:** a new "Current Roadmap (112-series)"
+table lists 112A/112B/112B.1 complete and 112C as the confirmed next
+phase; 112D/112E/113A are explicitly labeled tentative candidates, not
+a committed queue. The former 90-series table is preserved, relabeled
+"Historical: Production v1 Path (90-series, superseded)," with every
+row marked either "✅ Complete" or "Historical — not current" so it can
+never again read as active work.
+
+Added `docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md`. 18
+new tests (`tests/test_bootstrap_todo_consistency.py`). `docs/ROADMAP.md`
+was evaluated: its own "Current State" section is similarly stale
+(still describes "90 phases," "90B complete") but a full refresh is out
+of this phase's scope — named as a limitation, not silently repeated.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 112C — Runtime Context Prototype (Observation-Only) (not
+started).
+
+## Phase 112B Complete
+
 Phase 112B — Runtime Context Contract Freeze (completed).
 
 Contract/freeze phase only — no Runtime Context implementation,

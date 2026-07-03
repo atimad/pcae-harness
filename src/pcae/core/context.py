@@ -216,6 +216,25 @@ def build_bootstrap_prompt(
     else:
         lines.append(f"Phase: {rs['current_phase']}")
 
+    recommended_next_phase = rs.get("recommended_next_phase")
+    if recommended_next_phase:
+        lines.append(f"Recommended next phase: {recommended_next_phase}")
+
+    todo_status = rs.get("todo_status") or {}
+    todo_next_phase = todo_status.get("todo_next_phase")
+    if todo_next_phase:
+        if todo_status.get("stale"):
+            lines.append(
+                f"Planning note: tasks/TODO.md marks {todo_next_phase} as next -- stale "
+                f"relative to PROJECT_STATUS.md ({rs['current_phase']}); PROJECT_STATUS.md "
+                "is authoritative, tasks/TODO.md is informational only and was ignored."
+            )
+        else:
+            lines.append(
+                f"Planning note: tasks/TODO.md next-phase marker ({todo_next_phase}) is "
+                "consistent with PROJECT_STATUS.md."
+            )
+
     if audit is not None:
         phases_detected = audit.get("phases_detected", 0)
         warning_count = len(audit.get("warnings", []))
@@ -350,6 +369,7 @@ CONTEXT_PACK_OPERATIONAL_RULES: tuple[str, ...] = (
     "Do not infer stale tasks from older governance documents.",
     "Do not modify files outside the active task scope.",
     "Always run pcae check and python -m pytest -n auto before committing.",
+    "tasks/TODO.md is informational planning notes only; it never outranks PROJECT_STATUS.md's current phase or recommended next phase.",
 )
 
 CONTEXT_PACK_VALIDATION_COMMANDS: tuple[str, ...] = (
@@ -423,6 +443,73 @@ def _parse_project_status(root: HarnessPath) -> tuple[str, list[str]]:
     return current_phase, next_items
 
 
+# ---------------------------------------------------------------------------
+# Phase 112B.1 — Planning & Bootstrap Consistency Hardening
+#
+# PROJECT_STATUS.md is the canonical source of truth for "what phase are we
+# on" and "what phase comes next" (source-of-truth precedence, documented in
+# docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md). This project's
+# real "## Current Phase" section states its recommendation as an inline
+# sentence ("Recommended next repo phase: 112C — ...") rather than a separate
+# "## Next" heading, so it needs its own extraction distinct from the
+# next_items parsing above. tasks/TODO.md is planning scratch space only and
+# must never be treated as authoritative over PROJECT_STATUS.md -- this
+# section makes that comparison explicit and surfaces it in bootstrap output
+# instead of leaving it to be inferred.
+# ---------------------------------------------------------------------------
+
+_RECOMMENDED_NEXT_PHASE_RE = re.compile(
+    r"Recommended next repo phase:\s*(\S+)\s*—\s*(.+?)\s*\(not\b"
+)
+
+_LEADING_PHASE_NUMBER_RE = re.compile(r"(\d+)")
+
+_TODO_RELATIVE_PATH = Path("tasks") / "TODO.md"
+
+
+def _extract_recommended_next_phase(root: HarnessPath) -> str | None:
+    """Return "<phase_id> — <title>" from PROJECT_STATUS.md's inline
+    "Recommended next repo phase: ..." sentence, or None if absent."""
+    path = root.join(_PROJECT_STATUS_RELATIVE_PATH)
+    if not path.is_file():
+        return None
+    normalized = re.sub(r"\s+", " ", path.read_text(encoding="utf-8"))
+    match = _RECOMMENDED_NEXT_PHASE_RE.search(normalized)
+    if not match:
+        return None
+    phase_id, title = match.group(1), match.group(2)
+    return f"{phase_id} — {title}"
+
+
+def _todo_roadmap_status(root: HarnessPath, current_phase: str) -> dict:
+    """Compare tasks/TODO.md's own "🔜 Next" marker against the phase number
+    embedded in PROJECT_STATUS.md's current-phase line. Returns a dict with
+    `todo_next_phase` (the marked phase ID, or None if no such row exists)
+    and `stale` (True when that phase ID's number is lower than the current
+    phase's number -- i.e. TODO.md is describing already-completed work as
+    upcoming). This never changes what PCAE recommends; it only reports the
+    comparison so bootstrap can say explicitly which source is authoritative."""
+    path = root.join(_TODO_RELATIVE_PATH)
+    if not path.is_file():
+        return {"todo_next_phase": None, "stale": False}
+    todo_next_phase: str | None = None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if "🔜 Next" in stripped and stripped.startswith("|"):
+            columns = [c.strip() for c in stripped.strip("|").split("|")]
+            if columns and columns[0]:
+                todo_next_phase = columns[0]
+            break
+    if todo_next_phase is None:
+        return {"todo_next_phase": None, "stale": False}
+    current_match = _LEADING_PHASE_NUMBER_RE.search(current_phase or "")
+    todo_match = _LEADING_PHASE_NUMBER_RE.search(todo_next_phase)
+    stale = bool(
+        current_match and todo_match and int(todo_match.group(1)) < int(current_match.group(1))
+    )
+    return {"todo_next_phase": todo_next_phase, "stale": stale}
+
+
 def build_context_pack(root: HarnessPath) -> ContextPack:
     from pcae.core.agent import build_irg_loop_integration
 
@@ -431,6 +518,8 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
     policy = load_policy(root)
     provenance = build_provenance_timeline(root)
     current_phase, next_items = _parse_project_status(root)
+    recommended_next_phase = _extract_recommended_next_phase(root)
+    todo_status = _todo_roadmap_status(root, current_phase)
 
     lock = health["agent_lock"]
     governance_state = {
@@ -464,6 +553,8 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
     roadmap_summary = {
         "current_phase": current_phase,
         "next": next_items,
+        "recommended_next_phase": recommended_next_phase,
+        "todo_status": todo_status,
     }
 
     active_task_obj = find_latest_active_task(root)
