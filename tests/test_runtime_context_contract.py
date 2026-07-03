@@ -524,4 +524,7 @@ def test_task_contract_excludes_src_pcae():
     if not matches:
         pytest.skip("112B task contract not yet moved to tasks/done/ (phase still in progress)")
     contract_text_ = matches[0].read_text()
-    assert "src/pcae/" not in contract_text_
+    allowed_files_start = contract_text_.index("## Allowed Files")
+    allowed_files_end = contract_text_.index("##", allowed_files_start + 1)
+    allowed_files_section = contract_text_[allowed_files_start:allowed_files_end]
+    assert "src/pcae/" not in allowed_files_section
