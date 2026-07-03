@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 112B (20260703-2219-sync-final-pushed-state-metadata-for-112b-2)
 - Sync final pushed-state metadata for 112B (20260703-2218-sync-final-pushed-state-metadata-for-112b)
 - Phase 112B: Runtime Context Contract Freeze (20260703-2206-phase-112b-runtime-context-contract-freeze)
 - Sync final pushed-state metadata for 112A (20260703-2110-sync-final-pushed-state-metadata-for-112a)
