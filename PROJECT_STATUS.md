@@ -2,6 +2,107 @@
 
 ## Current Phase
 
+Phase 112B — Runtime Context Contract Freeze (completed).
+
+Contract/freeze phase only — no Runtime Context implementation,
+persistence implementation, or execution capability introduced; no
+file under `src/pcae/` touched. Second phase of the 112-series. Freezes
+the canonical Runtime Context contracts 112A designed: exact immutable
+identities, state models, ownership, persistence expectations,
+relationships, and invariants for every Runtime Context object, and
+resolves the two findings 112A explicitly deferred rather than
+guessed.
+
+**Core principle restated, extended:** Runtime orchestrates. Registry
+resolves. Plugins implement. Metadata precedes behavior. Visibility
+precedes authority. Context precedes execution. **Identity precedes
+state** (this phase's own addition) — a Context object's identity
+(§2) must be frozen before its state contract (§3) is meaningful;
+`Created` (112A §4) *is* the act of identity assignment, not a step
+preceding it.
+
+**Twelve identity contracts frozen** (`session_id` through
+`rollback_id`, plus `RuntimeContext`'s explicit non-identity as a root
+aggregate scoped to the active `RuntimeSession`), each specifying
+uniqueness, immutability, lifetime, and ownership. Two real,
+already-working precedents ground format requirements without
+inventing new ones: `task_id`'s `YYYYMMDD-HHMM-<slug>` format and
+`phase_id`'s bare identifier format; `session_id` is named honestly as
+not yet a concrete field in the real `.pcae/session.json`.
+
+**One canonical six-stage state contract frozen** for all twelve
+objects (`Created → Initialized → Observed → Updated → Completed →
+Archived`, 112A §4), with valid/invalid transitions and a terminal-state
+rule, plus per-object reachable ceilings today: `Archived` for
+`RuntimeSession`/`TaskContext`/`PhaseContext` (real filesystem
+precedent); `Updated` for `IntentContext`/`ObservationContext`;
+`Created` for every object gated on an unimplemented component
+(`ApprovalContext`, `BrokerDecisionContext`, `EvidenceContext`, and the
+three future stubs); `Initialized` for the root `RuntimeContext`
+aggregate.
+
+**Ownership frozen per object** (creates/owns/updates/archives/
+observes), extending 112A §5 — no row grants any Plugin, Broker, or
+Registry a create/update/archive action over any Context object.
+
+**Persistence contracts frozen into four buckets** (Persistent,
+Session-only, Future persistence, Never persist) for all twelve
+objects, refining 112A §7. One deliberate sharpening: `ObservationContext`
+(genuinely session-held) and `BrokerDecisionContext` (discarded within
+a single expression evaluation, 109D) are split into Session-only and
+Never-persist respectively, rather than 112A's shared "session-only/
+ephemeral" wording.
+
+**Relationships resolved:** Intent → Broker Decision → Approval →
+Evidence → (future) Execution → (future) Audit → (future) Rollback —
+reordering 112A's presentation to match 110A §5's frozen "Decision
+Pipeline → Approval" interface and 110A §8's frozen state sequence
+exactly, and extending the chain past Evidence to both remaining
+future stubs.
+
+**Nine invariants frozen:** 112A's seven, with "Phase belongs to one
+Task" resolved into "at most one Task is active per Phase at any given
+moment," plus two new invariants — "Broker Decision precedes Approval"
+and "Identity is immutable and precedes state."
+
+**Both findings 112A deferred are resolved, not assumed:** the
+Task:Phase cardinality/invariant tension is resolved by recognizing
+cumulative lifetime cardinality (many-to-one) and concurrent-moment
+cardinality (at-most-one-active) as different, both-true axes; the
+Approval/Broker-Decision ordering tension is resolved in favor of
+Broker Decision preceding Approval, citing 110A §5 and §8's own
+already-frozen evidence.
+
+Added `docs/PCAE_RUNTIME_CONTEXT_CONTRACT.md`,
+`docs/PHASE_112_RUNTIME_CONTEXT_CONTRACT_FREEZE.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 143 new tests
+(`tests/test_runtime_context_contract.py`) — a pure documentation-
+verification suite.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No Runtime Context implementation, persistence implementation,
+database, serialization, runtime execution, plugin loading, plugin
+instantiation, plugin invocation, dependency injection, shell
+mediation, backend invocation, adapter invocation, execution
+enablement, execution capability, Permission Broker enforcement, audit
+persistence, rollback execution, emergency stop, Telegram inbound, REST
+endpoint, web UI, daemon, background worker, or automatic apply
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains
+the autonomy target. GitHub Release for `v0.1.0-rc1` and branch
+protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 112C — Runtime Context Prototype (Observation-Only) (not
+started).
+
+## Phase 112A Complete
+
 Phase 112A — Runtime Context Architecture (completed).
 
 Architecture/design phase only — no Runtime Context implementation,
