@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 111C (20260703-1946-sync-final-pushed-state-metadata-for-111c)
 - Phase 111C: Runtime Inspect CLI (20260703-1923-phase-111c-runtime-inspect-cli)
 - Sync final pushed-state metadata for 111B (20260703-1913-sync-final-pushed-state-metadata-for-111b)
 - Phase 111B: Runtime Introspection Prototype (Observation-Only) (20260703-1849-phase-111b-runtime-introspection-prototype-observation-only)
