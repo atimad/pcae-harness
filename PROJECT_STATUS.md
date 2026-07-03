@@ -2,6 +2,83 @@
 
 ## Current Phase
 
+Phase 110A — PCAE Runtime Architecture & Plugin Model (completed).
+
+Architecture/freeze phase only — no execution capability introduced, no
+file under `src/pcae/` touched. Elevates PCAE from a collection of
+independently-frozen governance components (Permission Broker 108A–108D,
+observation integrations 109B–109D, Autonomy Contract 107B, No-Go Gates
+107C) into a single, named, modular runtime architecture that future
+execution capabilities will plug into.
+
+**Runtime:** defined as the central coordination layer — sequences
+intents through a fixed pipeline, enforces contracts between stages,
+tracks state-model transitions, delegates every substantive decision to
+a plugin or pipeline stage. Not a daemon, server, or background process.
+
+**Runtime Pipeline (7 stages, frozen):** Intent Source → Runtime →
+Intent Pipeline → Decision Pipeline → Execution Adapter → Evidence
+Pipeline → Notification Pipeline. Decision Pipeline wraps the unmodified
+`COMP-001` Permission Broker; Execution Adapter corresponds to
+`COMP-004`/`005`/`006`; Evidence Pipeline corresponds to `COMP-007`.
+Notification Pipeline is the only stage with a real, working
+implementation today (`pcae notify`, Telegram outbound).
+
+**Plugin Model (10 categories, frozen, in new `docs/PCAE_PLUGIN_MODEL.md`):**
+Intent Source, Policy, Decision, Approval, Execution Adapter, Audit,
+Notification, Storage, Identity, Context Plugin. Each fully specified
+(purpose, responsibilities, lifecycle, inputs, outputs, current status,
+future implementation phase). Three categories (Policy, Decision,
+Notification) have real but non-pluggable precedents already
+implemented; no plugin loading mechanism, discovery mechanism, or
+dependency injection framework is implemented by this phase.
+
+**Runtime Services (9, frozen):** Session, Task, Phase, Identity,
+Configuration, Plugin Registry, Policy Registry, Integration Registry,
+Audit Registry. **Runtime Interfaces (8 contracts, frozen):** every
+adjacent pipeline pair. **Runtime Principles (11, frozen):** Modular,
+Pluggable, Connected, Observable, Automatable, Governed, Fail-closed,
+Least privilege, Human-controlled, Deterministic, Testable — each tied
+to an existing frozen guarantee (e.g. Fail-closed ties to `_compose()`'s
+108C empty-registry behavior; Human-controlled ties to INV-003).
+
+**Capability Matrix and Runtime State Model:** eight states frozen
+(`Intent → Observed → Advisory → Approved → Executable → Executed →
+Audited → Rollback Ready`). Current maximum state reachable by any real
+PCAE command path today: **`Observed`** — the four existing observation
+integrations (INT-001..004) reach exactly this state and go no further.
+
+Added `docs/PCAE_RUNTIME_ARCHITECTURE.md`, `docs/PCAE_PLUGIN_MODEL.md`,
+`docs/PHASE_110_RUNTIME_ARCHITECTURE.md`. 132 new tests (1 skip until
+`pcae task finish` moves the task contract to `tasks/done/`)
+(`tests/test_runtime_architecture.py`) — a pure documentation-verification
+suite, since no runtime code exists to unit-test. Runtime architecture
+tests (132), governance/autonomy group (572), and release/lifecycle
+regression group (197) all passed under `-n auto`; `fast_green`
+4390/4390 (matches documented baseline). No group required a sequential
+fallback.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged — `pcae health`, `pcae check`, `pcae doctor task-memory`,
+`pcae push check`). Behavior-changing paths: **0**. Authorized paths:
+**0**. Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**.
+
+No runtime execution, command authorization, command denial, shell
+mediation, subprocess mediation, backend invocation, adapter invocation,
+execution enablement, execution capability, Permission Broker
+enforcement, audit persistence, rollback execution, emergency stop,
+Telegram inbound, REST server, web server, daemon, background workers,
+automatic apply, command execution, plugin loading implementation, or
+dependency injection framework implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub
+Release for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 110B — Runtime Plugin Contract Freeze (not started).
+
+## Phase 109D Complete
+
 Phase 109D — Observation Integration Verification & Compatibility (completed).
 
 Verification-only phase: re-proves, under one dedicated 87-test suite,
