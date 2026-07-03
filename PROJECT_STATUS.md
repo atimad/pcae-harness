@@ -2,6 +2,58 @@
 
 ## Current Phase
 
+Phase 109B — First Command-Path Integration Prototype (Observation-Only, Disabled by Default) (completed).
+
+Implements the first Permission Broker command-path integration
+prototype while preserving PCAE's current non-executing guarantees.
+Integrates exactly one command path — `pcae health` — in observation
+mode only: `run_health()` now calls a new
+`pcae.core.command_path_observation.observe()` helper, which constructs
+a `PermissionBrokerRequest` (`action_type="read"`, `execution_class="none"`,
+`requested_component="COMP-001"`, `requested_capability="pcae_health"`)
+and asks `PermissionBroker.evaluate()` for a decision — but the decision
+is immediately discarded. `observe()` can never raise (internal
+`try`/`except`); the call site in `health.py` wraps the call again
+(defense in depth). Proven directly: `pcae health`'s captured stdout and
+exit code are byte-identical whether `observe()` returns `ALLOW`, `DENY`,
+`HUMAN_REVIEW`, `None`, or raises an exception. `tests/test_health.py`'s
+14 pre-existing tests are unmodified and pass unchanged.
+`src/pcae/core/permission_broker_foundation.py` itself was not touched —
+not in this phase's task contract's allowed files — so its own 108A–108D
+isolation and behavior guarantees (171 tests) remain unmodified. No
+other command path was integrated.
+
+Added `docs/PHASE_109_FIRST_COMMAND_PATH_INTEGRATION_PROTOTYPE.md`,
+including a new "Execution Integration Status" report section (intended
+as a canonical, reusable format for future phases to extend). 22 new
+tests (`tests/test_permission_broker_command_path_prototype.py`).
+Focused integration group (602, combined with all `test_permission_broker*.py`
+and `test_health.py`), governance/autonomy group (1140), and
+release/lifecycle regression group (1458) all passed under `-n auto`;
+`fast_green` 4390/4390 (matches documented baseline, and now exercises
+the new integration transparently across dozens of existing `pcae
+health` invocations throughout the suite). No group required a
+sequential fallback.
+
+**Execution Integration Status:** Integrated command paths: **1**
+(`pcae health`, observation-only). Connected boundaries: **0**. Behavior-
+changing integrations: **0**. Execution-capable integrations: **0**.
+Current execution capability: **Execution unavailable**.
+
+No runtime execution, shell mediation, subprocess mediation, backend
+invocation, adapter invocation, execution enablement, execution
+capability, Permission Broker enforcement, audit persistence, rollback
+execution, emergency stop, Telegram inbound, automatic apply, command
+execution, command blocking, command authorization, or behavior change
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains
+the autonomy target. GitHub Release for `v0.1.0-rc1` and branch
+protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 109C — Command-Path Integration Hardening (not started).
+
+## Phase 109A Complete
+
 Phase 109A — Permission Broker Command-Path Integration Design (completed).
 
 Designs the first command-path integration architecture for the

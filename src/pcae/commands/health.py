@@ -3,12 +3,35 @@ from __future__ import annotations
 import argparse
 import json
 
+from pcae.core.command_path_observation import observe
 from pcae.core.health import build_health_data, policy_validation_text
 from pcae.core.paths import HarnessPath
 
 
 def run_health(args: argparse.Namespace) -> int:
     data = build_health_data(HarnessPath.cwd())
+
+    # Phase 109B: observation-only Permission Broker consultation. The
+    # decision is deliberately discarded — it must never change this
+    # command's output or exit code. Defense in depth: even though
+    # observe() itself never raises, the call site is wrapped too, so
+    # behavior preservation holds regardless of how observe() is
+    # implemented. See
+    # docs/PHASE_109_FIRST_COMMAND_PATH_INTEGRATION_PROTOTYPE.md.
+    active_task = data.get("active_task")
+    try:
+        observe(
+            action_type="read",
+            execution_class="none",
+            requested_component="COMP-001",
+            requested_capability="pcae_health",
+            task_id=active_task["id"] if active_task else None,
+            evidence_available=True,
+            approval_present=True,
+        )
+    except Exception:
+        pass
+
     if args.json:
         print(json.dumps(data, indent=2, sort_keys=True))
     else:
