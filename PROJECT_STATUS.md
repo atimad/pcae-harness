@@ -2,6 +2,76 @@
 
 ## Current Phase
 
+Phase 112D — Runtime Context Verification & Compatibility (completed).
+
+Verification/hardening phase only — no new Runtime Context
+functionality added; `src/pcae/core/runtime_context.py` (112C)
+unchanged. Proves the 112C prototype is immutable, internally
+consistent, compatible with 110A–112C, and incapable of introducing
+execution behavior.
+
+**Compatibility verified across all fourteen 110A–112C lineage phase
+documents:** each confirmed to exist; `CURRENT_RUNTIME_STATE`/
+`CURRENT_MAXIMUM_PLUGIN_CAPABILITY`/`EXECUTION_AVAILABILITY` confirmed
+to agree exactly between `runtime_context.py` and `runtime_introspection.py`
+(111B) — cross-module, not just cross-doc; all twelve object names, all
+six lifecycle stages, all four persistence buckets, and the literal
+"Broker Decision precedes Approval" resolution confirmed present in
+112A/112B's own contract text.
+
+**Immutability re-verified:** mutation attempted on every field of
+every one of the twelve classes — `FrozenInstanceError` in every case,
+including through a fully-composed seven-object chain and against the
+class-level `OWNERSHIP` metadata object itself. `CONTEXT_RELATIONSHIP_CHAIN`
+confirmed to be a genuine tuple (`.append()` raises); every composed
+collection confirmed to remain a tuple end-to-end.
+
+**Relationship integrity confirmed** across a full seven-object chain
+(`RuntimeSession → TaskContext → PhaseContext → IntentContext →
+BrokerDecisionContext → ApprovalContext → EvidenceContext`) — every
+adjacent identity reference agrees, no back-reference/cycle exists, and
+many-tasks-to-one-phase composes cleanly.
+
+**Ownership and persistence verified against an independently-
+transcribed expected-value table** (not re-derived from
+`runtime_context.py`'s own source) — all twelve match 112B §4/§5
+exactly, with zero drift.
+
+**Composition integrity confirmed, no god-object drift:** `RuntimeContext`
+carries exactly two fields (`session`, `lifecycle_stage`); no class
+carries a flattened child-identity field; a loose ≤7-field ceiling
+applied across all twelve classes as an early-warning guard.
+
+**fast_green baseline investigated, not silently accepted — sharpened,
+not merely repeated:** re-ran under two observed states. Idle
+(`tasks/active/` empty): `4389/4390`, `tests/test_dry_run_simulation.py
+::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked` fails.
+Active-task state (this phase's own task contract present):
+**`4390/4390`** — the identical test passes. Root cause identified
+precisely: `build_simulation()` reads the *real* repository root, not a
+hermetic fixture, so its result is a deterministic function of live
+`tasks/active/` state, not a fixed count — with no active task, the
+classifier returns `would_block_by_task_contract` with
+`would_require_active_task=False`, a third outcome the test's own
+two-branch assertion doesn't cover. Confirmed not a regression (same
+mechanism as 112C's own finding, now characterized more precisely).
+Repair belongs in `src/pcae/core/dry_run.py` or the test itself, neither
+in this phase's scope — documented precisely, including the important
+caveat that a future `4390/4390` report does not by itself mean this
+was fixed.
+
+Added `docs/PHASE_112_RUNTIME_CONTEXT_VERIFICATION.md`. 100 new tests
+(`tests/test_runtime_context_verification.py`).
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 112E — Runtime Inspect Context Integration (not started).
+
+## Phase 112C Complete
+
 Phase 112C — Runtime Context Prototype (Observation-Only) (completed).
 
 Implementation phase — the first live Runtime Context object model,
