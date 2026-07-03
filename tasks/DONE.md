@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 108D (20260703-1059-sync-final-pushed-state-metadata-for-108d)
 - Phase 108D: Permission Broker Verification & Compatibility (20260703-1039-phase-108d-permission-broker-verification-compatibility)
 - Sync final pushed-state metadata for 108C (20260703-1030-sync-final-pushed-state-metadata-for-108c)
 - Phase 108C: Permission Broker Policy Composition & Hardening (20260703-1008-phase-108c-permission-broker-policy-composition-hardening)
