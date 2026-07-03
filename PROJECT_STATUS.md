@@ -2,6 +2,106 @@
 
 ## Current Phase
 
+Phase 112A — Runtime Context Architecture (completed).
+
+Architecture/design phase only — no Runtime Context implementation,
+persistence implementation, or execution capability introduced; no
+file under `src/pcae/` touched. First phase of the 112-series. Designs
+how PCAE models the current operational state of the Runtime while
+preserving the complete non-executing guarantees established through
+111R.
+
+**Core principle restated, extended:** Runtime orchestrates. Registry
+resolves. Plugins implement. Metadata precedes behavior. Visibility
+precedes authority. **Context precedes execution** (this phase's own
+addition) — a future execution-capability phase must be able to name
+the exact session/task/phase/intent/approval/decision an action
+belongs to before that action could ever be authorized.
+
+**Runtime Context defined:** the dynamic operational model — what is
+happening now, as distinct from what is possible (110A), what exists
+(110B–111D), or what can be observed (111A/111B). Describes; never
+executes.
+
+**Persistent vs Session Context frozen**, generalizing 110C §8's
+static/dynamic split: Persistent (Runtime identity, Registry,
+plugin/capability metadata, version, contracts) vs Session (Session,
+Task, Phase, Intent, Approval state, Broker decision, Evidence,
+Observation state). Explicitly clarified as a *scope* distinction, not
+a disk-persistence distinction.
+
+**Twelve context objects frozen (design only):** `RuntimeContext`,
+`RuntimeSession`, `TaskContext`, `PhaseContext`, `IntentContext`,
+`ApprovalContext`, `BrokerDecisionContext`, `EvidenceContext`,
+`ObservationContext`, plus three future/stub objects —
+`ExecutionContext` (current state: `execution_unavailable`),
+`AuditContext`, `RollbackContext`.
+
+**Six-stage Context Lifecycle frozen** — `Created → Initialized →
+Observed → Updated → Completed → Archived` — a third, distinct
+lifecycle vocabulary alongside 110A §8's Runtime State Model and 110B
+§4's Plugin Lifecycle, not a competitor to either.
+
+**Ownership frozen:** Runtime owns Context lifecycle/current
+context/transitions; Registry owns metadata; Plugins own capability
+implementation; Broker owns policy decisions; Context never owns
+execution, approval decisions, or policy evaluation — the third
+instance, across this arc, of the "surfaces facts, never decides"
+discipline (110C §5, 111A §1, now this document).
+
+**Relationships frozen** (Session → Task → Phase → Intent → Approval →
+Broker Decision → Evidence → future Execution), with two
+evidence-grounded findings recorded rather than assumed: Task:Phase
+cardinality is many-to-one (verified against this session's own
+operational pattern — every 110–111 series phase was served by
+one-or-more tasks, never the reverse), and an Approval/Broker-Decision
+ordering tension against 110A §5's frozen interface table, left as an
+explicit open question for 112B.
+
+**Persistence Model frozen — the direct answer to 111R's recommendation
+condition, per-concept not uniform:** Session/Task/Phase should (and
+already do) persist; Intent recommended session-only until Evidence
+exists to make its persistence accountable; Approval/Evidence should
+eventually persist once implemented (nothing exists yet); Broker
+decision/Observation state deliberately session-only/ephemeral as a
+continuation of 109B–109D's already-frozen "consult and discard" safety
+property — persisting them explicitly declared out of 112A's scope
+entirely, not merely deferred.
+
+**Seven Context invariants frozen**, including one named, unresolved
+tension (Phase belongs to one Task, contradicting §6's Task:Phase
+evidence-grounded finding — left for 112B).
+
+Added `docs/PCAE_RUNTIME_CONTEXT_ARCHITECTURE.md`,
+`docs/PHASE_112_RUNTIME_CONTEXT_ARCHITECTURE.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 156 new tests (1 skip until `pcae task
+finish` moves the task contract to `tasks/done/`)
+(`tests/test_runtime_context_architecture.py`) — a pure documentation-
+verification suite.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No Runtime Context implementation, persistence implementation,
+database, serialization, runtime execution, plugin loading, plugin
+instantiation, plugin invocation, dependency injection, shell
+mediation, backend invocation, adapter invocation, execution
+enablement, execution capability, Permission Broker enforcement, audit
+persistence, rollback execution, emergency stop, Telegram inbound, REST
+endpoint, web UI, daemon, background worker, or automatic apply
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains
+the autonomy target. GitHub Release for `v0.1.0-rc1` and branch
+protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 112B — Runtime Context Contract Freeze (not started).
+
+## Phase 111R Complete
+
 Phase 111R — Runtime Architecture Review (completed).
 
 Review/documentation phase only — no source behavior changes, no
