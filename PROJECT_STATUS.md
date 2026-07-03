@@ -2,6 +2,125 @@
 
 ## Current Phase
 
+Phase 110C — Runtime Service Registry & Plugin Discovery Architecture (completed).
+
+Architecture/design phase only — no registry implementation, plugin
+loading, discovery execution, or execution capability introduced; no
+file under `src/pcae/` touched. Designs how the Runtime discovers,
+resolves, validates, and reasons about plugins without directly
+coupling to concrete implementations.
+
+**Core principle frozen:** Runtime orchestrates. Registry resolves.
+Plugins implement. Extended with this phase's own addition to the
+roadmap ordering: Pluggable first. Connected second. Automated third.
+Executable last. **Discoverable always** — a standing property across
+every plugin lifecycle state, not a fifth sequential stage.
+
+**Runtime Service Registry** (`docs/PCAE_RUNTIME_SERVICE_REGISTRY.md`):
+the canonical resolution layer between Runtime and plugins, generalizing
+two existing narrow precedents (`PolicyRegistry`, 108B;
+`INTEGRATION_REGISTRY`, 109C). The Runtime must never hardcode a
+concrete plugin; plugins must never discover or call each other
+directly; the Registry must never orchestrate, decide, approve, or
+execute.
+
+**Service Discovery (8 facets, frozen):** plugin identity, plugin type,
+capability declarations, version compatibility, health status,
+lifecycle state, security posture, current implementation status —
+each with a direct precedent in 110B's contract model or an existing
+non-pluggable subsystem.
+
+**Plugin Manifest Concept (15 fields, future, no implementation):**
+Plugin ID, Plugin name, Plugin type, Version, Compatible runtime
+version, Capabilities provided, Capabilities required, Dependencies,
+Lifecycle hooks, Configuration schema, Security boundaries, Evidence
+requirements, Approval requirements, Audit expectations, Current
+status. Thirteen of fifteen map directly onto an existing 110B contract
+field.
+
+**Capability Resolution (5-step flow, frozen):** Intent → Runtime needs
+capability → Registry resolves candidates → Runtime selects per policy
+→ Plugin implements. No capability-identifier grammar, resolution
+algorithm, or selection-policy mechanism implemented.
+
+**Registry Responsibilities frozen:** owns registration metadata,
+discovery, compatibility checks, capability lookup, plugin health
+visibility, lifecycle visibility, dependency metadata, current
+availability. Does not own orchestration, policy decisions, approval
+decisions, execution, audit persistence, rollback execution — mirroring
+108B's `PolicyRegistry`/`_compose()` split generalized to the
+plugin-infrastructure layer.
+
+**Plugin Responsibility Boundaries frozen:** plugins own declared
+capability implementation, local health signal, lifecycle hooks,
+bounded inputs/outputs, evidence emission where applicable; plugins do
+not own global orchestration, self-authorization, bypassing the broker/
+approval/audit, or discovering/calling each other directly.
+
+**Infrastructure vs. Capability plugin classes distinguished:**
+Infrastructure (Identity, Storage, Notification, Audit, Context) provide
+services others depend on without deciding/approving/executing anything
+intent-specific; Capability (Intent Source, Policy, Decision, Approval,
+Execution Adapter) participate directly in a specific intent's pipeline
+journey — distinguished by discovery cardinality, failure blast radius,
+security posture emphasis, and long-term vision framing.
+
+**Static vs. Dynamic runtime model documented:** static (architecture,
+contracts, registry, plugin metadata, compatibility) is designed by this
+phase; dynamic (session, task, phase, intent, approval, broker decision,
+execution state) is explicitly deferred to a future phase, not
+implemented here.
+
+Added `docs/PCAE_RUNTIME_SERVICE_REGISTRY.md`,
+`docs/PHASE_110_RUNTIME_SERVICE_REGISTRY_ARCHITECTURE.md`.
+`docs/ROADMAP.md` was evaluated and found to already state the relevant
+long-term vision (110B) completely — no change needed. 128 new tests (1
+skip until `pcae task finish` moves the task contract to `tasks/done/`)
+(`tests/test_runtime_service_registry_architecture.py`) — a pure
+documentation-verification suite. Focused tests (416, combining this
+phase's suite with `test_runtime_plugin_contracts.py` and
+`test_runtime_architecture.py`), governance/autonomy group (2052), and
+the collectible portion of release/lifecycle regression (1429/1429)
+all passed under `-n auto`; `fast_green` 4390/4390 (matches documented
+baseline). No group required a sequential fallback for the files that
+completed.
+
+**Validation finding (documented, repeat occurrence, not a regression):**
+`test_phase85_integration.py` and `test_phase87_integration.py` (68
+tests) again did not complete within a practical time budget — this is
+the same environmental performance issue first documented in 110B, now
+confirmed a second time via live process inspection (two independent
+checks five minutes apart, each showing a different xdist worker
+actively executing a real `pcae project-state --json` subprocess). Not
+a deadlock; genuinely slow governance-info commands as this session's
+accumulated history (110+ phases, 850+ provenance events) continues to
+grow. Outside this phase's task-contract scope to repair (no
+`src/pcae/` access). Unlike 110B, this phase's validation command did
+not reference a nonexistent test file.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged). No dynamic runtime context implemented.
+
+No plugin registry implementation, plugin loading, plugin discovery
+execution, dependency injection framework, runtime execution, command
+authorization, command denial, behavior-changing integration, shell
+mediation, subprocess mediation, backend invocation, adapter invocation,
+execution enablement, execution capability, Permission Broker
+enforcement, audit persistence, rollback execution, emergency stop,
+Telegram inbound, REST server, web server, daemon, background workers,
+automatic apply, or command execution implemented. `v0.1.0-rc1` remains
+non-executing by design; v0.2 remains the autonomy target. GitHub
+Release for `v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 110D — Runtime Registry Contract Freeze (not started).
+
+## Phase 110B Complete
+
 Phase 110B — Runtime Plugin Contract Freeze (completed).
 
 Contract/freeze phase only — no plugin loading, plugin registry
