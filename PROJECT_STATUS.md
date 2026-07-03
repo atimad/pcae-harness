@@ -2,6 +2,100 @@
 
 ## Current Phase
 
+Phase 111A — Runtime Introspection Architecture (completed).
+
+Architecture/design phase only — no introspection implementation, CLI
+command, REST endpoint, web UI, or execution capability introduced; no
+file under `src/pcae/` touched. Designs how PCAE exposes Runtime,
+Registry, Plugin, Capability, Session, and Health information through a
+safe, read-only introspection model. First phase of the 111-series.
+
+**Core principle restated, extended:** Runtime orchestrates. Registry
+resolves. Plugins implement. Metadata precedes behavior. **Visibility
+precedes authority** (this phase's own addition) — no future
+authorization/approval/execution-capability phase may skip past a
+frozen introspection layer.
+
+**Introspection defined:** the Runtime's read-only visibility layer —
+exposes information, never changes behavior. Generalizes three existing
+narrow precedents (`pcae health`, `pcae governance audit`,
+`RuntimeRegistry.registry_health()`/`.validate_consistency()`,
+110E/110F), none modified by this phase.
+
+**Fifteen introspection domains frozen:** Runtime, Registry, Plugins,
+Capabilities, Policy, Observation, Session, Task, Phase, Identity,
+Configuration, Health, Version, Governance, Future Execution. Seven
+already have a real, working, read-only precedent today; eight remain
+wholly or partially conceptual. Future Execution named **permanently
+the least-visible domain**.
+
+**Four-tier visibility model frozen:** Visible (exposable today, no
+gating), Hidden (conceptual, no live implementation yet), Requires
+future authorization (reserved, not designed), Permanently unavailable
+(structurally can never be exposed — execution handles, credentials).
+
+**Eleven introspection objects frozen (design only):** `RuntimeInfo`,
+`RegistryInfo`, `PluginInfo`, `CapabilityInfo`, `HealthInfo`,
+`VersionInfo`, `GovernanceInfo`, `RuntimeStateInfo`, `SessionInfo`,
+`TaskInfo`, `PhaseInfo`. `RegistryInfo`/`PluginInfo` map directly onto
+110E/110F's `RegistrySnapshot`/`PluginDescriptor`; `SessionInfo`/
+`TaskInfo`/`PhaseInfo` map onto existing `pcae session`/`task`/`phase`
+JSON output. No implementation.
+
+**Runtime Health Model frozen (8 facets):** runtime health, registry
+health, plugin metadata health, manifest validity, contract
+compatibility, observation coverage, execution availability, approval
+availability. Current expected aggregate state, without exception:
+Healthy, Execution unavailable.
+
+**Runtime Status Model frozen — restates 110A §8 verbatim, not a new
+vocabulary:** `Intent → Observed → Advisory → Approved → Executable →
+Executed → Audited → Rollback Ready`. Current state, without exception:
+`Observed`.
+
+**Introspection API frozen (8 operations, design only):**
+`GetRuntime()`, `GetRegistry()`, `GetPlugins()`, `GetCapabilities()`,
+`GetHealth()`, `GetGovernance()`, `GetState()`, `GetVersion()`. No
+signature or implementation.
+
+**Visibility rules frozen:** may expose metadata, contracts, health,
+status, capabilities, version, compatibility; must never expose
+execution handles, plugin instances, internal mutable state, secret
+material, credentials, approval bypasses, execution control.
+
+Added `docs/PCAE_RUNTIME_INTROSPECTION.md`,
+`docs/PHASE_111_RUNTIME_INTROSPECTION_ARCHITECTURE.md`. `docs/ROADMAP.md`
+evaluated and found to need no change — neither prior phase-scoped
+principle ("Discoverable always," "Metadata precedes behavior") appears
+there either, matching 110C's/110D's/110E's/110F's own evaluation
+outcome. 164 new tests (1 skip until `pcae task finish` moves the task
+contract to `tasks/done/`) (`tests/test_runtime_introspection_architecture.py`)
+— a pure documentation-verification suite.
+
+**Execution Integration Status:** Observed command paths: **4**
+(unchanged). Behavior-changing paths: **0**. Authorized paths: **0**.
+Execution-capable paths: **0**. Current execution capability:
+**Execution unavailable**. Current maximum runtime state: **Observed**
+(unchanged). Current maximum plugin capability: **`observe`**
+(unchanged).
+
+No runtime introspection implementation, CLI introspection command,
+REST endpoint, web UI, plugin loading, plugin instantiation, plugin
+invocation, dependency injection, runtime execution, command
+authorization, command denial, shell mediation, backend invocation,
+adapter invocation, execution enablement, execution capability,
+Permission Broker enforcement, audit persistence, rollback execution,
+emergency stop, Telegram inbound, daemon, background workers, or
+automatic apply implemented. `v0.1.0-rc1` remains non-executing by
+design; v0.2 remains the autonomy target. GitHub Release for
+`v0.1.0-rc1` and branch protection on `main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 111B — Runtime Introspection Prototype (Observation-Only)
+(not started).
+
+## Phase 110F Complete
+
 Phase 110F — Runtime Registry Verification & Compatibility (completed).
 
 Verification/hardening phase. Proves the passive Runtime Registry
