@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 108B (20260703-0955-sync-final-pushed-state-metadata-for-108b)
 - Phase 108B: Permission Broker Policy Rule Framework (20260703-0934-phase-108b-permission-broker-policy-rule-framework)
 - Sync final pushed-state metadata for 108A (20260703-0927-sync-final-pushed-state-metadata-for-108a)
 - Phase 108A: Permission Broker Foundation (20260703-0905-phase-108a-permission-broker-foundation)
