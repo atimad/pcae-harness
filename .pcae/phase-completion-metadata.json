@@ -1,11 +1,11 @@
 {
-    "phase_id": "109A", "phase_name": "phase_109a_permission_broker_command_path_integration_design", "phase_title": "Permission Broker Command-Path Integration Design",
+    "phase_id": "109B", "phase_name": "phase_109b_first_command_path_integration_prototype", "phase_title": "First Command-Path Integration Prototype (Observation-Only, Disabled by Default)",
     "status": "completed",
-    "summary": "Designs the first command-path integration architecture for the Permission Broker while preserving PCAE's current non-executing guarantees -- architecture/design only, no source code in src/pcae/ touched (this phase's task contract excludes the core/commands/cli zones entirely). Freezes an eight-stage canonical flow (AI Agent -> Permission Broker -> Command Boundary -> Execution Boundary -> Human Approval Gate -> Shell/Backend/Adapter Boundary -> Audit Boundary -> Rollback Boundary), explicitly naming Command Boundary as a design pattern rather than inventing an eleventh COMP-NNN component. Freezes eleven canonical command categories with examples, risk level, broker involvement, future approval requirement, and current implementation status -- candidly stating shell-class actions an AI agent's own tooling issues are entirely unmediated by any PCAE component today. Documents seven integration points with current status, future integration, and rationale -- none connected. Specifies the broker interaction contract using the existing, unmodified PermissionBrokerRequest/PermissionBrokerDecision models. Demonstrates compatibility with the Autonomy Contract, No-Go Gates, Local Governance, Branch Protection, and existing lifecycle commands. Explains how command-path integration would strengthen repository protection. Added docs/V0_2_PERMISSION_BROKER_COMMAND_PATH_INTEGRATION.md and docs/PHASE_109_PERMISSION_BROKER_COMMAND_PATH_INTEGRATION_DESIGN.md. 86 new tests. Focused design+broker group (566), governance/autonomy group (1054), and release/lifecycle regression group (1458) all passed under -n auto; fast_green 4390/4390 (matches documented baseline). No group required a sequential fallback.",
-    "files_changed_count": 5, "tests_added_or_updated": "86 tests added",
+    "summary": "Implements the first Permission Broker command-path integration prototype while preserving PCAE's current non-executing guarantees. Integrates exactly one command path -- pcae health -- in observation mode only: run_health() now calls a new pcae.core.command_path_observation.observe() helper, which constructs a PermissionBrokerRequest and asks PermissionBroker.evaluate() for a decision, but the decision is immediately discarded -- never assigned, never read, never used for control flow. observe() can never raise (internal try/except); the call site in health.py wraps the call again for defense in depth. Proven directly: pcae health's captured stdout and exit code are byte-identical whether observe() returns ALLOW, DENY, HUMAN_REVIEW, None, or raises an exception. tests/test_health.py's 14 pre-existing tests are unmodified and pass unchanged. permission_broker_foundation.py itself was not touched -- not in this phase's task contract's allowed files -- so its own 108A-108D isolation and behavior guarantees (171 tests) remain unmodified. No other command path was integrated. Added docs/PHASE_109_FIRST_COMMAND_PATH_INTEGRATION_PROTOTYPE.md, including a new Execution Integration Status report section intended as a canonical, reusable format for future phases. 22 new tests. Focused integration group (602), governance/autonomy group (1140), and release/lifecycle regression group (1458) all passed under -n auto; fast_green 4390/4390 (matches documented baseline, now exercising the new integration transparently across dozens of existing pcae health invocations throughout the suite). No group required a sequential fallback.",
+    "files_changed_count": 6, "tests_added_or_updated": "22 tests added",
     "phase_commits": [
-        {"hash": "591662fcac177f153e90ab111c21502145653236", "message": "Design permission broker command-path integration"},
-        {"hash": "ea8415e6447ca302132bec6a13fdf6d8159fc76e", "message": "Complete Phase 109A command-path integration design"}
+        {"hash": "85d22e1c3ebbdd06eac9e3865788c7041ca4f450", "message": "Prototype first broker command-path integration"},
+        {"hash": "e127922a7bcbfda3a130dfb2ecb8e51855b91806", "message": "Complete Phase 109B observation-only integration prototype"}
     ],
     "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
@@ -19,10 +19,17 @@
     "github_packages_publication": false,
     "new_tag_created": false,
     "final_v0_1_0_tag_created": false,
-    "note": "Post-push corrected metadata. Report is written after pcae push resolved final push state, per the established 105C.1/105D/106D-109A pattern.",
+    "note": "Post-push corrected metadata. Report is written after pcae push resolved final push state, per the established 105C.1/105D/106D-109B pattern.",
+    "execution_integration_status": {
+        "integrated_command_paths": 1,
+        "connected_boundaries": 0,
+        "behavior_changing_integrations": 0,
+        "execution_capable_integrations": 0,
+        "current_execution_capability": "Execution unavailable"
+    },
     "validation_results": [
-        {"name": "focused_design_broker_group", "result": "566/566", "status": "passed", "note": "test_permission_broker_command_path_design.py + test_permission_broker*.py, run with -n auto"},
-        {"name": "governance_autonomy_group", "result": "1054/1054", "status": "passed", "note": "run with -n auto"},
+        {"name": "focused_integration_group", "result": "602/602", "status": "passed", "note": "test_permission_broker_command_path_prototype.py + test_permission_broker*.py + test_health.py, run with -n auto"},
+        {"name": "governance_autonomy_group", "result": "1140/1140", "status": "passed", "note": "run with -n auto"},
         {"name": "release_lifecycle_regression", "result": "1458/1458", "status": "passed", "note": "run with -n auto (test_task*, test_phase*, test_notifications*, test_telegram_notifications.py)"},
         {"name": "fast_green", "result": "4390/4390", "status": "passed", "note": "run with -n auto, matches documented baseline exactly"},
         {"name": "report_notification_tests", "result": "present_in_canonical_metadata", "status": "present"},
@@ -40,6 +47,6 @@
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "no_go_confirmation": "No broker command-path integration. No runtime execution. No shell mediation. No subprocess mediation. No backend invocation. No adapter invocation. No execution enablement. No execution capability. No audit persistence. No rollback execution. No emergency stop. No Telegram inbound. No automatic apply. No command execution. No Permission Broker enforcement. No shell boundary implementation. No backend boundary implementation. No no-go gate runtime enforcement. No commit/push authorization changes beyond the existing governed lifecycle. No real AI backend calls. No production code in src/pcae/ changed -- design/documentation and test-verification only. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target (Level 3, not Level 4/5). GitHub Release for v0.1.0-rc1 and branch protection on main are unchanged. No new tag created. No new GitHub Release. No PyPI publication. No GitHub Packages publication. Next phase not started.",
-    "recommended_next_phase": "109B — First Command-Path Integration Prototype (Disabled by Default)"
+    "no_go_confirmation": "No runtime execution. No shell mediation. No subprocess mediation. No backend invocation. No adapter invocation. No execution enablement. No execution capability. No Permission Broker enforcement. No audit persistence. No rollback execution. No emergency stop. No Telegram inbound. No automatic apply. No command execution. No command blocking. No command authorization. No behavior change. implementation_status remains unconditionally execution_unavailable on every decision. The broker's decision is consulted but discarded -- never used for authorization, denial, or control flow. permission_broker_foundation.py itself unchanged. No no-go gate runtime enforcement. No commit/push authorization changes beyond the existing governed lifecycle. No real AI backend calls. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target (Level 3, not Level 4/5). GitHub Release for v0.1.0-rc1 and branch protection on main are unchanged. No new tag created. No new GitHub Release. No PyPI publication. No GitHub Packages publication. Next phase not started.",
+    "recommended_next_phase": "109C — Command-Path Integration Hardening"
 }
