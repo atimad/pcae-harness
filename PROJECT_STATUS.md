@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 108B — Permission Broker Policy Rule Framework (completed).
+
+Transforms the Permission Broker from a broker containing hardcoded
+decision logic (108A) into a broker that orchestrates an extensible
+policy rule framework. `PermissionBroker.evaluate()` now delegates to a
+`PolicyRegistry` that evaluates twelve independent `PolicyRule` instances
+(`POL-001`–`POL-012`, six carrying real logic reproducing 108A's exact
+prior checks, six registered as `StubPolicyRule` placeholders awaiting
+request-model fields future phases will add) and composes their results
+with fixed priority DENY > HUMAN_REVIEW > ALLOW, fail-closed. Rules never
+know about one another; every rule evaluates on every request, never
+short-circuited. `PermissionBrokerDecision` gained four explainability
+fields: `matched_component_ids`, `evaluated_policy_ids` (always all 12),
+`triggered_policy_ids`, and `causing_policy_id` (the single rule
+composition selected — `None` only for the structural-guard rejection and
+the ALLOW default). `tests/test_permission_broker_foundation.py` (108A,
+60 tests) is unmodified and passes unchanged against the refactored
+implementation, confirming this phase is a pure internal restructuring —
+no behavior change for any previously-tested scenario. `PermissionBroker`
+now accepts an optional injected `PolicyRegistry`, enabling future rule
+addition or swapping without modifying the broker itself.
+
+Added `docs/PHASE_108_PERMISSION_BROKER_POLICY_RULE_FRAMEWORK.md`. 63 new
+tests (`tests/test_permission_broker_policy_rule_framework.py`); combined
+with the existing permission-broker test files, 388 tests pass under
+`-n auto`. Focused broker group (388), governance/autonomy group (1027),
+and release/lifecycle regression group (1458) all passed under `-n auto`;
+`fast_green` 4390/4390 (matches documented baseline). No group required a
+sequential fallback. No runtime execution, shell mediation, subprocess
+mediation, backend invocation, adapter invocation, Telegram inbound, audit
+persistence, rollback execution, emergency stop implementation, execution
+enablement, execution capability, command execution, or automatic apply
+implemented. `v0.1.0-rc1` remains non-executing by design; v0.2 remains the
+autonomy target. GitHub Release for `v0.1.0-rc1` and branch protection on
+`main` are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 108C — Permission Broker Policy Composition & Hardening (not
+started).
+
+## Phase 108A Complete
+
 Phase 108A — Permission Broker Foundation (completed).
 
 Implements the foundational Permission Broker for PCAE as an isolated
