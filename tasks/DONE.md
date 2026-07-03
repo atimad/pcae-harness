@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 112C (20260703-2355-sync-final-pushed-state-metadata-for-112c)
 - Phase 112C: Runtime Context Prototype (Observation-Only) (20260703-2351-phase-112c-runtime-context-prototype-observation-only)
 - Sync final pushed-state metadata for 112B.1 (20260703-2253-sync-final-pushed-state-metadata-for-112b-1)
 - Phase 112B.1: Planning & Bootstrap Consistency Hardening (20260703-2240-phase-112b-1-planning-bootstrap-consistency-hardening)
