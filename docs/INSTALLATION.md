@@ -89,36 +89,43 @@ Verify the CLI is available:
 pcae --version 2>&1 || pcae health
 ```
 
-### Step 4 — Initialize PCAE memory files
+### Step 4 — Initialize PCAE memory files and local governance hooks
 
-Run `pcae init` from the repository root. This creates PCAE's required directories and template files without overwriting anything that already exists:
+Run `pcae init` from the repository root. This creates PCAE's required directories and template files without overwriting anything that already exists — **and, as of Phase 108E, automatically configures local Git hook governance in the same step** (no separate hook-installation step required):
 
 ```zsh
 pcae init
 ```
 
-To preview what will be created without writing anything:
+The last line of output confirms hook installation:
+
+```
+Installed PCAE Git hooks: core.hooksPath is .githooks
+```
+
+PCAE ships two governed hooks: a pre-commit hook that runs `pcae check` before every commit (blocking commits that violate task scope or documentation requirements), and a pre-push hook that runs `pcae health`, `pcae check`, `pcae doctor task-memory`, and `pcae push check` before every push (blocking a push if any of those report an ungoverned or unhealthy state). Neither hook executes repository code, invokes the Permission Broker, or mutates repository state — both are pure governance checks.
+
+`pcae init` only auto-installs hooks when run inside a Git repository (`git init` first if you have not already). If you are not yet inside a Git repository, `pcae init` prints a note and skips hook installation; run `git init` and then `pcae hooks install` (see below) once you are.
+
+To preview what will be created without writing anything (this does not install hooks either — dry runs never mutate state):
 
 ```zsh
 pcae init --dry-run
 ```
 
-### Step 5 — Install the Git pre-commit hook
-
-PCAE ships a pre-commit hook that runs `pcae check` before every commit, blocking commits that violate task scope or documentation requirements:
+If you ever need to (re-)install hooks explicitly — for example, after cloning a repository that already has PCAE scaffolding but no local hook configuration yet — `pcae hooks install` remains available and is idempotent:
 
 ```zsh
 pcae hooks install
 ```
 
-This configures Git to look for hooks in `.githooks/` instead of the default `.git/hooks/`.
-
-### Step 6 — Verify the installation
+### Step 5 — Verify local governance is active
 
 ```zsh
-pcae inspect   # confirm all required files are present
-pcae health    # confirm governance state is healthy
-pcae check     # confirm policy checks pass
+pcae inspect        # confirm all required files are present
+pcae health          # confirm governance state is healthy
+pcae check           # confirm policy checks pass
+pcae hooks status    # confirm local Git hooks are installed and healthy
 ```
 
 A healthy installation produces:
@@ -130,6 +137,19 @@ Required PCAE files: all present
 Policy validation: valid (repo config)
 ...
 ```
+
+and:
+
+```
+PCAE Git hook status
+  Status: installed
+  Git repository: True
+  core.hooksPath configured: '.githooks'
+  core.hooksPath expected: '.githooks'
+  Healthy: True
+```
+
+If `pcae hooks status` reports anything other than `installed`/`Healthy: True`, it prints the exact remediation command to run — see [Hook troubleshooting](#hook-troubleshooting) below. `pcae doctor hooks` reports the same diagnosis and is also available under the `pcae doctor` diagnostic family.
 
 ---
 
@@ -162,25 +182,24 @@ Or, if contributing to the pcae-harness repo itself:
 pip install -e ".[dev]"
 ```
 
-### Step 4 — Initialize PCAE
+### Step 4 — Initialize PCAE and local governance hooks
 
 ```zsh
 pcae init
 ```
 
-### Step 5 — Install the Git hook
+This creates PCAE's template files and, since Phase 108E, automatically installs the local Git hooks (pre-commit and pre-push) in the same step — no separate hook-install step is required for a fresh clone.
 
-```zsh
-pcae hooks install
-```
-
-### Step 6 — Verify
+### Step 5 — Verify
 
 ```zsh
 pcae inspect
 pcae health
 pcae check
+pcae hooks status
 ```
+
+If `pcae hooks status` does not report `Healthy: True` (for example, because `pcae init` was skipped or run outside a Git repository), run `pcae hooks install` to install hooks explicitly — it is idempotent and safe to re-run.
 
 ---
 
@@ -196,7 +215,7 @@ pcae init --dry-run
 
 Inspect the dry-run output. Files listed as `Would skip` already exist and will not be touched. Files listed as `Would create` are net-new PCAE files.
 
-If you want to regenerate PCAE-managed template files (such as `.githooks/pre-commit`) to pick up a newer version:
+If you want to regenerate PCAE-managed template files (such as `.githooks/pre-commit` and `.githooks/pre-push`) to pick up a newer version — for example, a repository whose PCAE scaffold predates Phase 108E and therefore has no pre-push hook yet:
 
 ```zsh
 pcae init --force
@@ -208,11 +227,13 @@ After reviewing the dry-run output:
 
 ```zsh
 pcae init
-pcae hooks install
 pcae inspect
 pcae health
 pcae check
+pcae hooks status
 ```
+
+`pcae init` re-installs (or, for an outdated repo, freshly installs) local Git hooks every time it runs — this is always safe to repeat.
 
 ---
 
@@ -232,7 +253,8 @@ your-repo/
 ├── .agent-prompts/
 │   └── end-session.md           # Agent session close prompt template
 ├── .githooks/
-│   └── pre-commit               # Runs `pcae check` before every commit
+│   ├── pre-commit               # Runs `pcae check` before every commit
+│   └── pre-push                 # Runs health/check/doctor/push-check before every push
 ├── scripts/
 │   ├── check-docs-updated.sh    # Documentation check script (macOS/Linux)
 │   └── check-docs-updated.ps1   # Documentation check script (Windows)
@@ -399,9 +421,20 @@ pcae init --force
 
 This will not overwrite your project's own source files or non-PCAE files.
 
-### `pcae hooks install` reports the hook is already configured
+### Hook troubleshooting
 
-Git is already pointed at `.githooks/`. No action needed — the hook is active.
+`pcae hooks status` (or `pcae doctor hooks`, which reports the same diagnosis) always names the exact remediation command for whatever state it finds:
+
+| `pcae hooks status` reports | Meaning | Fix |
+|---|---|---|
+| `Status: installed`, `Healthy: True` | Fully governed. Nothing to do. | — |
+| `Status: not_a_git_repo` | Not inside a Git repository. | `git init`, then `pcae hooks install` |
+| `Status: hooks_path_missing` | `core.hooksPath` was never set — the most common state right after a fresh clone, before running `pcae init`. | `pcae init` (auto-installs) or `pcae hooks install` |
+| `Status: hooks_path_incorrect` | `core.hooksPath` points somewhere other than `.githooks`. | `git config core.hooksPath .githooks` |
+| `Status: hook_files_missing` | `core.hooksPath` is correct, but one or more expected hook files (e.g. `pre-push`) don't exist yet — typically a repository whose PCAE scaffold predates Phase 108E. | `pcae init --force`, then `pcae hooks install` |
+| `Status: hook_files_not_executable` | Hook files exist but lost their executable bit (can happen after some file-transfer or archive workflows). | `chmod +x .githooks/pre-commit .githooks/pre-push` |
+
+`pcae hooks install` reporting "already configured" / re-printing its success message is expected and harmless — installation is idempotent; re-running it never breaks anything.
 
 ### The pre-commit hook fails on the first commit
 
@@ -411,6 +444,10 @@ The hook runs `pcae check`, which requires an active task. Create one before com
 pcae task new "Initial project setup"
 git commit -m "Add PCAE governance scaffold"
 ```
+
+### The pre-push hook blocks my push
+
+The pre-push hook runs `pcae health`, `pcae check`, `pcae doctor task-memory`, and `pcae push check` — the same four commands you should run before every push per [Step 5](#step-5--verify-local-governance-is-active) above. Run them individually to see which one is failing and follow its own remediation guidance; the hook is intentionally strict and never bypasses a real governance failure.
 
 ### `python -m pytest` fails after install
 

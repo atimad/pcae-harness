@@ -492,7 +492,7 @@ from pcae.commands.backend import (
 )
 from pcae.commands.mutation_preflight import run_mutation_preflight
 from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_preflight
-from pcae.commands.hooks import run_hooks_install
+from pcae.commands.hooks import run_hooks_install, run_hooks_status
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
@@ -688,6 +688,7 @@ from pcae.commands.review import (
 )
 from pcae.commands.task import (
     run_doctor_git_lock,
+    run_doctor_hooks,
     run_doctor_task_memory,
     run_doctor_test_run,
     run_task_close,
@@ -6036,6 +6037,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     hooks_install_parser.set_defaults(handler=run_hooks_install)
 
+    hooks_status_parser = hooks_subparsers.add_parser(
+        "status",
+        help="Report local Git hook governance status: installed, missing, "
+             "outdated, incorrect hooksPath, and recommended remediation "
+             "(Phase 108E). Read-only.",
+    )
+    hooks_status_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    hooks_status_parser.set_defaults(handler=run_hooks_status)
+
     session_parser = subparsers.add_parser(
         "session",
         help="Manage PCAE session handoff snapshots.",
@@ -9683,6 +9695,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--json", action="store_true", help="Print machine-readable JSON output."
     )
     doctor_test_run_parser.set_defaults(handler=run_doctor_test_run)
+
+    doctor_hooks_parser = doctor_subparsers.add_parser(
+        "hooks",
+        help="Diagnose local Git hook governance: missing, misconfigured, or "
+             "outdated hooks, with remediation guidance (Phase 108E).",
+    )
+    doctor_hooks_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    doctor_hooks_parser.set_defaults(handler=run_doctor_hooks)
 
     # ── pcae lifecycle ──
     from pcae.commands.lifecycle import run_lifecycle_status, run_lifecycle_next, run_lifecycle_run_gate, run_lifecycle_approve_gate, run_lifecycle_summary

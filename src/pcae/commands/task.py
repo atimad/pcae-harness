@@ -1396,3 +1396,43 @@ def run_doctor_test_run(args: argparse.Namespace) -> int:
             print("  Wait for existing runs to complete or stop them manually.")
 
     return 0 if clear_to_run else 1
+
+
+def run_doctor_hooks(args: argparse.Namespace) -> int:
+    """Diagnose local Git hook governance state (Phase 108E). Read-only;
+    shares diagnosis logic with `pcae hooks status` and recommends the
+    same remediation (`pcae hooks install`) when hooks are missing or
+    misconfigured."""
+    from pcae.core.hooks import diagnose_hooks
+
+    root = HarnessPath.cwd()
+    status = diagnose_hooks(root)
+
+    if getattr(args, "json", False):
+        print(json.dumps({
+            "status": status.status,
+            "git_repo": status.git_repo,
+            "hooks_path_configured": status.hooks_path_configured,
+            "hooks_path_expected": status.hooks_path_expected,
+            "missing_hook_files": list(status.missing_hook_files),
+            "non_executable_hook_files": list(status.non_executable_hook_files),
+            "healthy": status.healthy,
+            "recommended_remediation": list(status.recommended_remediation),
+        }, indent=2, sort_keys=True))
+    else:
+        print("Git hook governance diagnostic")
+        print(f"  Status: {status.status}")
+        print(f"  core.hooksPath: {status.hooks_path_configured!r} (expected {status.hooks_path_expected!r})")
+        if status.missing_hook_files:
+            print(f"  Missing hook files: {', '.join(status.missing_hook_files)}")
+        if status.non_executable_hook_files:
+            print(f"  Non-executable hook files: {', '.join(status.non_executable_hook_files)}")
+        print(f"  Healthy: {status.healthy}")
+        if status.recommended_remediation:
+            print("  Recommended remediation:")
+            for step in status.recommended_remediation:
+                print(f"    {step}")
+        else:
+            print("  No remediation needed.")
+
+    return 0 if status.healthy else 1

@@ -108,7 +108,7 @@ def parent_directories(templates: dict[Path, str]) -> tuple[Path, ...]:
 
 
 def make_executable_when_needed(path: Path) -> None:
-    if path.suffix != ".sh" and path.name != "pre-commit":
+    if path.suffix != ".sh" and path.name not in ("pre-commit", "pre-push"):
         return
 
     current_mode = path.stat().st_mode

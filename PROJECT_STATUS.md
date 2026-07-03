@@ -2,6 +2,66 @@
 
 ## Current Phase
 
+Phase 108E — Local Governance Bootstrap & Pre-Push Hardening (completed).
+
+Strengthens PCAE's local governance bootstrap so contributors and AI
+agents automatically receive local governance protections on a fresh
+clone, before any future Permission Broker command-path integration.
+Follows the read-only repository protection inspection performed after
+108D, which found that hook installation was a separate, easy-to-skip
+manual step and no pre-push hook existed. `pcae init` now automatically
+installs local Git hooks (`core.hooksPath=.githooks`) in the same step
+as scaffold creation, when run inside a Git repository — collapsing the
+previously two-step (`pcae init` + `pcae hooks install`) bootstrap into
+one documented step. A new `.githooks/pre-push` hook (added to
+`INIT_TEMPLATES`/`FORCE_MANAGED_TEMPLATES`, made executable
+automatically) runs `pcae health`, `pcae check`, `pcae doctor
+task-memory`, and `pcae push check` before every push under `set -eu`,
+blocking a push if any governance check fails; it never executes
+repository code, never invokes the Permission Broker, and never mutates
+repository state. New `pcae.core.hooks.diagnose_hooks()` reports one of
+six states (`installed`, `not_a_git_repo`, `hooks_path_missing`,
+`hooks_path_incorrect`, `hook_files_missing`, `hook_files_not_executable`)
+with exact remediation guidance, surfaced via two new read-only
+commands: `pcae hooks status` and `pcae doctor hooks` (joining the
+existing `execution-chain`/`task-memory`/`git-lock`/`test-run`
+diagnostic family). `install_hooks()`'s existing behavior and message
+format are preserved exactly (`tests/test_hooks.py`'s 5 tests and
+`tests/test_init.py`'s 18 tests pass unmodified) — the stricter
+multi-file diagnosis is purely additive via the new `diagnose_hooks()`
+function, not a change to `install_hooks()`'s existing single-file
+requirement. `docs/INSTALLATION.md` and `docs/CONTRIBUTOR_WORKFLOW.md`
+updated to describe the real, current bootstrap process, including a new
+Hook troubleshooting table mapping every diagnosis state to its exact
+fix. A fresh-clone bootstrap was validated end-to-end via a real local
+`git clone` (no network access): before bootstrap, `diagnose_hooks()`
+correctly reports `hooks_path_missing`; after running the single
+documented `pcae init` command as a real subprocess against the clone,
+both `diagnose_hooks()` and a real `pcae hooks status --json` subprocess
+report `installed`/healthy.
+
+Added `docs/PHASE_108_LOCAL_GOVERNANCE_BOOTSTRAP_HARDENING.md`. 25 new
+tests (`tests/test_hooks_bootstrap_hardening.py`). Hook-focused group
+(43, combined with `test_hooks.py`/`test_init.py`), governance/autonomy
+group (1054), and release/lifecycle regression group (1458) all passed
+under `-n auto`; `fast_green` 4390/4390 (matches documented baseline). No
+group required a sequential fallback. No runtime execution, Permission
+Broker command-path integration, shell mediation, subprocess mediation,
+backend invocation, adapter invocation, Telegram inbound, execution
+enablement, execution capability, audit persistence, rollback execution,
+emergency stop, CI required-status-check enforcement, GitHub
+branch-protection changes, Permission Broker enforcement, automatic
+execution, command execution, or automatic apply implemented.
+`v0.1.0-rc1` remains non-executing by design; v0.2 remains the autonomy
+target. GitHub Release for `v0.1.0-rc1` and branch protection on `main`
+are unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 109A — Permission Broker Command-Path Integration Design
+(not started).
+
+## Phase 108D Complete
+
 Phase 108D — Permission Broker Verification & Compatibility (completed).
 
 Verifies and hardens Permission Broker compatibility after 108A

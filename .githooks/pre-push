@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+set -eu
+
+# Pre-push governance gate (Phase 108E). Purely diagnostic: runs
+# read-only PCAE governance checks before allowing a push. Never
+# executes repository code, never invokes the Permission Broker, never
+# modifies repository state.
+
+pcae health
+pcae check
+pcae doctor task-memory
+pcae push check

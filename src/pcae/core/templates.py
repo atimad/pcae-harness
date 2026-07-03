@@ -9,6 +9,7 @@ FORCE_MANAGED_TEMPLATES: set[Path] = {
     Path(".pcae/policy.toml"),
     Path(".pcae/exports/.gitignore"),
     Path(".githooks/pre-commit"),
+    Path(".githooks/pre-push"),
     Path("scripts/check-docs-updated.sh"),
     Path("scripts/check-docs-updated.ps1"),
 }
@@ -117,6 +118,19 @@ set -eu
 # Legacy docs hook script is covered by pcae check:
 # scripts/check-docs-updated.sh
 pcae check
+""",
+    Path(".githooks/pre-push"): """#!/usr/bin/env sh
+set -eu
+
+# Pre-push governance gate (Phase 108E). Purely diagnostic: runs
+# read-only PCAE governance checks before allowing a push. Never
+# executes repository code, never invokes the Permission Broker, never
+# modifies repository state.
+
+pcae health
+pcae check
+pcae doctor task-memory
+pcae push check
 """,
     Path("scripts/check-docs-updated.sh"): """#!/usr/bin/env sh
 set -eu

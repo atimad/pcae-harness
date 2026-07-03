@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 
+from pcae.core.hooks import install_hooks, is_git_repo
 from pcae.core.paths import HarnessPath
 from pcae.core.templates import FORCE_MANAGED_TEMPLATES, INIT_TEMPLATES
 from pcae.core.writer import (
@@ -54,6 +55,16 @@ def run_init(args: argparse.Namespace) -> int:
         print("Already present:")
         for result in skipped:
             print(f"  {result.relative_path.as_posix()}")
+
+    print()
+    if is_git_repo(root):
+        hook_result = install_hooks(root)
+        print(hook_result.message)
+    else:
+        print(
+            "Skipped Git hook installation: not inside a Git repository. "
+            "Run `git init` and then `pcae hooks install` once you are."
+        )
 
     return 0
 

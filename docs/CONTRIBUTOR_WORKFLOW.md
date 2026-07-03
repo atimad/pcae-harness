@@ -40,6 +40,22 @@ All of these should be clean/passing before you open a pull request. If
 or update your task contract's allowed files/zones to match what you
 actually touched.
 
+As of Phase 108E, the first four of these checks (`health`, `check`,
+`doctor task-memory`, `push check`) run automatically in a local
+pre-push Git hook before every `git push` — assuming you followed the
+installation guide's `pcae init` step, which auto-installs local hooks.
+Confirm hooks are active with:
+
+```bash
+pcae hooks status
+```
+
+If it does not report `Healthy: True`, it prints the exact remediation
+command (see `docs/INSTALLATION.md`'s Hook troubleshooting section).
+The hook is purely diagnostic: it never executes repository code,
+invokes the Permission Broker, or mutates any repository state — it
+only blocks a push when one of the four checks above genuinely fails.
+
 ## 3. Never Use `--no-verify` or Force Push to Protected Branches
 
 - Do not pass `--no-verify` to any git operation.
