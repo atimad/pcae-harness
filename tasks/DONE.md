@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 112B: Runtime Context Contract Freeze (20260703-2206-phase-112b-runtime-context-contract-freeze)
 - Sync final pushed-state metadata for 112A (20260703-2110-sync-final-pushed-state-metadata-for-112a)
 - Phase 112A: Runtime Context Architecture (20260703-2059-phase-112a-runtime-context-architecture)
 - Sync final pushed-state metadata for 111R (20260703-2050-sync-final-pushed-state-metadata-for-111r)
