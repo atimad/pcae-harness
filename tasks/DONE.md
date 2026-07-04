@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync final pushed-state metadata for 112D (20260704-0203-sync-final-pushed-state-metadata-for-112d)
 - Phase 112D: Runtime Context Verification & Compatibility (20260704-0152-phase-112d-runtime-context-verification-compatibility)
 - Sync final pushed-state metadata for 112C (20260703-2355-sync-final-pushed-state-metadata-for-112c)
 - Phase 112C: Runtime Context Prototype (Observation-Only) (20260703-2351-phase-112c-runtime-context-prototype-observation-only)
