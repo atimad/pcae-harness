@@ -2,34 +2,105 @@
 
 ## Current Phase
 
-Phase 113X.5 — Architecture Status Canonicalization (completed).
+Phase 113XR — Governance Recovery Review (completed).
 
-Governance repair phase, closing 113X (Cross-Agent Governance
-Verification) Finding 4. No Advisory Runtime, Runtime Snapshot, Runtime
-Context, Runtime Registry, Runtime Inspect, Permission Broker,
-execution, authorization, plugin, Telegram-inbound, REST, Web UI, or
-Dashboard changes; no changes to Canonical Phase Identity, Finalization
-Gate, or Mobile Notification Guarantee. `_series_label()`'s hardcoded
-`SERIES_MAP` (e.g. `"113": "Advisory Runtime (Architecture, Contract,
-Prototype)"`) over-claimed completion the moment any one phase in a
-series completed, regardless of which specific phases actually had —
-and the existing consistency check meant to catch this searched for
-series digits as a literal substring inside the display label, which
-the hardcoded label never contained, so it could never fire. New
-`_render_series_milestone_label()` derives each series' label from
-exactly the phases whose own completion header exists, sorted
-deterministically, growing exactly in step with actual completion
-(only 113A → "Architecture"; +113B → "Architecture + Contract Freeze";
-+113C → "...+ Prototype"). New structured `completed_phase_ids` field
-lets consistency validation use direct set-membership instead of
-regex-parsing display labels. Architectural review recommends
-Architecture Status remain inside the report generator (single
-consumer, pure function of already-canonical sources) rather than
-become a dedicated Runtime Service, with the extraction path documented
-for if/when a second consumer appears.
+Final architectural review of the 113X governance-repair sequence
+(113X.1–113X.5) — review/verification only, no new features, no
+Advisory Runtime changes, no execution capability. Re-verified every
+forensic finding directly against the current codebase and live CLI
+behavior rather than trusting prior phase reports: 5 live reproductions
+in an isolated scratch repository confirmed the finalization gate
+(blocker → quarantined, `latest.json` never touched, exit non-zero),
+canonical phase identity (a summary mentioning three unrelated phase
+numbers at once never affects `phase_id`; zero identity sources →
+explicit fail-closed refusal, zero artifacts written), Architecture
+Status (only one phase in a series complete → no overclaim of later
+milestones), and the notification guarantee (finalized-but-partial
+completion → labeled WARNING event actually dispatched, never
+resembling a normal completion) are all resolved. `git log` across the
+entire 113X commit range against every Advisory Runtime/Runtime
+Snapshot/Runtime Context/Runtime Registry/Runtime Inspect/Permission
+Broker file returns zero commits — exactly 5 source files were touched
+across all five repair phases. Findings 1, 3, 4, 6, and 7 classified
+Resolved; the notification-guarantee gap and cross-agent-continuity
+concern classified Resolved. One new, minor, non-blocking observation:
+`pcae phase complete` has no duplicate-notification idempotency guard
+(unlike `pcae task finish --commit`'s path) — not unsafe, not a 113X
+regression, just undocumented.
+
+**Recommendation: safe to resume the normal roadmap.**
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113XR — Governance Recovery Review.
+repo phase: 113D — Advisory Runtime Verification & Compatibility.
+
+## Phase 113XR Complete
+
+Phase 113XR — Governance Recovery Review (completed).
+
+Final architectural review of the 113X governance-repair sequence — no
+new features, no Advisory Runtime changes, no execution capability.
+
+**Per-finding status** (see `docs/PHASE_113_GOVERNANCE_RECOVERY_REVIEW.md`
+for full evidence):
+
+| Finding | Status |
+|---|---|
+| Finding 1 — finalization gate enforcement | Resolved |
+| Finding 3 — canonical phase identity source | Resolved |
+| Finding 4 — Architecture Status derivation | Resolved |
+| Finding 6 — PROJECT_STATUS ordering/recommendation fragility | Resolved |
+| Finding 7 — current phase status ambiguity | Resolved (mechanism); banner firing is expected transient-window behavior, not a recurrence |
+| Notification guarantee gap | Resolved |
+| Cross-agent continuity issue | Resolved |
+
+**Reproductions performed live** (isolated scratch repository, never
+the real project state): finalization blocker → quarantined, `latest.json`
+never created, exit 1, `pcae push check` finds nothing to trust;
+summary mentioning three unrelated phase numbers at once → `phase_id`
+stayed the metadata-declared value; zero identity sources available →
+explicit fail-closed refusal, zero artifacts written (not even
+quarantined); Architecture Status with only one phase in a series
+complete → no mention of later milestones; finalized-but-partial
+completion with notifications enabled → labeled WARNING event
+dispatched and written, distinctly titled/severity-flagged.
+
+**No unintended Runtime/Advisory changes**: `git log` across the
+entire 113X sequence (`9d19a1fe~1..7962a3fb`) against
+`advisory_runtime.py`, `runtime_snapshot.py`, `runtime_context.py`,
+`runtime_registry.py`, `runtime_inspect.py`, and
+`permission_broker_foundation.py` returns zero commits. The complete
+source inventory touched across all five repair phases: `cli.py`,
+`commands/phase.py`, `commands/task.py` (8 lines),
+`core/notifications.py`, `core/phase_reports.py` — five files total.
+
+**Confirmed live**: `pcae session bootstrap --compact --profile
+implementation` correctly reports current phase and recommended next
+phase; `pcae runtime inspect`/`--json` show Runtime state `Observed`,
+execution capability `unavailable`, maximum plugin capability
+`observe` — unchanged throughout the entire sequence.
+
+**One new, minor, non-blocking observation**: `pcae phase complete`
+has no duplicate-notification idempotency guard (unlike `pcae task
+finish --commit`'s `.pcae/phase-reports/.last-notified.json` marker) —
+not unsafe (a repeated notification is still accurate), not a
+regression from 113X (this path never had a guard), but undocumented.
+Recorded for future consideration, not a blocker.
+
+**Known pre-existing, unrelated conditions reconfirmed** (not new, not
+caused by 113X): the same 3 test fragilities already documented in
+113X.1/113X.2 (tests hardcoded against the real, ever-advancing
+PROJECT_STATUS.md/tasks/TODO.md content); `tasks/TODO.md` remains stale
+(still marks "112C" as next), already correctly treated as
+informational-only by PCAE's own bootstrap tooling (112B.1).
+
+Added `docs/PHASE_113_GOVERNANCE_RECOVERY_REVIEW.md`.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113D — Advisory Runtime Verification & Compatibility.
 
 ## Phase 113X.5 Complete
 
