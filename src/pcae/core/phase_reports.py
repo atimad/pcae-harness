@@ -112,6 +112,8 @@ class PhaseReport:
     # Phase 92D.8 canonical report
     canonical_report_content: str = ""
     canonical_report_used: bool = False
+    # Phase 113C — PCAE Architecture Status (auto-derived from canonical state)
+    architecture_status: dict[str, Any] = field(default_factory=dict)
 
     def validate(self) -> list[str]:
         """Return list of validation issues (empty = valid)."""
@@ -255,6 +257,7 @@ class PhaseReport:
             "trust_warnings": self.trust_warnings,
             "notification_result": self.notification_result,
             "canonical_report_used": self.canonical_report_used,
+            "architecture_status": self.architecture_status,
         }
 
     def render_markdown(self) -> str:
@@ -319,6 +322,51 @@ class PhaseReport:
         lines.append("")
         lines.append(self.summary)
         lines.append("")
+
+        if self.architecture_status:
+            lines.append("## PCAE Architecture Status")
+            lines.append("")
+            lines.append(
+                "*Generated automatically from canonical project state. "
+                "Never manually maintained.*"
+            )
+            lines.append("")
+            arch = self.architecture_status
+
+            if arch.get("completed"):
+                lines.append("### Completed")
+                lines.append("")
+                for item in arch["completed"]:
+                    lines.append(f"- ✓ {item}")
+                lines.append("")
+
+            if arch.get("in_progress"):
+                lines.append("### In Progress")
+                lines.append("")
+                for item in arch["in_progress"]:
+                    lines.append(f"- ◐ {item}")
+                lines.append("")
+
+            if arch.get("planned"):
+                lines.append("### Planned")
+                lines.append("")
+                for item in arch["planned"]:
+                    lines.append(f"- ○ {item}")
+                lines.append("")
+
+            runtime_state = arch.get("current_runtime_state", "")
+            max_capability = arch.get("current_maximum_capability", "")
+            exec_availability = arch.get("execution_availability", "")
+            if runtime_state or max_capability or exec_availability:
+                lines.append("### Current Runtime State")
+                lines.append("")
+                if runtime_state:
+                    lines.append(f"- **State:** {runtime_state}")
+                if max_capability:
+                    lines.append(f"- **Maximum Capability:** {max_capability}")
+                if exec_availability:
+                    lines.append(f"- **Execution Availability:** {exec_availability}")
+                lines.append("")
 
         if self.governance_results:
             lines.append("## Governance Results")
@@ -937,6 +985,158 @@ def validate_finalization_gate(
     }
 
 
+def build_architecture_status() -> dict[str, Any]:
+    """Derive a PCAE Architecture Status snapshot from canonical project state.
+
+    Reads PROJECT_STATUS.md to discover completed architectural phases,
+    the current phase, and the most recent recommended next phase.
+    Reads RuntimeSnapshot for current runtime state, maximum capability,
+    and execution availability.
+    Returns a dict suitable for the ``architecture_status`` field of a
+    PhaseReport.  Never manually maintained — always derived from the
+    canonical sources at report-generation time.
+
+    Returns a dict with keys:
+        completed: list[str] — completed architectural milestones
+        in_progress: list[str] — current work in progress
+        planned: list[str] — planned next milestones
+        current_runtime_state: str
+        current_maximum_capability: str
+        execution_availability: str
+    """
+    from pathlib import Path as _Path
+    import re as _re
+
+    result: dict[str, Any] = {
+        "completed": [],
+        "in_progress": [],
+        "planned": [],
+        "current_runtime_state": "",
+        "current_maximum_capability": "",
+        "execution_availability": "",
+    }
+
+    # ── Derive from PROJECT_STATUS.md ──────────────────────────────────
+    ps_path = _Path("PROJECT_STATUS.md")
+    if not ps_path.exists():
+        return result
+
+    ps_text = ps_path.read_text(encoding="utf-8")
+
+    # Find all "## Phase NNN Complete" headers and extract a friendly label.
+    # Only include 110–113 series phases (the architectural foundation
+    # track) to keep the status section concise and relevant.
+    completed_pattern = _re.compile(
+        r"^##\s+Phase\s+(\d{3}[A-Z](?:\.\d+)?)\s*(?:Complete|—.*?Complete)",
+        _re.MULTILINE,
+    )
+    phase_label_pattern = _re.compile(
+        r"^Phase\s+\d{3}[A-Z](?:\.\d+)?\s*[—–-]\s*(.+)$", _re.MULTILINE,
+    )
+
+    completed_phases: list[tuple[str, str]] = []
+    for m in completed_pattern.finditer(ps_text):
+        phase_id = m.group(1)
+        # Only include 110-113 series (architectural foundation)
+        series_match = _re.match(r"(1(?:1[0-3]|10))\d*", phase_id)
+        if not series_match:
+            continue
+        snippet = ps_text[m.end():m.end() + 200]
+        name_m = phase_label_pattern.search(snippet)
+        phase_name = name_m.group(1).strip() if name_m else phase_id
+        completed_phases.append((phase_id, phase_name))
+
+    # Group by series for concise labels
+    seen_series: set[str] = set()
+    completed_labels: list[str] = []
+    for pid, pname in completed_phases:
+        series = _re.match(r"(1\d{2})", pid)
+        series_id = series.group(1) if series else pid
+        if series_id not in seen_series:
+            seen_series.add(series_id)
+            completed_labels.append(_series_label(series_id, pname))
+
+    result["completed"] = completed_labels
+
+    # ── Current phase (in progress) ───────────────────────────────────
+    # Read the "## Current Phase" section to determine what's active.
+    current_section = _re.search(
+        r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s)",
+        ps_text, _re.MULTILINE | _re.DOTALL,
+    )
+    if current_section:
+        section_text = current_section.group(1)
+        current_match = _re.match(
+            r"^Phase\s+(\d{3}[A-Z](?:\.\d+)?)\s*[—–-]\s*(.+)$",
+            section_text, _re.MULTILINE,
+        )
+        if current_match:
+            current_id = current_match.group(1)
+            current_name = current_match.group(2).strip()
+            # If the current phase is marked as "(completed)", it is
+            # not in-progress — it is already captured in completed above.
+            if "(completed)" not in section_text[:100]:
+                result["in_progress"].append(f"{current_name} ({current_id})")
+
+    # ── Planned — first recommended next phase from the most recent
+    # completed-phase section (the one nearest the top of the file, since
+    # newer phases are added at the top).
+    # The format in PROJECT_STATUS.md is:
+    #   No automatic next repo phase implementation started. Recommended next
+    #   repo phase: 113D — Advisory Runtime Verification & Compatibility (not started).
+    rec_pattern = _re.compile(
+        r"Recommended\s+next\s*\n\s*repo\s+phase:\s*(.+)$",
+        _re.MULTILINE | _re.IGNORECASE,
+    )
+    rec_matches = list(rec_pattern.finditer(ps_text))
+    recommended: list[str] = []
+    for m in rec_matches:
+        rec = m.group(1).strip()
+        rec = _re.sub(r"\s*\(not\s+started\)\s*$", "", rec).strip()
+        if rec and rec not in recommended:
+            recommended.append(rec)
+
+    # Take the first matching recommendation (nearest the top of the file,
+    # which is the most recently added phase)
+    if recommended:
+        result["planned"] = recommended[:1]
+
+    # ── Derive from Runtime Snapshot ───────────────────────────────────
+    try:
+        from pcae.core.runtime_snapshot import build_runtime_snapshot
+        from pcae.core.runtime_registry import RuntimeRegistry
+        from pcae.core.paths import HarnessPath
+
+        registry = RuntimeRegistry()
+        snapshot = build_runtime_snapshot(HarnessPath.cwd(), registry)
+        result["current_runtime_state"] = snapshot.health.current_runtime_state
+        result["current_maximum_capability"] = snapshot.health.current_maximum_plugin_capability
+        result["execution_availability"] = snapshot.health.execution_availability
+    except Exception:
+        # Best-effort — if snapshot can't be built, leave fields empty
+        pass
+
+    return result
+
+
+def _series_label(series_id: str, fallback_name: str) -> str:
+    """Map a phase series ID to a concise architectural milestone label."""
+    SERIES_MAP: dict[str, str] = {
+        "110": "Runtime Foundation",
+        "111": "Runtime Introspection Foundation",
+        "112": "Runtime Context, Snapshot & Inspect Integration",
+        "113": "Advisory Runtime (Architecture, Contract, Prototype)",
+    }
+    if series_id in SERIES_MAP:
+        return SERIES_MAP[series_id]
+
+    # Fallback: use the phase name, truncated
+    name = fallback_name.split("(")[0].strip().rstrip(".")
+    if len(name) > 60:
+        name = name[:57] + "..."
+    return name
+
+
 def _extract_commit_count_from_summary(summary: str) -> int | None:
     """Extract governed commit count from summary text. Returns None if ambiguous."""
     import re as _re
@@ -1008,6 +1208,13 @@ def finalize_phase_report(
         # Phase 95I.1 — commit attribution tracking
         if kwargs.get("commit_attribution"):
             report.metadata["commit_attribution"] = kwargs["commit_attribution"]
+        # Phase 113C — Auto-derive architecture status from canonical state
+        try:
+            report.architecture_status = build_architecture_status()
+        except Exception:
+            # Best-effort — architecture status is informative, not trust-critical
+            pass
+
         # Phase 92D.5/92D.8 — Apply trust assessment with canonical report
         _apply_canonical_and_trust(report, phase_id, phase_name, status)
         paths = write_phase_report(report, reports_dir)
