@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 113C: Add auto-derived PCAE Architecture Status to canonical phase report (20260704-0931-phase-113c-architecture-status)
 - Phase 113C: Advisory Runtime Prototype (Observation-Only) (20260704-0855-phase-113c-advisory-runtime-prototype)
 - Sync final pushed-state metadata for 113B (20260704-0929-sync-final-pushed-state-metadata-for-113b)
 - Phase 113B: Advisory Runtime Contract Freeze (20260704-0918-phase-113b-advisory-runtime-contract-freeze)
