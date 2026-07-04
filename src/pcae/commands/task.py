@@ -731,6 +731,14 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
             "phase_id": phase_id,
         }
 
+    # Phase 113X.1 — `pcae task finish --commit` intentionally does NOT
+    # pass `gate=` to finalize_phase_report(): this call site is warning-
+    # only by design (see docstring) and its pre-existing, tested contract
+    # is to still write a partial/incomplete report for human visibility
+    # (never silently repaired, never quarantined) while only suppressing
+    # notification dispatch. Finalization-gate *enforcement* (113X
+    # Finding 1) applies to the authoritative `pcae phase complete` path
+    # in commands/phase.py instead.
     report = fin.get("report")
     paths = fin.get("paths") or {}
 

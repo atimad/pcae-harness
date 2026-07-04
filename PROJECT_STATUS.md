@@ -2,13 +2,88 @@
 
 ## Current Phase
 
-Phase 113C — Advisory Runtime Prototype (Observation-Only) (completed).
+Phase 113X.1 — Finalization Gate Enforcement Repair (completed).
 
-First implementation phase of the Advisory Runtime. Introduces advisory
-reasoning only — no authorization, no execution, no enforcement.
-Implements the concrete Python types, provider framework, four initial
-providers, and deterministic aggregation pipeline. Observation-only: no
-CLI wiring, no execution capability, no mutation of existing state.
+Governance repair phase, scoped to Finding 1 of the Phase 113X
+(Cross-Agent Governance Verification) forensic audit. No Advisory
+Runtime changes, no execution. `validate_finalization_gate()` correctly
+detected phase-identity/trust blockers, but `finalize_phase_report()`
+wrote `latest.md`/`latest.json` unconditionally regardless of the gate
+result — a blocked report could still become the canonical "latest"
+artifact with no persisted blocker evidence. `finalize_phase_report()`
+now quarantines a blocked report (`write_quarantined_report()`) instead
+of writing `latest.*`, with blockers persisted in the quarantined
+artifact. `pcae phase complete` enforces this; `pcae task finish
+--commit`'s pre-existing, tested warning-only partial-report visibility
+behavior is unchanged; `--allow-partial-report`'s pre-existing override
+is unchanged.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113X.2 — Canonical Phase Identity Source Repair.
+
+## Phase 113X.1 Complete
+
+Phase 113X.1 — Finalization Gate Enforcement Repair (completed).
+
+Governance repair phase — no Advisory Runtime changes, no execution,
+no Runtime Snapshot behavior changes. Repairs Finding 1 of the Phase
+113X forensic audit (Cross-Agent Governance Verification): the
+finalization gate (`validate_finalization_gate()`, 113B.2) correctly
+detects phase-identity and trust blockers, but `finalize_phase_report()`
+wrote `latest.md`/`latest.json` unconditionally regardless of the gate
+result. Reproduced directly against the repository's own pre-repair
+`.pcae/phase-reports/latest.json`: `validate_phase_identity()` flagged
+it as blocked (`phase_id='113B'` vs. PROJECT_STATUS.md's then-current
+phase `'113C'`), yet that file was sitting on disk as the canonical
+"latest" report with no persisted record of the blocker.
+
+**`finalize_phase_report()` gains an optional `gate:` parameter**
+(`src/pcae/core/phase_reports.py`), default `None` — preserving the
+prior unconditional-write behavior exactly for every existing
+caller/test that doesn't pass it. When the caller passes a blocked
+gate, the report is written to a new quarantine path
+(`write_quarantined_report()`, under
+`.pcae/phase-reports/quarantine/*.blocked.{md,json}`) instead of
+`latest.md`/`latest.json` or the normal timestamped filename, never
+touching either. The blocker list is persisted directly inside the
+quarantined JSON (`finalization_blockers`) and Markdown.
+
+**`pcae phase complete` enforces the gate** (`src/pcae/commands/phase.py`):
+its already-computed `gate` is now passed through to
+`finalize_phase_report()` (as `None` when `--allow-partial-report` is
+given, preserving that pre-existing, tested override's own unchanged
+behavior — out of this repair's scope). Console output on a block now
+states plainly that `latest.md`/`latest.json` were not written or
+overwritten, and prints the quarantine file paths.
+
+**`pcae task finish --commit`'s report-finalization path is
+deliberately unchanged.** It is documented and tested as warning-only
+("never raises, never blocks task finish"), with a pre-existing, tested
+contract to still write a partial/incomplete report for human
+visibility when final push state is merely pending (e.g. not yet
+pushed) — a different, legitimate class of "blocker" from Finding 1's
+actual concern (a report whose identity/claims are actively wrong).
+
+Because blocked reports never touch `latest.json`, `pcae push
+check`/report trust can no longer read a quarantined artifact as the
+latest, trusted report.
+
+Added `docs/PHASE_113X1_FINALIZATION_GATE_ENFORCEMENT_REPAIR.md`. 15
+new tests (`tests/test_finalization_gate_enforcement.py`). Found (not
+fixed — out of scope, documented, left for 113X.2) one pre-existing
+test fragility discovered during validation:
+`tests/test_rc_audit_findings_repair.py::TestAsymmetryReproduction::test_both_paths_agree_on_complete_report`
+fails on a clean checkout of `5acd0499`, before any change in this
+phase, because `validate_phase_identity()` reads the real
+`PROJECT_STATUS.md` from the working directory rather than an isolated
+fixture.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113X.2 — Canonical Phase Identity Source Repair.
 
 ## Phase 113B Complete
 

@@ -242,6 +242,13 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     if not dispatch_allowed and notify_enabled:
         suppressed_notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED")
         os.environ["PCAE_NOTIFY_ENABLED"] = ""
+    # Phase 113X.1 — finalization gate enforcement (113X Finding 1): a
+    # blocked gate must quarantine the report instead of overwriting
+    # latest.md/latest.json. --allow-partial-report is the pre-existing,
+    # explicit human override (105D) and keeps its prior behavior exactly
+    # — it still writes the report canonically and proceeds. The gate is
+    # only enforced (passed through) when that override was not given.
+    enforced_gate = None if allow_partial_report else gate
     try:
         fin = finalize_phase_report(
             phase_id=phase_id,
@@ -258,6 +265,7 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
             explicit_no_go_confirmations=no_go_list,
             recommended_next_phase=recommended_next,
             commit_attribution=commit_attribution,
+            gate=enforced_gate,
         )
     finally:
         if suppressed_notify_enabled is not None:
@@ -268,6 +276,11 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
         return False
 
     # ── Phase 95M.1 — Finalization gate ──────────────────────────────────
+    # Phase 113X.1 — when not overridden by --allow-partial-report, a
+    # blocked gate is enforced by finalize_phase_report() itself: the
+    # report was quarantined, never written as latest.md/latest.json
+    # (113X Finding 1). --allow-partial-report keeps its pre-existing
+    # behavior of proceeding with the canonical write.
     report = fin.get("report")
     if not gate["finalizable"]:
         print("Phase report: BLOCKED by finalization gate")
@@ -277,6 +290,13 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
         if allow_partial_report:
             print("  --allow-partial-report: phase completion proceeds despite blockers.")
         else:
+            print("  Report quarantined -- latest.md/latest.json were NOT written or overwritten.")
+            if fin.get("blocked"):
+                qpaths = fin.get("paths", {})
+                if qpaths.get("quarantine_markdown"):
+                    print(f"  Quarantine markdown: {qpaths['quarantine_markdown']}")
+                if qpaths.get("quarantine_json"):
+                    print(f"  Quarantine json:     {qpaths['quarantine_json']}")
             print()
             print("  Phase completion refused. Repair the report before retrying.")
 
@@ -305,11 +325,12 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     paths = fin.get("paths", {})
     md_path = paths.get("markdown", "")
     json_path = paths.get("json", "")
-    print(f"Phase report: created")
-    if md_path:
-        print(f"  Markdown: {md_path}")
-    if json_path:
-        print(f"  JSON:     {json_path}")
+    if not fin.get("blocked"):
+        print(f"Phase report: created")
+        if md_path:
+            print(f"  Markdown: {md_path}")
+        if json_path:
+            print(f"  JSON:     {json_path}")
 
     # ── Notification dispatch result ──────────────────────────────────────
     print()

@@ -538,6 +538,64 @@ def write_phase_report(report: PhaseReport, reports_dir: Path) -> dict[str, str]
     }
 
 
+def write_quarantined_report(
+    report: "PhaseReport", reports_dir: Path, blockers: list[str],
+) -> dict[str, str]:
+    """Write a BLOCKED phase report to a quarantine path.
+
+    Phase 113X.1 — never touches ``latest.md``/``latest.json`` or the
+    normal timestamped filename. Used exactly when
+    ``validate_finalization_gate()`` returns blockers, so a report that
+    failed phase-identity/trust validation can never silently become the
+    canonical "latest" artifact (113X Finding 1). The blocker list is
+    persisted inside the quarantined artifact itself, so it remains
+    self-describing even without the console output that accompanied it.
+    """
+    quarantine_dir = reports_dir / "quarantine"
+    quarantine_dir.mkdir(parents=True, exist_ok=True)
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    safe_id = _safe_filename(report.phase_id)
+    base = f"{ts}-{safe_id}.blocked"
+
+    md_path = quarantine_dir / f"{base}.md"
+    json_path = quarantine_dir / f"{base}.json"
+
+    data = report.to_dict()
+    data["finalization_blockers"] = list(blockers)
+    data["report_completeness"] = "blocked"
+    json_content = json.dumps(data, indent=2, sort_keys=True)
+
+    md_lines = [
+        "# BLOCKED Phase Report",
+        "",
+        "*This report was refused by the finalization gate and was never*",
+        "*written as `latest.md`/`latest.json`. It is not canonical and*",
+        "*must not be treated as trusted.*",
+        "",
+        f"- **Phase ID:** `{report.phase_id}`",
+        f"- **Phase Name:** {report.phase_name}",
+        f"- **Blocker count:** {len(blockers)}",
+        "",
+        "## Finalization Blockers",
+        "",
+    ]
+    md_lines.extend(f"- {b}" for b in blockers)
+    md_lines.append("")
+    md_lines.append("## Report Content (as generated -- not trusted, not canonical)")
+    md_lines.append("")
+    md_lines.append(report.render_markdown())
+    md_content = "\n".join(md_lines)
+
+    md_path.write_text(md_content)
+    json_path.write_text(json_content)
+
+    return {
+        "quarantine_markdown": str(md_path),
+        "quarantine_json": str(json_path),
+    }
+
+
 def read_latest_report(reports_dir: Path) -> PhaseReport | None:
     """Read the latest phase report from latest.json. Returns None if not found."""
     latest_json = reports_dir / "latest.json"
@@ -1339,6 +1397,7 @@ def finalize_phase_report(
     origin_main_head_count: int = 0,
     explicit_no_go_confirmations: list[str] | None = None,
     recommended_next_phase: str = "",
+    gate: dict[str, Any] | None = None,
     **kwargs: Any,
 ) -> dict[str, Any]:
     """Create a phase report artifact and optionally dispatch notifications.
@@ -1349,6 +1408,9 @@ def finalize_phase_report(
     Returns a dict with:
       report: PhaseReport (the created report)
       paths: dict (written artifact paths)
+      blocked: bool (Phase 113X.1 -- True if the finalization gate refused
+        this report; ``paths`` then holds quarantine paths, never latest.*)
+      blockers: list[str] (present when blocked)
       notification_results: list[NotificationResult] or None
       notification_skipped: bool
       notification_error: str or None
@@ -1357,6 +1419,16 @@ def finalize_phase_report(
       PCAE_NOTIFY_ENABLED=1
       PCAE_NOTIFY_SINKS=telegram,filesystem  (optional, default: filesystem)
       PCAE_NOTIFY_OUTPUT_DIR=.pcae/notifications  (default)
+
+    Phase 113X.1 — finalization gate enforcement: when the caller passes
+    the already-computed ``gate`` (from ``validate_finalization_gate()``)
+    and it has blockers, the report is written to a quarantine path
+    instead of ``latest.md``/``latest.json`` (113X Finding 1: previously
+    the gate result was advisory-only for the write path -- a blocked
+    report could still overwrite the canonical "latest" artifact with no
+    persisted record of why it was blocked). ``gate=None`` (the default,
+    used by existing callers/tests that don't pass it) preserves the
+    prior unconditional-write behavior exactly.
     """
     import os
     from pathlib import Path as _Path
@@ -1393,6 +1465,24 @@ def finalize_phase_report(
 
         # Phase 92D.5/92D.8 — Apply trust assessment with canonical report
         _apply_canonical_and_trust(report, phase_id, phase_name, status)
+
+        # Phase 113X.1 — finalization gate enforcement: a blocked gate
+        # quarantines the report instead of writing latest.md/latest.json.
+        if gate is not None and not gate.get("finalizable", True):
+            blockers = [str(b) for b in gate.get("blockers", [])]
+            report.report_completeness = "blocked"
+            paths = write_quarantined_report(report, reports_dir, blockers)
+            return {
+                "report": report,
+                "paths": paths,
+                "blocked": True,
+                "blockers": blockers,
+                "notification_results": None,
+                "notification_skipped": True,
+                "notification_error": None,
+                "report_error": None,
+            }
+
         paths = write_phase_report(report, reports_dir)
     except Exception as exc:
         return {
