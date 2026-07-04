@@ -2,6 +2,16 @@
 
 ## Current Phase
 
+Phase 113C — Advisory Runtime Prototype (Observation-Only) (completed).
+
+First implementation phase of the Advisory Runtime. Introduces advisory
+reasoning only — no authorization, no execution, no enforcement.
+Implements the concrete Python types, provider framework, four initial
+providers, and deterministic aggregation pipeline. Observation-only: no
+CLI wiring, no execution capability, no mutation of existing state.
+
+## Phase 113B Complete
+
 Phase 113B — Advisory Runtime Contract Freeze (completed).
 
 Contract/freeze phase only — no advisory implementation, no runtime
@@ -78,7 +88,59 @@ capability: **Execution unavailable**. Current maximum runtime state:
 **Observed**. Current maximum plugin capability: **`observe`**.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113C — Advisory Runtime Prototype (Observation-Only) (not
+repo phase: 113D — Advisory Runtime Verification & Compatibility.
+
+## Phase 113C Complete
+
+Phase 113C — Advisory Runtime Prototype (Observation-Only) (completed).
+
+First implementation phase of the Advisory Runtime — introduces advisory
+reasoning only, no authorization, no execution, no enforcement.
+
+**New module `src/pcae/core/advisory_runtime.py`**: implements the
+concrete Python types frozen by 113A/113B. Four frozen vocabulary
+tuples (`ADVISORY_CATEGORIES`, `SEVERITY_LEVELS`, `CONFIDENCE_LEVELS`,
+`ADVISORY_LIFECYCLE_STAGES`). `EvidenceReference` frozen dataclass
+(4 fields: `domain`, `object_id`, `field_path`, `evidence_summary`),
+validated at construction (domain must be one of nine RuntimeSnapshot
+domains). `AdvisoryResult` frozen dataclass (14 fields matching 113B
+§1 exactly), validated at construction (category/severity/confidence
+against vocabularies; `implementation_status` unconditionally
+`"execution_unavailable"`, fail-closed). `ADVISORY_INVARIANT` module
+constant (the fixed invariant from 113B §2, never a per-instance field).
+
+**Provider framework**: `AdvisoryProvider` Protocol (structural
+subtyping via `typing.Protocol`) with `analyze(self, snapshot:
+RuntimeSnapshot) -> tuple[AdvisoryResult, ...]`. Four initial
+providers: `RuntimeHealthProvider` (8 results from `snapshot.health`),
+`GovernanceProvider` (4 results from `snapshot.governance`),
+`RuntimeContextProvider` (handles `None` context gracefully, 2–4+
+results from `snapshot.context`), `RegistryProvider` (4–6 results
+from `snapshot.registry`). Each provider is stateless — `analyze()` is
+a pure function of its snapshot argument.
+
+**Aggregation**: collect provider results, set shared timestamp and
+source reference, deduplicate by fingerprint, sort by severity then
+category, assign stable `ADV-{category_slug}-{seq:04d}` IDs.
+Deterministic — same snapshot always produces identical results.
+
+**Observation-only**: no CLI wiring, no `commands/advisory_runtime.py`,
+no argparse, no `PermissionBroker.evaluate()` call, no execution,
+no mutation. Import surface limited to stdlib + `RuntimeSnapshot`
+(verified by AST-based import allowlist tests). All ten safety rules
+(113B §7) upheld.
+
+Added `src/pcae/core/advisory_runtime.py`,
+`docs/PCAE_ADVISORY_RUNTIME_PROTOTYPE.md`,
+`docs/PHASE_113_ADVISORY_RUNTIME_PROTOTYPE.md`. 83 new tests
+(`tests/test_advisory_runtime.py`).
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113D — Advisory Runtime Verification & Compatibility (not
 started).
 
 ## Phase 113A Complete

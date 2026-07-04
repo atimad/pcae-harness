@@ -414,8 +414,11 @@ def test_recommended_next_phase_is_113b(architecture_text, phase_doc_text):
 
 def test_no_advisory_runtime_module_added_to_core():
     core_dir = REPO_ROOT / "src" / "pcae" / "core"
+    # advisory_runtime.py now legitimately exists (created by 113C prototype).
+    # The architecture phase (113A) was documentation-only; these other
+    # filenames should still not exist as separate modules.
     forbidden_names = {
-        "advisory_runtime.py", "advisory_result.py", "advisory_pipeline.py",
+        "advisory_result.py", "advisory_pipeline.py",
         "advisory_analysis.py", "advisory_recommendation.py",
     }
     existing = {p.name for p in core_dir.glob("*.py")}
