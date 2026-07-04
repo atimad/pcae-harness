@@ -49,7 +49,10 @@ def run_phase_complete(args: argparse.Namespace) -> int:
     # Phase 105D — trust-hard-fail: exit code now reflects report trust.
     allow_partial_report = getattr(args, "allow_partial_report", False)
     finalizable = _finalize_report_and_notify(
-        args.summary, allow_partial_report=allow_partial_report,
+        args.summary,
+        allow_partial_report=allow_partial_report,
+        cli_phase_id=getattr(args, "phase_id", None),
+        cli_phase_name=getattr(args, "phase_name", None),
     )
 
     challenge = build_irg_challenge_context(root)
@@ -64,7 +67,13 @@ def run_phase_complete(args: argparse.Namespace) -> int:
     return 0 if finalizable else 1
 
 
-def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = False) -> bool:
+def _finalize_report_and_notify(
+    summary: str,
+    *,
+    allow_partial_report: bool = False,
+    cli_phase_id: str | None = None,
+    cli_phase_name: str | None = None,
+) -> bool:
     """Create a phase report artifact and optionally dispatch notifications.
 
     Phase 92D/92D.6 — automatic finalization hook with structured metadata.
@@ -84,37 +93,51 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     WARNING notification instead whenever canonical latest.* artifacts
     were actually written (see its own docstring for the full outcome
     model).
+
+    Phase 113X.4 — `summary` is no longer a phase-identity source at
+    all (113X audit Finding 3: regex-derived identity from free text is
+    fundamentally unsound -- a summary mentioning a previous phase for
+    context could become the report's own identity). Canonical identity
+    now comes from `resolve_canonical_phase_identity()` alone: the
+    active task contract, phase-completion metadata, active lifecycle
+    context, or an explicit `--phase-id`/`--phase-name` CLI argument, in
+    that precedence order -- never summary text. Fails closed (refuses
+    finalization, writes nothing) if none resolve.
     """
     from pcae.core.phase_reports import (
         finalize_phase_report,
         is_phase_id_backward,
-        resolve_finalization_phase_identity,
+        resolve_canonical_phase_identity,
     )
-
-    phase_id = _derive_phase_id(summary)
-    phase_name = _derive_phase_name(summary)
+    from pcae.core.tasks import find_latest_active_task
 
     # Load structured metadata if available
     meta = _load_completion_metadata()
 
-    # ── Phase 113X.2: canonical phase-identity resolution ────────────────
-    # Single resolution point (resolve_finalization_phase_identity) for
-    # the two independent phase-identity sources feeding this
-    # finalization: the CLI/summary-derived phase_id and the metadata
-    # file's own declared phase_id. Phase 94T.1 originally handled a
-    # mismatch here by discarding the metadata and printing a
-    # console-only warning, then proceeding on git-derived fallback data
-    # -- a silent divergence that never became a gate blocker (113X
-    # forensic audit Finding 3). `identity_conflict` is instead threaded
-    # into validate_finalization_gate() below, so a genuine conflict is
-    # enforced through the same quarantine path (113X.1) as every other
-    # phase-identity mismatch.
-    _, identity_conflict = resolve_finalization_phase_identity(phase_id, meta)
-    if identity_conflict:
-        print(f"Warning: {identity_conflict}. Metadata discarded; "
-              f"finalization blocked pending resolution.")
-        meta = {}
-    elif meta:
+    # ── Phase 113X.4: canonical phase-identity resolution ────────────────
+    # `summary` is never a candidate source (see docstring above and
+    # resolve_canonical_phase_identity()'s own docstring for the full
+    # precedence order and rationale).
+    active_task = find_latest_active_task(HarnessPath.cwd())
+    identity = resolve_canonical_phase_identity(
+        active_task_title=active_task.title if active_task else None,
+        metadata=meta,
+        lifecycle_current_phase_line=_read_lifecycle_current_phase_line(),
+        cli_phase_id=cli_phase_id,
+        cli_phase_name=cli_phase_name,
+    )
+    if identity is None:
+        print(
+            "Phase identity could not be determined from any authoritative "
+            "source (active task contract, phase-completion metadata, "
+            "active lifecycle context, or --phase-id). Refusing to "
+            "finalize -- fail closed rather than fabricate an identity."
+        )
+        return False
+    phase_id = identity.phase_id
+    phase_name = identity.phase_name
+
+    if meta:
         # Check for backward-pointing recommended_next_phase
         meta_next = meta.get("recommended_next_phase", "")
         if meta_next:
@@ -192,7 +215,12 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     if origin_count is None:
         origin_count = _gather_origin_head_count()
 
-    recommended_next = meta.get("recommended_next_phase", "") or _derive_next_phase(summary)
+    # Phase 113X.4 — recommended_next_phase must come from structured
+    # metadata only, never parsed from free-text --summary (113X audit
+    # Finding 3). If metadata doesn't declare one, it stays empty and
+    # validate_finalization_gate()'s existing "recommended_next_phase
+    # missing as structured metadata" blocker fails closed naturally.
+    recommended_next = meta.get("recommended_next_phase", "")
     no_go_list = [no_go] if no_go else []
 
     # Phase 105D — build a trial report (no I/O: no write, no dispatch) to
@@ -234,7 +262,11 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
         no_go_confirmations=no_go_list,
         recommended_next_phase=recommended_next,
         commit_attribution=commit_attribution,
-        identity_conflict=identity_conflict,
+        # Phase 113X.4 — no more competing CLI/summary-derived value to
+        # conflict with metadata (see resolve_canonical_phase_identity());
+        # identity_conflict is retained on the gate as a general hook for
+        # other callers, unused here.
+        identity_conflict=None,
     )
     trust_result = compute_final_trust(
         trial_report.to_dict(), old_schema_missing_fields=trial_report.missing_trust_fields,
@@ -533,42 +565,31 @@ def _write_completion_metadata(meta: dict) -> bool:
         return True
     except Exception:
         return False
-def _derive_phase_id(summary: str) -> str:
-    """Derive a phase ID from the summary text."""
-    import re
-    m = re.search(r"Phase\s+(\d+[A-Z](?:\.\d+)*)", summary)
-    if m:
-        return m.group(1)
-    return "unknown"
+def _read_lifecycle_current_phase_line() -> str | None:
+    """Read PROJECT_STATUS.md's "## Current Phase" section text (Phase
+    113X.4's "active lifecycle context" canonical-identity source) --
+    the first non-blank line describing the current phase, e.g.
+    "Phase 113X.4 — Canonical Phase Identity Repair (completed)."
 
-
-def _derive_phase_name(summary: str) -> str:
-    """Derive a phase name from the summary text.
-
-    Strips trailing status markers (e.g. ' — completed') to keep the name clean.
+    Returns None if the file or section is absent. Callers only treat
+    this as a usable identity source when it is not already marked
+    "(completed)" -- i.e. only when it genuinely describes an
+    in-progress phase, not the previously-finalized one.
     """
-    import re
-    m = re.search(r"Phase\s+\d+[A-Za-z0-9.]*(?:\.\d+)?:\s*(.+?)(?:\.\s|$)", summary)
-    if m:
-        name = m.group(1).strip()
-        # Strip trailing status markers
-        for suffix in (" — completed", " — failed", " — blocked", " — partial", " — cancelled"):
-            if name.endswith(suffix):
-                name = name[: -len(suffix)]
-                break
-        if len(name) > 100:
-            name = name[:97] + "..."
-        return name
-    return summary[:80].rsplit(" ", 1)[0]
-
-
-def _derive_next_phase(summary: str) -> str:
-    """Derive recommended next phase from summary text."""
-    import re
-    m = re.search(r"(?:Recommended next phase|Next phase|next phase)[:\s]+(\d+[A-Z](?:\.\d+)?)", summary)
-    if m:
-        return m.group(1)
-    return ""
+    path = Path("PROJECT_STATUS.md")
+    if not path.exists():
+        return None
+    text = path.read_text(encoding="utf-8")
+    m = re.search(
+        r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s|\Z)",
+        text, re.MULTILINE | re.DOTALL,
+    )
+    if not m:
+        return None
+    section = m.group(1).strip()
+    if not section:
+        return None
+    return section.splitlines()[0].strip() or None
 
 
 def run_phase_handoff(args: argparse.Namespace) -> int:

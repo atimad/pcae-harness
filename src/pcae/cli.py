@@ -6293,6 +6293,21 @@ def build_parser() -> argparse.ArgumentParser:
             "suppressed for incomplete reports regardless of this flag."
         ),
     )
+    phase_complete_parser.add_argument(
+        "--phase-id",
+        default=None,
+        help=(
+            "Phase 113X.4: explicit canonical phase ID, used only as the "
+            "last-resort identity source (after the active task contract, "
+            "phase-completion metadata, and active lifecycle context). "
+            "Never derived from --summary."
+        ),
+    )
+    phase_complete_parser.add_argument(
+        "--phase-name",
+        default=None,
+        help="Phase 113X.4: explicit phase name paired with --phase-id.",
+    )
     phase_complete_parser.set_defaults(handler=run_phase_complete)
 
     phase_start_parser = phase_subparsers.add_parser(

@@ -989,49 +989,128 @@ def is_phase_id_backward(next_id: str, current_id: str) -> bool:
     return (next_branch, next_sub) < (cur_branch, cur_sub)
 
 
-def resolve_finalization_phase_identity(
-    derived_phase_id: str, metadata: dict[str, Any] | None,
-) -> tuple[str, str | None]:
-    """Single canonical phase-identity resolution point for the
-    ``pcae phase complete`` finalization path (Phase 113X.2).
+@dataclass(frozen=True)
+class CanonicalPhaseIdentity:
+    """The resolved, single-source phase identity for a finalization
+    (Phase 113X.4). ``phase_id``/``phase_name`` always originate from
+    the same ``source`` -- never mixed across sources."""
 
-    Compares the CLI/summary-derived ``phase_id`` (``_derive_phase_id()``
-    in ``commands/phase.py``) against the metadata file's own declared
-    ``phase_id`` -- the two independent phase-identity sources that used
-    to feed the same finalized report/artifact set. Before this repair,
-    a mismatch here was resolved silently: the metadata was discarded,
-    a console warning printed, and finalization proceeded on
-    git-derived fallback data -- the one 113X-forensic-audit divergence
-    point that bypassed ``validate_finalization_gate()`` entirely
-    (audit Finding 3; closed here rather than in 113X.1, which repaired
-    gate *enforcement*, not identity *resolution*).
+    phase_id: str
+    phase_name: str
+    source: str  # one of _CANONICAL_IDENTITY_SOURCES
 
-    Returns ``(metadata_phase_id, conflict)``:
-    - ``metadata_phase_id`` is the metadata's declared phase_id, used
-      as-is when the CLI/summary side has no phase reference at all
-      (``""``/``"unknown"``) -- not every disagreement is a conflict;
-      an absent CLI-side value has nothing to disagree with.
-    - ``conflict`` is ``None`` when the two sources agree, when only
-      one is present, or when the CLI/summary side has no real phase
-      reference. Otherwise it names both disagreeing values, so the
-      evidence survives into ``validate_finalization_gate()``'s
-      blockers list (and, per 113X.1, into a quarantined artifact)
-      instead of a console-only warning. A conflicting metadata
-      phase_id is never trusted for the finalization it disagrees
-      with -- callers must fall back to git-derived data for every
-      other field too.
+
+_CANONICAL_IDENTITY_SOURCE_CLI = "cli_argument"
+_CANONICAL_IDENTITY_SOURCE_TASK = "active_task_contract"
+_CANONICAL_IDENTITY_SOURCE_METADATA = "phase_completion_metadata"
+_CANONICAL_IDENTITY_SOURCE_LIFECYCLE = "active_lifecycle_context"
+
+_CANONICAL_IDENTITY_SOURCES: frozenset[str] = frozenset({
+    _CANONICAL_IDENTITY_SOURCE_TASK,
+    _CANONICAL_IDENTITY_SOURCE_METADATA,
+    _CANONICAL_IDENTITY_SOURCE_LIFECYCLE,
+    _CANONICAL_IDENTITY_SOURCE_CLI,
+})
+
+_LEADING_PHASE_REFERENCE_RE = re.compile(
+    r'^\s*Phase\s+(\d+[A-Za-z]*(?:\.\d+)*)\s*[:—–-]\s*(.+)$'
+)
+
+
+def _parse_leading_phase_reference(text: str) -> tuple[str, str] | None:
+    """Extract ``(phase_id, phase_name)`` from a string that *starts*
+    with ``"Phase <id>: <name>"`` or ``"Phase <id> — <name>"`` (Phase
+    113X.4). Anchored at the beginning of the string on purpose: this
+    is what makes it structurally safe against the exact forensic
+    defect free-text ``--summary`` had (a phase reference anywhere in
+    a sentence, e.g. "extends Phase 113B", being mistaken for the
+    report's own identity) -- a phase mentioned mid-prose never matches
+    here, only a leading, structured "Phase X: ..." declaration does.
+
+    Returns ``None`` if ``text`` doesn't start with such a reference.
     """
-    meta_phase_id = str((metadata or {}).get("phase_id", "")).strip()
-    if not meta_phase_id:
-        return "", None
-    if not derived_phase_id or derived_phase_id == "unknown":
-        return meta_phase_id, None
-    if meta_phase_id != derived_phase_id:
-        return "", (
-            f"CLI/summary phase_id={derived_phase_id!r} does not match "
-            f"metadata phase_id={meta_phase_id!r}"
+    m = _LEADING_PHASE_REFERENCE_RE.match(text.strip())
+    if not m:
+        return None
+    phase_id = m.group(1)
+    name = m.group(2).strip()
+    # Strip a trailing "(completed)."/"(not started)." style status marker.
+    name = re.sub(r'\s*\([^()]*\)\.?\s*$', '', name).strip()
+    name = name.rstrip('.').strip()
+    if not name:
+        return None
+    return phase_id, name
+
+
+def resolve_canonical_phase_identity(
+    *,
+    active_task_title: str | None = None,
+    metadata: dict[str, Any] | None = None,
+    lifecycle_current_phase_line: str | None = None,
+    cli_phase_id: str | None = None,
+    cli_phase_name: str | None = None,
+) -> CanonicalPhaseIdentity | None:
+    """Single canonical phase-identity resolution point for the
+    ``pcae phase complete`` finalization path (Phase 113X.4).
+
+    Repairs 113X audit Finding 3 in full: the forensic review proved
+    that deriving phase identity by regex over free-text ``--summary``
+    is fundamentally unsound -- a summary mentioning a previous phase
+    for context (e.g. "extends Phase 113B") could become the report's
+    own identity. 113X.2 only detected a *disagreement* between that
+    regex-derived value and metadata; this repairs the derivation
+    itself. Free-text summary is never consulted here at all -- it is
+    not one of the parameters.
+
+    Tries each authoritative source in a fixed precedence order,
+    returning the first that resolves. Never mixes fields across
+    sources -- ``phase_id`` and ``phase_name`` always come from the
+    same winning source:
+
+    1. ``active_task_title`` -- the active task contract's own
+       ``Title`` field (e.g. ``"Phase 113X.4: Canonical Phase Identity
+       Repair"``), when it starts with a leading "Phase X: ..."
+       reference. The task contract is the governed record of what is
+       actively being worked on.
+    2. ``metadata`` -- ``.pcae/phase-completion-metadata.json``'s own
+       structured ``phase_id``/``phase_name`` fields. Never parsed by
+       regex; read directly as declared.
+    3. ``lifecycle_current_phase_line`` -- PROJECT_STATUS.md's
+       "## Current Phase" section text, but *only* when it is not
+       already marked ``(completed)`` -- i.e. only when it genuinely
+       describes an in-progress phase, not the previously-finalized one.
+    4. ``cli_phase_id``/``cli_phase_name`` -- an explicit CLI argument,
+       the last-resort override for bootstrapping or when no other
+       governed source exists yet.
+
+    Returns ``None`` if no source resolves -- callers must fail closed
+    (refuse finalization; never fabricate ``"unknown"`` or fall back to
+    regex-derived values).
+    """
+    if active_task_title:
+        parsed = _parse_leading_phase_reference(active_task_title)
+        if parsed:
+            phase_id, phase_name = parsed
+            return CanonicalPhaseIdentity(phase_id, phase_name, _CANONICAL_IDENTITY_SOURCE_TASK)
+
+    meta = metadata or {}
+    meta_phase_id = str(meta.get("phase_id", "")).strip()
+    if meta_phase_id:
+        meta_phase_name = str(meta.get("phase_name") or meta.get("phase_title") or meta_phase_id).strip()
+        return CanonicalPhaseIdentity(meta_phase_id, meta_phase_name, _CANONICAL_IDENTITY_SOURCE_METADATA)
+
+    if lifecycle_current_phase_line and "(completed)" not in lifecycle_current_phase_line.lower():
+        parsed = _parse_leading_phase_reference(lifecycle_current_phase_line)
+        if parsed:
+            phase_id, phase_name = parsed
+            return CanonicalPhaseIdentity(phase_id, phase_name, _CANONICAL_IDENTITY_SOURCE_LIFECYCLE)
+
+    if cli_phase_id:
+        return CanonicalPhaseIdentity(
+            cli_phase_id, cli_phase_name or cli_phase_id, _CANONICAL_IDENTITY_SOURCE_CLI,
         )
-    return meta_phase_id, None
+
+    return None
 
 
 def validate_finalization_gate(
@@ -1058,11 +1137,16 @@ def validate_finalization_gate(
     Returns a dict with finalizable, blockers, warnings, diagnostics.
     Fail-closed: if any blocker is present, finalizable=False.
 
-    ``identity_conflict`` (Phase 113X.2) is the conflict string from
-    ``resolve_finalization_phase_identity()``, when the caller detected
-    one before calling this gate -- appended to ``blockers`` alongside
-    ``validate_phase_identity()``'s own findings, so both identity-
-    divergence classes are enforced through the same single path.
+    ``identity_conflict`` is an optional pre-computed identity-conflict
+    string, appended to ``blockers`` alongside ``validate_phase_
+    identity()``'s own findings. 113X.2 originally populated this from
+    a comparison between a regex-derived ``--summary`` phase_id and
+    metadata's declared one; 113X.4 replaced that derivation with
+    ``resolve_canonical_phase_identity()`` (a single deterministic
+    source, never summary text), so ``pcae phase complete`` no longer
+    has a competing value to conflict with and passes ``None`` here.
+    The parameter remains as a general hook for any other caller that
+    detects an identity conflict by its own means.
     """
     blockers: list[str] = []
     warnings: list[str] = []
@@ -1324,19 +1408,16 @@ def validate_phase_identity(
                 f"Architecture Status says {arch_cap!r}"
             )
 
-    # ── 5. Summary text vs report phase_id ──────────────────────────────
-    # The summary should describe the phase being completed, not a different one.
-    summary = report.summary or ""
-    summary_phase_match = _re.search(
-        r"Phase\s+(\d+[A-Z](?:\.\d+)*)\s*[—–:]\s*([^.\n]+)", summary
-    )
-    if summary_phase_match:
-        summary_phase_id = summary_phase_match.group(1)
-        if summary_phase_id != phase_id:
-            issues.append(
-                f"Summary describes Phase {summary_phase_id!r} but report "
-                f"is for Phase {phase_id!r}"
-            )
+    # ── 5. (retired — see Phase 113X.4) ──────────────────────────────────
+    # Previously compared a regex-extracted "Phase X: ..." reference in
+    # report.summary against phase_id, blocking on disagreement. Phase
+    # 113X.4 removed --summary as a phase-identity source entirely (113X
+    # audit Finding 3: regex-derived identity from free text is
+    # fundamentally unsound) -- keeping this check would still let
+    # summary prose block a canonically-correct finalization whenever it
+    # happened to open with "Phase X: ..." referencing anything else,
+    # directly contradicting "free-text summaries must never determine
+    # phase id" (now true of validation too, not just derivation).
 
     # ── 6. Commits reference other phases ───────────────────────────────
     for commit in report.commits:

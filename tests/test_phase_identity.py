@@ -43,8 +43,11 @@ def test_valid_report_no_issues(pr):
     assert len(issues) == 0
 
 
-def test_summary_describes_wrong_phase(pr):
-    """Summary that names a different phase must be flagged."""
+def test_summary_describing_other_phase_not_flagged(pr):
+    """Phase 113X.4: --summary is not a phase-identity source at all
+    (113X audit Finding 3) -- a summary naming a different phase must
+    NOT be flagged. Canonical identity (the `phase_id` argument here)
+    is authoritative regardless of what the summary prose says."""
     report = pr.make_phase_report(
         phase_id="113B.2",
         phase_name="Phase Identity & Lifecycle Hardening",
@@ -52,8 +55,7 @@ def test_summary_describes_wrong_phase(pr):
         summary="Phase 113C: Advisory Runtime Prototype. Completed.",
     )
     issues = pr.validate_phase_identity(report, "113B.2", {})
-    assert len(issues) > 0
-    assert any("Summary describes" in i for i in issues)
+    assert not any("Summary describes" in i for i in issues)
 
 
 def test_commit_references_wrong_phase(pr):
@@ -241,12 +243,18 @@ def test_detect_phase_ambiguity_returns_dict():
 # ═══════════════════════════════════════════════════════════════════════
 
 def test_phase_identity_issues_are_blockers_not_warnings(pr):
-    """Phase identity mismatches must appear as blockers, not warnings."""
+    """Phase identity mismatches must appear as blockers, not warnings.
+
+    Phase 113X.4: --summary is no longer a phase-identity source or
+    check (see test_summary_describing_other_phase_not_flagged above),
+    so this now exercises the commit-message identity check (#6, still
+    intact) instead of the retired summary check (#5)."""
     report = pr.make_phase_report(
         phase_id="113B.2",
         phase_name="Test",
         status="completed",
-        summary="Phase 999X: Wrong summary.",
+        summary="Phase 113B.2: Correct summary.",
+        commits=["Complete Phase 999X wrong phase"],
     )
     gate = pr.validate_finalization_gate(
         phase_id="113B.2",

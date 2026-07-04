@@ -342,7 +342,13 @@ class TestQuarantineBehaviorIntact:
 
 
 class TestIdentityConflictBlockerIntact:
-    def test_mismatched_cli_metadata_identity_still_blocks(self, tmp_path, monkeypatch, capsys):
+    def test_summary_disagreeing_with_metadata_no_longer_a_conflict(self, tmp_path, monkeypatch, capsys):
+        """Phase 113X.4 superseded 113X.2's narrower mechanism: there is
+        no more CLI/summary-derived phase_id to conflict with metadata,
+        since --summary is not a phase-identity source at all (113X
+        audit Finding 3, closed in full). Metadata's declared phase_id
+        wins cleanly; the summary mentioning a different phase number
+        is simply irrelevant, not a blocker."""
         root = _init_repo(tmp_path)
         _write_metadata(tmp_path, phase_id="205D")
         monkeypatch.chdir(tmp_path)
@@ -350,9 +356,10 @@ class TestIdentityConflictBlockerIntact:
         exit_code = main(["phase", "complete", "--summary", "Phase 205E: done."])
         output = capsys.readouterr().out
 
-        assert exit_code == 1
-        assert "BLOCKED by finalization gate" in output
-        assert "phase identity" in output
+        assert exit_code == 0
+        assert "BLOCKED by finalization gate" not in output
+        latest = json.loads((tmp_path / ".pcae" / "phase-reports" / "latest.json").read_text())
+        assert latest["phase_id"] == "205D"
 
 
 # ── Requirement 8: no canonical latest artifacts overwritten by blocked ─────

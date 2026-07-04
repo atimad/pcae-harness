@@ -2,31 +2,102 @@
 
 ## Current Phase
 
-Phase 113X.3 — Finalized Phase Mobile Notification Guarantee (completed).
+Phase 113X.4 — Canonical Phase Identity Repair (completed).
 
-Governance repair phase, closing a problem 113X.2's own completion
-exposed. No Advisory Runtime changes, no execution, no Runtime Snapshot
-behavior changes. Two distinct bugs: a naive lexicographic
-"backward-pointing recommended next phase" heuristic wrongly flagged
-`113D` as before `113X.2` (`'D' < 'X'` as strings), forcing 113X.2's own
-completion through `--allow-partial-report`; and once a report was
-`partial`, `pcae phase complete` suppressed *all* notification, even
-though canonical `latest.md`/`latest.json` had still been written — the
-operator received no Telegram signal for a finalized, pushed phase.
-New `is_phase_id_backward()` makes phase-ID comparison branch-aware
-(the lettered mainline and the `"X"` exceptional branch are different,
-not-directly-comparable sequences). New notification-outcome model
-(`attempted`/`sent`/`skipped_with_reason`/`failed_with_reason`) always
-recorded on `finalize_phase_report()`'s return value. A
-finalized-but-partial report now sends a distinctly labeled WARNING
-notification ("PHASE FINALIZED BUT REPORT PARTIAL — mobile operator
-attention required") instead of silence; blocked/quarantined reports
-(113X.1) remain fully silent, unchanged.
+Governance repair phase, closing 113X (Cross-Agent Governance
+Verification) Finding 3 in full. No Advisory Runtime, Runtime Snapshot,
+Runtime Context, Runtime Registry, Runtime Inspect, Permission Broker,
+execution, authorization, plugin, Telegram-inbound, REST, Web UI,
+Dashboard, or Architecture Status changes. 113X.2 only detected a
+*disagreement* between a regex-derived `--summary` phase_id and
+`.pcae/phase-completion-metadata.json`'s declared one; this phase
+removes the regex derivation itself. New
+`resolve_canonical_phase_identity()` takes no summary parameter at
+all, resolving `phase_id`/`phase_name` from exactly one source in
+precedence order: active task contract, explicit phase-completion
+metadata, active lifecycle context (PROJECT_STATUS.md's Current Phase,
+only if not marked completed), explicit `--phase-id`/`--phase-name`
+CLI argument — never free text. Fails closed (refuses finalization,
+writes nothing at all) if none resolve. `recommended_next_phase`
+likewise drops its summary-text fallback. Also removed
+`validate_phase_identity()`'s "summary text vs report phase_id" check,
+discovered during this phase's own regression testing to itself be a
+form of free-text influence over finalization outcomes.
+
+Numbered 113X.4 rather than the requested "113X.2," since 113X.2 and
+113X.3 were already completed in this arc; recreating that number
+would itself be the phase-identity collision this arc exists to
+prevent (confirmed with the human operator before starting).
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113D — Advisory Runtime Verification & Compatibility (the
-113X governance-repair excursion is complete; all three scoped findings
-are closed).
+repo phase: 113X.5 — Architecture Status Derivation Hardening.
+
+## Phase 113X.4 Complete
+
+Phase 113X.4 — Canonical Phase Identity Repair (completed).
+
+Governance repair phase — no Advisory Runtime, Runtime Snapshot,
+Runtime Context, Runtime Registry, Runtime Inspect, Permission Broker,
+execution, authorization, plugin, Telegram-inbound, REST, Web UI,
+Dashboard, or Architecture Status changes. Closes 113X (Cross-Agent
+Governance Verification) Finding 3 in full: the forensic review proved
+that deriving phase identity by regex over free-text `--summary` is
+fundamentally unsound — a summary mentioning a previous phase for
+context (e.g. "extends Phase 113B") could become the report's own
+identity. 113X.2 only detected a *disagreement* between that
+regex-derived value and metadata's declared `phase_id`; this phase
+removes the regex derivation entirely.
+
+**Canonical identity model**: new `resolve_canonical_phase_identity()`
+(`src/pcae/core/phase_reports.py`) takes no summary parameter at all —
+`--summary` cannot influence the outcome even in principle. It tries
+four sources in a fixed precedence order, `phase_id`/`phase_name`
+always from the same winning source: (1) the active task contract's
+`Title` field, parsed only when it starts with a "Phase X: ..."
+reference (anchored at position 0 — the anchoring is what makes this
+structurally safe against a phase mentioned mid-prose); (2)
+`.pcae/phase-completion-metadata.json`'s structured `phase_id`/
+`phase_name` fields, read directly, never regex-parsed; (3)
+PROJECT_STATUS.md's "## Current Phase" section, only when not already
+marked `(completed)`; (4) new `--phase-id`/`--phase-name` CLI
+arguments on `pcae phase complete`, the last-resort bootstrap override.
+`recommended_next_phase` drops its `_derive_next_phase(summary)`
+fallback — an absent structured value now fails closed via the
+pre-existing `validate_finalization_gate()` blocker instead of parsing
+prose.
+
+**Fail-closed**: if no source resolves, `_finalize_report_and_notify()`
+refuses immediately — prints an explicit message and returns before
+constructing any report or writing any artifact, not even a
+quarantined one (there is no identity, known or otherwise, to build a
+report around).
+
+**Retired as superseded**: `_derive_phase_id()`/`_derive_phase_name()`/
+`_derive_next_phase()` and 113X.2's `resolve_finalization_phase_
+identity()` (its entire premise — comparing a regex-derived value
+against metadata — no longer applies once that derivation is removed).
+Also removed `validate_phase_identity()`'s check #5 ("Summary text vs
+report phase_id"), discovered while writing this phase's own mandated
+regression tests to itself be a form of free-text influence over
+finalization outcomes — a summary opening with "Phase 999Z: ..." must
+not block a canonically-correct completion. Check #6 (commit messages
+vs phase_id) is untouched (not `--summary`, out of this phase's scope).
+`pcae task finish --commit`'s identity path was already metadata-only
+and needed no change.
+
+Added `docs/PHASE_113X4_CANONICAL_PHASE_IDENTITY_REPAIR.md`. 27 new
+tests (`tests/test_canonical_phase_identity_source_repair.py`,
+superseding `tests/test_canonical_phase_identity_repair.py`); 2
+pre-existing tests updated in `tests/test_phase_identity.py` and 1 in
+`tests/test_finalization_notification_guarantee.py` (113X.2's
+"conflict" scenario is now "metadata wins cleanly," not a conflict).
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113X.5 — Architecture Status Derivation Hardening.
 
 ## Phase 113X.3 Complete
 
