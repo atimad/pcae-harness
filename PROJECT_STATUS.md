@@ -2,40 +2,79 @@
 
 ## Current Phase
 
-Phase 113XR — Governance Recovery Review (completed).
+Phase 113D — Advisory Runtime Verification & Compatibility (completed).
 
-Final architectural review of the 113X governance-repair sequence
-(113X.1–113X.5) — review/verification only, no new features, no
-Advisory Runtime changes, no execution capability. Re-verified every
-forensic finding directly against the current codebase and live CLI
-behavior rather than trusting prior phase reports: 5 live reproductions
-in an isolated scratch repository confirmed the finalization gate
-(blocker → quarantined, `latest.json` never touched, exit non-zero),
-canonical phase identity (a summary mentioning three unrelated phase
-numbers at once never affects `phase_id`; zero identity sources →
-explicit fail-closed refusal, zero artifacts written), Architecture
-Status (only one phase in a series complete → no overclaim of later
-milestones), and the notification guarantee (finalized-but-partial
-completion → labeled WARNING event actually dispatched, never
-resembling a normal completion) are all resolved. `git log` across the
-entire 113X commit range against every Advisory Runtime/Runtime
-Snapshot/Runtime Context/Runtime Registry/Runtime Inspect/Permission
-Broker file returns zero commits — exactly 5 source files were touched
-across all five repair phases. Findings 1, 3, 4, 6, and 7 classified
-Resolved; the notification-guarantee gap and cross-agent-continuity
-concern classified Resolved. Two new, minor, non-blocking observations:
-`pcae phase complete` has no duplicate-notification idempotency guard
-(unlike `pcae task finish --commit`'s path); and `is_phase_id_backward()`'s
-"X" exceptional-branch recognition only matches an exact single `"X"`,
-not multi-letter variants like `"113XR"` (discovered live while
-finalizing this phase, worked around via `--allow-partial-report`, not
-fixed per this phase's review-only scope). Neither is unsafe, a 113X
-regression, or a blocker.
+Verification and hardening of the Advisory Runtime prototype (113C)
+against the architecture (113A) and contracts (113B).
+Verification/compatibility only — no new advisory behavior, no
+execution, no authorization, no Permission Broker enforcement.
 
-**Recommendation: safe to resume the normal roadmap.**
+All 12 verification areas confirmed:
+
+| # | Verification | Status |
+|---|---|---|
+| 1 | Advisory Runtime consumes Runtime Snapshot only | ✅ VERIFIED |
+| 2 | Advisory Providers remain modular | ✅ VERIFIED |
+| 3 | Advisory Results follow 113B contract | ✅ VERIFIED |
+| 4 | Explainability is complete (8 facets) | ✅ VERIFIED |
+| 5 | Recommendations are reproducible from Runtime Snapshot | ✅ VERIFIED |
+| 6 | Aggregation is deterministic | ✅ VERIFIED |
+| 7 | No provider inspects Runtime internals directly | ✅ VERIFIED |
+| 8 | No PermissionBroker.evaluate() is called | ✅ VERIFIED |
+| 9 | No plugin loading/invocation occurs | ✅ VERIFIED |
+| 10 | No mutation of Runtime Snapshot or Runtime Context | ✅ VERIFIED |
+| 11 | Runtime state remains Observed | ✅ VERIFIED |
+| 12 | Execution capability remains unavailable | ✅ VERIFIED |
+
+41 new verification tests (`tests/test_advisory_runtime_verification.py`),
+all passing. All 83 existing 113C prototype tests continue to pass.
+Broader suites: 3671 runtime/contract/autonomy/plugin/advisory tests pass,
+1532 task/phase/notifications tests pass (2 pre-existing failures unrelated),
+4389 fast_green tests pass (1 pre-existing failure unrelated).
+
+Safety invariants confirmed: Runtime state `Observed`, execution
+capability `unavailable`, maximum plugin capability `observe`,
+`implementation_status` unconditionally `execution_unavailable`, no CLI
+wiring, no commands module, import surface limited to stdlib +
+`RuntimeSnapshot`.
+
+Added `docs/PHASE_113_ADVISORY_RUNTIME_VERIFICATION.md`,
+`tests/test_advisory_runtime_verification.py`.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113D — Advisory Runtime Verification & Compatibility.
+repo phase: 113R — Advisory Runtime Architecture Review.
+
+## Phase 113D Complete
+
+Phase 113D — Advisory Runtime Verification & Compatibility (completed).
+
+Verification and hardening of the Advisory Runtime prototype (113C)
+against the architecture (113A) and contracts (113B).
+
+**Verification results** (see `docs/PHASE_113_ADVISORY_RUNTIME_VERIFICATION.md`
+for full evidence):
+
+All 12 verification areas confirmed: Advisory Runtime consumes Runtime
+Snapshot only; providers remain modular; results follow 113B contract;
+explainability complete (all 8 facets); recommendations reproducible;
+aggregation deterministic; no provider inspects Runtime internals directly;
+no PermissionBroker.evaluate() called; no plugin loading/invocation; no
+mutation; runtime state remains Observed; execution capability remains
+unavailable.
+
+**Tests**: 41 new verification tests + 83 existing 113C tests = 124
+advisory-runtime tests, all passing. Broader suites: 3671 runtime/contract
+tests, 1532 task/phase tests (2 pre-existing failures unrelated), 4389
+fast_green tests (1 pre-existing failure unrelated).
+
+**Safety invariants**: all confirmed unchanged.
+
+**Files added**: `tests/test_advisory_runtime_verification.py`,
+`docs/PHASE_113_ADVISORY_RUNTIME_VERIFICATION.md`.
+
+**No-go**: No execution, no authorization, no plugin loading/invocation,
+no PermissionBroker enforcement, no CLI wiring, no mutation, no new
+behavior. Execution capability remains unavailable.
 
 ## Phase 113XR Complete
 
