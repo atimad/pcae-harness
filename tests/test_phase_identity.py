@@ -129,7 +129,15 @@ def test_returns_list_even_on_error(pr):
 # ═══════════════════════════════════════════════════════════════════════
 
 def test_architecture_status_impossible_combo_detected(pr):
-    """'Prototype complete' + 'Prototype planned' must be flagged."""
+    """'113C complete' + '113C planned' must be flagged.
+
+    Phase 113X.5: this now uses the structured ``completed_phase_ids``
+    field rather than substring-matching the display ``completed``
+    label. The retired hardcoded label ("Advisory Runtime (Architecture,
+    Contract, Prototype)") contained no digits at all, so the old
+    substring check ("series in comp") could *never* actually fire --
+    the exact reason 113X audit Finding 4 went undetected. This is the
+    regression test proving it now does."""
     report = pr.make_phase_report(
         phase_id="113D",
         phase_name="Advisory Runtime Verification",
@@ -138,6 +146,7 @@ def test_architecture_status_impossible_combo_detected(pr):
     )
     report.architecture_status = {
         "completed": ["Advisory Runtime (Architecture, Contract, Prototype)"],
+        "completed_phase_ids": ["113A", "113B", "113C"],
         "in_progress": [],
         "planned": ["113C — Advisory Runtime Prototype (Observation-Only)"],
         "current_runtime_state": "Observed",
@@ -145,12 +154,7 @@ def test_architecture_status_impossible_combo_detected(pr):
         "execution_availability": "unavailable",
     }
     issues = pr.validate_phase_identity(report, "113D", {})
-    # "Prototype" in completed AND 113-series still planned is flagged
-    found = any("Prototype" in i and "planned" in i for i in issues)
-    if not found:
-        # The "both completed and planned" check might or might not trigger
-        # depending on exact matching. Either way is acceptable.
-        pass
+    assert any("113C" in i and "completed" in i and "planned" in i for i in issues)
 
 
 def test_runtime_state_mismatch_detected(pr):

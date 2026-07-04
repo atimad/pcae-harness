@@ -2,35 +2,116 @@
 
 ## Current Phase
 
-Phase 113X.4 — Canonical Phase Identity Repair (completed).
+Phase 113X.5 — Architecture Status Canonicalization (completed).
 
 Governance repair phase, closing 113X (Cross-Agent Governance
-Verification) Finding 3 in full. No Advisory Runtime, Runtime Snapshot,
-Runtime Context, Runtime Registry, Runtime Inspect, Permission Broker,
-execution, authorization, plugin, Telegram-inbound, REST, Web UI,
-Dashboard, or Architecture Status changes. 113X.2 only detected a
-*disagreement* between a regex-derived `--summary` phase_id and
-`.pcae/phase-completion-metadata.json`'s declared one; this phase
-removes the regex derivation itself. New
-`resolve_canonical_phase_identity()` takes no summary parameter at
-all, resolving `phase_id`/`phase_name` from exactly one source in
-precedence order: active task contract, explicit phase-completion
-metadata, active lifecycle context (PROJECT_STATUS.md's Current Phase,
-only if not marked completed), explicit `--phase-id`/`--phase-name`
-CLI argument — never free text. Fails closed (refuses finalization,
-writes nothing at all) if none resolve. `recommended_next_phase`
-likewise drops its summary-text fallback. Also removed
-`validate_phase_identity()`'s "summary text vs report phase_id" check,
-discovered during this phase's own regression testing to itself be a
-form of free-text influence over finalization outcomes.
-
-Numbered 113X.4 rather than the requested "113X.2," since 113X.2 and
-113X.3 were already completed in this arc; recreating that number
-would itself be the phase-identity collision this arc exists to
-prevent (confirmed with the human operator before starting).
+Verification) Finding 4. No Advisory Runtime, Runtime Snapshot, Runtime
+Context, Runtime Registry, Runtime Inspect, Permission Broker,
+execution, authorization, plugin, Telegram-inbound, REST, Web UI, or
+Dashboard changes; no changes to Canonical Phase Identity, Finalization
+Gate, or Mobile Notification Guarantee. `_series_label()`'s hardcoded
+`SERIES_MAP` (e.g. `"113": "Advisory Runtime (Architecture, Contract,
+Prototype)"`) over-claimed completion the moment any one phase in a
+series completed, regardless of which specific phases actually had —
+and the existing consistency check meant to catch this searched for
+series digits as a literal substring inside the display label, which
+the hardcoded label never contained, so it could never fire. New
+`_render_series_milestone_label()` derives each series' label from
+exactly the phases whose own completion header exists, sorted
+deterministically, growing exactly in step with actual completion
+(only 113A → "Architecture"; +113B → "Architecture + Contract Freeze";
++113C → "...+ Prototype"). New structured `completed_phase_ids` field
+lets consistency validation use direct set-membership instead of
+regex-parsing display labels. Architectural review recommends
+Architecture Status remain inside the report generator (single
+consumer, pure function of already-canonical sources) rather than
+become a dedicated Runtime Service, with the extraction path documented
+for if/when a second consumer appears.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113X.5 — Architecture Status Derivation Hardening.
+repo phase: 113XR — Governance Recovery Review.
+
+## Phase 113X.5 Complete
+
+Phase 113X.5 — Architecture Status Canonicalization (completed).
+
+Governance repair phase — no Advisory Runtime, Runtime Snapshot,
+Runtime Context, Runtime Registry, Runtime Inspect, Permission Broker,
+execution, authorization, plugin, Telegram-inbound, REST, Web UI, or
+Dashboard changes; no changes to Canonical Phase Identity (113X.4),
+Finalization Gate (113X.1), or Mobile Notification Guarantee (113X.3).
+Closes 113X Finding 4: `_series_label()`'s hardcoded `SERIES_MAP`
+mapped a phase's numeric series to a static string describing that
+series' entire eventual scope, regardless of which specific phases had
+actually completed — the moment one "113" phase completed, the label
+already read "Advisory Runtime (Architecture, Contract, Prototype)",
+falsely implying Contract and Prototype were also done. The existing
+consistency check meant to catch "X complete while X still planned"
+searched for the series digits as a literal substring inside the
+display label (`if series in comp`); the hardcoded label contains no
+digits at all, so this check could never fire — the exact reason
+Finding 4 went undetected.
+
+**Canonical derivation**: `_render_series_milestone_label()`
+(`src/pcae/core/phase_reports.py`) renders each series' label from
+exactly the phases whose own "## Phase X Complete" header exists —
+never inferred, never extrapolated. A single completed phase renders
+as its own full title; multiple phases render as their titles'
+longest-common-prefix (the shared "track name") plus each phase's own
+distinguishing remainder, joined with " + ", in phase-letter order.
+`_is_milestone_phase_id()` excludes sub-phases and the "X" exceptional/
+corrective-governance branch (113X.1–.5 themselves) from milestone
+consideration — governance hardening is not architecture-track
+progress. Completed phases are sorted by `(series, branch, subphase)`,
+deterministic and independent of file section order — closing 113X
+Finding 6's "out-of-order documentation" risk as a side effect.
+`completed`/`in_progress`/`planned` remain independently derived from
+disjoint PROJECT_STATUS.md evidence, never one from another; "planned"
+now preferentially reads the recommendation sentence from within the
+"## Current Phase" section's own bounded text rather than "nearest the
+top of the whole file," closing Finding 6's latent ordering fragility
+directly.
+
+**New structured field**: `completed_phase_ids` (the exact phase IDs
+behind `completed`) lets `validate_phase_identity()`'s consistency
+checks use direct set-membership instead of regex-parsing display
+labels — the fragility that let Finding 4 go undetected. New checks:
+a phase can never be both completed and still recommended as planned;
+`current_runtime_state == "Observed"` can never coexist with
+`execution_availability != "unavailable"`.
+
+**Considered and rejected**: a "consecutive letters" gap-detection
+check (flagging e.g. 113A+113C complete with 113B absent). Prototyped,
+then rejected after producing a false positive against this repo's own
+real history (`111R` legitimately follows `111D` with a
+non-consecutive mnemonic letter for "Review") — the underlying
+guarantee is satisfied structurally instead, since the label renderer
+never fabricates a milestone without its own completion evidence.
+
+**Architectural review**: Architecture Status should remain inside
+`phase_reports.py` for now. It has exactly one consumer today (the
+phase report itself), is a pure function of two already-canonical,
+already-read-only sources (PROJECT_STATUS.md text, RuntimeSnapshot's
+health fields), owns no state, and needs no registry/lifecycle of its
+own — none of the characteristics that would justify a dedicated
+Runtime Service. If a second independent consumer appears in the
+future, extracting the pure functions verbatim into
+`core/architecture_status.py` (with `phase_reports.py` re-exporting for
+backward compatibility) is the documented, low-risk path — deliberately
+not acted on now, since no second consumer exists yet.
+
+Added `docs/PHASE_113X5_ARCHITECTURE_STATUS_CANONICALIZATION.md`. 15
+new tests (`tests/test_architecture_status_canonicalization.py`); 1
+pre-existing test in `tests/test_phase_identity.py` strengthened from
+a soft ("either way acceptable") assertion to a strict one, now that
+the mechanism it exercises actually works.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113XR — Governance Recovery Review.
 
 ## Phase 113X.4 Complete
 
