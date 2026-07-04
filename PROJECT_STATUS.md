@@ -90,6 +90,41 @@ capability: **Execution unavailable**. Current maximum runtime state:
 No automatic next repo phase implementation started. Recommended next
 repo phase: 113D — Advisory Runtime Verification & Compatibility.
 
+## Phase 113B.2 Complete
+
+Phase 113B.2 — Phase Identity & Lifecycle Hardening (completed).
+
+Corrective governance hardening phase — no Advisory Runtime changes,
+no execution. Strengthens PCAE phase identity validation to prevent
+agents from silently drifting into the wrong phase.
+
+**`validate_phase_identity()` function** added to
+`src/pcae/core/phase_reports.py` — cross-references report phase_id
+against PROJECT_STATUS.md, Architecture Status, metadata execution
+integration status, summary text, and commit messages. Integrated
+into `validate_finalization_gate()` as hard blockers (never advisory).
+
+**Bootstrap ambiguity detection** added to `src/pcae/core/context.py`:
+`_detect_phase_ambiguity()` compares active task phase against
+PROJECT_STATUS.md current phase and detects completed-phase ambiguity.
+Displayed prominently in bootstrap with ⚠️ banner and explicit
+resolution instructions.
+
+**Design decisions**: fail-closed (mismatches are blockers, not
+warnings), sub-phase tolerance (113B.2 allowed to reference parent
+113B), no new module (changes in existing infrastructure), backward
+compatible (existing trust checks unchanged).
+
+Added `docs/PHASE_113B2_PHASE_IDENTITY_HARDENING.md`. 17 new tests
+(`tests/test_phase_identity.py`).
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+Recommended next phase: **113C — Advisory Runtime Prototype
+(Observation-Only)** (untouched by this corrective phase).
+
 ## Phase 113C Complete
 
 Phase 113C — Advisory Runtime Prototype (Observation-Only) (completed).

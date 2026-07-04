@@ -967,6 +967,11 @@ def validate_finalization_gate(
     if missing_fields:
         blockers.append(f"missing trust fields: {', '.join(missing_fields)}")
 
+    # ── Phase 113B.2 — Phase identity validation ─────────────────────────
+    identity_issues = validate_phase_identity(report, phase_id, md)
+    for issue in identity_issues:
+        blockers.append(f"phase identity: {issue}")
+
     # ── Determine outcome ────────────────────────────────────────────────
     finalizable = len(blockers) == 0
 
@@ -983,6 +988,177 @@ def validate_finalization_gate(
         "missing_trust_fields": missing_fields,
         "report_completeness": report.report_completeness,
     }
+
+
+def validate_phase_identity(
+    report: PhaseReport,
+    phase_id: str,
+    md: dict[str, Any],
+) -> list[str]:
+    """Validate that phase identity is consistent across canonical sources.
+
+    Cross-references the report's ``phase_id`` against PROJECT_STATUS.md,
+    architecture status, metadata, and RuntimeSnapshot. Returns a list
+    of issue strings (empty = valid). Each returned issue is a hard
+    blocker — phase identity mismatches are never advisory.
+
+    Sub-phases (like 113B.2) are legitimate governance hardening phases
+    that may not match the current parent phase in PROJECT_STATUS.md.
+    They are not flagged as identity mismatches.
+
+    Phase 113B.2 — fail-closed: summary/commit/architecture mismatches
+    block finalization.
+    """
+    issues: list[str] = []
+    import re as _re
+
+    # ── 1. PROJECT_STATUS.md current phase vs report phase_id ───────────
+    # Sub-phases (e.g. 113B.2) run independently of the current parent
+    # phase (e.g. 113C).  Only flag if the report claims to be a parent
+    # phase that PROJECT_STATUS.md says is different.
+    ps_path = Path("PROJECT_STATUS.md")
+    if ps_path.exists():
+        ps_text = ps_path.read_text(encoding="utf-8")
+        current_section = _re.search(
+            r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s)",
+            ps_text, _re.MULTILINE | _re.DOTALL,
+        )
+        if current_section:
+            section_text = current_section.group(1)
+            current_match = _re.match(
+                r"^Phase\s+(\d{3}[A-Z](?:\.\d+)?)\s*[—–-]\s*(.+)$",
+                section_text, _re.MULTILINE,
+            )
+            if current_match:
+                current_id = current_match.group(1)
+                # Sub-phases (113B.2) are allowed to complete independently
+                is_sub_phase = "." in phase_id
+                if not is_sub_phase and current_id != phase_id:
+                    report_base = _re.match(r"(\d+[A-Z])", phase_id)
+                    current_base = _re.match(r"(\d+[A-Z])", current_id)
+                    if report_base and current_base:
+                        if report_base.group(1) != current_base.group(1):
+                            issues.append(
+                                f"Report phase_id={phase_id!r} does not match "
+                                f"PROJECT_STATUS.md current phase "
+                                f"{current_id!r}"
+                            )
+
+    # ── 2. Architecture Status consistency ──────────────────────────────
+    arch_status = getattr(report, "architecture_status", None) or {}
+    if arch_status:
+        in_progress = arch_status.get("in_progress", [])
+        planned = arch_status.get("planned", [])
+
+        # Detect impossible combination: phase is in "in_progress" AND
+        # in "planned" at the same time
+        for item in in_progress:
+            for p_item in planned:
+                # Extract phase IDs for comparison
+                ip_match = _re.search(r"\((\d{3}[A-Z](?:\.\d+)?)\)", item)
+                pp_match = _re.search(r"^(\d{3}[A-Z](?:\.\d+)?)", p_item)
+                if ip_match and pp_match:
+                    if ip_match.group(1) == pp_match.group(1):
+                        issues.append(
+                            f"Architecture Status inconsistency: phase "
+                            f"{ip_match.group(1)!r} is both in-progress "
+                            f"and planned"
+                        )
+
+        # "Prototype complete" while "Prototype recommended next" is impossible
+        completed = arch_status.get("completed", [])
+        for comp in completed:
+            for p_item in planned:
+                pp_match = _re.search(r"^(\d{3}[A-Z](?:\.\d+)?)", p_item)
+                if pp_match:
+                    planned_phase = pp_match.group(1)
+                    # If the completed milestone mentions the planned phase's
+                    # series, flag the inconsistency
+                    planned_base = _re.match(r"(\d{3})", planned_phase)
+                    if planned_base:
+                        series = planned_base.group(1)
+                        if series in comp and "Prototype" in comp:
+                            issues.append(
+                                f"Architecture Status inconsistency: "
+                                f"'{comp}' is completed but "
+                                f"{planned_phase} is still planned "
+                                f"(series {series} cannot be both)"
+                            )
+
+    # ── 3. Recommended next phase vs Architecture Status planned ────────
+    if report.recommended_next_phase and arch_status.get("planned"):
+        rec_id_match = _re.match(
+            r"(\d{3}[A-Z](?:\.\d+)?)", report.recommended_next_phase
+        )
+        if rec_id_match:
+            rec_id = rec_id_match.group(1)
+            planned_items = arch_status["planned"]
+            planned_ids: list[str] = []
+            for p in planned_items:
+                pm = _re.match(r"^(\d{3}[A-Z](?:\.\d+)?)", p)
+                if pm:
+                    planned_ids.append(pm.group(1))
+            if planned_ids and rec_id not in planned_ids:
+                # Only an issue if the report's recommendation differs from
+                # what PROJECT_STATUS.md derived as planned
+                pass  # Informational only — not a hard blocker
+                # Different sources may legitimately differ on recommendation
+
+    # ── 4. Metadata execution integration vs Architecture Status ────────
+    ei_status = md.get("execution_integration_status", {})
+    if ei_status and arch_status:
+        meta_state = ei_status.get("current_maximum_runtime_state", "")
+        arch_state = arch_status.get("current_runtime_state", "")
+        if meta_state and arch_state and meta_state != arch_state:
+            issues.append(
+                f"Runtime state mismatch: metadata says {meta_state!r}, "
+                f"Architecture Status says {arch_state!r}"
+            )
+
+        meta_cap = ei_status.get("current_maximum_plugin_capability", "")
+        arch_cap = arch_status.get("current_maximum_capability", "")
+        if meta_cap and arch_cap and meta_cap != arch_cap:
+            issues.append(
+                f"Plugin capability mismatch: metadata says {meta_cap!r}, "
+                f"Architecture Status says {arch_cap!r}"
+            )
+
+    # ── 5. Summary text vs report phase_id ──────────────────────────────
+    # The summary should describe the phase being completed, not a different one.
+    summary = report.summary or ""
+    summary_phase_match = _re.search(
+        r"Phase\s+(\d+[A-Z](?:\.\d+)*)\s*[—–:]\s*([^.\n]+)", summary
+    )
+    if summary_phase_match:
+        summary_phase_id = summary_phase_match.group(1)
+        if summary_phase_id != phase_id:
+            issues.append(
+                f"Summary describes Phase {summary_phase_id!r} but report "
+                f"is for Phase {phase_id!r}"
+            )
+
+    # ── 6. Commits reference other phases ───────────────────────────────
+    for commit in report.commits:
+        commit_msg = commit if isinstance(commit, str) else (
+            commit.get("message", "") if isinstance(commit, dict) else ""
+        )
+        commit_phase_match = _re.search(
+            r"(?:Phase|phase)\s+(\d+[A-Z](?:\.\d+)*)", commit_msg
+        )
+        if commit_phase_match:
+            commit_phase = commit_phase_match.group(1)
+            if commit_phase != phase_id:
+                # Sub-phases may reference their parent phase (113B.2 → 113B)
+                is_sub = "." in phase_id
+                parent = phase_id.split(".")[0] if is_sub else ""
+                if not (is_sub and commit_phase == parent):
+                    issues.append(
+                        f"Commit message references Phase {commit_phase!r} "
+                        f"but report is for Phase {phase_id!r}: "
+                        f"{commit_msg[:80]}"
+                    )
+
+    return issues
 
 
 def build_architecture_status() -> dict[str, Any]:

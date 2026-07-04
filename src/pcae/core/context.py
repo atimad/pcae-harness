@@ -220,6 +220,9 @@ def build_bootstrap_prompt(
     if recommended_next_phase:
         lines.append(f"Recommended next phase: {recommended_next_phase}")
 
+    # Phase 113B.2 — Always show latest completed and current state
+    lines.append(f"Current phase (from PROJECT_STATUS.md): {rs['current_phase']}")
+
     todo_status = rs.get("todo_status") or {}
     todo_next_phase = todo_status.get("todo_next_phase")
     if todo_next_phase:
@@ -234,6 +237,22 @@ def build_bootstrap_prompt(
                 f"Planning note: tasks/TODO.md next-phase marker ({todo_next_phase}) is "
                 "consistent with PROJECT_STATUS.md."
             )
+
+    # ── Phase 113B.2 — Phase ambiguity detection ────────────────────────
+    phase_ambiguity = rs.get("phase_ambiguity") or {}
+    if phase_ambiguity.get("ambiguous"):
+        lines.append("")
+        lines.append("⚠️  PHASE IDENTITY AMBIGUITY DETECTED — VERIFY BEFORE PROCEEDING")
+        lines.append("")
+        for mismatch in phase_ambiguity.get("mismatches", []):
+            lines.append(f"  - {mismatch}")
+        lines.append("")
+        lines.append(
+            "The sources of phase identity disagree.  Halt and resolve "
+            "each mismatch before continuing.  Do NOT infer which is "
+            "correct — verify explicitly."
+        )
+        lines.append("")
 
     if audit is not None:
         phases_detected = audit.get("phases_detected", 0)
@@ -510,6 +529,52 @@ def _todo_roadmap_status(root: HarnessPath, current_phase: str) -> dict:
     return {"todo_next_phase": todo_next_phase, "stale": stale}
 
 
+def _detect_phase_ambiguity(
+    root: HarnessPath,
+    current_phase: str,
+    active_task: object | None,
+) -> dict[str, Any]:
+    """Detect phase identity ambiguity between canonical sources.
+
+    Returns a dict with:
+        ambiguous: bool — True if any ambiguity was detected
+        mismatches: list[str] — human-readable mismatch descriptions
+    Phase 113B.2 — fail-closed: ambiguity is flagged so the agent can
+    halt and seek clarification.
+    """
+    import re as _re
+    mismatches: list[str] = []
+
+    # ── Active task phase vs PROJECT_STATUS.md current phase ────────────
+    if active_task is not None:
+        task_title = getattr(active_task, "title", "") or ""
+        task_phase_match = _re.search(
+            r"Phase\s+(\d+[A-Z](?:\.\d+)*)", task_title,
+        )
+        if task_phase_match:
+            task_phase = task_phase_match.group(1)
+            # Extract base phase (e.g. "113B" from "113B.2")
+            task_base = _re.match(r"(\d+[A-Z])", task_phase)
+            current_base = _re.match(r"(\d+[A-Z])", current_phase) if current_phase else None
+            if task_base and current_base and task_base.group(1) != current_base.group(1):
+                mismatches.append(
+                    f"Active task phase {task_phase!r} does not match "
+                    f"PROJECT_STATUS.md current phase {current_phase!r}"
+                )
+
+    # ── Current phase claims to be completed ────────────────────────────
+    if current_phase and "completed" in current_phase.lower():
+        mismatches.append(
+            f"PROJECT_STATUS.md current phase appears to be marked as "
+            f"completed ({current_phase!r}) — no phase is in progress"
+        )
+
+    return {
+        "ambiguous": len(mismatches) > 0,
+        "mismatches": mismatches,
+    }
+
+
 def build_context_pack(root: HarnessPath) -> ContextPack:
     from pcae.core.agent import build_irg_loop_integration
 
@@ -550,14 +615,18 @@ def build_context_pack(root: HarnessPath) -> ContextPack:
         "latest_event": latest_event,
     }
 
+    active_task_obj = find_latest_active_task(root)
+
     roadmap_summary = {
         "current_phase": current_phase,
         "next": next_items,
         "recommended_next_phase": recommended_next_phase,
         "todo_status": todo_status,
+        "phase_ambiguity": _detect_phase_ambiguity(
+            root, current_phase, active_task_obj,
+        ),
     }
 
-    active_task_obj = find_latest_active_task(root)
     if active_task_obj is not None:
         scope_boundaries = {
             "allowed_files": list(active_task_obj.allowed_files),
