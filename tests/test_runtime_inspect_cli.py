@@ -412,13 +412,20 @@ def module_imports() -> list[str]:
 
 
 def test_module_imports_are_allowlisted(module_imports):
+    """112E updated this allowlist deliberately: the CLI no longer
+    imports `pcae.core.runtime_introspection` directly (assembly moved
+    to `pcae.core.runtime_snapshot`, per 112E objective 3 -- "avoid
+    bespoke assembly logic inside the CLI"); `pcae.core.paths` is new,
+    needed to resolve the repo root Runtime Snapshot reads real
+    session/task state from."""
     allowed = {
         "__future__",
         "argparse",
         "json",
         "pcae.core.command_path_observation",
-        "pcae.core.runtime_introspection",
+        "pcae.core.paths",
         "pcae.core.runtime_registry",
+        "pcae.core.runtime_snapshot",
     }
     for name in module_imports:
         assert name in allowed, f"unexpected import: {name}"

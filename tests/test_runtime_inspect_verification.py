@@ -129,9 +129,12 @@ def test_all_three_output_modes_agree_on_core_facts(capsys):
 
 #: The frozen top-level JSON schema, as a stable observation contract.
 #: Any change to this set in a future phase must be a deliberate,
-#: documented decision -- not an accidental side effect.
+#: documented decision -- not an accidental side effect. `context` was
+#: added deliberately in 112E (Runtime Snapshot / Runtime Context
+#: integration, objective 4) -- exactly the kind of documented decision
+#: this comment anticipated, not an accidental side effect.
 STABLE_TOP_LEVEL_KEYS = frozenset(
-    {"runtime", "registry", "plugins", "capabilities", "health", "governance", "state", "version"}
+    {"runtime", "registry", "plugins", "capabilities", "health", "governance", "state", "version", "context"}
 )
 
 STABLE_SECTION_KEYS = {
@@ -233,9 +236,18 @@ def test_runtime_metadata_present_and_well_formed(capsys):
 def test_json_is_always_a_flat_two_level_structure_for_scalars():
     """Every section value is either a scalar, a list of scalars, or a
     list of flat dicts -- no deeply nested structure that would make
-    this an unstable contract to consume."""
+    this an unstable contract to consume.
+
+    `context` (112E) is deliberately excluded from this flatness
+    constraint: Runtime Context is, by 112A/112B/112C's own frozen
+    design, a genuinely hierarchical composition (session -> tasks,
+    session -> observation) -- flattening it here would misrepresent
+    the composition model this phase exists to integrate, not make the
+    contract more stable."""
     data = ri_cli._build_snapshot(RuntimeRegistry())
     for key, value in data.items():
+        if key == "context":
+            continue
         if isinstance(value, dict):
             for sub_value in value.values():
                 assert not isinstance(sub_value, dict)
@@ -405,10 +417,17 @@ def test_compatible_with_110e_110f_registry_module_unchanged():
 
 
 def test_compatible_with_111a_introspection_architecture_domains(capsys):
+    """`context` is deliberately excluded from this per-key check: 111A's
+    architecture document predates Runtime Context entirely (112A-112E)
+    and never mentions it. `docs/PCAE_RUNTIME_SNAPSHOT.md` (112E) is the
+    document that key's presence is meaningfully checked against
+    instead -- see tests/test_runtime_snapshot.py."""
     text = (DOCS / "PCAE_RUNTIME_INTROSPECTION.md").read_text()
     _, output = _run(capsys, "--json")
     data = json.loads(output)
     for key in data.keys():
+        if key == "context":
+            continue
         assert key.capitalize() in text or key in text.lower()
 
 
@@ -565,16 +584,22 @@ def test_manifest_field_absent_from_every_output_mode(capsys):
 
 
 def test_module_import_allowlist_unchanged_from_111c():
-    """Reconfirms the AST-based import allowlist established in 111C
-    still holds -- no new dependency crept in."""
+    """Deliberately updated by 112E: the CLI now delegates assembly to
+    `pcae.core.runtime_snapshot` instead of importing
+    `pcae.core.runtime_introspection` directly (112E objective 3), and
+    gained `pcae.core.paths` to resolve the repo root Runtime Snapshot
+    reads. Every other 111C-era import remains unchanged -- this test
+    still exists specifically to catch any *other*, undocumented
+    dependency creeping in."""
     names = _module_import_names(ri_cli.__file__)
     allowed = {
         "__future__",
         "argparse",
         "json",
         "pcae.core.command_path_observation",
-        "pcae.core.runtime_introspection",
+        "pcae.core.paths",
         "pcae.core.runtime_registry",
+        "pcae.core.runtime_snapshot",
     }
     for name in names:
         assert name in allowed, f"unexpected import: {name}"

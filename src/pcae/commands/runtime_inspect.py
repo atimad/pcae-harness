@@ -1,27 +1,40 @@
 """
-Runtime Inspect CLI — Phase 111C.
+Runtime Inspect CLI — Phase 111C, integrated with Runtime Snapshot in 112E.
 
 `pcae runtime inspect` / `pcae runtime inspect --json` / `pcae runtime
-inspect --verbose`: the first CLI command exposing 111B's
-observation-only Runtime Introspection prototype
-(`pcae.core.runtime_introspection`) as a safe, read-only operational
-snapshot. This command exposes information; it never changes behavior
-(111A §1, "Visibility precedes authority").
+inspect --verbose`: renders the Runtime Snapshot (112E,
+`pcae.core.runtime_snapshot`) — the Runtime's single, canonical,
+read-only operational representation, composing 111B's Runtime
+Introspection objects with 112C's Runtime Context. This command
+exposes information; it never changes behavior (111A §1, "Visibility
+precedes authority").
+
+As of 112E, this module no longer assembles the snapshot itself
+(112E objective 3: "Avoid bespoke assembly logic inside the CLI") —
+`_build_snapshot()` is now a thin, backward-compatible wrapper around
+`pcae.core.runtime_snapshot.build_runtime_snapshot()`, kept under its
+original name and single-argument signature so every call site written
+against 111C/111D's own `_build_snapshot(registry)` continues to work
+unchanged.
 
 Read-only end to end: it constructs one fresh, empty `RuntimeRegistry()`
-per invocation and calls every `pcae.core.runtime_introspection.get_*()`
-function against it, then formats the result. There is no persisted or
-process-shared registry anywhere in this codebase today (110E's own
-documented limitation: "in-memory only for this phase") — an empty
-snapshot (zero registered plugins, zero declared capabilities) is
-therefore the honest, correct report every invocation produces, not a
-bug or a placeholder.
+per invocation and delegates to Runtime Snapshot, which calls every
+`pcae.core.runtime_introspection.get_*()` function against it, then
+formats the result. There is no persisted or process-shared registry
+anywhere in this codebase today (110E's own documented limitation:
+"in-memory only for this phase") — an empty snapshot (zero registered
+plugins, zero declared capabilities) is therefore the honest, correct
+report every invocation produces, not a bug or a placeholder.
 
 Never calls `PermissionBroker.evaluate()` (it reads one already-frozen
 status constant, via `runtime_introspection.get_governance()`, exactly
 as 111B does), never loads/instantiates/invokes a plugin, never mutates
 `RuntimeRegistry` state, never performs a network call, and never reads
-an environment variable, secret, token, or credential.
+an environment variable, secret, token, or credential. Runtime
+Snapshot's own Runtime Context integration reads real repo state
+(`.pcae/session.json`, `tasks/active/`) through the same already-
+governed helpers `pcae session bootstrap` uses — read-only, not a new
+I/O capability this command introduces.
 
 `PluginDescriptor.manifest` (an open, untyped field, per 110E/110F) is
 deliberately excluded from both the human-readable and JSON output —
@@ -30,8 +43,10 @@ deliberately excluded from both the human-readable and JSON output —
 command must never surface or attempt to serialize.
 
 See `docs/PHASE_111_RUNTIME_INSPECT_CLI.md`,
-`docs/PCAE_RUNTIME_INTROSPECTION.md` (111A), and
-`src/pcae/core/runtime_introspection.py` (111B).
+`docs/PCAE_RUNTIME_INTROSPECTION.md` (111A),
+`docs/PCAE_RUNTIME_SNAPSHOT.md` (112E),
+`src/pcae/core/runtime_introspection.py` (111B), and
+`src/pcae/core/runtime_snapshot.py` (112E).
 """
 
 from __future__ import annotations
@@ -40,93 +55,20 @@ import argparse
 import json
 
 from pcae.core.command_path_observation import INTEGRATION_REGISTRY
-from pcae.core.runtime_introspection import (
-    get_capabilities,
-    get_governance,
-    get_health,
-    get_plugins,
-    get_registry,
-    get_runtime,
-    get_state,
-    get_version,
-)
+from pcae.core.paths import HarnessPath
 from pcae.core.runtime_registry import RuntimeRegistry
+from pcae.core.runtime_snapshot import build_runtime_snapshot, snapshot_to_dict
 
 
 def _build_snapshot(registry: RuntimeRegistry) -> dict:
-    """Assemble the full operational snapshot from every 111B
-    introspection function, in one pass. Pure read: no argument is
-    mutated, no function call has a side effect."""
-    runtime = get_runtime()
-    registry_info = get_registry(registry)
-    plugins = get_plugins(registry)
-    capabilities = get_capabilities(registry)
-    health = get_health(registry)
-    governance = get_governance()
-    state = get_state()
-    version = get_version(registry)
-
-    return {
-        "runtime": {
-            "pipeline_stages": list(runtime.pipeline_stages),
-            "principles": list(runtime.principles),
-            "runtime_services": list(runtime.runtime_services),
-        },
-        "registry": {
-            "registered_plugin_count": registry_info.registered_plugin_count,
-            "registered_capability_count": registry_info.registered_capability_count,
-            "registry_status": registry_info.registry_status,
-            "metadata_validity": registry_info.metadata_validity,
-            "plugin_ids": list(registry_info.plugin_ids),
-            "capabilities": list(registry_info.capabilities),
-        },
-        "plugins": [
-            {
-                "plugin_id": p.plugin_id,
-                "plugin_type": p.plugin_type,
-                "version": p.version,
-                "capabilities": list(p.capabilities),
-                "lifecycle_state": p.lifecycle_state,
-                "health_state": p.health_state,
-                "implementation_status": p.implementation_status,
-                # manifest deliberately omitted -- open/untyped field,
-                # never surfaced by this command (see module docstring).
-            }
-            for p in plugins
-        ],
-        "capabilities": [
-            {
-                "capability": c.capability,
-                "declaring_plugin_ids": list(c.declaring_plugin_ids),
-                "undeclarable": c.undeclarable,
-            }
-            for c in capabilities
-        ],
-        "health": {
-            "runtime_status": health.runtime_status,
-            "registry_status": health.registry_status,
-            "plugin_count": health.plugin_count,
-            "capability_count": health.capability_count,
-            "metadata_validity": health.metadata_validity,
-            "execution_availability": health.execution_availability,
-            "current_runtime_state": health.current_runtime_state,
-            "current_maximum_plugin_capability": health.current_maximum_plugin_capability,
-        },
-        "governance": {
-            "non_executing_posture": governance.non_executing_posture,
-            "broker_implementation_status": governance.broker_implementation_status,
-            "observed_command_paths": governance.observed_command_paths,
-            "execution_capability": governance.execution_capability,
-        },
-        "state": {
-            "current_state": state.current_state,
-            "state_model": list(state.state_model),
-        },
-        "version": {
-            "release_version": version.release_version,
-            "plugin_versions": [list(pair) for pair in version.plugin_versions],
-        },
-    }
+    """Assemble the full operational snapshot. Kept under its original
+    111C name and single-argument signature for backward compatibility
+    -- delegates entirely to Runtime Snapshot (112E) for assembly; this
+    function itself contains no loop, no bespoke composition logic, and
+    no side effect."""
+    root = HarnessPath.cwd()
+    snapshot = build_runtime_snapshot(root, registry)
+    return snapshot_to_dict(snapshot)
 
 
 def _format_human(snapshot: dict, verbose: bool) -> str:
@@ -178,11 +120,36 @@ def _format_human(snapshot: dict, verbose: bool) -> str:
             lines.append(f"  - {entry.integration_id}: {entry.command} ({entry.observation_status})")
 
         lines.append("")
+        lines.append("Runtime Context (112E):")
+        context = snapshot.get("context")
+        if context is None:
+            lines.append("  (no session state observed)")
+        else:
+            lines.append(f"  Session:         {context['session_id']} ({context['lifecycle_stage']})")
+            if context["active_tasks"]:
+                for t in context["active_tasks"]:
+                    lines.append(f"  Active task:     {t['task_id']} — {t['title']} ({t['lifecycle_stage']})")
+            else:
+                lines.append("  Active task:     none")
+            lines.append("  Active phase:    not implemented anywhere (COMP-003/COMP-007 unimplemented)")
+            lines.append("  Intent:          not implemented anywhere")
+            lines.append("  Approval:        not implemented anywhere (COMP-003)")
+            lines.append("  Broker decision: not implemented anywhere")
+            lines.append("  Evidence:        not implemented anywhere (COMP-007)")
+            observation = context["observation"]
+            if observation is not None:
+                lines.append(
+                    f"  Observation:     {len(observation['consulted_integrations'])} integrations consulted "
+                    f"({', '.join(observation['consulted_integrations'])})"
+                )
+
+        lines.append("")
         lines.append("Current limitations:")
         lines.append("  - Registry is in-memory only; no persistence exists (110E).")
         lines.append("  - SessionInfo/TaskInfo/PhaseInfo not yet exposed (111B, deferred).")
         lines.append("  - No plugin loading, instantiation, or invocation exists anywhere.")
         lines.append("  - This command cannot see plugins registered by another process.")
+        lines.append("  - Active phase/intent/approval/broker decision/evidence remain unimplemented (112E).")
 
     return "\n".join(lines)
 
@@ -190,7 +157,9 @@ def _format_human(snapshot: dict, verbose: bool) -> str:
 def run_runtime_inspect(args: argparse.Namespace) -> int:
     """Handler for `pcae runtime inspect`. Never mutates, never loads/
     instantiates/invokes a plugin, never calls
-    `PermissionBroker.evaluate()`, never performs I/O beyond stdout."""
+    `PermissionBroker.evaluate()`, never performs I/O beyond stdout and
+    the read-only Runtime Context reads Runtime Snapshot itself
+    performs."""
     registry = RuntimeRegistry()
     snapshot = _build_snapshot(registry)
 

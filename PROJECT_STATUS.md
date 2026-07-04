@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 112E — Runtime Snapshot & Runtime Inspect Context Integration (completed).
+
+Implementation phase — integrates Runtime Context (112C/112D) into the
+Runtime Inspect subsystem by introducing the canonical Runtime
+Snapshot model. Observation-only integration; no execution capability.
+
+**New principle: "Runtime Snapshot is the canonical read model."**
+Added `src/pcae/core/runtime_snapshot.py`: `RuntimeSnapshot` composes
+111B's eight Runtime Introspection objects (unchanged — delegates to
+their own `get_*()` functions, no re-derivation) with a new
+`context: RuntimeContext | None` field.
+
+**`build_runtime_context_from_repo(root)`** is the new read-only bridge
+between 112C's isolated `RuntimeContext` object model and real repo
+state — reads `.pcae/session.json` and `tasks/active/` through the same
+already-governed helpers `pcae session bootstrap` itself uses (no new
+I/O capability). Populates `RuntimeSession`, the active `TaskContext`
+(if any), and `ObservationContext` (the four `INT-NNN` integrations,
+always populated per 112B §8's "Observation always available"
+invariant). Active Phase/Intent/Approval/Broker Decision/Evidence
+remain explicitly `null` — reported by name, not silently omitted —
+since none has a real, governed backing source anywhere in this
+codebase (`COMP-003`/`COMP-007` unimplemented).
+
+**`pcae runtime inspect` refactored:** `commands/runtime_inspect.py`'s
+`_build_snapshot(registry)` is now a three-line delegation to Runtime
+Snapshot, kept under its original 111C name/signature so every
+pre-existing call site continues to work unmodified. All composition
+logic moved out of the CLI.
+
+**Backward compatibility preserved and reconfirmed:** `pcae runtime
+inspect` / `--json` / `--verbose` all continue to work. JSON schema
+gains exactly one new, additive top-level key (`context`); every
+existing key/section shape is byte-for-byte unchanged, reconfirmed
+directly against 111D's own frozen `STABLE_TOP_LEVEL_KEYS`/
+`STABLE_SECTION_KEYS` contract tests (updated deliberately to include
+the new key, not loosened). Default human-readable output unchanged;
+new "Runtime Context (112E):" section appears only under `--verbose`.
+
+**Five pre-existing 111C/111D tests deliberately updated**, each with
+an explanatory comment: the CLI's import allowlist (now
+`pcae.core.runtime_snapshot`/`pcae.core.paths`, no longer
+`pcae.core.runtime_introspection` directly); `STABLE_TOP_LEVEL_KEYS`
+(added `context`, per that constant's own "deliberate, documented
+decision" comment); the JSON-flatness test (excludes `context`, since
+Runtime Context is genuinely hierarchical by 112A/112B/112C's own
+design); the 111A doc-text cross-check (excludes `context`, since 111A
+predates Runtime Context entirely).
+
+Added `docs/PCAE_RUNTIME_SNAPSHOT.md`,
+`docs/PHASE_112_RUNTIME_SNAPSHOT_INTEGRATION.md`. 35 new tests
+(`tests/test_runtime_snapshot.py`); 101 pre-existing tests across
+`test_runtime_inspect_cli.py`/`test_runtime_inspect_verification.py`
+still pass after their five deliberate updates.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 112F — Runtime Snapshot Contract Freeze (not started).
+
+## Phase 112D Complete
+
 Phase 112D — Runtime Context Verification & Compatibility (completed).
 
 Verification/hardening phase only — no new Runtime Context
