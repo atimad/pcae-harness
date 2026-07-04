@@ -214,7 +214,15 @@ class TestPhaseCompleteHardFail:
         assert exit_code == 0
         assert "--allow-partial-report" in output
 
-    def test_allow_partial_report_still_suppresses_telegram(self, tmp_path, monkeypatch, capsys):
+    def test_allow_partial_report_sends_partial_warning_notification(self, tmp_path, monkeypatch, capsys):
+        """Phase 113X.3 — a finalized-but-partial report (canonical
+        latest.* were written, via --allow-partial-report) is no longer
+        silently un-notified: it sends a clearly-labeled WARNING
+        notification instead of the normal "Phase COMPLETED" one and
+        instead of pure silence (105D's rule that partial reports are
+        never sent as *normal* final reports is preserved -- this is a
+        distinctly different, warning-labeled notification, not the
+        suppressed normal one)."""
         root = _init_repo(tmp_path)
         _write_metadata(tmp_path, files_changed_count=0)
         monkeypatch.chdir(tmp_path)
@@ -227,8 +235,12 @@ class TestPhaseCompleteHardFail:
         output = capsys.readouterr().out
 
         assert exit_code == 0
-        assert "Notification dispatch: skipped" in output
-        assert not (tmp_path / ".pcae" / "notifications").exists()
+        assert "Notification dispatch: sent" in output
+        assert "PARTIAL WARNING" in output
+        assert "Notification dispatch: skipped" not in output
+        # The warning notification was actually dispatched to the
+        # configured (filesystem) sink -- not suppressed.
+        assert (tmp_path / ".pcae" / "notifications").exists()
 
 
 # ── Group B: Push-check integration ─────────────────────────────────────────

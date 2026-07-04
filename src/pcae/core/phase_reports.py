@@ -37,6 +37,24 @@ VALID_COMPLETENESS: frozenset[str] = frozenset({
     COMPLETENESS_INCOMPLETE,
 })
 
+# Notification outcome model (Phase 113X.3) — explicit, recorded result of a
+# finalization's attempt to notify the mobile/Telegram channel. Distinct from
+# NotificationResult.success (per-sink), this is the single overall outcome
+# threaded through finalize_phase_report()'s return value and persisted on
+# PhaseReport.notification_result, so "was the operator told, and if not, why"
+# is always answerable from the report/status output alone.
+NOTIFICATION_OUTCOME_ATTEMPTED = "attempted"
+NOTIFICATION_OUTCOME_SENT = "sent"
+NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON = "skipped_with_reason"
+NOTIFICATION_OUTCOME_FAILED_WITH_REASON = "failed_with_reason"
+
+VALID_NOTIFICATION_OUTCOMES: frozenset[str] = frozenset({
+    NOTIFICATION_OUTCOME_ATTEMPTED,
+    NOTIFICATION_OUTCOME_SENT,
+    NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+    NOTIFICATION_OUTCOME_FAILED_WITH_REASON,
+})
+
 # Trust-critical fields for a completed phase report
 _TRUST_CRITICAL_FIELDS: tuple[str, ...] = (
     "phase_id", "phase_name", "status", "summary",
@@ -829,16 +847,16 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
         )
         if next_match:
             next_num = next_match.group(1)
-            # If next phase number equals current or points backward
+            # If next phase number equals current or points backward.
+            # Phase 113X.3 — is_phase_id_backward() is branch-aware:
+            # naive lexicographic comparison ("113D" < "113X.2") wrongly
+            # flagged a valid transition off the "X" exceptional branch
+            # back to the lettered mainline as "backward."
             if next_num == current:
                 mismatches.append(
                     f"recommended_next_phase={next_num} points to itself (current={current})"
                 )
-            elif (
-                len(next_num) >= 3 and len(current) >= 3
-                and next_num[:2] == current[:2]  # same series (e.g. both 94)
-                and next_num < current            # but earlier in series
-            ):
+            elif is_phase_id_backward(next_num, current):
                 mismatches.append(
                     f"recommended_next_phase={next_num} points backward from {current}"
                 )
@@ -900,6 +918,75 @@ def _apply_canonical_and_trust(
 
 _MIN_NO_GO_COUNT = 11
 _MIN_NO_GO_PREFIX = "No "
+
+_PHASE_ID_SHAPE_RE = re.compile(r'^(\d+)([A-Za-z]*)((?:\.\d+)*)$')
+
+
+def _parse_phase_id_shape(phase_id: str) -> tuple[str, str, tuple[int, ...]] | None:
+    """Parse a phase ID into ``(series, branch, subphase)`` for
+    branch-aware comparison (Phase 113X.3).
+
+    Examples: ``"113D"`` -> ``("113", "D", ())``;
+    ``"113X.2"`` -> ``("113", "X", (2,))``;
+    ``"113B.2"`` -> ``("113", "B", (2,))``.
+
+    Returns ``None`` if ``phase_id`` doesn't match the expected shape
+    (digits, then letters, then zero or more ``.N`` sub-phase parts).
+    """
+    m = _PHASE_ID_SHAPE_RE.match(phase_id.strip())
+    if not m:
+        return None
+    series, branch, subphase_str = m.groups()
+    subphase = tuple(int(p) for p in subphase_str.split(".") if p)
+    return series, branch, subphase
+
+
+def _is_exception_branch(branch: str) -> bool:
+    """True for the ``"X"`` exceptional/corrective-governance branch
+    marker (e.g. ``113X.1``, ``113X.2``) introduced by Phase 113X --
+    a self-contained numbered excursion, not a position in the normal
+    lettered mainline sequence (113A, 113B, 113C, 113D, ...)."""
+    return branch.upper() == "X"
+
+
+def is_phase_id_backward(next_id: str, current_id: str) -> bool:
+    """Branch-aware replacement for naive lexicographic phase-ID
+    ordering (Phase 113X.3, repairing a bug 113X.2 exposed).
+
+    Two phase IDs are only meaningfully orderable when they share the
+    same series *and* are on the same kind of branch. The plain
+    lettered mainline (``113A``, ``113B``, ``113C``, ``113D``, ...) is
+    one real, ordered sequence -- ``"113B"`` genuinely precedes
+    ``"113D"``. The ``"X"`` exceptional branch (``113X.1``, ``113X.2``,
+    ...) is a separate, self-contained governance-repair excursion with
+    its own sub-numbering, not a point in that lettered sequence.
+
+    Naive string/lexicographic comparison (``"113D" < "113X.2"``, since
+    ``'D' < 'X'``) wrongly treats a transition *between* these two
+    kinds of branch (e.g. returning from the ``113X.N`` excursion back
+    to the ``113D`` mainline) as "pointing backward" -- when the two
+    IDs simply aren't comparable at all.
+
+    Returns ``True`` only when both IDs share the same series, are
+    both on the mainline or both on the ``"X"`` branch, and ``next_id``
+    is a genuinely earlier (branch letter, subphase) position than
+    ``current_id``. Returns ``False`` (never "backward") whenever the
+    two IDs are not comparable -- different series, different kind of
+    branch, or either fails to parse -- rather than guessing.
+    """
+    next_parsed = _parse_phase_id_shape(next_id)
+    current_parsed = _parse_phase_id_shape(current_id)
+    if next_parsed is None or current_parsed is None:
+        return False
+    next_series, next_branch, next_sub = next_parsed
+    cur_series, cur_branch, cur_sub = current_parsed
+    if next_series != cur_series:
+        return False
+    if _is_exception_branch(next_branch) != _is_exception_branch(cur_branch):
+        return False
+    if next_id == current_id:
+        return False  # equality is a separate "points to itself" check
+    return (next_branch, next_sub) < (cur_branch, cur_sub)
 
 
 def resolve_finalization_phase_identity(
@@ -1437,6 +1524,37 @@ def _extract_commit_count_from_summary(summary: str) -> int | None:
     return None
 
 
+def _classify_notification_outcome(
+    *,
+    notify_enabled: bool,
+    sinks: list[Any],
+    notification_results: list[Any] | None,
+    notification_error: str | None,
+) -> tuple[str, str]:
+    """Classify a notification dispatch attempt into the Phase 113X.3
+    outcome model. Returns ``(outcome, reason)`` -- ``reason`` is ``""``
+    exactly when ``outcome == NOTIFICATION_OUTCOME_SENT``.
+
+    Called only once sinks are known to exist and dispatch has been
+    attempted (or raised); the "not enabled" / "no sinks configured"
+    cases are handled by their own early returns in
+    ``finalize_phase_report()`` before this is reached.
+    """
+    if not notify_enabled:
+        return NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON, "PCAE_NOTIFY_ENABLED is not set to 1/true/yes"
+    if not sinks:
+        return NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON, "no notification sinks configured (PCAE_NOTIFY_SINKS)"
+    if notification_error:
+        return NOTIFICATION_OUTCOME_FAILED_WITH_REASON, notification_error
+    if notification_results is None:
+        return NOTIFICATION_OUTCOME_ATTEMPTED, "dispatch attempted but produced no results"
+    if all(r.success for r in notification_results):
+        return NOTIFICATION_OUTCOME_SENT, ""
+    failed = [r for r in notification_results if not r.success]
+    reason = "; ".join(f"{r.sink_name}: {r.message}" for r in failed)
+    return NOTIFICATION_OUTCOME_FAILED_WITH_REASON, reason
+
+
 def finalize_phase_report(
     phase_id: str,
     phase_name: str,
@@ -1454,6 +1572,8 @@ def finalize_phase_report(
     explicit_no_go_confirmations: list[str] | None = None,
     recommended_next_phase: str = "",
     gate: dict[str, Any] | None = None,
+    report_is_complete: bool | None = None,
+    report_incomplete_reason: str = "",
     **kwargs: Any,
 ) -> dict[str, Any]:
     """Create a phase report artifact and optionally dispatch notifications.
@@ -1470,6 +1590,12 @@ def finalize_phase_report(
       notification_results: list[NotificationResult] or None
       notification_skipped: bool
       notification_error: str or None
+      notification_outcome: str (Phase 113X.3 -- one of
+        NOTIFICATION_OUTCOME_ATTEMPTED/SENT/SKIPPED_WITH_REASON/
+        FAILED_WITH_REASON; always present, so "was the operator told,
+        and if not, why" is always answerable)
+      notification_kind: str (Phase 113X.3 -- "complete", "partial_warning",
+        or "none")
 
     Notifications are disabled by default.  Enable with:
       PCAE_NOTIFY_ENABLED=1
@@ -1484,7 +1610,24 @@ def finalize_phase_report(
     report could still overwrite the canonical "latest" artifact with no
     persisted record of why it was blocked). ``gate=None`` (the default,
     used by existing callers/tests that don't pass it) preserves the
-    prior unconditional-write behavior exactly.
+    prior unconditional-write behavior exactly. Blocked/quarantined
+    reports remain fully silent (113X.1 semantics; not weakened here) --
+    the notification guarantee below applies only when canonical
+    latest.* artifacts are actually written.
+
+    Phase 113X.3 — finalization notification guarantee: ``report_is_
+    complete`` (default ``None``, preserving prior behavior exactly for
+    callers that don't pass it -- notably ``pcae task finish --commit``,
+    which remains a separate, unchanged, warning-only visibility path)
+    lets the caller state whether this finalization is fully trust-
+    complete. When ``False`` (finalized but partial -- canonical
+    latest.* were still written, just not via the "blocked" branch
+    above), a clearly-labeled WARNING notification is sent instead of
+    the normal "Phase COMPLETED" one, carrying ``report_incomplete_
+    reason`` -- closing the silent-Telegram gap 113X.2's own completion
+    exposed. A finalized phase that updates canonical report artifacts
+    is never simply silent: normal notification, warning notification,
+    or an explicit recorded skip/failure reason are the only outcomes.
     """
     import os
     from pathlib import Path as _Path
@@ -1536,6 +1679,16 @@ def finalize_phase_report(
                 "notification_results": None,
                 "notification_skipped": True,
                 "notification_error": None,
+                # Phase 113X.3 — additive visibility only: quarantine
+                # semantics (113X.1) are unchanged, still fully silent by
+                # design (do not weaken quarantine semantics).
+                "notification_outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+                "notification_reason": (
+                    "report was quarantined by the finalization gate "
+                    "(phase-identity/trust blocker) -- not eligible for "
+                    "any notification"
+                ),
+                "notification_kind": "none",
                 "report_error": None,
             }
 
@@ -1552,13 +1705,31 @@ def finalize_phase_report(
 
     # 2. Optionally dispatch notifications
     notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
+    # Phase 113X.3 — is this finalization fully trust-complete? Callers
+    # that don't state it explicitly (report_is_complete=None -- notably
+    # `pcae task finish --commit`, and any bare pre-113X.3 caller) get
+    # exactly the prior, unconditional "complete" event -- this function
+    # never used to look at report.report_completeness to decide the
+    # event kind at all, so deriving it from that field here would be a
+    # silent behavior change for those callers, not a preservation of it.
+    is_complete = True if report_is_complete is None else report_is_complete
     if not notify_enabled:
+        skip_reason = "PCAE_NOTIFY_ENABLED is not set to 1/true/yes"
+        report.notification_result = {
+            "dispatched": False, "sinks": [], "success": False, "error": None,
+            "outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+            "reason": skip_reason,
+            "kind": "complete" if is_complete else "partial_warning",
+        }
         return {
             "report": report,
             "paths": paths,
             "notification_results": None,
             "notification_skipped": True,
             "notification_error": None,
+            "notification_outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+            "notification_reason": skip_reason,
+            "notification_kind": "complete" if is_complete else "partial_warning",
             "report_error": None,
         }
 
@@ -1573,16 +1744,30 @@ def finalize_phase_report(
         TelegramSink,
         dispatch,
         phase_report_to_notification_event,
+        phase_report_to_partial_warning_notification_event,
         NotificationSink,
     )
 
     # Use timestamped markdown path for attachment — guarantees the current
     # phase report is attached (not a stale latest.md if write order changed).
     report_path = paths.get("markdown", paths.get("latest_markdown", ""))
-    event = phase_report_to_notification_event(
-        report,
-        artifact_paths=[str(report_path)] if report_path else [],
-    )
+    artifact_paths = [str(report_path)] if report_path else []
+
+    # Phase 113X.3 — a finalized-but-partial report (canonical latest.*
+    # were written; not the blocked/quarantined branch above) gets a
+    # clearly-labeled WARNING event, never the normal "Phase COMPLETED"
+    # one -- 105D's rule that partial reports are never sent as normal
+    # final reports is preserved by construction (different event, not
+    # a suppressed one).
+    notification_kind = "complete" if is_complete else "partial_warning"
+    if is_complete:
+        event = phase_report_to_notification_event(report, artifact_paths=artifact_paths)
+    else:
+        event = phase_report_to_partial_warning_notification_event(
+            report,
+            reason=report_incomplete_reason or "report trust is incomplete",
+            artifact_paths=artifact_paths,
+        )
 
     sinks: list[NotificationSink] = []
     for name in sink_names:
@@ -1595,11 +1780,38 @@ def finalize_phase_report(
 
     notification_error: str | None = None
     notification_results = None
-    if sinks:
-        try:
-            notification_results = dispatch(event, sinks)
-        except Exception as exc:
-            notification_error = str(exc)
+    if not sinks:
+        skip_reason = "no notification sinks configured (PCAE_NOTIFY_SINKS)"
+        report.notification_result = {
+            "dispatched": False, "sinks": [], "success": False, "error": None,
+            "outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+            "reason": skip_reason, "kind": notification_kind,
+        }
+        return {
+            "report": report,
+            "paths": paths,
+            "notification_results": None,
+            "notification_skipped": True,
+            "notification_error": None,
+            "notification_outcome": NOTIFICATION_OUTCOME_SKIPPED_WITH_REASON,
+            "notification_reason": skip_reason,
+            "notification_kind": notification_kind,
+            "report_error": None,
+        }
+
+    try:
+        notification_results = dispatch(event, sinks)
+    except Exception as exc:
+        notification_error = str(exc)
+
+    # Phase 113X.3 — single canonical outcome classification, one of
+    # NOTIFICATION_OUTCOME_{ATTEMPTED,SENT,SKIPPED_WITH_REASON,
+    # FAILED_WITH_REASON}. Always recorded, so "was the operator told,
+    # and if not, why" never depends on reading console output alone.
+    outcome, outcome_reason = _classify_notification_outcome(
+        notify_enabled=True, sinks=sinks,
+        notification_results=notification_results, notification_error=notification_error,
+    )
 
     # Phase 92D.5 — Store notification result in report
     report_sinks = [r.sink_name for r in notification_results] if notification_results else []
@@ -1609,6 +1821,9 @@ def finalize_phase_report(
         "sinks": report_sinks,
         "success": report_ok,
         "error": notification_error,
+        "outcome": outcome,
+        "reason": outcome_reason,
+        "kind": notification_kind,
     }
 
     # Stale-report check: verify report phase_id matches event
@@ -1623,5 +1838,8 @@ def finalize_phase_report(
         "notification_results": notification_results,
         "notification_skipped": False,
         "notification_error": notification_error,
+        "notification_outcome": outcome,
+        "notification_reason": outcome_reason if outcome != NOTIFICATION_OUTCOME_SENT else "",
+        "notification_kind": notification_kind,
         "report_error": None,
     }

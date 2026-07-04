@@ -391,6 +391,54 @@ def phase_report_to_notification_event(
     )
 
 
+def phase_report_to_partial_warning_notification_event(
+    report: Any,  # PhaseReport
+    reason: str,
+    artifact_paths: list[str] | None = None,
+) -> NotificationEvent:
+    """Phase 113X.3 — a clearly-labeled WARNING event for a phase that
+    finalized (canonical latest.md/latest.json were written) but whose
+    report is not fully trust-complete.
+
+    Distinct in both title and forced ``SEVERITY_WARNING`` from
+    ``phase_report_to_notification_event()``'s normal "Phase COMPLETED"
+    event, so a partial report is never mistaken on the mobile channel
+    for a normal final completion report (105D's rule: partial reports
+    are not sent as normal final reports) -- while the operator still
+    isn't left silent (113X.3's core governance rule: a finalized phase
+    that updates canonical artifacts must never be silent on Telegram).
+    """
+    from pcae.core.phase_reports import PhaseReport
+
+    if not isinstance(report, PhaseReport):
+        raise TypeError(f"Expected PhaseReport, got {type(report).__name__}")
+
+    title = (
+        f"PHASE FINALIZED BUT REPORT PARTIAL — mobile operator attention "
+        f"required: {report.phase_name} (Phase {report.phase_id})"
+    )
+    message = f"{report.summary}\n\nReason report is partial: {reason}"
+    paths = list(artifact_paths or [])
+
+    return make_notification_event(
+        event_type=EVENT_TYPE_PHASE_REPORT_CREATED,
+        title=title,
+        message=message,
+        severity=SEVERITY_WARNING,
+        artifact_paths=paths,
+        metadata={
+            "phase_id": report.phase_id,
+            "phase_name": report.phase_name,
+            "phase_status": report.status,
+            "notification_kind": "partial_warning",
+            "partial_reason": reason,
+            "report_completeness": report.report_completeness,
+            "missing_trust_fields": report.missing_trust_fields,
+            "trust_warnings": report.trust_warnings,
+        },
+    )
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Helpers
 # ═══════════════════════════════════════════════════════════════════════════════

@@ -76,12 +76,20 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
 
     Phase 105D — returns True if the report is trust-complete (95M.1 gate
     finalizable AND 105A/105B+push-state trust complete) or
-    `allow_partial_report` was passed; False otherwise (hard-fail). Telegram
-    dispatch is suppressed whenever trust is incomplete, regardless of
-    `allow_partial_report` — a partial report is never sent as final.
+    `allow_partial_report` was passed; False otherwise (hard-fail).
+
+    Phase 113X.3 — a report that isn't trust-complete never dispatches
+    the normal "Phase COMPLETED" notification, but it is not silently
+    dropped either: finalize_phase_report() sends a clearly-labeled
+    WARNING notification instead whenever canonical latest.* artifacts
+    were actually written (see its own docstring for the full outcome
+    model).
     """
-    import os
-    from pcae.core.phase_reports import finalize_phase_report, resolve_finalization_phase_identity
+    from pcae.core.phase_reports import (
+        finalize_phase_report,
+        is_phase_id_backward,
+        resolve_finalization_phase_identity,
+    )
 
     phase_id = _derive_phase_id(summary)
     phase_name = _derive_phase_name(summary)
@@ -115,14 +123,14 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
             meta_next_num = _re.match(r'^([\d]+[A-Za-z]*(?:\.[\d]+)*)', meta_next.strip())
             if meta_next_num:
                 next_num = meta_next_num.group(1)
-                # A recommended next phase should not be before/equal to current
-                # This is a heuristic — if the next phase looks like it's before
-                # the current phase alphabetically, flag it
-                if next_num == phase_id or (
-                    len(next_num) >= 2 and len(phase_id) >= 2 and
-                    next_num[:2] == phase_id[:2] and
-                    next_num < phase_id
-                ):
+                # Phase 113X.3 — branch-aware comparison: a naive
+                # lexicographic check ("113D" < "113X.2", since 'D' < 'X')
+                # wrongly flagged a valid transition off the "X"
+                # exceptional branch back to the lettered mainline as
+                # "backward." is_phase_id_backward() only flags a
+                # genuine regression within the same series and the
+                # same kind of branch (both mainline or both "X").
+                if next_num == phase_id or is_phase_id_backward(next_num, phase_id):
                     print(f"Warning: metadata recommended_next_phase={meta_next!r} "
                           f"appears stale (points to {next_num}, current phase is {phase_id}). "
                           f"Ignoring stale recommended_next_phase.")
@@ -187,8 +195,6 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     recommended_next = meta.get("recommended_next_phase", "") or _derive_next_phase(summary)
     no_go_list = [no_go] if no_go else []
 
-    notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
-
     # Phase 105D — build a trial report (no I/O: no write, no dispatch) to
     # decide hard-fail/dispatch-suppression *before* finalize_phase_report()
     # runs (which writes the report and may dispatch in the same call).
@@ -250,10 +256,24 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     # Command hard-fails (nonzero exit) unless explicitly overridden.
     finalizable = dispatch_allowed or allow_partial_report
 
-    suppressed_notify_enabled = None
-    if not dispatch_allowed and notify_enabled:
-        suppressed_notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED")
-        os.environ["PCAE_NOTIFY_ENABLED"] = ""
+    # Phase 113X.3 — finalization notification guarantee: a finalized
+    # phase that updates canonical latest.* artifacts must never be
+    # silently un-notified. Previously, whenever trust was incomplete,
+    # PCAE_NOTIFY_ENABLED was temporarily cleared before calling
+    # finalize_phase_report() -- suppressing *all* notification,
+    # including for a report that (via --allow-partial-report) still
+    # got written to latest.md/latest.json. finalize_phase_report()
+    # now decides the notification *kind* itself (normal vs a clearly
+    # labeled warning) from `report_is_complete`, so the env var is left
+    # exactly as the human configured it, and a finalized-but-partial
+    # report gets a warning notification instead of silence.
+    incomplete_reason = ""
+    if not dispatch_allowed:
+        reason_parts = [trust_result.summary] if trust_result.summary else []
+        if trust_result.missing_fields:
+            reason_parts.append(f"missing: {', '.join(trust_result.missing_fields)}")
+        incomplete_reason = " -- ".join(reason_parts) or "report trust is incomplete"
+
     # Phase 113X.1 — finalization gate enforcement (113X Finding 1): a
     # blocked gate must quarantine the report instead of overwriting
     # latest.md/latest.json. --allow-partial-report is the pre-existing,
@@ -261,27 +281,25 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     # — it still writes the report canonically and proceeds. The gate is
     # only enforced (passed through) when that override was not given.
     enforced_gate = None if allow_partial_report else gate
-    try:
-        fin = finalize_phase_report(
-            phase_id=phase_id,
-            phase_name=phase_name,
-            status="completed",
-            summary=summary,
-            files_changed=files_changed,
-            tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
-            test_results=test_results,
-            governance_results=governance_results,
-            commits=commits,
-            pushed_status=pushed_status,
-            origin_main_head_count=origin_count,
-            explicit_no_go_confirmations=no_go_list,
-            recommended_next_phase=recommended_next,
-            commit_attribution=commit_attribution,
-            gate=enforced_gate,
-        )
-    finally:
-        if suppressed_notify_enabled is not None:
-            os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
+    fin = finalize_phase_report(
+        phase_id=phase_id,
+        phase_name=phase_name,
+        status="completed",
+        summary=summary,
+        files_changed=files_changed,
+        tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
+        test_results=test_results,
+        governance_results=governance_results,
+        commits=commits,
+        pushed_status=pushed_status,
+        origin_main_head_count=origin_count,
+        explicit_no_go_confirmations=no_go_list,
+        recommended_next_phase=recommended_next,
+        commit_attribution=commit_attribution,
+        gate=enforced_gate,
+        report_is_complete=dispatch_allowed,
+        report_incomplete_reason=incomplete_reason,
+    )
 
     if fin.get("report_error"):
         print(f"Phase report: ERROR — {fin['report_error']}")
@@ -345,26 +363,30 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
             print(f"  JSON:     {json_path}")
 
     # ── Notification dispatch result ──────────────────────────────────────
+    # Phase 113X.3 — finalization notification guarantee: the outcome is
+    # always one of NOTIFICATION_OUTCOME_{SENT,FAILED_WITH_REASON,
+    # SKIPPED_WITH_REASON,ATTEMPTED}, recorded by finalize_phase_report()
+    # itself, so this printing is a direct reflection of that outcome
+    # rather than a second, possibly-diverging decision.
     print()
+    notif_kind = fin.get("notification_kind", "complete")
+    kind_label = " (PARTIAL WARNING — mobile operator attention required)" if notif_kind == "partial_warning" else ""
     if fin.get("notification_skipped"):
-        skip_reason = (
-            "report trust is incomplete — Telegram is never sent as a "
-            "partial/pre-final report"
-            if not dispatch_allowed
-            else _notification_skip_reason(notify_enabled)
-        )
-        print(f"Notification dispatch: skipped")
-        print(f"  Reason: {skip_reason}")
+        print(f"Notification dispatch: skipped{kind_label}")
+        print(f"  Reason: {fin.get('notification_reason', '')}")
         return finalizable
 
     nresults = fin.get("notification_results") or []
     attempted_sinks = [r.sink_name for r in nresults]
-    all_ok = all(r.success for r in nresults)
+    all_ok = bool(nresults) and all(r.success for r in nresults)
 
     if all_ok:
-        print(f"Notification dispatch: sent")
+        print(f"Notification dispatch: sent{kind_label}")
     else:
-        print(f"Notification dispatch: failed")
+        print(f"Notification dispatch: failed{kind_label}")
+        reason = fin.get("notification_reason", "")
+        if reason:
+            print(f"  Reason: {reason}")
 
     print(f"  Sinks attempted:  {', '.join(attempted_sinks) if attempted_sinks else 'none'}")
     if md_path:
@@ -383,26 +405,6 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
         print(f"  Dispatch error: {safe_err}")
 
     return finalizable
-
-
-def _notification_skip_reason(notify_enabled: bool) -> str:
-    """Return a human-readable reason why notification dispatch was skipped."""
-    import os
-    if not notify_enabled:
-        return "PCAE_NOTIFY_ENABLED is not set to 1/true/yes"
-    tg_token = os.environ.get("PCAE_TELEGRAM_BOT_TOKEN", "")
-    tg_chat_id = os.environ.get("PCAE_TELEGRAM_CHAT_ID", "")
-    tg_enabled = os.environ.get("PCAE_TELEGRAM_ENABLED", "").lower() in ("1", "true", "yes")
-    sinks_raw = os.environ.get("PCAE_NOTIFY_SINKS", "")
-    sinks = [s.strip() for s in sinks_raw.split(",") if s.strip()]
-    if not sinks:
-        return "PCAE_NOTIFY_SINKS is empty (no sinks configured)"
-    if "telegram" in sinks:
-        if not tg_token or not tg_chat_id:
-            return "Telegram sink configured but token or chat ID missing"
-        if not tg_enabled:
-            return "Telegram sink configured but PCAE_TELEGRAM_ENABLED is not set"
-    return "no sinks configured or enabled"
 
 
 def _redact_error(error: str) -> str:

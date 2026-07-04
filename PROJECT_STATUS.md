@@ -2,27 +2,110 @@
 
 ## Current Phase
 
-Phase 113X.2 — Canonical Phase Identity Source Repair (completed).
+Phase 113X.3 — Finalized Phase Mobile Notification Guarantee (completed).
 
-Governance repair phase, closing the one remaining finding from the
-Phase 113X (Cross-Agent Governance Verification) forensic audit that
-113X.1 did not address. No Advisory Runtime changes, no execution, no
-Runtime Snapshot behavior changes. `pcae phase complete`'s finalization
-path combines two independent phase-identity sources (CLI/summary-
-derived `phase_id` and `.pcae/phase-completion-metadata.json`'s own
-declared `phase_id`); a mismatch was previously resolved silently
-(metadata discarded, console-only warning, finalization proceeded on
-git-derived fallback data) without ever becoming a
-`validate_finalization_gate()` blocker. New
-`resolve_finalization_phase_identity()` is the single canonical
-resolution point for these two sources; a genuine conflict is now
-threaded into `validate_finalization_gate()` as a blocker, enforced
-through 113X.1's existing quarantine path.
+Governance repair phase, closing a problem 113X.2's own completion
+exposed. No Advisory Runtime changes, no execution, no Runtime Snapshot
+behavior changes. Two distinct bugs: a naive lexicographic
+"backward-pointing recommended next phase" heuristic wrongly flagged
+`113D` as before `113X.2` (`'D' < 'X'` as strings), forcing 113X.2's own
+completion through `--allow-partial-report`; and once a report was
+`partial`, `pcae phase complete` suppressed *all* notification, even
+though canonical `latest.md`/`latest.json` had still been written — the
+operator received no Telegram signal for a finalized, pushed phase.
+New `is_phase_id_backward()` makes phase-ID comparison branch-aware
+(the lettered mainline and the `"X"` exceptional branch are different,
+not-directly-comparable sequences). New notification-outcome model
+(`attempted`/`sent`/`skipped_with_reason`/`failed_with_reason`) always
+recorded on `finalize_phase_report()`'s return value. A
+finalized-but-partial report now sends a distinctly labeled WARNING
+notification ("PHASE FINALIZED BUT REPORT PARTIAL — mobile operator
+attention required") instead of silence; blocked/quarantined reports
+(113X.1) remain fully silent, unchanged.
 
 No automatic next repo phase implementation started. Recommended next
 repo phase: 113D — Advisory Runtime Verification & Compatibility (the
-113X governance-repair excursion is complete; both scoped forensic
-findings are closed).
+113X governance-repair excursion is complete; all three scoped findings
+are closed).
+
+## Phase 113X.3 Complete
+
+Phase 113X.3 — Finalized Phase Mobile Notification Guarantee (completed).
+
+Governance repair phase — no Advisory Runtime changes, no execution, no
+Runtime Snapshot behavior changes, no Telegram inbound/REST/web
+UI/plugin changes. Closes a problem discovered during Phase 113X.2's
+own completion: a finalized, pushed phase produced no Telegram
+notification at all, because a separate bug forced its report to be
+marked `partial`, and Phase 105D deliberately never sends a *normal*
+"Phase COMPLETED" notification for a partial report.
+
+**Root cause (two distinct bugs).** (1) Both `commands/phase.py`'s
+metadata freshness guard and `_check_canonical_metadata_consistency()`'s
+"backward-pointing recommended next phase" check compared phase IDs
+with naive string comparison (`next_num[:2] == current[:2] and
+next_num < current`). `"113D" < "113X.2"` is `True` as strings, so
+recommending `113D` from `113X.2` — a valid transition off the `113X`
+exceptional governance-repair branch back to the lettered mainline —
+was flagged as "pointing backward." (2) Once a report was `partial`,
+`pcae phase complete` cleared `PCAE_NOTIFY_ENABLED` before calling
+`finalize_phase_report()`, suppressing all notification even though the
+report's canonical `latest.*` had still been written (via
+`--allow-partial-report`).
+
+**Branch-aware phase-ID comparison**
+(`src/pcae/core/phase_reports.py`): `_parse_phase_id_shape()` parses an
+ID into `(series, branch, subphase)`; `is_phase_id_backward()` returns
+`True` only when both IDs share a series and are both on the mainline
+or both on the `"X"` branch, and `next_id` is a genuinely earlier
+`(branch, subphase)` position — different branch kinds are never
+comparable, never flagged backward. Both pre-existing call sites now
+share this one helper instead of duplicating the buggy logic.
+
+**Notification outcome model**: four explicit outcomes
+(`NOTIFICATION_OUTCOME_ATTEMPTED`/`_SENT`/`_SKIPPED_WITH_REASON`/
+`_FAILED_WITH_REASON`), classified by `_classify_notification_outcome()`
+and always recorded on `finalize_phase_report()`'s return value and
+`report.notification_result`.
+
+**`finalize_phase_report()` gains `report_is_complete:`/
+`report_incomplete_reason:`** (default `None`, exactly preserving prior
+behavior for callers that don't pass them, notably `pcae task finish
+--commit`). When explicitly `False` (finalized but partial — canonical
+`latest.*` were still written, e.g. via `--allow-partial-report`), a
+distinctly different, clearly-labeled WARNING event
+(`phase_report_to_partial_warning_notification_event()`, new in
+`core/notifications.py` — title "PHASE FINALIZED BUT REPORT PARTIAL —
+mobile operator attention required", forced `SEVERITY_WARNING`) is
+dispatched instead of the normal event and instead of silence — 105D's
+rule that partial reports are never sent as *normal* final reports is
+preserved by construction (a different event, not a suppressed one).
+Blocked/quarantined reports (113X.1) remain fully silent, unchanged —
+the guarantee applies only when canonical artifacts are actually
+updated, matching the brief's own scoping and not weakening quarantine
+semantics.
+
+`commands/phase.py`'s `PCAE_NOTIFY_ENABLED`-clearing suppression hack
+and the now-dead `_notification_skip_reason()` helper were removed.
+
+Added `docs/PHASE_113X3_FINALIZED_PHASE_MOBILE_NOTIFICATION_GUARANTEE.md`.
+17 new tests (`tests/test_finalization_notification_guarantee.py`); one
+pre-existing test updated (it asserted the exact old, now-intentionally-
+changed "always silent for partial" behavior). Reconfirmed the three
+previously-documented pre-existing test fragilities (113X.1/113X.2)
+remain unrelated; observed one additional likely xdist parallel-worker
+race (`test_project_state_no_repository_files_created`, passes cleanly
+in isolation), consistent with this codebase's own previously-
+documented parallel-safety issue class, not caused by this phase.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113D — Advisory Runtime Verification & Compatibility (the
+113X governance-repair excursion is complete; all three scoped findings
+are closed).
 
 ## Phase 113X.2 Complete
 
