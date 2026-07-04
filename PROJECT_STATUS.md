@@ -2,6 +2,87 @@
 
 ## Current Phase
 
+Phase 113B — Advisory Runtime Contract Freeze (completed).
+
+Contract/freeze phase only — no advisory implementation, no runtime
+behavior changes, no execution capability; no file under `src/pcae/`
+touched. Freezes the Advisory Runtime contracts (113A) before any
+advisory implementation begins.
+
+**New principle: "Explainability precedes trust."** A human cannot be
+expected to trust a recommendation they cannot verify — the
+analytical-layer counterpart to "Visibility precedes authority" (111A).
+
+**Fourteen-field `AdvisoryResult` contract frozen** — 113A's nine
+fields extended by five, each traced to a specific explainability or
+reproducibility requirement: `source_snapshot_reference`,
+`reasoning_summary`, `alternative_considerations`, `remediation`,
+`implementation_status` (reused verbatim from `PermissionBrokerDecision`,
+108A). **The brief's suggested `recommendation` field was reconciled,
+not duplicated** — realized as 113A's own `recommended_action`.
+
+**Eight-facet explainability contract frozen**, each mapped to a
+specific field or a fixed, universal invariant sentence restated on
+every result. New reproducibility principle: **"Every recommendation
+must be reproducible from the Runtime Snapshot"** — restates 110A §6's
+already-frozen "Deterministic" Runtime Principle for Analysis
+specifically.
+
+**Evidence model frozen**: one `EvidenceReference` shape (`domain`,
+`object_id`, `field_path`, `evidence_summary`) covers every evidence
+concept named in the brief. No evidence database, no audit
+persistence — evidence is referenced, never stored durably.
+
+**Advisory categories' extension rule frozen**: the taxonomy stays
+open (113A) — new categories may be added freely — but an existing
+category's *meaning* is frozen once published, requiring the same
+deliberate decision a Runtime Snapshot key rename would (112F §3).
+
+**Severity/confidence semantics frozen**: four severity levels
+(`info`/`advisory`/`warning`/`critical`) and four confidence levels
+(`unknown`/`observed`/`validated`/`proven`, reused verbatim from this
+codebase's own capability-discovery vocabulary), explicitly orthogonal
+and never conflated. Ambiguity handled fail-closed: lower confidence,
+populate `alternative_considerations`, or emit multiple results —
+never fabricate certainty.
+
+**Six-stage advisory lifecycle frozen** (`produced`, `presented`,
+future `acknowledged`/`superseded`/`resolved`/`dismissed`) — a fourth,
+distinct lifecycle vocabulary, not to be conflated with the Runtime
+State Model (110A), Plugin Lifecycle (110B), or Context Lifecycle
+(112A). Current implementation status: contract only.
+
+**Presentation contract frozen**: every consumer (CLI, Telegram, REST,
+Dashboard, AI agents) renders the same underlying `AdvisoryResult`
+model, varying only in detail shown.
+
+**Ten absolute safety rules frozen**: 113A's seven plus three new —
+never denies, never implies approval, never bypasses human review or
+future audit.
+
+**Compatibility rules frozen**, mirroring 112F's own discipline
+directly: additive-only within a major version; breaking changes need
+a version bump; consumers ignore unknown fields; reproducibility
+expectations restated. **No versioning field implemented this phase**
+— consistent with 112F's own decision not to implement
+`snapshot_schema_version` during a freeze phase.
+
+Added `docs/PCAE_ADVISORY_RUNTIME_CONTRACT.md`,
+`docs/PHASE_113_ADVISORY_RUNTIME_CONTRACT_FREEZE.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 158 new tests
+(`tests/test_advisory_runtime_contract.py`), a pure documentation-
+verification suite.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113C — Advisory Runtime Prototype (Observation-Only) (not
+started).
+
+## Phase 113A Complete
+
 Phase 113A — Advisory Runtime Architecture (completed).
 
 Architecture/design phase only — no advisory execution, no runtime
