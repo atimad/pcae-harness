@@ -23,10 +23,14 @@ Snapshot/Runtime Context/Runtime Registry/Runtime Inspect/Permission
 Broker file returns zero commits — exactly 5 source files were touched
 across all five repair phases. Findings 1, 3, 4, 6, and 7 classified
 Resolved; the notification-guarantee gap and cross-agent-continuity
-concern classified Resolved. One new, minor, non-blocking observation:
+concern classified Resolved. Two new, minor, non-blocking observations:
 `pcae phase complete` has no duplicate-notification idempotency guard
-(unlike `pcae task finish --commit`'s path) — not unsafe, not a 113X
-regression, just undocumented.
+(unlike `pcae task finish --commit`'s path); and `is_phase_id_backward()`'s
+"X" exceptional-branch recognition only matches an exact single `"X"`,
+not multi-letter variants like `"113XR"` (discovered live while
+finalizing this phase, worked around via `--allow-partial-report`, not
+fixed per this phase's review-only scope). Neither is unsafe, a 113X
+regression, or a blocker.
 
 **Recommendation: safe to resume the normal roadmap.**
 
@@ -79,12 +83,22 @@ phase; `pcae runtime inspect`/`--json` show Runtime state `Observed`,
 execution capability `unavailable`, maximum plugin capability
 `observe` — unchanged throughout the entire sequence.
 
-**One new, minor, non-blocking observation**: `pcae phase complete`
+**Two new, minor, non-blocking observations**: `pcae phase complete`
 has no duplicate-notification idempotency guard (unlike `pcae task
 finish --commit`'s `.pcae/phase-reports/.last-notified.json` marker) —
 not unsafe (a repeated notification is still accurate), not a
 regression from 113X (this path never had a guard), but undocumented.
-Recorded for future consideration, not a blocker.
+Also, discovered live while finalizing this very phase:
+`is_phase_id_backward()`'s "X" exceptional-branch recognition matches
+only an exact single `"X"` character, not multi-letter `"X"`-prefixed
+variants — `"113XR"` is treated as an ordinary lettered phase, so
+recommending `"113D"` from it was incorrectly flagged as "backward"
+(the same class of bug 113X.3 fixed for bare `"X"`, resurfacing for
+this one capstone ID). Worked around via `--allow-partial-report`
+(this phase's own completion report is `partial` as a direct result);
+not fixed, per this phase's review-only scope, and unlikely to recur
+since `"113XR"` is a one-time designation. Both recorded for future
+consideration, neither a blocker.
 
 **Known pre-existing, unrelated conditions reconfirmed** (not new, not
 caused by 113X): the same 3 test fragilities already documented in

@@ -62,6 +62,24 @@ pre-existing, non-blocking gap. Recorded here rather than silently
 passed over, in keeping with this review's evidence-based standard;
 not a blocker for resuming the roadmap.
 
+**`is_phase_id_backward()`'s "X" exceptional-branch recognition only
+matches an exact single `"X"` character, not multi-letter `"X"`-prefixed
+variants.** Discovered live, self-referentially, while finalizing
+*this very phase*: `_is_exception_branch("XR")` returns `False`
+(`"XR".upper() != "X"`), so `113XR` is treated as an ordinary lettered
+mainline phase for comparison purposes. Recommending `"113D"` from
+current phase `"113XR"` was incorrectly flagged as "backward" —
+`("D", ()) < ("XR", ())` is `True` as a tuple/string comparison, the
+same class of bug 113X.3 fixed for the bare `"X"` branch, now
+resurfacing for this one capstone-review ID. Worked around here via
+the pre-existing `--allow-partial-report` override (this phase's own
+completion report is therefore `partial`, not `complete`, purely as a
+result of this edge case); **not fixed**, per this phase's explicit
+review-only, no-new-implementation scope. `"113XR"` is very unlikely to recur as a pattern
+(this is a one-time capstone designation), so this is recorded as a
+minor, narrow, non-blocking edge case for awareness rather than
+escalated as a required follow-up.
+
 ### Known pre-existing, unrelated conditions (reconfirmed, not new)
 
 - Three test fragilities already documented in 113X.1/113X.2's own
