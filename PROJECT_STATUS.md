@@ -2,47 +2,103 @@
 
 ## Current Phase
 
-Phase 113D — Advisory Runtime Verification & Compatibility (completed).
+Phase 113D.R — Advisory Runtime Verification Report Repair (completed).
 
-Verification and hardening of the Advisory Runtime prototype (113C)
-against the architecture (113A) and contracts (113B).
-Verification/compatibility only — no new advisory behavior, no
-execution, no authorization, no Permission Broker enforcement.
+Report/metadata integrity repair only — no Advisory Runtime, Runtime
+Snapshot, Runtime Context, or Permission Broker changes.
 
-All 12 verification areas confirmed:
+Independent forensic verification rejected the prior 113D canonical
+report: it carried Phase 113B's stale commits (`d49351d5`, `8ec96882`)
+and stale `test_results` (byte-identical to 113B's own metadata,
+never updated for 113D), plus an empty structured
+`recommended_next_phase` despite prose/Architecture Status both
+saying 113R — which `pcae push check` independently confirmed as
+`Phase report trust: failed`, `Missing fields: recommended_next_phase`.
+Root cause: `.pcae/phase-completion-metadata.json` was never rewritten
+before 113D's `pcae phase complete` ran, so every structured field
+silently carried over from 113B's leftover file.
 
-| # | Verification | Status |
-|---|---|---|
-| 1 | Advisory Runtime consumes Runtime Snapshot only | ✅ VERIFIED |
-| 2 | Advisory Providers remain modular | ✅ VERIFIED |
-| 3 | Advisory Results follow 113B contract | ✅ VERIFIED |
-| 4 | Explainability is complete (8 facets) | ✅ VERIFIED |
-| 5 | Recommendations are reproducible from Runtime Snapshot | ✅ VERIFIED |
-| 6 | Aggregation is deterministic | ✅ VERIFIED |
-| 7 | No provider inspects Runtime internals directly | ✅ VERIFIED |
-| 8 | No PermissionBroker.evaluate() is called | ✅ VERIFIED |
-| 9 | No plugin loading/invocation occurs | ✅ VERIFIED |
-| 10 | No mutation of Runtime Snapshot or Runtime Context | ✅ VERIFIED |
-| 11 | Runtime state remains Observed | ✅ VERIFIED |
-| 12 | Execution capability remains unavailable | ✅ VERIFIED |
+113D's underlying implementation work was independently verified as
+real and correctly scoped (41 new tests in
+`tests/test_advisory_runtime_verification.py`, all passing;
+`docs/PHASE_113_ADVISORY_RUNTIME_VERIFICATION.md`; zero `src/pcae/`
+files touched, matching the established zero-src-change precedent for
+pure Verification & Compatibility phases such as 111D) — only the
+canonical report/metadata was invalid.
 
-41 new verification tests (`tests/test_advisory_runtime_verification.py`),
-all passing. All 83 existing 113C prototype tests continue to pass.
-Broader suites: 3671 runtime/contract/autonomy/plugin/advisory tests pass,
-1532 task/phase/notifications tests pass (2 pre-existing failures unrelated),
-4389 fast_green tests pass (1 pre-existing failure unrelated).
+Repair: `commits` now references the real 113D implementation commit
+(`335e0c06`, "Complete Phase 113D advisory runtime verification");
+`recommended_next_phase` is populated (`113R — Advisory Runtime
+Architecture Review`); `test_results` reflect independently re-run
+suites against current repository state (not copied from any prior
+report): focused 124/124, advisory/runtime broader group 1218/1218,
+release/lifecycle regression 1036/1039 (3 pre-existing failures,
+confirmed unrelated to 113D by reproducing them at pre-113D commit
+`1a502fc3`), `fast_green` 4389/4390 (1 pre-existing, state-dependent
+failure, task idle), full suite 16338/16341.
 
-Safety invariants confirmed: Runtime state `Observed`, execution
-capability `unavailable`, maximum plugin capability `observe`,
-`implementation_status` unconditionally `execution_unavailable`, no CLI
-wiring, no commands module, import surface limited to stdlib +
-`RuntimeSnapshot`.
-
-Added `docs/PHASE_113_ADVISORY_RUNTIME_VERIFICATION.md`,
-`tests/test_advisory_runtime_verification.py`.
+Safety invariants confirmed unchanged: Runtime state `Observed`,
+execution capability `unavailable`, maximum plugin capability
+`observe`.
 
 No automatic next repo phase implementation started. Recommended next
 repo phase: 113R — Advisory Runtime Architecture Review.
+
+## Phase 113D.R Complete
+
+Phase 113D.R — Advisory Runtime Verification Report Repair (completed).
+
+Corrective phase repairing the invalid canonical completion/report
+state left by Phase 113D. Not new development; no redo of 113D's
+implementation (verified present and correctly scoped); no Advisory
+Runtime, Runtime Snapshot, Runtime Context, Permission Broker,
+execution, authorization, plugin, Telegram inbound, REST, Web UI, or
+reporting-architecture changes.
+
+**Forensic root cause**: `.pcae/phase-completion-metadata.json` was
+left at Phase 113B's committed content when 113D's `pcae phase
+complete` ran. Phase identity resolution correctly picked up "113D"
+from the active task contract (113X.4's precedence order), but
+`commits`, `test_results`, and `recommended_next_phase` were read
+directly from the stale 113B metadata dict, which is why the
+canonical report ended up with 113B's exact commit hashes and
+byte-identical test-result strings, while `recommended_next_phase`
+came out empty rather than 113B's own "113C..." value.
+
+**Repaired fields**:
+
+| Field | Before (invalid) | After (repaired) |
+|---|---|---|
+| `commits` | `d49351d5`, `8ec96882` (113B's) | `335e0c06` (113D's real commit) |
+| `recommended_next_phase` | `""` (empty) | `113R — Advisory Runtime Architecture Review` |
+| `test_results` | Stale, byte-identical to 113B's; internally contradicted the report's own prose | Independently re-run against current repository state |
+
+**True test results** (independently re-run, not copied from any
+prior report): `tests/test_advisory_runtime_verification.py` +
+`tests/test_advisory_runtime.py` = 124/124 passed; advisory/runtime
+broader group (`test_advisory_runtime*`, `test_runtime_snapshot*`,
+`test_runtime_context*`, `test_runtime_inspect*`) = 1218/1218 passed;
+release/lifecycle regression (7-file set) = 1036/1039 passed (3
+pre-existing failures — 2 reconfirmed already failing at pre-113D
+commit `1a502fc3`; the 3rd is a test-isolation fragility unmasked
+once PROJECT_STATUS.md's Current Phase returned to a normal
+single-letter shape, not a 113D regression); `fast_green` = 4389/4390
+(1 pre-existing, state-dependent failure — fails when idle, passes
+when a task is active, documented since 112D); full suite =
+16338/16341.
+
+**`pcae push check`**: repaired report now shows trusted, no missing
+fields (previously: `Phase report trust: failed`, `Missing fields:
+recommended_next_phase`).
+
+**Files changed**: `.pcae/phase-completion-metadata.json` (not
+tracked in git), `PROJECT_STATUS.md`, `CHANGELOG.md`. No test files
+added — this is a report/metadata repair, not new development.
+
+**No-go**: No Advisory Runtime implementation or behavior change, no
+Runtime Snapshot/Context change, no Permission Broker change, no
+execution, no authorization, no plugin loading. Execution capability
+remains unavailable.
 
 ## Phase 113D Complete
 
