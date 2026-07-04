@@ -10,7 +10,7 @@ Phase 113C: Advisory Runtime Prototype (Observation-Only)
 
 ## Status
 
-active
+done
 
 ## Mode
 
