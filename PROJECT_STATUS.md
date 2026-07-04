@@ -2,6 +2,81 @@
 
 ## Current Phase
 
+Phase 113A — Advisory Runtime Architecture (completed).
+
+Architecture/design phase only — no advisory execution, no runtime
+behavior changes, no execution capability; no file under `src/pcae/`
+touched. First phase of the 113-series, following 112F's recommended
+"proceed" to Advisory Runtime work. Designs the Runtime subsystem
+responsible for producing read-only recommendations from Runtime
+Snapshot.
+
+**New principle: "Recommendation precedes authorization."** A future
+authorization mechanism must be able to point to the recommendation
+that preceded it — the same ordering discipline "Context precedes
+execution" (112A) already established for a different pair of
+concepts.
+
+**Advisory Runtime defined**: analytical only — never executes, never
+authorizes, never mutates Runtime Context, never mutates Runtime
+Snapshot. Explicitly distinguished from this codebase's pre-existing,
+unrelated "IRG Challenge" advisory concept (strategic/roadmap review,
+not Runtime Snapshot analysis) — same word, different architecture.
+
+**Five-stage Advisory Pipeline frozen**: Runtime Snapshot → Analysis →
+Recommendation → Advisory Result → Presentation, strictly one-
+directional, no execution path at any stage.
+
+**Advisory Result model frozen** (architecture only, nine fields):
+`advisory_id`, `category`, `severity` (new vocabulary:
+`info`/`advisory`/`warning`/`critical`, deliberately distinct from
+`dry_run.py`'s enforcement-flavored `simulation_severity`),
+`confidence` (reuses this codebase's own existing capability-discovery
+vocabulary verbatim: `unknown`/`observed`/`validated`/`proven`),
+`rationale`, `evidence_references`, `recommended_action`,
+`affected_runtime_objects`, `timestamp`.
+
+**Eight advisory categories frozen** (Runtime Health, Governance,
+Context Consistency, Registry, Plugin Compatibility, Configuration,
+Operational Readiness, future extensibility) as a deliberately **open**
+taxonomy — unlike 110B's closed ten-category plugin taxonomy, since an
+advisory category is a classification label, not a security boundary.
+
+**Runtime integration frozen**: Advisory Runtime consumes Runtime
+Snapshot exclusively, no direct CLI/Telegram/REST dependency — the
+same layering discipline `runtime_snapshot.py` (112E) already applies.
+
+**Plugin integration gap named, not resolved**: none of 110B's ten
+frozen plugin categories fits "read Runtime Snapshot, produce an
+analytical recommendation" (Policy Plugin is closest but is a
+pre-execution authorization concern). This phase does not add an
+eleventh category — extending 110B's closed taxonomy is out of scope
+— it names the extension point for a future phase to decide.
+
+**Presentation layer detailed** for five future consumers (CLI,
+Telegram, REST, dashboard, AI agents), none implemented — one
+`AdvisoryResult` model, many renderers.
+
+**Seven safety rules frozen**, absolute: never executes; never
+authorizes; never mutates Runtime Context; never mutates Runtime
+Snapshot; never invokes Permission Broker; never invokes shell; never
+invokes adapters.
+
+Added `docs/PCAE_ADVISORY_RUNTIME.md`,
+`docs/PHASE_113_ADVISORY_RUNTIME_ARCHITECTURE.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 123 new tests
+(`tests/test_advisory_runtime_architecture.py`), a pure documentation-
+verification suite.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113B — Advisory Runtime Contract Freeze (not started).
+
+## Phase 112F Complete
+
 Phase 112F — Runtime Snapshot Contract Freeze (completed).
 
 Contract/freeze phase only — no runtime behavior changes, no execution
