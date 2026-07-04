@@ -2,6 +2,78 @@
 
 ## Current Phase
 
+Phase 112F — Runtime Snapshot Contract Freeze (completed).
+
+Contract/freeze phase only — no runtime behavior changes, no execution
+capability; no file under `src/pcae/` touched. Freezes Runtime
+Snapshot (112E) as PCAE's stable canonical read-only interface before
+Advisory Runtime work (113A) begins.
+
+**Runtime Snapshot frozen as the canonical read-only interface** for
+six named consumer classes: humans, CLI (implemented), and future AI
+agents, Telegram, REST, dashboard/UI, and automation — none of the
+five future consumers implemented by this phase.
+
+**Nine-domain schema frozen**, transcribed directly from the real
+112E implementation: `runtime`, `registry`, `plugins`, `capabilities`,
+`health`, `governance`, `state`, `version`, `context`. **Corrects the
+phase brief's own suggested domain list against real evidence:** no
+independent "principles or maturity" domain exists — `principles`
+remains a field inside `runtime` (`runtime.principles`), not a tenth
+top-level domain; inventing one would itself have been an undocumented
+schema change.
+
+**JSON compatibility frozen:** stable top-level keys; additive-only
+changes within a schema major version (grounded in 112E's own real
+precedent — adding `context` broke nothing); removal/rename requires a
+major version bump; consumers must ignore unknown keys; no secrets/
+execution handles/mutable internal references.
+
+**Versioning decision — deliberate, not an oversight:** no
+`snapshot_schema_version` field is implemented by this phase. Adding
+one, however small, would be a behavior change to shipped output and
+would contradict this phase's own "no runtime behavior changes" hard
+boundary, breaking the same discipline every prior pure contract-freeze
+phase (110D, 112B) has kept. The full field contract is frozen instead
+(name, single-integer-major-version format starting at `1`,
+compatibility/deprecation/migration rules, and exactly which changes —
+removal, rename, meaning change — would require a future bump).
+
+**Human output compatibility frozen:** JSON is the machine contract;
+human-readable output is stable in content, not exact formatting;
+default output stays concise (today's eleven fields only); `--verbose`
+may gain further read-only sections without a version bump.
+
+**Future consumers detailed**, none implemented: Telegram (via existing
+outbound sinks), REST (serving `snapshot_to_dict()`'s JSON unchanged),
+dashboard, AI agents (via a future `build_context_pack` fold-in),
+audit/reporting (once `COMP-007` exists), and Advisory Runtime (113A)
+itself — reading Runtime Snapshot as read-only input, never writing to
+it, never letting a recommendation appear to be an authorization.
+
+**Security rules frozen** across ten forbidden categories (secrets,
+tokens, credentials, environment variables, execution handles, plugin
+instances, callable references, module/import paths, mutable internal
+objects, approval bypasses), each cross-checked against real,
+already-verified evidence from 111B/111C/111D/112E's own adversarial
+tests.
+
+Added `docs/PCAE_RUNTIME_SNAPSHOT_CONTRACT.md`,
+`docs/PHASE_112_RUNTIME_SNAPSHOT_CONTRACT_FREEZE.md`. `docs/ROADMAP.md`
+evaluated, no change needed. 125 new tests
+(`tests/test_runtime_snapshot_contract.py`), including a direct
+cross-check of the frozen nine-domain schema against the real CLI's
+current JSON output.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113A — Advisory Runtime Architecture (not started).
+
+## Phase 112E Complete
+
 Phase 112E — Runtime Snapshot & Runtime Inspect Context Integration (completed).
 
 Implementation phase — integrates Runtime Context (112C/112D) into the
