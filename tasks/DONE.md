@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 113X.1: Finalization Gate Enforcement Repair (20260704-1308-phase-113x-1-finalization-gate-enforcement-repair)
 - Phase 113B.2: Phase Identity & Lifecycle Hardening (20260704-1017-phase-113b2-phase-identity-hardening)
 - Phase 113C: Add auto-derived PCAE Architecture Status to canonical phase report (20260704-0931-phase-113c-architecture-status)
 - Phase 113C: Advisory Runtime Prototype (Observation-Only) (20260704-0855-phase-113c-advisory-runtime-prototype)
