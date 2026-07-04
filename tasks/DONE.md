@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 113B: Advisory Runtime Contract Freeze (20260704-0918-phase-113b-advisory-runtime-contract-freeze)
 - Sync final pushed-state metadata for 113A (20260704-0904-sync-final-pushed-state-metadata-for-113a)
 - Phase 113A: Advisory Runtime Architecture (20260704-0853-phase-113a-advisory-runtime-architecture)
 - Sync final pushed-state metadata for 112F (20260704-0335-sync-final-pushed-state-metadata-for-112f)
