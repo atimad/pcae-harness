@@ -2,24 +2,99 @@
 
 ## Current Phase
 
-Phase 113X.1 — Finalization Gate Enforcement Repair (completed).
+Phase 113X.2 — Canonical Phase Identity Source Repair (completed).
 
-Governance repair phase, scoped to Finding 1 of the Phase 113X
-(Cross-Agent Governance Verification) forensic audit. No Advisory
-Runtime changes, no execution. `validate_finalization_gate()` correctly
-detected phase-identity/trust blockers, but `finalize_phase_report()`
-wrote `latest.md`/`latest.json` unconditionally regardless of the gate
-result — a blocked report could still become the canonical "latest"
-artifact with no persisted blocker evidence. `finalize_phase_report()`
-now quarantines a blocked report (`write_quarantined_report()`) instead
-of writing `latest.*`, with blockers persisted in the quarantined
-artifact. `pcae phase complete` enforces this; `pcae task finish
---commit`'s pre-existing, tested warning-only partial-report visibility
-behavior is unchanged; `--allow-partial-report`'s pre-existing override
-is unchanged.
+Governance repair phase, closing the one remaining finding from the
+Phase 113X (Cross-Agent Governance Verification) forensic audit that
+113X.1 did not address. No Advisory Runtime changes, no execution, no
+Runtime Snapshot behavior changes. `pcae phase complete`'s finalization
+path combines two independent phase-identity sources (CLI/summary-
+derived `phase_id` and `.pcae/phase-completion-metadata.json`'s own
+declared `phase_id`); a mismatch was previously resolved silently
+(metadata discarded, console-only warning, finalization proceeded on
+git-derived fallback data) without ever becoming a
+`validate_finalization_gate()` blocker. New
+`resolve_finalization_phase_identity()` is the single canonical
+resolution point for these two sources; a genuine conflict is now
+threaded into `validate_finalization_gate()` as a blocker, enforced
+through 113X.1's existing quarantine path.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113X.2 — Canonical Phase Identity Source Repair.
+repo phase: 113D — Advisory Runtime Verification & Compatibility (the
+113X governance-repair excursion is complete; both scoped forensic
+findings are closed).
+
+## Phase 113X.2 Complete
+
+Phase 113X.2 — Canonical Phase Identity Source Repair (completed).
+
+Governance repair phase — no Advisory Runtime changes, no execution,
+no Runtime Snapshot behavior changes, no Telegram inbound/REST/web
+UI/plugin changes. Closes the one remaining finding from the Phase
+113X forensic audit that 113X.1 did not address: 113X.1 repaired
+finalization gate *enforcement* (a blocked report could still overwrite
+`latest.md`/`latest.json`); this phase repairs identity *resolution* —
+a specific divergence between two phase-identity sources feeding `pcae
+phase complete` that was resolved silently, before it ever reached the
+gate.
+
+**Root cause:** `_finalize_report_and_notify()`
+(`src/pcae/commands/phase.py`) combines the CLI/summary-derived
+`phase_id` (`_derive_phase_id()`, a regex over free-text `--summary`)
+with `.pcae/phase-completion-metadata.json`'s own declared `phase_id`.
+Phase 94T.1's "metadata freshness guard" handled a mismatch by
+discarding the metadata, printing a console-only warning, and
+proceeding to finalize using git-derived fallback data for every other
+field — the mismatch itself never became a
+`validate_finalization_gate()` blocker (113X audit Finding 3, not
+closed by 113X.1).
+
+**Every other identity-divergence point named in the 113X.2 brief was
+found, during inspection, to already converge on a single value by
+construction, or to already feed the existing gate**: report body
+phase ID (`report.phase_id`, single field), canonical latest/quarantine
+artifact identity (both derived from `report.phase_id`), notification/
+report status identity (`phase_report_to_notification_event()` reads
+`report.phase_id` only), and canonical-report-file vs current report
+(already checked by `_check_canonical_metadata_consistency()`, which
+downgrades `report_completeness` to `partial` — already a gate blocker
+via the existing "report completeness is not complete" check).
+`pcae task finish --commit`'s metadata has only one source (no
+competing CLI-derived value) — no divergence possible there
+structurally.
+
+**New `resolve_finalization_phase_identity(derived_phase_id, metadata)`**
+(`src/pcae/core/phase_reports.py`): single canonical resolution point.
+Both present and equal, or only one present → no conflict. CLI/summary
+side has no real phase reference (`""`/`"unknown"`) → metadata's value
+is used (nothing to disagree with). Both present and disagreeing →
+conflict names both values; the metadata's phase_id is never trusted
+for the finalization it disagrees with. **`validate_finalization_gate()`
+gains an `identity_conflict:` parameter**, appended to the same
+`blockers` list `validate_phase_identity()` already populates — the
+existing 113X.1 quarantine path enforces it with zero new mechanism.
+`commands/phase.py` calls the resolver instead of the old ad-hoc
+comparison and threads a genuine conflict into the gate.
+
+Added `docs/PHASE_113X2_CANONICAL_PHASE_IDENTITY_SOURCE_REPAIR.md`. 16
+new tests (`tests/test_canonical_phase_identity_repair.py`). Found (not
+fixed — pre-existing, out of scope, documented) three test fragilities
+in the full `python -m pytest` run, each reconfirmed via `git stash -u`
+against the clean pre-113X.2 baseline: the already-known
+`test_both_paths_agree_on_complete_report` (113X.1), plus
+`test_recommended_next_phase_matches_real_project_status` and
+`test_real_todo_not_flagged_stale_against_real_project_status`, both of
+which hardcode an expectation that PROJECT_STATUS.md's current
+recommended phase is still `"112C"`.
+
+**Execution Integration Status:** unchanged. Current execution
+capability: **Execution unavailable**. Current maximum runtime state:
+**Observed**. Current maximum plugin capability: **`observe`**.
+
+No automatic next repo phase implementation started. Recommended next
+repo phase: 113D — Advisory Runtime Verification & Compatibility (the
+113X governance-repair excursion is complete; both scoped forensic
+findings are closed).
 
 ## Phase 113X.1 Complete
 

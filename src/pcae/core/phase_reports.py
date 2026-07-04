@@ -902,6 +902,51 @@ _MIN_NO_GO_COUNT = 11
 _MIN_NO_GO_PREFIX = "No "
 
 
+def resolve_finalization_phase_identity(
+    derived_phase_id: str, metadata: dict[str, Any] | None,
+) -> tuple[str, str | None]:
+    """Single canonical phase-identity resolution point for the
+    ``pcae phase complete`` finalization path (Phase 113X.2).
+
+    Compares the CLI/summary-derived ``phase_id`` (``_derive_phase_id()``
+    in ``commands/phase.py``) against the metadata file's own declared
+    ``phase_id`` -- the two independent phase-identity sources that used
+    to feed the same finalized report/artifact set. Before this repair,
+    a mismatch here was resolved silently: the metadata was discarded,
+    a console warning printed, and finalization proceeded on
+    git-derived fallback data -- the one 113X-forensic-audit divergence
+    point that bypassed ``validate_finalization_gate()`` entirely
+    (audit Finding 3; closed here rather than in 113X.1, which repaired
+    gate *enforcement*, not identity *resolution*).
+
+    Returns ``(metadata_phase_id, conflict)``:
+    - ``metadata_phase_id`` is the metadata's declared phase_id, used
+      as-is when the CLI/summary side has no phase reference at all
+      (``""``/``"unknown"``) -- not every disagreement is a conflict;
+      an absent CLI-side value has nothing to disagree with.
+    - ``conflict`` is ``None`` when the two sources agree, when only
+      one is present, or when the CLI/summary side has no real phase
+      reference. Otherwise it names both disagreeing values, so the
+      evidence survives into ``validate_finalization_gate()``'s
+      blockers list (and, per 113X.1, into a quarantined artifact)
+      instead of a console-only warning. A conflicting metadata
+      phase_id is never trusted for the finalization it disagrees
+      with -- callers must fall back to git-derived data for every
+      other field too.
+    """
+    meta_phase_id = str((metadata or {}).get("phase_id", "")).strip()
+    if not meta_phase_id:
+        return "", None
+    if not derived_phase_id or derived_phase_id == "unknown":
+        return meta_phase_id, None
+    if meta_phase_id != derived_phase_id:
+        return "", (
+            f"CLI/summary phase_id={derived_phase_id!r} does not match "
+            f"metadata phase_id={meta_phase_id!r}"
+        )
+    return meta_phase_id, None
+
+
 def validate_finalization_gate(
     *,
     phase_id: str,
@@ -914,6 +959,7 @@ def validate_finalization_gate(
     no_go_confirmations: list[str] | None = None,
     recommended_next_phase: str = "",
     commit_attribution: str = "",
+    identity_conflict: str | None = None,
 ) -> dict[str, Any]:
     """Authoritative finalization gate for phase completion and Telegram send.
 
@@ -924,6 +970,12 @@ def validate_finalization_gate(
 
     Returns a dict with finalizable, blockers, warnings, diagnostics.
     Fail-closed: if any blocker is present, finalizable=False.
+
+    ``identity_conflict`` (Phase 113X.2) is the conflict string from
+    ``resolve_finalization_phase_identity()``, when the caller detected
+    one before calling this gate -- appended to ``blockers`` alongside
+    ``validate_phase_identity()``'s own findings, so both identity-
+    divergence classes are enforced through the same single path.
     """
     blockers: list[str] = []
     warnings: list[str] = []
@@ -1029,6 +1081,10 @@ def validate_finalization_gate(
     identity_issues = validate_phase_identity(report, phase_id, md)
     for issue in identity_issues:
         blockers.append(f"phase identity: {issue}")
+
+    # ── Phase 113X.2 — Canonical phase-identity source conflict ──────────
+    if identity_conflict:
+        blockers.append(f"phase identity: {identity_conflict}")
 
     # ── Determine outcome ────────────────────────────────────────────────
     finalizable = len(blockers) == 0

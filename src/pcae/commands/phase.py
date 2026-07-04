@@ -81,7 +81,7 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     `allow_partial_report` — a partial report is never sent as final.
     """
     import os
-    from pcae.core.phase_reports import finalize_phase_report
+    from pcae.core.phase_reports import finalize_phase_report, resolve_finalization_phase_identity
 
     phase_id = _derive_phase_id(summary)
     phase_name = _derive_phase_name(summary)
@@ -89,11 +89,22 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
     # Load structured metadata if available
     meta = _load_completion_metadata()
 
-    # ── Phase 94T.1: metadata freshness guard ───────────────────────────
-    meta_phase_id = meta.get("phase_id", "")
-    if meta_phase_id and meta_phase_id != phase_id:
-        print(f"Warning: metadata phase_id={meta_phase_id!r} does not match "
-              f"completing phase {phase_id!r}. Discarding stale metadata.")
+    # ── Phase 113X.2: canonical phase-identity resolution ────────────────
+    # Single resolution point (resolve_finalization_phase_identity) for
+    # the two independent phase-identity sources feeding this
+    # finalization: the CLI/summary-derived phase_id and the metadata
+    # file's own declared phase_id. Phase 94T.1 originally handled a
+    # mismatch here by discarding the metadata and printing a
+    # console-only warning, then proceeding on git-derived fallback data
+    # -- a silent divergence that never became a gate blocker (113X
+    # forensic audit Finding 3). `identity_conflict` is instead threaded
+    # into validate_finalization_gate() below, so a genuine conflict is
+    # enforced through the same quarantine path (113X.1) as every other
+    # phase-identity mismatch.
+    _, identity_conflict = resolve_finalization_phase_identity(phase_id, meta)
+    if identity_conflict:
+        print(f"Warning: {identity_conflict}. Metadata discarded; "
+              f"finalization blocked pending resolution.")
         meta = {}
     elif meta:
         # Check for backward-pointing recommended_next_phase
@@ -217,6 +228,7 @@ def _finalize_report_and_notify(summary: str, *, allow_partial_report: bool = Fa
         no_go_confirmations=no_go_list,
         recommended_next_phase=recommended_next,
         commit_attribution=commit_attribution,
+        identity_conflict=identity_conflict,
     )
     trust_result = compute_final_trust(
         trial_report.to_dict(), old_schema_missing_fields=trial_report.missing_trust_fields,
