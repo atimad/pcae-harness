@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 114B: Completion Sync (20260705-2035-phase-114b-completion-sync)
+- Phase 114B: Notification Enforcement & Idempotency (20260705-1951-phase-114b-notification-enforcement-idempotency)
 - Phase 114A: Canonical Artifact Promotion & Quarantine Hardening (20260705-1847-phase-114a-canonical-artifact-promotion-quarantine-hardening)
 - Phase 113Z: Repository Transition Validator Integration: Task Finish (20260705-1751-phase-113z-repository-transition-validator-integration-task-finish)
 - Phase 113Y: Repository Transition Validator Integration: Phase Completion (20260705-1503-phase-113y-repository-transition-validator-integration-phase-completion) — task closed
