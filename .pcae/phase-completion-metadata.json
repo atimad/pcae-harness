@@ -25,8 +25,8 @@
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/post_push_canonicalization.py",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 3,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -102,7 +102,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "not_ready (working tree dirty pending this completion commit; will be pushed by end of this phase per operating rules)"
+      "status": "clean"
     },
     {
       "name": "pcae_session_bootstrap",
