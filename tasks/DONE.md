@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 114C: Push Authorization & Post-Push Reconciliation (20260705-2201-phase-114c-push-authorization-post-push-reconciliation)
 - Phase 114B.1: Completion Sync (20260705-2126-phase-114b-1-completion-sync)
 - Phase 114B.1: Repository Events & Notification Policy (20260705-2107-phase-114b-1-repository-events-notification-policy)
 - Phase 114B: Completion Sync 2 (20260705-2036-phase-114b-completion-sync-2)
