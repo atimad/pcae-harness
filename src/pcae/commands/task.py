@@ -522,8 +522,10 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
     )
     from pcae.core.phase_reports import (
         finalize_phase_report,
+        phase_already_notified,
         read_latest_report,
         validate_finalization_gate,
+        write_notification_dispatch_marker,
     )
 
     meta_path = _Path(".pcae/phase-completion-metadata.json")
@@ -607,24 +609,12 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
 
     # Idempotency guard: skip dispatch if the same phase_id + commit was
     # already successfully dispatched by a prior finalization (e.g. an
-    # earlier `pcae phase complete` for the same metadata). A dedicated
-    # marker file is used rather than `PhaseReport.notification_result`,
+    # earlier `pcae phase complete` for the same metadata). Uses the shared
+    # marker (Phase 113V.N) rather than `PhaseReport.notification_result`,
     # because `finalize_phase_report()` writes the report artifact *before*
     # attempting dispatch, so the persisted report never reflects the
     # dispatch outcome.
-    marker_path = _Path(".pcae/phase-reports/.last-notified.json")
-    already_sent = False
-    if commit_hash and marker_path.exists():
-        try:
-            marker = json.loads(marker_path.read_text())
-        except json.JSONDecodeError:
-            marker = {}
-        marker_commit = marker.get("commit", "")
-        already_sent = bool(
-            marker.get("phase_id") == phase_id
-            and marker_commit
-            and (commit_hash.startswith(marker_commit) or marker_commit.startswith(commit_hash))
-        )
+    already_sent = bool(commit_hash) and phase_already_notified(phase_id, commit_hash)
     if already_sent:
         existing = read_latest_report(_Path(".pcae/phase-reports"))
         trust_result = (
@@ -801,11 +791,7 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
         if fin.get("notification_error"):
             result["notification_reason"] = fin["notification_error"]
         if all_ok and commit_hash:
-            marker_path.parent.mkdir(parents=True, exist_ok=True)
-            marker_path.write_text(json.dumps({
-                "phase_id": phase_id,
-                "commit": commit_hash[:8],
-            }))
+            write_notification_dispatch_marker(phase_id, commit_hash)
 
     return result
 

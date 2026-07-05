@@ -107,7 +107,9 @@ def _finalize_report_and_notify(
     from pcae.core.phase_reports import (
         finalize_phase_report,
         is_phase_id_backward,
+        phase_already_notified,
         resolve_canonical_phase_identity,
+        write_notification_dispatch_marker,
     )
     from pcae.core.tasks import find_latest_active_task
 
@@ -306,6 +308,21 @@ def _finalize_report_and_notify(
             reason_parts.append(f"missing: {', '.join(trust_result.missing_fields)}")
         incomplete_reason = " -- ".join(reason_parts) or "report trust is incomplete"
 
+    # Phase 113V.N — notification-dispatch idempotency guard. `pcae task
+    # finish --commit` has long had a marker-file guard against sending a
+    # duplicate Telegram final report for the same phase_id + commit; this
+    # path (the authoritative `pcae phase complete` finalization) did not,
+    # which was the actual notification asymmetry -- re-running `pcae phase
+    # complete` for the same metadata could dispatch twice. Both paths now
+    # share one marker implementation (phase_reports.phase_already_notified).
+    commit_for_marker = commits[0] if commits else ""
+    already_notified = bool(commit_for_marker) and phase_already_notified(phase_id, commit_for_marker)
+    suppressed_notify_enabled = None
+    if already_notified:
+        import os as _os
+        suppressed_notify_enabled = _os.environ.get("PCAE_NOTIFY_ENABLED")
+        _os.environ["PCAE_NOTIFY_ENABLED"] = ""
+
     # Phase 113X.1 — finalization gate enforcement (113X Finding 1): a
     # blocked gate must quarantine the report instead of overwriting
     # latest.md/latest.json. --allow-partial-report is the pre-existing,
@@ -313,25 +330,36 @@ def _finalize_report_and_notify(
     # — it still writes the report canonically and proceeds. The gate is
     # only enforced (passed through) when that override was not given.
     enforced_gate = None if allow_partial_report else gate
-    fin = finalize_phase_report(
-        phase_id=phase_id,
-        phase_name=phase_name,
-        status="completed",
-        summary=summary,
-        files_changed=files_changed,
-        tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
-        test_results=test_results,
-        governance_results=governance_results,
-        commits=commits,
-        pushed_status=pushed_status,
-        origin_main_head_count=origin_count,
-        explicit_no_go_confirmations=no_go_list,
-        recommended_next_phase=recommended_next,
-        commit_attribution=commit_attribution,
-        gate=enforced_gate,
-        report_is_complete=dispatch_allowed,
-        report_incomplete_reason=incomplete_reason,
-    )
+    try:
+        fin = finalize_phase_report(
+            phase_id=phase_id,
+            phase_name=phase_name,
+            status="completed",
+            summary=summary,
+            files_changed=files_changed,
+            tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
+            test_results=test_results,
+            governance_results=governance_results,
+            commits=commits,
+            pushed_status=pushed_status,
+            origin_main_head_count=origin_count,
+            explicit_no_go_confirmations=no_go_list,
+            recommended_next_phase=recommended_next,
+            commit_attribution=commit_attribution,
+            gate=enforced_gate,
+            report_is_complete=dispatch_allowed,
+            report_incomplete_reason=incomplete_reason,
+        )
+    finally:
+        if suppressed_notify_enabled is not None:
+            import os as _os
+            _os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
+
+    if already_notified:
+        fin["notification_reason"] = (
+            f"phase {phase_id} final report already dispatched at commit "
+            f"{commit_for_marker[:8] or '(none)'} — skipping duplicate send (idempotent)"
+        )
 
     if fin.get("report_error"):
         print(f"Phase report: ERROR — {fin['report_error']}")
@@ -404,7 +432,8 @@ def _finalize_report_and_notify(
     notif_kind = fin.get("notification_kind", "complete")
     kind_label = " (PARTIAL WARNING — mobile operator attention required)" if notif_kind == "partial_warning" else ""
     if fin.get("notification_skipped"):
-        print(f"Notification dispatch: skipped{kind_label}")
+        skip_label = " (idempotent — already dispatched)" if already_notified else ""
+        print(f"Notification dispatch: skipped{skip_label}{kind_label}")
         print(f"  Reason: {fin.get('notification_reason', '')}")
         return finalizable
 
@@ -414,6 +443,8 @@ def _finalize_report_and_notify(
 
     if all_ok:
         print(f"Notification dispatch: sent{kind_label}")
+        if commit_for_marker:
+            write_notification_dispatch_marker(phase_id, commit_for_marker)
     else:
         print(f"Notification dispatch: failed{kind_label}")
         reason = fin.get("notification_reason", "")

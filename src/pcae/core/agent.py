@@ -75910,22 +75910,164 @@ _SIT_ASSESSMENT_FIELDS: tuple[dict, ...] = (
 )
 
 
-def _sit_resolve_phase_target(target_id: str, roadmap_registry: list[dict]) -> dict:
+_SIT_PHASE_ID_GRAMMAR_RE = re.compile(r'^\d+[A-Za-z]*(?:\.\d+)*(?:\.[A-Za-z]+)?$')
+
+
+def _sit_phase_id_grammar_valid(target_id: str) -> bool:
+    """Recognized PCAE phase ID grammar (Phase 113V.N).
+
+    Accepts: a numeric series, an optional lettered branch/suffix
+    (``113D``, multi-letter ``113XR``), optional dotted numeric sub-phases
+    (``113X.2``), and an optional single dotted-letter repair suffix
+    (``113D.R``, ``113V.N``). Anything else is not a recognized phase-ID
+    shape at all -- distinct from (and reported separately from) a
+    syntactically valid phase ID that simply isn't found anywhere.
+    """
+    return bool(_SIT_PHASE_ID_GRAMMAR_RE.match(target_id.strip()))
+
+
+def _sit_find_phase_report_by_id(target_id: str, root: "HarnessPath") -> dict | None:
+    """Best-effort live resolution of a phase's own persisted state by
+    ``phase_id``, independent of the frozen ``_CRI_KNOWN_PHASES`` roadmap
+    registry snapshot (Phase 113V.N repairs the notification asymmetry:
+    that registry was last extended around Phase 69P/64B.6E and was never
+    kept current, so it fails to resolve *any* later phase, "special" or
+    not).  Checks, in order, the same live sources the real finalization
+    path (``pcae phase complete`` / ``finalize_phase_report``) already
+    treats as authoritative:
+
+    1. the canonical ``latest.json`` phase report
+    2. any historical timestamped report for that phase_id
+    3. a quarantined (blocked) report for that phase_id
+    4. in-flight ``.pcae/phase-completion-metadata.json``
+    5. PROJECT_STATUS.md's "## Current Phase" line
+
+    Returns ``None`` if no live source mentions this phase_id at all.
+    """
+    reports_dir = root.path / ".pcae" / "phase-reports"
+
+    def _read_json(path: Path) -> dict:
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            return {}
+        return data if isinstance(data, dict) else {}
+
+    latest_json = reports_dir / "latest.json"
+    if latest_json.exists():
+        data = _read_json(latest_json)
+        if data.get("phase_id") == target_id:
+            return {
+                "target_status": data.get("report_completeness") or data.get("status", "completed"),
+                "target_source": "phase_reports_latest",
+            }
+
+    if reports_dir.exists():
+        for path in sorted(reports_dir.glob("*.json")):
+            if path.name == "latest.json":
+                continue
+            data = _read_json(path)
+            if data.get("phase_id") == target_id:
+                return {
+                    "target_status": data.get("report_completeness") or data.get("status", "completed"),
+                    "target_source": "phase_reports_history",
+                }
+
+    quarantine_dir = reports_dir / "quarantine"
+    if quarantine_dir.exists():
+        for path in sorted(quarantine_dir.glob("*.json")):
+            data = _read_json(path)
+            if data.get("phase_id") == target_id:
+                return {
+                    "target_status": "blocked",
+                    "target_source": "phase_reports_quarantine",
+                }
+
+    meta_path = root.path / ".pcae" / "phase-completion-metadata.json"
+    if meta_path.exists():
+        data = _read_json(meta_path)
+        if data.get("phase_id") == target_id:
+            return {
+                "target_status": data.get("status") or "in_progress",
+                "target_source": "phase_completion_metadata",
+            }
+
+    status_path = root.path / "PROJECT_STATUS.md"
+    if status_path.exists():
+        try:
+            text = status_path.read_text(encoding="utf-8")
+        except OSError:
+            text = ""
+        m = re.search(
+            r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s|\Z)",
+            text, re.MULTILINE | re.DOTALL,
+        )
+        if m:
+            section = m.group(1).strip()
+            first_line = section.splitlines()[0].strip() if section else ""
+            line_match = re.match(r'^Phase\s+(\S+?)\s*[:—–-]', first_line)
+            if line_match and line_match.group(1) == target_id:
+                status = "completed" if "(completed)" in first_line else "in_progress"
+                return {
+                    "target_status": status,
+                    "target_source": "project_status_current_phase",
+                }
+
+    return None
+
+
+def _sit_resolve_phase_target(
+    target_id: str, roadmap_registry: list[dict], root: "HarnessPath | None" = None,
+) -> dict:
     match = next((r for r in roadmap_registry if r["phase_id"] == target_id), None)
-    if match is None:
+    if match is not None:
+        return {
+            "resolved": True,
+            "target_status": match["status"],
+            "target_source": "roadmap_registry",
+            "reason": "",
+            "phase": match,
+        }
+
+    # Phase 113V.N — the frozen roadmap registry above stops at ~69P/64B.6E
+    # and is never extended, so it alone fails every later phase, "special"
+    # ID or not. Fall back to live repository state before giving up.
+    if root is not None:
+        live = _sit_find_phase_report_by_id(target_id, root)
+        if live is not None:
+            return {
+                "resolved": True,
+                "target_status": live["target_status"],
+                "target_source": live["target_source"],
+                "reason": "",
+                "phase": None,
+            }
+
+    if not _sit_phase_id_grammar_valid(target_id):
         return {
             "resolved": False,
             "target_status": "unknown",
-            "target_source": "roadmap_registry",
-            "reason": f"Phase {target_id!r} not found in roadmap registry.",
+            "target_source": "phase_id_grammar",
+            "reason": (
+                f"{target_id!r} is not a recognized PCAE phase ID form "
+                "(expected digits, optional letter suffix, optional "
+                "dotted numeric sub-phase, optional single dotted-letter "
+                "repair suffix -- e.g. 113D, 113XR, 113X.2, 113D.R)."
+            ),
             "phase": None,
+            "invalid_form": True,
         }
+
     return {
-        "resolved": True,
-        "target_status": match["status"],
+        "resolved": False,
+        "target_status": "unknown",
         "target_source": "roadmap_registry",
-        "reason": "",
-        "phase": match,
+        "reason": (
+            f"Phase {target_id!r} not found in the roadmap registry, phase "
+            "reports archive (latest/history/quarantine), phase-completion "
+            "metadata, or PROJECT_STATUS.md's current phase."
+        ),
+        "phase": None,
     }
 
 
@@ -76046,6 +76188,18 @@ def _sit_infer_target_type(
         for phases in roadmap_tracks.values()
     ):
         return "track"
+
+    # Phase 113V.N — the frozen roadmap registry checked first above is
+    # never extended past ~69P/64B.6E, so any later phase ID (ordinary or
+    # "special": multi-letter suffix, dotted sub-phase, dotted-letter
+    # repair) falls through every check so far. Classify it as "phase"
+    # whenever live repository state or the phase-ID grammar itself
+    # recognizes the shape, so resolution reports a precise, phase-specific
+    # reason instead of a generic "unknown target type."
+    if _sit_find_phase_report_by_id(target_id, root) is not None:
+        return "phase"
+    if _sit_phase_id_grammar_valid(target_id):
+        return "phase"
 
     return None
 
@@ -76200,7 +76354,7 @@ def build_skill_invocation_targeting(
     # --- Resolve target ---
     resolved_target: dict | None = None
     if target_type == "phase":
-        resolved_target = _sit_resolve_phase_target(target_id, roadmap_registry)
+        resolved_target = _sit_resolve_phase_target(target_id, roadmap_registry, root)
     elif target_type == "capability":
         resolved_target = _sit_resolve_capability_target(target_id, capability_registry)
     elif target_type == "task":
@@ -76211,13 +76365,19 @@ def build_skill_invocation_targeting(
     resolved = resolved_target["resolved"] if resolved_target else False
 
     if resolved_target and not resolved:
+        # Phase 113V.N — a syntactically invalid phase ID form is reported
+        # distinctly from a well-formed ID that simply isn't found, per the
+        # explicit "do not silently fail" requirement: the two have
+        # different remedies (fix the ID's shape vs. check whether the
+        # phase actually exists yet).
+        is_invalid_form = bool(resolved_target.get("invalid_form"))
         signals.append({
             "signal_id": f"sit-sig-{ts}-{sig_idx:02d}",
             "skill_id": invoke_skill_id or "",
             "target_id": target_id,
             "target_type": target_type or "unknown",
             "validation_domain": "target_resolution",
-            "signal_type": "target_unresolved",
+            "signal_type": "invalid_phase_id_form" if is_invalid_form else "target_unresolved",
             "severity": "blocker",
             "detected_state": resolved_target.get("reason", "target not found"),
             "expected_state": "target must exist and be resolvable",
@@ -76326,6 +76486,23 @@ def build_skill_invocation_targeting(
 
     valid_types_for_skill = list(_SIT_SKILL_COMPATIBLE_TARGETS.get(invoke_skill_id or "", ()))
 
+    # Phase 113V.N — this targeting preview resolves *whether a phase ID
+    # exists*; it never sends, gates, or reflects real Telegram dispatch.
+    # That distinction was previously easy to miss: an operator seeing this
+    # command return "unresolved" for a phase could plausibly (and, in this
+    # repository's own history, actually did) conclude notification itself
+    # was broken. Making the boundary explicit here means an unresolved
+    # target is never confused with "notifications disabled" -- check
+    # `pcae notify status` / `pcae phase complete` / `pcae notify
+    # send-report --latest` for actual dispatch state.
+    notification_dispatch_note = (
+        "This command previews target existence/type only. It never sends, "
+        "gates, or reflects Telegram dispatch -- use `pcae notify status`, "
+        "`pcae phase complete`, or `pcae notify send-report --latest` for "
+        "actual notification state."
+        if invoke_skill_id == "phase-finalization" else None
+    )
+
     return {
         "generated_at": generated_at,
         "invoke_skill_id": invoke_skill_id,
@@ -76337,6 +76514,7 @@ def build_skill_invocation_targeting(
         "resolutions": [resolution],
         "signals": signals,
         "assessment": assessment,
+        "notification_dispatch_note": notification_dispatch_note,
         "valid_target_types": valid_types_for_skill,
         "target_model": {
             "model_name": "SkillInvocationTarget",

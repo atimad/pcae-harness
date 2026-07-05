@@ -14834,6 +14834,10 @@ def run_skill_invoke(args: argparse.Namespace) -> int:
             for sig in targeting["signals"]:
                 print(f"  [{sig['severity'].upper()}] {sig['signal_type']}: {sig['detected_state']}")
 
+        if targeting.get("notification_dispatch_note"):
+            print()
+            print(f"Note: {targeting['notification_dispatch_note']}")
+
         if render_data is not None:
             render_rec = render_data["render_record"]
             print()

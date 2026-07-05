@@ -626,6 +626,75 @@ def read_latest_report(reports_dir: Path) -> PhaseReport | None:
         return None
 
 
+# ── Notification dispatch idempotency (Phase 113V.N) ─────────────────────────
+#
+# `finalize_phase_report()` writes the report artifact *before* attempting
+# dispatch (see its own docstring), so the persisted report's
+# `notification_result` cannot itself serve as an "already sent" marker at
+# the moment dispatch is being decided. `pcae task finish --commit` already
+# carried a private marker-file workaround for this; the same workaround is
+# generalized here into one shared implementation so every finalization path
+# (`pcae phase complete`, `pcae task finish --commit`) answers "was this
+# phase+commit already dispatched" identically, instead of each caller
+# keeping (or, previously, only one caller keeping) its own notion of it.
+
+_NOTIFICATION_MARKER_PATH = Path(".pcae/phase-reports/.last-notified.json")
+
+
+def read_notification_dispatch_marker(marker_path: Path | None = None) -> dict[str, Any]:
+    """Read the shared notification-dispatch idempotency marker.
+
+    Returns ``{}`` if the marker file is absent or unreadable.
+    """
+    path = marker_path or _NOTIFICATION_MARKER_PATH
+    if not path.exists():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def phase_already_notified(
+    phase_id: str, commit_hash: str = "", marker_path: Path | None = None,
+) -> bool:
+    """True if ``phase_id`` already had a final report dispatched.
+
+    When ``commit_hash`` is given, requires a commit-prefix match (either
+    direction) against the recorded commit, not just the phase ID — so a
+    genuinely new commit for the same phase ID (e.g. a report-repair
+    follow-up commit) is correctly treated as not-yet-dispatched. When
+    ``commit_hash`` is empty (read-only previews with no specific commit to
+    check), matches on ``phase_id`` alone.
+    """
+    marker = read_notification_dispatch_marker(marker_path)
+    if marker.get("phase_id") != phase_id:
+        return False
+    if not commit_hash:
+        return True
+    marker_commit = marker.get("commit", "")
+    return bool(
+        marker_commit
+        and (commit_hash.startswith(marker_commit) or marker_commit.startswith(commit_hash))
+    )
+
+
+def write_notification_dispatch_marker(
+    phase_id: str, commit_hash: str = "", marker_path: Path | None = None,
+) -> None:
+    """Persist the shared notification-dispatch idempotency marker.
+
+    Call only after a dispatch attempt actually succeeded.
+    """
+    path = marker_path or _NOTIFICATION_MARKER_PATH
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({
+        "phase_id": phase_id,
+        "commit": commit_hash[:8] if commit_hash else "",
+    }))
+
+
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 
