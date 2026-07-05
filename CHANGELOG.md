@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Phase 114B — Notification Enforcement & Idempotency. Implementation
+  phase. Added `src/pcae/core/notification_certification.py`, wiring the
+  Repository Transition Validator's `TransitionKind.NOTIFY` and
+  `notification_eligible()` (frozen since 113T/113U, never previously
+  called from a real dispatch path) into the actual dispatch call sites in
+  `pcae phase complete` and `pcae task finish --commit`. Both callers now
+  call `certify_notification_transition(...)` before invoking
+  `finalize_phase_report(...)`, replacing two independently-shaped ad hoc
+  idempotency checks built directly on the Phase 113V.N marker file with
+  one shared certification decision. `NotificationCertificationOutcome`
+  names exactly one of `eligible`, `already_dispatched`, `disabled`,
+  `transport_unavailable`, or `not_certified` per attempt. Idempotency
+  mechanism is unchanged (the marker file, written only after a
+  successful dispatch); a failed dispatch never writes it, so retries
+  remain deterministic and safe. Notification failure never invalidates
+  canonical repository state -- `latest.md`/`latest.json` are written
+  before dispatch is attempted regardless of outcome. Added
+  `docs/PCAE_NOTIFICATION_CERTIFICATION.md`,
+  `docs/PHASE_114_NOTIFICATION_ENFORCEMENT.md`, and
+  `tests/test_notification_certification_idempotency.py`. Successful
+  Telegram/filesystem dispatch behavior remains byte-for-byte compatible;
+  no changes to `TelegramSink`, `dispatch()`, sink construction, push-check
+  integration, Runtime Snapshot, Runtime Inspect, Permission Broker, REST,
+  Telegram inbound, or execution integration. Execution capability remains
+  unavailable. Recommended next phase: 114C — Push Authorization &
+  Repository Trust Integration.
+
 - Phase 114A — Canonical Artifact Promotion & Quarantine Hardening.
   Implementation phase. Added
   `src/pcae/core/canonical_artifact_promotion.py`, a reusable artifact

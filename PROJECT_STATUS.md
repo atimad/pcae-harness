@@ -2,36 +2,59 @@
 
 ## Current Phase
 
-Phase 114A — Canonical Artifact Promotion & Quarantine Hardening (completed).
+Phase 114B — Notification Enforcement & Idempotency (completed).
 
 Implementation phase. Full design:
-`docs/PCAE_CANONICAL_ARTIFACT_PROMOTION.md`.
+`docs/PCAE_NOTIFICATION_CERTIFICATION.md`.
 Phase report:
-`docs/PHASE_114_CANONICAL_ARTIFACT_PROMOTION.md`.
+`docs/PHASE_114_NOTIFICATION_ENFORCEMENT.md`.
 
-**Canonical promotion pipeline**: phase reports now route canonical
-`latest.md` / `latest.json` promotion through
-`src/pcae/core/canonical_artifact_promotion.py`. The implemented lifecycle is
-Draft -> Validated -> Certified -> Canonical, with Rejected and Quarantined as
-terminal non-canonical states.
+**Notification certification**: `pcae phase complete` and `pcae task finish
+--commit` now construct a `TransitionKind.NOTIFY` transition and consult the
+Repository Transition Validator's `notification_eligible()` (frozen since
+113T/113U, never previously called from a real dispatch path) through
+`src/pcae/core/notification_certification.py`'s
+`certify_notification_transition(...)`.
 
-**Promotion authority**: only `Certified -> Canonical` writes canonical
-artifact paths. Rejected and quarantined artifacts never promote and never
-overwrite `latest.*`. Quarantined phase reports remain available under
-`.pcae/phase-reports/quarantine/` for forensic review.
+**Single notification authority**: both lifecycle commands consume the same
+certification decision instead of independently-shaped ad hoc idempotency
+checks. `NotificationCertificationOutcome` names exactly one of `eligible`,
+`already_dispatched`, `disabled`, `transport_unavailable`, or `not_certified`
+for every finalization attempt.
 
-**Compatibility**: accepted phase-report flows still produce the same
-timestamped markdown/JSON artifacts and `latest.md` / `latest.json` outputs.
-The promotion step is now explicit and deterministic.
+**Idempotency**: unchanged in mechanism (the Phase 113V.N marker file), now
+enforced through one function. Duplicate notifications for the same phase +
+commit are impossible; a failed dispatch never writes the marker, so retries
+remain deterministic and safe.
 
-**Scope boundary**: phase reports only. No notification enforcement, no push
-check integration, no Runtime Snapshot or Runtime Inspect change, no Permission
-Broker enforcement, no execution runtime, no authorization, no plugins, no
-Telegram inbound, no REST, no Web UI, and no Dashboard. Execution capability
-remains unavailable. Runtime state remains Observed. Maximum plugin capability
-remains `observe`.
+**Compatibility**: successful Telegram/filesystem dispatch behavior is
+unchanged. Notification failure never invalidates canonical repository
+state -- `latest.md` / `latest.json` are written before dispatch is
+attempted, regardless of certification outcome.
 
-Recommended next repo phase: 114B — Notification Enforcement & Idempotency (not started).
+**Scope boundary**: no changes to `TelegramSink`, `dispatch()`, `pcae push
+check`, Runtime Snapshot, Runtime Inspect, Permission Broker, execution
+runtime, authorization, plugins, Telegram inbound, REST, Web UI, or
+Dashboard. Execution capability remains unavailable. Runtime state remains
+Observed. Maximum plugin capability remains `observe`.
+
+Recommended next repo phase: 114C — Push Authorization & Repository Trust Integration (not started).
+
+## Phase 114B Complete
+
+Phase 114B — Notification Enforcement & Idempotency (completed).
+
+Wired the Repository Transition Validator's `TransitionKind.NOTIFY` /
+`notification_eligible()` into the real dispatch call sites in `pcae phase
+complete` and `pcae task finish --commit`, replacing two independently-shaped
+ad hoc idempotency checks with one shared `certify_notification_transition(...)`
+authority. Duplicate notifications are impossible; notification failure never
+corrupts canonical repository state.
+
+**No-go**: no changes to sink implementations, dispatch mechanics, or push
+check integration. Execution capability remains unavailable.
+
+Recommended next repo phase: 114C — Push Authorization & Repository Trust Integration (not started).
 
 ## Phase 114A Complete
 

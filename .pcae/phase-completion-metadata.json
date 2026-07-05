@@ -1,36 +1,33 @@
 {
-  "phase_id": "114A",
-  "phase_name": "Canonical Artifact Promotion & Quarantine Hardening",
-  "phase_title": "Canonical Artifact Promotion & Quarantine Hardening",
+  "phase_id": "114B",
+  "phase_name": "Notification Enforcement & Idempotency",
+  "phase_title": "Notification Enforcement & Idempotency",
   "status": "completed",
-  "summary": "Implemented canonical artifact promotion for phase reports. Added a reusable promotion state machine with Draft, Validated, Certified, Canonical, Rejected, and Quarantined states. Only Certified artifacts can become Canonical. Phase report writes now route latest.md/latest.json through promote_artifact(...), while quarantine writes route through quarantine_artifact(...). Rejected and quarantined artifacts never promote and never overwrite latest.*. Successful lifecycle behavior remains compatible. No notification enforcement, push-check integration, Runtime Snapshot, Runtime Inspect, Permission Broker, authorization, execution runtime, plugins, Telegram inbound, REST, Web UI, or Dashboard changes were made. Execution capability remains unavailable.",
-  "files_changed_count": 12,
+  "summary": "Wired the Repository Transition Validator's TransitionKind.NOTIFY and notification_eligible() (frozen since 113T/113U, never previously called from a real dispatch path) into pcae phase complete and pcae task finish --commit. Added src/pcae/core/notification_certification.py with certify_notification_transition(...) and notification_transport_status() as the single notification authority both callers now consume, replacing two independently-shaped ad hoc idempotency checks built directly on the Phase 113V.N marker file. NotificationCertificationOutcome names exactly one of eligible, already_dispatched, disabled, transport_unavailable, or not_certified per attempt. Idempotency mechanism is unchanged (the marker file, written only after a successful dispatch); a failed dispatch never writes it, so retries remain deterministic and safe. Notification failure never invalidates canonical repository state -- latest.md/latest.json are written before dispatch is attempted regardless of outcome. Successful Telegram/filesystem dispatch behavior remains byte-for-byte compatible. No changes to TelegramSink, dispatch(), sink construction, push-check integration, Runtime Snapshot, Runtime Inspect, Permission Broker, REST, Telegram inbound, or execution integration were made. Execution capability remains unavailable.",
+  "files_changed_count": 9,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
     ".pcae/phase-completion-metadata.json",
-    "docs/PCAE_CANONICAL_ARTIFACT_PROMOTION.md",
-    "docs/PHASE_114_CANONICAL_ARTIFACT_PROMOTION.md",
-    "src/pcae/core/canonical_artifact_promotion.py",
-    "src/pcae/core/phase_reports.py",
-    "tasks/DECISIONS.md",
-    "tasks/DONE.md",
-    "tasks/TODO.md",
-    "tasks/active/20260705-1847-phase-114a-canonical-artifact-promotion-quarantine-hardening.md",
-    "tests/test_canonical_artifact_promotion.py"
+    "docs/PCAE_NOTIFICATION_CERTIFICATION.md",
+    "docs/PHASE_114_NOTIFICATION_ENFORCEMENT.md",
+    "src/pcae/core/notification_certification.py",
+    "src/pcae/commands/phase.py",
+    "src/pcae/commands/task.py",
+    "tests/test_notification_certification_idempotency.py"
   ],
-  "tests_added_or_updated": "10 focused promotion tests added; phase report writer tests covered",
+  "tests_added_or_updated": "17 focused notification certification tests added; phase/task-finish/report/promotion suites unchanged",
   "phase_commits": [
     {
-      "hash": "b088c8b345523d309179955059aa799e1f1f420f",
-      "message": "Implement canonical artifact promotion pipeline"
+      "hash": "d1f0b0cf2814c67a14595e44c6e63435a6dbadd3",
+      "message": "Implement notification certification and idempotency"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/canonical_artifact_promotion.py",
+  "validator_module": "src/pcae/core/notification_certification.py",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 3,
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -42,28 +39,34 @@
   },
   "validation_results": [
     {
-      "name": "focused_promotion_report_compatibility",
-      "result": "172/172",
+      "name": "focused_notification_certification_idempotency",
+      "result": "17/17",
       "status": "passed",
-      "note": "canonical artifact promotion, phase report, phase report CLI, and repository-transition phase/task integration tests"
+      "note": "tests/test_notification_certification_idempotency.py -n auto"
     },
     {
-      "name": "phase_lifecycle_report_suite",
-      "result": "1039/1039",
+      "name": "report_transition_promotion_compatibility",
+      "result": "217/217",
       "status": "passed",
-      "note": "tests/test_canonical_artifact_promotion.py tests/test_phase.py tests/test_phase_reports.py tests/test_phase_reports_cli.py -n auto"
+      "note": "notification certification, repository transition validator, task-finish integration, canonical artifact promotion, phase report, phase report CLI -n auto"
+    },
+    {
+      "name": "phase_lifecycle_suite",
+      "result": "886/886",
+      "status": "passed",
+      "note": "tests/test_phase.py -n auto"
     },
     {
       "name": "governance_autonomy_runtime_advisory_plugin_group",
-      "result": "3830/3830",
+      "result": "4532/4532",
       "status": "passed",
       "note": "tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* tests/test_*advisory* -n auto"
     },
     {
       "name": "release_lifecycle_regression",
-      "result": "1571/1571",
-      "status": "passed",
-      "note": "task, phase, report, notification, and Telegram notification regression slice -n auto"
+      "result": "2724/2726",
+      "status": "passed_with_known_preexisting_failures",
+      "note": "task/phase/report/notification/telegram slice -n auto; 2 failures confirmed pre-existing and unrelated via git stash against unmodified main: test_rc_audit_findings_repair.py::test_task_finish_incomplete_report_path_skips_dispatch, test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcoded stale '113Y' literal)"
     },
     {
       "name": "fast_green",
@@ -83,10 +86,11 @@
     }
   ],
   "test_results": {
-    "focused_promotion_report_compatibility": "172/172",
-    "phase_lifecycle_report_suite": "1039/1039",
-    "governance_autonomy_runtime_advisory_plugin_group": "3830/3830",
-    "release_lifecycle_regression": "1571/1571",
+    "focused_notification_certification_idempotency": "17/17",
+    "report_transition_promotion_compatibility": "217/217",
+    "phase_lifecycle_suite": "886/886",
+    "governance_autonomy_runtime_advisory_plugin_group": "4532/4532",
+    "release_lifecycle_regression": "2724/2726",
     "fast_green": "4390/4390",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
@@ -106,7 +110,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "not_ready (3 unpushed commits ahead of origin/main; not pushed as part of this phase)"
     },
     {
       "name": "pcae_session_bootstrap",
@@ -131,6 +135,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No notification enforcement. No push-check integration. No Runtime Snapshot change. No Runtime Inspect change. No Permission Broker enforcement. No execution runtime. No authorization. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "114B — Notification Enforcement & Idempotency"
+  "no_go_confirmation": "No changes to TelegramSink or dispatch() sink implementations. No push-check command integration beyond reading existing push state. No Runtime Snapshot change. No Runtime Inspect change. No Permission Broker enforcement. No execution runtime. No authorization. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "114C — Push Authorization & Repository Trust Integration"
 }
