@@ -2,55 +2,64 @@
 
 ## Current Phase
 
-Phase 114B.1 — Repository Events & Notification Policy (completed).
+Phase 114C — Push Authorization & Post-Push Reconciliation (completed).
 
-Architecture/documentation phase. Full design:
-`docs/PCAE_REPOSITORY_EVENTS.md`, `docs/PCAE_NOTIFICATION_POLICY.md`.
-Phase report:
-`docs/PHASE_114B1_REPOSITORY_EVENTS_NOTIFICATION_POLICY.md`.
+Implementation phase. Phase report:
+`docs/PHASE_114_PUSH_AUTHORIZATION_POST_PUSH_RECONCILIATION.md`.
 
-**Origin**: Phase 114B's independent forensic verification confirmed
-notification certification, Repository Transition Validator integration,
-and canonical artifact promotion all behave correctly, and that
-quarantined transitions intentionally produce no notification -- but
-found that the operator has no way to learn that PCAE successfully
-prevented an invalid repository transition. This phase closes that gap
-architecturally.
+**Root cause fixed**: `pcae phase complete`/`pcae task finish --commit`
+read `pushed_status`/`origin_main_head_count` from the declared, static
+`.pcae/phase-completion-metadata.json` instead of live git state -- a
+genuinely pushed repository (`origin/main..HEAD` = 0, confirmed by `pcae
+push check`) was quarantined because stale metadata still said
+`not_pushed`. Found by Phase 114B's independent forensic verification.
 
-**Four Repository State Kernel primitives**: Repository State (what
-exists), Repository Transition (what change is proposed), Repository
-Artifact (what durable evidence was recorded), and Repository Event
-(what certified outcome was announced) are frozen as the complete
-vocabulary every kernel subsystem maps onto.
+**Live push-state authority**: `src/pcae/core/push_state_reconciliation.py`
+makes live git state authoritative for current push state whenever
+`origin/main` is resolvable. Isolated repositories with no real remote
+fall back to declared metadata exactly as before -- live authority only
+applies when genuinely determinable.
 
-**Repository Events**: a first-class kernel primitive, emitted once per
-completed transition evaluation (Accept, Reject, Quarantine, or Requires
-Human Review are all completions). Events never decide; they describe an
-outcome that already occurred. Ten event types frozen as the minimum
-taxonomy, including `TransitionRejected`, `TransitionQuarantined`, and
-`TransitionRequiresHumanReview`.
+**Reconciliation**: both lifecycle commands now use
+`reconcile_push_state(...)`'s reconciled `pushed_status`/
+`origin_main_head_count` everywhere they previously read those fields
+straight from metadata. Live state wins in both directions -- a
+falsely-optimistic `"pushed"` metadata value is overridden just as
+readily as a stale `"not_pushed"` one.
 
-**Notification Policy**: decides which Repository Events are externally
-visible. Direct answer to the 114B forensic gap -- rejected, quarantined,
-and human-review outcomes are frozen as visible, not optional, because
-containment succeeding is exactly as newsworthy as forward progress
-succeeding. `NotificationFailed` must be observable through a channel
-that does not depend on the transport that just failed.
+**Stale metadata is never hidden**: a disagreement between live and
+declared state is printed unconditionally
+(`metadata_push_state_stale: true` plus both values) before any
+finalization decision is made.
 
-**No implementation**: this phase adds no event bus, no `Event` type, no
-policy engine, and changes no runtime behavior in
-`certify_notification_transition(...)`, `validate_transition(...)`,
-`promote_artifact(...)`, or any lifecycle command. It freezes the concept
-and taxonomy a future implementation phase must conform to.
+**Notification eligibility**: `certify_notification_transition(...)` now
+receives the reconciled `origin_main_head_count`, so its push-clean check
+reflects live state -- a real push can now result in a real, eligible
+notification instead of being blocked by stale metadata.
 
-**Scope boundary**: no changes to the Repository Transition Validator,
-Notification Certification, Canonical Artifact Promotion, notification
-sinks/dispatch, `pcae push check`, Permission Broker, execution runtime,
-plugins, Telegram inbound, REST, Web UI, or Dashboard. Execution
-capability remains unavailable. Runtime state remains Observed. Maximum
-plugin capability remains `observe`.
+**No implementation beyond reconciliation**: no changes to `pcae push`/
+`pcae push check`, the Repository Transition Validator, Canonical Artifact
+Promotion, or notification dispatch mechanics. No event bus (114B.1's own
+non-goal, unchanged).
 
-Recommended next repo phase: 114C — Push Authorization & Repository Trust Integration (not started).
+Recommended next repo phase: 114D — Cross-Agent Verification Command (not started).
+
+## Phase 114C Complete
+
+Phase 114C — Push Authorization & Post-Push Reconciliation (completed).
+
+Fixed the live 114B/114B.1 forensic finding: finalization now reconciles
+live git push state against declared phase-completion metadata, with live
+state authoritative whenever determinable. Stale metadata can no longer
+incorrectly quarantine a genuinely pushed repository, and live unpushed
+state still blocks even if metadata falsely claims clean. Discrepancies
+are always printed, never silently resolved.
+
+**No-go**: no raw git push, no event bus, no changes to the Repository
+Transition Validator, Canonical Artifact Promotion, or notification
+dispatch. Execution capability remains unavailable.
+
+Recommended next repo phase: 114D — Cross-Agent Verification Command (not started).
 
 ## Phase 114B.1 Complete
 

@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 114C — Push Authorization & Post-Push Reconciliation. Implementation
+  phase, fixing the live defect Phase 114B's forensic verification found: a
+  genuinely pushed repository (`origin/main..HEAD` = 0, confirmed by `pcae
+  push check`) was quarantined by `pcae phase complete` because
+  `pushed_status`/`origin_main_head_count` were read from the declared,
+  static `.pcae/phase-completion-metadata.json` rather than live git state.
+  Added `src/pcae/core/push_state_reconciliation.py`
+  (`compute_live_push_state()`, `reconcile_push_state()`), making live git
+  state authoritative for current push state whenever `origin/main` is
+  resolvable; isolated repositories with no real remote fall back to
+  declared metadata exactly as every finalization path did before this
+  phase. `pcae phase complete` and `pcae task finish --commit` now use
+  reconciled values everywhere they previously read
+  `pushed_status`/`origin_main_head_count` straight from metadata -- live
+  state wins in both directions, so a falsely-optimistic `"pushed"` claim
+  is overridden just as readily as a stale `"not_pushed"` one. Any
+  disagreement is printed unconditionally
+  (`metadata_push_state_stale: true` plus both values), never silently
+  resolved. `certify_notification_transition(...)` now evaluates
+  notification eligibility against reconciled push state, so a real push
+  can result in a real, eligible notification. Added
+  `docs/PHASE_114_PUSH_AUTHORIZATION_POST_PUSH_RECONCILIATION.md` and
+  `tests/test_push_state_reconciliation.py`. No changes to `pcae push`/
+  `pcae push check`, the Repository Transition Validator, Canonical
+  Artifact Promotion, or notification dispatch mechanics; no event bus.
+  Execution capability remains unavailable. Recommended next phase: 114D
+  — Cross-Agent Verification Command.
+
 - Phase 114B.1 — Repository Events & Notification Policy. Architecture/
   documentation phase, arising from Phase 114B's independent forensic
   verification (notification certification, validator integration, and
