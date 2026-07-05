@@ -213,6 +213,51 @@ def _unpushed_commit_lines(root_path) -> list[str]:
         return []
 
 
+def _reconcile_post_push(root: HarnessPath) -> dict:
+    """Phase 114D.1 — after `pcae push` confirms the repository is
+    genuinely push-clean (whether it just pushed new commits or found
+    nothing to push), re-evaluate finalization if declared
+    phase-completion metadata still names a phase that was never
+    canonically promoted.
+
+    Reuses `pcae phase complete`'s own finalization path
+    (`_finalize_report_and_notify`, which already incorporates Phase
+    114C's live push-state reconciliation and Phase 114B's notification
+    certification/idempotency) rather than re-implementing promotion or
+    dispatch decisions here. Never called from a dry run.
+    """
+    from pcae.core.post_push_canonicalization import live_push_is_clean, reconciliation_pending
+
+    pending, reason, metadata = reconciliation_pending(root)
+    if not pending:
+        return {"reconciliation": "not_pending", "reason": reason}
+
+    if not live_push_is_clean(root):
+        return {"reconciliation": "skipped", "reason": "live push state is not clean; not promoting"}
+
+    # Cross-module reuse of an underscore-prefixed sibling command
+    # function is an established pattern in this codebase (see
+    # `pcae.commands.notifications` importing `_load_completion_metadata`
+    # from `pcae.commands.phase`).
+    from pcae.commands.phase import _finalize_report_and_notify
+
+    summary = metadata.get("summary") or f"Post-push canonicalization for {metadata.get('phase_id')}"
+    finalized = _finalize_report_and_notify(summary)
+    return {"reconciliation": "attempted", "finalized": finalized, "reason": reason}
+
+
+def _print_reconciliation_outcome(outcome: dict) -> None:
+    status = outcome.get("reconciliation")
+    if status == "not_pending":
+        return
+    print()
+    if status == "skipped":
+        print(f"Post-push reconciliation: skipped ({outcome.get('reason')})")
+    elif status == "attempted":
+        print(f"Post-push reconciliation: {outcome.get('reason')}")
+        print(f"  Canonical promotion + notification: {'completed' if outcome.get('finalized') else 'not fully trusted (see above)'}")
+
+
 def run_push(args: argparse.Namespace) -> int:
     root = HarnessPath.cwd()
     staged_file_aware = getattr(args, "staged_file_aware", False)
@@ -224,13 +269,21 @@ def run_push(args: argparse.Namespace) -> int:
     readiness = assess_push_readiness(root)
 
     if not readiness.ready:
+        reconciliation_outcome = None
+        if readiness.mode == "nothing_to_push":
+            reconciliation_outcome = _reconcile_post_push(root)
         if args.json:
-            print(json.dumps({
+            payload = {
                 **_readiness_dict(readiness),
                 "pushed": False,
-            }, indent=2, sort_keys=True))
+            }
+            if reconciliation_outcome is not None:
+                payload["post_push_reconciliation"] = reconciliation_outcome
+            print(json.dumps(payload, indent=2, sort_keys=True))
         else:
             _print_readiness(readiness, json_mode=False)
+            if reconciliation_outcome is not None:
+                _print_reconciliation_outcome(reconciliation_outcome)
         return 0 if readiness.mode == "nothing_to_push" else 1
 
     if dry_run:
@@ -265,15 +318,19 @@ def run_push(args: argparse.Namespace) -> int:
             print(f"Push failed: {error.stderr.strip()}")
         return 1
 
+    reconciliation_outcome = _reconcile_post_push(root)
+
     if args.json:
         print(json.dumps({
             **_readiness_dict(readiness),
             "push_output": push_output,
             "pushed": True,
+            "post_push_reconciliation": reconciliation_outcome,
         }, indent=2, sort_keys=True))
     else:
         _print_readiness(readiness, json_mode=False)
         print(f"Pushed: {push_output}")
+        _print_reconciliation_outcome(reconciliation_outcome)
 
     return 0
 
