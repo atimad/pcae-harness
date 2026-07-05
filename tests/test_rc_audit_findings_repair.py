@@ -50,9 +50,18 @@ def golden_workflow_text() -> str:
     return GOLDEN_WORKFLOW_PATH.read_text()
 
 
+def _current_project_phase_id() -> str:
+    text = (REPO_ROOT / "PROJECT_STATUS.md").read_text(encoding="utf-8")
+    current = text.split("## Current Phase", 1)[1].split("## Phase", 1)[0]
+    match = __import__("re").search(r"Phase\s+(\d{3}[A-Z](?:\.[A-Z0-9]+)?)", current)
+    assert match is not None
+    return match.group(1)
+
+
 def _synthetic_report(**overrides):
+    phase_id = overrides.pop("phase_id", _current_project_phase_id())
     common = dict(
-        phase_id="999Z",
+        phase_id=phase_id,
         phase_name="test_phase",
         status="completed",
         summary="test summary",

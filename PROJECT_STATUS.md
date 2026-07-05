@@ -2,89 +2,88 @@
 
 ## Current Phase
 
-Phase 113V.N — Phase Finalization Notification Repair (completed).
+Phase 113W — Repository Transition Validator Integration Design (completed).
 
-Governance/notification repair phase. Full report:
-`docs/PHASE_113V_NOTIFICATION_FINALIZATION_REPAIR.md`.
+Architecture/design only. Full design:
+`docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION.md`.
+Phase report:
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_DESIGN.md`.
 
-**Forensic findings**: `pcae skill invoke phase-finalization <phase-id>`
-is Phase 64B.5's generic, read-only "Skill Invocation Targeting"
-preview — it never imports `notifications.py`, never constructs a
-`TelegramSink`, and never reads `PCAE_NOTIFY_ENABLED`; it is not part of
-the real dispatch path at all. Its `target_unresolved`/
-`target_type_unresolved` failures came from `_sit_resolve_phase_target()`
-matching only against `_CRI_KNOWN_PHASES`, a hard-coded roadmap registry
-last extended around Phase 69P/64B.6E — confirmed live that it fails for
-`113D`, an entirely ordinary phase, identically to `113T`/`113U`/`113V`;
-"special" phase-ID shapes were never the actual variable. The real gap:
-`pcae phase complete` had no notification-dispatch idempotency guard,
-unlike `pcae task finish --commit`, which already carried a marker-file
-workaround (with its own comment explaining that `finalize_phase_report()`
-writes the report before dispatch, so `notification_result` can't answer
-"already sent" at decision time). Re-running `pcae phase complete` for
-the same phase_id + commit could dispatch a duplicate Telegram final
-report — the one concrete asymmetry 113S/113T/113U/113V's own titles
-pointed at without repairing.
+**Containment target**: models, humans, schedulers, and future automation
+may propose transitions, but PCAE constructs authoritative repository
+state, validates the proposed transition and expected target state, and
+returns exactly one verdict: accept, reject, quarantine, or requires human
+review. Valid transitions proceed through one canonical path; invalid
+transitions never become canonical.
 
-**Target resolution repair**: `_sit_resolve_phase_target()`/
-`_sit_infer_target_type()` (`src/pcae/core/agent.py`) now fall back to
-live repository state — `latest.json`, historical timestamped reports,
-quarantined reports, in-flight `.pcae/phase-completion-metadata.json`,
-and PROJECT_STATUS.md's own Current Phase line — before giving up. A new
-phase-ID grammar recognizes normal (`113D`), multi-letter-suffix
-(`113XR`), dotted-numeric-subphase (`113X.2`), and dotted-letter
-repair-suffix (`113D.R`, `113V.N`) forms; a syntactically invalid ID is
-now rejected as `invalid_phase_id_form`, distinct from a well-formed ID
-that simply isn't found (`target_unresolved`, with a reason naming every
-source checked). A new `notification_dispatch_note`, shown only for the
-`phase-finalization` skill, states explicitly that this command never
-gates or reflects Telegram dispatch.
+**Integration design**: future integration points are specified for
+`pcae phase complete`, `pcae task finish --commit`, report generation,
+report promotion, phase-completion metadata, `pcae push check`,
+`pcae notify send-report`, the phase-finalization skill, future
+automation/scheduler paths, and future agent-driven workflows. Each point
+records current behavior, proposed validated behavior, required
+`RepositoryState` inputs, `ProposedTransition`, `ExpectedTargetState`,
+invariants, and accept/reject/quarantine/human-review outcomes.
 
-**Idempotency repair**: `pcae task finish --commit`'s marker-file logic
-is generalized into shared `phase_reports.py` functions
-(`phase_already_notified()`, `write_notification_dispatch_marker()`,
-`read_notification_dispatch_marker()`), and `pcae phase complete` gains
-the same guard `task finish` already had. A repeated finalization for the
-same phase_id + commit now prints `Notification dispatch: skipped
-(idempotent — already dispatched)` with an explicit reason instead of
-sending twice; a genuinely new commit for the same phase (e.g. a
-report-repair follow-up) still sends normally. `pcae notify send-report
---latest` (the manual resend command) is deliberately left unguarded,
-since the phase-finalization skill's own documented workflow calls for
-resending after a report repair.
+**Canonical promotion design**: one future promotion path owns
+`latest.json`, `latest.md`, phase-completion metadata consumption during
+finalization, and notification event eligibility. Draft reports can become
+Certified only after an accept verdict; only Certified reports can become
+Canonical/latest; notifications can reference only Certified/Canonical
+reports. No alternate promotion path is allowed.
 
-**Tests**: 18 new focused tests
-(`tests/test_phase_113v_n_notification_finalization_repair.py`) covering
-live phase-report-based resolution for normal/multi-letter/dotted/
-repair-suffix IDs, quarantine-only phases resolving as `blocked` (not a
-clean target), grammar-invalid IDs rejected distinctly, the
-`notification_dispatch_note`, the read-only preview's absence of dispatch
-side effects, the shared marker helpers, and end-to-end `pcae phase
-complete` idempotency (first call sends and writes the marker, second
-call for the same phase+commit is a no-op with an explicit reason, a new
-commit for the same phase still sends, and a missing
-`PCAE_NOTIFY_ENABLED` is reported accurately and never as
-`target_unresolved`). 5,674 pre-existing tests across
-`test_phase.py`/`test_task.py`/`test_phase_reports*.py`/
-`test_notifications.py`/`test_telegram_notifications.py`/
-`test_task_finish_notification*.py`/`test_phase_report_trust_gate*.py`/
-`test_phase_report_trust_hard_fail.py`/`test_agent.py` (full
-skill-targeting suite)/`test_repository_transition_validator.py`/
-`test_finalization_notification_guarantee.py` all re-run clean. Fast
-green: 4,390/4,390.
+**Implementation order confirmed**: 1) `pcae phase complete`, 2) report
+promotion/latest artifacts, 3) `pcae task finish --commit`, 4)
+notification dispatch, 5) `pcae push check`, 6) cross-agent verification.
+The order starts with the authoritative phase lifecycle boundary and the
+shared canonical write surface, then closes the second existing writer,
+then layers notifications, push trust, and cross-agent drill coverage.
 
-**No-go**: no Repository Transition Validator integration (113W remains
-untouched), no Advisory Runtime/Runtime Snapshot/Runtime Context/Runtime
-Registry/Runtime Inspect/Permission Broker changes, no execution/
-authorization/plugin/Telegram-inbound/REST/Web-UI/Dashboard changes,
-`_CRI_KNOWN_PHASES` itself neither extended nor replaced. Execution
-capability remains unavailable.
+**DeepSeek containment scenarios documented**: stale commits in report,
+wrong phase ID, missing `recommended_next_phase`, malformed test results,
+duplicate Telegram reports, silent missing Telegram report, stale
+phase-completion metadata, report from wrong phase, Architecture Status
+overclaim, and push with untrusted report.
 
-Safety invariants confirmed unchanged: Runtime state `Observed`,
-execution capability `unavailable`, maximum plugin capability `observe`.
+**No-go**: no validator integration implemented, no lifecycle command
+behavior changed, no Advisory Runtime/Runtime Snapshot/Runtime Context/
+Runtime Registry/Runtime Inspect/Permission Broker enforcement changes,
+no execution/authorization/plugin/Telegram-inbound/REST/Web-UI/Dashboard
+changes. Execution capability remains unavailable. Runtime state remains
+Observed. Maximum plugin capability remains `observe`.
 
-No automatic next repo phase implementation started. Recommended next
-repo phase: 113W — Repository Transition Validator Integration Design.
+Recommended next repo phase: 113X — Repository Transition Validator Integration Contract (not started).
+
+## Phase 113W Complete
+
+Phase 113W — Repository Transition Validator Integration Design (completed).
+
+Architecture/design only. Full design:
+`docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION.md`.
+Phase report:
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_DESIGN.md`.
+
+**Containment target**: model proposes, PCAE validates, valid transitions
+proceed, invalid transitions reject/quarantine/require human review, and no
+invalid state becomes canonical.
+
+**Integration design**: covers `pcae phase complete`, `pcae task finish
+--commit`, report generation, report promotion, phase-completion metadata,
+`pcae push check`, `pcae notify send-report`, phase-finalization skill,
+future automation/scheduler paths, and future agent-driven workflows.
+
+**Canonical promotion design**: one future promotion path owns `latest.json`,
+`latest.md`, phase-completion metadata consumption, and notification
+eligibility. Only Certified reports can become Canonical/latest; no alternate
+promotion path is allowed.
+
+**No-go**: no validator integration implemented, no lifecycle command
+behavior changed, no Advisory Runtime/Runtime Snapshot/Runtime Context/
+Runtime Registry/Runtime Inspect/Permission Broker enforcement changes, no
+execution/authorization/plugin/Telegram-inbound/REST/Web-UI/Dashboard
+changes. Execution capability remains unavailable.
+
+Recommended next repo phase: 113X — Repository Transition Validator Integration Contract (not started).
 
 ## Phase 113V.N Complete
 

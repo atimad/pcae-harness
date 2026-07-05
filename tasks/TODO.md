@@ -11,7 +11,7 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-## Current Roadmap (112-series — Runtime Context track)
+## Current Roadmap (113-series — Repository Transition Validator track)
 
 Per `PROJECT_STATUS.md`. Only the phase explicitly named "Recommended
 next repo phase" there is confirmed; everything after it is a tentative
@@ -20,13 +20,16 @@ ahead of an explicit human decision (`tasks/DECISIONS.md`).
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 112A | Runtime Context Architecture | ✅ Complete |
-| 112B | Runtime Context Contract Freeze | ✅ Complete |
-| 112B.1 | Planning & Bootstrap Consistency Hardening | ✅ Complete |
-| 112C | Runtime Context Prototype (Observation-Only) | 🔜 Next (per PROJECT_STATUS.md) |
-| 112D | Runtime Context Verification & Compatibility | Tentative — candidate only, mirroring the 110C→110D/111A→111B "design → contract → prototype → verification" pattern; confirm scope once 112C lands |
-| 112E | Runtime Context Inspect Integration | Tentative — candidate only, if still appropriate once 112C/112D outcomes are known |
-| 113A | Advisory Runtime Architecture (or the then-current preferred next major track) | Not yet planned |
+| 113S | Repository Transition Validator Architecture | ✅ Complete |
+| 113T | Repository Transition Validator Contract Freeze | ✅ Complete |
+| 113U | Repository Transition Validator Prototype | ✅ Complete |
+| 113V | Repository Transition Validator Verification & Compatibility | ✅ Complete |
+| 113V.N | Phase Finalization Notification Repair | ✅ Complete |
+| 113W | Repository Transition Validator Integration Design | ✅ Complete |
+| 113X | Repository Transition Validator Integration Contract | 🔜 Next (per PROJECT_STATUS.md) |
+| 113Y | Phase Completion Integration | Tentative — candidate only, confirm after 113X contract |
+| 113Z | Task Finish Integration | Tentative — candidate only, confirm after 113Y |
+| 114A | Report Promotion / Quarantine Hardening | Tentative — candidate only |
 
 ## Historical: Production v1 Path (90-series, superseded)
 

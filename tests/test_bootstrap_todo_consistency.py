@@ -6,7 +6,7 @@ phase" marker cannot outrank PROJECT_STATUS.md's own current-phase record,
 pcae session bootstrap surfaces the comparison explicitly (which source is
 authoritative, which was stale, why it was ignored), the recommended next
 phase is derived from PROJECT_STATUS.md rather than tasks/TODO.md text, the
-real repo's tasks/TODO.md has been repaired to the current 112+ roadmap, and
+real repo's tasks/TODO.md has been repaired to the current roadmap, and
 bootstrap still succeeds in the idle/no-active-task state.
 """
 
@@ -122,7 +122,7 @@ def test_recommended_next_phase_matches_real_project_status() -> None:
     pack = build_context_pack(root)
     recommended = pack.roadmap_summary["recommended_next_phase"]
     assert recommended is not None
-    assert "112C" in recommended
+    assert "113X" in recommended
 
 
 # ---------------------------------------------------------------------------
@@ -250,7 +250,7 @@ def test_new_operational_rule_states_todo_precedence() -> None:
 
 
 # ---------------------------------------------------------------------------
-# Real repo: tasks/TODO.md repaired to the current 112+ roadmap
+# Real repo: tasks/TODO.md repaired to the current roadmap
 # ---------------------------------------------------------------------------
 
 
@@ -260,7 +260,7 @@ def test_real_todo_no_longer_marks_90_series_as_next() -> None:
         line for line in text.splitlines() if "\U0001F51C Next" in line and line.strip().startswith("|")
     ]
     assert len(lines_with_next_marker) == 1
-    assert "112C" in lines_with_next_marker[0]
+    assert "113X" in lines_with_next_marker[0]
     assert "90C" not in lines_with_next_marker[0]
 
 
@@ -270,10 +270,10 @@ def test_real_todo_marks_90_series_table_historical() -> None:
     assert "Historical reference only" in text
 
 
-def test_real_todo_current_roadmap_lists_112c_as_next() -> None:
+def test_real_todo_current_roadmap_lists_113x_as_next() -> None:
     text = (REPO_ROOT / "tasks" / "TODO.md").read_text(encoding="utf-8")
     current_section = text.split("## Current Roadmap")[1].split("## Historical")[0]
-    assert "112C" in current_section
+    assert "113X" in current_section
     assert "Next" in current_section
 
 
