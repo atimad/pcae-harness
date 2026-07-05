@@ -16,6 +16,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from pcae.core.canonical_artifact_promotion import (
+    ArtifactState as PromotionArtifactState,
+    promote_artifact,
+    quarantine_artifact,
+)
+
 SCHEMA_VERSION = "1.0"
 
 VALID_STATUSES: frozenset[str] = frozenset({
@@ -521,7 +527,7 @@ def _ensure_dir(reports_dir: Path) -> None:
 
 def write_phase_report(report: PhaseReport, reports_dir: Path) -> dict[str, str]:
     """Write a phase report as timestamped Markdown and JSON artifacts,
-    and update latest.md / latest.json.
+    and promote certified content to latest.md / latest.json.
 
     Returns a dict with paths written.
     """
@@ -543,16 +549,33 @@ def write_phase_report(report: PhaseReport, reports_dir: Path) -> dict[str, str]
     md_content = report.render_markdown()
     json_content = report.render_json()
 
-    md_path.write_text(md_content)
-    json_path.write_text(json_content)
-    latest_md.write_text(md_content)
-    latest_json.write_text(json_content)
+    promotion = promote_artifact(
+        artifact_type="phase_report",
+        artifact_id=report.phase_id,
+        source_state=PromotionArtifactState.CERTIFIED,
+        versioned_artifacts={
+            md_path: md_content,
+            json_path: json_content,
+        },
+        canonical_artifacts={
+            latest_md: md_content,
+            latest_json: json_content,
+        },
+    )
+    if not promotion.promoted:
+        reasons = "; ".join(d.message for d in promotion.diagnostics)
+        raise ValueError(f"Cannot promote phase report: {reasons}")
+    report.metadata["promotion_diagnostics"] = [
+        {"status": d.status, "message": d.message}
+        for d in promotion.diagnostics
+    ]
 
     return {
         "markdown": str(md_path),
         "json": str(json_path),
         "latest_markdown": str(latest_md),
         "latest_json": str(latest_json),
+        "promotion_status": "promoted",
     }
 
 
@@ -605,12 +628,20 @@ def write_quarantined_report(
     md_lines.append(report.render_markdown())
     md_content = "\n".join(md_lines)
 
-    md_path.write_text(md_content)
-    json_path.write_text(json_content)
+    quarantine_result = quarantine_artifact(
+        artifact_type="phase_report",
+        artifact_id=report.phase_id,
+        quarantine_artifacts={
+            md_path: md_content,
+            json_path: json_content,
+        },
+        blockers=tuple(blockers),
+    )
 
     return {
         "quarantine_markdown": str(md_path),
         "quarantine_json": str(json_path),
+        "promotion_status": "quarantined" if not quarantine_result.promoted else "promoted",
     }
 
 

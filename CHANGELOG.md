@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Phase 114A — Canonical Artifact Promotion & Quarantine Hardening.
+  Implementation phase. Added
+  `src/pcae/core/canonical_artifact_promotion.py`, a reusable artifact
+  promotion state machine with `Draft`, `Validated`, `Certified`,
+  `Canonical`, `Rejected`, and `Quarantined` states. Only
+  `Certified -> Canonical` writes canonical artifact paths. Routed phase-report
+  writes through `promote_artifact(...)` so `latest.md` and `latest.json` are
+  promoted deterministically, and routed quarantine writes through
+  `quarantine_artifact(...)` so quarantined reports remain forensic artifacts
+  and never overwrite latest. Added
+  `docs/PCAE_CANONICAL_ARTIFACT_PROMOTION.md`,
+  `docs/PHASE_114_CANONICAL_ARTIFACT_PROMOTION.md`, and
+  `tests/test_canonical_artifact_promotion.py`. Successful lifecycle behavior
+  remains compatible; no notification enforcement, push-check integration,
+  Runtime Snapshot, Runtime Inspect, Permission Broker, REST, Telegram inbound,
+  or execution integration. Execution capability remains unavailable.
+  Recommended next phase: 114B — Notification Enforcement & Idempotency.
+
 - Phase 113Z — Repository Transition Validator Integration: Task Finish.
   Implementation phase. Integrated the Repository Transition Validator into
   `pcae task finish --commit` only, reusing the shared phase-report transition

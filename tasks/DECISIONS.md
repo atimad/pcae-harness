@@ -2,6 +2,12 @@
 
 ## Accepted
 
+- Treat Phase 114A as phase-report promotion hardening only: introduce a
+  reusable canonical artifact promotion state machine, route phase-report
+  `latest.*` writes through Certified -> Canonical promotion, and keep
+  rejected/quarantined artifacts terminal and non-canonical while leaving
+  notification enforcement, push check, Runtime Snapshot, Runtime Inspect,
+  Permission Broker, REST, Telegram inbound, and execution out of scope.
 - Treat Phase 113Z as the second Repository State Kernel enforcement phase:
   `pcae task finish --commit` may finish and commit the governed task closure,
   but canonical phase-report promotion now requires Repository Transition

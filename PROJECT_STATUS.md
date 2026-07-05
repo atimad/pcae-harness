@@ -2,35 +2,50 @@
 
 ## Current Phase
 
-Phase 113Z — Repository Transition Validator Integration: Task Finish (completed).
+Phase 114A — Canonical Artifact Promotion & Quarantine Hardening (completed).
 
-Implementation phase. Full report:
-`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_TASK_FINISH_INTEGRATION.md`.
+Implementation phase. Full design:
+`docs/PCAE_CANONICAL_ARTIFACT_PROMOTION.md`.
+Phase report:
+`docs/PHASE_114_CANONICAL_ARTIFACT_PROMOTION.md`.
 
-**Second validator integration**: `pcae task finish --commit` now builds
-`RepositoryState`, `ProposedTransition(kind=finish_task)`, and
-`ExpectedTargetState(artifact_state=canonical)`, invokes
-`validate_transition(...)`, and reaches canonical phase-report promotion only
-after an `accept` verdict.
+**Canonical promotion pipeline**: phase reports now route canonical
+`latest.md` / `latest.json` promotion through
+`src/pcae/core/canonical_artifact_promotion.py`. The implemented lifecycle is
+Draft -> Validated -> Certified -> Canonical, with Rejected and Quarantined as
+terminal non-canonical states.
 
-**Asymmetry repaired**: task finish can no longer write or promote
-`latest.md` / `latest.json` through a path that bypasses the Repository
-Transition Validator required by `pcae phase complete`. Both commands share
-`src/pcae/core/repository_transition_integration.py` for phase-report
-transition validation and canonical identity handling.
+**Promotion authority**: only `Certified -> Canonical` writes canonical
+artifact paths. Rejected and quarantined artifacts never promote and never
+overwrite `latest.*`. Quarantined phase reports remain available under
+`.pcae/phase-reports/quarantine/` for forensic review.
 
-**Verdict behavior**: `accept` preserves the existing successful task-finish
-report flow; `reject` blocks canonical promotion and leaves latest artifacts
-unchanged; `quarantine` writes quarantine artifacts only; `requires_human_review`
-blocks promotion with explicit diagnostics.
+**Compatibility**: accepted phase-report flows still produce the same
+timestamped markdown/JSON artifacts and `latest.md` / `latest.json` outputs.
+The promotion step is now explicit and deterministic.
 
-**Scope boundary**: no push/check integration, no notification-dispatch
-enforcement, no execution runtime, no authorization, no Permission Broker
-enforcement, no plugin execution, no Telegram inbound, no REST, no Web UI, and
-no Dashboard. Execution capability remains unavailable. Runtime state remains
-Observed. Maximum plugin capability remains `observe`.
+**Scope boundary**: phase reports only. No notification enforcement, no push
+check integration, no Runtime Snapshot or Runtime Inspect change, no Permission
+Broker enforcement, no execution runtime, no authorization, no plugins, no
+Telegram inbound, no REST, no Web UI, and no Dashboard. Execution capability
+remains unavailable. Runtime state remains Observed. Maximum plugin capability
+remains `observe`.
 
-Recommended next repo phase: 114A — Report Promotion & Quarantine Hardening (not started).
+Recommended next repo phase: 114B — Notification Enforcement & Idempotency (not started).
+
+## Phase 114A Complete
+
+Phase 114A — Canonical Artifact Promotion & Quarantine Hardening (completed).
+
+Implemented a reusable canonical artifact promotion state machine and routed
+phase-report canonical writes through it. Only certified artifacts become
+canonical; rejected and quarantined artifacts remain non-canonical and cannot
+overwrite `latest.md` / `latest.json`.
+
+**No-go**: no notification or push-check command integration. Execution
+capability remains unavailable.
+
+Recommended next repo phase: 114B — Notification Enforcement & Idempotency (not started).
 
 ## Phase 113Z Complete
 

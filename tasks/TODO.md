@@ -29,7 +29,8 @@ ahead of an explicit human decision (`tasks/DECISIONS.md`).
 | 113X | Repository Transition Validator Integration Contract | ✅ Complete |
 | 113Y | Repository Transition Validator Integration: Phase Completion | ✅ Complete |
 | 113Z | Repository Transition Validator Integration: Task Finish | ✅ Complete |
-| 114A | Report Promotion / Quarantine Hardening | 🔜 Next (per PROJECT_STATUS.md) |
+| 114A | Report Promotion / Quarantine Hardening | ✅ Complete |
+| 114B | Notification Enforcement & Idempotency | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Production v1 Path (90-series, superseded)
 
