@@ -2,68 +2,122 @@
 
 ## Current Phase
 
-Phase 113T — Repository Transition Validator Contract Freeze (completed).
+Phase 113U — Repository Transition Validator Prototype (completed).
 
-Architecture/design only — no implementation. Freezes the Repository
-Transition Validator contract introduced in 113S: the validator is the
-single authority responsible for validating repository state
-transitions before any canonical repository state may change.
+Observation-only implementation of the validator interface frozen in
+113T. Not wired into any production lifecycle command — `pcae phase
+complete`, `pcae task finish --commit`, `pcae push`, and notification
+dispatch are all byte-for-byte unchanged. The validator may currently
+only be called directly, by tests.
 
-Elevates the asymmetry discovered during 113S's own finalization
-(`pcae phase complete` performs canonical identity resolution;
-`pcae task finish --commit` can currently write `latest.json`/
-`latest.md` directly from `.pcae/phase-completion-metadata.json`,
-bypassing that resolution) from an implementation detail into a
-frozen architectural invariant: there must never exist two independent
-canonical report promotion paths. This is not fixed by this phase —
-architecture/design only — but is now a named contract requirement a
-future implementation phase must close.
+Implements `src/pcae/core/repository_transition_validator.py`:
+`RepositoryState` (structural snapshot, no agent/model identity
+field), `ProposedTransition` (one of the 12 frozen `TransitionKind`
+values plus an open payload), `ExpectedTargetState`,
+`TransitionInvariant`/`InvariantViolation` (carrying
+classification/force per 113T's Invariant Contract), `TransitionVerdict`
+(exactly `accept`/`reject`/`quarantine`/`requires_human_review`),
+`validate_transition(current_state, proposed_transition,
+expected_target_state, invariants) -> TransitionResult` (pure,
+deterministic), `notification_eligible()` (the 5-condition check), and
+`promotion_allowed()` (only Certified may become Canonical).
 
-Freezes: the Transition Validator interface
-(`validate_transition(current_state, proposed_transition,
-expected_target_state, invariants) -> TransitionVerdict`, exactly four
-verdicts — Accept, Reject, Quarantine, Requires Human Review, no
-fifth); Repository State (every canonical object from 113S's 14-item
-list, now with explicit owner, authoritative source, lifecycle, and
-mutability); Transition Contracts (12 kinds, no command may bypass the
-validator); Canonical Transition Authority as a first-class requirement
-(`pcae phase complete`, `pcae task finish --commit`, and every future
-automation/scheduler/Telegram/REST/agent/execution-engine completion
-path must pass through exactly the same validation path); the
-Canonical Promotion Contract (Draft, Blocked, Rejected, Quarantined,
-Certified, Canonical — only Certified may become Canonical); the
-Identity Contract (single identity source, single report promotion
-source, single metadata source, single canonical report source — no
-alternate derivation, no alternate pipeline); the Notification Contract
-(eligibility, idempotency, single external notification, notification
-certification, no intermediate external notification); the Invariant
-Contract (every family classified mandatory/derived/optional/future
-and blocking/warning/informational); the Failure Contract (9 failure
-modes, each deterministically mapped to Reject, Quarantine, or
-Requires Human Review — never undefined behavior); the Semantic
-Boundary (models perform semantic work, the validator certifies
-structural correctness, models never certify themselves); and Future
-Integration scope (task lifecycle, phase lifecycle, Runtime Snapshot,
-Runtime Inspect, Advisory Runtime, Permission Broker, execution
-runtime, approval runtime, future execution).
+Implements 7 structural invariant families evaluable purely from a
+`RepositoryState` value with no live filesystem/git access: phase
+identity consistency, metadata consistency, report completeness,
+recommended-next-phase presence, canonical promotion eligibility,
+notification eligibility (evaluated only for the `notify` transition
+kind), and no-execution-availability-unless-contracted.
 
-No `validate_transition()` implementation exists. No change to
-`pcae phase complete` or `pcae task finish --commit` behavior. No
-Advisory Runtime, Runtime Snapshot, Runtime Context, Runtime Registry,
-or Permission Broker changes. No source file under `src/pcae/` was
-touched.
+Remaining future enforcement, explicitly not done here: wiring into
+`pcae phase complete`/`pcae task finish --commit` (the 113T-frozen
+single-promotion-path requirement remains contract-only, not yet
+code); live-state invariants requiring filesystem/git/subprocess access
+(commit lineage, architecture status consistency, push state
+consistency, test result consistency); and a live-I/O path that could
+actually produce `requires_human_review` (reserved, per 113T's Failure
+Contract, for "validator unavailable" — orthogonal to this pure
+prototype).
 
-Added `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_CONTRACT.md`,
-`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_CONTRACT_FREEZE.md`,
-`tests/test_repository_transition_validator_contract_freeze.py` (113
-documentation-completeness tests, all passing).
+Documents, as a distinct future validator integration target (not
+fixed this phase), a notification asymmetry observed after 113T:
+repository completion can be canonical while `pcae skill invoke
+phase-finalization <phase-id>` reports `target_unresolved` for special
+phase IDs — these are two independent, unreconciled questions today.
+
+Model-agnostic behavior verified directly: neither `RepositoryState`
+nor `ProposedTransition` carries an identity field, and a test confirms
+an `"agent"` key placed in `ProposedTransition.payload` never changes
+the verdict.
+
+No Advisory Runtime, Runtime Snapshot, Runtime Context, Runtime
+Registry, or Permission Broker changes. No change to any existing
+lifecycle enforcement path.
+
+Added `src/pcae/core/repository_transition_validator.py`,
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_PROTOTYPE.md`,
+`tests/test_repository_transition_validator.py` (36 tests, all
+passing).
 
 Safety invariants confirmed unchanged: Runtime state `Observed`,
 execution capability `unavailable`, maximum plugin capability
 `observe`.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113U — Repository Transition Validator Prototype.
+repo phase: 113V — Repository Transition Validator Verification &
+Compatibility.
+
+## Phase 113U Complete
+
+Phase 113U — Repository Transition Validator Prototype (completed).
+
+Observation-only. Module:
+`src/pcae/core/repository_transition_validator.py`. Phase summary:
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_PROTOTYPE.md`.
+
+**Prototype summary**: first working implementation of the validator
+interface frozen in 113T. Called directly by tests only — not wired
+into `pcae phase complete`, `pcae task finish --commit`, `pcae push`,
+or notification dispatch, all of which remain byte-for-byte unchanged.
+
+**State/transition/verdict model**: `RepositoryState` (structural
+snapshot, no identity field), `ProposedTransition` (12 frozen
+`TransitionKind` values + open payload never read for identity),
+`ExpectedTargetState`, `TransitionVerdict` (exactly `accept`/`reject`/
+`quarantine`/`requires_human_review`), `TransitionResult`
+(verdict + violations).
+
+**Invariant summary**: 7 of 113T's frozen families implemented
+structurally — phase identity consistency, metadata consistency,
+report completeness, recommended-next-phase presence, canonical
+promotion eligibility, notification eligibility (notify-transition-only),
+no-execution-availability-unless-contracted. The remaining families
+(commit lineage, architecture status consistency, push state
+consistency, test result consistency) require live I/O this pure
+prototype deliberately does not perform.
+
+**Canonical promotion summary**: all 6 states represented
+(`ArtifactState`); `promotion_allowed()` and the validator's own
+`canonical_promotion_eligibility` check both enforce "only Certified
+may become Canonical."
+
+**Notification eligibility summary**: `notification_eligible()`
+implements all 5 conditions (finalized, certified, push clean, not
+already dispatched, transport enabled) — all required simultaneously.
+
+**Observation-only confirmation**: no file under `src/pcae/commands/`
+touched; the only call site is the test file.
+
+**Tests**: 36 new tests (`tests/test_repository_transition_validator.py`),
+all passing — verdict existence, accept/reject/quarantine behavior,
+identity/metadata mismatch rejection, canonical promotion state rules,
+notification eligibility (individually and combined), execution-
+availability rejection, model-agnostic behavior, determinism.
+
+**No-go**: No Advisory Runtime/Runtime Snapshot/Runtime Context/Runtime
+Registry/Permission Broker changes, no execution/authorization/plugin/
+Telegram-inbound/REST/Web-UI changes, no change to any existing
+lifecycle enforcement path. Execution capability remains unavailable.
 
 ## Phase 113T Complete
 
