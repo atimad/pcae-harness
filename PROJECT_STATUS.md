@@ -2,41 +2,58 @@
 
 ## Current Phase
 
-Phase 114D.1 — Post-Push Canonicalization & Notification Reconciliation (completed).
+Phase 114E — Model Containment Drill (completed).
 
-Repair/integration phase. Phase report:
-`docs/PHASE_114D1_POST_PUSH_CANONICALIZATION_NOTIFICATION_RECONCILIATION.md`.
+Verification-only phase. Phase report:
+`docs/PHASE_114_MODEL_CONTAINMENT_DRILL.md`.
 
-**Defect fixed**: Phase 114D's own `pcae agent verify-handoff`, run
-immediately after 114D's governed push, correctly reported FAIL --
-metadata declared `phase_id: 114D` but the canonical report was still
-`114A`. Root cause: `pcae task finish --commit` evaluates finalization
-one commit before its own closure commit is pushed, so the validator
-correctly quarantines it (113X/114C, unchanged) -- but nothing ever
-re-evaluated finalization after the follow-up push actually landed.
+**Purpose**: prove the existing containment stack (113Y/113Z Repository
+Transition Validator, 114A Canonical Artifact Promotion, 114B
+Notification Certification, 114B.1 Notification Policy, 114C Push-State
+Reconciliation, 114D `verify-handoff`, 114D.1 Post-Push Canonicalization)
+holds against deliberately reproduced DeepSeek-style model/agent drift,
+not just against the specific bugs each phase fixed.
 
-**Reconciliation**: `pcae push` now calls a new
-`_reconcile_post_push(...)` after a real push succeeds and whenever
-readiness reports `nothing_to_push`. It asks two pure questions
-(`src/pcae/core/post_push_canonicalization.py`): does declared metadata
-disagree with the canonical report (`reconciliation_pending`), and is the
-working tree clean with live `origin/main..HEAD == 0`
-(`live_push_is_clean`, reusing 114C's `compute_live_push_state()`
-unmodified)? Only when both hold does it re-invoke the existing
-`_finalize_report_and_notify(...)` (`pcae phase complete`'s own
-function) -- no new promotion or dispatch logic was written.
+**12 scenarios drilled** in isolated scratch repositories (real local
+no-network origin remotes; the actual pcae-harness repository was never
+mutated): wrong phase identity, stale metadata reuse, stale commit
+hashes, missing `recommended_next_phase`, bad test result structure,
+duplicate notification, silent notification prevention, push-state
+mismatch (both directions), architecture overclaim, dirty working tree,
+`latest.md`/`latest.json` disagreement, execution availability
+violation. **All 12 passed** -- every invalid state was rejected,
+quarantined, or flagged before becoming canonical; no scenario produced a
+silent false success.
 
-**Idempotent by construction**: pending-ness is derived by comparing
-canonical state directly, not by a "have we run this" flag -- once
-promotion succeeds, every subsequent check finds the two already agree
-and silently no-ops.
+**No new runtime mechanism**: verification-only, per the brief's own
+scope option (tests + documentation rather than a new drill command,
+given 12 scenarios would make a command either shallow or duplicative of
+`verify-handoff`).
 
-**No new lifecycle mutation**: no changes to the Repository Transition
-Validator, Notification Certification, Canonical Artifact Promotion,
-`push_state_reconciliation.py`, or `_finalize_report_and_notify` itself --
-only when it gets called changed.
+**Remaining gaps (non-blocking)**: architecture overclaim is
+warning-level, not blocking; no dedicated containment-drill command
+exists (scenarios live as tests); Scenario 2's "reconcile when safe"
+branch is covered by 114C/114D.1's own suites, not independently drilled
+here.
 
-Recommended next repo phase: 114E — Model Containment Drill (not started).
+Recommended next repo phase: 114R — Repository State Kernel Review (not started).
+
+## Phase 114E Complete
+
+Phase 114E — Model Containment Drill (completed).
+
+Drilled 12 DeepSeek-style model/agent drift patterns against the
+existing containment stack in isolated scratch repositories. All 12
+passed: invalid repository states were rejected, quarantined, or
+reported before canonical promotion in every case; duplicate
+notification was prevented; live push-state reconciliation held in both
+directions; `verify-handoff` caught every unsafe handoff state drilled.
+
+**No-go**: no new runtime mechanism, no new command, no changes to any
+prior phase's containment logic. Execution capability remains
+unavailable.
+
+Recommended next repo phase: 114R — Repository State Kernel Review (not started).
 
 ## Phase 114D.1 Complete
 

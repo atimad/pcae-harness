@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 114E — Model Containment Drill. Verification-only phase, no new
+  runtime mechanism. Drilled 12 DeepSeek-style model/agent drift patterns
+  against the existing containment stack (113Y/113Z Repository Transition
+  Validator, 114A Canonical Artifact Promotion, 114B Notification
+  Certification, 114B.1 Notification Policy, 114C Push-State
+  Reconciliation, 114D `pcae agent verify-handoff`, 114D.1 Post-Push
+  Canonicalization) in isolated scratch repositories (real local
+  no-network origin remotes; the actual pcae-harness repository was never
+  mutated): wrong phase identity, stale metadata reuse, stale commit
+  hashes, missing `recommended_next_phase`, bad test result structure,
+  duplicate notification, silent notification prevention, push-state
+  mismatch (both directions), architecture overclaim, dirty working tree,
+  `latest.md`/`latest.json` disagreement, execution availability
+  violation. All 12 scenarios passed -- every invalid state was rejected,
+  quarantined, or flagged before canonical promotion, with no silent
+  false success. Added `tests/test_model_containment_drill.py` (17
+  tests) and `docs/PHASE_114_MODEL_CONTAINMENT_DRILL.md`. Recorded three
+  non-blocking precision notes (architecture overclaim is warning-level
+  not blocking; no dedicated drill command by design; Scenario 2's
+  "reconcile when safe" branch covered by 114C/114D.1's own suites, not
+  independently drilled here). No changes to the Repository Transition
+  Validator, Notification Certification, Canonical Artifact Promotion,
+  Push-State Reconciliation, Post-Push Canonicalization, or
+  `verify-handoff`. Execution capability remains unavailable.
+  Recommended next phase: 114R — Repository State Kernel Review.
+
 - Phase 114D.1 — Post-Push Canonicalization & Notification Reconciliation.
   Repair/integration phase, fixing the live defect Phase 114D's own `pcae
   agent verify-handoff` found immediately after 114D's governed push:

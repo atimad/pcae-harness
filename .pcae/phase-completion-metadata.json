@@ -1,32 +1,30 @@
 {
-  "phase_id": "114D.1",
-  "phase_name": "Post-Push Canonicalization & Notification Reconciliation",
-  "phase_title": "Post-Push Canonicalization & Notification Reconciliation",
+  "phase_id": "114E",
+  "phase_name": "Model Containment Drill",
+  "phase_title": "Model Containment Drill",
   "status": "completed",
-  "summary": "Fixed the live defect Phase 114D's own pcae agent verify-handoff found immediately after 114D's governed push: declared phase-completion metadata named 114D, but the canonical report (latest.json) was still 114A -- canonical promotion never reran after the push that made the repository push-clean. Root cause: pcae task finish --commit evaluates finalization one commit before its own closure commit is pushed, so the Repository Transition Validator correctly quarantines it (113X/114C behavior, unchanged); no path ever re-evaluated finalization after the subsequent push landed. Added src/pcae/core/post_push_canonicalization.py (reconciliation_pending(...), live_push_is_clean(...)), and wired pcae push (src/pcae/commands/push.py) to call _reconcile_post_push(...) after a real push succeeds and whenever readiness reports nothing_to_push. When declared metadata disagrees with the canonical report and live push state is genuinely clean, it re-invokes the existing _finalize_report_and_notify(...) (pcae phase complete's own finalization function, already carrying 114C's live push-state reconciliation and 114B's notification certification/idempotency) -- no new promotion or dispatch logic was written. Idempotent by construction: pending-ness is derived by comparing canonical state directly, so repeated calls silently no-op once promotion succeeds. No changes to the Repository Transition Validator, Notification Certification, Canonical Artifact Promotion, push_state_reconciliation.py, or _finalize_report_and_notify itself. Execution capability remains unavailable.",
-  "files_changed_count": 8,
+  "summary": "Verification-only phase drilling 12 DeepSeek-style model/agent drift patterns against the existing containment stack (113Y/113Z Repository Transition Validator, 114A Canonical Artifact Promotion, 114B Notification Certification, 114B.1 Notification Policy, 114C Push-State Reconciliation, 114D pcae agent verify-handoff, 114D.1 Post-Push Canonicalization) in isolated scratch repositories (real local no-network origin remotes; the actual pcae-harness repository was never mutated by the drill): wrong phase identity, stale metadata reuse, stale commit hashes, missing recommended_next_phase, bad test result structure, duplicate notification, silent notification prevention, push-state mismatch (both directions), architecture overclaim, dirty working tree, latest.md/latest.json disagreement, execution availability violation. All 12 scenarios passed -- every invalid state was rejected, quarantined, or flagged before canonical promotion, with no silent false success. Added tests/test_model_containment_drill.py (17 tests) and docs/PHASE_114_MODEL_CONTAINMENT_DRILL.md. Three non-blocking precision notes recorded (architecture overclaim is warning-level not blocking; no dedicated drill command by design -- tests and documentation only, per the brief's own scope option; Scenario 2's reconcile-when-safe branch covered by 114C/114D.1's own suites, not independently drilled here). No new runtime mechanism; no changes to the Repository Transition Validator, Notification Certification, Canonical Artifact Promotion, Push-State Reconciliation, Post-Push Canonicalization, or verify-handoff. Execution capability remains unavailable.",
+  "files_changed_count": 7,
   "files_changed": [
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     ".pcae/phase-completion-metadata.json",
-    "docs/PHASE_114D1_POST_PUSH_CANONICALIZATION_NOTIFICATION_RECONCILIATION.md",
-    "src/pcae/core/post_push_canonicalization.py",
-    "src/pcae/commands/push.py",
-    "tests/test_post_push_canonicalization.py",
-    "tasks/active/20260705-2300-phase-114d-1-post-push-canonicalization-notification-reconciliation.md"
+    "docs/PHASE_114_MODEL_CONTAINMENT_DRILL.md",
+    "tests/test_model_containment_drill.py",
+    "tasks/active/20260705-2341-phase-114e-model-containment-drill.md"
   ],
-  "tests_added_or_updated": "14 focused post-push reconciliation tests added; notification/report/push-state suites unchanged",
+  "tests_added_or_updated": "17 focused model containment drill tests added; no runtime code changed",
   "phase_commits": [
     {
-      "hash": "6e8e886667952fda66c2297fa8883ff3e00192ad",
-      "message": "Add post-push canonicalization and notification reconciliation"
+      "hash": "1fb121305dc50c18094f679d4bf1ec472e9b6402",
+      "message": "Add model containment drill"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/post_push_canonicalization.py",
+  "validator_module": "none (verification-only phase; no new runtime module added)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 3,
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -38,28 +36,22 @@
   },
   "validation_results": [
     {
-      "name": "focused_post_push_reconciliation_report_push_state_tests",
-      "result": "177/177",
+      "name": "focused_containment_drill_handoff_validator_report_notification_tests",
+      "result": "582/582",
       "status": "passed",
-      "note": "tests/test_post_push_canonicalization.py tests/test_handoff_verification.py tests/test_push_state_reconciliation.py tests/test_notification_certification_idempotency.py tests/test_repository_transition_validator.py tests/test_repository_transition_validator_task_finish_integration.py tests/test_canonical_artifact_promotion.py tests/test_phase_114b1_repository_events_notification_policy.py tests/test_push.py -n auto"
-    },
-    {
-      "name": "phase_lifecycle_suite",
-      "result": "886/886",
-      "status": "passed",
-      "note": "tests/test_phase.py -n auto"
+      "note": "tests/test_model_containment_drill.py tests/test_handoff_verification.py tests/test_repository_transition_validator*.py tests/test_phase_reports*.py tests/test_notifications*.py -n auto"
     },
     {
       "name": "governance_autonomy_runtime_advisory_plugin_group",
-      "result": "4534/4534",
+      "result": "3830/3830",
       "status": "passed",
       "note": "tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* tests/test_*advisory* -n auto"
     },
     {
       "name": "release_lifecycle_regression",
-      "result": "2763/2765",
-      "status": "passed_with_known_preexisting_failures",
-      "note": "task/phase/report/notification/telegram slice -n auto; 2 failures confirmed pre-existing since Phase 114B via git stash: test_rc_audit_findings_repair.py::test_task_finish_incomplete_report_path_skips_dispatch, test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcoded stale '113Y' literal)"
+      "result": "1597/1597",
+      "status": "passed",
+      "note": "tests/test_task*.py tests/test_*task* tests/test_*phase* tests/test_phase_reports.py tests/test_phase_reports_cli.py tests/test_notifications.py tests/test_notifications_cli.py tests/test_telegram_notifications.py -n auto; 0 failures (the two long-documented pre-existing failures from earlier phases are outside this exact glob)"
     },
     {
       "name": "fast_green",
@@ -79,10 +71,9 @@
     }
   ],
   "test_results": {
-    "focused_post_push_reconciliation_report_push_state_tests": "177/177",
-    "phase_lifecycle_suite": "886/886",
-    "governance_autonomy_runtime_advisory_plugin_group": "4534/4534",
-    "release_lifecycle_regression": "2763/2765",
+    "focused_containment_drill_handoff_validator_report_notification_tests": "582/582",
+    "governance_autonomy_runtime_advisory_plugin_group": "3830/3830",
+    "release_lifecycle_regression": "1597/1597",
     "fast_green": "4390/4390",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
@@ -127,6 +118,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No new promotion logic. No new dispatch logic. No changes to the Repository Transition Validator. No changes to Notification Certification. No changes to Canonical Artifact Promotion. No changes to push_state_reconciliation.py. No changes to _finalize_report_and_notify itself. No execution runtime. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "114E — Model Containment Drill"
+  "no_go_confirmation": "No new runtime mechanism. No new command. No changes to the Repository Transition Validator. No changes to Notification Certification. No changes to Canonical Artifact Promotion. No changes to Push-State Reconciliation. No changes to Post-Push Canonicalization. No changes to verify-handoff. No execution runtime. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "114R — Repository State Kernel Review"
 }
