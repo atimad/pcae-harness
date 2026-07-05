@@ -2,47 +2,97 @@
 
 ## Current Phase
 
-Phase 113D.R — Advisory Runtime Verification Report Repair (completed).
+Phase 113S — Repository Transition Validator Architecture (completed).
 
-Report/metadata integrity repair only — no Advisory Runtime, Runtime
-Snapshot, Runtime Context, or Permission Broker changes.
+Architecture/design only — no implementation. Turns the 113X/
+Claude-DeepSeek cross-agent incident into a formal PCAE design
+principle: Model proposes. PCAE validates. Repository advances only
+through valid state transitions.
 
-Independent forensic verification rejected the prior 113D canonical
-report: it carried Phase 113B's stale commits (`d49351d5`, `8ec96882`)
-and stale `test_results` (byte-identical to 113B's own metadata,
-never updated for 113D), plus an empty structured
-`recommended_next_phase` despite prose/Architecture Status both
-saying 113R — which `pcae push check` independently confirmed as
-`Phase report trust: failed`, `Missing fields: recommended_next_phase`.
-Root cause: `.pcae/phase-completion-metadata.json` was never rewritten
-before 113D's `pcae phase complete` ran, so every structured field
-silently carried over from 113B's leftover file.
+Defines: Repository State (14 independently-observable components,
+each with exactly one authoritative reader); Proposed Transition (10
+transition kinds — `start_task`, `modify_files`, `run_validation`,
+`commit`, `finish_task`, `complete_phase`, `push`, `notify`,
+`update_status`, `produce_report`); the Transition Validator itself
+(`validate_transition(current_state, proposed, target_state,
+invariants) -> TransitionVerdict`, deliberately blind to which agent is
+proposing); 15 invariant families (phase identity consistency, active
+task consistency, allowed file scope, commit lineage, report
+completeness, report trust, metadata consistency, architecture status
+consistency, recommended-next-phase consistency, test result
+consistency, push state consistency, notification eligibility,
+single-final-notification, no-execution-availability, no-canonical-
+promotion-when-blocked); Accept/Reject/Quarantine/Requires-Human-Review
+semantics; a 5-state canonical artifact promotion model (Draft →
+Blocked / Quarantined / Certified → Canonical/latest, only Certified
+artifacts may ever become canonical); Notification eligibility (5
+simultaneous conditions; intermediate reports never externally
+dispatched); the semantic/structural boundary (models own code design,
+implementation strategy, explanations, remediation; PCAE owns identity,
+lifecycle, scope, reports, commits, pushes, notifications, canonical
+state); model-agnostic behavior (same invariants for Claude,
+Claude-DeepSeek, Codex, Qwen, human operators, and future models); and
+future integration points (task lifecycle, phase lifecycle, commit
+governance, push governance, notification runtime, Runtime Snapshot/
+Advisory Runtime, future intent/approval/execution layers) — all
+without redesigning any existing code path.
 
-113D's underlying implementation work was independently verified as
-real and correctly scoped (41 new tests in
-`tests/test_advisory_runtime_verification.py`, all passing;
-`docs/PHASE_113_ADVISORY_RUNTIME_VERIFICATION.md`; zero `src/pcae/`
-files touched, matching the established zero-src-change precedent for
-pure Verification & Compatibility phases such as 111D) — only the
-canonical report/metadata was invalid.
+No `validate_transition()` implementation exists. No Advisory Runtime,
+Runtime Snapshot, Runtime Context, or Permission Broker changes. No
+source file under `src/pcae/` was touched.
 
-Repair: `commits` now references the real 113D implementation commit
-(`335e0c06`, "Complete Phase 113D advisory runtime verification");
-`recommended_next_phase` is populated (`113R — Advisory Runtime
-Architecture Review`); `test_results` reflect independently re-run
-suites against current repository state (not copied from any prior
-report): focused 124/124, advisory/runtime broader group 1218/1218,
-release/lifecycle regression 1036/1039 (3 pre-existing failures,
-confirmed unrelated to 113D by reproducing them at pre-113D commit
-`1a502fc3`), `fast_green` 4389/4390 (1 pre-existing, state-dependent
-failure, task idle), full suite 16338/16341.
+Added `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR.md`,
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_ARCHITECTURE.md`,
+`tests/test_repository_transition_validator_architecture.py` (97
+documentation-completeness tests, all passing).
 
 Safety invariants confirmed unchanged: Runtime state `Observed`,
 execution capability `unavailable`, maximum plugin capability
 `observe`.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113R — Advisory Runtime Architecture Review.
+repo phase: 113T — Repository Transition Validator Contract Freeze.
+
+## Phase 113S Complete
+
+Phase 113S — Repository Transition Validator Architecture (completed).
+
+Architecture/design only. Full architecture:
+`docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR.md`. Phase summary:
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_ARCHITECTURE.md`.
+
+**Core principle formalized**: Model proposes. PCAE validates.
+Repository advances only through valid state transitions. PCAE does
+not trust the intelligence of the agent; it trusts only repository
+state that satisfies continuously verified engineering invariants.
+
+**Defined**: Repository State (14 components), Proposed Transition (10
+kinds), the Transition Validator (pure function, no agent-identity
+input), 15 invariant families, Accept/Reject/Quarantine/Requires-Human-
+Review semantics, a 5-state canonical artifact promotion model (only
+Certified artifacts may become canonical), Notification eligibility (5
+simultaneous conditions), the semantic/structural boundary, model-
+agnostic behavior, and future integration points for task lifecycle,
+phase lifecycle, commit governance, push governance, notification
+runtime, Runtime Snapshot/Advisory Runtime, and future intent/approval/
+execution layers.
+
+**Relationship to existing mechanisms**: this phase does not replace
+or modify `validate_finalization_gate()`, `validate_phase_identity()`,
+`check_task_zone_scope()`/`check_task_file_scope()`, or `pcae push
+check` — it describes them as specific, already-implemented instances
+of the general validator model.
+
+**Tests**: 97 new documentation-completeness tests
+(`tests/test_repository_transition_validator_architecture.py`), all
+passing. No implementation tests, since no implementation exists.
+
+**No-go**: No `validate_transition()` implementation, no Advisory
+Runtime/Runtime Snapshot/Runtime Context/Permission Broker changes, no
+execution/authorization/plugin/Telegram-inbound/REST/Web-UI/audit-
+persistence/rollback changes, no change to any existing finalization-
+gate/phase-identity/push-check code path. Execution capability remains
+unavailable.
 
 ## Phase 113D.R Complete
 
