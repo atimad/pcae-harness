@@ -29,6 +29,7 @@ from pcae.core.notification_certification import (
     NotificationCertificationOutcome,
     certify_notification_transition,
 )
+from pcae.core.push_state_reconciliation import reconcile_push_state
 from pcae.core.repository_transition_integration import (
     handle_phase_report_transition_result,
     validate_phase_report_transition,
@@ -222,10 +223,25 @@ def _finalize_report_and_notify(
     else:
         commits = _gather_commits()
 
-    pushed_status = meta.get("pushed_status", "") or _gather_pushed_status()
-    origin_count = meta.get("origin_main_head_count", None)
-    if origin_count is None:
-        origin_count = _gather_origin_head_count()
+    # Phase 114C — live git state is authoritative for current push state
+    # whenever it can be determined (Objective 2). Declared metadata is
+    # only ever a fallback now, not a value that silently wins over a
+    # confirmed-clean or confirmed-unpushed live check (113V.N/114B
+    # forensic finding: a genuinely pushed repo was quarantined because
+    # stale metadata still said "not_pushed").
+    push_reconciliation = reconcile_push_state(meta)
+    pushed_status = push_reconciliation.pushed_status
+    origin_count = push_reconciliation.origin_main_head_count
+
+    # Objective 8 — never hide a stale-metadata discrepancy behind a
+    # silently reconciled value.
+    if push_reconciliation.metadata_push_state_stale:
+        print("Push state reconciliation: stale metadata detected")
+        print(f"  metadata_push_state_stale: true")
+        print(f"  metadata_pushed_status: {push_reconciliation.metadata_pushed_status!r}")
+        print(f"  metadata_origin_main_head_count: {push_reconciliation.metadata_origin_main_head_count}")
+        print(f"  live_origin_main_head_count: {push_reconciliation.live_origin_main_head_count}")
+        print(f"  reconciled_push_state: {push_reconciliation.pushed_status}")
 
     # Phase 113X.4 — recommended_next_phase must come from structured
     # metadata only, never parsed from free-text --summary (113X audit
@@ -600,38 +616,6 @@ def _gather_files_changed() -> int:
     except Exception:
         pass
     return -1
-
-
-def _gather_pushed_status() -> str:
-    """Check whether HEAD is pushed to origin/main."""
-    import subprocess
-    try:
-        # Check if there are unpushed commits
-        result = subprocess.run(
-            ["git", "log", "--oneline", "origin/main..HEAD"],
-            capture_output=True, text=True, timeout=10,
-        )
-        if result.returncode == 0:
-            count = len([l for l in result.stdout.strip().splitlines() if l])
-            return "pushed" if count == 0 else "not_pushed"
-    except Exception:
-        pass
-    return ""
-
-
-def _gather_origin_head_count() -> int:
-    """Return count of commits between origin/main and HEAD."""
-    import subprocess
-    try:
-        result = subprocess.run(
-            ["git", "rev-list", "--count", "origin/main..HEAD"],
-            capture_output=True, text=True, timeout=10,
-        )
-        if result.returncode == 0:
-            return int(result.stdout.strip())
-    except Exception:
-        pass
-    return 0
 
 
 def _load_completion_metadata() -> dict:

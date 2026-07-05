@@ -11,6 +11,7 @@ from pcae.core.notification_certification import (
     NotificationCertificationOutcome,
     certify_notification_transition,
 )
+from pcae.core.push_state_reconciliation import reconcile_push_state
 from pcae.core.repository_transition_integration import (
     handle_phase_report_transition_result,
     validate_phase_report_transition,
@@ -666,8 +667,21 @@ def _finalize_task_report_and_notify(
     else:
         commits = []
 
-    pushed_status = meta.get("pushed_status", "")
-    origin_count = meta.get("origin_main_head_count", 0)
+    # Phase 114C — live git state is authoritative for current push state
+    # whenever it can be determined; this path previously trusted declared
+    # metadata unconditionally, with no live-derivation fallback at all
+    # (114B forensic finding: a genuinely pushed repo can be quarantined by
+    # stale metadata that nothing ever refreshed).
+    push_reconciliation = reconcile_push_state(meta)
+    pushed_status = push_reconciliation.pushed_status
+    origin_count = push_reconciliation.origin_main_head_count
+    if push_reconciliation.metadata_push_state_stale and emit_diagnostics:
+        print("Push state reconciliation: stale metadata detected")
+        print(f"  metadata_push_state_stale: true")
+        print(f"  metadata_pushed_status: {push_reconciliation.metadata_pushed_status!r}")
+        print(f"  metadata_origin_main_head_count: {push_reconciliation.metadata_origin_main_head_count}")
+        print(f"  live_origin_main_head_count: {push_reconciliation.live_origin_main_head_count}")
+        print(f"  reconciled_push_state: {push_reconciliation.pushed_status}")
     recommended_next = meta.get("recommended_next_phase", "")
     no_go_text = meta.get("no_go_confirmation", "")
     no_go_list = [no_go_text] if no_go_text else []
