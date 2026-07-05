@@ -104,7 +104,6 @@ advisory
 - pcae check
 - pcae doctor task-memory
 - pcae push check
-- pcae agent verify-handoff
 - pcae session bootstrap --compact --profile implementation
 - pcae runtime inspect --json
 - pcae notify status
