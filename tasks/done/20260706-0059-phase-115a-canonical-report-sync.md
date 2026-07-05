@@ -10,7 +10,7 @@ Phase 115A: Canonical Report Sync
 
 ## Status
 
-active
+done
 
 ## Mode
 
