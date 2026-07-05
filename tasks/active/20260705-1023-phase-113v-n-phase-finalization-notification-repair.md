@@ -33,6 +33,7 @@ Repair the phase-finalization notification asymmetry: fix pcae skill invoke phas
 - CHANGELOG.md
 - tasks/DONE.md
 - tasks/active/20260705-1023-phase-113v-n-phase-finalization-notification-repair.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 

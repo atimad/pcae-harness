@@ -1,25 +1,13 @@
 {
-    "phase_id": "113B", "phase_name": "phase_113b_advisory_runtime_contract_freeze", "phase_title": "Advisory Runtime Contract Freeze",
+    "phase_id": "113V.N", "phase_name": "Phase Finalization Notification Repair", "phase_title": "Phase Finalization Notification Repair",
     "status": "completed",
-    "summary": "Contract/freeze phase only -- no advisory implementation, no runtime behavior changes, no execution capability; no file under src/pcae/ touched. Freezes the Advisory Runtime contracts (113A) before any advisory implementation begins. New principle: Explainability precedes trust. Freezes a fourteen-field AdvisoryResult contract (113A's nine extended by five: source_snapshot_reference, reasoning_summary, alternative_considerations, remediation, implementation_status; the brief's suggested recommendation field reconciled into 113A's existing recommended_action rather than duplicated), an eight-facet explainability contract plus a reproducibility principle (restating 110A section 6's Deterministic Runtime Principle for Analysis specifically), a one-shape EvidenceReference evidence model (no evidence database, no audit persistence), advisory-category extension rules (open taxonomy, frozen meanings), severity/confidence semantics (four levels each, explicitly orthogonal, fail-closed ambiguity handling), a six-stage advisory lifecycle (contract only), a presentation contract (one model, many renderers), ten absolute safety rules (113A's seven plus deny/imply-approval/bypass-review-or-audit), and compatibility rules mirroring 112F's own discipline (no versioning field implemented this phase, consistent with 112F's own precedent). Added docs/PCAE_ADVISORY_RUNTIME_CONTRACT.md, docs/PHASE_113_ADVISORY_RUNTIME_CONTRACT_FREEZE.md. docs/ROADMAP.md evaluated, no change needed. 158 new tests (tests/test_advisory_runtime_contract.py), a pure documentation-verification suite.",
-    "files_changed_count": 5, "tests_added_or_updated": "158 tests added",
+    "summary": "Governance/notification repair phase closing the notification asymmetry 113S/113T/113U/113V each documented and re-confirmed without repairing. Forensic finding: pcae skill invoke phase-finalization <phase-id> is Phase 64B.5's generic, read-only Skill Invocation Targeting preview -- it never imports notifications.py, never constructs a TelegramSink, never reads PCAE_NOTIFY_ENABLED, and is not part of the real dispatch path at all; its target_unresolved failures came from matching only against the frozen _CRI_KNOWN_PHASES roadmap registry (last extended around Phase 69P/64B.6E), confirmed live to fail for ordinary phase 113D identically to 113T/113U/113V -- special phase-ID shapes were never the actual variable. The real gap: pcae phase complete had no notification-dispatch idempotency guard, unlike pcae task finish --commit, which already carried a marker-file workaround. Repair: _sit_resolve_phase_target()/_sit_infer_target_type() (src/pcae/core/agent.py) now fall back to live repository state (latest.json, historical reports, quarantined reports, in-flight phase-completion metadata, PROJECT_STATUS.md current phase) and classify phase-shaped IDs via a new grammar supporting normal/multi-letter/dotted-numeric/dotted-letter-repair forms; a syntactically invalid ID is reported as invalid_phase_id_form, distinct from a well-formed but not-found target_unresolved. A new notification_dispatch_note clarifies the command never gates or reflects Telegram dispatch. pcae task finish --commit's marker-file idempotency logic is generalized into shared phase_reports.py functions and pcae phase complete gains the same guard: a repeated finalization for the same phase_id + commit is now a no-op with an explicit reason instead of a duplicate send; a new commit for the same phase still sends. pcae notify send-report --latest remains deliberately unguarded (manual resend workflow). 18 new focused tests; 5,674 pre-existing phase/task/notification/agent-skill-targeting tests re-run clean; fast_green 4,390/4,390; full suite 16,644/16,646 (2 pre-existing unrelated failures, hardcoded '112C' expectations documented since Phase 113X.2). No Repository Transition Validator integration (113W untouched). No Advisory Runtime/Runtime Snapshot/Runtime Context/Runtime Registry/Runtime Inspect/Permission Broker changes. No execution/authorization/plugin/Telegram-inbound/REST/Web-UI/Dashboard changes. Execution capability remains unavailable.",
+    "files_changed_count": 11, "tests_added_or_updated": "18 tests added",
     "phase_commits": [
-        {"hash": "d49351d571d431f8fe97c8c9fad8c951e8d3c7a3", "message": "Freeze advisory runtime contracts"},
-        {"hash": "8ec968827d0b4eaef3c2c65548c14487adacfd20", "message": "Complete Phase 113B advisory runtime contract freeze"}
+        {"hash": "e0cdc00989c6305671e85624c9c22375afd10b70", "message": "Repair phase finalization notification dispatch"}
     ],
-    "pushed_status": "pushed", "origin_main_head_count": 0, "commit_attribution": "phase_owned",
+    "commit_attribution": "phase_owned",
     "validator_module": "src/pcae/core/phase_report_trust.py",
-    "no_go_gate_count": 25,
-    "no_go_gate_ids": ["NG-001", "NG-002", "NG-003", "NG-004", "NG-005", "NG-006", "NG-007", "NG-008", "NG-009", "NG-010", "NG-011", "NG-012", "NG-013", "NG-014", "NG-015", "NG-016", "NG-017", "NG-018", "NG-019", "NG-020", "NG-021", "NG-022", "NG-023", "NG-024", "NG-025"],
-    "default_human_override_posture": "no (uniform across all 25 gates, unchanged this phase)",
-    "branch_protection_unchanged": true,
-    "branch_protection_live_verified_again": true,
-    "github_release_v0_1_0_rc1_unchanged": true,
-    "pypi_publication": false,
-    "github_packages_publication": false,
-    "new_tag_created": false,
-    "final_v0_1_0_tag_created": false,
-    "note": "Metadata written after pcae push resolved final push state (origin/main..HEAD = 0 verified directly); both phase commit hashes below are the real, final pushed hashes.",
     "execution_integration_status": {
         "observed_command_paths": 4,
         "behavior_changing_paths": 0,
@@ -30,26 +18,30 @@
         "current_maximum_plugin_capability": "observe"
     },
     "validation_results": [
-        {"name": "focused_tests", "result": "922/922 (1 skip pre-task-finish)", "status": "passed", "note": "test_advisory_runtime_contract.py + test_runtime_snapshot*.py + test_runtime_context*.py + test_runtime_inspect*.py, run with -n auto"},
-        {"name": "governance_autonomy_group", "result": "3254/3254 (1 skip pre-task-finish)", "status": "passed", "note": "test_*runtime* + test_*contract* + test_*autonomy* + test_*plugin*, run with -n auto"},
-        {"name": "release_lifecycle_regression_full", "result": "1497/1497", "status": "passed", "note": "test_task*.py + test_*task* + test_*phase* + test_phase_reports.py + test_phase_reports_cli.py + test_notifications.py + test_notifications_cli.py + test_telegram_notifications.py, run with -n auto; includes the 68 tests in test_phase85_integration.py/test_phase87_integration.py (known-slow environmental performance issue, not a regression), all passed in 412.58s"},
-        {"name": "fast_green", "result": "4390/4390", "status": "passed", "note": "run with -n auto, with this phase's own active task present in tasks/active/ -- consistent with 112D's finding that test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked is state-dependent, not a fixed baseline; passed here because a task was active"},
+        {"name": "focused_tests", "result": "18/18", "status": "passed", "note": "tests/test_phase_113v_n_notification_finalization_repair.py"},
+        {"name": "release_lifecycle_regression_full", "result": "5674/5674", "status": "passed", "note": "test_phase.py + test_task.py + test_phase_reports.py + test_phase_reports_cli.py + test_notifications.py + test_telegram_notifications.py + test_task_finish_notification_ordering.py + test_task_finish_report_trust_notification.py + test_phase_report_trust_gate.py + test_phase_report_trust_gate_cli.py + test_phase_report_trust_hard_fail.py + test_agent.py (full skill-targeting suite) + test_phase_113v_n_notification_finalization_repair.py + test_repository_transition_validator.py + test_finalization_notification_guarantee.py, single-process"},
+        {"name": "fast_green", "result": "4390/4390", "status": "passed", "note": "run with -n auto, this phase's own active task present in tasks/active/"},
+        {"name": "full_suite", "result": "16644/16646", "status": "passed_with_known_preexisting_failures", "note": "run with -n auto; 2 pre-existing, unrelated failures (test_recommended_next_phase_matches_real_project_status, test_real_todo_not_flagged_stale_against_real_project_status), both hardcoding an expectation that PROJECT_STATUS.md's recommended next phase is still '112C' -- documented as a known fragility since Phase 113X.2, unrelated to this phase's changes"},
         {"name": "report_notification_tests", "result": "present_in_canonical_metadata", "status": "present"},
-        {"name": "bootstrap_session_reporting_tests", "result": "not_referenced_by_this_phases_validation_command", "status": "present"}
+        {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"}
     ],
     "test_results": {
-        "report_notification_tests": "present_in_canonical_metadata (unchanged this phase)",
-        "bootstrap_session_reporting_tests": "not referenced by this phase's validation command",
-        "fast_green": "4390/4390 (active task present; see 112D for the state-dependent pre-existing test_dry_run_simulation.py finding)"
+        "focused_tests": "18/18 (tests/test_phase_113v_n_notification_finalization_repair.py)",
+        "release_lifecycle_regression_full": "5674/5674",
+        "fast_green": "4390/4390",
+        "full_suite": "16644/16646 (2 pre-existing unrelated failures, documented since Phase 113X.2)"
     },
-    "pre_existing_failures": [],
+    "pre_existing_failures": [
+        "tests/test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcodes stale '112C' expectation, documented since Phase 113X.2)",
+        "tests/test_bootstrap_todo_consistency.py::test_real_todo_not_flagged_stale_against_real_project_status (same root cause)"
+    ],
     "governance_results": [
         {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
         {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
         {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
     ],
     "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "xdist_compatibility": "All suites (focused, governance/autonomy, full release/lifecycle regression including phase85/87, fast_green) ran cleanly under -n auto; no failures observed only under xdist.",
-    "no_go_confirmation": "No advisory runtime implementation. No advisory execution. No command authorization. No command denial. No Permission Broker enforcement. No runtime execution. No plugin loading. No plugin instantiation. No plugin invocation. No dependency injection. No shell mediation. No backend invocation. No adapter invocation. No execution enablement. No execution capability. No automatic apply. No audit persistence. No rollback execution. No Telegram inbound. No REST server. No web UI. No daemon. No background workers. implementation_status remains unconditionally execution_unavailable on every Permission Broker decision. Current maximum runtime state remains Observed. Current maximum plugin capability remains observe. v0.1.0-rc1 remains non-executing by design. v0.2 remains the autonomy target (Level 3, not Level 4/5). GitHub Release for v0.1.0-rc1 and branch protection on main are unchanged. No new tag created. No new GitHub Release. No PyPI publication. No GitHub Packages publication. Next phase not started.",
-    "recommended_next_phase": "113C — Advisory Runtime Prototype (Observation-Only)"
+    "xdist_compatibility": "Focused, regression, and fast_green suites all ran cleanly under -n auto/single-process; full suite ran cleanly under -n auto with only the 2 known pre-existing, unrelated failures noted above.",
+    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization beyond this phase's own governed commit/push. No real AI backend calls. No Repository Transition Validator integration. No Advisory Runtime changes. No Runtime Snapshot changes. No Runtime Context changes. No Runtime Registry changes. No Runtime Inspect changes. No Permission Broker changes. No execution capability enablement. Next phase not started.",
+    "recommended_next_phase": "113W — Repository Transition Validator Integration Design"
 }
