@@ -2,6 +2,13 @@
 
 ## Accepted
 
+- Treat Phase 113Z as the second Repository State Kernel enforcement phase:
+  `pcae task finish --commit` may finish and commit the governed task closure,
+  but canonical phase-report promotion now requires Repository Transition
+  Validator acceptance through the same shared phase-report transition adapter
+  used by `pcae phase complete`. Partial report evidence quarantines instead
+  of writing `latest.*`; notification and push-check commands remain out of
+  scope.
 - Treat Phase 113Y as the first Repository State Kernel enforcement phase:
   `pcae phase complete` must request a transition from the Repository
   Transition Validator before canonical `latest.*` promotion, while task

@@ -7,6 +7,11 @@ from pcae.core.check import run_checks
 from pcae.core.command_path_observation import observe
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
+from pcae.core.repository_transition_integration import (
+    handle_phase_report_transition_result,
+    validate_phase_report_transition,
+)
+from pcae.core.repository_transition_validator import TransitionKind
 from pcae.core.session import SessionUpdate, update_session_snapshot, write_session_snapshot
 from pcae.core.status import check_project_status_coherence
 from pcae.core.policy import load_policy
@@ -365,7 +370,11 @@ def run_task_finish(args: argparse.Namespace) -> int:
     # --commit" being the real phase-closing workflow this integrates with).
     report_integration: dict | None = None
     if commit_message:
-        report_integration = _finalize_task_report_and_notify(commit_hash)
+        report_integration = _finalize_task_report_and_notify(
+            commit_hash,
+            active_task_title=result.completed_task.title,
+            emit_diagnostics=not args.json,
+        )
 
     if args.json:
         data = {
@@ -410,6 +419,11 @@ def run_task_finish(args: argparse.Namespace) -> int:
                 if report_integration.get("trust")
                 else None
             )
+            if "validator_verdict" in report_integration:
+                data["repository_transition_validator"] = {
+                    "verdict": report_integration.get("validator_verdict"),
+                    "violations": report_integration.get("validator_violations", []),
+                }
             data["notification_dispatch"] = {
                 "status": report_integration.get("notification_status", report_integration["status"]),
                 "reason": report_integration.get("notification_reason") or report_integration.get("message"),
@@ -443,6 +457,8 @@ def run_task_finish(args: argparse.Namespace) -> int:
         if report_integration is not None:
             _print_report_integration_human(report_integration)
 
+    if report_integration and str(report_integration.get("status", "")).startswith("validator_"):
+        return 1
     return 0
 
 
@@ -477,6 +493,15 @@ def _print_report_integration_human(report_integration: dict) -> None:
     if status in ("no_metadata", "invalid_metadata"):
         print(f"Report finalization: skipped ({report_integration['message']})")
         return
+    if status.startswith("validator_"):
+        print(f"Report finalization: blocked ({report_integration['message']})")
+        verdict = report_integration.get("validator_verdict", "unknown")
+        print(f"Repository transition validator: {verdict}")
+        for invariant in report_integration.get("validator_violations", []):
+            print(f"  Violation: {invariant}")
+        print("Report notification: skipped")
+        print("Telegram: outbound-only")
+        return
 
     trust = report_integration.get("trust") or {}
     print(f"Report trust: {trust.get('status', 'unknown')}")
@@ -499,7 +524,34 @@ def _print_report_integration_human(report_integration: dict) -> None:
     print("Telegram: outbound-only")
 
 
-def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
+def _read_lifecycle_current_phase_line() -> str | None:
+    """Read PROJECT_STATUS.md's Current Phase line for canonical identity."""
+    import re
+    from pathlib import Path
+
+    path = Path("PROJECT_STATUS.md")
+    if not path.exists():
+        return None
+    text = path.read_text(encoding="utf-8")
+    match = re.search(
+        r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s|\Z)",
+        text,
+        re.MULTILINE | re.DOTALL,
+    )
+    if not match:
+        return None
+    section = match.group(1).strip()
+    if not section:
+        return None
+    return section.splitlines()[0].strip() or None
+
+
+def _finalize_task_report_and_notify(
+    commit_hash: str | None,
+    *,
+    active_task_title: str | None = None,
+    emit_diagnostics: bool = True,
+) -> dict:
     """Phase 105C — finalize the phase-completion report, run the 105A/105B
     report-trust validator, and dispatch outbound notifications (Telegram)
     from `.pcae/phase-completion-metadata.json` during `pcae task finish
@@ -507,10 +559,10 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
 
     This is the actual PCAE phase-closing workflow; `pcae phase complete`
     already does this (via `finalize_phase_report`) but is not part of that
-    workflow in day-to-day use. Warning-only: never raises, never blocks
-    task finish. Read-only except for the local report/notification
-    artifacts it creates — the same ones `pcae phase complete` creates for
-    the same metadata file.
+    workflow in day-to-day use. Phase 113Z makes canonical report promotion
+    validator-gated: accepted transitions keep the previous report behavior,
+    while rejected/quarantined/human-review transitions never write
+    latest.md/latest.json.
     """
     import os
     from pathlib import Path as _Path
@@ -524,6 +576,7 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
         finalize_phase_report,
         phase_already_notified,
         read_latest_report,
+        resolve_canonical_phase_identity,
         validate_finalization_gate,
         write_notification_dispatch_marker,
     )
@@ -545,11 +598,19 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
     if not isinstance(meta, dict):
         return {"status": "invalid_metadata", "message": f"{meta_path} is not a JSON object"}
 
-    phase_id = meta.get("phase_id", "")
-    if not phase_id:
-        return {"status": "no_metadata", "message": f"{meta_path} is missing phase_id — skipping"}
+    identity = resolve_canonical_phase_identity(
+        active_task_title=active_task_title,
+        metadata=meta,
+        lifecycle_current_phase_line=_read_lifecycle_current_phase_line(),
+    )
+    if identity is None:
+        return {
+            "status": "invalid_metadata",
+            "message": f"{meta_path} does not identify a canonical phase",
+        }
 
-    phase_name = meta.get("phase_name") or meta.get("phase_title") or phase_id
+    phase_id = identity.phase_id
+    phase_name = identity.phase_name
     status = meta.get("status") or "completed"
     summary = meta.get("summary") or f"Phase {phase_id} completed via pcae task finish."
 
@@ -686,6 +747,42 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
     apply_old_schema_gate(trial_trust, gate)
     dispatch_allowed = trial_trust.complete
 
+    validator_result = validate_phase_report_transition(
+        phase_id=phase_id,
+        requested_phase_id=phase_id,
+        phase_name=phase_name,
+        active_task_title=active_task_title,
+        metadata=meta,
+        lifecycle_current_phase_line=_read_lifecycle_current_phase_line(),
+        trial_report=trial_report,
+        recommended_next_phase=recommended_next,
+        origin_main_head_count=origin_count,
+        transition_kind=TransitionKind.FINISH_TASK,
+    )
+    if not handle_phase_report_transition_result(
+        validator_result,
+        trial_report,
+        gate,
+        command_label="finish_task",
+        accepted_message="Transition accepted",
+        rejected_message="Task finish report promotion rejected -- latest.md/latest.json were NOT written or overwritten.",
+        refused_message="Task finish report promotion refused. Repair phase-completion metadata before retrying.",
+        notification_skip_message="Report notification: skipped",
+        emit_diagnostics=emit_diagnostics,
+    ):
+        return {
+            "status": f"validator_{validator_result.verdict.value}",
+            "message": "repository transition validator blocked task finish report promotion",
+            "phase_id": phase_id,
+            "trust": trial_trust.to_dict(),
+            "report_completeness": trial_report.report_completeness,
+            "metadata_path": str(meta_path),
+            "validator_verdict": validator_result.verdict.value,
+            "validator_violations": [v.invariant for v in validator_result.violations],
+            "notification_status": "skipped_validator",
+            "notification_reason": "repository transition validator did not accept transition",
+        }
+
     # Suppress dispatch (but still finalize/write the report) when the
     # report is not yet dispatch-ready — e.g. final push state is pending.
     # Prefer skip over sending a partial report labeled as final.
@@ -721,14 +818,9 @@ def _finalize_task_report_and_notify(commit_hash: str | None) -> dict:
             "phase_id": phase_id,
         }
 
-    # Phase 113X.1 — `pcae task finish --commit` intentionally does NOT
-    # pass `gate=` to finalize_phase_report(): this call site is warning-
-    # only by design (see docstring) and its pre-existing, tested contract
-    # is to still write a partial/incomplete report for human visibility
-    # (never silently repaired, never quarantined) while only suppressing
-    # notification dispatch. Finalization-gate *enforcement* (113X
-    # Finding 1) applies to the authoritative `pcae phase complete` path
-    # in commands/phase.py instead.
+    # Phase 113Z — Repository Transition Validator acceptance above is the
+    # authority for canonical promotion. This call remains the existing report
+    # writer for accepted task-finish transitions only.
     report = fin.get("report")
     paths = fin.get("paths") or {}
 

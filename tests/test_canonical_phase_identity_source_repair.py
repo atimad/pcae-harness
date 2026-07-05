@@ -306,10 +306,12 @@ class TestReportMatchesCanonicalSources:
             "Mentions a completely different Phase 999Q in passing.",
         ])
 
-        assert exit_code == 0
-        latest = json.loads((tmp_path / ".pcae" / "phase-reports" / "latest.json").read_text())
-        assert latest["phase_id"] == "205F"
-        assert latest["phase_name"] == "Active Task Wins"
+        output = capsys.readouterr().out
+        assert exit_code == 1
+        assert "Repository transition validator: Transition rejected" in output
+        assert "phase_identity_consistency" in output
+        assert "metadata_consistency" in output
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
     def test_report_phase_name_matches_canonical_phase(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)

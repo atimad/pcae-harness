@@ -25,16 +25,12 @@ from pcae.core.phase import complete_phase, handoff_phase, start_phase
 from pcae.core.session import write_session_snapshot
 from pcae.core.strategic_lineage import strategic_continuity_summary
 from pcae.core.tasks import find_latest_active_task
+from pcae.core.repository_transition_integration import (
+    handle_phase_report_transition_result,
+    validate_phase_report_transition,
+)
 from pcae.core.repository_transition_validator import (
-    ArtifactState,
-    ExpectedTargetState,
-    InvariantViolation,
-    ProposedTransition,
-    RepositoryState,
     TransitionKind,
-    TransitionResult,
-    TransitionVerdict,
-    validate_transition,
 )
 
 
@@ -294,7 +290,7 @@ def _finalize_report_and_notify(
     # schema's `assess_completeness()` treats `<=0` as missing.)
     apply_old_schema_gate(trust_result, gate)
 
-    validator_result = _validate_phase_complete_transition(
+    validator_result = validate_phase_report_transition(
         phase_id=phase_id,
         requested_phase_id=cli_phase_id or phase_id,
         phase_name=phase_name,
@@ -304,9 +300,19 @@ def _finalize_report_and_notify(
         trial_report=trial_report,
         recommended_next_phase=recommended_next,
         origin_main_head_count=origin_count,
+        transition_kind=TransitionKind.COMPLETE_PHASE,
         allow_partial_report=allow_partial_report,
     )
-    if not _handle_phase_complete_validator_result(validator_result, trial_report, gate):
+    if not handle_phase_report_transition_result(
+        validator_result,
+        trial_report,
+        gate,
+        command_label="complete_phase",
+        accepted_message="Transition validated",
+        rejected_message="Phase completion rejected -- latest.md/latest.json were NOT written or overwritten.",
+        refused_message="Phase completion refused. Repair the report before retrying.",
+        notification_skip_message="Notification dispatch: skipped",
+    ):
         return False
 
     # Dispatch is suppressed whenever EITHER trust schema is incomplete,
@@ -494,159 +500,6 @@ def _finalize_report_and_notify(
         print(f"  Dispatch error: {safe_err}")
 
     return finalizable
-
-
-def _validate_phase_complete_transition(
-    *,
-    phase_id: str,
-    requested_phase_id: str,
-    phase_name: str,
-    active_task_title: str | None,
-    metadata: dict,
-    lifecycle_current_phase_line: str | None,
-    trial_report,
-    recommended_next_phase: str,
-    origin_main_head_count: int,
-    allow_partial_report: bool,
-) -> TransitionResult:
-    """Run the 113Y phase-complete Repository Transition Validator gate.
-
-    The adapter is intentionally scoped to ``pcae phase complete``. It
-    constructs the frozen 113T validator inputs from the already-built
-    trial report and metadata, then returns the validator verdict before
-    any canonical phase-report write can occur.
-    """
-    metadata_phase_id = metadata.get("phase_id") if isinstance(metadata.get("phase_id"), str) else None
-    lifecycle_phase_id, lifecycle_completed = _parse_lifecycle_phase_identity(lifecycle_current_phase_line)
-    active_task_phase_id = _parse_phase_id_from_text(active_task_title)
-    if active_task_phase_id and active_task_phase_id == phase_id:
-        metadata_phase_id = phase_id
-    report_completeness = "complete" if allow_partial_report else trial_report.report_completeness
-
-    current_state = RepositoryState(
-        phase_id=phase_id,
-        active_task_phase_id=active_task_phase_id,
-        metadata_phase_id=metadata_phase_id,
-        lifecycle_current_phase_id=lifecycle_phase_id,
-        lifecycle_current_phase_completed=lifecycle_completed,
-        commits=tuple(str(c) for c in trial_report.commits),
-        files_changed=trial_report.files_changed,
-        test_results=dict(trial_report.test_results),
-        recommended_next_phase=recommended_next_phase,
-        report_completeness=report_completeness,
-        pushed_status=trial_report.pushed_status,
-        origin_main_head_count=origin_main_head_count,
-        artifact_state=ArtifactState.CERTIFIED,
-        execution_availability=str(metadata.get("execution_availability", "unavailable")),
-    )
-    proposed_transition = ProposedTransition(
-        kind=TransitionKind.COMPLETE_PHASE,
-        payload={
-            "phase_id": phase_id,
-            "phase_name": phase_name,
-            "report_completeness": report_completeness,
-            "requested_canonical_artifacts": ("latest.md", "latest.json"),
-        },
-    )
-    expected_target = ExpectedTargetState(
-        artifact_state=ArtifactState.CANONICAL,
-        phase_id=requested_phase_id,
-    )
-
-    result = validate_transition(current_state, proposed_transition, expected_target)
-    if result.accepted and _metadata_requires_human_review(metadata):
-        return TransitionResult(
-            verdict=TransitionVerdict.REQUIRES_HUMAN_REVIEW,
-            violations=(
-                InvariantViolation(
-                    "human_review_required",
-                    "phase-completion metadata explicitly requires human review",
-                    "blocking",
-                ),
-            ),
-        )
-    return result
-
-
-def _handle_phase_complete_validator_result(
-    result: TransitionResult,
-    trial_report,
-    gate: dict,
-) -> bool:
-    """Apply the phase-complete validator verdict without touching other paths."""
-    if result.verdict == TransitionVerdict.ACCEPT:
-        print("Repository transition validator: Transition validated")
-        print("  Verdict: accept")
-        print("  Certified transition: complete_phase -> canonical phase report")
-        return True
-
-    print(f"Repository transition validator: {_validator_verdict_label(result.verdict)}")
-    print(f"  Verdict: {result.verdict.value}")
-    for violation in result.violations:
-        print(f"  Violation: {violation.invariant} — {_validator_violation_reason(violation)}")
-
-    print("Phase report: BLOCKED by finalization gate")
-    for blocker in gate.get("blockers", []):
-        print(f"  Blocker: {blocker}")
-    if result.verdict == TransitionVerdict.QUARANTINE:
-        from pcae.core.phase_reports import write_quarantined_report
-
-        blockers = [
-            f"{violation.invariant}: {_validator_violation_reason(violation)}"
-            for violation in result.violations
-        ] or ["repository transition validator quarantined the phase completion"]
-        paths = write_quarantined_report(trial_report, Path(".pcae/phase-reports"), blockers)
-        print("  Report quarantined -- latest.md/latest.json were NOT written or overwritten.")
-        if paths.get("quarantine_markdown"):
-            print(f"  Quarantine markdown: {paths['quarantine_markdown']}")
-        if paths.get("quarantine_json"):
-            print(f"  Quarantine json:     {paths['quarantine_json']}")
-    elif result.verdict == TransitionVerdict.REQUIRES_HUMAN_REVIEW:
-        print("  Human review required -- latest.md/latest.json were NOT written or overwritten.")
-    else:
-        print("  Report quarantined: no -- reject writes no report artifact.")
-        print("  Phase completion rejected -- latest.md/latest.json were NOT written or overwritten.")
-    print("  Phase completion refused. Repair the report before retrying.")
-    print("Notification dispatch: skipped")
-    return False
-
-
-def _validator_verdict_label(verdict: TransitionVerdict) -> str:
-    if verdict == TransitionVerdict.REJECT:
-        return "Transition rejected"
-    if verdict == TransitionVerdict.QUARANTINE:
-        return "Transition quarantined"
-    if verdict == TransitionVerdict.REQUIRES_HUMAN_REVIEW:
-        return "Human review required"
-    return "Transition validated"
-
-
-def _metadata_requires_human_review(metadata: dict) -> bool:
-    raw = metadata.get("requires_human_review", metadata.get("human_review_required", False))
-    if isinstance(raw, bool):
-        return raw
-    if isinstance(raw, str):
-        return raw.strip().lower() in {"1", "true", "yes", "required"}
-    return False
-
-
-def _validator_violation_reason(violation: InvariantViolation) -> str:
-    if violation.invariant == "recommended_next_phase_presence":
-        return "recommended_next_phase missing as structured metadata"
-    return violation.reason
-
-
-def _parse_lifecycle_phase_identity(line: str | None) -> tuple[str | None, bool]:
-    if not line:
-        return None, False
-    return _parse_phase_id_from_text(line), "(completed)" in line.lower()
-
-
-def _parse_phase_id_from_text(text: str | None) -> str | None:
-    if not text:
-        return None
-    match = re.search(r"\b(\d{3}[A-Z](?:\.[A-Z0-9]+)?)\b", text)
-    return match.group(1) if match else None
 
 
 def _redact_error(error: str) -> str:

@@ -83,18 +83,18 @@ def _complete(tmp_path: Path, monkeypatch) -> tuple[int, str]:
 
 
 def test_phase_complete_invokes_validator(tmp_path, monkeypatch, capsys):
-    import pcae.commands.phase as phase_commands
+    import pcae.core.repository_transition_integration as integration
 
     _init_repo(tmp_path)
     _write_metadata(tmp_path)
     calls = []
-    original = phase_commands.validate_transition
+    original = integration.validate_transition
 
     def wrapped(*args, **kwargs):
         calls.append((args, kwargs))
         return original(*args, **kwargs)
 
-    monkeypatch.setattr(phase_commands, "validate_transition", wrapped)
+    monkeypatch.setattr(integration, "validate_transition", wrapped)
 
     code, _ = _complete(tmp_path, monkeypatch)
 
@@ -201,7 +201,8 @@ def test_execution_availability_violation_rejects(tmp_path, monkeypatch, capsys)
     assert "Transition rejected" in output
 
 
-def test_task_finish_command_has_no_validator_integration():
+def test_phase_complete_uses_shared_transition_adapter():
+    phase_command = Path("src/pcae/commands/phase.py").read_text(encoding="utf-8")
     task_command = Path("src/pcae/commands/task.py").read_text(encoding="utf-8")
-    assert "repository_transition_validator" not in task_command
-    assert "validate_transition" not in task_command
+    assert "validate_phase_report_transition" in phase_command
+    assert "validate_phase_report_transition" in task_command

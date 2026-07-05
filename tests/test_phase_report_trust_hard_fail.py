@@ -330,7 +330,7 @@ class TestPushCheckIntegration:
 
 
 class TestTaskFinishCompatibility:
-    def test_task_finish_still_warning_only_prepush(self, tmp_path, monkeypatch, capsys):
+    def test_task_finish_quarantines_prepush_report(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         _new_task(root)
         _write_metadata(tmp_path, pushed_status="not_pushed", origin_main_head_count=8,
@@ -344,9 +344,12 @@ class TestTaskFinishCompatibility:
         monkeypatch.chdir(tmp_path)
 
         exit_code = main(["task", "finish", "--staged-file-aware", "--commit", "test commit"])
-        assert exit_code == 0
+        output = capsys.readouterr().out
+        assert exit_code == 1
+        assert "Repository transition validator: Transition quarantined" in output
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
-    def test_task_finish_still_suppresses_telegram_for_prepush(self, tmp_path, monkeypatch, capsys):
+    def test_task_finish_blocks_telegram_for_prepush(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         _new_task(root)
         _write_metadata(tmp_path, pushed_status="not_pushed", origin_main_head_count=8,
@@ -364,10 +367,11 @@ class TestTaskFinishCompatibility:
         main(["task", "finish", "--staged-file-aware", "--commit", "test commit"])
         output = capsys.readouterr().out
 
-        assert "Report notification: skipped_incomplete" in output
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report notification: skipped" in output
         assert not (tmp_path / ".pcae" / "notifications").exists()
 
-    def test_task_finish_completes_governed_commit_flow(self, tmp_path, monkeypatch, capsys):
+    def test_task_finish_closes_and_commits_even_when_report_quarantines(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         _new_task(root)
         _write_metadata(tmp_path, pushed_status="not_pushed", origin_main_head_count=8)
@@ -376,8 +380,9 @@ class TestTaskFinishCompatibility:
         exit_code = main(["task", "finish", "--staged-file-aware", "--commit", "test commit"])
         output = capsys.readouterr().out
 
-        assert exit_code == 0
+        assert exit_code == 1
         assert "Committed:" in output
+        assert "Repository transition validator: Transition quarantined" in output
 
     def test_no_duplicate_sends_after_hard_fail_changes(self, tmp_path, monkeypatch):
         from pcae.commands.task import _finalize_task_report_and_notify

@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 113Z — Repository Transition Validator Integration: Task Finish.
+  Implementation phase. Integrated the Repository Transition Validator into
+  `pcae task finish --commit` only, reusing the shared phase-report transition
+  adapter now used by `pcae phase complete`. Task finish now builds
+  `RepositoryState`, `ProposedTransition(kind=finish_task)`, and
+  `ExpectedTargetState(artifact_state=canonical)`, invokes
+  `validate_transition(...)`, and can write/promote `latest.md` and
+  `latest.json` only after an `accept` verdict. `reject` leaves latest
+  artifacts unchanged, `quarantine` writes only quarantine artifacts, and
+  `requires_human_review` blocks promotion. Stale phase-completion metadata can
+  no longer overwrite canonical latest reports when canonical identity
+  disagrees. Added
+  `src/pcae/core/repository_transition_integration.py`,
+  `tests/test_repository_transition_validator_task_finish_integration.py`, and
+  `docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_TASK_FINISH_INTEGRATION.md`;
+  updated task-finish notification-ordering tests for quarantine-first
+  canonical promotion. No push/check command integration, notification
+  enforcement, Runtime Snapshot, Runtime Inspect, Advisory Runtime, Permission
+  Broker, REST, Telegram inbound, or execution integration. Execution
+  capability remains unavailable. Recommended next phase: 114A — Report
+  Promotion & Quarantine Hardening.
+
 - Phase 113Y — Repository Transition Validator Integration: Phase Completion.
   Implementation phase. Integrated the Repository Transition Validator into
   `pcae phase complete` only. The command now builds `RepositoryState`,

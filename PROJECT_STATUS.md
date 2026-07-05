@@ -2,36 +2,51 @@
 
 ## Current Phase
 
-Phase 113Y — Repository Transition Validator Integration: Phase Completion (completed).
+Phase 113Z — Repository Transition Validator Integration: Task Finish (completed).
 
 Implementation phase. Full report:
-`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_PHASE_COMPLETE_INTEGRATION.md`.
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_TASK_FINISH_INTEGRATION.md`.
 
-**First real validator integration**: `pcae phase complete` now builds
-`RepositoryState`, `ProposedTransition(kind=complete_phase)`, and
+**Second validator integration**: `pcae task finish --commit` now builds
+`RepositoryState`, `ProposedTransition(kind=finish_task)`, and
 `ExpectedTargetState(artifact_state=canonical)`, invokes
-`validate_transition(...)`, and proceeds to canonical report generation only
+`validate_transition(...)`, and reaches canonical phase-report promotion only
 after an `accept` verdict.
 
-**Canonical promotion gate**: invalid phase-complete transitions stop before
-`latest.md` / `latest.json` can be written or overwritten. `reject` blocks
-promotion without writing a canonical report; `quarantine` writes only
-quarantine artifacts; `requires_human_review` pauses promotion with explicit
-review diagnostics.
+**Asymmetry repaired**: task finish can no longer write or promote
+`latest.md` / `latest.json` through a path that bypasses the Repository
+Transition Validator required by `pcae phase complete`. Both commands share
+`src/pcae/core/repository_transition_integration.py` for phase-report
+transition validation and canonical identity handling.
 
-**Compatibility**: accepted phase completions continue through the existing
-report finalization flow. CLI shape, report writer, notification
-implementation, Runtime Snapshot, Runtime Inspect, Advisory Runtime,
-Permission Broker, and execution posture are unchanged.
+**Verdict behavior**: `accept` preserves the existing successful task-finish
+report flow; `reject` blocks canonical promotion and leaves latest artifacts
+unchanged; `quarantine` writes quarantine artifacts only; `requires_human_review`
+blocks promotion with explicit diagnostics.
 
-**Scope boundary**: no `pcae task finish --commit` integration, no push/check
-integration, no notification-dispatch enforcement, no report-promotion
-integration outside the phase-complete path, no Permission Broker enforcement,
-no execution runtime, no REST, no Web UI, no Dashboard, and no Telegram inbound.
-Execution capability remains unavailable. Runtime state remains Observed.
-Maximum plugin capability remains `observe`.
+**Scope boundary**: no push/check integration, no notification-dispatch
+enforcement, no execution runtime, no authorization, no Permission Broker
+enforcement, no plugin execution, no Telegram inbound, no REST, no Web UI, and
+no Dashboard. Execution capability remains unavailable. Runtime state remains
+Observed. Maximum plugin capability remains `observe`.
 
-Recommended next repo phase: 113Z — Repository Transition Validator Integration: Task Finish (not started).
+Recommended next repo phase: 114A — Report Promotion & Quarantine Hardening (not started).
+
+## Phase 113Z Complete
+
+Phase 113Z — Repository Transition Validator Integration: Task Finish (completed).
+
+Integrated the Repository Transition Validator into `pcae task finish
+--commit` only. Canonical reports are now produced by task finish only after
+validator acceptance. Stale phase-completion metadata, phase identity mismatch,
+missing `recommended_next_phase`, partial report evidence, explicit human
+review, and execution availability overclaims cannot become canonical latest
+reports through task finish.
+
+**No-go**: no notification or push-check command integration. Execution
+capability remains unavailable.
+
+Recommended next repo phase: 114A — Report Promotion & Quarantine Hardening (not started).
 
 ## Phase 113Y Complete
 

@@ -125,10 +125,12 @@ class TestPartialDispatchSuppression:
         exit_code = _finish(tmp_path)
         output = capsys.readouterr().out
 
-        assert exit_code == 0
-        assert "Report notification: skipped_incomplete" in output
+        assert exit_code == 1
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report notification: skipped" in output
         assert not (tmp_path / ".pcae" / "notifications").exists()
         assert not (tmp_path / ".pcae" / "phase-reports" / ".last-notified.json").exists()
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
     def test_missing_origin_main_head_skips_final_send(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
@@ -141,9 +143,11 @@ class TestPartialDispatchSuppression:
         exit_code = _finish(tmp_path)
         output = capsys.readouterr().out
 
-        assert exit_code == 0
-        assert "Report notification: skipped_incomplete" in output
+        assert exit_code == 1
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report notification: skipped" in output
         assert not (tmp_path / ".pcae" / "notifications").exists()
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
     def test_pending_push_check_skips_final_send(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
@@ -156,9 +160,11 @@ class TestPartialDispatchSuppression:
         exit_code = _finish(tmp_path)
         output = capsys.readouterr().out
 
-        assert exit_code == 0
-        assert "Report notification: skipped_incomplete" in output
+        assert exit_code == 1
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report notification: skipped" in output
         assert not (tmp_path / ".pcae" / "notifications").exists()
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
     def test_output_lists_missing_fields_and_repair_required(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
@@ -172,8 +178,8 @@ class TestPartialDispatchSuppression:
         _finish(tmp_path)
         output = capsys.readouterr().out
 
-        assert "Report trust: partial" in output
-        assert "Repair required: yes" in output
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report finalization: blocked" in output
         assert "pushed_status" in output
         assert "origin_main_head" in output
         assert "governance_results.pcae_push_check" in output
@@ -191,8 +197,8 @@ class TestPartialDispatchSuppression:
         _finish(tmp_path)
         output = capsys.readouterr().out
 
-        assert "Report trust: partial" in output
-        assert "Repair required: yes" in output
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report finalization: blocked" in output
 
 
 # ── Group B: Complete report dispatch ────────────────────────────────────────
@@ -264,8 +270,10 @@ class TestIdempotencyMarker:
         monkeypatch.setenv("PCAE_NOTIFY_SINKS", "filesystem")
 
         result = _finalize_task_report_and_notify("abc1234")
-        assert result["notification_status"] == "skipped_incomplete"
+        assert result["notification_status"] == "skipped_validator"
+        assert result["status"] == "validator_quarantine"
         assert not (tmp_path / ".pcae" / "phase-reports" / ".last-notified.json").exists()
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
     def test_later_complete_report_can_still_send_after_partial(self, tmp_path, monkeypatch):
         from pcae.commands.task import _finalize_task_report_and_notify
@@ -278,7 +286,8 @@ class TestIdempotencyMarker:
         monkeypatch.setenv("PCAE_NOTIFY_SINKS", "filesystem")
 
         first = _finalize_task_report_and_notify("abc1234")
-        assert first["notification_status"] == "skipped_incomplete"
+        assert first["notification_status"] == "skipped_validator"
+        assert first["status"] == "validator_quarantine"
 
         # Now push state resolves (e.g. after `pcae push`); metadata is
         # updated and a later finalization (same commit) must be able to
@@ -320,7 +329,8 @@ class TestReportTrustBehavior:
 
         _finish(tmp_path)
         output = capsys.readouterr().out
-        assert "Report notification: skipped_incomplete" in output
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report notification: skipped" in output
 
     def test_partial_reports_remain_visible_as_partial_in_written_report(
         self, tmp_path, monkeypatch, capsys,
@@ -336,9 +346,13 @@ class TestReportTrustBehavior:
         _finish(tmp_path)
         capsys.readouterr()
 
-        latest = json.loads((tmp_path / ".pcae" / "phase-reports" / "latest.json").read_text())
-        assert latest["report_completeness"] == "partial"
-        assert "pushed_status" in latest["missing_trust_fields"]
+        reports_dir = tmp_path / ".pcae" / "phase-reports"
+        assert not (reports_dir / "latest.json").exists()
+        quarantined = sorted((reports_dir / "quarantine").glob("*.json"))
+        assert quarantined
+        blocked = json.loads(quarantined[-1].read_text())
+        assert blocked["report_completeness"] == "blocked"
+        assert "pushed_status" in blocked["missing_trust_fields"]
 
     def test_no_silent_auto_repair_of_missing_fields(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
@@ -352,9 +366,13 @@ class TestReportTrustBehavior:
         _finish(tmp_path)
         capsys.readouterr()
 
-        latest = json.loads((tmp_path / ".pcae" / "phase-reports" / "latest.json").read_text())
-        assert latest["pushed_status"] == "not_pushed"
-        assert latest["origin_main_head_count"] == 8
+        reports_dir = tmp_path / ".pcae" / "phase-reports"
+        assert not (reports_dir / "latest.json").exists()
+        quarantined = sorted((reports_dir / "quarantine").glob("*.json"))
+        assert quarantined
+        blocked = json.loads(quarantined[-1].read_text())
+        assert blocked["pushed_status"] == "not_pushed"
+        assert blocked["origin_main_head_count"] == 8
 
 
 # ── Group E: CLI / UX ────────────────────────────────────────────────────────
@@ -391,9 +409,10 @@ class TestCliUx:
 
         assert data["report_trust"]["complete"] is False
         assert data["repair_required"] is True
-        assert data["notification_dispatch"]["status"] == "skipped_incomplete"
+        assert data["notification_dispatch"]["status"] == "skipped_validator"
+        assert data["repository_transition_validator"]["verdict"] == "quarantine"
         assert data["telegram_runtime"] == "outbound-only"
-        assert data["report_path"]
+        assert data["report_path"] is None
         assert data["metadata_path"] == ".pcae/phase-completion-metadata.json"
 
 
