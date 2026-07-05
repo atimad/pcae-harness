@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 114D: Cross-Agent Verification Command (20260705-2227-phase-114d-cross-agent-verification-command)
 - Phase 114C: Completion Sync (20260705-2204-phase-114c-completion-sync)
 - Phase 114C: Push Authorization & Post-Push Reconciliation (20260705-2201-phase-114c-push-authorization-post-push-reconciliation)
 - Phase 114B.1: Completion Sync (20260705-2126-phase-114b-1-completion-sync)
