@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- Phase 114D.1 — Post-Push Canonicalization & Notification Reconciliation.
+  Repair/integration phase, fixing the live defect Phase 114D's own `pcae
+  agent verify-handoff` found immediately after 114D's governed push:
+  declared phase-completion metadata named `114D`, but the canonical
+  report (`latest.json`) was still `114A` -- canonical promotion never
+  reran after the push that made the repository push-clean. Root cause:
+  `pcae task finish --commit` evaluates finalization one commit before
+  its own closure commit is pushed, so the Repository Transition
+  Validator correctly quarantines it (113X/114C behavior, unchanged); no
+  path ever re-evaluated finalization after the subsequent push landed.
+  Added `src/pcae/core/post_push_canonicalization.py`
+  (`reconciliation_pending(...)`, `live_push_is_clean(...)`), and wired
+  `pcae push` (`src/pcae/commands/push.py`) to call
+  `_reconcile_post_push(...)` after a real push succeeds and whenever
+  readiness reports `nothing_to_push`. When declared metadata disagrees
+  with the canonical report and live push state is genuinely clean, it
+  re-invokes the existing `_finalize_report_and_notify(...)`
+  (`pcae phase complete`'s own finalization function, already carrying
+  114C's live push-state reconciliation and 114B's notification
+  certification/idempotency) -- no new promotion or dispatch logic was
+  written. Idempotent by construction: pending-ness is derived by
+  comparing canonical state directly, so repeated calls silently no-op
+  once promotion succeeds. Added
+  `docs/PHASE_114D1_POST_PUSH_CANONICALIZATION_NOTIFICATION_RECONCILIATION.md`
+  and `tests/test_post_push_canonicalization.py`. No changes to the
+  Repository Transition Validator, Notification Certification, Canonical
+  Artifact Promotion, `push_state_reconciliation.py`, or
+  `_finalize_report_and_notify` itself. Execution capability remains
+  unavailable. Recommended next phase: 114E — Model Containment Drill.
+
 - Phase 114D — Cross-Agent Verification Command. Implementation phase.
   Added `pcae agent verify-handoff` (`--json` supported), a model-agnostic,
   read-only command answering "safe to continue?" for any model, agent,

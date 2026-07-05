@@ -2,40 +2,56 @@
 
 ## Current Phase
 
-Phase 114D — Cross-Agent Verification Command (completed).
+Phase 114D.1 — Post-Push Canonicalization & Notification Reconciliation (completed).
 
-Implementation phase. Phase report:
-`docs/PHASE_114_CROSS_AGENT_VERIFICATION_COMMAND.md`.
+Repair/integration phase. Phase report:
+`docs/PHASE_114D1_POST_PUSH_CANONICALIZATION_NOTIFICATION_RECONCILIATION.md`.
 
-**Command**: `pcae agent verify-handoff` (`--json` supported) is a
-model-agnostic, read-only repository handoff verification command,
-answering "safe to continue?" for any model, agent, automation, or human
-picking up work here. No file mutation, no commit, no push, no
-notification, no finalization.
+**Defect fixed**: Phase 114D's own `pcae agent verify-handoff`, run
+immediately after 114D's governed push, correctly reported FAIL --
+metadata declared `phase_id: 114D` but the canonical report was still
+`114A`. Root cause: `pcae task finish --commit` evaluates finalization
+one commit before its own closure commit is pushed, so the validator
+correctly quarantines it (113X/114C, unchanged) -- but nothing ever
+re-evaluated finalization after the follow-up push actually landed.
 
-**Checks**: 23 checks across git state, task state, phase/report state,
-114C push-state reconciliation, notification state, architecture status,
-and runtime invariants, rolled up into a single `pass`/`warning`/`fail`
-verdict (worst-of-all-checks). A missing notification marker is a
-warning, not a failure -- dispatch is opt-in and push-state gated; a
-dirty tree, phase-identity mismatch, missing canonical report, or
-execution becoming available are all failures.
+**Reconciliation**: `pcae push` now calls a new
+`_reconcile_post_push(...)` after a real push succeeds and whenever
+readiness reports `nothing_to_push`. It asks two pure questions
+(`src/pcae/core/post_push_canonicalization.py`): does declared metadata
+disagree with the canonical report (`reconciliation_pending`), and is the
+working tree clean with live `origin/main..HEAD == 0`
+(`live_push_is_clean`, reusing 114C's `compute_live_push_state()`
+unmodified)? Only when both hold does it re-invoke the existing
+`_finalize_report_and_notify(...)` (`pcae phase complete`'s own
+function) -- no new promotion or dispatch logic was written.
 
-**Reuses 114C directly**: push-state checks call
-`reconcile_push_state(...)` from `src/pcae/core/push_state_reconciliation.py`
-without modification, surfacing the same `metadata_push_state_stale`
-diagnostic as a warning whenever declared metadata disagrees with live
-git state.
-
-**Model-agnostic by construction**: `verify_handoff(root)` takes exactly
-one parameter and carries no model/agent/backend identity field anywhere
-in its result, mirroring the Repository Transition Validator's own frozen
-constraint.
+**Idempotent by construction**: pending-ness is derived by comparing
+canonical state directly, not by a "have we run this" flag -- once
+promotion succeeds, every subsequent check finds the two already agree
+and silently no-ops.
 
 **No new lifecycle mutation**: no changes to the Repository Transition
 Validator, Notification Certification, Canonical Artifact Promotion,
-`push_state_reconciliation.py`, `pcae push`/`pcae push check`, or
-notification dispatch mechanics.
+`push_state_reconciliation.py`, or `_finalize_report_and_notify` itself --
+only when it gets called changed.
+
+Recommended next repo phase: 114E — Model Containment Drill (not started).
+
+## Phase 114D.1 Complete
+
+Phase 114D.1 — Post-Push Canonicalization & Notification Reconciliation (completed).
+
+Fixed the live defect Phase 114D's own handoff verification found:
+canonical report promotion never reran after a governed push made the
+repository push-clean. `pcae push` now re-evaluates finalization
+(reusing existing 114B/114C/114D machinery unchanged) whenever declared
+metadata is pending and live push state is clean.
+
+**No-go**: no new promotion or dispatch logic; no changes to the
+Repository Transition Validator, Notification Certification, Canonical
+Artifact Promotion, or `push_state_reconciliation.py`. Execution
+capability remains unavailable.
 
 Recommended next repo phase: 114E — Model Containment Drill (not started).
 

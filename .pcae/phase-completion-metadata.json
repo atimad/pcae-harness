@@ -1,30 +1,29 @@
 {
-  "phase_id": "114D",
-  "phase_name": "Cross-Agent Verification Command",
-  "phase_title": "Cross-Agent Verification Command",
+  "phase_id": "114D.1",
+  "phase_name": "Post-Push Canonicalization & Notification Reconciliation",
+  "phase_title": "Post-Push Canonicalization & Notification Reconciliation",
   "status": "completed",
-  "summary": "Added pcae agent verify-handoff (--json supported), a model-agnostic, read-only command answering 'safe to continue?' for any model, agent, automation, or human picking up work in this repository. Added src/pcae/core/handoff_verification.py (verify_handoff(...), HandoffCheck, HandoffVerificationResult) implementing 23 checks across git state, task state, phase/report state, push-state reconciliation (reusing Phase 114C's reconcile_push_state(...) unmodified), notification state (Telegram configured/enabled read-only, dispatch marker presence, never sending), architecture status, and runtime invariants (execution-unavailable/Observed/observe). Overall verdict is the worst severity among all checks; a missing notification marker is a warning, never a failure. Exit code 0 for pass/warning, 1 for fail. No model/agent/backend identity anywhere in the result. The command performs no mutation: no commit, no push, no notification, no finalization, and no changes to the Repository Transition Validator, Notification Certification, Canonical Artifact Promotion, push_state_reconciliation.py, pcae push/pcae push check, or notification dispatch mechanics. Execution capability remains unavailable.",
-  "files_changed_count": 9,
+  "summary": "Fixed the live defect Phase 114D's own pcae agent verify-handoff found immediately after 114D's governed push: declared phase-completion metadata named 114D, but the canonical report (latest.json) was still 114A -- canonical promotion never reran after the push that made the repository push-clean. Root cause: pcae task finish --commit evaluates finalization one commit before its own closure commit is pushed, so the Repository Transition Validator correctly quarantines it (113X/114C behavior, unchanged); no path ever re-evaluated finalization after the subsequent push landed. Added src/pcae/core/post_push_canonicalization.py (reconciliation_pending(...), live_push_is_clean(...)), and wired pcae push (src/pcae/commands/push.py) to call _reconcile_post_push(...) after a real push succeeds and whenever readiness reports nothing_to_push. When declared metadata disagrees with the canonical report and live push state is genuinely clean, it re-invokes the existing _finalize_report_and_notify(...) (pcae phase complete's own finalization function, already carrying 114C's live push-state reconciliation and 114B's notification certification/idempotency) -- no new promotion or dispatch logic was written. Idempotent by construction: pending-ness is derived by comparing canonical state directly, so repeated calls silently no-op once promotion succeeds. No changes to the Repository Transition Validator, Notification Certification, Canonical Artifact Promotion, push_state_reconciliation.py, or _finalize_report_and_notify itself. Execution capability remains unavailable.",
+  "files_changed_count": 8,
   "files_changed": [
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     ".pcae/phase-completion-metadata.json",
-    "docs/PHASE_114_CROSS_AGENT_VERIFICATION_COMMAND.md",
-    "src/pcae/core/handoff_verification.py",
-    "src/pcae/commands/agent.py",
-    "src/pcae/cli.py",
-    "tests/test_handoff_verification.py",
-    "tasks/active/20260705-2227-phase-114d-cross-agent-verification-command.md"
+    "docs/PHASE_114D1_POST_PUSH_CANONICALIZATION_NOTIFICATION_RECONCILIATION.md",
+    "src/pcae/core/post_push_canonicalization.py",
+    "src/pcae/commands/push.py",
+    "tests/test_post_push_canonicalization.py",
+    "tasks/active/20260705-2300-phase-114d-1-post-push-canonicalization-notification-reconciliation.md"
   ],
-  "tests_added_or_updated": "15 focused handoff verification tests added; notification/report/push-state suites unchanged",
+  "tests_added_or_updated": "14 focused post-push reconciliation tests added; notification/report/push-state suites unchanged",
   "phase_commits": [
     {
-      "hash": "5e079b8a53ed0a659fb779fb81586d6203d9ff25",
-      "message": "Add cross-agent handoff verification command"
+      "hash": "6e8e886667952fda66c2297fa8883ff3e00192ad",
+      "message": "Add post-push canonicalization and notification reconciliation"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/handoff_verification.py",
+  "validator_module": "src/pcae/core/post_push_canonicalization.py",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
   "origin_main_head_count": 3,
@@ -39,10 +38,10 @@
   },
   "validation_results": [
     {
-      "name": "focused_handoff_verification_report_push_state_tests",
-      "result": "129/129",
+      "name": "focused_post_push_reconciliation_report_push_state_tests",
+      "result": "177/177",
       "status": "passed",
-      "note": "tests/test_handoff_verification.py tests/test_push_state_reconciliation.py tests/test_notification_certification_idempotency.py tests/test_repository_transition_validator.py tests/test_repository_transition_validator_task_finish_integration.py tests/test_canonical_artifact_promotion.py tests/test_phase_114b1_repository_events_notification_policy.py -n auto"
+      "note": "tests/test_post_push_canonicalization.py tests/test_handoff_verification.py tests/test_push_state_reconciliation.py tests/test_notification_certification_idempotency.py tests/test_repository_transition_validator.py tests/test_repository_transition_validator_task_finish_integration.py tests/test_canonical_artifact_promotion.py tests/test_phase_114b1_repository_events_notification_policy.py tests/test_push.py -n auto"
     },
     {
       "name": "phase_lifecycle_suite",
@@ -58,7 +57,7 @@
     },
     {
       "name": "release_lifecycle_regression",
-      "result": "2758/2760",
+      "result": "2763/2765",
       "status": "passed_with_known_preexisting_failures",
       "note": "task/phase/report/notification/telegram slice -n auto; 2 failures confirmed pre-existing since Phase 114B via git stash: test_rc_audit_findings_repair.py::test_task_finish_incomplete_report_path_skips_dispatch, test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcoded stale '113Y' literal)"
     },
@@ -80,10 +79,10 @@
     }
   ],
   "test_results": {
-    "focused_handoff_verification_report_push_state_tests": "129/129",
+    "focused_post_push_reconciliation_report_push_state_tests": "177/177",
     "phase_lifecycle_suite": "886/886",
     "governance_autonomy_runtime_advisory_plugin_group": "4534/4534",
-    "release_lifecycle_regression": "2758/2760",
+    "release_lifecycle_regression": "2763/2765",
     "fast_green": "4390/4390",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
@@ -128,6 +127,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No file mutation by the new command. No commit from the new command. No push from the new command. No notification dispatch from the new command. No finalization from the new command. No changes to the Repository Transition Validator. No changes to Notification Certification. No changes to Canonical Artifact Promotion. No changes to push_state_reconciliation.py. No changes to pcae push or pcae push check. No changes to notification sinks or dispatch mechanics. No execution runtime. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "no_go_confirmation": "No new promotion logic. No new dispatch logic. No changes to the Repository Transition Validator. No changes to Notification Certification. No changes to Canonical Artifact Promotion. No changes to push_state_reconciliation.py. No changes to _finalize_report_and_notify itself. No execution runtime. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
   "recommended_next_phase": "114E — Model Containment Drill"
 }
