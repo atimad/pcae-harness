@@ -10,7 +10,7 @@ Phase 113Y: Repository Transition Validator Integration: Phase Completion
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -91,10 +91,9 @@ advisory
 
 ## Acceptance Checks
 
-- `python -m pytest tests/test_repository_transition_validator_phase_complete_integration.py -q -ra`
-- `python -m pytest tests/test_phase.py tests/test_repository_transition_validator_phase_complete_integration.py -q -ra`
-- `python -m pytest tests/test_phase_reports.py tests/test_finalization_gate_enforcement.py tests/test_finalization_notification_guarantee.py tests/test_canonical_phase_identity_source_repair.py -q -ra`
-- Governance, release/lifecycle, and fast_green validation before completion.
+- pcae health
+- pcae check
+- pcae doctor task-memory
 
 ## Documentation Requirements
 
