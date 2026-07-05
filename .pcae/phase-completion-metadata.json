@@ -1,29 +1,30 @@
 {
-  "phase_id": "114C",
-  "phase_name": "Push Authorization & Post-Push Reconciliation",
-  "phase_title": "Push Authorization & Post-Push Reconciliation",
+  "phase_id": "114D",
+  "phase_name": "Cross-Agent Verification Command",
+  "phase_title": "Cross-Agent Verification Command",
   "status": "completed",
-  "summary": "Fixed the live 114B/114B.1 forensic finding: pcae phase complete and pcae task finish --commit read pushed_status/origin_main_head_count from the declared, static .pcae/phase-completion-metadata.json instead of live git state, causing a genuinely pushed repository (origin/main..HEAD=0, confirmed by pcae push check) to be incorrectly quarantined because stale metadata still said not_pushed. Added src/pcae/core/push_state_reconciliation.py (compute_live_push_state(), reconcile_push_state()), making live git state authoritative for current push state whenever origin/main is resolvable; isolated repositories with no real remote fall back to declared metadata exactly as every finalization path did before this phase. Both lifecycle commands now use reconciled pushed_status/origin_main_head_count everywhere they previously read those fields straight from metadata -- live state wins in both directions, overriding a falsely-optimistic pushed claim just as readily as a stale not_pushed one. Discrepancies are printed unconditionally (metadata_push_state_stale plus both values), never silently resolved. certify_notification_transition(...) now evaluates notification eligibility against reconciled push state. No changes to pcae push/pcae push check, the Repository Transition Validator, Canonical Artifact Promotion, or notification dispatch mechanics; no event bus. Execution capability remains unavailable.",
-  "files_changed_count": 8,
+  "summary": "Added pcae agent verify-handoff (--json supported), a model-agnostic, read-only command answering 'safe to continue?' for any model, agent, automation, or human picking up work in this repository. Added src/pcae/core/handoff_verification.py (verify_handoff(...), HandoffCheck, HandoffVerificationResult) implementing 23 checks across git state, task state, phase/report state, push-state reconciliation (reusing Phase 114C's reconcile_push_state(...) unmodified), notification state (Telegram configured/enabled read-only, dispatch marker presence, never sending), architecture status, and runtime invariants (execution-unavailable/Observed/observe). Overall verdict is the worst severity among all checks; a missing notification marker is a warning, never a failure. Exit code 0 for pass/warning, 1 for fail. No model/agent/backend identity anywhere in the result. The command performs no mutation: no commit, no push, no notification, no finalization, and no changes to the Repository Transition Validator, Notification Certification, Canonical Artifact Promotion, push_state_reconciliation.py, pcae push/pcae push check, or notification dispatch mechanics. Execution capability remains unavailable.",
+  "files_changed_count": 9,
   "files_changed": [
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     ".pcae/phase-completion-metadata.json",
-    "docs/PHASE_114_PUSH_AUTHORIZATION_POST_PUSH_RECONCILIATION.md",
-    "src/pcae/core/push_state_reconciliation.py",
-    "src/pcae/commands/phase.py",
-    "src/pcae/commands/task.py",
-    "tests/test_push_state_reconciliation.py"
+    "docs/PHASE_114_CROSS_AGENT_VERIFICATION_COMMAND.md",
+    "src/pcae/core/handoff_verification.py",
+    "src/pcae/commands/agent.py",
+    "src/pcae/cli.py",
+    "tests/test_handoff_verification.py",
+    "tasks/active/20260705-2227-phase-114d-cross-agent-verification-command.md"
   ],
-  "tests_added_or_updated": "14 focused push-state reconciliation tests added; notification/report/transition suites unchanged",
+  "tests_added_or_updated": "15 focused handoff verification tests added; notification/report/push-state suites unchanged",
   "phase_commits": [
     {
-      "hash": "fb889cfc58577eb3a15e814191afbb3e1680ff0f",
-      "message": "Implement post-push reconciliation"
+      "hash": "5e079b8a53ed0a659fb779fb81586d6203d9ff25",
+      "message": "Add cross-agent handoff verification command"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/push_state_reconciliation.py",
+  "validator_module": "src/pcae/core/handoff_verification.py",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
   "origin_main_head_count": 3,
@@ -38,10 +39,10 @@
   },
   "validation_results": [
     {
-      "name": "focused_push_reconciliation_report_notification_tests",
-      "result": "114/114",
+      "name": "focused_handoff_verification_report_push_state_tests",
+      "result": "129/129",
       "status": "passed",
-      "note": "tests/test_push_state_reconciliation.py tests/test_notification_certification_idempotency.py tests/test_repository_transition_validator.py tests/test_repository_transition_validator_task_finish_integration.py tests/test_canonical_artifact_promotion.py tests/test_phase_114b1_repository_events_notification_policy.py -n auto"
+      "note": "tests/test_handoff_verification.py tests/test_push_state_reconciliation.py tests/test_notification_certification_idempotency.py tests/test_repository_transition_validator.py tests/test_repository_transition_validator_task_finish_integration.py tests/test_canonical_artifact_promotion.py tests/test_phase_114b1_repository_events_notification_policy.py -n auto"
     },
     {
       "name": "phase_lifecycle_suite",
@@ -51,21 +52,21 @@
     },
     {
       "name": "governance_autonomy_runtime_advisory_plugin_group",
-      "result": "4530/4533",
-      "status": "passed_with_known_preexisting_failures",
-      "note": "tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* tests/test_*advisory* -n auto; 3 failures confirmed pre-existing via git stash: test_backend_preflight.py::test_task_contract_detected, test_scope_preflight_review.py::test_allowed_exact_match_task_contract, test_scope_preflight.py::test_active_task_contract_detected -- all depend on tasks/active/ containing a contract at the moment pytest itself runs, not on any code path this phase touches"
+      "result": "4534/4534",
+      "status": "passed",
+      "note": "tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* tests/test_*advisory* -n auto"
     },
     {
       "name": "release_lifecycle_regression",
-      "result": "2749/2756",
+      "result": "2758/2760",
       "status": "passed_with_known_preexisting_failures",
-      "note": "task/phase/report/notification/telegram slice -n auto; 7 failures confirmed pre-existing via git stash: the 2 already known from Phase 114B (test_rc_audit_findings_repair.py::test_task_finish_incomplete_report_path_skips_dispatch, test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status) plus 5 real-active-task-state-dependent tests in test_scope_preflight*.py/test_backend_preflight.py"
+      "note": "task/phase/report/notification/telegram slice -n auto; 2 failures confirmed pre-existing since Phase 114B via git stash: test_rc_audit_findings_repair.py::test_task_finish_incomplete_report_path_skips_dispatch, test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcoded stale '113Y' literal)"
     },
     {
       "name": "fast_green",
-      "result": "4389/4390",
-      "status": "passed_with_known_preexisting_failure",
-      "note": "python -m pytest -m fast_green -n auto; 1 failure confirmed pre-existing via git stash: test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked, deterministic on tasks/active/ state (documented recurring gotcha)"
+      "result": "4390/4390",
+      "status": "passed",
+      "note": "python -m pytest -m fast_green -n auto"
     },
     {
       "name": "report_notification_tests",
@@ -79,11 +80,11 @@
     }
   ],
   "test_results": {
-    "focused_push_reconciliation_report_notification_tests": "114/114",
+    "focused_handoff_verification_report_push_state_tests": "129/129",
     "phase_lifecycle_suite": "886/886",
-    "governance_autonomy_runtime_advisory_plugin_group": "4530/4533",
-    "release_lifecycle_regression": "2749/2756",
-    "fast_green": "4389/4390",
+    "governance_autonomy_runtime_advisory_plugin_group": "4534/4534",
+    "release_lifecycle_regression": "2758/2760",
+    "fast_green": "4390/4390",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
   },
@@ -127,6 +128,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No raw git push. No raw git commit. No --no-verify. No force push. No tags. No releases. No package publication. No changes to pcae push or pcae push check. No changes to the Repository Transition Validator. No changes to Canonical Artifact Promotion. No changes to notification sinks or dispatch mechanics. No event bus. No execution runtime. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard.",
-  "recommended_next_phase": "114D — Cross-Agent Verification Command"
+  "no_go_confirmation": "No file mutation by the new command. No commit from the new command. No push from the new command. No notification dispatch from the new command. No finalization from the new command. No changes to the Repository Transition Validator. No changes to Notification Certification. No changes to Canonical Artifact Promotion. No changes to push_state_reconciliation.py. No changes to pcae push or pcae push check. No changes to notification sinks or dispatch mechanics. No execution runtime. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "114E — Model Containment Drill"
 }

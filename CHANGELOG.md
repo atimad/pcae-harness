@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Phase 114D — Cross-Agent Verification Command. Implementation phase.
+  Added `pcae agent verify-handoff` (`--json` supported), a model-agnostic,
+  read-only command answering "safe to continue?" for any model, agent,
+  automation, or human picking up work in this repository. Added
+  `src/pcae/core/handoff_verification.py` (`verify_handoff(...)`,
+  `HandoffCheck`, `HandoffVerificationResult`) implementing 23 checks
+  across git state (working tree, branch, origin/main resolvability,
+  ahead/behind counts, live pushed status), task state (active task,
+  `tasks/DONE.md`/`tasks/TODO.md` presence, task-memory doctor), phase/
+  report state (canonical report existence, metadata/report phase-id
+  agreement, trust completeness, `latest.md`/`latest.json` agreement,
+  commits-match-git), push-state reconciliation (reusing Phase 114C's
+  `reconcile_push_state(...)` unmodified), notification state (Telegram
+  configured/enabled read-only, dispatch marker presence), architecture
+  status (`architecture_status` presence, `completed_phase_ids`, obvious
+  duplicate/overclaim detection), and runtime invariants
+  (execution-unavailable/Observed/observe). Overall verdict is the worst
+  severity among all checks; a missing notification marker is a warning,
+  never a failure. Exit code `0` for pass/warning, `1` for fail. No model/
+  agent/backend identity anywhere in the result. Added
+  `docs/PHASE_114_CROSS_AGENT_VERIFICATION_COMMAND.md` and
+  `tests/test_handoff_verification.py`. The command performs no
+  mutation: no commit, no push, no notification, no finalization, and no
+  changes to the Repository Transition Validator, Notification
+  Certification, Canonical Artifact Promotion, `push_state_reconciliation.py`,
+  `pcae push`/`pcae push check`, or notification dispatch mechanics.
+  Execution capability remains unavailable. Recommended next phase: 114E
+  — Model Containment Drill.
+
 - Phase 114C — Push Authorization & Post-Push Reconciliation. Implementation
   phase, fixing the live defect Phase 114B's forensic verification found: a
   genuinely pushed repository (`origin/main..HEAD` = 0, confirmed by `pcae

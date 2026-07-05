@@ -2,47 +2,59 @@
 
 ## Current Phase
 
-Phase 114C — Push Authorization & Post-Push Reconciliation (completed).
+Phase 114D — Cross-Agent Verification Command (completed).
 
 Implementation phase. Phase report:
-`docs/PHASE_114_PUSH_AUTHORIZATION_POST_PUSH_RECONCILIATION.md`.
+`docs/PHASE_114_CROSS_AGENT_VERIFICATION_COMMAND.md`.
 
-**Root cause fixed**: `pcae phase complete`/`pcae task finish --commit`
-read `pushed_status`/`origin_main_head_count` from the declared, static
-`.pcae/phase-completion-metadata.json` instead of live git state -- a
-genuinely pushed repository (`origin/main..HEAD` = 0, confirmed by `pcae
-push check`) was quarantined because stale metadata still said
-`not_pushed`. Found by Phase 114B's independent forensic verification.
+**Command**: `pcae agent verify-handoff` (`--json` supported) is a
+model-agnostic, read-only repository handoff verification command,
+answering "safe to continue?" for any model, agent, automation, or human
+picking up work here. No file mutation, no commit, no push, no
+notification, no finalization.
 
-**Live push-state authority**: `src/pcae/core/push_state_reconciliation.py`
-makes live git state authoritative for current push state whenever
-`origin/main` is resolvable. Isolated repositories with no real remote
-fall back to declared metadata exactly as before -- live authority only
-applies when genuinely determinable.
+**Checks**: 23 checks across git state, task state, phase/report state,
+114C push-state reconciliation, notification state, architecture status,
+and runtime invariants, rolled up into a single `pass`/`warning`/`fail`
+verdict (worst-of-all-checks). A missing notification marker is a
+warning, not a failure -- dispatch is opt-in and push-state gated; a
+dirty tree, phase-identity mismatch, missing canonical report, or
+execution becoming available are all failures.
 
-**Reconciliation**: both lifecycle commands now use
-`reconcile_push_state(...)`'s reconciled `pushed_status`/
-`origin_main_head_count` everywhere they previously read those fields
-straight from metadata. Live state wins in both directions -- a
-falsely-optimistic `"pushed"` metadata value is overridden just as
-readily as a stale `"not_pushed"` one.
+**Reuses 114C directly**: push-state checks call
+`reconcile_push_state(...)` from `src/pcae/core/push_state_reconciliation.py`
+without modification, surfacing the same `metadata_push_state_stale`
+diagnostic as a warning whenever declared metadata disagrees with live
+git state.
 
-**Stale metadata is never hidden**: a disagreement between live and
-declared state is printed unconditionally
-(`metadata_push_state_stale: true` plus both values) before any
-finalization decision is made.
+**Model-agnostic by construction**: `verify_handoff(root)` takes exactly
+one parameter and carries no model/agent/backend identity field anywhere
+in its result, mirroring the Repository Transition Validator's own frozen
+constraint.
 
-**Notification eligibility**: `certify_notification_transition(...)` now
-receives the reconciled `origin_main_head_count`, so its push-clean check
-reflects live state -- a real push can now result in a real, eligible
-notification instead of being blocked by stale metadata.
+**No new lifecycle mutation**: no changes to the Repository Transition
+Validator, Notification Certification, Canonical Artifact Promotion,
+`push_state_reconciliation.py`, `pcae push`/`pcae push check`, or
+notification dispatch mechanics.
 
-**No implementation beyond reconciliation**: no changes to `pcae push`/
-`pcae push check`, the Repository Transition Validator, Canonical Artifact
-Promotion, or notification dispatch mechanics. No event bus (114B.1's own
-non-goal, unchanged).
+Recommended next repo phase: 114E — Model Containment Drill (not started).
 
-Recommended next repo phase: 114D — Cross-Agent Verification Command (not started).
+## Phase 114D Complete
+
+Phase 114D — Cross-Agent Verification Command (completed).
+
+Added `pcae agent verify-handoff` -- a model-agnostic, read-only
+containment command that verifies repository state is safe to continue
+from, using 23 checks across git, task, phase/report, push-state
+reconciliation, notification, architecture, and runtime invariant
+signals. Rolls up to a single pass/warning/fail verdict with both JSON
+and concise human-readable output.
+
+**No-go**: no file mutation, no commit, no push, no notification, no
+finalization, no changes to any prior phase's lifecycle mechanics.
+Execution capability remains unavailable.
+
+Recommended next repo phase: 114E — Model Containment Drill (not started).
 
 ## Phase 114C Complete
 
