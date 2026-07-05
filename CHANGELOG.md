@@ -2,6 +2,47 @@
 
 ## Unreleased
 
+- Phase 114R — Repository State Kernel Review. Architecture review only,
+  no runtime implementation. First complete review of the Repository
+  State Kernel after Phase 114E's containment validation. Froze the four
+  kernel primitives (Repository State, Repository Transition, Repository
+  Artifact, Repository Event) as complete -- no additional first-class
+  primitive emerged. Evaluated Repository Decision against the proposed
+  Transition -> Validation -> Decision -> Artifact Promotion chain and
+  concluded it should not become a fifth primitive: it already exists as
+  `TransitionResult`, the frozen four-verdict output of
+  `validate_transition(...)`; this phase formalizes the vocabulary rather
+  than inventing a new type. Reviewed every invariant across
+  113X/114A/114B/114C/114D/114E and produced a canonical taxonomy: no
+  missing invariants and no contradictions, but real duplication found
+  -- three overlapping phase-identity-consistency mechanisms
+  (`validate_phase_identity` 113B.2, the `identity_conflict` hook 113X.2,
+  and the structural invariants 113T/113U), plus duplicated
+  `recommended_next_phase`/report-completeness/push-state checks across
+  the older finalization gate and the newer structural invariants.
+  Confirmed containment does not depend on model capability -- zero
+  `model_id`/`agent_id`/`backend_id`/`vendor` references found across all
+  seven kernel modules by direct grep; containment for Claude, DeepSeek,
+  Codex, GLM, humans, and future models is identical by construction.
+  Reviewed observability (every significant transition outcome is
+  observable; one intentional exception, manual `pcae notify` commands
+  bypassing automatic certification by design) and authority (exactly
+  one authority per concern, listed explicitly; one honest exception --
+  `RepositoryState` has two construction call sites kept consistent by
+  convention, flagged as a follow-up). Traced full lifecycle connectivity
+  with no disconnected paths found. Produced the definitive canonical
+  Mermaid wire diagram, making the four-verdict Decision point and its
+  Reject/Quarantine/Requires-Human-Review-to-Notification-Policy path
+  explicit for the first time. Added
+  `docs/PCAE_REPOSITORY_STATE_KERNEL.md`,
+  `docs/PHASE_114R_REPOSITORY_STATE_KERNEL_REVIEW.md`, and
+  `tests/test_phase_114r_repository_state_kernel_review.py` (16 tests).
+  No changes to the Repository Transition Validator, Notification
+  Certification, Canonical Artifact Promotion, Push-State Reconciliation,
+  Post-Push Canonicalization, or `verify-handoff`. Execution capability
+  remains unavailable. Recommended next phase: 115A — Repository
+  Decision & Explainability Architecture.
+
 - Phase 114E — Model Containment Drill. Verification-only phase, no new
   runtime mechanism. Drilled 12 DeepSeek-style model/agent drift patterns
   against the existing containment stack (113Y/113Z Repository Transition
