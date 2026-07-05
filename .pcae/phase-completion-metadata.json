@@ -29,13 +29,23 @@
     {
       "hash": "6c3e72b8",
       "message": "Close Phase 115A decision explainability framework task"
+    },
+    {
+      "hash": "2489cba75e28aed2f74f48ce58c18ba7bee37316",
+      "message": "Sync Phase 115A completion metadata"
+    },
+    {
+      "hash": "dd61dc3b",
+      "message": "Close Phase 115A completion sync task"
     }
   ],
   "commit_attribution": "phase_owned",
   "validator_module": "none (architecture and contract phase; no runtime module added)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 3,
+  "origin_main_head_count": 5,
+  "report_completeness": "complete",
+  "missing_trust_fields": [],
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -94,7 +104,10 @@
     }
   ],
   "test_results": {
-    "focused_decision_explainability_documentation_tests": "15/15"
+    "focused_decision_explainability_documentation_tests": "15/15",
+    "report_notification_tests": "present_in_canonical_metadata",
+    "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
+    "fast_green": "not_run_documentation_only_no_runtime_code_changed"
   },
   "governance_results": [
     {
@@ -111,7 +124,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "passed"
+      "status": "clean (nothing_to_push once governed push completes)"
     },
     {
       "name": "pcae_agent_verify_handoff",

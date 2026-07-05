@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 115A: Metadata Correction (20260706-0057-phase-115a-metadata-correction)
 - Phase 115A: Completion Sync (20260706-0056-phase-115a-completion-sync)
 - Phase 115A: Repository Decision & Explainability Framework (20260706-0051-phase-115a-repository-decision-explainability-framework)
 - Phase 114R: Completion Sync (20260706-0017-phase-114r-completion-sync)
