@@ -579,6 +579,65 @@ def run_agent_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _short_phase_label(text: str) -> str:
+    """Extract just the phase ID from a full PROJECT_STATUS.md sentence
+    (e.g. "Phase 114C — Push Authorization ... (completed)." -> "114C")
+    for the concise human-readable summary line. Falls back to the full
+    text if no phase ID pattern is found."""
+    import re
+
+    match = re.search(r"\b(\d{3}[A-Za-z](?:\.[A-Za-z0-9]+)?)\b", text)
+    return match.group(1) if match else (text or "unknown")
+
+
+def run_agent_verify_handoff(args: argparse.Namespace) -> int:
+    """Phase 114D: read-only cross-agent repository handoff verification.
+
+    Answers "safe to continue?" for any model, agent, automation, or
+    human picking up work in this repository. Performs no mutation: no
+    commit, no push, no notification, no finalization.
+    """
+    from pcae.core.handoff_verification import STATUS_FAIL, STATUS_PASS, verify_handoff
+
+    result = verify_handoff(HarnessPath.cwd())
+
+    if getattr(args, "json", False):
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        status_label = {"pass": "PASS", "warning": "WARNING", "fail": "FAIL"}[result.status]
+        print(f"Cross-agent handoff verification: {status_label}")
+        print(f"Latest completed phase: {_short_phase_label(result.latest_completed_phase)}")
+        print(f"Recommended next phase: {_short_phase_label(result.recommended_next_phase)}")
+
+        git_checks = {c.name: c for c in result.checks}
+        tree_state = "clean" if git_checks.get("git_working_tree") and git_checks["git_working_tree"].status == STATUS_PASS else "dirty"
+        push_state = result.pushed_status or "unknown"
+        print(f"Git: {tree_state}, {push_state}")
+
+        trust_check = git_checks.get("report_trust_completeness")
+        if trust_check:
+            print(f"Report trust: {trust_check.status}")
+
+        print(f"Runtime: Observed, execution {result.execution_availability}")
+
+        notif_check = git_checks.get("notification_marker")
+        if notif_check:
+            print(f"Notification: {notif_check.status}, {notif_check.detail}")
+
+        print(f"Safe to continue: {'yes' if result.status != STATUS_FAIL else 'no'}")
+
+        if result.warnings:
+            print(f"Warnings ({len(result.warnings)}):")
+            for w in result.warnings:
+                print(f"  - {w}")
+        if result.failures:
+            print(f"Failures ({len(result.failures)}):")
+            for f in result.failures:
+                print(f"  - {f}")
+
+    return 0 if result.status != STATUS_FAIL else 1
+
+
 def run_agents(args: argparse.Namespace) -> int:
     data = build_multi_agent_registry()
     if args.json:

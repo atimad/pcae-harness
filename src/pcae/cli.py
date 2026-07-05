@@ -14,6 +14,7 @@ from pcae.commands.agent import (
     run_agent_acquire,
     run_agent_release,
     run_agent_status,
+    run_agent_verify_handoff,
     run_agents,
     run_agents_adapter_inspect,
     run_agents_adapter_show,
@@ -1605,6 +1606,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON agent lock status.",
     )
     agent_status_parser.set_defaults(handler=run_agent_status)
+
+    agent_verify_handoff_parser = agent_subparsers.add_parser(
+        "verify-handoff",
+        help="Read-only cross-agent repository handoff verification (Phase 114D).",
+    )
+    agent_verify_handoff_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON handoff verification output.",
+    )
+    agent_verify_handoff_parser.set_defaults(handler=run_agent_verify_handoff)
 
     agents_parser = subparsers.add_parser(
         "agents",
