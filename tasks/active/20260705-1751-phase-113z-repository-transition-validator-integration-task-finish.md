@@ -27,6 +27,7 @@ Integrate Repository Transition Validator enforcement into pcae task finish --co
 - src/pcae/core/repository_transition_validator.py
 - src/pcae/core/phase_reports.py
 - src/pcae/core/repository_transition_integration.py
+- .pcae/phase-completion-metadata.json
 - tests/test_repository_transition_validator_task_finish_integration.py
 - tests/test_repository_transition_validator_phase_complete_integration.py
 - tests/test_task_finish_report_trust_notification.py

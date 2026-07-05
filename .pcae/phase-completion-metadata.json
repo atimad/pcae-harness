@@ -1,47 +1,138 @@
 {
-    "phase_id": "113V.N", "phase_name": "Phase Finalization Notification Repair", "phase_title": "Phase Finalization Notification Repair",
-    "status": "completed",
-    "summary": "Governance/notification repair phase closing the notification asymmetry 113S/113T/113U/113V each documented and re-confirmed without repairing. Forensic finding: pcae skill invoke phase-finalization <phase-id> is Phase 64B.5's generic, read-only Skill Invocation Targeting preview -- it never imports notifications.py, never constructs a TelegramSink, never reads PCAE_NOTIFY_ENABLED, and is not part of the real dispatch path at all; its target_unresolved failures came from matching only against the frozen _CRI_KNOWN_PHASES roadmap registry (last extended around Phase 69P/64B.6E), confirmed live to fail for ordinary phase 113D identically to 113T/113U/113V -- special phase-ID shapes were never the actual variable. The real gap: pcae phase complete had no notification-dispatch idempotency guard, unlike pcae task finish --commit, which already carried a marker-file workaround. Repair: _sit_resolve_phase_target()/_sit_infer_target_type() (src/pcae/core/agent.py) now fall back to live repository state (latest.json, historical reports, quarantined reports, in-flight phase-completion metadata, PROJECT_STATUS.md current phase) and classify phase-shaped IDs via a new grammar supporting normal/multi-letter/dotted-numeric/dotted-letter-repair forms; a syntactically invalid ID is reported as invalid_phase_id_form, distinct from a well-formed but not-found target_unresolved. A new notification_dispatch_note clarifies the command never gates or reflects Telegram dispatch. pcae task finish --commit's marker-file idempotency logic is generalized into shared phase_reports.py functions and pcae phase complete gains the same guard: a repeated finalization for the same phase_id + commit is now a no-op with an explicit reason instead of a duplicate send; a new commit for the same phase still sends. pcae notify send-report --latest remains deliberately unguarded (manual resend workflow). 18 new focused tests; 5,674 pre-existing phase/task/notification/agent-skill-targeting tests re-run clean; fast_green 4,390/4,390; full suite 16,644/16,646 (2 pre-existing unrelated failures, hardcoded '112C' expectations documented since Phase 113X.2). No Repository Transition Validator integration (113W untouched). No Advisory Runtime/Runtime Snapshot/Runtime Context/Runtime Registry/Runtime Inspect/Permission Broker changes. No execution/authorization/plugin/Telegram-inbound/REST/Web-UI/Dashboard changes. Execution capability remains unavailable.",
-    "files_changed_count": 11, "tests_added_or_updated": "18 tests added",
-    "phase_commits": [
-        {"hash": "e0cdc00989c6305671e85624c9c22375afd10b70", "message": "Repair phase finalization notification dispatch"}
-    ],
-    "commit_attribution": "phase_owned",
-    "validator_module": "src/pcae/core/phase_report_trust.py",
-    "execution_integration_status": {
-        "observed_command_paths": 4,
-        "behavior_changing_paths": 0,
-        "authorized_paths": 0,
-        "execution_capable_paths": 0,
-        "current_execution_capability": "Execution unavailable",
-        "current_maximum_runtime_state": "Observed",
-        "current_maximum_plugin_capability": "observe"
+  "phase_id": "113Z",
+  "phase_name": "Repository Transition Validator Integration: Task Finish",
+  "phase_title": "Repository Transition Validator Integration: Task Finish",
+  "status": "completed",
+  "summary": "Implemented the second Repository Transition Validator lifecycle integration. pcae task finish --commit now requests a finish_task transition before canonical phase-report promotion, using the same shared phase-report transition adapter as pcae phase complete. Accept preserves the existing successful report flow; reject leaves latest.md/latest.json unchanged; quarantine writes only quarantine artifacts; requires_human_review blocks promotion. The 113S/113T asymmetry is repaired: stale phase-completion metadata, phase identity mismatch, missing recommended_next_phase, partial report evidence, explicit human review, and execution availability overclaims cannot become canonical latest reports through task finish. No push-check command integration, notification-dispatch enforcement, execution runtime, authorization, Permission Broker enforcement, plugin execution, Telegram inbound, REST, Web UI, or Dashboard was added. Execution capability remains unavailable.",
+  "files_changed_count": 16,
+  "files_changed": [
+    "CHANGELOG.md",
+    "PROJECT_STATUS.md",
+    ".pcae/phase-completion-metadata.json",
+    "docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_TASK_FINISH_INTEGRATION.md",
+    "src/pcae/commands/phase.py",
+    "src/pcae/commands/task.py",
+    "src/pcae/core/repository_transition_integration.py",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/TODO.md",
+    "tasks/active/20260705-1751-phase-113z-repository-transition-validator-integration-task-finish.md",
+    "tests/test_canonical_phase_identity_source_repair.py",
+    "tests/test_phase_report_trust_hard_fail.py",
+    "tests/test_repository_transition_validator_phase_complete_integration.py",
+    "tests/test_repository_transition_validator_task_finish_integration.py",
+    "tests/test_task_finish_notification_ordering.py"
+  ],
+  "tests_added_or_updated": "11 focused task-finish integration tests added; legacy task-finish and canonical-identity tests updated",
+  "phase_commits": [
+    {
+      "hash": "970b8e79095d0c48739f6f173b6c5c0d71bce840",
+      "message": "Integrate transition validator into task finish"
+    }
+  ],
+  "commit_attribution": "phase_owned",
+  "validator_module": "src/pcae/core/repository_transition_integration.py",
+  "execution_availability": "unavailable",
+  "execution_integration_status": {
+    "observed_command_paths": 4,
+    "behavior_changing_paths": 0,
+    "authorized_paths": 0,
+    "execution_capable_paths": 0,
+    "current_execution_capability": "Execution unavailable",
+    "current_maximum_runtime_state": "Observed",
+    "current_maximum_plugin_capability": "observe"
+  },
+  "validation_results": [
+    {
+      "name": "focused_task_phase_validator_and_report_suites",
+      "result": "60/60",
+      "status": "passed",
+      "note": "phase-complete validator, task-finish validator, task-finish report trust, and task-finish notification ordering suites"
     },
-    "validation_results": [
-        {"name": "focused_tests", "result": "18/18", "status": "passed", "note": "tests/test_phase_113v_n_notification_finalization_repair.py"},
-        {"name": "release_lifecycle_regression_full", "result": "5674/5674", "status": "passed", "note": "test_phase.py + test_task.py + test_phase_reports.py + test_phase_reports_cli.py + test_notifications.py + test_telegram_notifications.py + test_task_finish_notification_ordering.py + test_task_finish_report_trust_notification.py + test_phase_report_trust_gate.py + test_phase_report_trust_gate_cli.py + test_phase_report_trust_hard_fail.py + test_agent.py (full skill-targeting suite) + test_phase_113v_n_notification_finalization_repair.py + test_repository_transition_validator.py + test_finalization_notification_guarantee.py, single-process"},
-        {"name": "fast_green", "result": "4390/4390", "status": "passed", "note": "run with -n auto, this phase's own active task present in tasks/active/"},
-        {"name": "full_suite", "result": "16644/16646", "status": "passed_with_known_preexisting_failures", "note": "run with -n auto; 2 pre-existing, unrelated failures (test_recommended_next_phase_matches_real_project_status, test_real_todo_not_flagged_stale_against_real_project_status), both hardcoding an expectation that PROJECT_STATUS.md's recommended next phase is still '112C' -- documented as a known fragility since Phase 113X.2, unrelated to this phase's changes"},
-        {"name": "report_notification_tests", "result": "present_in_canonical_metadata", "status": "present"},
-        {"name": "bootstrap_session_reporting_tests", "result": "present_in_canonical_metadata", "status": "present"}
-    ],
-    "test_results": {
-        "focused_tests": "18/18 (tests/test_phase_113v_n_notification_finalization_repair.py)",
-        "release_lifecycle_regression_full": "5674/5674",
-        "fast_green": "4390/4390",
-        "full_suite": "16644/16646 (2 pre-existing unrelated failures, documented since Phase 113X.2)"
+    {
+      "name": "repository_transition_task_report_group",
+      "result": "713/713",
+      "status": "passed",
+      "note": "tests/test_repository_transition_validator*.py tests/test_task*.py tests/test_*task* tests/test_phase_reports*.py -n auto"
     },
-    "pre_existing_failures": [
-        "tests/test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcodes stale '112C' expectation, documented since Phase 113X.2)",
-        "tests/test_bootstrap_todo_consistency.py::test_real_todo_not_flagged_stale_against_real_project_status (same root cause)"
-    ],
-    "governance_results": [
-        {"name": "pcae_health", "status": "healthy"}, {"name": "pcae_check", "status": "passed"},
-        {"name": "pcae_doctor_task_memory", "status": "clean"}, {"name": "pcae_push_check", "status": "clean"},
-        {"name": "telegram_runtime", "status": "loaded, configured, enabled"}
-    ],
-    "telegram_runtime": {"status": "loaded, configured, enabled", "inbound": false, "outbound": true, "polling": false},
-    "xdist_compatibility": "Focused, regression, and fast_green suites all ran cleanly under -n auto/single-process; full suite ran cleanly under -n auto with only the 2 known pre-existing, unrelated failures noted above.",
-    "no_go_confirmation": "No real backend invocation. No adapter execution. No subprocess execution. No network call. No shell interception. No Telegram inbound. No enforcement. No automatic apply. No apply execution. No commit/push authorization beyond this phase's own governed commit/push. No real AI backend calls. No Repository Transition Validator integration. No Advisory Runtime changes. No Runtime Snapshot changes. No Runtime Context changes. No Runtime Registry changes. No Runtime Inspect changes. No Permission Broker changes. No execution capability enablement. Next phase not started.",
-    "recommended_next_phase": "113W — Repository Transition Validator Integration Design"
+    {
+      "name": "governance_autonomy_runtime_advisory_plugin_group",
+      "result": "3830/3830",
+      "status": "passed",
+      "note": "tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* tests/test_*advisory* -n auto"
+    },
+    {
+      "name": "release_lifecycle_regression",
+      "result": "1571/1571",
+      "status": "passed",
+      "note": "task, phase, report, notification, and Telegram notification regression slice -n auto"
+    },
+    {
+      "name": "fast_green",
+      "result": "4390/4390",
+      "status": "passed",
+      "note": "python -m pytest -m fast_green -n auto"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
+    }
+  ],
+  "test_results": {
+    "focused_task_phase_validator_and_report_suites": "60/60",
+    "repository_transition_task_report_group": "713/713",
+    "governance_autonomy_runtime_advisory_plugin_group": "3830/3830",
+    "release_lifecycle_regression": "1571/1571",
+    "fast_green": "4390/4390",
+    "report_notification_tests": "present_in_canonical_metadata",
+    "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
+  },
+  "governance_results": [
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_session_bootstrap",
+      "status": "completed"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "execution unavailable, Observed, observe"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "loaded, configured, enabled"
+    },
+    {
+      "name": "phase_finalization_skill",
+      "status": "resolved, target completed"
+    }
+  ],
+  "telegram_runtime": {
+    "status": "loaded, configured, enabled",
+    "inbound": false,
+    "outbound": true,
+    "polling": false
+  },
+  "no_go_confirmation": "No notification-dispatch enforcement. No push-check command integration. No execution runtime. No authorization. No Permission Broker enforcement. No plugin execution. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "114A — Report Promotion & Quarantine Hardening"
 }
