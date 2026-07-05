@@ -2,6 +2,14 @@
 
 ## Accepted
 
+- Treat Phase 115A as an architecture-only explainability framework
+  phase: Repository Decision remains a centralized computation over
+  repository state, proposed transition, evidence, and invariants;
+  Evidence becomes a first-class architectural concept but not a kernel
+  primitive; Repository Skills are future evidence-only providers that
+  never decide, vote, mutate state, authorize transitions, promote
+  artifacts, send notifications, bypass the validator, invoke runtime
+  execution, or depend on model identity.
 - Treat Phase 114A as phase-report promotion hardening only: introduce a
   reusable canonical artifact promotion state machine, route phase-report
   `latest.*` writes through Certified -> Canonical promotion, and keep

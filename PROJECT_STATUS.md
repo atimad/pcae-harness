@@ -2,6 +2,76 @@
 
 ## Current Phase
 
+Phase 115A — Repository Decision & Explainability Framework (completed).
+
+Architecture and contract only. Full designs:
+`docs/PCAE_DECISION_FRAMEWORK.md` and
+`docs/PCAE_REPOSITORY_SKILLS.md`.
+Phase report:
+`docs/PHASE_115A_DECISION_EXPLAINABILITY_FRAMEWORK.md`.
+
+**Decision Framework**: frozen as the deterministic evaluation chain
+`Repository State -> Repository Transition -> Evidence Collection ->
+Decision Evaluation -> Transition Result -> Repository Artifact ->
+Repository Event`. Repository Decision remains a computation, not a
+kernel primitive.
+
+**Evidence**: introduced as a first-class architectural concept but not a
+kernel primitive. Evidence exists only during evaluation and is
+deterministic, reproducible, structured, and model-independent. Evidence
+Source, Category, Confidence, and Freshness are defined.
+
+**Evidence Providers / Repository Skills**: defined as future
+evidence-only providers. They collect evidence and never decide, mutate
+state, authorize transitions, promote artifacts, send notifications,
+bypass the validator, invoke runtime execution, or depend on model
+identity.
+
+**Explainability**: every `TransitionResult` must be explainable through
+structured fields: Decision, Reason, Evidence Used, Invariant(s),
+Severity, Suggested Repair, and Confidence. No AI-generated prose is
+required for explanations.
+
+**Decision Composition**: skills never vote and never override one
+another. Conflicting evidence remains evidence and is evaluated by the
+centralized Decision Framework.
+
+**Canonical wire diagram**: added in
+`docs/PCAE_DECISION_FRAMEWORK.md`, showing Repository State -> Evidence
+Providers -> Evidence -> Decision Framework -> Transition Validator ->
+Transition Result -> Repository Artifact -> Repository Event ->
+Notification Policy -> Consumers.
+
+**No runtime implementation**: no Repository Transition Validator
+changes, no Notification Policy changes, no lifecycle command changes,
+no Permission Broker changes, no plugins, no Telegram inbound, no REST,
+no Web UI, no Dashboard. Execution capability remains unavailable.
+
+Recommended next repo phase: 115B — Repository Evidence Framework Contract Freeze (not started).
+
+## Phase 115A Complete
+
+Phase 115A — Repository Decision & Explainability Framework (completed).
+
+Froze the architecture by which PCAE explains why every repository
+transition is accepted, rejected, quarantined, or requires human review.
+Defined Evidence as evaluation-scoped, deterministic, structured,
+reproducible, and model-independent; defined Evidence Source, Category,
+Confidence, and Freshness; defined Evidence Providers and future
+Repository Skills as evidence-only contributors; froze centralized
+Decision Evaluation and structured explanations; reviewed all four
+verdicts; defined non-voting decision composition; and produced the new
+canonical Mermaid explainability architecture.
+
+**No-go**: no runtime implementation, no lifecycle changes, no Repository
+Transition Validator changes, no Notification Policy changes, no
+Permission Broker changes, no plugins, no Telegram inbound, no REST, no
+Web UI, no Dashboard. Execution capability remains unavailable.
+
+Recommended next repo phase: 115B — Repository Evidence Framework Contract Freeze (not started).
+
+## Phase 114R Complete
+
 Phase 114R — Repository State Kernel Review (completed).
 
 Architecture review only. Full design:
@@ -46,26 +116,6 @@ follow-up, not a defect.
 diagram makes the four-verdict Decision point and its Reject/Quarantine/
 Requires-Human-Review-to-Notification-Policy path explicit for the first
 time.
-
-Recommended next repo phase: 115A — Repository Decision & Explainability Architecture (not started).
-
-## Phase 114R Complete
-
-Phase 114R — Repository State Kernel Review (completed).
-
-First complete architectural review of the Repository State Kernel after
-114E's containment validation. Froze the four kernel primitives as
-complete, formalized Repository Decision as the existing
-`TransitionResult` rather than a new primitive, produced a canonical
-invariant taxonomy surfacing real (non-contradictory) duplication across
-113X-114E, confirmed containment is model-independent by construction,
-listed every kernel authority explicitly, traced full lifecycle
-connectivity with no disconnected paths, and produced the definitive
-canonical wire diagram.
-
-**No-go**: no runtime implementation, no lifecycle changes, no changes to
-any prior phase's containment logic. Execution capability remains
-unavailable.
 
 Recommended next repo phase: 115A — Repository Decision & Explainability Architecture (not started).
 

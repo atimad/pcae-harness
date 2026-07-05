@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 115A: Repository Decision & Explainability Framework (20260706-0051-phase-115a-repository-decision-explainability-framework)
 - Phase 114R: Completion Sync (20260706-0017-phase-114r-completion-sync)
 - Phase 114R: Repository State Kernel Review (20260706-0009-phase-114r-repository-state-kernel-review)
 - Phase 114E: Completion Sync (20260706-0003-phase-114e-completion-sync)

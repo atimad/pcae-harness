@@ -2,6 +2,43 @@
 
 ## Unreleased
 
+- Phase 115A — Repository Decision & Explainability Framework.
+  Architecture and contract only, no runtime implementation. Froze the
+  framework by which PCAE explains why a repository transition is
+  accepted, rejected, quarantined, or requires human review. Defined the
+  deterministic chain `Repository State -> Repository Transition ->
+  Evidence Collection -> Decision Evaluation -> Transition Result ->
+  Repository Artifact -> Repository Event`, while preserving Phase
+  114R's conclusion that Repository Decision is a computation, not a
+  fifth kernel primitive. Introduced Evidence as a first-class
+  architectural concept but not a kernel primitive; Evidence exists only
+  during evaluation and has Source, Category, Confidence, and Freshness.
+  Defined Evidence Providers and future Repository Skills as
+  evidence-only contributors: they never decide, vote, mutate state,
+  authorize transitions, promote artifacts, send notifications, bypass
+  the validator, invoke runtime execution, or depend on model identity.
+  Froze the centralized evaluation pipeline `Evidence -> Invariant
+  Evaluation -> Decision -> Explanation -> Transition Result`, with
+  structured reproducible explanations containing Decision, Reason,
+  Evidence Used, Invariant(s), Severity, Suggested Repair, and
+  Confidence; no AI-generated prose is required. Reviewed Accept,
+  Reject, Quarantine, and Requires Human Review verdict semantics.
+  Defined decision composition: skills never vote or override one
+  another; conflicts remain evidence and are evaluated centrally. Added
+  the canonical Mermaid explainability diagram showing Repository State
+  -> Evidence Providers -> Evidence -> Decision Framework -> Transition
+  Validator -> Transition Result -> Repository Artifact -> Repository
+  Event -> Notification Policy -> Consumers. Added
+  `docs/PCAE_DECISION_FRAMEWORK.md`,
+  `docs/PCAE_REPOSITORY_SKILLS.md`,
+  `docs/PHASE_115A_DECISION_EXPLAINABILITY_FRAMEWORK.md`, and
+  `tests/test_phase_115a_decision_explainability_framework.py`.
+  No Repository Transition Validator changes, no Notification Policy
+  changes, no lifecycle command changes, no Permission Broker changes,
+  no plugins, no Telegram inbound, no REST, no Web UI, no Dashboard.
+  Execution capability remains unavailable. Recommended next phase:
+  115B — Repository Evidence Framework Contract Freeze.
+
 - Phase 114R — Repository State Kernel Review. Architecture review only,
   no runtime implementation. First complete review of the Repository
   State Kernel after Phase 114E's containment validation. Froze the four
