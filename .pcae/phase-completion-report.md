@@ -1,33 +1,80 @@
-# Phase Report: Canonical Phase Identity Source Repair
+# Phase 115A Complete — Repository Decision & Explainability Framework
 
-- **Phase ID:** `113X.2`
+- **Phase ID:** `115A`
 - **Status:** completed
-- **Report completeness:** partial ⚠️
-- **Missing trust fields:** metadata_consistency
-- **Files changed:** 6
-- **Tests run:** 16
-- **Commits:** 40d68c15, da167426
+- **Report completeness:** complete
+- **Missing trust fields:** none
+- **Files changed:** 9
+- **Tests run:** 15
+- **Commits:** 79662071, 676a8063, 6c3e72b8, 2489cba7, dd61dc3b, 2cb43bc8, f4bee1a4
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 113X.2: Canonical Phase Identity Source Repair. Repaired 113X Finding 3 -- CLI/summary-derived phase_id vs metadata phase_id mismatches were silently discarded instead of blocking finalization. resolve_finalization_phase_identity() now threads a genuine conflict into validate_finalization_gate() as a hard blocker, enforced through 113X.1's existing quarantine path. Recommended next phase: 113D -- Advisory Runtime Verification and Compatibility.
+Phase 115A froze the Repository Decision & Explainability Framework. It
+defines how PCAE explains why a repository transition is accepted,
+rejected, quarantined, or requires human review. Repository Decision
+remains a computation, not a fifth Repository State Kernel primitive.
+
+The canonical framework is:
+
+Repository State -> Repository Transition -> Evidence Collection ->
+Decision Evaluation -> Transition Result -> Repository Artifact ->
+Repository Event.
+
+## Decision Framework
+
+The framework distinguishes Repository State, Evidence, Decision,
+Repository Artifact, and Repository Event. Evidence is evaluation-scoped:
+it is a first-class architectural concept but not a kernel primitive.
+Decision Evaluation remains centralized and deterministic.
+
+## Evidence Architecture
+
+Evidence has Source, Category, Confidence, and Freshness. Evidence must
+be deterministic, reproducible, structured, and model-independent.
+Evidence examples include Git, Reports, Metadata, Tasks, Architecture,
+Runtime, Push State, Notification, Governance, and Tests.
+
+## Repository Skills
+
+Repository Skills are future evidence-only providers. They collect
+evidence and never decide, vote, mutate state, authorize transitions,
+promote artifacts, send notifications, bypass the validator, invoke
+runtime execution, or depend on model identity.
+
+## Explainability Model
+
+Every Transition Result must be explainable with structured fields:
+Decision, Reason, Evidence Used, Invariant(s), Severity, Suggested
+Repair, and Confidence. No AI-generated prose is required.
+
+## Decision Composition
+
+Skills never vote and never override one another. Conflicting evidence
+remains evidence and is evaluated by the centralized Decision Framework.
+
+## Canonical Wire Diagram
+
+The canonical Mermaid diagram is in `docs/PCAE_DECISION_FRAMEWORK.md`:
+Repository State -> Evidence Providers -> Evidence -> Decision Framework
+-> Transition Validator -> Transition Result -> Repository Artifact ->
+Repository Event -> Notification Policy -> Consumers.
 
 ## PCAE Architecture Status
 
-*Generated automatically from canonical project state. Never manually maintained.*
+*Generated conceptually from canonical project state. Never manually
+maintained as runtime state.*
 
 ### Completed
 
-- ✓ Advisory Runtime (Architecture, Contract, Prototype)
-- ✓ Runtime Context, Snapshot & Inspect Integration
-- ✓ Runtime Introspection Foundation
-- ✓ Runtime Foundation
+- Repository State Kernel review through Phase 114R
+- Repository Decision & Explainability Framework through Phase 115A
 
 ### Planned
 
-- ○ 113D — Advisory Runtime Verification & Compatibility (the
+- 115B — Repository Evidence Framework Contract Freeze
 
 ### Current Runtime State
 
@@ -41,37 +88,46 @@ Phase 113X.2: Canonical Phase Identity Source Repair. Repaired 113X Finding 3 --
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_push_check:** clean
+- **pcae_session_bootstrap_compact:** completed
+- **pcae_runtime_inspect:** execution unavailable, Observed, observe
 - **telegram_runtime:** loaded, configured, enabled
 
 ## Test Results
 
-- **report_notification_tests:** 16/16 (passed)
-- **bootstrap_session_reporting_tests:** present
-- **fast_green:** 4390/4390 (passed)
+- **focused_decision_explainability_documentation_tests:** 15/15 (passed)
+- **report_notification_tests:** present_in_canonical_metadata (present)
+- **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
+- **fast_green:** not_run_documentation_only_no_runtime_code_changed
 
 ## No-Go Confirmations
 
-- No advisory runtime implementation. No advisory execution. No Advisory Runtime changes. No Runtime Snapshot behavior changes. No execution capability. No authorization changes. No Permission Broker enforcement changes. No plugin changes. No Telegram inbound. No REST endpoint. No web UI changes. No force push. No tags. No releases. No package publication.
+- No runtime implementation.
+- No execution capability.
+- No Repository Transition Validator changes.
+- No Notification Policy changes.
+- No lifecycle command changes.
+- No Permission Broker changes.
+- No plugins.
+- No Telegram inbound.
+- No REST.
+- No Web UI.
+- No Dashboard.
+- No raw git commit.
+- No raw git push.
+- No force push.
+- No tags.
+- No releases.
+- No package publication.
 
 ## Recommended Next Phase
 
-113D
-
-## Missing Trust Fields
-
-- **Fields:** metadata_consistency
-- ⚠️ canonical report and metadata disagree
-- ⚠️   Mismatch: recommended_next_phase=113D points backward from 113X.2
-- ⚠️ Manual review recommended.
+115B — Repository Evidence Framework Contract Freeze
 
 ## Report Consistency
 
 - **Canonical report:** present
 - **Metadata:** present
-- **Status:** mismatch detected
-- **Warnings:**
-  - canonical report and metadata disagree
-  -   Mismatch: recommended_next_phase=113D points backward from 113X.2
+- **Status:** consistent
 
 ---
-*Report generated by PCAE Phase 92A. Schema version 1.0.*
+*Report generated for PCAE Phase 115A. Schema version 1.0.*
