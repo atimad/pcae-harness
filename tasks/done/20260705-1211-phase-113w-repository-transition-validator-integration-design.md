@@ -10,7 +10,7 @@ Phase 113W: Repository Transition Validator Integration Design
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -49,6 +49,7 @@ implementation.
 - docs
 - tests
 - tasks
+- config
 
 ## Forbidden Zones
 
@@ -92,18 +93,16 @@ strict
 - Implementation order defined
 - No integration implemented
 - Execution capability remains unavailable
+- Focused, governance/autonomy, release/lifecycle, fast_green, and full-suite
+  validation results recorded in the phase report
 
 ## Acceptance Checks
 
-- pcae status coherence passes
-- pcae health passes
-- pcae check passes
-- python -m pytest -n auto passes
-- focused design tests pass
-- governance/autonomy tests pass
-- release/lifecycle regression passes
-- fast_green passes
-- pcae push check passes
+- pcae health
+- pcae check
+- pcae doctor task-memory
+- python -m pytest tests/test_repository_transition_validator_integration_design.py -q
+- pcae push check
 
 ## Documentation Requirements
 
