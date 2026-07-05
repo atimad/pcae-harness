@@ -10,7 +10,7 @@ Phase 115A: Trust Metadata Sync
 
 ## Status
 
-active
+done
 
 ## Mode
 
