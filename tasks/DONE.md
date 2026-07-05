@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 114D.1: Metadata Correction (20260705-2326-phase-114d-1-metadata-correction)
 - Phase 114D.1: Completion Sync (20260705-2325-phase-114d-1-completion-sync)
 - Phase 114D.1: Post-Push Canonicalization & Notification Reconciliation (20260705-2300-phase-114d-1-post-push-canonicalization-notification-reconciliation)
 - Phase 114D: Completion Sync (20260705-2253-phase-114d-completion-sync)
