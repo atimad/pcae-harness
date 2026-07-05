@@ -25,6 +25,10 @@ from pcae.core.phase import complete_phase, handoff_phase, start_phase
 from pcae.core.session import write_session_snapshot
 from pcae.core.strategic_lineage import strategic_continuity_summary
 from pcae.core.tasks import find_latest_active_task
+from pcae.core.notification_certification import (
+    NotificationCertificationOutcome,
+    certify_notification_transition,
+)
 from pcae.core.repository_transition_integration import (
     handle_phase_report_transition_result,
     validate_phase_report_transition,
@@ -114,7 +118,6 @@ def _finalize_report_and_notify(
     from pcae.core.phase_reports import (
         finalize_phase_report,
         is_phase_id_backward,
-        phase_already_notified,
         resolve_canonical_phase_identity,
         write_notification_dispatch_marker,
     )
@@ -340,17 +343,33 @@ def _finalize_report_and_notify(
             reason_parts.append(f"missing: {', '.join(trust_result.missing_fields)}")
         incomplete_reason = " -- ".join(reason_parts) or "report trust is incomplete"
 
-    # Phase 113V.N — notification-dispatch idempotency guard. `pcae task
-    # finish --commit` has long had a marker-file guard against sending a
-    # duplicate Telegram final report for the same phase_id + commit; this
-    # path (the authoritative `pcae phase complete` finalization) did not,
-    # which was the actual notification asymmetry -- re-running `pcae phase
-    # complete` for the same metadata could dispatch twice. Both paths now
-    # share one marker implementation (phase_reports.phase_already_notified).
+    # Phase 114B — notification certification. `pcae task finish --commit`
+    # and this path each used to decide "was this already dispatched" with
+    # their own ad hoc condition built directly on the Phase 113V.N marker
+    # file; that was the last independent notification decision left after
+    # 113Z wired both paths through the same shared COMPLETE_PHASE/
+    # FINISH_TASK transition helper. `certify_notification_transition()` is
+    # now the one place both callers ask "should this NOTIFY transition be
+    # allowed to dispatch" -- backed by the Repository Transition
+    # Validator's own `notification_eligible()` invariant rather than a
+    # bespoke check.
     commit_for_marker = commits[0] if commits else ""
-    already_notified = bool(commit_for_marker) and phase_already_notified(phase_id, commit_for_marker)
+    certification = certify_notification_transition(
+        phase_id=phase_id,
+        requested_phase_id=cli_phase_id or phase_id,
+        active_task_title=active_task.title if active_task else None,
+        metadata=meta,
+        lifecycle_current_phase_line=_read_lifecycle_current_phase_line(),
+        trial_report=trial_report,
+        recommended_next_phase=recommended_next,
+        origin_main_head_count=origin_count,
+        commit_hash=commit_for_marker,
+        source_transition_kind=TransitionKind.COMPLETE_PHASE,
+        allow_partial_report=allow_partial_report,
+    )
+    already_notified = certification.outcome.value == "already_dispatched"
     suppressed_notify_enabled = None
-    if already_notified:
+    if not certification.eligible:
         import os as _os
         suppressed_notify_enabled = _os.environ.get("PCAE_NOTIFY_ENABLED")
         _os.environ["PCAE_NOTIFY_ENABLED"] = ""
@@ -391,6 +410,22 @@ def _finalize_report_and_notify(
         fin["notification_reason"] = (
             f"phase {phase_id} final report already dispatched at commit "
             f"{commit_for_marker[:8] or '(none)'} — skipping duplicate send (idempotent)"
+        )
+    elif (
+        not certification.eligible
+        and certification.outcome != NotificationCertificationOutcome.DISABLED
+        and certification.reasons
+    ):
+        # DISABLED is excluded: finalize_phase_report() already reports the
+        # precise "PCAE_NOTIFY_ENABLED is not set..." reason for that case
+        # on its own, and blanking the env var to suppress dispatch doesn't
+        # change that it's accurate. The other ineligible outcomes (push not
+        # clean, transport unavailable) would otherwise be masked by that
+        # same generic message once the env var is blanked, so those need
+        # the real reason substituted in.
+        fin["notification_reason"] = (
+            f"notification certification: {certification.outcome.value} — "
+            + "; ".join(certification.reasons)
         )
 
     if fin.get("report_error"):
@@ -453,6 +488,14 @@ def _finalize_report_and_notify(
             print(f"  Markdown: {md_path}")
         if json_path:
             print(f"  JSON:     {json_path}")
+
+    # ── Notification certification (Phase 114B) ────────────────────────────
+    # The single shared eligibility decision, evaluated before dispatch was
+    # even attempted -- printed unconditionally so "eligible"/"already
+    # dispatched"/"disabled"/"transport unavailable"/"not certified" is
+    # always visible, independent of whatever finalize_phase_report() went
+    # on to actually attempt.
+    print(f"Notification certification: {certification.outcome.value}")
 
     # ── Notification dispatch result ──────────────────────────────────────
     # Phase 113X.3 — finalization notification guarantee: the outcome is

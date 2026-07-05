@@ -7,6 +7,10 @@ from pcae.core.check import run_checks
 from pcae.core.command_path_observation import observe
 from pcae.core.health import build_health_data
 from pcae.core.paths import HarnessPath
+from pcae.core.notification_certification import (
+    NotificationCertificationOutcome,
+    certify_notification_transition,
+)
 from pcae.core.repository_transition_integration import (
     handle_phase_report_transition_result,
     validate_phase_report_transition,
@@ -783,11 +787,30 @@ def _finalize_task_report_and_notify(
             "notification_reason": "repository transition validator did not accept transition",
         }
 
+    # Phase 114B — the same shared notification certification `pcae phase
+    # complete` now uses. `already_sent` above already short-circuited the
+    # marker-file duplicate case; this call additionally covers push-clean
+    # and transport-configured, which nothing on this path checked before.
+    certification = certify_notification_transition(
+        phase_id=phase_id,
+        requested_phase_id=phase_id,
+        active_task_title=active_task_title,
+        metadata=meta,
+        lifecycle_current_phase_line=_read_lifecycle_current_phase_line(),
+        trial_report=trial_report,
+        recommended_next_phase=recommended_next,
+        origin_main_head_count=origin_count,
+        commit_hash=commit_hash or "",
+        source_transition_kind=TransitionKind.FINISH_TASK,
+    )
+
     # Suppress dispatch (but still finalize/write the report) when the
-    # report is not yet dispatch-ready — e.g. final push state is pending.
-    # Prefer skip over sending a partial report labeled as final.
+    # report is not yet dispatch-ready — e.g. final push state is pending —
+    # or the shared certification does not consider this transition
+    # eligible. Prefer skip over sending a partial or uncertified report
+    # labeled as final.
     suppressed_notify_enabled = None
-    if not dispatch_allowed and notify_enabled:
+    if (not dispatch_allowed or not certification.eligible) and notify_enabled:
         suppressed_notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED")
         os.environ["PCAE_NOTIFY_ENABLED"] = ""
     try:
@@ -857,6 +880,7 @@ def _finalize_task_report_and_notify(
         "report_completeness": report.report_completeness if report else "",
         "report_path": paths.get("markdown", ""),
         "metadata_path": str(meta_path),
+        "notification_certification": certification.outcome.value,
     }
 
     if not dispatch_allowed:
@@ -866,6 +890,26 @@ def _finalize_task_report_and_notify(
             f"missing: {', '.join(trust_result.missing_fields)}. "
             "Run final push/report completion path before dispatch."
         )
+        return result
+
+    # DISABLED falls through to the generic `fin.get("notification_skipped")`
+    # handling below: finalize_phase_report() already reports the precise
+    # "PCAE_NOTIFY_ENABLED is not set..." reason for that case on its own,
+    # and suppressing dispatch by blanking the env var doesn't change that
+    # it's accurate. The other ineligible outcomes (already dispatched,
+    # push not clean, transport unavailable) would otherwise be masked by
+    # that same generic message once the env var is blanked, so those get
+    # the real certification reason instead.
+    if not certification.eligible and certification.outcome != NotificationCertificationOutcome.DISABLED:
+        result["notification_status"] = (
+            "skipped_duplicate"
+            if certification.outcome == NotificationCertificationOutcome.ALREADY_DISPATCHED
+            else "skipped"
+        )
+        reason = f"notification certification: {certification.outcome.value}"
+        if certification.reasons:
+            reason += " — " + "; ".join(certification.reasons)
+        result["notification_reason"] = reason
         return result
 
     if fin.get("notification_skipped"):
