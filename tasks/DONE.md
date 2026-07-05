@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 115A: Trust Metadata Sync (20260706-0102-phase-115a-trust-metadata-sync)
 - Phase 115A: Canonical Report Sync (20260706-0059-phase-115a-canonical-report-sync)
 - Phase 115A: Metadata Correction (20260706-0057-phase-115a-metadata-correction)
 - Phase 115A: Completion Sync (20260706-0056-phase-115a-completion-sync)

@@ -71,6 +71,21 @@
       "note": "python -m pytest tests/test_phase_115a_decision_explainability_framework.py"
     },
     {
+      "name": "report_notification_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
+    },
+    {
+      "name": "fast_green",
+      "result": "not_run_documentation_only_no_runtime_code_changed",
+      "status": "passed"
+    },
+    {
       "name": "pcae_health",
       "result": "healthy",
       "status": "passed"
@@ -132,7 +147,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean (nothing_to_push once governed push completes)"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
