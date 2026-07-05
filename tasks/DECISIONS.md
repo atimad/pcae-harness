@@ -2,6 +2,11 @@
 
 ## Accepted
 
+- Treat Phase 113X as a contract-freeze phase for future Repository Transition
+  Validator lifecycle integration: commands remain transition-request front
+  ends, the validator is the only certification authority, the Model
+  Containment Layer is model-agnostic, and no lifecycle behavior changes until
+  later implementation phases.
 - Treat Phase 113W as a design-only Repository Transition Validator integration phase: the human phase prompt supersedes the generated transition contract's overly narrow default scope, so 113W may edit integration design docs, documentation-completeness tests, and project memory, while continuing to forbid source behavior changes, lifecycle behavior changes, and raw git operations.
 - Treat the Phase 88L task-state mismatch as legacy contract-format reconciliation, not a transition-engine defect: checkbox-based `## Status` content is visible to directory-based health reporting but is not the literal `active` status required by `pcae task transition`; close the completed legacy contract with `pcae task close`, create a separate structured 88L.1 reconciliation contract, and do not create or start 88M until reconciliation is complete.
 - Treat Phase 69C agent approval as artifact-authoritative and strict: `gep-gate-006` must use `ApprovedPromptArtifact.approved_agents` as the only authoritative approval source; legacy 69B artifacts without `approved_agents` block with `reason=approved_agents_missing`; approval must not be inferred from runtime registration, installation status, contract presence, prompt approval alone, or recommended runtime.

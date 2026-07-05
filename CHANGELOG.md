@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 113X — Repository Transition Validator Integration Contract.
+  Architecture/contract only. Added
+  `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_CONTRACT.md` and
+  `docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_CONTRACT.md`
+  to freeze lifecycle integration: every lifecycle command is a transition
+  request, the Repository Transition Validator is the mandatory certification
+  gateway, no lifecycle command owns canonical state, the Model Containment
+  Layer is model-agnostic, the frozen pipeline is proposal -> validation ->
+  certification -> promotion -> notification -> completion -> rollback
+  eligibility, and notification is downstream of certification. Frozen future
+  enforcement order: 113Y phase completion, 113Z task finish, 114A report
+  promotion/quarantine, 114B notification enforcement, 114C push/check, 114D
+  cross-agent verification, 114E model containment drill. Added
+  `tests/test_repository_transition_validator_integration_contract.py`
+  contract-completeness tests. Validation: focused contract `46 passed`;
+  contract + real-repo bootstrap/TODO `64 passed`; governance/autonomy
+  `3830 passed`; release/lifecycle `1552 passed`; fast-green `4390 passed`;
+  full suite `16749 passed`. No validator integration implemented and no
+  lifecycle behavior changed. Execution capability remains unavailable.
+  Recommended next phase: 113Y — Repository Transition Validator Integration:
+  Phase Completion.
+
 - Phase 113W — Repository Transition Validator Integration Design.
   Architecture/design only. Added
   `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION.md` and

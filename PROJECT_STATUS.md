@@ -2,57 +2,68 @@
 
 ## Current Phase
 
-Phase 113W — Repository Transition Validator Integration Design (completed).
+Phase 113X — Repository Transition Validator Integration Contract (completed).
 
-Architecture/design only. Full design:
-`docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION.md`.
+Architecture/contract only. Full contract:
+`docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_CONTRACT.md`.
 Phase report:
-`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_DESIGN.md`.
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_CONTRACT.md`.
 
-**Containment target**: models, humans, schedulers, and future automation
-may propose transitions, but PCAE constructs authoritative repository
-state, validates the proposed transition and expected target state, and
-returns exactly one verdict: accept, reject, quarantine, or requires human
-review. Valid transitions proceed through one canonical path; invalid
-transitions never become canonical.
+**Integration contract frozen**: lifecycle commands are transition-request
+front ends. They do not own canonical state. The Repository Transition
+Validator is the mandatory gateway that certifies whether a requested
+repository transition may become canonical.
 
-**Integration design**: future integration points are specified for
-`pcae phase complete`, `pcae task finish --commit`, report generation,
-report promotion, phase-completion metadata, `pcae push check`,
-`pcae notify send-report`, the phase-finalization skill, future
-automation/scheduler paths, and future agent-driven workflows. Each point
-records current behavior, proposed validated behavior, required
-`RepositoryState` inputs, `ProposedTransition`, `ExpectedTargetState`,
-invariants, and accept/reject/quarantine/human-review outcomes.
+**Canonical authority frozen**: commands request transitions; the validator
+certifies transitions; only Certified artifacts may become Canonical/latest;
+there is one canonical promotion path and one certification authority.
 
-**Canonical promotion design**: one future promotion path owns
-`latest.json`, `latest.md`, phase-completion metadata consumption during
-finalization, and notification event eligibility. Draft reports can become
-Certified only after an accept verdict; only Certified reports can become
-Canonical/latest; notifications can reference only Certified/Canonical
-reports. No alternate promotion path is allowed.
+**Model Containment Layer frozen**: models never modify canonical state,
+models propose transitions, validator certifies transitions, repository
+changes only after certification, and no agent identity influences
+certification. The same contract applies to Claude, DeepSeek, Codex, GLM,
+Qwen, Gemini, humans, future automation, future REST, future schedulers, and
+future execution runtimes.
 
-**Implementation order confirmed**: 1) `pcae phase complete`, 2) report
-promotion/latest artifacts, 3) `pcae task finish --commit`, 4)
-notification dispatch, 5) `pcae push check`, 6) cross-agent verification.
-The order starts with the authoritative phase lifecycle boundary and the
-shared canonical write surface, then closes the second existing writer,
-then layers notifications, push trust, and cross-agent drill coverage.
+**Pipeline frozen**: proposal, validation, certification, promotion,
+notification, completion, and rollback eligibility. Reject, Quarantine, and
+Requires Human Review do not mutate canonical state.
 
-**DeepSeek containment scenarios documented**: stale commits in report,
-wrong phase ID, missing `recommended_next_phase`, malformed test results,
-duplicate Telegram reports, silent missing Telegram report, stale
-phase-completion metadata, report from wrong phase, Architecture Status
-overclaim, and push with untrusted report.
+**Notification integration frozen**: notification is downstream of
+certification. No certification means no notification. Certification happens
+once; final notification happens once; notifications may reference only a
+Certified/Canonical report.
+
+**Implementation roadmap frozen**: 113Y phase completion integration, 113Z
+task finish integration, 114A report promotion/quarantine hardening, 114B
+notification enforcement, 114C push/check integration, 114D cross-agent
+verification, 114E model containment drill.
 
 **No-go**: no validator integration implemented, no lifecycle command
-behavior changed, no Advisory Runtime/Runtime Snapshot/Runtime Context/
-Runtime Registry/Runtime Inspect/Permission Broker enforcement changes,
-no execution/authorization/plugin/Telegram-inbound/REST/Web-UI/Dashboard
-changes. Execution capability remains unavailable. Runtime state remains
-Observed. Maximum plugin capability remains `observe`.
+behavior changed, no report promotion behavior changed, no notification
+dispatch behavior changed, no push behavior changed, no Runtime Snapshot,
+Runtime Inspect, Advisory Runtime, Permission Broker enforcement, execution,
+authorization, plugin, Telegram inbound, REST, Web UI, or Dashboard changes.
+Execution capability remains unavailable. Runtime state remains Observed.
+Maximum plugin capability remains `observe`.
 
-Recommended next repo phase: 113X — Repository Transition Validator Integration Contract (not started).
+Recommended next repo phase: 113Y — Repository Transition Validator Integration: Phase Completion (not started).
+
+## Phase 113X Complete
+
+Phase 113X — Repository Transition Validator Integration Contract (completed).
+
+Architecture/contract only. Full contract:
+`docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_CONTRACT.md`.
+Phase report:
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_CONTRACT.md`.
+
+**Summary**: frozen lifecycle integration contract, canonical authority,
+Model Containment Layer, transition pipeline, notification downstream-of-
+certification rule, integration invariants, compatibility constraints, and
+implementation roadmap. No integration implemented.
+
+Recommended next repo phase: 113Y — Repository Transition Validator Integration: Phase Completion (not started).
 
 ## Phase 113W Complete
 

@@ -122,7 +122,7 @@ def test_recommended_next_phase_matches_real_project_status() -> None:
     pack = build_context_pack(root)
     recommended = pack.roadmap_summary["recommended_next_phase"]
     assert recommended is not None
-    assert "113X" in recommended
+    assert "113Y" in recommended
 
 
 # ---------------------------------------------------------------------------
@@ -260,7 +260,7 @@ def test_real_todo_no_longer_marks_90_series_as_next() -> None:
         line for line in text.splitlines() if "\U0001F51C Next" in line and line.strip().startswith("|")
     ]
     assert len(lines_with_next_marker) == 1
-    assert "113X" in lines_with_next_marker[0]
+    assert "113Y" in lines_with_next_marker[0]
     assert "90C" not in lines_with_next_marker[0]
 
 
@@ -270,10 +270,10 @@ def test_real_todo_marks_90_series_table_historical() -> None:
     assert "Historical reference only" in text
 
 
-def test_real_todo_current_roadmap_lists_113x_as_next() -> None:
+def test_real_todo_current_roadmap_lists_113y_as_next() -> None:
     text = (REPO_ROOT / "tasks" / "TODO.md").read_text(encoding="utf-8")
     current_section = text.split("## Current Roadmap")[1].split("## Historical")[0]
-    assert "113X" in current_section
+    assert "113Y" in current_section
     assert "Next" in current_section
 
 
