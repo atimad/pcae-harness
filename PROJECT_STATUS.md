@@ -2,70 +2,138 @@
 
 ## Current Phase
 
-Phase 113U — Repository Transition Validator Prototype (completed).
+Phase 113V — Repository Transition Validator Verification & Compatibility (completed).
 
-Observation-only implementation of the validator interface frozen in
-113T. Not wired into any production lifecycle command — `pcae phase
-complete`, `pcae task finish --commit`, `pcae push`, and notification
-dispatch are all byte-for-byte unchanged. The validator may currently
-only be called directly, by tests.
+Verification only — no lifecycle integration, no Telegram dispatch
+repair, no enforcement implemented. Independently re-verified 113U's
+observation-only validator prototype against 113T's frozen contract
+and 113S's architecture.
 
-Implements `src/pcae/core/repository_transition_validator.py`:
-`RepositoryState` (structural snapshot, no agent/model identity
-field), `ProposedTransition` (one of the 12 frozen `TransitionKind`
-values plus an open payload), `ExpectedTargetState`,
-`TransitionInvariant`/`InvariantViolation` (carrying
-classification/force per 113T's Invariant Contract), `TransitionVerdict`
-(exactly `accept`/`reject`/`quarantine`/`requires_human_review`),
-`validate_transition(current_state, proposed_transition,
-expected_target_state, invariants) -> TransitionResult` (pure,
-deterministic), `notification_eligible()` (the 5-condition check), and
-`promotion_allowed()` (only Certified may become Canonical).
+**Purity re-confirmed structurally, not just by convention**:
+`git diff --stat` across the entire 113S→113U commit range shows
+exactly one `src/` file changed (`repository_transition_validator.py`
+itself); `runtime_snapshot.py`, `advisory_runtime.py`,
+`permission_broker.py`, and `phase_report_trust.py` are all
+byte-for-byte unchanged; no `src/pcae/commands/` file references the
+validator at all; its only importer anywhere in the repository is its
+own test file.
 
-Implements 7 structural invariant families evaluable purely from a
-`RepositoryState` value with no live filesystem/git access: phase
-identity consistency, metadata consistency, report completeness,
-recommended-next-phase presence, canonical promotion eligibility,
-notification eligibility (evaluated only for the `notify` transition
-kind), and no-execution-availability-unless-contracted.
+**Determinism re-confirmed**: identical input run 50 times in a single
+process produced 50 identical `(verdict, violations)` results; the
+module contains no time/random/environment/filesystem access anywhere.
 
-Remaining future enforcement, explicitly not done here: wiring into
-`pcae phase complete`/`pcae task finish --commit` (the 113T-frozen
-single-promotion-path requirement remains contract-only, not yet
-code); live-state invariants requiring filesystem/git/subprocess access
-(commit lineage, architecture status consistency, push state
-consistency, test result consistency); and a live-I/O path that could
-actually produce `requires_human_review` (reserved, per 113T's Failure
-Contract, for "validator unavailable" — orthogonal to this pure
-prototype).
+**Verdict contract re-confirmed**: exactly 4 values
+(`accept`/`reject`/`quarantine`/`requires_human_review`), no fifth.
 
-Documents, as a distinct future validator integration target (not
-fixed this phase), a notification asymmetry observed after 113T:
-repository completion can be canonical while `pcae skill invoke
-phase-finalization <phase-id>` reports `target_unresolved` for special
-phase IDs — these are two independent, unreconciled questions today.
+**All 7 implemented invariants re-confirmed** against
+`STRUCTURAL_INVARIANTS`'s own frozen tuple: phase identity consistency,
+metadata consistency, report completeness, recommended-next-phase
+presence, canonical promotion eligibility, notification eligibility,
+no-execution-availability-unless-contracted.
 
-Model-agnostic behavior verified directly: neither `RepositoryState`
-nor `ProposedTransition` carries an identity field, and a test confirms
-an `"agent"` key placed in `ProposedTransition.payload` never changes
-the verdict.
+**Canonical promotion re-confirmed**: only `ArtifactState.CERTIFIED`
+may target `ArtifactState.CANONICAL`, verified against all 6 states via
+both the standalone helper and the full validator.
 
-No Advisory Runtime, Runtime Snapshot, Runtime Context, Runtime
-Registry, or Permission Broker changes. No change to any existing
-lifecycle enforcement path.
+**Notification eligibility re-confirmed**: all 5 conditions (finalized,
+certified, push clean, not already dispatched, transport enabled)
+required simultaneously; real Telegram dispatch was not touched.
 
-Added `src/pcae/core/repository_transition_validator.py`,
-`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_PROTOTYPE.md`,
-`tests/test_repository_transition_validator.py` (36 tests, all
-passing).
+**Model-agnostic behavior re-confirmed**: neither `RepositoryState` nor
+`ProposedTransition` carries an identity field; an `"agent"` key in
+`ProposedTransition.payload` never changes the verdict.
+
+**Compatibility verified** with 113S architecture, 113T contract, 113U
+prototype, Runtime Snapshot, Advisory Runtime, Permission Broker, and
+phase report trust — no incompatibility found in any of the six.
+
+**Future integration targets documented**: 5 invariants ready for
+future enforcement as-is; 2 ready with the caveat that a real caller
+must populate `RepositoryState` honestly; 4 still need a live-I/O
+adapter layer (commit lineage, architecture status consistency, push
+state consistency, test result consistency); the 113S/113T
+single-canonical-transition-authority requirement remains entirely
+unaddressed (target for 113W); the notification asymmetry
+(`pcae skill invoke phase-finalization <phase-id>` → `target_unresolved`
+for special phase IDs) was re-checked live for `113V` itself, reconfirmed
+present and unchanged, and — per this phase's explicit instruction —
+not repaired here.
+
+No new tests were required: every verification objective was
+re-confirmable using 113U's existing 36-test suite plus direct
+interactive re-verification. No Advisory Runtime, Runtime Snapshot,
+Runtime Context, Runtime Registry, or Permission Broker changes. No
+change to any existing lifecycle enforcement path.
+
+Validator (246/246), governance/autonomy (3784/3784), and fast_green
+(4390/4390) test suites all re-run clean. A fourth required suite
+(task/phase/notifications) reproducibly stalled across four independent
+attempts (parallel and sequential) inside `pcae project-state --json`'s
+subprocess call, a pre-existing macOS fork-contention condition already
+noted in project memory as an open performance issue in
+`test_phase85_integration.py`/`test_phase87_integration.py` — confirmed
+unrelated to this phase's work (zero `src/` changes beyond the validator
+module across 113S→113V). Documented in full, including a repair
+recommendation, in `docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_VERIFICATION.md`.
+
+Added `docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_VERIFICATION.md`.
 
 Safety invariants confirmed unchanged: Runtime state `Observed`,
 execution capability `unavailable`, maximum plugin capability
 `observe`.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113V — Repository Transition Validator Verification &
-Compatibility.
+repo phase: 113W — Repository Transition Validator Integration Design.
+
+## Phase 113V Complete
+
+Phase 113V — Repository Transition Validator Verification & Compatibility (completed).
+
+Verification only. Full report:
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_VERIFICATION.md`.
+
+**Verification summary**: purity, determinism, verdict contract,
+implemented invariants, canonical promotion model, notification
+eligibility model, and model-agnostic behavior all independently
+re-confirmed — not merely re-asserted from 113U's own claims.
+
+**Purity/no-integration summary**: `git diff --stat` across 113S→113U
+shows exactly one `src/` file changed (the validator module itself);
+Runtime Snapshot, Advisory Runtime, Permission Broker, and phase report
+trust modules unchanged; zero references to the validator anywhere
+under `src/pcae/commands/`.
+
+**Invariant verification summary**: all 7 implemented families
+(phase identity consistency, metadata consistency, report completeness,
+recommended-next-phase presence, canonical promotion eligibility,
+notification eligibility, no-execution-availability-unless-contracted)
+directly re-exercised and confirmed correct.
+
+**Canonical promotion summary**: only Certified may become Canonical,
+confirmed across all 6 states via both the standalone helper and the
+full validator.
+
+**Notification eligibility summary**: all 5 conditions required
+simultaneously; real dispatch untouched.
+
+**Future integration targets**: 5 invariants enforcement-ready as-is; 2
+ready with a live-caller-honesty caveat; 4 need a live-I/O adapter
+layer (commit lineage, architecture/push/test-result consistency); the
+single-canonical-transition-authority requirement remains unaddressed
+(target for 113W); the notification asymmetry re-confirmed present,
+unrepaired per instruction.
+
+**Environmental finding**: the required task/phase/notifications test
+command reproducibly stalled (4 independent attempts, both parallel
+and sequential) inside `pcae project-state --json`'s subprocess call —
+a pre-existing macOS fork-contention condition, confirmed unrelated to
+this phase or the validator, documented in full with a repair
+recommendation for a future phase.
+
+**No-go**: no lifecycle integration added, no Telegram dispatch repair,
+no enforcement implemented, no Advisory Runtime/Runtime Snapshot/
+Runtime Context/Runtime Registry/Permission Broker changes. Execution
+capability remains unavailable.
 
 ## Phase 113U Complete
 
