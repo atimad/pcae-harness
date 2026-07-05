@@ -1,38 +1,36 @@
 {
-  "phase_id": "113Z",
-  "phase_name": "Repository Transition Validator Integration: Task Finish",
-  "phase_title": "Repository Transition Validator Integration: Task Finish",
+  "phase_id": "114A",
+  "phase_name": "Canonical Artifact Promotion & Quarantine Hardening",
+  "phase_title": "Canonical Artifact Promotion & Quarantine Hardening",
   "status": "completed",
-  "summary": "Implemented the second Repository Transition Validator lifecycle integration. pcae task finish --commit now requests a finish_task transition before canonical phase-report promotion, using the same shared phase-report transition adapter as pcae phase complete. Accept preserves the existing successful report flow; reject leaves latest.md/latest.json unchanged; quarantine writes only quarantine artifacts; requires_human_review blocks promotion. The 113S/113T asymmetry is repaired: stale phase-completion metadata, phase identity mismatch, missing recommended_next_phase, partial report evidence, explicit human review, and execution availability overclaims cannot become canonical latest reports through task finish. No push-check command integration, notification-dispatch enforcement, execution runtime, authorization, Permission Broker enforcement, plugin execution, Telegram inbound, REST, Web UI, or Dashboard was added. Execution capability remains unavailable.",
-  "files_changed_count": 16,
+  "summary": "Implemented canonical artifact promotion for phase reports. Added a reusable promotion state machine with Draft, Validated, Certified, Canonical, Rejected, and Quarantined states. Only Certified artifacts can become Canonical. Phase report writes now route latest.md/latest.json through promote_artifact(...), while quarantine writes route through quarantine_artifact(...). Rejected and quarantined artifacts never promote and never overwrite latest.*. Successful lifecycle behavior remains compatible. No notification enforcement, push-check integration, Runtime Snapshot, Runtime Inspect, Permission Broker, authorization, execution runtime, plugins, Telegram inbound, REST, Web UI, or Dashboard changes were made. Execution capability remains unavailable.",
+  "files_changed_count": 12,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
     ".pcae/phase-completion-metadata.json",
-    "docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_TASK_FINISH_INTEGRATION.md",
-    "src/pcae/commands/phase.py",
-    "src/pcae/commands/task.py",
-    "src/pcae/core/repository_transition_integration.py",
+    "docs/PCAE_CANONICAL_ARTIFACT_PROMOTION.md",
+    "docs/PHASE_114_CANONICAL_ARTIFACT_PROMOTION.md",
+    "src/pcae/core/canonical_artifact_promotion.py",
+    "src/pcae/core/phase_reports.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20260705-1751-phase-113z-repository-transition-validator-integration-task-finish.md",
-    "tests/test_canonical_phase_identity_source_repair.py",
-    "tests/test_phase_report_trust_hard_fail.py",
-    "tests/test_repository_transition_validator_phase_complete_integration.py",
-    "tests/test_repository_transition_validator_task_finish_integration.py",
-    "tests/test_task_finish_notification_ordering.py"
+    "tasks/active/20260705-1847-phase-114a-canonical-artifact-promotion-quarantine-hardening.md",
+    "tests/test_canonical_artifact_promotion.py"
   ],
-  "tests_added_or_updated": "11 focused task-finish integration tests added; legacy task-finish and canonical-identity tests updated",
+  "tests_added_or_updated": "10 focused promotion tests added; phase report writer tests covered",
   "phase_commits": [
     {
-      "hash": "970b8e79095d0c48739f6f173b6c5c0d71bce840",
-      "message": "Integrate transition validator into task finish"
+      "hash": "b088c8b345523d309179955059aa799e1f1f420f",
+      "message": "Implement canonical artifact promotion pipeline"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_integration.py",
+  "validator_module": "src/pcae/core/canonical_artifact_promotion.py",
   "execution_availability": "unavailable",
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -44,16 +42,16 @@
   },
   "validation_results": [
     {
-      "name": "focused_task_phase_validator_and_report_suites",
-      "result": "60/60",
+      "name": "focused_promotion_report_compatibility",
+      "result": "172/172",
       "status": "passed",
-      "note": "phase-complete validator, task-finish validator, task-finish report trust, and task-finish notification ordering suites"
+      "note": "canonical artifact promotion, phase report, phase report CLI, and repository-transition phase/task integration tests"
     },
     {
-      "name": "repository_transition_task_report_group",
-      "result": "713/713",
+      "name": "phase_lifecycle_report_suite",
+      "result": "1039/1039",
       "status": "passed",
-      "note": "tests/test_repository_transition_validator*.py tests/test_task*.py tests/test_*task* tests/test_phase_reports*.py -n auto"
+      "note": "tests/test_canonical_artifact_promotion.py tests/test_phase.py tests/test_phase_reports.py tests/test_phase_reports_cli.py -n auto"
     },
     {
       "name": "governance_autonomy_runtime_advisory_plugin_group",
@@ -85,8 +83,8 @@
     }
   ],
   "test_results": {
-    "focused_task_phase_validator_and_report_suites": "60/60",
-    "repository_transition_task_report_group": "713/713",
+    "focused_promotion_report_compatibility": "172/172",
+    "phase_lifecycle_report_suite": "1039/1039",
     "governance_autonomy_runtime_advisory_plugin_group": "3830/3830",
     "release_lifecycle_regression": "1571/1571",
     "fast_green": "4390/4390",
@@ -133,6 +131,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No notification-dispatch enforcement. No push-check command integration. No execution runtime. No authorization. No Permission Broker enforcement. No plugin execution. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "114A — Report Promotion & Quarantine Hardening"
+  "no_go_confirmation": "No notification enforcement. No push-check integration. No Runtime Snapshot change. No Runtime Inspect change. No Permission Broker enforcement. No execution runtime. No authorization. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "114B — Notification Enforcement & Idempotency"
 }
