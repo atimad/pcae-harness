@@ -2,48 +2,60 @@
 
 ## Current Phase
 
-Phase 113S — Repository Transition Validator Architecture (completed).
+Phase 113T — Repository Transition Validator Contract Freeze (completed).
 
-Architecture/design only — no implementation. Turns the 113X/
-Claude-DeepSeek cross-agent incident into a formal PCAE design
-principle: Model proposes. PCAE validates. Repository advances only
-through valid state transitions.
+Architecture/design only — no implementation. Freezes the Repository
+Transition Validator contract introduced in 113S: the validator is the
+single authority responsible for validating repository state
+transitions before any canonical repository state may change.
 
-Defines: Repository State (14 independently-observable components,
-each with exactly one authoritative reader); Proposed Transition (10
-transition kinds — `start_task`, `modify_files`, `run_validation`,
-`commit`, `finish_task`, `complete_phase`, `push`, `notify`,
-`update_status`, `produce_report`); the Transition Validator itself
-(`validate_transition(current_state, proposed, target_state,
-invariants) -> TransitionVerdict`, deliberately blind to which agent is
-proposing); 15 invariant families (phase identity consistency, active
-task consistency, allowed file scope, commit lineage, report
-completeness, report trust, metadata consistency, architecture status
-consistency, recommended-next-phase consistency, test result
-consistency, push state consistency, notification eligibility,
-single-final-notification, no-execution-availability, no-canonical-
-promotion-when-blocked); Accept/Reject/Quarantine/Requires-Human-Review
-semantics; a 5-state canonical artifact promotion model (Draft →
-Blocked / Quarantined / Certified → Canonical/latest, only Certified
-artifacts may ever become canonical); Notification eligibility (5
-simultaneous conditions; intermediate reports never externally
-dispatched); the semantic/structural boundary (models own code design,
-implementation strategy, explanations, remediation; PCAE owns identity,
-lifecycle, scope, reports, commits, pushes, notifications, canonical
-state); model-agnostic behavior (same invariants for Claude,
-Claude-DeepSeek, Codex, Qwen, human operators, and future models); and
-future integration points (task lifecycle, phase lifecycle, commit
-governance, push governance, notification runtime, Runtime Snapshot/
-Advisory Runtime, future intent/approval/execution layers) — all
-without redesigning any existing code path.
+Elevates the asymmetry discovered during 113S's own finalization
+(`pcae phase complete` performs canonical identity resolution;
+`pcae task finish --commit` can currently write `latest.json`/
+`latest.md` directly from `.pcae/phase-completion-metadata.json`,
+bypassing that resolution) from an implementation detail into a
+frozen architectural invariant: there must never exist two independent
+canonical report promotion paths. This is not fixed by this phase —
+architecture/design only — but is now a named contract requirement a
+future implementation phase must close.
 
-No `validate_transition()` implementation exists. No Advisory Runtime,
-Runtime Snapshot, Runtime Context, or Permission Broker changes. No
-source file under `src/pcae/` was touched.
+Freezes: the Transition Validator interface
+(`validate_transition(current_state, proposed_transition,
+expected_target_state, invariants) -> TransitionVerdict`, exactly four
+verdicts — Accept, Reject, Quarantine, Requires Human Review, no
+fifth); Repository State (every canonical object from 113S's 14-item
+list, now with explicit owner, authoritative source, lifecycle, and
+mutability); Transition Contracts (12 kinds, no command may bypass the
+validator); Canonical Transition Authority as a first-class requirement
+(`pcae phase complete`, `pcae task finish --commit`, and every future
+automation/scheduler/Telegram/REST/agent/execution-engine completion
+path must pass through exactly the same validation path); the
+Canonical Promotion Contract (Draft, Blocked, Rejected, Quarantined,
+Certified, Canonical — only Certified may become Canonical); the
+Identity Contract (single identity source, single report promotion
+source, single metadata source, single canonical report source — no
+alternate derivation, no alternate pipeline); the Notification Contract
+(eligibility, idempotency, single external notification, notification
+certification, no intermediate external notification); the Invariant
+Contract (every family classified mandatory/derived/optional/future
+and blocking/warning/informational); the Failure Contract (9 failure
+modes, each deterministically mapped to Reject, Quarantine, or
+Requires Human Review — never undefined behavior); the Semantic
+Boundary (models perform semantic work, the validator certifies
+structural correctness, models never certify themselves); and Future
+Integration scope (task lifecycle, phase lifecycle, Runtime Snapshot,
+Runtime Inspect, Advisory Runtime, Permission Broker, execution
+runtime, approval runtime, future execution).
 
-Added `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR.md`,
-`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_ARCHITECTURE.md`,
-`tests/test_repository_transition_validator_architecture.py` (97
+No `validate_transition()` implementation exists. No change to
+`pcae phase complete` or `pcae task finish --commit` behavior. No
+Advisory Runtime, Runtime Snapshot, Runtime Context, Runtime Registry,
+or Permission Broker changes. No source file under `src/pcae/` was
+touched.
+
+Added `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_CONTRACT.md`,
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_CONTRACT_FREEZE.md`,
+`tests/test_repository_transition_validator_contract_freeze.py` (113
 documentation-completeness tests, all passing).
 
 Safety invariants confirmed unchanged: Runtime state `Observed`,
@@ -51,7 +63,51 @@ execution capability `unavailable`, maximum plugin capability
 `observe`.
 
 No automatic next repo phase implementation started. Recommended next
-repo phase: 113T — Repository Transition Validator Contract Freeze.
+repo phase: 113U — Repository Transition Validator Prototype.
+
+## Phase 113T Complete
+
+Phase 113T — Repository Transition Validator Contract Freeze (completed).
+
+Architecture/design only. Full contract:
+`docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_CONTRACT.md`. Phase summary:
+`docs/PHASE_113_REPOSITORY_TRANSITION_VALIDATOR_CONTRACT_FREEZE.md`.
+
+**Core principle frozen**: Repository state is authoritative. Commands
+are merely transition requests. No command owns canonical state. Every
+canonical state transition must be validated through exactly one
+Repository Transition Validator.
+
+**The 113S asymmetry, resolution status**: elevated from an
+implementation detail (corrected manually during 113S by careful
+re-inspection of `latest.json` after `pcae task finish --commit` ran)
+to a frozen architectural invariant: "There must never exist two
+independent canonical report promotion paths." Not fixed by this
+phase — a future implementation phase (113U or later) must route both
+`pcae phase complete` and `pcae task finish --commit` through one
+promotion function.
+
+**Frozen**: the Transition Validator interface (4 verdicts, no fifth);
+Repository State (owner/source/lifecycle/mutability per object);
+Transition Contracts (12 kinds); Canonical Transition Authority as a
+first-class requirement; the Canonical Promotion Contract (6 states,
+only Certified may become Canonical); the Identity Contract (4
+singular authorities, no alternate derivation); the Notification
+Contract (eligibility, idempotency, certification); the Invariant
+Contract (every family classified); the Failure Contract (9 failure
+modes, each mapped to a named verdict, never undefined); the Semantic
+Boundary (models never certify themselves); Future Integration scope.
+
+**Tests**: 113 new documentation-completeness tests
+(`tests/test_repository_transition_validator_contract_freeze.py`), all
+passing. No implementation tests, since no implementation exists.
+
+**No-go**: No `validate_transition()` implementation, no change to
+`pcae phase complete`/`pcae task finish --commit` behavior, no
+Advisory Runtime/Runtime Snapshot/Runtime Context/Runtime Registry/
+Permission Broker changes, no execution/authorization/plugin/
+Telegram-inbound/REST/Web-UI/execution-behavior changes. Execution
+capability remains unavailable.
 
 ## Phase 113S Complete
 
