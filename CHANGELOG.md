@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Phase 114B.1 — Repository Events & Notification Policy. Architecture/
+  documentation phase, arising from Phase 114B's independent forensic
+  verification (notification certification, validator integration, and
+  canonical promotion all confirmed correct; quarantine intentionally
+  produces no notification -- but the operator had no way to learn that
+  containment succeeded). Froze Repository State Kernel as four
+  primitives -- Repository State, Repository Transition, Repository
+  Artifact, and the new Repository Event -- each mapping existing
+  subsystems onto a shared vocabulary instead of inventing their own.
+  Repository Events are emitted once per completed transition evaluation
+  (Accept, Reject, Quarantine, Requires Human Review all count) and never
+  decide anything. Froze a ten-event taxonomy
+  (`TransitionAccepted`/`Rejected`/`Quarantined`/`RequiresHumanReview`,
+  `CanonicalPromotionSucceeded`/`Rejected`,
+  `NotificationDelivered`/`Failed`/`Skipped`, `RetryScheduled`) and a
+  Notification Policy that makes rejected, quarantined, and human-review
+  outcomes externally visible by design -- containment succeeding is as
+  newsworthy as forward progress succeeding. Added
+  `docs/PCAE_REPOSITORY_EVENTS.md`, `docs/PCAE_NOTIFICATION_POLICY.md`,
+  `docs/PHASE_114B1_REPOSITORY_EVENTS_NOTIFICATION_POLICY.md` (with an
+  updated Mermaid wire diagram), and
+  `tests/test_phase_114b1_repository_events_notification_policy.py`. No
+  event bus, policy engine, or runtime behavior implemented; no changes
+  to the Repository Transition Validator, Notification Certification,
+  Canonical Artifact Promotion, notification sinks/dispatch, or any
+  lifecycle command. Execution capability remains unavailable.
+  Recommended next phase: 114C — Push Authorization & Repository Trust
+  Integration.
+
 - Phase 114B — Notification Enforcement & Idempotency. Implementation
   phase. Added `src/pcae/core/notification_certification.py`, wiring the
   Repository Transition Validator's `TransitionKind.NOTIFY` and

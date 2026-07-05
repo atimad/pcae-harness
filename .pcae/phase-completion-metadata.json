@@ -1,33 +1,32 @@
 {
-  "phase_id": "114B",
-  "phase_name": "Notification Enforcement & Idempotency",
-  "phase_title": "Notification Enforcement & Idempotency",
+  "phase_id": "114B.1",
+  "phase_name": "Repository Events & Notification Policy",
+  "phase_title": "Repository Events & Notification Policy",
   "status": "completed",
-  "summary": "Wired the Repository Transition Validator's TransitionKind.NOTIFY and notification_eligible() (frozen since 113T/113U, never previously called from a real dispatch path) into pcae phase complete and pcae task finish --commit. Added src/pcae/core/notification_certification.py with certify_notification_transition(...) and notification_transport_status() as the single notification authority both callers now consume, replacing two independently-shaped ad hoc idempotency checks built directly on the Phase 113V.N marker file. NotificationCertificationOutcome names exactly one of eligible, already_dispatched, disabled, transport_unavailable, or not_certified per attempt. Idempotency mechanism is unchanged (the marker file, written only after a successful dispatch); a failed dispatch never writes it, so retries remain deterministic and safe. Notification failure never invalidates canonical repository state -- latest.md/latest.json are written before dispatch is attempted regardless of outcome. Successful Telegram/filesystem dispatch behavior remains byte-for-byte compatible. No changes to TelegramSink, dispatch(), sink construction, push-check integration, Runtime Snapshot, Runtime Inspect, Permission Broker, REST, Telegram inbound, or execution integration were made. Execution capability remains unavailable.",
-  "files_changed_count": 9,
+  "summary": "Architecture/documentation phase arising from Phase 114B's independent forensic verification, which confirmed notification certification, Repository Transition Validator integration, and canonical artifact promotion all behave correctly, and that quarantined transitions intentionally produce no notification -- but found the operator had no way to learn that PCAE successfully prevented an invalid repository transition. Froze the Repository State Kernel as four primitives: Repository State, Repository Transition, Repository Artifact, and the new Repository Event. Repository Events are emitted once per completed transition evaluation (Accept, Reject, Quarantine, Requires Human Review all count) and never decide anything. Froze a ten-event taxonomy and a Notification Policy that makes rejected, quarantined, and human-review outcomes externally visible by design. Added docs/PCAE_REPOSITORY_EVENTS.md, docs/PCAE_NOTIFICATION_POLICY.md, docs/PHASE_114B1_REPOSITORY_EVENTS_NOTIFICATION_POLICY.md (with Mermaid wire diagram), and tests/test_phase_114b1_repository_events_notification_policy.py. No event bus, policy engine, or runtime behavior implemented; no changes to the Repository Transition Validator, Notification Certification, Canonical Artifact Promotion, notification sinks/dispatch, or any lifecycle command. Execution capability remains unavailable.",
+  "files_changed_count": 8,
   "files_changed": [
-    "CHANGELOG.md",
     "PROJECT_STATUS.md",
+    "CHANGELOG.md",
     ".pcae/phase-completion-metadata.json",
-    "docs/PCAE_NOTIFICATION_CERTIFICATION.md",
-    "docs/PHASE_114_NOTIFICATION_ENFORCEMENT.md",
-    "src/pcae/core/notification_certification.py",
-    "src/pcae/commands/phase.py",
-    "src/pcae/commands/task.py",
-    "tests/test_notification_certification_idempotency.py"
+    "docs/PCAE_REPOSITORY_EVENTS.md",
+    "docs/PCAE_NOTIFICATION_POLICY.md",
+    "docs/PHASE_114B1_REPOSITORY_EVENTS_NOTIFICATION_POLICY.md",
+    "tests/test_phase_114b1_repository_events_notification_policy.py",
+    "tasks/active/20260705-2107-phase-114b-1-repository-events-notification-policy.md"
   ],
-  "tests_added_or_updated": "17 focused notification certification tests added; phase/task-finish/report/promotion suites unchanged",
+  "tests_added_or_updated": "26 focused architecture/documentation verification tests added; no runtime tests changed",
   "phase_commits": [
     {
-      "hash": "d1f0b0cf2814c67a14595e44c6e63435a6dbadd3",
-      "message": "Implement notification certification and idempotency"
+      "hash": "b0ff77df5497f9bdef9ae89dac383870bd6ab9b8",
+      "message": "Define Repository Events and Notification Policy architecture"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/notification_certification.py",
+  "validator_module": "none (architecture/documentation phase; no runtime module added)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 3,
+  "origin_main_head_count": 7,
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -39,40 +38,34 @@
   },
   "validation_results": [
     {
-      "name": "focused_notification_certification_idempotency",
-      "result": "17/17",
+      "name": "focused_architecture_documentation_tests",
+      "result": "26/26",
       "status": "passed",
-      "note": "tests/test_notification_certification_idempotency.py -n auto"
+      "note": "tests/test_phase_114b1_repository_events_notification_policy.py"
     },
     {
-      "name": "report_transition_promotion_compatibility",
-      "result": "217/217",
+      "name": "notification_certification_regression",
+      "result": "74/74",
       "status": "passed",
-      "note": "notification certification, repository transition validator, task-finish integration, canonical artifact promotion, phase report, phase report CLI -n auto"
-    },
-    {
-      "name": "phase_lifecycle_suite",
-      "result": "886/886",
-      "status": "passed",
-      "note": "tests/test_phase.py -n auto"
+      "note": "tests/test_notification_certification_idempotency.py tests/test_repository_transition_validator.py tests/test_repository_transition_validator_task_finish_integration.py tests/test_canonical_artifact_promotion.py -- confirms zero runtime drift from a docs-only phase"
     },
     {
       "name": "governance_autonomy_runtime_advisory_plugin_group",
-      "result": "4532/4532",
+      "result": "4533/4533",
       "status": "passed",
       "note": "tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* tests/test_*advisory* -n auto"
     },
     {
       "name": "release_lifecycle_regression",
-      "result": "2724/2726",
+      "result": "2750/2752",
       "status": "passed_with_known_preexisting_failures",
-      "note": "task/phase/report/notification/telegram slice -n auto; 2 failures confirmed pre-existing and unrelated via git stash against unmodified main: test_rc_audit_findings_repair.py::test_task_finish_incomplete_report_path_skips_dispatch, test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcoded stale '113Y' literal)"
+      "note": "task/phase/report/notification/telegram slice -n auto; 2 failures are the same pre-existing, unrelated failures confirmed via git stash in Phase 114B: test_rc_audit_findings_repair.py::test_task_finish_incomplete_report_path_skips_dispatch, test_bootstrap_todo_consistency.py::test_recommended_next_phase_matches_real_project_status (hardcoded stale '113Y' literal)"
     },
     {
       "name": "fast_green",
       "result": "4390/4390",
       "status": "passed",
-      "note": "python -m pytest -m fast_green -n auto"
+      "note": "python -m pytest -m fast_green -n auto; identical count to pre-phase baseline, confirming no runtime drift"
     },
     {
       "name": "report_notification_tests",
@@ -86,11 +79,10 @@
     }
   ],
   "test_results": {
-    "focused_notification_certification_idempotency": "17/17",
-    "report_transition_promotion_compatibility": "217/217",
-    "phase_lifecycle_suite": "886/886",
-    "governance_autonomy_runtime_advisory_plugin_group": "4532/4532",
-    "release_lifecycle_regression": "2724/2726",
+    "focused_architecture_documentation_tests": "26/26",
+    "notification_certification_regression": "74/74",
+    "governance_autonomy_runtime_advisory_plugin_group": "4533/4533",
+    "release_lifecycle_regression": "2750/2752",
     "fast_green": "4390/4390",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
@@ -110,7 +102,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "not_ready (3 unpushed commits ahead of origin/main; not pushed as part of this phase)"
+      "status": "not_ready (6 unpushed commits ahead of origin/main after this phase; not pushed as part of this phase)"
     },
     {
       "name": "pcae_session_bootstrap",
@@ -135,6 +127,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No changes to TelegramSink or dispatch() sink implementations. No push-check command integration beyond reading existing push state. No Runtime Snapshot change. No Runtime Inspect change. No Permission Broker enforcement. No execution runtime. No authorization. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "no_go_confirmation": "No event bus. No Event dataclass or emitter. No policy engine. No change to Repository Transition Validator. No change to Notification Certification. No change to Canonical Artifact Promotion. No change to notification sinks or dispatch. No change to any lifecycle command runtime behavior. No Permission Broker enforcement. No execution runtime. No authorization. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
   "recommended_next_phase": "114C — Push Authorization & Repository Trust Integration"
 }

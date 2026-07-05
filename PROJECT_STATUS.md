@@ -2,41 +2,70 @@
 
 ## Current Phase
 
-Phase 114B — Notification Enforcement & Idempotency (completed).
+Phase 114B.1 — Repository Events & Notification Policy (completed).
 
-Implementation phase. Full design:
-`docs/PCAE_NOTIFICATION_CERTIFICATION.md`.
+Architecture/documentation phase. Full design:
+`docs/PCAE_REPOSITORY_EVENTS.md`, `docs/PCAE_NOTIFICATION_POLICY.md`.
 Phase report:
-`docs/PHASE_114_NOTIFICATION_ENFORCEMENT.md`.
+`docs/PHASE_114B1_REPOSITORY_EVENTS_NOTIFICATION_POLICY.md`.
 
-**Notification certification**: `pcae phase complete` and `pcae task finish
---commit` now construct a `TransitionKind.NOTIFY` transition and consult the
-Repository Transition Validator's `notification_eligible()` (frozen since
-113T/113U, never previously called from a real dispatch path) through
-`src/pcae/core/notification_certification.py`'s
-`certify_notification_transition(...)`.
+**Origin**: Phase 114B's independent forensic verification confirmed
+notification certification, Repository Transition Validator integration,
+and canonical artifact promotion all behave correctly, and that
+quarantined transitions intentionally produce no notification -- but
+found that the operator has no way to learn that PCAE successfully
+prevented an invalid repository transition. This phase closes that gap
+architecturally.
 
-**Single notification authority**: both lifecycle commands consume the same
-certification decision instead of independently-shaped ad hoc idempotency
-checks. `NotificationCertificationOutcome` names exactly one of `eligible`,
-`already_dispatched`, `disabled`, `transport_unavailable`, or `not_certified`
-for every finalization attempt.
+**Four Repository State Kernel primitives**: Repository State (what
+exists), Repository Transition (what change is proposed), Repository
+Artifact (what durable evidence was recorded), and Repository Event
+(what certified outcome was announced) are frozen as the complete
+vocabulary every kernel subsystem maps onto.
 
-**Idempotency**: unchanged in mechanism (the Phase 113V.N marker file), now
-enforced through one function. Duplicate notifications for the same phase +
-commit are impossible; a failed dispatch never writes the marker, so retries
-remain deterministic and safe.
+**Repository Events**: a first-class kernel primitive, emitted once per
+completed transition evaluation (Accept, Reject, Quarantine, or Requires
+Human Review are all completions). Events never decide; they describe an
+outcome that already occurred. Ten event types frozen as the minimum
+taxonomy, including `TransitionRejected`, `TransitionQuarantined`, and
+`TransitionRequiresHumanReview`.
 
-**Compatibility**: successful Telegram/filesystem dispatch behavior is
-unchanged. Notification failure never invalidates canonical repository
-state -- `latest.md` / `latest.json` are written before dispatch is
-attempted, regardless of certification outcome.
+**Notification Policy**: decides which Repository Events are externally
+visible. Direct answer to the 114B forensic gap -- rejected, quarantined,
+and human-review outcomes are frozen as visible, not optional, because
+containment succeeding is exactly as newsworthy as forward progress
+succeeding. `NotificationFailed` must be observable through a channel
+that does not depend on the transport that just failed.
 
-**Scope boundary**: no changes to `TelegramSink`, `dispatch()`, `pcae push
-check`, Runtime Snapshot, Runtime Inspect, Permission Broker, execution
-runtime, authorization, plugins, Telegram inbound, REST, Web UI, or
-Dashboard. Execution capability remains unavailable. Runtime state remains
-Observed. Maximum plugin capability remains `observe`.
+**No implementation**: this phase adds no event bus, no `Event` type, no
+policy engine, and changes no runtime behavior in
+`certify_notification_transition(...)`, `validate_transition(...)`,
+`promote_artifact(...)`, or any lifecycle command. It freezes the concept
+and taxonomy a future implementation phase must conform to.
+
+**Scope boundary**: no changes to the Repository Transition Validator,
+Notification Certification, Canonical Artifact Promotion, notification
+sinks/dispatch, `pcae push check`, Permission Broker, execution runtime,
+plugins, Telegram inbound, REST, Web UI, or Dashboard. Execution
+capability remains unavailable. Runtime state remains Observed. Maximum
+plugin capability remains `observe`.
+
+Recommended next repo phase: 114C — Push Authorization & Repository Trust Integration (not started).
+
+## Phase 114B.1 Complete
+
+Phase 114B.1 — Repository Events & Notification Policy (completed).
+
+Formalized Repository Events as a first-class Repository State Kernel
+primitive alongside Repository State, Repository Transition, and
+Repository Artifact. Froze a ten-event taxonomy and a Notification Policy
+that makes rejected/quarantined/human-review transitions visible outcomes
+rather than silent ones -- the direct architectural answer to the 114B
+forensic verification's observability gap. No runtime, validator,
+promotion, or dispatch behavior changed.
+
+**No-go**: no event bus, no policy engine, no runtime behavior change.
+Execution capability remains unavailable.
 
 Recommended next repo phase: 114C — Push Authorization & Repository Trust Integration (not started).
 
