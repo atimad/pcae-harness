@@ -25,6 +25,7 @@ def test_phase_complete_records_phase_completed_provenance(
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     monkeypatch.chdir(tmp_path)
 
     exit_code = main(["phase", "complete", "--summary", "Finished Phase 32A", "--allow-partial-report"])
@@ -43,6 +44,7 @@ def test_phase_complete_releases_lock_and_records_agent_released(
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     acquire_agent_lock(root, "claude-local")
     monkeypatch.chdir(tmp_path)
 
@@ -63,6 +65,7 @@ def test_phase_complete_without_lock_succeeds(
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     monkeypatch.chdir(tmp_path)
 
     exit_code = main(["phase", "complete", "--summary", "No lock held", "--allow-partial-report"])
@@ -78,6 +81,7 @@ def test_phase_complete_prints_summary_output(
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     monkeypatch.chdir(tmp_path)
 
     exit_code = main(["phase", "complete", "--summary", "Completed Phase 32B", "--allow-partial-report"])
@@ -96,6 +100,7 @@ def test_phase_complete_with_lock_prints_released(
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     acquire_agent_lock(root, "claude-local")
     monkeypatch.chdir(tmp_path)
 
@@ -114,6 +119,7 @@ def test_phase_complete_shows_independent_challenge_context(
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     monkeypatch.setattr(
         phase_commands,
         "build_irg_challenge_context",
@@ -161,6 +167,7 @@ def test_phase_complete_phase_completed_captures_agent_id(
     root = HarnessPath(tmp_path)
     init_harness(root)
     init_git_repo(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     acquire_agent_lock(root, "claude-local")
     monkeypatch.chdir(tmp_path)
 
@@ -309,6 +316,7 @@ def test_phase_start_then_complete_round_trip(
     init_harness(root)
     init_git_repo(tmp_path)
     create_task_contract(root, "Round trip task")
+    write_phase_complete_acceptance_metadata(tmp_path)
     patch_task_allowed_files(tmp_path)
     commit_baseline(tmp_path)
     monkeypatch.chdir(tmp_path)
@@ -528,6 +536,7 @@ def test_phase_lifecycle_challenge_independence_validation(
     create_task_contract(root, "Phase lifecycle independence task")
     patch_task_allowed_files(tmp_path)
     commit_baseline(tmp_path)
+    write_phase_complete_acceptance_metadata(tmp_path)
     monkeypatch.chdir(tmp_path)
 
     complete_scenarios = [
@@ -4935,6 +4944,51 @@ def patch_task_allowed_files(root: Path) -> None:
             ),
             encoding="utf-8",
         )
+
+
+def write_phase_complete_acceptance_metadata(
+    root: Path,
+    *,
+    phase_id: str = "32A",
+    phase_name: str = "Phase Complete Fixture",
+) -> None:
+    (root / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n"
+        "## Current Phase\n\n"
+        f"Phase {phase_id} — {phase_name}.\n\n"
+        f"Recommended next repo phase: {phase_id}N — Next Phase.\n",
+        encoding="utf-8",
+    )
+    meta = {
+        "phase_id": phase_id,
+        "phase_name": phase_name,
+        "files_changed_count": 1,
+        "tests_added_or_updated": "3 tests added",
+        "validation_results": [
+            {"name": "report_notification_tests", "result": "1/1", "status": "passed"},
+            {"name": "bootstrap_session_reporting_tests", "result": "present", "status": "passed"},
+            {"name": "fast_green", "result": "1/1", "status": "passed"},
+        ],
+        "governance_results": [
+            {"name": "pcae_health", "status": "healthy"},
+            {"name": "pcae_check", "status": "passed"},
+            {"name": "pcae_doctor_task_memory", "status": "clean"},
+            {"name": "pcae_push_check", "status": "clean"},
+            {"name": "telegram_runtime", "status": "loaded"},
+        ],
+        "no_go_confirmation": (
+            "No validator bypass. No task finish integration. No notification enforcement. "
+            "No push integration. No Permission Broker change. No execution. No REST. "
+            "No Telegram inbound. No runtime invocation. No adapter execution. No automatic apply."
+        ),
+        "pushed_status": "pushed",
+        "origin_main_head_count": 0,
+        "recommended_next_phase": f"{phase_id}N — Next Phase",
+        "phase_commits": [{"hash": "abc1234500000000"}],
+        "commit_attribution": "phase_owned",
+        "execution_availability": "unavailable",
+    }
+    write_file(root / ".pcae" / "phase-completion-metadata.json", json.dumps(meta))
 
 
 def init_git_repo(root: Path) -> None:

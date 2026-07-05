@@ -27,8 +27,8 @@ ahead of an explicit human decision (`tasks/DECISIONS.md`).
 | 113V.N | Phase Finalization Notification Repair | ✅ Complete |
 | 113W | Repository Transition Validator Integration Design | ✅ Complete |
 | 113X | Repository Transition Validator Integration Contract | ✅ Complete |
-| 113Y | Repository Transition Validator Integration: Phase Completion | 🔜 Next (per PROJECT_STATUS.md) |
-| 113Z | Task Finish Integration | Tentative — candidate only, confirm after 113Y |
+| 113Y | Repository Transition Validator Integration: Phase Completion | ✅ Complete |
+| 113Z | Repository Transition Validator Integration: Task Finish | 🔜 Next (per PROJECT_STATUS.md) |
 | 114A | Report Promotion / Quarantine Hardening | Tentative — candidate only |
 
 ## Historical: Production v1 Path (90-series, superseded)

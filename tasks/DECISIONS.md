@@ -2,6 +2,12 @@
 
 ## Accepted
 
+- Treat Phase 113Y as the first Repository State Kernel enforcement phase:
+  `pcae phase complete` must request a transition from the Repository
+  Transition Validator before canonical `latest.*` promotion, while task
+  finish, push/check, notification enforcement, Runtime Snapshot, Runtime
+  Inspect, Advisory Runtime, Permission Broker, REST, and execution remain out
+  of scope.
 - Treat Phase 113X as a contract-freeze phase for future Repository Transition
   Validator lifecycle integration: commands remain transition-request front
   ends, the validator is the only certification authority, the Model

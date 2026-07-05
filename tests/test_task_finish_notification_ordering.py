@@ -403,6 +403,13 @@ class TestCliUx:
 class TestExistingBehaviorPreservation:
     def test_phase_complete_still_works(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
+        _write_metadata(
+            tmp_path,
+            phase_id="205Q",
+            phase_name="Phase Complete Preservation",
+            recommended_next_phase="205R — Next Phase",
+            phase_commits=[{"hash": "abc1234500000000"}],
+        )
         monkeypatch.chdir(tmp_path)
 
         exit_code = main([

@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 113Y — Repository Transition Validator Integration: Phase Completion.
+  Implementation phase. Integrated the Repository Transition Validator into
+  `pcae phase complete` only. The command now builds `RepositoryState`,
+  `ProposedTransition(kind=complete_phase)`, and
+  `ExpectedTargetState(artifact_state=canonical)`, invokes
+  `validate_transition(...)`, and reaches canonical phase-report promotion
+  only after an `accept` verdict. `reject` blocks canonical report creation
+  and leaves `latest.md`/`latest.json` unchanged; `quarantine` writes only
+  `.pcae/phase-reports/quarantine/*`; `requires_human_review` blocks
+  promotion with explicit diagnostics. Accepted completions continue through
+  the existing report finalization path. Added
+  `tests/test_repository_transition_validator_phase_complete_integration.py`
+  and updated phase-complete fixtures to provide valid acceptance metadata.
+  Validation: focused integration `8 passed`; focused integration plus
+  legacy phase-complete fixtures `16 passed`; report/finalization regression
+  slice `194 passed`; phase lifecycle suite `894 passed`; governance/autonomy
+  `3830 passed`; release/lifecycle regression `1560 passed`; fast_green
+  `4390 passed`. No task-finish, push/check, notification-dispatch
+  enforcement, Runtime Snapshot, Runtime Inspect, Advisory Runtime, Permission
+  Broker, REST, Telegram inbound, or execution integration. Execution
+  capability remains unavailable.
+  Recommended next phase: 113Z — Repository Transition Validator Integration:
+  Task Finish.
+
 - Phase 113X — Repository Transition Validator Integration Contract.
   Architecture/contract only. Added
   `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION_CONTRACT.md` and
