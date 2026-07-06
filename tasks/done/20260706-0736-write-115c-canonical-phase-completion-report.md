@@ -10,7 +10,7 @@ Write 115C canonical phase-completion report
 
 ## Status
 
-active
+done
 
 ## Mode
 
