@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+- Phase 115R — Advisory Repository Skills Prototype. Implements the
+  framework 115P designed and 115Q froze, using only a deterministic
+  `MockAdvisoryProvider`. Adds `src/pcae/core/advisory_repository_skills.py`:
+  `AdvisoryRequest`/`RawAdvisoryResponse`/`NormalizedAdvisoryResponse`
+  (frozen dataclasses matching 115Q's contract exactly, with
+  structural validation -- e.g. `NormalizedAdvisoryResponse` rejects a
+  non-`failed` status with zero findings, and empty `limitations`
+  always); the `AdvisoryProvider` interface (`provider_id`,
+  `backend_kind`, `determinism`, single `invoke()`); `MockAdvisoryProvider`
+  (a pure, in-memory lookup from question to canned
+  `RawAdvisoryResponse`, `backend_kind="deterministic_mock"`,
+  `EvidenceDeterminism.DETERMINISTIC` -- no randomness, network I/O,
+  filesystem write, or execution); `build_advisory_request` (Prompt
+  Builder -- bounded context, explicit objective, no provider
+  parameter); `normalize_advisory_response` (Normalizer -- rejects
+  provider failures, unparseable JSON, non-object payloads,
+  missing/empty findings, and any unauthorized field claim
+  (`verdict`/`commit`/`push`/`authorized`/`execute`/`finalize`)
+  outright as `"failed"`; drops invalid findings while keeping valid
+  ones as `"partial"`); `build_evidence_from_normalized` (Evidence
+  Builder -- one probabilistic, confidence-labelled,
+  provenance-preserving `Evidence` item per finding, or one
+  `UNKNOWN`-freshness item for a failed normalization);
+  `AdvisoryRepositorySkill` (base class) and
+  `RepositoryConsistencyAdvisorySkill` (the first concrete Advisory
+  Repository Skill -- 115Q's first-pilot scope, repository consistency
+  review, defaulting to `MockAdvisoryProvider()`, not added to
+  `build_default_registry()`). Proves the end-to-end pipeline
+  deterministic and non-mutating, and three distinct deterministic
+  failure paths (provider failure, malformed content, provider
+  exception), with 77 new tests
+  (`tests/test_advisory_repository_skills_prototype_115r.py`). Adds
+  `docs/PCAE_ADVISORY_REPOSITORY_SKILLS_PROTOTYPE.md` and
+  `docs/PHASE_115R_ADVISORY_REPOSITORY_SKILLS_PROTOTYPE.md`. No
+  DeepSeek, Claude API, OpenAI, GLM, Qwen, Codex backend, local SLM,
+  network call, subprocess model execution, or MCP model invocation
+  anywhere. No Decision Evaluation, Repository Transition Validator,
+  lifecycle command, or Repository Skills runtime modified. Execution
+  capability remains unavailable.
+
 - Phase 115Q — Advisory Repository Skills Contract Freeze.
   Contract/design only: freezes the backend-agnostic contract for
   Advisory Repository Skills before any implementation. Freezes the
