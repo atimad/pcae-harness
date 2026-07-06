@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 115Q: Advisory Repository Skills Contract Freeze (20260706-1925-115q-advisory-repository-skills-contract-freeze)
 - Sync phase 115P completion metadata (20260706-1911-sync-phase-115p-completion-metadata)
 - 115P: Advisory Repository Skills Architecture (20260706-1909-115p-advisory-repository-skills-architecture)
 - Sync phase 115N completion metadata (20260706-1814-sync-phase-115n-completion-metadata)
