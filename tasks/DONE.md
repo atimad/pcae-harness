@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix 115L pushed-state metadata field (20260706-1557-fix-115l-pushed-state-metadata-field)
 - Sync Phase 115L completion metadata (20260706-1555-sync-phase-115l-completion-metadata)
 - 115L: Repository Skills Integration Design (20260706-1551-115l-repository-skills-integration-design)
 - Fix 115K pushed-state metadata field (20260706-1536-fix-115k-pushed-state-metadata-field)
