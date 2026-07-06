@@ -1,68 +1,85 @@
-# Phase 115X Complete — Advisory Context Package Prototype
+# Phase 115Y Complete — Advisory Context Package Verification & Compatibility
 
-- **Phase ID:** `115X`
+- **Phase ID:** `115Y`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 9
-- **Tests run:** 79 new + 1526 focused suite + 4390/4390 fast_green
-- **Commits:** 68b3b390, e9971ea9
+- **Files changed:** 8
+- **Tests run:** 87 new + 1613 focused suite + 4390/4390 fast_green
+- **Commits:** b3a4b4d1, eee4e58d
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115X implements the `AdvisoryContextPackage` runtime object
-exactly as frozen by 115W. Zero integration with any Advisory
-Provider, Repository Skill, Decision Evaluation, the Repository
-Transition Validator, or any lifecycle command.
+Phase 115Y re-proves 115X's `AdvisoryContextPackage` prototype is
+deterministic, bounded, prompt-safe, serialization-compatible, and
+ready to be consumed by a future advisory pipeline. Verification only;
+zero implementation change.
 
-## Implementation Summary
+## Determinism Verification
 
-New module `src/pcae/core/advisory_context_package.py` implements six
-frozen dataclasses: `AdvisoryContextPackage`, `AdvisoryContextSection`,
-`AdvisoryArtifactReference`, `AdvisoryContextProvenance`,
-`AdvisoryContextBudget`, `AdvisoryRedactionSummary` — all
-self-validating at construction.
+Identical inputs produce equal packages, identical serialization, and
+identical JSON output across 20 repeated constructions; validation
+outcomes identical across 10 repeated attempts.
 
-## Required Sections
+## Required Sections Verification
 
-All 15 of 115W's frozen sections implemented as required constructor
-arguments, none with a default.
+Exactly 15 sections confirmed present, each a required constructor
+argument, each individually rejected via `from_dict()` when missing.
 
-## Trust Boundary Enforcement
+## Trust Boundary Verification
 
-Every named section validated against the trust class 115W assigned
-it; a mismatch raises `ValueError` at construction.
+A section's cosmetic `name` field cannot spoof its trust class — an
+untrusted section named `"trusted_pcae_instructions"` is still
+validated, labelled, and ordered as untrusted; the package's real
+trusted field is entirely unaffected.
 
-## Enforcement Summary
+## Prompt-Injection Boundary Verification
 
-Allowed advisory question limited to exactly "Is the repository state
-internally consistent?" Size budgets enforced with concrete defaults
-chosen this phase (total 20,000 chars, per-section default 4,000
-chars, untrusted content 2,000 chars) — violations rejected, never
-truncated. Redaction summary, provenance (package- and item-level),
-and bounded artifact references all enforced.
+Four adversarial content strings placed in untrusted sections remain
+classified untrusted, never migrate into trusted content, and always
+sort after every trusted section in assembly order.
 
-## Prompt-Injection Boundary Representation
+## Size Budget Verification
 
-`ordered_sections_for_prompt_assembly()` returns sections in 115W's
-required order (deterministic evidence and untrusted content first,
-trusted instructions always last); `prompt_label` gives every section
-an explicit class-specific label; adversarial repository content
-proven to never change its own trust class.
+Content exactly at budget accepted, one character over rejected;
+per-section overrides enforced independently; total budget confirmed
+as the true sum across every section and artifact reference.
 
-## Serialization
+## Redaction / Secrets Policy Verification
 
-`to_dict()`/`from_dict()` on every type, JSON-compatible only, no
-persistence layer, round-trip equality verified.
+`redaction_summary` remains required and self-validating. Documented
+scope boundary: `AdvisoryContextPackage` does not itself scan content
+for secret-shaped strings — redacting sensitive content before
+construction remains the assembler's responsibility, consistent with
+115X's frozen scope.
 
-## No Integration
+## Provenance Verification
 
-Confirmed via source-level checks: never imported by any Advisory
-Provider, Repository Skill, Decision Evaluation, the Repository
-Transition Validator, or any lifecycle command; default Repository
-Skills registry unchanged.
+Package-level and artifact-reference-level provenance both survive a
+full round trip exactly, including `evidence_ids`.
+
+## Artifact Reference Verification
+
+A full-file-sized summary (1000 lines) is rejected outright; all
+three kinds remain distinct and frozen.
+
+## Allowed Advisory Question Verification
+
+Six near-miss variants all individually confirmed rejected, confirming
+an exact match.
+
+## JSON Compatibility Verification
+
+Recursive primitive-only output confirmed; survives real
+`json.dumps()`/`json.loads()`; unknown extra keys ignored gracefully;
+stable across five repeated round trips.
+
+## No Hidden Integration Verification
+
+Reconfirmed across every lifecycle, notification, handoff, provider,
+and skill module; default Repository Skills registry unchanged.
 
 ## PCAE Architecture Status
 
@@ -94,10 +111,11 @@ maintained as runtime state.*
 - Advisory Evidence Enrichment Architecture through Phase 115V
 - Advisory Context Package Contract through Phase 115W
 - Advisory Context Package Prototype through Phase 115X
+- Advisory Context Package Verification & Compatibility through Phase 115Y
 
 ### Planned
 
-- 115Y — Advisory Context Package Verification & Compatibility
+- 115Z — Advisory Skill Pilot Hardening
 
 ### Current Runtime State
 
@@ -119,14 +137,14 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_advisory_repository_skills_evidence_decision_tests:** 1526/1526 (passed)
+- **focused_advisory_context_package_and_related_tests:** 1613/1613 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 - **fast_green:** 4390/4390 (passed)
 
 ## No-Go Confirmations
 
-- No Advisory Provider runtime modified.
+- No AdvisoryContextPackage integration added.
 - No Repository Skill modified.
 - No Evidence Provider modified.
 - No Decision Evaluation modified.
@@ -158,7 +176,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115Y — Advisory Context Package Verification & Compatibility
+115Z — Advisory Skill Pilot Hardening
 
 ## Report Consistency
 
@@ -167,4 +185,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115X. Schema version 1.0.*
+*Report generated for PCAE Phase 115Y. Schema version 1.0.*

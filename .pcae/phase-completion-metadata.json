@@ -1,34 +1,33 @@
 {
-  "phase_id": "115X",
-  "phase_name": "Advisory Context Package Prototype",
-  "phase_title": "Advisory Context Package Prototype",
+  "phase_id": "115Y",
+  "phase_name": "Advisory Context Package Verification & Compatibility",
+  "phase_title": "Advisory Context Package Verification & Compatibility",
   "status": "completed",
-  "summary": "Implements the AdvisoryContextPackage runtime object exactly as frozen by 115W. Adds src/pcae/core/advisory_context_package.py: six frozen dataclasses (AdvisoryContextPackage, AdvisoryContextSection, AdvisoryArtifactReference, AdvisoryContextProvenance, AdvisoryContextBudget, AdvisoryRedactionSummary), all self-validating at construction. All 15 required sections implemented with no defaults (a package cannot omit any section). Trust boundary classes enforced: every named section validated against the trust class 115W assigned it. Allowed advisory question enforced (exactly 'Is the repository state internally consistent?', any other value rejected). Size budgets enforced with concrete defaults chosen this phase (total 20,000 chars, per-section default 4,000 chars, untrusted repository content tightened to 2,000 chars) -- violations raise ValueError, never silently truncated. Prompt-injection boundary represented via ordered_sections_for_prompt_assembly() (deterministic evidence and untrusted content first, trusted instructions always last) and prompt_label (explicit, class-specific labelling); adversarial repository content proven to never change its own trust class. Redaction summary, package- and item-level provenance, and bounded artifact references (file/evidence/commit, summary capped at 500 chars) all enforced. to_dict()/from_dict() implemented on every type, JSON-compatible only, no persistence layer, round-trip equality verified. Adds 79 new tests (tests/test_advisory_context_package.py). Also repairs two stale guard tests (from 115V and 115W) that asserted advisory_context_package.py must not exist -- expected staleness once this later phase legitimately implements exactly that file. Confirmed via source-level checks: never imported by any Advisory Provider, Repository Skill, Decision Evaluation, Repository Transition Validator, or lifecycle command; default Repository Skills registry unchanged (still 115J's four deterministic skills). No model configuration, no second provider, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude/local-SLM integration. Execution capability remains unavailable.",
-  "files_changed_count": 9,
+  "summary": "Verification-only phase re-proving 115X's AdvisoryContextPackage prototype is deterministic, bounded, prompt-safe, serialization-compatible, and ready to be consumed by a future advisory pipeline. Adds 87 new tests (tests/test_advisory_context_package_verification_115y.py) proving: determinism (identical inputs -> equal packages/serialization/JSON across 20 repeated constructions; validation outcomes identical across 10 repeated attempts); all 15 required sections present and individually rejected via from_dict() when missing; trust boundaries (a section's cosmetic name cannot spoof its declared trust_class -- an untrusted section named 'trusted_pcae_instructions' is still validated/labelled/ordered as untrusted, with the package's real trusted field entirely unaffected); the prompt-injection boundary (four adversarial content strings placed in untrusted sections remain classified untrusted, never migrate into trusted content, and always sort after every trusted section in assembly order); size budgets (exact-boundary and one-over rejection, per-section overrides enforced independently, total budget confirmed as the true sum across every section and artifact reference); the redaction/secrets policy (required, self-validating redaction_summary, with a documented scope boundary: AdvisoryContextPackage does not itself scan content for secret-shaped strings -- redacting sensitive content before construction remains the assembler's responsibility, consistent with 115X's frozen scope); provenance (package- and artifact-reference-level, round-trip exact including evidence_ids); artifact references (a full-file-sized summary rejected outright, all three kinds distinct and frozen); the allowed advisory question (six near-miss variants -- whitespace, punctuation, case -- all individually rejected, confirming an exact match); JSON compatibility (recursive primitive-only output, real json.dumps()/json.loads() round trip, unknown-key forward-compatibility, five-round-trip stability); and no hidden integration (reconfirmed across every lifecycle, notification, handoff, provider, and skill module; default Repository Skills registry unchanged). No AdvisoryContextPackage integration added, no Repository Skill, Evidence Provider, Decision Evaluation, Repository Transition Validator, or lifecycle command modified. No model configuration, no second provider, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM integration. Execution capability remains unavailable.",
+  "files_changed_count": 8,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_115X_ADVISORY_CONTEXT_PACKAGE_PROTOTYPE.md",
-    "src/pcae/core/advisory_context_package.py",
+    "docs/PHASE_115Y_ADVISORY_CONTEXT_PACKAGE_VERIFICATION.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-2149-115x-advisory-context-package-prototype.md",
-    "tests/test_advisory_context_package.py",
-    "tests/test_phase_115v_advisory_evidence_enrichment_architecture.py",
-    "tests/test_phase_115w_advisory_context_package_contract.py"
+    "tasks/done/20260706-2219-115y-advisory-context-package-verification-compatibility.md",
+    "tests/test_advisory_context_package_verification_115y.py",
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md"
   ],
-  "tests_added_or_updated": "79 new tests added (tests/test_advisory_context_package.py) covering construction, required sections, serialization, trust-boundary markers, allowed advisory question, unsupported question rejection, size budget enforcement, redaction summary, provenance, artifact references, prompt-injection boundary representation, no provider/model/lifecycle integration, execution unavailable; two stale 115V/115W guard tests repaired for expected staleness; all pre-existing suites (advisory framework, repository_skills, evidence, decision_evaluation, fast_green) pass unmodified",
+  "tests_added_or_updated": "87 new tests added (tests/test_advisory_context_package_verification_115y.py) covering deterministic serialization, required sections, trust boundaries, prompt-injection safety, size budgets, redaction policy, provenance, artifact references, allowed advisory question, JSON compatibility, no hidden integration, execution unavailable; all pre-existing suites (advisory context package, advisory framework, repository_skills, evidence, decision_evaluation, fast_green) pass unmodified",
   "phase_commits": [
     {
-      "hash": "68b3b390",
-      "message": "Implement Advisory Context Package prototype"
+      "hash": "b3a4b4d1",
+      "message": "Verify Advisory Context Package compatibility"
     },
     {
-      "hash": "e9971ea9",
-      "message": "Complete Phase 115X Advisory Context Package prototype"
+      "hash": "eee4e58d",
+      "message": "Complete Phase 115Y Advisory Context Package verification"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115X adds no modification, only a new isolated context package module)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115Y adds no modification, only new tests re-verifying 115X)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -45,10 +44,10 @@
   },
   "validation_results": [
     {
-      "name": "focused_advisory_repository_skills_evidence_decision_tests",
-      "result": "1526/1526",
+      "name": "focused_advisory_context_package_and_related_tests",
+      "result": "1613/1613",
       "status": "passed",
-      "note": "python -m pytest tests/test_*advisory* tests/test_repository_skills*.py tests/test_evidence*.py tests/test_decision_evaluation*.py -n auto -q -ra --durations=100"
+      "note": "python -m pytest tests/test_advisory_context_package.py tests/test_*advisory* tests/test_repository_skills*.py tests/test_evidence*.py tests/test_decision_evaluation*.py -n auto -q -ra --durations=100"
     },
     {
       "name": "report_notification_tests",
@@ -108,7 +107,7 @@
     }
   ],
   "test_results": {
-    "focused_advisory_repository_skills_evidence_decision_tests": "1526/1526",
+    "focused_advisory_context_package_and_related_tests": "1613/1613",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "4390/4390"
@@ -157,6 +156,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No Advisory Provider runtime modified. No Repository Skill modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No model configuration added. No second provider added. No DeepSeek integration. No GLM integration. No Qwen integration. No Codex integration. No OpenAI integration. No Claude-specific integration. No local SLM integration. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115Y — Advisory Context Package Verification & Compatibility"
+  "no_go_confirmation": "No AdvisoryContextPackage integration added. No Repository Skill modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No model configuration added. No second provider added. No DeepSeek integration. No GLM integration. No Qwen integration. No Codex integration. No OpenAI integration. No Claude-specific integration. No local SLM integration. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115Z — Advisory Skill Pilot Hardening"
 }
