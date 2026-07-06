@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 115F: Repository Decision Evaluation Integration (20260706-0940-115f-repository-decision-evaluation-integration)
 - Fix 115E pushed-state metadata field (20260706-0921-fix-115e-pushed-state-metadata-field)
 - Sync Phase 115E completion metadata (20260706-0919-sync-phase-115e-completion-metadata)
 - 115E: Repository Decision Evaluation Prototype (20260706-0912-115e-repository-decision-evaluation-prototype)
