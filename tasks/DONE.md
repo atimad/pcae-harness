@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 115S: First Advisory Provider Integration (Current Acting Model) (20260706-2037-115s-first-advisory-provider-integration-current-acting-model)
 - Sync phase 115R completion metadata (20260706-2009-sync-phase-115r-completion-metadata)
 - 115R: Advisory Repository Skills Prototype (20260706-2007-115r-advisory-repository-skills-prototype)
 - Sync phase 115Q completion metadata (20260706-1927-sync-phase-115q-completion-metadata)
