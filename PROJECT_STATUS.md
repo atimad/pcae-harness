@@ -2,74 +2,70 @@
 
 ## Current Phase
 
-Phase 115L — Repository Skills Integration Design (completed).
+Phase 115M — Repository Skills Integration Prototype (completed).
 
-Architecture and design only: no Repository Skills integration
-implemented, no Repository Skill modified, no Evidence Provider
-modified, no Decision Evaluation modified, no Repository Transition
-Validator modified, no lifecycle command modified, no Notification
-Policy modified, no Canonical Artifact Promotion modified, no
-Push-State Reconciliation modified, no Post-Push Canonicalization
-modified, no execution capability. Phase report:
-`docs/PHASE_115L_REPOSITORY_SKILLS_INTEGRATION_DESIGN.md`. Canonical
-architecture: `docs/PCAE_REPOSITORY_SKILLS_INTEGRATION_ARCHITECTURE.md`.
+Behavior-preserving integration prototype implementing Stage 3 of
+115L's frozen migration strategy. No Evidence Provider modified, no
+Decision Evaluation modified, no Repository Transition Validator
+modified, no lifecycle command modified, no Notification Policy
+modified, no Canonical Artifact Promotion modified, no Push-State
+Reconciliation modified, no Post-Push Canonicalization modified, no
+AI/SLM/LLM skill, no DeepSeek integration, no execution capability.
+Phase report:
+`docs/PHASE_115M_REPOSITORY_SKILLS_INTEGRATION_PROTOTYPE.md`.
 
-**Integration architecture frozen**: Repository Skills become the
-sole orchestrators of Evidence Providers. Decision Evaluation
-receives only `EvidenceCollection` (already its shape today) and
-never knows which providers exist.
+**New adapter module**: `src/pcae/core/repository_skills_integration.py`
+exposes `collect_evidence_via_repository_skills` (delegates
+exclusively to a `RepositorySkillRegistry`, 115J's four deterministic
+skills only) and `build_evaluation_context_from_repository_skills`
+(wraps that evidence into a ready-to-evaluate `EvaluationContext`).
+This is the concrete Stage 3 adapter 115L's architecture document
+anticipated.
 
-**Integration boundary frozen**: Decision Evaluation must never
-construct providers, discover providers, call providers directly, or
-know provider ordering. Repository Skills own provider orchestration
-exclusively.
+**Old path preserved**: `collect_evidence_via_evidence_providers` and
+`build_evaluation_context_from_evidence_providers` remain available,
+instantiating 115D's four Evidence Providers directly, unchanged in
+behavior — nothing before 115M was deleted or disabled.
 
-**Orchestration model frozen**: one Repository Skill may invoke zero,
-one, or multiple providers, merging its own `EvidenceCollection`
-before returning — the only two merge points that may ever exist are
-within one skill (provider-to-skill) and across skills
-(`RepositorySkillRegistry.merge_evidence`).
+**Equivalence proven**: 41 new tests
+(`tests/test_repository_skills_integration_115m.py`) prove the old
+provider path and new skill path produce the same Evidence IDs and
+semantically equal items (differing only in independent wall-clock
+timestamps); `evaluate()` produces identical `EvaluationResult`
+objects (full dataclass equality) regardless of which path supplied
+its context; `validate_transition`'s verdicts and the 113U/115F
+regression scenarios are unchanged; the validator's own evidence IDs
+(`E-report-002`, `E-metadata-002`, `E-report-003`, `E-runtime-002`)
+are a subset of the richer skill-path evidence.
 
-**Skill composition frozen**: a skill may compose sub-skills
-internally, preserving deterministic invocation order (already
-115K-verified for multi-skill invocation), with no recursive cycles
-permitted.
+**No hidden integration**: `core/decision_evaluation.py` still imports
+only `pcae.core.evidence`; `core/repository_skills.py` still never
+imports `decision_evaluation` or `repository_transition_validator`;
+no lifecycle command, Notification Policy, Canonical Artifact
+Promotion, Push-State Reconciliation, or Post-Push Canonicalization
+references the new module. 115L's frozen Integration Boundary and
+Dependency Direction hold unchanged.
 
-**Compatibility guarantees frozen**: no provider API change, no
-Decision Evaluation semantic change, no Transition Validator behavior
-change, no lifecycle command change.
+**No AI/execution**: only 115J's four deterministic skills are used;
+no DeepSeek/GLM/Qwen/GPT/Codex import or skill ID exists anywhere in
+the new path. Execution capability remains unavailable — the real
+repository's `E-runtime-002` evidence is `"unavailable"` via both
+paths, and `runtime_execution_unavailable` still evaluates to `PASS`.
 
-**Migration strategy frozen**, four stages: Stage 1 (current —
-Decision Evaluation consumes `RepositoryState`-derived evidence via
-115F's adapter), Stage 2 (completed — Repository Skills wrap
-providers, 115J/115K), Stage 3 (not started — Decision Evaluation
-receives Repository Skill output, candidate for 115M), Stage 4 (not
-started — providers become a fully encapsulated implementation
-detail).
+Recommended next repo phase: 115N — Repository Skills Integration Verification & Compatibility (not started).
 
-**Dependency direction frozen**: Repository Skills depend on
-Evidence Providers; Decision Evaluation depends only on Evidence;
-Transition Validator depends only on `EvaluationResult`; no reverse
-dependency.
+## Phase 115M Complete
 
-**Future AI insertion point frozen**: future DeepSeek/GLM/GPT/Qwen/
-local-SLM-backed skills fit beside deterministic Repository Skills as
-parallel `RepositorySkill` implementations, both merging into the
-same `EvidenceCollection`. Decision Evaluation and the Transition
-Validator remain unaware; Repository State remains authoritative.
+Phase 115M — Repository Skills Integration Prototype (completed).
 
-**Updated canonical wire diagram**: Repository State -> Evidence
-Providers -> Repository Skills (Deterministic + Advisory, parallel)
--> Evidence Collection -> Decision Evaluation -> Repository
-Transition Validator -> Transition Result -> Repository Artifact ->
-Repository Event -> Notification Policy -> Consumers.
+Implemented the Stage 3 Repository Skills evidence-acquisition adapter
+(`src/pcae/core/repository_skills_integration.py`) alongside the
+preserved pre-115M Evidence Provider path, proving evidence, Decision
+Evaluation, and Repository Transition Validator equivalence with 41
+new tests. Zero lifecycle behavior change; zero AI/SLM/DeepSeek
+integration; execution capability remains unavailable.
 
-Added `tests/test_phase_115l_repository_skills_integration_design.py`
-(18 new tests, architecture/documentation verification only). No
-implementation, no execution. Execution capability remains
-unavailable.
-
-Recommended next repo phase: 115M — Repository Skills Integration Prototype (not started).
+Recommended next repo phase: 115N — Repository Skills Integration Verification & Compatibility (not started).
 
 ## Phase 115L Complete
 

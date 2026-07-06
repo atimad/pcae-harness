@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 115M — Repository Skills Integration Prototype. Implements
+  Stage 3 of 115L's frozen migration strategy: adds
+  `src/pcae/core/repository_skills_integration.py`, a narrowly scoped
+  adapter exposing `collect_evidence_via_repository_skills` (delegates
+  exclusively to a `RepositorySkillRegistry`, 115J's four deterministic
+  skills only) and `build_evaluation_context_from_repository_skills`
+  (wraps that evidence into a ready-to-evaluate `EvaluationContext`).
+  Preserves the pre-115M path unmodified via
+  `collect_evidence_via_evidence_providers` and
+  `build_evaluation_context_from_evidence_providers`. Proves, with 41
+  new tests (`tests/test_repository_skills_integration_115m.py`): the
+  old provider path and new skill path produce the same Evidence IDs
+  and semantically equal items; `evaluate()` produces identical
+  `EvaluationResult` objects regardless of which path supplied its
+  context; `validate_transition`'s verdicts and the 113U/115F
+  regression scenarios are unchanged; the validator's own evidence IDs
+  are a subset of the richer skill-path evidence; no lifecycle command,
+  Notification Policy, Canonical Artifact Promotion, Push-State
+  Reconciliation, or Post-Push Canonicalization was touched; no AI/SLM/
+  DeepSeek skill exists; execution capability remains unavailable.
+  115L's frozen dependency direction and integration boundary hold
+  unchanged -- `core/decision_evaluation.py` still imports only
+  `pcae.core.evidence`, and `core/repository_skills.py` still never
+  imports `decision_evaluation` or `repository_transition_validator`.
+
 - Phase 115L — Repository Skills Integration Design. Architecture and
   design only; zero implementation added. Designs how Repository
   Skills (115H design, 115I contract freeze, 115J prototype, 115K

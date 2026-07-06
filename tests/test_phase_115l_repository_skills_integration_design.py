@@ -170,8 +170,17 @@ def test_no_implementation_claims():
 
 
 def test_no_new_implementation_module_added():
+    """As of 115L (this phase), no implementation module existed yet.
+
+    ``repository_skills_integration.py`` was subsequently implemented
+    by Phase 115M (the "recommended next phase" this document itself
+    named) -- this guard test is intentionally narrowed to the one
+    module name that remains unimplemented, since 115L's own
+    "no implementation" claim is a property of 115L's diff, not a
+    permanent constraint on later phases. See
+    ``docs/PHASE_115M_REPOSITORY_SKILLS_INTEGRATION_PROTOTYPE.md``.
+    """
     forbidden_paths = (
-        REPO_ROOT / "src" / "pcae" / "core" / "repository_skills_integration.py",
         REPO_ROOT / "src" / "pcae" / "core" / "skill_orchestration.py",
     )
     for path in forbidden_paths:
@@ -181,7 +190,9 @@ def test_no_new_implementation_module_added():
 def test_no_existing_module_modified_to_reference_repository_skills():
     """115L is design-only: repository_transition_validator.py,
     decision_evaluation.py, and repository_transition_integration.py
-    must still not reference repository_skills (unchanged since 115K)."""
+    must still not reference repository_skills (unchanged since 115K,
+    reconfirmed by 115M -- see
+    tests/test_repository_skills_integration_115m.py::TestNoLifecycleBehaviorChange)."""
     for module_path in (
         REPO_ROOT / "src" / "pcae" / "core" / "decision_evaluation.py",
         REPO_ROOT / "src" / "pcae" / "core" / "repository_transition_validator.py",
