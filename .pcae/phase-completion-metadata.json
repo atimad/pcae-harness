@@ -41,8 +41,8 @@
   "commit_attribution": "phase_owned",
   "validator_module": "none (runtime object prototype only; no Repository Transition Validator module touched)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 4,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -100,7 +100,7 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "nothing_to_push before implementation commits; not_pushed after commits until governed push",
+      "result": "clean (pushed, origin/main..HEAD == 0)",
       "status": "passed"
     },
     {
@@ -146,11 +146,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "not_pushed (governed push pending as this phase's own next step)"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending_post_push"
+      "status": "pass"
     },
     {
       "name": "pcae_session_bootstrap_compact",
