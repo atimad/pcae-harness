@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix 115E pushed-state metadata field (20260706-0921-fix-115e-pushed-state-metadata-field)
 - Sync Phase 115E completion metadata (20260706-0919-sync-phase-115e-completion-metadata)
 - 115E: Repository Decision Evaluation Prototype (20260706-0912-115e-repository-decision-evaluation-prototype)
 - Fix 115D pushed-state metadata field (20260706-0820-fix-115d-pushed-state-metadata-field)
