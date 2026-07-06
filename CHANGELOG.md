@@ -2,6 +2,56 @@
 
 ## Unreleased
 
+- Phase 115I — Repository Skills Contract Freeze. Contract phase only;
+  zero implementation added. Freezes the Repository Skills contract
+  115H designed: the `RepositorySkill` interface (declare capabilities,
+  evidence categories produced, determinism class, confidence defaults,
+  required repository inputs; produce only `EvidenceCollection`;
+  explicitly and permanently forbidden from repository mutation,
+  decision making, validator bypass, lifecycle authority, artifact
+  promotion, notification dispatch, execution, authorization, commit,
+  push, and finalize). Introduces `RepositorySkillCapability`
+  describing evidence outputs, never implementations, with a frozen
+  minimum set (`git_analysis`, `runtime_analysis`,
+  `architecture_analysis`, `documentation_analysis`, `report_analysis`,
+  `metadata_analysis`, `dependency_analysis`, `ai_review`). Freezes the
+  skill manifest field set (`skill_id`/`name`/`version`/capability
+  list/`determinism`/confidence policy/evidence categories/required
+  inputs/optional inputs/`timeout`/failure policy/side-effect
+  policy/model-produced flag/experimental flag) with no
+  schema/loader/registry implemented. Freezes five determinism classes
+  (`deterministic`/`reproducible_external`/`probabilistic`/
+  `human_assisted`/`experimental`), reusing 115C's existing
+  `EvidenceDeterminism` enum with no new member. Freezes a two-outcome
+  failure contract: every skill failure must produce honest `UNKNOWN`
+  evidence or an explicit, structured failure outcome -- never partial
+  hidden failure, never silent success. Freezes an execution boundary
+  (skills must never invoke runtime execution, authorize execution,
+  approve transitions, override evidence, override other skills, or
+  override the validator) and an advisory/AI skill boundary (future
+  DeepSeek/GLM/GPT/Qwen/local-SLM-backed skills must produce advisory
+  evidence only, declare `probabilistic` determinism by default, be
+  labelled model-produced, never become sole authority for Accept,
+  never bypass Decision Evaluation). Freezes a composition model (one
+  skill may internally use multiple Evidence Providers; Decision
+  Evaluation never sees this internal composition, only an
+  `EvidenceCollection`) and explainability requirements (every Evidence
+  item a skill produces must preserve provenance via 115C's existing
+  `Evidence.provenance`; decision explanations reference Evidence IDs
+  regardless of which Repository Skill produced them). Freezes the
+  canonical wire diagram (unchanged from 115H, now canonical rather
+  than merely descriptive). Added
+  `docs/PCAE_REPOSITORY_SKILLS_CONTRACT.md`,
+  `docs/PHASE_115I_REPOSITORY_SKILLS_CONTRACT_FREEZE.md`, and
+  `tests/test_phase_115i_repository_skills_contract_freeze.py` (19 new
+  tests, architecture/documentation verification only). No Repository
+  Skill implemented, no deterministic skill implemented, no AI/SLM/LLM-
+  backed skill implemented, no DeepSeek integration, no changes to
+  Evidence Providers, Decision Evaluation, the Repository Transition
+  Validator, lifecycle commands, Notification Policy, Canonical
+  Artifact Promotion, Push-State Reconciliation, or Post-Push
+  Canonicalization. Execution capability remains unavailable.
+
 - Phase 115H — Repository Skills Architecture. Architecture and design
   only; zero implementation added. Defines Repository Skills as the
   governed extension mechanism for PCAE decision support, building on

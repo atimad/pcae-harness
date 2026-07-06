@@ -2,6 +2,106 @@
 
 ## Current Phase
 
+Phase 115I — Repository Skills Contract Freeze (completed).
+
+Contract freeze only. No Repository Skill implemented, no
+deterministic skill implemented, no AI/SLM/LLM-backed skill
+implemented, no DeepSeek integration, no changes to Evidence
+Providers, Decision Evaluation, the Repository Transition Validator,
+lifecycle commands, Notification Policy, Canonical Artifact
+Promotion, Push-State Reconciliation, or Post-Push Canonicalization.
+Phase report: `docs/PHASE_115I_REPOSITORY_SKILLS_CONTRACT_FREEZE.md`.
+Canonical contract: `docs/PCAE_REPOSITORY_SKILLS_CONTRACT.md`.
+
+**Core principle**: Repository Skills never decide. Repository Skills
+produce Evidence. Repository Skills are model-agnostic.
+
+**Repository Skill contract frozen**: the `RepositorySkill` interface
+requires every skill to declare capabilities, evidence categories
+produced, determinism class, confidence defaults, and required
+repository inputs, and to produce only an `EvidenceCollection`.
+Explicitly and permanently forbidden: repository mutation, decision
+making, validator bypass, lifecycle authority, artifact promotion,
+notification dispatch, execution, authorization, commit, push,
+finalize.
+
+**Capability model frozen**: `RepositorySkillCapability` describes
+evidence outputs, never implementations. Frozen minimum set:
+`git_analysis`, `runtime_analysis`, `architecture_analysis`,
+`documentation_analysis`, `report_analysis`, `metadata_analysis`,
+`dependency_analysis`, `ai_review`.
+
+**Manifest frozen**: `skill_id`, `name`, `version`, capability list,
+`determinism`, confidence policy, evidence categories, required
+inputs, optional inputs, `timeout`, failure policy, side-effect
+policy, model-produced flag, experimental flag. No schema/loader/
+registry implemented.
+
+**Determinism classes frozen**: `deterministic`,
+`reproducible_external`, `probabilistic`, `human_assisted`,
+`experimental` — reusing 115C's existing `EvidenceDeterminism` enum,
+no new member added.
+
+**Failure contract frozen**: every skill failure must produce honest
+`UNKNOWN` evidence or an explicit, structured failure outcome. Never
+partial hidden failure. Never silent success.
+
+**Execution boundary frozen**: skills must never invoke runtime
+execution, authorize execution, approve transitions, override
+evidence, override other skills, or override the validator.
+
+**Advisory/AI boundary frozen**: future DeepSeek, GLM, GPT, Qwen, or
+local-SLM-backed skills must produce advisory evidence only, declare
+`probabilistic` determinism by default, be labelled model-produced,
+never become sole authority for Accept, never bypass Decision
+Evaluation.
+
+**Composition model frozen**: one skill may internally use multiple
+Evidence Providers; Decision Evaluation never sees this internal
+composition, only an `EvidenceCollection`.
+
+**Explainability requirements frozen**: every Evidence item a skill
+produces must preserve provenance; decision explanations reference
+Evidence IDs regardless of which Repository Skill produced them.
+
+**Canonical wire diagram frozen**: Repository State -> Evidence
+Providers -> Repository Skills -> Evidence Collection -> Decision
+Evaluation -> Repository Transition Validator -> Transition Result ->
+Repository Artifact -> Repository Event -> Notification Policy ->
+Consumers.
+
+Added `tests/test_phase_115i_repository_skills_contract_freeze.py` (19
+new tests, architecture/documentation verification only). No
+implementation, no execution, no authorization, no Permission Broker
+enforcement, no plugins, no Telegram inbound, no REST, no Web UI, no
+Dashboard. Execution capability remains unavailable.
+
+Recommended next repo phase: 115J — Repository Skills Prototype (not started).
+
+## Phase 115I Complete
+
+Phase 115I — Repository Skills Contract Freeze (completed).
+
+Froze the Repository Skills contract 115H designed: the
+`RepositorySkill` interface, capability model, manifest, five
+determinism classes, a two-outcome failure contract, an execution
+boundary, an advisory/AI skill boundary, a composition model,
+explainability requirements, and a now-frozen canonical wire diagram.
+Contract phase only; zero implementation added.
+
+**No-go**: no Repository Skill implemented, no deterministic skill
+implemented, no AI/SLM/LLM-backed skill implemented, no DeepSeek
+integration, no changes to Evidence Providers, Decision Evaluation,
+the Repository Transition Validator, lifecycle commands, Notification
+Policy, Canonical Artifact Promotion, Push-State Reconciliation, or
+Post-Push Canonicalization, no execution, no authorization, no
+Permission Broker enforcement, no plugins, no Telegram inbound, no
+REST, no Web UI, no Dashboard.
+
+Recommended next repo phase: 115J — Repository Skills Prototype (not started).
+
+## Phase 115H Complete
+
 Phase 115H — Repository Skills Architecture (completed).
 
 Architecture and design only. No Repository Skill implemented, no
