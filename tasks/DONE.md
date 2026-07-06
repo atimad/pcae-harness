@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix 115D pushed-state metadata field (20260706-0820-fix-115d-pushed-state-metadata-field)
 - Sync Phase 115D completion metadata (20260706-0819-sync-phase-115d-completion-metadata)
 - 115D: Repository Evidence Provider Prototype (20260706-0809-115d-repository-evidence-provider-prototype)
 - Write 115C canonical phase-completion report (20260706-0736-write-115c-canonical-phase-completion-report)
