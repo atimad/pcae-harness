@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 115Z — Advisory Subsystem Hardening & Release Readiness (20260706-2241-115z-advisory-subsystem-hardening-release-readiness)
 - Sync phase 115Y completion metadata (20260706-2222-sync-phase-115y-completion-metadata)
 - 115Y: Advisory Context Package Verification & Compatibility (20260706-2219-115y-advisory-context-package-verification-compatibility)
 - Sync phase 115X completion metadata (20260706-2153-sync-phase-115x-completion-metadata)
