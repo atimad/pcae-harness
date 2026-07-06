@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair 115M phase report trust fields (20260706-1742-repair-115m-phase-report-trust-fields)
 - Fix 115M pushed-state metadata field (20260706-1740-fix-115m-pushed-state-metadata-field)
 - Sync phase 115M completion metadata (20260706-1737-sync-phase-115m-completion-metadata)
 - 115M: Repository Skills Integration Prototype (20260706-1657-115m-repository-skills-integration-prototype)
