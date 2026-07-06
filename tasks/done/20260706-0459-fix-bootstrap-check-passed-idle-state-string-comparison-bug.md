@@ -10,7 +10,7 @@ Fix bootstrap check_passed idle-state string comparison bug
 
 ## Status
 
-active
+done
 
 ## Mode
 
