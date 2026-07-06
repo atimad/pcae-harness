@@ -2,6 +2,56 @@
 
 ## Unreleased
 
+- Phase 115K — Repository Skills Verification & Compatibility.
+  Verification-only phase proving 115J's Repository Skills prototype
+  (`src/pcae/core/repository_skills.py`) is deterministic, read-only,
+  evidence-only, and fully compatible with the existing Evidence
+  Provider (115D) and Decision Evaluation (115E) architecture. No
+  implementation change. Added
+  `tests/test_repository_skills_verification_115k.py` (49 new tests)
+  covering: skill purity (every default skill is read-only, produces
+  only `EvidenceCollection`, creates no new files, carries no
+  model/agent/backend/vendor identity field; every
+  `Evidence.provenance.producer` is a class label ending in
+  `"Provider"`); registry determinism (registration/lookup/listing/
+  multi-skill-invocation order all stable and deterministic; duplicate
+  `skill_id` rejected every time; merged `EvidenceCollection` identical
+  across 10 repeated invocations and independent of invocation order);
+  provider compatibility (every skill's evidence -- IDs, observed
+  values, freshness, confidence -- proven identical to calling its
+  wrapped 115D Evidence Provider directly; determinism and
+  `required_inputs` match exactly); failure behavior (missing git
+  repository or missing canonical report/metadata files degrade to
+  honest `UNKNOWN` evidence; an explicit provider exception produces a
+  `FAILED` result with zero evidence and a required `failure_reason`);
+  no hidden integration (direct source-grep confirms
+  `repository_skills` is referenced by none of Decision Evaluation,
+  the Repository Transition Validator,
+  `repository_transition_integration.py`, `commands/phase.py`,
+  `commands/task.py`, `commands/push.py`,
+  `notification_certification.py`, `handoff_verification.py`,
+  `post_push_canonicalization.py`, or `commands/runtime_inspect.py`);
+  AI boundary (no skill ID references deepseek/GLM/Qwen/Claude/GPT/
+  Codex; every default skill declares `model_produced=False` and
+  `EvidenceDeterminism.DETERMINISTIC`; `ai_review` capability has zero
+  registered skills); execution boundary (no
+  subprocess/os.system/Popen/exec/eval token; registry public API has
+  no commit/push/finalize/notify/authorize/execute/mutate method; every
+  manifest declares `side_effect_policy="none"`); and
+  serialization/Decision Evaluation compatibility (skill-merged
+  evidence survives a `to_dict()`/`from_dict()` round trip, is
+  JSON-serializable, and is a valid `EvaluationContext` input verified
+  by direct test construction only, never wired in source -- with a
+  notable finding that full skill-composed evidence resolves all six
+  Decision Evaluation invariants with zero `NOT_APPLICABLE`, unlike
+  115F's narrow adapter, without any wiring being added). Added
+  `docs/PHASE_115K_REPOSITORY_SKILLS_VERIFICATION.md`. No new
+  Repository Skill, no AI/SLM/LLM skill, no DeepSeek integration, no
+  Repository Skills integration into Decision Evaluation or the
+  Repository Transition Validator, no lifecycle command changes, no
+  Notification Policy changes. Execution capability remains
+  unavailable.
+
 - Phase 115J — Repository Skills Prototype. Implements the first
   Repository Skills framework
   (`src/pcae/core/repository_skills.py`) on top of 115I's frozen

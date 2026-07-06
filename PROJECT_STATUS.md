@@ -2,6 +2,97 @@
 
 ## Current Phase
 
+Phase 115K — Repository Skills Verification & Compatibility (completed).
+
+Verification-only phase: no new Repository Skill implemented, no
+AI/SLM/LLM skill implemented, no DeepSeek integration, no Repository
+Skills integration into Decision Evaluation or the Repository
+Transition Validator, no lifecycle command changes, no Notification
+Policy changes, no execution capability. Phase report:
+`docs/PHASE_115K_REPOSITORY_SKILLS_VERIFICATION.md`.
+
+**Skill purity verified**: every default skill is read-only (`git
+log` byte-identical before/after invocation), produces only
+`EvidenceCollection`, creates no new files, and carries no
+model/agent/backend/vendor identity field anywhere in its manifest or
+result; every `Evidence.provenance.producer` string is a class label
+ending in `"Provider"`, never a human/model name.
+
+**Registry determinism verified**: registration order, lookup,
+listing, and multi-skill invocation order are all stable and
+deterministic; duplicate `skill_id` registration is rejected every
+time; merged `EvidenceCollection` output is identical across 10
+repeated full-registry invocations and independent of invocation
+order.
+
+**Provider compatibility verified**: every deterministic skill's
+evidence (IDs, observed values, freshness, confidence) is proven
+identical to calling its wrapped 115D Evidence Provider directly;
+each skill declares the same determinism and `required_inputs` as its
+wrapped provider.
+
+**Failure behavior verified**: a missing git repository or missing
+`.pcae/phase-reports/latest.json`/`.pcae/phase-completion-metadata.json`
+degrades gracefully to honest `UNKNOWN` evidence; an explicit provider
+exception produces a `FAILED` result with zero evidence and a
+required `failure_reason` — never silent success, never partial
+hidden failure.
+
+**No hidden integration proven**: direct source-grep confirms
+`repository_skills` is referenced by none of Decision Evaluation, the
+Repository Transition Validator, `repository_transition_integration.py`,
+`commands/phase.py`, `commands/task.py`, `commands/push.py`,
+`notification_certification.py`, `handoff_verification.py`,
+`post_push_canonicalization.py`, or `commands/runtime_inspect.py`.
+
+**AI boundary verified**: no skill ID references
+deepseek/GLM/Qwen/Claude/GPT/Codex; every default skill declares
+`model_produced=False` and `EvidenceDeterminism.DETERMINISTIC`; the
+`ai_review` capability has zero registered skills.
+
+**Execution boundary verified**: no `subprocess`/`os.system`/`Popen`/
+`exec`/`eval` token in `repository_skills.py`; the registry's public
+API has no commit/push/finalize/notify/authorize/execute/mutate
+method; every manifest declares `side_effect_policy="none"`.
+
+**Serialization/Decision Evaluation compatibility verified**:
+skill-merged evidence survives a `to_dict()`/`from_dict()` round trip
+and is JSON-serializable; it is a valid `EvaluationContext` input,
+verified by direct test construction only (never wired in source).
+**Notable finding**: unlike 115F's narrow adapter (three invariants
+permanently `NOT_APPLICABLE`), full skill-composed evidence resolves
+all six Decision Evaluation invariants with zero `NOT_APPLICABLE` — a
+compatibility finding, not a behavior change; no wiring was added.
+
+Added `tests/test_repository_skills_verification_115k.py` (49 new
+tests). Execution capability remains unavailable.
+
+Recommended next repo phase: 115L — Repository Skills Integration Design (not started).
+
+## Phase 115K Complete
+
+Phase 115K — Repository Skills Verification & Compatibility (completed).
+
+Verified 115J's Repository Skills prototype is deterministic,
+read-only, evidence-only, and fully compatible with the existing
+Evidence Provider and Decision Evaluation architecture, across eight
+objectives: skill purity, registry determinism, provider
+compatibility, failure behavior, no hidden integration, AI boundary,
+execution boundary, and serialization/Decision Evaluation
+compatibility. No implementation code changed; one new focused test
+module (49 tests) added.
+
+**No-go**: no new Repository Skill, no AI/SLM/LLM skill, no DeepSeek
+integration, no Repository Skills integration into Decision
+Evaluation or the Repository Transition Validator, no lifecycle
+command changes, no Notification Policy changes, no execution,
+authorization, Permission Broker enforcement, plugins, Telegram
+inbound, REST, Web UI, or Dashboard.
+
+Recommended next repo phase: 115L — Repository Skills Integration Design (not started).
+
+## Phase 115J Complete
+
 Phase 115J — Repository Skills Prototype (completed).
 
 Implementation prototype only: no AI/SLM/LLM skills, no DeepSeek
