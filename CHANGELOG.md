@@ -2,6 +2,48 @@
 
 ## Unreleased
 
+- Phase 115U — Advisory Provider Strategy & Extension Point Review.
+  Architecture/review only: decides PCAE does not need a second
+  advisory provider now, while preserving the ability to add one
+  later without architectural redesign. Reviews the current same-model
+  default (`CurrentActingModelAdvisoryProvider`) across five
+  properties (same-model default, bounded pilot scope, one request/one
+  response/one `EvidenceCollection`, stateless operation, normalized
+  evidence boundary, provider containment) -- all sound. Evaluates a
+  second provider across ten considerations (benefit, complexity,
+  latency, cost, reproducibility, disagreement handling, reliability,
+  configuration burden, vendor coupling, governance risk) -- every
+  consideration shows no benefit or a cost with no offsetting benefit.
+  Decision: implement a second provider now? No. Defer? Yes. Keep the
+  extension point open? Yes. Documents how a future second
+  `AdvisoryProvider` can be added by implementing only the frozen
+  contract (`provider_id`/`backend_kind`/`determinism`/`invoke()`),
+  requiring no redesign of Evidence, `EvidenceCollection`, Repository
+  Skills, Decision Evaluation, the Repository Transition Validator,
+  lifecycle commands, or Notification Policy. Defines future provider
+  criteria (independent review, better domain expertise, local/offline
+  advisory, lower cost, privacy constraint, stronger consistency
+  checking, comparative evidence); multi-provider risks (conflicting
+  evidence, provider disagreement, compounding nondeterminism, cost/
+  latency, prompt drift, provider-specific quirks, hidden vendor
+  coupling, operator confusion); disagreement handling (preserve all
+  evidence, mark conflicts, never average or vote blindly, let
+  unmodified Decision Evaluation handle conflicts, no provider ever
+  becomes authority); and configuration posture (no provider config
+  needed now; any future split-model mode stays isolated to the
+  provider-selection layer). Recommends the next phase focus on
+  higher-quality evidence and advisory skill hardening, not provider
+  proliferation. Adds `docs/PCAE_ADVISORY_PROVIDER_STRATEGY.md` and
+  `docs/PHASE_115U_ADVISORY_PROVIDER_STRATEGY_REVIEW.md`, plus 27 new
+  architecture/documentation verification tests
+  (`tests/test_phase_115u_advisory_provider_strategy_review.py`). No
+  second Advisory Provider, provider selection, model configuration,
+  DeepSeek/GLM/Qwen/Codex-specific/OpenAI-specific/Claude-specific/
+  local-SLM integration, Advisory Provider runtime, Repository Skills
+  runtime, Evidence, Decision Evaluation, Repository Transition
+  Validator, or lifecycle command implemented or modified. Execution
+  capability remains unavailable.
+
 - Phase 115T — Advisory Provider Verification & Compatibility.
   Verification-only phase re-proving 115S's first real Advisory
   Provider integration (`CurrentActingModelAdvisoryProvider`) is

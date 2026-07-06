@@ -2,62 +2,92 @@
 
 ## Current Phase
 
-Phase 115T — Advisory Provider Verification & Compatibility (completed).
+Phase 115U — Advisory Provider Strategy & Extension Point Review (completed).
 
-Verification only: no new provider implemented, no DeepSeek added, no
-GLM added, no Codex-specific integration added, no provider selection
-added, no model configuration added, no lifecycle command modified,
+Architecture and review only: no second Advisory Provider
+implemented, no provider selection added, no model configuration
+added, no DeepSeek/GLM/Qwen/Codex-specific/OpenAI-specific/Claude-
+specific/local-SLM integration added, no Advisory Provider runtime
+modified, no Repository Skills runtime modified, no Evidence modified,
 no Decision Evaluation modified, no Repository Transition Validator
-modified, no Repository Skills runtime modified. Phase report:
-`docs/PHASE_115T_ADVISORY_PROVIDER_VERIFICATION.md`.
+modified, no lifecycle command modified. Phase report:
+`docs/PHASE_115U_ADVISORY_PROVIDER_STRATEGY_REVIEW.md`. Canonical
+strategy: `docs/PCAE_ADVISORY_PROVIDER_STRATEGY.md`.
 
-**Containment verified**: the advisory provider/skill expose no
-decide/authorize/commit/push/finalize/notify/mutate/execute method;
-`RawAdvisoryResponse` carries no verdict/authorization field; the
-skill never mutates a real repository; neither advisory module
-references `repository_transition_validator`/`TransitionVerdict`/
-`validate_transition`. Advisory-only evidence resolves **zero**
-invariants to `PASS`; mixing advisory evidence with deterministic
-evidence never changes the deterministic evaluation's
-`blocking_failures`.
+**Core question answered**: do we need a second advisory provider
+now? **No.** Reviewed the current same-model default across five
+properties (same-model default, bounded pilot scope, one request/one
+response/one `EvidenceCollection`, stateless operation, normalized
+evidence boundary, provider containment) — all sound. Evaluated a
+second provider across ten considerations (benefit, complexity,
+latency, cost, reproducibility, disagreement handling, reliability,
+configuration burden, vendor coupling, governance risk) — every
+consideration showed no benefit or a cost with no offsetting benefit.
 
-**Boundaries verified**: provider returns exactly `RawAdvisoryResponse`;
-Normalizer returns exactly `NormalizedAdvisoryResponse`; Evidence
-Builder returns exactly `EvidenceCollection`; `EvaluationContext`
-rejects non-`EvidenceCollection` evidence; `validate_transition`
-resolves verdicts from `RepositoryState` alone, unaware advisory
-evidence exists.
+**Decision frozen**: implement a second provider now? No. Defer the
+second provider? Yes. Keep the extension point open? Yes.
 
-**Failure isolation verified**: six scenarios (unavailable, malformed,
-missing confidence, missing limitations, unexpected extra content,
-empty findings) each degrade to `UNKNOWN`/`LOW` evidence or ignore
-unrecognized extras — never `HIGH`/`MEDIUM` confidence from a failure
-path, never an uncaught exception, never affecting deterministic
-evaluation.
+**Extension point preserved**: a future second `AdvisoryProvider` can
+be added by implementing only the frozen contract
+(`provider_id`/`backend_kind`/`determinism`/`invoke()`) — no redesign
+required of Evidence, `EvidenceCollection`, Repository Skills,
+Decision Evaluation, the Repository Transition Validator, lifecycle
+commands, or Notification Policy, per 115Q's frozen dependency
+direction and 115T's empirical portability proof.
 
-**Nondeterminism contained**: across five varied raw contents, every
-normalized output conforms to schema, every evidence item is
-probabilistic/model-produced with confidence/limitations/provenance
-always present, and advisory evidence never alone authorizes Accept.
+**Future provider criteria frozen**: independent review, better domain
+expertise, local/offline advisory, lower cost, a privacy constraint,
+stronger consistency checking, or deliberate comparative evidence —
+never by default.
 
-**Backend portability demonstrated (test-only stand-ins, nothing
-implemented)**: a fake provider parametrized over `backend_kind`
-values `current_acting_model`/`deepseek`/`glm_zai`/`qwen`/`codex`/
-`local_slm` plugs into the unmodified skill identically; Decision
-Evaluation and the Validator require zero change for any of them.
+**Multi-provider risks documented in advance**: conflicting advisory
+evidence, provider disagreement, compounding nondeterminism, cost/
+latency, prompt drift, provider-specific quirks, hidden vendor
+coupling, operator confusion.
 
-**Pilot scope reconfirmed**: exactly one question, "Is the repository
-state internally consistent?"; no code/architecture/security review,
-planning, or autonomous-repair scope exists anywhere.
+**Disagreement handling defined in advance, not implemented**:
+preserve all evidence, mark conflicts, never average or vote blindly,
+let unmodified Decision Evaluation handle conflicts exactly as it
+already does for deterministic evidence, no provider ever becomes
+authority.
 
-**No hidden configuration**: no provider registry, no backend
-selection function, no API-key/secret/env reference, no split-model
-config, no network-specific config anywhere in either advisory module.
+**Configuration posture**: no provider configuration needed now;
+current acting model remains default. Any future split-model mode
+would be optional, explicit, isolated to the provider-selection layer,
+and never leak into Decision Evaluation or the Validator.
 
-Added `tests/test_advisory_provider_verification_115t.py` (66 new
-tests).
+**Roadmap outcome**: focus next on higher-quality evidence and
+advisory skill hardening, not provider proliferation.
 
-Recommended next repo phase: 115U — Second Advisory Provider Pilot Planning (not started).
+Added `tests/test_phase_115u_advisory_provider_strategy_review.py` (27
+new tests, architecture/documentation verification only). No
+implementation, no second provider, no execution.
+
+Recommended next repo phase: 115V — Advisory Evidence Quality Hardening (not started).
+
+## Phase 115U Complete
+
+Phase 115U — Advisory Provider Strategy & Extension Point Review (completed).
+
+Decided PCAE does not need a second advisory provider now: the
+same-model default remains sound across all five reviewed properties,
+and every one of ten evaluation considerations (benefit through
+governance risk) showed no benefit or a cost with no offsetting
+benefit. Documented the second-provider decision (defer, keep the
+extension point open), the extension point's preserved scope, future
+provider criteria, multi-provider risks, disagreement handling, and
+configuration posture — all in advance of any concrete need.
+Architecture/review only; zero implementation added.
+
+**No-go**: no second Advisory Provider implemented, no provider
+selection added, no model configuration added, no DeepSeek/GLM/Qwen/
+Codex-specific/OpenAI-specific/Claude-specific/local-SLM integration,
+no Advisory Provider runtime modified, no Repository Skills runtime
+modified, no Evidence modified, no Decision Evaluation modified, no
+Repository Transition Validator modified, no lifecycle command
+modified.
+
+Recommended next repo phase: 115V — Advisory Evidence Quality Hardening (not started).
 
 ## Phase 115T Complete
 
