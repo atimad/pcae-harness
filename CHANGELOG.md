@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+- Phase 115Z — Advisory Subsystem Hardening & Release Readiness.
+  Consolidation/hardening-only phase reviewing the entire Advisory
+  Repository Skills subsystem (115P-115Y) end to end
+  (`docs/PHASE_115Z_ADVISORY_SUBSYSTEM_HARDENING.md`,
+  `tests/test_phase_115z_advisory_subsystem_hardening.py`). Confirms:
+  no duplicated responsibilities, no hidden coupling into any
+  lifecycle/notification/handoff/decision-evaluation/validator module,
+  and no circular dependencies (`advisory_context_package.py` has zero
+  internal `pcae` imports; the remaining two modules form a clean,
+  one-directional dependency chain). All five extension points
+  (`AdvisoryProvider`, `RepositorySkill`/`AdvisoryRepositorySkill`,
+  `EvidenceProvider`, `AdvisoryContextPackage`, `DecisionEvaluation`)
+  verified stable against their frozen contracts. Containment
+  reconfirmed: cannot authorize, execute, mutate the repository,
+  bypass the Repository Transition Validator, or bypass response
+  normalization. Architecture consistency confirmed across all ten
+  phase reports and six canonical documents (terminology, the pilot
+  advisory question, cross-phase references, the "Recommended Next
+  Phase" chain, and diagrams all consistent, no drift). Implementation
+  consistency confirmed: all three prototypes still match their frozen
+  contracts. Explicitly scopes every check to the three real subsystem
+  modules, distinct from two unrelated pre-existing "advisory" systems
+  (Phase 88X's `advisory.py`, Phase 113C's `advisory_runtime.py`).
+  Remaining architectural debt documented across four categories
+  (documentation/implementation/optimization/future capability), all
+  pre-existing and deliberate, none a defect. Declares the Advisory
+  Repository Skills subsystem a stable v0.2 subsystem of PCAE with its
+  extension points frozen. No new feature, evidence provider,
+  Repository Skill, Advisory Provider, or second Advisory Provider. No
+  Decision Evaluation, Repository Transition Validator, lifecycle
+  command, Notification Policy, or Repository State Kernel modified.
+  No execution, authorization, Permission Broker enforcement, plugins,
+  Telegram inbound, REST, Dashboard, or Web UI. Execution capability
+  remains unavailable. Recommended next repo phase: 116A -- v0.2
+  Architecture Review & Consolidation.
+
 - Phase 115Y — Advisory Context Package Verification & Compatibility.
   Verification-only phase re-proving 115X's `AdvisoryContextPackage`
   prototype is deterministic, bounded, prompt-safe, serialization-

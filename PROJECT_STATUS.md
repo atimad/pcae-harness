@@ -2,76 +2,93 @@
 
 ## Current Phase
 
-Phase 115Y — Advisory Context Package Verification & Compatibility (completed).
+Phase 115Z — Advisory Subsystem Hardening & Release Readiness
+(completed).
 
-Verification only: no `AdvisoryContextPackage` integration added, no
-Repository Skill modified, no Evidence Provider modified, no Decision
-Evaluation modified, no Repository Transition Validator modified, no
-lifecycle command modified, no model configuration added, no second
-provider added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/
-local-SLM integration. Phase report:
-`docs/PHASE_115Y_ADVISORY_CONTEXT_PACKAGE_VERIFICATION.md`.
+Hardening and release-readiness only: no new feature, no new evidence
+provider, no new Repository Skill, no new Advisory Provider, no second
+Advisory Provider, no modification to Decision Evaluation, the
+Repository Transition Validator, any lifecycle command, Notification
+Policy, or the Repository State Kernel, and no execution,
+authorization, Permission Broker enforcement, plugin, Telegram
+inbound, REST, Dashboard, or Web UI implementation. Phase report:
+`docs/PHASE_115Z_ADVISORY_SUBSYSTEM_HARDENING.md`.
 
-**Determinism verified**: identical inputs produce equal packages,
-identical serialization, and identical JSON output across 20 repeated
-constructions; validation outcomes identical across 10 repeated
-attempts; section ordering stable.
+**Architectural review complete**: reviewed all ten phase reports
+(115P–115Y) and six canonical architecture/contract documents against
+the three real runtime modules
+(`advisory_repository_skills.py`, `current_acting_model_advisory_
+provider.py`, `advisory_context_package.py`). Confirmed responsibility
+separation with no duplication, no hidden coupling into any lifecycle,
+notification, handoff, decision-evaluation, or validator module, and
+no circular dependencies — `advisory_context_package.py` has zero
+internal `pcae` imports and the remaining two modules form a clean,
+one-directional dependency chain.
 
-**Required sections verified**: exactly 15 sections confirmed present
-in `to_dict()`, each a required (no-default) constructor argument,
-each individually rejected via `from_dict()` when missing.
+**Extension points verified stable**: `AdvisoryProvider`,
+`RepositorySkill`/`AdvisoryRepositorySkill`, `EvidenceProvider`,
+`AdvisoryContextPackage`, and `DecisionEvaluation` all confirmed
+unchanged against their frozen contracts.
 
-**Trust boundaries verified**: a section's cosmetic `name` field
-cannot spoof its trust class — an untrusted section named
-`"trusted_pcae_instructions"` is still validated, labelled, and
-ordered as untrusted; the package's own trusted field is entirely
-unaffected.
+**Containment reconfirmed**: the subsystem cannot authorize, execute,
+mutate the repository, bypass the Repository Transition Validator, or
+bypass response normalization. `pcae runtime inspect --json` still
+reports execution unavailable, Observed, observe.
 
-**Prompt-injection boundary verified**: four adversarial content
-strings (fake system overrides, fake authorization/execution
-instructions, fake instruction-tag injection, fake push instructions)
-placed in untrusted sections remain classified untrusted, never
-migrate into trusted content, and always sort after every trusted
-section in prompt-assembly order.
+**Architecture consistency confirmed**: terminology, the pilot
+advisory question, the same-model-default term, cross-phase
+references, the "Recommended Next Phase" chain, and Mermaid diagrams
+are all consistent across every 115P–115Y document with no drift.
 
-**Size budgets verified**: content exactly at budget accepted, one
-character over rejected; per-section overrides enforced independently;
-total budget confirmed to be the true sum across every section and
-artifact reference, not just the largest one.
+**Implementation consistency confirmed**: all three prototypes still
+match their frozen contracts exactly; the default Repository Skills
+registry remains the four deterministic skills frozen in 115J.
 
-**Redaction/secrets policy verified, with a documented scope
-boundary**: `redaction_summary` remains required and self-validating;
-`AdvisoryContextPackage` does not itself scan content for
-secret-shaped strings — redacting sensitive content before
-construction remains the assembler's responsibility, consistent with
-115X's frozen scope (package object, validation, serialization — not
-a secret-detection heuristic).
+**Remaining architectural debt documented**, classified as
+documentation (none major) / implementation (`AdvisoryContextPackage`
+not yet wired into the live pipeline; no live model-invocation
+mechanism; no automatic redaction scanning — all pre-existing,
+deliberate scope boundaries, not defects) / optimization (none) /
+future capability (second Advisory Provider, additional advisory
+question types, split-model mode — all previously deferred).
 
-**Provenance verified**: package-level and artifact-reference-level
-provenance both survive a full round trip exactly, including
-`evidence_ids`.
+**Advisory subsystem declared a stable v0.2 subsystem of PCAE.**
+Extension points frozen; no further contract changes anticipated
+absent a separately-scoped future phase.
 
-**Artifact references verified**: a full-file-sized summary (1000
-lines) is rejected outright; all three kinds remain distinct and
-frozen.
+Added `tests/test_phase_115z_advisory_subsystem_hardening.py` (new
+architecture-verification tests).
 
-**Allowed advisory question verified**: six near-miss variants
-(whitespace, missing punctuation, case variants) all individually
-confirmed rejected — the check is an exact match.
+Recommended next repo phase: 116A — v0.2 Architecture Review &
+Consolidation (not started).
 
-**JSON compatibility verified**: `to_dict()` output recursively
-confirmed to contain only JSON primitive types; survives real
-`json.dumps()`/`json.loads()`; `from_dict()` ignores unknown extra
-keys gracefully; stable across five repeated round trips.
+## Phase 115Z Complete
 
-**No hidden integration verified**: reconfirmed across every
-lifecycle, notification, handoff, provider, and skill module; default
-Repository Skills registry unchanged.
+Phase 115Z — Advisory Subsystem Hardening & Release Readiness
+(completed).
 
-Added `tests/test_advisory_context_package_verification_115y.py` (87
-new tests).
+Reviewed the entire Advisory Repository Skills subsystem (115P–115Y)
+end to end: architecture, extension points, containment,
+implementation-vs-contract consistency, and roadmap. Found no
+duplicated responsibilities, no hidden coupling, no circular
+dependencies, and no authority leakage. Confirmed the subsystem is
+scoped precisely to three runtime modules, distinct from two unrelated
+pre-existing "advisory" systems (Phase 88X's `advisory.py` and Phase
+113C's `advisory_runtime.py`). Documented remaining architectural debt
+across four categories, all pre-existing and deliberate. Declared the
+Advisory Repository Skills subsystem stable and its extension points
+frozen. Verification/consolidation only; zero runtime implementation
+change.
 
-Recommended next repo phase: 115Z — Advisory Skill Pilot Hardening (not started).
+**No-go**: no new feature, no new evidence provider, no new Repository
+Skill, no new Advisory Provider, no second Advisory Provider, no
+Decision Evaluation/Repository Transition Validator/lifecycle
+command/Notification Policy/Repository State Kernel modification, no
+execution, no authorization, no Permission Broker enforcement, no
+plugins, no Telegram inbound, no REST, no Dashboard, no Web UI.
+
+Recommended next repo phase: 116A — v0.2 Architecture Review &
+Consolidation (not started).
 
 ## Phase 115Y Complete
 
