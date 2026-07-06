@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 115W: Advisory Context Package Contract (20260706-2137-115w-advisory-context-package-contract)
 - Sync phase 115V completion metadata (20260706-2126-sync-phase-115v-completion-metadata)
 - 115V: Advisory Evidence Enrichment Architecture (20260706-2124-115v-advisory-evidence-enrichment-architecture)
 - Sync phase 115U completion metadata (20260706-2114-sync-phase-115u-completion-metadata)
