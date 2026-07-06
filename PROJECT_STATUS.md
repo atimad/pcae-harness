@@ -2,68 +2,95 @@
 
 ## Current Phase
 
-Phase 115U — Advisory Provider Strategy & Extension Point Review (completed).
+Phase 115V — Advisory Evidence Enrichment Architecture (completed).
 
-Architecture and review only: no second Advisory Provider
-implemented, no provider selection added, no model configuration
-added, no DeepSeek/GLM/Qwen/Codex-specific/OpenAI-specific/Claude-
-specific/local-SLM integration added, no Advisory Provider runtime
-modified, no Repository Skills runtime modified, no Evidence modified,
-no Decision Evaluation modified, no Repository Transition Validator
-modified, no lifecycle command modified. Phase report:
-`docs/PHASE_115U_ADVISORY_PROVIDER_STRATEGY_REVIEW.md`. Canonical
-strategy: `docs/PCAE_ADVISORY_PROVIDER_STRATEGY.md`.
+Architecture and design only: no new Evidence Provider implemented,
+no new Repository Skill implemented, no Advisory Provider runtime
+modified, no second advisory provider added, no model configuration
+added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM
+integration introduced, no Decision Evaluation modified, no Repository
+Transition Validator modified, no lifecycle command modified. Phase
+report:
+`docs/PHASE_115V_ADVISORY_EVIDENCE_ENRICHMENT_ARCHITECTURE.md`.
+Canonical architecture: `docs/PCAE_ADVISORY_EVIDENCE_ENRICHMENT.md`.
 
-**Core question answered**: do we need a second advisory provider
-now? **No.** Reviewed the current same-model default across five
-properties (same-model default, bounded pilot scope, one request/one
-response/one `EvidenceCollection`, stateless operation, normalized
-evidence boundary, provider containment) — all sound. Evaluated a
-second provider across ten considerations (benefit, complexity,
-latency, cost, reproducibility, disagreement handling, reliability,
-configuration burden, vendor coupling, governance risk) — every
-consideration showed no benefit or a cost with no offsetting benefit.
+**Core principle frozen**: Models improve by receiving better
+evidence, not by receiving more authority.
 
-**Decision frozen**: implement a second provider now? No. Defer the
-second provider? Yes. Keep the extension point open? Yes.
+**Advisory Evidence Enrichment defined**: supplying an Advisory
+Repository Skill's Prompt Builder with richer deterministic evidence —
+drawn from existing 115D Evidence Providers, 115J Repository Skills,
+and future deterministic sources — without changing containment, the
+Normalizer boundary, or Decision Evaluation authority.
 
-**Extension point preserved**: a future second `AdvisoryProvider` can
-be added by implementing only the frozen contract
-(`provider_id`/`backend_kind`/`determinism`/`invoke()`) — no redesign
-required of Evidence, `EvidenceCollection`, Repository Skills,
-Decision Evaluation, the Repository Transition Validator, lifecycle
-commands, or Notification Policy, per 115Q's frozen dependency
-direction and 115T's empirical portability proof.
+**Eleven evidence enrichment categories named**: repository state,
+git/history, changed-files, test evidence, architecture evidence,
+dependency/module evidence, documentation evidence, governance
+evidence, runtime capability evidence, report/metadata consistency
+evidence, future semantic/code graph evidence — each mapped to its
+deterministic source (existing or future).
 
-**Future provider criteria frozen**: independent review, better domain
-expertise, local/offline advisory, lower cost, a privacy constraint,
-stronger consistency checking, or deliberate comparative evidence —
-never by default.
+**Priority matrix frozen**: value/difficulty/determinism/risk/expected
+advisory benefit per category, tiered — Tier 1 (repository state,
+changed-files, governance, report/metadata consistency), Tier 2
+(git/history, test evidence, runtime capability), Tier 3
+(architecture, dependency/module, documentation, future semantic/code
+graph).
 
-**Multi-provider risks documented in advance**: conflicting advisory
-evidence, provider disagreement, compounding nondeterminism, cost/
-latency, prompt drift, provider-specific quirks, hidden vendor
-coupling, operator confusion.
+**Advisory Context Package designed**: bounded repository summary,
+deterministic evidence, current transition/question, constraints/
+no-go rules, relevant artifacts, known limitations — a design target
+for 115W, not implemented, not a modification of `AdvisoryRequest`'s
+already-frozen four fields.
 
-**Disagreement handling defined in advance, not implemented**:
-preserve all evidence, mark conflicts, never average or vote blindly,
-let unmodified Decision Evaluation handle conflicts exactly as it
-already does for deterministic evidence, no provider ever becomes
+**Safety boundaries frozen**: enriched evidence must never grant
+execution capability, expose secrets, include unbounded repository
+dumps, allow prompt injection from repository files, allow model
+output to bypass normalization, or change Decision Evaluation
 authority.
 
-**Configuration posture**: no provider configuration needed now;
-current acting model remains default. Any future split-model mode
-would be optional, explicit, isolated to the provider-selection layer,
-and never leak into Decision Evaluation or the Validator.
+**Prompt-injection handling frozen**: repository-derived content is
+always untrusted input, never instructions; a future prompt must
+separate trusted PCAE instructions, deterministic evidence, and
+untrusted repository content — complementary to, not a substitute for,
+115Q's Normalizer boundary.
 
-**Roadmap outcome**: focus next on higher-quality evidence and
-advisory skill hardening, not provider proliferation.
+**Evidence summarization rules frozen**: deterministic summaries
+preferred, bounded length, provenance preserved, references retained,
+raw evidence never blindly pasted.
 
-Added `tests/test_phase_115u_advisory_provider_strategy_review.py` (27
-new tests, architecture/documentation verification only). No
-implementation, no second provider, no execution.
+**Future roadmap frozen**: 115W (Contract Freeze) → 115X (Prototype,
+Tier 1 evidence only) → 115Y (Verification) → 115Z (Advisory Skill
+Pilot Hardening).
 
-Recommended next repo phase: 115V — Advisory Evidence Quality Hardening (not started).
+Added
+`tests/test_phase_115v_advisory_evidence_enrichment_architecture.py`
+(25 new tests, architecture/documentation verification only). No
+implementation, no new provider, no execution.
+
+Recommended next repo phase: 115W — Advisory Context Package Contract (not started).
+
+## Phase 115V Complete
+
+Phase 115V — Advisory Evidence Enrichment Architecture (completed).
+
+Designed how PCAE improves advisory quality by enriching the
+deterministic evidence supplied to Advisory Repository Skills: the
+enrichment definition, eleven evidence categories with sources, a
+priority matrix and tiering, the future Advisory Context Package,
+safety boundaries, prompt-injection handling (trusted instructions vs.
+deterministic evidence vs. untrusted repository content), evidence
+summarization rules, and a four-phase future roadmap (115W-115Z).
+Architecture and design only; zero implementation added.
+
+**No-go**: no new Evidence Provider implemented, no new Repository
+Skill implemented, no Advisory Provider runtime modified, no second
+advisory provider added, no model configuration added, no DeepSeek/
+GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM integration, no
+Decision Evaluation modified, no Repository Transition Validator
+modified, no lifecycle command modified.
+
+Recommended next repo phase: 115W — Advisory Context Package Contract (not started).
 
 ## Phase 115U Complete
 

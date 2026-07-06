@@ -2,6 +2,48 @@
 
 ## Unreleased
 
+- Phase 115V — Advisory Evidence Enrichment Architecture. Architecture
+  and design only: designs how PCAE improves advisory quality by
+  enriching the deterministic evidence supplied to Advisory Repository
+  Skills -- the axis of improvement 115U named instead of a second
+  advisory provider. Freezes the core principle (models improve by
+  receiving better evidence, not by receiving more authority); the
+  Advisory Evidence Enrichment definition (richer deterministic
+  evidence from existing 115D providers/115J skills and future
+  sources, without changing containment, the Normalizer boundary, or
+  Decision Evaluation authority); eleven evidence enrichment categories
+  (repository state, git/history, changed-files, test evidence,
+  architecture evidence, dependency/module evidence, documentation
+  evidence, governance evidence, runtime capability evidence, report/
+  metadata consistency evidence, future semantic/code graph evidence)
+  each mapped to a deterministic source; a priority matrix (value/
+  difficulty/determinism/risk/expected advisory benefit) with Tier
+  1/2/3 recommendations; the future Advisory Context Package (bounded
+  repository summary, deterministic evidence, current transition/
+  question, constraints/no-go rules, relevant artifacts, known
+  limitations -- a 115W design target, not implemented, not a
+  modification of AdvisoryRequest's frozen fields); safety boundaries
+  (never grant execution capability, expose secrets, include unbounded
+  repository dumps, allow prompt injection, bypass normalization, or
+  change Decision Evaluation authority); prompt-injection handling
+  (repository-derived content always untrusted input, never
+  instructions; trusted PCAE instructions / deterministic evidence /
+  untrusted repository content clearly separated -- complementary to
+  115Q's Normalizer boundary); evidence summarization rules
+  (deterministic summaries preferred, bounded length, provenance
+  preserved, references retained, raw evidence never blindly pasted);
+  and a four-phase future roadmap (115W Contract Freeze -> 115X
+  Prototype -> 115Y Verification -> 115Z Advisory Skill Pilot
+  Hardening). Adds `docs/PCAE_ADVISORY_EVIDENCE_ENRICHMENT.md` and
+  `docs/PHASE_115V_ADVISORY_EVIDENCE_ENRICHMENT_ARCHITECTURE.md`, plus
+  25 new architecture/documentation verification tests
+  (`tests/test_phase_115v_advisory_evidence_enrichment_architecture.py`).
+  No new Evidence Provider, Repository Skill, Advisory Provider runtime
+  change, second advisory provider, model configuration, DeepSeek/GLM/
+  Qwen/Codex/OpenAI/Claude-specific/local-SLM integration, Decision
+  Evaluation, Repository Transition Validator, or lifecycle command
+  implemented or modified. Execution capability remains unavailable.
+
 - Phase 115U — Advisory Provider Strategy & Extension Point Review.
   Architecture/review only: decides PCAE does not need a second
   advisory provider now, while preserving the ability to add one
