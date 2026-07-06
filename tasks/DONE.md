@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 115J completion metadata (20260706-1503-sync-phase-115j-completion-metadata)
 - 115J: Repository Skills Prototype (20260706-1458-115j-repository-skills-prototype)
 - Fix 115I pushed-state metadata field (20260706-1438-fix-115i-pushed-state-metadata-field)
 - Sync Phase 115I completion metadata (20260706-1437-sync-phase-115i-completion-metadata)
