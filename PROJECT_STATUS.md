@@ -2,6 +2,97 @@
 
 ## Current Phase
 
+Phase 115H — Repository Skills Architecture (completed).
+
+Architecture and design only. No Repository Skill implemented, no
+AI/SLM/LLM-backed skill implemented, no DeepSeek integration, no
+changes to Evidence Providers, Decision Evaluation, the Repository
+Transition Validator, or any lifecycle command. Phase report:
+`docs/PHASE_115H_REPOSITORY_SKILLS_ARCHITECTURE.md`. Canonical
+architecture: `docs/PCAE_REPOSITORY_SKILLS_ARCHITECTURE.md`.
+
+**Core principle**: Repository Skills produce evidence. Repository
+Skills do not decide.
+
+**Repository Skill defined**: observes repository state, collects or
+derives evidence, may enrich existing evidence, returns an
+`EvidenceCollection` (115C's frozen shape, reused unmodified). Never
+mutates repository state, decides, votes, authorizes, promotes
+artifacts, sends notifications, bypasses the Repository Transition
+Validator, or invokes execution.
+
+**Five skill classes defined**: Deterministic, Reproducible External,
+Advisory, Human-Assisted, Experimental — all mapped onto 115C's
+existing `EvidenceDeterminism` enum, no new enum introduced.
+
+**Six deterministic skill concepts named** (design only): Git
+Topology, Report Consistency, Metadata Consistency, Architecture
+Status, Documentation Completeness, Test-Result Consistency.
+
+**Advisory skill boundary defined**: the governed home for any future
+AI/SLM/LLM-backed skill (DeepSeek, GLM, Qwen, Claude, Codex, a local
+SLM) — advisory only, probabilistic by default, labelled
+model-produced, never sole authority for Accept, never allowed to
+mutate state or finalize/push/notify, allowed only to produce
+evidence.
+
+**DeepSeek future pilot boundary**: DeepSeek must not be reintroduced
+as lifecycle authority under any framing. Any future DeepSeek pilot
+must be scoped as a bounded Advisory Repository Skill: evidence-only,
+`model_produced: true`, `PROBABILISTIC` by default, never sole
+authority for Accept.
+
+**Seven-stage skill lifecycle defined**: registered -> configured ->
+invoked -> evidence produced -> evidence validated -> evidence
+consumed by Decision Evaluation -> result referenced in explanation.
+
+**Skill manifest concept documented** (schema freeze deferred to
+115I): `skill_id`, `name`, `version`, `class`, `determinism`,
+`categories produced`, `required inputs`, `allowed outputs`,
+`side-effect policy`, `timeout policy`, `failure behavior`,
+`confidence defaults`, `model-produced flag`.
+
+**Exhaustive skill safety boundary**: skills must never own
+Repository State, Repository Transition, Repository Artifact
+promotion, Repository Event emission, Notification Policy, lifecycle
+authority, or execution authority.
+
+**Updated canonical wire diagram**: Repository State -> Evidence
+Providers -> Repository Skills -> Evidence Collection -> Decision
+Evaluation -> Repository Transition Validator -> Transition Result ->
+Repository Artifact -> Repository Event -> Notification Policy ->
+Consumers.
+
+Added `tests/test_phase_115h_repository_skills_architecture.py` (18
+new tests, architecture/documentation verification only). No
+implementation, no execution, no authorization, no Permission Broker
+enforcement, no plugins, no Telegram inbound, no REST, no Web UI, no
+Dashboard. Execution capability remains unavailable.
+
+Recommended next repo phase: 115I — Repository Skills Contract Freeze (not started).
+
+## Phase 115H Complete
+
+Phase 115H — Repository Skills Architecture (completed).
+
+Designed Repository Skills as the governed extension mechanism for
+PCAE decision support: skill definition, five skill classes, six
+deterministic skill concepts, the advisory/AI skill boundary, a
+DeepSeek future pilot boundary, a seven-stage lifecycle, a manifest
+concept, an exhaustive safety boundary, and an updated canonical wire
+diagram. Architecture and design only; zero implementation added.
+
+**No-go**: no Repository Skill implemented, no AI/SLM/LLM-backed skill
+implemented, no DeepSeek integration, no changes to Evidence
+Providers, Decision Evaluation, the Repository Transition Validator,
+or lifecycle commands, no execution, no authorization, no Permission
+Broker enforcement, no plugins, no Telegram inbound, no REST, no Web
+UI, no Dashboard.
+
+Recommended next repo phase: 115I — Repository Skills Contract Freeze (not started).
+
+## Phase 115G Complete
+
 Phase 115G — Repository Decision Evaluation Verification & Compatibility (completed).
 
 Verification-only phase. No implementation change to

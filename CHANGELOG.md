@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+- Phase 115H — Repository Skills Architecture. Architecture and design
+  only; zero implementation added. Defines Repository Skills as the
+  governed extension mechanism for PCAE decision support, building on
+  115C-115G. Core principle: Repository Skills produce evidence,
+  Repository Skills do not decide. Defines a Repository Skill
+  (observes repository state, collects/derives/enriches evidence,
+  returns `EvidenceCollection`; never mutates state, decides, votes,
+  authorizes, promotes artifacts, notifies, bypasses the validator, or
+  invokes execution). Defines five skill classes (Deterministic,
+  Reproducible External, Advisory, Human-Assisted, Experimental),
+  mapped onto 115C's existing `EvidenceDeterminism` enum with no new
+  enum introduced. Names six deterministic skill concepts (Git
+  Topology, Report Consistency, Metadata Consistency, Architecture
+  Status, Documentation Completeness, Test-Result Consistency).
+  Defines the advisory skill boundary governing any future AI/SLM/LLM-
+  backed skill (DeepSeek, GLM, Qwen, Claude, Codex, a local SLM):
+  advisory only, probabilistic by default, labelled model-produced,
+  never sole authority for Accept, never allowed to mutate state or
+  finalize/push/notify. Documents a permanent DeepSeek future-pilot
+  boundary: DeepSeek must not be reintroduced as lifecycle authority
+  under any framing; any future pilot must be a bounded Advisory
+  Repository Skill, evidence-only. Defines a seven-stage skill
+  lifecycle (registered -> configured -> invoked -> evidence produced
+  -> evidence validated -> evidence consumed by Decision Evaluation ->
+  result referenced in explanation) and a skill manifest concept
+  (`skill_id`/`name`/`version`/`class`/`determinism`/`categories
+  produced`/`required inputs`/`allowed outputs`/`side-effect policy`/
+  `timeout policy`/`failure behavior`/`confidence defaults`/
+  `model-produced flag`) with schema freeze deferred to 115I. Defines
+  an exhaustive skill safety boundary (skills never own Repository
+  State, Repository Transition, Repository Artifact promotion,
+  Repository Event emission, Notification Policy, lifecycle
+  authority, or execution authority). Adds an updated canonical wire
+  diagram showing Repository Skills between Evidence Providers and
+  Evidence Collection. Added
+  `docs/PCAE_REPOSITORY_SKILLS_ARCHITECTURE.md`,
+  `docs/PHASE_115H_REPOSITORY_SKILLS_ARCHITECTURE.md`, and
+  `tests/test_phase_115h_repository_skills_architecture.py` (18 new
+  tests, architecture/documentation verification only). No Repository
+  Skill implemented, no AI/SLM/LLM-backed skill implemented, no
+  DeepSeek integration, no changes to Evidence Providers, Decision
+  Evaluation, the Repository Transition Validator, or lifecycle
+  commands. No execution, no authorization, no Permission Broker
+  enforcement, no plugins, no Telegram inbound, no REST, no Web UI, no
+  Dashboard. Execution capability remains unavailable.
+
 - Phase 115G — Repository Decision Evaluation Verification & Compatibility.
   Verification-only phase proving 115F's Repository Decision Evaluation
   integration (`TransitionResult.explanation`) is fully
