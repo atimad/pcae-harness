@@ -1,72 +1,68 @@
-# Phase 115W Complete — Advisory Context Package Contract
+# Phase 115X Complete — Advisory Context Package Prototype
 
-- **Phase ID:** `115W`
+- **Phase ID:** `115X`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 8
-- **Tests run:** 92 (focused contract/architecture suite)
-- **Commits:** d0110d3a, 5c736e04
+- **Files changed:** 9
+- **Tests run:** 79 new + 1526 focused suite + 4390/4390 fast_green
+- **Commits:** 68b3b390, e9971ea9
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115W freezes the `AdvisoryContextPackage` contract — the
-bounded, trusted, provenance-preserving context that may be supplied
-to an Advisory Repository Skill's Prompt Builder — before any
-implementation. Contract/design only; zero implementation added.
+Phase 115X implements the `AdvisoryContextPackage` runtime object
+exactly as frozen by 115W. Zero integration with any Advisory
+Provider, Repository Skill, Decision Evaluation, the Repository
+Transition Validator, or any lifecycle command.
 
-## Context Package Contract Summary
+## Implementation Summary
 
-15 required sections frozen, none optional. Four trust-boundary
-classes frozen. The prompt-injection boundary requires
-`untrusted_repository_content` to be its own, always-delimited section
-that is never honored as instructions, with trusted sections always
-assembled last. Size limits, redaction/secrets policy, provenance
-rules, and the artifact-reference model are all frozen. Only one
-advisory question is currently allowed. Future extensibility is
-documented, not implemented.
+New module `src/pcae/core/advisory_context_package.py` implements six
+frozen dataclasses: `AdvisoryContextPackage`, `AdvisoryContextSection`,
+`AdvisoryArtifactReference`, `AdvisoryContextProvenance`,
+`AdvisoryContextBudget`, `AdvisoryRedactionSummary` — all
+self-validating at construction.
 
 ## Required Sections
 
-`package_id`, `created_at_utc`, `objective`, `advisory_question`,
-`trusted_pcae_instructions`, `repository_summary`,
-`deterministic_evidence_summary`, `transition_context`,
-`constraints_and_no_go_rules`, `artifact_references`,
-`untrusted_repository_content`, `provenance`, `limitations`,
-`size_budget`, `redaction_summary`.
+All 15 of 115W's frozen sections implemented as required constructor
+arguments, none with a default.
 
-## Trust Boundary Summary
+## Trust Boundary Enforcement
 
-Trusted PCAE instructions, deterministic PCAE evidence, untrusted
-repository content, model-produced advisory output — each mapped to
-specific sections, never blended.
+Every named section validated against the trust class 115W assigned
+it; a mismatch raises `ValueError` at construction.
 
-## Prompt-Injection Handling
+## Enforcement Summary
 
-Untrusted repository content is always its own, delimited/labelled
-section; no instruction found within it may ever be honored; trusted
-sections are always assembled last.
+Allowed advisory question limited to exactly "Is the repository state
+internally consistent?" Size budgets enforced with concrete defaults
+chosen this phase (total 20,000 chars, per-section default 4,000
+chars, untrusted content 2,000 chars) — violations rejected, never
+truncated. Redaction summary, provenance (package- and item-level),
+and bounded artifact references all enforced.
 
-## Size / Redaction / Provenance Rules
+## Prompt-Injection Boundary Representation
 
-Size: total and per-section budgets exist and are enforced (concrete
-numbers deferred to 115X); deterministic summarization required; no
-unbounded dumps ever. Redaction: no secrets/tokens/credentials/
-private env values/unrestricted logs/raw config secrets; every
-redaction recorded. Provenance: package-level and item-level, never
-discarded during summarization.
+`ordered_sections_for_prompt_assembly()` returns sections in 115W's
+required order (deterministic evidence and untrusted content first,
+trusted instructions always last); `prompt_label` gives every section
+an explicit class-specific label; adversarial repository content
+proven to never change its own trust class.
 
-## Artifact Reference Model
+## Serialization
 
-Files by path, evidence by Evidence ID, commits by hash —
-full-content embedding never a default.
+`to_dict()`/`from_dict()` on every type, JSON-compatible only, no
+persistence layer, round-trip equality verified.
 
-## Allowed Advisory Question
+## No Integration
 
-Exactly one: "Is the repository state internally consistent?" —
-unchanged from 115S/115T's verified pilot scope.
+Confirmed via source-level checks: never imported by any Advisory
+Provider, Repository Skill, Decision Evaluation, the Repository
+Transition Validator, or any lifecycle command; default Repository
+Skills registry unchanged.
 
 ## PCAE Architecture Status
 
@@ -97,10 +93,11 @@ maintained as runtime state.*
 - Advisory Provider Strategy & Extension Point Review through Phase 115U
 - Advisory Evidence Enrichment Architecture through Phase 115V
 - Advisory Context Package Contract through Phase 115W
+- Advisory Context Package Prototype through Phase 115X
 
 ### Planned
 
-- 115X — Advisory Context Package Prototype
+- 115Y — Advisory Context Package Verification & Compatibility
 
 ### Current Runtime State
 
@@ -122,14 +119,13 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_contract_architecture_tests:** 92/92 (passed)
+- **focused_advisory_repository_skills_evidence_decision_tests:** 1526/1526 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **fast_green:** 4390/4390 (passed; carried forward from 115V, unaffected by this contract-freeze-only phase)
+- **fast_green:** 4390/4390 (passed)
 
 ## No-Go Confirmations
 
-- No AdvisoryContextPackage runtime implemented.
 - No Advisory Provider runtime modified.
 - No Repository Skill modified.
 - No Evidence Provider modified.
@@ -162,7 +158,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115X — Advisory Context Package Prototype
+115Y — Advisory Context Package Verification & Compatibility
 
 ## Report Consistency
 
@@ -171,4 +167,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115W. Schema version 1.0.*
+*Report generated for PCAE Phase 115X. Schema version 1.0.*

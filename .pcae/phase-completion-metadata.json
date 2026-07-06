@@ -1,33 +1,34 @@
 {
-  "phase_id": "115W",
-  "phase_name": "Advisory Context Package Contract",
-  "phase_title": "Advisory Context Package Contract",
+  "phase_id": "115X",
+  "phase_name": "Advisory Context Package Prototype",
+  "phase_title": "Advisory Context Package Prototype",
   "status": "completed",
-  "summary": "Contract/design only, zero implementation added. Freezes the AdvisoryContextPackage contract -- the bounded, trusted, provenance-preserving context that may be supplied to an Advisory Repository Skill's Prompt Builder -- before any implementation. Freezes the core principle (advisory models receive bounded, trusted, provenance-preserving context, never unrestricted repository access); 15 required sections (package_id, created_at_utc, objective, advisory_question, trusted_pcae_instructions, repository_summary, deterministic_evidence_summary, transition_context, constraints_and_no_go_rules, artifact_references, untrusted_repository_content, provenance, limitations, size_budget, redaction_summary -- none optional); four trust-boundary classes (trusted PCAE instructions, deterministic PCAE evidence, untrusted repository content, model-produced advisory output) with an explicit section-to-class mapping; the prompt-injection boundary (untrusted_repository_content always its own section, always delimited/labelled, never honored as instructions, trusted sections always assembled last -- complementary to 115Q's Normalizer boundary); size limits (total package budget, per-section budgets, deterministic summarization requirement, absolute prohibition on unbounded repository dumps -- concept frozen, concrete numbers deferred to 115X); the redaction/secrets policy (no secrets/tokens/credentials/private env values/unrestricted logs/raw config secrets, every redaction recorded); provenance rules (package-level and item-level, never discarded during summarization); the artifact-reference model (files by path, evidence by Evidence ID, commits by hash, full-content embedding never a default); the one allowed advisory question (\"Is the repository state internally consistent?\", unchanged from 115S/115T); and future extensibility (documentation/report/architecture consistency review, code review, security review -- documented, not implemented). No AdvisoryContextPackage runtime, Advisory Provider runtime change, Repository Skill, Evidence Provider, Decision Evaluation, Repository Transition Validator, or lifecycle command implemented or modified. Execution capability remains unavailable.",
-  "files_changed_count": 8,
+  "summary": "Implements the AdvisoryContextPackage runtime object exactly as frozen by 115W. Adds src/pcae/core/advisory_context_package.py: six frozen dataclasses (AdvisoryContextPackage, AdvisoryContextSection, AdvisoryArtifactReference, AdvisoryContextProvenance, AdvisoryContextBudget, AdvisoryRedactionSummary), all self-validating at construction. All 15 required sections implemented with no defaults (a package cannot omit any section). Trust boundary classes enforced: every named section validated against the trust class 115W assigned it. Allowed advisory question enforced (exactly 'Is the repository state internally consistent?', any other value rejected). Size budgets enforced with concrete defaults chosen this phase (total 20,000 chars, per-section default 4,000 chars, untrusted repository content tightened to 2,000 chars) -- violations raise ValueError, never silently truncated. Prompt-injection boundary represented via ordered_sections_for_prompt_assembly() (deterministic evidence and untrusted content first, trusted instructions always last) and prompt_label (explicit, class-specific labelling); adversarial repository content proven to never change its own trust class. Redaction summary, package- and item-level provenance, and bounded artifact references (file/evidence/commit, summary capped at 500 chars) all enforced. to_dict()/from_dict() implemented on every type, JSON-compatible only, no persistence layer, round-trip equality verified. Adds 79 new tests (tests/test_advisory_context_package.py). Also repairs two stale guard tests (from 115V and 115W) that asserted advisory_context_package.py must not exist -- expected staleness once this later phase legitimately implements exactly that file. Confirmed via source-level checks: never imported by any Advisory Provider, Repository Skill, Decision Evaluation, Repository Transition Validator, or lifecycle command; default Repository Skills registry unchanged (still 115J's four deterministic skills). No model configuration, no second provider, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude/local-SLM integration. Execution capability remains unavailable.",
+  "files_changed_count": 9,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PCAE_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md",
-    "docs/PHASE_115W_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md",
+    "docs/PHASE_115X_ADVISORY_CONTEXT_PACKAGE_PROTOTYPE.md",
+    "src/pcae/core/advisory_context_package.py",
     "tasks/DONE.md",
-    "tasks/done/20260706-2137-115w-advisory-context-package-contract.md",
-    "tests/test_phase_115w_advisory_context_package_contract.py",
-    ".pcae/phase-completion-metadata.json"
+    "tasks/done/20260706-2149-115x-advisory-context-package-prototype.md",
+    "tests/test_advisory_context_package.py",
+    "tests/test_phase_115v_advisory_evidence_enrichment_architecture.py",
+    "tests/test_phase_115w_advisory_context_package_contract.py"
   ],
-  "tests_added_or_updated": "30 new focused architecture/contract verification tests added (tests/test_phase_115w_advisory_context_package_contract.py); no implementation code changed; all pre-existing suites (115H/115Q/115V architecture tests) pass unmodified",
+  "tests_added_or_updated": "79 new tests added (tests/test_advisory_context_package.py) covering construction, required sections, serialization, trust-boundary markers, allowed advisory question, unsupported question rejection, size budget enforcement, redaction summary, provenance, artifact references, prompt-injection boundary representation, no provider/model/lifecycle integration, execution unavailable; two stale 115V/115W guard tests repaired for expected staleness; all pre-existing suites (advisory framework, repository_skills, evidence, decision_evaluation, fast_green) pass unmodified",
   "phase_commits": [
     {
-      "hash": "d0110d3a",
-      "message": "Freeze Advisory Context Package contract"
+      "hash": "68b3b390",
+      "message": "Implement Advisory Context Package prototype"
     },
     {
-      "hash": "5c736e04",
-      "message": "Complete Phase 115W Advisory Context Package contract"
+      "hash": "e9971ea9",
+      "message": "Complete Phase 115X Advisory Context Package prototype"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115W adds no implementation)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115X adds no modification, only a new isolated context package module)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -44,10 +45,10 @@
   },
   "validation_results": [
     {
-      "name": "focused_contract_architecture_tests",
-      "result": "92/92",
+      "name": "focused_advisory_repository_skills_evidence_decision_tests",
+      "result": "1526/1526",
       "status": "passed",
-      "note": "python -m pytest tests/test_phase_115w_advisory_context_package_contract.py tests/test_phase_115v_advisory_evidence_enrichment_architecture.py tests/test_phase_115q_advisory_repository_skills_contract_freeze.py -q -ra"
+      "note": "python -m pytest tests/test_*advisory* tests/test_repository_skills*.py tests/test_evidence*.py tests/test_decision_evaluation*.py -n auto -q -ra --durations=100"
     },
     {
       "name": "report_notification_tests",
@@ -63,7 +64,7 @@
       "name": "fast_green",
       "result": "4390/4390",
       "status": "passed",
-      "note": "prior phase's fast_green result carried forward; unaffected by this contract-freeze-only phase"
+      "note": "python -m pytest -m \"fast_green\" -n auto -ra --durations=100"
     },
     {
       "name": "pcae_health",
@@ -107,7 +108,7 @@
     }
   ],
   "test_results": {
-    "focused_contract_architecture_tests": "92/92",
+    "focused_advisory_repository_skills_evidence_decision_tests": "1526/1526",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "4390/4390"
@@ -156,6 +157,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No AdvisoryContextPackage runtime implemented. No Advisory Provider runtime modified. No Repository Skill modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No model configuration added. No second provider added. No DeepSeek integration. No GLM integration. No Qwen integration. No Codex integration. No OpenAI integration. No Claude-specific integration. No local SLM integration. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115X — Advisory Context Package Prototype"
+  "no_go_confirmation": "No Advisory Provider runtime modified. No Repository Skill modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No model configuration added. No second provider added. No DeepSeek integration. No GLM integration. No Qwen integration. No Codex integration. No OpenAI integration. No Claude-specific integration. No local SLM integration. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115Y — Advisory Context Package Verification & Compatibility"
 }
