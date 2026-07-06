@@ -1,87 +1,99 @@
-# Phase 115P Complete — Advisory Repository Skills Architecture
+# Phase 115Q Complete — Advisory Repository Skills Contract Freeze
 
-- **Phase ID:** `115P`
+- **Phase ID:** `115Q`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 8
-- **Tests run:** 240 (focused architecture/documentation suite)
-- **Commits:** e0ecb920, d956359e
+- **Tests run:** 259 (focused architecture/documentation suite)
+- **Commits:** 27fb2e93, 2fb57b3f
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115P designs Advisory Repository Skills as model-backed,
-evidence-only Repository Skills — the concrete pipeline, model
-boundary, and default-mode rule that 115H Section 4 and 115L Section 8
-both anticipated but did not specify. Architecture and design only;
-zero implementation added.
+Phase 115Q freezes the backend-agnostic contract for Advisory
+Repository Skills before any implementation or model call: the
+`AdvisoryRepositorySkill` interface, the `AdvisoryProvider` abstraction,
+the prompt/response/evidence boundaries, the default same-model mode,
+the deferred split-model mode, the failure contract, an exhaustive
+safety-rule checklist, and a narrow first pilot scope. Contract/design
+only; zero implementation added.
 
-## Core Principle
+## Advisory Contract Summary
 
-Advisory models may produce evidence. PCAE decides.
+`AdvisoryRepositorySkill` requires every conforming skill to declare
+advisory capability, evidence categories produced, probabilistic
+determinism by default, and a model-produced evidence boundary; to
+build a prompt/request, consume a normalized advisory response, and
+produce `EvidenceCollection`; and is exhaustively forbidden from
+decision making, repository mutation, lifecycle authority, commit,
+push, finalize, notification dispatch, artifact promotion, execution,
+authorization, and validator bypass.
 
-## Advisory Pipeline
+## Advisory Provider Abstraction
 
-```
-Repository State -> Prompt Builder -> Current Model -> Raw Response
-    -> Normalizer -> Evidence Builder -> EvidenceCollection
-    -> Decision Evaluation -> Repository Transition Validator
-```
+Four contract-only types: `AdvisoryProvider` (`provider_id`,
+`backend_kind`, `determinism`, single `invoke()`), `AdvisoryRequest`
+(`bounded_context`, `question`, `response_schema_hint`,
+`timeout_seconds`), `RawAdvisoryResponse` (`raw_content`,
+`provider_id`, `succeeded`), `NormalizedAdvisoryResponse` (`findings`,
+`confidence_signal`, `references`, `limitations`,
+`normalization_status`). Current acting model (default), DeepSeek,
+Claude, Codex, GLM/Z.ai, Qwen, OpenAI, local SLM, external review
+service, and deterministic mock named as possible future providers —
+none implemented.
 
-The Normalizer is the sole boundary converting untrusted model output
-into a validated intermediate shape (or failing closed);
-EvidenceCollection merges via the existing
-`RepositorySkillRegistry.merge_evidence()` point (115J, unchanged);
-Decision Evaluation and the Repository Transition Validator are
-unmodified and source-agnostic.
+## Prompt Boundary
 
-## Model Boundary
+Bounded repository context, explicit task/question, no secrets, no
+unrestricted command capability, no execution request, advisory
+request only.
 
-A model never returns a trusted PCAE object directly. Raw Response is
-plain text/JSON only; the model has no tool-call authority, no
-file-write access, and no `pcae` command invocation ability.
+## Response Normalization Boundary
 
-## Default Same-Model Mode
+Raw model output never trusted directly — must pass through the
+Normalizer (producing a validated `NormalizedAdvisoryResponse`) then
+the Evidence Builder. Only canonical `Evidence` enters PCAE.
 
-The current acting model may be the advisory model by default — no
-new configuration file, CLI flag, environment variable, or model
-registry entry required.
+## Evidence Builder Contract
 
-## Future Split-Model Mode
+Probabilistic by default, model-produced if applicable, advisory
+only, confidence-labelled, limitation-labelled, provenance-preserving,
+never sole authority for Accept — reusing existing
+`Evidence`/`RepositorySkillManifest` fields, no schema change.
 
-Documented, not implemented: a writer model (performs the session's
-changes) vs. an advisory model (reviews them), to reduce same-model
-blind-spot risk. No schema, selection logic, or adapter added.
+## Same-Model Default
+
+The default `AdvisoryProvider` is, conceptually, the current acting
+model — an architecture rule, not an implementation. No new
+configuration required.
+
+## Split-Model Future Mode
+
+Documented, not implemented: writer model vs. advisory model,
+configuration only needed for that split-model mode.
 
 ## Safety Rules
 
-Probabilistic by default, model-produced (existing `Evidence.provenance`/
-`RepositorySkillManifest.model_produced` fields), never sole authority
-for Accept, may trigger human review, may suggest repair
-(`InvariantResult.suggested_repair`), must include non-empty
-`limitations`, must cite references where possible. No new field,
-enum value, or type required.
+Advisory Repository Skills must never execute commands, request shell
+access, mutate the repository, authorize transitions, override
+deterministic evidence, override the validator, produce final
+lifecycle decisions, send notifications, or access secrets.
 
-## Failure Behavior
+## First Pilot Scope
 
-`UNKNOWN`-freshness evidence or an explicit `RepositorySkillResult`
-failure; never blocks deterministic checks by itself; never silently
-succeeds.
-
-## First Future Pilot Scope
-
-Repository consistency review, documentation consistency review,
-report consistency review only. Excludes code execution, lifecycle
-authority, and commit/push/finalize authority.
+Exactly one of repository/documentation/report consistency review —
+never all three at once, and never code execution, security
+authorization, lifecycle control, or autonomous repair.
 
 ## Wire Diagram Summary
 
-Two Mermaid diagrams: the advisory pipeline itself, and how an
-Advisory Repository Skill plugs into the existing Repository Skills
-wire diagram alongside deterministic skills, both merging into one
-undifferentiated `EvidenceCollection`.
+Two Mermaid diagrams: the full pipeline including the Advisory
+Provider abstraction and Raw/Normalized response stages, and a
+swappable-backend diagram showing the `AdvisoryProvider` interface
+with current-acting-model default and every other named provider as
+dotted, unimplemented future branches.
 
 ## PCAE Architecture Status
 
@@ -105,10 +117,11 @@ maintained as runtime state.*
 - Repository Skills Integration Prototype through Phase 115M
 - Repository Skills Integration Verification & Compatibility through Phase 115N
 - Advisory Repository Skills Architecture through Phase 115P
+- Advisory Repository Skills Contract Freeze through Phase 115Q
 
 ### Planned
 
-- 115Q — Advisory Repository Skills Contract Freeze
+- 115R — Advisory Repository Skills Prototype
 
 ### Current Runtime State
 
@@ -130,14 +143,15 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_architecture_documentation_tests:** 240/240 (passed)
+- **focused_architecture_documentation_tests:** 259/259 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **fast_green:** 4390/4390 (passed; carried forward from 115N, unaffected by this architecture-only phase)
+- **fast_green:** 4390/4390 (passed; carried forward from 115P, unaffected by this contract-freeze-only phase)
 
 ## No-Go Confirmations
 
 - No Advisory Repository Skill implemented.
+- No Advisory Provider implemented.
 - No model call implemented.
 - No DeepSeek integration.
 - No GLM integration.
@@ -169,7 +183,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115Q — Advisory Repository Skills Contract Freeze
+115R — Advisory Repository Skills Prototype
 
 ## Report Consistency
 
@@ -178,4 +192,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115P. Schema version 1.0.*
+*Report generated for PCAE Phase 115Q. Schema version 1.0.*

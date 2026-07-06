@@ -1,33 +1,33 @@
 {
-  "phase_id": "115P",
-  "phase_name": "Advisory Repository Skills Architecture",
-  "phase_title": "Advisory Repository Skills Architecture",
+  "phase_id": "115Q",
+  "phase_name": "Advisory Repository Skills Contract Freeze",
+  "phase_title": "Advisory Repository Skills Contract Freeze",
   "status": "completed",
-  "summary": "Architecture and design only, zero implementation added. Designs Advisory Repository Skills as model-backed, evidence-only Repository Skills. Freezes the core principle (Advisory models may produce evidence, PCAE decides); the advisory pipeline (Repository State -> Prompt Builder -> Current Model -> Raw Response -> Normalizer -> Evidence Builder -> EvidenceCollection -> Decision Evaluation -> Repository Transition Validator); the model boundary (a model never returns a trusted PCAE object directly, the Normalizer is the sole conversion point, no tool-call authority, no file-write access); the default same-model mode (the current acting model may be the advisory model by default, no new configuration file/CLI flag/environment variable/model registry entry required); a documented-only future split-model mode (writer model vs. advisory model, named as a rationale only, not implemented); seven safety rules (probabilistic by default, model-produced, never sole authority for Accept, may trigger human review, may suggest repair, must include limitations, must cite references where possible -- all reusing existing Evidence/RepositorySkillManifest/InvariantResult fields, no schema change); failure behavior (UNKNOWN evidence or explicit advisory failure via the existing RepositorySkillResult two-outcome contract, never blocks deterministic checks by itself, never silently succeeds); and a narrow first future pilot scope (repository/documentation/report consistency review only, excluding code execution and lifecycle/commit/push/finalize authority). No Advisory Repository Skill implemented, no model call implemented, no DeepSeek/GLM/Claude/Codex/Qwen/OpenAI/local-SLM/any-backend integration, no model configuration added, no Repository Skills runtime, Evidence Provider, Decision Evaluation, Repository Transition Validator, or lifecycle command modified. Execution capability remains unavailable.",
+  "summary": "Contract/design only, zero implementation added. Freezes the backend-agnostic contract for Advisory Repository Skills before any implementation. Freezes the backend-agnostic principle (an Advisory Repository Skill must not depend directly on a specific model backend, talking only to an AdvisoryProvider abstraction); the AdvisoryRepositorySkill interface (declares advisory capability, evidence categories, probabilistic-by-default determinism, model-produced evidence boundary; builds a prompt/request, consumes a normalized advisory response, produces EvidenceCollection; exhaustively forbidden from decision making, mutation, lifecycle authority, commit, push, finalize, notification dispatch, artifact promotion, execution, authorization, validator bypass); the AdvisoryProvider/AdvisoryRequest/RawAdvisoryResponse/NormalizedAdvisoryResponse abstraction (contract only -- current acting model default, DeepSeek, Claude, Codex, GLM/Z.ai, Qwen, OpenAI, local SLM, external review service, and deterministic mock named as possible future providers, none implemented); the default same-model mode (no new configuration required); a documented-only split-model future mode; the prompt boundary (bounded context, explicit question, no secrets, no unrestricted command capability, no execution request); the response boundary (raw model output never trusted directly, only canonical Evidence enters PCAE); the Evidence Builder contract (probabilistic by default, model-produced if applicable, advisory only, confidence-labelled, limitation-labelled, provenance-preserving, never sole authority for Accept); the failure contract (UNKNOWN evidence or explicit advisory failure, never silent success, never hidden partial output); an exhaustive safety-rule checklist; and a narrow first future pilot scope (exactly one of repository/documentation/report consistency review, excluding code execution, security authorization, lifecycle control, and autonomous repair). No Advisory Repository Skill, Advisory Provider, model call, DeepSeek/GLM/Claude/Codex/Qwen/OpenAI/local-SLM/any-backend integration, model configuration, Repository Skills runtime, Evidence Provider, Decision Evaluation, Repository Transition Validator, or lifecycle command implemented or modified. Execution capability remains unavailable.",
   "files_changed_count": 8,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PCAE_ADVISORY_REPOSITORY_SKILLS_ARCHITECTURE.md",
-    "docs/PHASE_115P_ADVISORY_REPOSITORY_SKILLS_ARCHITECTURE.md",
+    "docs/PCAE_ADVISORY_REPOSITORY_SKILLS_CONTRACT.md",
+    "docs/PHASE_115Q_ADVISORY_REPOSITORY_SKILLS_CONTRACT_FREEZE.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-1909-115p-advisory-repository-skills-architecture.md",
-    "tests/test_phase_115p_advisory_repository_skills_architecture.py",
+    "tasks/done/20260706-1925-115q-advisory-repository-skills-contract-freeze.md",
+    "tests/test_phase_115q_advisory_repository_skills_contract_freeze.py",
     ".pcae/phase-completion-metadata.json"
   ],
-  "tests_added_or_updated": "29 new focused architecture/documentation verification tests added (tests/test_phase_115p_advisory_repository_skills_architecture.py); no implementation code changed; all pre-existing suites (115H/115I/115L architecture tests, repository_skills/repository_skills_integration/repository_skills_integration_verification suites) pass unmodified",
+  "tests_added_or_updated": "37 new focused architecture/documentation verification tests added (tests/test_phase_115q_advisory_repository_skills_contract_freeze.py); no implementation code changed; all pre-existing suites (115H/115I/115P architecture tests, repository_skills/repository_skills_integration/repository_skills_integration_verification suites) pass unmodified",
   "phase_commits": [
     {
-      "hash": "e0ecb920",
-      "message": "Design Advisory Repository Skills architecture"
+      "hash": "27fb2e93",
+      "message": "Freeze Advisory Repository Skills contract"
     },
     {
-      "hash": "d956359e",
-      "message": "Complete Phase 115P Advisory Repository Skills architecture"
+      "hash": "2fb57b3f",
+      "message": "Complete Phase 115Q Advisory Repository Skills contract"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115P adds no implementation)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115Q adds no implementation)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -45,9 +45,9 @@
   "validation_results": [
     {
       "name": "focused_architecture_documentation_tests",
-      "result": "240/240",
+      "result": "259/259",
       "status": "passed",
-      "note": "python -m pytest tests/test_phase_115p_advisory_repository_skills_architecture.py tests/test_phase_115h_repository_skills_architecture.py tests/test_phase_115i_repository_skills_contract_freeze.py tests/test_phase_115l_repository_skills_integration_design.py tests/test_repository_skills.py tests/test_repository_skills_integration_115m.py tests/test_repository_skills_integration_verification_115n.py -q -ra"
+      "note": "python -m pytest tests/test_phase_115q_advisory_repository_skills_contract_freeze.py tests/test_phase_115h_repository_skills_architecture.py tests/test_phase_115i_repository_skills_contract_freeze.py tests/test_phase_115p_advisory_repository_skills_architecture.py tests/test_repository_skills.py tests/test_repository_skills_integration_115m.py tests/test_repository_skills_integration_verification_115n.py -q -ra"
     },
     {
       "name": "report_notification_tests",
@@ -63,7 +63,7 @@
       "name": "fast_green",
       "result": "4390/4390",
       "status": "passed",
-      "note": "prior phase's fast_green result carried forward; unaffected by this architecture-only phase"
+      "note": "prior phase's fast_green result carried forward; unaffected by this contract-freeze-only phase"
     },
     {
       "name": "pcae_health",
@@ -107,7 +107,7 @@
     }
   ],
   "test_results": {
-    "focused_architecture_documentation_tests": "240/240",
+    "focused_architecture_documentation_tests": "259/259",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "4390/4390"
@@ -156,6 +156,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No Advisory Repository Skill implemented. No model call implemented. No DeepSeek integration. No GLM integration. No Claude skill. No Codex skill. No Qwen integration. No OpenAI integration. No local SLM integration. No model configuration added. No Repository Skills runtime modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115Q — Advisory Repository Skills Contract Freeze"
+  "no_go_confirmation": "No Advisory Repository Skill implemented. No Advisory Provider implemented. No model call implemented. No DeepSeek integration. No GLM integration. No Claude skill. No Codex skill. No Qwen integration. No OpenAI integration. No local SLM integration. No model configuration added. No Repository Skills runtime modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115R — Advisory Repository Skills Prototype"
 }
