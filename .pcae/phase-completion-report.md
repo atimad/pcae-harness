@@ -6,9 +6,9 @@
 - **Missing trust fields:** none
 - **Files changed:** 8
 - **Tests run:** 52 (focused architecture/documentation suite)
-- **Commits:** 4cb8884d, 792c907b
-- **Pushed:** not_pushed
-- **origin/main..HEAD:** 2
+- **Commits:** 4cb8884d, 792c907b, ab0fc415, f52037ac
+- **Pushed:** pushed
+- **origin/main..HEAD:** 0
 
 ## Summary
 
@@ -140,8 +140,8 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** pending (not yet pushed at report-write time)
-- **pcae_agent_verify_handoff:** pending (dirty working tree until final commit/push)
+- **pcae_push_check:** clean (pushed, origin/main..HEAD == 0)
+- **pcae_agent_verify_handoff:** pass
 - **pcae_session_bootstrap_compact:** completed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe
 - **telegram_runtime:** loaded, configured, enabled

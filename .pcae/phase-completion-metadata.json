@@ -25,13 +25,21 @@
     {
       "hash": "792c907b",
       "message": "Complete Phase 115I Repository Skills contract freeze"
+    },
+    {
+      "hash": "ab0fc415",
+      "message": "Sync Phase 115I completion metadata and canonical report"
+    },
+    {
+      "hash": "f52037ac",
+      "message": "Close 115I completion metadata sync task"
     }
   ],
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; contract-only phase, no code modified)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -83,8 +91,8 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "pending (not yet pushed at metadata-write time)",
-      "status": "pending"
+      "result": "clean (pushed, origin/main..HEAD == 0)",
+      "status": "passed"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -128,11 +136,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "pending"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending (dirty working tree until final commit/push)"
+      "status": "pass"
     },
     {
       "name": "pcae_session_bootstrap_compact",
