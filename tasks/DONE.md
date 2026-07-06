@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 115G: Repository Decision Evaluation Verification & Compatibility (20260706-1209-115g-repository-decision-evaluation-verification-compatibility)
 - Fix 115F pushed-state metadata field (20260706-1000-fix-115f-pushed-state-metadata-field)
 - Sync Phase 115F completion metadata (20260706-0959-sync-phase-115f-completion-metadata)
 - 115F: Repository Decision Evaluation Integration (20260706-0940-115f-repository-decision-evaluation-integration)
