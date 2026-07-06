@@ -2,6 +2,48 @@
 
 ## Unreleased
 
+- Phase 115F — Repository Decision Evaluation Integration.
+  Integrates 115E's Decision Evaluation with the Repository Transition
+  Validator (`core/repository_transition_validator.py`) in a
+  behavior-preserving way: same decisions, better explanations.
+  `TransitionResult` gains one new, backward-compatible field,
+  `explanation: EvaluationResult | None = None`; the validator's own
+  verdict-computing logic (113U's `checks`/`violations`/`blocking`
+  branching) is unchanged, line for line -- only the three return
+  statements now also pass `explanation=explanation`. Added
+  `build_evidence_from_repository_state(state) -> EvidenceCollection`,
+  mapping already-computed `RepositoryState` fields into 115C `Evidence`
+  items reusing 115D's own Evidence IDs, so 115E's invariant evaluators
+  run completely unmodified; no new Git/filesystem/subprocess/runtime
+  I/O. Fixed a real bug found while designing the adapter:
+  `evaluate_canonical_promotion_eligibility` (`decision_evaluation.py`)
+  now resolves `NOT_APPLICABLE`, not a misleading automatic `FAIL`, when
+  only one of its two required inputs is present (no existing 115E test
+  exercised this case). Verified behavior-preserving: all 36
+  pre-existing `test_repository_transition_validator.py` tests pass
+  unmodified; added
+  `tests/test_repository_transition_validator_decision_evaluation_integration.py`
+  (32 new tests) re-running 12 representative 113U scenarios with
+  identical verdicts, proving explanation presence, evidence references,
+  UNKNOWN-never-passes and conflict-preservation inheritance, backward
+  compatibility, and no execution capability introduced; the real
+  `pcae phase complete`/`pcae task finish --commit` lifecycle
+  integration test suites
+  (`test_repository_transition_validator_phase_complete_integration.py`,
+  `test_repository_transition_validator_task_finish_integration.py`)
+  pass completely unmodified, proving CLI output is unaffected (neither
+  reads the new field). `push_state_consistency`/`metadata_consistency`
+  resolve `NOT_APPLICABLE` through this adapter by design (no second
+  independent source exists in `RepositoryState`). Added
+  `docs/PHASE_115F_DECISION_EVALUATION_INTEGRATION.md`. No Repository
+  Skills, no execution, no authorization, no Repository Transition
+  Validator behavior changes, no lifecycle command changes, no
+  Notification Policy changes, no Canonical Artifact Promotion changes,
+  no Push-State Reconciliation changes, no Post-Push Canonicalization
+  changes, no Telegram changes, no REST, no Dashboard, no plugins, no
+  SLM/LLM integration. Recommended next phase: 115G — Repository
+  Decision Evaluation Verification & Compatibility.
+
 - Phase 115E — Repository Decision Evaluation Prototype.
   Implements the deterministic Repository Decision Evaluation layer
   between 115D's Evidence Providers and the Repository Transition

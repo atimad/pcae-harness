@@ -9,29 +9,32 @@ deterministic invariant families.
 Core principle (115A/115B, restated here): Evidence never decides.
 Evaluation is deterministic. The Repository Transition Validator remains
 the only authority capable of determining repository state transitions
--- nothing in this module produces a ``TransitionVerdict``, and nothing
-here is called by the validator, any lifecycle command, or any
-notification path.
+-- nothing in this module produces a ``TransitionVerdict``.
 
 Consumes only ``Evidence``/``EvidenceCollection`` (115C). No Git access,
 no filesystem access, no subprocesses, no runtime inspection, no
 lifecycle commands -- this module's only import is
-``pcae.core.evidence``; it never imports ``evidence_providers.py``,
-``repository_transition_validator.py``, or anything that performs I/O.
-Callers assemble an ``EvidenceCollection`` (e.g. via 115D's providers)
-and pass it in; this module only reasons about the evidence it is given.
+``pcae.core.evidence``; it never imports ``evidence_providers.py`` or
+``repository_transition_validator.py``, and performs no I/O itself.
+Callers assemble an ``EvidenceCollection`` (e.g. via 115D's providers,
+or 115F's ``RepositoryState``-to-``Evidence`` adapter) and pass it in;
+this module only reasons about the evidence it is given.
 
 The six invariant families implemented here share their names with
 ``repository_transition_validator.py``'s ``STRUCTURAL_INVARIANTS``
 (``phase_identity_consistency``, ``metadata_consistency``,
 ``report_completeness``, ``canonical_promotion_eligibility``) plus two
 new evidence-only families (``push_state_consistency``,
-``runtime_execution_unavailable``) -- deliberately, since 115E is the
-evidence-based analogue the validator's own structural checks are
-expected to eventually integrate with (115F, not this phase). The two
-implementations are entirely independent: this module shares no code,
-no import, and no call path with the validator's checks, which operate
-on ``RepositoryState`` fields, never on ``Evidence``.
+``runtime_execution_unavailable``) -- deliberately, since this module is
+the evidence-based analogue the validator's own structural checks are
+expected to integrate with. The two implementations remain independent
+at the code level: this module still shares no code and no import with
+the validator's own checks (which operate on ``RepositoryState`` fields,
+never on ``Evidence``); the dependency runs in one direction only, as of
+115F, from ``repository_transition_validator.py`` calling into this
+module (never the reverse) to attach an optional, additive explanation
+to its ``TransitionResult`` -- verdict authority remains entirely with
+the validator's own unchanged invariant checks.
 """
 
 from __future__ import annotations
@@ -489,10 +492,12 @@ def evaluate_canonical_promotion_eligibility(evidence: EvidenceCollection) -> In
     consistency_ev = _by_id(evidence, "E-report-005")
     present = tuple(e for e in (completeness_ev, consistency_ev) if e is not None)
 
-    if not present:
+    if len(present) < 2:
         return _not_applicable_result(
             invariant_id, severity,
-            "No report completeness/consistency evidence (E-report-003, E-report-005) present in this evaluation.",
+            "Both report completeness (E-report-003) and consistency (E-report-005) evidence "
+            "are required to jointly evaluate this invariant; at least one is not present in "
+            "this evaluation.",
         )
     if any(_is_unknown(e) for e in present):
         return _unknown_result(

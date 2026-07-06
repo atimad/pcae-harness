@@ -563,8 +563,15 @@ class TestNoRuntimeDependencies:
 
 
 class TestNoValidatorIntegration:
-    """Objective 9: Repository Transition Validator remains unchanged
-    and unaware of this module."""
+    """Objective 9 (115E): this module (``decision_evaluation.py``)
+    remains unaware of the Repository Transition Validator -- it must
+    never import it, regardless of what the validator does.
+
+    As of 115F, the dependency runs the other way: the validator
+    imports this module (one-directional only) to attach an optional
+    explanation to its ``TransitionResult``, without this module ever
+    importing the validator back or gaining any knowledge of
+    ``RepositoryState``/``TransitionVerdict``."""
 
     def test_decision_evaluation_never_imports_validator(self):
         import pcae.core.decision_evaluation as module
@@ -575,14 +582,31 @@ class TestNoValidatorIntegration:
         ]
         assert not any("repository_transition_validator" in line for line in import_lines)
 
-    def test_validator_never_imports_decision_evaluation(self):
+    def test_validator_imports_decision_evaluation_one_way_only(self):
+        """115F: the validator is now allowed (and expected) to import
+        this module for explanation enrichment -- but never the
+        reverse, proven by ``test_decision_evaluation_never_imports_validator``
+        above."""
         import pcae.core.repository_transition_validator as validator_module
         source = Path(validator_module.__file__).read_text(encoding="utf-8")
         import_lines = [
             line for line in source.splitlines()
             if line.strip().startswith("from ") or line.strip().startswith("import ")
         ]
-        assert not any("decision_evaluation" in line for line in import_lines)
+        assert any("decision_evaluation" in line for line in import_lines)
+
+    def test_decision_evaluation_never_gains_repository_state_knowledge(self):
+        """115F must not make this module aware of RepositoryState/
+        TransitionVerdict/TransitionResult -- the adapter and any
+        RepositoryState-shaped types belong to the validator side of
+        the integration, never here."""
+        import pcae.core.decision_evaluation as module
+        source = Path(module.__file__).read_text(encoding="utf-8")
+        import_lines = [
+            line for line in source.splitlines()
+            if line.strip().startswith("from ") or line.strip().startswith("import ")
+        ]
+        assert not any("RepositoryState" in line or "TransitionVerdict" in line for line in import_lines)
 
     def test_evaluation_result_is_not_a_transition_result(self):
         from pcae.core.repository_transition_validator import TransitionResult

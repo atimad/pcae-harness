@@ -6,12 +6,22 @@ deterministic, model-agnostic function that evaluates a proposed
 repository state transition against a fixed set of structural
 invariants and returns one of four verdicts.
 
-Observation-only: nothing in this module is called by ``pcae phase
-complete``, ``pcae task finish --commit``, ``pcae push``, or any
-notification path. It exists to be called directly -- by tests today,
-by a future integration phase once this prototype is verified. Calling
-it has no effect on canonical repository state; it only classifies a
-transition that has already been described to it.
+Verdict authority: this module's own invariant checks below (added in
+113U, unchanged since) remain the sole source of ``TransitionVerdict``.
+As of Phase 115F, ``validate_transition`` additionally attaches an
+optional, backward-compatible ``TransitionResult.explanation`` --
+115E's Decision Evaluation output, built from an evidence adapter over
+this same ``RepositoryState`` -- but this enrichment never influences,
+overrides, or is consulted by the verdict logic itself. "Same
+decisions, better explanations": rerunning any pre-115F scenario
+produces the exact same ``verdict``/``violations``, unconditionally.
+
+``repository_transition_integration.py`` is the live adapter that calls
+``validate_transition`` from ``pcae phase complete`` and ``pcae task
+finish --commit`` (Phase 113Y/113Z) -- so the explanation enrichment
+added here is automatically available through that real path too,
+without any change to those lifecycle commands or their printed output
+(neither reads ``TransitionResult.explanation``).
 
 No field on any type in this module carries the identity of the
 proposing agent. The validator evaluates repository state, never
@@ -23,6 +33,18 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
+
+from pcae.core.decision_evaluation import EvaluationContext, EvaluationResult
+from pcae.core.decision_evaluation import evaluate as evaluate_decision
+from pcae.core.evidence import (
+    Evidence,
+    EvidenceCategory,
+    EvidenceCollection,
+    EvidenceConfidence,
+    EvidenceDeterminism,
+    EvidenceFreshness,
+    EvidenceProvenance,
+)
 
 
 class TransitionKind(str, Enum):
@@ -134,6 +156,14 @@ class InvariantViolation:
 class TransitionResult:
     verdict: TransitionVerdict
     violations: tuple[InvariantViolation, ...] = ()
+    #: 115F: optional, backward-compatible enrichment. ``None`` for any
+    #: caller/test that constructs a ``TransitionResult`` directly
+    #: (unaffected -- this field simply defaults) and for the rare case
+    #: where explanation-building itself fails (never for a verdict
+    #: failure -- see ``_build_explanation``). Never read by
+    #: ``verdict``/``accepted``/``violations``, and never consulted by
+    #: ``validate_transition``'s own verdict logic.
+    explanation: EvaluationResult | None = None
 
     @property
     def accepted(self) -> bool:
@@ -293,6 +323,115 @@ def _check_no_execution_availability_unless_contracted(state: RepositoryState) -
     return None
 
 
+#: 115F: producer label for evidence adapted from ``RepositoryState``,
+#: distinct from 115D's real providers (``GitEvidenceProvider`` etc.) --
+#: this evidence is derived from already-computed state, not freshly
+#: collected from git/filesystem/runtime.
+_STATE_ADAPTER_PRODUCER = "RepositoryStateEvidenceAdapter"
+_STATE_ADAPTER_TIMESTAMP = "n/a (adapted from already-computed RepositoryState, no live collection timestamp)"
+
+
+def _state_adapter_provenance(produced_from: str) -> EvidenceProvenance:
+    return EvidenceProvenance(
+        producer=_STATE_ADAPTER_PRODUCER,
+        produced_from=produced_from,
+        timestamp=_STATE_ADAPTER_TIMESTAMP,
+        deterministic_origin=True,
+    )
+
+
+def _adapted_evidence(
+    evidence_id: str, category: EvidenceCategory, value: Any, produced_from: str, explanation: str,
+) -> Evidence:
+    return Evidence(
+        evidence_id=evidence_id,
+        source="RepositoryState",
+        category=category,
+        producer=_STATE_ADAPTER_PRODUCER,
+        timestamp_utc=_STATE_ADAPTER_TIMESTAMP,
+        freshness=EvidenceFreshness.CURRENT,
+        confidence=EvidenceConfidence.MEDIUM,
+        determinism=EvidenceDeterminism.DETERMINISTIC,
+        scope="repository state (adapted from an already-computed RepositoryState, not independently collected)",
+        references=(),
+        observed_value=value,
+        explanation=explanation,
+        provenance=_state_adapter_provenance(produced_from),
+    )
+
+
+def build_evidence_from_repository_state(state: RepositoryState) -> EvidenceCollection:
+    """Adapts already-computed ``RepositoryState`` fields into 115C
+    ``Evidence`` items, reusing 115D's own Evidence IDs so 115E's
+    invariant evaluators work completely unmodified.
+
+    Deliberately narrow (115F Objective 5): only fields
+    ``RepositoryState`` already carries a single, authoritative value
+    for are mapped here -- no new Git/filesystem/subprocess/runtime
+    I/O is performed by this function or by anything it calls.
+
+    ``push_state_consistency`` and ``metadata_consistency`` resolve
+    ``NOT_APPLICABLE`` through this adapter by design: those two
+    invariants compare two *independently sourced* observations (e.g.
+    git-derived vs declared-metadata pushed status), but
+    ``RepositoryState`` carries only one already-reconciled
+    ``pushed_status``/``origin_main_head_count`` pair by the time it
+    reaches the validator -- there is no second, independent source
+    left to adapt, so this function does not fabricate one.
+    """
+    items: list[Evidence] = []
+
+    if state.phase_id is not None:
+        items.append(_adapted_evidence(
+            "E-report-002", EvidenceCategory.REPORT, state.phase_id,
+            "RepositoryState.phase_id",
+            f"Repository state phase_id is {state.phase_id!r}.",
+        ))
+    if state.metadata_phase_id is not None:
+        items.append(_adapted_evidence(
+            "E-metadata-002", EvidenceCategory.METADATA, state.metadata_phase_id,
+            "RepositoryState.metadata_phase_id",
+            f"Repository state metadata_phase_id is {state.metadata_phase_id!r}.",
+        ))
+    items.append(_adapted_evidence(
+        "E-report-003", EvidenceCategory.REPORT, state.report_completeness,
+        "RepositoryState.report_completeness",
+        f"Repository state report_completeness is {state.report_completeness!r}.",
+    ))
+    items.append(_adapted_evidence(
+        "E-runtime-002", EvidenceCategory.RUNTIME, state.execution_availability,
+        "RepositoryState.execution_availability",
+        f"Repository state execution_availability is {state.execution_availability!r}.",
+    ))
+
+    return EvidenceCollection(tuple(items))
+
+
+def _build_explanation(state: RepositoryState) -> EvaluationResult | None:
+    """Best-effort explanation enrichment only (115F Objective 3).
+
+    Never affects ``validate_transition``'s verdict: any failure here
+    (there is no I/O to fail, but this stays defensive against future
+    changes) is swallowed and results in ``explanation=None`` -- never
+    a broken ``TransitionResult``, never a changed verdict.
+    """
+    try:
+        evidence = build_evidence_from_repository_state(state)
+        context = EvaluationContext(
+            evidence=evidence,
+            evaluation_id=(
+                f"repository-transition-validator:"
+                f"{state.phase_id or 'unknown'}:{state.metadata_phase_id or 'unknown'}"
+            ),
+            evaluation_timestamp=_STATE_ADAPTER_TIMESTAMP,
+            repository_snapshot_reference=f"phase_id={state.phase_id or 'unknown'}",
+            evaluation_version="1.0",
+        )
+        return evaluate_decision(context)
+    except Exception:
+        return None
+
+
 def validate_transition(
     current_state: RepositoryState,
     proposed_transition: ProposedTransition,
@@ -302,14 +441,20 @@ def validate_transition(
     """Evaluate a proposed repository state transition.
 
     Pure function: same inputs always produce the same
-    :class:`TransitionResult`. Contains no branch on any agent/model
-    identity -- there is no such field on any input type.
+    :class:`TransitionResult`, including its ``explanation`` field.
+    Contains no branch on any agent/model identity -- there is no such
+    field on any input type.
 
     Maps to a verdict per the Failure Contract (113T Section 9):
     any blocking violation on identity/metadata/canonical-promotion/
     notification/execution-availability rejects; a report-completeness
     violation classified as a warning (partial validation) quarantines
     instead of rejecting; no violations accepts.
+
+    115F: ``explanation`` is computed once from ``current_state`` and
+    attached to every branch below -- purely additive. The verdict
+    computed above (``violations``/``blocking``) is entirely unchanged
+    from 113U and does not read ``explanation`` in any way.
     """
     checks = (
         _check_phase_identity_consistency(current_state),
@@ -321,17 +466,18 @@ def validate_transition(
         _check_no_execution_availability_unless_contracted(current_state),
     )
     violations = tuple(v for v in checks if v is not None)
+    explanation = _build_explanation(current_state)
 
     if not violations:
-        return TransitionResult(verdict=TransitionVerdict.ACCEPT, violations=())
+        return TransitionResult(verdict=TransitionVerdict.ACCEPT, violations=(), explanation=explanation)
 
     blocking = tuple(v for v in violations if v.force == "blocking")
     if blocking:
-        return TransitionResult(verdict=TransitionVerdict.REJECT, violations=violations)
+        return TransitionResult(verdict=TransitionVerdict.REJECT, violations=violations, explanation=explanation)
 
     # Only non-blocking (warning-classified, e.g. partial report
     # completeness) violations remain -- quarantine, never reject.
-    return TransitionResult(verdict=TransitionVerdict.QUARANTINE, violations=violations)
+    return TransitionResult(verdict=TransitionVerdict.QUARANTINE, violations=violations, explanation=explanation)
 
 
 def promotion_allowed(current: ArtifactState, target: ArtifactState) -> bool:
