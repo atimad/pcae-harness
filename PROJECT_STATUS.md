@@ -2,13 +2,76 @@
 
 ## Current Phase
 
-Phase 115C — Repository Evidence Framework Prototype (in progress).
+Phase 115C — Repository Evidence Framework Prototype (completed).
 
-Implements the runtime representation of the Evidence contract frozen by
-115B: immutable `Evidence`, `EvidenceCollection`, the four frozen enums,
-`EvidenceReference`, and `EvidenceProvenance`, with serialization and
-validation. No decision logic, no Repository Transition Validator
-integration, no lifecycle/notification integration.
+Runtime object prototype only. Full implementation:
+`src/pcae/core/evidence.py`.
+Phase report:
+`docs/PHASE_115C_REPOSITORY_EVIDENCE_PROTOTYPE.md`.
+
+**Implemented**: immutable `Evidence` (the 14 fields frozen by 115B, plus
+a `provenance` field), `EvidenceCollection` (ordered, duplicate-
+`evidence_id`-rejecting, `by_id`/`by_category`/`by_source`/
+`by_determinism`/`by_confidence` filtering, `add()` returns a new
+collection), the four frozen enumerations (`EvidenceCategory`,
+`EvidenceDeterminism`, `EvidenceConfidence`, `EvidenceFreshness`) as
+`class X(str, Enum)`, `EvidenceReference` (`evidence_id` + optional
+`note`), and `EvidenceProvenance` (`producer`/`produced_from`/
+`timestamp`/`deterministic_origin`, metadata only).
+
+**Immutability**: all four types are `@dataclass(frozen=True)`.
+`references`/`observed_value`/`expected_value` are deep-frozen (dicts
+become read-only `MappingProxyType` views, lists become tuples) so no
+caller-held mutable reference can change stored state after
+construction.
+
+**Serialization**: `to_dict()`/`from_dict()` on all four types produce
+and consume plain JSON-compatible dicts; no persistence layer.
+
+**Validation**: required fields must be non-empty; category/freshness/
+confidence/determinism are validated through the enum's own constructor;
+duplicate `evidence_id` values inside one `EvidenceCollection` are
+rejected. Repository semantics (e.g. whether a referenced commit hash
+actually exists) are deliberately not validated.
+
+**Disconnected by design**: `evidence.py` imports only from the Python
+standard library. Not consumed by Repository Skills, Decision
+Evaluation, the Repository Transition Validator, any lifecycle command,
+Notification Policy, Canonical Artifact Promotion, Push-State
+Reconciliation, Post-Push Canonicalization, or `pcae agent
+verify-handoff`. No execution, authorization, Permission Broker
+enforcement, plugins, Telegram inbound, REST, Web UI, or Dashboard.
+Execution capability remains unavailable.
+
+Recommended next repo phase: 115D — Repository Evidence Provider Prototype (not started).
+
+## Phase 115C Complete
+
+Phase 115C — Repository Evidence Framework Prototype (completed).
+
+Runtime object prototype only. Full implementation:
+`src/pcae/core/evidence.py`.
+Phase report:
+`docs/PHASE_115C_REPOSITORY_EVIDENCE_PROTOTYPE.md`.
+
+Implemented immutable `Evidence`, `EvidenceCollection`, the four frozen
+enumerations, `EvidenceReference`, and `EvidenceProvenance`, exactly as
+frozen by 115B, plus a `provenance` field. Deep-froze
+`references`/`observed_value`/`expected_value` against aliasing
+mutation. Added `to_dict()`/`from_dict()` JSON-compatible serialization
+and structural validation (required fields, enum values, duplicate
+evidence IDs) with no repository-semantics checking. `evidence.py`
+imports only from the Python standard library.
+
+**No-go**: no Repository Skills, no Decision Evaluation, no Repository
+Transition Validator integration, no lifecycle command changes, no
+Notification Policy changes, no Canonical Artifact Promotion changes, no
+Push-State Reconciliation changes, no Post-Push Canonicalization
+changes, no execution, authorization, Permission Broker enforcement,
+plugins, Telegram inbound, REST, Web UI, or Dashboard. Execution
+capability remains unavailable.
+
+Recommended next repo phase: 115D — Repository Evidence Provider Prototype (not started).
 
 ## Phase 115B Complete
 
