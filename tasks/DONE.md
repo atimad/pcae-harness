@@ -2,6 +2,7 @@
 
 ## Completed
 
+- 115T: Advisory Provider Verification & Compatibility (20260706-2057-115t-advisory-provider-verification-compatibility)
 - Sync phase 115S completion metadata (20260706-2040-sync-phase-115s-completion-metadata)
 - 115S: First Advisory Provider Integration (Current Acting Model) (20260706-2037-115s-first-advisory-provider-integration-current-acting-model)
 - Sync phase 115R completion metadata (20260706-2009-sync-phase-115r-completion-metadata)
