@@ -1,79 +1,76 @@
-# Phase 115U Complete — Advisory Provider Strategy & Extension Point Review
+# Phase 115V Complete — Advisory Evidence Enrichment Architecture
 
-- **Phase ID:** `115U`
+- **Phase ID:** `115V`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 8
-- **Tests run:** 284 (focused architecture/documentation suite)
-- **Commits:** d73a9956, 7c3cd22b
+- **Tests run:** 107 (focused architecture/documentation suite)
+- **Commits:** 7d295dfc, 785d35c9
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115U decides PCAE does not need a second advisory provider now,
-while preserving the ability to add one later without architectural
-redesign. Architecture/review only; zero implementation added.
+Phase 115V designs how PCAE improves advisory quality by enriching
+the deterministic evidence supplied to Advisory Repository Skills —
+the axis of improvement 115U named instead of a second advisory
+provider. Architecture and design only; zero implementation added.
 
-## Core Question
+## Advisory Evidence Enrichment Summary
 
-Do we need a second advisory provider now? **No.**
+Enrichment supplies an Advisory Repository Skill's Prompt Builder with
+richer deterministic evidence from existing 115D providers/115J
+skills and future sources, without changing containment, the
+Normalizer boundary, or Decision Evaluation authority.
 
-## Advisory Provider Strategy Summary
+## Evidence Category Summary
 
-Reviewed the current same-model default across five properties
-(same-model default, bounded pilot scope, one request/one response/one
-`EvidenceCollection`, stateless operation, normalized evidence
-boundary, provider containment) — all sound. Evaluated a second
-provider across ten considerations (benefit, complexity, latency,
-cost, reproducibility, disagreement handling, reliability,
-configuration burden, vendor coupling, governance risk) — every
-consideration showed no benefit or a cost with no offsetting benefit.
+Eleven categories named: repository state, git/history, changed-files,
+test evidence, architecture evidence, dependency/module evidence,
+documentation evidence, governance evidence, runtime capability
+evidence, report/metadata consistency evidence, future semantic/code
+graph evidence — each mapped to a deterministic source.
 
-## Second-Provider Decision
+## Priority Matrix Summary
 
-Defer. Do not implement a second provider now. Keep the extension
-point open — a review outcome, not a permanent prohibition.
+Value/difficulty/determinism/risk/expected advisory benefit per
+category. Tier 1: repository state, changed-files, governance,
+report/metadata consistency. Tier 2: git/history, test evidence,
+runtime capability. Tier 3: architecture, dependency/module,
+documentation, future semantic/code graph evidence.
 
-## Extension Point Summary
+## Advisory Context Package Summary
 
-A future second `AdvisoryProvider` can be added by implementing only
-the frozen contract (`provider_id`/`backend_kind`/`determinism`/
-`invoke()`) — no redesign required of Evidence, `EvidenceCollection`,
-Repository Skills, Decision Evaluation, the Repository Transition
-Validator, lifecycle commands, or Notification Policy.
+Bounded repository summary, deterministic evidence, current
+transition/question, constraints/no-go rules, relevant artifacts,
+known limitations — a 115W design target, not implemented, not a
+modification of `AdvisoryRequest`'s frozen fields.
 
-## Future Provider Criteria
+## Safety Boundary Summary
 
-Independent review, better domain expertise, local/offline advisory,
-lower cost, a privacy constraint, stronger consistency checking, or
-deliberate comparative evidence — never by default.
+Enriched evidence must never grant execution capability, expose
+secrets, include unbounded repository dumps, allow prompt injection,
+allow model output to bypass normalization, or change Decision
+Evaluation authority.
 
-## Multi-Provider Risk Summary
+## Prompt-Injection Handling
 
-Conflicting advisory evidence, provider disagreement, compounding
-nondeterminism, cost/latency, prompt drift, provider-specific quirks,
-hidden vendor coupling, operator confusion — documented in advance.
+Repository-derived content always untrusted input, never instructions.
+Trusted PCAE instructions, deterministic evidence, and untrusted
+repository content must be clearly separated — complementary to
+115Q's Normalizer boundary.
 
-## Disagreement Handling
+## Summarization Strategy
 
-Preserve all evidence, mark conflicts, never average or vote blindly,
-let unmodified Decision Evaluation handle conflicts exactly as it
-already does for deterministic evidence, no provider ever becomes
-authority.
+Deterministic summaries preferred over a second model call; bounded
+length; provenance preserved; references retained; raw evidence never
+blindly pasted.
 
-## Configuration Posture
+## Future Roadmap
 
-No provider configuration needed now; current acting model remains
-default. Any future split-model mode would be optional, explicit,
-isolated to the provider-selection layer, and never leak into Decision
-Evaluation or the Validator.
-
-## Roadmap Recommendation
-
-Focus next on higher-quality evidence and advisory skill hardening,
-not provider proliferation.
+115W (Contract Freeze) → 115X (Prototype, Tier 1 evidence only) →
+115Y (Verification) → 115Z (Advisory Skill Pilot Hardening).
 
 ## PCAE Architecture Status
 
@@ -102,10 +99,11 @@ maintained as runtime state.*
 - First Advisory Provider Integration (Current Acting Model) through Phase 115S
 - Advisory Provider Verification & Compatibility through Phase 115T
 - Advisory Provider Strategy & Extension Point Review through Phase 115U
+- Advisory Evidence Enrichment Architecture through Phase 115V
 
 ### Planned
 
-- 115V — Advisory Evidence Quality Hardening
+- 115W — Advisory Context Package Contract
 
 ### Current Runtime State
 
@@ -127,26 +125,25 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_architecture_documentation_tests:** 284/284 (passed)
+- **focused_architecture_documentation_tests:** 107/107 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **fast_green:** 4390/4390 (passed; carried forward from 115T, unaffected by this architecture/review-only phase)
+- **fast_green:** 4390/4390 (passed; carried forward from 115U, unaffected by this architecture-only phase)
 
 ## No-Go Confirmations
 
-- No second Advisory Provider implemented.
-- No provider selection added.
+- No new Evidence Provider implemented.
+- No new Repository Skill implemented.
+- No Advisory Provider runtime modified.
+- No second advisory provider added.
 - No model configuration added.
 - No DeepSeek integration.
 - No GLM integration.
 - No Qwen integration.
-- No Codex-specific integration.
-- No OpenAI-specific integration.
+- No Codex integration.
+- No OpenAI integration.
 - No Claude-specific integration.
 - No local SLM integration.
-- No Advisory Provider runtime modified.
-- No Repository Skills runtime modified.
-- No Evidence modified.
 - No Decision Evaluation modified.
 - No Repository Transition Validator modified.
 - No lifecycle command modified.
@@ -167,7 +164,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115V — Advisory Evidence Quality Hardening
+115W — Advisory Context Package Contract
 
 ## Report Consistency
 
@@ -176,4 +173,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115U. Schema version 1.0.*
+*Report generated for PCAE Phase 115V. Schema version 1.0.*
