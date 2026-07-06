@@ -1,31 +1,36 @@
 {
-  "phase_id": "116A",
-  "phase_name": "v0.2 Architecture Review & Consolidation",
-  "phase_title": "v0.2 Architecture Review & Consolidation",
+  "phase_id": "116B",
+  "phase_name": "v0.2 Architecture Consolidation",
+  "phase_title": "v0.2 Architecture Consolidation",
   "status": "completed",
-  "summary": "Review-only v0.2 architecture assessment after 115Z. Reviewed Runtime, Governance, Repository State Kernel, Repository Transition Validator, Evidence Framework, Decision Evaluation, Repository Skills, Advisory Providers, Advisory Context Package, Reporting, Notifications, and Phase lifecycle. Assessment: architecture requires minor consolidation before freeze, not significant redesign. Extension points for Repository Skills, Advisory Providers, Evidence Providers, and Runtime Plugins are complete enough for the v0.2 architecture. Naming and wire diagrams are consistent. Remaining debt is classified: no must-fix items before v0.2; recommended consolidation for overlapping phase-identity/finalization checks, duplicated report-completeness/recommended-next-phase enforcement, shared RepositoryState construction, and the policy-only Repository Event layer; future enhancements and intentionally deferred capabilities documented. No runtime capability, execution, authorization, Permission Broker change, Repository Skill, Advisory Provider, Evidence Provider, Decision Evaluation change, Repository Transition Validator change, lifecycle command change, Notification Policy change, Telegram inbound, REST, Dashboard, Web UI, or model integration was implemented. Execution capability remains unavailable.",
-  "files_changed_count": 6,
+  "summary": "Documentation-only v0.2 architecture consolidation applying the minor items identified by Phase 116A. Structural invariants are documented as the long-term authority for phase identity, metadata consistency, report completeness, recommended-next-phase presence, canonical promotion eligibility, notification eligibility, and execution-unavailability checks. The legacy finalization gate remains a v0.2 compatibility/trust gate until its unique governance-key and test-result-key checks migrate into first-class invariants. Shared RepositoryState construction is documented as a future implementation shape owned by the Repository Transition Validator/integration layer. Repository Event is explicitly frozen as policy/taxonomy only for v0.2, not a runtime type, emitter, event bus, or subscription API. No runtime capability, execution, authorization, Permission Broker change, Repository Skill, Advisory Provider, Evidence Provider, Decision Evaluation behavior change, Repository Transition Validator behavior change, lifecycle command behavior change, Notification Policy behavior change, Telegram inbound, REST, Dashboard, Web UI, event bus, or model integration was implemented. Execution capability remains unavailable.",
+  "files_changed_count": 11,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_116A_V0_2_ARCHITECTURE_REVIEW.md",
+    "docs/GOVERNANCE_LIFECYCLE_DIAGRAM.md",
+    "docs/PCAE_NOTIFICATION_POLICY.md",
+    "docs/PCAE_REPOSITORY_STATE_KERNEL.md",
+    "docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION.md",
+    "docs/PHASE_116B_V0_2_ARCHITECTURE_CONSOLIDATION.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-2252-116a-v0-2-architecture-review-consolidation.md"
+    "tasks/TODO.md",
+    "tasks/done/20260706-2312-116b-v0-2-architecture-consolidation.md"
   ],
   "tests_added_or_updated": "No tests added or updated; architecture/documentation verification only.",
   "phase_commits": [
     {
-      "hash": "8b22131f",
-      "message": "116A v0.2 architecture review"
+      "hash": "1aa4fe18",
+      "message": "116B v0.2 architecture consolidation"
     },
     {
-      "hash": "14e223fe",
-      "message": "Close 116A architecture review task"
+      "hash": "fa82db98",
+      "message": "Close 116B architecture consolidation task"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116A is review/documentation only)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116B is documentation-only consolidation)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -62,13 +67,8 @@
       "status": "passed"
     },
     {
-      "name": "pcae_agent_verify_handoff",
-      "result": "pending final post-metadata verification",
-      "status": "pending"
-    },
-    {
       "name": "pcae_session_bootstrap_compact",
-      "result": "completed",
+      "result": "completed; TODO next marker consistent with PROJECT_STATUS.md",
       "status": "passed"
     },
     {
@@ -77,21 +77,32 @@
       "status": "passed"
     },
     {
+      "name": "python_m_pytest_n_auto",
+      "result": "7 failed, 18056 passed; failures are legacy/stale expectations outside 116B source-free documentation scope",
+      "status": "failed_documented"
+    },
+    {
+      "name": "pcae_agent_verify_handoff",
+      "result": "pending final post-metadata verification",
+      "status": "pending"
+    },
+    {
       "name": "pcae_notify_status",
-      "result": "loaded, configured, enabled",
-      "status": "passed"
+      "result": "pending final Telegram environment check",
+      "status": "pending"
     },
     {
       "name": "phase_finalization_skill",
-      "result": "resolved, target in_progress during pre-completion validation",
-      "status": "passed"
+      "result": "pending final invocation",
+      "status": "pending"
     }
   ],
   "test_results": {
     "architecture_documentation_verification": "completed",
-    "bootstrap_session_reporting_tests": "not_applicable_documentation_only",
+    "bootstrap_session_reporting_tests": "completed",
     "fast_green": "not_run_documentation_only",
-    "report_notification_tests": "not_applicable_documentation_only",
+    "full_pytest_suite": "failed_7_failed_18056_passed_legacy_expectations",
+    "report_notification_tests": "pending_final_telegram_delivery",
     "runtime_inspect_execution_unavailable": "passed"
   },
   "governance_results": [
@@ -112,10 +123,6 @@
       "status": "clean"
     },
     {
-      "name": "pcae_agent_verify_handoff",
-      "status": "pending final post-metadata verification"
-    },
-    {
       "name": "pcae_session_bootstrap_compact",
       "status": "completed"
     },
@@ -124,20 +131,28 @@
       "status": "execution unavailable, Observed, observe"
     },
     {
+      "name": "full_pytest_suite",
+      "status": "failed_legacy_expectations"
+    },
+    {
+      "name": "pcae_agent_verify_handoff",
+      "status": "pending final post-metadata verification"
+    },
+    {
       "name": "telegram_runtime",
-      "status": "loaded, configured, enabled"
+      "status": "pending final Telegram environment check"
     },
     {
       "name": "phase_finalization_skill",
-      "status": "resolved"
+      "status": "pending final invocation"
     }
   ],
   "telegram_runtime": {
-    "status": "loaded, configured, enabled",
+    "status": "pending final Telegram environment check",
     "inbound": false,
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No runtime capability implemented. No execution implemented. No authorization implemented. No Permission Broker change. No Repository Skill implemented. No Advisory Provider implemented. No Evidence Provider implemented. No Decision Evaluation change. No Repository Transition Validator change. No lifecycle command change. No Notification Policy change. No Telegram inbound. No REST. No Dashboard. No Web UI. No model integration. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
-  "recommended_next_phase": "116B — v0.2 Architecture Consolidation"
+  "no_go_confirmation": "No runtime capability implemented. No execution implemented. No authorization implemented. No Permission Broker change. No Repository Skill implemented. No Advisory Provider implemented. No Evidence Provider implemented. No Decision Evaluation change. No Repository Transition Validator behavior change. No lifecycle command behavior change. No Notification Policy behavior change. No Telegram inbound. No REST. No Dashboard. No Web UI. No event bus. No model integration. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
+  "recommended_next_phase": "116C - v0.2 Architecture Consolidation Verification"
 }
