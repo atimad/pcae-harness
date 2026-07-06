@@ -1,96 +1,112 @@
-# Phase 115J Complete — Repository Skills Prototype
+# Phase 115K Complete — Repository Skills Verification & Compatibility
 
-- **Phase ID:** `115J`
+- **Phase ID:** `115K`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 8
-- **Tests run:** 245 (repository skills + evidence + architecture doc suite)
-- **Commits:** e664a937, 5d0dc645, 71cdf990, 0ab910c3
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Tests run:** 308 (repository skills verification + evidence + decision evaluation suite)
+- **Commits:** 46f2c5d6, 0e5be8fd
+- **Pushed:** not_pushed
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 115J implements the first Repository Skills framework
-(`src/pcae/core/repository_skills.py`) on top of 115I's frozen
-contract, using only deterministic skills that wrap existing 115D
-Evidence Providers. Implementation prototype only; no AI/SLM/LLM
-skills, no DeepSeek integration, no lifecycle/Decision Evaluation/
-Repository Transition Validator integration.
+Phase 115K verifies that 115J's Repository Skills prototype
+(`src/pcae/core/repository_skills.py`) is deterministic, read-only,
+evidence-only, and fully compatible with the existing Evidence
+Provider (115D) and Decision Evaluation (115E) architecture. No
+implementation code changed; one new focused test module (49 tests)
+added.
 
-## Repository Skills Prototype Summary
+## Verification Summary
 
-Repository Skills produce evidence. Repository Skills do not decide.
-This phase implements the frozen `RepositorySkill` contract as running
-code for the first time, with four deterministic skills, each a thin
-wrapper around one 115D Evidence Provider: no new evidence-collection
-logic was written — every skill delegates its work to the existing
-provider and returns that provider's `EvidenceCollection` unchanged.
+All eight objectives verified, no findings requiring an
+implementation change. 115J's Repository Skills remain exactly what
+115H/115I designed and froze: evidence producers, never deciders.
 
-## Skill Interface Summary
+## Skill Purity Summary
 
-`RepositorySkillCapability` (115I's frozen eight-value enum),
-`RepositorySkillManifest` (115I's frozen field set, validated at
-construction to reject a non-`none` `side_effect_policy` or an invalid
-`failure_policy`), `RepositorySkillContext` (mirrors 115D's
-`EvidenceProviderContext`), `RepositorySkillResult` (structurally
-enforces the two-outcome failure contract — a `FAILED` status cannot
-construct without a `failure_reason`), and the `RepositorySkill`
-abstract base declaring one `manifest` and one `invoke()` method. No
-model/agent/backend/vendor identity field exists on any of these
-shapes.
+Every default skill is proven read-only (`git log --oneline`
+byte-identical before/after invocation), produces only
+`EvidenceCollection`, creates no new files on disk, and carries no
+model/agent/backend/vendor identity field anywhere in its manifest or
+result. Every `Evidence.provenance.producer` string ends in
+`"Provider"` — a class label, never a human/model/agent name.
 
-## Registry Summary
+## Registry Determinism Summary
 
-`RepositorySkillRegistry` implements registration (with duplicate
-`skill_id` rejection), `get`/`list_skills`/`list_manifests`,
-`filter_by_capability`/`filter_by_category`, `invoke`/`invoke_many`/
-`invoke_all`, and `merge_evidence` (combines every `SUCCESS` result's
-evidence into one `EvidenceCollection`; `FAILED` results contribute
-none; a genuine ID collision would surface via `EvidenceCollection`'s
-own duplicate-ID `ValueError`, never a silent drop).
-`build_default_registry()` registers all four skills below.
+Registration order, lookup, listing, and multi-skill invocation order
+are all stable and deterministic. Duplicate `skill_id` registration is
+rejected every time (verified across 3 repeated attempts). Merged
+`EvidenceCollection` output is identical across 10 repeated
+full-registry invocations and independent of invocation order
+(forward vs. reverse skill order produces the same merged ID set).
 
-## Deterministic Skills Implemented
+## Provider Compatibility Summary
 
-| Skill | Wraps | Capability | Evidence IDs |
-| --- | --- | --- | --- |
-| `GitRepositorySkill` | `GitEvidenceProvider` | `git_analysis` | `E-git-001`..`005` |
-| `RuntimeRepositorySkill` | `RuntimeEvidenceProvider` | `runtime_analysis` | `E-runtime-001`..`003` |
-| `ReportRepositorySkill` | `ReportEvidenceProvider` | `report_analysis` | `E-report-001`..`005` |
-| `MetadataRepositorySkill` | `MetadataEvidenceProvider` | `metadata_analysis` | `E-metadata-001`..`005` |
+Every deterministic skill's evidence (IDs, observed values, freshness,
+confidence) is proven identical to calling its wrapped 115D Evidence
+Provider directly, for all four skills. Each skill declares the same
+`EvidenceDeterminism` and `required_inputs` as its wrapped provider —
+a structural guarantee (skills call `collect()` unmodified and return
+the result verbatim), now made explicit and regression-proof.
 
-## Evidence Produced
+## Failure Behavior Summary
 
-Verified live against this real repository: the four default skills
-collectively produce 18 `Evidence` items (5+3+5+5), merging cleanly
-into one 18-item `EvidenceCollection` with no ID collisions (115D's
-provider IDs were already disjoint namespaces).
+A missing git repository degrades `GitRepositorySkill` to `SUCCESS`
+with every item honestly `UNKNOWN`. Missing canonical report/metadata
+files correctly report `exists=False` (a valid `CURRENT` observation)
+while dependent fields degrade to `UNKNOWN`. No result ever reports
+`SUCCESS` with a `failure_reason` set. An explicit provider exception
+produces a `FAILED` result with zero evidence and a required
+`failure_reason` — never silent success, never partial hidden
+failure.
 
-## Failure Behavior
+## No-Hidden-Integration Proof
 
-Every skill failure produces exactly one of 115I's two frozen
-outcomes: honest `UNKNOWN` evidence (when the wrapped provider itself
-degrades gracefully — verified by invoking `GitRepositorySkill`
-against a directory with no git repository) or an explicit `FAILED`
-result with a required `failure_reason` (when the skill invocation
-itself cannot complete — verified by monkeypatching a provider's
-`collect()` to raise). No silent success: `RepositorySkillResult`
-structurally refuses to construct a `FAILED` status without a reason.
+Direct source-grep confirms `repository_skills` is referenced by none
+of: Decision Evaluation, the Repository Transition Validator,
+`repository_transition_integration.py`, `commands/phase.py`,
+`commands/task.py`, `commands/push.py`,
+`notification_certification.py`, `handoff_verification.py`,
+`post_push_canonicalization.py`, or `commands/runtime_inspect.py`.
+`repository_skills.py`'s own imports never reference
+`decision_evaluation`, `repository_transition_validator`,
+`pcae.commands`, `notification_certification`, or
+`handoff_verification`.
 
-## No-Integration Confirmation
+## AI Boundary Verification
 
-`repository_skills.py`'s only internal imports are
-`pcae.core.evidence`, `pcae.core.evidence_providers`, and
-`pcae.core.paths`. Not imported by, and does not import from, Decision
-Evaluation, the Repository Transition Validator, or any lifecycle
-command (`commands/phase.py`, `commands/task.py`). No AI/SLM/LLM-backed
-skill is registered by `build_default_registry()` — all four default
-skills declare `EvidenceDeterminism.DETERMINISTIC` and
-`model_produced=False`. The `ai_review` capability exists only as an
-enum value, matching 115I's frozen minimum set, with zero skills
-declaring it.
+No skill ID registered by `build_default_registry()` references
+deepseek/GLM/Qwen/Claude/GPT/Codex. Every default skill declares
+`model_produced=False` and `EvidenceDeterminism.DETERMINISTIC`. Every
+evidence item the four default skills produce carries
+`determinism="deterministic"`. The `ai_review` capability has zero
+registered skills declaring it.
+
+## Execution Boundary Verification
+
+`repository_skills.py` contains no `subprocess`/`os.system`/`Popen(`/
+`exec(`/`eval(` token. `RepositorySkillRegistry`'s public API has no
+commit/push/finalize/notify/authorize/execute/mutate method. Every
+default skill's manifest declares `side_effect_policy="none"`. No
+skill class defines a commit/push/finalize/notify/execute method.
+
+## Serialization / Decision Evaluation Compatibility
+
+Skill-merged `EvidenceCollection` survives a `to_dict()`/`from_dict()`
+round trip with identical IDs and observed values, and is fully
+JSON-serializable. Skill-merged evidence is a valid input to
+`decision_evaluation`'s `EvaluationContext`/`evaluate()` — confirmed
+by direct test construction only (`repository_skills.py` itself still
+contains no `evaluate(` call and no `decision_evaluation` import).
+
+**Notable finding**: unlike 115F's narrow `RepositoryState` adapter
+(which leaves three invariants permanently `NOT_APPLICABLE`), the
+full 115D provider evidence a Repository Skill exposes verbatim is
+rich enough for all six invariants to resolve PASS/FAIL — a
+compatibility finding, not a behavior change; no wiring was added.
 
 ## PCAE Architecture Status
 
@@ -109,10 +125,11 @@ maintained as runtime state.*
 - Repository Skills Architecture through Phase 115H
 - Repository Skills Contract Freeze through Phase 115I
 - Repository Skills Prototype through Phase 115J
+- Repository Skills Verification & Compatibility through Phase 115K
 
 ### Planned
 
-- 115K — Repository Skills Verification & Compatibility
+- 115L — Repository Skills Integration Design
 
 ### Current Runtime State
 
@@ -125,8 +142,8 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean (pushed, origin/main..HEAD == 0)
-- **pcae_agent_verify_handoff:** pass
+- **pcae_push_check:** pending (not yet pushed at report-write time)
+- **pcae_agent_verify_handoff:** pending (dirty working tree until final commit/push)
 - **pcae_session_bootstrap_compact:** completed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe
 - **telegram_runtime:** loaded, configured, enabled
@@ -134,8 +151,7 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_repository_skills_evidence_tests:** 193/193 (passed)
-- **architecture_documentation_tests:** 245/245 (passed)
+- **focused_repository_skills_verification_tests:** 308/308 (passed)
 - **runtime_contract_autonomy_plugin_regression:** 3573/3573 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
@@ -143,13 +159,14 @@ maintained as runtime state.*
 
 ## No-Go Confirmations
 
-- No AI/SLM/LLM skills.
+- No new Repository Skill.
+- No AI/SLM/LLM skill.
 - No DeepSeek integration.
+- No Repository Skills integration into Decision Evaluation or the
+  Repository Transition Validator.
 - No lifecycle command changes.
-- No Decision Evaluation integration.
-- No Repository Transition Validator integration.
 - No Notification Policy changes.
-- No execution capability.
+- No execution.
 - No authorization.
 - No Permission Broker enforcement.
 - No plugins.
@@ -166,7 +183,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115K — Repository Skills Verification & Compatibility
+115L — Repository Skills Integration Design
 
 ## Report Consistency
 
@@ -175,4 +192,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115J. Schema version 1.0.*
+*Report generated for PCAE Phase 115K. Schema version 1.0.*
