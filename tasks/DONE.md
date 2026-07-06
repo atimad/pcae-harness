@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix 115G pushed-state metadata field (20260706-1238-fix-115g-pushed-state-metadata-field)
 - Sync Phase 115G completion metadata (20260706-1237-sync-phase-115g-completion-metadata)
 - 115G: Repository Decision Evaluation Verification & Compatibility (20260706-1209-115g-repository-decision-evaluation-verification-compatibility)
 - Fix 115F pushed-state metadata field (20260706-1000-fix-115f-pushed-state-metadata-field)
