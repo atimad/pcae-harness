@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix pushed-state metadata for 115Z (20260706-2245-fix-pushed-state-metadata-for-115z)
 - Sync phase 115Z completion metadata (20260706-2243-sync-phase-115z-completion-metadata)
 - 115Z — Advisory Subsystem Hardening & Release Readiness (20260706-2241-115z-advisory-subsystem-hardening-release-readiness)
 - Sync phase 115Y completion metadata (20260706-2222-sync-phase-115y-completion-metadata)
