@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 115R completion metadata (20260706-2009-sync-phase-115r-completion-metadata)
 - 115R: Advisory Repository Skills Prototype (20260706-2007-115r-advisory-repository-skills-prototype)
 - Sync phase 115Q completion metadata (20260706-1927-sync-phase-115q-completion-metadata)
 - 115Q: Advisory Repository Skills Contract Freeze (20260706-1925-115q-advisory-repository-skills-contract-freeze)
