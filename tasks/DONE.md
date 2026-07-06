@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 115V completion metadata (20260706-2126-sync-phase-115v-completion-metadata)
 - 115V: Advisory Evidence Enrichment Architecture (20260706-2124-115v-advisory-evidence-enrichment-architecture)
 - Sync phase 115U completion metadata (20260706-2114-sync-phase-115u-completion-metadata)
 - 115U: Advisory Provider Strategy & Extension Point Review (20260706-2113-115u-advisory-provider-strategy-extension-point-review)

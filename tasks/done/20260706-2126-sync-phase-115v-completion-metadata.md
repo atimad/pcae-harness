@@ -10,7 +10,7 @@ Sync phase 115V completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
