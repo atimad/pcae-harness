@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- Phase 115C — Repository Evidence Framework Prototype.
+  Implements the runtime representation of the Evidence contract frozen
+  by 115B. Added `src/pcae/core/evidence.py`: immutable `Evidence` (the
+  14 fields frozen by 115B, plus a `provenance` field), `EvidenceCollection`
+  (ordered, duplicate-`evidence_id`-rejecting, with `by_id`/`by_category`/
+  `by_source`/`by_determinism`/`by_confidence` filtering and an `add()`
+  that returns a new collection rather than mutating), the four frozen
+  enumerations (`EvidenceCategory`, `EvidenceDeterminism`,
+  `EvidenceConfidence`, `EvidenceFreshness`) as `class X(str, Enum)`,
+  `EvidenceReference` (`evidence_id` + optional `note`, intentionally
+  distinct from `core/advisory_runtime.py`'s existing `EvidenceReference`),
+  and `EvidenceProvenance` (`producer`/`produced_from`/`timestamp`/
+  `deterministic_origin`, metadata only). `Evidence.references`/
+  `observed_value`/`expected_value` are deep-frozen (dicts become
+  read-only `MappingProxyType` views, lists become tuples) so no
+  caller-held mutable reference can change stored state after
+  construction. `to_dict()`/`from_dict()` on all four types produce and
+  consume plain JSON-compatible dicts (no persistence layer). Added
+  `tests/test_evidence.py`, `tests/test_evidence_collection.py`,
+  `tests/test_evidence_serialization.py`,
+  `tests/test_evidence_validation.py` (90 tests), and
+  `docs/PHASE_115C_REPOSITORY_EVIDENCE_PROTOTYPE.md`. `evidence.py`
+  imports only from the Python standard library — zero internal PCAE
+  imports, zero I/O, zero side effects. No Repository Skills, no
+  Decision Evaluation, no Repository Transition Validator integration,
+  no lifecycle command changes, no Notification Policy changes, no
+  Canonical Artifact Promotion changes, no Push-State Reconciliation
+  changes, no Post-Push Canonicalization changes, no execution, no
+  authorization, no Permission Broker enforcement, no plugins, no
+  Telegram inbound, no REST, no Web UI, no Dashboard. Execution
+  capability remains unavailable. Recommended next phase: 115D —
+  Repository Evidence Provider Prototype.
+
 - Phase 115B — Repository Evidence Framework Contract Freeze.
   Architecture and contract only, no runtime implementation. Froze the
   exact structure, semantics, and constraints for Evidence used by PCAE

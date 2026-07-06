@@ -382,12 +382,16 @@ def test_no_runtime_context_module_added_to_core():
     `runtime_context.py` is also deliberately excluded as of 112C
     (Runtime Context Prototype), which legitimately created it -- this
     111R-era guard predates that phase and must not treat its intended
-    outcome as a regression."""
+    outcome as a regression.
+
+    `evidence.py` is likewise deliberately excluded as of 115C
+    (Repository Evidence Framework Prototype), which legitimately
+    created it -- same reasoning, this guard predates that phase too."""
     core_dir = REPO_ROOT / "src" / "pcae" / "core"
     forbidden_names = {
         "session_info.py",
         "task_info.py", "phase_info.py", "intent.py", "approval.py",
-        "broker_decision.py", "evidence.py",
+        "broker_decision.py",
     }
     existing = {p.name for p in core_dir.glob("*.py")}
     assert not (forbidden_names & existing)

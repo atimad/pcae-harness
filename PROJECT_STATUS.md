@@ -2,55 +2,13 @@
 
 ## Current Phase
 
-Phase 115B — Repository Evidence Framework Contract Freeze (completed).
+Phase 115C — Repository Evidence Framework Prototype (in progress).
 
-Architecture and contract only. Full designs:
-`docs/PCAE_REPOSITORY_EVIDENCE_FRAMEWORK.md` and
-`docs/PCAE_EVIDENCE_PROVIDER_CONTRACT.md`.
-Phase report:
-`docs/PHASE_115B_REPOSITORY_EVIDENCE_CONTRACT_FREEZE.md`.
-
-**Evidence contract**: frozen with required fields `evidence_id`,
-`source`, `category`, `producer`, `timestamp_utc`, `freshness`,
-`confidence`, `determinism`, `scope`, `references`, `observed_value`,
-`expected_value`, `explanation`, and `limitations`.
-
-**Evidence identity**: stable within one evaluation and referenceable by
-decision explanations. Evidence IDs are not global permanent repository
-IDs unless persisted inside a future Repository Artifact.
-
-**Categories**: frozen minimum category set: `git`, `task`, `phase`,
-`report`, `metadata`, `architecture`, `runtime`, `push_state`,
-`notification`, `governance`, `test_result`, `security`,
-`documentation`, `ai_review`, and `unknown`.
-
-**Determinism, confidence, freshness**: determinism classes are
-`deterministic`, `reproducible_external`, `probabilistic`,
-`human_asserted`, and `unknown`; confidence levels are `high`, `medium`,
-`low`, and `unknown`; freshness levels are `current`, `stale`,
-`expired`, and `unknown`. Confidence never overrides hard invariants;
-probabilistic evidence may never alone authorize canonical mutation.
-
-**Provider contract**: Evidence Providers collect evidence and never
-decide, mutate state, promote artifacts, send notifications, bypass the
-validator, authorize execution, invoke runtime execution, override other
-providers, or hide conflicts.
-
-**Conflict and explanation semantics**: conflicting evidence is
-preserved and evaluated centrally. Decision explanations cite evidence
-IDs such as `E-git-001` and `E-metadata-002`.
-
-**SLM/AI boundary**: future SLM/LLM evidence is advisory only,
-probabilistic by default, never sole authority for Accept, may trigger
-human review, may suggest repairs, and must be labelled model-produced.
-
-**No runtime implementation**: no Repository Transition Validator
-behavior changes, no lifecycle command changes, no Notification Policy
-changes, no Repository Skills implementation, no execution,
-authorization, Permission Broker enforcement, plugins, Telegram inbound,
-REST, Web UI, or Dashboard. Execution capability remains unavailable.
-
-Recommended next repo phase: 115C — Repository Evidence Framework Prototype (not started).
+Implements the runtime representation of the Evidence contract frozen by
+115B: immutable `Evidence`, `EvidenceCollection`, the four frozen enums,
+`EvidenceReference`, and `EvidenceProvenance`, with serialization and
+validation. No decision logic, no Repository Transition Validator
+integration, no lifecycle/notification integration.
 
 ## Phase 115B Complete
 
