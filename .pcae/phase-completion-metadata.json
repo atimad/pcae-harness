@@ -1,30 +1,31 @@
 {
-  "phase_id": "115Z",
-  "phase_name": "Advisory Subsystem Hardening & Release Readiness",
-  "phase_title": "Advisory Subsystem Hardening & Release Readiness",
+  "phase_id": "116A",
+  "phase_name": "v0.2 Architecture Review & Consolidation",
+  "phase_title": "v0.2 Architecture Review & Consolidation",
   "status": "completed",
-  "summary": "Consolidation/hardening-only phase reviewing the entire Advisory Repository Skills subsystem (115P-115Y) end to end. Confirms: responsibilities clearly separated with no duplication (AdvisoryRepositorySkill/RepositoryConsistencyAdvisorySkill for skill invocation, build_advisory_request for prompt assembly, AdvisoryProvider/MockAdvisoryProvider/CurrentActingModelAdvisoryProvider for backend-agnostic invocation, normalize_advisory_response for normalization, build_evidence_from_normalized for evidence construction, AdvisoryContextPackage for bounded context assembly); no hidden coupling into decision_evaluation.py, repository_transition_validator.py, any lifecycle command, notification_certification.py, handoff_verification.py, post_push_canonicalization.py, runtime_inspect.py, repository_skills_integration.py, or repository_transition_integration.py; no circular dependencies (advisory_context_package.py has zero internal pcae imports; advisory_repository_skills.py and current_acting_model_advisory_provider.py form a clean one-directional chain terminating in evidence.py/paths.py/repository_skills.py); no authority leakage (no decide/authorize/commit/push/finalize/notify/mutate/execute/approve/reject method on any public class, no TransitionVerdict import, no execution primitive in source). All five extension points (AdvisoryProvider, RepositorySkill/AdvisoryRepositorySkill, EvidenceProvider, AdvisoryContextPackage, DecisionEvaluation) verified stable against their frozen contracts. Containment reconfirmed with executable tests: cannot authorize, cannot execute, cannot mutate the repository (git log identical before/after skill invocation against a disposable repo), cannot bypass the Repository Transition Validator, cannot bypass response normalization; execution capability remains unavailable per pcae runtime inspect and collect_evidence_via_repository_skills(). Architecture consistency reviewed across all ten phase reports (115P-115Y) and six canonical documents: terminology consistent, the pilot advisory question quoted identically everywhere, same-model-default terminology consistent, cross-phase references accurate, the Recommended Next Phase chain unbroken end to end, Mermaid diagrams internally consistent, execution-unavailable confirmation present in every document. Implementation consistency confirmed: all three prototypes still match their frozen contracts (RepositorySkillManifest shape, AI_REVIEW capability + model_produced=True, CurrentActingModelAdvisoryProvider's provider_id/backend_kind/determinism/invoke shape, AdvisoryContextPackage's one allowed question + four trust classes, default Repository Skills registry unchanged at four deterministic skills). Explicitly scopes every check to the three real subsystem modules (advisory_repository_skills.py, current_acting_model_advisory_provider.py, advisory_context_package.py), distinct from two unrelated pre-existing systems: Phase 88X's advisory.py (read-only Advisory mode / would-* decision layer over Permission Broker evidence) and Phase 113C's advisory_runtime.py (observation-only Advisory Runtime capability results) -- neither referenced, modified, or conflated. Remaining architectural debt documented across four categories, all pre-existing and deliberate, none a defect: documentation (none major); implementation (AdvisoryContextPackage not yet wired into the live pipeline, no live/automated model-invocation mechanism, no automatic redaction scanning -- all explicit prior-phase scope boundaries); optimization (none identified); future capability (second Advisory Provider, additional advisory question types beyond repository-consistency review, split-model mode -- all previously deferred in 115U/115Q/115W). Declares the Advisory Repository Skills subsystem a stable v0.2 subsystem of PCAE with its extension points frozen. Adds tests/test_phase_115z_advisory_subsystem_hardening.py (95 new architecture-verification tests). No new feature, no new Evidence Provider, no new Repository Skill, no new Advisory Provider, no second Advisory Provider, no Decision Evaluation/Repository Transition Validator/lifecycle command/Notification Policy/Repository State Kernel modification. No execution, no authorization, no Permission Broker enforcement, no plugins, no Telegram inbound, no REST, no Dashboard, no Web UI. Execution capability remains unavailable.",
-  "files_changed_count": 5,
+  "summary": "Review-only v0.2 architecture assessment after 115Z. Reviewed Runtime, Governance, Repository State Kernel, Repository Transition Validator, Evidence Framework, Decision Evaluation, Repository Skills, Advisory Providers, Advisory Context Package, Reporting, Notifications, and Phase lifecycle. Assessment: architecture requires minor consolidation before freeze, not significant redesign. Extension points for Repository Skills, Advisory Providers, Evidence Providers, and Runtime Plugins are complete enough for the v0.2 architecture. Naming and wire diagrams are consistent. Remaining debt is classified: no must-fix items before v0.2; recommended consolidation for overlapping phase-identity/finalization checks, duplicated report-completeness/recommended-next-phase enforcement, shared RepositoryState construction, and the policy-only Repository Event layer; future enhancements and intentionally deferred capabilities documented. No runtime capability, execution, authorization, Permission Broker change, Repository Skill, Advisory Provider, Evidence Provider, Decision Evaluation change, Repository Transition Validator change, lifecycle command change, Notification Policy change, Telegram inbound, REST, Dashboard, Web UI, or model integration was implemented. Execution capability remains unavailable.",
+  "files_changed_count": 6,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_115Z_ADVISORY_SUBSYSTEM_HARDENING.md",
-    "tests/test_phase_115z_advisory_subsystem_hardening.py",
-    "tasks/active/20260706-2241-115z-advisory-subsystem-hardening-release-readiness.md"
+    "docs/PHASE_116A_V0_2_ARCHITECTURE_REVIEW.md",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/done/20260706-2252-116a-v0-2-architecture-review-consolidation.md"
   ],
-  "tests_added_or_updated": "95 new tests added (tests/test_phase_115z_advisory_subsystem_hardening.py) covering subsystem doc inventory, architecture consistency, diagram consistency, extension point stability, containment (no authority leakage, no execution primitive, cannot bypass validator/normalization, cannot mutate repository), no duplicated responsibilities, no circular dependencies, implementation-vs-contract consistency, roadmap consistency, no new implementation, and execution unavailable; all pre-existing suites (advisory context package, advisory framework, repository_skills, evidence, decision_evaluation, fast_green) pass unmodified",
+  "tests_added_or_updated": "No tests added or updated; architecture/documentation verification only.",
   "phase_commits": [
     {
-      "hash": "9f8d6c42",
-      "message": "Harden Advisory subsystem"
+      "hash": "8b22131f",
+      "message": "116A v0.2 architecture review"
     },
     {
-      "hash": "e8ba16c5",
-      "message": "Complete Phase 115Z Advisory subsystem hardening"
+      "hash": "14e223fe",
+      "message": "Close 116A architecture review task"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115Z adds no modification, only new architecture-verification tests reviewing 115P-115Y)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116A is review/documentation only)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -40,28 +41,6 @@
     "current_maximum_plugin_capability": "observe"
   },
   "validation_results": [
-    {
-      "name": "focused_advisory_subsystem_hardening_and_related_tests",
-      "result": "1708/1708",
-      "status": "passed",
-      "note": "python -m pytest tests/test_phase_115z_advisory_subsystem_hardening.py tests/test_advisory_context_package.py tests/test_*advisory* tests/test_repository_skills*.py tests/test_evidence*.py tests/test_decision_evaluation*.py -n auto -q -ra --durations=100"
-    },
-    {
-      "name": "fast_green",
-      "result": "4390/4390",
-      "status": "passed",
-      "note": "python -m pytest -m \"fast_green\" -n auto -ra --durations=100"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "present_in_canonical_metadata",
-      "status": "present"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "present_in_canonical_metadata",
-      "status": "present"
-    },
     {
       "name": "pcae_health",
       "result": "healthy",
@@ -79,13 +58,13 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean (pushed, origin/main..HEAD == 0)",
+      "result": "clean",
       "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "result": "pass",
-      "status": "passed"
+      "result": "pending final post-metadata verification",
+      "status": "pending"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -104,15 +83,16 @@
     },
     {
       "name": "phase_finalization_skill",
-      "result": "resolved, target completed",
+      "result": "resolved, target in_progress during pre-completion validation",
       "status": "passed"
     }
   ],
   "test_results": {
-    "focused_advisory_subsystem_hardening_and_related_tests": "1708/1708",
-    "fast_green": "4390/4390",
-    "report_notification_tests": "present_in_canonical_metadata",
-    "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
+    "architecture_documentation_verification": "completed",
+    "bootstrap_session_reporting_tests": "not_applicable_documentation_only",
+    "fast_green": "not_run_documentation_only",
+    "report_notification_tests": "not_applicable_documentation_only",
+    "runtime_inspect_execution_unavailable": "passed"
   },
   "governance_results": [
     {
@@ -133,7 +113,7 @@
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pass"
+      "status": "pending final post-metadata verification"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -149,7 +129,7 @@
     },
     {
       "name": "phase_finalization_skill",
-      "status": "resolved, target completed"
+      "status": "resolved"
     }
   ],
   "telegram_runtime": {
@@ -158,6 +138,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No new feature added. No new Evidence Provider added. No new Repository Skill added. No new Advisory Provider added. No second Advisory Provider added. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No Notification Policy modified. No Repository State Kernel modified. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Dashboard. No Web UI implementation. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
-  "recommended_next_phase": "116A — v0.2 Architecture Review & Consolidation"
+  "no_go_confirmation": "No runtime capability implemented. No execution implemented. No authorization implemented. No Permission Broker change. No Repository Skill implemented. No Advisory Provider implemented. No Evidence Provider implemented. No Decision Evaluation change. No Repository Transition Validator change. No lifecycle command change. No Notification Policy change. No Telegram inbound. No REST. No Dashboard. No Web UI. No model integration. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
+  "recommended_next_phase": "116B — v0.2 Architecture Consolidation"
 }
