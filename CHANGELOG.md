@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 116A — v0.2 Architecture Review & Consolidation. Review-only
+  architecture phase covering Runtime, Governance, Repository State
+  Kernel, Repository Transition Validator, Evidence Framework,
+  Decision Evaluation, Repository Skills, Advisory Providers, Advisory
+  Context Package, Reporting, Notifications, and Phase lifecycle
+  (`docs/PHASE_116A_V0_2_ARCHITECTURE_REVIEW.md`). Assessment:
+  architecture requires minor consolidation, not significant redesign.
+  Confirms no hidden execution authority, no lifecycle authority in
+  skills/providers/advisory components, no notification eligibility
+  bypass, no model-identity-based repository decisions, and no wire
+  diagram claiming implemented execution, authorization, REST,
+  Dashboard, Web UI, Telegram inbound, or model integration. Reviews
+  extension points for Repository Skills, Advisory Providers, Evidence
+  Providers, and Runtime Plugins. Classifies remaining debt: no must-fix
+  items before v0.2; recommended consolidation before freeze for
+  overlapping phase-identity/finalization checks, duplicated
+  report-completeness/recommended-next-phase enforcement, shared
+  `RepositoryState` construction, and the policy-only Repository Event
+  layer. No source, tests, runtime capability, execution,
+  authorization, Permission Broker behavior, Repository Skill, Advisory
+  Provider, Evidence Provider, Decision Evaluation, Repository
+  Transition Validator, lifecycle command, Notification Policy,
+  Telegram inbound, REST, Dashboard, Web UI, or model integration
+  changed. Execution capability remains unavailable.
+
 - Phase 115Z — Advisory Subsystem Hardening & Release Readiness.
   Consolidation/hardening-only phase reviewing the entire Advisory
   Repository Skills subsystem (115P-115Y) end to end

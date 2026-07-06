@@ -2,65 +2,73 @@
 
 ## Current Phase
 
-Phase 115Z — Advisory Subsystem Hardening & Release Readiness
+Phase 116A — v0.2 Architecture Review & Consolidation
 (completed).
 
-Hardening and release-readiness only: no new feature, no new evidence
-provider, no new Repository Skill, no new Advisory Provider, no second
-Advisory Provider, no modification to Decision Evaluation, the
-Repository Transition Validator, any lifecycle command, Notification
-Policy, or the Repository State Kernel, and no execution,
-authorization, Permission Broker enforcement, plugin, Telegram
-inbound, REST, Dashboard, or Web UI implementation. Phase report:
-`docs/PHASE_115Z_ADVISORY_SUBSYSTEM_HARDENING.md`.
+Review and consolidation only: no runtime capability, execution,
+authorization, Permission Broker change, Repository Skill, Advisory
+Provider, Evidence Provider, Decision Evaluation change, Repository
+Transition Validator change, lifecycle command change, Notification
+Policy change, Telegram inbound, REST, Dashboard, Web UI, or model
+integration was implemented. Phase report:
+`docs/PHASE_116A_V0_2_ARCHITECTURE_REVIEW.md`.
 
-**Architectural review complete**: reviewed all ten phase reports
-(115P–115Y) and six canonical architecture/contract documents against
-the three real runtime modules
-(`advisory_repository_skills.py`, `current_acting_model_advisory_
-provider.py`, `advisory_context_package.py`). Confirmed responsibility
-separation with no duplication, no hidden coupling into any lifecycle,
-notification, handoff, decision-evaluation, or validator module, and
-no circular dependencies — `advisory_context_package.py` has zero
-internal `pcae` imports and the remaining two modules form a clean,
-one-directional dependency chain.
+**Complete v0.2 architecture review performed** across Runtime,
+Governance, Repository State Kernel, Repository Transition Validator,
+Evidence Framework, Decision Evaluation, Repository Skills, Advisory
+Providers, Advisory Context Package, Reporting, Notifications, and
+Phase lifecycle.
 
-**Extension points verified stable**: `AdvisoryProvider`,
-`RepositorySkill`/`AdvisoryRepositorySkill`, `EvidenceProvider`,
-`AdvisoryContextPackage`, and `DecisionEvaluation` all confirmed
-unchanged against their frozen contracts.
+**Architecture assessment**: architecture requires minor consolidation.
+No significant redesign is required and no authority leakage was found,
+but overlapping phase-identity/finalization checks, duplicated
+report-completeness/recommended-next-phase enforcement, two
+independent `RepositoryState` construction call sites, and the
+policy-only Repository Event layer should be consolidated before a
+v0.2 architecture freeze.
 
-**Containment reconfirmed**: the subsystem cannot authorize, execute,
-mutate the repository, bypass the Repository Transition Validator, or
-bypass response normalization. `pcae runtime inspect --json` still
-reports execution unavailable, Observed, observe.
+**Extension points reviewed**: Repository Skills, Advisory Providers,
+Evidence Providers, and Runtime Plugins are complete enough for the
+v0.2 architecture and remain extensible without changing Decision
+Evaluation or Repository Transition Validator authority.
 
-**Architecture consistency confirmed**: terminology, the pilot
-advisory question, the same-model-default term, cross-phase
-references, the "Recommended Next Phase" chain, and Mermaid diagrams
-are all consistent across every 115P–115Y document with no drift.
+**Naming and diagrams verified**: kernel primitive, evidence,
+decision, advisory, notification, runtime-state, and extension-point
+terminology is consistent across canonical docs, contracts,
+implementation names, and Mermaid diagrams. No diagram claims
+implemented execution, authorization, REST, Dashboard, Web UI,
+Telegram inbound, or model integration.
 
-**Implementation consistency confirmed**: all three prototypes still
-match their frozen contracts exactly; the default Repository Skills
-registry remains the four deterministic skills frozen in 115J.
+**Implementation consistency confirmed**: prototypes still satisfy
+their frozen contracts. Runtime Inspect reports execution unavailable,
+state `Observed`, maximum plugin capability `observe`, and no
+registered runtime plugins.
 
-**Remaining architectural debt documented**, classified as
-documentation (none major) / implementation (`AdvisoryContextPackage`
-not yet wired into the live pipeline; no live model-invocation
-mechanism; no automatic redaction scanning — all pre-existing,
-deliberate scope boundaries, not defects) / optimization (none) /
-future capability (second Advisory Provider, additional advisory
-question types, split-model mode — all previously deferred).
+**Architectural debt classified** as no must-fix items before v0.2,
+four recommended consolidation items before v0.2, future enhancements,
+and intentionally deferred capabilities.
 
-**Advisory subsystem declared a stable v0.2 subsystem of PCAE.**
-Extension points frozen; no further contract changes anticipated
-absent a separately-scoped future phase.
+Recommended next repo phase: 116B — v0.2 Architecture Consolidation.
 
-Added `tests/test_phase_115z_advisory_subsystem_hardening.py` (new
-architecture-verification tests).
+## Phase 116A Complete
 
-Recommended next repo phase: 116A — v0.2 Architecture Review &
-Consolidation (not started).
+Phase 116A — v0.2 Architecture Review & Consolidation (completed).
+
+Reviewed the full v0.2 architecture end to end after 115Z. Confirmed
+that PCAE's architecture is coherent, model-agnostic, evidence-based,
+non-executing, and governed by centralized repository-state
+validation rather than provider, skill, advisory, notification, or
+model authority. Classified the remaining debt and assessed the
+architecture as requiring minor consolidation before freeze, not
+significant redesign.
+
+**No-go**: no runtime capability, execution, authorization, Permission
+Broker change, Repository Skill, Advisory Provider, Evidence Provider,
+Decision Evaluation change, Repository Transition Validator change,
+lifecycle command change, Notification Policy change, Telegram
+inbound, REST, Dashboard, Web UI, or model integration.
+
+Recommended next repo phase: 116B — v0.2 Architecture Consolidation.
 
 ## Phase 115Z Complete
 

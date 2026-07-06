@@ -2,6 +2,19 @@
 
 ## Accepted
 
+- Treat Phase 116A as a review-only v0.2 architecture assessment:
+  the architecture is internally coherent and does not require
+  significant redesign, but it should be classified as requiring minor
+  consolidation before freeze because phase-identity/finalization
+  checks overlap, report-completeness/recommended-next-phase
+  enforcement is duplicated, `RepositoryState` is constructed at two
+  equivalent call sites, and Repository Event remains policy vocabulary
+  rather than a runtime type. No runtime capability, execution,
+  authorization, Permission Broker change, Repository Skill, Advisory
+  Provider, Evidence Provider, Decision Evaluation change, Repository
+  Transition Validator change, lifecycle command change, Notification
+  Policy change, Telegram inbound, REST, Dashboard, Web UI, or model
+  integration is authorized by this review.
 - Treat Phase 115B as an architecture-only Evidence contract freeze:
   Evidence is evaluation-scoped, referenceable by explanations, and
   contractually structured, but it does not decide, mutate repository
