@@ -1,99 +1,80 @@
-# Phase 115Q Complete — Advisory Repository Skills Contract Freeze
+# Phase 115R Complete — Advisory Repository Skills Prototype
 
-- **Phase ID:** `115Q`
+- **Phase ID:** `115R`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 8
-- **Tests run:** 259 (focused architecture/documentation suite)
-- **Commits:** 27fb2e93, 2fb57b3f
+- **Files changed:** 9
+- **Tests run:** 77 new + 773 focused suite + 4390/4390 fast_green
+- **Commits:** 88f53d7c, 02949f64
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115Q freezes the backend-agnostic contract for Advisory
-Repository Skills before any implementation or model call: the
-`AdvisoryRepositorySkill` interface, the `AdvisoryProvider` abstraction,
-the prompt/response/evidence boundaries, the default same-model mode,
-the deferred split-model mode, the failure contract, an exhaustive
-safety-rule checklist, and a narrow first pilot scope. Contract/design
-only; zero implementation added.
+Phase 115R implements the framework 115P designed and 115Q froze,
+using only a deterministic `MockAdvisoryProvider`. No real model
+backend implemented or invoked.
 
-## Advisory Contract Summary
+## Framework Summary
 
-`AdvisoryRepositorySkill` requires every conforming skill to declare
-advisory capability, evidence categories produced, probabilistic
-determinism by default, and a model-produced evidence boundary; to
-build a prompt/request, consume a normalized advisory response, and
-produce `EvidenceCollection`; and is exhaustively forbidden from
-decision making, repository mutation, lifecycle authority, commit,
-push, finalize, notification dispatch, artifact promotion, execution,
-authorization, and validator bypass.
+New module `src/pcae/core/advisory_repository_skills.py` implements
+the full 115Q pipeline: `AdvisoryRequest` -> `AdvisoryProvider.invoke()`
+-> `RawAdvisoryResponse` -> `normalize_advisory_response()` ->
+`NormalizedAdvisoryResponse` -> `build_evidence_from_normalized()` ->
+`EvidenceCollection`, wired by `AdvisoryRepositorySkill` and its first
+concrete subclass `RepositoryConsistencyAdvisorySkill`.
 
-## Advisory Provider Abstraction
+## Advisory Request Summary
 
-Four contract-only types: `AdvisoryProvider` (`provider_id`,
-`backend_kind`, `determinism`, single `invoke()`), `AdvisoryRequest`
+`AdvisoryRequest` is a frozen dataclass with 115Q's four frozen fields
 (`bounded_context`, `question`, `response_schema_hint`,
-`timeout_seconds`), `RawAdvisoryResponse` (`raw_content`,
-`provider_id`, `succeeded`), `NormalizedAdvisoryResponse` (`findings`,
-`confidence_signal`, `references`, `limitations`,
-`normalization_status`). Current acting model (default), DeepSeek,
-Claude, Codex, GLM/Z.ai, Qwen, OpenAI, local SLM, external review
-service, and deterministic mock named as possible future providers —
-none implemented.
+`timeout_seconds`), validating non-empty context/question and a
+positive timeout.
 
-## Prompt Boundary
+## Prompt Builder Summary
 
-Bounded repository context, explicit task/question, no secrets, no
-unrestricted command capability, no execution request, advisory
-request only.
+`build_advisory_request()` assembles a bounded, deterministic
+`AdvisoryRequest` from repository context, requested evidence
+categories, and an explicit objective. Takes no `AdvisoryProvider`
+parameter.
 
-## Response Normalization Boundary
+## Mock Provider Summary
 
-Raw model output never trusted directly — must pass through the
-Normalizer (producing a validated `NormalizedAdvisoryResponse`) then
-the Evidence Builder. Only canonical `Evidence` enters PCAE.
+`MockAdvisoryProvider` is the only concrete `AdvisoryProvider`: a pure
+in-memory lookup from question to canned `RawAdvisoryResponse`
+(`backend_kind="deterministic_mock"`,
+`EvidenceDeterminism.DETERMINISTIC`). No randomness, network I/O,
+filesystem write, or execution. Supports deterministic failure
+scenarios by construction.
 
-## Evidence Builder Contract
+## Normalizer Summary
 
-Probabilistic by default, model-produced if applicable, advisory
-only, confidence-labelled, limitation-labelled, provenance-preserving,
-never sole authority for Accept — reusing existing
-`Evidence`/`RepositorySkillManifest` fields, no schema change.
+`normalize_advisory_response()` rejects provider failures, unparseable
+JSON, non-object payloads, missing/empty findings, and unauthorized
+field claims outright as `"failed"`; drops invalid findings while
+keeping valid ones as `"partial"`.
 
-## Same-Model Default
+## Evidence Builder Summary
 
-The default `AdvisoryProvider` is, conceptually, the current acting
-model — an architecture rule, not an implementation. No new
-configuration required.
+`build_evidence_from_normalized()` produces one probabilistic,
+confidence-labelled, provenance-preserving `Evidence` item per finding,
+or one `UNKNOWN`-freshness item for a failed normalization.
 
-## Split-Model Future Mode
+## End-to-End Pipeline Summary
 
-Documented, not implemented: writer model vs. advisory model,
-configuration only needed for that split-model mode.
+`RepositoryConsistencyAdvisorySkill` (defaults to `MockAdvisoryProvider()`)
+wires the full pipeline through `RepositorySkill.invoke()`, proven
+deterministic across repeated invocations and never mutating a real,
+git-initialized synthetic repository.
 
-## Safety Rules
+## Deterministic Failure Handling
 
-Advisory Repository Skills must never execute commands, request shell
-access, mutate the repository, authorize transitions, override
-deterministic evidence, override the validator, produce final
-lifecycle decisions, send notifications, or access secrets.
-
-## First Pilot Scope
-
-Exactly one of repository/documentation/report consistency review —
-never all three at once, and never code execution, security
-authorization, lifecycle control, or autonomous repair.
-
-## Wire Diagram Summary
-
-Two Mermaid diagrams: the full pipeline including the Advisory
-Provider abstraction and Raw/Normalized response stages, and a
-swappable-backend diagram showing the `AdvisoryProvider` interface
-with current-acting-model default and every other named provider as
-dotted, unimplemented future branches.
+Provider-level failure and malformed raw content both degrade to one
+`UNKNOWN` evidence item with an overall `SUCCESS` skill result; a
+provider invocation exception yields an explicit
+`RepositorySkillResult(status=FAILED, ...)` with zero evidence — never
+silent success, never hidden partial output.
 
 ## PCAE Architecture Status
 
@@ -118,10 +99,11 @@ maintained as runtime state.*
 - Repository Skills Integration Verification & Compatibility through Phase 115N
 - Advisory Repository Skills Architecture through Phase 115P
 - Advisory Repository Skills Contract Freeze through Phase 115Q
+- Advisory Repository Skills Prototype through Phase 115R
 
 ### Planned
 
-- 115R — Advisory Repository Skills Prototype
+- 115S — First Advisory Provider Integration (Current Acting Model)
 
 ### Current Runtime State
 
@@ -143,30 +125,28 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_architecture_documentation_tests:** 259/259 (passed)
+- **focused_advisory_framework_tests:** 773/773 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **fast_green:** 4390/4390 (passed; carried forward from 115P, unaffected by this contract-freeze-only phase)
+- **fast_green:** 4390/4390 (passed)
 
 ## No-Go Confirmations
 
-- No Advisory Repository Skill implemented.
-- No Advisory Provider implemented.
-- No model call implemented.
-- No DeepSeek integration.
-- No GLM integration.
-- No Claude skill.
-- No Codex skill.
-- No Qwen integration.
-- No OpenAI integration.
-- No local SLM integration.
-- No model configuration added.
-- No Repository Skills runtime modified.
-- No Evidence Provider modified.
+- No DeepSeek.
+- No Claude API.
+- No OpenAI.
+- No GLM.
+- No Qwen.
+- No Codex backend.
+- No local SLM.
+- No network calls.
+- No subprocess model execution.
+- No MCP model invocation.
+- No execution capability.
 - No Decision Evaluation modified.
 - No Repository Transition Validator modified.
 - No lifecycle command modified.
-- No execution.
+- No Repository Skills runtime modified.
 - No authorization.
 - No Permission Broker enforcement.
 - No plugins.
@@ -183,7 +163,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115R — Advisory Repository Skills Prototype
+115S — First Advisory Provider Integration (Current Acting Model)
 
 ## Report Consistency
 
@@ -192,4 +172,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115Q. Schema version 1.0.*
+*Report generated for PCAE Phase 115R. Schema version 1.0.*
