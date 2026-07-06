@@ -10,7 +10,7 @@ Sync phase 115T completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
