@@ -113,7 +113,9 @@
     "focused_evidence_decision_validator_skills_tests": "786/786",
     "task_and_phase_suites": "1555/1555 + 68/68",
     "runtime_contract_autonomy_plugin_suites": "3573/3573",
-    "fast_green": "4389/4390 (1 pre-existing, unrelated, idle-state-dependent failure)"
+    "fast_green": "4389/4390 (1 pre-existing, unrelated, idle-state-dependent failure)",
+    "report_notification_tests": "present_in_canonical_metadata",
+    "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
   },
   "governance_results": [
     {
