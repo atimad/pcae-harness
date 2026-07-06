@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 115U completion metadata (20260706-2114-sync-phase-115u-completion-metadata)
 - 115U: Advisory Provider Strategy & Extension Point Review (20260706-2113-115u-advisory-provider-strategy-extension-point-review)
 - Sync phase 115T completion metadata (20260706-2100-sync-phase-115t-completion-metadata)
 - 115T: Advisory Provider Verification & Compatibility (20260706-2057-115t-advisory-provider-verification-compatibility)

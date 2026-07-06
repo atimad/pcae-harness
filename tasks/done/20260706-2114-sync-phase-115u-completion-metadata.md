@@ -10,7 +10,7 @@ Sync phase 115U completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
