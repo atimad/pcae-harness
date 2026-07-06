@@ -2,51 +2,88 @@
 
 ## Current Phase
 
-Phase 115F — Repository Decision Evaluation Integration (completed).
+Phase 115G — Repository Decision Evaluation Verification & Compatibility (completed).
 
-Behavior-preserving explanation-enrichment integration only. Full
-implementation: `src/pcae/core/repository_transition_validator.py`.
-Phase report:
-`docs/PHASE_115F_DECISION_EVALUATION_INTEGRATION.md`.
+Verification-only phase. No implementation change to
+`src/pcae/core/decision_evaluation.py` or
+`src/pcae/core/repository_transition_validator.py`. Phase report:
+`docs/PHASE_115G_DECISION_EVALUATION_VERIFICATION.md`.
 
-**Same decisions, better explanations**: `TransitionResult` gains one
-new, backward-compatible field, `explanation: EvaluationResult | None
-= None`. The validator's own verdict-computing logic (113U, `checks`/
-`violations`/`blocking` branching) is unchanged, line for line — only
-the three return statements now also pass `explanation=explanation`.
+**Verdict equivalence verified**: a ten-scenario side-by-side matrix
+(plus two integration-bridge scenarios exercising
+`REQUIRES_HUMAN_REVIEW`) proves every `verdict`/`violations`/`accepted`
+is byte-for-byte identical to a synthetic "legacy-shaped"
+`dataclasses.replace(result, explanation=None)` — explanation remains
+pure overlay, never influencing the verdict.
 
-**Evidence adapter**: `build_evidence_from_repository_state(state)`
-maps already-computed `RepositoryState` fields into 115C `Evidence`
-items reusing 115D's own Evidence IDs, so 115E's invariant evaluators
-run unmodified. No new Git/filesystem/subprocess/runtime I/O.
+**Explanation verified**: every `explanation_reference` Evidence ID
+resolves against the evaluated `EvidenceCollection`; `blocking_failures`/
+`warnings`/`informational` buckets are proven to only ever contain
+invariant IDs whose actual severity/status justify that bucket, across
+the full scenario matrix, with no double-counting or omission.
 
-**Bug fix in `decision_evaluation.py`**: `evaluate_canonical_promotion_eligibility`
-now resolves `NOT_APPLICABLE` (not a misleading automatic `FAIL`) when
-only one of its two required inputs is present — found while designing
-the adapter, which legitimately never has `report_consistency`
-evidence to offer.
+**Evidence integrity verified**: no duplicate Evidence IDs, no dangling
+evidence references, conflicting evidence preserved through the real
+integration boundary (adapter output augmented with one additional
+independently-sourced disagreeing item), UNKNOWN evidence never
+silently dropped.
 
-**Verified behavior-preserving**: all 36 pre-existing validator tests
-pass unmodified; 32 new regression tests re-run 12 representative 113U
-scenarios with identical verdicts; the real
-`pcae phase complete`/`pcae task finish --commit` lifecycle integration
-test suites pass completely unmodified, proving CLI behavior is
-unaffected (neither reads the new `explanation` field).
+**Determinism verified**: `validate_transition`/`evaluate` identical
+across 20 repeated calls; result independent of evidence insertion
+order; the adapter's timestamp is a fixed sentinel, never wall-clock.
 
-**Limitations**: `push_state_consistency`/`metadata_consistency`
-resolve `NOT_APPLICABLE` through this adapter (no second independent
-source in `RepositoryState`); the evidence-based
-`phase_identity_consistency`/`report_completeness` explanations are
-simplifications of the validator's own more detailed checks and never
-drive the verdict.
+**Backward compatibility verified**: `handle_phase_report_transition_result`
+produces byte-identical stdout whether `explanation` is populated or
+`None`; the field's dataclass default is `None` and can never become
+required.
 
-No Repository Skills, no execution, no authorization, no lifecycle
+**No hidden dependencies verified**: no subprocess/socket/requests/
+urllib/Popen/os.system/shutil token in either module; no dataclass
+carries an agent/model/backend identity field; the validator→
+decision_evaluation dependency remains one-directional.
+
+**Lifecycle compatibility verified**: full task/phase, runtime/contract/
+autonomy/plugin, and `fast_green` regression suites pass unmodified;
+neither `commands/phase.py` nor `commands/task.py` reads `.explanation`;
+`STRUCTURAL_INVARIANTS` unchanged since 113U.
+
+**Explainability completeness verified**: every `InvariantResult`
+across the full scenario matrix carries a non-empty explanation; no
+blocking failure or warning is ever unexplained.
+
+Added `tests/test_repository_transition_validator_verification_115g.py`
+(37 new tests). No Repository Skills, no execution, no authorization,
+no Repository Transition Validator behavior changes, no lifecycle
 command changes, no Notification Policy changes, no Canonical Artifact
 Promotion/Push-State Reconciliation/Post-Push Canonicalization changes,
 no Telegram changes, no REST, no Dashboard, no plugins, no SLM/LLM
 integration. Execution capability remains unavailable.
 
-Recommended next repo phase: 115G — Repository Decision Evaluation Verification & Compatibility (not started).
+Recommended next repo phase: 115H — Repository Skills Architecture (not started).
+
+## Phase 115G Complete
+
+Phase 115G — Repository Decision Evaluation Verification & Compatibility (completed).
+
+Verified 115F's Repository Decision Evaluation integration is fully
+behavior-preserving, deterministic, reproducible, and compatible with
+all pre-existing Repository Transition Validator behavior across eight
+objectives: verdict equivalence, explanation correctness, evidence
+integrity, determinism, backward compatibility, no hidden dependencies,
+lifecycle compatibility, and explainability completeness. No
+implementation code changed; one new focused test module (37 tests)
+added. All pre-existing suites (validator/evidence/decision-evaluation,
+task/phase regression, runtime/contract/autonomy/plugin regression,
+`fast_green`) pass unmodified.
+
+**No-go**: no Repository Skills, no execution, no authorization, no
+Repository Transition Validator behavior changes, no lifecycle command
+changes, no Notification Policy changes, no Canonical Artifact
+Promotion changes, no Push-State Reconciliation changes, no Post-Push
+Canonicalization changes, no Telegram changes, no REST, no Dashboard,
+no plugins, no SLM/LLM integration.
+
+Recommended next repo phase: 115H — Repository Skills Architecture (not started).
 
 ## Phase 115F Complete
 

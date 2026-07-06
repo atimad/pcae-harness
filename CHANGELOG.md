@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+- Phase 115G — Repository Decision Evaluation Verification & Compatibility.
+  Verification-only phase proving 115F's Repository Decision Evaluation
+  integration (`TransitionResult.explanation`) is fully
+  behavior-preserving, deterministic, reproducible, and compatible with
+  all pre-existing Repository Transition Validator behavior. No
+  implementation change to `decision_evaluation.py` or
+  `repository_transition_validator.py`. Added
+  `tests/test_repository_transition_validator_verification_115g.py` (37
+  new tests) covering: verdict equivalence (a ten-scenario side-by-side
+  matrix plus two `REQUIRES_HUMAN_REVIEW` integration-bridge scenarios,
+  each proving `dataclasses.replace(result, explanation=None)` is
+  identical in verdict/violations/accepted to the live result);
+  explanation correctness (every `explanation_reference` Evidence ID
+  resolves against the evaluated `EvidenceCollection`;
+  `blocking_failures`/`warnings`/`informational` buckets only ever
+  contain invariant IDs whose actual severity/status justify that
+  bucket); evidence integrity (no duplicate IDs, no dangling references,
+  conflicting evidence preserved through the real integration boundary,
+  UNKNOWN evidence never silently dropped); determinism (`validate_transition`/
+  `evaluate` identical across 20 repeated calls, order-independent,
+  fixed timestamp sentinel not wall-clock); backward compatibility
+  (`handle_phase_report_transition_result` produces byte-identical
+  stdout with or without `explanation`; the field's dataclass default
+  is `None`); no hidden dependencies (no subprocess/socket/requests/
+  urllib/Popen/os.system/shutil token, no agent/model/backend identity
+  field on any dataclass in either module); lifecycle compatibility
+  (full task/phase, runtime/contract/autonomy/plugin, and `fast_green`
+  regression suites pass unmodified; neither `commands/phase.py` nor
+  `commands/task.py` reads `.explanation`; `STRUCTURAL_INVARIANTS`
+  unchanged since 113U); explainability completeness (every
+  `InvariantResult` across the full scenario matrix carries a
+  non-empty explanation). Added
+  `docs/PHASE_115G_DECISION_EVALUATION_VERIFICATION.md`. No Repository
+  Skills, no execution, no authorization, no Repository Transition
+  Validator behavior changes, no lifecycle command changes, no
+  Notification Policy changes, no Canonical Artifact Promotion/
+  Push-State Reconciliation/Post-Push Canonicalization changes, no
+  Telegram changes, no REST, no Dashboard, no plugins, no SLM/LLM
+  integration. Execution capability remains unavailable.
+
 - Phase 115F — Repository Decision Evaluation Integration.
   Integrates 115E's Decision Evaluation with the Repository Transition
   Validator (`core/repository_transition_validator.py`) in a
