@@ -22,7 +22,8 @@ Correct governance_results.pcae_push_check and pushed_status/origin_main_head_co
 
 ## Allowed Files
 
-- TBD
+- .pcae/phase-completion-metadata.json
+- tasks/active/20260706-0730-fix-115c-pushed-state-metadata-field.md
 
 ## Forbidden Files
 
