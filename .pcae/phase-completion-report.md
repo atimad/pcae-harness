@@ -1,65 +1,79 @@
-# Phase 115T Complete — Advisory Provider Verification & Compatibility
+# Phase 115U Complete — Advisory Provider Strategy & Extension Point Review
 
-- **Phase ID:** `115T`
+- **Phase ID:** `115U`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 8
-- **Tests run:** 66 new + 1365 + 3610 + 4390/4390 fast_green
-- **Commits:** 09c22d88, 62e78dfe
+- **Tests run:** 284 (focused architecture/documentation suite)
+- **Commits:** d73a9956, 7c3cd22b
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115T re-proves 115S's first real Advisory Provider integration
-is safely contained, behavior-compatible, failure-isolated, and
-portable to future providers. Verification only; zero implementation
-change.
+Phase 115U decides PCAE does not need a second advisory provider now,
+while preserving the ability to add one later without architectural
+redesign. Architecture/review only; zero implementation added.
 
-## Containment Verification Summary
+## Core Question
 
-No decide/authorize/commit/push/finalize/notify/mutate/execute
-method; no verdict/authorization field; never mutates a repository;
-no reference to the validator in either advisory module.
-Advisory-only evidence resolves zero invariants to `PASS`; advisory
-evidence never overrides a disagreeing deterministic evaluation.
+Do we need a second advisory provider now? **No.**
 
-## Boundary Verification
+## Advisory Provider Strategy Summary
 
-Provider returns exactly `RawAdvisoryResponse`; Normalizer returns
-exactly `NormalizedAdvisoryResponse`; Evidence Builder returns exactly
-`EvidenceCollection`; `EvaluationContext` rejects non-collection
-evidence; the Validator resolves verdicts unaware advisory evidence
-exists.
+Reviewed the current same-model default across five properties
+(same-model default, bounded pilot scope, one request/one response/one
+`EvidenceCollection`, stateless operation, normalized evidence
+boundary, provider containment) — all sound. Evaluated a second
+provider across ten considerations (benefit, complexity, latency,
+cost, reproducibility, disagreement handling, reliability,
+configuration burden, vendor coupling, governance risk) — every
+consideration showed no benefit or a cost with no offsetting benefit.
 
-## Failure Isolation
+## Second-Provider Decision
 
-Six scenarios (unavailable, malformed, missing confidence, missing
-limitations, unexpected extra content, empty findings) each degrade
-safely — never raise, never affect deterministic evaluation, never
-produce `HIGH`/`MEDIUM` confidence from a failure path.
+Defer. Do not implement a second provider now. Keep the extension
+point open — a review outcome, not a permanent prohibition.
 
-## Nondeterminism Containment
+## Extension Point Summary
 
-Across five varied raw contents: schema conformance always holds,
-every evidence item is probabilistic/model-produced with confidence/
-limitations/provenance always present, and advisory evidence never
-alone authorizes Accept.
+A future second `AdvisoryProvider` can be added by implementing only
+the frozen contract (`provider_id`/`backend_kind`/`determinism`/
+`invoke()`) — no redesign required of Evidence, `EvidenceCollection`,
+Repository Skills, Decision Evaluation, the Repository Transition
+Validator, lifecycle commands, or Notification Policy.
 
-## Backend Portability
+## Future Provider Criteria
 
-Demonstrated with test-only stand-ins only (nothing implemented): a
-fake provider parametrized over `current_acting_model`/`deepseek`/
-`glm_zai`/`qwen`/`codex`/`local_slm` plugs into the unmodified skill
-identically; Decision Evaluation and the Validator require zero
-change for any of them.
+Independent review, better domain expertise, local/offline advisory,
+lower cost, a privacy constraint, stronger consistency checking, or
+deliberate comparative evidence — never by default.
 
-## Pilot Scope Verification
+## Multi-Provider Risk Summary
 
-Exactly one question, "Is the repository state internally
-consistent?"; no code/architecture/security review, planning, or
-autonomous-repair scope exists anywhere in either advisory module.
+Conflicting advisory evidence, provider disagreement, compounding
+nondeterminism, cost/latency, prompt drift, provider-specific quirks,
+hidden vendor coupling, operator confusion — documented in advance.
+
+## Disagreement Handling
+
+Preserve all evidence, mark conflicts, never average or vote blindly,
+let unmodified Decision Evaluation handle conflicts exactly as it
+already does for deterministic evidence, no provider ever becomes
+authority.
+
+## Configuration Posture
+
+No provider configuration needed now; current acting model remains
+default. Any future split-model mode would be optional, explicit,
+isolated to the provider-selection layer, and never leak into Decision
+Evaluation or the Validator.
+
+## Roadmap Recommendation
+
+Focus next on higher-quality evidence and advisory skill hardening,
+not provider proliferation.
 
 ## PCAE Architecture Status
 
@@ -87,10 +101,11 @@ maintained as runtime state.*
 - Advisory Repository Skills Prototype through Phase 115R
 - First Advisory Provider Integration (Current Acting Model) through Phase 115S
 - Advisory Provider Verification & Compatibility through Phase 115T
+- Advisory Provider Strategy & Extension Point Review through Phase 115U
 
 ### Planned
 
-- 115U — Second Advisory Provider Pilot Planning
+- 115V — Advisory Evidence Quality Hardening
 
 ### Current Runtime State
 
@@ -112,24 +127,30 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_advisory_repository_skills_evidence_decision_tests:** 1365/1365 (passed)
-- **runtime_contract_autonomy_plugin_suites:** 3610/3610 (passed)
+- **focused_architecture_documentation_tests:** 284/284 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **fast_green:** 4390/4390 (passed)
+- **fast_green:** 4390/4390 (passed; carried forward from 115T, unaffected by this architecture/review-only phase)
 
 ## No-Go Confirmations
 
-- No new provider implemented.
-- No DeepSeek.
-- No GLM.
+- No second Advisory Provider implemented.
+- No provider selection added.
+- No model configuration added.
+- No DeepSeek integration.
+- No GLM integration.
+- No Qwen integration.
 - No Codex-specific integration.
-- No provider selection.
-- No model configuration.
-- No lifecycle command modified.
+- No OpenAI-specific integration.
+- No Claude-specific integration.
+- No local SLM integration.
+- No Advisory Provider runtime modified.
+- No Repository Skills runtime modified.
+- No Evidence modified.
 - No Decision Evaluation modified.
 - No Repository Transition Validator modified.
-- No Repository Skills runtime modified.
+- No lifecycle command modified.
+- No execution.
 - No authorization.
 - No Permission Broker enforcement.
 - No plugins.
@@ -146,7 +167,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115U — Second Advisory Provider Pilot Planning
+115V — Advisory Evidence Quality Hardening
 
 ## Report Consistency
 
@@ -155,4 +176,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115T. Schema version 1.0.*
+*Report generated for PCAE Phase 115U. Schema version 1.0.*

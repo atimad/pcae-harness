@@ -1,33 +1,33 @@
 {
-  "phase_id": "115T",
-  "phase_name": "Advisory Provider Verification & Compatibility",
-  "phase_title": "Advisory Provider Verification & Compatibility",
+  "phase_id": "115U",
+  "phase_name": "Advisory Provider Strategy & Extension Point Review",
+  "phase_title": "Advisory Provider Strategy & Extension Point Review",
   "status": "completed",
-  "summary": "Verification-only phase re-proving 115S's first real Advisory Provider integration (CurrentActingModelAdvisoryProvider) is safely contained, behavior-compatible, failure-isolated, and portable to future providers. Adds 66 new tests (tests/test_advisory_provider_verification_115t.py) proving: behavioral containment (no decide/authorize/commit/push/finalize/notify/mutate/execute method, no verdict/authorization field, never mutates a repository, no reference to the validator in either advisory module, advisory-only evidence resolves zero invariants to PASS, advisory evidence never overrides a disagreeing deterministic evaluation); pipeline boundaries (provider returns exactly RawAdvisoryResponse, Normalizer returns exactly NormalizedAdvisoryResponse, Evidence Builder returns exactly EvidenceCollection, EvaluationContext rejects non-collection evidence, the Validator resolves verdicts unaware advisory evidence exists); failure isolation across six scenarios (unavailable, malformed, missing confidence, missing limitations, unexpected extra content, empty findings -- each degrades safely, never raises, never affects deterministic evaluation); nondeterminism containment across five varied raw contents (schema conformance, probabilistic/model-produced/confidence/limitations/provenance always present, never sole authority for Accept); backend portability demonstrated with test-only stand-ins only (current_acting_model/deepseek/glm_zai/qwen/codex/local_slm backend_kind values, all requiring zero change to Decision Evaluation or the Validator, none implemented); pilot scope (exactly one question, no other review scope string present); and no hidden configuration (no provider registry, no backend-selection function, no API-key/secret/env reference, no split-model config, no network-specific config). No new provider implemented, no DeepSeek, no GLM, no Codex-specific integration, no provider selection, no model configuration, no lifecycle command, Decision Evaluation, Repository Transition Validator, or Repository Skills runtime modified. Execution capability remains unavailable.",
+  "summary": "Architecture and review only, zero implementation added. Decides PCAE does not need a second advisory provider now, while preserving the ability to add one later without architectural redesign. Reviews the current same-model default (CurrentActingModelAdvisoryProvider) across five properties -- same-model default, bounded pilot scope, one request/one response/one EvidenceCollection, stateless operation, normalized evidence boundary, provider containment -- all sound. Evaluates a second provider across ten considerations -- benefit, complexity, latency, cost, reproducibility, disagreement handling, reliability, configuration burden, vendor coupling, governance risk -- every consideration shows no benefit or a cost with no offsetting benefit. Decision: implement a second provider now? No. Defer? Yes. Keep the extension point open? Yes. Documents how a future second AdvisoryProvider can be added by implementing only the frozen contract (provider_id/backend_kind/determinism/invoke()), requiring no redesign of Evidence, EvidenceCollection, Repository Skills, Decision Evaluation, the Repository Transition Validator, lifecycle commands, or Notification Policy. Defines future provider criteria (independent review, better domain expertise, local/offline advisory, lower cost, privacy constraint, stronger consistency checking, comparative evidence); multi-provider risks (conflicting evidence, provider disagreement, compounding nondeterminism, cost/latency, prompt drift, provider-specific quirks, hidden vendor coupling, operator confusion); disagreement handling (preserve all evidence, mark conflicts, never average or vote blindly, let unmodified Decision Evaluation handle conflicts, no provider ever becomes authority); and configuration posture (no provider config needed now; any future split-model mode stays isolated to the provider-selection layer). Recommends the next phase focus on higher-quality evidence and advisory skill hardening, not provider proliferation. No second Advisory Provider, provider selection, model configuration, DeepSeek/GLM/Qwen/Codex-specific/OpenAI-specific/Claude-specific/local-SLM integration, Advisory Provider runtime, Repository Skills runtime, Evidence, Decision Evaluation, Repository Transition Validator, or lifecycle command implemented or modified. Execution capability remains unavailable.",
   "files_changed_count": 8,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_115T_ADVISORY_PROVIDER_VERIFICATION.md",
+    "docs/PCAE_ADVISORY_PROVIDER_STRATEGY.md",
+    "docs/PHASE_115U_ADVISORY_PROVIDER_STRATEGY_REVIEW.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-2057-115t-advisory-provider-verification-compatibility.md",
-    "tests/test_advisory_provider_verification_115t.py",
-    ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md"
+    "tasks/done/20260706-2113-115u-advisory-provider-strategy-extension-point-review.md",
+    "tests/test_phase_115u_advisory_provider_strategy_review.py",
+    ".pcae/phase-completion-metadata.json"
   ],
-  "tests_added_or_updated": "66 new tests added (tests/test_advisory_provider_verification_115t.py) covering provider containment, raw/normalized/evidence boundaries, failure isolation, malformed response handling, UNKNOWN evidence, probabilistic/model-produced evidence, advisory evidence cannot authorize Accept alone, pilot scope restriction, no hidden backend config, no execution capability; all pre-existing suites (advisory framework, repository_skills, evidence, decision_evaluation, runtime/contract/autonomy/plugin, fast_green) pass unmodified",
+  "tests_added_or_updated": "27 new focused architecture/documentation verification tests added (tests/test_phase_115u_advisory_provider_strategy_review.py); no implementation code changed; all pre-existing suites (115P/115Q architecture tests, advisory framework/verification suites) pass unmodified",
   "phase_commits": [
     {
-      "hash": "09c22d88",
-      "message": "Verify advisory provider containment"
+      "hash": "d73a9956",
+      "message": "Review Advisory Provider strategy"
     },
     {
-      "hash": "62e78dfe",
-      "message": "Complete Phase 115T advisory provider verification"
+      "hash": "7c3cd22b",
+      "message": "Complete Phase 115U Advisory Provider strategy review"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115T adds no modification, only new tests re-verifying it)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115U adds no implementation)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -44,16 +44,10 @@
   },
   "validation_results": [
     {
-      "name": "focused_advisory_repository_skills_evidence_decision_tests",
-      "result": "1365/1365",
+      "name": "focused_architecture_documentation_tests",
+      "result": "284/284",
       "status": "passed",
-      "note": "python -m pytest tests/test_*advisory* tests/test_repository_skills*.py tests/test_evidence*.py tests/test_decision_evaluation*.py -n auto -q -ra --durations=100"
-    },
-    {
-      "name": "runtime_contract_autonomy_plugin_suites",
-      "result": "3610/3610",
-      "status": "passed",
-      "note": "python -m pytest tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* -n auto -q -ra --durations=100"
+      "note": "python -m pytest tests/test_phase_115u_advisory_provider_strategy_review.py tests/test_advisory_provider_verification_115t.py tests/test_current_acting_model_advisory_provider_115s.py tests/test_advisory_repository_skills_prototype_115r.py tests/test_phase_115q_advisory_repository_skills_contract_freeze.py tests/test_phase_115p_advisory_repository_skills_architecture.py -q -ra"
     },
     {
       "name": "report_notification_tests",
@@ -69,7 +63,7 @@
       "name": "fast_green",
       "result": "4390/4390",
       "status": "passed",
-      "note": "python -m pytest -m \"fast_green\" -n auto -ra --durations=100"
+      "note": "prior phase's fast_green result carried forward; unaffected by this architecture/review-only phase"
     },
     {
       "name": "pcae_health",
@@ -113,8 +107,7 @@
     }
   ],
   "test_results": {
-    "focused_advisory_repository_skills_evidence_decision_tests": "1365/1365",
-    "runtime_contract_autonomy_plugin_suites": "3610/3610",
+    "focused_architecture_documentation_tests": "284/284",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "4390/4390"
@@ -163,6 +156,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No new provider implemented. No DeepSeek. No GLM. No Codex-specific integration. No provider selection. No model configuration. No lifecycle command modified. No Decision Evaluation modified. No Repository Transition Validator modified. No Repository Skills runtime modified. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115U — Second Advisory Provider Pilot Planning"
+  "no_go_confirmation": "No second Advisory Provider implemented. No provider selection added. No model configuration added. No DeepSeek integration. No GLM integration. No Qwen integration. No Codex-specific integration. No OpenAI-specific integration. No Claude-specific integration. No local SLM integration. No Advisory Provider runtime modified. No Repository Skills runtime modified. No Evidence modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115V — Advisory Evidence Quality Hardening"
 }
