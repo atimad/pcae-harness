@@ -2,67 +2,92 @@
 
 ## Current Phase
 
-Phase 115W — Advisory Context Package Contract (completed).
+Phase 115X — Advisory Context Package Prototype (completed).
 
-Contract/design only: no `AdvisoryContextPackage` runtime implemented,
-no Advisory Provider runtime modified, no Repository Skill modified,
-no Evidence Provider modified, no Decision Evaluation modified, no
-Repository Transition Validator modified, no lifecycle command
-modified, no model configuration added, no second provider added, no
-DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM integration
-introduced. Phase report:
-`docs/PHASE_115W_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md`. Canonical
-contract: `docs/PCAE_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md`.
+Implements the `AdvisoryContextPackage` runtime object exactly as
+frozen by 115W. No Advisory Provider runtime modified, no Repository
+Skill modified, no Evidence Provider modified, no Decision Evaluation
+modified, no Repository Transition Validator modified, no lifecycle
+command modified, no model configuration added, no second provider
+added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude/local-SLM integration.
+Phase report:
+`docs/PHASE_115X_ADVISORY_CONTEXT_PACKAGE_PROTOTYPE.md`.
 
-**Core principle frozen**: Advisory models receive bounded, trusted,
-provenance-preserving context. They do not receive unrestricted
-repository access.
+**New module**: `src/pcae/core/advisory_context_package.py` implements
+`AdvisoryContextPackage`, `AdvisoryContextSection`,
+`AdvisoryArtifactReference`, `AdvisoryContextProvenance`,
+`AdvisoryContextBudget`, and `AdvisoryRedactionSummary` — six frozen
+dataclasses, all validating their own shape at construction.
 
-**`AdvisoryContextPackage` frozen with 15 required sections**:
-`package_id`, `created_at_utc`, `objective`, `advisory_question`,
-`trusted_pcae_instructions`, `repository_summary`,
-`deterministic_evidence_summary`, `transition_context`,
-`constraints_and_no_go_rules`, `artifact_references`,
-`untrusted_repository_content`, `provenance`, `limitations`,
-`size_budget`, `redaction_summary` — none optional.
+**All 15 required sections implemented** as required constructor
+arguments, none with a default — a package cannot be constructed with
+any section omitted.
 
-**Four trust-boundary classes frozen**: trusted PCAE instructions,
-deterministic PCAE evidence, untrusted repository content, and
-model-produced advisory output — with an explicit section-to-class
-mapping.
+**Trust boundary classes enforced**: every named section is validated
+against the trust class 115W assigned it (e.g. `repository_summary`
+must declare `deterministic_pcae_evidence`, every
+`untrusted_repository_content` item must declare
+`untrusted_repository_content`) — a mismatch raises `ValueError`.
 
-**Prompt-injection boundary frozen**: `untrusted_repository_content`
-is always its own section, always delimited/labelled, never honored
-as instructions; trusted sections are always assembled last —
-complementary to, not a substitute for, 115Q's Normalizer boundary.
+**Allowed advisory question enforced**: exactly one value accepted,
+`"Is the repository state internally consistent?"` — any other value
+rejected.
 
-**Size limits frozen (concept, not fixed numbers)**: total package
-budget, per-section budgets, deterministic summarization requirement,
-absolute prohibition on unbounded repository dumps.
+**Size budgets enforced with concrete defaults chosen this phase**:
+total budget 20,000 chars, per-section default 4,000 chars, untrusted
+repository content tightened to 2,000 chars — every section and the
+aggregate checked; violations raise `ValueError`, never silently
+truncated.
 
-**Redaction/secrets policy frozen**: no secrets, tokens, credentials,
-private env values, unrestricted logs, or raw config secrets — every
-redaction recorded in `redaction_summary`, never silently dropped.
+**Prompt-injection boundary represented**:
+`ordered_sections_for_prompt_assembly()` returns sections in 115W's
+required order (deterministic evidence and untrusted content first,
+trusted instructions always last); `prompt_label` gives every section
+an explicit, class-specific label; adversarial repository content
+proven to never change its own trust class.
 
-**Provenance rules frozen**: package-level and item-level, never
-discarded during summarization.
+**Redaction/provenance/artifact references all enforced**: redaction
+summary required and self-validating; package-level and
+per-artifact-reference provenance required; artifacts referenced by
+path/Evidence ID/commit hash with a bounded summary, never embedded in
+full.
 
-**Artifact-reference model frozen**: files by path, evidence by
-Evidence ID, commits by hash — full-content embedding never a default.
+**Serialization implemented**: `to_dict()`/`from_dict()` on every
+type, JSON-compatible only, no persistence layer, round-trip equality
+verified.
 
-**Allowed advisory question frozen**: exactly one, "Is the repository
-state internally consistent?" — unchanged from 115S/115T's verified
-pilot scope.
+**No integration**: confirmed by source-level checks that
+`advisory_context_package.py` is never imported by any Advisory
+Provider, Repository Skill, Decision Evaluation, the Repository
+Transition Validator, or any lifecycle command; the default Repository
+Skills registry still returns exactly 115J's four deterministic
+skills.
 
-**Future extensibility documented, not implemented**: documentation/
-report/architecture consistency review, code review, security review
-— each requiring its own future contract-freeze phase.
+Added `tests/test_advisory_context_package.py` (79 new tests). No
+execution capability.
 
-Added `tests/test_phase_115w_advisory_context_package_contract.py` (30
-new tests, architecture/contract verification only). No
-implementation, no execution.
+Recommended next repo phase: 115Y — Advisory Context Package Verification & Compatibility (not started).
 
-Recommended next repo phase: 115X — Advisory Context Package Prototype (not started).
+## Phase 115X Complete
+
+Phase 115X — Advisory Context Package Prototype (completed).
+
+Implemented the `AdvisoryContextPackage` runtime object exactly as
+frozen by 115W: the package shape, four trust-boundary classes, size
+budgets (concrete defaults chosen this phase), redaction summary,
+provenance, artifact references, prompt-injection boundary
+representation, and JSON-compatible serialization — with 79 new tests.
+Zero integration with any Advisory Provider, Repository Skill,
+Decision Evaluation, the Repository Transition Validator, or any
+lifecycle command.
+
+**No-go**: no Advisory Provider runtime modified, no Repository Skill
+modified, no Evidence Provider modified, no Decision Evaluation
+modified, no Repository Transition Validator modified, no lifecycle
+command modified, no model configuration added, no second provider
+added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude/local-SLM integration.
+
+Recommended next repo phase: 115Y — Advisory Context Package Verification & Compatibility (not started).
 
 ## Phase 115W Complete
 

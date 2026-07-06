@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+- Phase 115X — Advisory Context Package Prototype. Implements the
+  `AdvisoryContextPackage` runtime object exactly as frozen by 115W.
+  Adds `src/pcae/core/advisory_context_package.py`: six frozen
+  dataclasses (`AdvisoryContextPackage`, `AdvisoryContextSection`,
+  `AdvisoryArtifactReference`, `AdvisoryContextProvenance`,
+  `AdvisoryContextBudget`, `AdvisoryRedactionSummary`), all
+  self-validating at construction. All 15 required sections
+  implemented with no defaults (a package cannot omit any section).
+  Trust boundary classes enforced: every named section validated
+  against the trust class 115W assigned it. Allowed advisory question
+  enforced (exactly `"Is the repository state internally
+  consistent?"`, any other value rejected). Size budgets enforced with
+  concrete defaults chosen this phase (total 20,000 chars, per-section
+  default 4,000 chars, untrusted repository content tightened to 2,000
+  chars) -- violations raise `ValueError`, never silently truncated.
+  Prompt-injection boundary represented via
+  `ordered_sections_for_prompt_assembly()` (deterministic evidence and
+  untrusted content first, trusted instructions always last) and
+  `prompt_label` (explicit, class-specific labelling); adversarial
+  repository content proven to never change its own trust class.
+  Redaction summary, package- and item-level provenance, and bounded
+  artifact references (file/evidence/commit, summary capped at 500
+  chars) all enforced. `to_dict()`/`from_dict()` implemented on every
+  type, JSON-compatible only, no persistence layer, round-trip
+  equality verified. Adds 79 new tests
+  (`tests/test_advisory_context_package.py`) and
+  `docs/PHASE_115X_ADVISORY_CONTEXT_PACKAGE_PROTOTYPE.md`. Confirmed
+  via source-level checks: never imported by any Advisory Provider,
+  Repository Skill, Decision Evaluation, Repository Transition
+  Validator, or lifecycle command; default Repository Skills registry
+  unchanged (still 115J's four deterministic skills). No model
+  configuration, no second provider, no DeepSeek/GLM/Qwen/Codex/
+  OpenAI/Claude/local-SLM integration. Execution capability remains
+  unavailable.
+
 - Phase 115W — Advisory Context Package Contract. Contract/design
   only: freezes the `AdvisoryContextPackage` contract -- the bounded,
   trusted, provenance-preserving context that may be supplied to an

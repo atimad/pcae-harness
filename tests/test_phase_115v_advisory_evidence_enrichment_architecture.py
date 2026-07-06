@@ -233,9 +233,18 @@ def test_no_implementation_claims():
 
 
 def test_no_new_implementation_module_added():
+    """As of 115V (this phase), no implementation module existed yet.
+
+    ``advisory_context_package.py`` was subsequently implemented by
+    Phase 115X (per 115V's own named roadmap: 115W contract freeze ->
+    115X prototype) -- this guard test is intentionally narrowed to
+    the module names that remain unimplemented, since 115V's own
+    "no implementation" claim is a property of 115V's diff, not a
+    permanent constraint on later phases. See
+    ``docs/PHASE_115X_ADVISORY_CONTEXT_PACKAGE_PROTOTYPE.md``.
+    """
     forbidden_paths = (
         REPO_ROOT / "src" / "pcae" / "core" / "advisory_evidence_enrichment.py",
-        REPO_ROOT / "src" / "pcae" / "core" / "advisory_context_package.py",
         REPO_ROOT / "src" / "pcae" / "core" / "evidence_enrichment.py",
     )
     for path in forbidden_paths:
