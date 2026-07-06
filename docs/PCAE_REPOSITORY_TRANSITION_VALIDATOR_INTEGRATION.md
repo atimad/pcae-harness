@@ -57,6 +57,29 @@ state:
 No command owns canonical state. Each command becomes a transition request
 that calls one shared validation and promotion pipeline.
 
+## 3.1 116B Consolidation Ownership
+
+Phase 116B clarifies the intended ownership model without changing
+current lifecycle behavior:
+
+- `RepositoryState` construction is one policy, even where current code
+  has two construction call sites. A future helper should live with the
+  Repository Transition Validator/integration layer and be used by both
+  `validate_phase_report_transition(...)` and
+  `certify_notification_transition(...)`.
+- Lifecycle commands remain front ends that request transitions. They do
+  not own phase identity, report completeness, recommended-next-phase
+  enforcement, canonical promotion eligibility, notification
+  eligibility, or execution-unavailability policy.
+- Structural invariants are the long-term home for phase identity,
+  metadata consistency, report completeness, and recommended-next-phase
+  enforcement. The finalization gate remains a v0.2 compatibility/trust
+  gate until its unique governance-key and test-result-key checks are
+  migrated into first-class invariants.
+- Repository Event remains policy/taxonomy only for v0.2. Notification
+  certification observes transition outcomes and dispatch eligibility; it
+  does not materialize an event stream or own an event runtime type.
+
 ## 4. Transition Flow Matrix
 
 ### 4.1 `pcae phase complete`

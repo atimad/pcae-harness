@@ -23,7 +23,7 @@ below):
 | Repository State | What exists right now | 113T/113U | `RepositoryState` |
 | Repository Transition | What change is proposed | 113T/113U | `ProposedTransition` |
 | Repository Artifact | What durable evidence was recorded | 114A | `ArtifactState` (114A's own enum) |
-| Repository Event | What certified outcome was announced | 114B.1 | conceptual (no runtime type yet) |
+| Repository Event | What certified outcome was announced | 114B.1 / 116B | policy/taxonomy only for v0.2 (no runtime type) |
 
 ## Repository Decision
 
@@ -145,6 +145,28 @@ governance-key/test-result-key presence checks, which the structural
 invariants do not cover at all) is migrated to a first-class invariant of
 its own.
 
+### 116B Consolidation Position
+
+Phase 116B consolidates the documented architecture position without
+changing runtime behavior:
+
+- **Structural invariants are the long-term authority** for phase
+  identity, metadata consistency, report completeness, recommended-next-
+  phase presence, canonical promotion eligibility, notification
+  eligibility, and execution-unavailability checks.
+- The legacy finalization gate remains a compatibility/trust gate for
+  v0.2 while its unique governance-key and test-result-key checks have no
+  first-class structural-invariant replacement. Future implementation
+  work should migrate those unique checks into invariants before retiring
+  duplicate finalization-gate checks.
+- No fourth phase-identity authority should be added. Future identity
+  work should converge `validate_phase_identity`, `identity_conflict`,
+  and `phase_identity_consistency` / `metadata_consistency` toward the
+  structural-invariant path.
+- Report-completeness and recommended-next-phase checks should not be
+  reimplemented in another lifecycle layer. If their policy changes, the
+  change belongs in the structural invariant definitions first.
+
 ## Containment Assessment
 
 **Containment does not depend on model capability, and this review
@@ -233,6 +255,15 @@ authority" is achieved by discipline rather than by structure -- noted
 here as a concrete follow-up candidate, not a defect (114E's drill found
 no case where the two actually disagreed).
 
+**116B consolidation**: shared `RepositoryState` construction is the
+required future implementation shape. The helper should be owned by the
+Repository Transition Validator/integration layer and consumed by both
+`validate_phase_report_transition(...)` and
+`certify_notification_transition(...)`. Notification certification may
+read notification-specific fields, but it should not own a parallel
+repository-state construction policy. Phase 116B documents this
+ownership only; it does not introduce the helper or change call behavior.
+
 ## Lifecycle Connectivity
 
 ```
@@ -254,7 +285,7 @@ Canonical Artifact Promotion (promote_artifact -- Accept + Certified only)
 Repository State (latest.json / latest.md)
        |
        v
-Repository Event (conceptual -- Accepted/Rejected/Quarantined/RequiresHumanReview/
+Repository Event (policy/taxonomy only for v0.2 -- Accepted/Rejected/Quarantined/RequiresHumanReview/
                    PromotionSucceeded/PromotionRejected/NotificationDelivered/
                    Failed/Skipped/RetryScheduled, 114B.1 taxonomy)
        |
@@ -269,12 +300,13 @@ Consumers (Telegram sink today; REST/Dashboard/Audit/Monitoring documented,
 No disconnected path was found: every arrow above has a concrete,
 identified function or module backing it (see Kernel Authorities). The
 one asterisk is Repository Event itself -- 114B.1 froze the taxonomy and
-the policy that consumes it, but no `Event` type or emitter exists yet
-(deliberately; 114B.1's own non-goal). Today, the "event" step is
-implicit in what `certify_notification_transition(...)` observes about
-the Decision and Artifact steps that already ran, not a distinct object
-passed between them. This is the one honest gap in the wire diagram: the
-Event layer is a policy and a vocabulary, not yet a runtime hop.
+the policy that consumes it, and 116B explicitly freezes its v0.2 status
+as policy/taxonomy only. No `Event` type or emitter exists in v0.2.
+Today, the "event" step is implicit in what
+`certify_notification_transition(...)` observes about the Decision and
+Artifact steps that already ran, not a distinct object passed between
+them. This is the intentional wire-diagram caveat for v0.2: the Event
+layer is policy and vocabulary, not a runtime hop.
 
 ## Canonical Lifecycle Wire Diagram
 
@@ -307,7 +339,7 @@ flowchart TD
 
 Green = implemented and unchanged by this review (113U/114A). Blue =
 implemented (113T/113U validator). Orange = policy/taxonomy frozen
-(114B.1), no runtime `Event` type yet. Red/decision = the frozen
+(114B.1/116B), no v0.2 runtime `Event` type. Red/decision = the frozen
 four-verdict Decision point. Gray = external actors/consumers, unchanged.
 This diagram supersedes 114B.1's own wire diagram (which omitted the
 explicit Reject/Quarantine/Requires-Human-Review branch reaching
@@ -350,7 +382,7 @@ architecture phase):
 - The finalization gate's specific required-key lists
 
 **Should never again be duplicated** (this review's single strongest
-recommendation):
+recommendation, consolidated by 116B):
 
 - Phase identity consistency checking -- three mechanisms exist today
   (`validate_phase_identity`, `identity_conflict`, the structural
@@ -362,6 +394,13 @@ recommendation):
   call `git rev-list --count origin/main..HEAD` for this purpose; every
   consumer (114D, 114D.1, notification certification) already reuses
   them unmodified, and this discipline should hold going forward.
+- Repository State construction -- future implementation should create
+  one shared construction helper for lifecycle/report and notification
+  validation rather than maintaining equivalent field population in two
+  places.
+- Repository Event -- frozen for v0.2 as policy/taxonomy only. Do not
+  add partial event-like runtime objects in individual consumers; a real
+  Event type or bus requires a separate future contract phase.
 
 ## Future Roadmap
 
@@ -374,13 +413,16 @@ proposes: **transition toward explainability and autonomous reasoning**
 top of the now-formalized Repository Decision vocabulary
 (`TransitionResult`) this review named rather than replaced.
 
-Two concrete, non-blocking items carried forward for a future phase (not
-114R, not required before 115A):
+Three concrete, non-blocking items carried forward for future
+implementation phases:
 
 1. Consolidate the three overlapping phase-identity-checking mechanisms
    into the structural invariants.
 2. Give `RepositoryState` construction one shared constructor instead of
    two independently-maintained call sites.
+3. If Repository Events become runtime objects later, introduce them
+   through a dedicated contract phase rather than through notification
+   sink behavior.
 
 ## Compatibility Boundaries
 

@@ -2,53 +2,75 @@
 
 ## Current Phase
 
-Phase 116A — v0.2 Architecture Review & Consolidation
+Phase 116B — v0.2 Architecture Consolidation
 (completed).
 
-Review and consolidation only: no runtime capability, execution,
-authorization, Permission Broker change, Repository Skill, Advisory
-Provider, Evidence Provider, Decision Evaluation change, Repository
-Transition Validator change, lifecycle command change, Notification
-Policy change, Telegram inbound, REST, Dashboard, Web UI, or model
-integration was implemented. Phase report:
-`docs/PHASE_116A_V0_2_ARCHITECTURE_REVIEW.md`.
+Consolidation only: applied the minor documentation and architecture
+consistency items identified by Phase 116A. No runtime capability,
+execution, authorization, Permission Broker change, Repository Skill,
+Advisory Provider, Evidence Provider, Decision Evaluation change,
+Repository Transition Validator behavior change, lifecycle command
+change, Notification Policy behavior change, Telegram inbound, REST,
+Dashboard, Web UI, event bus, or model integration was implemented.
+Phase report:
+`docs/PHASE_116B_V0_2_ARCHITECTURE_CONSOLIDATION.md`.
 
-**Complete v0.2 architecture review performed** across Runtime,
-Governance, Repository State Kernel, Repository Transition Validator,
-Evidence Framework, Decision Evaluation, Repository Skills, Advisory
-Providers, Advisory Context Package, Reporting, Notifications, and
-Phase lifecycle.
+**116A minor consolidation items applied**: structural invariants are
+documented as the long-term authority for phase identity, metadata
+consistency, report completeness, and recommended-next-phase checks;
+the legacy finalization gate remains a v0.2 compatibility/trust gate
+until its unique governance-key and test-result-key checks migrate into
+first-class invariants; shared `RepositoryState` construction is
+documented as the required future implementation shape; and Repository
+Event is explicitly frozen as policy/taxonomy only for v0.2.
 
-**Architecture assessment**: architecture requires minor consolidation.
-No significant redesign is required and no authority leakage was found,
-but overlapping phase-identity/finalization checks, duplicated
-report-completeness/recommended-next-phase enforcement, two
-independent `RepositoryState` construction call sites, and the
-policy-only Repository Event layer should be consolidated before a
-v0.2 architecture freeze.
+**Architecture assessment**: architecture still does not require
+significant redesign. The documentation consolidation portion is
+complete; remaining implementation-oriented consolidation should be
+handled only by separately approved future phases.
 
-**Extension points reviewed**: Repository Skills, Advisory Providers,
-Evidence Providers, and Runtime Plugins are complete enough for the
-v0.2 architecture and remain extensible without changing Decision
-Evaluation or Repository Transition Validator authority.
+**Extension points unchanged**: Repository Skills, Advisory Providers,
+Evidence Providers, and Runtime Plugins remain as reviewed in 116A. No
+extension point contract changed.
 
-**Naming and diagrams verified**: kernel primitive, evidence,
-decision, advisory, notification, runtime-state, and extension-point
-terminology is consistent across canonical docs, contracts,
-implementation names, and Mermaid diagrams. No diagram claims
-implemented execution, authorization, REST, Dashboard, Web UI,
-Telegram inbound, or model integration.
+**Naming and diagrams consolidated**: canonical docs now use consistent
+Repository Event wording for v0.2 policy/taxonomy-only status and include
+a kernel ownership diagram that does not claim new runtime behavior.
 
-**Implementation consistency confirmed**: prototypes still satisfy
-their frozen contracts. Runtime Inspect reports execution unavailable,
-state `Observed`, maximum plugin capability `observe`, and no
-registered runtime plugins.
+**Implementation consistency preserved**: no source files or tests were
+changed. Runtime Inspect continues to report execution unavailable,
+state `Observed`, maximum plugin capability `observe`, and no registered
+runtime plugins.
 
-**Architectural debt classified** as no must-fix items before v0.2,
-four recommended consolidation items before v0.2, future enhancements,
-and intentionally deferred capabilities.
+**Remaining debt** is implementation-oriented and intentionally deferred:
+migrate unique finalization-gate checks into structural invariants,
+implement one shared `RepositoryState` construction helper, and introduce
+a runtime Repository Event type only through a separate future contract
+phase if needed.
 
-Recommended next repo phase: 116B — v0.2 Architecture Consolidation.
+Recommended next repo phase: 116C — v0.2 Architecture Consolidation Verification.
+
+## Phase 116B Complete
+
+Phase 116B — v0.2 Architecture Consolidation (completed).
+
+Applied the minor consolidation items identified by 116A as
+documentation and architecture-consistency changes only. Structural
+invariants are documented as the long-term authority for phase identity,
+metadata consistency, report completeness, and recommended-next-phase
+checks; the finalization gate is documented as a v0.2 compatibility/trust
+gate until its unique checks migrate; shared `RepositoryState`
+construction is documented as a future implementation shape; and
+Repository Event is frozen as policy/taxonomy only for v0.2.
+
+**No-go**: no runtime capability, execution, authorization, Permission
+Broker change, Repository Skill, Advisory Provider, Evidence Provider,
+Decision Evaluation change, Repository Transition Validator behavior
+change, lifecycle command change, Notification Policy behavior change,
+Telegram inbound, REST, Dashboard, Web UI, event bus, or model
+integration.
+
+Recommended next repo phase: 116C — v0.2 Architecture Consolidation Verification.
 
 ## Phase 116A Complete
 

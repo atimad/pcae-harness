@@ -11,12 +11,24 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-## Current Roadmap (113-series — Repository Transition Validator track)
+## Current Roadmap (v0.2 architecture freeze track)
 
 Per `PROJECT_STATUS.md`. Only the phase explicitly named "Recommended
 next repo phase" there is confirmed; everything after it is a tentative
 candidate, not a committed queue — no phase activation is inferred
 ahead of an explicit human decision (`tasks/DECISIONS.md`).
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 116A | v0.2 Architecture Review & Consolidation | ✅ Complete |
+| 116B | v0.2 Architecture Consolidation | ✅ Complete |
+| 116C | v0.2 Architecture Consolidation Verification | 🔜 Next (per PROJECT_STATUS.md) |
+
+## Historical: Repository State Kernel Track (113S-114B)
+
+Completed historical track retained for reference. It is not the current
+queue; `PROJECT_STATUS.md` remains authoritative for the active phase and
+recommended next phase.
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -30,7 +42,7 @@ ahead of an explicit human decision (`tasks/DECISIONS.md`).
 | 113Y | Repository Transition Validator Integration: Phase Completion | ✅ Complete |
 | 113Z | Repository Transition Validator Integration: Task Finish | ✅ Complete |
 | 114A | Report Promotion / Quarantine Hardening | ✅ Complete |
-| 114B | Notification Enforcement & Idempotency | 🔜 Next (per PROJECT_STATUS.md) |
+| 114B | Notification Enforcement & Idempotency | ✅ Complete |
 
 ## Historical: Production v1 Path (90-series, superseded)
 

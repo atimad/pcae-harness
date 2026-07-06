@@ -15,6 +15,11 @@ an emitter, or any dispatch behavior. `certify_notification_transition(...)`
 Telegram/filesystem dispatch; this document describes the policy a future
 implementation phase must route through Repository Events to satisfy.
 
+Phase 116B explicitly freezes Repository Event as policy/taxonomy only for
+v0.2. No v0.2 component may treat Repository Event as an implemented
+runtime object, emitter, event bus, or consumer subscription API. A future
+runtime Event type requires its own contract phase.
+
 ## Policy Principle
 
 Notification Policy decides which Repository Events are externally
@@ -83,9 +88,9 @@ formatting, or a severity field on any runtime type.
 
 ## Future Consumer Model
 
-Additional consumers subscribe to Repository Events (filtered through
-Notification Policy's visibility rules), not to lifecycle commands
-directly:
+In the future consumer model, additional consumers subscribe to
+Repository Events (filtered through Notification Policy's visibility
+rules), not to lifecycle commands directly:
 
 - **Telegram** -- the existing sink (`src/pcae/core/notifications.py`),
   unchanged by this phase; a future implementation routes its input
@@ -107,11 +112,12 @@ directly:
   (`docs/PCAE_RUNTIME_PLUGIN_CONTRACTS.md`), never by modifying the
   Repository Transition Validator.
 
-Every consumer in this list is additive: none of them requires a change to
-`validate_transition(...)`, `promote_artifact(...)`, or
-`certify_notification_transition(...)`. That is the point of routing
-through Repository Events -- new consumers subscribe to an event stream
-instead of each inventing their own call site into lifecycle commands.
+Every consumer in this list is additive and future-facing: none of them
+requires a change to `validate_transition(...)`,
+`promote_artifact(...)`, or `certify_notification_transition(...)`.
+That is the point of the Repository Event vocabulary -- later consumers
+should subscribe to one event stream rather than inventing call sites
+into lifecycle commands. In v0.2, that stream remains policy only.
 
 ## Non-Goals
 

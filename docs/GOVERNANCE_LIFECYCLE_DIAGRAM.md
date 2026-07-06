@@ -134,3 +134,36 @@ flowchart LR
 ```
 
 **Green** = implemented. **Orange** = designed, not implemented. **Gray** = future.
+
+## 6. v0.2 Repository State Kernel Ownership
+
+This 116B diagram is an ownership map, not a new runtime flow. It records
+where future consolidation work should happen while preserving current
+v0.2 behavior.
+
+```mermaid
+flowchart TD
+    LC[Lifecycle Commands] --> RS[RepositoryState Construction Policy]
+    NC[Notification Certification] --> RS
+    RS --> SI[Structural Invariants]
+    SI --> TR[TransitionResult]
+    TR --> CAP[Canonical Artifact Promotion]
+    TR --> NP[Notification Policy]
+
+    FG[Legacy Finalization Gate] -. compatibility/trust checks .-> SI
+    EV[Repository Event Policy/Taxonomy] -. v0.2 policy only .-> NP
+
+    style LC fill:#888,color:#fff
+    style NC fill:#2d5,color:#fff
+    style RS fill:#da3,color:#fff
+    style SI fill:#36a,color:#fff
+    style TR fill:#c52,color:#fff
+    style CAP fill:#2d5,color:#fff
+    style NP fill:#da3,color:#fff
+    style FG fill:#888,color:#fff
+    style EV fill:#da3,color:#fff
+```
+
+Blue = implemented validator authority. Green = implemented lifecycle
+components. Orange = documented ownership/policy boundary. Red = frozen
+decision result. Gray = compatibility/external command surface.

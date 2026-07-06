@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Treat Phase 116B as documentation-only v0.2 architecture consolidation:
+  structural invariants are the long-term authority for phase identity,
+  metadata consistency, report completeness, recommended-next-phase
+  presence, canonical promotion eligibility, notification eligibility,
+  and execution-unavailability checks; the legacy finalization gate
+  remains a v0.2 compatibility/trust gate until its unique
+  governance-key and test-result-key checks migrate into first-class
+  invariants; shared `RepositoryState` construction is the required
+  future implementation shape owned by the Repository Transition
+  Validator/integration layer; and Repository Event is frozen as
+  policy/taxonomy only for v0.2, not a runtime type, event bus, emitter,
+  or consumer subscription API. No runtime behavior, lifecycle behavior,
+  execution, authorization, Permission Broker behavior, Repository
+  Skill, Advisory Provider, Evidence Provider, Decision Evaluation
+  behavior, Repository Transition Validator behavior, Notification
+  Policy behavior, Telegram inbound, REST, Dashboard, Web UI, event bus,
+  or model integration is authorized by this phase.
 - Treat Phase 116A as a review-only v0.2 architecture assessment:
   the architecture is internally coherent and does not require
   significant redesign, but it should be classified as requiring minor

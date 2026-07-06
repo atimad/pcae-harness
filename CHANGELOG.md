@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 116B — v0.2 Architecture Consolidation. Documentation-only
+  consolidation phase applying the minor items identified by 116A
+  (`docs/PHASE_116B_V0_2_ARCHITECTURE_CONSOLIDATION.md`). Documents
+  structural invariants as the long-term authority for phase identity,
+  metadata consistency, report completeness, recommended-next-phase
+  presence, canonical promotion eligibility, notification eligibility,
+  and execution-unavailability checks. Clarifies that the legacy
+  finalization gate remains a v0.2 compatibility/trust gate until its
+  unique governance-key and test-result-key checks migrate into
+  first-class invariants. Documents one shared `RepositoryState`
+  construction policy as a future implementation shape owned by the
+  Repository Transition Validator/integration layer and consumed by both
+  lifecycle/report validation and notification certification. Explicitly
+  freezes Repository Event as policy/taxonomy only for v0.2, not an
+  implemented runtime object, emitter, event bus, or consumer
+  subscription API. Adds a kernel ownership diagram and updates roadmap
+  wording for 116C, including the informational `tasks/TODO.md` current
+  roadmap table. No source, tests, runtime capability, execution,
+  authorization, Permission Broker behavior, Repository Skill, Advisory
+  Provider, Evidence Provider, Decision Evaluation behavior, Repository
+  Transition Validator behavior, lifecycle command behavior,
+  Notification Policy behavior, Telegram inbound, REST, Dashboard, Web
+  UI, event bus, or model integration changed. Execution capability
+  remains unavailable.
+
 - Phase 116A — v0.2 Architecture Review & Consolidation. Review-only
   architecture phase covering Runtime, Governance, Repository State
   Kernel, Repository Transition Validator, Evidence Framework,
