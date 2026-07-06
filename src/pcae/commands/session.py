@@ -70,7 +70,7 @@ from pcae.core.context import (
     build_context_pack,
     resolve_profile,
 )
-from pcae.core.health import build_health_data
+from pcae.core.health import build_health_data, is_healthy
 from pcae.core.paths import HarnessPath
 from pcae.core.provenance import (
     ProvenanceEvent,
@@ -426,7 +426,7 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     _refresh_session_snapshot_for_governed_flow(root)
     health_data = build_health_data(root)
     health_status: str = health_data["overall_status"]
-    check_passed = health_status == "healthy"
+    check_passed = is_healthy(health_data)
 
     session_snapshot = read_session_snapshot(root)
     active_task = None
@@ -449,9 +449,10 @@ def run_session_bootstrap(args: argparse.Namespace) -> int:
     active_task_count = _count_active_tasks(root)
     task_memory_warnings = active_task_count > 1
 
+    readiness_health_status = "healthy" if check_passed else health_status
     readiness, issues = _classify_bootstrap_readiness(
         check_passed=check_passed,
-        health_status=health_status,
+        health_status=readiness_health_status,
         active_task=active_task,
         latest_report=latest_report,
         latest_handoff=handoff,

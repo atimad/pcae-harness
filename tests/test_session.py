@@ -803,7 +803,7 @@ def test_session_bootstrap_fails_when_lock_already_held(
     assert "Agent lock already held by other-agent." in output
 
 
-def test_session_bootstrap_no_task_reports_check_failure(
+def test_session_bootstrap_no_task_is_healthy_idle_and_ready(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
@@ -814,8 +814,9 @@ def test_session_bootstrap_no_task_reports_check_failure(
     exit_code = main(["session", "bootstrap", "--agent-id", "claude-local"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
-    assert "Check: failed" in output
+    assert exit_code == 0
+    assert "Health: healthy (idle)" in output
+    assert "Check: passed" in output
 
 
 def test_session_bootstrap_json_output(
@@ -863,7 +864,7 @@ def test_session_bootstrap_json_output(
     assert data["latest_handoff"] is None
 
 
-def test_session_bootstrap_json_no_task_reports_check_failure(
+def test_session_bootstrap_json_no_task_is_healthy_idle_and_ready(
     tmp_path: Path, monkeypatch, capsys
 ) -> None:
     init_harness(HarnessPath(tmp_path))
@@ -874,10 +875,11 @@ def test_session_bootstrap_json_no_task_reports_check_failure(
     exit_code = main(["session", "bootstrap", "--agent-id", "claude-local", "--json"])
 
     output = capsys.readouterr().out
-    assert exit_code == 1
+    assert exit_code == 0
     data = json.loads(output)
-    assert data["ready"] is False
-    assert data["check_status"] == "failed"
+    assert data["ready"] is True
+    assert data["check_status"] == "passed"
+    assert data["health_status"] == "healthy (idle)"
 
 
 # same-agent idempotent bootstrap

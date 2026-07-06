@@ -136,6 +136,10 @@ New JSON fields: `readiness`, `readiness_issues`, `latest_phase_report`, `push_c
 | Task memory auto-cleanup | Future |
 | Approval expiry check | TBD |
 
+## 13. Bugfix Addendum (2026-07-06)
+
+The pcae health factor (row 52 above) was implemented as `check_passed = health_data["overall_status"] == "healthy"`. `overall_status` is a *display* string (`HEALTH_DISPLAY` in `core/health.py`) that renders `"healthy (idle)"` when there is no active task — so this comparison was always false while the repository was idle, forcing `Readiness: blocked` even when `pcae health` and `pcae check` both actually passed. `core/phase.py`'s `handoff_phase` already used the correct `is_healthy(health_data)` helper for the same check; `run_session_bootstrap` now uses it too.
+
 ---
 
 *Phase 94Q.1 is a corrective bootstrap/session/reporting/runtime hardening phase. No real backend invocation, apply execution, patch parsing, file mutation, subprocess, network, shell interception, enforcement, or autonomous mutation was implemented.*
