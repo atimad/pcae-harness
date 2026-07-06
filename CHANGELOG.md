@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 115N — Repository Skills Integration Verification &
+  Compatibility. Verification-only phase re-proving 115M's Repository
+  Skills evidence-acquisition adapter is fully behavior-preserving,
+  with 62 new tests
+  (`tests/test_repository_skills_integration_verification_115n.py`):
+  per-skill evidence equivalence (each of the four deterministic
+  skills individually matches its Evidence-ID-prefixed subset of the
+  direct provider path); full `EvaluationResult` equality between
+  provider-path and skill-path contexts on both a synthetic
+  mostly-`UNKNOWN` repo and the real project root; unchanged
+  `validate_transition` verdicts across the 113U/115F regression
+  scenarios plus CERTIFIED/BLOCKED->CANONICAL promotion decisions;
+  lifecycle compatibility (source-level: no lifecycle command,
+  Notification Policy, Canonical Artifact Promotion, Push-State
+  Reconciliation, or Post-Push Canonicalization references the 115M
+  module); deterministic registry ordering/invocation/merge/
+  duplicate-rejection; the old Evidence Provider compatibility path
+  still fully functional; Repository Skills isolation (evidence-only,
+  no mutation, no execution, no verdict/authorization field); the AI
+  boundary (no DeepSeek/GLM/Qwen/Claude/GPT/Codex/SLM skill, no
+  model-produced evidence); and the execution boundary
+  (`E-runtime-002` = `"unavailable"`, runtime inspect reports
+  Observed/observe/unavailable). Classifies 115M's `4389/4390`
+  fast_green result as a pre-existing, idle-state-dependent condition
+  in `core/permission_broker.py`'s `_broker_decide` (a plain
+  `python -m pytest ...` command hard-blocks when no active task is
+  present) -- reproduced deterministically, not a regression, not a
+  flake, not the failing test's intended behavior. This phase's own
+  fast_green run (active task present) scored `4390/4390`. Zero
+  implementation change; execution capability remains unavailable.
+
 - Phase 115M — Repository Skills Integration Prototype. Implements
   Stage 3 of 115L's frozen migration strategy: adds
   `src/pcae/core/repository_skills_integration.py`, a narrowly scoped

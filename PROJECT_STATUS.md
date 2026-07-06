@@ -2,57 +2,76 @@
 
 ## Current Phase
 
-Phase 115M — Repository Skills Integration Prototype (completed).
+Phase 115N — Repository Skills Integration Verification & Compatibility (completed).
 
-Behavior-preserving integration prototype implementing Stage 3 of
-115L's frozen migration strategy. No Evidence Provider modified, no
-Decision Evaluation modified, no Repository Transition Validator
-modified, no lifecycle command modified, no Notification Policy
-modified, no Canonical Artifact Promotion modified, no Push-State
-Reconciliation modified, no Post-Push Canonicalization modified, no
-AI/SLM/LLM skill, no DeepSeek integration, no execution capability.
-Phase report:
-`docs/PHASE_115M_REPOSITORY_SKILLS_INTEGRATION_PROTOTYPE.md`.
+Verification only: no Repository Skill modified, no Evidence Provider
+modified, no Decision Evaluation modified, no Repository Transition
+Validator modified, no lifecycle command modified, no Notification
+Policy modified, no Canonical Artifact Promotion modified, no
+Push-State Reconciliation modified, no Post-Push Canonicalization
+modified, no new Repository Skill, no AI/SLM/LLM skill, no DeepSeek
+integration, no execution capability. Phase report:
+`docs/PHASE_115N_REPOSITORY_SKILLS_INTEGRATION_VERIFICATION.md`.
 
-**New adapter module**: `src/pcae/core/repository_skills_integration.py`
-exposes `collect_evidence_via_repository_skills` (delegates
-exclusively to a `RepositorySkillRegistry`, 115J's four deterministic
-skills only) and `build_evaluation_context_from_repository_skills`
-(wraps that evidence into a ready-to-evaluate `EvaluationContext`).
-This is the concrete Stage 3 adapter 115L's architecture document
-anticipated.
+**Re-proven, with 62 new tests**
+(`tests/test_repository_skills_integration_verification_115n.py`):
+per-skill evidence equivalence (each of the four deterministic skills
+individually matches its Evidence-ID-prefixed subset of the direct
+provider path); full `EvaluationResult` equality between provider-path
+and skill-path contexts on both a synthetic mostly-`UNKNOWN` repo and
+the real project root; unchanged `validate_transition` verdicts across
+the 113U/115F regression scenarios plus CERTIFIED/BLOCKED→CANONICAL
+promotion decisions; deterministic registry ordering/invocation/merge/
+duplicate-rejection; the old Evidence Provider compatibility path
+still fully functional; Repository Skills isolation (evidence-only, no
+mutation, no execution, no verdict/authorization field); the AI
+boundary (no DeepSeek/GLM/Qwen/Claude/GPT/Codex/SLM skill, no
+model-produced evidence, `AI_REVIEW` capability has zero skills); and
+the execution boundary (`E-runtime-002` = `"unavailable"`, runtime
+inspect reports Observed/observe/unavailable).
 
-**Old path preserved**: `collect_evidence_via_evidence_providers` and
-`build_evaluation_context_from_evidence_providers` remain available,
-instantiating 115D's four Evidence Providers directly, unchanged in
-behavior — nothing before 115M was deleted or disabled.
+**fast_green discrepancy classified**: 115M's `4389/4390` fast_green
+result (one failure,
+`test_dry_run_simulation.py::test_pytest_dry_run_not_blocked`) is a
+**pre-existing, idle-state-dependent condition** in
+`core/permission_broker.py`'s `_broker_decide` — a plain
+`python -m pytest ...` command hard-blocks
+(`would_block_by_task_contract`) whenever no active task is present,
+which the failing test's own assertion doesn't account for. Reproduced
+deterministically via `build_simulation` against a synthetic
+`tmp_path` with/without a `tasks/active/` directory — not a regression
+(neither 115M's nor 115N's own modules reference
+`permission_broker`/`advisory`/`shell_gate`/`dry_run` at all), not a
+flake (100% reproducible under the known idle condition), not the
+test's intended behavior (its own comment expects
+`would_require_active_task=True`, never produced by this branch). This
+phase's own fast_green run (with an active task present) scored
+`4390/4390`, confirming the mismatch never fires when a task is
+active. Out of this verification-only phase's scope to repair.
 
-**Equivalence proven**: 41 new tests
-(`tests/test_repository_skills_integration_115m.py`) prove the old
-provider path and new skill path produce the same Evidence IDs and
-semantically equal items (differing only in independent wall-clock
-timestamps); `evaluate()` produces identical `EvaluationResult`
-objects (full dataclass equality) regardless of which path supplied
-its context; `validate_transition`'s verdicts and the 113U/115F
-regression scenarios are unchanged; the validator's own evidence IDs
-(`E-report-002`, `E-metadata-002`, `E-report-003`, `E-runtime-002`)
-are a subset of the richer skill-path evidence.
+**Readiness**: Repository Skills are verified as a fully
+behavior-preserving evidence-acquisition path, ready for Stage 4
+planning and a future Advisory Repository Skills architecture design
+(115L Section 8's frozen AI Insertion Point).
 
-**No hidden integration**: `core/decision_evaluation.py` still imports
-only `pcae.core.evidence`; `core/repository_skills.py` still never
-imports `decision_evaluation` or `repository_transition_validator`;
-no lifecycle command, Notification Policy, Canonical Artifact
-Promotion, Push-State Reconciliation, or Post-Push Canonicalization
-references the new module. 115L's frozen Integration Boundary and
-Dependency Direction hold unchanged.
+Recommended next repo phase: 115P — Advisory Repository Skills Architecture (not started).
 
-**No AI/execution**: only 115J's four deterministic skills are used;
-no DeepSeek/GLM/Qwen/GPT/Codex import or skill ID exists anywhere in
-the new path. Execution capability remains unavailable — the real
-repository's `E-runtime-002` evidence is `"unavailable"` via both
-paths, and `runtime_execution_unavailable` still evaluates to `PASS`.
+## Phase 115N Complete
 
-Recommended next repo phase: 115N — Repository Skills Integration Verification & Compatibility (not started).
+Phase 115N — Repository Skills Integration Verification & Compatibility (completed).
+
+Re-proved 115M's Repository Skills integration is fully
+behavior-preserving with 62 new tests: per-skill evidence equivalence,
+Decision Evaluation compatibility, Repository Transition Validator
+compatibility, lifecycle compatibility (source-level, plus existing
+integration suites unchanged), registry determinism, the old
+compatibility path, isolation, and the AI/execution boundaries.
+Classified 115M's fast_green discrepancy as a pre-existing,
+idle-state-dependent condition in `core/permission_broker.py`,
+unrelated to Repository Skills. Verification only; zero implementation
+change.
+
+Recommended next repo phase: 115P — Advisory Repository Skills Architecture (not started).
 
 ## Phase 115M Complete
 
