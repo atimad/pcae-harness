@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 115X completion metadata (20260706-2153-sync-phase-115x-completion-metadata)
 - 115X: Advisory Context Package Prototype (20260706-2149-115x-advisory-context-package-prototype)
 - Sync phase 115W completion metadata (20260706-2139-sync-phase-115w-completion-metadata)
 - 115W: Advisory Context Package Contract (20260706-2137-115w-advisory-context-package-contract)
