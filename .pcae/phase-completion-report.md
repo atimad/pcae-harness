@@ -6,9 +6,9 @@
 - **Missing trust fields:** none
 - **Files changed:** 8
 - **Tests run:** 308 (repository skills verification + evidence + decision evaluation suite)
-- **Commits:** 46f2c5d6, 0e5be8fd
-- **Pushed:** not_pushed
-- **origin/main..HEAD:** 2
+- **Commits:** 46f2c5d6, 0e5be8fd, 24134853, 309cd206
+- **Pushed:** pushed
+- **origin/main..HEAD:** 0
 
 ## Summary
 
@@ -142,8 +142,8 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** pending (not yet pushed at report-write time)
-- **pcae_agent_verify_handoff:** pending (dirty working tree until final commit/push)
+- **pcae_push_check:** clean (pushed, origin/main..HEAD == 0)
+- **pcae_agent_verify_handoff:** pass
 - **pcae_session_bootstrap_compact:** completed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe
 - **telegram_runtime:** loaded, configured, enabled
