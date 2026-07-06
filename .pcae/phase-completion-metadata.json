@@ -30,8 +30,8 @@
   "commit_attribution": "phase_owned",
   "validator_module": "none (deterministic evaluation prototype only; no Repository Transition Validator module touched)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -89,7 +89,7 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "nothing_to_push before implementation commits; not_pushed after commits until governed push",
+      "result": "clean (pushed, origin/main..HEAD == 0)",
       "status": "passed"
     },
     {
@@ -135,11 +135,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "not_pushed (governed push pending as this phase's own next step)"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending_post_push"
+      "status": "pass"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -165,5 +165,5 @@
     "polling": false
   },
   "no_go_confirmation": "No Repository Skills. No execution. No authorization. No Repository Transition Validator behavior changes. No lifecycle command changes. No Notification Policy changes. No Canonical Artifact Promotion changes. No Push-State Reconciliation changes. No Post-Push Canonicalization changes. No Telegram changes. No REST. No Dashboard. No plugins. No SLM/LLM integration. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115F — Repository Decision Evaluation Integration"
+  "recommended_next_phase": "115F \u2014 Repository Decision Evaluation Integration"
 }
