@@ -1,34 +1,33 @@
 {
-  "phase_id": "115M",
-  "phase_name": "Repository Skills Integration Prototype",
-  "phase_title": "Repository Skills Integration Prototype",
+  "phase_id": "115N",
+  "phase_name": "Repository Skills Integration Verification & Compatibility",
+  "phase_title": "Repository Skills Integration Verification & Compatibility",
   "status": "completed",
-  "summary": "Behavior-preserving integration prototype implementing Stage 3 of 115L's frozen migration strategy. Adds src/pcae/core/repository_skills_integration.py exposing collect_evidence_via_repository_skills (delegates exclusively to a RepositorySkillRegistry, 115J's four deterministic skills only) and build_evaluation_context_from_repository_skills (wraps that evidence into a ready-to-evaluate EvaluationContext). Preserves the pre-115M path unmodified via collect_evidence_via_evidence_providers and build_evaluation_context_from_evidence_providers. Proves, with 41 new tests (tests/test_repository_skills_integration_115m.py): the old provider path and new skill path produce the same Evidence IDs and semantically equal items (differing only in independent wall-clock timestamps); evaluate() produces identical EvaluationResult objects (full dataclass equality) regardless of which path supplied its context; validate_transition's verdicts and the 113U/115F regression scenarios are unchanged; the validator's own evidence IDs (E-report-002, E-metadata-002, E-report-003, E-runtime-002) are a subset of the richer skill-path evidence. No lifecycle command, Notification Policy, Canonical Artifact Promotion, Push-State Reconciliation, or Post-Push Canonicalization was touched. No AI/SLM/DeepSeek skill exists; only 115J's four deterministic skills are used. 115L's frozen Integration Boundary and Dependency Direction hold unchanged -- core/decision_evaluation.py still imports only pcae.core.evidence, and core/repository_skills.py still never imports decision_evaluation or repository_transition_validator. Also repairs a stale 115L guard test (test_no_new_implementation_module_added) that asserted repository_skills_integration.py must not exist -- expected staleness once this later phase legitimately implements exactly that file. Execution capability remains unavailable.",
-  "files_changed_count": 9,
+  "summary": "Verification-only phase re-proving 115M's Repository Skills evidence-acquisition adapter (src/pcae/core/repository_skills_integration.py) is fully behavior-preserving. Adds 62 new tests (tests/test_repository_skills_integration_verification_115n.py) proving: per-skill evidence equivalence (each of the four deterministic skills individually matches its Evidence-ID-prefixed subset of the direct provider path, via 115M's own public API); full EvaluationResult equality between provider-path and skill-path contexts on both a synthetic mostly-UNKNOWN repository and the real project root (identical invariant_results, blocking_failures, warnings, informational, explanation_reference, summary); unchanged validate_transition verdicts across the 113U/115F regression scenarios plus CERTIFIED/BLOCKED->CANONICAL promotion decisions, with the validator's own adapter evidence IDs remaining a subset of the richer skill-path evidence; lifecycle compatibility confirmed at the source level (no lifecycle command, Notification Policy, Canonical Artifact Promotion, Push-State Reconciliation, or Post-Push Canonicalization references repository_skills at all) plus unmodified passage of the existing phase-complete/task-finish/notification/report-generation integration suites; deterministic registry ordering, invocation order, order-independent merge, duplicate-skill-id rejection, and stable lookup; the old Evidence Provider compatibility path fully functional and provider required_inputs unchanged; Repository Skills isolation (read-only, creates no files, no commit/push/finalize/notify/authorize/execute/mutate function, never calls evaluate() itself, no verdict/authorization field on any result type); the AI boundary (no DeepSeek/GLM/Qwen/Claude/GPT/Codex/SLM skill id, no model-produced evidence, AI_REVIEW capability has zero registered skills); and the execution boundary (E-runtime-002 = 'unavailable' via both paths, runtime_execution_unavailable invariant PASSes, pcae runtime inspect reports Observed/observe/unavailable). Investigates and classifies 115M's 4389/4390 fast_green result: the one failure (test_dry_run_simulation.py::test_pytest_dry_run_not_blocked) is a pre-existing, idle-state-dependent condition in core/permission_broker.py's _broker_decide (a plain `python -m pytest ...` command hard-blocks via would_block_by_task_contract whenever no active task is present) -- reproduced deterministically against a synthetic tmp_path with/without a tasks/active/ directory, confirmed unrelated to 115M/115N (neither references permission_broker/advisory/shell_gate/dry_run), and confirmed to disappear (4390/4390) when this phase's own fast_green run had an active task present. Zero implementation change; no Repository Skill, Evidence Provider, Decision Evaluation, Repository Transition Validator, lifecycle command, Notification Policy, Canonical Artifact Promotion, Push-State Reconciliation, or Post-Push Canonicalization modified. Execution capability remains unavailable.",
+  "files_changed_count": 8,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_115M_REPOSITORY_SKILLS_INTEGRATION_PROTOTYPE.md",
-    "src/pcae/core/repository_skills_integration.py",
+    "docs/PHASE_115N_REPOSITORY_SKILLS_INTEGRATION_VERIFICATION.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-1657-115m-repository-skills-integration-prototype.md",
-    "tests/test_phase_115l_repository_skills_integration_design.py",
-    "tests/test_repository_skills_integration_115m.py",
-    ".pcae/phase-completion-metadata.json"
+    "tasks/done/20260706-1758-115n-repository-skills-integration-verification-compatibility.md",
+    "tests/test_repository_skills_integration_verification_115n.py",
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md"
   ],
-  "tests_added_or_updated": "41 new equivalence/compatibility tests added (tests/test_repository_skills_integration_115m.py); one 115L guard test repaired for expected staleness (tests/test_phase_115l_repository_skills_integration_design.py); all pre-existing suites (evidence/decision_evaluation/repository_skills/repository_transition_validator, task/phase suites including the known-slow test_phase85/87_integration.py, runtime/contract/autonomy/plugin suites, fast_green) pass unmodified",
+  "tests_added_or_updated": "62 new verification tests added (tests/test_repository_skills_integration_verification_115n.py) covering evidence equivalence per skill, Decision Evaluation compatibility, Transition Validator compatibility, lifecycle compatibility, registry verification, compatibility path verification, isolation verification, AI boundary verification, execution boundary verification, and the fast_green discrepancy investigation; all pre-existing suites (evidence/decision_evaluation/repository_skills/repository_transition_validator, task/phase/notification suites including the known-slow test_phase85/87_integration.py, runtime/contract/autonomy/plugin suites, fast_green) pass unmodified",
   "phase_commits": [
     {
-      "hash": "dcf4d3a6",
-      "message": "Integrate Repository Skills evidence acquisition"
+      "hash": "71b6741d",
+      "message": "Verify Repository Skills integration compatibility"
     },
     {
-      "hash": "909d0742",
-      "message": "Complete Phase 115M Repository Skills integration prototype"
+      "hash": "4e7e5926",
+      "message": "Complete Phase 115N Repository Skills integration verification"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115M adds no modification, only a new adapter module above it)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115N adds no modification, only new tests re-verifying it)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -46,15 +45,15 @@
   "validation_results": [
     {
       "name": "focused_evidence_decision_validator_skills_tests",
-      "result": "786/786",
+      "result": "848/848",
       "status": "passed",
       "note": "python -m pytest tests/test_repository_skills*.py tests/test_evidence*.py tests/test_decision_evaluation*.py tests/test_repository_transition_validator*.py -n auto -q -ra --durations=100"
     },
     {
-      "name": "task_and_phase_suites",
-      "result": "1555/1555 + 68/68",
+      "name": "task_phase_notification_suites",
+      "result": "1651/1651",
       "status": "passed",
-      "note": "python -m pytest tests/test_task*.py tests/test_*task* tests/test_*phase* tests/test_phase_reports.py tests/test_phase_reports_cli.py -n auto -q -ra --durations=100 (test_phase85_integration.py/test_phase87_integration.py run separately without -n auto due to known per-test pcae-subprocess cost, ~12 min, not a regression)"
+      "note": "python -m pytest tests/test_task*.py tests/test_*phase* tests/test_phase_reports*.py tests/test_notification*.py -n auto -q -ra --durations=100 (includes test_phase85_integration.py/test_phase87_integration.py, ~12 min due to known per-test pcae-subprocess cost, not a regression)"
     },
     {
       "name": "runtime_contract_autonomy_plugin_suites",
@@ -64,9 +63,9 @@
     },
     {
       "name": "fast_green",
-      "result": "4389/4390",
+      "result": "4390/4390",
       "status": "passed",
-      "note": "python -m pytest -m \"fast_green\" -n auto -ra --durations=100; one pre-existing unrelated failure (test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked) reproduces identically on an unmodified tree with no active task -- idle-state-dependent, not a 115M regression"
+      "note": "python -m pytest -m \"fast_green\" -n auto -ra --durations=100; full pass this round with an active task present, confirming the 115M discrepancy is idle-state-dependent, not a regression"
     },
     {
       "name": "pcae_health",
@@ -120,10 +119,10 @@
     }
   ],
   "test_results": {
-    "focused_evidence_decision_validator_skills_tests": "786/786",
-    "task_and_phase_suites": "1555/1555 + 68/68",
+    "focused_evidence_decision_validator_skills_tests": "848/848",
+    "task_phase_notification_suites": "1651/1651",
     "runtime_contract_autonomy_plugin_suites": "3573/3573",
-    "fast_green": "4389/4390 (1 pre-existing, unrelated, idle-state-dependent failure)",
+    "fast_green": "4390/4390 (active task present; confirms 115M's 1 failure was idle-state-dependent)",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
   },
@@ -171,6 +170,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No Notification Policy modified. No Canonical Artifact Promotion modified. No Push-State Reconciliation modified. No Post-Push Canonicalization modified. No AI/SLM/LLM skill. No DeepSeek integration. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115N — Repository Skills Integration Verification & Compatibility"
+  "no_go_confirmation": "No Repository Skill modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No Notification Policy modified. No Canonical Artifact Promotion modified. No Push-State Reconciliation modified. No Post-Push Canonicalization modified. No new Repository Skill. No AI/SLM/LLM skill. No DeepSeek integration. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115P — Advisory Repository Skills Architecture"
 }
