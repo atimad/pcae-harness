@@ -157,6 +157,8 @@ maintained as runtime state.*
 
 - **focused_advisory_subsystem_hardening_and_related_tests:** 1708/1708 (passed)
 - **fast_green:** 4390/4390 (passed)
+- **report_notification_tests:** present_in_canonical_metadata (present)
+- **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 
 ## No-Go Confirmations
 

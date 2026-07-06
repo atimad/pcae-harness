@@ -53,6 +53,16 @@
       "note": "python -m pytest -m \"fast_green\" -n auto -ra --durations=100"
     },
     {
+      "name": "report_notification_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
+    },
+    {
       "name": "pcae_health",
       "result": "healthy",
       "status": "passed"
@@ -100,7 +110,9 @@
   ],
   "test_results": {
     "focused_advisory_subsystem_hardening_and_related_tests": "1708/1708",
-    "fast_green": "4390/4390"
+    "fast_green": "4390/4390",
+    "report_notification_tests": "present_in_canonical_metadata",
+    "bootstrap_session_reporting_tests": "present_in_canonical_metadata"
   },
   "governance_results": [
     {
