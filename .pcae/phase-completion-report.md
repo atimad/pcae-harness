@@ -1,66 +1,85 @@
-# Phase 115A Complete — Repository Decision & Explainability Framework
+# Phase 115B Complete — Repository Evidence Framework Contract Freeze
 
-- **Phase ID:** `115A`
+- **Phase ID:** `115B`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 9
-- **Tests run:** 15
-- **Commits:** 79662071, 676a8063, 6c3e72b8, 2489cba7, dd61dc3b, 2cb43bc8, f4bee1a4
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Tests run:** 16
+- **Commits:** c370933e, 07d3fe7b
+- **Pushed:** not_pushed
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 115A froze the Repository Decision & Explainability Framework. It
-defines how PCAE explains why a repository transition is accepted,
-rejected, quarantined, or requires human review. Repository Decision
-remains a computation, not a fifth Repository State Kernel primitive.
+Phase 115B froze the Repository Evidence Framework contract introduced
+in 115A. Evidence informs decisions, does not decide, does not mutate
+repository state, and does not become a kernel primitive.
 
-The canonical framework is:
+## Evidence Contract
 
-Repository State -> Repository Transition -> Evidence Collection ->
-Decision Evaluation -> Transition Result -> Repository Artifact ->
-Repository Event.
+Required Evidence fields are `evidence_id`, `source`, `category`,
+`producer`, `timestamp_utc`, `freshness`, `confidence`, `determinism`,
+`scope`, `references`, `observed_value`, `expected_value`,
+`explanation`, and `limitations`.
 
-## Decision Framework
+Evidence IDs are stable within one evaluation and may be cited by
+decision explanations. They are not global permanent repository IDs
+unless persisted inside a future Repository Artifact.
 
-The framework distinguishes Repository State, Evidence, Decision,
-Repository Artifact, and Repository Event. Evidence is evaluation-scoped:
-it is a first-class architectural concept but not a kernel primitive.
-Decision Evaluation remains centralized and deterministic.
+## Evidence Categories
 
-## Evidence Architecture
+Frozen categories: `git`, `task`, `phase`, `report`, `metadata`,
+`architecture`, `runtime`, `push_state`, `notification`, `governance`,
+`test_result`, `security`, `documentation`, `ai_review`, and `unknown`.
 
-Evidence has Source, Category, Confidence, and Freshness. Evidence must
-be deterministic, reproducible, structured, and model-independent.
-Evidence examples include Git, Reports, Metadata, Tasks, Architecture,
-Runtime, Push State, Notification, Governance, and Tests.
+## Determinism Model
 
-## Repository Skills
+Frozen determinism levels: `deterministic`, `reproducible_external`,
+`probabilistic`, `human_asserted`, and `unknown`.
 
-Repository Skills are future evidence-only providers. They collect
-evidence and never decide, vote, mutate state, authorize transitions,
-promote artifacts, send notifications, bypass the validator, invoke
-runtime execution, or depend on model identity.
+## Confidence Model
 
-## Explainability Model
+Frozen confidence levels: `high`, `medium`, `low`, and `unknown`.
+Confidence must not override hard invariants. Probabilistic evidence may
+never alone authorize canonical mutation.
 
-Every Transition Result must be explainable with structured fields:
-Decision, Reason, Evidence Used, Invariant(s), Severity, Suggested
-Repair, and Confidence. No AI-generated prose is required.
+## Freshness Model
 
-## Decision Composition
+Frozen freshness levels: `current`, `stale`, `expired`, and `unknown`.
+Stale evidence is preserved and labelled; it is never silently selected
+over current evidence.
 
-Skills never vote and never override one another. Conflicting evidence
-remains evidence and is evaluated by the centralized Decision Framework.
+## Evidence Provider Contract
 
-## Canonical Wire Diagram
+Evidence Providers collect evidence and never decide. They declare
+determinism class, evidence categories produced, required repository
+inputs, scope, and limitations. They never mutate state, promote
+artifacts, send notifications, bypass the validator, authorize
+execution, invoke runtime execution, override another provider, or hide
+conflicts.
 
-The canonical Mermaid diagram is in `docs/PCAE_DECISION_FRAMEWORK.md`:
-Repository State -> Evidence Providers -> Evidence -> Decision Framework
--> Transition Validator -> Transition Result -> Repository Artifact ->
-Repository Event -> Notification Policy -> Consumers.
+## Conflict Semantics
+
+Conflicting evidence is preserved, marked, and evaluated centrally by
+the Decision Framework. Providers never silently choose one item, vote,
+or override another provider.
+
+## Explanation References
+
+Decision explanations cite Evidence IDs such as `E-git-001` and
+`E-metadata-002`.
+
+## Persistence Boundary
+
+Evidence is transient during evaluation. Raw evidence persistence is
+future work and is not implemented by Phase 115B.
+
+## SLM / AI Evidence Boundary
+
+Future SLM/LLM evidence is advisory only, probabilistic by default,
+never sole authority for Accept, may trigger human review, may suggest
+repairs, and must be labelled model-produced.
 
 ## PCAE Architecture Status
 
@@ -69,12 +88,12 @@ maintained as runtime state.*
 
 ### Completed
 
-- Repository State Kernel review through Phase 114R
 - Repository Decision & Explainability Framework through Phase 115A
+- Repository Evidence Framework Contract Freeze through Phase 115B
 
 ### Planned
 
-- 115B — Repository Evidence Framework Contract Freeze
+- 115C — Repository Evidence Framework Prototype
 
 ### Current Runtime State
 
@@ -94,7 +113,7 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_decision_explainability_documentation_tests:** 15/15 (passed)
+- **focused_repository_evidence_contract_tests:** 16/16 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 - **fast_green:** not_run_documentation_only_no_runtime_code_changed
@@ -102,11 +121,13 @@ maintained as runtime state.*
 ## No-Go Confirmations
 
 - No runtime implementation.
-- No execution capability.
-- No Repository Transition Validator changes.
-- No Notification Policy changes.
+- No Repository Transition Validator behavior changes.
 - No lifecycle command changes.
-- No Permission Broker changes.
+- No Notification Policy changes.
+- No Repository Skills implementation.
+- No execution.
+- No authorization.
+- No Permission Broker enforcement.
 - No plugins.
 - No Telegram inbound.
 - No REST.
@@ -121,7 +142,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115B — Repository Evidence Framework Contract Freeze
+115C — Repository Evidence Framework Prototype
 
 ## Report Consistency
 
@@ -130,4 +151,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115A. Schema version 1.0.*
+*Report generated for PCAE Phase 115B. Schema version 1.0.*

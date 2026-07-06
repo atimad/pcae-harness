@@ -1,57 +1,37 @@
 {
-  "phase_id": "115A",
-  "phase_name": "Repository Decision & Explainability Framework",
-  "phase_title": "Repository Decision & Explainability Framework",
+  "phase_id": "115B",
+  "phase_name": "Repository Evidence Framework Contract Freeze",
+  "phase_title": "Repository Evidence Framework Contract Freeze",
   "status": "completed",
-  "summary": "Architecture and contract phase freezing the framework by which PCAE explains why a repository transition is accepted, rejected, quarantined, or requires human review. Defined the deterministic chain Repository State -> Repository Transition -> Evidence Collection -> Decision Evaluation -> Transition Result -> Repository Artifact -> Repository Event while preserving Repository Decision as a computation, not a fifth kernel primitive. Introduced Evidence as a first-class architectural concept but not a kernel primitive; Evidence exists only during evaluation and has Source, Category, Confidence, and Freshness. Defined Evidence Providers and future Repository Skills as evidence-only contributors that never decide, vote, mutate state, authorize transitions, promote artifacts, send notifications, bypass the validator, invoke runtime execution, or depend on model identity. Froze the centralized evaluation pipeline Evidence -> Invariant Evaluation -> Decision -> Explanation -> Transition Result, with structured reproducible explanations containing Decision, Reason, Evidence Used, Invariant(s), Severity, Suggested Repair, and Confidence; no AI-generated prose is required. Reviewed Accept, Reject, Quarantine, and Requires Human Review verdict semantics. Defined decision composition: skills never vote or override one another; conflicts remain evidence and are evaluated centrally. Added the canonical Mermaid explainability diagram showing Repository State -> Evidence Providers -> Evidence -> Decision Framework -> Transition Validator -> Transition Result -> Repository Artifact -> Repository Event -> Notification Policy -> Consumers. No Repository Transition Validator changes, no Notification Policy changes, no lifecycle command changes, no Permission Broker changes, no plugins, no Telegram inbound, no REST, no Web UI, no Dashboard. Execution capability remains unavailable.",
+  "summary": "Architecture and contract phase freezing the exact structure, semantics, and constraints for Evidence used by PCAE decisions. Evidence informs decisions, does not decide, does not mutate repository state, and does not become a kernel primitive. Required Evidence fields are evidence_id, source, category, producer, timestamp_utc, freshness, confidence, determinism, scope, references, observed_value, expected_value, explanation, and limitations. Evidence identity is stable within one evaluation and may be cited by explanations, but is not a global permanent repository ID unless persisted inside a future Repository Artifact. Frozen categories: git, task, phase, report, metadata, architecture, runtime, push_state, notification, governance, test_result, security, documentation, ai_review, unknown. Frozen determinism levels: deterministic, reproducible_external, probabilistic, human_asserted, unknown. Frozen confidence levels: high, medium, low, unknown. Frozen freshness levels: current, stale, expired, unknown. Evidence Providers collect evidence and declare determinism class, categories, required inputs, scope, and limitations; they never decide, vote, mutate state, promote artifacts, send notifications, bypass the validator, authorize execution, invoke runtime execution, override another provider, or hide conflicts. Conflicting evidence is preserved and evaluated centrally. Decision explanations cite Evidence IDs. Raw evidence persistence remains future work. Future SLM/LLM evidence is advisory only, probabilistic by default, never sole authority for Accept, may trigger human review, may suggest repairs, and must be labelled model-produced. No Repository Transition Validator behavior changes, no lifecycle command changes, no Notification Policy changes, no Repository Skills implementation, no execution, no authorization, no Permission Broker enforcement, no plugins, no Telegram inbound, no REST, no Web UI, no Dashboard. Execution capability remains unavailable.",
   "files_changed_count": 9,
   "files_changed": [
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/active/20260706-0051-phase-115a-repository-decision-explainability-framework.md",
-    "docs/PCAE_DECISION_FRAMEWORK.md",
-    "docs/PCAE_REPOSITORY_SKILLS.md",
-    "docs/PHASE_115A_DECISION_EXPLAINABILITY_FRAMEWORK.md",
-    "tests/test_phase_115a_decision_explainability_framework.py"
+    "tasks/active/20260706-0243-phase-115b-repository-evidence-framework-contract-freeze.md",
+    "docs/PCAE_REPOSITORY_EVIDENCE_FRAMEWORK.md",
+    "docs/PCAE_EVIDENCE_PROVIDER_CONTRACT.md",
+    "docs/PHASE_115B_REPOSITORY_EVIDENCE_CONTRACT_FREEZE.md",
+    "tests/test_phase_115b_repository_evidence_contract_freeze.py"
   ],
-  "tests_added_or_updated": "15 focused architecture/documentation verification tests added; no runtime code changed",
+  "tests_added_or_updated": "16 focused architecture/documentation verification tests added; no runtime code changed",
   "phase_commits": [
     {
-      "hash": "796620710f3a537b650286b73067deae85b3ba18",
-      "message": "Add Phase 115A decision explainability framework"
+      "hash": "c370933ed2beea79d089c7375a78a543b8446f13",
+      "message": "Freeze repository evidence framework contract"
     },
     {
-      "hash": "676a80635cfd5ce6cc818172b6ea50b71a626dd6",
-      "message": "Adjust Phase 115A finish acceptance checks"
-    },
-    {
-      "hash": "6c3e72b8",
-      "message": "Close Phase 115A decision explainability framework task"
-    },
-    {
-      "hash": "2489cba75e28aed2f74f48ce58c18ba7bee37316",
-      "message": "Sync Phase 115A completion metadata"
-    },
-    {
-      "hash": "dd61dc3b",
-      "message": "Close Phase 115A completion sync task"
-    },
-    {
-      "hash": "2cb43bc858070672ac8843d15d4b04496b44881e",
-      "message": "Correct Phase 115A completion metadata"
-    },
-    {
-      "hash": "f4bee1a4",
-      "message": "Close Phase 115A metadata correction task"
+      "hash": "07d3fe7b",
+      "message": "Complete Phase 115B repository evidence contract freeze"
     }
   ],
   "commit_attribution": "phase_owned",
   "validator_module": "none (architecture and contract phase; no runtime module added)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 2,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -65,10 +45,10 @@
   },
   "validation_results": [
     {
-      "name": "focused_decision_explainability_documentation_tests",
-      "result": "15/15",
+      "name": "focused_repository_evidence_contract_tests",
+      "result": "16/16",
       "status": "passed",
-      "note": "python -m pytest tests/test_phase_115a_decision_explainability_framework.py"
+      "note": "python -m pytest tests/test_phase_115b_repository_evidence_contract_freeze.py"
     },
     {
       "name": "report_notification_tests",
@@ -127,7 +107,7 @@
     }
   ],
   "test_results": {
-    "focused_decision_explainability_documentation_tests": "15/15",
+    "focused_repository_evidence_contract_tests": "16/16",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "not_run_documentation_only_no_runtime_code_changed"
@@ -176,6 +156,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No runtime implementation. No execution capability. No Repository Transition Validator changes. No Notification Policy changes. No lifecycle command changes. No Permission Broker changes. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115B — Repository Evidence Framework Contract Freeze"
+  "no_go_confirmation": "No runtime implementation. No Repository Transition Validator behavior changes. No lifecycle command changes. No Notification Policy changes. No Repository Skills implementation. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115C — Repository Evidence Framework Prototype"
 }

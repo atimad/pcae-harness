@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 115B: Completion Sync (20260706-0247-phase-115b-completion-sync)
 - Phase 115B: Repository Evidence Framework Contract Freeze (20260706-0243-phase-115b-repository-evidence-framework-contract-freeze)
 - Phase 115A: Trust Metadata Sync (20260706-0102-phase-115a-trust-metadata-sync)
 - Phase 115A: Canonical Report Sync (20260706-0059-phase-115a-canonical-report-sync)
