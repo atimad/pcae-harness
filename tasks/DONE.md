@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 115N completion metadata (20260706-1814-sync-phase-115n-completion-metadata)
 - 115N: Repository Skills Integration Verification & Compatibility (20260706-1758-115n-repository-skills-integration-verification-compatibility)
 - Repair 115M phase report trust fields (20260706-1742-repair-115m-phase-report-trust-fields)
 - Fix 115M pushed-state metadata field (20260706-1740-fix-115m-pushed-state-metadata-field)
