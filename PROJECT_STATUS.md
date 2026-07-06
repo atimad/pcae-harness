@@ -2,6 +2,100 @@
 
 ## Current Phase
 
+Phase 115L — Repository Skills Integration Design (completed).
+
+Architecture and design only: no Repository Skills integration
+implemented, no Repository Skill modified, no Evidence Provider
+modified, no Decision Evaluation modified, no Repository Transition
+Validator modified, no lifecycle command modified, no Notification
+Policy modified, no Canonical Artifact Promotion modified, no
+Push-State Reconciliation modified, no Post-Push Canonicalization
+modified, no execution capability. Phase report:
+`docs/PHASE_115L_REPOSITORY_SKILLS_INTEGRATION_DESIGN.md`. Canonical
+architecture: `docs/PCAE_REPOSITORY_SKILLS_INTEGRATION_ARCHITECTURE.md`.
+
+**Integration architecture frozen**: Repository Skills become the
+sole orchestrators of Evidence Providers. Decision Evaluation
+receives only `EvidenceCollection` (already its shape today) and
+never knows which providers exist.
+
+**Integration boundary frozen**: Decision Evaluation must never
+construct providers, discover providers, call providers directly, or
+know provider ordering. Repository Skills own provider orchestration
+exclusively.
+
+**Orchestration model frozen**: one Repository Skill may invoke zero,
+one, or multiple providers, merging its own `EvidenceCollection`
+before returning — the only two merge points that may ever exist are
+within one skill (provider-to-skill) and across skills
+(`RepositorySkillRegistry.merge_evidence`).
+
+**Skill composition frozen**: a skill may compose sub-skills
+internally, preserving deterministic invocation order (already
+115K-verified for multi-skill invocation), with no recursive cycles
+permitted.
+
+**Compatibility guarantees frozen**: no provider API change, no
+Decision Evaluation semantic change, no Transition Validator behavior
+change, no lifecycle command change.
+
+**Migration strategy frozen**, four stages: Stage 1 (current —
+Decision Evaluation consumes `RepositoryState`-derived evidence via
+115F's adapter), Stage 2 (completed — Repository Skills wrap
+providers, 115J/115K), Stage 3 (not started — Decision Evaluation
+receives Repository Skill output, candidate for 115M), Stage 4 (not
+started — providers become a fully encapsulated implementation
+detail).
+
+**Dependency direction frozen**: Repository Skills depend on
+Evidence Providers; Decision Evaluation depends only on Evidence;
+Transition Validator depends only on `EvaluationResult`; no reverse
+dependency.
+
+**Future AI insertion point frozen**: future DeepSeek/GLM/GPT/Qwen/
+local-SLM-backed skills fit beside deterministic Repository Skills as
+parallel `RepositorySkill` implementations, both merging into the
+same `EvidenceCollection`. Decision Evaluation and the Transition
+Validator remain unaware; Repository State remains authoritative.
+
+**Updated canonical wire diagram**: Repository State -> Evidence
+Providers -> Repository Skills (Deterministic + Advisory, parallel)
+-> Evidence Collection -> Decision Evaluation -> Repository
+Transition Validator -> Transition Result -> Repository Artifact ->
+Repository Event -> Notification Policy -> Consumers.
+
+Added `tests/test_phase_115l_repository_skills_integration_design.py`
+(18 new tests, architecture/documentation verification only). No
+implementation, no execution. Execution capability remains
+unavailable.
+
+Recommended next repo phase: 115M — Repository Skills Integration Prototype (not started).
+
+## Phase 115L Complete
+
+Phase 115L — Repository Skills Integration Design (completed).
+
+Designed how Repository Skills become the primary evidence
+acquisition layer for Decision Evaluation, without changing any
+observable lifecycle behavior: integration architecture, integration
+boundary, orchestration model, skill composition (sub-skills, no
+cycles), compatibility guarantees, a four-stage migration strategy,
+dependency direction, the future AI insertion point, and an updated
+canonical wire diagram. Architecture and design only; zero
+implementation added.
+
+**No-go**: no Repository Skills integration implemented, no
+Repository Skill modified, no Evidence Provider modified, no Decision
+Evaluation modified, no Repository Transition Validator modified, no
+lifecycle command modified, no Notification Policy modified, no
+Canonical Artifact Promotion modified, no Push-State Reconciliation
+modified, no Post-Push Canonicalization modified, no execution
+capability.
+
+Recommended next repo phase: 115M — Repository Skills Integration Prototype (not started).
+
+## Phase 115K Complete
+
 Phase 115K — Repository Skills Verification & Compatibility (completed).
 
 Verification-only phase: no new Repository Skill implemented, no

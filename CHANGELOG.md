@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+- Phase 115L — Repository Skills Integration Design. Architecture and
+  design only; zero implementation added. Designs how Repository
+  Skills (115H design, 115I contract freeze, 115J prototype, 115K
+  verification) become the primary evidence-acquisition layer for
+  Decision Evaluation, without changing any observable lifecycle
+  behavior. Freezes the integration architecture: Repository Skills
+  become the sole orchestrators of Evidence Providers; Decision
+  Evaluation receives only `EvidenceCollection` (already its shape
+  today) and never knows which providers exist. Freezes the
+  integration boundary: Decision Evaluation must never construct,
+  discover, or call a provider directly, or know provider ordering.
+  Freezes the orchestration model: one Repository Skill may invoke
+  zero, one, or multiple providers, merging its own
+  `EvidenceCollection` before returning -- the only two merge points
+  that may ever exist are within one skill and across skills via
+  `RepositorySkillRegistry.merge_evidence`. Freezes skill composition:
+  a skill may compose sub-skills internally with deterministic
+  invocation order and no recursive cycles. Freezes compatibility
+  guarantees (no provider API change, no Decision Evaluation semantic
+  change, no Transition Validator behavior change, no lifecycle
+  command change) and a four-stage migration strategy (Stage 1:
+  current `RepositoryState`-derived adapter path; Stage 2: completed
+  115J/115K Repository Skills wrapping providers; Stage 3: not started,
+  Decision Evaluation receiving Repository Skill output, candidate for
+  115M; Stage 4: not started, providers fully encapsulated). Freezes
+  the dependency direction (Repository Skills -> Evidence Providers;
+  Decision Evaluation -> Evidence only; Transition Validator ->
+  `EvaluationResult` only; no reverse dependency) and the future AI
+  insertion point (future DeepSeek/GLM/GPT/Qwen/local-SLM-backed
+  skills fit beside deterministic Repository Skills as parallel
+  `RepositorySkill` implementations, both merging into the same
+  `EvidenceCollection`, with Decision Evaluation/the Transition
+  Validator unaware and Repository State remaining authoritative).
+  Adds an updated canonical wire diagram showing Deterministic and
+  Advisory Repository Skills as parallel implementations under one
+  Repository Skills layer. Added
+  `docs/PCAE_REPOSITORY_SKILLS_INTEGRATION_ARCHITECTURE.md`,
+  `docs/PHASE_115L_REPOSITORY_SKILLS_INTEGRATION_DESIGN.md`, and
+  `tests/test_phase_115l_repository_skills_integration_design.py` (18
+  new tests, architecture/documentation verification only). No
+  Repository Skills integration implemented, no Repository Skill,
+  Evidence Provider, Decision Evaluation, Repository Transition
+  Validator, lifecycle command, Notification Policy, Canonical
+  Artifact Promotion, Push-State Reconciliation, or Post-Push
+  Canonicalization modified. Execution capability remains unavailable.
+
 - Phase 115K — Repository Skills Verification & Compatibility.
   Verification-only phase proving 115J's Repository Skills prototype
   (`src/pcae/core/repository_skills.py`) is deterministic, read-only,
