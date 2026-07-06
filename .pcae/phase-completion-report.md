@@ -1,69 +1,65 @@
-# Phase 115S Complete — First Advisory Provider Integration (Current Acting Model)
+# Phase 115T Complete — Advisory Provider Verification & Compatibility
 
-- **Phase ID:** `115S`
+- **Phase ID:** `115T`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 9
-- **Tests run:** 48 new + 1299 focused suite + 4390/4390 fast_green
-- **Commits:** e6caa9e5, 385eca3a
+- **Files changed:** 8
+- **Tests run:** 66 new + 1365 + 3610 + 4390/4390 fast_green
+- **Commits:** 09c22d88, 62e78dfe
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115S integrates the first real Advisory Provider — the current
-acting model — as a stateless, one-shot evidence producer for exactly
-one bounded pilot question. Tightly scoped: no backend selection, no
-model configuration, no provider registry, no multi-model mode, no
-execution capability.
+Phase 115T re-proves 115S's first real Advisory Provider integration
+is safely contained, behavior-compatible, failure-isolated, and
+portable to future providers. Verification only; zero implementation
+change.
 
-## Provider Integration Summary
+## Containment Verification Summary
 
-New module `src/pcae/core/current_acting_model_advisory_provider.py`
-implements `CurrentActingModelAdvisoryProvider`, conforming to 115R's
-`AdvisoryProvider` interface unmodified. No live model API call, no
-network invocation, no subprocess, no MCP tool call anywhere.
+No decide/authorize/commit/push/finalize/notify/mutate/execute
+method; no verdict/authorization field; never mutates a repository;
+no reference to the validator in either advisory module.
+Advisory-only evidence resolves zero invariants to `PASS`; advisory
+evidence never overrides a disagreeing deterministic evaluation.
 
-## Pilot Scope
+## Boundary Verification
 
-Exactly one bounded question: "Is the repository state internally
-consistent?" — operationalized as 115R's
-`RepositoryConsistencyAdvisorySkill.objective ==
-"repository_consistency_review"`, reused unmodified.
+Provider returns exactly `RawAdvisoryResponse`; Normalizer returns
+exactly `NormalizedAdvisoryResponse`; Evidence Builder returns exactly
+`EvidenceCollection`; `EvaluationContext` rejects non-collection
+evidence; the Validator resolves verdicts unaware advisory evidence
+exists.
 
-## Provider Boundary
+## Failure Isolation
 
-`invoke()` returns `RawAdvisoryResponse` only. Stateless, single-use:
-a second `invoke()` raises `RuntimeError` rather than retrying.
+Six scenarios (unavailable, malformed, missing confidence, missing
+limitations, unexpected extra content, empty findings) each degrade
+safely — never raise, never affect deterministic evaluation, never
+produce `HIGH`/`MEDIUM` confidence from a failure path.
 
-## Normalization Boundary
+## Nondeterminism Containment
 
-Raw response passes through 115R's existing
-`normalize_advisory_response()` unmodified — no bespoke normalization
-logic in the new module.
+Across five varied raw contents: schema conformance always holds,
+every evidence item is probabilistic/model-produced with confidence/
+limitations/provenance always present, and advisory evidence never
+alone authorizes Accept.
 
-## Evidence Boundary
+## Backend Portability
 
-Evidence built via 115R's existing `build_evidence_from_normalized()`
-unmodified: probabilistic, model-produced, advisory only,
-confidence-labelled, limitations-labelled, provenance-preserving.
-Proven never sole authority for Accept — feeding this pilot's evidence
-alone into `evaluate()` resolves zero invariants to `PASS`.
+Demonstrated with test-only stand-ins only (nothing implemented): a
+fake provider parametrized over `current_acting_model`/`deepseek`/
+`glm_zai`/`qwen`/`codex`/`local_slm` plugs into the unmodified skill
+identically; Decision Evaluation and the Validator require zero
+change for any of them.
 
-## Safety Summary
+## Pilot Scope Verification
 
-No execution, mutation, commit, push, finalize, notify, authorization,
-validator bypass, or secret access — verified structurally via
-source-level checks across the new module and every lifecycle/
-notification/validator module.
-
-## Failure Behavior
-
-Unavailable or malformed advisory degrades to one `UNKNOWN`-freshness
-evidence item; a provider exception yields an explicit `FAILED` skill
-result with zero evidence — 115R's two-outcome failure contract,
-reused unmodified.
+Exactly one question, "Is the repository state internally
+consistent?"; no code/architecture/security review, planning, or
+autonomous-repair scope exists anywhere in either advisory module.
 
 ## PCAE Architecture Status
 
@@ -90,10 +86,11 @@ maintained as runtime state.*
 - Advisory Repository Skills Contract Freeze through Phase 115Q
 - Advisory Repository Skills Prototype through Phase 115R
 - First Advisory Provider Integration (Current Acting Model) through Phase 115S
+- Advisory Provider Verification & Compatibility through Phase 115T
 
 ### Planned
 
-- 115T — Advisory Provider Verification & Compatibility
+- 115U — Second Advisory Provider Pilot Planning
 
 ### Current Runtime State
 
@@ -115,23 +112,23 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_advisory_provider_tests:** 1299/1299 (passed)
+- **focused_advisory_repository_skills_evidence_decision_tests:** 1365/1365 (passed)
+- **runtime_contract_autonomy_plugin_suites:** 3610/3610 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 - **fast_green:** 4390/4390 (passed)
 
 ## No-Go Confirmations
 
-- No backend selection.
+- No new provider implemented.
+- No DeepSeek.
+- No GLM.
+- No Codex-specific integration.
+- No provider selection.
 - No model configuration.
-- No DeepSeek-specific integration.
-- No GLM-specific integration.
-- No provider registry.
-- No multi-model mode.
-- No execution capability.
+- No lifecycle command modified.
 - No Decision Evaluation modified.
 - No Repository Transition Validator modified.
-- No lifecycle command modified.
 - No Repository Skills runtime modified.
 - No authorization.
 - No Permission Broker enforcement.
@@ -149,7 +146,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115T — Advisory Provider Verification & Compatibility
+115U — Second Advisory Provider Pilot Planning
 
 ## Report Consistency
 
@@ -158,4 +155,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115S. Schema version 1.0.*
+*Report generated for PCAE Phase 115T. Schema version 1.0.*

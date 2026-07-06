@@ -1,34 +1,33 @@
 {
-  "phase_id": "115S",
-  "phase_name": "First Advisory Provider Integration (Current Acting Model)",
-  "phase_title": "First Advisory Provider Integration (Current Acting Model)",
+  "phase_id": "115T",
+  "phase_name": "Advisory Provider Verification & Compatibility",
+  "phase_title": "Advisory Provider Verification & Compatibility",
   "status": "completed",
-  "summary": "Tightly scoped advisory pilot integrating the first real (non-mock) AdvisoryProvider. Adds src/pcae/core/current_acting_model_advisory_provider.py: CurrentActingModelAdvisoryProvider, conforming to 115R's AdvisoryProvider interface unmodified (backend_kind='current_acting_model', determinism=PROBABILISTIC, provider_id='current_acting_model_advisory_provider'). No live model API call, no network invocation, no subprocess, no MCP tool call anywhere -- 'the current acting model' supplies one answer at construction time, exactly as a human operator would type one in; the module's only job is shepherding that answer through 115R's unmodified normalize_advisory_response() and build_evidence_from_normalized(), never bypassing either. Stateless and single-use: a second invoke() on the same instance raises RuntimeError rather than retrying ('one request / one response', no retries, no multi-turn conversation, enforced structurally). Pilot scope is exactly one bounded question -- 'Is the repository state internally consistent?' -- operationalized as 115R's own RepositoryConsistencyAdvisorySkill.objective == 'repository_consistency_review', reused unmodified via the new build_repository_consistency_skill_with_current_model() prototype helper (substitutes only the provider, same skill class, not added to build_default_registry()). Proves advisory evidence is never sole authority for Accept (feeding this pilot's evidence alone into evaluate() resolves zero invariants to PASS) and that unavailable/malformed advisory degrades to one UNKNOWN-freshness evidence item, or an explicit FAILED skill result with zero evidence on a provider exception -- 115R's two-outcome failure contract, reused unmodified. No backend selection, no model configuration, no DeepSeek/GLM-specific integration, no provider registry, no multi-model mode. Not wired into pcae phase complete, pcae task finish, pcae push, pcae notify, pcae agent verify-handoff, or pcae runtime inspect as an authority. No Decision Evaluation, Repository Transition Validator, lifecycle command, or Repository Skills runtime modified (build_default_registry() still returns exactly 115J's four deterministic skills). Execution capability remains unavailable.",
-  "files_changed_count": 9,
+  "summary": "Verification-only phase re-proving 115S's first real Advisory Provider integration (CurrentActingModelAdvisoryProvider) is safely contained, behavior-compatible, failure-isolated, and portable to future providers. Adds 66 new tests (tests/test_advisory_provider_verification_115t.py) proving: behavioral containment (no decide/authorize/commit/push/finalize/notify/mutate/execute method, no verdict/authorization field, never mutates a repository, no reference to the validator in either advisory module, advisory-only evidence resolves zero invariants to PASS, advisory evidence never overrides a disagreeing deterministic evaluation); pipeline boundaries (provider returns exactly RawAdvisoryResponse, Normalizer returns exactly NormalizedAdvisoryResponse, Evidence Builder returns exactly EvidenceCollection, EvaluationContext rejects non-collection evidence, the Validator resolves verdicts unaware advisory evidence exists); failure isolation across six scenarios (unavailable, malformed, missing confidence, missing limitations, unexpected extra content, empty findings -- each degrades safely, never raises, never affects deterministic evaluation); nondeterminism containment across five varied raw contents (schema conformance, probabilistic/model-produced/confidence/limitations/provenance always present, never sole authority for Accept); backend portability demonstrated with test-only stand-ins only (current_acting_model/deepseek/glm_zai/qwen/codex/local_slm backend_kind values, all requiring zero change to Decision Evaluation or the Validator, none implemented); pilot scope (exactly one question, no other review scope string present); and no hidden configuration (no provider registry, no backend-selection function, no API-key/secret/env reference, no split-model config, no network-specific config). No new provider implemented, no DeepSeek, no GLM, no Codex-specific integration, no provider selection, no model configuration, no lifecycle command, Decision Evaluation, Repository Transition Validator, or Repository Skills runtime modified. Execution capability remains unavailable.",
+  "files_changed_count": 8,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_115S_FIRST_ADVISORY_PROVIDER_INTEGRATION.md",
-    "src/pcae/core/current_acting_model_advisory_provider.py",
+    "docs/PHASE_115T_ADVISORY_PROVIDER_VERIFICATION.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-2037-115s-first-advisory-provider-integration-current-acting-model.md",
-    "tests/test_current_acting_model_advisory_provider_115s.py",
+    "tasks/done/20260706-2057-115t-advisory-provider-verification-compatibility.md",
+    "tests/test_advisory_provider_verification_115t.py",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "tests_added_or_updated": "48 new tests added (tests/test_current_acting_model_advisory_provider_115s.py) covering conformance to AdvisoryProvider, one request/one response/one EvidenceCollection, raw response normalization, Evidence Builder output, malformed response handling, unavailable provider handling, no execution, no mutation, no lifecycle authority, no backend-specific dependency, advisory evidence never sole authority for Accept, and pilot scope; all pre-existing suites (advisory framework, repository_skills, evidence, decision_evaluation, fast_green) pass unmodified",
+  "tests_added_or_updated": "66 new tests added (tests/test_advisory_provider_verification_115t.py) covering provider containment, raw/normalized/evidence boundaries, failure isolation, malformed response handling, UNKNOWN evidence, probabilistic/model-produced evidence, advisory evidence cannot authorize Accept alone, pilot scope restriction, no hidden backend config, no execution capability; all pre-existing suites (advisory framework, repository_skills, evidence, decision_evaluation, runtime/contract/autonomy/plugin, fast_green) pass unmodified",
   "phase_commits": [
     {
-      "hash": "e6caa9e5",
-      "message": "Integrate current acting model advisory provider"
+      "hash": "09c22d88",
+      "message": "Verify advisory provider containment"
     },
     {
-      "hash": "385eca3a",
-      "message": "Complete Phase 115S first advisory provider integration"
+      "hash": "62e78dfe",
+      "message": "Complete Phase 115T advisory provider verification"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115S adds no modification, only a new isolated advisory provider module)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115T adds no modification, only new tests re-verifying it)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -45,10 +44,16 @@
   },
   "validation_results": [
     {
-      "name": "focused_advisory_provider_tests",
-      "result": "1299/1299",
+      "name": "focused_advisory_repository_skills_evidence_decision_tests",
+      "result": "1365/1365",
       "status": "passed",
       "note": "python -m pytest tests/test_*advisory* tests/test_repository_skills*.py tests/test_evidence*.py tests/test_decision_evaluation*.py -n auto -q -ra --durations=100"
+    },
+    {
+      "name": "runtime_contract_autonomy_plugin_suites",
+      "result": "3610/3610",
+      "status": "passed",
+      "note": "python -m pytest tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* -n auto -q -ra --durations=100"
     },
     {
       "name": "report_notification_tests",
@@ -108,7 +113,8 @@
     }
   ],
   "test_results": {
-    "focused_advisory_provider_tests": "1299/1299",
+    "focused_advisory_repository_skills_evidence_decision_tests": "1365/1365",
+    "runtime_contract_autonomy_plugin_suites": "3610/3610",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "4390/4390"
@@ -157,6 +163,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No backend selection. No model configuration. No DeepSeek-specific integration. No GLM-specific integration. No provider registry. No multi-model mode. No execution capability. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No Repository Skills runtime modified. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115T — Advisory Provider Verification & Compatibility"
+  "no_go_confirmation": "No new provider implemented. No DeepSeek. No GLM. No Codex-specific integration. No provider selection. No model configuration. No lifecycle command modified. No Decision Evaluation modified. No Repository Transition Validator modified. No Repository Skills runtime modified. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115U — Second Advisory Provider Pilot Planning"
 }
