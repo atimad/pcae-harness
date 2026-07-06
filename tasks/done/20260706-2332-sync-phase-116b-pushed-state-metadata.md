@@ -10,7 +10,7 @@ Sync phase 116B pushed-state metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 116B pushed-state metadata (20260706-2332-sync-phase-116b-pushed-state-metadata)
 - Sync phase 116B completion metadata (20260706-2329-sync-phase-116b-completion-metadata)
 - 116B — v0.2 Architecture Consolidation (20260706-2312-116b-v0-2-architecture-consolidation)
 - Sync phase 116A completion metadata (20260706-2301-sync-phase-116a-completion-metadata)
