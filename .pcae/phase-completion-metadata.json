@@ -28,13 +28,21 @@
     {
       "hash": "6b927744",
       "message": "Complete Phase 115G Repository Decision Evaluation verification"
+    },
+    {
+      "hash": "60966bce",
+      "message": "Sync Phase 115G completion metadata and canonical report"
+    },
+    {
+      "hash": "0d7878cb",
+      "message": "Close 115G completion metadata sync task"
     }
   ],
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; verification-only phase, no explanation-enrichment or verdict-logic modifications)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 3,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -98,8 +106,8 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "pending (not yet pushed at metadata-write time)",
-      "status": "pending"
+      "result": "clean (pushed, origin/main..HEAD == 0)",
+      "status": "passed"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -145,11 +153,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "pending"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending (dirty working tree until final commit/push)"
+      "status": "pass"
     },
     {
       "name": "pcae_session_bootstrap_compact",
