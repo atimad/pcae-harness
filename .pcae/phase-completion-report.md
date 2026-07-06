@@ -1,72 +1,81 @@
-# Phase 115C Complete — Repository Evidence Framework Prototype
+# Phase 115D Complete — Repository Evidence Provider Prototype
 
-- **Phase ID:** `115C`
+- **Phase ID:** `115D`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 12
-- **Tests run:** 90
-- **Commits:** cb3d0f41, 1b34a3df, 8eff1fc1, dc291bea
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Files changed:** 6
+- **Tests run:** 140
+- **Commits:** 4451fd2c, f6ea03ae
+- **Pushed:** not_pushed
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 115C implements the runtime representation of the Evidence
-contract frozen in 115B: immutable `Evidence`, `EvidenceCollection`, the
-four frozen enumerations, `EvidenceReference`, and `EvidenceProvenance`.
-Evidence informs decisions, does not decide, does not mutate repository
-state, and does not become a kernel primitive.
+Phase 115D implements the first deterministic Repository Evidence
+Providers on top of 115C's `Evidence`/`EvidenceCollection`: a common
+`EvidenceProvider` contract plus four concrete providers producing real
+evidence from git, runtime, phase report, and phase metadata state.
+Providers collect evidence; they never decide.
 
-## Implemented Runtime Objects
+## Provider Framework
 
-`src/pcae/core/evidence.py` implements:
+`src/pcae/core/evidence_providers.py` implements:
 
-- **`Evidence`** — immutable (`@dataclass(frozen=True)`), the 14 fields
-  frozen by 115B (`evidence_id`, `source`, `category`, `producer`,
-  `timestamp_utc`, `freshness`, `confidence`, `determinism`, `scope`,
-  `references`, `observed_value`, `expected_value`, `explanation`,
-  `limitations`) plus a `provenance` field.
-- **`EvidenceCollection`** — ordered, duplicate-`evidence_id`-rejecting,
-  with `by_id`/`by_category`/`by_source`/`by_determinism`/
-  `by_confidence` filtering; `add()` returns a new collection.
-- **`EvidenceCategory`, `EvidenceDeterminism`, `EvidenceConfidence`,
-  `EvidenceFreshness`** — the four frozen enumerations, as
-  `class X(str, Enum)`, using exactly the values frozen in 115B.
-- **`EvidenceReference`** — `evidence_id` + optional `note`,
-  intentionally distinct from `core/advisory_runtime.py`'s existing
-  `EvidenceReference` (113B §3).
-- **`EvidenceProvenance`** — `producer`/`produced_from`/`timestamp`/
-  `deterministic_origin`, metadata only.
+- **`EvidenceProviderContext`** — `root: HarnessPath` (read-only) +
+  `strict: bool = False`.
+- **`EvidenceProviderResult`** — mirrors 115B's Provider Contract table:
+  `provider_id`, `producer`, `determinism`, `categories`,
+  `required_inputs`, `scope`, `limitations`, and the produced
+  `evidence: EvidenceCollection`.
+- **`EvidenceProvider`** — abstract base class declaring the contract;
+  one abstract method, `collect(context) -> EvidenceProviderResult`.
 
-## Immutability
+## Provider List
 
-All four types are `@dataclass(frozen=True)`. `references`/
-`observed_value`/`expected_value` are deep-frozen (dicts become
-read-only `MappingProxyType` views, lists become tuples) so no
-caller-held mutable reference can change stored state after
-construction.
+- **`GitEvidenceProvider`** (`git`, `push_state`) — branch, working tree
+  clean/dirty, commits ahead/behind `origin/main`, derived pushed
+  status.
+- **`RuntimeEvidenceProvider`** (`runtime`) — runtime state, execution
+  availability, maximum plugin capability; reuses `build_runtime_snapshot`
+  unmodified.
+- **`ReportEvidenceProvider`** (`report`) — latest canonical report
+  existence, phase_id, completeness, recommended next phase, derived
+  consistency.
+- **`MetadataEvidenceProvider`** (`metadata`) — declared
+  phase-completion metadata existence, phase_id, pushed_status,
+  origin_main_head_count, recommended next phase.
 
-## Serialization
+## Evidence Produced
 
-`to_dict()`/`from_dict()` on all four types produce and consume plain
-JSON-compatible dicts. No persistence layer is implemented.
+17 `Evidence` items across the four providers (5 git, 3 runtime, 5
+report, 5 metadata) in a real-repo smoke test; exact counts vary with
+repository state (e.g. a fresh repo with no canonical report/metadata
+still produces the same item count, with `observed_value="unavailable"`
+for the undeterminable fields).
 
-## Validation
+## Determinism Model
 
-Required fields must be non-empty; category/freshness/confidence/
-determinism are validated through the enum's own constructor; duplicate
-`evidence_id` values inside one `EvidenceCollection` are rejected.
-Repository semantics (e.g. whether a referenced commit hash actually
-exists) are deliberately not validated.
+All four providers declare `EvidenceDeterminism.DETERMINISTIC`; every
+produced `Evidence` item carries the same value. Determinism describes
+the observed value (same repository state -> same observed value), not
+the wall-clock `timestamp_utc` each item also carries.
 
-## Disconnected By Design
+## Failure Behavior
 
-`evidence.py` imports only from the Python standard library. Not
-consumed by Repository Skills, Decision Evaluation, the Repository
-Transition Validator, any lifecycle command, Notification Policy,
-Canonical Artifact Promotion, Push-State Reconciliation, Post-Push
-Canonicalization, or `pcae agent verify-handoff`.
+Provider failures never crash the caller unless `context.strict=True`.
+Missing inputs (no `origin/main` remote, no canonical report, no
+declared metadata) or unexpected exceptions degrade to
+`observed_value="unavailable"`, `freshness=UNKNOWN`,
+`confidence=UNKNOWN` evidence — an honestly unknown observation, never a
+fabricated value. `context.strict=True` re-raises instead.
+
+## No Integration (Confirmed)
+
+Not wired into the Repository Transition Validator, any Decision
+Framework, lifecycle commands, Notification Policy, `pcae agent
+verify-handoff`, or `pcae runtime inspect`. No SLM/LLM/AI evidence
+provider implemented.
 
 ## PCAE Architecture Status
 
@@ -78,10 +87,11 @@ maintained as runtime state.*
 - Repository Decision & Explainability Framework through Phase 115A
 - Repository Evidence Framework Contract Freeze through Phase 115B
 - Repository Evidence Framework Prototype through Phase 115C
+- Repository Evidence Provider Prototype through Phase 115D
 
 ### Planned
 
-- 115D — Repository Evidence Provider Prototype
+- 115E — Repository Decision Evaluation Prototype
 
 ### Current Runtime State
 
@@ -103,7 +113,7 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_evidence_tests:** 90/90 (passed)
+- **focused_evidence_tests:** 140/140 (passed)
 - **runtime_contract_autonomy_plugin_regression:** 3554/3554 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
@@ -116,9 +126,6 @@ maintained as runtime state.*
 - No Repository Transition Validator integration.
 - No lifecycle command changes.
 - No Notification Policy changes.
-- No Canonical Artifact Promotion changes.
-- No Push-State Reconciliation changes.
-- No Post-Push Canonicalization changes.
 - No execution.
 - No authorization.
 - No Permission Broker enforcement.
@@ -127,6 +134,7 @@ maintained as runtime state.*
 - No REST.
 - No Web UI.
 - No Dashboard.
+- No SLM/LLM/AI evidence providers.
 - No raw git commit.
 - No raw git push.
 - No force push.
@@ -136,7 +144,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115D — Repository Evidence Provider Prototype
+115E — Repository Decision Evaluation Prototype
 
 ## Report Consistency
 
@@ -145,4 +153,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115C. Schema version 1.0.*
+*Report generated for PCAE Phase 115D. Schema version 1.0.*

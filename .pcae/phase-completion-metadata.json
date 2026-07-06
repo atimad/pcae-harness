@@ -1,48 +1,37 @@
 {
-  "phase_id": "115C",
-  "phase_name": "Repository Evidence Framework Prototype",
-  "phase_title": "Repository Evidence Framework Prototype",
+  "phase_id": "115D",
+  "phase_name": "Repository Evidence Provider Prototype",
+  "phase_title": "Repository Evidence Provider Prototype",
   "status": "completed",
-  "summary": "Runtime object prototype implementing the Evidence contract frozen by 115B. Added src/pcae/core/evidence.py: immutable Evidence (the 14 fields frozen by 115B, plus a provenance field), EvidenceCollection (ordered, duplicate-evidence_id-rejecting, with by_id/by_category/by_source/by_determinism/by_confidence filtering and an add() that returns a new collection rather than mutating), the four frozen enumerations (EvidenceCategory, EvidenceDeterminism, EvidenceConfidence, EvidenceFreshness) as class X(str, Enum), EvidenceReference (evidence_id + optional note, intentionally distinct from core/advisory_runtime.py's existing EvidenceReference), and EvidenceProvenance (producer/produced_from/timestamp/deterministic_origin, metadata only). Evidence.references/observed_value/expected_value are deep-frozen (dicts become read-only MappingProxyType views, lists become tuples) so no caller-held mutable reference can change stored state after construction. to_dict()/from_dict() on all four types produce and consume plain JSON-compatible dicts; no persistence layer. evidence.py imports only from the Python standard library -- zero internal PCAE imports, zero I/O, zero side effects. No Repository Skills, no Decision Evaluation, no Repository Transition Validator integration, no lifecycle command changes, no Notification Policy changes, no Canonical Artifact Promotion changes, no Push-State Reconciliation changes, no Post-Push Canonicalization changes, no execution, no authorization, no Permission Broker enforcement, no plugins, no Telegram inbound, no REST, no Web UI, no Dashboard. Execution capability remains unavailable.",
-  "files_changed_count": 12,
+  "summary": "Read-only evidence provider prototype implementing the first deterministic Repository Evidence Providers on top of 115C's Evidence/EvidenceCollection. Added src/pcae/core/evidence_providers.py: a common EvidenceProvider contract (EvidenceProviderContext, EvidenceProviderResult, EvidenceProvider) plus four concrete providers. GitEvidenceProvider produces branch, working tree clean/dirty, commits ahead/behind origin/main, and a derived pushed status. RuntimeEvidenceProvider produces runtime state, execution availability, and maximum plugin capability, reusing build_runtime_snapshot unmodified. ReportEvidenceProvider reads .pcae/phase-reports/latest.json for existence/phase_id/completeness/recommended_next_phase/consistency. MetadataEvidenceProvider reads .pcae/phase-completion-metadata.json for existence/phase_id/pushed_status/origin_main_head_count/recommended_next_phase. All four providers declare EvidenceDeterminism.DETERMINISTIC; every produced Evidence item carries the same determinism value. Provider failures degrade to honest unknown/unavailable evidence (freshness=UNKNOWN, confidence=UNKNOWN, observed_value=\"unavailable\") rather than crashing, unless the caller passes EvidenceProviderContext(strict=True). No Repository Skills, no Decision Evaluation, no Repository Transition Validator integration, no lifecycle command changes, no Notification Policy changes, no execution, no authorization, no Permission Broker enforcement, no plugins, no Telegram inbound, no REST, no Web UI, no Dashboard, no SLM/LLM/AI evidence providers. Execution capability remains unavailable.",
+  "files_changed_count": 6,
   "files_changed": [
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260706-0714-115c-repository-evidence-framework-prototype.md",
-    "src/pcae/core/evidence.py",
-    "tests/test_evidence.py",
-    "tests/test_evidence_collection.py",
-    "tests/test_evidence_serialization.py",
-    "tests/test_evidence_validation.py",
-    "tests/test_runtime_architecture_review.py",
-    "docs/PHASE_115C_REPOSITORY_EVIDENCE_PROTOTYPE.md",
-    ".pcae/phase-completion-metadata.json"
+    "tasks/active/20260706-0809-115d-repository-evidence-provider-prototype.md",
+    "src/pcae/core/evidence_providers.py",
+    "tests/test_evidence_providers.py",
+    "docs/PHASE_115D_REPOSITORY_EVIDENCE_PROVIDER_PROTOTYPE.md",
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md"
   ],
-  "tests_added_or_updated": "90 new focused Evidence tests added (tests/test_evidence*.py); 1 pre-existing guard test updated (test_runtime_architecture_review.py) to exclude the now-legitimately-created evidence.py, mirroring the existing runtime_context.py exclusion",
+  "tests_added_or_updated": "50 new focused Evidence Provider tests added (tests/test_evidence_providers.py)",
   "phase_commits": [
     {
-      "hash": "cb3d0f412484b4362815fe0bcdc61f4dbbdf33df",
-      "message": "Implement Repository Evidence Framework prototype"
+      "hash": "4451fd2c",
+      "message": "Implement Repository Evidence Provider prototype"
     },
     {
-      "hash": "1b34a3df2755b372a970d494493a27fa500bf84e",
-      "message": "Complete Phase 115C Repository Evidence Framework prototype"
-    },
-    {
-      "hash": "8eff1fc19c5f9dbb54433b7ee7b7df6fdfc9e4a0",
-      "message": "Fix 115C acceptance check to avoid unexpanded shell glob"
-    },
-    {
-      "hash": "dc291beabbe8a01438a0bc8a3bf2f3b7478a9d01",
-      "message": "Close Phase 115C Repository Evidence Framework prototype task"
+      "hash": "f6ea03ae",
+      "message": "Complete Phase 115D Repository Evidence Provider prototype"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "none (runtime object prototype only; no Repository Transition Validator module touched)",
+  "validator_module": "none (read-only evidence provider prototype only; no Repository Transition Validator module touched)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 2,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -57,9 +46,9 @@
   "validation_results": [
     {
       "name": "focused_evidence_tests",
-      "result": "90/90",
+      "result": "140/140",
       "status": "passed",
-      "note": "python -m pytest tests/test_evidence.py tests/test_evidence_collection.py tests/test_evidence_serialization.py tests/test_evidence_validation.py -n auto -q -ra --durations=100"
+      "note": "python -m pytest tests/test_evidence*.py -n auto -q -ra --durations=100"
     },
     {
       "name": "runtime_contract_autonomy_plugin_regression",
@@ -100,7 +89,7 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean (pushed, origin/main..HEAD == 0)",
+      "result": "nothing_to_push before implementation commits; not_pushed after commits until governed push",
       "status": "passed"
     },
     {
@@ -125,7 +114,7 @@
     }
   ],
   "test_results": {
-    "focused_evidence_tests": "90/90",
+    "focused_evidence_tests": "140/140",
     "runtime_contract_autonomy_plugin_regression": "3554/3554",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
@@ -146,11 +135,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "not_pushed (governed push pending as this phase's own next step)"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pass"
+      "status": "pending_post_push"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -175,6 +164,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No Repository Skills. No Decision Evaluation. No Repository Transition Validator integration. No lifecycle command changes. No Notification Policy changes. No Canonical Artifact Promotion changes. No Push-State Reconciliation changes. No Post-Push Canonicalization changes. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115D — Repository Evidence Provider Prototype"
+  "no_go_confirmation": "No Repository Skills. No Decision Evaluation. No Repository Transition Validator integration. No lifecycle command changes. No Notification Policy changes. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No SLM/LLM/AI evidence providers. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115E — Repository Decision Evaluation Prototype"
 }
