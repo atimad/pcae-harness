@@ -2,6 +2,47 @@
 
 ## Unreleased
 
+- Phase 115W — Advisory Context Package Contract. Contract/design
+  only: freezes the `AdvisoryContextPackage` contract -- the bounded,
+  trusted, provenance-preserving context that may be supplied to an
+  Advisory Repository Skill's Prompt Builder -- before any
+  implementation. Freezes the core principle (advisory models receive
+  bounded, trusted, provenance-preserving context, never unrestricted
+  repository access); 15 required sections (`package_id`,
+  `created_at_utc`, `objective`, `advisory_question`,
+  `trusted_pcae_instructions`, `repository_summary`,
+  `deterministic_evidence_summary`, `transition_context`,
+  `constraints_and_no_go_rules`, `artifact_references`,
+  `untrusted_repository_content`, `provenance`, `limitations`,
+  `size_budget`, `redaction_summary` -- none optional); four
+  trust-boundary classes (trusted PCAE instructions, deterministic
+  PCAE evidence, untrusted repository content, model-produced advisory
+  output) with an explicit section-to-class mapping; the
+  prompt-injection boundary (`untrusted_repository_content` always its
+  own section, always delimited/labelled, never honored as
+  instructions, trusted sections always assembled last --
+  complementary to 115Q's Normalizer boundary); size limits (total
+  package budget, per-section budgets, deterministic summarization
+  requirement, absolute prohibition on unbounded repository dumps --
+  concept frozen, concrete numbers deferred to 115X); the redaction/
+  secrets policy (no secrets/tokens/credentials/private env values/
+  unrestricted logs/raw config secrets, every redaction recorded);
+  provenance rules (package-level and item-level, never discarded
+  during summarization); the artifact-reference model (files by path,
+  evidence by Evidence ID, commits by hash, full-content embedding
+  never a default); the one allowed advisory question ("Is the
+  repository state internally consistent?", unchanged from 115S/115T);
+  and future extensibility (documentation/report/architecture
+  consistency review, code review, security review -- documented, not
+  implemented). Adds `docs/PCAE_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md`
+  and `docs/PHASE_115W_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md`, plus 30
+  new architecture/contract verification tests
+  (`tests/test_phase_115w_advisory_context_package_contract.py`). No
+  `AdvisoryContextPackage` runtime, Advisory Provider runtime change,
+  Repository Skill, Evidence Provider, Decision Evaluation, Repository
+  Transition Validator, or lifecycle command implemented or modified.
+  Execution capability remains unavailable.
+
 - Phase 115V — Advisory Evidence Enrichment Architecture. Architecture
   and design only: designs how PCAE improves advisory quality by
   enriching the deterministic evidence supplied to Advisory Repository

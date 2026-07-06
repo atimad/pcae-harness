@@ -2,73 +2,89 @@
 
 ## Current Phase
 
-Phase 115V — Advisory Evidence Enrichment Architecture (completed).
+Phase 115W — Advisory Context Package Contract (completed).
 
-Architecture and design only: no new Evidence Provider implemented,
-no new Repository Skill implemented, no Advisory Provider runtime
-modified, no second advisory provider added, no model configuration
-added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM
-integration introduced, no Decision Evaluation modified, no Repository
-Transition Validator modified, no lifecycle command modified. Phase
-report:
-`docs/PHASE_115V_ADVISORY_EVIDENCE_ENRICHMENT_ARCHITECTURE.md`.
-Canonical architecture: `docs/PCAE_ADVISORY_EVIDENCE_ENRICHMENT.md`.
+Contract/design only: no `AdvisoryContextPackage` runtime implemented,
+no Advisory Provider runtime modified, no Repository Skill modified,
+no Evidence Provider modified, no Decision Evaluation modified, no
+Repository Transition Validator modified, no lifecycle command
+modified, no model configuration added, no second provider added, no
+DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM integration
+introduced. Phase report:
+`docs/PHASE_115W_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md`. Canonical
+contract: `docs/PCAE_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md`.
 
-**Core principle frozen**: Models improve by receiving better
-evidence, not by receiving more authority.
+**Core principle frozen**: Advisory models receive bounded, trusted,
+provenance-preserving context. They do not receive unrestricted
+repository access.
 
-**Advisory Evidence Enrichment defined**: supplying an Advisory
-Repository Skill's Prompt Builder with richer deterministic evidence —
-drawn from existing 115D Evidence Providers, 115J Repository Skills,
-and future deterministic sources — without changing containment, the
-Normalizer boundary, or Decision Evaluation authority.
+**`AdvisoryContextPackage` frozen with 15 required sections**:
+`package_id`, `created_at_utc`, `objective`, `advisory_question`,
+`trusted_pcae_instructions`, `repository_summary`,
+`deterministic_evidence_summary`, `transition_context`,
+`constraints_and_no_go_rules`, `artifact_references`,
+`untrusted_repository_content`, `provenance`, `limitations`,
+`size_budget`, `redaction_summary` — none optional.
 
-**Eleven evidence enrichment categories named**: repository state,
-git/history, changed-files, test evidence, architecture evidence,
-dependency/module evidence, documentation evidence, governance
-evidence, runtime capability evidence, report/metadata consistency
-evidence, future semantic/code graph evidence — each mapped to its
-deterministic source (existing or future).
+**Four trust-boundary classes frozen**: trusted PCAE instructions,
+deterministic PCAE evidence, untrusted repository content, and
+model-produced advisory output — with an explicit section-to-class
+mapping.
 
-**Priority matrix frozen**: value/difficulty/determinism/risk/expected
-advisory benefit per category, tiered — Tier 1 (repository state,
-changed-files, governance, report/metadata consistency), Tier 2
-(git/history, test evidence, runtime capability), Tier 3
-(architecture, dependency/module, documentation, future semantic/code
-graph).
+**Prompt-injection boundary frozen**: `untrusted_repository_content`
+is always its own section, always delimited/labelled, never honored
+as instructions; trusted sections are always assembled last —
+complementary to, not a substitute for, 115Q's Normalizer boundary.
 
-**Advisory Context Package designed**: bounded repository summary,
-deterministic evidence, current transition/question, constraints/
-no-go rules, relevant artifacts, known limitations — a design target
-for 115W, not implemented, not a modification of `AdvisoryRequest`'s
-already-frozen four fields.
+**Size limits frozen (concept, not fixed numbers)**: total package
+budget, per-section budgets, deterministic summarization requirement,
+absolute prohibition on unbounded repository dumps.
 
-**Safety boundaries frozen**: enriched evidence must never grant
-execution capability, expose secrets, include unbounded repository
-dumps, allow prompt injection from repository files, allow model
-output to bypass normalization, or change Decision Evaluation
-authority.
+**Redaction/secrets policy frozen**: no secrets, tokens, credentials,
+private env values, unrestricted logs, or raw config secrets — every
+redaction recorded in `redaction_summary`, never silently dropped.
 
-**Prompt-injection handling frozen**: repository-derived content is
-always untrusted input, never instructions; a future prompt must
-separate trusted PCAE instructions, deterministic evidence, and
-untrusted repository content — complementary to, not a substitute for,
-115Q's Normalizer boundary.
+**Provenance rules frozen**: package-level and item-level, never
+discarded during summarization.
 
-**Evidence summarization rules frozen**: deterministic summaries
-preferred, bounded length, provenance preserved, references retained,
-raw evidence never blindly pasted.
+**Artifact-reference model frozen**: files by path, evidence by
+Evidence ID, commits by hash — full-content embedding never a default.
 
-**Future roadmap frozen**: 115W (Contract Freeze) → 115X (Prototype,
-Tier 1 evidence only) → 115Y (Verification) → 115Z (Advisory Skill
-Pilot Hardening).
+**Allowed advisory question frozen**: exactly one, "Is the repository
+state internally consistent?" — unchanged from 115S/115T's verified
+pilot scope.
 
-Added
-`tests/test_phase_115v_advisory_evidence_enrichment_architecture.py`
-(25 new tests, architecture/documentation verification only). No
-implementation, no new provider, no execution.
+**Future extensibility documented, not implemented**: documentation/
+report/architecture consistency review, code review, security review
+— each requiring its own future contract-freeze phase.
 
-Recommended next repo phase: 115W — Advisory Context Package Contract (not started).
+Added `tests/test_phase_115w_advisory_context_package_contract.py` (30
+new tests, architecture/contract verification only). No
+implementation, no execution.
+
+Recommended next repo phase: 115X — Advisory Context Package Prototype (not started).
+
+## Phase 115W Complete
+
+Phase 115W — Advisory Context Package Contract (completed).
+
+Froze the `AdvisoryContextPackage` contract: 15 required sections,
+four trust-boundary classes, the prompt-injection boundary (always its
+own section, delimited/labelled, never honored as instructions,
+trusted sections assembled last), size limits (concept, not fixed
+numbers), the redaction/secrets policy, provenance rules (package- and
+item-level), the artifact-reference model, and the one allowed
+advisory question. Documented future extensibility without
+implementing it. Contract/design only; zero implementation added.
+
+**No-go**: no `AdvisoryContextPackage` runtime implemented, no
+Advisory Provider runtime modified, no Repository Skill modified, no
+Evidence Provider modified, no Decision Evaluation modified, no
+Repository Transition Validator modified, no lifecycle command
+modified, no model configuration added, no second provider added, no
+DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM integration.
+
+Recommended next repo phase: 115X — Advisory Context Package Prototype (not started).
 
 ## Phase 115V Complete
 
