@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 115D — Repository Evidence Provider Prototype.
+  Implements the first deterministic Repository Evidence Providers on
+  top of 115C's runtime `Evidence`/`EvidenceCollection`. Added
+  `src/pcae/core/evidence_providers.py`: a common `EvidenceProvider`
+  contract (`EvidenceProviderContext`, `EvidenceProviderResult`,
+  `EvidenceProvider`) plus four concrete providers.
+  `GitEvidenceProvider` produces branch, working tree clean/dirty,
+  commits ahead/behind `origin/main`, and a derived pushed status.
+  `RuntimeEvidenceProvider` produces runtime state, execution
+  availability, and maximum plugin capability, reusing
+  `build_runtime_snapshot` unmodified. `ReportEvidenceProvider` reads
+  `.pcae/phase-reports/latest.json` for existence, phase_id,
+  completeness, recommended next phase, and a derived consistency
+  signal. `MetadataEvidenceProvider` reads
+  `.pcae/phase-completion-metadata.json` for existence, phase_id,
+  pushed_status, origin_main_head_count, and recommended next phase.
+  All four providers declare `EvidenceDeterminism.DETERMINISTIC`;
+  provider failures degrade to honest unknown/unavailable evidence
+  (`freshness=UNKNOWN`, `confidence=UNKNOWN`,
+  `observed_value="unavailable"`) rather than crashing, unless the
+  caller passes `EvidenceProviderContext(strict=True)`. Added
+  `tests/test_evidence_providers.py` (50 tests) and
+  `docs/PHASE_115D_REPOSITORY_EVIDENCE_PROVIDER_PROTOTYPE.md`. No
+  decision evaluation, no Repository Transition Validator integration,
+  no lifecycle command changes, no notification changes, no execution
+  capability, no SLM/LLM/AI evidence providers. Recommended next phase:
+  115E — Repository Decision Evaluation Prototype.
+
 - Phase 115C — Repository Evidence Framework Prototype.
   Implements the runtime representation of the Evidence contract frozen
   by 115B. Added `src/pcae/core/evidence.py`: immutable `Evidence` (the

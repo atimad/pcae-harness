@@ -2,48 +2,61 @@
 
 ## Current Phase
 
-Phase 115C — Repository Evidence Framework Prototype (completed).
+Phase 115D — Repository Evidence Provider Prototype (completed).
 
-Runtime object prototype only. Full implementation:
-`src/pcae/core/evidence.py`.
+Read-only evidence provider prototype only. Full implementation:
+`src/pcae/core/evidence_providers.py`.
 Phase report:
-`docs/PHASE_115C_REPOSITORY_EVIDENCE_PROTOTYPE.md`.
+`docs/PHASE_115D_REPOSITORY_EVIDENCE_PROVIDER_PROTOTYPE.md`.
 
-**Implemented**: immutable `Evidence` (the 14 fields frozen by 115B, plus
-a `provenance` field), `EvidenceCollection` (ordered, duplicate-
-`evidence_id`-rejecting, `by_id`/`by_category`/`by_source`/
-`by_determinism`/`by_confidence` filtering, `add()` returns a new
-collection), the four frozen enumerations (`EvidenceCategory`,
-`EvidenceDeterminism`, `EvidenceConfidence`, `EvidenceFreshness`) as
-`class X(str, Enum)`, `EvidenceReference` (`evidence_id` + optional
-`note`), and `EvidenceProvenance` (`producer`/`produced_from`/
-`timestamp`/`deterministic_origin`, metadata only).
+**Implemented**: a common `EvidenceProvider` contract
+(`EvidenceProviderContext`/`EvidenceProviderResult`/`EvidenceProvider`)
+plus four deterministic providers producing 115C's `Evidence`/
+`EvidenceCollection`: `GitEvidenceProvider` (branch, working tree
+clean/dirty, ahead/behind `origin/main`, derived pushed status),
+`RuntimeEvidenceProvider` (runtime state, execution availability,
+maximum plugin capability — reuses `build_runtime_snapshot` unmodified),
+`ReportEvidenceProvider` (latest canonical report existence, phase_id,
+completeness, recommended next phase, consistency), and
+`MetadataEvidenceProvider` (declared phase-completion metadata
+existence, phase_id, pushed_status, origin_main_head_count, recommended
+next phase).
 
-**Immutability**: all four types are `@dataclass(frozen=True)`.
-`references`/`observed_value`/`expected_value` are deep-frozen (dicts
-become read-only `MappingProxyType` views, lists become tuples) so no
-caller-held mutable reference can change stored state after
-construction.
+**Determinism**: all four providers declare
+`EvidenceDeterminism.DETERMINISTIC`; every produced `Evidence` item
+carries the same value.
 
-**Serialization**: `to_dict()`/`from_dict()` on all four types produce
-and consume plain JSON-compatible dicts; no persistence layer.
+**Failure behavior**: provider failures never crash the caller unless
+`context.strict=True` — missing inputs (no `origin/main` remote, no
+canonical report, no declared metadata) degrade to
+`observed_value="unavailable"`, `freshness=UNKNOWN`,
+`confidence=UNKNOWN` evidence rather than a fabricated value or crash.
 
-**Validation**: required fields must be non-empty; category/freshness/
-confidence/determinism are validated through the enum's own constructor;
-duplicate `evidence_id` values inside one `EvidenceCollection` are
-rejected. Repository semantics (e.g. whether a referenced commit hash
-actually exists) are deliberately not validated.
+**No integration**: not wired into the Repository Transition Validator,
+any Decision Framework, lifecycle commands, Notification Policy, `pcae
+agent verify-handoff`, or `pcae runtime inspect`. No SLM/LLM/AI evidence
+provider implemented. Execution capability remains unavailable.
 
-**Disconnected by design**: `evidence.py` imports only from the Python
-standard library. Not consumed by Repository Skills, Decision
-Evaluation, the Repository Transition Validator, any lifecycle command,
-Notification Policy, Canonical Artifact Promotion, Push-State
-Reconciliation, Post-Push Canonicalization, or `pcae agent
-verify-handoff`. No execution, authorization, Permission Broker
-enforcement, plugins, Telegram inbound, REST, Web UI, or Dashboard.
-Execution capability remains unavailable.
+Recommended next repo phase: 115E — Repository Decision Evaluation Prototype (not started).
 
-Recommended next repo phase: 115D — Repository Evidence Provider Prototype (not started).
+## Phase 115D Complete
+
+Phase 115D — Repository Evidence Provider Prototype (completed).
+
+Implemented the first deterministic Repository Evidence Providers
+(`GitEvidenceProvider`, `RuntimeEvidenceProvider`,
+`ReportEvidenceProvider`, `MetadataEvidenceProvider`) in
+`src/pcae/core/evidence_providers.py`, each producing 115C's
+`EvidenceCollection` from real, read-only repository state. All four
+declare `EvidenceDeterminism.DETERMINISTIC`. Provider failures degrade
+to honest unknown/unavailable evidence rather than crashing, unless
+`context.strict=True`.
+
+**No-go**: no decision evaluation, no Repository Transition Validator
+integration, no lifecycle command changes, no notification changes, no
+execution capability, no SLM/LLM/AI evidence providers.
+
+Recommended next repo phase: 115E — Repository Decision Evaluation Prototype (not started).
 
 ## Phase 115C Complete
 
