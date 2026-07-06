@@ -22,7 +22,8 @@ Write .pcae/phase-completion-metadata.json for 115C and run pcae phase complete 
 
 ## Allowed Files
 
-- TBD
+- .pcae/phase-completion-metadata.json
+- tasks/active/20260706-0727-sync-phase-115c-completion-metadata.md
 
 ## Forbidden Files
 
@@ -32,6 +33,7 @@ Write .pcae/phase-completion-metadata.json for 115C and run pcae phase complete 
 ## Allowed Zones
 
 - config
+- docs
 - tasks
 
 ## Forbidden Zones
