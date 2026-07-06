@@ -69,7 +69,7 @@ TBD
 
 ## Acceptance Checks
 
-- python -m pytest tests/test_evidence*.py -n auto -q -ra --durations=100
+- python -m pytest tests/test_evidence.py tests/test_evidence_collection.py tests/test_evidence_serialization.py tests/test_evidence_validation.py -n auto -q -ra --durations=100
 
 ## Documentation Requirements
 
