@@ -225,8 +225,12 @@ def test_no_implementation_claims():
 
 
 def test_no_new_implementation_module_added():
+    """115H itself adds no implementation. ``repository_skills.py`` is
+    deliberately excluded from this guard: 115J (a later phase) is
+    explicitly mandated to implement it -- this test only ever asserted
+    that *115H* added no implementation, not that no later phase ever
+    would."""
     forbidden_paths = (
-        REPO_ROOT / "src" / "pcae" / "core" / "repository_skills.py",
         REPO_ROOT / "src" / "pcae" / "core" / "skills.py",
         REPO_ROOT / "src" / "pcae" / "core" / "skill_registry.py",
     )

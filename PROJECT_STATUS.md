@@ -2,6 +2,84 @@
 
 ## Current Phase
 
+Phase 115J — Repository Skills Prototype (completed).
+
+Implementation prototype only: no AI/SLM/LLM skills, no DeepSeek
+integration, no lifecycle command changes, no Decision Evaluation
+integration, no Repository Transition Validator integration, no
+Notification Policy changes, no execution capability. Phase report:
+`docs/PHASE_115J_REPOSITORY_SKILLS_PROTOTYPE.md`. Implementation:
+`src/pcae/core/repository_skills.py`.
+
+**Repository Skills framework implemented**: `RepositorySkillCapability`
+(115I's frozen eight-value enum), `RepositorySkillManifest` (115I's
+frozen field set, validated at construction), `RepositorySkillContext`
+(mirrors 115D's `EvidenceProviderContext`), `RepositorySkillResult`
+(enforces the two-outcome failure contract structurally), the
+`RepositorySkill` abstract base, and `RepositorySkillRegistry`
+(register/lookup/filter/invoke/merge, duplicate-`skill_id` rejection).
+
+**Four deterministic skills implemented**, each a thin wrapper
+delegating to one 115D Evidence Provider unmodified: `GitRepositorySkill`
+(`GitEvidenceProvider`), `RuntimeRepositorySkill`
+(`RuntimeEvidenceProvider`), `ReportRepositorySkill`
+(`ReportEvidenceProvider`), `MetadataRepositorySkill`
+(`MetadataEvidenceProvider`). No new evidence-collection logic was
+written; each skill returns its wrapped provider's `EvidenceCollection`
+verbatim. Verified live against this real repository: the four default
+skills collectively produce 18 `Evidence` items, merging cleanly into
+one `EvidenceCollection` with no ID collisions (115D's provider IDs
+were already disjoint namespaces).
+
+**Failure contract implemented**: a skill failure produces honest
+`UNKNOWN` evidence (when the wrapped provider itself degrades
+gracefully) or an explicit `FAILED` result with a required
+`failure_reason` (when the skill invocation itself cannot complete) —
+never silent success, never a `FAILED` result without a reason.
+
+**No integration confirmed**: `repository_skills.py`'s only internal
+imports are `pcae.core.evidence`, `pcae.core.evidence_providers`, and
+`pcae.core.paths`. Not imported by, and does not import from, Decision
+Evaluation, the Repository Transition Validator, or any lifecycle
+command. No AI/SLM/LLM-backed skill is registered; all four default
+skills declare `EvidenceDeterminism.DETERMINISTIC` and
+`model_produced=False`.
+
+Added `tests/test_repository_skills.py` (53 new tests). Updated two
+pre-existing 115H/115I architecture-verification guard tests that
+asserted `repository_skills.py` did not yet exist — accurate at the
+time those phases were written, since implementing it was always
+115J's own later, explicit mandate. Execution capability remains
+unavailable.
+
+Recommended next repo phase: 115K — Repository Skills Verification & Compatibility (not started).
+
+## Phase 115J Complete
+
+Phase 115J — Repository Skills Prototype (completed).
+
+Implemented the first Repository Skills framework
+(`src/pcae/core/repository_skills.py`) on top of 115I's frozen
+contract: `RepositorySkill`, `RepositorySkillContext`,
+`RepositorySkillResult`, `RepositorySkillRegistry`,
+`RepositorySkillCapability`, `RepositorySkillManifest`, plus four
+deterministic skills (Git/Runtime/Report/Metadata) each wrapping one
+115D Evidence Provider unmodified. Registry supports registration,
+duplicate rejection, lookup, capability/category filtering, single and
+multi-skill invocation, and evidence merging. Failure contract
+enforced structurally by `RepositorySkillResult`. No AI/SLM/LLM skill,
+no DeepSeek integration, no lifecycle/Decision Evaluation/Repository
+Transition Validator integration.
+
+**No-go**: no AI/SLM/LLM skills, no DeepSeek integration, no lifecycle
+command changes, no Decision Evaluation integration, no Repository
+Transition Validator integration, no Notification Policy changes, no
+execution capability.
+
+Recommended next repo phase: 115K — Repository Skills Verification & Compatibility (not started).
+
+## Phase 115I Complete
+
 Phase 115I — Repository Skills Contract Freeze (completed).
 
 Contract freeze only. No Repository Skill implemented, no

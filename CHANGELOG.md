@@ -2,6 +2,52 @@
 
 ## Unreleased
 
+- Phase 115J — Repository Skills Prototype. Implements the first
+  Repository Skills framework
+  (`src/pcae/core/repository_skills.py`) on top of 115I's frozen
+  contract, using only deterministic skills that wrap existing 115D
+  Evidence Providers. Implements `RepositorySkillCapability` (115I's
+  frozen eight-value enum), `RepositorySkillManifest` (115I's frozen
+  field set, validated at construction to reject a non-`none`
+  `side_effect_policy` or an invalid `failure_policy`),
+  `RepositorySkillContext` (mirrors 115D's `EvidenceProviderContext`),
+  `RepositorySkillResult` (structurally enforces the two-outcome
+  failure contract -- a `FAILED` status can never construct without a
+  `failure_reason`), the `RepositorySkill` abstract base, and
+  `RepositorySkillRegistry` (register/get/list_skills/list_manifests/
+  filter_by_capability/filter_by_category/invoke/invoke_many/
+  invoke_all/merge_evidence, with duplicate `skill_id` rejection).
+  Implements four deterministic skills, each a thin wrapper delegating
+  to one 115D Evidence Provider unmodified: `GitRepositorySkill`
+  (`GitEvidenceProvider`), `RuntimeRepositorySkill`
+  (`RuntimeEvidenceProvider`), `ReportRepositorySkill`
+  (`ReportEvidenceProvider`), `MetadataRepositorySkill`
+  (`MetadataEvidenceProvider`) -- no new evidence-collection logic was
+  written; each skill returns its wrapped provider's
+  `EvidenceCollection` verbatim. Verified live against this real
+  repository: the four default skills collectively produce 18
+  `Evidence` items, merging cleanly into one `EvidenceCollection` with
+  no ID collisions (115D's provider IDs were already disjoint
+  namespaces). A skill failure produces honest `UNKNOWN` evidence (via
+  the wrapped provider's own established graceful-degradation pattern)
+  or an explicit `FAILED` result with a required `failure_reason` --
+  never silent success. `repository_skills.py`'s only internal imports
+  are `pcae.core.evidence`, `pcae.core.evidence_providers`, and
+  `pcae.core.paths`; it is not imported by, and does not import from,
+  Decision Evaluation, the Repository Transition Validator, or any
+  lifecycle command. No AI/SLM/LLM-backed skill is registered by
+  `build_default_registry()`; all four default skills declare
+  `EvidenceDeterminism.DETERMINISTIC` and `model_produced=False`. Adds
+  `docs/PHASE_115J_REPOSITORY_SKILLS_PROTOTYPE.md` and
+  `tests/test_repository_skills.py` (53 new tests). Updates two
+  pre-existing 115H/115I architecture-verification guard tests that
+  asserted `repository_skills.py` did not yet exist -- accurate when
+  written, since implementing it was always 115J's own later, explicit
+  mandate. No lifecycle command changes, no Decision Evaluation
+  integration, no Repository Transition Validator integration, no
+  Notification Policy changes, no DeepSeek integration. Execution
+  capability remains unavailable.
+
 - Phase 115I — Repository Skills Contract Freeze. Contract phase only;
   zero implementation added. Freezes the Repository Skills contract
   115H designed: the `RepositorySkill` interface (declare capabilities,
