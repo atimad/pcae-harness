@@ -1,90 +1,117 @@
-# Phase 115G Complete — Repository Decision Evaluation Verification & Compatibility
+# Phase 115H Complete — Repository Skills Architecture
 
-- **Phase ID:** `115G`
+- **Phase ID:** `115H`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 8
-- **Tests run:** 643 (focused verification/validator/evidence suite)
-- **Commits:** 41e39c8c, bec82550, 6b927744, 60966bce, 0d7878cb
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Tests run:** 33 (focused architecture/documentation suite)
+- **Commits:** 77215568, d32acf74
+- **Pushed:** not_pushed
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 115G verifies that 115F's Repository Decision Evaluation
-integration (`TransitionResult.explanation`) is fully
-behavior-preserving, deterministic, reproducible, and compatible with
-all pre-existing Repository Transition Validator behavior. No
-implementation code changed; one new focused test module (37 tests)
-added.
+Phase 115H designs Repository Skills as the governed extension
+mechanism for PCAE decision support, building on 115C (Evidence), 115D
+(Evidence Providers), 115E (Decision Evaluation), 115F (integration),
+and 115G (verification). Architecture and design only; zero
+implementation added.
 
-## Compatibility Verification Summary
+## Repository Skills Architecture Summary
 
-Eight objectives verified, no findings requiring an implementation
-change:
+Core principle: **Repository Skills produce evidence. Repository
+Skills do not decide.** A Repository Skill observes repository state,
+collects or derives evidence, may enrich existing evidence, and
+returns an `EvidenceCollection` — reusing 115C's frozen Evidence shape
+unmodified. A skill never mutates repository state, decides, votes,
+authorizes, promotes artifacts, sends notifications, bypasses the
+Repository Transition Validator, or invokes execution.
 
-1. **Verdict equivalence** — a ten-scenario side-by-side matrix (plus
-   two `REQUIRES_HUMAN_REVIEW` integration-bridge scenarios) proves
-   `verdict`/`violations`/`accepted` identical to a synthetic
-   `dataclasses.replace(result, explanation=None)` "legacy-shaped"
-   result.
-2. **Explanation correctness** — every `explanation_reference`
-   Evidence ID resolves against the evaluated `EvidenceCollection`;
-   `blocking_failures`/`warnings`/`informational` buckets only contain
-   invariant IDs whose actual severity/status justify that bucket.
-3. **Evidence integrity** — no duplicate IDs, no dangling references,
-   conflicting evidence preserved through the real integration
-   boundary, UNKNOWN evidence never silently dropped.
-4. **Determinism** — `validate_transition`/`evaluate` identical across
-   20 repeated calls, order-independent, fixed timestamp sentinel not
-   wall-clock.
-5. **Backward compatibility** — `handle_phase_report_transition_result`
-   produces byte-identical stdout whether `explanation` is populated or
-   `None`; the field's dataclass default is `None`.
-6. **No hidden dependencies** — no subprocess/socket/requests/urllib/
-   Popen/os.system/shutil token, no agent/model/backend identity field
-   on any dataclass in either module.
-7. **Lifecycle compatibility** — full task/phase,
-   runtime/contract/autonomy/plugin, and `fast_green` regression suites
-   pass unmodified; neither `commands/phase.py` nor `commands/task.py`
-   reads `.explanation`; `STRUCTURAL_INVARIANTS` unchanged since 113U.
-8. **Explainability completeness** — every `InvariantResult` across the
-   full scenario matrix carries a non-empty explanation.
+## Skill Class Summary
 
-## Verdict Compatibility Summary
+Five skill classes defined, mapped onto 115C's existing
+`EvidenceDeterminism` enum (no new enum introduced):
 
-Accept/Reject/Quarantine verdicts unchanged for every scenario tested
-(fully consistent, phase-identity mismatch, missing
-recommended-next-phase, partial report completeness, missing evidence,
-blocked/certified canonical promotion, notify-ineligible,
-execution-available, metadata-vs-target mismatch, multiple
-simultaneous blocking violations). `REQUIRES_HUMAN_REVIEW` remains
-producible only by `repository_transition_integration.py`'s own
-override (unchanged since 113Y/113Z) and never carries an explanation.
+| Class | Determinism | Example |
+| --- | --- | --- |
+| Deterministic | `DETERMINISTIC` | Git Topology Skill |
+| Reproducible External | `REPRODUCIBLE_EXTERNAL` | Pinned static-analysis wrapper |
+| Advisory | `PROBABILISTIC` | Future DeepSeek/Claude/Codex/GLM/Qwen code-review skill |
+| Human-Assisted | `HUMAN_ASSERTED` | Human code-review sign-off skill |
+| Experimental | any + `experimental: true` | Prototype skill exploring a new evidence category |
 
-## Remaining Limitations (inherited from 115F, unchanged)
+Six deterministic skill concepts named (design only): Git Topology,
+Report Consistency, Metadata Consistency, Architecture Status,
+Documentation Completeness, Test-Result Consistency.
 
-- `push_state_consistency`/`metadata_consistency`/
-  `canonical_promotion_eligibility` still resolve `NOT_APPLICABLE`
-  through the unaugmented `build_evidence_from_repository_state`
-  adapter (no second independent source in `RepositoryState`).
-- The evidence-based `phase_identity_consistency`/`report_completeness`
-  explanations remain simplifications of the validator's own more
-  detailed structural checks.
-- No `EvaluationResult` is attached to the human-review override path
-  in `repository_transition_integration.py`.
+## Evidence-Only Boundary
 
-## Readiness for Repository Skills (115H)
+Every skill class, without exception, is bound by the same
+prohibitions: never mutate repository state, never decide, never vote,
+never authorize, never promote artifacts, never notify, never bypass
+the validator, never invoke execution. Advisory skills add strictly
+narrower guarantees on top, never a looser set.
 
-Verdict authority is proven to rest entirely with `validate_transition`'s
-own unchanged structural checks under a substantially broader scenario
-matrix than 115F exercised. The evaluation layer's determinism,
-conflict-preservation, and UNKNOWN-never-silently-passes properties are
-now proven at the real integration boundary (not just synthetic 115E
-evidence shapes), giving a future Repository Skill contributing
-additional Evidence a verified foundation to build on without further
-evaluation-layer validation work.
+## Advisory / AI Skill Boundary
+
+Advisory skills are the governed home for any future AI/SLM/LLM-backed
+contribution (DeepSeek, GLM, Qwen, Claude, Codex, or a local SLM).
+Must be advisory only, probabilistic by default, labelled
+model-produced (via 115C's existing `Evidence.producer`/
+`EvidenceProvenance`), never sole authority for Accept, never allowed
+to mutate state or finalize/push/notify, allowed only to produce
+evidence.
+
+## DeepSeek Future Pilot Boundary
+
+DeepSeek must not be reintroduced as lifecycle authority,
+decision-maker, approver, artifact-promoter, notifier, or execution
+authority, under any framing. Any future DeepSeek pilot must be scoped
+as a bounded Advisory Repository Skill: evidence-only, `model_produced:
+true`, `PROBABILISTIC` by default, never sole authority for Accept.
+
+## Skill Lifecycle Summary
+
+Seven stages: registered -> configured -> invoked -> evidence produced
+-> evidence validated -> evidence consumed by Decision Evaluation ->
+result referenced in explanation. No stage authorizes, decides,
+mutates, promotes, or notifies.
+
+## Skill Manifest Concept
+
+Documented, not frozen: `skill_id`, `name`, `version`, `class`,
+`determinism`, `categories produced`, `required inputs`, `allowed
+outputs`, `side-effect policy`, `timeout policy`, `failure behavior`,
+`confidence defaults`, `model-produced flag`. Schema freeze explicitly
+deferred to 115I.
+
+## Skill Safety Boundary
+
+Skills must never own Repository State, Repository Transition,
+Repository Artifact promotion, Repository Event emission, Notification
+Policy, lifecycle authority, or execution authority.
+
+## Wire Diagram Summary
+
+```mermaid
+flowchart TD
+    RS[Repository State] --> EP[Evidence Providers]
+    EP --> RSK[Repository Skills]
+    RSK --> EC[Evidence Collection]
+    EC --> DE[Decision Evaluation]
+    DE --> RTV[Repository Transition Validator]
+    RTV --> TR[Transition Result]
+    TR --> RA[Repository Artifact]
+    TR --> RE[Repository Event]
+    RA --> RE
+    RE --> NP[Notification Policy]
+    NP --> C[Consumers]
+```
+
+Repository Skills sit strictly between Evidence Providers and Evidence
+Collection. Decision Evaluation cannot tell, and does not need to
+tell, whether an `Evidence` item came from a 115D Provider or a Skill.
 
 ## PCAE Architecture Status
 
@@ -100,10 +127,11 @@ maintained as runtime state.*
 - Repository Decision Evaluation Prototype through Phase 115E
 - Repository Decision Evaluation Integration through Phase 115F
 - Repository Decision Evaluation Verification & Compatibility through Phase 115G
+- Repository Skills Architecture through Phase 115H
 
 ### Planned
 
-- 115H — Repository Skills Architecture
+- 115I — Repository Skills Contract Freeze
 
 ### Current Runtime State
 
@@ -116,8 +144,8 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean (pushed, origin/main..HEAD == 0)
-- **pcae_agent_verify_handoff:** pass
+- **pcae_push_check:** pending (not yet pushed at report-write time)
+- **pcae_agent_verify_handoff:** pending (dirty working tree until final commit/push)
 - **pcae_session_bootstrap_compact:** completed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe
 - **telegram_runtime:** loaded, configured, enabled
@@ -125,29 +153,26 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_verification_validator_evidence_tests:** 643/643 (passed)
-- **task_phase_regression:** 1568/1568 (passed)
-- **runtime_contract_autonomy_plugin_regression:** 3554/3554 (passed)
+- **focused_architecture_documentation_tests:** 33/33 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 - **fast_green:** 4390/4390 (passed)
 
 ## No-Go Confirmations
 
-- No Repository Skills.
+- No Repository Skill implemented.
+- No AI/SLM/LLM-backed skill implemented.
+- No DeepSeek integration.
+- No changes to Evidence Providers, Decision Evaluation, the
+  Repository Transition Validator, or lifecycle commands.
 - No execution.
 - No authorization.
-- No Repository Transition Validator behavior changes.
-- No lifecycle command changes.
-- No Notification Policy changes.
-- No Canonical Artifact Promotion changes.
-- No Push-State Reconciliation changes.
-- No Post-Push Canonicalization changes.
-- No Telegram changes.
-- No REST.
-- No Dashboard.
+- No Permission Broker enforcement.
 - No plugins.
-- No SLM/LLM integration.
+- No Telegram inbound.
+- No REST.
+- No Web UI.
+- No Dashboard.
 - No raw git commit.
 - No raw git push.
 - No force push.
@@ -157,7 +182,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115H — Repository Skills Architecture
+115I — Repository Skills Contract Freeze
 
 ## Report Consistency
 
@@ -166,4 +191,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115G. Schema version 1.0.*
+*Report generated for PCAE Phase 115H. Schema version 1.0.*
