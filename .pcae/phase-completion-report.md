@@ -1,125 +1,103 @@
-# Phase 115L Complete — Repository Skills Integration Design
+# Phase 115M Complete — Repository Skills Integration Prototype
 
-- **Phase ID:** `115L`
+- **Phase ID:** `115M`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 8
-- **Tests run:** 70 (focused architecture/documentation suite)
-- **Commits:** 73ab8377, bda6f172, 1cd46b27, 708f3fc6
+- **Files changed:** 9
+- **Tests run:** 41 new + 786 + 1555 + 68 + 3573 + 4389/4390 fast_green (see Test Results)
+- **Commits:** dcf4d3a6, 909d0742
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115L designs how Repository Skills (115H design, 115I contract
-freeze, 115J prototype, 115K verification) become the primary
-evidence-acquisition layer for Decision Evaluation, without changing
-any observable lifecycle behavior. Architecture and design only; zero
-implementation added.
+Phase 115M implements Stage 3 of 115L's frozen migration strategy:
+Repository Skills become an available evidence-acquisition path for
+Decision Evaluation, alongside — not instead of — the existing
+Evidence Provider path. Behavior-preserving prototype only; zero
+lifecycle, Notification Policy, Canonical Artifact Promotion,
+Push-State Reconciliation, or Post-Push Canonicalization change.
 
-## Integration Architecture Summary
-
-Repository Skills become the sole orchestrators of Evidence
-Providers. Decision Evaluation receives only `EvidenceCollection`
-(already its shape today) and never knows which providers exist. The
-target pipeline:
+## Integration Summary
 
 ```
-Repository State -> Evidence Providers -> Repository Skills
-    -> Evidence Collection -> Decision Evaluation -> Transition Validator
+RepositoryState
+      |
+      v
+RepositorySkillRegistry
+      |
+      v
+RepositorySkills
+      |
+      v
+EvidenceCollection
+      |
+      v
+DecisionEvaluation
 ```
 
-replaces today's reality where 115F's validator adapter builds
-`Evidence` directly from `RepositoryState` and 115J's Repository
-Skills exist as a parallel, currently-unused path.
+New module `src/pcae/core/repository_skills_integration.py` exposes:
 
-## Orchestration Summary
+- `collect_evidence_via_repository_skills` / `build_evaluation_context_from_repository_skills`
+  — the 115M path, delegating exclusively to a `RepositorySkillRegistry`
+  (115J's four deterministic skills only).
+- `collect_evidence_via_evidence_providers` / `build_evaluation_context_from_evidence_providers`
+  — the preserved pre-115M path.
 
-Decision Evaluation must never construct, discover, or call an
-Evidence Provider directly, and must never know provider ordering —
-Repository Skills own provider orchestration exclusively. One
-Repository Skill may invoke zero, one, or multiple providers, merging
-its own `EvidenceCollection` before returning — the only two merge
-points that may ever exist are within one skill and across skills
-(`RepositorySkillRegistry.merge_evidence`). A skill may compose
-sub-skills internally, preserving deterministic invocation order
-(already 115K-verified for multi-skill invocation), with no recursive
-cycles permitted.
+## Skill Evidence Acquisition Summary
 
-## Migration Strategy
+Only 115J's four deterministic skills (`GitRepositorySkill`,
+`RuntimeRepositorySkill`, `ReportRepositorySkill`,
+`MetadataRepositorySkill`) are used, via `build_default_registry()`.
+No advisory skill, no AI/SLM skill, no model-produced evidence.
 
-Four stages, frozen: **Stage 1** (current — Decision Evaluation
-consumes `RepositoryState`-derived evidence via 115F's adapter);
-**Stage 2** (completed: 115J/115K — Repository Skills wrap providers,
-proven read-only/deterministic/provider-equivalent, not yet wired);
-**Stage 3** (not started — Decision Evaluation receives Repository
-Skill output, candidate for 115M); **Stage 4** (not started —
-providers become a fully encapsulated implementation detail). Each
-stage is additive and reversible; this phase does not authorize
-skipping or collapsing stages.
+## Provider Compatibility Summary
 
-## Dependency Direction
+`collect_evidence_via_evidence_providers` preserves direct
+instantiation of 115D's four Evidence Providers, unchanged in
+behavior; nothing before 115M was deleted or disabled.
 
-```
-Repository Skills   -> Evidence Providers
-Decision Evaluation  -> Evidence (only)
-Transition Validator -> EvaluationResult (only)
-```
+## Evidence Equivalence Result
 
-One-way only, no reverse dependency: Evidence Providers never import
-Repository Skills; Evidence never imports Decision Evaluation;
-`EvaluationResult` never imports the Transition Validator.
+Old provider path and new skill path return the same Evidence IDs and
+semantically equal items (same category/producer/freshness/
+confidence/determinism/scope/references/observed value/explanation/
+limitations/provenance producer/produced_from/deterministic_origin),
+differing only in independent wall-clock timestamps. Verified against
+a synthetic repository and the real project root. **Result:
+equivalent.**
 
-## Compatibility Guarantees
+## Decision Evaluation Equivalence Result
 
-No provider API change (`EvidenceProvider.collect(context) ->
-EvidenceProviderResult` unchanged); no Decision Evaluation semantic
-change (the six frozen invariant families keep evaluating whatever
-evidence is present, unaware of pipeline shape); no Transition
-Validator behavior change (`validate_transition`'s structural checks
-remain sole verdict authority); no lifecycle command change (`pcae
-phase complete`/`pcae task finish --commit` continue calling the
-existing 115F adapter path unchanged).
+`evaluate(provider_context) == evaluate(skill_context)` holds by full
+dataclass equality (neither `EvaluationResult` nor `InvariantResult`
+carry a per-item timestamp). Verified against a synthetic repository
+and the real project root. **Result: identical.**
 
-## AI Insertion Point
+## Validator Verdict Compatibility
 
-Future AI-backed Repository Skills (DeepSeek, GLM, GPT, Qwen, local
-SLM) fit beside deterministic Repository Skills as parallel
-implementations of the same `RepositorySkill` interface, both merging
-into the same `EvidenceCollection`. Decision Evaluation and the
-Transition Validator remain unaware of which skills ran or whether
-any were model-backed. Repository State remains authoritative — no
-AI skill's evidence becomes a second source of truth.
+113U/115F's own regression scenarios (fully consistent state accepts,
+identity mismatch rejects, partial report completeness quarantines,
+execution-available rejects) re-run verbatim and unchanged — no line
+of `repository_transition_validator.py` was touched. Every Evidence ID
+the validator's own 115F adapter cites (`E-report-002`,
+`E-metadata-002`, `E-report-003`, `E-runtime-002`) is a subset of the
+richer skill-path evidence. **Result: unchanged verdicts, equivalent
+Evidence IDs.**
 
-## Wire Diagram Summary
+## No-Integration / No-AI Confirmation
 
-```mermaid
-flowchart TD
-    RS[Repository State] --> EP[Evidence Providers]
-    subgraph RSK[Repository Skills]
-        direction LR
-        DET[Deterministic Skills]
-        ADV[Advisory Skills]
-    end
-    EP --> DET
-    EP --> ADV
-    DET --> EC[Evidence Collection]
-    ADV --> EC
-    EC --> DE[Decision Evaluation]
-    DE --> RTV[Repository Transition Validator]
-    RTV --> TR[Transition Result]
-    TR --> RA[Repository Artifact]
-    TR --> RE[Repository Event]
-    RA --> RE
-    RE --> NP[Notification Policy]
-    NP --> C[Consumers]
-```
-
-Deterministic and Advisory Repository Skills are parallel
-implementations under one Repository Skills layer; Decision Evaluation
-cannot tell, and does not need to tell, which kind of skill (or
-whether a skill at all) produced a given `Evidence` item.
+`core/decision_evaluation.py` still imports only `pcae.core.evidence`;
+`core/repository_skills.py` still never imports `decision_evaluation`
+or `repository_transition_validator`; no lifecycle command,
+Notification Policy, Canonical Artifact Promotion, Push-State
+Reconciliation, or Post-Push Canonicalization references the new
+module. No DeepSeek/GLM/Qwen/GPT/Codex import or skill ID exists
+anywhere in the new path. Execution capability remains unavailable —
+the real repository's `E-runtime-002` evidence is `"unavailable"` via
+both paths, and `runtime_execution_unavailable` still evaluates to
+`PASS`.
 
 ## PCAE Architecture Status
 
@@ -140,10 +118,11 @@ maintained as runtime state.*
 - Repository Skills Prototype through Phase 115J
 - Repository Skills Verification & Compatibility through Phase 115K
 - Repository Skills Integration Design through Phase 115L
+- Repository Skills Integration Prototype through Phase 115M
 
 ### Planned
 
-- 115M — Repository Skills Integration Prototype
+- 115N — Repository Skills Integration Verification & Compatibility
 
 ### Current Runtime State
 
@@ -165,15 +144,13 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_architecture_documentation_tests:** 70/70 (passed)
-- **report_notification_tests:** present_in_canonical_metadata (present)
-- **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **fast_green:** 4390/4390 (passed)
+- **focused_evidence_decision_validator_skills_tests:** 786/786 (passed)
+- **task_and_phase_suites:** 1555/1555 + 68/68 (passed; test_phase85/87_integration.py run separately without `-n auto`, ~12 min, known per-test pcae-subprocess cost, not a regression)
+- **runtime_contract_autonomy_plugin_suites:** 3573/3573 (passed)
+- **fast_green:** 4389/4390 (passed; 1 pre-existing, unrelated, idle-state-dependent failure)
 
 ## No-Go Confirmations
 
-- No Repository Skills integration implemented.
-- No Repository Skill modified.
 - No Evidence Provider modified.
 - No Decision Evaluation modified.
 - No Repository Transition Validator modified.
@@ -182,6 +159,8 @@ maintained as runtime state.*
 - No Canonical Artifact Promotion modified.
 - No Push-State Reconciliation modified.
 - No Post-Push Canonicalization modified.
+- No AI/SLM/LLM skill.
+- No DeepSeek integration.
 - No execution.
 - No authorization.
 - No Permission Broker enforcement.
@@ -199,7 +178,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115M — Repository Skills Integration Prototype
+115N — Repository Skills Integration Verification & Compatibility
 
 ## Report Consistency
 
@@ -208,4 +187,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115L. Schema version 1.0.*
+*Report generated for PCAE Phase 115M. Schema version 1.0.*
