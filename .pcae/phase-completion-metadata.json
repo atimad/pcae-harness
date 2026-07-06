@@ -1,37 +1,39 @@
 {
-  "phase_id": "115E",
-  "phase_name": "Repository Decision Evaluation Prototype",
-  "phase_title": "Repository Decision Evaluation Prototype",
+  "phase_id": "115F",
+  "phase_name": "Repository Decision Evaluation Integration",
+  "phase_title": "Repository Decision Evaluation Integration",
   "status": "completed",
-  "summary": "Deterministic evaluation prototype implementing the Repository Decision Evaluation layer between 115D's Evidence Providers and the Repository Transition Validator. Added src/pcae/core/decision_evaluation.py: EvaluationContext (evidence + evaluation identity/provenance, immutable), InvariantResult (invariant_id/status/severity/supporting_evidence/conflicting_evidence/explanation/suggested_repair), EvaluationResult (invariant_results/summary/blocking_failures/warnings/informational/explanation_reference), InvariantStatus (PASS/FAIL/UNKNOWN/NOT_APPLICABLE), and six evidence-only deterministic invariant families (phase_identity_consistency, push_state_consistency, metadata_consistency, report_completeness, runtime_execution_unavailable, canonical_promotion_eligibility) -- deliberately independent of repository_transition_validator.py's own same-named checks. Every result cites Evidence IDs via EvidenceReference; explanations are deterministic template strings, never AI-generated prose. Conflicting evidence is preserved in both directions, never resolved by provider priority. UNKNOWN evidence never silently passes -- a blocking invariant with unknown inputs is bucketed into blocking_failures. Fixed a real bug found during smoke-testing: the unknown-detection check must rely solely on freshness==UNKNOWN, never on matching observed_value=='unavailable' (which is also a genuine correct domain value). decision_evaluation.py's only import is pcae.core.evidence -- no Git/filesystem/subprocess/runtime access, no import of evidence_providers.py or repository_transition_validator.py, and produces no TransitionVerdict. No Repository Skills, no execution, no authorization, no Repository Transition Validator behavior changes, no lifecycle command changes, no Notification Policy changes, no Canonical Artifact Promotion changes, no Push-State Reconciliation changes, no Post-Push Canonicalization changes, no Telegram changes, no REST, no Dashboard, no plugins, no SLM/LLM integration. Execution capability remains unavailable.",
-  "files_changed_count": 6,
+  "summary": "Behavior-preserving explanation-enrichment integration of 115E's Decision Evaluation with the Repository Transition Validator: same decisions, better explanations. TransitionResult gains one new, backward-compatible field, explanation: EvaluationResult | None = None; the validator's own verdict-computing logic (113U's checks/violations/blocking branching) is unchanged, line for line -- only the three return statements now also pass explanation=explanation. Added build_evidence_from_repository_state(state) -> EvidenceCollection, mapping already-computed RepositoryState fields into 115C Evidence items reusing 115D's own Evidence IDs, so 115E's invariant evaluators run completely unmodified; no new Git/filesystem/subprocess/runtime I/O. Fixed a real bug found while designing the adapter: evaluate_canonical_promotion_eligibility now resolves NOT_APPLICABLE, not a misleading automatic FAIL, when only one of its two required inputs is present. Verified behavior-preserving: all 36 pre-existing test_repository_transition_validator.py tests pass unmodified; 32 new regression tests re-run 12 representative 113U scenarios with identical verdicts; the real pcae phase complete / pcae task finish --commit lifecycle integration test suites pass completely unmodified, proving CLI output is unaffected. push_state_consistency/metadata_consistency resolve NOT_APPLICABLE through this adapter by design (no second independent source exists in RepositoryState). No Repository Skills, no execution, no authorization, no Repository Transition Validator behavior changes, no lifecycle command changes, no Notification Policy changes, no Canonical Artifact Promotion changes, no Push-State Reconciliation changes, no Post-Push Canonicalization changes, no Telegram changes, no REST, no Dashboard, no plugins, no SLM/LLM integration. Execution capability remains unavailable.",
+  "files_changed_count": 8,
   "files_changed": [
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260706-0912-115e-repository-decision-evaluation-prototype.md",
+    "tasks/active/20260706-0940-115f-repository-decision-evaluation-integration.md",
     "src/pcae/core/decision_evaluation.py",
+    "src/pcae/core/repository_transition_validator.py",
     "tests/test_decision_evaluation.py",
-    "docs/PHASE_115E_REPOSITORY_DECISION_EVALUATION_PROTOTYPE.md",
+    "tests/test_repository_transition_validator_decision_evaluation_integration.py",
+    "docs/PHASE_115F_DECISION_EVALUATION_INTEGRATION.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "tests_added_or_updated": "65 new focused Decision Evaluation tests added (tests/test_decision_evaluation.py)",
+  "tests_added_or_updated": "32 new focused integration tests added (tests/test_repository_transition_validator_decision_evaluation_integration.py); 2 tests updated in tests/test_decision_evaluation.py to reflect the new one-directional dependency; all 36 pre-existing validator tests and all real lifecycle integration tests pass unmodified",
   "phase_commits": [
     {
-      "hash": "1463646f",
-      "message": "Implement Repository Decision Evaluation prototype"
+      "hash": "5476086e",
+      "message": "Integrate decision evaluation explanations"
     },
     {
-      "hash": "a5f69c1d",
-      "message": "Complete Phase 115E Repository Decision Evaluation prototype"
+      "hash": "fdb24fd3",
+      "message": "Complete Phase 115F decision evaluation integration"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "none (deterministic evaluation prototype only; no Repository Transition Validator module touched)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (verdict logic unchanged; explanation enrichment added)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 2,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -45,10 +47,16 @@
   },
   "validation_results": [
     {
-      "name": "focused_decision_evaluation_and_evidence_tests",
-      "result": "205/205",
+      "name": "focused_decision_evaluation_validator_evidence_tests",
+      "result": "703/703",
       "status": "passed",
-      "note": "python -m pytest tests/test_evidence*.py tests/test_decision_evaluation.py -n auto -q -ra --durations=100"
+      "note": "python -m pytest tests/test_decision_evaluation.py tests/test_repository_transition_validator*.py tests/test_evidence*.py -n auto -q -ra --durations=100"
+    },
+    {
+      "name": "task_phase_regression",
+      "result": "1568/1568",
+      "status": "passed",
+      "note": "python -m pytest tests/test_task*.py tests/test_*task* tests/test_*phase* tests/test_phase_reports.py tests/test_phase_reports_cli.py -n auto -q -ra --durations=100 (includes known-slow test_phase85/87_integration.py, pre-existing perf issue)"
     },
     {
       "name": "runtime_contract_autonomy_plugin_regression",
@@ -89,7 +97,7 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean (pushed, origin/main..HEAD == 0)",
+      "result": "nothing_to_push before implementation commits; not_pushed after commits until governed push",
       "status": "passed"
     },
     {
@@ -114,7 +122,8 @@
     }
   ],
   "test_results": {
-    "focused_decision_evaluation_and_evidence_tests": "205/205",
+    "focused_decision_evaluation_validator_evidence_tests": "703/703",
+    "task_phase_regression": "1568/1568",
     "runtime_contract_autonomy_plugin_regression": "3554/3554",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
@@ -135,11 +144,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "not_pushed (governed push pending as this phase's own next step)"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pass"
+      "status": "pending_post_push"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -165,5 +174,5 @@
     "polling": false
   },
   "no_go_confirmation": "No Repository Skills. No execution. No authorization. No Repository Transition Validator behavior changes. No lifecycle command changes. No Notification Policy changes. No Canonical Artifact Promotion changes. No Push-State Reconciliation changes. No Post-Push Canonicalization changes. No Telegram changes. No REST. No Dashboard. No plugins. No SLM/LLM integration. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115F \u2014 Repository Decision Evaluation Integration"
+  "recommended_next_phase": "115G — Repository Decision Evaluation Verification & Compatibility"
 }

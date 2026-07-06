@@ -1,78 +1,73 @@
-# Phase 115E Complete — Repository Decision Evaluation Prototype
+# Phase 115F Complete — Repository Decision Evaluation Integration
 
-- **Phase ID:** `115E`
+- **Phase ID:** `115F`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 6
-- **Tests run:** 65
-- **Commits:** 1463646f, a5f69c1d
+- **Files changed:** 8
+- **Tests run:** 703 (focused decision-evaluation/validator/evidence suite)
+- **Commits:** 5476086e, fdb24fd3
 - **Pushed:** not_pushed
 - **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 115E implements the deterministic Repository Decision Evaluation
-layer between 115D's Evidence Providers and the Repository Transition
-Validator. Evidence never decides; evaluation is deterministic; the
-Repository Transition Validator remains the only authority capable of
-determining repository state transitions.
+Phase 115F integrates 115E's Decision Evaluation with the Repository
+Transition Validator in a behavior-preserving way: same decisions,
+better explanations. The validator's own verdict logic is unchanged;
+Decision Evaluation is wired in strictly as optional, additive
+explanation enrichment.
 
-## Evaluation Framework
+## Integration Summary
 
-`src/pcae/core/decision_evaluation.py` implements:
+`src/pcae/core/repository_transition_validator.py` is the only
+implementation file changed. `TransitionResult` gains one new,
+backward-compatible field, `explanation: EvaluationResult | None =
+None`. A new adapter, `build_evidence_from_repository_state(state) ->
+EvidenceCollection`, maps already-computed `RepositoryState` fields
+into 115C `Evidence` items reusing 115D's own Evidence IDs, so 115E's
+invariant evaluators run completely unmodified. No new
+Git/filesystem/subprocess/runtime I/O. No changes to
+`repository_transition_integration.py`, `commands/phase.py`,
+`commands/task.py`, or any notification/push code.
 
-- **`EvaluationContext`** — `evidence: EvidenceCollection` +
-  `evaluation_id`/`evaluation_timestamp`/`repository_snapshot_reference`/
-  `evaluation_version`. Immutable.
-- **`InvariantResult`** — `invariant_id`/`status`/`severity`/
-  `supporting_evidence`/`conflicting_evidence`/`explanation`/
-  `suggested_repair`.
-- **`EvaluationResult`** — `invariant_results`/`summary`/
-  `blocking_failures`/`warnings`/`informational`/
-  `explanation_reference`. Produces no `TransitionVerdict`.
-- **`InvariantStatus`** — `PASS`/`FAIL`/`UNKNOWN`/`NOT_APPLICABLE`.
+## Behavior-Preserving Verification
 
-## Invariant Model
+`validate_transition`'s verdict-computing logic (113U's `checks`/
+`violations`/`blocking` branching) is unchanged, line for line -- only
+the three return statements now also pass `explanation=explanation`.
+All 36 pre-existing `test_repository_transition_validator.py` tests
+pass unmodified. 32 new regression tests re-run 12 representative 113U
+scenarios and assert identical verdicts. The real `pcae phase
+complete`/`pcae task finish --commit` lifecycle integration test suites
+pass completely unmodified, proving CLI output is unaffected.
 
-Six evidence-only deterministic invariant families:
-`phase_identity_consistency`, `push_state_consistency`,
-`metadata_consistency`, `report_completeness`,
-`runtime_execution_unavailable`, `canonical_promotion_eligibility` —
-deliberately independent of `repository_transition_validator.py`'s own
-same-named checks (which read `RepositoryState`, never `Evidence`).
+## Verdict Compatibility Summary
 
-## Explainability Model
+Accept/Reject/Quarantine verdicts unchanged for every existing
+scenario tested (fully consistent, phase-identity mismatch, missing
+recommended-next-phase, partial report completeness, missing evidence,
+blocked/certified canonical promotion, notify-ineligible,
+execution-available, agent-identity-in-payload no-op).
+`REQUIRES_HUMAN_REVIEW` remains unreachable from `validate_transition`'s
+own structural checks, exactly as in 113U.
 
-Every non-`NOT_APPLICABLE` result cites Evidence IDs via
-`EvidenceReference`. Explanations are deterministic template strings,
-never AI-generated prose. Identical input produces an identical
-`EvaluationResult`.
+## Explanation/Evidence Reference Summary
 
-## Conflict Handling
+`TransitionResult.explanation`, when populated, is a full 115E
+`EvaluationResult` (`invariant_results`/`summary`/
+`blocking_failures`/`warnings`/`informational`/`explanation_reference`).
+`push_state_consistency`/`metadata_consistency` resolve
+`NOT_APPLICABLE` through this adapter by design (no second independent
+source exists in `RepositoryState`).
 
-Conflicting evidence (e.g. git-derived vs declared-metadata push state
--- 115B's own literal conflict example) is preserved in both
-directions in `conflicting_evidence`, never resolved by provider
-priority.
+## Bug Fix
 
-## UNKNOWN Handling
-
-UNKNOWN evidence never silently passes: a blocking invariant with
-unknown inputs is bucketed into `blocking_failures`, not
-`informational`. A real bug was found and fixed during this phase's own
-smoke-testing: unknown-detection must rely solely on
-`freshness == EvidenceFreshness.UNKNOWN`, never on matching
-`observed_value == "unavailable"` (which is also the correct, genuine
-domain value for execution-availability evidence).
-
-## No Integration (Confirmed)
-
-`decision_evaluation.py`'s only import is `pcae.core.evidence` -- no
-Git/filesystem/subprocess/runtime access, no import of
-`evidence_providers.py` or `repository_transition_validator.py`, and
-produces no `TransitionVerdict`. Not wired into the Repository
-Transition Validator, any lifecycle command, or Notification Policy.
+`evaluate_canonical_promotion_eligibility` (`decision_evaluation.py`)
+now resolves `NOT_APPLICABLE`, not a misleading automatic `FAIL`, when
+only one of its two required inputs is present -- found while
+designing the adapter, which legitimately never has `report_consistency`
+evidence to offer. No existing 115E test exercised this case.
 
 ## PCAE Architecture Status
 
@@ -86,10 +81,11 @@ maintained as runtime state.*
 - Repository Evidence Framework Prototype through Phase 115C
 - Repository Evidence Provider Prototype through Phase 115D
 - Repository Decision Evaluation Prototype through Phase 115E
+- Repository Decision Evaluation Integration through Phase 115F
 
 ### Planned
 
-- 115F — Repository Decision Evaluation Integration
+- 115G — Repository Decision Evaluation Verification & Compatibility
 
 ### Current Runtime State
 
@@ -111,7 +107,8 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_decision_evaluation_and_evidence_tests:** 205/205 (passed)
+- **focused_decision_evaluation_validator_evidence_tests:** 703/703 (passed)
+- **task_phase_regression:** 1568/1568 (passed)
 - **runtime_contract_autonomy_plugin_regression:** 3554/3554 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
@@ -142,7 +139,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115F — Repository Decision Evaluation Integration
+115G — Repository Decision Evaluation Verification & Compatibility
 
 ## Report Consistency
 
@@ -151,4 +148,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115E. Schema version 1.0.*
+*Report generated for PCAE Phase 115F. Schema version 1.0.*
