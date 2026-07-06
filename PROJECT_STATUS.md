@@ -2,58 +2,85 @@
 
 ## Current Phase
 
-Phase 115S — First Advisory Provider Integration (Current Acting Model) (completed).
+Phase 115T — Advisory Provider Verification & Compatibility (completed).
 
-Tightly scoped advisory pilot: no backend selection, no model
-configuration, no DeepSeek/GLM-specific integration, no provider
-registry, no multi-model mode, no execution capability. No Decision
-Evaluation modified, no Repository Transition Validator modified, no
-lifecycle command modified, no Repository Skills runtime modified.
-Phase report:
-`docs/PHASE_115S_FIRST_ADVISORY_PROVIDER_INTEGRATION.md`.
+Verification only: no new provider implemented, no DeepSeek added, no
+GLM added, no Codex-specific integration added, no provider selection
+added, no model configuration added, no lifecycle command modified,
+no Decision Evaluation modified, no Repository Transition Validator
+modified, no Repository Skills runtime modified. Phase report:
+`docs/PHASE_115T_ADVISORY_PROVIDER_VERIFICATION.md`.
 
-**New module**: `src/pcae/core/current_acting_model_advisory_provider.py`
-implements `CurrentActingModelAdvisoryProvider` — the first real
-(non-mock) `AdvisoryProvider`, conforming to 115R's interface
-unmodified. No live model API call, no network invocation, no
-subprocess, no MCP tool call anywhere: "the current acting model"
-means whichever agent is operating a PCAE session supplies one answer
-at construction time, exactly as a human operator would type one in.
+**Containment verified**: the advisory provider/skill expose no
+decide/authorize/commit/push/finalize/notify/mutate/execute method;
+`RawAdvisoryResponse` carries no verdict/authorization field; the
+skill never mutates a real repository; neither advisory module
+references `repository_transition_validator`/`TransitionVerdict`/
+`validate_transition`. Advisory-only evidence resolves **zero**
+invariants to `PASS`; mixing advisory evidence with deterministic
+evidence never changes the deterministic evaluation's
+`blocking_failures`.
 
-**Pilot scope**: exactly one bounded question — "Is the repository
-state internally consistent?" — operationalized as 115R's
-`RepositoryConsistencyAdvisorySkill.objective ==
-"repository_consistency_review"`, reused unmodified. Excludes code
-review, architecture review, planning, refactoring advice, bug
-finding, security review, and autonomous repair.
+**Boundaries verified**: provider returns exactly `RawAdvisoryResponse`;
+Normalizer returns exactly `NormalizedAdvisoryResponse`; Evidence
+Builder returns exactly `EvidenceCollection`; `EvaluationContext`
+rejects non-`EvidenceCollection` evidence; `validate_transition`
+resolves verdicts from `RepositoryState` alone, unaware advisory
+evidence exists.
 
-**Stateless, single-use**: a second `invoke()` call on the same
-provider instance raises `RuntimeError` rather than retrying or
-silently returning a second answer — "one request / one response",
-"no retries", "no multi-turn conversation" enforced structurally.
+**Failure isolation verified**: six scenarios (unavailable, malformed,
+missing confidence, missing limitations, unexpected extra content,
+empty findings) each degrade to `UNKNOWN`/`LOW` evidence or ignore
+unrecognized extras — never `HIGH`/`MEDIUM` confidence from a failure
+path, never an uncaught exception, never affecting deterministic
+evaluation.
 
-**Normalization and Evidence boundaries reused unmodified**: the raw
-response passes through 115R's existing `normalize_advisory_response()`
-and `build_evidence_from_normalized()` with zero bespoke logic in the
-new module — same rejection rules for malformed/unauthorized content,
-same probabilistic/model-produced/confidence-labelled/
-limitations-labelled/provenance-preserving evidence shape.
+**Nondeterminism contained**: across five varied raw contents, every
+normalized output conforms to schema, every evidence item is
+probabilistic/model-produced with confidence/limitations/provenance
+always present, and advisory evidence never alone authorizes Accept.
 
-**Never sole authority for Accept, proven directly**: feeding this
-pilot's evidence alone into `evaluate()` resolves zero invariants to
-`PASS` — advisory evidence carries no Evidence ID any of the six
-frozen invariant families look up.
+**Backend portability demonstrated (test-only stand-ins, nothing
+implemented)**: a fake provider parametrized over `backend_kind`
+values `current_acting_model`/`deepseek`/`glm_zai`/`qwen`/`codex`/
+`local_slm` plugs into the unmodified skill identically; Decision
+Evaluation and the Validator require zero change for any of them.
 
-**Failure handling reused unmodified**: unavailable/malformed advisory
-degrades to one `UNKNOWN`-freshness evidence item; a provider
-exception yields an explicit `FAILED` skill result with zero evidence.
+**Pilot scope reconfirmed**: exactly one question, "Is the repository
+state internally consistent?"; no code/architecture/security review,
+planning, or autonomous-repair scope exists anywhere.
 
-Added `tests/test_current_acting_model_advisory_provider_115s.py` (48
-new tests). Not wired into `pcae phase complete`, `pcae task finish`,
-`pcae push`, `pcae notify`, `pcae agent verify-handoff`, or `pcae
-runtime inspect` as an authority.
+**No hidden configuration**: no provider registry, no backend
+selection function, no API-key/secret/env reference, no split-model
+config, no network-specific config anywhere in either advisory module.
 
-Recommended next repo phase: 115T — Advisory Provider Verification & Compatibility (not started).
+Added `tests/test_advisory_provider_verification_115t.py` (66 new
+tests).
+
+Recommended next repo phase: 115U — Second Advisory Provider Pilot Planning (not started).
+
+## Phase 115T Complete
+
+Phase 115T — Advisory Provider Verification & Compatibility (completed).
+
+Verified 115S's first real Advisory Provider integration is safely
+contained, behavior-compatible, failure-isolated, and portable to
+future providers, with 66 new tests. Confirmed advisory evidence
+cannot decide, authorize, mutate, commit, push, finalize, notify,
+bypass the validator, or become sole authority for Accept; failure
+scenarios degrade safely; nondeterminism is contained by schema and
+category; backend portability requires zero change to Decision
+Evaluation or the Validator; pilot scope remains exactly one bounded
+question; no hidden configuration exists. Verification only; zero
+implementation change.
+
+**No-go**: no new provider implemented, no DeepSeek, no GLM, no
+Codex-specific integration, no provider selection, no model
+configuration, no lifecycle command modified, no Decision Evaluation
+modified, no Repository Transition Validator modified, no Repository
+Skills runtime modified.
+
+Recommended next repo phase: 115U — Second Advisory Provider Pilot Planning (not started).
 
 ## Phase 115S Complete
 

@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+- Phase 115T — Advisory Provider Verification & Compatibility.
+  Verification-only phase re-proving 115S's first real Advisory
+  Provider integration (`CurrentActingModelAdvisoryProvider`) is
+  safely contained, behavior-compatible, failure-isolated, and
+  portable to future providers, with 66 new tests
+  (`tests/test_advisory_provider_verification_115t.py`). Confirms:
+  behavioral containment (no decide/authorize/commit/push/finalize/
+  notify/mutate/execute method, no verdict/authorization field, never
+  mutates a repository, no reference to the validator in either
+  advisory module, advisory-only evidence resolves zero invariants to
+  `PASS`, advisory evidence never overrides a disagreeing
+  deterministic evaluation); pipeline boundaries (provider returns
+  exactly `RawAdvisoryResponse`, Normalizer returns exactly
+  `NormalizedAdvisoryResponse`, Evidence Builder returns exactly
+  `EvidenceCollection`, `EvaluationContext` rejects non-collection
+  evidence, the Validator resolves verdicts unaware advisory evidence
+  exists); failure isolation across six scenarios (unavailable,
+  malformed, missing confidence, missing limitations, unexpected extra
+  content, empty findings -- each degrades safely, never raises, never
+  affects deterministic evaluation); nondeterminism containment across
+  five varied raw contents (schema conformance, probabilistic/
+  model-produced/confidence/limitations/provenance always present,
+  never sole authority for Accept); backend portability demonstrated
+  with test-only stand-ins only (`current_acting_model`/`deepseek`/
+  `glm_zai`/`qwen`/`codex`/`local_slm` `backend_kind` values, all
+  requiring zero change to Decision Evaluation or the Validator, none
+  implemented); pilot scope (exactly one question, no other review
+  scope string present); and no hidden configuration (no provider
+  registry, no backend-selection function, no API-key/secret/env
+  reference, no split-model config, no network-specific config). No
+  new provider implemented, no DeepSeek, no GLM, no Codex-specific
+  integration, no provider selection, no model configuration, no
+  lifecycle command, Decision Evaluation, Repository Transition
+  Validator, or Repository Skills runtime modified. Execution
+  capability remains unavailable.
+
 - Phase 115S — First Advisory Provider Integration (Current Acting
   Model). Adds `src/pcae/core/current_acting_model_advisory_provider.py`:
   `CurrentActingModelAdvisoryProvider`, the first real (non-mock)
