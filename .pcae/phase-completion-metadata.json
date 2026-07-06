@@ -1,33 +1,33 @@
 {
-  "phase_id": "115V",
-  "phase_name": "Advisory Evidence Enrichment Architecture",
-  "phase_title": "Advisory Evidence Enrichment Architecture",
+  "phase_id": "115W",
+  "phase_name": "Advisory Context Package Contract",
+  "phase_title": "Advisory Context Package Contract",
   "status": "completed",
-  "summary": "Architecture and design only, zero implementation added. Designs how PCAE improves advisory quality by enriching the deterministic evidence supplied to Advisory Repository Skills -- the axis of improvement 115U named instead of a second advisory provider. Freezes the core principle (models improve by receiving better evidence, not by receiving more authority); the Advisory Evidence Enrichment definition (richer deterministic evidence from existing 115D providers/115J skills and future sources, without changing containment, the Normalizer boundary, or Decision Evaluation authority); eleven evidence enrichment categories (repository state, git/history, changed-files, test evidence, architecture evidence, dependency/module evidence, documentation evidence, governance evidence, runtime capability evidence, report/metadata consistency evidence, future semantic/code graph evidence) each mapped to a deterministic source; a priority matrix (value/difficulty/determinism/risk/expected advisory benefit) with Tier 1/2/3 recommendations; the future Advisory Context Package (bounded repository summary, deterministic evidence, current transition/question, constraints/no-go rules, relevant artifacts, known limitations -- a 115W design target, not implemented, not a modification of AdvisoryRequest's frozen fields); safety boundaries (never grant execution capability, expose secrets, include unbounded repository dumps, allow prompt injection, bypass normalization, or change Decision Evaluation authority); prompt-injection handling (repository-derived content always untrusted input, never instructions; trusted PCAE instructions / deterministic evidence / untrusted repository content clearly separated -- complementary to 115Q's Normalizer boundary); evidence summarization rules (deterministic summaries preferred, bounded length, provenance preserved, references retained, raw evidence never blindly pasted); and a four-phase future roadmap (115W Contract Freeze -> 115X Prototype -> 115Y Verification -> 115Z Advisory Skill Pilot Hardening). No new Evidence Provider, Repository Skill, Advisory Provider runtime change, second advisory provider, model configuration, DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/local-SLM integration, Decision Evaluation, Repository Transition Validator, or lifecycle command implemented or modified. Execution capability remains unavailable.",
+  "summary": "Contract/design only, zero implementation added. Freezes the AdvisoryContextPackage contract -- the bounded, trusted, provenance-preserving context that may be supplied to an Advisory Repository Skill's Prompt Builder -- before any implementation. Freezes the core principle (advisory models receive bounded, trusted, provenance-preserving context, never unrestricted repository access); 15 required sections (package_id, created_at_utc, objective, advisory_question, trusted_pcae_instructions, repository_summary, deterministic_evidence_summary, transition_context, constraints_and_no_go_rules, artifact_references, untrusted_repository_content, provenance, limitations, size_budget, redaction_summary -- none optional); four trust-boundary classes (trusted PCAE instructions, deterministic PCAE evidence, untrusted repository content, model-produced advisory output) with an explicit section-to-class mapping; the prompt-injection boundary (untrusted_repository_content always its own section, always delimited/labelled, never honored as instructions, trusted sections always assembled last -- complementary to 115Q's Normalizer boundary); size limits (total package budget, per-section budgets, deterministic summarization requirement, absolute prohibition on unbounded repository dumps -- concept frozen, concrete numbers deferred to 115X); the redaction/secrets policy (no secrets/tokens/credentials/private env values/unrestricted logs/raw config secrets, every redaction recorded); provenance rules (package-level and item-level, never discarded during summarization); the artifact-reference model (files by path, evidence by Evidence ID, commits by hash, full-content embedding never a default); the one allowed advisory question (\"Is the repository state internally consistent?\", unchanged from 115S/115T); and future extensibility (documentation/report/architecture consistency review, code review, security review -- documented, not implemented). No AdvisoryContextPackage runtime, Advisory Provider runtime change, Repository Skill, Evidence Provider, Decision Evaluation, Repository Transition Validator, or lifecycle command implemented or modified. Execution capability remains unavailable.",
   "files_changed_count": 8,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PCAE_ADVISORY_EVIDENCE_ENRICHMENT.md",
-    "docs/PHASE_115V_ADVISORY_EVIDENCE_ENRICHMENT_ARCHITECTURE.md",
+    "docs/PCAE_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md",
+    "docs/PHASE_115W_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-2124-115v-advisory-evidence-enrichment-architecture.md",
-    "tests/test_phase_115v_advisory_evidence_enrichment_architecture.py",
+    "tasks/done/20260706-2137-115w-advisory-context-package-contract.md",
+    "tests/test_phase_115w_advisory_context_package_contract.py",
     ".pcae/phase-completion-metadata.json"
   ],
-  "tests_added_or_updated": "25 new focused architecture/documentation verification tests added (tests/test_phase_115v_advisory_evidence_enrichment_architecture.py); no implementation code changed; all pre-existing suites (115H/115P/115Q/115U architecture tests) pass unmodified",
+  "tests_added_or_updated": "30 new focused architecture/contract verification tests added (tests/test_phase_115w_advisory_context_package_contract.py); no implementation code changed; all pre-existing suites (115H/115Q/115V architecture tests) pass unmodified",
   "phase_commits": [
     {
-      "hash": "7d295dfc",
-      "message": "Design Advisory Evidence Enrichment architecture"
+      "hash": "d0110d3a",
+      "message": "Freeze Advisory Context Package contract"
     },
     {
-      "hash": "785d35c9",
-      "message": "Complete Phase 115V Advisory Evidence Enrichment architecture"
+      "hash": "5c736e04",
+      "message": "Complete Phase 115W Advisory Context Package contract"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115V adds no implementation)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115W adds no implementation)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -44,10 +44,10 @@
   },
   "validation_results": [
     {
-      "name": "focused_architecture_documentation_tests",
-      "result": "107/107",
+      "name": "focused_contract_architecture_tests",
+      "result": "92/92",
       "status": "passed",
-      "note": "python -m pytest tests/test_phase_115v_advisory_evidence_enrichment_architecture.py tests/test_phase_115u_advisory_provider_strategy_review.py tests/test_phase_115h_repository_skills_architecture.py tests/test_phase_115q_advisory_repository_skills_contract_freeze.py -q -ra"
+      "note": "python -m pytest tests/test_phase_115w_advisory_context_package_contract.py tests/test_phase_115v_advisory_evidence_enrichment_architecture.py tests/test_phase_115q_advisory_repository_skills_contract_freeze.py -q -ra"
     },
     {
       "name": "report_notification_tests",
@@ -63,7 +63,7 @@
       "name": "fast_green",
       "result": "4390/4390",
       "status": "passed",
-      "note": "prior phase's fast_green result carried forward; unaffected by this architecture-only phase"
+      "note": "prior phase's fast_green result carried forward; unaffected by this contract-freeze-only phase"
     },
     {
       "name": "pcae_health",
@@ -107,7 +107,7 @@
     }
   ],
   "test_results": {
-    "focused_architecture_documentation_tests": "107/107",
+    "focused_contract_architecture_tests": "92/92",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "4390/4390"
@@ -156,6 +156,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No new Evidence Provider implemented. No new Repository Skill implemented. No Advisory Provider runtime modified. No second advisory provider added. No model configuration added. No DeepSeek integration. No GLM integration. No Qwen integration. No Codex integration. No OpenAI integration. No Claude-specific integration. No local SLM integration. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115W — Advisory Context Package Contract"
+  "no_go_confirmation": "No AdvisoryContextPackage runtime implemented. No Advisory Provider runtime modified. No Repository Skill modified. No Evidence Provider modified. No Decision Evaluation modified. No Repository Transition Validator modified. No lifecycle command modified. No model configuration added. No second provider added. No DeepSeek integration. No GLM integration. No Qwen integration. No Codex integration. No OpenAI integration. No Claude-specific integration. No local SLM integration. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115X — Advisory Context Package Prototype"
 }

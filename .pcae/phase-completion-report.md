@@ -1,76 +1,72 @@
-# Phase 115V Complete — Advisory Evidence Enrichment Architecture
+# Phase 115W Complete — Advisory Context Package Contract
 
-- **Phase ID:** `115V`
+- **Phase ID:** `115W`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 8
-- **Tests run:** 107 (focused architecture/documentation suite)
-- **Commits:** 7d295dfc, 785d35c9
+- **Tests run:** 92 (focused contract/architecture suite)
+- **Commits:** d0110d3a, 5c736e04
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 115V designs how PCAE improves advisory quality by enriching
-the deterministic evidence supplied to Advisory Repository Skills —
-the axis of improvement 115U named instead of a second advisory
-provider. Architecture and design only; zero implementation added.
+Phase 115W freezes the `AdvisoryContextPackage` contract — the
+bounded, trusted, provenance-preserving context that may be supplied
+to an Advisory Repository Skill's Prompt Builder — before any
+implementation. Contract/design only; zero implementation added.
 
-## Advisory Evidence Enrichment Summary
+## Context Package Contract Summary
 
-Enrichment supplies an Advisory Repository Skill's Prompt Builder with
-richer deterministic evidence from existing 115D providers/115J
-skills and future sources, without changing containment, the
-Normalizer boundary, or Decision Evaluation authority.
+15 required sections frozen, none optional. Four trust-boundary
+classes frozen. The prompt-injection boundary requires
+`untrusted_repository_content` to be its own, always-delimited section
+that is never honored as instructions, with trusted sections always
+assembled last. Size limits, redaction/secrets policy, provenance
+rules, and the artifact-reference model are all frozen. Only one
+advisory question is currently allowed. Future extensibility is
+documented, not implemented.
 
-## Evidence Category Summary
+## Required Sections
 
-Eleven categories named: repository state, git/history, changed-files,
-test evidence, architecture evidence, dependency/module evidence,
-documentation evidence, governance evidence, runtime capability
-evidence, report/metadata consistency evidence, future semantic/code
-graph evidence — each mapped to a deterministic source.
+`package_id`, `created_at_utc`, `objective`, `advisory_question`,
+`trusted_pcae_instructions`, `repository_summary`,
+`deterministic_evidence_summary`, `transition_context`,
+`constraints_and_no_go_rules`, `artifact_references`,
+`untrusted_repository_content`, `provenance`, `limitations`,
+`size_budget`, `redaction_summary`.
 
-## Priority Matrix Summary
+## Trust Boundary Summary
 
-Value/difficulty/determinism/risk/expected advisory benefit per
-category. Tier 1: repository state, changed-files, governance,
-report/metadata consistency. Tier 2: git/history, test evidence,
-runtime capability. Tier 3: architecture, dependency/module,
-documentation, future semantic/code graph evidence.
-
-## Advisory Context Package Summary
-
-Bounded repository summary, deterministic evidence, current
-transition/question, constraints/no-go rules, relevant artifacts,
-known limitations — a 115W design target, not implemented, not a
-modification of `AdvisoryRequest`'s frozen fields.
-
-## Safety Boundary Summary
-
-Enriched evidence must never grant execution capability, expose
-secrets, include unbounded repository dumps, allow prompt injection,
-allow model output to bypass normalization, or change Decision
-Evaluation authority.
+Trusted PCAE instructions, deterministic PCAE evidence, untrusted
+repository content, model-produced advisory output — each mapped to
+specific sections, never blended.
 
 ## Prompt-Injection Handling
 
-Repository-derived content always untrusted input, never instructions.
-Trusted PCAE instructions, deterministic evidence, and untrusted
-repository content must be clearly separated — complementary to
-115Q's Normalizer boundary.
+Untrusted repository content is always its own, delimited/labelled
+section; no instruction found within it may ever be honored; trusted
+sections are always assembled last.
 
-## Summarization Strategy
+## Size / Redaction / Provenance Rules
 
-Deterministic summaries preferred over a second model call; bounded
-length; provenance preserved; references retained; raw evidence never
-blindly pasted.
+Size: total and per-section budgets exist and are enforced (concrete
+numbers deferred to 115X); deterministic summarization required; no
+unbounded dumps ever. Redaction: no secrets/tokens/credentials/
+private env values/unrestricted logs/raw config secrets; every
+redaction recorded. Provenance: package-level and item-level, never
+discarded during summarization.
 
-## Future Roadmap
+## Artifact Reference Model
 
-115W (Contract Freeze) → 115X (Prototype, Tier 1 evidence only) →
-115Y (Verification) → 115Z (Advisory Skill Pilot Hardening).
+Files by path, evidence by Evidence ID, commits by hash —
+full-content embedding never a default.
+
+## Allowed Advisory Question
+
+Exactly one: "Is the repository state internally consistent?" —
+unchanged from 115S/115T's verified pilot scope.
 
 ## PCAE Architecture Status
 
@@ -100,10 +96,11 @@ maintained as runtime state.*
 - Advisory Provider Verification & Compatibility through Phase 115T
 - Advisory Provider Strategy & Extension Point Review through Phase 115U
 - Advisory Evidence Enrichment Architecture through Phase 115V
+- Advisory Context Package Contract through Phase 115W
 
 ### Planned
 
-- 115W — Advisory Context Package Contract
+- 115X — Advisory Context Package Prototype
 
 ### Current Runtime State
 
@@ -125,18 +122,22 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_architecture_documentation_tests:** 107/107 (passed)
+- **focused_contract_architecture_tests:** 92/92 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
-- **fast_green:** 4390/4390 (passed; carried forward from 115U, unaffected by this architecture-only phase)
+- **fast_green:** 4390/4390 (passed; carried forward from 115V, unaffected by this contract-freeze-only phase)
 
 ## No-Go Confirmations
 
-- No new Evidence Provider implemented.
-- No new Repository Skill implemented.
+- No AdvisoryContextPackage runtime implemented.
 - No Advisory Provider runtime modified.
-- No second advisory provider added.
+- No Repository Skill modified.
+- No Evidence Provider modified.
+- No Decision Evaluation modified.
+- No Repository Transition Validator modified.
+- No lifecycle command modified.
 - No model configuration added.
+- No second provider added.
 - No DeepSeek integration.
 - No GLM integration.
 - No Qwen integration.
@@ -144,9 +145,6 @@ maintained as runtime state.*
 - No OpenAI integration.
 - No Claude-specific integration.
 - No local SLM integration.
-- No Decision Evaluation modified.
-- No Repository Transition Validator modified.
-- No lifecycle command modified.
 - No execution.
 - No authorization.
 - No Permission Broker enforcement.
@@ -164,7 +162,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115W — Advisory Context Package Contract
+115X — Advisory Context Package Prototype
 
 ## Report Consistency
 
@@ -173,4 +171,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115V. Schema version 1.0.*
+*Report generated for PCAE Phase 115W. Schema version 1.0.*
