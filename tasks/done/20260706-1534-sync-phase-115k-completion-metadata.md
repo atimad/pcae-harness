@@ -10,7 +10,7 @@ Sync Phase 115K completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
