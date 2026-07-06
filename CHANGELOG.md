@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+- Phase 115S — First Advisory Provider Integration (Current Acting
+  Model). Adds `src/pcae/core/current_acting_model_advisory_provider.py`:
+  `CurrentActingModelAdvisoryProvider`, the first real (non-mock)
+  `AdvisoryProvider`, conforming to 115R's interface unmodified
+  (`backend_kind="current_acting_model"`,
+  `determinism=PROBABILISTIC`). No live model API call, no network
+  invocation, no subprocess, no MCP tool call -- "the current acting
+  model" supplies one answer at construction time, exactly as a human
+  operator would type one in; the module's only job is shepherding
+  that answer through 115R's unmodified Normalizer
+  (`normalize_advisory_response`) and Evidence Builder
+  (`build_evidence_from_normalized`). Stateless and single-use: a
+  second `invoke()` on the same instance raises `RuntimeError` rather
+  than retrying (`"one request / one response"`, no retries, no
+  multi-turn conversation, enforced structurally). Pilot scope is
+  exactly one bounded question -- "Is the repository state internally
+  consistent?" -- operationalized as 115R's own
+  `RepositoryConsistencyAdvisorySkill.objective ==
+  "repository_consistency_review"`, reused unmodified via the new
+  `build_repository_consistency_skill_with_current_model()` prototype
+  helper (substitutes only the provider, same skill class). Proves
+  advisory evidence is never sole authority for Accept (feeding this
+  pilot's evidence alone into `evaluate()` resolves zero invariants to
+  `PASS`) and that unavailable/malformed advisory degrades to one
+  `UNKNOWN`-freshness evidence item, or an explicit `FAILED` skill
+  result with zero evidence on a provider exception -- 115R's
+  two-outcome failure contract, reused unmodified. Adds 48 new tests
+  (`tests/test_current_acting_model_advisory_provider_115s.py`). No
+  backend selection, no model configuration, no DeepSeek/GLM-specific
+  integration, no provider registry, no multi-model mode. Not wired
+  into `pcae phase complete`, `pcae task finish`, `pcae push`, `pcae
+  notify`, `pcae agent verify-handoff`, or `pcae runtime inspect` as
+  an authority. No Decision Evaluation, Repository Transition
+  Validator, lifecycle command, or Repository Skills runtime
+  modified. Execution capability remains unavailable.
+
 - Phase 115R — Advisory Repository Skills Prototype. Implements the
   framework 115P designed and 115Q froze, using only a deterministic
   `MockAdvisoryProvider`. Adds `src/pcae/core/advisory_repository_skills.py`:

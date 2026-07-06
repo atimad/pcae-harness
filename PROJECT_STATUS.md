@@ -2,54 +2,79 @@
 
 ## Current Phase
 
-Phase 115R — Advisory Repository Skills Prototype (completed).
+Phase 115S — First Advisory Provider Integration (Current Acting Model) (completed).
 
-Implements the framework 115P designed and 115Q froze, using only a
-deterministic `MockAdvisoryProvider`. No real model backend
-implemented or invoked: no DeepSeek, Claude API, OpenAI, GLM, Qwen,
-Codex backend, local SLM, network call, subprocess model execution, or
-MCP model invocation. No Decision Evaluation modified, no Repository
-Transition Validator modified, no lifecycle command modified, no
-Repository Skills runtime modified (`build_default_registry()` still
-returns exactly 115J's four deterministic skills). No execution
-capability. Phase report:
-`docs/PHASE_115R_ADVISORY_REPOSITORY_SKILLS_PROTOTYPE.md`. Canonical
-reference: `docs/PCAE_ADVISORY_REPOSITORY_SKILLS_PROTOTYPE.md`.
+Tightly scoped advisory pilot: no backend selection, no model
+configuration, no DeepSeek/GLM-specific integration, no provider
+registry, no multi-model mode, no execution capability. No Decision
+Evaluation modified, no Repository Transition Validator modified, no
+lifecycle command modified, no Repository Skills runtime modified.
+Phase report:
+`docs/PHASE_115S_FIRST_ADVISORY_PROVIDER_INTEGRATION.md`.
 
-**New module**: `src/pcae/core/advisory_repository_skills.py`
-implements `AdvisoryRequest`, `RawAdvisoryResponse`,
-`NormalizedAdvisoryResponse`, the `AdvisoryProvider` interface,
-`MockAdvisoryProvider`, `build_advisory_request` (Prompt Builder),
-`normalize_advisory_response` (Normalizer),
-`build_evidence_from_normalized` (Evidence Builder),
-`AdvisoryRepositorySkill` (base class), and
-`RepositoryConsistencyAdvisorySkill` (the first concrete Advisory
-Repository Skill, 115Q's first-pilot scope: repository consistency
-review).
+**New module**: `src/pcae/core/current_acting_model_advisory_provider.py`
+implements `CurrentActingModelAdvisoryProvider` — the first real
+(non-mock) `AdvisoryProvider`, conforming to 115R's interface
+unmodified. No live model API call, no network invocation, no
+subprocess, no MCP tool call anywhere: "the current acting model"
+means whichever agent is operating a PCAE session supplies one answer
+at construction time, exactly as a human operator would type one in.
 
-**Mock provider only**: `MockAdvisoryProvider` is a pure, in-memory
-lookup from question to canned `RawAdvisoryResponse`
-(`backend_kind="deterministic_mock"`, `EvidenceDeterminism.DETERMINISTIC`)
-— no randomness, network I/O, filesystem write, or execution. Supports
-deterministic failure scenarios by construction.
+**Pilot scope**: exactly one bounded question — "Is the repository
+state internally consistent?" — operationalized as 115R's
+`RepositoryConsistencyAdvisorySkill.objective ==
+"repository_consistency_review"`, reused unmodified. Excludes code
+review, architecture review, planning, refactoring advice, bug
+finding, security review, and autonomous repair.
 
-**Pipeline proven end-to-end**: Repository State -> Prompt Builder ->
-Mock Provider -> Raw Advisory Response -> Normalizer -> Normalized
-Advisory Response -> Evidence Builder -> `EvidenceCollection`, all
-deterministic across repeated invocations, never mutating the
-repository.
+**Stateless, single-use**: a second `invoke()` call on the same
+provider instance raises `RuntimeError` rather than retrying or
+silently returning a second answer — "one request / one response",
+"no retries", "no multi-turn conversation" enforced structurally.
 
-**Failure handling proven**: provider-level failure and malformed raw
-content both degrade to one `UNKNOWN`-freshness evidence item with an
-overall `SUCCESS` skill result; a provider invocation exception yields
-an explicit `RepositorySkillResult(status=FAILED, ...)` with zero
-evidence — never silent success, never hidden partial output.
+**Normalization and Evidence boundaries reused unmodified**: the raw
+response passes through 115R's existing `normalize_advisory_response()`
+and `build_evidence_from_normalized()` with zero bespoke logic in the
+new module — same rejection rules for malformed/unauthorized content,
+same probabilistic/model-produced/confidence-labelled/
+limitations-labelled/provenance-preserving evidence shape.
 
-Added `tests/test_advisory_repository_skills_prototype_115r.py` (77
-new tests). No real model invoked, no network access, no execution
-capability.
+**Never sole authority for Accept, proven directly**: feeding this
+pilot's evidence alone into `evaluate()` resolves zero invariants to
+`PASS` — advisory evidence carries no Evidence ID any of the six
+frozen invariant families look up.
 
-Recommended next repo phase: 115S — First Advisory Provider Integration (Current Acting Model) (not started).
+**Failure handling reused unmodified**: unavailable/malformed advisory
+degrades to one `UNKNOWN`-freshness evidence item; a provider
+exception yields an explicit `FAILED` skill result with zero evidence.
+
+Added `tests/test_current_acting_model_advisory_provider_115s.py` (48
+new tests). Not wired into `pcae phase complete`, `pcae task finish`,
+`pcae push`, `pcae notify`, `pcae agent verify-handoff`, or `pcae
+runtime inspect` as an authority.
+
+Recommended next repo phase: 115T — Advisory Provider Verification & Compatibility (not started).
+
+## Phase 115S Complete
+
+Phase 115S — First Advisory Provider Integration (Current Acting Model) (completed).
+
+Integrated the first real Advisory Provider
+(`CurrentActingModelAdvisoryProvider`) using the current acting model
+as a stateless, one-shot evidence producer for exactly one bounded
+pilot question (repository consistency review). Reused 115R's
+unmodified Normalizer and Evidence Builder. Proved advisory evidence
+is never sole authority for Accept and that failure handling degrades
+safely, with 48 new tests. No backend selection, no model
+configuration, no provider registry, no multi-model mode, no lifecycle
+integration, no execution capability.
+
+**No-go**: no DeepSeek-specific integration, no GLM-specific
+integration, no backend SDK dependency, no network calls, no
+subprocess model execution, no MCP model invocation, no lifecycle
+authority, no execution capability.
+
+Recommended next repo phase: 115T — Advisory Provider Verification & Compatibility (not started).
 
 ## Phase 115R Complete
 
