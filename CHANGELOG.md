@@ -2,6 +2,47 @@
 
 ## Unreleased
 
+- Phase 115E — Repository Decision Evaluation Prototype.
+  Implements the deterministic Repository Decision Evaluation layer
+  between 115D's Evidence Providers and the Repository Transition
+  Validator. Added `src/pcae/core/decision_evaluation.py`:
+  `EvaluationContext` (evidence + evaluation identity/provenance,
+  immutable), `InvariantResult` (`invariant_id`/`status`/`severity`/
+  `supporting_evidence`/`conflicting_evidence`/`explanation`/
+  `suggested_repair`), `EvaluationResult` (`invariant_results`/
+  `summary`/`blocking_failures`/`warnings`/`informational`/
+  `explanation_reference`), `InvariantStatus` (`PASS`/`FAIL`/`UNKNOWN`/
+  `NOT_APPLICABLE`), and six evidence-only deterministic invariant
+  families (`phase_identity_consistency`, `push_state_consistency`,
+  `metadata_consistency`, `report_completeness`,
+  `runtime_execution_unavailable`, `canonical_promotion_eligibility`) --
+  deliberately independent of `repository_transition_validator.py`'s
+  own same-named checks (which read `RepositoryState`, never
+  `Evidence`). Every result cites Evidence IDs via `EvidenceReference`;
+  explanations are deterministic template strings, never AI-generated
+  prose. Conflicting evidence (e.g. git vs declared metadata push
+  state) is preserved in both directions, never resolved by provider
+  priority. UNKNOWN evidence never silently passes -- a blocking
+  invariant with unknown inputs is bucketed into `blocking_failures`.
+  Fixed a real bug found during this phase's own smoke-testing: the
+  initial unknown-detection check also matched
+  `observed_value == "unavailable"`, which is *also* the correct,
+  genuine domain value for execution-availability evidence; fixed to
+  rely solely on `freshness == EvidenceFreshness.UNKNOWN`. Added
+  `tests/test_decision_evaluation.py` (65 tests) and
+  `docs/PHASE_115E_REPOSITORY_DECISION_EVALUATION_PROTOTYPE.md`.
+  `decision_evaluation.py`'s only import is `pcae.core.evidence` -- no
+  Git/filesystem/subprocess/runtime access, no import of
+  `evidence_providers.py` or `repository_transition_validator.py`, and
+  produces no `TransitionVerdict`. No Repository Skills, no execution,
+  no authorization, no Repository Transition Validator behavior
+  changes, no lifecycle command changes, no Notification Policy
+  changes, no Canonical Artifact Promotion changes, no Push-State
+  Reconciliation changes, no Post-Push Canonicalization changes, no
+  Telegram changes, no REST, no Dashboard, no plugins, no SLM/LLM
+  integration. Recommended next phase: 115F — Repository Decision
+  Evaluation Integration.
+
 - Phase 115D — Repository Evidence Provider Prototype.
   Implements the first deterministic Repository Evidence Providers on
   top of 115C's runtime `Evidence`/`EvidenceCollection`. Added
