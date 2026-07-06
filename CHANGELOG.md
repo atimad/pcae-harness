@@ -2,6 +2,47 @@
 
 ## Unreleased
 
+- Phase 115B — Repository Evidence Framework Contract Freeze.
+  Architecture and contract only, no runtime implementation. Froze the
+  exact structure, semantics, and constraints for Evidence used by PCAE
+  decisions. Evidence informs decisions, does not decide, does not mutate
+  repository state, and does not become a kernel primitive. Required
+  Evidence fields are now contractually defined: `evidence_id`, `source`,
+  `category`, `producer`, `timestamp_utc`, `freshness`, `confidence`,
+  `determinism`, `scope`, `references`, `observed_value`,
+  `expected_value`, `explanation`, and `limitations`. Evidence identity
+  is stable within one evaluation and may be cited by explanations, but
+  is not a global permanent repository ID unless persisted inside a
+  future artifact. Froze the minimum category set (`git`, `task`,
+  `phase`, `report`, `metadata`, `architecture`, `runtime`,
+  `push_state`, `notification`, `governance`, `test_result`, `security`,
+  `documentation`, `ai_review`, `unknown`), determinism levels
+  (`deterministic`, `reproducible_external`, `probabilistic`,
+  `human_asserted`, `unknown`), confidence semantics (`high`, `medium`,
+  `low`, `unknown`), and freshness semantics (`current`, `stale`,
+  `expired`, `unknown`). Confidence cannot override hard invariants;
+  probabilistic evidence may never alone authorize canonical mutation.
+  Froze Evidence Provider declarations and prohibitions: providers
+  collect evidence and declare determinism class, categories, required
+  inputs, scope, and limitations; they never decide, vote, mutate state,
+  promote artifacts, send notifications, bypass the validator, authorize
+  execution, invoke runtime execution, override another provider, or hide
+  conflicts. Conflict semantics preserve both items and evaluate
+  centrally. Explanation references cite Evidence IDs. Raw evidence
+  persistence remains future work. Future SLM/LLM evidence is advisory
+  only, probabilistic by default, never sole authority for Accept, may
+  trigger human review, may suggest repairs, and must be labelled
+  model-produced. Added `docs/PCAE_REPOSITORY_EVIDENCE_FRAMEWORK.md`,
+  `docs/PCAE_EVIDENCE_PROVIDER_CONTRACT.md`,
+  `docs/PHASE_115B_REPOSITORY_EVIDENCE_CONTRACT_FREEZE.md`, and
+  `tests/test_phase_115b_repository_evidence_contract_freeze.py`.
+  No Repository Transition Validator behavior changes, no lifecycle
+  command changes, no Notification Policy changes, no Repository Skills
+  implementation, no execution, no authorization, no Permission Broker
+  enforcement, no plugins, no Telegram inbound, no REST, no Web UI, no
+  Dashboard. Execution capability remains unavailable. Recommended next
+  phase: 115C — Repository Evidence Framework Prototype.
+
 - Phase 115A — Repository Decision & Explainability Framework.
   Architecture and contract only, no runtime implementation. Froze the
   framework by which PCAE explains why a repository transition is

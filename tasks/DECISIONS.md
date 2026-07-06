@@ -2,6 +2,12 @@
 
 ## Accepted
 
+- Treat Phase 115B as an architecture-only Evidence contract freeze:
+  Evidence is evaluation-scoped, referenceable by explanations, and
+  contractually structured, but it does not decide, mutate repository
+  state, become a kernel primitive, persist by default, authorize
+  canonical mutation, or give Evidence Providers any authority beyond
+  producing labelled evidence for centralized evaluation.
 - Treat Phase 115A as an architecture-only explainability framework
   phase: Repository Decision remains a centralized computation over
   repository state, proposed transition, evidence, and invariants;
