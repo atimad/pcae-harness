@@ -107,6 +107,16 @@
       "name": "phase_finalization_skill",
       "result": "resolved, target completed",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "present_in_canonical_metadata",
+      "status": "present"
     }
   ],
   "test_results": {
