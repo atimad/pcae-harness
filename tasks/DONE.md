@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 116A completion metadata (20260706-2301-sync-phase-116a-completion-metadata)
 - 116A — v0.2 Architecture Review & Consolidation (20260706-2252-116a-v0-2-architecture-review-consolidation)
 - Fix pushed-state metadata for 115Z (20260706-2245-fix-pushed-state-metadata-for-115z)
 - Sync phase 115Z completion metadata (20260706-2243-sync-phase-115z-completion-metadata)
