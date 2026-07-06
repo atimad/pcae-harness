@@ -67,7 +67,7 @@ TBD
 
 ## Acceptance Checks
 
-- python -m pytest tests/test_repository_transition_validator_verification_115g.py tests/test_decision_evaluation.py tests/test_repository_transition_validator*.py -n auto -q -ra --durations=100
+- python -m pytest tests/test_repository_transition_validator_verification_115g.py tests/test_decision_evaluation.py tests/test_repository_transition_validator.py tests/test_repository_transition_validator_architecture.py tests/test_repository_transition_validator_contract_freeze.py tests/test_repository_transition_validator_decision_evaluation_integration.py tests/test_repository_transition_validator_integration_contract.py tests/test_repository_transition_validator_integration_design.py tests/test_repository_transition_validator_phase_complete_integration.py tests/test_repository_transition_validator_task_finish_integration.py -n auto -q -ra --durations=100
 
 ## Documentation Requirements
 
