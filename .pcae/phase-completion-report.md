@@ -1,112 +1,96 @@
-# Phase 115I Complete — Repository Skills Contract Freeze
+# Phase 115J Complete — Repository Skills Prototype
 
-- **Phase ID:** `115I`
+- **Phase ID:** `115J`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 8
-- **Tests run:** 52 (focused architecture/documentation suite)
-- **Commits:** 4cb8884d, 792c907b, ab0fc415, f52037ac
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Tests run:** 245 (repository skills + evidence + architecture doc suite)
+- **Commits:** e664a937, 5d0dc645
+- **Pushed:** not_pushed
+- **origin/main..HEAD:** 2
 
 ## Summary
 
-Phase 115I freezes the Repository Skills contract 115H designed:
-building on 115C (Evidence), 115D (Evidence Providers), 115E (Decision
-Evaluation), 115F (integration), 115G (verification), and 115H
-(architecture). Contract phase only; zero implementation added.
+Phase 115J implements the first Repository Skills framework
+(`src/pcae/core/repository_skills.py`) on top of 115I's frozen
+contract, using only deterministic skills that wrap existing 115D
+Evidence Providers. Implementation prototype only; no AI/SLM/LLM
+skills, no DeepSeek integration, no lifecycle/Decision Evaluation/
+Repository Transition Validator integration.
 
-## Repository Skill Contract Summary
+## Repository Skills Prototype Summary
 
-Core principle: **Repository Skills never decide. Repository Skills
-produce Evidence. Repository Skills are model-agnostic.** The frozen
-`RepositorySkill` interface requires every skill to declare
-capabilities, evidence categories produced, determinism class,
-confidence defaults, and required repository inputs, and to produce
-only an `EvidenceCollection`. Explicitly and permanently forbidden:
-repository mutation, decision making, validator bypass, lifecycle
-authority, artifact promotion, notification dispatch, execution,
-authorization, commit, push, finalize.
+Repository Skills produce evidence. Repository Skills do not decide.
+This phase implements the frozen `RepositorySkill` contract as running
+code for the first time, with four deterministic skills, each a thin
+wrapper around one 115D Evidence Provider: no new evidence-collection
+logic was written — every skill delegates its work to the existing
+provider and returns that provider's `EvidenceCollection` unchanged.
 
-## Capability Model
+## Skill Interface Summary
 
-`RepositorySkillCapability` describes evidence outputs, never
-implementations. Frozen minimum set: `git_analysis`,
-`runtime_analysis`, `architecture_analysis`, `documentation_analysis`,
-`report_analysis`, `metadata_analysis`, `dependency_analysis`,
-`ai_review`. Two skills may declare the same capability while using
-entirely different internal logic.
+`RepositorySkillCapability` (115I's frozen eight-value enum),
+`RepositorySkillManifest` (115I's frozen field set, validated at
+construction to reject a non-`none` `side_effect_policy` or an invalid
+`failure_policy`), `RepositorySkillContext` (mirrors 115D's
+`EvidenceProviderContext`), `RepositorySkillResult` (structurally
+enforces the two-outcome failure contract — a `FAILED` status cannot
+construct without a `failure_reason`), and the `RepositorySkill`
+abstract base declaring one `manifest` and one `invoke()` method. No
+model/agent/backend/vendor identity field exists on any of these
+shapes.
 
-## Manifest Summary
+## Registry Summary
 
-Frozen fields, no schema/loader/registry implemented: `skill_id`,
-`name`, `version`, capability list, `determinism`, confidence policy,
-evidence categories, required inputs, optional inputs, `timeout`,
-failure policy, side-effect policy, model-produced flag, experimental
-flag.
+`RepositorySkillRegistry` implements registration (with duplicate
+`skill_id` rejection), `get`/`list_skills`/`list_manifests`,
+`filter_by_capability`/`filter_by_category`, `invoke`/`invoke_many`/
+`invoke_all`, and `merge_evidence` (combines every `SUCCESS` result's
+evidence into one `EvidenceCollection`; `FAILED` results contribute
+none; a genuine ID collision would surface via `EvidenceCollection`'s
+own duplicate-ID `ValueError`, never a silent drop).
+`build_default_registry()` registers all four skills below.
 
-## Determinism Classes
+## Deterministic Skills Implemented
 
-Five classes frozen, reusing 115C's existing `EvidenceDeterminism`
-enum with no new member: `deterministic`, `reproducible_external`,
-`probabilistic`, `human_assisted`, `experimental`.
+| Skill | Wraps | Capability | Evidence IDs |
+| --- | --- | --- | --- |
+| `GitRepositorySkill` | `GitEvidenceProvider` | `git_analysis` | `E-git-001`..`005` |
+| `RuntimeRepositorySkill` | `RuntimeEvidenceProvider` | `runtime_analysis` | `E-runtime-001`..`003` |
+| `ReportRepositorySkill` | `ReportEvidenceProvider` | `report_analysis` | `E-report-001`..`005` |
+| `MetadataRepositorySkill` | `MetadataEvidenceProvider` | `metadata_analysis` | `E-metadata-001`..`005` |
 
-## Failure Contract
+## Evidence Produced
 
-Every Repository Skill failure must produce exactly one of two
-outcomes: honest `UNKNOWN` evidence (115D's established pattern) or an
-explicit, structured failure outcome. Never partial hidden failure.
-Never silent success — a timeout is itself a failure requiring one of
-the two outcomes, never a fabricated passing result.
+Verified live against this real repository: the four default skills
+collectively produce 18 `Evidence` items (5+3+5+5), merging cleanly
+into one 18-item `EvidenceCollection` with no ID collisions (115D's
+provider IDs were already disjoint namespaces).
 
-## Advisory Boundary
+## Failure Behavior
 
-Future DeepSeek, GLM, GPT, Qwen, or local-SLM-backed skills must
-produce advisory evidence only, declare `probabilistic` determinism by
-default, be labelled model-produced (via 115C's existing
-`Evidence.producer`/`EvidenceProvenance`), never become sole authority
-for Accept, and never bypass Decision Evaluation — advisory evidence
-flows through the identical `EvidenceCollection` -> `evaluate()` path
-as every other evidence item.
+Every skill failure produces exactly one of 115I's two frozen
+outcomes: honest `UNKNOWN` evidence (when the wrapped provider itself
+degrades gracefully — verified by invoking `GitRepositorySkill`
+against a directory with no git repository) or an explicit `FAILED`
+result with a required `failure_reason` (when the skill invocation
+itself cannot complete — verified by monkeypatching a provider's
+`collect()` to raise). No silent success: `RepositorySkillResult`
+structurally refuses to construct a `FAILED` status without a reason.
 
-## Composition Model
+## No-Integration Confirmation
 
-One Repository Skill may internally use multiple 115D Evidence
-Providers to assemble its own evidence. Decision Evaluation never sees
-this internal composition — it receives only an `EvidenceCollection`,
-looked up by evidence ID/category, never by producing skill or
-provider.
-
-## Explainability Summary
-
-Every Evidence item a Repository Skill produces must preserve
-provenance via 115C's existing `Evidence.provenance` field — no new
-provenance field introduced. Decision explanations reference Evidence
-IDs regardless of which Repository Skill produced them — a guarantee
-115G already verified end-to-end for adapter-produced evidence, now
-frozen as contract for skill-produced evidence with zero additional
-code required.
-
-## Wire Diagram
-
-```mermaid
-flowchart TD
-    RS[Repository State] --> EP[Evidence Providers]
-    EP --> RSK[Repository Skills]
-    RSK --> EC[Evidence Collection]
-    EC --> DE[Decision Evaluation]
-    DE --> RTV[Repository Transition Validator]
-    RTV --> TR[Transition Result]
-    TR --> RA[Repository Artifact]
-    TR --> RE[Repository Event]
-    RA --> RE
-    RE --> NP[Notification Policy]
-    NP --> C[Consumers]
-```
-
-Unchanged from 115H's diagram; frozen here as canonical rather than
-merely descriptive.
+`repository_skills.py`'s only internal imports are
+`pcae.core.evidence`, `pcae.core.evidence_providers`, and
+`pcae.core.paths`. Not imported by, and does not import from, Decision
+Evaluation, the Repository Transition Validator, or any lifecycle
+command (`commands/phase.py`, `commands/task.py`). No AI/SLM/LLM-backed
+skill is registered by `build_default_registry()` — all four default
+skills declare `EvidenceDeterminism.DETERMINISTIC` and
+`model_produced=False`. The `ai_review` capability exists only as an
+enum value, matching 115I's frozen minimum set, with zero skills
+declaring it.
 
 ## PCAE Architecture Status
 
@@ -124,10 +108,11 @@ maintained as runtime state.*
 - Repository Decision Evaluation Verification & Compatibility through Phase 115G
 - Repository Skills Architecture through Phase 115H
 - Repository Skills Contract Freeze through Phase 115I
+- Repository Skills Prototype through Phase 115J
 
 ### Planned
 
-- 115J — Repository Skills Prototype
+- 115K — Repository Skills Verification & Compatibility
 
 ### Current Runtime State
 
@@ -140,8 +125,8 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean (pushed, origin/main..HEAD == 0)
-- **pcae_agent_verify_handoff:** pass
+- **pcae_push_check:** pending (not yet pushed at report-write time)
+- **pcae_agent_verify_handoff:** pending (dirty working tree until final commit/push)
 - **pcae_session_bootstrap_compact:** completed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe
 - **telegram_runtime:** loaded, configured, enabled
@@ -149,22 +134,22 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **focused_architecture_documentation_tests:** 52/52 (passed)
+- **focused_repository_skills_evidence_tests:** 193/193 (passed)
+- **architecture_documentation_tests:** 245/245 (passed)
+- **runtime_contract_autonomy_plugin_regression:** 3573/3573 (passed)
 - **report_notification_tests:** present_in_canonical_metadata (present)
 - **bootstrap_session_reporting_tests:** present_in_canonical_metadata (present)
 - **fast_green:** 4390/4390 (passed)
 
 ## No-Go Confirmations
 
-- No Repository Skill implemented.
-- No deterministic skill implemented.
-- No AI/SLM/LLM-backed skill implemented.
+- No AI/SLM/LLM skills.
 - No DeepSeek integration.
-- No changes to Evidence Providers, Decision Evaluation, the
-  Repository Transition Validator, lifecycle commands, Notification
-  Policy, Canonical Artifact Promotion, Push-State Reconciliation, or
-  Post-Push Canonicalization.
-- No execution.
+- No lifecycle command changes.
+- No Decision Evaluation integration.
+- No Repository Transition Validator integration.
+- No Notification Policy changes.
+- No execution capability.
 - No authorization.
 - No Permission Broker enforcement.
 - No plugins.
@@ -181,7 +166,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-115J — Repository Skills Prototype
+115K — Repository Skills Verification & Compatibility
 
 ## Report Consistency
 
@@ -190,4 +175,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 115I. Schema version 1.0.*
+*Report generated for PCAE Phase 115J. Schema version 1.0.*

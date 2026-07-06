@@ -1,45 +1,37 @@
 {
-  "phase_id": "115I",
-  "phase_name": "Repository Skills Contract Freeze",
-  "phase_title": "Repository Skills Contract Freeze",
+  "phase_id": "115J",
+  "phase_name": "Repository Skills Prototype",
+  "phase_title": "Repository Skills Prototype",
   "status": "completed",
-  "summary": "Contract phase only, zero implementation added. Freezes the Repository Skills contract 115H designed -- the RepositorySkill interface, capability model, manifest, five determinism classes, a two-outcome failure contract, an execution boundary, an advisory/AI skill boundary, a composition model, explainability requirements, and a now-frozen canonical wire diagram. The RepositorySkill interface requires every skill to declare capabilities, evidence categories produced, determinism class, confidence defaults, and required repository inputs, and to produce only an EvidenceCollection. Explicitly and permanently forbidden: repository mutation, decision making, validator bypass, lifecycle authority, artifact promotion, notification dispatch, execution, authorization, commit, push, finalize. RepositorySkillCapability describes evidence outputs, never implementations: git_analysis, runtime_analysis, architecture_analysis, documentation_analysis, report_analysis, metadata_analysis, dependency_analysis, ai_review. Five determinism classes reuse 115C's existing EvidenceDeterminism enum with no new member. The failure contract requires honest UNKNOWN evidence or an explicit failure outcome -- never partial hidden failure, never silent success. The advisory/AI boundary governs any future DeepSeek/GLM/GPT/Qwen/local-SLM-backed skill: advisory evidence only, probabilistic by default, labelled model-produced, never sole authority for Accept, never bypasses Decision Evaluation. No Repository Skill implemented, no deterministic skill implemented, no AI/SLM/LLM-backed skill implemented, no DeepSeek integration, no changes to Evidence Providers, Decision Evaluation, the Repository Transition Validator, lifecycle commands, Notification Policy, Canonical Artifact Promotion, Push-State Reconciliation, or Post-Push Canonicalization. Execution capability remains unavailable.",
+  "summary": "Implements the first Repository Skills framework (src/pcae/core/repository_skills.py) on top of 115I's frozen contract, using only deterministic skills that wrap existing 115D Evidence Providers. Implements RepositorySkillCapability (115I's frozen eight-value enum), RepositorySkillManifest (115I's frozen field set, validated at construction to reject a non-'none' side_effect_policy or an invalid failure_policy), RepositorySkillContext (mirrors 115D's EvidenceProviderContext), RepositorySkillResult (structurally enforces the two-outcome failure contract), the RepositorySkill abstract base, and RepositorySkillRegistry (register/get/list/filter/invoke/merge, with duplicate skill_id rejection). Implements four deterministic skills, each a thin wrapper delegating to one 115D Evidence Provider unmodified: GitRepositorySkill, RuntimeRepositorySkill, ReportRepositorySkill, MetadataRepositorySkill. No new evidence-collection logic was written. Verified live: the four default skills collectively produce 18 Evidence items, merging cleanly into one EvidenceCollection with no ID collisions. A skill failure produces honest UNKNOWN evidence or an explicit FAILED result with a required failure_reason -- never silent success. repository_skills.py's only internal imports are pcae.core.evidence, pcae.core.evidence_providers, and pcae.core.paths; not imported by, and does not import from, Decision Evaluation, the Repository Transition Validator, or any lifecycle command. No AI/SLM/LLM-backed skill is registered by build_default_registry(). No lifecycle command changes, no Decision Evaluation integration, no Repository Transition Validator integration, no Notification Policy changes, no DeepSeek integration. Execution capability remains unavailable.",
   "files_changed_count": 8,
   "files_changed": [
     "PROJECT_STATUS.md",
     "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/done/20260706-1433-115i-repository-skills-contract-freeze.md",
-    "docs/PCAE_REPOSITORY_SKILLS_CONTRACT.md",
-    "docs/PHASE_115I_REPOSITORY_SKILLS_CONTRACT_FREEZE.md",
-    "tests/test_phase_115i_repository_skills_contract_freeze.py",
+    "tasks/done/20260706-1458-115j-repository-skills-prototype.md",
+    "src/pcae/core/repository_skills.py",
+    "tests/test_repository_skills.py",
+    "docs/PHASE_115J_REPOSITORY_SKILLS_PROTOTYPE.md",
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md"
   ],
-  "tests_added_or_updated": "19 new focused architecture/documentation verification tests added (tests/test_phase_115i_repository_skills_contract_freeze.py); no implementation code changed; all pre-existing suites (115A/115H architecture tests, fast_green) pass unmodified",
+  "tests_added_or_updated": "53 new focused tests added (tests/test_repository_skills.py); 2 pre-existing 115H/115I architecture-verification guard tests updated to drop the now-legitimate repository_skills.py path from their forbidden-implementation-module list; all pre-existing suites (evidence, runtime/contract/autonomy/plugin, fast_green) pass unmodified",
   "phase_commits": [
     {
-      "hash": "4cb8884d",
-      "message": "Freeze Repository Skills contract"
+      "hash": "e664a937",
+      "message": "Implement Repository Skills prototype"
     },
     {
-      "hash": "792c907b",
-      "message": "Complete Phase 115I Repository Skills contract freeze"
-    },
-    {
-      "hash": "ab0fc415",
-      "message": "Sync Phase 115I completion metadata and canonical report"
-    },
-    {
-      "hash": "f52037ac",
-      "message": "Close 115I completion metadata sync task"
+      "hash": "5d0dc645",
+      "message": "Complete Phase 115J Repository Skills prototype"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; contract-only phase, no code modified)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 115J adds no validator integration)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 2,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -53,10 +45,22 @@
   },
   "validation_results": [
     {
-      "name": "focused_architecture_documentation_tests",
-      "result": "52/52",
+      "name": "focused_repository_skills_evidence_tests",
+      "result": "193/193",
       "status": "passed",
-      "note": "python -m pytest tests/test_phase_115i_repository_skills_contract_freeze.py tests/test_phase_115h_repository_skills_architecture.py tests/test_phase_115a_decision_explainability_framework.py -q -ra"
+      "note": "python -m pytest tests/test_repository_skills.py tests/test_evidence*.py -n auto -q -ra --durations=100"
+    },
+    {
+      "name": "architecture_documentation_tests",
+      "result": "245/245",
+      "status": "passed",
+      "note": "python -m pytest tests/test_repository_skills.py tests/test_evidence.py tests/test_evidence_collection.py tests/test_evidence_providers.py tests/test_evidence_serialization.py tests/test_evidence_validation.py tests/test_phase_115h_repository_skills_architecture.py tests/test_phase_115i_repository_skills_contract_freeze.py tests/test_phase_115a_decision_explainability_framework.py -q -ra"
+    },
+    {
+      "name": "runtime_contract_autonomy_plugin_regression",
+      "result": "3573/3573",
+      "status": "passed",
+      "note": "python -m pytest tests/test_*runtime* tests/test_*contract* tests/test_*autonomy* tests/test_*plugin* -n auto -q -ra --durations=100"
     },
     {
       "name": "report_notification_tests",
@@ -91,8 +95,8 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean (pushed, origin/main..HEAD == 0)",
-      "status": "passed"
+      "result": "pending (not yet pushed at metadata-write time)",
+      "status": "pending"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -116,7 +120,9 @@
     }
   ],
   "test_results": {
-    "focused_architecture_documentation_tests": "52/52",
+    "focused_repository_skills_evidence_tests": "193/193",
+    "architecture_documentation_tests": "245/245",
+    "runtime_contract_autonomy_plugin_regression": "3573/3573",
     "report_notification_tests": "present_in_canonical_metadata",
     "bootstrap_session_reporting_tests": "present_in_canonical_metadata",
     "fast_green": "4390/4390"
@@ -136,11 +142,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "pending"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pass"
+      "status": "pending (dirty working tree until final commit/push)"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -165,6 +171,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No Repository Skill implemented. No deterministic skill implemented. No AI/SLM/LLM-backed skill implemented. No DeepSeek integration. No changes to Evidence Providers, Decision Evaluation, the Repository Transition Validator, lifecycle commands, Notification Policy, Canonical Artifact Promotion, Push-State Reconciliation, or Post-Push Canonicalization. No execution. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
-  "recommended_next_phase": "115J — Repository Skills Prototype"
+  "no_go_confirmation": "No AI/SLM/LLM skills. No DeepSeek integration. No lifecycle command changes. No Decision Evaluation integration. No Repository Transition Validator integration. No Notification Policy changes. No execution capability. No authorization. No Permission Broker enforcement. No plugins. No Telegram inbound. No REST. No Web UI. No Dashboard. No raw git commit. No raw git push. No force push. No tags. No releases. No package publication.",
+  "recommended_next_phase": "115K — Repository Skills Verification & Compatibility"
 }
