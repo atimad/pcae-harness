@@ -2,59 +2,83 @@
 
 ## Current Phase
 
-Phase 115N — Repository Skills Integration Verification & Compatibility (completed).
+Phase 115P — Advisory Repository Skills Architecture (completed).
 
-Verification only: no Repository Skill modified, no Evidence Provider
+Architecture and design only: no Advisory Repository Skill
+implemented, no model call implemented, no DeepSeek/GLM/Claude/Codex/
+Qwen/OpenAI/local-SLM/any-backend integration, no model configuration
+added, no Repository Skills runtime modified, no Evidence Provider
 modified, no Decision Evaluation modified, no Repository Transition
-Validator modified, no lifecycle command modified, no Notification
-Policy modified, no Canonical Artifact Promotion modified, no
-Push-State Reconciliation modified, no Post-Push Canonicalization
-modified, no new Repository Skill, no AI/SLM/LLM skill, no DeepSeek
-integration, no execution capability. Phase report:
-`docs/PHASE_115N_REPOSITORY_SKILLS_INTEGRATION_VERIFICATION.md`.
+Validator modified, no lifecycle command modified, no execution
+capability. Phase report:
+`docs/PHASE_115P_ADVISORY_REPOSITORY_SKILLS_ARCHITECTURE.md`. Canonical
+architecture: `docs/PCAE_ADVISORY_REPOSITORY_SKILLS_ARCHITECTURE.md`.
 
-**Re-proven, with 62 new tests**
-(`tests/test_repository_skills_integration_verification_115n.py`):
-per-skill evidence equivalence (each of the four deterministic skills
-individually matches its Evidence-ID-prefixed subset of the direct
-provider path); full `EvaluationResult` equality between provider-path
-and skill-path contexts on both a synthetic mostly-`UNKNOWN` repo and
-the real project root; unchanged `validate_transition` verdicts across
-the 113U/115F regression scenarios plus CERTIFIED/BLOCKED→CANONICAL
-promotion decisions; deterministic registry ordering/invocation/merge/
-duplicate-rejection; the old Evidence Provider compatibility path
-still fully functional; Repository Skills isolation (evidence-only, no
-mutation, no execution, no verdict/authorization field); the AI
-boundary (no DeepSeek/GLM/Qwen/Claude/GPT/Codex/SLM skill, no
-model-produced evidence, `AI_REVIEW` capability has zero skills); and
-the execution boundary (`E-runtime-002` = `"unavailable"`, runtime
-inspect reports Observed/observe/unavailable).
+**Core principle frozen**: Advisory models may produce evidence. PCAE
+decides.
 
-**fast_green discrepancy classified**: 115M's `4389/4390` fast_green
-result (one failure,
-`test_dry_run_simulation.py::test_pytest_dry_run_not_blocked`) is a
-**pre-existing, idle-state-dependent condition** in
-`core/permission_broker.py`'s `_broker_decide` — a plain
-`python -m pytest ...` command hard-blocks
-(`would_block_by_task_contract`) whenever no active task is present,
-which the failing test's own assertion doesn't account for. Reproduced
-deterministically via `build_simulation` against a synthetic
-`tmp_path` with/without a `tasks/active/` directory — not a regression
-(neither 115M's nor 115N's own modules reference
-`permission_broker`/`advisory`/`shell_gate`/`dry_run` at all), not a
-flake (100% reproducible under the known idle condition), not the
-test's intended behavior (its own comment expects
-`would_require_active_task=True`, never produced by this branch). This
-phase's own fast_green run (with an active task present) scored
-`4390/4390`, confirming the mismatch never fires when a task is
-active. Out of this verification-only phase's scope to repair.
+**Advisory pipeline frozen**: Repository State -> Prompt Builder ->
+Current Model -> Raw Response -> Normalizer -> Evidence Builder ->
+EvidenceCollection -> Decision Evaluation -> Repository Transition
+Validator. The Normalizer is the sole boundary converting untrusted
+model output into a validated intermediate shape; EvidenceCollection
+merges via the existing `RepositorySkillRegistry.merge_evidence()`
+point (115J, unchanged).
 
-**Readiness**: Repository Skills are verified as a fully
-behavior-preserving evidence-acquisition path, ready for Stage 4
-planning and a future Advisory Repository Skills architecture design
-(115L Section 8's frozen AI Insertion Point).
+**Model boundary frozen**: a model never returns a trusted PCAE object
+directly. Raw Response is plain text/JSON only; the model has no
+tool-call authority, no file-write access, and no `pcae` command
+invocation ability.
 
-Recommended next repo phase: 115P — Advisory Repository Skills Architecture (not started).
+**Default same-model mode frozen**: the current acting model may be
+the advisory model by default — no new configuration file, CLI flag,
+environment variable, or model registry entry required.
+
+**Future split-model mode documented, not implemented**: a writer
+model and a distinct advisory model, to reduce same-model blind-spot
+risk, named as a rationale only for a future phase to build against.
+
+**Safety rules frozen**: probabilistic by default, model-produced,
+never sole authority for Accept, may trigger human review, may suggest
+repair, must include limitations, must cite references where possible
+— all reusing existing `Evidence`/`RepositorySkillManifest`/
+`InvariantResult` fields, no schema change required.
+
+**Failure behavior frozen**: `UNKNOWN` evidence or explicit advisory
+failure; never blocks deterministic checks by itself; never silently
+succeeds.
+
+**First future pilot scope frozen**: repository/documentation/report
+consistency review only, excluding code execution and lifecycle/
+commit/push/finalize authority.
+
+Added `tests/test_phase_115p_advisory_repository_skills_architecture.py`
+(29 new tests, architecture/documentation verification only). No
+implementation, no model call, no backend integration, no execution.
+
+Recommended next repo phase: 115Q — Advisory Repository Skills Contract Freeze (not started).
+
+## Phase 115P Complete
+
+Phase 115P — Advisory Repository Skills Architecture (completed).
+
+Designed Advisory Repository Skills as model-backed, evidence-only
+Repository Skills: the frozen advisory pipeline (Prompt Builder ->
+Current Model -> Raw Response -> Normalizer -> Evidence Builder ->
+EvidenceCollection), the model boundary (a model never returns a
+trusted PCAE object directly), default same-model mode (no new
+configuration required), a documented-only future split-model mode,
+seven safety rules, failure behavior, and a narrow first future pilot
+scope. Architecture and design only; zero implementation added.
+
+**No-go**: no Advisory Repository Skill implemented, no model call
+implemented, no DeepSeek/GLM/Claude/Codex/Qwen/OpenAI/local-SLM/any-
+backend integration, no model configuration added, no Repository
+Skills runtime modified, no Evidence Provider modified, no Decision
+Evaluation modified, no Repository Transition Validator modified, no
+lifecycle command modified, no execution capability.
+
+Recommended next repo phase: 115Q — Advisory Repository Skills Contract Freeze (not started).
 
 ## Phase 115N Complete
 

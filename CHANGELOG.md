@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 115P — Advisory Repository Skills Architecture. Architecture
+  and design only: designs Advisory Repository Skills as model-backed,
+  evidence-only Repository Skills. Freezes the core principle
+  (Advisory models may produce evidence, PCAE decides); the advisory
+  pipeline (Repository State -> Prompt Builder -> Current Model -> Raw
+  Response -> Normalizer -> Evidence Builder -> EvidenceCollection ->
+  Decision Evaluation -> Repository Transition Validator); the model
+  boundary (a model never returns a trusted PCAE object directly, the
+  Normalizer is the sole conversion point); the default same-model
+  mode (the current acting model may be the advisory model by default,
+  no new configuration required); a documented-only future split-model
+  mode (writer model vs. advisory model, not implemented); seven safety
+  rules (probabilistic by default, model-produced, never sole authority
+  for Accept, may trigger human review, may suggest repair, must
+  include limitations, must cite references where possible -- all
+  reusing existing Evidence/RepositorySkillManifest/InvariantResult
+  fields, no schema change); failure behavior (UNKNOWN evidence or
+  explicit advisory failure, never blocks deterministic checks by
+  itself, never silently succeeds); and a narrow first future pilot
+  scope (repository/documentation/report consistency review only,
+  excluding code execution and lifecycle/commit/push/finalize
+  authority). Adds `docs/PCAE_ADVISORY_REPOSITORY_SKILLS_ARCHITECTURE.md`
+  and `docs/PHASE_115P_ADVISORY_REPOSITORY_SKILLS_ARCHITECTURE.md`, plus
+  29 new architecture/documentation verification tests
+  (`tests/test_phase_115p_advisory_repository_skills_architecture.py`).
+  No Advisory Repository Skill, model call, DeepSeek/GLM/Claude/Codex/
+  Qwen/OpenAI/local-SLM/any-backend integration, model configuration,
+  Repository Skills runtime, Evidence Provider, Decision Evaluation,
+  Repository Transition Validator, or lifecycle command implemented or
+  modified. Execution capability remains unavailable.
+
 - Phase 115N — Repository Skills Integration Verification &
   Compatibility. Verification-only phase re-proving 115M's Repository
   Skills evidence-acquisition adapter is fully behavior-preserving,
