@@ -2,71 +2,103 @@
 
 ## Current Phase
 
-Phase 115X — Advisory Context Package Prototype (completed).
+Phase 115Y — Advisory Context Package Verification & Compatibility (completed).
 
-Implements the `AdvisoryContextPackage` runtime object exactly as
-frozen by 115W. No Advisory Provider runtime modified, no Repository
-Skill modified, no Evidence Provider modified, no Decision Evaluation
-modified, no Repository Transition Validator modified, no lifecycle
-command modified, no model configuration added, no second provider
-added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude/local-SLM integration.
-Phase report:
-`docs/PHASE_115X_ADVISORY_CONTEXT_PACKAGE_PROTOTYPE.md`.
+Verification only: no `AdvisoryContextPackage` integration added, no
+Repository Skill modified, no Evidence Provider modified, no Decision
+Evaluation modified, no Repository Transition Validator modified, no
+lifecycle command modified, no model configuration added, no second
+provider added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/
+local-SLM integration. Phase report:
+`docs/PHASE_115Y_ADVISORY_CONTEXT_PACKAGE_VERIFICATION.md`.
 
-**New module**: `src/pcae/core/advisory_context_package.py` implements
-`AdvisoryContextPackage`, `AdvisoryContextSection`,
-`AdvisoryArtifactReference`, `AdvisoryContextProvenance`,
-`AdvisoryContextBudget`, and `AdvisoryRedactionSummary` — six frozen
-dataclasses, all validating their own shape at construction.
+**Determinism verified**: identical inputs produce equal packages,
+identical serialization, and identical JSON output across 20 repeated
+constructions; validation outcomes identical across 10 repeated
+attempts; section ordering stable.
 
-**All 15 required sections implemented** as required constructor
-arguments, none with a default — a package cannot be constructed with
-any section omitted.
+**Required sections verified**: exactly 15 sections confirmed present
+in `to_dict()`, each a required (no-default) constructor argument,
+each individually rejected via `from_dict()` when missing.
 
-**Trust boundary classes enforced**: every named section is validated
-against the trust class 115W assigned it (e.g. `repository_summary`
-must declare `deterministic_pcae_evidence`, every
-`untrusted_repository_content` item must declare
-`untrusted_repository_content`) — a mismatch raises `ValueError`.
+**Trust boundaries verified**: a section's cosmetic `name` field
+cannot spoof its trust class — an untrusted section named
+`"trusted_pcae_instructions"` is still validated, labelled, and
+ordered as untrusted; the package's own trusted field is entirely
+unaffected.
 
-**Allowed advisory question enforced**: exactly one value accepted,
-`"Is the repository state internally consistent?"` — any other value
-rejected.
+**Prompt-injection boundary verified**: four adversarial content
+strings (fake system overrides, fake authorization/execution
+instructions, fake instruction-tag injection, fake push instructions)
+placed in untrusted sections remain classified untrusted, never
+migrate into trusted content, and always sort after every trusted
+section in prompt-assembly order.
 
-**Size budgets enforced with concrete defaults chosen this phase**:
-total budget 20,000 chars, per-section default 4,000 chars, untrusted
-repository content tightened to 2,000 chars — every section and the
-aggregate checked; violations raise `ValueError`, never silently
-truncated.
+**Size budgets verified**: content exactly at budget accepted, one
+character over rejected; per-section overrides enforced independently;
+total budget confirmed to be the true sum across every section and
+artifact reference, not just the largest one.
 
-**Prompt-injection boundary represented**:
-`ordered_sections_for_prompt_assembly()` returns sections in 115W's
-required order (deterministic evidence and untrusted content first,
-trusted instructions always last); `prompt_label` gives every section
-an explicit, class-specific label; adversarial repository content
-proven to never change its own trust class.
+**Redaction/secrets policy verified, with a documented scope
+boundary**: `redaction_summary` remains required and self-validating;
+`AdvisoryContextPackage` does not itself scan content for
+secret-shaped strings — redacting sensitive content before
+construction remains the assembler's responsibility, consistent with
+115X's frozen scope (package object, validation, serialization — not
+a secret-detection heuristic).
 
-**Redaction/provenance/artifact references all enforced**: redaction
-summary required and self-validating; package-level and
-per-artifact-reference provenance required; artifacts referenced by
-path/Evidence ID/commit hash with a bounded summary, never embedded in
-full.
+**Provenance verified**: package-level and artifact-reference-level
+provenance both survive a full round trip exactly, including
+`evidence_ids`.
 
-**Serialization implemented**: `to_dict()`/`from_dict()` on every
-type, JSON-compatible only, no persistence layer, round-trip equality
-verified.
+**Artifact references verified**: a full-file-sized summary (1000
+lines) is rejected outright; all three kinds remain distinct and
+frozen.
 
-**No integration**: confirmed by source-level checks that
-`advisory_context_package.py` is never imported by any Advisory
-Provider, Repository Skill, Decision Evaluation, the Repository
-Transition Validator, or any lifecycle command; the default Repository
-Skills registry still returns exactly 115J's four deterministic
-skills.
+**Allowed advisory question verified**: six near-miss variants
+(whitespace, missing punctuation, case variants) all individually
+confirmed rejected — the check is an exact match.
 
-Added `tests/test_advisory_context_package.py` (79 new tests). No
-execution capability.
+**JSON compatibility verified**: `to_dict()` output recursively
+confirmed to contain only JSON primitive types; survives real
+`json.dumps()`/`json.loads()`; `from_dict()` ignores unknown extra
+keys gracefully; stable across five repeated round trips.
 
-Recommended next repo phase: 115Y — Advisory Context Package Verification & Compatibility (not started).
+**No hidden integration verified**: reconfirmed across every
+lifecycle, notification, handoff, provider, and skill module; default
+Repository Skills registry unchanged.
+
+Added `tests/test_advisory_context_package_verification_115y.py` (87
+new tests).
+
+Recommended next repo phase: 115Z — Advisory Skill Pilot Hardening (not started).
+
+## Phase 115Y Complete
+
+Phase 115Y — Advisory Context Package Verification & Compatibility (completed).
+
+Verified 115X's `AdvisoryContextPackage` prototype is deterministic,
+bounded, prompt-safe, serialization-compatible, and ready to be
+consumed by a future advisory pipeline, with 87 new tests. Confirmed a
+section's cosmetic name cannot spoof its trust class; adversarial
+repository content never escapes its untrusted classification or
+migrates into trusted content; size budgets are enforced as true
+aggregates, not per-section only; JSON serialization is
+forward-compatible and round-trip stable; and no hidden integration
+exists anywhere. Documented, as an explicit scope boundary rather than
+a defect, that content redaction itself remains the assembler's
+responsibility — the package validates presence and consistency of a
+redaction record, not automatic secret detection. Verification only;
+zero implementation change.
+
+**No-go**: no `AdvisoryContextPackage` integration added, no
+Repository Skill modified, no Evidence Provider modified, no Decision
+Evaluation modified, no Repository Transition Validator modified, no
+lifecycle command modified, no model configuration added, no second
+provider added, no DeepSeek/GLM/Qwen/Codex/OpenAI/Claude-specific/
+local-SLM integration.
+
+Recommended next repo phase: 115Z — Advisory Skill Pilot Hardening (not started).
 
 ## Phase 115X Complete
 

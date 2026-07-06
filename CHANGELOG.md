@@ -2,6 +2,48 @@
 
 ## Unreleased
 
+- Phase 115Y — Advisory Context Package Verification & Compatibility.
+  Verification-only phase re-proving 115X's `AdvisoryContextPackage`
+  prototype is deterministic, bounded, prompt-safe, serialization-
+  compatible, and ready to be consumed by a future advisory pipeline,
+  with 87 new tests
+  (`tests/test_advisory_context_package_verification_115y.py`).
+  Confirms: determinism (identical inputs -> equal packages/
+  serialization/JSON across 20 repeated constructions); all 15
+  required sections present and individually rejected via `from_dict()`
+  when missing; trust boundaries (a section's cosmetic `name` cannot
+  spoof its declared `trust_class` -- an untrusted section named
+  `"trusted_pcae_instructions"` is still validated/labelled/ordered as
+  untrusted, with the package's real trusted field entirely
+  unaffected); the prompt-injection boundary (four adversarial content
+  strings placed in untrusted sections remain classified untrusted,
+  never migrate into trusted content, and always sort after every
+  trusted section in assembly order); size budgets (exact-boundary and
+  one-over rejection, per-section overrides enforced independently,
+  total budget confirmed as the true sum across every section and
+  artifact reference); the redaction/secrets policy (required,
+  self-validating `redaction_summary`, with a documented scope
+  boundary: `AdvisoryContextPackage` does not itself scan content for
+  secret-shaped strings -- redacting sensitive content before
+  construction remains the assembler's responsibility, consistent with
+  115X's frozen scope); provenance (package- and artifact-reference-
+  level, round-trip exact including `evidence_ids`); artifact
+  references (a full-file-sized summary rejected outright, all three
+  kinds distinct and frozen); the allowed advisory question (six
+  near-miss variants -- whitespace, punctuation, case -- all
+  individually rejected, confirming an exact match); JSON
+  compatibility (recursive primitive-only output, real
+  `json.dumps()`/`json.loads()` round trip, unknown-key
+  forward-compatibility, five-round-trip stability); and no hidden
+  integration (reconfirmed across every lifecycle, notification,
+  handoff, provider, and skill module; default Repository Skills
+  registry unchanged). No `AdvisoryContextPackage` integration added,
+  no Repository Skill, Evidence Provider, Decision Evaluation,
+  Repository Transition Validator, or lifecycle command modified. No
+  model configuration, no second provider, no DeepSeek/GLM/Qwen/Codex/
+  OpenAI/Claude-specific/local-SLM integration. Execution capability
+  remains unavailable.
+
 - Phase 115X — Advisory Context Package Prototype. Implements the
   `AdvisoryContextPackage` runtime object exactly as frozen by 115W.
   Adds `src/pcae/core/advisory_context_package.py`: six frozen
