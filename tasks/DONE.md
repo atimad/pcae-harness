@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix 115C pushed-state metadata field (20260706-0730-fix-115c-pushed-state-metadata-field)
 - Sync Phase 115C completion metadata (20260706-0727-sync-phase-115c-completion-metadata)
 - 115C: Repository Evidence Framework Prototype (20260706-0714-115c-repository-evidence-framework-prototype)
 - Fix bootstrap check_passed idle-state string comparison bug (20260706-0459-fix-bootstrap-check-passed-idle-state-string-comparison-bug)
