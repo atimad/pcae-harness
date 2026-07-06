@@ -2,6 +2,49 @@
 
 ## Unreleased
 
+- Phase 115Q — Advisory Repository Skills Contract Freeze.
+  Contract/design only: freezes the backend-agnostic contract for
+  Advisory Repository Skills before any implementation. Freezes the
+  backend-agnostic principle (an Advisory Repository Skill must not
+  depend directly on a specific model backend, talking only to an
+  `AdvisoryProvider` abstraction); the `AdvisoryRepositorySkill`
+  interface (declares advisory capability, evidence categories,
+  probabilistic-by-default determinism, model-produced evidence
+  boundary; builds a prompt/request, consumes a normalized advisory
+  response, produces `EvidenceCollection`; exhaustively forbidden from
+  decision making, mutation, lifecycle authority, commit, push,
+  finalize, notification dispatch, artifact promotion, execution,
+  authorization, validator bypass); the `AdvisoryProvider`/
+  `AdvisoryRequest`/`RawAdvisoryResponse`/`NormalizedAdvisoryResponse`
+  abstraction (contract only -- current acting model default,
+  DeepSeek, Claude, Codex, GLM/Z.ai, Qwen, OpenAI, local SLM, external
+  review service, and deterministic mock named as possible future
+  providers, none implemented); the default same-model mode (no new
+  configuration required); a documented-only split-model future mode;
+  the prompt boundary (bounded context, explicit question, no
+  secrets, no unrestricted command capability, no execution request);
+  the response boundary (raw model output never trusted directly,
+  only canonical Evidence enters PCAE); the Evidence Builder contract
+  (probabilistic by default, model-produced if applicable, advisory
+  only, confidence-labelled, limitation-labelled,
+  provenance-preserving, never sole authority for Accept); the
+  failure contract (UNKNOWN evidence or explicit advisory failure,
+  never silent success, never hidden partial output); an exhaustive
+  safety-rule checklist; and a narrow first future pilot scope (exactly
+  one of repository/documentation/report consistency review,
+  excluding code execution, security authorization, lifecycle
+  control, and autonomous repair). Adds
+  `docs/PCAE_ADVISORY_REPOSITORY_SKILLS_CONTRACT.md` and
+  `docs/PHASE_115Q_ADVISORY_REPOSITORY_SKILLS_CONTRACT_FREEZE.md`,
+  plus 37 new architecture/documentation verification tests
+  (`tests/test_phase_115q_advisory_repository_skills_contract_freeze.py`).
+  No Advisory Repository Skill, Advisory Provider, model call,
+  DeepSeek/GLM/Claude/Codex/Qwen/OpenAI/local-SLM/any-backend
+  integration, model configuration, Repository Skills runtime,
+  Evidence Provider, Decision Evaluation, Repository Transition
+  Validator, or lifecycle command implemented or modified. Execution
+  capability remains unavailable.
+
 - Phase 115P — Advisory Repository Skills Architecture. Architecture
   and design only: designs Advisory Repository Skills as model-backed,
   evidence-only Repository Skills. Freezes the core principle
