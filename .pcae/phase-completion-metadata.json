@@ -23,8 +23,18 @@
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117D is documentation/release-preparation only)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": null,
+  "phase_commits": [
+    {
+      "hash": "82f75bf0",
+      "message": "Prepare Phase 117D v0.2 release candidate docs"
+    },
+    {
+      "hash": "37b0b718",
+      "message": "Close Phase 117D release candidate preparation"
+    }
+  ],
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -54,13 +64,18 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "nothing to push before commits; working tree dirty due active phase docs",
+      "result": "clean",
       "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
       "result": "pre-closure run failed only because active task and dirty tree were present; rerun after completion/push",
       "status": "pending"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "pcae session bootstrap --compact --profile implementation passed",
+      "status": "passed"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -109,7 +124,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "passed"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",

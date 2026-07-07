@@ -6,9 +6,9 @@
 - **Missing trust fields:** none
 - **Files changed:** 11
 - **Tests run:** fast_green
-- **Commits:** pending
-- **Pushed:** not_pushed
-- **origin/main..HEAD:** pending
+- **Commits:** 82f75bf0, 37b0b718
+- **Pushed:** pushed
+- **origin/main..HEAD:** 0
 
 ## Summary
 
@@ -76,7 +76,7 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** passed before commits
+- **pcae_push_check:** clean
 - **pcae_agent_verify_handoff:** pending final task closure, push, and canonical report promotion
 - **pcae_session_bootstrap_compact:** passed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
