@@ -28,7 +28,7 @@ the frozen subsystem list and accepted non-blockers.
 | 116C | v0.2 Architecture Consolidation Verification | ✅ Complete |
 | 116D | v0.2 Architecture Freeze Preparation | ✅ Complete |
 | 116F | v0.2 Architecture Freeze | ✅ Complete |
-| 117B | v0.2 Test Suite Maintenance & Quality Improvements | 🔜 Next (per PROJECT_STATUS.md) |
+| 117D | v0.2 Release Candidate Preparation | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 

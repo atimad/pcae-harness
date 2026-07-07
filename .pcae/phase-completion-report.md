@@ -1,38 +1,40 @@
-# Phase 117B Complete — v0.2 Test Suite Maintenance & Quality Improvements
+# Phase 117C Complete — v0.2 Quality Baseline Verification
 
-- **Phase ID:** `117B`
+- **Phase ID:** `117C`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 11
-- **Tests run:** focused stale-test set, full suite, and fast_green
-- **Commits:** b4534f98, 12c673da, e37d243a
-- **Pushed:** pushed
+- **Files changed:** 9
+- **Tests run:** focused governance suites, full suite, and fast_green
+- **Commits:** pending final commit
+- **Pushed:** not_pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 117B was a test-maintenance-only phase. It repaired the stale and
-legacy expectations documented during 116C/116D so PCAE has a clean v0.2
-quality baseline before release preparation. No production source files
-changed.
+Phase 117C independently verified the v0.2 quality baseline established
+by 117B. Initial focused verification found two reproducibility defects
+in the 117B baseline. Both were repaired as test-only baseline fixes,
+then focused governance suites, full suite, and `fast_green` all passed.
 
-## Maintenance Contents
+## Verification Contents
 
-- Updated `tests/test_bootstrap_todo_consistency.py` so real-repository
-  checks derive the expected recommended phase id from authoritative
-  `PROJECT_STATUS.md` instead of hard-coding stale `113Y`.
-- Updated `tasks/TODO.md`'s planning scratch table so its single next
-  marker matches the authoritative 117B recommendation.
-- Updated `tests/test_rc_audit_findings_repair.py` to expect frozen
-  v0.2 Repository Transition Validator behavior for incomplete
-  task-finish report promotion: quarantine, `report_completeness`
-  violation, and notification skipped.
-- Confirmed the documented 88M standalone issue is fixture-state
-  dependent: the focused `test_88m_requires_human_review` set passed
-  with the 117B task active.
+- Verified `latest.json` before 117C finalization: `phase_id=117B`,
+  complete report, no missing trust fields, pushed state, and
+  `origin/main..HEAD=0`.
+- Re-ran focused governance suites. Initial result reproduced the
+  baseline defects: `5 failed, 125 passed`.
+- Repaired the stale real-repository recommended-next-phase assertion so
+  it derives the phase id from `PROJECT_STATUS.md`.
+- Updated `tasks/TODO.md` to mark 117C as the current recommended next
+  phase during verification.
+- Repaired 88M Python-level preflight fixtures so decision assertions no
+  longer depend on the real repository active task scope.
+- Re-ran focused governance suites: `130 passed`.
+- Re-ran full suite: `18063 passed`.
+- Re-ran `fast_green`: `4390 passed`.
 
-Full detail: `docs/PHASE_117B_V0_2_TEST_SUITE_MAINTENANCE.md`.
+Full detail: `docs/PHASE_117C_V0_2_QUALITY_BASELINE_VERIFICATION.md`.
 
 ## PCAE Architecture Status
 
@@ -48,10 +50,11 @@ maintained as runtime state.*
 - v0.2 Architecture Freeze through Phase 116F
 - v0.2 Architecture Retrospective & Release Notes through Phase 117A
 - v0.2 Test Suite Maintenance & Quality Improvements through Phase 117B
+- v0.2 Quality Baseline Verification through Phase 117C
 
 ### Planned
 
-- 117C — v0.2 Quality Baseline Verification
+- 117D — v0.2 Release Candidate Preparation
 
 ### Current Runtime State
 
@@ -64,17 +67,16 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
-- **pcae_agent_verify_handoff:** pending final metadata sync and canonical report promotion
-- **pcae_session_bootstrap_compact:** completed
+- **pcae_push_check:** nothing_to_push before 117C commits
+- **pcae_agent_verify_handoff:** pending final commit/push
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
 - **telegram_runtime:** configured, enabled, ready for outbound delivery
 
 ## Test Results
 
-- **focused_stale_tests:** 40 passed in 1.97s
-- **full_suite:** 18063 passed in 815.34s
-- **fast_green:** 4390 passed in 70.97s
+- **focused_governance_suites:** 130 passed in 8.83s
+- **full_suite:** 18063 passed in 839.05s
+- **fast_green:** 4390 passed in 67.92s
 - **bootstrap_session_reporting_tests:** passed
 - **runtime_inspect_execution_unavailable:** passed
 - **report_notification_tests:** pending final Telegram delivery
@@ -88,6 +90,7 @@ maintained as runtime state.*
 - No authorization.
 - No architecture change.
 - No lifecycle behavior changed.
+- No release preparation started.
 - No Repository State behavior changed.
 - No Repository Skills behavior changed.
 - No Advisory behavior changed.
@@ -107,7 +110,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-117C — v0.2 Quality Baseline Verification
+117D — v0.2 Release Candidate Preparation
 
 ## Report Consistency
 
@@ -116,4 +119,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 117B. Schema version 1.0.*
+*Report generated for PCAE Phase 117C. Schema version 1.0.*

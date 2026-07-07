@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 117C — v0.2 Quality Baseline Verification
+  (`docs/PHASE_117C_V0_2_QUALITY_BASELINE_VERIFICATION.md`).
+  Verification phase that independently re-ran the 117B quality
+  baseline. The first focused governance rerun found two reproducibility
+  defects in the 117B baseline: a hard-coded 117B expectation in
+  `tests/test_bootstrap_todo_consistency.py`, and 88M Python-level
+  preflight assertions that still depended on the real repository active
+  task scope. Both were repaired as test-only baseline fixes. Focused
+  governance suites, full suite, and `fast_green` all pass. PCAE is
+  ready for release candidate preparation. No production source files
+  changed. No feature, runtime behavior, execution, authorization,
+  architecture, lifecycle behavior, release preparation, Repository
+  State behavior, Repository Skills behavior, Advisory behavior,
+  Decision Evaluation behavior, Repository Transition Validator
+  behavior, Notification Policy behavior, model integration, REST,
+  Dashboard, Web UI, or Telegram inbound path changed.
+
 - Phase 117B — v0.2 Test Suite Maintenance & Quality Improvements
   (`docs/PHASE_117B_V0_2_TEST_SUITE_MAINTENANCE.md`). Repaired the
   stale/legacy test expectations documented by 116C/116D: real-repo

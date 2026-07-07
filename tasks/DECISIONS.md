@@ -2,6 +2,14 @@
 
 ## Accepted
 
+- Treat Phase 117C as verification-only with a narrow test-repair
+  exception for proven 117B baseline regressions: real-repository
+  TODO/bootstrap checks must derive the expected current recommendation
+  from authoritative `PROJECT_STATUS.md` rather than hard-code a phase
+  id, and 88M preflight decision assertions must use a stable fixture
+  task contract rather than the real repository's active task scope. No
+  production source, runtime behavior, architecture, lifecycle behavior,
+  or release-preparation change is authorized by this verification.
 - Treat Phase 117B as test-maintenance only: update stale/legacy test
   expectations documented by 116C/116D to match frozen v0.2 behavior
   without changing production source or weakening safety coverage.

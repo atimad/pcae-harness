@@ -1,42 +1,27 @@
 {
-  "phase_id": "117B",
-  "phase_name": "v0.2 Test Suite Maintenance & Quality Improvements",
-  "phase_title": "v0.2 Test Suite Maintenance & Quality Improvements",
+  "phase_id": "117C",
+  "phase_name": "v0.2 Quality Baseline Verification",
+  "phase_title": "v0.2 Quality Baseline Verification",
   "status": "completed",
-  "summary": "Test-maintenance-only phase. Repaired stale/legacy test expectations documented during 116C/116D so PCAE has a clean v0.2 quality baseline before release preparation. Updated real-repository TODO/bootstrap consistency tests to derive the expected recommended phase from authoritative PROJECT_STATUS.md instead of hard-coding stale 113Y; updated tasks/TODO.md's planning scratch row to mark 117B as next; and updated the legacy RC audit CLI expectation to match frozen v0.2 Repository Transition Validator behavior for incomplete reports: quarantine, report_completeness violation, and notification skipped. Focused stale-test set, full suite, and fast_green all pass. No production source files changed. No feature, runtime behavior, execution, authorization, architecture, lifecycle behavior, Repository State behavior, Repository Skills behavior, Advisory behavior, Decision Evaluation behavior, Repository Transition Validator behavior, Notification Policy behavior, model integration, REST, Dashboard, Web UI, or Telegram inbound path changed.",
-  "files_changed_count": 11,
+  "summary": "Verification phase. Independently verified that the v0.2 quality baseline established by 117B is complete, reproducible, and ready for release candidate preparation. The first focused governance rerun found two reproducibility defects in the 117B baseline: a hard-coded 117B expectation in tests/test_bootstrap_todo_consistency.py and 88M Python-level preflight assertions depending on the real repository active task scope. Both were repaired as test-only baseline fixes. Focused governance suites, full suite, and fast_green all pass. No production source files changed. No feature, runtime behavior, execution, authorization, architecture, lifecycle behavior, release preparation, Repository State behavior, Repository Skills behavior, Advisory behavior, Decision Evaluation behavior, Repository Transition Validator behavior, Notification Policy behavior, model integration, REST, Dashboard, Web UI, or Telegram inbound path changed.",
+  "files_changed_count": 9,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_117B_V0_2_TEST_SUITE_MAINTENANCE.md",
+    "docs/PHASE_117C_V0_2_QUALITY_BASELINE_VERIFICATION.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/done/20260707-0656-phase-117b-v0-2-test-suite-maintenance-quality-improvements.md",
-    "tasks/active/20260707-0740-sync-phase-117b-implementation-changes.md",
-    "tasks/done/20260707-0740-sync-phase-117b-implementation-changes.md",
+    "tasks/active/20260707-0848-phase-117c-v0-2-quality-baseline-verification.md",
     "tests/test_bootstrap_todo_consistency.py",
-    "tests/test_rc_audit_findings_repair.py"
+    "tests/test_preflight_integration_verification.py"
   ],
-  "tests_added_or_updated": "Updated stale expectations in tests/test_bootstrap_todo_consistency.py and tests/test_rc_audit_findings_repair.py.",
-  "phase_commits": [
-    {
-      "hash": "b4534f98",
-      "message": "Implement Phase 117B test suite maintenance"
-    },
-    {
-      "hash": "12c673da",
-      "message": "Sync Phase 117B implementation changes"
-    },
-    {
-      "hash": "e37d243a",
-      "message": "Close Phase 117B implementation sync"
-    }
-  ],
+  "tests_added_or_updated": "Updated two tests as reproducibility repairs after focused 117C verification proved 117B baseline regressions.",
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117B is test-maintenance only)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117C is verification/test-baseline repair only)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
+  "pushed_status": "not_pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
@@ -67,18 +52,13 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean",
+      "result": "nothing_to_push before 117C commits",
       "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "result": "pending final metadata sync and canonical report promotion; rerun after completion",
+      "result": "pending final commit/push; rerun after completion",
       "status": "pending"
-    },
-    {
-      "name": "pcae_session_bootstrap_compact",
-      "result": "completed",
-      "status": "passed"
     },
     {
       "name": "pcae_runtime_inspect",
@@ -91,18 +71,18 @@
       "status": "passed"
     },
     {
-      "name": "focused_stale_tests",
-      "result": "40 passed in 1.97s",
+      "name": "focused_governance_suites",
+      "result": "130 passed in 8.83s after initial 5 failed, 125 passed reproduction",
       "status": "passed"
     },
     {
       "name": "full_suite",
-      "result": "18063 passed in 815.34s",
+      "result": "18063 passed in 839.05s",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "4390 passed in 70.97s",
+      "result": "4390 passed in 67.92s",
       "status": "passed"
     },
     {
@@ -112,14 +92,14 @@
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap --compact --profile implementation completed",
+      "result": "pcae session bootstrap --agent-id codex-local completed at phase start",
       "status": "passed"
     }
   ],
   "test_results": {
-    "focused_stale_tests": "40 passed in 1.97s",
-    "full_suite": "18063 passed in 815.34s",
-    "fast_green": "4390 passed in 70.97s",
+    "focused_governance_suites": "130 passed in 8.83s after initial 5 failed, 125 passed reproduction",
+    "full_suite": "18063 passed in 839.05s",
+    "fast_green": "4390 passed in 67.92s",
     "bootstrap_session_reporting_tests": "passed",
     "report_notification_tests": "pending_final_telegram_delivery",
     "runtime_inspect_execution_unavailable": "passed"
@@ -139,15 +119,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "nothing_to_push before 117C commits"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending final metadata sync and canonical report promotion"
-    },
-    {
-      "name": "pcae_session_bootstrap_compact",
-      "status": "completed"
+      "status": "pending final commit/push"
     },
     {
       "name": "pcae_runtime_inspect",
@@ -164,6 +140,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No architecture changed. No lifecycle behavior changed. No Repository State behavior changed. No Repository Skills behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
-  "recommended_next_phase": "117C - v0.2 Quality Baseline Verification"
+  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No architecture changed. No lifecycle behavior changed. No release preparation started. No Repository State behavior changed. No Repository Skills behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
+  "recommended_next_phase": "117D - v0.2 Release Candidate Preparation"
 }

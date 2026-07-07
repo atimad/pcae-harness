@@ -132,9 +132,9 @@ def test_recommended_next_phase_matches_real_project_status() -> None:
     root = HarnessPath(REPO_ROOT)
     pack = build_context_pack(root)
     recommended = pack.roadmap_summary["recommended_next_phase"]
+    recommended_phase_id = _real_recommended_next_phase_id()
     assert recommended is not None
-    assert recommended.lstrip().startswith("117B")
-    assert "v0.2 Test Suite Maintenance & Quality Improvements" in recommended
+    assert recommended.lstrip().startswith(recommended_phase_id)
 
 
 # ---------------------------------------------------------------------------

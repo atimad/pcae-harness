@@ -8,20 +8,39 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
 
+from pcae.commands.init import init_harness
 from pcae.core.scope_preflight import build_scope_preflight
 from pcae.core.backend_preflight import build_backend_preflight
 from pcae.core.mutation_preflight import build_mutation_preflight
 from pcae.core.commit_push_preflight import build_commit_preflight, build_push_preflight
+from pcae.core.paths import HarnessPath
+from pcae.core.tasks import create_task_contract
 
 pytestmark = [pytest.mark.slow, pytest.mark.integration]
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 _PCAE = [sys.executable, "-m", "pcae"]
+
+
+_FIXTURE_TMP = tempfile.TemporaryDirectory()
+PREFLIGHT_FIXTURE_ROOT = Path(_FIXTURE_TMP.name)
+init_harness(HarnessPath(PREFLIGHT_FIXTURE_ROOT))
+create_task_contract(
+    HarnessPath(PREFLIGHT_FIXTURE_ROOT),
+    title="Phase 88M preflight integration fixture",
+    goal="stable preflight integration fixture independent of real repo task scope",
+    mode="verification",
+    allowed_files=("tests/test_preflight_integration_verification.py",),
+    forbidden_files=("src/**", ".pcae/**"),
+    allowed_zones=("tests",),
+    enforcement_mode="advisory",
+)
 
 # ---------------------------------------------------------------------------
 # CLI helper (subprocess — used only for smoke, no-cache, and regression tests)
@@ -68,31 +87,31 @@ _PUSH_REVIEW_ARGS = [
 # ---------------------------------------------------------------------------
 
 _S = build_scope_preflight(
-    REPO_ROOT, "source_mutation",
+    PREFLIGHT_FIXTURE_ROOT, "source_mutation",
     ["tests/test_preflight_integration_verification.py"],
 )["preflight"]
 
 _B = build_backend_preflight(
-    REPO_ROOT, "claude", "source_mutation",
+    PREFLIGHT_FIXTURE_ROOT, "claude", "source_mutation",
     ["tests/test_preflight_integration_verification.py"],
     prompt_present=True, prompt_hash="abc123",
 )["preflight"]
 
 _M = build_mutation_preflight(
-    REPO_ROOT, "source_mutation",
+    PREFLIGHT_FIXTURE_ROOT, "source_mutation",
     ["tests/test_preflight_integration_verification.py"],
     source_backend="claude",
 )["preflight"]
 
 _C = build_commit_preflight(
-    REPO_ROOT,
+    PREFLIGHT_FIXTURE_ROOT,
     commit_message="integration test",
     diff_present=True, tests_present=True, tests_passed=True,
     pcae_check_passed=True, pcae_health_passed=True, doctor_passed=True,
 )["preflight"]
 
 _P = build_push_preflight(
-    REPO_ROOT,
+    PREFLIGHT_FIXTURE_ROOT,
     push_target="origin/main",
     push_check_passed=True, tests_present=True, tests_passed=True,
     pcae_check_passed=True, pcae_health_passed=True, doctor_passed=True,

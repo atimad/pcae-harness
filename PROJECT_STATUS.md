@@ -2,34 +2,56 @@
 
 ## Current Phase
 
-Phase 117B — v0.2 Test Suite Maintenance & Quality Improvements
+Phase 117C — v0.2 Quality Baseline Verification
 (completed).
 
-Test-maintenance-only phase: repaired the stale/legacy expectations
-documented during 116C/116D so PCAE has a clean v0.2 quality baseline.
-Updated real-repository TODO/bootstrap consistency tests to derive the
-expected recommended phase from authoritative `PROJECT_STATUS.md`
-instead of hard-coding stale `113Y`; updated the TODO planning scratch
-row to mark 117B as the authoritative recommended next phase; and
-updated the legacy RC audit CLI expectation to match frozen v0.2
-Repository Transition Validator behavior for incomplete reports
-(quarantine, `report_completeness` violation, notification skipped).
+Verification phase: independently re-ran the 117B quality baseline and
+verified it is reproducible after two test-only baseline repairs. The
+first focused governance rerun found a 117B-introduced hard-coded 117B
+expectation in `tests/test_bootstrap_todo_consistency.py` and confirmed
+the previously documented 88M fixture-state issue still made
+`tests/test_preflight_integration_verification.py` depend on the real
+active task scope. Both were repaired without production source changes:
+the TODO/bootstrap real-repository check now derives the expected phase
+id from authoritative `PROJECT_STATUS.md`, `tasks/TODO.md` marks 117C as
+the current recommended next phase, and 88M Python-level shared preflight
+objects now use a temporary harness with a known active task contract.
 
-Validation passed: focused stale-test set `40 passed`; full suite
+Validation passed: focused governance suites `130 passed`; full suite
 `18063 passed`; `fast_green` `4390 passed`.
 
 No production source files changed. No feature, runtime behavior,
-execution, authorization, architecture, lifecycle behavior, Repository
-State behavior, Repository Skills behavior, Advisory behavior, Decision
-Evaluation behavior, Repository Transition Validator behavior,
-Notification Policy behavior, model integration, REST, Dashboard, Web
-UI, or Telegram inbound path changed.
+execution, authorization, architecture, lifecycle behavior, release
+preparation, Repository State behavior, Repository Skills behavior,
+Advisory behavior, Decision Evaluation behavior, Repository Transition
+Validator behavior, Notification Policy behavior, model integration,
+REST, Dashboard, Web UI, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 117C — v0.2 Quality Baseline Verification.
+Recommended next repo phase: 117D — v0.2 Release Candidate Preparation.
+
+## Phase 117C Complete
+
+Phase 117C — v0.2 Quality Baseline Verification (completed).
+
+Independently verified the v0.2 quality baseline. Initial focused
+verification found two reproducibility defects in the 117B baseline;
+both were repaired as test-only changes, then focused governance suites,
+full suite, and `fast_green` all passed. See
+`docs/PHASE_117C_V0_2_QUALITY_BASELINE_VERIFICATION.md`.
+
+**No-go**: no feature, runtime behavior, execution, authorization,
+architecture change, lifecycle behavior change, release preparation,
+Repository State behavior change, Repository Skills behavior change,
+Advisory behavior change, Decision Evaluation behavior change,
+Repository Transition Validator behavior change, Notification Policy
+behavior change, model integration, REST, Dashboard, Web UI, or Telegram
+inbound.
+
+Recommended next repo phase: 117D — v0.2 Release Candidate Preparation.
 
 ## Phase 117B Complete
 
