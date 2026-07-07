@@ -1,54 +1,49 @@
-# Phase 116F Complete — v0.2 Architecture Freeze
+# Phase 117A Complete — v0.2 Architecture Retrospective & Release Notes
 
-- **Phase ID:** `116F`
+- **Phase ID:** `117A`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 5
-- **Tests run:** freeze-blocker re-verification against 116D's checklist (no new tests added)
-- **Commits:** 58250b6b, 36b95ab9
+- **Files changed:** 4
+- **Tests run:** documentation and analysis phase only; no tests added or run
+- **Commits:** a7244f47, bd68ef9e
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 116F declares the PCAE v0.2 architecture frozen, following the
-unbroken review chain 115Z through 116D, none of which found a
-must-fix architectural defect, hidden authority, circular dependency,
-or execution-capability leak. Zero runtime implementation change.
+Phase 117A is a documentation-and-analysis-only phase. It produced the
+canonical v0.2 architecture retrospective
+(`docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`), following the v0.2
+architecture freeze declared in Phase 116F. Zero runtime implementation
+change.
 
-## Freeze Declaration
+## Retrospective Contents
 
-**The PCAE v0.2 architecture is declared frozen.**
+- **Evolution**: eleven architectural epochs from Governance Foundation
+  through Architecture Freeze.
+- **Principles**: ten architectural principles now defining PCAE
+  (governance first, deterministic before probabilistic, evidence
+  before decision, explainability before automation, execution
+  unavailable by default, advisory cannot authorize, advisory cannot
+  mutate repository, capability boundaries are explicit,
+  behavior-preserving evolution, architecture before implementation).
+- **Design decisions**: six major design-decision rationales (contract
+  freeze before implementation, evidence/decision separation,
+  advisory/authority separation, execution unavailability, single
+  Advisory Provider default, AI as evidence producer not decision
+  maker).
+- **Lessons learned**: architectural successes, unexpected discoveries,
+  governance improvements, mistakes corrected, reusable engineering
+  practices.
+- **Release notes**: capabilities delivered and explicitly not
+  delivered in v0.2.
+- **v0.3 direction**: stale-test maintenance, richer deterministic
+  evidence, advisory quality improvements, architectural dependency
+  analysis, semantic repository understanding, constrained execution
+  planning — documented only, no implementation commitment.
 
-## Frozen Subsystem List
-
-1. Repository State Kernel — `docs/PCAE_REPOSITORY_STATE_KERNEL.md`
-2. Repository Transition Validator — `docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR.md`
-3. Canonical Artifact Promotion — `docs/PCAE_REPOSITORY_STATE_KERNEL.md` §Canonical Artifact Promotion
-4. Notification Policy — `docs/PCAE_NOTIFICATION_POLICY.md`
-5. Repository Events — `docs/PCAE_REPOSITORY_EVENTS.md` (policy/taxonomy only for v0.2)
-6. Evidence Framework — `docs/PCAE_REPOSITORY_EVIDENCE_FRAMEWORK.md`
-7. Decision Evaluation — `docs/PCAE_DECISION_FRAMEWORK.md`
-8. Repository Skills — `docs/PCAE_REPOSITORY_SKILLS.md`
-9. Advisory Provider Framework — `docs/PCAE_ADVISORY_PROVIDER_STRATEGY.md`
-10. Advisory Context Package — `docs/PCAE_ADVISORY_CONTEXT_PACKAGE_CONTRACT.md`
-
-Full detail: `docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md`.
-
-## Accepted Non-Blockers
-
-1. Stale test expectations documented by 116C/116D (7 pre-existing
-   failures, none indicating an architecture defect).
-2. Finalization-gate migration deferred (unique governance/test-result
-   checks not yet migrated into structural invariants).
-3. Shared `RepositoryState` construction helper deferred (two call
-   sites remain in sync by convention, not a single constructor).
-
-## Freeze Blocker Re-Verification
-
-Re-ran 116D's freeze readiness checklist against current state; no new
-blocker found.
+Full detail: `docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`.
 
 ## PCAE Architecture Status
 
@@ -62,10 +57,11 @@ maintained as runtime state.*
 - v0.2 Architecture Consolidation Verification through Phase 116C
 - v0.2 Architecture Freeze Preparation through Phase 116D
 - v0.2 Architecture Freeze through Phase 116F
+- v0.2 Architecture Retrospective & Release Notes through Phase 117A
 
 ### Planned
 
-- 117A — v0.2 Stale Test Maintenance
+- 117B — v0.2 Test Suite Maintenance & Quality Improvements
 
 ### Current Runtime State
 
@@ -86,31 +82,29 @@ maintained as runtime state.*
 
 ## Test Results
 
-- **freeze_blocker_reverification:** no new blocker found since 116D
-- **fast_green:** not_applicable (freeze-declaration phase)
+- **architecture_retrospective_documentation:** completed
+- **fast_green:** not_applicable (documentation phase)
 - **report_notification_tests:** pending final Telegram delivery
-- **bootstrap_session_reporting_tests:** not_applicable (freeze-declaration phase)
+- **bootstrap_session_reporting_tests:** not_applicable (documentation phase)
 
 ## No-Go Confirmations
 
 - No new feature added.
-- No new Evidence Provider added.
-- No new Repository Skill added.
-- No new Advisory Provider added.
-- No second Advisory Provider added.
-- No Decision Evaluation modified.
-- No Repository Transition Validator modified.
-- No lifecycle command modified.
-- No Notification Policy modified.
-- No Repository State Kernel modified.
+- No runtime behavior changed.
 - No execution.
 - No authorization.
-- No Permission Broker enforcement.
-- No plugins.
-- No Telegram inbound.
+- No lifecycle behavior changed.
+- No Repository State change.
+- No Repository Skills change.
+- No Advisory change.
+- No Decision Evaluation change.
+- No Repository Transition Validator change.
+- No Notification Policy change.
+- No model integration.
 - No REST.
 - No Dashboard.
 - No Web UI implementation.
+- No Telegram inbound.
 - No raw git push.
 - No force push.
 - No tags.
@@ -119,7 +113,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-117A — v0.2 Stale Test Maintenance
+117B — v0.2 Test Suite Maintenance & Quality Improvements
 
 ## Report Consistency
 
@@ -128,4 +122,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 116F. Schema version 1.0.*
+*Report generated for PCAE Phase 117A. Schema version 1.0.*
