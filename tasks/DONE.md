@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 116F - v0.2 Architecture Freeze (20260707-0541-phase-116f-v0-2-architecture-freeze)
 - Repair 116D completion metadata trust fields (20260707-0238-repair-116d-completion-metadata-trust-fields)
 - Fix 116D pushed-state metadata (20260707-0235-fix-116d-pushed-state-metadata)
 - Sync Phase 116D completion metadata (20260707-0234-sync-phase-116d-completion-metadata)
