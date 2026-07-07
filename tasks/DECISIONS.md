@@ -2,6 +2,14 @@
 
 ## Accepted
 
+- Treat Phase 116C as verification-only: Phase 116B introduced no
+  runtime/source regression because it changed no `src/` or `tests/`
+  files. Six full-suite failures are pre-existing stale expectations.
+  One full-suite failure is an intentional changed expectation caused by
+  116B's roadmap scratch correction from stale 113Y-era wording to the
+  116A/116B/116C v0.2 architecture-freeze track. No 116B
+  architecture/runtime repair is required; stale tests may be addressed
+  by a future focused test-maintenance phase before freeze if desired.
 - Treat Phase 116B as documentation-only v0.2 architecture consolidation:
   structural invariants are the long-term authority for phase identity,
   metadata consistency, report completeness, recommended-next-phase

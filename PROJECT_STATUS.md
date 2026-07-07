@@ -2,53 +2,54 @@
 
 ## Current Phase
 
-Phase 116B — v0.2 Architecture Consolidation
+Phase 116C — v0.2 Architecture Consolidation Verification
 (completed).
 
-Consolidation only: applied the minor documentation and architecture
-consistency items identified by Phase 116A. No runtime capability,
-execution, authorization, Permission Broker change, Repository Skill,
-Advisory Provider, Evidence Provider, Decision Evaluation change,
-Repository Transition Validator behavior change, lifecycle command
-change, Notification Policy behavior change, Telegram inbound, REST,
-Dashboard, Web UI, event bus, or model integration was implemented.
-Phase report:
-`docs/PHASE_116B_V0_2_ARCHITECTURE_CONSOLIDATION.md`.
+Verification only: verified Phase 116B consolidation and classified the
+seven full-suite failures reported before v0.2 freeze preparation. No
+feature, runtime behavior, execution, authorization, lifecycle behavior,
+source implementation, or test implementation changed. Phase report:
+`docs/PHASE_116C_V0_2_ARCHITECTURE_CONSOLIDATION_VERIFICATION.md`.
 
-**116A minor consolidation items applied**: structural invariants are
-documented as the long-term authority for phase identity, metadata
-consistency, report completeness, and recommended-next-phase checks;
-the legacy finalization gate remains a v0.2 compatibility/trust gate
-until its unique governance-key and test-result-key checks migrate into
-first-class invariants; shared `RepositoryState` construction is
-documented as the required future implementation shape; and Repository
-Event is explicitly frozen as policy/taxonomy only for v0.2.
+**116B scope verified**: `git diff --name-only 4571b494..HEAD -- src
+tests` returned no files. 116B changed documentation, governance memory,
+and phase metadata only.
 
-**Architecture assessment**: architecture still does not require
-significant redesign. The documentation consolidation portion is
-complete; remaining implementation-oriented consolidation should be
-handled only by separately approved future phases.
+**Failure classification**: six failures are pre-existing stale
+expectations. One failure is an intentional changed expectation caused
+by 116B's documentation correction that moved `tasks/TODO.md` from the
+stale 113Y-era current roadmap to the 116A/116B/116C v0.2 architecture
+freeze track. No runtime/source regression was introduced by 116B.
 
-**Extension points unchanged**: Repository Skills, Advisory Providers,
-Evidence Providers, and Runtime Plugins remain as reviewed in 116A. No
-extension point contract changed.
+**Repair assessment**: no 116B architecture/runtime repair is required.
+A small future test-maintenance phase may update stale bootstrap/TODO,
+preflight, and RC finalization assertions before freeze if desired.
 
-**Naming and diagrams consolidated**: canonical docs now use consistent
-Repository Event wording for v0.2 policy/taxonomy-only status and include
-a kernel ownership diagram that does not claim new runtime behavior.
-
-**Implementation consistency preserved**: no source files or tests were
-changed. Runtime Inspect continues to report execution unavailable,
-state `Observed`, maximum plugin capability `observe`, and no registered
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-**Remaining debt** is implementation-oriented and intentionally deferred:
-migrate unique finalization-gate checks into structural invariants,
-implement one shared `RepositoryState` construction helper, and introduce
-a runtime Repository Event type only through a separate future contract
-phase if needed.
+Recommended next repo phase: 116D — v0.2 Architecture Freeze Preparation.
 
-Recommended next repo phase: 116C — v0.2 Architecture Consolidation Verification.
+## Phase 116C Complete
+
+Phase 116C — v0.2 Architecture Consolidation Verification (completed).
+
+Verified Phase 116B consolidation before freeze preparation. Re-ran the
+full suite (`7 failed, 18056 passed`) and the exact failing tests. Found
+no 116B runtime/source regression: 116B touched no `src/` or `tests/`
+files. Classified six failures as pre-existing stale expectations and
+one as an intentional changed expectation from the 116B roadmap scratch
+refresh. No repair is required before proceeding to freeze preparation,
+though stale tests should be handled by a focused future test-maintenance
+phase if the project wants a green full suite before freeze.
+
+**No-go**: no feature, runtime behavior, execution, authorization,
+lifecycle behavior, source implementation, test implementation,
+Permission Broker behavior, REST, Dashboard, Web UI, Telegram inbound,
+event bus, or model integration change.
+
+Recommended next repo phase: 116D — v0.2 Architecture Freeze Preparation.
 
 ## Phase 116B Complete
 
