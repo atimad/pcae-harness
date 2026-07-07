@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 118B — Historical Memory Architecture
+  (`docs/PHASE_118_HISTORICAL_MEMORY_ARCHITECTURE.md`). Defines
+  Historical Memory as the deterministic, source-attributed, inspectable,
+  versioned, read-only temporal layer inside Repository Knowledge. The
+  architecture distinguishes Historical Memory from Repository
+  Knowledge, Repository State, Evidence, Advisory Context, Decision
+  Evaluation, model memory, and conversation memory; defines historical
+  subjects, events, claims, sources, lineages, evidence links, snapshots,
+  and query results; and documents phase/report/decision/repair/
+  hardening/release/subsystem lineage, source attribution,
+  supersession/correction handling, conflict preservation, determinism,
+  verification, versioning, query classes, and integrations with
+  Evidence, Repository Skills, Advisory, and Decision Evaluation.
+  Architecture only; no historical extraction implementation, database,
+  CLI, dependency graph, change impact analysis, advisory behavior,
+  source, test, runtime behavior, execution, enforcement, lifecycle,
+  Permission Broker, REST, Dashboard, Web UI, model integration, or
+  Telegram inbound changes.
+
 - Phase 118A — Repository Knowledge Architecture
   (`docs/PHASE_118_REPOSITORY_KNOWLEDGE_ARCHITECTURE.md`). Begins Track B:
   Repository Intelligence. Defines Repository Knowledge as a deterministic,

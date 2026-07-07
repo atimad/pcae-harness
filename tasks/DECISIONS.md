@@ -2,6 +2,19 @@
 
 ## Accepted
 
+- Treat Phase 118B as the architecture-only Historical Memory phase for
+  Track B Repository Intelligence: Historical Memory is a deterministic,
+  source-attributed, inspectable, versioned, read-only temporal layer
+  inside Repository Knowledge that describes how repository
+  architecture, capabilities, contracts, decisions, repairs, hardening,
+  releases, and subsystems evolved over time. It may expose historical
+  subjects, events, claims, sources, lineage, snapshots, query results,
+  and evidence links; may produce evidence candidates; and may
+  strengthen Advisory through bounded historical context. It must not
+  become generic model/conversation memory, decide, authorize, execute,
+  enforce, mutate repository state, rewrite history, promote artifacts,
+  send notifications, replace governance, or bypass Decision Evaluation
+  / the Repository Transition Validator.
 - Treat Phase 118A as the architecture-only start of Track B
   Repository Intelligence: define Repository Knowledge as a deterministic,
   read-only, source-attributed architectural understanding layer that is

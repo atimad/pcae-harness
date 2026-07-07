@@ -2,20 +2,21 @@
 
 ## Current Phase
 
-Phase 118A — Repository Knowledge Architecture
+Phase 118B — Historical Memory Architecture
 (completed).
 
-Architecture-only start of Track B: Repository Intelligence. Defines
-Repository Knowledge as a deterministic, inspectable, source-attributed,
-read-only architectural understanding layer distinct from Repository
-State, Evidence, Advisory Context, Repository Skills, and Decision
-Evaluation. Establishes core primitives, layered knowledge graph model,
-source attribution, determinism, production, inspection, verification,
-versioning, read-only boundaries, and the future emergence path for
-historical memory, change impact analysis, dependency graph work,
-architectural contract mapping, and richer advisory reasoning.
+Architecture-only continuation of Track B: Repository Intelligence.
+Defines Historical Memory as the deterministic, source-attributed,
+inspectable, versioned, read-only temporal layer inside Repository
+Knowledge. Historical Memory describes how repository architecture,
+capabilities, contracts, decisions, repairs, hardening, releases, and
+subsystems evolved over time without becoming model memory,
+conversation memory, an autonomous planner, a decision maker, or an
+execution mechanism.
 
-No implementation, source code, tests, runtime behavior, execution,
+No historical extraction implementation, historical memory database,
+historical memory CLI, dependency graph implementation, change impact
+analysis, source code, tests, runtime behavior, execution,
 authorization, enforcement, lifecycle behavior, Permission Broker
 behavior, Repository State behavior, Repository Skills behavior,
 Advisory behavior, Decision Evaluation behavior, Repository Transition
@@ -26,7 +27,33 @@ REST, Dashboard, Web UI, or Telegram inbound path changed.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 118B — Historical Memory Architecture.
+Recommended next repo phase: 118C — Change Impact Analysis Architecture.
+
+## Phase 118B Complete
+
+Phase 118B — Historical Memory Architecture (completed).
+
+Architecture-only Historical Memory design for Track B Repository
+Intelligence. The phase defines Historical Memory as a temporal view
+inside Repository Knowledge using historical subjects, events, claims,
+sources, evidence links, snapshots, lineages, and query results. It
+defines phase, report, decision, repair, hardening, release, and
+subsystem lineage; supersession and correction handling; conflict
+preservation; source attribution; determinism; verification; versioning;
+query classes; and integrations with Evidence, Repository Skills,
+Advisory, and Decision Evaluation.
+
+**No-go**: no historical extraction implementation, historical memory
+database, historical memory CLI, dependency graph implementation, change
+impact analysis, source implementation, test implementation, runtime
+behavior change, execution, authorization, enforcement, lifecycle
+behavior change, Permission Broker change, Repository State behavior
+change, Repository Skills behavior change, Advisory behavior change,
+Decision Evaluation change, Repository Transition Validator behavior
+change, Notification Policy behavior change, model integration, REST,
+Dashboard, Web UI, or Telegram inbound.
+
+Recommended next repo phase: 118C — Change Impact Analysis Architecture.
 
 ## Phase 118A Complete
 
