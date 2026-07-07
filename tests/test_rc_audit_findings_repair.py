@@ -274,9 +274,10 @@ class TestCliIntegration:
         exit_code = main(["task", "finish", "--staged-file-aware", "--commit", "Repair test finish"])
         output = capsys.readouterr().out
 
-        assert exit_code == 0  # task finish itself never hard-fails
-        assert "Report notification: skipped_incomplete" in output
-        assert "old_schema_gate" in output
+        assert exit_code == 1
+        assert "Repository transition validator: Transition quarantined" in output
+        assert "Report notification: skipped" in output
+        assert "report_completeness" in output
 
     def test_phase_complete_incomplete_report_path_hard_fails(self, tmp_path, monkeypatch, capsys):
         from pcae.cli import main

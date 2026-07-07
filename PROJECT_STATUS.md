@@ -2,33 +2,52 @@
 
 ## Current Phase
 
-Phase 117A — v0.2 Architecture Retrospective & Release Notes
+Phase 117B — v0.2 Test Suite Maintenance & Quality Improvements
 (completed).
 
-Documentation and analysis only: produced the canonical v0.2
-architecture retrospective (`docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`)
-covering the evolution of PCAE across eleven architectural epochs
-(Governance Foundation, Repository State Kernel, Repository Transition
-Validator, Canonical Reporting, Evidence Framework, Decision
-Evaluation, Repository Skills, Advisory Repository Skills, Advisory
-Context Package, Architecture Review, Architecture Freeze), the ten
-architectural principles that now define PCAE, the major design
-decisions and their rationale, lessons learned (successes, unexpected
-discoveries, governance improvements, mistakes corrected, reusable
-patterns), v0.2 release notes (delivered and explicitly-not-delivered
-capabilities), and the documented (non-committal) starting point for
-v0.3. No feature, runtime behavior, execution, authorization,
-lifecycle behavior, Repository State change, Repository Skills change,
-Advisory change, Decision Evaluation change, Repository Transition
-Validator change, Notification Policy change, model integration, REST,
-Dashboard, Web UI, or Telegram inbound path changed.
+Test-maintenance-only phase: repaired the stale/legacy expectations
+documented during 116C/116D so PCAE has a clean v0.2 quality baseline.
+Updated real-repository TODO/bootstrap consistency tests to derive the
+expected recommended phase from authoritative `PROJECT_STATUS.md`
+instead of hard-coding stale `113Y`; updated the TODO planning scratch
+row to mark 117B as the authoritative recommended next phase; and
+updated the legacy RC audit CLI expectation to match frozen v0.2
+Repository Transition Validator behavior for incomplete reports
+(quarantine, `report_completeness` violation, notification skipped).
+
+Validation passed: focused stale-test set `40 passed`; full suite
+`18063 passed`; `fast_green` `4390 passed`.
+
+No production source files changed. No feature, runtime behavior,
+execution, authorization, architecture, lifecycle behavior, Repository
+State behavior, Repository Skills behavior, Advisory behavior, Decision
+Evaluation behavior, Repository Transition Validator behavior,
+Notification Policy behavior, model integration, REST, Dashboard, Web
+UI, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 117B — v0.2 Test Suite Maintenance &
-Quality Improvements.
+Recommended next repo phase: 117C — v0.2 Quality Baseline Verification.
+
+## Phase 117B Complete
+
+Phase 117B — v0.2 Test Suite Maintenance & Quality Improvements
+(completed).
+
+Repaired stale test expectations documented by 116C/116D without
+changing production runtime behavior. See
+`docs/PHASE_117B_V0_2_TEST_SUITE_MAINTENANCE.md`.
+
+**No-go**: no feature, runtime behavior, execution, authorization,
+architecture change, lifecycle behavior change, Repository State
+behavior change, Repository Skills behavior change, Advisory behavior
+change, Decision Evaluation behavior change, Repository Transition
+Validator behavior change, Notification Policy behavior change, model
+integration, REST, Dashboard, Web UI, or Telegram inbound.
+
+Recommended next repo phase: 117C — v0.2 Quality Baseline Verification.
 
 ## Phase 117A Complete
 

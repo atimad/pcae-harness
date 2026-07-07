@@ -1,31 +1,27 @@
 {
-  "phase_id": "117A",
-  "phase_name": "v0.2 Architecture Retrospective & Release Notes",
-  "phase_title": "v0.2 Architecture Retrospective & Release Notes",
+  "phase_id": "117B",
+  "phase_name": "v0.2 Test Suite Maintenance & Quality Improvements",
+  "phase_title": "v0.2 Test Suite Maintenance & Quality Improvements",
   "status": "completed",
-  "summary": "Documentation-and-analysis-only phase. Produced the canonical v0.2 architecture retrospective (docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md) covering eleven architectural epochs (Governance Foundation, Repository State Kernel, Repository Transition Validator, Canonical Reporting, Evidence Framework, Decision Evaluation, Repository Skills, Advisory Repository Skills, Advisory Context Package, Architecture Review, Architecture Freeze), ten architectural principles, six major design-decision rationales, lessons learned across five categories (successes, unexpected discoveries, governance improvements, mistakes corrected, reusable patterns), v0.2 release notes (delivered and explicitly-not-delivered capabilities), and a non-committal v0.3 direction section. No feature, runtime behavior, execution, authorization, lifecycle behavior, Repository State change, Repository Skills change, Advisory change, Decision Evaluation change, Repository Transition Validator change, Notification Policy change, model integration, REST, Dashboard, Web UI, or Telegram inbound path changed.",
-  "files_changed_count": 4,
+  "summary": "Test-maintenance-only phase. Repaired stale/legacy test expectations documented during 116C/116D so PCAE has a clean v0.2 quality baseline before release preparation. Updated real-repository TODO/bootstrap consistency tests to derive the expected recommended phase from authoritative PROJECT_STATUS.md instead of hard-coding stale 113Y; updated tasks/TODO.md's planning scratch row to mark 117B as next; and updated the legacy RC audit CLI expectation to match frozen v0.2 Repository Transition Validator behavior for incomplete reports: quarantine, report_completeness violation, and notification skipped. Focused stale-test set, full suite, and fast_green all pass. No production source files changed. No feature, runtime behavior, execution, authorization, architecture, lifecycle behavior, Repository State behavior, Repository Skills behavior, Advisory behavior, Decision Evaluation behavior, Repository Transition Validator behavior, Notification Policy behavior, model integration, REST, Dashboard, Web UI, or Telegram inbound path changed.",
+  "files_changed_count": 9,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md",
-    "tasks/active/20260707-0552-phase-117a-v0-2-architecture-retrospective-release-notes.md"
+    "docs/PHASE_117B_V0_2_TEST_SUITE_MAINTENANCE.md",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/TODO.md",
+    "tasks/active/20260707-0656-phase-117b-v0-2-test-suite-maintenance-quality-improvements.md",
+    "tests/test_bootstrap_todo_consistency.py",
+    "tests/test_rc_audit_findings_repair.py"
   ],
-  "tests_added_or_updated": "No tests added or updated; documentation and analysis phase only.",
-  "phase_commits": [
-    {
-      "hash": "a7244f47",
-      "message": "Implement Phase 117A - v0.2 Architecture Retrospective and Release Notes"
-    },
-    {
-      "hash": "bd68ef9e",
-      "message": "Complete Phase 117A - v0.2 Architecture Retrospective and Release Notes"
-    }
-  ],
+  "tests_added_or_updated": "Updated stale expectations in tests/test_bootstrap_todo_consistency.py and tests/test_rc_audit_findings_repair.py.",
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117A is documentation-only)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117B is test-maintenance only)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
+  "pushed_status": "not_pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
@@ -56,13 +52,13 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean",
+      "result": "nothing_to_push",
       "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "result": "safe to continue",
-      "status": "passed"
+      "result": "blocked before final commit because working tree dirty and active task present; rerun after completion",
+      "status": "pending"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -71,7 +67,7 @@
     },
     {
       "name": "pcae_runtime_inspect",
-      "result": "execution unavailable, Observed, observe",
+      "result": "execution unavailable, Observed, observe, zero runtime plugins",
       "status": "passed"
     },
     {
@@ -80,14 +76,19 @@
       "status": "passed"
     },
     {
-      "name": "phase_finalization_skill",
-      "result": "resolved, target 117A in_progress from PROJECT_STATUS.md",
+      "name": "focused_stale_tests",
+      "result": "40 passed in 1.97s",
+      "status": "passed"
+    },
+    {
+      "name": "full_suite",
+      "result": "18063 passed in 815.34s",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "not_applicable_documentation_phase",
-      "status": "not_applicable"
+      "result": "4390 passed in 70.97s",
+      "status": "passed"
     },
     {
       "name": "report_notification_tests",
@@ -96,15 +97,15 @@
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_documentation_phase",
-      "status": "not_applicable"
+      "result": "pcae session bootstrap --compact --profile implementation completed",
+      "status": "passed"
     }
   ],
   "test_results": {
-    "architecture_retrospective_documentation": "completed",
-    "bootstrap_session_reporting_tests": "not_applicable_documentation_phase",
-    "fast_green": "not_applicable_documentation_phase",
-    "phase_finalization_skill": "resolved",
+    "focused_stale_tests": "40 passed in 1.97s",
+    "full_suite": "18063 passed in 815.34s",
+    "fast_green": "4390 passed in 70.97s",
+    "bootstrap_session_reporting_tests": "passed",
     "report_notification_tests": "pending_final_telegram_delivery",
     "runtime_inspect_execution_unavailable": "passed"
   },
@@ -123,11 +124,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "nothing_to_push"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "safe to continue"
+      "status": "pending until tree is clean and task is closed"
     },
     {
       "name": "pcae_session_bootstrap_compact",
@@ -135,7 +136,7 @@
     },
     {
       "name": "pcae_runtime_inspect",
-      "status": "execution unavailable, Observed, observe"
+      "status": "execution unavailable, Observed, observe, zero runtime plugins"
     },
     {
       "name": "telegram_runtime",
@@ -148,6 +149,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No lifecycle behavior changed. No Repository State change. No Repository Skills change. No Advisory change. No Decision Evaluation change. No Repository Transition Validator change. No Notification Policy change. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
-  "recommended_next_phase": "117B - v0.2 Test Suite Maintenance & Quality Improvements"
+  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No architecture changed. No lifecycle behavior changed. No Repository State behavior changed. No Repository Skills behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
+  "recommended_next_phase": "117C - v0.2 Quality Baseline Verification"
 }

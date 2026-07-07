@@ -2,6 +2,17 @@
 
 ## Accepted
 
+- Treat Phase 117B as test-maintenance only: update stale/legacy test
+  expectations documented by 116C/116D to match frozen v0.2 behavior
+  without changing production source or weakening safety coverage.
+  `PROJECT_STATUS.md` remains authoritative over `tasks/TODO.md`; real
+  TODO/bootstrap tests should derive the current recommended phase from
+  that source instead of hard-coding a historical phase id. Incomplete
+  task-finish report promotion is expected to be quarantined by the
+  Repository Transition Validator with notification dispatch skipped.
+  The 88M preflight standalone issue remains classified as a
+  real-repository fixture-state concern unless it reproduces with an
+  active task and proves a product defect.
 - Treat Phase 116C as verification-only: Phase 116B introduced no
   runtime/source regression because it changed no `src/` or `tests/`
   files. Six full-suite failures are pre-existing stale expectations.

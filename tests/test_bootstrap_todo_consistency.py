@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import re
 import subprocess
 
 import pytest
@@ -29,6 +30,16 @@ from pcae.core.context import (
 from pcae.core.paths import HarnessPath
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _real_recommended_next_phase_id() -> str:
+    root = HarnessPath(REPO_ROOT)
+    pack = build_context_pack(root)
+    recommended = pack.roadmap_summary["recommended_next_phase"]
+    assert recommended is not None
+    match = re.match(r"\s*(\d{3}[A-Z](?:\.[A-Z0-9]+)?)", recommended)
+    assert match is not None
+    return match.group(1)
 
 
 # ---------------------------------------------------------------------------
@@ -122,7 +133,8 @@ def test_recommended_next_phase_matches_real_project_status() -> None:
     pack = build_context_pack(root)
     recommended = pack.roadmap_summary["recommended_next_phase"]
     assert recommended is not None
-    assert "113Y" in recommended
+    assert recommended.lstrip().startswith("117B")
+    assert "v0.2 Test Suite Maintenance & Quality Improvements" in recommended
 
 
 # ---------------------------------------------------------------------------
@@ -256,11 +268,12 @@ def test_new_operational_rule_states_todo_precedence() -> None:
 
 def test_real_todo_no_longer_marks_90_series_as_next() -> None:
     text = (REPO_ROOT / "tasks" / "TODO.md").read_text(encoding="utf-8")
+    recommended_phase_id = _real_recommended_next_phase_id()
     lines_with_next_marker = [
         line for line in text.splitlines() if "\U0001F51C Next" in line and line.strip().startswith("|")
     ]
     assert len(lines_with_next_marker) == 1
-    assert "113Y" in lines_with_next_marker[0]
+    assert recommended_phase_id in lines_with_next_marker[0]
     assert "90C" not in lines_with_next_marker[0]
 
 
@@ -270,10 +283,11 @@ def test_real_todo_marks_90_series_table_historical() -> None:
     assert "Historical reference only" in text
 
 
-def test_real_todo_current_roadmap_lists_113y_as_next() -> None:
+def test_real_todo_current_roadmap_lists_recommended_phase_as_next() -> None:
     text = (REPO_ROOT / "tasks" / "TODO.md").read_text(encoding="utf-8")
+    recommended_phase_id = _real_recommended_next_phase_id()
     current_section = text.split("## Current Roadmap")[1].split("## Historical")[0]
-    assert "113Y" in current_section
+    assert recommended_phase_id in current_section
     assert "Next" in current_section
 
 

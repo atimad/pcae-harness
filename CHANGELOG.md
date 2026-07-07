@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 117B — v0.2 Test Suite Maintenance & Quality Improvements
+  (`docs/PHASE_117B_V0_2_TEST_SUITE_MAINTENANCE.md`). Repaired the
+  stale/legacy test expectations documented by 116C/116D: real-repo
+  TODO/bootstrap consistency tests now derive the expected recommended
+  phase from authoritative `PROJECT_STATUS.md` instead of hard-coding
+  stale `113Y`; `tasks/TODO.md`'s planning scratch table now marks
+  117B as next; and the legacy RC audit CLI test now expects frozen
+  v0.2 Repository Transition Validator behavior for incomplete reports
+  (quarantine, `report_completeness`, notification skipped). Focused
+  stale-test set, full suite, and `fast_green` all pass. No production
+  source files changed. No feature, runtime behavior, execution,
+  authorization, architecture, lifecycle behavior, Repository State
+  behavior, Repository Skills behavior, Advisory behavior, Decision
+  Evaluation behavior, Repository Transition Validator behavior,
+  Notification Policy behavior, model integration, REST, Dashboard,
+  Web UI, or Telegram inbound path changed.
+
 - Phase 117A — v0.2 Architecture Retrospective & Release Notes.
   Documentation-and-analysis-only phase
   (`docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`). Documents eleven
