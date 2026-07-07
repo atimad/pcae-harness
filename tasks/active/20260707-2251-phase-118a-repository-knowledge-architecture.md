@@ -55,7 +55,6 @@ Design the architecture-only Repository Knowledge foundation for Track B Reposit
 - package
 - session
 - policy
-- config
 
 ## Allowed Dependencies
 

@@ -1,48 +1,56 @@
-# Phase 117E.1 Complete — v0.2.0 Release Publication Repair
+# Phase 118A Complete - Repository Knowledge Architecture
 
-- **Phase ID:** `117E.1`
+- **Phase ID:** `118A`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 10
-- **Tests run:** release publication and governance verification
-- **Commits:** d951da2e, 04021713, 0c97e389
+- **Files changed:** 9
+- **Tests run:** governance validation only
+- **Commits:** 219d55ba
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 117E.1 is a corrective governance phase for the v0.2.0
-publication gap. It preserves the audit trail without rewriting history:
-117E remains part of project history as release preparation /
-release-attempt work, while 117E.1 records and repairs the external
-publication discrepancy.
+Phase 118A begins Track B: Repository Intelligence. It defines
+Repository Knowledge as deterministic, inspectable, source-attributed,
+read-only architectural understanding derived from repository sources.
 
-## Verification Before Repair
+The phase establishes Repository Knowledge as distinct from Repository
+State, Evidence, Advisory Context, Repository Skills, and Decision
+Evaluation. It preserves the v0.2 authority model: Repository State owns
+governed lifecycle condition, Evidence remains evaluation-scoped,
+Repository Skills produce evidence only, Advisory remains advisory and
+evidence-producing, and Decision Evaluation / the Repository Transition
+Validator remain the only decision path.
 
-- Package/version metadata reported `0.2.0`.
-- `docs/RELEASE_NOTES_V0_2_0.md` existed.
-- Local Git tag `v0.2.0` was missing.
-- Remote Git tag `v0.2.0` was missing.
-- GitHub Release `v0.2.0` was missing.
-- Canonical latest phase report still pointed to 117D.
+## Architecture Produced
 
-## Corrective Publication Performed
+- Created `docs/PHASE_118_REPOSITORY_KNOWLEDGE_ARCHITECTURE.md`.
+- Defined Repository Knowledge and its relationship to the v0.2
+  Repository State Kernel.
+- Defined the initial primitive set: Knowledge Entity, Knowledge
+  Relationship, Knowledge Claim, Knowledge Source, Knowledge Evidence
+  Link, and Knowledge Snapshot.
+- Defined entity and relationship taxonomies for architecture,
+  capability, contract, implementation, test, documentation, phase,
+  report, skill, evidence, ownership, dependency, history, impact, and
+  advisory relationships.
+- Established a layered model: source layer, claim layer,
+  entity/relationship layer, and view layer.
+- Defined source attribution, determinism, production, inspection,
+  verification, and versioning models.
+- Defined read-only no-go boundaries.
+- Explained how historical memory, change impact analysis, dependency
+  graph work, architectural contract mapping, and advisory reasoning can
+  emerge from a shared Repository Knowledge foundation.
 
-- Created local Git tag `v0.2.0`.
-- Created remote Git tag `v0.2.0`.
-- Published GitHub Release `PCAE v0.2.0`.
-- Published release notes from `docs/RELEASE_NOTES_V0_2_0.md`.
+## Track B Boundary
 
-Release URL:
-`https://github.com/atimad/pcae-harness/releases/tag/v0.2.0`
-
-## Audit-Trail Preservation
-
-No historical records were rewritten. No existing 117E commit was
-amended, removed, or reclassified out of history. This phase is an
-additive repair record documenting what was expected, what verification
-found, and what was corrected.
+Repository Knowledge is not autonomy, execution, larger context, provider
+selection, model orchestration, or enforcement. It is a deterministic
+understanding layer that can later produce evidence candidates and
+support advisory context without becoming a decision maker.
 
 ## PCAE Architecture Status
 
@@ -52,16 +60,12 @@ maintained as runtime state.*
 ### Completed
 
 - v0.2 Architecture Freeze through Phase 116F
-- v0.2 Architecture Retrospective & Release Notes through Phase 117A
-- v0.2 Test Suite Maintenance & Quality Improvements through Phase 117B
-- v0.2 Quality Baseline Verification through Phase 117C
-- v0.2 Release Candidate Preparation through Phase 117D
-- v0.2.0 Release preparation / attempt through Phase 117E
-- v0.2.0 Release Publication Repair through Phase 117E.1
+- v0.2 Release through Phase 117E / 117E.1 publication repair
+- Track B Repository Intelligence foundation through Phase 118A
 
 ### Planned
 
-- 117F — Public v0.2 Article Draft (outside repository)
+- 118B - Historical Memory Architecture
 
 ### Current Runtime State
 
@@ -74,47 +78,60 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
-- **pcae_agent_verify_handoff:** pending final validation
-- **pcae_session_bootstrap_compact:** passed
-- **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
-- **telegram_runtime:** configured, enabled, ready for outbound delivery
+- **pcae_push_check:** nothing_to_push
+- **pcae_skill_invoke_phase_finalization_118A:** target resolved; preview-only in current lifecycle
+- **pcae_runtime_inspect:** pending final validation
+- **telegram_runtime:** pending final validation after sourcing environment
 
-## Release Verification
+## Validation
 
-- **local_git_tag:** `v0.2.0` exists and points to `d951da2e1402744688cc40aae5ef75d98976d716`
-- **remote_git_tag:** `v0.2.0` exists and points to `d951da2e1402744688cc40aae5ef75d98976d716`
-- **github_release:** `https://github.com/atimad/pcae-harness/releases/tag/v0.2.0`
-- **release_notes_published:** GitHub Release body contains approved 117E.1 release-status wording
+- `pcae health` passed.
+- `pcae check` passed.
+- `pcae doctor task-memory` passed.
+- `pcae push check` passed with `nothing_to_push`.
+- `pcae skill invoke phase-finalization 118A` resolved the phase target;
+  in the current lifecycle this command is a preview/targeting command
+  and does not write completion artifacts.
+
+No implementation test suite or `fast_green` run was required because
+118A changed documentation and governance memory only. No source or test
+files changed.
 
 ## No-Go Confirmations
 
-- No feature implemented.
+- No implementation added.
+- No source code changed.
+- No tests changed.
 - No runtime behavior changed.
 - No execution implemented.
 - No authorization implemented.
-- No architecture changed.
+- No enforcement implemented.
 - No lifecycle behavior changed.
-- No production source changed.
-- No tests changed.
-- No PyPI publication.
-- No package publication.
+- No Permission Broker behavior changed.
+- No Repository State behavior changed.
+- No Repository Skills behavior changed.
+- No Advisory behavior changed.
+- No Decision Evaluation behavior changed.
+- No Repository Transition Validator behavior changed.
+- No Notification Policy behavior changed.
 - No model integration.
 - No REST.
 - No Dashboard.
-- No Web UI implementation.
+- No Web UI.
 - No Telegram inbound.
-- No historical records rewritten.
+
+Execution capability remains unavailable. Runtime state remains
+`Observed`. Maximum runtime capability remains `observe`.
 
 ## Recommended Next Phase
 
-117F — Public v0.2 Article Draft (outside repository)
+118B - Historical Memory Architecture
 
 ## Report Consistency
 
-- **Canonical report:** present
+- **Canonical report:** pending `pcae phase complete` promotion
 - **Metadata:** present
-- **Status:** consistent after pushed-state metadata sync; pending final notification
+- **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 117E.1. Schema version 1.0.*
+*Report generated for PCAE Phase 118A. Schema version 1.0.*

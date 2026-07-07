@@ -1,39 +1,30 @@
 {
-  "phase_id": "117E.1",
-  "phase_name": "v0.2.0 Release Publication Repair",
-  "phase_title": "v0.2.0 Release Publication Repair",
+  "phase_id": "118A",
+  "phase_name": "Repository Knowledge Architecture",
+  "phase_title": "Repository Knowledge Architecture",
   "status": "completed",
-  "summary": "Corrective governance phase for the v0.2.0 publication gap. Verification found release metadata and release notes present, but the local tag, remote tag, GitHub Release, and canonical latest report were missing or inconsistent. 117E.1 preserved the audit trail without rewriting history, created the local v0.2.0 tag, created the remote v0.2.0 tag, and published the GitHub Release using docs/RELEASE_NOTES_V0_2_0.md. No feature implementation, runtime behavior change, architecture change, execution capability, lifecycle change, production source change, test change, PyPI publication, or package publication occurred.",
-  "files_changed_count": 10,
+  "summary": "Architecture-only start of Track B: Repository Intelligence. Defines Repository Knowledge as a deterministic, inspectable, source-attributed, read-only architectural understanding layer distinct from Repository State, Evidence, Advisory Context, Repository Skills, and Decision Evaluation. Establishes core primitives, layered knowledge graph model, source attribution, determinism, production, inspection, verification, versioning, read-only boundaries, and future emergence paths for historical memory, change impact analysis, dependency graph work, architectural contract mapping, and advisory reasoning. No source, test, runtime behavior, execution, enforcement, lifecycle behavior, Permission Broker, REST, Dashboard, Web UI, model integration, or Telegram inbound changes.",
+  "files_changed_count": 9,
   "files_changed": [
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_117E_1_RELEASE_PUBLICATION_REPAIR.md",
-    "docs/RELEASE_NOTES_V0_2_0.md",
+    "docs/PHASE_118_REPOSITORY_KNOWLEDGE_ARCHITECTURE.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20260707-1418-phase-117e-1-v0-2-0-release-publication-repair.md"
+    "tasks/active/20260707-2251-phase-118a-repository-knowledge-architecture.md"
   ],
-  "tests_added_or_updated": "None. 117E.1 was corrective release-publication governance and did not modify tests.",
+  "tests_added_or_updated": "None. 118A was architecture-only documentation and did not modify tests.",
   "phase_commits": [
     {
-      "hash": "d951da2e",
-      "message": "Document Phase 117E.1 release publication repair"
-    },
-    {
-      "hash": "04021713",
-      "message": "Sync Phase 117E.1 release publication metadata"
-    },
-    {
-      "hash": "0c97e389",
-      "message": "Close Phase 117E.1 release publication repair"
+      "hash": "219d55ba",
+      "message": "Document Phase 118A repository knowledge architecture"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117E.1 is corrective release-publication governance)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 118A is architecture-only documentation)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -49,26 +40,6 @@
     "current_maximum_plugin_capability": "observe"
   },
   "validation_results": [
-    {
-      "name": "local_git_tag",
-      "result": "v0.2.0 -> d951da2e1402744688cc40aae5ef75d98976d716",
-      "status": "passed"
-    },
-    {
-      "name": "remote_git_tag",
-      "result": "v0.2.0 -> d951da2e1402744688cc40aae5ef75d98976d716",
-      "status": "passed"
-    },
-    {
-      "name": "github_release",
-      "result": "https://github.com/atimad/pcae-harness/releases/tag/v0.2.0",
-      "status": "passed"
-    },
-    {
-      "name": "release_notes_match",
-      "result": "GitHub Release body contains approved Phase 117E.1 release-status wording",
-      "status": "passed"
-    },
     {
       "name": "pcae_health",
       "result": "healthy",
@@ -86,22 +57,12 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean",
+      "result": "nothing_to_push",
       "status": "passed"
     },
     {
-      "name": "pcae_agent_verify_handoff",
-      "result": "pending final validation",
-      "status": "pending"
-    },
-    {
-      "name": "pcae_session_bootstrap_compact",
-      "result": "passed",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "passed",
+      "name": "pcae_skill_invoke_phase_finalization_118A",
+      "result": "target resolved; invocation is preview-only in current lifecycle",
       "status": "passed"
     },
     {
@@ -111,29 +72,27 @@
     },
     {
       "name": "pcae_notify_status",
-      "result": "Telegram configured, enabled, ready for outbound delivery",
+      "result": "pending final Telegram runtime check after sourcing environment",
+      "status": "pending"
+    },
+    {
+      "name": "architecture_scope",
+      "result": "documentation and governance memory only; no src or tests changed",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "not_applicable_corrective_release_publication_repair_no_tests_changed",
+      "result": "not_applicable_architecture_only_no_source_or_tests_changed",
       "status": "not_applicable"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "pending final Telegram delivery",
-      "status": "pending"
     }
   ],
   "test_results": {
-    "local_git_tag": "passed",
-    "remote_git_tag": "passed",
-    "github_release": "passed",
-    "release_notes_match": "passed",
-    "bootstrap_session_reporting_tests": "passed",
-    "fast_green": "not_applicable_corrective_release_publication_repair_no_tests_changed",
-    "runtime_inspect_execution_unavailable": "passed",
-    "report_notification_tests": "pending_final_telegram_delivery"
+    "pcae_health": "passed",
+    "pcae_check": "passed",
+    "pcae_doctor_task_memory": "passed",
+    "pcae_push_check": "passed",
+    "runtime_inspect_execution_unavailable": "pending_final_validation",
+    "fast_green": "not_applicable_architecture_only_no_source_or_tests_changed"
   },
   "governance_results": [
     {
@@ -150,37 +109,23 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_agent_verify_handoff",
-      "status": "pending final validation"
+      "status": "nothing_to_push"
     },
     {
       "name": "pcae_runtime_inspect",
-      "status": "execution unavailable, Observed, observe, zero runtime plugins"
+      "status": "pending final validation"
     },
     {
       "name": "telegram_runtime",
-      "status": "configured, enabled, ready for outbound delivery"
+      "status": "pending final validation after sourcing environment"
     }
   ],
-  "release_results": {
-    "release_tag": "v0.2.0",
-    "local_git_tag_exists": true,
-    "remote_git_tag_exists": true,
-    "github_release_published": true,
-    "github_release_url": "https://github.com/atimad/pcae-harness/releases/tag/v0.2.0",
-    "release_notes_published": true,
-    "pypi_published": false,
-    "packages_published": false
-  },
   "telegram_runtime": {
-    "status": "configured, enabled, ready for outbound delivery",
+    "status": "pending final validation after sourcing environment",
     "inbound": false,
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No architecture changed. No lifecycle behavior changed. No production source changed. No tests changed. No PyPI publication. No package publication. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No historical records rewritten. Execution capability remains unavailable.",
-  "recommended_next_phase": "117F - Public v0.2 Article Draft (outside repository)"
+  "no_go_confirmation": "No implementation added. No source code changed. No tests changed. No runtime behavior changed. No execution implemented. No authorization implemented. No enforcement implemented. No lifecycle behavior changed. No Permission Broker behavior changed. No Repository State behavior changed. No Repository Skills behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. Execution capability remains unavailable.",
+  "recommended_next_phase": "118B - Historical Memory Architecture"
 }
