@@ -10,7 +10,7 @@ Sync Phase 117C completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
