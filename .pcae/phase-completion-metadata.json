@@ -100,6 +100,11 @@
       "status": "passed"
     },
     {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "passed",
+      "status": "passed"
+    },
+    {
       "name": "pcae_runtime_inspect",
       "result": "execution unavailable, Observed, observe, zero runtime plugins",
       "status": "passed"
