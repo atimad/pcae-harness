@@ -1,49 +1,38 @@
-# Phase 117A Complete — v0.2 Architecture Retrospective & Release Notes
+# Phase 117B Complete — v0.2 Test Suite Maintenance & Quality Improvements
 
-- **Phase ID:** `117A`
+- **Phase ID:** `117B`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 4
-- **Tests run:** documentation and analysis phase only; no tests added or run
-- **Commits:** a7244f47, bd68ef9e
+- **Files changed:** 11
+- **Tests run:** focused stale-test set, full suite, and fast_green
+- **Commits:** b4534f98, 12c673da, e37d243a
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
 
-Phase 117A is a documentation-and-analysis-only phase. It produced the
-canonical v0.2 architecture retrospective
-(`docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`), following the v0.2
-architecture freeze declared in Phase 116F. Zero runtime implementation
-change.
+Phase 117B was a test-maintenance-only phase. It repaired the stale and
+legacy expectations documented during 116C/116D so PCAE has a clean v0.2
+quality baseline before release preparation. No production source files
+changed.
 
-## Retrospective Contents
+## Maintenance Contents
 
-- **Evolution**: eleven architectural epochs from Governance Foundation
-  through Architecture Freeze.
-- **Principles**: ten architectural principles now defining PCAE
-  (governance first, deterministic before probabilistic, evidence
-  before decision, explainability before automation, execution
-  unavailable by default, advisory cannot authorize, advisory cannot
-  mutate repository, capability boundaries are explicit,
-  behavior-preserving evolution, architecture before implementation).
-- **Design decisions**: six major design-decision rationales (contract
-  freeze before implementation, evidence/decision separation,
-  advisory/authority separation, execution unavailability, single
-  Advisory Provider default, AI as evidence producer not decision
-  maker).
-- **Lessons learned**: architectural successes, unexpected discoveries,
-  governance improvements, mistakes corrected, reusable engineering
-  practices.
-- **Release notes**: capabilities delivered and explicitly not
-  delivered in v0.2.
-- **v0.3 direction**: stale-test maintenance, richer deterministic
-  evidence, advisory quality improvements, architectural dependency
-  analysis, semantic repository understanding, constrained execution
-  planning — documented only, no implementation commitment.
+- Updated `tests/test_bootstrap_todo_consistency.py` so real-repository
+  checks derive the expected recommended phase id from authoritative
+  `PROJECT_STATUS.md` instead of hard-coding stale `113Y`.
+- Updated `tasks/TODO.md`'s planning scratch table so its single next
+  marker matches the authoritative 117B recommendation.
+- Updated `tests/test_rc_audit_findings_repair.py` to expect frozen
+  v0.2 Repository Transition Validator behavior for incomplete
+  task-finish report promotion: quarantine, `report_completeness`
+  violation, and notification skipped.
+- Confirmed the documented 88M standalone issue is fixture-state
+  dependent: the focused `test_88m_requires_human_review` set passed
+  with the 117B task active.
 
-Full detail: `docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`.
+Full detail: `docs/PHASE_117B_V0_2_TEST_SUITE_MAINTENANCE.md`.
 
 ## PCAE Architecture Status
 
@@ -58,10 +47,11 @@ maintained as runtime state.*
 - v0.2 Architecture Freeze Preparation through Phase 116D
 - v0.2 Architecture Freeze through Phase 116F
 - v0.2 Architecture Retrospective & Release Notes through Phase 117A
+- v0.2 Test Suite Maintenance & Quality Improvements through Phase 117B
 
 ### Planned
 
-- 117B — v0.2 Test Suite Maintenance & Quality Improvements
+- 117C — v0.2 Quality Baseline Verification
 
 ### Current Runtime State
 
@@ -74,32 +64,36 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean (pushed, origin/main..HEAD == 0)
-- **pcae_agent_verify_handoff:** safe to continue
+- **pcae_push_check:** clean
+- **pcae_agent_verify_handoff:** pending final metadata sync and canonical report promotion
 - **pcae_session_bootstrap_compact:** completed
-- **pcae_runtime_inspect:** execution unavailable, Observed, observe
+- **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
 - **telegram_runtime:** configured, enabled, ready for outbound delivery
 
 ## Test Results
 
-- **architecture_retrospective_documentation:** completed
-- **fast_green:** not_applicable (documentation phase)
+- **focused_stale_tests:** 40 passed in 1.97s
+- **full_suite:** 18063 passed in 815.34s
+- **fast_green:** 4390 passed in 70.97s
+- **bootstrap_session_reporting_tests:** passed
+- **runtime_inspect_execution_unavailable:** passed
 - **report_notification_tests:** pending final Telegram delivery
-- **bootstrap_session_reporting_tests:** not_applicable (documentation phase)
 
 ## No-Go Confirmations
 
 - No new feature added.
+- No production source file changed.
 - No runtime behavior changed.
 - No execution.
 - No authorization.
+- No architecture change.
 - No lifecycle behavior changed.
-- No Repository State change.
-- No Repository Skills change.
-- No Advisory change.
-- No Decision Evaluation change.
-- No Repository Transition Validator change.
-- No Notification Policy change.
+- No Repository State behavior changed.
+- No Repository Skills behavior changed.
+- No Advisory behavior changed.
+- No Decision Evaluation behavior changed.
+- No Repository Transition Validator behavior changed.
+- No Notification Policy behavior changed.
 - No model integration.
 - No REST.
 - No Dashboard.
@@ -113,7 +107,7 @@ maintained as runtime state.*
 
 ## Recommended Next Phase
 
-117B — v0.2 Test Suite Maintenance & Quality Improvements
+117C — v0.2 Quality Baseline Verification
 
 ## Report Consistency
 
@@ -122,4 +116,4 @@ maintained as runtime state.*
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 117A. Schema version 1.0.*
+*Report generated for PCAE Phase 117B. Schema version 1.0.*
