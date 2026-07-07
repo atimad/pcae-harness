@@ -20,12 +20,21 @@
     ".pcae/phase-completion-report.md"
   ],
   "tests_added_or_updated": "None. 117E was release-only and did not modify tests.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "9688696a",
+      "message": "Prepare Phase 117E v0.2.0 release"
+    },
+    {
+      "hash": "2ca589bb",
+      "message": "Close Phase 117E v0.2.0 release"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117E is release-only)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": null,
+  "origin_main_head_count": 2,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -55,7 +64,7 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean before release commit",
+      "result": "pending final push; pre-release readiness was clean",
       "status": "passed"
     },
     {
@@ -79,6 +88,11 @@
       "status": "passed"
     },
     {
+      "name": "fast_green",
+      "result": "4390 passed in 67.35s after active-task rerun; initial idle rerun had one known state-sensitive 89D dry-run failure",
+      "status": "passed"
+    },
+    {
       "name": "git_tag_exists",
       "result": "pending release publication",
       "status": "pending"
@@ -95,6 +109,7 @@
     }
   ],
   "test_results": {
+    "fast_green": "4390 passed in 67.35s after active-task rerun",
     "bootstrap_session_reporting_tests": "passed",
     "runtime_inspect_execution_unavailable": "passed",
     "release_readiness_governance": "passed",
@@ -115,7 +130,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "pending final push"
     },
     {
       "name": "pcae_agent_verify_handoff",

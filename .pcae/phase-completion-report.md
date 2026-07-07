@@ -5,8 +5,8 @@
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 12
-- **Tests run:** release readiness governance checks
-- **Commits:** pending
+- **Tests run:** release readiness governance checks and fast_green
+- **Commits:** 9688696a, 2ca589bb
 - **Pushed:** not_pushed
 - **origin/main..HEAD:** pending
 
@@ -63,7 +63,7 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
+- **pcae_push_check:** pending final push; pre-release readiness was clean
 - **pcae_agent_verify_handoff:** safe to continue
 - **pcae_session_bootstrap_compact:** passed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
@@ -71,6 +71,8 @@ maintained as runtime state.*
 
 ## Release Verification
 
+- **fast_green:** 4390 passed in 67.35s after active-task rerun
+- **fast_green initial idle rerun:** 1 failed, 4389 passed due known state-sensitive 89D dry-run expectation; no test or runtime repair made in release phase
 - **git_tag_exists:** pending release publication
 - **github_release_exists:** pending release publication
 - **release_notes_published:** pending release publication
