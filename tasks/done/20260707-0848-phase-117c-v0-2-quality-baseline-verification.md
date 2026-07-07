@@ -10,7 +10,7 @@ Phase 117C - v0.2 Quality Baseline Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
