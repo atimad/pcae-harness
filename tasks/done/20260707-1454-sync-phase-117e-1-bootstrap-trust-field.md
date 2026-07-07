@@ -10,7 +10,7 @@ Sync Phase 117E.1 bootstrap trust field
 
 ## Status
 
-active
+done
 
 ## Mode
 
