@@ -2,6 +2,14 @@
 
 ## Accepted
 
+- Treat Phase 117E.1 as an additive corrective governance phase, not a
+  history rewrite: 117E remains part of the audit trail as release
+  preparation / release-attempt history, while 117E.1 verifies the real
+  external publication state and publishes only the missing v0.2.0 Git
+  tag and GitHub Release. Do not amend or delete historical 117E
+  records. No feature, runtime behavior, architecture, execution,
+  lifecycle behavior, production source, or test behavior change is
+  authorized by this repair.
 - Treat Phase 117E as release-only: publish the official `v0.2.0` Git
   tag and GitHub Release using the 117D release notes, update release
   metadata/status, and do not add features, change runtime behavior,

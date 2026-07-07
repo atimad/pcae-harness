@@ -2,15 +2,27 @@
 
 ## Unreleased
 
+- Phase 117E.1 — v0.2.0 Release Publication Repair. Corrective
+  governance phase for the v0.2.0 publication gap. Verification found
+  that 117E had prepared release metadata and repository memory, but the
+  local Git tag, remote Git tag, GitHub Release, and canonical latest
+  phase report were missing or inconsistent. 117E.1 preserves the audit
+  trail without rewriting history, publishes only missing external
+  release artifacts, and documents the repair in
+  `docs/PHASE_117E_1_RELEASE_PUBLICATION_REPAIR.md`. No feature,
+  runtime behavior, execution, architecture, lifecycle behavior,
+  production source, or test behavior changed. No PyPI or package
+  publication occurred.
+
 - Phase 117E — v0.2.0 Release. Official release phase for PCAE v0.2.0.
   Verified final release readiness, updated release metadata to
-  `0.2.0` in package metadata and version constants, published the
-  `v0.2.0` Git tag and GitHub Release using
-  `docs/RELEASE_NOTES_V0_2_0.md`, and verified the repository remained
-  clean and governed afterward. No feature development, runtime change,
-  architecture change, execution capability, lifecycle modification,
-  PyPI publication, or package publication occurred. Execution remains
-  unavailable and runtime state remains `Observed`.
+  `0.2.0` in package metadata and version constants, and prepared the
+  repository for publication. Post-phase verification later found the
+  external publication artifacts were missing; Phase 117E.1 repairs
+  that gap without rewriting this history. No feature development,
+  runtime change, architecture change, execution capability, lifecycle
+  modification, PyPI publication, or package publication occurred.
+  Execution remains unavailable and runtime state remains `Observed`.
 
 - Phase 117D — v0.2 Release Candidate Preparation
   (`docs/PHASE_117D_V0_2_RELEASE_CANDIDATE_PREPARATION.md`).

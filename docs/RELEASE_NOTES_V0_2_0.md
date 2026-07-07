@@ -1,8 +1,9 @@
 # PCAE v0.2.0 Draft Release Notes
 
-Status: official v0.2.0 release notes. Phase 117E published the
-official Git tag and GitHub Release. No PyPI or package publication is
-part of this release.
+Status: official v0.2.0 release notes. Phase 117E prepared the release
+metadata and release-facing repository state; Phase 117E.1 repaired the
+publication gap by publishing the official Git tag and GitHub Release.
+No PyPI or package publication is part of this release.
 
 ## Release Positioning
 
@@ -109,6 +110,7 @@ Phase 117C established the current quality baseline:
 
 Phase 117D release preparation re-verified the release-facing
 documentation and reran the required release-prep validation gates.
+Phase 117E.1 verified and repaired external publication.
 
 ## Upgrade Notes
 
@@ -124,4 +126,4 @@ review, but it cannot authorize or perform repository mutation.
 
 ## Release Status
 
-Released as v0.2.0.
+Released as v0.2.0 by Phase 117E.1.

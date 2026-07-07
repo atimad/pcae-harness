@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 117E.1 - v0.2.0 Release Publication Repair (20260707-1418-phase-117e-1-v0-2-0-release-publication-repair)
 - Sync Phase 117E release metadata (20260707-1333-sync-phase-117e-release-metadata)
 - Phase 117E - v0.2.0 Release (20260707-1328-phase-117e-v0-2-0-release)
 - Sync Phase 117D completion metadata (20260707-1250-sync-phase-117d-completion-metadata)

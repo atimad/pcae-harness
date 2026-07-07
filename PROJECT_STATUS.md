@@ -2,13 +2,15 @@
 
 ## Current Phase
 
-Phase 117E — v0.2.0 Release
+Phase 117E.1 — v0.2.0 Release Publication Repair
 (completed).
 
-Official release phase for PCAE v0.2.0. Published the `v0.2.0` Git tag
-and GitHub Release using `docs/RELEASE_NOTES_V0_2_0.md` after 117D
-completed release-candidate preparation and 117C verified the quality
-baseline. Package metadata now reports `0.2.0`.
+Corrective governance phase for the v0.2.0 release-publication gap.
+Verification after 117E found that release preparation and version
+metadata updates had completed, but the local Git tag, remote Git tag,
+GitHub Release, and canonical 117E latest-report promotion were missing.
+117E.1 preserves the audit trail without rewriting history and publishes
+only the missing external release artifacts.
 
 No PyPI or package publication occurred. No feature, runtime behavior,
 execution, authorization, architecture, lifecycle behavior, Repository
@@ -23,12 +25,31 @@ runtime plugins.
 
 Recommended next repo phase: 117F — Public v0.2 Article Draft (outside repository).
 
+## Phase 117E.1 Complete
+
+Phase 117E.1 — v0.2.0 Release Publication Repair (completed).
+
+Corrective publication phase for v0.2.0. 117E remains part of the audit
+trail as release preparation / release attempt history. This phase
+verified the missing publication artifacts and published only what was
+absent: the `v0.2.0` Git tag and GitHub Release using
+`docs/RELEASE_NOTES_V0_2_0.md`. No historical records were rewritten.
+
+**No-go**: no feature, runtime behavior change, execution
+implementation, architecture change, lifecycle behavior change,
+production behavior change, test change, PyPI publication, or package
+publication.
+
+Recommended next repo phase: 117F — Public v0.2 Article Draft (outside repository).
+
 ## Phase 117E Complete
 
 Phase 117E — v0.2.0 Release (completed).
 
-Published the official PCAE v0.2.0 Git tag and GitHub Release using
-`docs/RELEASE_NOTES_V0_2_0.md`.
+Prepared the PCAE v0.2.0 release and updated version metadata to
+`0.2.0`, but post-phase verification later found the external Git tag
+and GitHub Release were missing. The publication gap is repaired by
+Phase 117E.1 without rewriting 117E history.
 
 **No-go**: no PyPI publication, package publication, feature, runtime
 behavior change, execution implementation, architecture change,
@@ -36,7 +57,7 @@ lifecycle behavior change, production behavior change, or test change.
 Only release-version metadata changed in package metadata and version
 constants.
 
-Recommended next repo phase: 117F — Public v0.2 Article Draft (outside repository).
+Recommended next repo phase: 117E.1 — v0.2.0 Release Publication Repair.
 
 ## Phase 117D Complete
 

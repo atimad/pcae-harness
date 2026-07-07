@@ -30,6 +30,7 @@ the frozen subsystem list and accepted non-blockers.
 | 116F | v0.2 Architecture Freeze | ✅ Complete |
 | 117D | v0.2 Release Candidate Preparation | ✅ Complete |
 | 117E | v0.2.0 Release | ✅ Complete |
+| 117E.1 | v0.2.0 Release Publication Repair | ✅ Complete |
 | 117F | Public v0.2 Article Draft (outside repository) | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
