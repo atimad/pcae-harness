@@ -1,36 +1,30 @@
 {
-  "phase_id": "116B",
-  "phase_name": "v0.2 Architecture Consolidation",
-  "phase_title": "v0.2 Architecture Consolidation",
+  "phase_id": "116C",
+  "phase_name": "v0.2 Architecture Consolidation Verification",
+  "phase_title": "v0.2 Architecture Consolidation Verification",
   "status": "completed",
-  "summary": "Documentation-only v0.2 architecture consolidation applying the minor items identified by Phase 116A. Structural invariants are documented as the long-term authority for phase identity, metadata consistency, report completeness, recommended-next-phase presence, canonical promotion eligibility, notification eligibility, and execution-unavailability checks. The legacy finalization gate remains a v0.2 compatibility/trust gate until its unique governance-key and test-result-key checks migrate into first-class invariants. Shared RepositoryState construction is documented as a future implementation shape owned by the Repository Transition Validator/integration layer. Repository Event is explicitly frozen as policy/taxonomy only for v0.2, not a runtime type, emitter, event bus, or subscription API. No runtime capability, execution, authorization, Permission Broker change, Repository Skill, Advisory Provider, Evidence Provider, Decision Evaluation behavior change, Repository Transition Validator behavior change, lifecycle command behavior change, Notification Policy behavior change, Telegram inbound, REST, Dashboard, Web UI, event bus, or model integration was implemented. Execution capability remains unavailable.",
-  "files_changed_count": 11,
+  "summary": "Verification-only phase for 116B consolidation. Confirmed 116B changed documentation, governance memory, and phase metadata only; no src or tests files changed across 116B. Re-ran the full test suite and exact failing tests. Full suite result: 7 failed, 18056 passed. Classified six failures as pre-existing stale expectations and one failure as an intentional changed expectation caused by the 116B roadmap scratch refresh from stale 113Y-era current-roadmap wording to the 116A/116B/116C v0.2 architecture-freeze track. No 116B runtime/source regression was found and no 116B repair is required. Runtime state remains Observed, execution unavailable, maximum plugin capability observe, and zero registered runtime plugins.",
+  "files_changed_count": 5,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/GOVERNANCE_LIFECYCLE_DIAGRAM.md",
-    "docs/PCAE_NOTIFICATION_POLICY.md",
-    "docs/PCAE_REPOSITORY_STATE_KERNEL.md",
-    "docs/PCAE_REPOSITORY_TRANSITION_VALIDATOR_INTEGRATION.md",
-    "docs/PHASE_116B_V0_2_ARCHITECTURE_CONSOLIDATION.md",
+    "docs/PHASE_116C_V0_2_ARCHITECTURE_CONSOLIDATION_VERIFICATION.md",
     "tasks/DECISIONS.md",
-    "tasks/DONE.md",
-    "tasks/TODO.md",
-    "tasks/done/20260706-2312-116b-v0-2-architecture-consolidation.md"
+    "tasks/done/20260707-0202-116c-v0-2-architecture-consolidation-verification.md"
   ],
-  "tests_added_or_updated": "No tests added or updated; architecture/documentation verification only.",
+  "tests_added_or_updated": "No tests added or updated; verification only.",
   "phase_commits": [
     {
-      "hash": "1aa4fe18",
-      "message": "116B v0.2 architecture consolidation"
+      "hash": "74d871de",
+      "message": "116C v0.2 architecture consolidation verification"
     },
     {
-      "hash": "fa82db98",
-      "message": "Close 116B architecture consolidation task"
+      "hash": "bb49b4c8",
+      "message": "Close 116C architecture verification task"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116B is documentation-only consolidation)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116C is verification-only)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -68,7 +62,7 @@
     },
     {
       "name": "pcae_session_bootstrap_compact",
-      "result": "completed; TODO next marker consistent with PROJECT_STATUS.md",
+      "result": "completed",
       "status": "passed"
     },
     {
@@ -78,8 +72,13 @@
     },
     {
       "name": "python_m_pytest_n_auto",
-      "result": "7 failed, 18056 passed; failures are legacy/stale expectations outside 116B source-free documentation scope",
-      "status": "failed_documented"
+      "result": "7 failed, 18056 passed; classified in 116C report",
+      "status": "failed_classified"
+    },
+    {
+      "name": "exact_failing_tests",
+      "result": "rerun and classified",
+      "status": "completed"
     },
     {
       "name": "pcae_agent_verify_handoff",
@@ -90,18 +89,13 @@
       "name": "pcae_notify_status",
       "result": "pending final Telegram environment check",
       "status": "pending"
-    },
-    {
-      "name": "phase_finalization_skill",
-      "result": "pending final invocation",
-      "status": "pending"
     }
   ],
   "test_results": {
     "architecture_documentation_verification": "completed",
-    "bootstrap_session_reporting_tests": "completed",
-    "fast_green": "not_run_documentation_only",
-    "full_pytest_suite": "failed_7_failed_18056_passed_legacy_expectations",
+    "bootstrap_session_reporting_tests": "failed_stale_expectations_classified",
+    "fast_green": "not_applicable_verification_phase",
+    "full_pytest_suite": "failed_7_failed_18056_passed_classified",
     "report_notification_tests": "pending_final_telegram_delivery",
     "runtime_inspect_execution_unavailable": "passed"
   },
@@ -132,7 +126,7 @@
     },
     {
       "name": "full_pytest_suite",
-      "status": "failed_legacy_expectations"
+      "status": "failed_classified"
     },
     {
       "name": "pcae_agent_verify_handoff",
@@ -141,10 +135,6 @@
     {
       "name": "telegram_runtime",
       "status": "pending final Telegram environment check"
-    },
-    {
-      "name": "phase_finalization_skill",
-      "status": "pending final invocation"
     }
   ],
   "telegram_runtime": {
@@ -153,6 +143,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No runtime capability implemented. No execution implemented. No authorization implemented. No Permission Broker change. No Repository Skill implemented. No Advisory Provider implemented. No Evidence Provider implemented. No Decision Evaluation change. No Repository Transition Validator behavior change. No lifecycle command behavior change. No Notification Policy behavior change. No Telegram inbound. No REST. No Dashboard. No Web UI. No event bus. No model integration. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
-  "recommended_next_phase": "116C - v0.2 Architecture Consolidation Verification"
+  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No lifecycle behavior changed. No source implementation changed. No test implementation changed. No Permission Broker behavior changed. No REST. No Dashboard. No Web UI. No Telegram inbound. No event bus. No model integration. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
+  "recommended_next_phase": "116D - v0.2 Architecture Freeze Preparation"
 }
