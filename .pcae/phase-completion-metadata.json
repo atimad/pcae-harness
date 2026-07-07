@@ -12,16 +12,25 @@
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20260707-0848-phase-117c-v0-2-quality-baseline-verification.md",
+    "tasks/done/20260707-0848-phase-117c-v0-2-quality-baseline-verification.md",
     "tests/test_bootstrap_todo_consistency.py",
     "tests/test_preflight_integration_verification.py"
   ],
   "tests_added_or_updated": "Updated two tests as reproducibility repairs after focused 117C verification proved 117B baseline regressions.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "4fc6393",
+      "message": "Implement Phase 117C quality baseline verification"
+    },
+    {
+      "hash": "aea74b21",
+      "message": "Close Phase 117C quality baseline verification"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117C is verification/test-baseline repair only)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
@@ -52,12 +61,12 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "nothing_to_push before 117C commits",
+      "result": "clean",
       "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "result": "pending final commit/push; rerun after completion",
+      "result": "pending final metadata sync and canonical report promotion; rerun after completion",
       "status": "pending"
     },
     {
@@ -119,11 +128,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "nothing_to_push before 117C commits"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending final commit/push"
+      "status": "pending final metadata sync and canonical report promotion"
     },
     {
       "name": "pcae_runtime_inspect",

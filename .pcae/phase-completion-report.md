@@ -6,8 +6,8 @@
 - **Missing trust fields:** none
 - **Files changed:** 9
 - **Tests run:** focused governance suites, full suite, and fast_green
-- **Commits:** pending final commit
-- **Pushed:** not_pushed
+- **Commits:** 4fc6393, aea74b21
+- **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
 ## Summary
@@ -67,8 +67,8 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** nothing_to_push before 117C commits
-- **pcae_agent_verify_handoff:** pending final commit/push
+- **pcae_push_check:** clean
+- **pcae_agent_verify_handoff:** pending final metadata sync and canonical report promotion
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
 - **telegram_runtime:** configured, enabled, ready for outbound delivery
 
