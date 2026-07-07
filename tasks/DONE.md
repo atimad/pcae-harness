@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync phase 116C completion metadata (20260707-0217-sync-phase-116c-completion-metadata)
 - 116C — v0.2 Architecture Consolidation Verification (20260707-0202-116c-v0-2-architecture-consolidation-verification)
 - Sync phase 116B pushed-state metadata (20260706-2332-sync-phase-116b-pushed-state-metadata)
 - Sync phase 116B completion metadata (20260706-2329-sync-phase-116b-completion-metadata)
