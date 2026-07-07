@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 117A - v0.2 Architecture Retrospective & Release Notes (20260707-0552-phase-117a-v0-2-architecture-retrospective-release-notes)
 - Fix 116F pushed-state metadata (20260707-0544-fix-116f-pushed-state-metadata)
 - Sync Phase 116F completion metadata (20260707-0543-sync-phase-116f-completion-metadata)
 - Phase 116F - v0.2 Architecture Freeze (20260707-0541-phase-116f-v0-2-architecture-freeze)

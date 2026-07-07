@@ -10,7 +10,7 @@ Phase 117A - v0.2 Architecture Retrospective & Release Notes
 
 ## Status
 
-active
+done
 
 ## Mode
 
