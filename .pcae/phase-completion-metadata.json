@@ -1,35 +1,35 @@
 {
-  "phase_id": "116D",
-  "phase_name": "v0.2 Architecture Freeze Preparation",
-  "phase_title": "v0.2 Architecture Freeze Preparation",
+  "phase_id": "116F",
+  "phase_name": "v0.2 Architecture Freeze",
+  "phase_title": "v0.2 Architecture Freeze",
   "status": "completed",
-  "summary": "Freeze-preparation-only phase. Built a v0.2 freeze readiness checklist (canonical report phase_id, clean/pushed tree, verify-handoff safety, runtime state Observed, execution unavailable, maximum plugin capability observe, zero registered plugins, architecture-doc consistency). Re-verified Phase 116C's 7 classified full-suite failures (3 test_bootstrap_todo_consistency.py, 2 test_rc_audit_findings_repair.py reproduce identically) and made one new observation: test_preflight_integration_verification.py::test_88m_requires_human_review fails more broadly outside the -n auto full-suite context, consistent with the already-documented category of tests depending on real tasks/active/ idle-vs-active state, not a new regression. Decided stale/environment-dependent tests do not block freeze. Produced a full remaining-debt table: found and fixed one stale documentation item (tasks/TODO.md roadmap table still showed 116C as Next and omitted 116D); classified two implementation-only consolidation items from 116A (finalization-gate consolidation, shared RepositoryState construction helper) as explicitly deferred future enhancements, not freeze blockers; confirmed the Repository Event item already resolved by 116B. No freeze blockers found.",
+  "summary": "Freeze-declaration-only phase. Declared the PCAE v0.2 architecture frozen following the unbroken review chain 115Z through 116D, none of which found a must-fix architectural defect, hidden authority, circular dependency, or execution-capability leak. Recorded the ten frozen subsystems (Repository State Kernel, Repository Transition Validator, Canonical Artifact Promotion, Notification Policy, Repository Events, Evidence Framework, Decision Evaluation, Repository Skills, Advisory Provider Framework, Advisory Context Package) with their canonical contract documents. Recorded three accepted non-blockers: stale test expectations documented by 116C/116D, finalization-gate migration deferred, shared RepositoryState construction helper deferred. Re-verified 116D's freeze readiness checklist against current state; no new blocker found. Runtime state remains Observed, execution unavailable, maximum plugin capability observe, zero registered runtime plugins.",
   "files_changed_count": 5,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_116D_V0_2_ARCHITECTURE_FREEZE_PREPARATION.md",
+    "docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md",
     "tasks/TODO.md",
-    "tasks/active/20260707-0231-phase-116d-v0-2-architecture-freeze-preparation.md"
+    "tasks/active/20260707-0541-phase-116f-v0-2-architecture-freeze.md"
   ],
-  "tests_added_or_updated": "No tests added or updated; freeze-preparation phase re-ran existing focused tests only.",
+  "tests_added_or_updated": "No tests added or updated; freeze-declaration phase re-ran existing focused governance validation commands only.",
   "phase_commits": [
     {
-      "hash": "f843109c",
-      "message": "Implement Phase 116D - v0.2 Architecture Freeze Preparation"
+      "hash": "58250b6b",
+      "message": "Implement Phase 116F - v0.2 Architecture Freeze"
     },
     {
-      "hash": "a989f6f2",
-      "message": "Complete Phase 116D - v0.2 Architecture Freeze Preparation"
+      "hash": "36b95ab9",
+      "message": "Complete Phase 116F - v0.2 Architecture Freeze"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116D is freeze-preparation only)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116F is freeze-declaration only)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
-  "report_completeness": "complete",
-  "missing_trust_fields": [],
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 2,
+  "report_completeness": "partial",
+  "missing_trust_fields": ["pushed_status", "origin_main_head"],
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -57,8 +57,8 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean",
-      "status": "passed"
+      "result": "not_ready (pending this completion commit; will be pushed as a follow-up step)",
+      "status": "pending"
     },
     {
       "name": "pcae_agent_verify_handoff",
@@ -76,13 +76,18 @@
       "status": "passed"
     },
     {
-      "name": "focused_stale_test_reverification",
-      "result": "reproduced 116C's 7 classified failures plus one new idle-state observation; no regression",
-      "status": "failed_classified"
+      "name": "pcae_notify_status",
+      "result": "Telegram configured, enabled, ready for outbound delivery",
+      "status": "passed"
+    },
+    {
+      "name": "freeze_blocker_reverification",
+      "result": "no new blocker found since 116D",
+      "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "not_applicable_freeze_preparation_phase",
+      "result": "not_applicable_freeze_declaration_phase",
       "status": "not_applicable"
     },
     {
@@ -92,15 +97,15 @@
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_freeze_preparation_phase",
+      "result": "not_applicable_freeze_declaration_phase",
       "status": "not_applicable"
     }
   ],
   "test_results": {
-    "architecture_documentation_verification": "completed",
-    "bootstrap_session_reporting_tests": "failed_stale_expectations_reverified",
-    "fast_green": "not_applicable_freeze_preparation_phase",
-    "full_pytest_suite": "not_required_focused_tests_only_per_phase_scope",
+    "architecture_freeze_declaration": "completed",
+    "bootstrap_session_reporting_tests": "not_applicable_freeze_declaration_phase",
+    "fast_green": "not_applicable_freeze_declaration_phase",
+    "freeze_blocker_reverification": "no_new_blocker_found",
     "report_notification_tests": "pending_final_telegram_delivery",
     "runtime_inspect_execution_unavailable": "passed"
   },
@@ -119,7 +124,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "not_ready (working tree pending this completion commit; will be pushed as a follow-up step)"
     },
     {
       "name": "pcae_agent_verify_handoff",
@@ -135,15 +140,15 @@
     },
     {
       "name": "telegram_runtime",
-      "status": "pending final Telegram environment check"
+      "status": "configured, enabled, ready for outbound delivery"
     }
   ],
   "telegram_runtime": {
-    "status": "pending final Telegram environment check",
+    "status": "configured, enabled, ready for outbound delivery",
     "inbound": false,
     "outbound": true,
     "polling": false
   },
   "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No lifecycle behavior changed. No source implementation changed. No test implementation changed. No Permission Broker behavior changed. No REST. No Dashboard. No Web UI. No Telegram inbound. No event bus. No model integration. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
-  "recommended_next_phase": "116F - v0.2 Architecture Freeze"
+  "recommended_next_phase": "117A - v0.2 Stale Test Maintenance"
 }
