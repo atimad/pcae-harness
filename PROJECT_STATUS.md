@@ -2,44 +2,49 @@
 
 ## Current Phase
 
-Phase 116D — v0.2 Architecture Freeze Preparation
+Phase 116F — v0.2 Architecture Freeze
 (completed).
 
-Freeze preparation only: built a v0.2 freeze readiness checklist,
-re-verified 116C's seven classified full-suite failures, decided stale
-tests do not block freeze, classified all remaining
-governance/documentation/test debt, and fixed one documentation
-inconsistency (`tasks/TODO.md`'s roadmap table still showed 116C as
-"Next" and omitted 116D). No feature, runtime behavior, execution,
-authorization, lifecycle behavior, source implementation, or test
-implementation changed. Phase report:
-`docs/PHASE_116D_V0_2_ARCHITECTURE_FREEZE_PREPARATION.md`.
+**The PCAE v0.2 architecture is declared frozen.** Freeze-declaration
+only: recorded the ten frozen subsystems (Repository State Kernel,
+Repository Transition Validator, Canonical Artifact Promotion,
+Notification Policy, Repository Events, Evidence Framework, Decision
+Evaluation, Repository Skills, Advisory Provider Framework, Advisory
+Context Package), recorded the three accepted non-blockers (stale test
+expectations, finalization-gate migration deferral, shared
+`RepositoryState` construction helper deferral), re-verified no new
+blocker exists since 116D, and confirmed execution remains unavailable.
+No feature, runtime behavior, execution, authorization, or lifecycle
+behavior changed. Phase report:
+`docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md`.
 
-**Stale-test decision**: 116C's 7 classified failures re-verified
-identical for `test_bootstrap_todo_consistency.py` (3) and
-`test_rc_audit_findings_repair.py` (2). One new observation:
-`test_preflight_integration_verification.py::test_88m_requires_human_review`
-fails more broadly when run outside the full `-n auto` suite context,
-consistent with the already-documented, pre-existing category of tests
-that depend on real `tasks/active/` idle-vs-active state. None of these
-indicate a v0.2 architecture defect. Full-suite greenness is not
-required for freeze.
-
-**Debt classification**: no must-fix architectural debt found. Two
-items from 116A's "Recommended Before v0.2" list (finalization-gate
-consolidation, shared `RepositoryState` construction helper) remain
-explicitly deferred future enhancements, not freeze blockers — 116A's
-own review already found nothing under "Must Fix Before v0.2." The
-Repository Event item was already resolved by 116B (frozen as
-policy/taxonomy-only for v0.2).
-
-**Freeze blockers**: none.
+**Freeze blockers**: none, confirmed in both 116D and this phase.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 116F — v0.2 Architecture Freeze.
+Recommended next repo phase: 117A — v0.2 Stale Test Maintenance.
+
+## Phase 116F Complete
+
+Phase 116F — v0.2 Architecture Freeze (completed).
+
+Declared the PCAE v0.2 architecture frozen following the unbroken
+review chain 115Z → 116A → 116B → 116C → 116D → 116F, none of which
+found a must-fix architectural defect, hidden authority, circular
+dependency, or execution-capability leak. Recorded the ten frozen
+subsystems with their canonical contract documents and the three
+accepted non-blockers carried forward from 116C/116D/116A. Re-ran
+116D's freeze-readiness checklist against current state; no new
+blocker found.
+
+**No-go**: no feature, runtime behavior, execution, authorization,
+lifecycle behavior, source implementation, test implementation,
+Permission Broker behavior, REST, Dashboard, Web UI, Telegram inbound,
+event bus, or model integration change.
+
+Recommended next repo phase: 117A — v0.2 Stale Test Maintenance.
 
 ## Phase 116D Complete
 

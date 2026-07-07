@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 116F — v0.2 Architecture Freeze. **The PCAE v0.2 architecture
+  is declared frozen**
+  (`docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md`), following the
+  unbroken review chain 115Z → 116A → 116B → 116C → 116D → 116F.
+  Recorded the ten frozen subsystems with their canonical contract
+  documents: Repository State Kernel, Repository Transition Validator,
+  Canonical Artifact Promotion, Notification Policy, Repository Events,
+  Evidence Framework, Decision Evaluation, Repository Skills, Advisory
+  Provider Framework, and Advisory Context Package. Recorded three
+  accepted non-blockers: stale test expectations documented by
+  116C/116D, finalization-gate migration deferred (117A's test
+  maintenance excluded, tracked as future implementation work), and
+  shared `RepositoryState` construction helper deferred. Re-verified
+  116D's freeze-readiness checklist against current state — no new
+  blocker found. Runtime state remains `Observed`, execution
+  unavailable, maximum plugin capability `observe`, zero registered
+  runtime plugins. No feature, runtime behavior, execution,
+  authorization, or lifecycle behavior changed.
+
 - Phase 116D — v0.2 Architecture Freeze Preparation. Freeze-preparation
   phase
   (`docs/PHASE_116D_V0_2_ARCHITECTURE_FREEZE_PREPARATION.md`). Built a

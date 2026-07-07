@@ -11,12 +11,15 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-## Current Roadmap (v0.2 architecture freeze track)
+## Current Roadmap (v0.2 architecture freeze track — frozen)
 
 Per `PROJECT_STATUS.md`. Only the phase explicitly named "Recommended
 next repo phase" there is confirmed; everything after it is a tentative
 candidate, not a committed queue — no phase activation is inferred
-ahead of an explicit human decision (`tasks/DECISIONS.md`).
+ahead of an explicit human decision (`tasks/DECISIONS.md`). The v0.2
+architecture was declared frozen in Phase 116F
+(`docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md`); see that document for
+the frozen subsystem list and accepted non-blockers.
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -24,7 +27,8 @@ ahead of an explicit human decision (`tasks/DECISIONS.md`).
 | 116B | v0.2 Architecture Consolidation | ✅ Complete |
 | 116C | v0.2 Architecture Consolidation Verification | ✅ Complete |
 | 116D | v0.2 Architecture Freeze Preparation | ✅ Complete |
-| 116F | v0.2 Architecture Freeze | 🔜 Next (per PROJECT_STATUS.md) |
+| 116F | v0.2 Architecture Freeze | ✅ Complete |
+| 117A | v0.2 Stale Test Maintenance | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 
