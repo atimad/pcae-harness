@@ -1,38 +1,48 @@
-# Phase 117E Complete — v0.2.0 Release
+# Phase 117E.1 Complete — v0.2.0 Release Publication Repair
 
-- **Phase ID:** `117E`
+- **Phase ID:** `117E.1`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 12
-- **Tests run:** release readiness governance checks and fast_green
-- **Commits:** 9688696a, 2ca589bb
+- **Files changed:** 10
+- **Tests run:** release publication and governance verification
+- **Commits:** d951da2e
 - **Pushed:** not_pushed
-- **origin/main..HEAD:** pending
+- **origin/main..HEAD:** pending final push
 
 ## Summary
 
-Phase 117E publishes the official PCAE v0.2.0 release using the release
-notes prepared in 117D.
+Phase 117E.1 is a corrective governance phase for the v0.2.0
+publication gap. It preserves the audit trail without rewriting history:
+117E remains part of project history as release preparation /
+release-attempt work, while 117E.1 records and repairs the external
+publication discrepancy.
 
-## Release Contents
+## Verification Before Repair
 
-- Package metadata and version constants updated to `0.2.0`.
-- Release notes finalized in `docs/RELEASE_NOTES_V0_2_0.md`.
-- README status updated from release-candidate preparation to released.
-- Project/changelog/task memory updated for 117E.
-- Official Git tag: `v0.2.0` (pending publication at initial commit time).
-- GitHub Release: `v0.2.0` (pending publication at initial commit time).
+- Package/version metadata reported `0.2.0`.
+- `docs/RELEASE_NOTES_V0_2_0.md` existed.
+- Local Git tag `v0.2.0` was missing.
+- Remote Git tag `v0.2.0` was missing.
+- GitHub Release `v0.2.0` was missing.
+- Canonical latest phase report still pointed to 117D.
 
-## Release Boundary Confirmation
+## Corrective Publication Performed
 
-- No feature development.
-- No runtime behavior change.
-- No architecture change.
-- No execution capability.
-- No lifecycle modification.
-- No PyPI publication.
-- No package publication.
+- Created local Git tag `v0.2.0`.
+- Created remote Git tag `v0.2.0`.
+- Published GitHub Release `PCAE v0.2.0`.
+- Published release notes from `docs/RELEASE_NOTES_V0_2_0.md`.
+
+Release URL:
+`https://github.com/atimad/pcae-harness/releases/tag/v0.2.0`
+
+## Audit-Trail Preservation
+
+No historical records were rewritten. No existing 117E commit was
+amended, removed, or reclassified out of history. This phase is an
+additive repair record documenting what was expected, what verification
+found, and what was corrected.
 
 ## PCAE Architecture Status
 
@@ -46,7 +56,8 @@ maintained as runtime state.*
 - v0.2 Test Suite Maintenance & Quality Improvements through Phase 117B
 - v0.2 Quality Baseline Verification through Phase 117C
 - v0.2 Release Candidate Preparation through Phase 117D
-- v0.2.0 Release through Phase 117E
+- v0.2.0 Release preparation / attempt through Phase 117E
+- v0.2.0 Release Publication Repair through Phase 117E.1
 
 ### Planned
 
@@ -60,48 +71,40 @@ maintained as runtime state.*
 
 ## Governance Results
 
-- **pcae_health:** healthy
-- **pcae_check:** passed
-- **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** pending final push; pre-release readiness was clean
-- **pcae_agent_verify_handoff:** safe to continue
-- **pcae_session_bootstrap_compact:** passed
-- **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
-- **telegram_runtime:** configured, enabled, ready for outbound delivery
+- **pcae_health:** pending final validation
+- **pcae_check:** pending final validation
+- **pcae_doctor_task_memory:** pending final validation
+- **pcae_push_check:** pending final push
+- **pcae_agent_verify_handoff:** pending final validation
+- **pcae_session_bootstrap_compact:** pending final validation
+- **pcae_runtime_inspect:** pending final validation
+- **telegram_runtime:** pending final validation
 
 ## Release Verification
 
-- **fast_green:** 4390 passed in 67.35s after active-task rerun
-- **fast_green initial idle rerun:** 1 failed, 4389 passed due known state-sensitive 89D dry-run expectation; no test or runtime repair made in release phase
-- **git_tag_exists:** pending release publication
-- **github_release_exists:** pending release publication
-- **release_notes_published:** pending release publication
-- **report_notification_tests:** pending final Telegram delivery
+- **local_git_tag:** `v0.2.0` exists and points to `d951da2e1402744688cc40aae5ef75d98976d716`
+- **remote_git_tag:** `v0.2.0` exists and points to `d951da2e1402744688cc40aae5ef75d98976d716`
+- **github_release:** `https://github.com/atimad/pcae-harness/releases/tag/v0.2.0`
+- **release_notes_published:** GitHub Release body contains approved 117E.1 release-status wording
 
 ## No-Go Confirmations
 
-- No source feature added.
-- No production behavior changed; source edits were limited to
-  release-version metadata constants.
-- No test changed.
+- No feature implemented.
 - No runtime behavior changed.
-- No execution.
-- No authorization.
-- No architecture change.
+- No execution implemented.
+- No authorization implemented.
+- No architecture changed.
 - No lifecycle behavior changed.
-- No Repository State behavior changed.
-- No Repository Skills behavior changed.
-- No Advisory behavior changed.
-- No Decision Evaluation behavior changed.
-- No Repository Transition Validator behavior changed.
-- No Notification Policy behavior changed.
+- No production source changed.
+- No tests changed.
+- No PyPI publication.
+- No package publication.
 - No model integration.
 - No REST.
 - No Dashboard.
 - No Web UI implementation.
 - No Telegram inbound.
-- No PyPI publication.
-- No package publication.
+- No historical records rewritten.
 
 ## Recommended Next Phase
 
@@ -109,9 +112,9 @@ maintained as runtime state.*
 
 ## Report Consistency
 
-- **Canonical report:** pending promotion
+- **Canonical report:** present
 - **Metadata:** present
-- **Status:** pending final task closure, tag/release publication, and push
+- **Status:** pending final validation, push, and notification
 
 ---
-*Report generated for PCAE Phase 117E. Schema version 1.0.*
+*Report generated for PCAE Phase 117E.1. Schema version 1.0.*

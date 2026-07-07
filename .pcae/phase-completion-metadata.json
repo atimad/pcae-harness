@@ -1,40 +1,34 @@
 {
-  "phase_id": "117E",
-  "phase_name": "v0.2.0 Release",
-  "phase_title": "v0.2.0 Release",
+  "phase_id": "117E.1",
+  "phase_name": "v0.2.0 Release Publication Repair",
+  "phase_title": "v0.2.0 Release Publication Repair",
   "status": "completed",
-  "summary": "Official release phase for PCAE v0.2.0. Verified final release readiness, updated release metadata to 0.2.0, prepared official release notes, and published the v0.2.0 Git tag and GitHub Release. No feature development, runtime behavior change, architecture change, execution capability, lifecycle modification, PyPI publication, or package publication occurred. Source edits were limited to release-version metadata constants.",
-  "files_changed_count": 12,
+  "summary": "Corrective governance phase for the v0.2.0 publication gap. Verification found release metadata and release notes present, but the local tag, remote tag, GitHub Release, and canonical latest report were missing or inconsistent. 117E.1 preserved the audit trail without rewriting history, created the local v0.2.0 tag, created the remote v0.2.0 tag, and published the GitHub Release using docs/RELEASE_NOTES_V0_2_0.md. No feature implementation, runtime behavior change, architecture change, execution capability, lifecycle change, production source change, test change, PyPI publication, or package publication occurred.",
+  "files_changed_count": 10,
   "files_changed": [
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "README.md",
+    "docs/PHASE_117E_1_RELEASE_PUBLICATION_REPAIR.md",
     "docs/RELEASE_NOTES_V0_2_0.md",
-    "pyproject.toml",
-    "src/pcae/__init__.py",
-    "src/pcae/core/status.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20260707-1328-phase-117e-v0-2-0-release.md",
-    ".pcae/phase-completion-report.md"
+    "tasks/active/20260707-1418-phase-117e-1-v0-2-0-release-publication-repair.md"
   ],
-  "tests_added_or_updated": "None. 117E was release-only and did not modify tests.",
+  "tests_added_or_updated": "None. 117E.1 was corrective release-publication governance and did not modify tests.",
   "phase_commits": [
     {
-      "hash": "9688696a",
-      "message": "Prepare Phase 117E v0.2.0 release"
-    },
-    {
-      "hash": "2ca589bb",
-      "message": "Close Phase 117E v0.2.0 release"
+      "hash": "d951da2e",
+      "message": "Document Phase 117E.1 release publication repair"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117E is release-only)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117E.1 is corrective release-publication governance)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -48,6 +42,26 @@
   },
   "validation_results": [
     {
+      "name": "local_git_tag",
+      "result": "v0.2.0 -> d951da2e1402744688cc40aae5ef75d98976d716",
+      "status": "passed"
+    },
+    {
+      "name": "remote_git_tag",
+      "result": "v0.2.0 -> d951da2e1402744688cc40aae5ef75d98976d716",
+      "status": "passed"
+    },
+    {
+      "name": "github_release",
+      "result": "https://github.com/atimad/pcae-harness/releases/tag/v0.2.0",
+      "status": "passed"
+    },
+    {
+      "name": "release_notes_match",
+      "result": "GitHub Release body contains approved Phase 117E.1 release-status wording",
+      "status": "passed"
+    },
+    {
       "name": "pcae_health",
       "result": "healthy",
       "status": "passed"
@@ -59,47 +73,32 @@
     },
     {
       "name": "pcae_doctor_task_memory",
-      "result": "clean",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_push_check",
-      "result": "pending final push; pre-release readiness was clean",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_agent_verify_handoff",
-      "result": "safe to continue before release task; rerun after finalization",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap --compact --profile implementation passed",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_runtime_inspect",
-      "result": "execution unavailable, Observed, observe, zero runtime plugins",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_notify_status",
-      "result": "Telegram configured, enabled, ready for outbound delivery",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "4390 passed in 67.35s after active-task rerun; initial idle rerun had one known state-sensitive 89D dry-run failure",
-      "status": "passed"
-    },
-    {
-      "name": "git_tag_exists",
-      "result": "pending release publication",
+      "result": "pending final validation",
       "status": "pending"
     },
     {
-      "name": "github_release_exists",
-      "result": "pending release publication",
+      "name": "pcae_push_check",
+      "result": "pending final push",
+      "status": "pending"
+    },
+    {
+      "name": "pcae_agent_verify_handoff",
+      "result": "pending final validation",
+      "status": "pending"
+    },
+    {
+      "name": "pcae_session_bootstrap_compact",
+      "result": "pending final validation",
+      "status": "pending"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "result": "pending final validation",
+      "status": "pending"
+    },
+    {
+      "name": "pcae_notify_status",
+      "result": "pending final validation",
       "status": "pending"
     },
     {
@@ -109,10 +108,12 @@
     }
   ],
   "test_results": {
-    "fast_green": "4390 passed in 67.35s after active-task rerun",
-    "bootstrap_session_reporting_tests": "passed",
-    "runtime_inspect_execution_unavailable": "passed",
-    "release_readiness_governance": "passed",
+    "local_git_tag": "passed",
+    "remote_git_tag": "passed",
+    "github_release": "passed",
+    "release_notes_match": "passed",
+    "bootstrap_session_reporting_tests": "pending_final_validation",
+    "runtime_inspect_execution_unavailable": "pending_final_validation",
     "report_notification_tests": "pending_final_telegram_delivery"
   },
   "governance_results": [
@@ -126,7 +127,7 @@
     },
     {
       "name": "pcae_doctor_task_memory",
-      "status": "clean"
+      "status": "pending final validation"
     },
     {
       "name": "pcae_push_check",
@@ -134,31 +135,33 @@
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "safe to continue"
+      "status": "pending final validation"
     },
     {
       "name": "pcae_runtime_inspect",
-      "status": "execution unavailable, Observed, observe, zero runtime plugins"
+      "status": "pending final validation"
     },
     {
       "name": "telegram_runtime",
-      "status": "configured, enabled, ready for outbound delivery"
+      "status": "pending final validation"
     }
   ],
+  "release_results": {
+    "release_tag": "v0.2.0",
+    "local_git_tag_exists": true,
+    "remote_git_tag_exists": true,
+    "github_release_published": true,
+    "github_release_url": "https://github.com/atimad/pcae-harness/releases/tag/v0.2.0",
+    "release_notes_published": true,
+    "pypi_published": false,
+    "packages_published": false
+  },
   "telegram_runtime": {
-    "status": "configured, enabled, ready for outbound delivery",
+    "status": "pending final validation",
     "inbound": false,
     "outbound": true,
     "polling": false
   },
-  "release_results": {
-    "release_tag": "v0.2.0",
-    "git_tag_exists": false,
-    "github_release_published": false,
-    "release_notes_published": false,
-    "pypi_published": false,
-    "packages_published": false
-  },
-  "no_go_confirmation": "No feature development. No runtime behavior changed beyond release-version reporting. No execution capability implemented. No architecture changed. No lifecycle behavior changed. Source edits were limited to release-version metadata constants. No tests changed. No PyPI publication. No package publication. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. Execution capability remains unavailable.",
+  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No architecture changed. No lifecycle behavior changed. No production source changed. No tests changed. No PyPI publication. No package publication. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No historical records rewritten. Execution capability remains unavailable.",
   "recommended_next_phase": "117F - Public v0.2 Article Draft (outside repository)"
 }
