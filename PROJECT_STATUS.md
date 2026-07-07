@@ -2,28 +2,55 @@
 
 ## Current Phase
 
-Phase 117E.1 — v0.2.0 Release Publication Repair
+Phase 118A — Repository Knowledge Architecture
 (completed).
 
-Corrective governance phase for the v0.2.0 release-publication gap.
-Verification after 117E found that release preparation and version
-metadata updates had completed, but the local Git tag, remote Git tag,
-GitHub Release, and canonical 117E latest-report promotion were missing.
-117E.1 preserves the audit trail without rewriting history and publishes
-only the missing external release artifacts.
+Architecture-only start of Track B: Repository Intelligence. Defines
+Repository Knowledge as a deterministic, inspectable, source-attributed,
+read-only architectural understanding layer distinct from Repository
+State, Evidence, Advisory Context, Repository Skills, and Decision
+Evaluation. Establishes core primitives, layered knowledge graph model,
+source attribution, determinism, production, inspection, verification,
+versioning, read-only boundaries, and the future emergence path for
+historical memory, change impact analysis, dependency graph work,
+architectural contract mapping, and richer advisory reasoning.
 
-No PyPI or package publication occurred. No feature, runtime behavior,
-execution, authorization, architecture, lifecycle behavior, Repository
-State behavior, Repository Skills behavior, Advisory behavior, Decision
-Evaluation behavior, Repository Transition Validator behavior,
-Notification Policy behavior, model integration, REST, Dashboard, Web
-UI, or Telegram inbound path changed.
+No implementation, source code, tests, runtime behavior, execution,
+authorization, enforcement, lifecycle behavior, Permission Broker
+behavior, Repository State behavior, Repository Skills behavior,
+Advisory behavior, Decision Evaluation behavior, Repository Transition
+Validator behavior, Notification Policy behavior, model integration,
+REST, Dashboard, Web UI, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 117F — Public v0.2 Article Draft (outside repository).
+Recommended next repo phase: 118B — Historical Memory Architecture.
+
+## Phase 118A Complete
+
+Phase 118A — Repository Knowledge Architecture (completed).
+
+Architecture-only Track B foundation for Repository Intelligence. The
+phase defines Repository Knowledge as the read-only semantic map PCAE can
+derive from repository sources about architectural entities,
+relationships, claims, sources, snapshots, and evidence links. It
+preserves the v0.2 authority model: Repository State Kernel owns
+lifecycle state, Evidence remains evaluation-scoped, Repository Skills
+produce evidence only, Advisory remains advisory/evidence-producing, and
+Decision Evaluation / the Repository Transition Validator remain the only
+decision path.
+
+**No-go**: no source implementation, test implementation, runtime
+behavior change, execution, authorization, enforcement, lifecycle
+behavior change, Permission Broker change, Repository State behavior
+change, Repository Skills behavior change, Advisory behavior change,
+Decision Evaluation change, Repository Transition Validator behavior
+change, Notification Policy behavior change, model integration, REST,
+Dashboard, Web UI, or Telegram inbound.
+
+Recommended next repo phase: 118B — Historical Memory Architecture.
 
 ## Phase 117E.1 Complete
 

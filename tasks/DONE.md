@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 118A - Repository Knowledge Architecture (20260707-2251-phase-118a-repository-knowledge-architecture)
 - Sync Phase 117E.1 bootstrap trust field (20260707-1454-sync-phase-117e-1-bootstrap-trust-field)
 - Sync Phase 117E.1 completion metadata (20260707-1452-sync-phase-117e-1-completion-metadata)
 - Phase 117E.1 - v0.2.0 Release Publication Repair (20260707-1418-phase-117e-1-v0-2-0-release-publication-repair)

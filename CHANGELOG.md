@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Phase 118A — Repository Knowledge Architecture
+  (`docs/PHASE_118_REPOSITORY_KNOWLEDGE_ARCHITECTURE.md`). Begins Track B:
+  Repository Intelligence. Defines Repository Knowledge as a deterministic,
+  inspectable, source-attributed, read-only architectural understanding
+  layer distinct from Repository State, Evidence, Advisory Context,
+  Repository Skills, and Decision Evaluation. Establishes the initial
+  primitives (entities, relationships, claims, sources, evidence links,
+  snapshots), layered knowledge graph model, attribution, determinism,
+  verification, versioning, read-only boundary, and future emergence path
+  for historical memory, change impact analysis, dependency graph work,
+  architectural contract mapping, and advisory reasoning. Architecture
+  only; no source, test, runtime behavior, execution, enforcement,
+  lifecycle behavior, Permission Broker, REST, Dashboard, Web UI, model
+  integration, or Telegram inbound changes.
+
 - Phase 117E.1 — v0.2.0 Release Publication Repair. Corrective
   governance phase for the v0.2.0 publication gap. Verification found
   that 117E had prepared release metadata and repository memory, but the

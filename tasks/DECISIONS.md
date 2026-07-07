@@ -2,6 +2,17 @@
 
 ## Accepted
 
+- Treat Phase 118A as the architecture-only start of Track B
+  Repository Intelligence: define Repository Knowledge as a deterministic,
+  read-only, source-attributed architectural understanding layer that is
+  distinct from Repository State, Evidence, Advisory Context, Repository
+  Skills, and Decision Evaluation. Repository Knowledge may describe
+  entities, relationships, claims, sources, snapshots, and evidence links;
+  may produce evidence candidates; and may strengthen Advisory through
+  bounded context selection. It must not decide, authorize, execute,
+  enforce, mutate repository state, promote artifacts, send notifications,
+  replace governance, or bypass Decision Evaluation / the Repository
+  Transition Validator.
 - Treat Phase 117E.1 as an additive corrective governance phase, not a
   history rewrite: 117E remains part of the audit trail as release
   preparation / release-attempt history, while 117E.1 verifies the real

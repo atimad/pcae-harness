@@ -11,15 +11,15 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-## Current Roadmap (v0.2 architecture freeze track — frozen)
+## Current Roadmap (Track B — Repository Intelligence)
 
 Per `PROJECT_STATUS.md`. Only the phase explicitly named "Recommended
 next repo phase" there is confirmed; everything after it is a tentative
-candidate, not a committed queue — no phase activation is inferred
-ahead of an explicit human decision (`tasks/DECISIONS.md`). The v0.2
-architecture was declared frozen in Phase 116F
-(`docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md`); see that document for
-the frozen subsystem list and accepted non-blockers.
+candidate, not a committed queue — no phase activation is inferred ahead
+of an explicit human decision (`tasks/DECISIONS.md`). Track A is complete
+through the v0.2.0 release and publication repair. Track B begins with
+Repository Intelligence: deterministic, source-attributed architectural
+understanding without execution, enforcement, or autonomy.
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -31,7 +31,8 @@ the frozen subsystem list and accepted non-blockers.
 | 117D | v0.2 Release Candidate Preparation | ✅ Complete |
 | 117E | v0.2.0 Release | ✅ Complete |
 | 117E.1 | v0.2.0 Release Publication Repair | ✅ Complete |
-| 117F | Public v0.2 Article Draft (outside repository) | 🔜 Next (per PROJECT_STATUS.md) |
+| 118A | Repository Knowledge Architecture | ✅ Complete |
+| 118B | Historical Memory Architecture | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 
