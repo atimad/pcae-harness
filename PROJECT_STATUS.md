@@ -2,29 +2,52 @@
 
 ## Current Phase
 
-Phase 116F — v0.2 Architecture Freeze
+Phase 117A — v0.2 Architecture Retrospective & Release Notes
 (completed).
 
-**The PCAE v0.2 architecture is declared frozen.** Freeze-declaration
-only: recorded the ten frozen subsystems (Repository State Kernel,
-Repository Transition Validator, Canonical Artifact Promotion,
-Notification Policy, Repository Events, Evidence Framework, Decision
-Evaluation, Repository Skills, Advisory Provider Framework, Advisory
-Context Package), recorded the three accepted non-blockers (stale test
-expectations, finalization-gate migration deferral, shared
-`RepositoryState` construction helper deferral), re-verified no new
-blocker exists since 116D, and confirmed execution remains unavailable.
-No feature, runtime behavior, execution, authorization, or lifecycle
-behavior changed. Phase report:
-`docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md`.
-
-**Freeze blockers**: none, confirmed in both 116D and this phase.
+Documentation and analysis only: produced the canonical v0.2
+architecture retrospective (`docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`)
+covering the evolution of PCAE across eleven architectural epochs
+(Governance Foundation, Repository State Kernel, Repository Transition
+Validator, Canonical Reporting, Evidence Framework, Decision
+Evaluation, Repository Skills, Advisory Repository Skills, Advisory
+Context Package, Architecture Review, Architecture Freeze), the ten
+architectural principles that now define PCAE, the major design
+decisions and their rationale, lessons learned (successes, unexpected
+discoveries, governance improvements, mistakes corrected, reusable
+patterns), v0.2 release notes (delivered and explicitly-not-delivered
+capabilities), and the documented (non-committal) starting point for
+v0.3. No feature, runtime behavior, execution, authorization,
+lifecycle behavior, Repository State change, Repository Skills change,
+Advisory change, Decision Evaluation change, Repository Transition
+Validator change, Notification Policy change, model integration, REST,
+Dashboard, Web UI, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 117A — v0.2 Stale Test Maintenance.
+Recommended next repo phase: 117B — v0.2 Test Suite Maintenance &
+Quality Improvements.
+
+## Phase 117A Complete
+
+Phase 117A — v0.2 Architecture Retrospective & Release Notes
+(completed).
+
+Produced the canonical v0.2 architecture retrospective covering PCAE's
+evolution, architectural principles, design decisions, lessons
+learned, release notes, and v0.3 direction. Documentation and analysis
+only; zero runtime implementation change.
+
+**No-go**: no runtime capability, execution, authorization, lifecycle
+change, Repository State change, Repository Skills change, Advisory
+change, Decision Evaluation change, Repository Transition Validator
+change, Notification Policy change, model integration, REST,
+Dashboard, Web UI, or Telegram inbound.
+
+Recommended next repo phase: 117B — v0.2 Test Suite Maintenance &
+Quality Improvements.
 
 ## Phase 116F Complete
 

@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Phase 117A — v0.2 Architecture Retrospective & Release Notes.
+  Documentation-and-analysis-only phase
+  (`docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md`). Documents eleven
+  architectural epochs (Governance Foundation, Repository State
+  Kernel, Repository Transition Validator, Canonical Reporting,
+  Evidence Framework, Decision Evaluation, Repository Skills, Advisory
+  Repository Skills, Advisory Context Package, Architecture Review,
+  Architecture Freeze); ten architectural principles (governance
+  first, deterministic before probabilistic, evidence before decision,
+  explainability before automation, execution unavailable by default,
+  advisory cannot authorize, advisory cannot mutate repository,
+  capability boundaries are explicit, behavior-preserving evolution,
+  architecture before implementation); six major design-decision
+  rationales; lessons learned across five categories (successes,
+  unexpected discoveries, governance improvements, mistakes corrected,
+  reusable patterns); v0.2 release notes listing delivered and
+  explicitly-not-delivered capabilities; and a non-committal v0.3
+  starting-point section (stale-test maintenance, richer deterministic
+  evidence, advisory quality improvements, architectural dependency
+  analysis, semantic repository understanding, constrained execution
+  planning). No feature, runtime behavior, execution, authorization,
+  lifecycle behavior, Repository State change, Repository Skills
+  change, Advisory change, Decision Evaluation change, Repository
+  Transition Validator change, Notification Policy change, model
+  integration, REST, Dashboard, Web UI, or Telegram inbound path
+  changed.
+
 - Phase 116F — v0.2 Architecture Freeze. **The PCAE v0.2 architecture
   is declared frozen**
   (`docs/PHASE_116F_V0_2_ARCHITECTURE_FREEZE.md`), following the
