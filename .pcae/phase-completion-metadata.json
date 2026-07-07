@@ -26,10 +26,10 @@
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 116D is freeze-preparation only)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
-  "report_completeness": "partial",
-  "missing_trust_fields": ["pushed_status", "origin_main_head"],
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
+  "report_completeness": "complete",
+  "missing_trust_fields": [],
   "execution_integration_status": {
     "observed_command_paths": 4,
     "behavior_changing_paths": 0,
@@ -57,8 +57,8 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "not_ready (pending this completion commit; will be pushed as a follow-up step)",
-      "status": "pending"
+      "result": "clean",
+      "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
@@ -109,7 +109,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "not_ready (working tree pending this completion commit; will be pushed as a follow-up step)"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
