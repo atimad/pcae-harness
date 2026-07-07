@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 117B completion metadata (20260707-0744-sync-phase-117b-completion-metadata)
 - Sync Phase 117B implementation changes (20260707-0740-sync-phase-117b-implementation-changes)
 - Phase 117B - v0.2 Test Suite Maintenance & Quality Improvements (20260707-0656-phase-117b-v0-2-test-suite-maintenance-quality-improvements)
 - Fix 117A pushed-state metadata (20260707-0556-fix-117a-pushed-state-metadata)
