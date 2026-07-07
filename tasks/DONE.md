@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix 116D pushed-state metadata (20260707-0235-fix-116d-pushed-state-metadata)
 - Sync Phase 116D completion metadata (20260707-0234-sync-phase-116d-completion-metadata)
 - Phase 116D - v0.2 Architecture Freeze Preparation (20260707-0231-phase-116d-v0-2-architecture-freeze-preparation)
 - Sync phase 116C completion metadata (20260707-0217-sync-phase-116c-completion-metadata)
