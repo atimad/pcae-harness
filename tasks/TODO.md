@@ -22,7 +22,9 @@ ahead of an explicit human decision (`tasks/DECISIONS.md`).
 |-------|------|--------|
 | 116A | v0.2 Architecture Review & Consolidation | ✅ Complete |
 | 116B | v0.2 Architecture Consolidation | ✅ Complete |
-| 116C | v0.2 Architecture Consolidation Verification | 🔜 Next (per PROJECT_STATUS.md) |
+| 116C | v0.2 Architecture Consolidation Verification | ✅ Complete |
+| 116D | v0.2 Architecture Freeze Preparation | ✅ Complete |
+| 116F | v0.2 Architecture Freeze | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 

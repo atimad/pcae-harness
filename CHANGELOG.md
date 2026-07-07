@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 116D — v0.2 Architecture Freeze Preparation. Freeze-preparation
+  phase
+  (`docs/PHASE_116D_V0_2_ARCHITECTURE_FREEZE_PREPARATION.md`). Built a
+  v0.2 freeze readiness checklist covering canonical report phase_id,
+  clean/pushed tree, `pcae agent verify-handoff` safety, runtime state
+  `Observed`, execution unavailable, maximum plugin capability
+  `observe`, zero registered plugins, and architecture-doc consistency.
+  Re-verified Phase 116C's 7 classified full-suite failures (3
+  `test_bootstrap_todo_consistency.py`, 2
+  `test_rc_audit_findings_repair.py` reproduce identically) and found
+  one new observation: `test_preflight_integration_verification.py::test_88m_requires_human_review`
+  fails more broadly outside the `-n auto` full-suite context, consistent
+  with the already-documented category of tests depending on real
+  `tasks/active/` idle-vs-active state, not a new regression. Decided
+  stale/environment-dependent tests do not block freeze. Produced a
+  full remaining-debt table: found and fixed one stale documentation
+  item (`tasks/TODO.md`'s roadmap table still showed 116C as "Next" and
+  omitted 116D); classified two implementation-only consolidation items
+  from 116A (finalization-gate consolidation, shared `RepositoryState`
+  construction helper) as explicitly deferred future enhancements, not
+  freeze blockers; confirmed the Repository Event item already resolved
+  by 116B. **No freeze blockers found.** No feature, runtime behavior,
+  execution, authorization, lifecycle behavior, source implementation,
+  or test implementation changed.
+
 - Phase 116C — v0.2 Architecture Consolidation Verification.
   Verification-only phase for 116B
   (`docs/PHASE_116C_V0_2_ARCHITECTURE_CONSOLIDATION_VERIFICATION.md`).

@@ -2,34 +2,64 @@
 
 ## Current Phase
 
-Phase 116C — v0.2 Architecture Consolidation Verification
+Phase 116D — v0.2 Architecture Freeze Preparation
 (completed).
 
-Verification only: verified Phase 116B consolidation and classified the
-seven full-suite failures reported before v0.2 freeze preparation. No
-feature, runtime behavior, execution, authorization, lifecycle behavior,
-source implementation, or test implementation changed. Phase report:
-`docs/PHASE_116C_V0_2_ARCHITECTURE_CONSOLIDATION_VERIFICATION.md`.
+Freeze preparation only: built a v0.2 freeze readiness checklist,
+re-verified 116C's seven classified full-suite failures, decided stale
+tests do not block freeze, classified all remaining
+governance/documentation/test debt, and fixed one documentation
+inconsistency (`tasks/TODO.md`'s roadmap table still showed 116C as
+"Next" and omitted 116D). No feature, runtime behavior, execution,
+authorization, lifecycle behavior, source implementation, or test
+implementation changed. Phase report:
+`docs/PHASE_116D_V0_2_ARCHITECTURE_FREEZE_PREPARATION.md`.
 
-**116B scope verified**: `git diff --name-only 4571b494..HEAD -- src
-tests` returned no files. 116B changed documentation, governance memory,
-and phase metadata only.
+**Stale-test decision**: 116C's 7 classified failures re-verified
+identical for `test_bootstrap_todo_consistency.py` (3) and
+`test_rc_audit_findings_repair.py` (2). One new observation:
+`test_preflight_integration_verification.py::test_88m_requires_human_review`
+fails more broadly when run outside the full `-n auto` suite context,
+consistent with the already-documented, pre-existing category of tests
+that depend on real `tasks/active/` idle-vs-active state. None of these
+indicate a v0.2 architecture defect. Full-suite greenness is not
+required for freeze.
 
-**Failure classification**: six failures are pre-existing stale
-expectations. One failure is an intentional changed expectation caused
-by 116B's documentation correction that moved `tasks/TODO.md` from the
-stale 113Y-era current roadmap to the 116A/116B/116C v0.2 architecture
-freeze track. No runtime/source regression was introduced by 116B.
+**Debt classification**: no must-fix architectural debt found. Two
+items from 116A's "Recommended Before v0.2" list (finalization-gate
+consolidation, shared `RepositoryState` construction helper) remain
+explicitly deferred future enhancements, not freeze blockers — 116A's
+own review already found nothing under "Must Fix Before v0.2." The
+Repository Event item was already resolved by 116B (frozen as
+policy/taxonomy-only for v0.2).
 
-**Repair assessment**: no 116B architecture/runtime repair is required.
-A small future test-maintenance phase may update stale bootstrap/TODO,
-preflight, and RC finalization assertions before freeze if desired.
+**Freeze blockers**: none.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 116D — v0.2 Architecture Freeze Preparation.
+Recommended next repo phase: 116F — v0.2 Architecture Freeze.
+
+## Phase 116D Complete
+
+Phase 116D — v0.2 Architecture Freeze Preparation (completed).
+
+Built the v0.2 freeze readiness checklist (all governance/runtime
+verification items pass), reviewed architecture docs for consistency
+(found and fixed one stale `tasks/TODO.md` roadmap-table entry),
+re-verified 116C's failure classification, decided stale/environment-
+dependent tests do not block freeze, and produced a full remaining-debt
+table classifying every open item as resolved, an explicitly deferred
+future enhancement, or an acceptable documented exception. No blockers
+found.
+
+**No-go**: no feature, runtime behavior, execution, authorization,
+lifecycle behavior, source implementation, test implementation,
+Permission Broker behavior, REST, Dashboard, Web UI, Telegram inbound,
+event bus, or model integration change.
+
+Recommended next repo phase: 116F — v0.2 Architecture Freeze.
 
 ## Phase 116C Complete
 
