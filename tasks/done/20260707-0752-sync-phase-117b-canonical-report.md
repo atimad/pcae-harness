@@ -10,7 +10,7 @@ Sync Phase 117B canonical report
 
 ## Status
 
-active
+done
 
 ## Mode
 
