@@ -1,8 +1,8 @@
 # PCAE v0.2.0 Draft Release Notes
 
-Status: draft only. Phase 117D prepared this document for the future
-v0.2.0 release phase. It does not publish a release, create a tag, push
-a GitHub Release, publish to PyPI, or publish packages.
+Status: official v0.2.0 release notes. Phase 117E published the
+official Git tag and GitHub Release. No PyPI or package publication is
+part of this release.
 
 ## Release Positioning
 
@@ -112,10 +112,8 @@ documentation and reran the required release-prep validation gates.
 
 ## Upgrade Notes
 
-The package metadata still reports `0.1.0` until the future release
-phase performs the explicit version/tag/publication work. v0.2.0 release
-preparation does not change packaging metadata, create tags, or publish
-artifacts.
+The package metadata reports `0.2.0` for the v0.2.0 GitHub Release.
+This release does not publish to PyPI or publish package artifacts.
 
 ## Known Boundaries
 
@@ -126,6 +124,4 @@ review, but it cannot authorize or perform repository mutation.
 
 ## Release Status
 
-Ready for the dedicated v0.2.0 release phase after final release
-operator approval.
-
+Released as v0.2.0.

@@ -1,52 +1,38 @@
-# Phase 117D Complete — v0.2 Release Candidate Preparation
+# Phase 117E Complete — v0.2.0 Release
 
-- **Phase ID:** `117D`
+- **Phase ID:** `117E`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 11
-- **Tests run:** fast_green
-- **Commits:** 82f75bf0, 37b0b718
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Files changed:** 12
+- **Tests run:** release readiness governance checks
+- **Commits:** pending
+- **Pushed:** not_pushed
+- **origin/main..HEAD:** pending
 
 ## Summary
 
-Phase 117D prepared PCAE for the future v0.2.0 release phase. It
-reviewed release readiness from a new-user perspective, refreshed
-release-facing README/install/demo messaging, reviewed changelog,
-project status, license, contribution guidance, usage snippets, and
-stale TODO/temporary-note surfaces, and drafted
-`docs/RELEASE_NOTES_V0_2_0.md`.
+Phase 117E publishes the official PCAE v0.2.0 release using the release
+notes prepared in 117D.
 
-No release was published. No tag was created. No GitHub Release was
-pushed. No PyPI or package publication occurred.
+## Release Contents
 
-## Release Preparation Contents
+- Package metadata and version constants updated to `0.2.0`.
+- Release notes finalized in `docs/RELEASE_NOTES_V0_2_0.md`.
+- README status updated from release-candidate preparation to released.
+- Project/changelog/task memory updated for 117E.
+- Official Git tag: `v0.2.0` (pending publication at initial commit time).
+- GitHub Release: `v0.2.0` (pending publication at initial commit time).
 
-- Created draft v0.2.0 release notes:
-  `docs/RELEASE_NOTES_V0_2_0.md`.
-- Created the 117D phase report:
-  `docs/PHASE_117D_V0_2_RELEASE_CANDIDATE_PREPARATION.md`.
-- Updated README status, resource links, runtime posture, safety status,
-  roadmap snapshot, and limitations.
-- Updated installation guidance for v0.2 release-candidate posture and
-  runtime inspection, including replacement of a stale `pcae agent end`
-  snippet with the implemented `pcae agent release --agent-id <id>
-  --force-stale` form.
-- Updated demo script baseline and no-execution messaging.
-- Updated changelog, project status, TODO, DONE, and decision memory.
+## Release Boundary Confirmation
 
-## v0.2 Messaging Confirmed
-
-- PCAE is non-executing by design.
-- Runtime state is `Observed`.
-- Execution capability is unavailable.
-- Maximum plugin capability is `observe`.
-- Advisory evidence does not authorize action.
-- Dry-run output does not authorize action.
-- PCAE is not an autonomous coding agent.
-- Human approval remains authoritative.
+- No feature development.
+- No runtime behavior change.
+- No architecture change.
+- No execution capability.
+- No lifecycle modification.
+- No PyPI publication.
+- No package publication.
 
 ## PCAE Architecture Status
 
@@ -60,10 +46,11 @@ maintained as runtime state.*
 - v0.2 Test Suite Maintenance & Quality Improvements through Phase 117B
 - v0.2 Quality Baseline Verification through Phase 117C
 - v0.2 Release Candidate Preparation through Phase 117D
+- v0.2.0 Release through Phase 117E
 
 ### Planned
 
-- 117E — v0.2.0 Release
+- 117F — Public v0.2 Article Draft (outside repository)
 
 ### Current Runtime State
 
@@ -77,28 +64,23 @@ maintained as runtime state.*
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
 - **pcae_push_check:** clean
-- **pcae_agent_verify_handoff:** pending final task closure, push, and canonical report promotion
+- **pcae_agent_verify_handoff:** safe to continue
 - **pcae_session_bootstrap_compact:** passed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
 - **telegram_runtime:** configured, enabled, ready for outbound delivery
 
-## Test Results
+## Release Verification
 
-- **fast_green:** 4390 passed in 67.50s
-- **runtime_inspect_execution_unavailable:** passed
-- **bootstrap_session_reporting_tests:** passed
+- **git_tag_exists:** pending release publication
+- **github_release_exists:** pending release publication
+- **release_notes_published:** pending release publication
 - **report_notification_tests:** pending final Telegram delivery
 
 ## No-Go Confirmations
 
-- No release publication.
-- No tag creation.
-- No GitHub Release publication.
-- No PyPI publication.
-- No package publication.
-- No package-version change.
-- No feature added.
-- No production source file changed.
+- No source feature added.
+- No production behavior changed; source edits were limited to
+  release-version metadata constants.
 - No test changed.
 - No runtime behavior changed.
 - No execution.
@@ -116,16 +98,18 @@ maintained as runtime state.*
 - No Dashboard.
 - No Web UI implementation.
 - No Telegram inbound.
+- No PyPI publication.
+- No package publication.
 
 ## Recommended Next Phase
 
-117E — v0.2.0 Release
+117F — Public v0.2 Article Draft (outside repository)
 
 ## Report Consistency
 
 - **Canonical report:** pending promotion
 - **Metadata:** present
-- **Status:** pending final task closure and push
+- **Status:** pending final task closure, tag/release publication, and push
 
 ---
-*Report generated for PCAE Phase 117D. Schema version 1.0.*
+*Report generated for PCAE Phase 117E. Schema version 1.0.*

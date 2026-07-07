@@ -2,6 +2,12 @@
 
 ## Accepted
 
+- Treat Phase 117E as release-only: publish the official `v0.2.0` Git
+  tag and GitHub Release using the 117D release notes, update release
+  metadata/status, and do not add features, change runtime behavior,
+  change architecture, implement execution, modify lifecycle behavior,
+  publish to PyPI, or publish packages. Package metadata may be updated
+  to `0.2.0` as release metadata; this is not runtime behavior.
 - Treat Phase 117D as release preparation only. Draft v0.2.0 release
   notes and refresh release-facing README/install/demo messaging to
   match the frozen v0.2 posture, but do not publish a release, create a

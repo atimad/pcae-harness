@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 117E - v0.2.0 Release (20260707-1328-phase-117e-v0-2-0-release)
 - Sync Phase 117D completion metadata (20260707-1250-sync-phase-117d-completion-metadata)
 - Phase 117D - v0.2 Release Candidate Preparation (20260707-1229-phase-117d-v0-2-release-candidate-preparation)
 - Sync Phase 117C completion metadata (20260707-0914-sync-phase-117c-completion-metadata)

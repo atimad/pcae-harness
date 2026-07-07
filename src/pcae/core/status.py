@@ -1994,7 +1994,7 @@ def exported_by_version() -> str:
     try:
         return metadata.version("pcae-harness")
     except metadata.PackageNotFoundError:
-        return "0.1.0"
+        return "0.2.0"
 
 
 def version_tuple(version: str) -> tuple[int, ...]:

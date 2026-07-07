@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Phase 117E — v0.2.0 Release. Official release phase for PCAE v0.2.0.
+  Verified final release readiness, updated release metadata to
+  `0.2.0` in package metadata and version constants, published the
+  `v0.2.0` Git tag and GitHub Release using
+  `docs/RELEASE_NOTES_V0_2_0.md`, and verified the repository remained
+  clean and governed afterward. No feature development, runtime change,
+  architecture change, execution capability, lifecycle modification,
+  PyPI publication, or package publication occurred. Execution remains
+  unavailable and runtime state remains `Observed`.
+
 - Phase 117D — v0.2 Release Candidate Preparation
   (`docs/PHASE_117D_V0_2_RELEASE_CANDIDATE_PREPARATION.md`).
   Release-preparation-only phase that reviewed v0.2 readiness from a

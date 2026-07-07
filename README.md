@@ -4,7 +4,7 @@ PCAE is a governance harness for AI-assisted software engineering. It does not m
 
 PCAE is a work-in-progress engineering experiment. It is **not production ready**. It does not claim to solve autonomous coding. The goal is governed autonomy — giving AI agents increasing capability while maintaining auditability, scope discipline, and human authority at every boundary.
 
-**Status:** preparing `v0.2.0` release candidate — a governed,
+**Status:** `v0.2.0` released — a governed,
 **non-executing** AI coding lifecycle harness with a frozen v0.2
 architecture and a clean quality baseline. Full-suite verification:
 `18063 passed`; fast-green gate: `4390 passed`. PCAE remains
@@ -17,7 +17,7 @@ harness for human-authoritative AI-assisted engineering.
 
 | Resource | Link |
 |----------|------|
-| **v0.2 Draft Release Notes** | [docs/RELEASE_NOTES_V0_2_0.md](docs/RELEASE_NOTES_V0_2_0.md) |
+| **v0.2 Release Notes** | [docs/RELEASE_NOTES_V0_2_0.md](docs/RELEASE_NOTES_V0_2_0.md) |
 | **v0.2 Architecture Retrospective** | [docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md](docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md) |
 | **v0.1 Release Scope** | [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) |
 | **v0.1 Golden Workflow** | [docs/V0_1_GOLDEN_WORKFLOW.md](docs/V0_1_GOLDEN_WORKFLOW.md) |
@@ -355,9 +355,10 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the canonical roadmap. This section s
 | 117A | v0.2 architecture retrospective and release notes | Complete |
 | 117B | v0.2 test-suite maintenance | Complete |
 | 117C | v0.2 quality baseline verification | Complete |
-| 117D | v0.2 release candidate preparation | Current |
+| 117D | v0.2 release candidate preparation | Complete |
+| 117E | v0.2.0 release | Complete |
 
-**Recommended next phase after release preparation:** 117E — v0.2.0 Release.
+**Recommended next phase after release:** 117F — Public v0.2 Article Draft (outside repository).
 
 ### Future v2 / Pluggability
 

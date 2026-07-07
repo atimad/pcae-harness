@@ -2,20 +2,17 @@
 
 ## Current Phase
 
-Phase 117D — v0.2 Release Candidate Preparation
+Phase 117E — v0.2.0 Release
 (completed).
 
-Release-preparation-only phase: reviewed v0.2 readiness from a new-user
-perspective, refreshed release-facing README/install/demo messaging,
-reviewed changelog, project status, license, contribution guidance,
-usage snippets, and stale TODO/temporary-note surfaces, and drafted
-`docs/RELEASE_NOTES_V0_2_0.md`.
+Official release phase for PCAE v0.2.0. Published the `v0.2.0` Git tag
+and GitHub Release using `docs/RELEASE_NOTES_V0_2_0.md` after 117D
+completed release-candidate preparation and 117C verified the quality
+baseline. Package metadata now reports `0.2.0`.
 
-No release was published. No tag was created. No GitHub Release was
-pushed. No PyPI or package publication occurred. No production source,
-tests, package metadata, feature, runtime behavior, execution,
-authorization, architecture, lifecycle behavior, Repository State
-behavior, Repository Skills behavior, Advisory behavior, Decision
+No PyPI or package publication occurred. No feature, runtime behavior,
+execution, authorization, architecture, lifecycle behavior, Repository
+State behavior, Repository Skills behavior, Advisory behavior, Decision
 Evaluation behavior, Repository Transition Validator behavior,
 Notification Policy behavior, model integration, REST, Dashboard, Web
 UI, or Telegram inbound path changed.
@@ -24,7 +21,22 @@ UI, or Telegram inbound path changed.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 117E — v0.2.0 Release.
+Recommended next repo phase: 117F — Public v0.2 Article Draft (outside repository).
+
+## Phase 117E Complete
+
+Phase 117E — v0.2.0 Release (completed).
+
+Published the official PCAE v0.2.0 Git tag and GitHub Release using
+`docs/RELEASE_NOTES_V0_2_0.md`.
+
+**No-go**: no PyPI publication, package publication, feature, runtime
+behavior change, execution implementation, architecture change,
+lifecycle behavior change, production behavior change, or test change.
+Only release-version metadata changed in package metadata and version
+constants.
+
+Recommended next repo phase: 117F — Public v0.2 Article Draft (outside repository).
 
 ## Phase 117D Complete
 
