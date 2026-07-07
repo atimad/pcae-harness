@@ -10,7 +10,7 @@ Repair 116D completion metadata trust fields
 
 ## Status
 
-active
+done
 
 ## Mode
 
