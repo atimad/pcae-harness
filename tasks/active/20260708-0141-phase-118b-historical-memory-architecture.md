@@ -30,6 +30,8 @@ Design the architecture-only Historical Memory layer for Track B Repository Inte
 - docs/PHASE_118_HISTORICAL_MEMORY_ARCHITECTURE.md
 - tasks/active/20260708-0141-phase-118b-historical-memory-architecture.md
 - tasks/active
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
@@ -40,6 +42,7 @@ Design the architecture-only Historical Memory layer for Track B Repository Inte
 
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
@@ -52,7 +55,6 @@ Design the architecture-only Historical Memory layer for Track B Repository Inte
 - package
 - session
 - policy
-- config
 
 ## Allowed Dependencies
 

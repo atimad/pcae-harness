@@ -1,34 +1,30 @@
 {
-  "phase_id": "118A",
-  "phase_name": "Repository Knowledge Architecture",
-  "phase_title": "Repository Knowledge Architecture",
+  "phase_id": "118B",
+  "phase_name": "Historical Memory Architecture",
+  "phase_title": "Historical Memory Architecture",
   "status": "completed",
-  "summary": "Architecture-only start of Track B: Repository Intelligence. Defines Repository Knowledge as a deterministic, inspectable, source-attributed, read-only architectural understanding layer distinct from Repository State, Evidence, Advisory Context, Repository Skills, and Decision Evaluation. Establishes core primitives, layered knowledge graph model, source attribution, determinism, production, inspection, verification, versioning, read-only boundaries, and future emergence paths for historical memory, change impact analysis, dependency graph work, architectural contract mapping, and advisory reasoning. No source, test, runtime behavior, execution, enforcement, lifecycle behavior, Permission Broker, REST, Dashboard, Web UI, model integration, or Telegram inbound changes.",
+  "summary": "Architecture-only continuation of Track B: Repository Intelligence. Defines Historical Memory as the deterministic, source-attributed, inspectable, versioned, read-only temporal layer inside Repository Knowledge. Establishes historical subjects, events, claims, sources, lineages, evidence links, snapshots, and query results; defines phase/report/decision/repair/hardening/release/subsystem lineage; documents source attribution, supersession and correction handling, conflict preservation, determinism, verification, versioning, query classes, and integrations with Evidence, Repository Skills, Advisory, and Decision Evaluation. No historical extraction implementation, database, CLI, dependency graph, change impact analysis, advisory behavior, source, test, runtime behavior, execution, enforcement, lifecycle behavior, Permission Broker, REST, Dashboard, Web UI, model integration, or Telegram inbound changes.",
   "files_changed_count": 9,
   "files_changed": [
     ".pcae/phase-completion-metadata.json",
     ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_118_REPOSITORY_KNOWLEDGE_ARCHITECTURE.md",
+    "docs/PHASE_118_HISTORICAL_MEMORY_ARCHITECTURE.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20260707-2251-phase-118a-repository-knowledge-architecture.md"
+    "tasks/active/20260708-0141-phase-118b-historical-memory-architecture.md"
   ],
-  "tests_added_or_updated": "None. 118A was architecture-only documentation and did not modify tests.",
+  "tests_added_or_updated": "None. 118B was architecture-only documentation and did not modify tests.",
   "phase_commits": [
     {
-      "hash": "219d55ba",
-      "message": "Document Phase 118A repository knowledge architecture"
-    },
-    {
-      "hash": "2c8ae54c",
-      "message": "Sync Phase 118A completion metadata"
+      "hash": "79e9503d",
+      "message": "Document Phase 118B historical memory architecture"
     }
   ],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 118A is architecture-only documentation)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 118B is architecture-only documentation)",
   "execution_availability": "unavailable",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
@@ -61,18 +57,8 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "nothing_to_push",
+      "result": "nothing_to_push after governed push",
       "status": "passed"
-    },
-    {
-      "name": "pcae_skill_invoke_phase_finalization_118A",
-      "result": "target resolved; invocation is preview-only in current lifecycle",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_architecture_only_no_source_or_tests_changed",
-      "status": "not_applicable"
     },
     {
       "name": "pcae_runtime_inspect",
@@ -81,8 +67,18 @@
     },
     {
       "name": "pcae_notify_status",
-      "result": "Telegram configured, enabled, ready for outbound delivery",
+      "result": "Telegram configured, enabled, ready for outbound delivery after sourcing environment",
       "status": "passed"
+    },
+    {
+      "name": "pcae_skill_invoke_phase_finalization_118B",
+      "result": "target resolved; invocation is preview-only in current lifecycle",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_architecture_only_no_source_or_tests_changed",
+      "status": "not_applicable"
     },
     {
       "name": "architecture_scope",
@@ -142,6 +138,6 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No implementation added. No source code changed. No tests changed. No runtime behavior changed. No execution implemented. No authorization implemented. No enforcement implemented. No lifecycle behavior changed. No Permission Broker behavior changed. No Repository State behavior changed. No Repository Skills behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. Execution capability remains unavailable.",
-  "recommended_next_phase": "118B - Historical Memory Architecture"
+  "no_go_confirmation": "No historical memory extraction implemented. No historical memory database implemented. No historical memory CLI implemented. No dependency graph implemented. No change impact analysis implemented. No advisory behavior changed. No source code changed. No tests changed. No runtime behavior changed. No execution implemented. No shell mediation implemented. No authorization implemented. No enforcement implemented. No lifecycle behavior changed. No Permission Broker behavior changed. No Repository State behavior changed. No Evidence subsystem behavior changed. No Decision Evaluation behavior changed. No Repository Skills behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No provider selection. No multi-model orchestration. No autonomous coding. No model capability expansion. No repository mutation. Execution capability remains unavailable.",
+  "recommended_next_phase": "118C - Change Impact Analysis Architecture"
 }
