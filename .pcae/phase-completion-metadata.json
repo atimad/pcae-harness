@@ -4,7 +4,7 @@
   "phase_title": "v0.2 Test Suite Maintenance & Quality Improvements",
   "status": "completed",
   "summary": "Test-maintenance-only phase. Repaired stale/legacy test expectations documented during 116C/116D so PCAE has a clean v0.2 quality baseline before release preparation. Updated real-repository TODO/bootstrap consistency tests to derive the expected recommended phase from authoritative PROJECT_STATUS.md instead of hard-coding stale 113Y; updated tasks/TODO.md's planning scratch row to mark 117B as next; and updated the legacy RC audit CLI expectation to match frozen v0.2 Repository Transition Validator behavior for incomplete reports: quarantine, report_completeness violation, and notification skipped. Focused stale-test set, full suite, and fast_green all pass. No production source files changed. No feature, runtime behavior, execution, authorization, architecture, lifecycle behavior, Repository State behavior, Repository Skills behavior, Advisory behavior, Decision Evaluation behavior, Repository Transition Validator behavior, Notification Policy behavior, model integration, REST, Dashboard, Web UI, or Telegram inbound path changed.",
-  "files_changed_count": 9,
+  "files_changed_count": 11,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
@@ -12,16 +12,31 @@
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/active/20260707-0656-phase-117b-v0-2-test-suite-maintenance-quality-improvements.md",
+    "tasks/done/20260707-0656-phase-117b-v0-2-test-suite-maintenance-quality-improvements.md",
+    "tasks/active/20260707-0740-sync-phase-117b-implementation-changes.md",
+    "tasks/done/20260707-0740-sync-phase-117b-implementation-changes.md",
     "tests/test_bootstrap_todo_consistency.py",
     "tests/test_rc_audit_findings_repair.py"
   ],
   "tests_added_or_updated": "Updated stale expectations in tests/test_bootstrap_todo_consistency.py and tests/test_rc_audit_findings_repair.py.",
-  "phase_commits": [],
+  "phase_commits": [
+    {
+      "hash": "b4534f98",
+      "message": "Implement Phase 117B test suite maintenance"
+    },
+    {
+      "hash": "12c673da",
+      "message": "Sync Phase 117B implementation changes"
+    },
+    {
+      "hash": "e37d243a",
+      "message": "Close Phase 117B implementation sync"
+    }
+  ],
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117B is test-maintenance only)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
@@ -52,12 +67,12 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "nothing_to_push",
+      "result": "clean",
       "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "result": "blocked before final commit because working tree dirty and active task present; rerun after completion",
+      "result": "pending final metadata sync and canonical report promotion; rerun after completion",
       "status": "pending"
     },
     {
@@ -124,11 +139,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "nothing_to_push"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending until tree is clean and task is closed"
+      "status": "pending final metadata sync and canonical report promotion"
     },
     {
       "name": "pcae_session_bootstrap_compact",
