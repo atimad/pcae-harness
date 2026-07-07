@@ -17,6 +17,7 @@ pcae health          # Overall governance health
 pcae check           # Validate changes against governance policy
 pcae doctor task-memory  # Check task/session consistency
 pcae push check      # Push readiness without pushing
+pcae runtime inspect --json  # Confirm observe-only runtime posture
 ```
 
 ## 2. Task and Lifecycle Status
@@ -100,6 +101,8 @@ pcae gate-dry-run --json --requested-action push \
 - Backend name does not invoke backend
 - Commit message does not create commit
 - Push target does not perform push
+- Runtime state remains Observed; execution capability is unavailable
+- Advisory evidence does not authorize execution
 
 ## 6. What Is NOT Demonstrated
 
@@ -108,9 +111,10 @@ pcae gate-dry-run --json --requested-action push \
 - No commit is created
 - No push is performed
 - No storage or cache is created
-- Permission broker is architecture-only (not implemented)
-- Shell gate is architecture-only (not implemented)
-- Enforced preflight gates are not yet implemented
+- PCAE is not an autonomous coding agent
+- No execution capability is available
+- No live backend invocation or shell mediation is performed
+- No advisory output authorizes action
 
 ## 7. Architecture Layers
 
@@ -124,18 +128,20 @@ Implemented:
   pcae project-state     → integrated answer
   pcae gate-dry-run      → dry-run gate evaluation
 
-Designed (not implemented):
-  Permission broker      → policy mediation
-  Shell gate             → command enforcement
+Observed:
+  pcae runtime inspect   → non-executing runtime posture
 
-Future:
-  Enforced preflight     → narrow scope/commit/push blocking
-  Governed execution     → controlled agent action
+Not available:
+  Governed execution     → no live runtime invocation in v0.2
+  Autonomous agent action → explicitly out of scope
 ```
 
 ## 8. Running the Full Test Suite
 
 ```bash
 python -m pytest -n auto
-# Expected: 7278+ tests passed, 0 failures
+# v0.2 baseline: 18063 passed
+
+python -m pytest -m "fast_green" -n auto -ra --durations=100
+# v0.2 fast-green baseline: 4390 passed
 ```

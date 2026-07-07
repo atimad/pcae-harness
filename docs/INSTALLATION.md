@@ -27,21 +27,27 @@ Every governance command (`pcae check`, `pcae health`, `pcae task new`, etc.) re
 
 PCAE has no runtime dependencies beyond the Python standard library. The only optional dependencies are `pytest` and `pytest-xdist`, used for running the test suite.
 
-## v0.1 notes
+## v0.2 release-candidate notes
 
-PCAE v0.1 is positioned as **"PCAE v0.1 — Governed AI Coding Lifecycle
-Harness"**: non-executing by design. Installing it (editable or
-non-editable — both are validated in Phase 106D) gives you the `pcae`
-console script and governed lifecycle commands (task contracts, commit/push
-governance, report-trust validation and hard-fail gates); it does not
-install or enable any code-execution, backend-invocation, or shell-mediation
-capability. Outbound Telegram notification (`~/.config/pcae/telegram.env`)
-is entirely optional — every command works with it unset; see
-`pcae notify status` for current configuration state. For the exact,
-command-verified v0.1 operator workflow, see
-[docs/V0_1_GOLDEN_WORKFLOW.md](V0_1_GOLDEN_WORKFLOW.md); for a
-copy-pasteable clean-install verification sequence, see
-[docs/V0_1_CLEAN_SMOKE_TEST.md](V0_1_CLEAN_SMOKE_TEST.md).
+PCAE v0.2 is positioned as a governed, non-executing AI coding lifecycle
+harness. Installing it (editable or non-editable) gives you the `pcae`
+console script and governed lifecycle commands: task contracts,
+commit/push governance, report-trust validation, runtime introspection,
+repository transition validation, evidence/advisory architecture, and
+outbound notification support. It does not install or enable
+code-execution, backend-invocation, autonomous agent execution, or shell
+mediation.
+
+The runtime posture is intentionally observe-only: `pcae runtime inspect
+--json` reports runtime state `Observed`, execution capability
+`unavailable`, maximum plugin capability `observe`, and zero registered
+runtime plugins. Advisory evidence and dry-run output are context for
+human review; they do not authorize execution.
+
+Outbound Telegram notification (`~/.config/pcae/telegram.env`) is
+optional — every command works with it unset; see `pcae notify status`
+for current configuration state. For the v0.2 release-candidate
+summary, see [docs/RELEASE_NOTES_V0_2_0.md](RELEASE_NOTES_V0_2_0.md).
 
 ---
 
@@ -356,7 +362,8 @@ Run these commands to inspect the governance state of your installation at any t
 | `pcae inspect` | Detailed structural inspection: every required file, zone patterns, hook status |
 | `pcae check` | Policy validation: source changes against task scope, documentation requirements |
 | `pcae status coherence` | PROJECT_STATUS.md coherence against roadmap registry |
-| `pcae session bootstrap` | Full session context pack for AI agents starting a new session |
+| `pcae session bootstrap --agent-id <id>` | Full session context pack for AI agents starting a new session |
+| `pcae runtime inspect --json` | Machine-readable runtime posture, including execution unavailability |
 
 For machine-readable output (useful in CI):
 
@@ -364,6 +371,7 @@ For machine-readable output (useful in CI):
 pcae health --json
 pcae check --json
 pcae inspect --json
+pcae runtime inspect --json
 ```
 
 ---
@@ -408,7 +416,7 @@ pcae session bootstrap --agent-id my-agent
 Or clear it manually if no agent is actively running:
 
 ```zsh
-pcae agent end
+pcae agent release --agent-id my-agent --force-stale
 ```
 
 ### `pcae init` skips a file I want to regenerate

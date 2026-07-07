@@ -4,10 +4,21 @@ PCAE is a governance harness for AI-assisted software engineering. It does not m
 
 PCAE is a work-in-progress engineering experiment. It is **not production ready**. It does not claim to solve autonomous coding. The goal is governed autonomy — giving AI agents increasing capability while maintaining auditability, scope discipline, and human authority at every boundary.
 
-**Status:** `v0.1.0-rc1` tagged and pushed — a governed, **non-executing** AI coding lifecycle harness. 12,900+ tests passing (fast-green gate: 4390/4390 fully green). Governed lifecycle tooling, read-only project intelligence, dry-run action gate evaluation, and broker/shell-gate architecture documented. Enforced preflight gates and live broker/shell-gate mediation are not yet implemented — v0.1 does not execute code, invoke a real AI backend, or mediate a shell on an agent's behalf. See [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) for the frozen v0.1 scope, [docs/V0_1_GOLDEN_WORKFLOW.md](docs/V0_1_GOLDEN_WORKFLOW.md) for the supported operator workflow, and [docs/RELEASE_HANDOFF_V0_1_RC1.md](docs/RELEASE_HANDOFF_V0_1_RC1.md) for the release-candidate handoff. Governed autonomy (real backend invocation, runtime enforcement) is the **v0.2** target — not yet implemented.
+**Status:** preparing `v0.2.0` release candidate — a governed,
+**non-executing** AI coding lifecycle harness with a frozen v0.2
+architecture and a clean quality baseline. Full-suite verification:
+`18063 passed`; fast-green gate: `4390 passed`. PCAE remains
+observe-only by design: runtime state is `Observed`, execution
+capability is unavailable, maximum plugin capability is `observe`, and
+zero runtime plugins are registered. Advisory evidence, dry-run output,
+scope matches, and human-review flags never authorize execution by
+themselves. PCAE is not an autonomous coding agent; it is a governance
+harness for human-authoritative AI-assisted engineering.
 
 | Resource | Link |
 |----------|------|
+| **v0.2 Draft Release Notes** | [docs/RELEASE_NOTES_V0_2_0.md](docs/RELEASE_NOTES_V0_2_0.md) |
+| **v0.2 Architecture Retrospective** | [docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md](docs/V0_2_ARCHITECTURE_RETROSPECTIVE.md) |
 | **v0.1 Release Scope** | [docs/RELEASE_SCOPE_V0_1.md](docs/RELEASE_SCOPE_V0_1.md) |
 | **v0.1 Golden Workflow** | [docs/V0_1_GOLDEN_WORKFLOW.md](docs/V0_1_GOLDEN_WORKFLOW.md) |
 | **v0.1 Release Handoff** | [docs/RELEASE_HANDOFF_V0_1_RC1.md](docs/RELEASE_HANDOFF_V0_1_RC1.md) |
@@ -257,7 +268,7 @@ Phases 86A–86I implemented a read-only project-intelligence stack that answers
 
 **Read-only and non-authorizing.** These commands report observed governance state from committed evidence. They do not grant permission, authorize execution, invoke agents, approve adoption, permit commits, or permit pushes. All outputs are JSON to stdout — no generated cache, no committed state files, no `.pcae` storage.
 
-**Test coverage.** 183 tests across 86C–86I, including 38 integration tests validating cross-layer consistency, no-write behavior, and no authority inference. Full suite: `python -m pytest -n auto` — 7122 passed, 0 failures.
+**Test coverage.** 183 tests across 86C–86I, including 38 integration tests validating cross-layer consistency, no-write behavior, and no authority inference. The current v0.2 baseline is `python -m pytest -n auto` — `18063 passed`; fast-green is `4390 passed`.
 
 For the full summary, see [docs/PHASE_85_READ_ONLY_STACK_SUMMARY.md](docs/PHASE_85_READ_ONLY_STACK_SUMMARY.md).
 
@@ -290,6 +301,9 @@ pcae irg-challenge
 
 # Assess runtime trust
 pcae runtime-trust
+
+# Inspect current non-executing runtime posture
+pcae runtime inspect --json
 ```
 
 ## Capability Maturity
@@ -305,11 +319,11 @@ Run `pcae capability-inventory` for the live, regenerated inventory (`docs/CAPAB
 
 ## Current Safety Status
 
-PCAE has completed BR-005 (Execution Governance Activation) through Phase 69O. The full chain from human approval to governed root promotion to governed rollback is implemented and tested.
+PCAE has completed BR-005 (Execution Governance Activation) through Phase 69O and the v0.2 architecture is frozen. The full chain from human approval to governed root promotion to governed rollback is implemented and tested, but live AI/runtime execution remains unavailable.
 
 | Capability | Status |
 |---|---|
-| Real AI runtime invocation | **Disabled** — `execution_allowed=False` for every command, including `pcae promote` and `pcae rollback` |
+| Real AI runtime invocation | **Unavailable** — runtime state is `Observed`; execution capability is unavailable |
 | Governed write to root | **Enabled, human-gated** — `pcae promote` writes only content already captured in an ECP and explicitly authorized in an EPR (`promotion_authorized=True`) |
 | Governed rollback of a promotion | **Enabled, human-gated** — `pcae rollback` reverses only a specific PER's writes, gated on `rollback_payload_available=True` |
 | Rollback-of-rollback | **Forbidden by construction** — no command accepts an `rer_id` as a rollback target |
@@ -317,6 +331,7 @@ PCAE has completed BR-005 (Execution Governance Activation) through Phase 69O. T
 | Failure injection / corruption simulation | **Disabled** — `injection_allowed=False` / `simulation_allowed=False` for all such commands |
 | Recovery execution | **Disabled** — `recovery_allowed=False` and `recovery_execution_allowed=False` for all recovery commands |
 | Human review | **Required** — for every invocation, promotion, and rollback decision |
+| Advisory evidence | **Non-authorizing** — advisory output is evidence context only; it never grants execution authority |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#current-limitations) for the full, current list of limitations and deferred capabilities, including the unresolved Phase Activation Governance gap (implementation approval does not imply activation, commit, or push approval).
 
@@ -332,18 +347,17 @@ See [docs/ROADMAP.md](docs/ROADMAP.md) for the canonical roadmap. This section s
 | Multi-agent and intelligence | 82A–87J | Complete — agent discovery through governed action gates |
 | Advisory and enforcement readiness | 88P–90B | Complete — shell gate, permission broker, advisory, dry-run simulation, enforcement readiness, full-suite green (9530/9530) |
 
-### Production v1 Path (In Progress)
+### v0.2 Release Candidate Track
 
-| Series | Phases | Focus |
-|--------|--------|-------|
-| **90** | 90A–90C | Enforcement boundary and test foundation |
-| **91** | 91A–91C | Permission broker simulation prototype and CLI |
-| **92** | 92A–92D | Phase reporting, notification foundation, Telegram outbound delivery |
-| **93** | 93A–93B | Narrow shell gate design and prototype |
-| **94** | 94A | Governed backend invocation design |
-| **95–96** | 95A–96A | Documentation, install, demo, governance review |
+| Phase | Focus | Status |
+|-------|-------|--------|
+| 116F | v0.2 architecture freeze | Complete |
+| 117A | v0.2 architecture retrospective and release notes | Complete |
+| 117B | v0.2 test-suite maintenance | Complete |
+| 117C | v0.2 quality baseline verification | Complete |
+| 117D | v0.2 release candidate preparation | Current |
 
-**Recommended next phase:** 90C — Permission Broker Enforcement Boundary Test Plan (requires explicit operator approval).
+**Recommended next phase after release preparation:** 117E — v0.2.0 Release.
 
 ### Future v2 / Pluggability
 
@@ -352,11 +366,13 @@ Notification adapters, backend adapters, policy modules, audit storage adapters,
 ### Limitations
 
 - PCAE is **not production ready**
-- Enforcement is **simulation-only** — no real blocking, no shell interception
-- Permission broker and shell gate are **simulation prototypes, not enforcement engines**
+- Runtime is **observe-only** — execution capability remains unavailable
+- PCAE is **not an autonomous coding agent**
+- Permission broker and shell gate remain governed architecture/prototype surfaces, not live autonomous execution engines
 - Dry-run/advisory output is **not authorization**
+- Advisory evidence does **not** authorize action
 - No agent is given autonomous repo access
-- Telegram is **outbound only** in Production v1 — no inbound commands, no remote shell
+- Telegram is **outbound only** — no inbound commands, no remote shell
 
 ## Contributing
 

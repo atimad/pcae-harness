@@ -1,37 +1,30 @@
 {
-  "phase_id": "117C",
-  "phase_name": "v0.2 Quality Baseline Verification",
-  "phase_title": "v0.2 Quality Baseline Verification",
+  "phase_id": "117D",
+  "phase_name": "v0.2 Release Candidate Preparation",
+  "phase_title": "v0.2 Release Candidate Preparation",
   "status": "completed",
-  "summary": "Verification phase. Independently verified that the v0.2 quality baseline established by 117B is complete, reproducible, and ready for release candidate preparation. The first focused governance rerun found two reproducibility defects in the 117B baseline: a hard-coded 117B expectation in tests/test_bootstrap_todo_consistency.py and 88M Python-level preflight assertions depending on the real repository active task scope. Both were repaired as test-only baseline fixes. Focused governance suites, full suite, and fast_green all pass. No production source files changed. No feature, runtime behavior, execution, authorization, architecture, lifecycle behavior, release preparation, Repository State behavior, Repository Skills behavior, Advisory behavior, Decision Evaluation behavior, Repository Transition Validator behavior, Notification Policy behavior, model integration, REST, Dashboard, Web UI, or Telegram inbound path changed.",
-  "files_changed_count": 9,
+  "summary": "Release-preparation-only phase. Reviewed v0.2 readiness from a new-user perspective, refreshed release-facing README/install/demo messaging, reviewed changelog, project status, license, contribution guidance, examples, usage snippets, and stale TODO/temporary-note surfaces, and drafted docs/RELEASE_NOTES_V0_2_0.md. No release was published, no tag was created, no GitHub Release was pushed, no PyPI or package publication occurred, and no production source, tests, package metadata, feature, runtime behavior, execution, authorization, architecture, lifecycle behavior, model integration, REST, Dashboard, Web UI, or Telegram inbound path changed.",
+  "files_changed_count": 11,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_117C_V0_2_QUALITY_BASELINE_VERIFICATION.md",
+    "README.md",
+    "docs/DEMO_SCRIPT.md",
+    "docs/INSTALLATION.md",
+    "docs/PHASE_117D_V0_2_RELEASE_CANDIDATE_PREPARATION.md",
+    "docs/RELEASE_NOTES_V0_2_0.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
     "tasks/TODO.md",
-    "tasks/done/20260707-0848-phase-117c-v0-2-quality-baseline-verification.md",
-    "tests/test_bootstrap_todo_consistency.py",
-    "tests/test_preflight_integration_verification.py"
+    "tasks/active/20260707-1229-phase-117d-v0-2-release-candidate-preparation.md"
   ],
-  "tests_added_or_updated": "Updated two tests as reproducibility repairs after focused 117C verification proved 117B baseline regressions.",
-  "phase_commits": [
-    {
-      "hash": "4fc6393",
-      "message": "Implement Phase 117C quality baseline verification"
-    },
-    {
-      "hash": "aea74b21",
-      "message": "Close Phase 117C quality baseline verification"
-    }
-  ],
+  "tests_added_or_updated": "None. 117D was release preparation only and did not modify tests.",
+  "phase_commits": [],
   "commit_attribution": "phase_owned",
-  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117C is verification/test-baseline repair only)",
+  "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117D is documentation/release-preparation only)",
   "execution_availability": "unavailable",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": null,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -61,13 +54,18 @@
     },
     {
       "name": "pcae_push_check",
-      "result": "clean",
+      "result": "nothing to push before commits; working tree dirty due active phase docs",
       "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "result": "pending final metadata sync and canonical report promotion; rerun after completion",
+      "result": "pre-closure run failed only because active task and dirty tree were present; rerun after completion/push",
       "status": "pending"
+    },
+    {
+      "name": "pcae_session_bootstrap_compact",
+      "result": "passed with implementation profile",
+      "status": "passed"
     },
     {
       "name": "pcae_runtime_inspect",
@@ -80,38 +78,21 @@
       "status": "passed"
     },
     {
-      "name": "focused_governance_suites",
-      "result": "130 passed in 8.83s after initial 5 failed, 125 passed reproduction",
-      "status": "passed"
-    },
-    {
-      "name": "full_suite",
-      "result": "18063 passed in 839.05s",
-      "status": "passed"
-    },
-    {
       "name": "fast_green",
-      "result": "4390 passed in 67.92s",
+      "result": "4390 passed in 67.50s",
       "status": "passed"
     },
     {
       "name": "report_notification_tests",
       "result": "pending final Telegram delivery",
       "status": "pending"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "pcae session bootstrap --agent-id codex-local completed at phase start",
-      "status": "passed"
     }
   ],
   "test_results": {
-    "focused_governance_suites": "130 passed in 8.83s after initial 5 failed, 125 passed reproduction",
-    "full_suite": "18063 passed in 839.05s",
-    "fast_green": "4390 passed in 67.92s",
+    "fast_green": "4390 passed in 67.50s",
+    "runtime_inspect_execution_unavailable": "passed",
     "bootstrap_session_reporting_tests": "passed",
-    "report_notification_tests": "pending_final_telegram_delivery",
-    "runtime_inspect_execution_unavailable": "passed"
+    "report_notification_tests": "pending_final_telegram_delivery"
   },
   "governance_results": [
     {
@@ -128,11 +109,11 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "clean"
+      "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
-      "status": "pending final metadata sync and canonical report promotion"
+      "status": "pending final task closure, push, and canonical report promotion"
     },
     {
       "name": "pcae_runtime_inspect",
@@ -149,6 +130,22 @@
     "outbound": true,
     "polling": false
   },
-  "no_go_confirmation": "No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No architecture changed. No lifecycle behavior changed. No release preparation started. No Repository State behavior changed. No Repository Skills behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. No raw git push. No force push. No tags. No releases. No package publication. Execution capability remains unavailable.",
-  "recommended_next_phase": "117D - v0.2 Release Candidate Preparation"
+  "release_preparation_results": {
+    "release_notes_drafted": true,
+    "readme_reviewed": true,
+    "installation_reviewed": true,
+    "examples_reviewed": true,
+    "changelog_reviewed": true,
+    "project_status_reviewed": true,
+    "license_reviewed": true,
+    "contribution_guidance_reviewed": true,
+    "stale_todo_reviewed": true,
+    "release_published": false,
+    "tag_created": false,
+    "github_release_pushed": false,
+    "pypi_published": false,
+    "packages_published": false
+  },
+  "no_go_confirmation": "No release published. No tag created. No GitHub Release pushed. No PyPI publication. No package publication. No package metadata change. No feature implemented. No runtime behavior changed. No execution implemented. No authorization implemented. No architecture changed. No lifecycle behavior changed. No production source changed. No tests changed. No Repository State behavior changed. No Repository Skills behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed. No Repository Transition Validator behavior changed. No Notification Policy behavior changed. No model integration. No REST. No Dashboard. No Web UI. No Telegram inbound. Execution capability remains unavailable.",
+  "recommended_next_phase": "117E - v0.2.0 Release"
 }

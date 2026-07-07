@@ -2,6 +2,15 @@
 
 ## Accepted
 
+- Treat Phase 117D as release preparation only. Draft v0.2.0 release
+  notes and refresh release-facing README/install/demo messaging to
+  match the frozen v0.2 posture, but do not publish a release, create a
+  tag, push a GitHub Release, publish packages, add features, change
+  runtime behavior, implement execution, change architecture, or change
+  lifecycle behavior. The release message must state that PCAE is
+  non-executing by design, runtime state is `Observed`, execution is
+  unavailable, advisory evidence does not authorize action, and PCAE is
+  not an autonomous coding agent.
 - Treat Phase 117C as verification-only with a narrow test-repair
   exception for proven 117B baseline regressions: real-repository
   TODO/bootstrap checks must derive the expected current recommendation
@@ -128,3 +137,14 @@
 - Keep Phase 61F agent handoff modernization strictly assessment-only: inspect continuity requirements, summarize roadmap/runtime/governance posture, and recommend modernization when needed, but do not rewrite handoff artifacts, rewrite session state, or mutate repository state automatically.
 - Keep Phase 61G roadmap continuity strictly assessment-only: validate roadmap/task/session/runtime/handoff alignment before runtime work, but do not rewrite roadmap files, rewrite session state, or mutate repository state automatically.
 - Keep Phase 61H automated task transition limited to governance lifecycle automation: complete the current task, create the next task, refresh session continuity, update governance memory files, and validate coherence/health/check state, but do not invoke runtimes, execute prompts, authorize execution, commit, push, rollback, or change unrelated source behavior.
+# Decisions
+
+- Accepted: Treat Phase 117D as release preparation only. Draft v0.2.0
+  release notes and refresh release-facing README/install/demo
+  messaging to match the frozen v0.2 posture, but do not publish a
+  release, create a tag, push a GitHub Release, publish packages, add
+  features, change runtime behavior, implement execution, change
+  architecture, or change lifecycle behavior. The release message must
+  state that PCAE is non-executing by design, runtime state is
+  `Observed`, execution is unavailable, advisory evidence does not
+  authorize action, and PCAE is not an autonomous coding agent.

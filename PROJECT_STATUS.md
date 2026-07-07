@@ -2,36 +2,44 @@
 
 ## Current Phase
 
-Phase 117C — v0.2 Quality Baseline Verification
+Phase 117D — v0.2 Release Candidate Preparation
 (completed).
 
-Verification phase: independently re-ran the 117B quality baseline and
-verified it is reproducible after two test-only baseline repairs. The
-first focused governance rerun found a 117B-introduced hard-coded 117B
-expectation in `tests/test_bootstrap_todo_consistency.py` and confirmed
-the previously documented 88M fixture-state issue still made
-`tests/test_preflight_integration_verification.py` depend on the real
-active task scope. Both were repaired without production source changes:
-the TODO/bootstrap real-repository check now derives the expected phase
-id from authoritative `PROJECT_STATUS.md`, `tasks/TODO.md` marks 117C as
-the current recommended next phase, and 88M Python-level shared preflight
-objects now use a temporary harness with a known active task contract.
+Release-preparation-only phase: reviewed v0.2 readiness from a new-user
+perspective, refreshed release-facing README/install/demo messaging,
+reviewed changelog, project status, license, contribution guidance,
+usage snippets, and stale TODO/temporary-note surfaces, and drafted
+`docs/RELEASE_NOTES_V0_2_0.md`.
 
-Validation passed: focused governance suites `130 passed`; full suite
-`18063 passed`; `fast_green` `4390 passed`.
-
-No production source files changed. No feature, runtime behavior,
-execution, authorization, architecture, lifecycle behavior, release
-preparation, Repository State behavior, Repository Skills behavior,
-Advisory behavior, Decision Evaluation behavior, Repository Transition
-Validator behavior, Notification Policy behavior, model integration,
-REST, Dashboard, Web UI, or Telegram inbound path changed.
+No release was published. No tag was created. No GitHub Release was
+pushed. No PyPI or package publication occurred. No production source,
+tests, package metadata, feature, runtime behavior, execution,
+authorization, architecture, lifecycle behavior, Repository State
+behavior, Repository Skills behavior, Advisory behavior, Decision
+Evaluation behavior, Repository Transition Validator behavior,
+Notification Policy behavior, model integration, REST, Dashboard, Web
+UI, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 117D — v0.2 Release Candidate Preparation.
+Recommended next repo phase: 117E — v0.2.0 Release.
+
+## Phase 117D Complete
+
+Phase 117D — v0.2 Release Candidate Preparation (completed).
+
+Prepared the v0.2.0 release-candidate documentation and messaging. See
+`docs/PHASE_117D_V0_2_RELEASE_CANDIDATE_PREPARATION.md` and
+`docs/RELEASE_NOTES_V0_2_0.md`.
+
+**No-go**: no release publication, tag creation, GitHub Release, PyPI
+publication, package publication, package-version change, feature,
+runtime behavior change, execution implementation, architecture change,
+lifecycle behavior change, production source change, or test change.
+
+Recommended next repo phase: 117E — v0.2.0 Release.
 
 ## Phase 117C Complete
 

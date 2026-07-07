@@ -1,40 +1,52 @@
-# Phase 117C Complete — v0.2 Quality Baseline Verification
+# Phase 117D Complete — v0.2 Release Candidate Preparation
 
-- **Phase ID:** `117C`
+- **Phase ID:** `117D`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
-- **Files changed:** 9
-- **Tests run:** focused governance suites, full suite, and fast_green
-- **Commits:** 4fc6393, aea74b21
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Files changed:** 11
+- **Tests run:** fast_green
+- **Commits:** pending
+- **Pushed:** not_pushed
+- **origin/main..HEAD:** pending
 
 ## Summary
 
-Phase 117C independently verified the v0.2 quality baseline established
-by 117B. Initial focused verification found two reproducibility defects
-in the 117B baseline. Both were repaired as test-only baseline fixes,
-then focused governance suites, full suite, and `fast_green` all passed.
+Phase 117D prepared PCAE for the future v0.2.0 release phase. It
+reviewed release readiness from a new-user perspective, refreshed
+release-facing README/install/demo messaging, reviewed changelog,
+project status, license, contribution guidance, usage snippets, and
+stale TODO/temporary-note surfaces, and drafted
+`docs/RELEASE_NOTES_V0_2_0.md`.
 
-## Verification Contents
+No release was published. No tag was created. No GitHub Release was
+pushed. No PyPI or package publication occurred.
 
-- Verified `latest.json` before 117C finalization: `phase_id=117B`,
-  complete report, no missing trust fields, pushed state, and
-  `origin/main..HEAD=0`.
-- Re-ran focused governance suites. Initial result reproduced the
-  baseline defects: `5 failed, 125 passed`.
-- Repaired the stale real-repository recommended-next-phase assertion so
-  it derives the phase id from `PROJECT_STATUS.md`.
-- Updated `tasks/TODO.md` to mark 117C as the current recommended next
-  phase during verification.
-- Repaired 88M Python-level preflight fixtures so decision assertions no
-  longer depend on the real repository active task scope.
-- Re-ran focused governance suites: `130 passed`.
-- Re-ran full suite: `18063 passed`.
-- Re-ran `fast_green`: `4390 passed`.
+## Release Preparation Contents
 
-Full detail: `docs/PHASE_117C_V0_2_QUALITY_BASELINE_VERIFICATION.md`.
+- Created draft v0.2.0 release notes:
+  `docs/RELEASE_NOTES_V0_2_0.md`.
+- Created the 117D phase report:
+  `docs/PHASE_117D_V0_2_RELEASE_CANDIDATE_PREPARATION.md`.
+- Updated README status, resource links, runtime posture, safety status,
+  roadmap snapshot, and limitations.
+- Updated installation guidance for v0.2 release-candidate posture and
+  runtime inspection, including replacement of a stale `pcae agent end`
+  snippet with the implemented `pcae agent release --agent-id <id>
+  --force-stale` form.
+- Updated demo script baseline and no-execution messaging.
+- Updated changelog, project status, TODO, DONE, and decision memory.
+
+## v0.2 Messaging Confirmed
+
+- PCAE is non-executing by design.
+- Runtime state is `Observed`.
+- Execution capability is unavailable.
+- Maximum plugin capability is `observe`.
+- Advisory evidence does not authorize action.
+- Dry-run output does not authorize action.
+- PCAE is not an autonomous coding agent.
+- Human approval remains authoritative.
 
 ## PCAE Architecture Status
 
@@ -43,18 +55,15 @@ maintained as runtime state.*
 
 ### Completed
 
-- v0.2 Architecture Review & Consolidation through Phase 116A
-- v0.2 Architecture Consolidation through Phase 116B
-- v0.2 Architecture Consolidation Verification through Phase 116C
-- v0.2 Architecture Freeze Preparation through Phase 116D
 - v0.2 Architecture Freeze through Phase 116F
 - v0.2 Architecture Retrospective & Release Notes through Phase 117A
 - v0.2 Test Suite Maintenance & Quality Improvements through Phase 117B
 - v0.2 Quality Baseline Verification through Phase 117C
+- v0.2 Release Candidate Preparation through Phase 117D
 
 ### Planned
 
-- 117D — v0.2 Release Candidate Preparation
+- 117E — v0.2.0 Release
 
 ### Current Runtime State
 
@@ -67,30 +76,35 @@ maintained as runtime state.*
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
-- **pcae_agent_verify_handoff:** pending final metadata sync and canonical report promotion
+- **pcae_push_check:** passed before commits
+- **pcae_agent_verify_handoff:** pending final task closure, push, and canonical report promotion
+- **pcae_session_bootstrap_compact:** passed
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
 - **telegram_runtime:** configured, enabled, ready for outbound delivery
 
 ## Test Results
 
-- **focused_governance_suites:** 130 passed in 8.83s
-- **full_suite:** 18063 passed in 839.05s
-- **fast_green:** 4390 passed in 67.92s
-- **bootstrap_session_reporting_tests:** passed
+- **fast_green:** 4390 passed in 67.50s
 - **runtime_inspect_execution_unavailable:** passed
+- **bootstrap_session_reporting_tests:** passed
 - **report_notification_tests:** pending final Telegram delivery
 
 ## No-Go Confirmations
 
-- No new feature added.
+- No release publication.
+- No tag creation.
+- No GitHub Release publication.
+- No PyPI publication.
+- No package publication.
+- No package-version change.
+- No feature added.
 - No production source file changed.
+- No test changed.
 - No runtime behavior changed.
 - No execution.
 - No authorization.
 - No architecture change.
 - No lifecycle behavior changed.
-- No release preparation started.
 - No Repository State behavior changed.
 - No Repository Skills behavior changed.
 - No Advisory behavior changed.
@@ -102,21 +116,16 @@ maintained as runtime state.*
 - No Dashboard.
 - No Web UI implementation.
 - No Telegram inbound.
-- No raw git push.
-- No force push.
-- No tags.
-- No releases.
-- No package publication.
 
 ## Recommended Next Phase
 
-117D — v0.2 Release Candidate Preparation
+117E — v0.2.0 Release
 
 ## Report Consistency
 
-- **Canonical report:** present
+- **Canonical report:** pending promotion
 - **Metadata:** present
-- **Status:** consistent
+- **Status:** pending final task closure and push
 
 ---
-*Report generated for PCAE Phase 117C. Schema version 1.0.*
+*Report generated for PCAE Phase 117D. Schema version 1.0.*

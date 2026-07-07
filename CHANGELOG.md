@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Phase 117D — v0.2 Release Candidate Preparation
+  (`docs/PHASE_117D_V0_2_RELEASE_CANDIDATE_PREPARATION.md`).
+  Release-preparation-only phase that reviewed v0.2 readiness from a
+  new-user perspective, refreshed release-facing README/install/demo
+  messaging, reviewed changelog, project status, license, contribution
+  guidance, usage snippets, and stale TODO/temporary-note surfaces, and
+  drafted `docs/RELEASE_NOTES_V0_2_0.md`. No release was published, no
+  tag was created, no GitHub Release was pushed, no package was
+  published, and no production source, tests, runtime behavior,
+  execution capability, architecture, or lifecycle behavior changed.
+  Messaging now states the v0.2 boundaries explicitly: PCAE remains
+  non-executing by design, runtime state is `Observed`, execution is
+  unavailable, advisory evidence does not authorize action, and PCAE is
+  not an autonomous coding agent.
+
 - Phase 117C — v0.2 Quality Baseline Verification
   (`docs/PHASE_117C_V0_2_QUALITY_BASELINE_VERIFICATION.md`).
   Verification phase that independently re-ran the 117B quality
