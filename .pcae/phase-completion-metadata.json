@@ -84,6 +84,16 @@
       "name": "fast_green",
       "result": "not_applicable_freeze_preparation_phase",
       "status": "not_applicable"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "pending final Telegram delivery",
+      "status": "pending"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_freeze_preparation_phase",
+      "status": "not_applicable"
     }
   ],
   "test_results": {
