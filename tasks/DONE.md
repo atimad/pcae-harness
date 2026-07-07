@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix 117A pushed-state metadata (20260707-0556-fix-117a-pushed-state-metadata)
 - Sync Phase 117A completion metadata (20260707-0555-sync-phase-117a-completion-metadata)
 - Phase 117A - v0.2 Architecture Retrospective & Release Notes (20260707-0552-phase-117a-v0-2-architecture-retrospective-release-notes)
 - Fix 116F pushed-state metadata (20260707-0544-fix-116f-pushed-state-metadata)
