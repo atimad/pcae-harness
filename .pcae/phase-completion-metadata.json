@@ -21,6 +21,10 @@
     {
       "hash": "219d55ba",
       "message": "Document Phase 118A repository knowledge architecture"
+    },
+    {
+      "hash": "2c8ae54c",
+      "message": "Sync Phase 118A completion metadata"
     }
   ],
   "commit_attribution": "phase_owned",
@@ -66,14 +70,19 @@
       "status": "passed"
     },
     {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_architecture_only_no_source_or_tests_changed",
+      "status": "not_applicable"
+    },
+    {
       "name": "pcae_runtime_inspect",
       "result": "execution unavailable, Observed, observe, zero runtime plugins",
       "status": "passed"
     },
     {
       "name": "pcae_notify_status",
-      "result": "pending final Telegram runtime check after sourcing environment",
-      "status": "pending"
+      "result": "Telegram configured, enabled, ready for outbound delivery",
+      "status": "passed"
     },
     {
       "name": "architecture_scope",
@@ -84,6 +93,11 @@
       "name": "fast_green",
       "result": "not_applicable_architecture_only_no_source_or_tests_changed",
       "status": "not_applicable"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "pending final Telegram delivery",
+      "status": "pending"
     }
   ],
   "test_results": {
@@ -91,8 +105,10 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "passed",
     "pcae_push_check": "passed",
-    "runtime_inspect_execution_unavailable": "pending_final_validation",
-    "fast_green": "not_applicable_architecture_only_no_source_or_tests_changed"
+    "bootstrap_session_reporting_tests": "not_applicable_architecture_only_no_source_or_tests_changed",
+    "runtime_inspect_execution_unavailable": "passed",
+    "fast_green": "not_applicable_architecture_only_no_source_or_tests_changed",
+    "report_notification_tests": "pending_final_telegram_delivery"
   },
   "governance_results": [
     {
@@ -113,15 +129,15 @@
     },
     {
       "name": "pcae_runtime_inspect",
-      "status": "pending final validation"
+      "status": "execution unavailable, Observed, observe, zero runtime plugins"
     },
     {
       "name": "telegram_runtime",
-      "status": "pending final validation after sourcing environment"
+      "status": "configured, enabled, ready for outbound delivery"
     }
   ],
   "telegram_runtime": {
-    "status": "pending final validation after sourcing environment",
+    "status": "configured, enabled, ready for outbound delivery",
     "inbound": false,
     "outbound": true,
     "polling": false
