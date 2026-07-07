@@ -6,9 +6,9 @@
 - **Missing trust fields:** none
 - **Files changed:** 10
 - **Tests run:** release publication and governance verification
-- **Commits:** d951da2e
-- **Pushed:** not_pushed
-- **origin/main..HEAD:** pending final push
+- **Commits:** d951da2e, 04021713, 0c97e389
+- **Pushed:** pushed
+- **origin/main..HEAD:** 0
 
 ## Summary
 
@@ -71,14 +71,14 @@ maintained as runtime state.*
 
 ## Governance Results
 
-- **pcae_health:** pending final validation
-- **pcae_check:** pending final validation
-- **pcae_doctor_task_memory:** pending final validation
-- **pcae_push_check:** pending final push
+- **pcae_health:** healthy
+- **pcae_check:** passed
+- **pcae_doctor_task_memory:** clean
+- **pcae_push_check:** clean
 - **pcae_agent_verify_handoff:** pending final validation
-- **pcae_session_bootstrap_compact:** pending final validation
-- **pcae_runtime_inspect:** pending final validation
-- **telegram_runtime:** pending final validation
+- **pcae_session_bootstrap_compact:** passed
+- **pcae_runtime_inspect:** execution unavailable, Observed, observe, zero runtime plugins
+- **telegram_runtime:** configured, enabled, ready for outbound delivery
 
 ## Release Verification
 
@@ -114,7 +114,7 @@ maintained as runtime state.*
 
 - **Canonical report:** present
 - **Metadata:** present
-- **Status:** pending final validation, push, and notification
+- **Status:** consistent after pushed-state metadata sync; pending final notification
 
 ---
 *Report generated for PCAE Phase 117E.1. Schema version 1.0.*

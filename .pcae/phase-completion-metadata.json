@@ -22,12 +22,20 @@
     {
       "hash": "d951da2e",
       "message": "Document Phase 117E.1 release publication repair"
+    },
+    {
+      "hash": "04021713",
+      "message": "Sync Phase 117E.1 release publication metadata"
+    },
+    {
+      "hash": "0c97e389",
+      "message": "Close Phase 117E.1 release publication repair"
     }
   ],
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 117E.1 is corrective release-publication governance)",
   "execution_availability": "unavailable",
-  "pushed_status": "not_pushed",
+  "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
@@ -73,13 +81,13 @@
     },
     {
       "name": "pcae_doctor_task_memory",
-      "result": "pending final validation",
-      "status": "pending"
+      "result": "clean",
+      "status": "passed"
     },
     {
       "name": "pcae_push_check",
-      "result": "pending final push",
-      "status": "pending"
+      "result": "clean",
+      "status": "passed"
     },
     {
       "name": "pcae_agent_verify_handoff",
@@ -88,18 +96,23 @@
     },
     {
       "name": "pcae_session_bootstrap_compact",
-      "result": "pending final validation",
-      "status": "pending"
+      "result": "passed",
+      "status": "passed"
     },
     {
       "name": "pcae_runtime_inspect",
-      "result": "pending final validation",
-      "status": "pending"
+      "result": "execution unavailable, Observed, observe, zero runtime plugins",
+      "status": "passed"
     },
     {
       "name": "pcae_notify_status",
-      "result": "pending final validation",
-      "status": "pending"
+      "result": "Telegram configured, enabled, ready for outbound delivery",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "not_applicable_corrective_release_publication_repair_no_tests_changed",
+      "status": "not_applicable"
     },
     {
       "name": "report_notification_tests",
@@ -112,8 +125,9 @@
     "remote_git_tag": "passed",
     "github_release": "passed",
     "release_notes_match": "passed",
-    "bootstrap_session_reporting_tests": "pending_final_validation",
-    "runtime_inspect_execution_unavailable": "pending_final_validation",
+    "bootstrap_session_reporting_tests": "passed",
+    "fast_green": "not_applicable_corrective_release_publication_repair_no_tests_changed",
+    "runtime_inspect_execution_unavailable": "passed",
     "report_notification_tests": "pending_final_telegram_delivery"
   },
   "governance_results": [
@@ -127,11 +141,11 @@
     },
     {
       "name": "pcae_doctor_task_memory",
-      "status": "pending final validation"
+      "status": "clean"
     },
     {
       "name": "pcae_push_check",
-      "status": "pending final push"
+      "status": "clean"
     },
     {
       "name": "pcae_agent_verify_handoff",
@@ -139,11 +153,11 @@
     },
     {
       "name": "pcae_runtime_inspect",
-      "status": "pending final validation"
+      "status": "execution unavailable, Observed, observe, zero runtime plugins"
     },
     {
       "name": "telegram_runtime",
-      "status": "pending final validation"
+      "status": "configured, enabled, ready for outbound delivery"
     }
   ],
   "release_results": {
@@ -157,7 +171,7 @@
     "packages_published": false
   },
   "telegram_runtime": {
-    "status": "pending final validation",
+    "status": "configured, enabled, ready for outbound delivery",
     "inbound": false,
     "outbound": true,
     "polling": false
