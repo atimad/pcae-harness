@@ -1,0 +1,794 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/query_result.schema.json",
+  "title": "Repository Intelligence Query Result",
+  "description": "Artifact-family schema for a structural Query Result. It records a declared, source-attributed representation of the shape of a possible future Repository Intelligence query result; it is descriptive, read-only, non-decision, and no-execution, and it does not execute a query, does not implement a query engine, does not traverse a graph, does not authorize action or execution, does not replace Decision Evaluation, does not replace Evidence, does not replace Repository State, does not prove query result truth, and does not prove query result completeness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "query_result_identity",
+    "query_subject",
+    "query_scope",
+    "query_description",
+    "query_execution_disclosure",
+    "result_items",
+    "limit_disclosure",
+    "result_sources",
+    "unknowns_gaps",
+    "result_limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "query_result_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "query_result_identity": {
+      "$ref": "#/$defs/query_result_identity"
+    },
+    "query_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "query_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "query_description": {
+      "$ref": "#/$defs/query_description"
+    },
+    "query_execution_disclosure": {
+      "$ref": "#/$defs/query_execution_disclosure"
+    },
+    "result_items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/result_item"
+      }
+    },
+    "result_groups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/result_group"
+      }
+    },
+    "result_summaries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/result_summary"
+      }
+    },
+    "relevance_matches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relevance_match"
+      }
+    },
+    "limit_disclosure": {
+      "$ref": "#/$defs/limit_disclosure"
+    },
+    "referenced_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/referenced_artifact"
+      }
+    },
+    "result_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/evidence_link_record.schema.json"
+      }
+    },
+    "unknowns_gaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/unknown_gap"
+      }
+    },
+    "result_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "conflict_or_supersession_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/conflict_supersession_record.schema.json"
+      }
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/derivation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "query_result_disclaimer": {
+      "type": "string",
+      "const": "This Query Result describes the declared, source-attributed shape of a possible query outcome. It does not execute a query, does not implement a query engine, does not traverse a graph, does not prove query result truth or completeness, is not Repository State, and does not authorize action or execution."
+    }
+  },
+  "$defs": {
+    "query_result_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query_result_id",
+        "query_subject",
+        "query_scope",
+        "query_type"
+      ],
+      "properties": {
+        "query_result_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_type": {
+          "$ref": "#/$defs/query_type"
+        },
+        "query_result_created_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "const": "119E.1.0"
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "const": "119C.1.0-concept"
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "const": "119Y.1.0-json-schema"
+        }
+      }
+    },
+    "query_type": {
+      "type": "string",
+      "enum": [
+        "repository_knowledge_query",
+        "historical_memory_query",
+        "dependency_graph_query",
+        "change_impact_query",
+        "advisory_context_query",
+        "conformance_query",
+        "artifact_lookup",
+        "source_lookup",
+        "unknown"
+      ]
+    },
+    "query_description": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query_id",
+        "query_text_or_structured_description",
+        "query_type",
+        "query_scope",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "query_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_text_or_structured_description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared query text or structured description only; this field does not assert the query was executed or correctly interpreted."
+        },
+        "query_type": {
+          "$ref": "#/$defs/query_type"
+        },
+        "query_intent": {
+          "type": "string"
+        },
+        "query_parameters": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "query_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "query_source": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "query_execution_disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_mode",
+        "execution_status",
+        "generation_method",
+        "produced_by",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "execution_mode": {
+          "type": "string",
+          "enum": [
+            "not_executed",
+            "declared",
+            "imported",
+            "simulated",
+            "generated_by_future_system",
+            "unknown"
+          ],
+          "description": "Declared provenance mode only; no value in this enum asserts that PCAE executed a query."
+        },
+        "execution_status": {
+          "$ref": "#/$defs/execution_status"
+        },
+        "generation_method": {
+          "type": "string",
+          "minLength": 1
+        },
+        "produced_by": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/producer"
+        },
+        "run_timestamp_utc": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "execution_status": {
+      "type": "string",
+      "enum": [
+        "not_executed",
+        "declared_result",
+        "imported_result",
+        "simulated_result",
+        "future_generated_result",
+        "unknown"
+      ],
+      "description": "Declared artifact provenance status only; this field does not describe current PCAE query execution capability, which remains unavailable."
+    },
+    "result_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result_item_id",
+        "result_item_type",
+        "result_subject",
+        "result_statement",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "result_item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result_item_type": {
+          "$ref": "#/$defs/result_item_type"
+        },
+        "result_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result_statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structured_value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "result_artifact_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "result_entity_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "result_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "result_rank_or_order": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Declared display order only; this field does not assert authoritative ranking."
+        },
+        "relevance_or_match_rationale": {
+          "type": "string"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "conflict_or_supersession_records": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/conflict_supersession_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "boundary_disclosures": {
+          "$ref": "../shared/boundary_disclosure.schema.json"
+        }
+      }
+    },
+    "result_item_type": {
+      "type": "string",
+      "enum": [
+        "knowledge_claim",
+        "historical_event",
+        "dependency_node",
+        "dependency_edge",
+        "impact_claim",
+        "advisory_context_item",
+        "contract_conformance_record",
+        "source_reference",
+        "evidence_reference",
+        "document_reference",
+        "artifact_reference",
+        "unknown"
+      ]
+    },
+    "result_group": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "group_id",
+        "group_type",
+        "group_label",
+        "included_result_item_ids",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "group_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "group_type": {
+          "type": "string",
+          "enum": [
+            "by_artifact_family",
+            "by_subject",
+            "by_relevance",
+            "by_source",
+            "manual_grouping",
+            "unknown"
+          ]
+        },
+        "group_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "group_description": {
+          "type": "string"
+        },
+        "included_result_item_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "result_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary_id",
+        "summary_type",
+        "summary_statement",
+        "included_result_item_ids",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "summary_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary_type": {
+          "type": "string",
+          "enum": [
+            "overview",
+            "grouping_summary",
+            "coverage_summary",
+            "gap_summary",
+            "unknown"
+          ]
+        },
+        "summary_statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared summary statement only; this field does not assert the summary is complete or correct."
+        },
+        "included_result_item_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "relevance_match": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "match_id",
+        "result_item_reference",
+        "match_type",
+        "match_strength",
+        "match_rationale",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "match_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "result_item_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "match_type": {
+          "type": "string",
+          "enum": [
+            "exact",
+            "partial",
+            "semantic",
+            "structural",
+            "inferred",
+            "unknown"
+          ]
+        },
+        "match_strength": {
+          "type": "string",
+          "enum": [
+            "high",
+            "medium",
+            "low",
+            "informational",
+            "unknown",
+            "not_assessed"
+          ],
+          "description": "Declared/recorded match value only; this field does not imply ranking authority or query engine behavior."
+        },
+        "match_rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "limit_disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result_count",
+        "total_count_known",
+        "truncated",
+        "completeness_state",
+        "limitations"
+      ],
+      "properties": {
+        "result_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_count_known": {
+          "type": "boolean"
+        },
+        "total_count_estimate": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "truncation_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "limit_applied": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "pagination_token_or_cursor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "completeness_state": {
+          "$ref": "#/$defs/completeness_state"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "completeness_state": {
+      "type": "string",
+      "enum": [
+        "complete_claimed_by_source",
+        "partial",
+        "incomplete",
+        "unknown",
+        "not_assessed",
+        "unverifiable"
+      ]
+    },
+    "referenced_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_id",
+        "reference_type",
+        "reference_locator",
+        "relationship_to_result",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference_type": {
+          "type": "string",
+          "enum": [
+            "repository_knowledge_snapshot",
+            "historical_memory_snapshot",
+            "dependency_knowledge_graph_snapshot",
+            "change_impact_report",
+            "advisory_intelligence_context_package",
+            "contract_conformance_record",
+            "repository_intelligence_package",
+            "unknown"
+          ]
+        },
+        "reference_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "relationship_to_result": {
+          "type": "string",
+          "enum": [
+            "documents",
+            "constrains",
+            "references",
+            "supports",
+            "supersedes",
+            "unknown"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "unknown_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unknown_id",
+        "unknown_subject",
+        "missing_evidence",
+        "affected_scope",
+        "uncertainty_state",
+        "limitation"
+      ],
+      "properties": {
+        "unknown_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "follow_up_requirement": {
+          "type": "string",
+          "description": "Declared follow-up context only when permitted by contract; this field does not authorize action."
+        }
+      }
+    }
+  }
+}
