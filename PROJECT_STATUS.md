@@ -2,63 +2,90 @@
 
 ## Current Phase
 
-Phase 119R — Repository Intelligence Executable Schema Verification:
-Historical Memory Snapshot
+Phase 119S — Repository Intelligence Executable Schema Implementation:
+Dependency Knowledge Graph Snapshot
 (completed).
 
-Verification phase for Track B Repository Intelligence. Verifies the
-Historical Memory Snapshot schema implemented in 119Q:
-`schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json`.
-Confirms JSON parse validity, JSON Schema Draft 2020-12 declaration,
-`$id` uniqueness, `$ref` resolution (192 local refs across fifteen
-schema files), shared component reuse, the common artifact envelope
-relationship, snapshot identity, historical event and claim structures,
-phase lineage, release lineage, decision history, repair/hardening
-history, supersession/correction history, historical relationships,
-unknowns/gaps, Evidence link structure, boundary disclosures,
-disclaimers, `additionalProperties` policy, and authority-creep-free
-language. No schema or shared-component corrections were required.
+Implementation phase for Track B Repository Intelligence. Implements
+exactly one additional artifact-family schema:
+`schemas/repository_intelligence/artifacts/dependency_knowledge_graph_snapshot.schema.json`.
+The schema is standalone JSON Schema Draft 2020-12, references verified
+shared components, includes the common artifact envelope relationship,
+and structurally represents snapshot identity, graph scope, graph
+metadata (graph id, name, kind, scope, directionality, completeness
+state, generation-method disclosure), graph nodes, graph edges,
+dependency claims, dependency sources, optional Evidence links,
+dependency paths, graph views, clusters, external references, unknowns
+and gaps, limitations, boundary disclosures, disclaimers, and the
+Dependency Knowledge Graph Snapshot boundary disclaimer.
 
-Investigated the `Commits: pending_` field observed in the 119Q handoff
-report. Recovered the actual 119Q implementation commit
-(`d804458fda2663d79577941f7c415a2a50fe1573`) from git history and
-confirmed the canonical `.pcae/phase-completion-report.md`,
-`.pcae/phase-completion-metadata.json`, and
-`.pcae/phase-reports/*-119Q.json` artifacts also contain the same
-`pending_` placeholder. This is an inherited, non-blocking canonical
-report-generation-ordering defect (the report/metadata are generated as
-part of the same commit they describe, so they cannot self-reference
-their own resulting hash), not a pasted-report transcription error. No
-repair was performed to the already-committed `.pcae/` artifacts; see
-`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_HISTORICAL_MEMORY_SNAPSHOT_VERIFICATION.md`
-for full detail.
-
-No new artifact-family schema, Repository Intelligence Package schema,
-Dependency Knowledge Graph Snapshot schema, Change Impact Report schema,
+No Repository Intelligence Package schema, Change Impact Report schema,
 Advisory Intelligence Context Package schema, Query Result schema,
 validator, validation library, schema verification CLI, automated test
 suite, Python model, Pydantic model, dataclass, repository intelligence
 extraction, repository knowledge extraction, repository scanning,
-historical memory extraction, git history analysis, timeline generation,
-change impact analysis engine, dependency graph construction, graph
-query engine, advisory behavior change, Advisory Runtime change,
-Advisory Context Package change, Evidence subsystem change, Repository
-Skills change, Decision Evaluation change, source code change, test code
-change, runtime behavior change, execution, shell mediation,
-enforcement, lifecycle behavior change, Permission Broker behavior
-change, Repository State behavior change, Repository Transition
-Validator behavior change, Notification Policy behavior change, REST,
-Dashboard, Web UI, provider orchestration, autonomous coding, model
-capability expansion, automatic patch generation, automatic refactoring,
-repository mutation outside planned schema/docs/status files, runtime
-plugin change, or Telegram inbound path changed.
+dependency extraction, dependency scanning, git history analysis,
+timeline generation, change impact analysis engine, dependency graph
+construction, graph traversal, graph query engine, advisory behavior
+change, Advisory Runtime change, Advisory Context Package change,
+Evidence subsystem change, Repository Skills change, Decision Evaluation
+change, source code change, test code change, runtime behavior change,
+execution, shell mediation, enforcement, lifecycle behavior change,
+Permission Broker behavior change, Repository State behavior change,
+Repository Transition Validator behavior change, Notification Policy
+behavior change, REST, Dashboard, Web UI, provider orchestration,
+autonomous coding, model capability expansion, automatic patch
+generation, automatic refactoring, repository mutation outside planned
+schema/docs/status files, runtime plugin change, or Telegram inbound
+path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119S — Repository Intelligence Executable
-Schema Implementation: Dependency Knowledge Graph Snapshot.
+Recommended next repo phase: 119T — Repository Intelligence Executable
+Schema Verification: Dependency Knowledge Graph Snapshot.
+
+## Phase 119S Complete
+
+Phase 119S — Repository Intelligence Executable Schema Implementation:
+Dependency Knowledge Graph Snapshot (completed).
+
+Narrow schema-only implementation phase for the Dependency Knowledge
+Graph Snapshot artifact family. Implements
+`schemas/repository_intelligence/artifacts/dependency_knowledge_graph_snapshot.schema.json`
+as a standalone JSON Schema Draft 2020-12 artifact outside `src`.
+Updates schema documentation in `schemas/repository_intelligence/README.md`
+and adds
+`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_DEPENDENCY_KNOWLEDGE_GRAPH_SNAPSHOT.md`.
+The schema references verified shared components, includes the common
+artifact envelope relationship, represents snapshot identity, graph
+scope, graph metadata, graph nodes, graph edges, dependency claims,
+dependency sources, dependency paths, graph views, clusters, external
+references, unknowns and gaps, limitations, boundary disclosures,
+disclaimers, and the frozen Dependency Knowledge Graph Snapshot boundary
+disclaimer. It represents graph-shaped knowledge structurally without
+constructing, traversing, or querying a graph.
+
+**No-go**: no Repository Intelligence Package schema, Change Impact
+Report schema, Advisory Intelligence Context Package schema, Query
+Result schema, validator, validation library, schema verification CLI,
+automated test suite, Python models, Pydantic models, dataclasses,
+Repository Intelligence extraction, Repository Knowledge extraction,
+repository scanning, dependency extraction, dependency scanning, git
+history analysis, timeline generation, graph construction, graph
+traversal, graph query engine, impact engine, Advisory behavior,
+Advisory Runtime, Advisory Context Package, Evidence, Repository
+Skills, Decision Evaluation, source code, test code, runtime behavior,
+execution, shell mediation, Permission Broker, lifecycle redesign, REST,
+Dashboard, Web UI, Telegram inbound, provider selection, multi-model
+orchestration, autonomous coding, model capability expansion, repository
+mutation outside planned schema/docs/status files, runtime plugin
+changes, Repository State changes, automatic patch generation, or
+automatic refactoring.
+
+Recommended next repo phase: 119T — Repository Intelligence Executable
+Schema Verification: Dependency Knowledge Graph Snapshot.
 
 ## Phase 119R Complete
 

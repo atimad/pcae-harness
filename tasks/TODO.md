@@ -55,7 +55,8 @@ understanding without execution, enforcement, or autonomy.
 | 119P | Repository Intelligence Executable Schema Verification: Repository Knowledge Snapshot | ✅ Complete |
 | 119Q | Repository Intelligence Executable Schema Implementation: Historical Memory Snapshot | ✅ Complete |
 | 119R | Repository Intelligence Executable Schema Verification: Historical Memory Snapshot | ✅ Complete |
-| 119S | Repository Intelligence Executable Schema Implementation: Dependency Knowledge Graph Snapshot | 🔜 Next (per PROJECT_STATUS.md) |
+| 119S | Repository Intelligence Executable Schema Implementation: Dependency Knowledge Graph Snapshot | ✅ Complete |
+| 119T | Repository Intelligence Executable Schema Verification: Dependency Knowledge Graph Snapshot | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 

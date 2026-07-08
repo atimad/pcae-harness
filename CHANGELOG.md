@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- Phase 119S - Repository Intelligence Executable Schema Implementation:
+  Dependency Knowledge Graph Snapshot
+  (`schemas/repository_intelligence/artifacts/dependency_knowledge_graph_snapshot.schema.json`,
+  `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_DEPENDENCY_KNOWLEDGE_GRAPH_SNAPSHOT.md`).
+  Implements exactly one new artifact-family JSON Schema Draft 2020-12
+  file: the Dependency Knowledge Graph Snapshot schema. This is the
+  fourth artifact-family schema and the third content-bearing Repository
+  Intelligence artifact-family schema. It references verified shared
+  components, includes the common artifact envelope relationship, and
+  represents snapshot identity, graph scope, graph metadata (graph id,
+  name, kind, scope, directionality, completeness state,
+  generation-method disclosure), graph nodes, graph edges, dependency
+  claims, dependency sources, optional Evidence links, dependency paths,
+  graph views, clusters, external references, unknowns and gaps,
+  limitations, boundary disclosures, disclaimers, and the frozen
+  Dependency Knowledge Graph Snapshot boundary disclaimer. Represents
+  graph-shaped knowledge structurally without constructing, traversing,
+  or querying a graph. Schema-only; no Repository Intelligence Package,
+  Change Impact Report, Advisory Intelligence Context Package, Query
+  Result, validator, validation library, CLI, automated tests, Python
+  models, Pydantic models, dataclasses, extraction, repository scanning,
+  dependency extraction, dependency scanning, git history analysis,
+  timeline generation, graph construction, graph traversal, graph query
+  engine, impact engine, advisory behavior, Evidence, Repository Skills,
+  Decision Evaluation, source code, test code, runtime behavior,
+  execution, enforcement, lifecycle, Permission Broker, REST, Dashboard,
+  Web UI, provider orchestration, autonomous coding, automatic patch
+  generation, automatic refactoring, repository mutation outside planned
+  schema/docs files, or Telegram inbound changes.
+
 - Phase 119R - Repository Intelligence Executable Schema Verification:
   Historical Memory Snapshot
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_HISTORICAL_MEMORY_SNAPSHOT_VERIFICATION.md`).

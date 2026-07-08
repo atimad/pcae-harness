@@ -1,0 +1,879 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/dependency_knowledge_graph_snapshot.schema.json",
+  "title": "Repository Intelligence Dependency Knowledge Graph Snapshot",
+  "description": "Artifact-family schema for a structural Dependency Knowledge Graph Snapshot. It records a declared, source-attributed, graph-shaped view of repository relationships as nodes, edges, dependency claims, and paths; it is descriptive, read-only, non-decision, and no-execution, and it does not construct or query a graph, does not authorize action or execution, does not replace Decision Evaluation, does not replace Evidence, does not replace Repository State, does not prove dependency truth, and does not prove dependency completeness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "snapshot_identity",
+    "snapshot_subject",
+    "snapshot_scope",
+    "graph_metadata",
+    "nodes",
+    "edges",
+    "dependency_claims",
+    "dependency_sources",
+    "unknowns_gaps",
+    "snapshot_limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "dependency_knowledge_graph_snapshot_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "snapshot_identity": {
+      "$ref": "#/$defs/snapshot_identity"
+    },
+    "snapshot_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshot_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "graph_metadata": {
+      "$ref": "#/$defs/graph_metadata"
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/graph_node"
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/graph_edge"
+      }
+    },
+    "dependency_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/dependency_claim"
+      }
+    },
+    "dependency_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/evidence_link_record.schema.json"
+      }
+    },
+    "dependency_paths": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dependency_path"
+      }
+    },
+    "graph_views": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/graph_view"
+      }
+    },
+    "clusters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/graph_cluster"
+      }
+    },
+    "external_references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/external_reference"
+      }
+    },
+    "unknowns_gaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/unknown_gap"
+      }
+    },
+    "snapshot_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "conflict_or_supersession_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/conflict_supersession_record.schema.json"
+      }
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/derivation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "dependency_knowledge_graph_snapshot_disclaimer": {
+      "type": "string",
+      "const": "This Dependency Knowledge Graph Snapshot describes a declared, source-attributed relationship view of the repository. It does not construct or query a graph, does not prove dependency truth or completeness, is not Repository State, and does not authorize action or execution."
+    }
+  },
+  "$defs": {
+    "snapshot_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_id",
+        "snapshot_subject",
+        "snapshot_scope",
+        "graph_scope"
+      ],
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "graph_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_created_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "const": "119E.1.0"
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "const": "119C.1.0-concept"
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "const": "119S.1.0-json-schema"
+        }
+      }
+    },
+    "graph_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "graph_id",
+        "graph_name",
+        "graph_kind",
+        "graph_scope",
+        "graph_directionality",
+        "graph_completeness_state",
+        "graph_generation_method_disclosure",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "graph_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "graph_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "graph_kind": {
+          "$ref": "#/$defs/graph_kind"
+        },
+        "graph_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "graph_directionality": {
+          "$ref": "#/$defs/graph_direction"
+        },
+        "graph_completeness_state": {
+          "$ref": "#/$defs/graph_completeness_state"
+        },
+        "graph_generation_method_disclosure": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared description of how this graph view was assembled. This field does not assert that a graph was constructed, traversed, or queried by PCAE tooling."
+        },
+        "node_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "edge_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "graph_kind": {
+      "type": "string",
+      "enum": [
+        "dependency",
+        "documentation",
+        "test_coverage",
+        "lifecycle",
+        "governance",
+        "schema",
+        "advisory",
+        "evidence",
+        "mixed",
+        "unknown"
+      ]
+    },
+    "graph_direction": {
+      "type": "string",
+      "enum": [
+        "directed",
+        "undirected",
+        "bidirectional",
+        "mixed",
+        "unknown"
+      ]
+    },
+    "graph_completeness_state": {
+      "type": "string",
+      "enum": [
+        "complete_claimed_by_source",
+        "partial",
+        "incomplete",
+        "unknown",
+        "not_assessed",
+        "unverifiable"
+      ]
+    },
+    "graph_node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "node_id",
+        "node_type",
+        "node_name",
+        "node_status",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "node_type": {
+          "$ref": "#/$defs/node_type"
+        },
+        "node_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "node_label": {
+          "type": "string"
+        },
+        "node_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "node_role": {
+          "type": "string"
+        },
+        "node_status": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "known",
+            "unknown",
+            "unverified",
+            "partially_verified",
+            "superseded",
+            "conflicting"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "boundary_disclosures": {
+          "$ref": "../shared/boundary_disclosure.schema.json"
+        }
+      }
+    },
+    "node_type": {
+      "type": "string",
+      "enum": [
+        "repository",
+        "package",
+        "module",
+        "file",
+        "document",
+        "schema",
+        "command",
+        "configuration",
+        "test",
+        "task",
+        "phase",
+        "release",
+        "runtime_component",
+        "advisory_component",
+        "evidence_artifact",
+        "repository_skill",
+        "contract",
+        "unknown"
+      ]
+    },
+    "graph_edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "edge_id",
+        "edge_type",
+        "source_node_id",
+        "target_node_id",
+        "direction",
+        "relationship_status",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "edge_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "edge_type": {
+          "$ref": "#/$defs/edge_type"
+        },
+        "source_node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "$ref": "#/$defs/graph_direction"
+        },
+        "relationship_label": {
+          "type": "string"
+        },
+        "relationship_status": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "known",
+            "unknown",
+            "unverified",
+            "partially_verified",
+            "superseded",
+            "conflicting"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "conflict_or_supersession_records": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/conflict_supersession_record.schema.json"
+          }
+        },
+        "boundary_disclosures": {
+          "$ref": "../shared/boundary_disclosure.schema.json"
+        }
+      }
+    },
+    "edge_type": {
+      "type": "string",
+      "enum": [
+        "depends_on",
+        "references",
+        "documents",
+        "tests",
+        "configures",
+        "governs",
+        "produces",
+        "consumes",
+        "verifies",
+        "supersedes",
+        "related_to",
+        "derived_from",
+        "unknown"
+      ]
+    },
+    "dependency_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "claim_type",
+        "claim_subject",
+        "claim_statement",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "node_existence",
+            "edge_existence",
+            "path_existence",
+            "dependency_strength",
+            "dependency_scope",
+            "unknown"
+          ]
+        },
+        "claim_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_node_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "target_node_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "claim_statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structured_value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "dependency_strength": {
+          "type": "string",
+          "enum": [
+            "required",
+            "optional",
+            "weak",
+            "inferred",
+            "possible",
+            "unknown",
+            "conflicting",
+            "stale",
+            "superseded"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "conflict_or_supersession_records": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/conflict_supersession_record.schema.json"
+          }
+        },
+        "related_claims": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "dependency_path": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path_id",
+        "start_node_id",
+        "end_node_id",
+        "ordered_edge_ids",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "path_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "start_node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "end_node_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ordered_edge_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "path_status": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "known",
+            "unknown",
+            "unverified",
+            "partially_verified",
+            "superseded",
+            "conflicting"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "graph_view": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "view_id",
+        "view_name",
+        "view_purpose",
+        "included_node_ids",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "view_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "view_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "view_purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "included_node_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "included_edge_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "graph_cluster": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "cluster_id",
+        "cluster_name",
+        "cluster_type",
+        "included_node_ids",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "cluster_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cluster_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cluster_type": {
+          "type": "string",
+          "enum": [
+            "subsystem",
+            "capability",
+            "package",
+            "documentation_set",
+            "test_suite",
+            "release_scope",
+            "governance_scope",
+            "unknown"
+          ]
+        },
+        "included_node_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "included_edge_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "external_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_id",
+        "reference_type",
+        "reference_locator",
+        "relationship_to_snapshot",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference_type": {
+          "type": "string",
+          "enum": [
+            "repository_knowledge_snapshot",
+            "historical_memory_snapshot",
+            "contract_conformance_record",
+            "source_document",
+            "evidence_artifact",
+            "phase_report",
+            "contract",
+            "unknown"
+          ]
+        },
+        "reference_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "relationship_to_snapshot": {
+          "type": "string",
+          "enum": [
+            "documents",
+            "constrains",
+            "references",
+            "supports",
+            "supersedes",
+            "unknown"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "unknown_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unknown_id",
+        "unknown_subject",
+        "missing_node_or_edge",
+        "affected_scope",
+        "uncertainty_state",
+        "limitation"
+      ],
+      "properties": {
+        "unknown_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_node_or_edge": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "follow_up_requirement": {
+          "type": "string",
+          "description": "Declared follow-up context only when permitted by contract; this field does not authorize action."
+        }
+      }
+    }
+  }
+}
