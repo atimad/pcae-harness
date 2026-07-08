@@ -17,12 +17,17 @@
     "tasks/active/20260708-0757-phase-119a-repository-intelligence-contract-freeze.md"
   ],
   "tests_added_or_updated": "None. 119A was contract-freeze-only documentation and did not modify source or test files.",
-  "phase_commits": [],
-  "commit_attribution": "pending_governed_commit",
+  "phase_commits": [
+    {
+      "hash": "dc5a97b",
+      "message": "Document Phase 119A repository intelligence contract freeze"
+    }
+  ],
+  "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 119A is contract-freeze-only documentation)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 0,
+  "origin_main_head_count": 1,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
