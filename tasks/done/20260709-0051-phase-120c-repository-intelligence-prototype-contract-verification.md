@@ -10,7 +10,7 @@ Phase 120C: Repository Intelligence Prototype Contract Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
