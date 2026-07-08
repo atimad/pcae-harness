@@ -18,11 +18,16 @@
   ],
   "tests_run": 0,
   "tests_added_or_updated": "None. 119G was executable-schema-architecture-only and did not modify source or test files.",
-  "phase_commits": [],
-  "commit_attribution": "pending_governed_commit",
+  "phase_commits": [
+    {
+      "hash": "a470eab75693f59a5d7234ad56be382b1f40dbf4",
+      "message": "Document Phase 119G repository intelligence executable schema architecture"
+    }
+  ],
+  "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 119G is executable-schema-architecture-only)",
   "execution_availability": "unavailable",
-  "pushed_status": "pending_governed_commit_and_push",
+  "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
@@ -39,10 +44,12 @@
     {"name": "pcae_health", "result": "healthy", "status": "passed"},
     {"name": "pcae_check", "result": "passed", "status": "passed"},
     {"name": "pcae_doctor_task_memory", "result": "clean", "status": "passed"},
-    {"name": "pcae_push_check", "result": "nothing_to_push before governed commit", "status": "passed"},
+    {"name": "pcae_push_check", "result": "nothing_to_push after governed push", "status": "passed"},
     {"name": "pcae_runtime_inspect", "result": "execution unavailable, Observed, observe, zero runtime plugins", "status": "passed"},
     {"name": "pcae_notify_status", "result": "Telegram available but not configured until runtime env is loaded in this shell", "status": "passed"},
     {"name": "review_scope", "result": "documentation and governance memory only; no src or tests changed", "status": "passed"},
+    {"name": "report_notification_tests", "result": "pending_final_telegram_delivery", "status": "pending"},
+    {"name": "bootstrap_session_reporting_tests", "result": "not_applicable_executable_schema_architecture_only_no_source_or_tests_changed", "status": "not_applicable"},
     {"name": "fast_green", "result": "not_applicable_executable_schema_architecture_only_no_source_or_tests_changed", "status": "not_applicable"}
   ],
   "test_results": {
@@ -50,6 +57,8 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "passed",
     "pcae_push_check": "passed",
+    "report_notification_tests": "pending_final_telegram_delivery",
+    "bootstrap_session_reporting_tests": "not_applicable_executable_schema_architecture_only_no_source_or_tests_changed",
     "runtime_inspect_execution_unavailable": "passed",
     "review_scope": "passed_no_src_or_tests_changed",
     "fast_green": "not_applicable_executable_schema_architecture_only_no_source_or_tests_changed"
@@ -58,7 +67,7 @@
     {"name": "pcae_health", "status": "healthy"},
     {"name": "pcae_check", "status": "passed"},
     {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "nothing_to_push_before_governed_commit"},
+    {"name": "pcae_push_check", "status": "nothing_to_push"},
     {"name": "pcae_runtime_inspect", "status": "execution unavailable, Observed, observe, zero runtime plugins"},
     {"name": "telegram_runtime", "status": "available but not configured until runtime env is loaded in this shell"}
   ],
