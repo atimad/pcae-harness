@@ -10,7 +10,7 @@ Phase 119D - Repository Intelligence Conceptual Schema Review
 
 ## Status
 
-active
+done
 
 ## Mode
 
