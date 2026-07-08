@@ -2,43 +2,122 @@
 
 ## Current Phase
 
-Phase 119D — Repository Intelligence Conceptual Schema Review
+Phase 119E — Repository Intelligence Artifact Contract Freeze
 (completed).
 
-Conceptual-schema-review-only continuation of Track B: Repository
-Intelligence. Reviews the 119C conceptual schema architecture against
-the 119A contract and 119B verification expectations. The review
-concludes the conceptual schema family set is coherent and ready for
-artifact contract freeze with minor clarifications. It reviews the
-schema family inventory, common artifact envelope, each conceptual
-schema family, relationship model, contract invariant mapping, source
-attribution coverage, evidence link coverage, determinism/derivation
-representation, uncertainty/conflict/supersession representation,
-versioning/snapshot representation, boundary representation,
-non-normative examples, implementation leakage, completeness, overlap,
-simplification opportunities, risks, required clarifications, and
-artifact contract freeze readiness.
+Artifact-contract-freeze-only continuation of Track B: Repository
+Intelligence. Freezes the initial Repository Intelligence artifact
+contract for all twelve conceptual schema families defined in 119C and
+reviewed in 119D. Freezes the common artifact envelope, per-family
+contracts (Repository Intelligence Package, Repository Knowledge
+Snapshot, Historical Memory Snapshot, Dependency Knowledge Graph
+Snapshot, Change Impact Report, Advisory Intelligence Context Package,
+Source Attribution Record, Evidence Link Record, Uncertainty /
+Verification State, Conflict / Supersession Record, Query Result,
+Contract Conformance Record), mandatory artifact invariants, source
+attribution contract, evidence link contract, uncertainty/verification
+contract, conflict/supersession contract, derivation disclosure contract,
+versioning/snapshot contract, forbidden artifact claims, artifact
+conformance model, contract compatibility matrix, future executable
+schema constraints, future prototype constraints, future query/report
+constraints, Repository Skills constraints, and Advisory consumer
+constraints. Incorporates all six minor clarifications from 119D:
+canonical field naming, required-vs-optional envelope fields,
+embedded-vs-referenced cross-cutting records, package materialization
+order, Contract Conformance Record non-decision wording, and source
+locator / artifact reference vocabulary.
 
-No artifact contract freeze, executable schema, JSON Schema, Pydantic
-model, dataclass, validator, contract verifier, CLI, automated tests,
-repository intelligence extraction, repository knowledge extraction,
-historical memory extraction, change impact analysis engine, dependency
-graph construction, graph query engine, advisory behavior changes,
-Advisory Runtime changes, Advisory Context Package changes, Evidence
-subsystem changes, Repository Skills changes, Decision Evaluation
-changes, source code, tests, runtime behavior, execution,
-authorization, enforcement, lifecycle behavior, Permission Broker
-behavior, Repository State behavior, Repository Transition Validator
-behavior, Notification Policy behavior, REST, Dashboard, Web UI,
-provider orchestration, autonomous coding, model capability expansion,
-automatic patch generation, automatic refactoring, repository mutation,
-or Telegram inbound path changed.
+No executable schema, JSON Schema, Pydantic model, dataclass, validator,
+contract verifier, CLI, automated tests, repository intelligence
+extraction, repository knowledge extraction, historical memory
+extraction, change impact analysis engine, dependency graph
+construction, graph query engine, advisory behavior changes, Advisory
+Runtime changes, Advisory Context Package changes, Evidence subsystem
+changes, Repository Skills changes, Decision Evaluation changes, source
+code, tests, runtime behavior, execution, authorization, enforcement,
+lifecycle behavior, Permission Broker behavior, Repository State
+behavior, Repository Transition Validator behavior, Notification Policy
+behavior, REST, Dashboard, Web UI, provider orchestration, autonomous
+coding, model capability expansion, automatic patch generation,
+automatic refactoring, repository mutation, or Telegram inbound path
+changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119E — Repository Intelligence Artifact Contract Freeze.
+Recommended next repo phase: 119F — Repository Intelligence Artifact Contract Verification.
+
+## Phase 119E Complete
+
+Phase 119E — Repository Intelligence Artifact Contract Freeze (completed).
+
+Artifact-contract-freeze-only phase for Track B Repository Intelligence.
+Freezes the initial artifact contract derived from the 119C conceptual
+schema architecture and incorporating the minor clarifications from the
+119D review. The contract freezes:
+
+- The twelve frozen artifact families: Repository Intelligence Package,
+  Repository Knowledge Snapshot, Historical Memory Snapshot, Dependency
+  Knowledge Graph Snapshot, Change Impact Report, Advisory Intelligence
+  Context Package, Source Attribution Record, Evidence Link Record,
+  Uncertainty / Verification State, Conflict / Supersession Record, Query
+  Result, Contract Conformance Record.
+- Four deferred families: Release Intelligence Snapshot, Contract Map
+  Snapshot, Cross-Repository Intelligence Package, Artifact Provenance
+  Chain Record.
+- Common artifact envelope with 18 required fields, 3 conditional fields,
+  and 6 optional fields.
+- Per-family contracts with required, optional, and conditional field
+  classifications.
+- Cross-cutting record convention: embedded for artifact-scoped records,
+  referenced for shared records.
+- 27 mandatory artifact invariants spanning identity, source attribution,
+  evidence link, uncertainty, conflict/supersession, boundary, producer,
+  and limitations categories.
+- Source attribution contract with frozen 14-type source locator
+  vocabulary and 9-value artifact reference vocabulary.
+- Evidence link contract with frozen evidence types, support strengths,
+  candidate/accepted states, and eligibility values.
+- Uncertainty / verification contract with 14 frozen state values.
+- Conflict / supersession contract with 7 conflict types and 5 resolution
+  states.
+- Derivation disclosure contract with derivation rules and prohibited
+  claims.
+- Versioning / snapshot contract distinguishing contract version, schema
+  concept version, repository version, and artifact identity.
+- 24 forbidden artifact claims across authorization/execution, decision
+  evaluation, repository state/evidence, advisory authority, model
+  inference, mutation, and canonical/lifecycle categories.
+- Artifact conformance model with 5 conformance states and 11
+  non-conformance conditions.
+- Contract compatibility matrix mapping all 12 artifact families to 10
+  PCAE subsystems.
+- Future executable schema constraints (7 permitted, 10 prohibited).
+- Future prototype constraints (6 permitted, 6 prohibited).
+- Future query/report constraints (4 permitted, 4 prohibited).
+- Repository Skills exposing artifacts constraints (3 permitted, 4
+  prohibited).
+- Advisory consumer constraints (4 permitted, 5 prohibited).
+- All six 119D minor clarifications addressed.
+
+**No-go**: no executable schema, JSON Schema, Pydantic model, dataclass,
+validator, contract verifier, CLI, automated tests, Repository
+Intelligence extraction, Repository Knowledge extraction, Historical
+Memory extraction, Change Impact Analysis engine, Dependency Knowledge
+Graph construction, graph query engine, Advisory behavior change,
+Advisory Runtime change, Advisory Context Package change, Evidence
+subsystem change, Repository Skills change, Decision Evaluation change,
+source implementation, test implementation, runtime behavior change,
+execution, authorization, enforcement, lifecycle behavior change,
+Permission Broker change, Repository State behavior change, Repository
+Transition Validator behavior change, Notification Policy behavior
+change, REST, Dashboard, Web UI, Telegram inbound, provider selection,
+multi-model orchestration, autonomous coding, model capability expansion,
+repository mutation, automatic patch generation, or automatic
+refactoring.
+
+Recommended next repo phase: 119F — Repository Intelligence Artifact Contract Verification.
 
 ## Phase 119D Complete
 

@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 119E - Repository Intelligence Artifact Contract Freeze
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_FREEZE.md`).
+  Freezes the initial Repository Intelligence artifact contract for all
+  twelve conceptual schema families defined in 119C and reviewed in 119D.
+  Freezes the common artifact envelope (18 required, 3 conditional, 6
+  optional fields), per-family contracts with required/optional/conditional
+  field classifications, cross-cutting record convention, 27 mandatory
+  artifact invariants, source attribution contract with 14-type locator
+  vocabulary, evidence link contract, uncertainty/verification contract
+  with 14 state values, conflict/supersession contract, derivation
+  disclosure contract, versioning/snapshot contract, 24 forbidden artifact
+  claims, artifact conformance model with 5 states, contract compatibility
+  matrix (12 families × 10 subsystems), future executable schema
+  constraints, future prototype constraints, future query/report
+  constraints, Repository Skills constraints, and Advisory consumer
+  constraints. Addresses all six 119D minor clarifications. Artifact
+  contract freeze only; no executable schema, JSON Schema, Pydantic model,
+  dataclass, validator, verifier, CLI, automated tests, extraction, graph
+  construction, impact engine, advisory behavior, Evidence, Repository
+  Skills, Decision Evaluation, source, test, runtime behavior, execution,
+  enforcement, lifecycle, Permission Broker, REST, Dashboard, Web UI,
+  provider orchestration, autonomous coding, automatic patch generation,
+  automatic refactoring, repository mutation, or Telegram inbound changes.
+
 - Phase 119D - Repository Intelligence Conceptual Schema Review
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONCEPTUAL_SCHEMA_REVIEW.md`).
   Reviews the 119C conceptual schema architecture against the 119A

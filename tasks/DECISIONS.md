@@ -2,6 +2,32 @@
 
 ## Accepted
 
+- Treat Phase 119E as artifact-contract-freeze-only: freeze the initial
+  Repository Intelligence artifact contract for all twelve conceptual
+  schema families defined in 119C and reviewed in 119D, incorporating the
+  six minor clarifications identified by 119D (canonical field names with
+  required/optional/conditional classification, embedded-vs-referenced
+  cross-cutting convention, package materialization order, Contract
+  Conformance Record non-decision wording, source locator vocabulary, and
+  artifact reference vocabulary). Freeze the common artifact envelope,
+  per-family contracts, mandatory invariants, source attribution contract,
+  evidence link contract, uncertainty/verification contract,
+  conflict/supersession contract, derivation disclosure contract,
+  versioning/snapshot contract, forbidden claims, conformance model,
+  compatibility matrix, and future constraints. Do not create executable
+  schemas, JSON Schema, Pydantic models, dataclasses, validators, contract
+  verifiers, CLIs, automated tests, Repository Intelligence extraction,
+  Repository Knowledge extraction, Historical Memory extraction, Change
+  Impact Analysis engines, Dependency Knowledge Graph construction, graph
+  query engines, Advisory behavior changes, Advisory Runtime changes,
+  Advisory Context Package changes, Evidence subsystem changes, Repository
+  Skills changes, Decision Evaluation changes, source code, tests, runtime
+  behavior, execution, authorization, enforcement, lifecycle behavior,
+  Permission Broker behavior, Repository State behavior, Repository
+  Transition Validator behavior, Notification Policy behavior, REST,
+  Dashboard, Web UI, provider orchestration, autonomous coding, model
+  capability expansion, automatic patch generation, automatic
+  refactoring, repository mutation, or Telegram inbound capability.
 - Treat Phase 119D as conceptual-schema-review-only: review the 119C
   conceptual schema architecture against the 119A contract and 119B
   verification expectations, assess coherence, completeness,
