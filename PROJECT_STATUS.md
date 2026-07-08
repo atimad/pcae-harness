@@ -2,25 +2,25 @@
 
 ## Current Phase
 
-Phase 119I — Repository Intelligence Executable Schema Contract Verification
+Phase 119J — Repository Intelligence Executable Schema Implementation Plan
 (completed).
 
-Executable-schema-contract-verification-only continuation of Track B:
-Repository Intelligence. Verifies the frozen 119H executable schema
-contract as internally consistent, testable, future-enforceable, and safe
-against validator authority creep. Verifies all twelve schema families,
-shared components, common envelope expectations, field classification,
-structural validation boundaries, semantic validation boundaries,
-manual/future-governance validation boundaries, forbidden-claim
-validation boundaries, source attribution validation, evidence link
-validation, uncertainty and verification-state validation, conflict and
-supersession validation, derivation disclosure validation, versioning and
-compatibility, future file organization, future validator boundaries,
-future test expectations, artifact generation constraints, Repository
-Skills integration, Advisory consumer integration, Decision Evaluation
-boundary, read-only boundary, no-execution boundary, validator
-authority-creep risk, schema-valid artifact authority-creep risk, and
-readiness for executable schema implementation planning.
+Executable-schema-implementation-plan-only continuation of Track B:
+Repository Intelligence. Plans how PCAE should later implement
+Repository Intelligence executable schemas while preserving the frozen
+119H contract verified in 119I, the 119E artifact contract, read-only
+boundary, Decision Evaluation boundary, Evidence boundary, Repository
+State boundary, Advisory non-authority, and execution-unavailable
+posture. Recommends JSON Schema as the first schema representation,
+outside `src`, with a shared-components-first implementation slice.
+Defines implementation principles, schema family sequencing, future file
+organization, future module boundaries, staged validator plan, future
+test plan, future fixture plan, structural validation scope, semantic
+validation deferral, manual/future-governance deferral, forbidden-claim
+handling, versioning, migration/deprecation, artifact generation
+constraints, Repository Skills exposure deferral, Advisory consumer
+deferral, governance integration, no-go boundary preservation,
+rollback/fallback, risks, and first implementation acceptance criteria.
 
 No executable schema, JSON Schema, Pydantic model, dataclass, validator,
 contract verifier, CLI, automated tests, repository intelligence
@@ -41,7 +41,41 @@ changed.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119J — Repository Intelligence Executable Schema Implementation Plan.
+Recommended next repo phase: 119K — Repository Intelligence Executable Schema Implementation: Shared Components.
+
+## Phase 119J Complete
+
+Phase 119J — Repository Intelligence Executable Schema Implementation Plan
+(completed).
+
+Implementation-plan-only phase for Track B Repository Intelligence. Plans
+how future executable schema implementation should proceed without adding
+schema artifacts, validators, CLI, tests, fixtures, schema directories,
+source code, runtime behavior, extraction, graph construction, impact
+analysis, Advisory behavior, Evidence behavior, Repository Skills
+behavior, Decision Evaluation behavior, execution, enforcement, or
+authority. Recommends standalone JSON Schema outside `src` as the first
+representation. Recommends a smallest safe first implementation slice of
+shared components only: common artifact envelope, source attribution,
+evidence link, uncertainty/verification state, conflict/supersession,
+derivation disclosure, limitations, context records, and boundary
+disclosures. Defers family-specific high-level artifacts, validators,
+CLI, fixtures, Repository Skills exposure, Advisory consumption,
+extraction, graph construction, impact analysis, and prototypes to later
+governed phases.
+
+**No-go**: no executable schema, JSON Schema, Pydantic model, dataclass,
+validator, artifact contract verifier, schema verification CLI,
+automated tests, schema directories, extraction, graph construction,
+impact engine, advisory behavior, Advisory Runtime, Advisory Context
+Package, Evidence, Repository Skills, Decision Evaluation, source, test,
+runtime behavior, execution, enforcement, lifecycle, Permission Broker,
+REST, Dashboard, Web UI, Telegram inbound, provider orchestration,
+autonomous coding, model capability expansion, repository mutation,
+automatic patch generation, or automatic refactoring.
+
+Recommended next repo phase: 119K — Repository Intelligence Executable
+Schema Implementation: Shared Components.
 
 ## Phase 119I Complete
 

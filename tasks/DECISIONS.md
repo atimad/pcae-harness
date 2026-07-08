@@ -2,6 +2,31 @@
 
 ## Accepted
 
+- Treat Phase 119J as executable-schema-implementation-plan-only: plan
+  how PCAE should later implement Repository Intelligence executable
+  schemas while preserving the frozen 119H contract verified in 119I, the
+  119E artifact contract, read-only boundary, Decision Evaluation
+  boundary, Evidence boundary, Repository State boundary, Advisory
+  non-authority, and execution-unavailable posture. Recommend standalone
+  JSON Schema outside `src` as the first schema representation, with a
+  narrow first implementation slice limited to shared components. Define
+  implementation principles, schema language rationale, schema family
+  sequencing, future file organization, future module boundaries, staged
+  validator plan, future tests, future fixtures, structural validation
+  scope, semantic validation deferral, manual/future-governance deferral,
+  forbidden-claim handling, versioning, migration/deprecation, artifact
+  generation constraints, Repository Skills exposure deferral, Advisory
+  consumer deferral, governance integration, no-go preservation, risks,
+  rollback/fallback, and first implementation acceptance criteria. Do not
+  implement executable schemas, JSON Schema, Pydantic models, dataclasses,
+  validators, CLIs, tests, schema directories, extraction, graph
+  construction, impact analysis, advisory behavior, Evidence changes,
+  Repository Skills changes, Decision Evaluation changes, runtime
+  behavior, execution, enforcement, Permission Broker changes, repository
+  mutation, automatic patch generation, automatic refactoring, or Telegram
+  inbound capability. Recommended next phase: 119K — Repository
+  Intelligence Executable Schema Implementation: Shared Components.
+
 - Treat Phase 119I as executable-schema-contract-verification-only:
   verify the frozen 119H Repository Intelligence executable schema
   contract as internally consistent, testable, future-enforceable, and

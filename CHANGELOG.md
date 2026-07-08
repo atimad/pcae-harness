@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 119J - Repository Intelligence Executable Schema Implementation
+  Plan
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`).
+  Plans how PCAE should later implement Repository Intelligence
+  executable schemas while preserving the frozen 119H contract verified
+  in 119I, the 119E artifact contract, read-only boundary, Decision
+  Evaluation boundary, Evidence boundary, Repository State boundary,
+  Advisory non-authority, and execution-unavailable posture. Recommends
+  standalone JSON Schema outside `src` as the first schema representation
+  and a shared-components-first implementation slice. Defines
+  implementation principles, schema language rationale, first
+  implementation slice, schema family sequencing, future file
+  organization, future module boundaries, staged validator plan, future
+  tests, future fixtures, structural validation scope, semantic
+  validation deferral, manual/future-governance deferral, forbidden claim
+  handling, versioning, migration/deprecation, artifact generation
+  constraints, Repository Skills exposure deferral, Advisory consumer
+  deferral, governance integration, no-go boundary preservation,
+  rollback/fallback, risks, and first implementation acceptance criteria.
+  Plan only; no executable schema, JSON Schema, Pydantic model,
+  dataclass, validator, verifier, CLI, automated tests, schema directory,
+  extraction, graph construction, impact engine, advisory behavior,
+  Evidence, Repository Skills, Decision Evaluation, source, test,
+  runtime behavior, execution, enforcement, lifecycle, Permission Broker,
+  REST, Dashboard, Web UI, provider orchestration, autonomous coding,
+  automatic patch generation, automatic refactoring, repository mutation,
+  or Telegram inbound changes.
+
 - Phase 119I - Repository Intelligence Executable Schema Contract
   Verification
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_VERIFICATION.md`).
