@@ -1,60 +1,94 @@
 {
-  "phase_id": "120C",
-  "phase_name": "Repository Intelligence Prototype Contract Verification",
-  "phase_title": "Repository Intelligence Prototype Contract Verification",
+  "phase_id": "120D",
+  "phase_name": "Repository Knowledge Snapshot Prototype Plan",
+  "phase_title": "Repository Knowledge Snapshot Prototype Plan",
   "status": "completed",
-  "summary": "Verification-only phase independently verifying the 120B Repository Intelligence Prototype Contract before any prototype planning or implementation begins. Verified contract completeness (all 20 required sections present), architectural consistency with the Phase 119 executable schema line (locator vocabulary, uncertainty vocabulary, boundary disclosure fields, and disclaimer constants independently cross-checked byte-for-byte against the schema files, all exact matches) and with Phase 120A (no contradiction found), scope (remains limited to Repository Knowledge Snapshot, read-only, deterministic), input/output models, determinism, read-only boundary (all ten prohibited behaviors confirmed present), attribution, Evidence boundary, uncertainty and limitation contracts, the ten prototype stages (logical ordering confirmed), the fail-closed failure contract, governance compatibility, and sufficiency for 120D-120F without further architectural work. Found one non-blocking terminology clarification (Repository Knowledge Snapshot's actual required field is unknowns, not unknowns_gaps as 120B's prose stated) and one non-blocking structural framing difference (120A's separate Human Review Layer vs. 120B's unified ten-stage list), both documented as guidance for 120D without reopening or modifying the frozen 120B contract. Carried forward the same three known inherited, non-blocking tooling/reporting issues without repairing them. No schema, source, or test file was changed; no implementation occurred.",
+  "summary": "Documentation-only implementation-planning phase producing the definitive plan for Phase 120E: a deterministic, read-only Repository Knowledge Snapshot generator. Defines docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_PLAN.md, reaffirming all ten implementation boundaries from 120A-120C (read-only, deterministic, observe-only, no execution, no repository/runtime mutation, no AI inference, no network access, no Advisory/Decision Evaluation integration). Defines planned conceptual inputs, an eleven-stage logical extraction pipeline (an implementation-planning elaboration of 120B's ten frozen stages, not a contract amendment), a ten-component plan (responsibility/inputs/outputs/boundaries, no code specified), a source attribution plan, unknown-handling and limitation plans, a verification plan for 120F, and a fail-closed failure plan. Makes the persistence-location decision 120B deferred to this phase: selects .pcae/repository-intelligence/ as the planned output location, with rationale against the other two 120A candidates. Lists 120E's expected deliverables and eleven measurable acceptance criteria, documents four implementation risks with mitigations, explicitly defers the query layer, Advisory consumption, change impact prototype, graph traversal, and execution planning/capability, and carries forward the same three known inherited, non-blocking tooling/reporting issues without repairing them. No schema, source, or test file was changed; no implementation occurred.",
   "files_changed_count": 5,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
     "tasks/TODO.md",
-    "docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_VERIFICATION.md",
-    "tasks/active/20260709-0051-phase-120c-repository-intelligence-prototype-contract-verification.md"
+    "docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_PLAN.md",
+    "tasks/active/20260709-0057-phase-120d-repository-knowledge-snapshot-prototype-plan.md"
   ],
   "source_files_changed": 0,
   "test_files_changed": 0,
   "tests_run": 0,
-  "tests_added_or_updated": "None. 120C was a verification-only phase and did not add automated tests.",
-  "verification_document_path": "docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_VERIFICATION.md",
-  "contract_verification_conclusion": "verified_no_contract_modifications_required",
-  "contract_verification_matrix": [
-    {"area": "Contract completeness", "classification": "Verified"},
-    {"area": "Architectural consistency - Phase 119", "classification": "Verified"},
-    {"area": "Architectural consistency - Phase 120A", "classification": "Verified"},
-    {"area": "Architectural consistency - Repository Intelligence principles", "classification": "Verified"},
-    {"area": "Architectural consistency - observe-only architecture", "classification": "Verified"},
-    {"area": "Scope verification", "classification": "Verified"},
-    {"area": "Input model verification", "classification": "Verified"},
-    {"area": "Output model verification", "classification": "Verified with clarification"},
-    {"area": "Determinism verification", "classification": "Verified"},
-    {"area": "Read-only boundary verification", "classification": "Verified"},
-    {"area": "Attribution verification", "classification": "Verified"},
-    {"area": "Evidence boundary verification", "classification": "Verified"},
-    {"area": "Uncertainty verification", "classification": "Verified"},
-    {"area": "Limitation verification", "classification": "Verified"},
-    {"area": "Prototype stage verification", "classification": "Verified with clarification"},
-    {"area": "Failure contract verification", "classification": "Verified"},
-    {"area": "Governance verification", "classification": "Verified"},
-    {"area": "Phase sequencing verification (120D-120F sufficiency)", "classification": "Verified"},
-    {"area": "Persistence storage implementation choice", "classification": "Out of scope (delegated to 120D)"},
-    {"area": "Verification tooling implementation", "classification": "Out of scope (delegated to 120F)"},
-    {"area": "Generator implementation detail", "classification": "Requires future implementation detail (120D/120E)"}
+  "tests_added_or_updated": "None. 120D was a documentation-only planning phase and did not add automated tests.",
+  "plan_document_path": "docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_PLAN.md",
+  "implementation_planning_summary": "Defines exactly how Phase 120E will implement a deterministic, read-only Repository Knowledge Snapshot generator, subject to every boundary from 120A, every rule frozen in 120B, and every finding verified in 120C.",
+  "planned_pipeline_overview": [
+    "1. Repository source discovery",
+    "2. Source eligibility evaluation",
+    "3. Attribution assignment",
+    "4. Repository knowledge extraction",
+    "5. Knowledge normalization",
+    "6. Repository Knowledge Snapshot assembly",
+    "7. Schema alignment",
+    "8. Limitation capture",
+    "9. Boundary attachment",
+    "10. Persistence",
+    "11. Human review"
   ],
-  "completeness_assessment": "All 20 sections required by the 120B brief are present in the frozen contract document; no required contractual element is missing.",
-  "consistency_assessment": "No contradiction found between 120B and Phase 119's schema line (locator vocabulary, uncertainty vocabulary, boundary disclosure fields, and disclaimer constants all confirmed exact matches against schema files) or Phase 120A's architecture (every narrowing or reframing is explicit and traceable).",
-  "determinism_assessment": "The determinism contract (120B Section 6) is precise, testable (byte-for-byte identical output except approved metadata fields), and has no gap allowing non-deterministic behavior; no probabilistic reasoning or AI inference permitted.",
-  "governance_compatibility_assessment": "The governance contract (120B Section 16) is fully compatible with PCAE's existing governance model; introduces no new mechanism and defers entirely to the lifecycle already in use throughout 118, 119, and 120A-120B.",
-  "implementation_readiness_assessment": "The frozen contract is sufficient for 120D-120F as written; no additional architectural phase is required before 120D begins. Two non-blocking clarifications were recorded as guidance for 120D (the unknowns field-name detail and the layer-vs-stage framing difference), neither requiring contract modification.",
-  "clarifications_found": [
-    "120B Section 10 refers to the artifact's 'unknowns_gaps' array; the actual required field name in repository_knowledge_snapshot.schema.json is 'unknowns' (unknowns_gaps is correct for the other seven artifact families, which postdate Repository Knowledge Snapshot's 119O implementation). Non-blocking; 120D must use the schema's actual field name.",
-    "120B's ten-stage list (Section 12) folds 120A's separately-described Human Review Layer (120A Section 6) into a unified ten-stage process alongside 120A's nine process stages (120A Section 5). Content is identical; only the structural framing differs. Non-blocking."
+  "component_responsibility_summary": [
+    "Source Inventory Component - enumerate allowed input sources present at the snapshotted commit",
+    "Attribution Component - assign deterministic Source Attribution Records before extraction",
+    "Extraction Component - apply deterministic, non-inferential extraction to attributed sources",
+    "Normalization Component - normalize candidate knowledge without altering substantive meaning or attribution",
+    "Assembly Component - assemble normalized knowledge into the Repository Knowledge Snapshot shape",
+    "Schema Alignment Component - align the assembled structure against the frozen schema",
+    "Limitation/Unknown Capture Component - populate unknowns, snapshot_limitations, and per-record limitations honestly",
+    "Boundary Attachment Component - attach boundary_disclosures, disclaimers, and the family-specific disclaimer const verbatim",
+    "Persistence Component - write the completed snapshot through the governed PCAE lifecycle only",
+    "Verification/Reporting Component - verify the persisted snapshot against the 120F verification agenda"
+  ],
+  "implementation_boundaries_reaffirmed": [
+    "Read-only",
+    "Deterministic",
+    "Observe-only",
+    "No execution",
+    "No repository mutation",
+    "No runtime mutation",
+    "No AI inference",
+    "No network access",
+    "No Advisory integration",
+    "No Decision Evaluation integration"
+  ],
+  "persistence_location_decision": "Selected .pcae/repository-intelligence/ as the planned (not yet implemented) output location, resolving the persistence-location decision 120B Section 13 deferred to this phase. Rejected artifacts/repository-intelligence/ and reports/repository-intelligence/ as introducing unnecessary new top-level conventions or risking conflation with .pcae/phase-reports/.",
+  "acceptance_criteria_for_120e": [
+    "Exactly one Repository Knowledge Snapshot artifact generated per run, no other artifact family produced",
+    "Generated artifact validates structurally against the frozen schema and its shared components",
+    "Every content-bearing record carries a valid source_attribution locator",
+    "Re-running the generator against the same commit produces byte-for-byte identical output except approved metadata",
+    "All nine boundary_disclosures fields and all six disclaimer consts present, verbatim, unmodified",
+    "unknowns and snapshot_limitations populated wherever generator coverage has bounds",
+    "No repository file outside the artifact's own governed persistence write was modified",
+    "No execution, shell mediation beyond governed commands, AI provider invocation, external API call, or network access occurred",
+    "No Advisory or Decision Evaluation subsystem invoked, mutated, or replaced",
+    "Artifact persisted only through the governed PCAE lifecycle, origin/main..HEAD returned to 0",
+    "Repository health remained healthy/passed/clean throughout"
+  ],
+  "risks_documented": [
+    "Extraction ambiguity for architectural entities - mitigated via fail-closed representation in both applicable $defs or an unknowns entry",
+    "Determinism drift from git/filesystem ordering - mitigated via explicit stable-key sorting before assembly",
+    "Persistence location conflicts with the architecture zone system (.pcae/ is unclassified) - mitigated via the same --allowed-file task-contract pattern used throughout 119",
+    "Schema evolution mismatch between 120D planning time and 120E implementation time - mitigated by requiring 120E to re-verify the schema's current required fields and $defs at implementation time"
+  ],
+  "deferred_work": [
+    "query layer (tentatively 121)",
+    "Advisory consumption (tentatively 122)",
+    "change impact read-only prototype (tentatively 123)",
+    "graph traversal",
+    "execution planning (tentatively 125+, separately scoped)",
+    "execution capability of any kind"
   ],
   "known_inherited_issues_reviewed": [
     "119Q report-generation-ordering defect (Commits: pending_, recovered commit d804458fda2663d79577941f7c415a2a50fe1573, documented in 119R) - classified non-blocking",
-    "is_phase_id_backward() phase-id string-comparison bug in pcae phase complete (src/pcae/core/phase_reports.py), documented in 119AB - classified non-blocking for 120C; should still be tracked before a letter-length transition occurs within the 120 series; not repaired in this phase",
+    "is_phase_id_backward() phase-id string-comparison bug in pcae phase complete (src/pcae/core/phase_reports.py), documented in 119AB - classified non-blocking for 120D; should still be tracked before a letter-length transition occurs within the 120 series; not repaired in this phase",
     "recurring report_notification_tests: pending_final_telegram_delivery report-timing detail - classified non-blocking, well-understood, and consistently handled"
   ],
+  "implementation_readiness_assessment": "120E may proceed to implementation. The plan resolves the persistence-location decision, defines a complete eleven-stage pipeline and ten-component plan with no implementation detail specified, and provides measurable acceptance criteria and a fail-closed failure plan. No further planning phase is required before 120E begins.",
   "shared_components_reviewed": [
     "common_artifact_envelope",
     "source_attribution_record",
@@ -98,7 +132,7 @@
     },
     {
       "name": "fast_green",
-      "result": "not_applicable_verification_only_no_source_or_tests_changed",
+      "result": "not_applicable_documentation_only_no_source_or_tests_changed",
       "status": "not_applicable"
     },
     {
@@ -108,15 +142,15 @@
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_verification_only_no_source_or_tests_changed",
+      "result": "not_applicable_documentation_only_no_source_or_tests_changed",
       "status": "not_applicable"
     }
   ],
   "test_results": {
     "report_notification_tests": "pending_final_telegram_delivery",
-    "bootstrap_session_reporting_tests": "not_applicable_verification_only_no_source_or_tests_changed",
-    "fast_green": "not_applicable_verification_only_no_source_or_tests_changed",
-    "full_pytest": "not_applicable_verification_only_no_source_or_tests_changed"
+    "bootstrap_session_reporting_tests": "not_applicable_documentation_only_no_source_or_tests_changed",
+    "fast_green": "not_applicable_documentation_only_no_source_or_tests_changed",
+    "full_pytest": "not_applicable_documentation_only_no_source_or_tests_changed"
   },
   "governance_results": [
     {
@@ -145,40 +179,39 @@
     }
   ],
   "boundary_confirmations": [
-    "No contract modification occurred",
-    "No prototype was implemented",
     "No generator was implemented",
     "No repository scanning was implemented",
     "No extraction was implemented",
     "No persistence implementation was created",
-    "No validator or CLI was added",
-    "No Python code, models, or dataclasses were added",
-    "No tests were added",
+    "No validator was implemented",
+    "No CLI was implemented",
+    "No Python code, models, or dataclasses were implemented",
+    "No tests were implemented",
     "No runtime behavior changed",
     "No Advisory integration occurred",
     "No query execution or graph traversal was implemented",
     "No execution capability was introduced",
     "No known inherited tooling/reporting issue was repaired (explicitly out of scope)"
   ],
-  "no_go_confirmation": "No No-Go conditions triggered. No contract modification occurred. No prototype or generator was implemented. No repository scanning or extraction was implemented. No persistence implementation was created. No validator or CLI was added. No Python code, models, or dataclasses were added. No tests were added. No runtime behavior changed. No Advisory integration occurred. No query execution or graph traversal was implemented. No execution capability was introduced. No known inherited tooling/reporting issue was repaired (explicitly out of scope for this phase).",
+  "no_go_confirmation": "No No-Go conditions triggered. No generator was implemented. No repository scanning or extraction was implemented. No persistence implementation was created. No validator or CLI was implemented. No Python code, models, or dataclasses were implemented. No tests were implemented. No runtime behavior changed. No Advisory integration occurred. No query execution or graph traversal was implemented. No execution capability was introduced. No known inherited tooling/reporting issue was repaired (explicitly out of scope for this phase).",
   "phase_commits": [
     {
-      "hash": "9d5e7aa1a1236653a6c1d4cbf32c838c8bbe4932",
-      "message": "Phase 120C: Repository Intelligence Prototype Contract Verification"
+      "hash": "8084566442e56ffdd8deaf9dc220442384cbabee",
+      "message": "Phase 120D: Repository Knowledge Snapshot Prototype Plan"
     },
     {
-      "hash": "5b7a59ef",
-      "message": "Finish Phase 120C task"
+      "hash": "2187f595",
+      "message": "Finish Phase 120D task"
     }
   ],
-  "commit_attribution": "9d5e7aa1a1236653a6c1d4cbf32c838c8bbe4932",
+  "commit_attribution": "8084566442e56ffdd8deaf9dc220442384cbabee",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
-  "recommended_next_phase": "Recommended next phase: 120D - Repository Knowledge Snapshot Prototype Plan",
-  "recommended_next_phase_id": "120D",
-  "recommended_next_phase_name": "Repository Knowledge Snapshot Prototype Plan",
+  "recommended_next_phase": "Recommended next phase: 120E - Repository Knowledge Snapshot Prototype: Read-Only Generator",
+  "recommended_next_phase_id": "120E",
+  "recommended_next_phase_name": "Repository Knowledge Snapshot Prototype: Read-Only Generator",
   "report_notification_status": "pending_final_telegram_delivery",
   "schema_version": "1.0"
 }
