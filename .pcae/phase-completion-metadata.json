@@ -69,8 +69,8 @@
   "commit_attribution": "phase_owned",
   "validator_module": "not_applicable_no_validator_implemented",
   "execution_availability": "unavailable",
-  "pushed_status": "pending_governed_push",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -83,27 +83,87 @@
     "current_maximum_plugin_capability": "observe"
   },
   "validation_results": [
-    {"name": "pcae_health", "result": "healthy", "status": "passed"},
-    {"name": "pcae_check", "result": "passed", "status": "passed"},
-    {"name": "pcae_doctor_task_memory", "result": "clean", "status": "passed"},
-    {"name": "pcae_push_check", "result": "working tree had implementation changes before commit; nothing_to_push after final governed push expected", "status": "passed"},
-    {"name": "pcae_runtime_inspect", "result": "execution unavailable, Observed, observe, zero runtime plugins", "status": "passed"},
-    {"name": "pcae_notify_status", "result": "Telegram configured, enabled, and ready for outbound delivery once the env is loaded in this shell", "status": "passed"},
-    {"name": "json_parse_validation", "result": "13 schema files parsed with Python standard library", "status": "passed"},
-    {"name": "schema_declaration_scan", "result": "all 13 schemas declare $schema, $id, title, description, and type object", "status": "passed"},
-    {"name": "draft_consistency_scan", "result": "all 13 schemas declare JSON Schema Draft 2020-12", "status": "passed"},
-    {"name": "id_ref_scan", "result": "unique ids and 69 local refs inspected with no missing local file or fragment targets", "status": "passed"},
-    {"name": "authority_creep_language_scan", "result": "no risky authority-creep terms found in schemas/repository_intelligence or 119M phase documentation", "status": "passed"},
-    {"name": "review_scope", "result": "schema and documentation/status memory only; no src or tests changed", "status": "passed"},
-    {"name": "report_notification_tests", "result": "pending_final_telegram_delivery", "status": "pending"},
-    {"name": "bootstrap_session_reporting_tests", "result": "not_applicable_first_artifact_family_schema_only_no_source_or_tests_changed", "status": "not_applicable"},
-    {"name": "fast_green", "result": "not_applicable_first_artifact_family_schema_only_no_source_or_tests_changed", "status": "not_applicable"}
+    {
+      "name": "pcae_health",
+      "result": "healthy",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_check",
+      "result": "passed",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "result": "clean",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_push_check",
+      "result": "nothing_to_push",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "result": "execution unavailable, Observed, observe, zero runtime plugins",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_notify_status",
+      "result": "Telegram configured, enabled, and ready for outbound delivery once the env is loaded in this shell",
+      "status": "passed"
+    },
+    {
+      "name": "json_parse_validation",
+      "result": "13 schema files parsed with Python standard library",
+      "status": "passed"
+    },
+    {
+      "name": "schema_declaration_scan",
+      "result": "all 13 schemas declare $schema, $id, title, description, and type object",
+      "status": "passed"
+    },
+    {
+      "name": "draft_consistency_scan",
+      "result": "all 13 schemas declare JSON Schema Draft 2020-12",
+      "status": "passed"
+    },
+    {
+      "name": "id_ref_scan",
+      "result": "unique ids and 69 local refs inspected with no missing local file or fragment targets",
+      "status": "passed"
+    },
+    {
+      "name": "authority_creep_language_scan",
+      "result": "no risky authority-creep terms found in schemas/repository_intelligence or 119M phase documentation",
+      "status": "passed"
+    },
+    {
+      "name": "review_scope",
+      "result": "schema and documentation/status memory only; no src or tests changed",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "pending_final_telegram_delivery",
+      "status": "pending"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_first_artifact_family_schema_only_no_source_or_tests_changed",
+      "status": "not_applicable"
+    },
+    {
+      "name": "fast_green",
+      "result": "not_applicable_first_artifact_family_schema_only_no_source_or_tests_changed",
+      "status": "not_applicable"
+    }
   ],
   "test_results": {
     "pcae_health": "passed",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "passed",
-    "pcae_push_check": "passed",
+    "pcae_push_check": "nothing_to_push",
     "json_parse_validation": "13 schema files parsed with Python standard library",
     "schema_declaration_scan": "passed",
     "draft_consistency_scan": "passed",
@@ -116,12 +176,30 @@
     "fast_green": "not_applicable_first_artifact_family_schema_only_no_source_or_tests_changed"
   },
   "governance_results": [
-    {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_check", "status": "passed"},
-    {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "nothing_to_push expected after governed push"},
-    {"name": "pcae_runtime_inspect", "status": "execution unavailable, Observed, observe, zero runtime plugins"},
-    {"name": "telegram_runtime", "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"}
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "nothing_to_push"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "execution unavailable, Observed, observe, zero runtime plugins"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
+    }
   ],
   "boundary_confirmations": {
     "read_only": "preserved",

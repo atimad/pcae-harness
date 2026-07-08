@@ -90,8 +90,7 @@ Evaluation outcomes, execution safety, or remediation correctness.
 - `pcae health`: healthy.
 - `pcae check`: passed.
 - `pcae doctor task-memory`: clean.
-- `pcae push check`: passed in pre-commit checks; expected to be
-  nothing-to-push after governed push.
+- `pcae push check`: nothing to push after governed push.
 - `pcae runtime inspect`: execution unavailable, runtime state Observed,
   maximum plugin capability observe, zero runtime plugins.
 - `pcae notify status`: Telegram configured, enabled, and ready for
