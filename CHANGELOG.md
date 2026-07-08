@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- Phase 119U - Repository Intelligence Executable Schema Implementation:
+  Change Impact Report
+  (`schemas/repository_intelligence/artifacts/change_impact_report.schema.json`,
+  `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CHANGE_IMPACT_REPORT.md`).
+  Implements exactly one new artifact-family JSON Schema Draft 2020-12
+  file: the Change Impact Report schema. This is the fifth
+  artifact-family schema and the fourth content-bearing Repository
+  Intelligence artifact-family schema. It references verified shared
+  components, includes the common artifact envelope relationship, and
+  represents report identity, change subject, impact claims (with
+  conservative `possible_*` impact types, direction, and severity),
+  affected entities, affected contracts, affected validation surfaces,
+  dependency context references (pointing at Dependency Knowledge Graph
+  Snapshot without traversal), risk observations, recommended review
+  surfaces, unknowns and gaps, limitations, boundary disclosures,
+  disclaimers, and the frozen Change Impact Report boundary disclaimer.
+  Represents impact-claim knowledge structurally without performing
+  impact analysis, impact prediction, diff analysis, blast-radius
+  computation, or graph traversal. Schema-only; no Repository
+  Intelligence Package, Advisory Intelligence Context Package, Query
+  Result, validator, validation library, CLI, automated tests, Python
+  models, Pydantic models, dataclasses, extraction, repository scanning,
+  dependency extraction, dependency scanning, diff analysis, git history
+  analysis, timeline generation, impact analysis engine, blast-radius
+  computation, graph construction, graph traversal, graph query engine,
+  advisory behavior, Evidence, Repository Skills, Decision Evaluation,
+  source code, test code, runtime behavior, execution, enforcement,
+  lifecycle, Permission Broker, REST, Dashboard, Web UI, provider
+  orchestration, autonomous coding, automatic patch generation,
+  automatic refactoring, repository mutation outside planned schema/docs
+  files, or Telegram inbound changes.
+
 - Phase 119T - Repository Intelligence Executable Schema Verification:
   Dependency Knowledge Graph Snapshot
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_DEPENDENCY_KNOWLEDGE_GRAPH_SNAPSHOT_VERIFICATION.md`).

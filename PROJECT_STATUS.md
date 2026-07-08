@@ -2,54 +2,94 @@
 
 ## Current Phase
 
-Phase 119T — Repository Intelligence Executable Schema Verification:
-Dependency Knowledge Graph Snapshot
+Phase 119U — Repository Intelligence Executable Schema Implementation:
+Change Impact Report
 (completed).
 
-Verification phase for Track B Repository Intelligence. Verifies the
-Dependency Knowledge Graph Snapshot schema implemented in 119S:
-`schemas/repository_intelligence/artifacts/dependency_knowledge_graph_snapshot.schema.json`.
-Confirms JSON parse validity, JSON Schema Draft 2020-12 declaration,
-`$id` uniqueness, `$ref` resolution (249 local refs across sixteen
-schema files), shared component reuse, the common artifact envelope
-relationship, snapshot identity, graph metadata, graph kind/direction/
-completeness enums, node and edge structures and their type enums,
-dependency claim structure, dependency source/path/view/cluster/
-external-reference structures, unknowns/gaps, Evidence link structure,
-boundary disclosures, disclaimers, `additionalProperties` policy, and
-authority-creep-free language. No schema or shared-component
-corrections were required.
+Implementation phase for Track B Repository Intelligence. Implements
+exactly one additional artifact-family schema:
+`schemas/repository_intelligence/artifacts/change_impact_report.schema.json`.
+The schema is standalone JSON Schema Draft 2020-12, references verified
+shared components, includes the common artifact envelope relationship,
+and structurally represents report identity, change subject, impact
+claims (with conservative `possible_*` impact types, direction, and
+severity), affected entities, affected contracts, affected validation
+surfaces, dependency context references (pointing at Dependency
+Knowledge Graph Snapshot without traversal), risk observations,
+recommended review surfaces, unknowns and gaps, limitations, boundary
+disclosures, disclaimers, and the Change Impact Report boundary
+disclaimer.
 
-Confirmed the schema does not construct, traverse, or query a graph and
-does not perform impact analysis: graph views and dependency paths are
-declared, source-attributed containers, not query/algorithm output.
-
-No new artifact-family schema, Repository Intelligence Package schema,
-Change Impact Report schema, Advisory Intelligence Context Package
-schema, Query Result schema, validator, validation library, schema
-verification CLI, automated test suite, Python model, Pydantic model,
-dataclass, repository intelligence extraction, repository knowledge
-extraction, repository scanning, dependency extraction, dependency
-scanning, git history analysis, timeline generation, change impact
-analysis engine, dependency graph construction, graph traversal, graph
-query engine, advisory behavior change, Advisory Runtime change,
-Advisory Context Package change, Evidence subsystem change, Repository
-Skills change, Decision Evaluation change, source code change, test code
-change, runtime behavior change, execution, shell mediation,
-enforcement, lifecycle behavior change, Permission Broker behavior
-change, Repository State behavior change, Repository Transition
-Validator behavior change, Notification Policy behavior change, REST,
-Dashboard, Web UI, provider orchestration, autonomous coding, model
-capability expansion, automatic patch generation, automatic refactoring,
-repository mutation outside planned schema/docs/status files, runtime
-plugin change, or Telegram inbound path changed.
+No Repository Intelligence Package schema, Advisory Intelligence Context
+Package schema, Query Result schema, validator, validation library,
+schema verification CLI, automated test suite, Python model, Pydantic
+model, dataclass, repository intelligence extraction, repository
+knowledge extraction, repository scanning, dependency extraction,
+dependency scanning, diff analysis, git history analysis, timeline
+generation, change impact analysis engine, impact prediction,
+blast-radius computation, dependency graph construction, graph
+traversal, graph query engine, advisory behavior change, Advisory
+Runtime change, Advisory Context Package change, Evidence subsystem
+change, Repository Skills change, Decision Evaluation change, source
+code change, test code change, runtime behavior change, execution,
+shell mediation, enforcement, lifecycle behavior change, Permission
+Broker behavior change, Repository State behavior change, Repository
+Transition Validator behavior change, Notification Policy behavior
+change, REST, Dashboard, Web UI, provider orchestration, autonomous
+coding, model capability expansion, automatic patch generation,
+automatic refactoring, repository mutation outside planned
+schema/docs/status files, runtime plugin change, or Telegram inbound
+path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119U — Repository Intelligence Executable
-Schema Implementation: Change Impact Report.
+Recommended next repo phase: 119V — Repository Intelligence Executable
+Schema Verification: Change Impact Report.
+
+## Phase 119U Complete
+
+Phase 119U — Repository Intelligence Executable Schema Implementation:
+Change Impact Report (completed).
+
+Narrow schema-only implementation phase for the Change Impact Report
+artifact family. Implements
+`schemas/repository_intelligence/artifacts/change_impact_report.schema.json`
+as a standalone JSON Schema Draft 2020-12 artifact outside `src`.
+Updates schema documentation in `schemas/repository_intelligence/README.md`
+and adds
+`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CHANGE_IMPACT_REPORT.md`.
+The schema references verified shared components, includes the common
+artifact envelope relationship, represents report identity, change
+subject, impact claims, affected entities, affected contracts, affected
+validation surfaces, dependency context references, risk observations,
+recommended review surfaces, unknowns and gaps, limitations, boundary
+disclosures, disclaimers, and the frozen Change Impact Report boundary
+disclaimer. It represents impact-claim knowledge structurally without
+performing impact analysis, impact prediction, diff analysis,
+blast-radius computation, or graph traversal.
+
+**No-go**: no Repository Intelligence Package schema, Advisory
+Intelligence Context Package schema, Query Result schema, validator,
+validation library, schema verification CLI, automated test suite,
+Python models, Pydantic models, dataclasses, Repository Intelligence
+extraction, Repository Knowledge extraction, repository scanning,
+dependency extraction, dependency scanning, diff analysis, git history
+analysis, timeline generation, change impact analysis engine, impact
+prediction, blast-radius computation, dependency graph construction,
+graph traversal, graph query engine, Advisory behavior, Advisory
+Runtime, Advisory Context Package, Evidence, Repository Skills, Decision
+Evaluation, source code, test code, runtime behavior, execution, shell
+mediation, Permission Broker, lifecycle redesign, REST, Dashboard, Web
+UI, Telegram inbound, provider selection, multi-model orchestration,
+autonomous coding, model capability expansion, repository mutation
+outside planned schema/docs/status files, runtime plugin changes,
+Repository State changes, automatic patch generation, or automatic
+refactoring.
+
+Recommended next repo phase: 119V — Repository Intelligence Executable
+Schema Verification: Change Impact Report.
 
 ## Phase 119T Complete
 

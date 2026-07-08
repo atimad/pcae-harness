@@ -1,0 +1,846 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/change_impact_report.schema.json",
+  "title": "Repository Intelligence Change Impact Report",
+  "description": "Artifact-family schema for a structural Change Impact Report. It records declared, source-attributed impact claims about a proposed, observed, or historical repository change; it is descriptive, read-only, non-decision, and no-execution, and it does not authorize action or execution, does not determine impact, does not compute blast radius, does not traverse a graph, does not replace Decision Evaluation, does not replace Evidence, does not replace Repository State, does not prove impact truth, and does not prove impact completeness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "report_identity",
+    "report_subject",
+    "report_scope",
+    "change_subject",
+    "impact_claims",
+    "affected_entities",
+    "impact_sources",
+    "unknowns_gaps",
+    "report_limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "change_impact_report_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "report_identity": {
+      "$ref": "#/$defs/report_identity"
+    },
+    "report_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "report_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "change_subject": {
+      "$ref": "#/$defs/change_subject"
+    },
+    "impact_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/impact_claim"
+      }
+    },
+    "affected_entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/affected_entity"
+      }
+    },
+    "affected_contracts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/affected_contract"
+      }
+    },
+    "affected_validation_surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/affected_validation_surface"
+      }
+    },
+    "dependency_context": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dependency_context_reference"
+      }
+    },
+    "risk_observations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/risk_observation"
+      }
+    },
+    "recommended_review_surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/recommended_review_surface"
+      }
+    },
+    "impact_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/evidence_link_record.schema.json"
+      }
+    },
+    "unknowns_gaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/unknown_gap"
+      }
+    },
+    "report_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "conflict_or_supersession_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/conflict_supersession_record.schema.json"
+      }
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/derivation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "change_impact_report_disclaimer": {
+      "type": "string",
+      "const": "This Change Impact Report describes declared, source-attributed impact claims about a change. It does not determine impact, does not compute blast radius, does not traverse a dependency graph, does not prove impact truth or completeness, is not Repository State, and does not authorize action or execution."
+    }
+  },
+  "$defs": {
+    "report_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "report_id",
+        "report_subject",
+        "report_scope",
+        "report_type"
+      ],
+      "properties": {
+        "report_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report_type": {
+          "type": "string",
+          "enum": [
+            "proposed_change_report",
+            "observed_change_report",
+            "historical_change_report",
+            "unknown"
+          ]
+        },
+        "report_created_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "const": "119E.1.0"
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "const": "119C.1.0-concept"
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "const": "119U.1.0-json-schema"
+        }
+      }
+    },
+    "change_subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "change_id",
+        "change_type",
+        "change_summary",
+        "change_status",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "change_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "change_type": {
+          "$ref": "#/$defs/change_type"
+        },
+        "change_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "change_status": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "known",
+            "unknown",
+            "unverified",
+            "partially_verified",
+            "superseded",
+            "conflicting"
+          ]
+        },
+        "proposed_change_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "observed_change_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "historical_change_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "affected_files_or_artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "change_type": {
+      "type": "string",
+      "enum": [
+        "proposed_change",
+        "observed_change",
+        "historical_change",
+        "documentation_change",
+        "schema_change",
+        "configuration_change",
+        "test_change",
+        "governance_change",
+        "lifecycle_change",
+        "runtime_change",
+        "unknown"
+      ]
+    },
+    "impact_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "impact_claim_id",
+        "impact_type",
+        "impact_subject",
+        "impact_statement",
+        "impact_direction",
+        "impact_severity",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "impact_claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_type": {
+          "$ref": "#/$defs/impact_type"
+        },
+        "impact_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "impact_statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structured_value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "affected_entity_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "affected_artifact_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "impact_direction": {
+          "$ref": "#/$defs/impact_direction"
+        },
+        "impact_severity": {
+          "$ref": "#/$defs/impact_severity"
+        },
+        "dependency_context_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "conflict_or_supersession_records": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/conflict_supersession_record.schema.json"
+          }
+        }
+      }
+    },
+    "impact_type": {
+      "type": "string",
+      "enum": [
+        "possible_contract_impact",
+        "possible_schema_impact",
+        "possible_documentation_impact",
+        "possible_test_impact",
+        "possible_runtime_impact",
+        "possible_governance_impact",
+        "possible_advisory_impact",
+        "possible_evidence_impact",
+        "possible_repository_state_impact",
+        "possible_dependency_impact",
+        "unknown"
+      ]
+    },
+    "impact_severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "informational",
+        "unknown",
+        "not_assessed"
+      ],
+      "description": "Declared/recorded severity value only; this field does not approve, reject, or decide the change."
+    },
+    "impact_direction": {
+      "type": "string",
+      "enum": [
+        "direct",
+        "indirect",
+        "downstream",
+        "upstream",
+        "lateral",
+        "unknown",
+        "not_assessed"
+      ],
+      "description": "Declared direction label only; this field does not imply computed graph traversal or a discovered impact path."
+    },
+    "affected_entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_id",
+        "entity_type",
+        "entity_name",
+        "impact_role",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "entity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entity_type": {
+          "type": "string",
+          "enum": [
+            "repository",
+            "package",
+            "module",
+            "file",
+            "document",
+            "schema",
+            "command",
+            "configuration",
+            "test",
+            "task",
+            "phase",
+            "release",
+            "runtime_component",
+            "advisory_component",
+            "evidence_artifact",
+            "repository_skill",
+            "contract",
+            "unknown"
+          ]
+        },
+        "entity_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entity_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "impact_role": {
+          "type": "string",
+          "enum": [
+            "possibly_affected",
+            "possibly_related",
+            "possibly_defending",
+            "possibly_constraining",
+            "possibly_documenting",
+            "unknown"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "boundary_disclosures": {
+          "$ref": "../shared/boundary_disclosure.schema.json"
+        }
+      }
+    },
+    "affected_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "contract_name",
+        "relationship_to_change",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "contract_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "relationship_to_change": {
+          "type": "string",
+          "enum": [
+            "possibly_constrains",
+            "possibly_implicated",
+            "possibly_referenced",
+            "possibly_documents",
+            "unknown"
+          ],
+          "description": "Declared relationship label only; this field does not declare contract violation, approval, or a Decision Evaluation outcome."
+        },
+        "impact_claim_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "affected_validation_surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation_surface_id",
+        "validation_surface_type",
+        "validation_surface_name",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "validation_surface_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_surface_type": {
+          "type": "string",
+          "enum": [
+            "test_file",
+            "test_suite",
+            "validation_command",
+            "governance_check",
+            "unknown"
+          ]
+        },
+        "validation_surface_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "validation_surface_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "related_entity_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "impact_claim_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "dependency_context_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "context_id",
+        "context_type",
+        "reference_locator",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "context_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_type": {
+          "type": "string",
+          "enum": [
+            "dependency_knowledge_graph_snapshot",
+            "graph_node",
+            "graph_edge",
+            "dependency_claim",
+            "unknown"
+          ]
+        },
+        "reference_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_or_target_reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "risk_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "risk_id",
+        "risk_type",
+        "risk_subject",
+        "risk_statement",
+        "risk_severity",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "risk_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_type": {
+          "type": "string",
+          "enum": [
+            "contract_risk",
+            "test_coverage_risk",
+            "documentation_risk",
+            "governance_risk",
+            "advisory_risk",
+            "evidence_risk",
+            "repository_state_risk",
+            "dependency_risk",
+            "unknown"
+          ]
+        },
+        "risk_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "risk_severity": {
+          "$ref": "#/$defs/impact_severity"
+        },
+        "decision_required": {
+          "type": "boolean",
+          "description": "Declared marker indicating Decision Evaluation input may be needed; this field does not itself request, grant, or perform a decision."
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "recommended_review_surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "review_surface_id",
+        "review_surface_type",
+        "review_surface_name",
+        "rationale",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "review_surface_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_surface_type": {
+          "type": "string",
+          "enum": [
+            "document",
+            "test",
+            "contract",
+            "command",
+            "configuration",
+            "governance_artifact",
+            "unknown"
+          ]
+        },
+        "review_surface_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_surface_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared rationale for human review only; this field does not instruct or authorize any system to execute a review action."
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "unknown_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unknown_id",
+        "unknown_subject",
+        "missing_evidence",
+        "affected_scope",
+        "uncertainty_state",
+        "limitation"
+      ],
+      "properties": {
+        "unknown_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "follow_up_requirement": {
+          "type": "string",
+          "description": "Declared follow-up context only when permitted by contract; this field does not authorize action."
+        }
+      }
+    }
+  }
+}
