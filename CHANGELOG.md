@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 120C - Repository Intelligence Prototype Contract Verification
+  (`docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_VERIFICATION.md`).
+  Verification-only phase independently verifying the 120B contract
+  before any prototype planning or implementation begins. Verifies
+  contract completeness (all 20 required sections present),
+  architectural consistency with the Phase 119 executable schema line
+  (locator vocabulary, uncertainty vocabulary, boundary disclosure
+  fields, and disclaimer constants independently cross-checked
+  byte-for-byte against the schema files, all exact matches) and with
+  Phase 120A (no contradiction found), scope (remains limited to
+  Repository Knowledge Snapshot, read-only, deterministic), input/
+  output models, determinism, read-only boundary (all ten prohibited
+  behaviors confirmed present), attribution, Evidence boundary,
+  uncertainty and limitation contracts, the ten prototype stages
+  (logical ordering confirmed), the fail-closed failure contract,
+  governance compatibility, and sufficiency for 120D-120F without
+  further architectural work. Found one non-blocking terminology
+  clarification (Repository Knowledge Snapshot's actual required field
+  is `unknowns`, not `unknowns_gaps` as 120B's prose stated) and one
+  non-blocking structural framing difference (120A's separate Human
+  Review Layer vs. 120B's unified ten-stage list), both documented as
+  guidance for 120D without reopening or modifying the frozen 120B
+  contract. Carries forward the same three known inherited,
+  non-blocking tooling/reporting issues without repairing them.
+  Recommends 120D. Verification-only; no contract modification, no
+  implementation, generator, generated artifact, repository scanning,
+  extraction, persistence implementation, validator, CLI, Python code,
+  models, dataclasses, tests, runtime behavior change, Advisory
+  integration, query execution, graph traversal, or execution
+  capability.
+
 - Phase 120B - Repository Intelligence Prototype Contract Freeze
   (`docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md`).
   Documentation-only phase freezing the canonical contract governing
