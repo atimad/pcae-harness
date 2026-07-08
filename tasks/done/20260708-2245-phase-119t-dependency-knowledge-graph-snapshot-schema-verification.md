@@ -10,7 +10,7 @@ Phase 119T Dependency Knowledge Graph Snapshot schema verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
