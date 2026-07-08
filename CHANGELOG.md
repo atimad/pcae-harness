@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 119F - Repository Intelligence Artifact Contract Verification
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_VERIFICATION.md`).
+  Verifies the frozen 119E artifact contract across all dimensions.
+  Concludes the contract is VERIFIED as internally consistent,
+  contradiction-free, and 119A-invariant-preserving. Verifies all twelve
+  artifact family contracts, common envelope (19 required / 3 conditional
+  / 7 optional fields), 27 mandatory invariants, source attribution
+  contract with 14-type locator vocabulary, evidence link contract,
+  uncertainty/verification contract with 14 state values,
+  conflict/supersession contract, derivation disclosure contract,
+  versioning/snapshot contract, 24 forbidden artifact claims, five
+  conformance states, and 12×10 compatibility matrix. Assesses readiness
+  for executable schema architecture, prototype planning, query/report
+  artifacts, Repository Skills exposure, and Advisory consumers. Includes
+  21 non-blocking observations, 15 non-conformance examples, 12
+  contract-preserving examples, 21-item future conformance checklist, 15
+  risks, and recommends 119G — Repository Intelligence Executable Schema
+  Architecture. Verification only; no executable schema, JSON Schema,
+  Pydantic model, dataclass, validator, verifier, CLI, automated tests,
+  extraction, graph construction, impact engine, advisory behavior,
+  Evidence, Repository Skills, Decision Evaluation, source, test, runtime
+  behavior, execution, enforcement, lifecycle, Permission Broker, REST,
+  Dashboard, Web UI, provider orchestration, autonomous coding, automatic
+  patch generation, automatic refactoring, repository mutation, or
+  Telegram inbound changes.
+
 - Phase 119E - Repository Intelligence Artifact Contract Freeze
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_FREEZE.md`).
   Freezes the initial Repository Intelligence artifact contract for all

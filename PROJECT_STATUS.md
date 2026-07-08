@@ -2,30 +2,27 @@
 
 ## Current Phase
 
-Phase 119E — Repository Intelligence Artifact Contract Freeze
+Phase 119F — Repository Intelligence Artifact Contract Verification
 (completed).
 
-Artifact-contract-freeze-only continuation of Track B: Repository
-Intelligence. Freezes the initial Repository Intelligence artifact
-contract for all twelve conceptual schema families defined in 119C and
-reviewed in 119D. Freezes the common artifact envelope, per-family
-contracts (Repository Intelligence Package, Repository Knowledge
-Snapshot, Historical Memory Snapshot, Dependency Knowledge Graph
-Snapshot, Change Impact Report, Advisory Intelligence Context Package,
-Source Attribution Record, Evidence Link Record, Uncertainty /
-Verification State, Conflict / Supersession Record, Query Result,
-Contract Conformance Record), mandatory artifact invariants, source
-attribution contract, evidence link contract, uncertainty/verification
-contract, conflict/supersession contract, derivation disclosure contract,
-versioning/snapshot contract, forbidden artifact claims, artifact
-conformance model, contract compatibility matrix, future executable
-schema constraints, future prototype constraints, future query/report
-constraints, Repository Skills constraints, and Advisory consumer
-constraints. Incorporates all six minor clarifications from 119D:
-canonical field naming, required-vs-optional envelope fields,
-embedded-vs-referenced cross-cutting records, package materialization
-order, Contract Conformance Record non-decision wording, and source
-locator / artifact reference vocabulary.
+Artifact-contract-verification-only continuation of Track B: Repository
+Intelligence. Verifies the frozen Repository Intelligence artifact
+contract from Phase 119E. Concludes the artifact contract is internally
+consistent, contradiction-free, 119A-invariant-preserving, and ready to
+constrain future executable schema architecture, prototype planning,
+query/report artifacts, Repository Skills exposure, and Advisory
+consumers. Verifies the common artifact envelope, all twelve artifact
+family contracts, 27 mandatory invariants, source attribution contract
+with 14-type locator vocabulary, evidence link contract,
+uncertainty/verification contract with 14 state values,
+conflict/supersession contract, derivation disclosure contract,
+versioning/snapshot contract, 24 forbidden artifact claims, five
+conformance states, and 12×10 compatibility matrix. Assesses readiness
+for executable schema architecture, prototype planning, query/report
+artifacts, Repository Skills exposure, and Advisory consumers. Includes
+non-conformance examples, contract-preserving examples, future artifact
+conformance checklist, risks, and observations. 21 observations
+identified; none rise to contract violations.
 
 No executable schema, JSON Schema, Pydantic model, dataclass, validator,
 contract verifier, CLI, automated tests, repository intelligence
@@ -46,7 +43,42 @@ changed.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119F — Repository Intelligence Artifact Contract Verification.
+Recommended next repo phase: 119G — Repository Intelligence Executable Schema Architecture.
+
+## Phase 119F Complete
+
+Phase 119F — Repository Intelligence Artifact Contract Verification
+(completed).
+
+Artifact-contract-verification-only phase for Track B Repository
+Intelligence. Verifies the frozen 119E artifact contract. Concludes the
+contract is VERIFIED as internally consistent, contradiction-free,
+119A-invariant-preserving, and ready to constrain future executable
+schema architecture, prototype planning, query/report artifacts,
+Repository Skills exposure, and Advisory consumers. Verifies all twelve
+artifact family contracts (no contradictions), common envelope (19/3/7
+fields sufficient), 27 mandatory invariants (26 manually checkable, 17
+fully automatable), source attribution contract, evidence link contract,
+uncertainty/verification contract, conflict/supersession contract,
+derivation disclosure contract, versioning/snapshot contract, 24
+forbidden claims, five conformance states, and 12×10 compatibility
+matrix. Assesses future executable schema, prototype, query/report,
+Repository Skills, and Advisory consumer readiness. Includes 21
+non-blocking observations, 15 non-conformance examples, 12
+contract-preserving examples, 21-item conformance checklist, and 15
+risks. No repair required.
+
+**No-go**: no executable schema, JSON Schema, Pydantic model, dataclass,
+validator, contract verifier, CLI, automated tests, extraction, graph
+construction, impact engine, advisory behavior, Evidence, Repository
+Skills, Decision Evaluation, source, test, runtime behavior, execution,
+enforcement, lifecycle, Permission Broker, REST, Dashboard, Web UI,
+Telegram inbound, provider orchestration, autonomous coding, model
+capability expansion, repository mutation, automatic patch generation, or
+automatic refactoring.
+
+Recommended next repo phase: 119G — Repository Intelligence Executable
+Schema Architecture.
 
 ## Phase 119E Complete
 

@@ -2,7 +2,34 @@
 
 ## Accepted
 
-- Treat Phase 119E as artifact-contract-freeze-only: freeze the initial
+- Treat Phase 119F as artifact-contract-verification-only: verify that
+  the frozen 119E artifact contract is internally consistent,
+  contradiction-free, 119A-invariant-preserving, and ready to constrain
+  future executable schema architecture, prototype planning, query/report
+  artifacts, Repository Skills exposure, and Advisory consumers. Verify
+  all twelve artifact family contracts, common envelope, 27 mandatory
+  invariants, source attribution contract, evidence link contract,
+  uncertainty/verification contract, conflict/supersession contract,
+  derivation disclosure contract, versioning/snapshot contract, 24
+  forbidden claims, five conformance states, and 12×10 compatibility
+  matrix. Assess readiness for future phases. Include non-conformance
+  examples, contract-preserving examples, and future conformance
+  checklist. Do not implement executable schemas, JSON Schema, Pydantic
+  models, dataclasses, validators, contract verifiers, CLIs, automated
+  tests, Repository Intelligence extraction, Repository Knowledge
+  extraction, Historical Memory extraction, Change Impact Analysis
+  engines, Dependency Knowledge Graph construction, graph query engines,
+  Advisory behavior changes, Advisory Runtime changes, Advisory Context
+  Package changes, Evidence subsystem changes, Repository Skills changes,
+  Decision Evaluation changes, source code, tests, runtime behavior,
+  execution, authorization, enforcement, lifecycle behavior, Permission
+  Broker behavior, Repository State behavior, Repository Transition
+  Validator behavior, Notification Policy behavior, REST, Dashboard, Web
+  UI, provider orchestration, autonomous coding, model capability
+  expansion, automatic patch generation, automatic refactoring,
+  repository mutation, or Telegram inbound capability.
+  Recommended next phase: 119G — Repository Intelligence Executable
+  Schema Architecture.
   Repository Intelligence artifact contract for all twelve conceptual
   schema families defined in 119C and reviewed in 119D, incorporating the
   six minor clarifications identified by 119D (canonical field names with
