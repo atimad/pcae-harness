@@ -1,0 +1,734 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json",
+  "title": "Repository Intelligence Repository Knowledge Snapshot",
+  "description": "Artifact-family schema for a structural Repository Knowledge Snapshot. It records declared, source-attributed repository knowledge claims and entity relationships for a repository snapshot; it is descriptive, read-only, non-decision, and no-execution, and it does not authorize action or execution, replace Decision Evaluation, replace Evidence, or replace Repository State.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "snapshot_identity",
+    "snapshot_subject",
+    "snapshot_scope",
+    "architectural_entities",
+    "capabilities",
+    "subsystems",
+    "knowledge_relationships",
+    "knowledge_claims",
+    "knowledge_sources",
+    "evidence_links",
+    "unknowns",
+    "snapshot_limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "repository_knowledge_snapshot_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "snapshot_identity": {
+      "$ref": "#/$defs/snapshot_identity"
+    },
+    "snapshot_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshot_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "architectural_entities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/architectural_entity"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/capability_summary"
+      }
+    },
+    "subsystems": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/subsystem_summary"
+      }
+    },
+    "knowledge_relationships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/knowledge_relationship"
+      }
+    },
+    "knowledge_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/knowledge_claim"
+      }
+    },
+    "knowledge_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/evidence_link_record.schema.json"
+      }
+    },
+    "unknowns": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "snapshot_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "commands_and_cli_surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/command_surface"
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract_reference"
+      }
+    },
+    "documentation_references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/documentation_reference"
+      }
+    },
+    "test_references": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+      }
+    },
+    "ownership_markers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ownership_marker"
+      }
+    },
+    "conflict_or_supersession_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/conflict_supersession_record.schema.json"
+      }
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/derivation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "repository_knowledge_snapshot_disclaimer": {
+      "type": "string",
+      "const": "This Repository Knowledge Snapshot describes repository architecture and entity relationships. It is not Repository State and does not decide whether the repository is valid, correct, or complete."
+    }
+  },
+  "$defs": {
+    "snapshot_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_id",
+        "snapshot_subject",
+        "snapshot_scope"
+      ],
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_created_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "const": "119E.1.0"
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "const": "119C.1.0-concept"
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "const": "119O.1.0-json-schema"
+        }
+      }
+    },
+    "architectural_entity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_id",
+        "entity_type",
+        "entity_name",
+        "entity_path",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "entity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entity_type": {
+          "$ref": "#/$defs/entity_type"
+        },
+        "entity_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entity_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "entity_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "entity_role": {
+          "type": "string"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "related_claims": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "entity_type": {
+      "type": "string",
+      "enum": [
+        "document",
+        "schema",
+        "package",
+        "module",
+        "command",
+        "configuration",
+        "test",
+        "task",
+        "phase",
+        "release",
+        "runtime_component",
+        "advisory_component",
+        "evidence_artifact",
+        "repository_skill",
+        "contract",
+        "report",
+        "source_file",
+        "unknown"
+      ]
+    },
+    "capability_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability_id",
+        "capability_name",
+        "capability_source",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "capability_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability_type": {
+          "type": "string",
+          "enum": [
+            "observe",
+            "advise",
+            "govern",
+            "plan",
+            "report",
+            "unknown"
+          ]
+        },
+        "described_capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability_source": {
+          "$ref": "../shared/source_attribution_record.schema.json"
+        },
+        "boundary_disclosures": {
+          "$ref": "../shared/boundary_disclosure.schema.json"
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "subsystem_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subsystem_id",
+        "subsystem_name",
+        "subsystem_boundary",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "subsystem_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subsystem_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subsystem_type": {
+          "type": "string",
+          "enum": [
+            "runtime",
+            "governance",
+            "advisory",
+            "evidence",
+            "repository_state",
+            "schema",
+            "documentation",
+            "unknown"
+          ]
+        },
+        "subsystem_boundary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "described_capability": {
+          "type": "string"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "boundary_disclosures": {
+          "$ref": "../shared/boundary_disclosure.schema.json"
+        }
+      }
+    },
+    "knowledge_relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationship_id",
+        "from_entity_id",
+        "to_entity_id",
+        "relationship_type",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "relationship_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "from_entity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "to_entity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relationship_type": {
+          "type": "string",
+          "enum": [
+            "documents",
+            "implements",
+            "tests",
+            "depends_on",
+            "constrains",
+            "introduced_by",
+            "changed_by",
+            "promotes_to",
+            "produces_evidence_for",
+            "supports_advisory_context",
+            "has_impact_on",
+            "references",
+            "unknown"
+          ]
+        },
+        "relationship_scope": {
+          "type": "string"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "related_claims": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "knowledge_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "claim_text",
+        "claim_subject",
+        "claim_type",
+        "claim_status",
+        "source_attribution",
+        "verification_state",
+        "uncertainty_state",
+        "limitations"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "entity",
+            "relationship",
+            "capability",
+            "subsystem",
+            "contract",
+            "documentation",
+            "test",
+            "boundary",
+            "unknown"
+          ]
+        },
+        "claim_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structured_value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "claim_scope": {
+          "type": "string"
+        },
+        "claim_status": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/state_value"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "related_claims": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "command_surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "command_id",
+        "command_name",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "command_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "command_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "command_boundary": {
+          "type": "string"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "contract_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "contract_name",
+        "contract_version",
+        "contract_document_reference",
+        "source_attribution",
+        "relationship_to_snapshot"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_document_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "relationship_to_snapshot": {
+          "type": "string",
+          "enum": [
+            "defines",
+            "constrains",
+            "references",
+            "documents",
+            "supersedes",
+            "unknown"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "documentation_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_id",
+        "document_path",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "document_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "document_title": {
+          "type": "string"
+        },
+        "referenced_section_or_anchor": {
+          "type": "string"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "ownership_marker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "marker_id",
+        "marker_subject",
+        "marker_text",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "marker_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marker_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "marker_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    }
+  }
+}

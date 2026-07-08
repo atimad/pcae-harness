@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Phase 119O - Repository Intelligence Executable Schema Implementation:
+  Repository Knowledge Snapshot
+  (`schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json`,
+  `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT.md`).
+  Implements exactly one new artifact-family JSON Schema Draft 2020-12
+  file: the Repository Knowledge Snapshot schema. This is the second
+  artifact-family schema and the first content-bearing Repository
+  Intelligence artifact-family schema. It references verified shared
+  components, includes the common artifact envelope relationship,
+  represents snapshot identity, source-attributed knowledge claims,
+  architectural entities, capabilities, subsystems, knowledge
+  relationships, knowledge sources, Evidence links, unknowns,
+  limitations, contract references, documentation references, boundary
+  disclosures, disclaimers, and the frozen Repository Knowledge Snapshot
+  boundary disclaimer. Schema-only; no Repository Intelligence Package,
+  Historical Memory Snapshot, Dependency Knowledge Graph Snapshot,
+  Change Impact Report, Advisory Intelligence Context Package, Query
+  Result, validator, validation library, CLI, automated tests, Python
+  models, Pydantic models, dataclasses, extraction, repository scanning,
+  graph construction, impact engine, advisory behavior, Evidence,
+  Repository Skills, Decision Evaluation, source code, test code,
+  runtime behavior, execution, enforcement, lifecycle, Permission
+  Broker, REST, Dashboard, Web UI, provider orchestration, autonomous
+  coding, automatic patch generation, automatic refactoring, repository
+  mutation outside planned schema/docs files, or Telegram inbound
+  changes.
+
 - Phase 119N - Repository Intelligence Executable Schema Verification:
   First Artifact Family
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_FIRST_ARTIFACT_FAMILY_VERIFICATION.md`).

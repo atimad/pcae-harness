@@ -2,6 +2,30 @@
 
 ## Accepted
 
+- Treat Phase 119O as a schema-only Repository Knowledge Snapshot
+  implementation phase: implement exactly one new standalone JSON Schema
+  Draft 2020-12 artifact-family schema under
+  `schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json`.
+  Build on the verified shared components from 119K/119L and the first
+  family pattern verified in 119N. Include the common artifact envelope
+  relationship, snapshot identity, source-attributed knowledge claims,
+  architectural entities, capabilities, subsystems, knowledge
+  relationships, knowledge sources, Evidence links, unknowns,
+  limitations, contract references, documentation references, boundary
+  disclosures, disclaimers, and the frozen Repository Knowledge Snapshot
+  boundary disclaimer. Do not implement another artifact-family schema,
+  validators, validation libraries, CLI, automated tests, Python models,
+  Pydantic models, dataclasses, Repository Intelligence extraction,
+  Repository Knowledge extraction, repository scanning, historical memory
+  extraction, graph construction, impact analysis, Advisory behavior,
+  Evidence behavior, Repository Skills behavior, Decision Evaluation
+  behavior, runtime behavior, execution, enforcement, lifecycle changes,
+  Permission Broker changes, repository mutation outside planned
+  schema/docs files, automatic patch generation, automatic refactoring,
+  or Telegram inbound capability. Recommended next phase: 119P -
+  Repository Intelligence Executable Schema Verification: Repository
+  Knowledge Snapshot.
+
 - Treat Phase 119N as first-artifact-family-verification-only: verify
   `schemas/repository_intelligence/artifacts/contract_conformance_record.schema.json`
   against the frozen 119E artifact contract, 119H executable schema

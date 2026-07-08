@@ -1,10 +1,11 @@
 # Repository Intelligence Schemas
 
 Phase 119K introduced the first standalone JSON Schema artifacts for
-Repository Intelligence. Phase 119M adds the first artifact-family schema
-on top of the verified shared components. These schemas live outside
-`src` so they remain language-neutral contract artifacts rather than
-runtime code.
+Repository Intelligence. Phase 119M added the first artifact-family
+schema on top of the verified shared components. Phase 119O adds the
+Repository Knowledge Snapshot schema as the first content-bearing
+artifact-family schema. These schemas live outside `src` so they remain
+language-neutral contract artifacts rather than runtime code.
 
 ## Scope
 
@@ -28,6 +29,7 @@ Shared components:
 Artifact-family schemas:
 
 - `artifacts/contract_conformance_record.schema.json`
+- `artifacts/repository_knowledge_snapshot.schema.json`
 
 The Contract Conformance Record schema is the first artifact-family
 schema because it records structural contract conformance without
@@ -35,15 +37,23 @@ performing repository extraction, graph construction, impact analysis,
 Advisory behavior, Decision Evaluation, execution, enforcement, or
 repository mutation.
 
+The Repository Knowledge Snapshot schema is the second artifact-family
+schema and the first content-bearing artifact-family schema. It
+structurally represents source-attributed repository knowledge claims,
+repository entities, capabilities, subsystems, relationships, contract
+references, documentation references, Evidence links, unknowns,
+limitations, boundary disclosures, and disclaimers. It does not perform
+repository scanning or Repository Knowledge extraction.
+
 Not implemented in this slice:
 
-- additional artifact-family schemas
+- additional artifact-family schemas beyond the two listed above
 - validators or validation libraries
 - CLI commands
 - Python models, Pydantic models, or dataclasses
 - automated tests or fixtures
-- repository extraction, graph construction, impact analysis, or Advisory
-  behavior
+- repository extraction, repository scanning, graph construction, impact
+  analysis, or Advisory behavior
 
 ## JSON Schema Draft
 
@@ -90,6 +100,13 @@ correctness, natural-language forbidden claims, lifecycle standing,
 Repository State validity, Decision Evaluation outcomes, execution
 safety, or remediation correctness.
 
+The Repository Knowledge Snapshot schema structurally represents
+declared source-attributed knowledge. It does not validate source truth,
+source existence, Evidence sufficiency, claim truth, repository
+knowledge completeness, lifecycle standing, Repository State validity,
+Decision Evaluation outcomes, execution safety, or derivation
+correctness.
+
 Future validators must preserve the same boundary. Other
 artifact-family schemas remain future work.
 
@@ -97,9 +114,9 @@ artifact-family schemas remain future work.
 
 The recommended next phase is:
 
-`119N - Repository Intelligence Executable Schema Verification: First Artifact Family`
+`119P - Repository Intelligence Executable Schema Verification: Repository Knowledge Snapshot`
 
 That phase should verify JSON validity, reference consistency, contract
-alignment, shared component reuse, conformance-state correctness, and
-authority-creep safety before another artifact-family schema is
-implemented.
+alignment, shared component reuse, source attribution, uncertainty
+preservation, and authority-creep safety before another content-bearing
+artifact-family schema is implemented.
