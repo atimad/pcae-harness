@@ -1,41 +1,45 @@
-# Phase 119I Complete - Repository Intelligence Executable Schema Contract Verification
+# Phase 119J Complete - Repository Intelligence Executable Schema Implementation Plan
 
-- **Phase ID:** `119I`
-- **Phase name:** Repository Intelligence Executable Schema Contract Verification
+- **Phase ID:** `119J`
+- **Phase name:** Repository Intelligence Executable Schema Implementation Plan
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_VERIFICATION.md`
+- **Implementation plan document:** `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Commit:** `0d6862cf23d7b067cb6680b351617bbc825f55e0`
-- **Recommended next phase:** 119J - Repository Intelligence Executable Schema Implementation Plan
+- **Commit:** `8f3e8e0a092d22ac200704ef961f2c75340a1d3d`
+- **Recommended next phase:** 119K - Repository Intelligence Executable Schema Implementation: Shared Components
 
 ## Summary
 
-Completed an executable-schema-contract-verification-only continuation of
-Track B. Verified the frozen 119H Repository Intelligence executable
-schema contract as internally consistent, testable, future-enforceable,
-and ready for executable schema implementation planning.
+Completed an executable-schema-implementation-plan-only continuation of
+Track B. Planned how PCAE should later implement Repository Intelligence
+executable schemas while preserving the frozen 119H contract verified in
+119I, the 119E artifact contract, read-only boundary, Decision Evaluation
+boundary, Evidence boundary, Repository State boundary, Advisory
+non-authority, and execution-unavailable posture.
 
-The verification confirms that future Repository Intelligence executable
-schemas, validators, and schema-valid artifacts can be checked against the
-frozen contract without adding authority, execution, mutation,
-enforcement, or decision-making.
+The plan recommends standalone JSON Schema outside `src` as the first
+schema representation, a shared-components-first implementation slice,
+and deferral of validators, CLI, fixtures, Repository Skills exposure,
+Advisory consumption, extraction, graph construction, impact analysis,
+and prototypes until later governed phases.
 
 ## Files Changed
 
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_VERIFICATION.md`
+- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`
 - `PROJECT_STATUS.md`
 - `CHANGELOG.md`
 - `tasks/DECISIONS.md`
 - `tasks/TODO.md`
-- `tasks/active/20260708-1441-phase-119i-repository-intelligence-executable-schema-contract-verification.md`
+- `tasks/active/20260708-1557-phase-119j-repository-intelligence-executable-schema-implementation-plan.md`
 - `.pcae/phase-completion-report.md`
 - `.pcae/phase-completion-metadata.json`
 
 ## Contract Basis Reviewed
 
+- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_VERIFICATION.md`
 - `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`
 - `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_ARCHITECTURE.md`
 - `docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_VERIFICATION.md`
@@ -44,171 +48,130 @@ enforcement, or decision-making.
 - `docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONCEPTUAL_SCHEMA_ARCHITECTURE.md`
 - `docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONTRACT_VERIFICATION.md`
 - `docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONTRACT_FREEZE.md`
-- `docs/PHASE_118_REPOSITORY_INTELLIGENCE_ARCHITECTURE_REVIEW.md`
-- `docs/PHASE_118_REPOSITORY_KNOWLEDGE_ARCHITECTURE.md`
-- `docs/PHASE_118_HISTORICAL_MEMORY_ARCHITECTURE.md`
-- `docs/PHASE_118_CHANGE_IMPACT_ANALYSIS_ARCHITECTURE.md`
-- `docs/PHASE_118_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`
-- `docs/PHASE_118_ADVISORY_REASONING_EXPANSION_ARCHITECTURE.md`
 
 Boundary context was checked against existing Repository State, Evidence,
 Decision Evaluation, Repository Skills, Advisory Repository Skills,
 Advisory Context Package, Advisory Runtime, Runtime Context, Runtime
 Inspect, lifecycle, phase report, release governance, transition
-validation, and no-go boundary documents.
+validation, Permission Broker, and execution no-go documents.
 
-## Verification Conclusion
+## Implementation-Plan Status
 
-The frozen executable schema contract is verified and ready for
-executable schema implementation planning.
+Plan only. No executable schemas, schema files, validators, CLI, tests,
+fixtures, schema directories, source code, or runtime behavior were added.
 
-No repair is required before implementation planning. Non-blocking
-implementation-planning clarifications remain around validator severity
-vocabulary, the relationship between Contract Conformance Records and
-validator output, the minimum authority-creep fixture set, warning wording
-for possible forbidden claims, and exact future file placement.
+## Plan Summary
 
-## Verification Scope Summary
+- **Implementation principles:** contract-preserving, schema-first,
+  structure-first, shared-components-first, read-only,
+  non-authoritative, no execution, no extraction, no graph construction,
+  no impact engine, no Advisory behavior change, no Decision Evaluation
+  replacement, no Evidence replacement, and no Repository State
+  replacement.
+- **Schema language recommendation:** JSON Schema first. It gives the best
+  balance of contract fidelity, structural validation, low runtime
+  coupling, language-neutral artifact compatibility, and fixture-based
+  testability. Python dataclasses and Pydantic models are deferred.
+  Markdown-only tables remain documentation, not executable schemas.
+- **Recommended first implementation slice:** shared components only:
+  common artifact envelope, artifact identity/family values, context
+  records, derivation disclosure, source attribution, evidence links,
+  verification/uncertainty states, conflict/supersession, limitations,
+  boundary disclosures, non-decision disclaimer, no-execution disclaimer,
+  and Advisory non-authority disclaimer.
+- **Schema family sequence:** shared components, source attribution,
+  evidence link, uncertainty/verification, conflict/supersession,
+  Contract Conformance Record, Query Result, Repository Knowledge
+  Snapshot, Historical Memory Snapshot, Dependency Knowledge Graph
+  Snapshot, Change Impact Report, Advisory Intelligence Context Package,
+  Repository Intelligence Package last.
+- **Future file organization:** recommend future
+  `schemas/repository_intelligence/` outside `src`; no directory created.
+- **Future module boundaries:** defer Python support; if later needed, use
+  resource loading, structural validation, and diagnostic result modules
+  that cannot express approval, execution, or mutation authority.
+- **Future validator plan:** Stage 1 library-only structural validation;
+  Stage 2 fixture-based conformance checks; Stage 3 optional CLI
+  inspection; Stage 4 future Repository Skill exposure. Validators remain
+  non-authoritative and non-executing.
+- **Future test plan:** valid/invalid fixtures, boundary disclosure,
+  forbidden field/value, enum, version compatibility, source attribution,
+  evidence link, uncertainty/conflict/supersession, validator
+  non-authority, and no-execution/no-mutation tests.
+- **Future fixture plan:** minimal valid envelope, invalid missing field,
+  invalid forbidden field, source attribution, evidence link, uncertainty,
+  conflict/supersession, derivation disclosure, and schema-valid but
+  non-actionable artifact fixtures.
+- **Structural validation scope:** required/conditional fields, types,
+  shapes, enum membership, family values, versions, references, source
+  shape, evidence shape, states, conflict/supersession, derivation,
+  boundary disclaimers, and forbidden field absence.
+- **Semantic validation deferral:** claim truth, source sufficiency,
+  evidence sufficiency, derivation correctness, graph correctness, impact
+  accuracy, Advisory quality, natural-language implication, and action
+  approval remain deferred.
+- **Manual/future-governance deferral:** Evidence acceptance, Decision
+  Evaluation, Permission Broker outcomes, lifecycle validity, repository
+  mutation approval, execution approval, Advisory recommendation quality,
+  and contract-meaning preservation remain outside schemas.
+- **Forbidden claim handling:** reject prohibited structured fields and
+  values first, require disclaimers first, defer prose analysis, and never
+  claim natural-language truth analysis.
+- **Versioning plan:** initial implementation should distinguish artifact
+  contract version `119E.1.0`, executable schema contract version
+  `119H.1.0`, executable schema implementation version, schema concept
+  version, `$id`, compatibility notes, breaking changes, stale schemas,
+  and superseded schemas.
+- **Migration/deprecation plan:** use explicit deprecation, replacement,
+  supersession, migration, and stale-schema metadata; no migration tool
+  before schemas exist and are verified.
+- **Artifact generation constraints:** future generators must preserve
+  envelope, sources, evidence, uncertainty, conflict, supersession,
+  derivation, limitations, and boundary disclaimers, and must not extract,
+  execute, mutate, decide, or authorize.
+- **Repository Skills exposure plan:** defer until schema implementation,
+  validator verification, fixtures, and authority-creep tests exist.
+- **Advisory consumer plan:** defer until schema implementation,
+  verification, and read-only prototype planning.
+- **Governance integration plan:** use explicit task contracts, governed
+  commits/pushes, required PCAE checks, runtime inspect, notification
+  status, and canonical phase reports.
+- **No-go boundary preservation:** preserves no execution, shell
+  mediation, backend invocation, repository mutation, lifecycle mutation,
+  Decision Evaluation replacement, Advisory authority expansion, Evidence
+  replacement, Repository State replacement, Permission Broker change,
+  runtime plugin change, REST, Dashboard, Web UI, Telegram inbound,
+  provider orchestration, autonomous coding, patch generation, and
+  refactoring behavior.
 
-- **Schema family verification inventory:** all twelve future schema
-  families are verified as mappable to the frozen 119E artifact families.
-- **Shared schema component verification:** common envelope,
-  repository/phase/release context, derivation, source attribution,
-  evidence links, verification/uncertainty states, conflict/supersession,
-  boundary disclosure, limitations, non-decision, and no-execution
-  components are verifiable without authority expansion.
-- **Common artifact envelope schema verification:** identity, family,
-  contract version, context, derivation, source, evidence, state,
-  conflict, supersession, read-only, decision, Advisory, execution,
-  limitations, and disclaimers are structurally testable.
-- **Field classification verification:** required, conditional, optional,
-  forbidden, and forbidden-implication handling is clear and testable at
-  the correct level.
-- **Structural validation boundary verification:** future schemas may
-  check presence, types, enum membership, object/array shape, versions,
-  family declarations, references, and boundary disclosure presence.
-- **Semantic validation boundary verification:** schemas must not prove
-  source truth, source sufficiency, claim truth, derivation correctness,
-  evidence sufficiency, advisory quality, architectural correctness,
-  decision validity, or action approval.
-- **Manual / future-governance validation boundary verification:** source
-  materiality, evidence adequacy, derivation correctness, graph/impact
-  correctness, Advisory usefulness, action approval, and natural-language
-  implication remain outside schema proof.
-- **Forbidden-claim validation boundary verification:** prohibited fields,
-  prohibited values, required disclaimers, explicit boundary fields,
-  structured forbidden flags, conservative string-pattern warnings, and
-  manual review triggers are permitted; full natural-language truth
-  analysis is not.
-- **Source attribution validation verification:** schema-level source
-  shape and presence are testable; source truth and sufficiency are not
-  schema claims.
-- **Evidence link validation verification:** Evidence Link structure,
-  candidate/accepted state, and gap markers are testable while Evidence
-  acceptance remains owned by the Evidence subsystem.
-- **Uncertainty / verification-state validation verification:** state
-  vocabularies, rationale fields, conditional verification method fields,
-  and state-disclosure requirements are distinct and testable.
-- **Conflict / supersession validation verification:** conflicts,
-  superseded items, replacement history, and preserved history are
-  structurally preservable without deciding which claim is true.
-- **Derivation disclosure validation verification:** derivation inputs,
-  method, rule family, tool, limitations, and nondeterminism exclusions
-  are testable as disclosure, not correctness proof.
-- **Versioning and compatibility verification:** schema versioning,
-  artifact contract versioning, schema concept versioning, compatibility,
-  breaking change, deprecation, migration, stale schema, and superseded
-  schema expectations are testable.
-- **Future file organization verification:** dedicated future Repository
-  Intelligence schema placement is coherent; no directory was created.
-- **Future validator verification:** validator responsibilities and
-  no-go boundaries are explicit.
-- **Future test expectation verification:** future fixture expectations
-  are sufficient without adding tests in this phase.
-- **Artifact generation constraint verification:** future generators must
-  preserve envelope, sources, evidence, uncertainty, conflict,
-  supersession, derivation, limitations, disclaimers, and read-only
-  posture.
-- **Repository Skills integration verification:** future skills may expose
-  read-only inspection and conformance summaries only.
-- **Advisory consumer integration verification:** future Advisory
-  consumers may use schema-valid artifacts only as bounded,
-  non-authoritative context.
-- **Decision Evaluation boundary verification:** schema validity is not
-  decision validity, approval, authorization, or execution permission.
-- **Read-only and no-execution boundary verification:** future schemas and
-  validators remain read-only and non-executing.
+## Risk Analysis
 
-## Authority-Creep Analysis
+Key risks: schema implementation drift, validators becoming decision
+makers, schema validity being mistaken for approval, overbuilt shared
+components, too many schemas at once, fixture gaps, source attribution
+box-checking, evidence links mistaken for accepted Evidence,
+forbidden-claim overreach, unnecessary dependencies, excessive JSON
+Schema conditional complexity, and later Repository Skills or Advisory
+surfaces hiding uncertainty.
 
-Validator authority-creep risk is real because `valid`, `conforms`, or
-`passed` can be misread as permission. The contract mitigates this with
-non-authority disclaimers, forbidden approval fields/status values,
-non-decision validator output, limitations, review triggers, and explicit
-Decision Evaluation separation.
+Mitigations: shared-components-first sequencing, field-to-contract
+tracing, descriptive validator output, authority-creep fixtures,
+boundary disclaimers, conservative forbidden-claim handling, standalone
+schemas outside `src`, and deferring consumers until verification.
 
-Schema-valid artifact authority-creep risk is also real because polished
-artifacts can look more authoritative than their source, evidence, or
-uncertainty state supports. The contract mitigates this through required
-source attribution, evidence boundaries, uncertainty/verification states,
-conflict/supersession preservation, derivation disclosure, limitations,
-read-only boundary, decision boundary, and execution boundary.
+## First Implementation Acceptance Criteria
 
-## Examples Summary
-
-Non-conformance examples include schemas allowing `execution_approved:
-true`, validators reporting `safe_to_push`, validators mutating
-repository state, validators running shell commands, schemas omitting
-source attribution, schemas collapsing unknown and verified states,
-schemas removing supersession history, schema-valid artifacts claiming
-Decision Evaluation can be bypassed, Repository Skills treating schema
-validity as permission, and Advisory treating schema validity as approval.
-
-Contract-preserving examples include schemas that require the common
-envelope, source attribution, evidence links or gap markers, uncertainty
-states, limitations, and boundary disclaimers; validators that report
-missing structural disclosure without deciding truth; Contract
-Conformance Records with non-decision/no-execution disclaimers;
-Repository Skills exposing read-only conformance summaries; and Advisory
-using schema-valid artifacts only as bounded context.
-
-## Future Executable Schema Conformance Checklist Summary
-
-The verification document defines a future implementation checklist
-covering family mapping, envelope preservation, version representation,
-required/conditional/optional/forbidden fields, forbidden-implication
-warnings, source attribution, evidence links, uncertainty/verification,
-conflict/supersession, derivation disclosure, versioning,
-non-authoritative validator output, read-only validator behavior,
-authority-creep fixtures, generator constraints, Repository Skills
-constraints, Advisory constraints, Decision Evaluation separation, and
-no-execution preservation.
-
-## Risks
-
-- Validator output could become shorthand for approval.
-- Schema-valid artifacts could look more authoritative than their
-  source/evidence/uncertainty state supports.
-- Forbidden-claim checks could overclaim natural-language understanding.
-- Future file organization could mix schemas, validators, fixtures, and
-  generated artifacts.
-- Repository Skills could hide uncertainty or limitations.
-- Advisory could quote schema-valid content without preserving boundaries.
-- Version compatibility rules could be weakened during implementation.
-
-## Required Clarifications or Repairs
-
-No repair is required before executable schema implementation planning.
-
-Recommended non-blocking clarifications for planning:
-
-1. Define future validator output severity vocabulary.
-2. Define whether Contract Conformance Records are emitted by validators
-   or authored as separate review artifacts.
-3. Define the minimum authority-creep and forbidden-claim fixture set.
-4. Define wording for conservative forbidden-claim warnings.
-5. Define exact future schema, validator, fixture, and generated-artifact
-   file placement.
+The recommended first implementation phase should create only shared
+Repository Intelligence JSON Schema artifacts under a governed future
+schema path; implement the common envelope and shared components; map
+every component to 119E/119H; represent required/conditional/optional and
+forbidden field rules where structurally expressible; include boundary
+disclosures and version identifiers; preserve source, evidence,
+uncertainty, conflict, supersession, derivation, and limitations; avoid
+approval/authorization/execution/mutation/lifecycle/Evidence/Decision
+Evaluation/Advisory/Repository State/Permission Broker authority; pass
+PCAE checks; and return repository state to clean with
+`origin/main..HEAD = 0`.
 
 ## Non-Goals
 
@@ -232,33 +195,37 @@ automatic patch generation, or automatic refactoring.
 - `pcae health`: healthy
 - `pcae check`: passed
 - `pcae doctor task-memory`: clean
-- `pcae push check`: nothing to push after governed push
+- `pcae push check`: nothing to push before governed commit
 - `pcae runtime inspect`: execution unavailable, runtime state Observed,
   maximum plugin capability observe, zero runtime plugins
 - `pcae notify status`: Telegram configured, enabled, and ready for
   outbound delivery once the env is loaded in this shell
-- `pcae skill invoke phase-finalization 119I`: resolved
+- `pcae skill invoke phase-finalization 119J`: resolved
 
 ## Validation Results
 
-Implementation test suites and fast-green were not run because 119I is
+Implementation test suites and fast-green were not run because 119J is
 documentation-only and changed no source or test files. Required PCAE
 governance validation passed before completion artifact sync.
 
 ## Commit and Push Status
 
 - Phase documentation commit:
-  `0d6862cf23d7b067cb6680b351617bbc825f55e0`
-- Completion metadata commit: `be4b17a1967b3145902c66713e39a99d9f099139`
-- Push status: pushed
-- `origin/main..HEAD`: 0
+  `8f3e8e0a092d22ac200704ef961f2c75340a1d3d`
+- Completion metadata commit: pending
+- Push status: pending governed push
+- `origin/main..HEAD`: pending final validation
 - Telegram notification result: pending final delivery
 
 ## Recommended Next Phase
 
-119J - Repository Intelligence Executable Schema Implementation Plan.
+119K - Repository Intelligence Executable Schema Implementation: Shared
+Components.
 
-Reason: the executable schema contract verifies cleanly. PCAE should plan
-schema implementation before creating any schema files, validators, tests,
-fixtures, generated artifacts, or Repository Intelligence prototype
-behavior.
+Reason: the first implementation slice should be narrow: shared JSON
+Schema components only, likely common envelope, source attribution,
+evidence link, uncertainty/verification state, conflict/supersession,
+derivation disclosure, limitations, and boundary disclosures. No
+validators, CLI, tests, fixtures, extraction, graph construction, impact
+engine, Advisory behavior change, Evidence change, Repository Skills
+change, Decision Evaluation change, runtime behavior change, or execution.
