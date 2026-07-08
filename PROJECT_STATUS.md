@@ -2,75 +2,93 @@
 
 ## Current Phase
 
-Phase 119AC — Repository Intelligence Executable Schema Final Review
+Phase 120A — Repository Intelligence Read-Only Prototype Architecture
 (completed).
 
-Final review phase for Track B Repository Intelligence. Reviews the
-COMPLETE 119K-through-119AB executable schema line as a whole — all
-eight artifact-family schemas and twelve shared components — rather
-than a single family. Adds
-`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_FINAL_REVIEW.md`
-with 38 review sections covering JSON parse validity, schema
-declaration, draft consistency, `$id` uniqueness, `$ref` resolution
-(477 local refs across twenty schema files, zero broken), shared
-component reuse, common artifact envelope consistency, source
-attribution consistency, evidence boundary consistency,
-uncertainty/verification state consistency, conflict/supersession
-consistency, boundary disclosure consistency, disclaimer consistency,
-`additionalProperties` consistency (108 object definitions; 107 declare
-`additionalProperties: false`, 1 intentionally unconstrained and
-documented), artifact-family naming consistency, artifact
-dependency/order consistency, aggregate package/query/graph/impact/
-advisory/package boundary consistency, authority-creep-free language
-(zero hits across all 20 schemas + README), documentation coherence,
-and governance state. No schema or shared-component corrections were
-required.
+Architecture-only phase opening Track 120. Defines
+`docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md`,
+answering how PCAE architecture should support a future read-only
+Repository Intelligence prototype that generates schema-conforming
+artifacts from the frozen 119 schema line without execution, mutation,
+Advisory authority, Decision Evaluation replacement, runtime behavior
+change, or repository-state authority. Defines nine conceptual
+prototype stages (source inventory, source attribution, deterministic
+extraction planning, artifact assembly, schema-shape alignment,
+limitation/unknown capture, boundary/disclaimer attachment, output
+persistence, verification/reporting), eight architectural layers
+(Schema Contract, Source Observation, Attribution, Artifact Assembly,
+Boundary/Disclaimer, Persistence, Verification, Human Review),
+conceptual input/output models, read-only guarantees, source
+attribution architecture, Evidence boundary architecture, uncertainty/
+unknown handling, limitation/disclaimer architecture, boundary
+disclosure architecture, conceptual (non-final) persistence
+architecture, verification architecture, governance architecture, and
+failure/no-go conditions. Names Repository Knowledge Snapshot as the
+first future prototype target, grounded in Phase 118A's read-only
+production model and 118's own "Historical Memory/Dependency Graph/
+Change Impact emerge from Repository Knowledge" architecture. Defines
+the Track 120 roadmap (120B-120F committed candidates; 121-125+
+tentative, not activated). No schema or shared-component was changed.
 
-Documented and classified three known inherited, non-blocking
-tooling/reporting issues rather than repairing them (repair was
-explicitly out of scope for this phase): the 119Q report-generation-
-ordering defect (`Commits: pending_`, recovered and documented in
-119R), the `is_phase_id_backward()` phase-id string-comparison bug in
-`pcae phase complete` (discovered and worked around during 119AA,
-documented in 119AB), and the recurring
-`report_notification_tests: pending_final_telegram_delivery` report-
-timing detail (consistently confirmed non-blocking across the whole
-119 line by re-running `pcae phase complete` with Telegram enabled).
+Documented and classified the same three known inherited, non-blocking
+tooling/reporting issues carried forward from 119AC (119Q
+report-generation-ordering defect, `is_phase_id_backward()` phase-id
+comparison bug, recurring Telegram notification-timing detail); none
+blocks 120A or the 120B-120F architecture, and none was repaired in
+this phase.
 
-Concluded the complete 119 executable schema line is ready to inform
-Phase 120A.
-
-No new artifact-family schema, validator, validation library, schema
-verification CLI, automated test suite, Python model, Pydantic model,
-dataclass, repository intelligence extraction, repository knowledge
-extraction, repository scanning, dependency extraction, dependency
-scanning, diff analysis, git history analysis, timeline generation,
-change impact analysis engine, impact prediction, blast-radius
-computation, dependency graph construction, graph traversal, graph
-query engine, query execution, query engine, query result generation,
-query ranking, package generation, package validation, package
-builder, package registry, package integrity computation, Advisory
-Intelligence Context generation, Advisory Context Package generation,
-advisory behavior change, Advisory Runtime change, Advisory
+No implementation, generator, generated artifact, repository scanning,
+extraction, validator, validation library, schema verification CLI,
+automated test suite, Python model, Pydantic model, dataclass, runtime
+behavior change, Advisory behavior change, Decision Evaluation change
+or replacement, source code change, test code change, or execution was
+introduced. No new artifact-family schema, package generation,
+package validation, query execution, graph traversal, Advisory
 integration, Evidence subsystem change, Repository Skills change,
-Decision Evaluation change or replacement, source code change, test
-code change, runtime behavior change, execution, shell mediation,
-enforcement, lifecycle behavior change, Permission Broker behavior
-change, Repository State behavior change, Repository Transition
-Validator behavior change, Notification Policy behavior change, REST,
-Dashboard, Web UI, provider orchestration, autonomous coding, model
-capability expansion, automatic patch generation, automatic
-refactoring, repository mutation outside planned schema/docs/status
-files, runtime plugin change, or Telegram inbound path change. Repair
-of the two known inherited tooling/reporting issues was explicitly out
-of scope for this phase.
+Permission Broker behavior change, Repository State behavior change,
+Repository Transition Validator behavior change, Notification Policy
+behavior change, REST, Dashboard, Web UI, provider orchestration,
+autonomous coding, model capability expansion, automatic patch
+generation, automatic refactoring, repository mutation outside planned
+docs/status files, or runtime plugin change occurred. Repair of the
+known inherited tooling/reporting issues was explicitly out of scope
+for this phase.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 120A — Repository Intelligence Read-Only
-Prototype Architecture.
+Recommended next repo phase: 120B — Repository Intelligence Prototype
+Contract Freeze.
+
+## Phase 120A Complete
+
+Phase 120A — Repository Intelligence Read-Only Prototype Architecture
+(completed).
+
+Opened Track 120 with an architecture-only phase defining
+`docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md`.
+Answers how PCAE architecture should support a future read-only
+Repository Intelligence prototype generating schema-conforming
+artifacts from the 119 schema line, without execution, mutation,
+Advisory authority, Decision Evaluation replacement, runtime behavior
+change, or repository-state authority. Defined the prototype's nine
+conceptual stages, eight architectural layers, conceptual input/output
+models, read-only guarantees, source attribution/Evidence
+boundary/uncertainty/limitation/disclaimer/boundary-disclosure
+architecture, non-final persistence architecture (three candidate
+locations proposed for 120B to decide, none chosen), verification
+architecture (no validators implemented), governance architecture, and
+failure/no-go conditions. Named Repository Knowledge Snapshot as the
+first future prototype target. Defined the Track 120 roadmap
+(120B-120F as committed candidates; 121-125+ as tentative, unactivated
+long-range shape). Documented relationships to Phase 119, Advisory,
+Decision Evaluation, and execution, all confirming no authority or
+behavior change occurred. Classified the three known inherited
+tooling/reporting issues carried forward from 119AC as non-blocking
+for architecture. No schema, source, or test file was changed; no
+generator, validator, CLI, or automated test suite was implemented; no
+generated artifact was produced.
 
 ## Phase 119AC Complete
 

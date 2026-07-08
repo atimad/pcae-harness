@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+- Phase 120A - Repository Intelligence Read-Only Prototype Architecture
+  (`docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md`).
+  Architecture-only phase opening Track 120. Defines how PCAE
+  architecture should support a future read-only Repository
+  Intelligence prototype that generates schema-conforming artifacts
+  from the frozen 119 executable schema line, without execution,
+  mutation, Advisory authority, Decision Evaluation replacement,
+  runtime behavior change, or repository-state authority. Defines nine
+  conceptual prototype stages (source inventory through verification/
+  reporting), eight architectural layers (Schema Contract, Source
+  Observation, Attribution, Artifact Assembly, Boundary/Disclaimer,
+  Persistence, Verification, Human Review), conceptual input/output
+  models, read-only guarantees, source attribution architecture,
+  Evidence boundary architecture, uncertainty/unknown handling,
+  limitation/disclaimer architecture, boundary disclosure architecture,
+  non-final persistence architecture (three candidate locations
+  proposed for 120B, none chosen), verification architecture (no
+  validators implemented), governance architecture, and failure/no-go
+  conditions. Names Repository Knowledge Snapshot as the first future
+  prototype target, grounded in Phase 118A's read-only production model.
+  Defines the Track 120 roadmap: 120B - Repository Intelligence
+  Prototype Contract Freeze, 120C - Contract Verification, 120D -
+  Repository Knowledge Snapshot Prototype Plan, 120E - Read-Only
+  Generator, 120F - Prototype Verification as committed candidates;
+  121-125+ as a tentative, unactivated long-range shape. Documents and
+  classifies the three known inherited tooling/reporting issues carried
+  forward from 119AC as non-blocking for architecture, without
+  repairing them. Recommends 120B as the next phase. Architecture-only;
+  no generator, generated artifact, repository scanning, extraction,
+  validator, validation library, CLI, Python models, Pydantic models,
+  dataclasses, automated test suite, source code, test code, runtime
+  behavior change, Advisory behavior change, Decision Evaluation change
+  or replacement, or execution.
+
 - Phase 119AC - Repository Intelligence Executable Schema Final Review
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_FINAL_REVIEW.md`).
   Cross-schema final review of the complete 119K-through-119AB
