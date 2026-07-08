@@ -163,21 +163,7 @@
     "No runtime behavior change or execution",
     "No repair of known inherited tooling/reporting issues (explicitly out of scope)"
   ],
-  "no_go_confirmation": [
-    "No No-Go conditions triggered",
-    "No schema or shared-component correction was required",
-    "No new artifact-family schema was added",
-    "No validator or validation library was added",
-    "No automated test suite was added",
-    "No Repository Intelligence extraction or repository scanning occurred",
-    "No package generation or validation occurred",
-    "No query execution or graph traversal occurred",
-    "No Advisory integration occurred",
-    "No Decision Evaluation change or replacement occurred",
-    "No source code or test code was changed",
-    "No runtime behavior changed and no execution occurred",
-    "No known inherited tooling/reporting issue was repaired (explicitly out of scope)"
-  ],
+  "no_go_confirmation": "No No-Go conditions triggered. No schema or shared-component correction was required. No new artifact-family schema was added. No validator or validation library was added. No automated test suite was added. No Repository Intelligence extraction or repository scanning occurred. No package generation or validation occurred. No query execution or graph traversal occurred. No Advisory integration occurred. No Decision Evaluation change or replacement occurred. No source code or test code was changed. No runtime behavior changed and no execution occurred. No known inherited tooling/reporting issue was repaired (explicitly out of scope for this phase).",
   "phase_commits": [
     {
       "hash": "55466b72523bc197d49cd9013249ed5b88fd3d17",
