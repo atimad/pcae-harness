@@ -106,6 +106,21 @@
       "name": "pcae_notify_status",
       "result": "telegram_configured_enabled_ready",
       "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "not_applicable_final_review_only_no_source_or_tests_changed",
+      "status": "not_applicable"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "pending_final_telegram_delivery",
+      "status": "pending"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_final_review_only_no_source_or_tests_changed",
+      "status": "not_applicable"
     }
   ],
   "test_results": {
