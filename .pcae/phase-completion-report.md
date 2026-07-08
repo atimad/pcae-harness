@@ -6,9 +6,9 @@
 - **Missing trust fields:** none
 - **Files changed:** 9
 - **Tests run:** governance validation only
-- **Commits:** pending governed commit
+- **Commits:** `bf8bf527488119b48d1fd9ec289d180c66ca0b45`
 - **Pushed:** pending
-- **origin/main..HEAD:** 0 before commit
+- **origin/main..HEAD:** 1 before push
 
 ## Summary
 
