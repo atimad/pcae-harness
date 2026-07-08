@@ -2,6 +2,35 @@
 
 ## Accepted
 
+- Treat Phase 119P as Repository Knowledge Snapshot verification only:
+  verify
+  `schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json`
+  against the 118A Repository Knowledge architecture, 119C conceptual
+  schema architecture, 119E artifact contract, 119H executable schema
+  contract, 119I verification, 119J implementation plan, 119L shared
+  component verification, 119N first-family verification, and 119O
+  implementation document. Confirm JSON parsing, schema declarations,
+  Draft 2020-12 consistency, `$id` uniqueness, `$ref` targets, shared
+  component reuse, common envelope relationship, snapshot identity,
+  source-attributed repository knowledge claims, repository entities,
+  entity type values, capability/subsystem summaries, knowledge
+  relationships, knowledge sources, Evidence links, unknowns,
+  uncertainty preservation, contract references, documentation
+  references, boundary disclosures, disclaimers, `additionalProperties:
+  false`, authority-creep language, documentation clarity, and no-go
+  scope. Do not implement a new artifact-family schema, validators,
+  validation libraries, CLI, automated tests, Python models, Pydantic
+  models, dataclasses, Repository Intelligence extraction, Repository
+  Knowledge extraction, repository scanning, historical memory
+  extraction, graph construction, impact analysis, Advisory behavior,
+  Evidence behavior, Repository Skills behavior, Decision Evaluation
+  behavior, runtime behavior, execution, enforcement, lifecycle changes,
+  Permission Broker changes, repository mutation outside allowed
+  verification docs/status files, automatic patch generation, automatic
+  refactoring, or Telegram inbound capability. No corrections were
+  required. Recommended next phase: 119Q - Repository Intelligence
+  Executable Schema Implementation: Historical Memory Snapshot.
+
 - Treat Phase 119O as a schema-only Repository Knowledge Snapshot
   implementation phase: implement exactly one new standalone JSON Schema
   Draft 2020-12 artifact-family schema under
