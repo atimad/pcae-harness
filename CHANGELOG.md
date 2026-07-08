@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- Phase 120D - Repository Knowledge Snapshot Prototype Plan
+  (`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_PLAN.md`).
+  Documentation-only implementation-planning phase for the first
+  Repository Intelligence prototype. Defines exactly how Phase 120E
+  will implement a deterministic, read-only Repository Knowledge
+  Snapshot generator while preserving every boundary from 120A-120C.
+  Reaffirms all ten implementation boundaries (read-only,
+  deterministic, observe-only, no execution, no repository/runtime
+  mutation, no AI inference, no network access, no Advisory/Decision
+  Evaluation integration). Defines planned conceptual inputs, an
+  eleven-stage logical extraction pipeline (an implementation-planning
+  elaboration of 120B's ten frozen stages, not a contract amendment), a
+  ten-component plan (responsibility/inputs/outputs/boundaries, no code
+  specified), a source attribution plan, unknown-handling and
+  limitation plans, a verification plan for 120F, and a fail-closed
+  failure plan. Makes the persistence-location decision 120B deferred
+  to this phase: selects `.pcae/repository-intelligence/` as the
+  planned output location, with rationale against the other two 120A
+  candidates. Lists 120E's expected deliverables and eleven measurable
+  acceptance criteria, documents four implementation risks with
+  mitigations, explicitly defers the query layer, Advisory consumption,
+  change impact prototype, graph traversal, and execution
+  planning/capability, and carries forward the same three known
+  inherited, non-blocking tooling/reporting issues without repairing
+  them. Recommends 120E. Documentation-only; no generator, generated
+  artifact, repository scanning, extraction, persistence
+  implementation, validator, CLI, Python code, models, dataclasses,
+  tests, runtime behavior change, Advisory integration, query
+  execution, graph traversal, or execution capability.
+
 - Phase 120C - Repository Intelligence Prototype Contract Verification
   (`docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_VERIFICATION.md`).
   Verification-only phase independently verifying the 120B contract

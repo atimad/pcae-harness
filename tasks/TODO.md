@@ -69,7 +69,8 @@ understanding without execution, enforcement, or autonomy.
 | 120A | Repository Intelligence Read-Only Prototype Architecture | ✅ Complete |
 | 120B | Repository Intelligence Prototype Contract Freeze | ✅ Complete |
 | 120C | Repository Intelligence Prototype Contract Verification | ✅ Complete |
-| 120D | Repository Knowledge Snapshot Prototype Plan | 🔜 Next (per PROJECT_STATUS.md) |
+| 120D | Repository Knowledge Snapshot Prototype Plan | ✅ Complete |
+| 120E | Repository Knowledge Snapshot Prototype: Read-Only Generator | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 

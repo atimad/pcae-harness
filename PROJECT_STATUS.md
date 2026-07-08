@@ -2,41 +2,68 @@
 
 ## Current Phase
 
-Phase 120C — Repository Intelligence Prototype Contract Verification
-(completed).
+Phase 120D — Repository Knowledge Snapshot Prototype Plan (completed).
 
-Verification-only phase independently verifying the 120B contract
-before any prototype planning or implementation begins. Adds
-`docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_VERIFICATION.md`.
-Verified: contract completeness (all 20 required 120B sections
-present); architectural consistency with the Phase 119 executable
-schema line (locator vocabulary, uncertainty vocabulary, boundary
-disclosure fields, and disclaimer constants all independently
-cross-checked byte-for-byte against the schema files on disk, not just
-against prose — all exact matches); architectural consistency with
-Phase 120A (no contradiction found; every narrowing or reframing is
-explicit and traceable); scope (remains limited to Repository
-Knowledge Snapshot, read-only, deterministic); input/output models;
-determinism, read-only boundary (all ten prohibited behaviors
-confirmed present), attribution, Evidence boundary, uncertainty, and
-limitation contracts; the ten prototype stages (logical ordering
-confirmed); the fail-closed failure contract; governance compatibility;
-and sufficiency for 120D-120F without further architectural work.
-Found one non-blocking terminology clarification (Repository Knowledge
-Snapshot's actual required field is `unknowns`, not `unknowns_gaps` as
-120B's prose stated) and one non-blocking structural framing
-difference (120A's separate "Human Review Layer" vs. 120B's unified
-ten-stage list) — both documented as guidance for 120D, neither
-requiring the frozen 120B contract to be reopened or modified. No
-schema, source, or test file was changed; no implementation,
-generator, validator, CLI, or automated test suite occurred.
+Documentation-only implementation-planning phase for the first
+Repository Intelligence prototype. Adds
+`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_PLAN.md`, the
+definitive plan for how Phase 120E will implement a deterministic,
+read-only Repository Knowledge Snapshot generator while preserving
+every boundary from 120A-120C. Reaffirms all ten implementation
+boundaries (read-only, deterministic, observe-only, no execution, no
+repository/runtime mutation, no AI inference, no network access, no
+Advisory/Decision Evaluation integration). Defines the planned
+conceptual inputs, an eleven-stage logical extraction pipeline (an
+implementation-planning elaboration of 120B's ten frozen stages, not a
+contract amendment), a ten-component plan (responsibility/inputs/
+outputs/boundaries for each, no code specified), a source attribution
+plan, an unknown-handling plan, a limitation plan, a verification plan
+for 120F, and a fail-closed failure plan. **Makes the persistence-
+location decision 120B deferred to this phase**: selects
+`.pcae/repository-intelligence/` as the planned (not yet implemented)
+output location, with rationale against the other two candidates from
+120A. Lists 120E's expected deliverables and eleven measurable
+acceptance criteria, documents four implementation risks with
+mitigations, explicitly defers the query layer, Advisory consumption,
+change impact prototype, graph traversal, and execution planning/
+capability, and carries forward the same three known inherited,
+non-blocking tooling/reporting issues without repairing them. No
+schema, source, or test file was changed; no generator, validator,
+CLI, or automated test suite was implemented.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 120D — Repository Knowledge Snapshot
-Prototype Plan.
+Recommended next repo phase: 120E — Repository Knowledge Snapshot
+Prototype: Read-Only Generator.
+
+## Phase 120D Complete
+
+Phase 120D — Repository Knowledge Snapshot Prototype Plan (completed).
+
+Produced the definitive implementation plan for the first Repository
+Intelligence prototype in
+`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_PLAN.md`.
+Reaffirmed all ten implementation boundaries from 120A-120C. Defined
+planned conceptual inputs, an eleven-stage logical extraction pipeline,
+a ten-component plan (Source Inventory, Attribution, Extraction,
+Normalization, Assembly, Schema Alignment, Limitation/Unknown Capture,
+Boundary Attachment, Persistence, Verification/Reporting), a source
+attribution plan, unknown-handling and limitation plans, a 120F
+verification plan, and a fail-closed failure plan — no implementation
+detail specified for any of them. Selected
+`.pcae/repository-intelligence/` as the planned output location,
+resolving the persistence-location decision 120B deferred to this
+phase. Listed 120E's expected deliverables and eleven measurable
+acceptance criteria; documented four implementation risks with
+mitigations (extraction ambiguity, determinism drift, architecture-zone
+governance, schema-evolution mismatch); explicitly deferred the query
+layer, Advisory consumption, change impact prototype, graph traversal,
+and execution planning/capability. Carried forward the same three
+known inherited, non-blocking tooling/reporting issues without
+repairing them. No schema, source, or test file was changed; no
+implementation occurred.
 
 ## Phase 120C Complete
 
