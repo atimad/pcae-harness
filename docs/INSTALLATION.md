@@ -49,6 +49,10 @@ optional — every command works with it unset; see `pcae notify status`
 for current configuration state. For the v0.2 release-candidate
 summary, see [docs/RELEASE_NOTES_V0_2_0.md](RELEASE_NOTES_V0_2_0.md).
 
+Historical v0.1 notes remain available in the v0.1 release-scope and
+handoff documents. Telegram configuration was optional there as well;
+the current v0.2 path preserves that optional notification posture.
+
 ---
 
 ## Scenario 1 — Brand-new repository

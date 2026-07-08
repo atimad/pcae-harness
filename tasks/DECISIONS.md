@@ -2,6 +2,33 @@
 
 ## Accepted
 
+- Treat Phase 119Q as a schema-only Historical Memory Snapshot
+  implementation phase: implement exactly one new standalone JSON Schema
+  Draft 2020-12 artifact-family schema under
+  `schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json`.
+  Build on the verified shared components from 119K/119L, the first
+  family pattern verified in 119N, and the Repository Knowledge Snapshot
+  pattern verified in 119P. Include the common artifact envelope
+  relationship, snapshot identity, historical window, source-attributed
+  historical events, historical claims, historical sources, phase
+  lineage, release lineage, decision history, repair and hardening
+  history, supersession and correction history, historical
+  relationships, unknowns and gaps, limitations, boundary disclosures,
+  disclaimers, and the Historical Memory Snapshot boundary disclaimer.
+  Do not implement another artifact-family schema, validators,
+  validation libraries, CLI, automated tests, Python models, Pydantic
+  models, dataclasses, Repository Intelligence extraction, Repository
+  Knowledge extraction, repository scanning, Historical Memory
+  extraction, git history analysis, timeline generation, graph
+  construction, impact analysis, Advisory behavior, Evidence behavior,
+  Repository Skills behavior, Decision Evaluation behavior, runtime
+  behavior, execution, enforcement, lifecycle changes, Permission
+  Broker changes, repository mutation outside planned schema/docs/status
+  files, automatic patch generation, automatic refactoring, or Telegram
+  inbound capability. Recommended next phase: 119R - Repository
+  Intelligence Executable Schema Verification: Historical Memory
+  Snapshot.
+
 - Treat Phase 119P as Repository Knowledge Snapshot verification only:
   verify
   `schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json`

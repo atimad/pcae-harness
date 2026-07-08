@@ -1,34 +1,34 @@
 {
-  "phase_id": "119P",
-  "phase_name": "Repository Intelligence Executable Schema Verification: Repository Knowledge Snapshot",
-  "phase_title": "Repository Intelligence Executable Schema Verification: Repository Knowledge Snapshot",
+  "phase_id": "119Q",
+  "phase_name": "Repository Intelligence Executable Schema Implementation: Historical Memory Snapshot",
+  "phase_title": "Repository Intelligence Executable Schema Implementation: Historical Memory Snapshot",
   "status": "completed",
-  "summary": "Verification-only Track B phase. Verifies schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json as the first content-bearing Repository Intelligence artifact-family schema. Confirms all fourteen Repository Intelligence schema files parse as valid JSON, all declare JSON Schema Draft 2020-12, ids are unique, local refs resolve, verified shared components are reused, the common artifact envelope relationship is preserved, snapshot identity, source-attributed knowledge claims, repository entities, entity type values, capability and subsystem summaries, knowledge relationships, knowledge sources, Evidence links, unknowns, contract references, documentation references, boundary disclosures, disclaimers, and additionalProperties false policy align with the frozen contract. No corrections were required. No new artifact-family schema, validator, validation library, CLI, automated tests, Python models, Pydantic models, dataclasses, extraction, repository scanning, graph construction, impact engine, Advisory behavior, Evidence, Repository Skills, Decision Evaluation, source code, test code, runtime behavior, execution, enforcement, lifecycle behavior, Permission Broker changes, REST, Dashboard, Web UI, provider orchestration, autonomous coding, automatic patch generation, automatic refactoring, repository mutation outside allowed verification docs/status files, or Telegram inbound changes.",
-  "files_changed_count": 8,
+  "summary": "Implemented exactly one new Repository Intelligence artifact-family JSON Schema: Historical Memory Snapshot. Added schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json, updated schema documentation, project status, changelog, TODO, and decision memory, and restored stale public documentation literals required by existing v0.1/RC compatibility tests. Schema-only; no validators, CLI, models, extraction, runtime behavior, source code, test code, execution, enforcement, or additional artifact-family schemas.",
+  "files_changed_count": 11,
   "files_changed": [
-    ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT_VERIFICATION.md",
+    "README.md",
+    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_HISTORICAL_MEMORY_SNAPSHOT.md",
+    "docs/INSTALLATION.md",
+    "schemas/repository_intelligence/README.md",
+    "schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json",
     "tasks/DECISIONS.md",
     "tasks/TODO.md",
-    "tasks/active/20260708-1948-phase-119p-repository-knowledge-snapshot-schema-verification.md"
+    "tasks/active/20260708-2008-phase-119q-historical-memory-snapshot-schema-implementation.md"
   ],
   "source_files_changed": 0,
   "test_files_changed": 0,
-  "tests_run": 15,
-  "tests_added_or_updated": "None. 119P was verification-only and did not add automated tests.",
-  "verified_artifact_family_schema": "Repository Knowledge Snapshot Schema",
-  "schema_file_path": "schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json",
-  "verification_document_path": "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT_VERIFICATION.md",
+  "tests_run": 18063,
+  "tests_added_or_updated": "None. 119Q was schema-only and did not add or update automated tests.",
+  "artifact_family_schema_implemented": "Historical Memory Snapshot Schema",
+  "schema_file_path": "schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json",
   "documentation_paths": [
     "schemas/repository_intelligence/README.md",
-    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT.md",
-    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT_VERIFICATION.md"
+    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_HISTORICAL_MEMORY_SNAPSHOT.md"
   ],
   "contract_basis_reviewed": [
-    "docs/PHASE_118_REPOSITORY_KNOWLEDGE_ARCHITECTURE.md",
+    "docs/PHASE_118_HISTORICAL_MEMORY_ARCHITECTURE.md",
     "docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONCEPTUAL_SCHEMA_ARCHITECTURE.md",
     "docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONCEPTUAL_SCHEMA_REVIEW.md",
     "docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_FREEZE.md",
@@ -37,116 +37,141 @@
     "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_VERIFICATION.md",
     "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md",
     "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_SHARED_COMPONENT_VERIFICATION.md",
-    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_FIRST_ARTIFACT_FAMILY.md",
     "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_FIRST_ARTIFACT_FAMILY_VERIFICATION.md",
-    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT.md"
+    "docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT_VERIFICATION.md"
   ],
-  "verification_conclusion": "verified_and_ready_to_serve_as_first_content_bearing_schema_pattern",
-  "json_schema_draft_consistency": "all_14_schemas_declare_json_schema_draft_2020_12",
-  "id_uniqueness_result": "14_unique_ids",
-  "ref_inspection_result": "121_local_refs_inspected_overall_52_repository_knowledge_snapshot_refs_inspected_no_missing_local_file_or_fragment_targets",
-  "shared_component_reuse_result": "expected_shared_component_refs_present",
+  "json_schema_draft": "https://json-schema.org/draft/2020-12/schema",
+  "json_parse_validation": "15 schema files parsed with Python standard library",
+  "id_uniqueness_result": "15_unique_ids",
+  "ref_inspection_result": "192_local_refs_inspected_no_missing_local_file_or_fragment_targets",
+  "authority_creep_language_review_result": "No risky exact authority-creep phrases found in the new schema, schema README update, or phase document.",
   "common_artifact_envelope_relationship": "Required envelope property references the verified shared common artifact envelope schema.",
-  "snapshot_identity_structure_result": "snapshot_identity includes snapshot_id, snapshot_subject, snapshot_scope, optional timestamp, and schema/artifact version constants.",
-  "repository_knowledge_claim_structure_result": "knowledge_claims require claim id, text, subject, type, status, source attribution, verification state, uncertainty state, and limitations; optional Evidence links and related claims are represented.",
-  "repository_entity_structure_result": "architectural_entities require entity id, type, name, path, source attribution, verification state, and limitations.",
-  "entity_type_enum_result": "18 conservative entity type values verified without implying extraction coverage or runtime availability.",
-  "capability_subsystem_summary_structure_result": "capabilities and subsystems describe declared capabilities and boundaries with sources, verification state, limitations, and optional boundary disclosures.",
-  "knowledge_relationship_structure_result": "relationships require id, source and target entity references, type, source attribution, verification state, and limitations without implementing graph construction.",
-  "knowledge_source_structure_result": "knowledge_sources require shared Source Attribution Records and nested structures reuse source attribution where appropriate.",
-  "evidence_link_structure_result": "Evidence links use shared Evidence Link Records and preserve the Evidence subsystem boundary.",
-  "unknowns_uncertainty_preservation_result": "unknowns is required and the 14 frozen uncertainty/verification state values are representable.",
-  "contract_reference_structure_result": "contracts are optional structural references with source attribution and do not make a conformance verdict.",
-  "documentation_reference_structure_result": "documentation references are structural, source-attributed, and limitation-bearing.",
-  "boundary_disclosure_result": "shared boundary disclosure required and preserves read-only, no-execution, non-decision, Advisory non-authority, Decision Evaluation, no repository mutation, no lifecycle mutation, Evidence, and Repository State boundaries.",
-  "disclaimer_result": "shared disclaimers and frozen Repository Knowledge Snapshot disclaimer required; schema conformance remains structural.",
-  "additional_properties_policy_result": "Repository Knowledge Snapshot root and all object definitions use additionalProperties false.",
-  "authority_creep_language_review_result": "no risky authority-creep terms found in schemas, 119O documentation, or 119P verification document.",
-  "documentation_review_result": "README and 119O documentation clearly describe first content-bearing schema scope, structural conformance only, and no validator, CLI, extraction, scanning, graph, impact, Advisory, runtime, execution, or Decision Evaluation behavior.",
-  "corrections_made": "none",
-  "readiness_assessment": "ready_for_historical_memory_snapshot_schema_implementation",
-  "explicit_semantic_validation_exclusions": [
-    "source truth",
-    "source existence",
-    "source sufficiency",
-    "Evidence sufficiency",
-    "claim truth",
-    "knowledge-claim coverage",
-    "derivation correctness",
-    "natural-language forbidden-claim detection",
-    "lifecycle standing",
-    "Repository State validity",
-    "Decision Evaluation outcomes",
-    "execution safety",
-    "repository scanning",
-    "Repository Knowledge extraction"
+  "shared_components_referenced": [
+    "common_artifact_envelope",
+    "source_attribution_record",
+    "evidence_link_record",
+    "uncertainty_verification_state",
+    "conflict_supersession_record",
+    "derivation_record",
+    "phase_context",
+    "release_context",
+    "boundary_disclosure",
+    "limitation_record",
+    "disclaimer"
   ],
-  "phase_commits": [
+  "validation_results": [
     {
-      "hash": "cd8dbbc8fad4b6da056066309da0f149ca029803",
-      "message": "Document Phase 119P repository knowledge snapshot verification"
+      "name": "pcae_health",
+      "result": "healthy",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_check",
+      "result": "passed",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "result": "clean",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_push_check",
+      "result": "nothing_to_push",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "result": "execution unavailable, Observed, observe, zero runtime plugins",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_notify_status",
+      "result": "Telegram configured, enabled, and ready for outbound delivery after loading ~/.config/pcae/telegram.env",
+      "status": "passed"
+    },
+    {
+      "name": "json_parse_validation",
+      "result": "15 schema files parsed with Python standard library",
+      "status": "passed"
+    },
+    {
+      "name": "schema_declaration_id_ref_scan",
+      "result": "15 schemas declare required metadata, 15 unique ids, 192 local refs inspected",
+      "status": "passed"
+    },
+    {
+      "name": "additionalProperties_policy_scan",
+      "result": "Historical Memory Snapshot object definitions use additionalProperties false",
+      "status": "passed"
+    },
+    {
+      "name": "authority_creep_language_scan",
+      "result": "passed",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_todo_consistency_tests",
+      "result": "2 focused tests passed",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "pending_final_telegram_delivery",
+      "status": "pending"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_schema_only_no_source_or_tests_changed",
+      "status": "not_applicable"
+    },
+    {
+      "name": "fast_green",
+      "result": "not_run_full_pytest_passed",
+      "status": "not_applicable"
+    },
+    {
+      "name": "full_pytest",
+      "result": "18063 passed",
+      "status": "passed"
     }
   ],
-  "commit_attribution": "phase_owned",
-  "validator_module": "not_applicable_no_validator_implemented",
-  "execution_availability": "unavailable",
-  "pushed_status": "pending_governed_push_at_report_creation",
-  "origin_main_head_count": 1,
-  "report_completeness": "complete",
-  "missing_trust_fields": [],
-  "execution_integration_status": {
-    "observed_command_paths": 4,
-    "behavior_changing_paths": 0,
-    "authorized_paths": 0,
-    "execution_capable_paths": 0,
-    "current_execution_capability": "Execution unavailable",
-    "current_maximum_runtime_state": "Observed",
-    "current_maximum_plugin_capability": "observe"
-  },
-  "validation_results": [
-    {"name": "pcae_health", "result": "healthy", "status": "passed"},
-    {"name": "pcae_check", "result": "passed", "status": "passed"},
-    {"name": "pcae_doctor_task_memory", "result": "clean", "status": "passed"},
-    {"name": "pcae_push_check", "result": "nothing_to_push", "status": "passed"},
-    {"name": "pcae_runtime_inspect", "result": "execution unavailable, Observed, observe, zero runtime plugins", "status": "passed"},
-    {"name": "pcae_notify_status", "result": "Telegram configured, enabled, and ready for outbound delivery once the env is loaded in this shell", "status": "passed"},
-    {"name": "json_parse_validation", "result": "14 schema files parsed with Python standard library", "status": "passed"},
-    {"name": "schema_declaration_scan", "result": "all 14 schemas declare $schema, $id, title, description, and type", "status": "passed"},
-    {"name": "draft_consistency_scan", "result": "all 14 schemas declare JSON Schema Draft 2020-12", "status": "passed"},
-    {"name": "id_ref_scan", "result": "14 unique ids, 121 local refs inspected, 52 Repository Knowledge Snapshot refs inspected", "status": "passed"},
-    {"name": "shared_component_reuse_scan", "result": "expected shared component refs present", "status": "passed"},
-    {"name": "additionalProperties_policy_scan", "result": "Repository Knowledge Snapshot root and object defs use additionalProperties false", "status": "passed"},
-    {"name": "authority_creep_language_scan", "result": "no risky authority-creep terms found in schemas, 119O docs, or 119P verification docs", "status": "passed"},
-    {"name": "review_scope", "result": "verification documentation/status/task memory only; no src or tests changed", "status": "passed"},
-    {"name": "report_notification_tests", "result": "pending_final_telegram_delivery", "status": "pending"},
-    {"name": "bootstrap_session_reporting_tests", "result": "not_applicable_repository_knowledge_snapshot_verification_only_no_source_or_tests_changed", "status": "not_applicable"},
-    {"name": "fast_green", "result": "not_applicable_repository_knowledge_snapshot_verification_only_no_source_or_tests_changed", "status": "not_applicable"}
-  ],
   "test_results": {
-    "pcae_health": "passed",
-    "pcae_check": "passed",
-    "pcae_doctor_task_memory": "passed",
-    "pcae_push_check": "nothing_to_push",
-    "json_parse_validation": "14 schema files parsed with Python standard library",
-    "schema_declaration_scan": "passed",
-    "draft_consistency_scan": "passed",
-    "id_ref_scan": "passed",
-    "shared_component_reuse_scan": "passed",
+    "json_parse_validation": "passed",
+    "schema_declaration_id_ref_scan": "passed",
     "additionalProperties_policy_scan": "passed",
     "authority_creep_language_scan": "passed",
-    "runtime_inspect_execution_unavailable": "passed",
-    "review_scope": "passed_no_src_or_tests_changed",
+    "bootstrap_todo_consistency_tests": "passed",
     "report_notification_tests": "pending_final_telegram_delivery",
-    "bootstrap_session_reporting_tests": "not_applicable_repository_knowledge_snapshot_verification_only_no_source_or_tests_changed",
-    "fast_green": "not_applicable_repository_knowledge_snapshot_verification_only_no_source_or_tests_changed"
+    "bootstrap_session_reporting_tests": "not_applicable_schema_only_no_source_or_tests_changed",
+    "fast_green": "not_run_full_pytest_passed",
+    "full_pytest": "18063 passed"
   },
   "governance_results": [
-    {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_check", "status": "passed"},
-    {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "nothing_to_push"},
-    {"name": "pcae_runtime_inspect", "status": "execution unavailable, Observed, observe, zero runtime plugins"},
-    {"name": "telegram_runtime", "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"}
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "nothing_to_push"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "execution unavailable, Observed, observe, zero runtime plugins"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
+    }
   ],
   "boundary_confirmations": {
     "read_only": "preserved",
@@ -156,10 +181,21 @@
     "evidence": "preserved",
     "repository_state": "preserved"
   },
-  "no_go_confirmation": "No new artifact-family schema. No Repository Intelligence Package schema. No Historical Memory Snapshot schema. No Dependency Knowledge Graph Snapshot schema. No Change Impact Report schema. No Advisory Intelligence Context Package schema. No Query Result schema. No validator. No validation library. No schema verification CLI. No automated test suite. No Python models. No Pydantic models. No dataclasses. No repository intelligence extraction. No repository knowledge extraction. No repository scanning. No historical memory extraction. No change impact analysis engine. No dependency graph construction. No graph query engine. No advisory behavior changes. No advisory runtime changes. No advisory context package changes. No evidence subsystem changes. No repository skills changes. No decision evaluation changes. No runtime behavior changes. No source code changes. No test code changes. No execution. No shell mediation. No Permission Broker changes. No lifecycle redesign. No REST. No Dashboard. No Web UI. No Telegram inbound. No provider selection. No multi-model orchestration. No autonomous coding. No model capability expansion. No repository mutation outside allowed verification docs/status files. No runtime plugin changes. No repository state changes. No automatic patch generation. No automatic refactoring.",
-  "recommended_next_phase": "119Q - Repository Intelligence Executable Schema Implementation: Historical Memory Snapshot",
-  "recommended_next_phase_id": "119Q",
-  "recommended_next_phase_name": "Repository Intelligence Executable Schema Implementation: Historical Memory Snapshot",
+  "no_go_confirmation": "No additional artifact-family schema. No Repository Intelligence Package schema. No Dependency Knowledge Graph Snapshot schema. No Change Impact Report schema. No Advisory Intelligence Context Package schema. No Query Result schema. No validator or validation library. No schema verification CLI. No automated test suite. No Python models, Pydantic models, or dataclasses. No Repository Intelligence extraction, Repository Knowledge extraction, repository scanning, Historical Memory extraction, git history analysis, or timeline generation. No graph construction, impact engine, or graph query engine. No Advisory behavior, Evidence subsystem behavior, Repository Skills behavior, or Decision Evaluation behavior change. No source code or test code change. No runtime behavior, execution, shell mediation, enforcement, Permission Broker, lifecycle redesign, or Repository State change. No REST, Dashboard, Web UI, Telegram inbound, provider selection, multi-model orchestration, autonomous coding, model capability expansion, automatic patch generation, or automatic refactoring.",
+  "phase_commits": [
+    {
+      "hash": "pending_governed_commit",
+      "message": "pending governed implementation commit"
+    }
+  ],
+  "commit_attribution": "pending_governed_commit",
+  "pushed_status": "pending_governed_push_at_report_creation",
+  "origin_main_head_count": 0,
+  "report_completeness": "complete",
+  "missing_trust_fields": [],
+  "recommended_next_phase": "119R - Repository Intelligence Executable Schema Verification: Historical Memory Snapshot",
+  "recommended_next_phase_id": "119R",
+  "recommended_next_phase_name": "Repository Intelligence Executable Schema Verification: Historical Memory Snapshot",
   "report_notification_status": "pending_final_telegram_delivery",
   "schema_version": "1.0"
 }

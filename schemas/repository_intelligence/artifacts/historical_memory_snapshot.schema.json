@@ -1,0 +1,975 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json",
+  "title": "Repository Intelligence Historical Memory Snapshot",
+  "description": "Artifact-family schema for a structural Historical Memory Snapshot. It records declared, source-attributed repository history, chronology, lineage, corrections, uncertainty, and gaps; it is descriptive, read-only, non-decision, and no-execution, and it does not authorize action or execution, replace Decision Evaluation, replace Evidence, replace Repository State, prove historical truth, or prove completeness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "snapshot_identity",
+    "snapshot_subject",
+    "snapshot_scope",
+    "historical_window",
+    "historical_events",
+    "historical_claims",
+    "historical_sources",
+    "phase_lineage",
+    "release_lineage",
+    "decision_history",
+    "repair_hardening_history",
+    "supersession_correction_history",
+    "historical_relationships",
+    "unknowns_gaps",
+    "snapshot_limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "historical_memory_snapshot_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "snapshot_identity": {
+      "$ref": "#/$defs/snapshot_identity"
+    },
+    "snapshot_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "snapshot_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "historical_window": {
+      "$ref": "#/$defs/historical_period"
+    },
+    "historical_events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/historical_event"
+      }
+    },
+    "historical_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/historical_claim"
+      }
+    },
+    "historical_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/evidence_link_record.schema.json"
+      }
+    },
+    "phase_lineage": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/phase_lineage_record"
+      }
+    },
+    "release_lineage": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/release_lineage_record"
+      }
+    },
+    "decision_history": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decision_history_record"
+      }
+    },
+    "repair_hardening_history": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/repair_hardening_record"
+      }
+    },
+    "supersession_correction_history": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/supersession_correction_record"
+      }
+    },
+    "historical_relationships": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/historical_relationship"
+      }
+    },
+    "unknowns_gaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/unknown_gap"
+      }
+    },
+    "snapshot_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "conflict_or_supersession_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/conflict_supersession_record.schema.json"
+      }
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/derivation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "historical_memory_snapshot_disclaimer": {
+      "type": "string",
+      "const": "This Historical Memory Snapshot describes declared repository history and lineage. It is not Repository State, does not decide lifecycle standing, does not prove historical truth or completeness, and does not authorize action or execution."
+    }
+  },
+  "$defs": {
+    "snapshot_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "snapshot_id",
+        "snapshot_subject",
+        "snapshot_scope",
+        "historical_window"
+      ],
+      "properties": {
+        "snapshot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "snapshot_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "historical_window": {
+          "$ref": "#/$defs/historical_period"
+        },
+        "snapshot_created_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "const": "119E.1.0"
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "const": "119C.1.0-concept"
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "const": "119Q.1.0-json-schema"
+        }
+      }
+    },
+    "historical_period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "period_id",
+        "period_description",
+        "period_start",
+        "period_end"
+      ],
+      "properties": {
+        "period_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "period_start": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "period_end": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "period_granularity": {
+          "type": "string",
+          "enum": [
+            "timestamp",
+            "date",
+            "phase",
+            "release",
+            "commit",
+            "unknown"
+          ]
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        }
+      }
+    },
+    "historical_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event_id",
+        "event_type",
+        "event_subject",
+        "event_time",
+        "event_summary",
+        "event_status",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_type": {
+          "$ref": "#/$defs/historical_event_type"
+        },
+        "event_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_time": {
+          "$ref": "#/$defs/historical_time_reference"
+        },
+        "event_phase_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "event_release_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "event_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_status": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "known",
+            "unknown",
+            "unverified",
+            "partially_verified",
+            "superseded",
+            "conflicting"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "related_events": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "historical_event_type": {
+      "type": "string",
+      "enum": [
+        "phase_started",
+        "phase_completed",
+        "architecture_defined",
+        "architecture_reviewed",
+        "contract_frozen",
+        "contract_verified",
+        "schema_implemented",
+        "schema_verified",
+        "prototype_added",
+        "integration_recorded",
+        "hardening_completed",
+        "repair_completed",
+        "release_published",
+        "governance_check_completed",
+        "report_generated",
+        "metadata_promoted",
+        "notification_sent",
+        "decision_recorded",
+        "supersession_recorded",
+        "correction_recorded",
+        "unknown"
+      ]
+    },
+    "historical_time_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "time_reference_type",
+        "time_reference_value"
+      ],
+      "properties": {
+        "time_reference_type": {
+          "type": "string",
+          "enum": [
+            "timestamp_utc",
+            "date",
+            "date_range",
+            "phase",
+            "release",
+            "commit",
+            "unknown"
+          ]
+        },
+        "time_reference_value": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "time_reference_end": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "time_reference_source": {
+          "$ref": "../shared/source_attribution_record.schema.json"
+        }
+      }
+    },
+    "historical_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "claim_type",
+        "claim_subject",
+        "claim_statement",
+        "historical_period",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_type": {
+          "type": "string",
+          "enum": [
+            "evolution",
+            "lineage",
+            "introduction",
+            "modification",
+            "repair",
+            "hardening",
+            "release",
+            "decision",
+            "supersession",
+            "correction",
+            "unknown"
+          ]
+        },
+        "claim_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structured_value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "historical_period": {
+          "$ref": "#/$defs/historical_period"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "conflict_or_supersession_records": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/conflict_supersession_record.schema.json"
+          }
+        },
+        "related_claims": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "phase_lineage_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase_id",
+        "phase_name",
+        "phase_status_context",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "phase_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phase_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "phase_context": {
+          "$ref": "../shared/phase_context.schema.json"
+        },
+        "predecessor_phase_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "successor_phase_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "phase_status_context": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared phase status context only; this field does not establish lifecycle standing."
+        },
+        "report_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "metadata_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "commit_references": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "release_lineage_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "release_id",
+        "version",
+        "release_status_context",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "release_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tag": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "release_context": {
+          "$ref": "../shared/release_context.schema.json"
+        },
+        "release_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "related_phase_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "release_artifact_references": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+          }
+        },
+        "release_status_context": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared release status context only; this field does not approve or authorize a release."
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "decision_history_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_id",
+        "decision_subject",
+        "decision_type",
+        "decision_summary",
+        "decision_source",
+        "recorded_outcome",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "decision_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_type": {
+          "type": "string",
+          "enum": [
+            "architecture",
+            "contract",
+            "implementation_scope",
+            "verification_scope",
+            "release",
+            "repair",
+            "governance",
+            "unknown"
+          ]
+        },
+        "decision_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_date": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "decision_source": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "recorded_outcome": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Recorded historical outcome only; this field does not make a new decision."
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "repair_hardening_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id",
+        "record_type",
+        "record_subject",
+        "issue_or_boundary_addressed",
+        "correction_or_hardening_summary",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "record_type": {
+          "type": "string",
+          "enum": [
+            "repair",
+            "hardening",
+            "correction",
+            "compatibility",
+            "unknown"
+          ]
+        },
+        "record_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "issue_or_boundary_addressed": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correction_or_hardening_summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_artifact_or_subsystem": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "phase_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "supersession_correction_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "record_id",
+        "superseded_reference",
+        "superseding_reference",
+        "supersession_reason",
+        "preserved_history",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "record_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "superseded_reference": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/artifact_reference"
+        },
+        "superseding_reference": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/artifact_reference"
+        },
+        "supersession_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "correction_source": {
+          "$ref": "../shared/source_attribution_record.schema.json"
+        },
+        "preserved_history": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "shared_conflict_supersession_record": {
+          "$ref": "../shared/conflict_supersession_record.schema.json"
+        }
+      }
+    },
+    "historical_relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relationship_id",
+        "relationship_type",
+        "source_reference",
+        "target_reference",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "relationship_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relationship_type": {
+          "type": "string",
+          "enum": [
+            "introduced_by",
+            "changed_by",
+            "froze_contract",
+            "verified_by",
+            "repaired_by",
+            "hardened_by",
+            "supersedes",
+            "corrects",
+            "included_in_release",
+            "documents",
+            "related_to",
+            "unknown"
+          ]
+        },
+        "source_reference": {
+          "$ref": "#/$defs/historical_reference"
+        },
+        "target_reference": {
+          "$ref": "#/$defs/historical_reference"
+        },
+        "direction": {
+          "type": "string",
+          "enum": [
+            "source_to_target",
+            "target_to_source",
+            "bidirectional",
+            "unknown"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "historical_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reference_id",
+        "reference_type"
+      ],
+      "properties": {
+        "reference_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference_type": {
+          "type": "string",
+          "enum": [
+            "historical_event",
+            "historical_claim",
+            "phase",
+            "release",
+            "decision",
+            "repair_or_hardening",
+            "correction",
+            "source",
+            "artifact",
+            "unknown"
+          ]
+        },
+        "reference_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        }
+      }
+    },
+    "unknown_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unknown_id",
+        "unknown_subject",
+        "missing_evidence",
+        "affected_period",
+        "uncertainty_state",
+        "limitation"
+      ],
+      "properties": {
+        "unknown_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_period": {
+          "$ref": "#/$defs/historical_period"
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "follow_up_requirement": {
+          "type": "string",
+          "description": "Declared follow-up context only when permitted by contract; this field does not authorize action."
+        }
+      }
+    }
+  }
+}

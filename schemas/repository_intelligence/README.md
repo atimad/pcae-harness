@@ -2,10 +2,13 @@
 
 Phase 119K introduced the first standalone JSON Schema artifacts for
 Repository Intelligence. Phase 119M added the first artifact-family
-schema on top of the verified shared components. Phase 119O adds the
+schema on top of the verified shared components. Phase 119O added the
 Repository Knowledge Snapshot schema as the first content-bearing
-artifact-family schema. These schemas live outside `src` so they remain
-language-neutral contract artifacts rather than runtime code.
+artifact-family schema. Phase 119Q adds the Historical Memory Snapshot
+schema as the next content-bearing artifact-family schema because
+Historical Memory is the temporal layer over Repository Knowledge. These
+schemas live outside `src` so they remain language-neutral contract
+artifacts rather than runtime code.
 
 ## Scope
 
@@ -30,6 +33,7 @@ Artifact-family schemas:
 
 - `artifacts/contract_conformance_record.schema.json`
 - `artifacts/repository_knowledge_snapshot.schema.json`
+- `artifacts/historical_memory_snapshot.schema.json`
 
 The Contract Conformance Record schema is the first artifact-family
 schema because it records structural contract conformance without
@@ -45,14 +49,28 @@ references, documentation references, Evidence links, unknowns,
 limitations, boundary disclosures, and disclaimers. It does not perform
 repository scanning or Repository Knowledge extraction.
 
+The Historical Memory Snapshot schema is the third artifact-family schema
+and the second content-bearing artifact-family schema. It structurally
+represents source-attributed historical events, historical claims,
+historical sources, phase lineage, release lineage, decision history,
+repair and hardening history, supersession and correction history,
+historical relationships, unknowns and gaps, limitations, boundary
+disclosures, and disclaimers. It follows Repository Knowledge Snapshot
+because Historical Memory describes how repository architecture,
+contracts, capabilities, releases, repairs, hardening, and decisions
+evolved over time. It does not perform historical extraction, git history
+analysis, repository scanning, timeline generation, or lifecycle
+validation.
+
 Not implemented in this slice:
 
-- additional artifact-family schemas beyond the two listed above
+- additional artifact-family schemas beyond the three listed above
 - validators or validation libraries
 - CLI commands
 - Python models, Pydantic models, or dataclasses
 - automated tests or fixtures
-- repository extraction, repository scanning, graph construction, impact
+- repository extraction, historical extraction, git history analysis,
+  repository scanning, timeline generation, graph construction, impact
   analysis, or Advisory behavior
 
 ## JSON Schema Draft
@@ -107,6 +125,17 @@ knowledge completeness, lifecycle standing, Repository State validity,
 Decision Evaluation outcomes, execution safety, or derivation
 correctness.
 
+The Historical Memory Snapshot schema structurally represents declared
+source-attributed historical memory. It does not validate source truth,
+source existence, Evidence sufficiency, historical truth, historical
+completeness, chronological completeness, lifecycle standing, Repository
+State validity, Decision Evaluation outcomes, execution safety,
+derivation correctness, release approval, or whether any historical
+claim is sufficient for action. Schema conformance is not historical
+truth, is not completeness, is not approval, is not execution permission,
+is not lifecycle standing, is not Decision Evaluation, is not Evidence
+truth, and is not Repository State truth.
+
 Future validators must preserve the same boundary. Other
 artifact-family schemas remain future work.
 
@@ -114,9 +143,10 @@ artifact-family schemas remain future work.
 
 The recommended next phase is:
 
-`119P - Repository Intelligence Executable Schema Verification: Repository Knowledge Snapshot`
+`119R - Repository Intelligence Executable Schema Verification: Historical Memory Snapshot`
 
 That phase should verify JSON validity, reference consistency, contract
-alignment, shared component reuse, source attribution, uncertainty
-preservation, and authority-creep safety before another content-bearing
-artifact-family schema is implemented.
+alignment, shared component reuse, source attribution, chronology
+preservation, supersession preservation, uncertainty preservation, and
+authority-creep safety before another content-bearing artifact-family
+schema is implemented.

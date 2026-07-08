@@ -2,49 +2,89 @@
 
 ## Current Phase
 
-Phase 119P — Repository Intelligence Executable Schema Verification:
-Repository Knowledge Snapshot
+Phase 119Q — Repository Intelligence Executable Schema Implementation:
+Historical Memory Snapshot
 (completed).
 
-Verification phase for Track B Repository Intelligence. Verifies
-`schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json`.
-Confirms all fourteen Repository Intelligence schema files parse as
-valid JSON, all declare JSON Schema Draft 2020-12, `$id` values remain
-unique, local `$ref` targets resolve, expected shared components are
-reused, the common artifact envelope relationship is preserved, snapshot
-identity, source-attributed repository knowledge claims, repository
-entities, entity type values, capability/subsystem summaries, knowledge
-relationships, knowledge sources, Evidence links, unknowns, contract
-references, documentation references, boundary disclosures, disclaimers,
-and `additionalProperties: false` policy align with the frozen
-contract. No corrections were required.
+Implementation phase for Track B Repository Intelligence. Implements
+exactly one additional artifact-family schema:
+`schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json`.
+The schema is standalone JSON Schema Draft 2020-12, references verified
+shared components, includes the common artifact envelope relationship,
+and structurally represents snapshot identity, historical window,
+source-attributed historical events, historical claims, historical
+sources, phase lineage, release lineage, decision history, repair and
+hardening history, supersession and correction history, historical
+relationships, unknowns and gaps, limitations, boundary disclosures,
+disclaimers, and the Historical Memory Snapshot boundary disclaimer.
 
-No new artifact-family schema, Repository Intelligence Package schema,
-Historical Memory Snapshot schema, Dependency Knowledge Graph Snapshot
-schema, Change Impact Report schema, Advisory Intelligence Context
-Package schema, Query Result schema, validator, validation library,
-schema verification CLI, automated test suite, Python model, Pydantic
-model, dataclass, repository intelligence extraction, repository
-knowledge extraction, repository scanning, historical memory extraction,
-change impact analysis engine, dependency graph construction, graph
-query engine, advisory behavior change, Advisory Runtime change,
-Advisory Context Package change, Evidence subsystem change, Repository
-Skills change, Decision Evaluation change, source code change, test code
-change, runtime behavior change, execution, shell mediation,
-enforcement, lifecycle behavior change, Permission Broker behavior
-change, Repository State behavior change, Repository Transition
-Validator behavior change, Notification Policy behavior change, REST,
-Dashboard, Web UI, provider orchestration, autonomous coding, model
-capability expansion, automatic patch generation, automatic refactoring,
-repository mutation outside allowed verification documentation/status
-files, or Telegram inbound path changed.
+No Repository Intelligence Package schema, Dependency Knowledge Graph
+Snapshot schema, Change Impact Report schema, Advisory Intelligence
+Context Package schema, Query Result schema, validator, validation
+library, schema verification CLI, automated test suite, Python model,
+Pydantic model, dataclass, repository intelligence extraction,
+repository knowledge extraction, repository scanning, historical memory
+extraction, git history analysis, timeline generation, change impact
+analysis engine, dependency graph construction, graph query engine,
+advisory behavior change, Advisory Runtime change, Advisory Context
+Package change, Evidence subsystem change, Repository Skills change,
+Decision Evaluation change, source code change, test code change,
+runtime behavior change, execution, shell mediation, enforcement,
+lifecycle behavior change, Permission Broker behavior change,
+Repository State behavior change, Repository Transition Validator
+behavior change, Notification Policy behavior change, REST, Dashboard,
+Web UI, provider orchestration, autonomous coding, model capability
+expansion, automatic patch generation, automatic refactoring,
+repository mutation outside planned schema/docs/status files, runtime
+plugin change, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119Q — Repository Intelligence Executable
-Schema Implementation: Historical Memory Snapshot.
+Recommended next repo phase: 119R — Repository Intelligence Executable
+Schema Verification: Historical Memory Snapshot.
+
+## Phase 119Q Complete
+
+Phase 119Q — Repository Intelligence Executable Schema Implementation:
+Historical Memory Snapshot (completed).
+
+Narrow schema-only implementation phase for the Historical Memory
+Snapshot artifact family. Implements
+`schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json`
+as a standalone JSON Schema Draft 2020-12 artifact outside `src`.
+Updates schema documentation in `schemas/repository_intelligence/README.md`
+and adds
+`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_HISTORICAL_MEMORY_SNAPSHOT.md`.
+The schema references verified shared components, includes the common
+artifact envelope relationship, represents snapshot identity,
+historical window, source-attributed historical events, historical
+claims, historical sources, phase lineage, release lineage, decision
+history, repair and hardening history, supersession and correction
+history, historical relationships, unknowns and gaps, limitations,
+boundary disclosures, disclaimers, and the frozen Historical Memory
+Snapshot boundary disclaimer.
+
+**No-go**: no Repository Intelligence Package schema, Dependency
+Knowledge Graph Snapshot schema, Change Impact Report schema, Advisory
+Intelligence Context Package schema, Query Result schema, validator,
+validation library, schema verification CLI, automated test suite,
+Python models, Pydantic models, dataclasses, Repository Intelligence
+extraction, Repository Knowledge extraction, repository scanning,
+Historical Memory extraction, git history analysis, timeline generation,
+graph construction, impact engine, Advisory behavior, Advisory Runtime,
+Advisory Context Package, Evidence, Repository Skills, Decision
+Evaluation, source code, test code, runtime behavior, execution, shell
+mediation, Permission Broker, lifecycle redesign, REST, Dashboard, Web
+UI, Telegram inbound, provider selection, multi-model orchestration,
+autonomous coding, model capability expansion, repository mutation
+outside planned schema/docs/status files, runtime plugin changes,
+Repository State changes, automatic patch generation, or automatic
+refactoring.
+
+Recommended next repo phase: 119R — Repository Intelligence Executable
+Schema Verification: Historical Memory Snapshot.
 
 ## Phase 119P Complete
 

@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 119Q - Repository Intelligence Executable Schema Implementation:
+  Historical Memory Snapshot
+  (`schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json`,
+  `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_HISTORICAL_MEMORY_SNAPSHOT.md`).
+  Implements exactly one new artifact-family JSON Schema Draft 2020-12
+  file: the Historical Memory Snapshot schema. This is the third
+  artifact-family schema and the second content-bearing Repository
+  Intelligence artifact-family schema. It references verified shared
+  components, includes the common artifact envelope relationship,
+  represents snapshot identity, historical window, source-attributed
+  historical events, historical claims, historical sources, phase
+  lineage, release lineage, decision history, repair and hardening
+  history, supersession and correction history, historical
+  relationships, unknowns and gaps, limitations, boundary disclosures,
+  disclaimers, and the frozen Historical Memory Snapshot boundary
+  disclaimer. Schema-only; no Repository Intelligence Package,
+  Dependency Knowledge Graph Snapshot, Change Impact Report, Advisory
+  Intelligence Context Package, Query Result, validator, validation
+  library, CLI, automated tests, Python models, Pydantic models,
+  dataclasses, extraction, repository scanning, Historical Memory
+  extraction, git history analysis, timeline generation, graph
+  construction, impact engine, advisory behavior, Evidence, Repository
+  Skills, Decision Evaluation, source code, test code, runtime behavior,
+  execution, enforcement, lifecycle, Permission Broker, REST, Dashboard,
+  Web UI, provider orchestration, autonomous coding, automatic patch
+  generation, automatic refactoring, repository mutation outside planned
+  schema/docs files, or Telegram inbound changes.
+
 - Phase 119P - Repository Intelligence Executable Schema Verification:
   Repository Knowledge Snapshot
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT_VERIFICATION.md`).
