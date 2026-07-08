@@ -2,6 +2,31 @@
 
 ## Accepted
 
+- Treat Phase 119I as executable-schema-contract-verification-only:
+  verify the frozen 119H Repository Intelligence executable schema
+  contract as internally consistent, testable, future-enforceable, and
+  safe against validator authority creep before any executable schema
+  implementation. Verify all twelve schema families, shared components,
+  common envelope expectations, field classification, structural
+  validation boundaries, semantic validation boundaries,
+  manual/future-governance boundaries, forbidden-claim validation
+  boundaries, source attribution validation, evidence link validation,
+  uncertainty/verification-state validation, conflict/supersession
+  validation, derivation disclosure validation, versioning and
+  compatibility, future file organization, future validator boundaries,
+  future test expectations, artifact generation constraints, Repository
+  Skills integration, Advisory consumer integration, Decision Evaluation
+  separation, read-only/no-execution boundaries, validator authority-creep
+  risk, and schema-valid artifact authority-creep risk. Do not implement
+  executable schemas, JSON Schema, Pydantic models, dataclasses,
+  validators, CLIs, tests, schema directories, extraction, graph
+  construction, impact analysis, advisory behavior, Evidence changes,
+  Repository Skills changes, Decision Evaluation changes, runtime
+  behavior, execution, enforcement, Permission Broker changes, repository
+  mutation, automatic patch generation, automatic refactoring, or Telegram
+  inbound capability. Recommended next phase: 119J — Repository
+  Intelligence Executable Schema Implementation Plan.
+
 - Treat Phase 119H as executable-schema-contract-freeze-only: freeze the
   initial Repository Intelligence executable schema contract based on the
   119G executable schema architecture and constrained by the 119E
