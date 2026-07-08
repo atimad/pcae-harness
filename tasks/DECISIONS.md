@@ -2,6 +2,19 @@
 
 ## Accepted
 
+- Treat Phase 118R as the architecture-review-only closure of the
+  initial Track B architecture set: 118A through 118E form one coherent
+  Repository Intelligence architecture, with Repository Knowledge as the
+  foundation, Historical Memory as temporal layer, Dependency Knowledge
+  Graph as relationship layer, Change Impact Analysis as read-only
+  change-scoped reasoning, and Advisory Reasoning Expansion as a
+  non-authoritative consumer. The architecture is ready for contract
+  freeze with minor clarifications around shared primitive names, source
+  references, evidence links, uncertainty states, snapshot identity,
+  dependency-vs-impact relationship views, and Advisory Context Package
+  integration. Do not introduce implementation, extraction, graph
+  construction, advisory behavior changes, contract freeze, execution,
+  lifecycle redesign, or authority changes in 118R.
 - Treat Phase 118E as the architecture-only Advisory Reasoning
   Expansion phase for Track B Repository Intelligence: expanded
   Advisory may consume Repository Knowledge, Historical Memory, Change

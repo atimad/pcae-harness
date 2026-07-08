@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 118R — Repository Intelligence Architecture Review
+  (`docs/PHASE_118_REPOSITORY_INTELLIGENCE_ARCHITECTURE_REVIEW.md`).
+  Reviews the Track B architecture set across Repository Knowledge,
+  Historical Memory, Change Impact Analysis, Dependency Knowledge Graph,
+  and Advisory Reasoning Expansion. Concludes the architecture is
+  coherent and ready for contract freeze with minor clarifications.
+  Confirms Repository Knowledge as the foundation, Historical Memory as
+  temporal layer, Dependency Knowledge Graph as relationship layer,
+  Change Impact Analysis as read-only change-scoped reasoning, and
+  Advisory Reasoning Expansion as a non-authoritative consumer. Reviews
+  boundaries, terminology, primitive compatibility, source attribution,
+  determinism, uncertainty/conflict/supersession handling,
+  verification, versioning/snapshot concepts, integrations, no-go
+  boundaries, risks, required clarifications, and recommends 119A —
+  Repository Intelligence Contract Freeze. Review only; no contracts,
+  extraction, graph construction, impact engine, advisory behavior,
+  Evidence, Repository Skills, Decision Evaluation, source, test,
+  runtime behavior, execution, enforcement, lifecycle, Permission
+  Broker, REST, Dashboard, Web UI, model integration, provider
+  orchestration, autonomous coding, automatic patch generation,
+  automatic refactoring, or Telegram inbound changes.
+
 - Phase 118E — Advisory Reasoning Expansion Architecture
   (`docs/PHASE_118_ADVISORY_REASONING_EXPANSION_ARCHITECTURE.md`).
   Defines how PCAE Advisory should eventually consume Repository

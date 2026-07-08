@@ -2,42 +2,77 @@
 
 ## Current Phase
 
-Phase 118E — Advisory Reasoning Expansion Architecture
+Phase 118R — Repository Intelligence Architecture Review
 (completed).
 
-Architecture-only continuation of Track B: Repository Intelligence.
-Defines Advisory Reasoning Expansion as the architecture by which PCAE
-Advisory may eventually consume deterministic, source-attributed
-Repository Intelligence context from Repository Knowledge, Historical
-Memory, Change Impact Analysis, Dependency Knowledge Graph, Evidence,
-Repository Skills, Advisory Repository Skills, Advisory Context
-Packages, and canonical lifecycle artifacts. The phase defines advisory
-claims, explanations, recommendations, context items, evidence links,
-sources, uncertainty, limitations, reasoning traces, knowledge/
-historical/impact/graph references, handoff, reports, advisory input
-and output models, source attribution, uncertainty handling,
-recommendation boundaries, handoff to Decision Evaluation, and
-integration models. Advisory may become more informed, grounded,
-inspectable, and auditable; it does not become more authoritative.
+Architecture-review-only continuation of Track B: Repository
+Intelligence. Reviews the architecture set produced by 118A through
+118E: Repository Knowledge, Historical Memory, Change Impact Analysis,
+Dependency Knowledge Graph, and Advisory Reasoning Expansion. The review
+concludes that the Track B architecture set is coherent and ready for
+contract freeze with minor clarifications. Repository Knowledge is the
+foundation; Historical Memory is the temporal layer inside Repository
+Knowledge; Dependency Knowledge Graph is the relationship layer inside
+Repository Knowledge; Change Impact Analysis is read-only change-scoped
+reasoning over Repository Knowledge, Historical Memory, and dependency
+relationships; Advisory Reasoning Expansion is a non-authoritative
+consumer of Repository Intelligence context.
 
-No advisory behavior changes, Advisory Runtime changes, Advisory
-Context Package changes, advisory CLI, advisory reasoning engine, model
-integration, model selection, provider orchestration, repository
-knowledge extraction, historical memory extraction, change impact
-analysis engine, dependency graph construction, graph query engine,
-source code, tests, runtime behavior, execution, authorization,
-enforcement, lifecycle behavior, Permission Broker behavior, Repository
-State behavior, Evidence subsystem behavior, Repository Skills
-behavior, Decision Evaluation behavior, Repository Transition Validator
+The review identifies no blocking contradictions and no repair-phase
+requirement. It identifies minor contract-freeze clarifications around
+shared primitive names, source-reference schema, evidence-link bridge
+shape, uncertainty/verification vocabulary, snapshot identity,
+dependency-vs-impact relationship views, and Advisory Context Package
+integration.
+
+No repository intelligence contracts, repository knowledge extraction,
+historical memory extraction, change impact analysis engine, dependency
+graph construction, graph query engine, advisory behavior changes,
+Advisory Runtime changes, Advisory Context Package changes, Evidence
+subsystem changes, Repository Skills changes, Decision Evaluation
+changes, source code, tests, runtime behavior, execution,
+authorization, enforcement, lifecycle behavior, Permission Broker
+behavior, Repository State behavior, Repository Transition Validator
 behavior, Notification Policy behavior, REST, Dashboard, Web UI,
-autonomous coding, model capability expansion, automatic patch
-generation, automatic refactoring, or Telegram inbound path changed.
+provider orchestration, autonomous coding, model capability expansion,
+automatic patch generation, automatic refactoring, or Telegram inbound
+path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 118R — Repository Intelligence Architecture Review.
+Recommended next repo phase: 119A — Repository Intelligence Contract Freeze.
+
+## Phase 118R Complete
+
+Phase 118R — Repository Intelligence Architecture Review (completed).
+
+Architecture-review-only phase for the Track B Repository Intelligence
+set. The review covers all five Track B documents from 118A through
+118E and concludes the architecture is coherent and ready for contract
+freeze with minor clarifications. It reviews the architecture stack,
+confirmed decisions, boundaries, terminology, primitive compatibility,
+source attribution, determinism, uncertainty/conflict/supersession,
+verification, versioning/snapshot concepts, integration paths, no-go
+boundaries, risks, required clarifications, and contract-freeze
+readiness.
+
+**No-go**: no Repository Intelligence contracts, Repository Knowledge
+extraction, Historical Memory extraction, Change Impact Analysis engine,
+Dependency Knowledge Graph construction, graph query engine, Advisory
+behavior change, Advisory Runtime change, Advisory Context Package
+change, Evidence subsystem change, Repository Skills change, Decision
+Evaluation change, source implementation, test implementation, runtime
+behavior change, execution, authorization, enforcement, lifecycle
+behavior change, Permission Broker change, Repository State behavior
+change, Repository Transition Validator behavior change, Notification
+Policy behavior change, REST, Dashboard, Web UI, Telegram inbound,
+provider selection, multi-model orchestration, autonomous coding, model
+capability expansion, repository mutation, automatic patch generation,
+or automatic refactoring.
+
+Recommended next repo phase: 119A — Repository Intelligence Contract Freeze.
 
 ## Phase 118E Complete
 
