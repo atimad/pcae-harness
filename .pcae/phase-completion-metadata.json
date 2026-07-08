@@ -20,13 +20,17 @@
     {
       "hash": "cc1fd654",
       "message": "Document Phase 118C change impact architecture"
+    },
+    {
+      "hash": "7f128fa9",
+      "message": "Sync Phase 118C completion metadata"
     }
   ],
   "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 118C is architecture-only documentation)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 1,
+  "origin_main_head_count": 2,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
@@ -80,6 +84,16 @@
       "status": "passed"
     },
     {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_architecture_only_no_source_or_tests_changed",
+      "status": "not_applicable"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "pending_final_telegram_delivery",
+      "status": "pending"
+    },
+    {
       "name": "fast_green",
       "result": "not_applicable_architecture_only_no_source_or_tests_changed",
       "status": "not_applicable"
@@ -90,9 +104,11 @@
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "passed",
     "pcae_push_check": "passed",
+    "bootstrap_session_reporting_tests": "not_applicable_architecture_only_no_source_or_tests_changed",
     "runtime_inspect_execution_unavailable": "passed",
     "architecture_scope": "passed_no_src_or_tests_changed",
-    "fast_green": "not_applicable_architecture_only_no_source_or_tests_changed"
+    "fast_green": "not_applicable_architecture_only_no_source_or_tests_changed",
+    "report_notification_tests": "pending_final_telegram_delivery"
   },
   "governance_results": [
     {
