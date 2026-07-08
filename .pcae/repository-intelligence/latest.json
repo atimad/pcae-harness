@@ -1,0 +1,1538 @@
+{
+  "architectural_entities": [
+    {
+      "entity_id": "entity:src/pcae/__init__.py",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/__init__.py"
+      },
+      "entity_name": "__init__.py",
+      "entity_path": "src/pcae/__init__.py",
+      "entity_role": "top_level_package_member",
+      "entity_type": "source_file",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/__init__.py",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/__init__.py"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/__main__.py",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/__main__.py"
+      },
+      "entity_name": "__main__.py",
+      "entity_path": "src/pcae/__main__.py",
+      "entity_role": "top_level_package_member",
+      "entity_type": "source_file",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/__main__.py",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/__main__.py"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/artifact_metadata.py",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/artifact_metadata.py"
+      },
+      "entity_name": "artifact_metadata.py",
+      "entity_path": "src/pcae/artifact_metadata.py",
+      "entity_role": "top_level_package_member",
+      "entity_type": "source_file",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/artifact_metadata.py",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/artifact_metadata.py"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/cli.py",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/cli.py"
+      },
+      "entity_name": "cli.py",
+      "entity_path": "src/pcae/cli.py",
+      "entity_role": "top_level_package_member",
+      "entity_type": "source_file",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/cli.py",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/cli.py"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/commands",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/commands"
+      },
+      "entity_name": "commands",
+      "entity_path": "src/pcae/commands",
+      "entity_role": "top_level_package_member",
+      "entity_type": "module",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/commands",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/commands"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/core",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/core"
+      },
+      "entity_name": "core",
+      "entity_path": "src/pcae/core",
+      "entity_role": "top_level_package_member",
+      "entity_type": "module",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/core",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/core"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/hook_bypass.py",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/hook_bypass.py"
+      },
+      "entity_name": "hook_bypass.py",
+      "entity_path": "src/pcae/hook_bypass.py",
+      "entity_role": "top_level_package_member",
+      "entity_type": "source_file",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/hook_bypass.py",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/hook_bypass.py"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/lifecycle.py",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/lifecycle.py"
+      },
+      "entity_name": "lifecycle.py",
+      "entity_path": "src/pcae/lifecycle.py",
+      "entity_role": "top_level_package_member",
+      "entity_type": "source_file",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/lifecycle.py",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/lifecycle.py"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:src/pcae/repository_intelligence",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/repository_intelligence"
+      },
+      "entity_name": "repository_intelligence",
+      "entity_path": "src/pcae/repository_intelligence",
+      "entity_role": "top_level_package_member",
+      "entity_type": "module",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records top-level path existence only; it does not parse file contents, imports, or symbols.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:src/pcae/repository_intelligence",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "src/pcae/repository_intelligence"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to path existence; semantic purpose or correctness was not verified."
+        ],
+        "state_reason": "Path existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:tests",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "tests"
+      },
+      "entity_name": "tests",
+      "entity_path": "tests",
+      "entity_role": "top_level_repository_directory",
+      "entity_type": "test",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records directory existence only; it does not recursively enumerate or parse directory contents.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:tests",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "tests"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to directory existence; contents were not recursively enumerated."
+        ],
+        "state_reason": "Directory existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "entity_id": "entity:schemas/repository_intelligence",
+      "entity_locator": {
+        "locator_type": "file_path",
+        "locator_value": "schemas/repository_intelligence"
+      },
+      "entity_name": "repository_intelligence",
+      "entity_path": "schemas/repository_intelligence",
+      "entity_role": "top_level_repository_directory",
+      "entity_type": "schema",
+      "limitations": [
+        {
+          "limitation_description": "This prototype records directory existence only; it does not recursively enumerate or parse directory contents.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:schemas/repository_intelligence",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "schemas/repository_intelligence"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "verification_state": {
+        "state_limitations": [
+          "Verification is limited to directory existence; contents were not recursively enumerated."
+        ],
+        "state_reason": "Directory existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    }
+  ],
+  "boundary_disclosures": {
+    "advisory_non_authority": true,
+    "decision_evaluation_required": true,
+    "no_evidence_replacement": true,
+    "no_execution": true,
+    "no_lifecycle_mutation": true,
+    "no_repository_mutation": true,
+    "no_repository_state_replacement": true,
+    "non_decision": true,
+    "read_only": true
+  },
+  "capabilities": [],
+  "disclaimers": {
+    "advisory_non_authority_disclaimer": "This artifact may inform Advisory context but does not convert Advisory output into approval, permission, enforcement, or execution.",
+    "evidence_boundary_disclaimer": "This artifact may link to Evidence but does not replace, bypass, or preempt the Evidence subsystem.",
+    "no_execution_disclaimer": "This artifact does not execute commands, invoke runtimes, mediate shells, route execution, or authorize execution. Execution remains unavailable.",
+    "non_decision_disclaimer": "This artifact is not a decision. Decision Evaluation remains required for PCAE decisions.",
+    "repository_state_boundary_disclaimer": "This artifact may describe repository context but does not replace Repository State."
+  },
+  "envelope": {
+    "artifact_contract_version": "119E.1.0",
+    "artifact_family": "repository_knowledge_snapshot",
+    "artifact_id": "repository_knowledge_snapshot:0eedb51dd5fa15abdfbda69ba00f9fe902bffadc",
+    "artifact_type": "repository_knowledge_snapshot",
+    "boundary_disclosures": {
+      "advisory_non_authority": true,
+      "decision_evaluation_required": true,
+      "no_evidence_replacement": true,
+      "no_execution": true,
+      "no_lifecycle_mutation": true,
+      "no_repository_mutation": true,
+      "no_repository_state_replacement": true,
+      "non_decision": true,
+      "read_only": true
+    },
+    "conflict_state": "none",
+    "decision_boundary": "This artifact is not a decision. Decision Evaluation is the sole decision maker in PCAE. This artifact provides context only.",
+    "disclaimers": {
+      "advisory_non_authority_disclaimer": "This artifact may inform Advisory context but does not convert Advisory output into approval, permission, enforcement, or execution.",
+      "evidence_boundary_disclaimer": "This artifact may link to Evidence but does not replace, bypass, or preempt the Evidence subsystem.",
+      "no_execution_disclaimer": "This artifact does not execute commands, invoke runtimes, mediate shells, route execution, or authorize execution. Execution remains unavailable.",
+      "non_decision_disclaimer": "This artifact is not a decision. Decision Evaluation remains required for PCAE decisions.",
+      "repository_state_boundary_disclaimer": "This artifact may describe repository context but does not replace Repository State."
+    },
+    "evidence_links": [
+      {
+        "candidate_or_accepted_state": "unsubmitted",
+        "decision_evaluation_eligibility": "not_eligible_evidence_gap",
+        "evidence_id": "evidence-gap:envelope",
+        "evidence_source": {
+          "source_identity": "not_applicable",
+          "source_type": "none"
+        },
+        "evidence_type": "evidence_gap_marker",
+        "limitations": [
+          "This prototype does not integrate with the Evidence subsystem."
+        ],
+        "support_strength": "inconclusive",
+        "supported_claim": {
+          "claim_id": "envelope",
+          "claim_summary": "No Evidence subsystem link is established by this prototype."
+        }
+      }
+    ],
+    "executable_schema_version": "119K.1.0-json-schema",
+    "execution_boundary": "This artifact does not execute commands, invoke runtimes, mediate shells, route execution, or authorize execution. Execution remains unavailable.",
+    "generated_at_utc": "2026-07-08T23:14:02Z",
+    "limitations": [
+      {
+        "limitation_description": "This is a narrow, first-prototype Repository Knowledge Snapshot; see snapshot_limitations for the full disclosure.",
+        "limitation_type": "scope_limitation"
+      }
+    ],
+    "producer": {
+      "producer_identity": "pcae repository-intelligence snapshot generate (Phase 120E read-only prototype)",
+      "producer_type": "tool"
+    },
+    "read_only_boundary": "This artifact is descriptive and read-only. It does not mutate repository state, lifecycle state, or any other PCAE subsystem state.",
+    "repository_context": {
+      "release_context_ref": null,
+      "repository_branch": "main",
+      "repository_commit": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc",
+      "repository_identity": {
+        "identity_type": "repository_name",
+        "identity_value": "pcae-harness"
+      },
+      "repository_path": null,
+      "repository_status_context": null
+    },
+    "schema_concept_version": "119C.1.0-concept",
+    "source_attribution": [
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:generation-commit",
+        "source_limitations": [
+          "Commit SHA observed via `git rev-parse HEAD`; commit contents beyond the paths explicitly listed elsewhere in this snapshot were not enumerated."
+        ],
+        "source_locator": {
+          "locator_type": "commit_sha",
+          "locator_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "commit",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:project-status.current-phase",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "PROJECT_STATUS.md"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:pyproject.description",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "pyproject.toml"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:pyproject.name",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "pyproject.toml"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:pyproject.version",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "pyproject.toml"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:schemas/repository_intelligence",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "schemas/repository_intelligence"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/__init__.py",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/__init__.py"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/__main__.py",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/__main__.py"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/artifact_metadata.py",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/artifact_metadata.py"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/cli.py",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/cli.py"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/commands",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/commands"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/core",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/core"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/hook_bypass.py",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/hook_bypass.py"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/lifecycle.py",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/lifecycle.py"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:src/pcae/repository_intelligence",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "src/pcae/repository_intelligence"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:subsystem:docs",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "docs"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:subsystem:schemas/repository_intelligence",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "schemas/repository_intelligence"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      },
+      {
+        "source_claim_relationship": "documents",
+        "source_id": "source:tests",
+        "source_limitations": [
+          "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+        ],
+        "source_locator": {
+          "locator_type": "file_path",
+          "locator_value": "tests"
+        },
+        "source_staleness_state": "current",
+        "source_support_level": "direct",
+        "source_type": "file",
+        "source_verification_state": "verified"
+      }
+    ],
+    "supersession_state": "current",
+    "uncertainty_state": "partially_verified",
+    "verification_state": "partially_verified"
+  },
+  "evidence_links": [],
+  "knowledge_claims": [
+    {
+      "claim_id": "claim:generation-commit",
+      "claim_status": "verified",
+      "claim_subject": "repository.commit",
+      "claim_text": "This Repository Knowledge Snapshot was generated for the repository at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc.",
+      "claim_type": "documentation",
+      "limitations": [
+        {
+          "limitation_description": "Identifies the snapshotted commit only.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:generation-commit",
+          "source_limitations": [
+            "Commit SHA observed via `git rev-parse HEAD`; commit contents beyond the paths explicitly listed elsewhere in this snapshot were not enumerated."
+          ],
+          "source_locator": {
+            "locator_type": "commit_sha",
+            "locator_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "commit",
+          "source_verification_state": "verified"
+        }
+      ],
+      "uncertainty_state": {
+        "state_limitations": [
+          "Limited to the commit identifier itself."
+        ],
+        "state_reason": "Commit SHA is directly observable, not inferred.",
+        "state_value": "known",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      },
+      "verification_state": {
+        "state_limitations": [
+          "Limited to the commit identifier itself."
+        ],
+        "state_reason": "Commit SHA observed via `git rev-parse HEAD`.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "claim_id": "claim:pyproject.project.name",
+      "claim_status": "verified",
+      "claim_subject": "pyproject.toml [project].name",
+      "claim_text": "pyproject.toml declares [project].name = \"pcae-harness\".",
+      "claim_type": "documentation",
+      "limitations": [
+        {
+          "limitation_description": "Reflects the declared pyproject.toml field value only; does not verify runtime behavior.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:pyproject.name",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "pyproject.toml"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "uncertainty_state": {
+        "state_limitations": [
+          "Limited to the declared field value."
+        ],
+        "state_reason": "Value is directly observable, not inferred.",
+        "state_value": "known",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      },
+      "verification_state": {
+        "state_limitations": [
+          "Parsing is limited to a narrow regex over the [project] table; complex TOML value types are not supported."
+        ],
+        "state_reason": "Field value read directly from pyproject.toml [project] table via deterministic text parsing.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "claim_id": "claim:pyproject.project.version",
+      "claim_status": "verified",
+      "claim_subject": "pyproject.toml [project].version",
+      "claim_text": "pyproject.toml declares [project].version = \"0.2.0\".",
+      "claim_type": "documentation",
+      "limitations": [
+        {
+          "limitation_description": "Reflects the declared pyproject.toml field value only; does not verify runtime behavior.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:pyproject.version",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "pyproject.toml"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "uncertainty_state": {
+        "state_limitations": [
+          "Limited to the declared field value."
+        ],
+        "state_reason": "Value is directly observable, not inferred.",
+        "state_value": "known",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      },
+      "verification_state": {
+        "state_limitations": [
+          "Parsing is limited to a narrow regex over the [project] table; complex TOML value types are not supported."
+        ],
+        "state_reason": "Field value read directly from pyproject.toml [project] table via deterministic text parsing.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "claim_id": "claim:pyproject.project.description",
+      "claim_status": "verified",
+      "claim_subject": "pyproject.toml [project].description",
+      "claim_text": "pyproject.toml declares [project].description = \"Persistent Constrained Agentic Engineering Harness CLI.\".",
+      "claim_type": "documentation",
+      "limitations": [
+        {
+          "limitation_description": "Reflects the declared pyproject.toml field value only; does not verify runtime behavior.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:pyproject.description",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "pyproject.toml"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "uncertainty_state": {
+        "state_limitations": [
+          "Limited to the declared field value."
+        ],
+        "state_reason": "Value is directly observable, not inferred.",
+        "state_value": "known",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      },
+      "verification_state": {
+        "state_limitations": [
+          "Parsing is limited to a narrow regex over the [project] table; complex TOML value types are not supported."
+        ],
+        "state_reason": "Field value read directly from pyproject.toml [project] table via deterministic text parsing.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "claim_id": "claim:project-status.current-phase",
+      "claim_status": "verified",
+      "claim_subject": "PROJECT_STATUS.md ## Current Phase",
+      "claim_text": "PROJECT_STATUS.md's '## Current Phase' section begins: Phase 120D \u2014 Repository Knowledge Snapshot Prototype Plan (completed).",
+      "claim_type": "documentation",
+      "limitations": [
+        {
+          "limitation_description": "Reflects PROJECT_STATUS.md's declared current phase text only; does not independently verify phase completion state.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:project-status.current-phase",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "PROJECT_STATUS.md"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "uncertainty_state": {
+        "state_limitations": [
+          "Does not cross-check against .pcae/ canonical phase-completion metadata."
+        ],
+        "state_reason": "The line was observed directly, but its continued accuracy depends on PROJECT_STATUS.md staying in sync with governed phase state, which this prototype does not independently verify.",
+        "state_value": "partially_verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      },
+      "verification_state": {
+        "state_limitations": [
+          "Reflects only the first non-empty line of the section; the section may continue with additional detail not captured here."
+        ],
+        "state_reason": "Line read directly from PROJECT_STATUS.md's '## Current Phase' section via deterministic text parsing.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    }
+  ],
+  "knowledge_relationships": [],
+  "knowledge_sources": [
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:generation-commit",
+      "source_limitations": [
+        "Commit SHA observed via `git rev-parse HEAD`; commit contents beyond the paths explicitly listed elsewhere in this snapshot were not enumerated."
+      ],
+      "source_locator": {
+        "locator_type": "commit_sha",
+        "locator_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "commit",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:project-status.current-phase",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "PROJECT_STATUS.md"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:pyproject.description",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "pyproject.toml"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:pyproject.name",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "pyproject.toml"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:pyproject.version",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "pyproject.toml"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:schemas/repository_intelligence",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "schemas/repository_intelligence"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/__init__.py",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/__init__.py"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/__main__.py",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/__main__.py"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/artifact_metadata.py",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/artifact_metadata.py"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/cli.py",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/cli.py"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/commands",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/commands"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/core",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/core"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/hook_bypass.py",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/hook_bypass.py"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/lifecycle.py",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/lifecycle.py"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:src/pcae/repository_intelligence",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "src/pcae/repository_intelligence"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:subsystem:docs",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "docs"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:subsystem:schemas/repository_intelligence",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "schemas/repository_intelligence"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    },
+    {
+      "source_claim_relationship": "documents",
+      "source_id": "source:tests",
+      "source_limitations": [
+        "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+      ],
+      "source_locator": {
+        "locator_type": "file_path",
+        "locator_value": "tests"
+      },
+      "source_staleness_state": "current",
+      "source_support_level": "direct",
+      "source_type": "file",
+      "source_verification_state": "verified"
+    }
+  ],
+  "repository_knowledge_snapshot_disclaimer": "This Repository Knowledge Snapshot describes repository architecture and entity relationships. It is not Repository State and does not decide whether the repository is valid, correct, or complete.",
+  "snapshot_identity": {
+    "artifact_contract_version": "119E.1.0",
+    "executable_schema_version": "119O.1.0-json-schema",
+    "schema_concept_version": "119C.1.0-concept",
+    "snapshot_created_at_utc": "2026-07-08T23:14:02Z",
+    "snapshot_id": "rks-0eedb51dd5fa15abdfbda69ba00f9fe902bffadc",
+    "snapshot_scope": "Top-level members of src/pcae, the tests/ and schemas/repository_intelligence directories, and pyproject.toml [project] metadata, as observed at a fixed commit. Recursive file-content parsing, import analysis, and symbol extraction are not performed by this narrow first prototype.",
+    "snapshot_subject": "pcae-harness repository architecture"
+  },
+  "snapshot_limitations": [
+    {
+      "affected_claims_or_fields": [
+        "architectural_entities",
+        "capabilities",
+        "subsystems",
+        "knowledge_relationships"
+      ],
+      "limitation_description": "This is the first, intentionally narrow Repository Knowledge Snapshot prototype (Phase 120E). It observes a fixed set of top-level repository locations without recursive parsing.",
+      "limitation_type": "scope_limitation",
+      "mitigation_or_follow_up": "Future phases may extend extraction depth and breadth under a new, separately scoped contract phase.",
+      "severity_or_scope": "snapshot-wide"
+    }
+  ],
+  "snapshot_scope": "Top-level members of src/pcae, the tests/ and schemas/repository_intelligence directories, and pyproject.toml [project] metadata, as observed at a fixed commit. Recursive file-content parsing, import analysis, and symbol extraction are not performed by this narrow first prototype.",
+  "snapshot_subject": "pcae-harness repository architecture",
+  "subsystems": [
+    {
+      "limitations": [
+        {
+          "limitation_description": "Subsystem classification reflects only the directory's declared top-level purpose; it is not a semantic analysis of subsystem behavior.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:subsystem:schemas/repository_intelligence",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "schemas/repository_intelligence"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "subsystem_boundary": "Files under `schemas/repository_intelligence/`.",
+      "subsystem_id": "subsystem:schemas/repository_intelligence",
+      "subsystem_name": "schemas/repository_intelligence",
+      "subsystem_type": "schema",
+      "verification_state": {
+        "state_limitations": [
+          "Subsystem boundary is declared as a top-level directory path only; internal structure was not analyzed."
+        ],
+        "state_reason": "Directory existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    },
+    {
+      "limitations": [
+        {
+          "limitation_description": "Subsystem classification reflects only the directory's declared top-level purpose; it is not a semantic analysis of subsystem behavior.",
+          "limitation_type": "scope_limitation"
+        }
+      ],
+      "source_attribution": [
+        {
+          "source_claim_relationship": "documents",
+          "source_id": "source:subsystem:docs",
+          "source_limitations": [
+            "Existence and path observed via deterministic filesystem listing at commit 0eedb51dd5fa15abdfbda69ba00f9fe902bffadc; file contents were not parsed."
+          ],
+          "source_locator": {
+            "locator_type": "file_path",
+            "locator_value": "docs"
+          },
+          "source_staleness_state": "current",
+          "source_support_level": "direct",
+          "source_type": "file",
+          "source_verification_state": "verified"
+        }
+      ],
+      "subsystem_boundary": "Files under `docs/`.",
+      "subsystem_id": "subsystem:docs",
+      "subsystem_name": "docs",
+      "subsystem_type": "documentation",
+      "verification_state": {
+        "state_limitations": [
+          "Subsystem boundary is declared as a top-level directory path only; internal structure was not analyzed."
+        ],
+        "state_reason": "Directory existence observed via deterministic filesystem listing at generation commit.",
+        "state_value": "verified",
+        "supporting_sources": [],
+        "timestamp_or_snapshot_context": {
+          "context_type": "commit",
+          "context_value": "0eedb51dd5fa15abdfbda69ba00f9fe902bffadc"
+        }
+      }
+    }
+  ],
+  "unknowns": [
+    "Capabilities were not extracted in this narrow prototype pass; the capabilities array is empty pending a future, separately scoped extraction phase.",
+    "Relationships between architectural entities were not extracted in this narrow prototype pass; the knowledge_relationships array is empty.",
+    "File contents, imports, and internal symbols were not parsed; entity records reflect top-level path existence only.",
+    "The full repository directory tree was not recursively enumerated; only a fixed set of top-level locations was observed (src/pcae direct children, tests/, schemas/repository_intelligence, pyproject.toml, PROJECT_STATUS.md)."
+  ]
+}

@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+- Phase 120E - Repository Knowledge Snapshot Prototype: Read-Only
+  Generator
+  (`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_IMPLEMENTATION.md`).
+  First implementation phase of Track 120. Implements a deterministic,
+  read-only Repository Knowledge Snapshot generator at
+  `src/pcae/repository_intelligence/` (`source_inventory.py`,
+  `attribution.py`, `snapshot_builder.py`, `persistence.py`,
+  `snapshot_generator.py`), producing artifacts conforming to
+  `schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json`.
+  Adds a new CLI command, `pcae repository-intelligence snapshot
+  generate` (`--output`, `--pretty`, `--json`). Only the Repository
+  Knowledge Snapshot artifact family is implemented; no other
+  Repository Intelligence generator, query engine, or graph traversal
+  exists. Implements the full eleven-stage pipeline planned in 120D:
+  source discovery, attribution assignment, deterministic extraction
+  (git commit/branch, sorted top-level `src/pcae` listing, narrow
+  `pyproject.toml`/`PROJECT_STATUS.md` parsing), normalization,
+  schema-conformant assembly, limitation/unknown capture, verbatim
+  boundary-disclosure/disclaimer attachment, and fail-closed
+  persistence. Persists to `.pcae/repository-intelligence/`
+  (`latest.json` plus an append-only, microsecond-precision
+  `snapshots/` history). Adds 14 focused tests
+  (`tests/test_phase_120e_repository_knowledge_snapshot.py`) covering
+  deterministic generation, schema conformance, attribution
+  completeness, limitation/disclaimer/boundary-disclosure attachment,
+  persistence, latest-snapshot updates, invalid-input/fail-closed
+  handling, and unknown handling, all passing. Verifies determinism
+  directly via a two-run byte-for-byte comparison (excluding the two
+  approved timestamp fields) and structural schema conformance against
+  the on-disk schema files. Generates and commits the actual first
+  Repository Knowledge Snapshot artifact as a deliverable. `fast_green`
+  re-run clean except one pre-existing, unrelated failure confirmed
+  present before this phase's changes. No AI inference, network
+  access, Advisory/Decision Evaluation integration, or execution
+  capability was introduced. Recommends 120F.
+
 - Phase 120D - Repository Knowledge Snapshot Prototype Plan
   (`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_PLAN.md`).
   Documentation-only implementation-planning phase for the first

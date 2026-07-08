@@ -500,6 +500,9 @@ from pcae.commands.init import run_init
 from pcae.commands.inspect import run_inspect
 from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
+from pcae.commands.repository_intelligence import (
+    run_repository_intelligence_snapshot_generate,
+)
 from pcae.commands.session import (
     run_session_bootstrap,
     run_session_continuity_check,
@@ -4483,6 +4486,54 @@ def build_parser() -> argparse.ArgumentParser:
         help="Apply PCAE onboarding templates to the target repo.",
     )
     repo_apply_parser.set_defaults(handler=run_repo_apply)
+
+    # ── pcae repository-intelligence (Phase 120E) ────────────────────────
+    repository_intelligence_parser = subparsers.add_parser(
+        "repository-intelligence",
+        help="Read-only Repository Intelligence prototype (Phase 120E).",
+    )
+    repository_intelligence_subparsers = repository_intelligence_parser.add_subparsers(
+        dest="repository_intelligence_command",
+        required=True,
+    )
+
+    ri_snapshot_parser = repository_intelligence_subparsers.add_parser(
+        "snapshot",
+        help="Repository Knowledge Snapshot generation.",
+    )
+    ri_snapshot_subparsers = ri_snapshot_parser.add_subparsers(
+        dest="repository_intelligence_snapshot_command",
+        required=True,
+    )
+
+    ri_snapshot_generate_parser = ri_snapshot_subparsers.add_parser(
+        "generate",
+        help=(
+            "Deterministically generate a schema-conformant Repository "
+            "Knowledge Snapshot (read-only, no execution)."
+        ),
+    )
+    ri_snapshot_generate_parser.add_argument(
+        "--output",
+        default=None,
+        help=(
+            "Override the output directory (default: "
+            ".pcae/repository-intelligence/)."
+        ),
+    )
+    ri_snapshot_generate_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Persist the generated snapshot as indented (pretty) JSON.",
+    )
+    ri_snapshot_generate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON generation metadata to stdout.",
+    )
+    ri_snapshot_generate_parser.set_defaults(
+        handler=run_repository_intelligence_snapshot_generate
+    )
 
     architecture_parser = subparsers.add_parser(
         "architecture",
