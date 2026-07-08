@@ -10,7 +10,7 @@ Phase 119W Advisory Intelligence Context Package schema implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
