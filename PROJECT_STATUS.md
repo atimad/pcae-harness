@@ -2,59 +2,102 @@
 
 ## Current Phase
 
-Phase 119Z — Repository Intelligence Executable Schema Verification:
-Query Result
+Phase 119AA — Repository Intelligence Executable Schema Implementation:
+Repository Intelligence Package
 (completed).
 
-Verification phase for Track B Repository Intelligence. Verifies the
-Query Result schema implemented in 119Y:
-`schemas/repository_intelligence/artifacts/query_result.schema.json`.
-Confirms JSON parse validity, JSON Schema Draft 2020-12 declaration,
-`$id` uniqueness, `$ref` resolution (416 local refs across nineteen
-schema files), shared component reuse, the common artifact envelope
-relationship, query result identity, query description and its type
-enum, query execution disclosure and execution status enum, result
-item structure and its type enum, result grouping and summary
-structures, relevance/match metadata, the required limit disclosure and
-completeness state enum, referenced artifact structure, unknowns/gaps,
-Evidence link structure, boundary disclosures, disclaimers,
-`additionalProperties` policy, and authority-creep-free language. No
-schema or shared-component corrections were required.
+Implementation phase for Track B Repository Intelligence. Implements
+the eighth and final artifact-family schema for the current executable
+schema implementation line:
+`schemas/repository_intelligence/artifacts/repository_intelligence_package.schema.json`.
+The schema is standalone JSON Schema Draft 2020-12, references verified
+shared components, includes the common artifact envelope relationship,
+and structurally represents package identity, package composition
+(declared included/optional/omitted artifact references and rationale),
+included artifact records (referencing any of the other seven artifact
+families), package provenance (declared/imported/manually_assembled/
+future_generated/source_claimed), an integrity disclosure (declared
+counts and consistency status, not computed checksums), compatibility
+claims (declared, not enforced), a package index, package summaries,
+package exclusions, unknowns and gaps, limitations, boundary
+disclosures, disclaimers, and the Repository Intelligence Package
+boundary disclaimer.
 
-Explicitly confirmed the schema does not execute a query, implement a
-query engine, generate query results, rank results, or traverse a
-graph: execution mode/status values describe declared provenance only,
-result rank and match strength carry non-authoritative disclaimers, and
-referenced-artifact/result-item references are declared locators, not
-traversal or query-engine output.
-
-No new artifact-family schema, Repository Intelligence Package schema,
-validator, validation library, schema verification CLI, automated test
-suite, Python model, Pydantic model, dataclass, repository intelligence
-extraction, repository knowledge extraction, repository scanning,
-dependency extraction, dependency scanning, diff analysis, git history
-analysis, timeline generation, change impact analysis engine, impact
-prediction, blast-radius computation, dependency graph construction,
-graph traversal, graph query engine, query execution, query engine,
-query result generation, query ranking, Advisory Intelligence Context
+No validator, validation library, schema verification CLI, automated
+test suite, Python model, Pydantic model, dataclass, repository
+intelligence extraction, repository knowledge extraction, repository
+scanning, dependency extraction, dependency scanning, diff analysis,
+git history analysis, timeline generation, change impact analysis
+engine, impact prediction, blast-radius computation, dependency graph
+construction, graph traversal, graph query engine, query execution,
+query engine, query result generation, query ranking, package
+generation, package validation, package builder, package registry,
+package integrity computation, Advisory Intelligence Context
 generation, Advisory Context Package generation, advisory behavior
-change, Advisory Runtime change, Evidence subsystem change, Repository
-Skills change, Decision Evaluation change or replacement, source code
-change, test code change, runtime behavior change, execution, shell
-mediation, enforcement, lifecycle behavior change, Permission Broker
-behavior change, Repository State behavior change, Repository Transition
-Validator behavior change, Notification Policy behavior change, REST,
-Dashboard, Web UI, provider orchestration, autonomous coding, model
-capability expansion, automatic patch generation, automatic refactoring,
-repository mutation outside planned schema/docs/status files, runtime
-plugin change, or Telegram inbound path changed.
+change, Advisory Runtime change, Advisory integration, Evidence
+subsystem change, Repository Skills change, Decision Evaluation change
+or replacement, source code change, test code change, runtime behavior
+change, execution, shell mediation, enforcement, lifecycle behavior
+change, Permission Broker behavior change, Repository State behavior
+change, Repository Transition Validator behavior change, Notification
+Policy behavior change, REST, Dashboard, Web UI, provider orchestration,
+autonomous coding, model capability expansion, automatic patch
+generation, automatic refactoring, repository mutation outside planned
+schema/docs/status files, runtime plugin change, or Telegram inbound
+path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119AA — Repository Intelligence Executable
-Schema Implementation: Repository Intelligence Package.
+Recommended next repo phase: 119AB — Repository Intelligence Executable
+Schema Verification: Repository Intelligence Package.
+
+## Phase 119AA Complete
+
+Phase 119AA — Repository Intelligence Executable Schema Implementation:
+Repository Intelligence Package (completed).
+
+Narrow schema-only implementation phase for the Repository Intelligence
+Package artifact family, the eighth and final artifact-family schema
+for the current executable schema implementation line. Implements
+`schemas/repository_intelligence/artifacts/repository_intelligence_package.schema.json`
+as a standalone JSON Schema Draft 2020-12 artifact outside `src`.
+Updates schema documentation in `schemas/repository_intelligence/README.md`
+and adds
+`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_INTELLIGENCE_PACKAGE.md`.
+The schema references verified shared components, includes the common
+artifact envelope relationship, represents package identity, package
+composition, included artifact records, package provenance, an
+integrity disclosure, compatibility claims, a package index, package
+summaries, package exclusions, unknowns and gaps, limitations, boundary
+disclosures, disclaimers, and the frozen Repository Intelligence
+Package boundary disclaimer. It represents the aggregate container and
+index structurally without generating, validating, or building a
+package.
+
+**No-go**: no additional artifact-family schema, validator, validation
+library, schema verification CLI, automated test suite, Python models,
+Pydantic models, dataclasses, Repository Intelligence extraction,
+Repository Knowledge extraction, repository scanning, dependency
+extraction, dependency scanning, diff analysis, git history analysis,
+timeline generation, change impact analysis engine, impact prediction,
+blast-radius computation, graph construction, graph traversal, graph
+query engine, query execution, query engine, query result generation,
+query ranking, package generation, package validation, package builder,
+package registry, package integrity computation, Advisory Intelligence
+Context generation, Advisory Context Package generation, Advisory
+behavior, Advisory Runtime, Advisory integration, Evidence, Repository
+Skills, Decision Evaluation change or replacement, source code, test
+code, runtime behavior, execution, shell mediation, Permission Broker,
+lifecycle redesign, REST, Dashboard, Web UI, Telegram inbound, provider
+selection, multi-model orchestration, autonomous coding, model
+capability expansion, repository mutation outside planned
+schema/docs/status files, runtime plugin changes, Repository State
+changes, automatic patch generation, or automatic refactoring.
+
+Recommended next repo phase: 119AB — Repository Intelligence Executable
+Schema Verification: Repository Intelligence Package.
 
 ## Phase 119Z Complete
 

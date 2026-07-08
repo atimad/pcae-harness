@@ -1,0 +1,762 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/repository_intelligence_package.schema.json",
+  "title": "Repository Intelligence Package",
+  "description": "Artifact-family schema for a structural Repository Intelligence Package. It records a declared, source-attributed aggregate bundle that references or contains other Repository Intelligence artifact-family outputs for one repository snapshot or analysis context; it is descriptive, read-only, non-decision, and no-execution, and it does not generate a package, does not validate a package at runtime, does not merge component authority, does not authorize action or execution, does not replace Decision Evaluation, does not replace Evidence, does not replace Repository State, does not prove artifact truth, does not prove artifact acceptance, and does not prove package completeness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "package_identity",
+    "package_subject",
+    "package_scope",
+    "package_composition",
+    "included_artifacts",
+    "package_provenance",
+    "package_sources",
+    "unknowns_gaps",
+    "package_limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "repository_intelligence_package_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "package_identity": {
+      "$ref": "#/$defs/package_identity"
+    },
+    "package_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_composition": {
+      "$ref": "#/$defs/package_composition"
+    },
+    "included_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/included_artifact"
+      }
+    },
+    "package_provenance": {
+      "$ref": "#/$defs/package_provenance"
+    },
+    "integrity_disclosure": {
+      "$ref": "#/$defs/integrity_disclosure"
+    },
+    "compatibility_claims": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/compatibility_claim"
+      }
+    },
+    "package_index": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/package_index_entry"
+      }
+    },
+    "package_summaries": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/package_summary"
+      }
+    },
+    "package_exclusions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/package_exclusion"
+      }
+    },
+    "package_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/evidence_link_record.schema.json"
+      }
+    },
+    "unknowns_gaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/unknown_gap"
+      }
+    },
+    "package_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "conflict_or_supersession_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/conflict_supersession_record.schema.json"
+      }
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/derivation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "repository_intelligence_package_disclaimer": {
+      "type": "string",
+      "const": "This Repository Intelligence Package is a declared, source-attributed container and index over other Repository Intelligence artifacts. It does not generate a package, does not validate a package at runtime, does not merge component authority, does not prove artifact truth, does not prove artifact acceptance, does not prove package completeness, is not Repository State, and does not authorize action or execution."
+    }
+  },
+  "$defs": {
+    "package_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_id",
+        "package_subject",
+        "package_scope",
+        "package_purpose",
+        "package_type"
+      ],
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_purpose": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared purpose only; this field does not authorize any use of the package."
+        },
+        "package_type": {
+          "$ref": "#/$defs/package_type"
+        },
+        "package_created_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "const": "119E.1.0"
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "const": "119C.1.0-concept"
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "const": "119AA.1.0-json-schema"
+        }
+      }
+    },
+    "package_type": {
+      "type": "string",
+      "enum": [
+        "repository_intelligence_package",
+        "repository_knowledge_package",
+        "historical_memory_package",
+        "dependency_context_package",
+        "advisory_context_package",
+        "query_result_package",
+        "mixed_package",
+        "unknown"
+      ]
+    },
+    "package_composition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "composition_id",
+        "composition_type",
+        "included_artifact_references",
+        "composition_rationale",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "composition_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "composition_type": {
+          "type": "string",
+          "enum": [
+            "single_snapshot_bundle",
+            "multi_artifact_bundle",
+            "cross_family_bundle",
+            "manual_selection",
+            "unknown"
+          ]
+        },
+        "included_artifact_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "optional_artifact_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "omitted_artifact_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "composition_rationale": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared rationale only; this field does not assert that all relevant artifacts are present."
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "included_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_type",
+        "artifact_reference",
+        "artifact_schema_id",
+        "artifact_contract_version",
+        "artifact_status",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_type": {
+          "$ref": "#/$defs/artifact_type"
+        },
+        "artifact_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "artifact_schema_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_status": {
+          "type": "string",
+          "enum": [
+            "declared",
+            "known",
+            "unknown",
+            "unverified",
+            "partially_verified",
+            "superseded",
+            "conflicting"
+          ],
+          "description": "Declared status context only; this field does not assert artifact truth or acceptance."
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "boundary_disclosures": {
+          "$ref": "../shared/boundary_disclosure.schema.json"
+        }
+      }
+    },
+    "artifact_type": {
+      "type": "string",
+      "enum": [
+        "contract_conformance_record",
+        "repository_knowledge_snapshot",
+        "historical_memory_snapshot",
+        "dependency_knowledge_graph_snapshot",
+        "change_impact_report",
+        "advisory_intelligence_context_package",
+        "query_result",
+        "unknown"
+      ]
+    },
+    "package_provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provenance_id",
+        "provenance_type",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "provenance_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provenance_type": {
+          "$ref": "#/$defs/provenance_type"
+        },
+        "declared_by": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/producer"
+        },
+        "generated_by_future_system": {
+          "type": "boolean",
+          "description": "Declared marker only; true does not assert that PCAE currently generates packages."
+        },
+        "imported_from": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "manually_assembled": {
+          "type": "boolean"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "derivation_record": {
+          "$ref": "../shared/derivation_record.schema.json"
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "provenance_type": {
+      "type": "string",
+      "enum": [
+        "declared",
+        "imported",
+        "manually_assembled",
+        "future_generated",
+        "source_claimed",
+        "unknown"
+      ],
+      "description": "Declared provenance category only; no value in this enum asserts current PCAE package generation."
+    },
+    "integrity_disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "integrity_id",
+        "integrity_type",
+        "declared_artifact_count",
+        "observed_artifact_count",
+        "consistency_status",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "integrity_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "integrity_type": {
+          "type": "string",
+          "enum": [
+            "declared_count_only",
+            "declared_checksum",
+            "declared_digest",
+            "unknown"
+          ],
+          "description": "Declared integrity category only; this field does not imply PCAE computed a checksum or performed runtime validation."
+        },
+        "checksum_or_digest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "declared_artifact_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "observed_artifact_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "consistency_status": {
+          "type": "string",
+          "enum": [
+            "consistent_claimed_by_source",
+            "inconsistent_claimed_by_source",
+            "unknown",
+            "not_assessed",
+            "unverifiable"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "compatibility_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "compatibility_id",
+        "compatibility_subject",
+        "compatible_schema_ids",
+        "compatibility_status",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "compatibility_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compatibility_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "compatible_schema_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "compatible_artifact_versions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "compatibility_status": {
+          "$ref": "#/$defs/compatibility_status"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "compatibility_status": {
+      "type": "string",
+      "enum": [
+        "compatible_claimed_by_source",
+        "partially_compatible",
+        "incompatible_claimed_by_source",
+        "unknown",
+        "not_assessed",
+        "unverifiable"
+      ],
+      "description": "Declared/recorded compatibility value only; this field does not assert PCAE has enforced compatibility."
+    },
+    "package_index_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index_id",
+        "index_entry_type",
+        "artifact_reference",
+        "artifact_label",
+        "source_attribution",
+        "limitations"
+      ],
+      "properties": {
+        "index_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "index_entry_type": {
+          "$ref": "#/$defs/artifact_type"
+        },
+        "artifact_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_locator": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "package_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "summary_id",
+        "summary_type",
+        "summary_statement",
+        "included_artifact_references",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "summary_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary_type": {
+          "type": "string",
+          "enum": [
+            "overview",
+            "composition_summary",
+            "coverage_summary",
+            "gap_summary",
+            "unknown"
+          ]
+        },
+        "summary_statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared summary statement only; this field does not assert the summary is complete or correct."
+        },
+        "included_artifact_references": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "package_exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exclusion_id",
+        "excluded_artifact_type",
+        "excluded_subject",
+        "exclusion_reason",
+        "limitation",
+        "source_attribution",
+        "verification_state"
+      ],
+      "properties": {
+        "exclusion_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "excluded_artifact_type": {
+          "$ref": "#/$defs/artifact_type"
+        },
+        "excluded_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exclusion_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        }
+      }
+    },
+    "unknown_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unknown_id",
+        "unknown_subject",
+        "missing_artifact_type",
+        "affected_package_scope",
+        "uncertainty_state",
+        "limitation"
+      ],
+      "properties": {
+        "unknown_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_artifact_type": {
+          "$ref": "#/$defs/artifact_type"
+        },
+        "affected_package_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "follow_up_requirement": {
+          "type": "string",
+          "description": "Declared follow-up context only when permitted by contract; this field does not authorize action."
+        }
+      }
+    }
+  }
+}

@@ -17,10 +17,13 @@ Knowledge Graph to describe what may be affected by a change. Phase 119W
 added the Advisory Intelligence Context Package schema as the next
 artifact-family schema because it packages Repository Intelligence
 context for possible future Advisory consumption without causing
-Advisory behavior. Phase 119Y adds the Query Result schema as the next
+Advisory behavior. Phase 119Y added the Query Result schema as the next
 artifact-family schema because it declares the structural shape of a
 possible future Repository Intelligence query result without executing
-a query. These schemas live outside `src` so they remain
+a query. Phase 119AA adds the Repository Intelligence Package schema as
+the aggregate artifact-family schema because it declares a bundle of
+references to the other artifact-family schemas without generating or
+validating a package. These schemas live outside `src` so they remain
 language-neutral contract artifacts rather than runtime code.
 
 ## Scope
@@ -51,6 +54,7 @@ Artifact-family schemas:
 - `artifacts/change_impact_report.schema.json`
 - `artifacts/advisory_intelligence_context_package.schema.json`
 - `artifacts/query_result.schema.json`
+- `artifacts/repository_intelligence_package.schema.json`
 
 The Contract Conformance Record schema is the first artifact-family
 schema because it records structural contract conformance without
@@ -136,9 +140,23 @@ does not execute a query, does not implement a query engine, does not
 traverse a graph, and does not imply query result truth or
 completeness.
 
+The Repository Intelligence Package schema is the eighth and final
+artifact-family schema. It structurally represents a declared,
+source-attributed aggregate bundle that references or contains outputs
+from the other seven artifact-family schemas: package identity, package
+composition, included artifact records, package provenance, an
+integrity disclosure, compatibility claims, a package index, package
+summaries, package exclusions, unknowns and gaps, limitations, boundary
+disclosures, and disclaimers. It follows Query Result because it is the
+top-level container and index over all Repository Intelligence artifact
+families, including query results. It does not generate a package, does
+not validate a package at runtime, does not implement a package
+builder, does not implement a package registry, and does not merge
+component authority.
+
 Not implemented in this slice:
 
-- additional artifact-family schemas beyond the seven listed above
+- additional artifact-family schemas beyond the eight listed above
 - validators or validation libraries
 - CLI commands
 - Python models, Pydantic models, or dataclasses
@@ -147,9 +165,11 @@ Not implemented in this slice:
   dependency scanning, diff analysis, git history analysis, repository
   scanning, timeline generation, graph construction, graph traversal,
   graph query execution, query execution, query engine, query result
-  generation, query ranking, impact analysis, impact prediction,
-  blast-radius computation, Advisory Intelligence Context generation,
-  Advisory Context Package generation, or Advisory behavior
+  generation, query ranking, package generation, package validation,
+  package builder, package registry, package integrity computation,
+  impact analysis, impact prediction, blast-radius computation, Advisory
+  Intelligence Context generation, Advisory Context Package generation,
+  Advisory integration, or Advisory behavior
 
 ## JSON Schema Draft
 
@@ -260,18 +280,31 @@ approval, is not execution permission, is not lifecycle standing, is not
 Decision Evaluation, is not Evidence truth, and is not Repository State
 truth.
 
-Future validators must preserve the same boundary. Other
-artifact-family schemas remain future work.
+The Repository Intelligence Package schema structurally represents a
+declared, source-attributed aggregate container and index. It does not
+validate source truth, source existence, Evidence sufficiency, artifact
+truth, artifact acceptance, package completeness, package integrity,
+compatibility correctness, lifecycle standing, Repository State
+validity, Decision Evaluation outcomes, execution safety, or derivation
+correctness. Schema conformance is not package generation, is not
+package validation, is not package completeness, is not artifact truth,
+is not artifact acceptance, is not approval, is not execution
+permission, is not lifecycle standing, is not Decision Evaluation, is
+not Evidence truth, and is not Repository State truth.
+
+Future validators must preserve the same boundary. This is the eighth
+and final artifact-family schema planned for the current executable
+schema implementation line; other artifact-family schemas remain future
+work only if a new phase explicitly scopes them.
 
 ## Next Phase
 
 The recommended next phase is:
 
-`119Z - Repository Intelligence Executable Schema Verification: Query Result`
+`119AB - Repository Intelligence Executable Schema Verification: Repository Intelligence Package`
 
 That phase should verify JSON validity, reference consistency, contract
-alignment, shared component reuse, query-execution boundary
-preservation, graph-traversal boundary preservation, result limitation
-disclosure, source attribution, uncertainty preservation, and
-authority-creep safety before another artifact-family schema is
-implemented.
+alignment, shared component reuse, package-boundary preservation,
+reference consistency, false-completeness protection, source
+attribution, uncertainty preservation, and authority-creep safety before
+closing the 119 executable schema implementation line.
