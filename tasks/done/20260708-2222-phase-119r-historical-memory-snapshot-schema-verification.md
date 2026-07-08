@@ -10,7 +10,7 @@ Phase 119R Historical Memory Snapshot schema verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
