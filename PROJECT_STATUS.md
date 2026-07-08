@@ -2,32 +2,64 @@
 
 ## Current Phase
 
-Phase 118B — Historical Memory Architecture
+Phase 118C — Change Impact Analysis Architecture
 (completed).
 
 Architecture-only continuation of Track B: Repository Intelligence.
-Defines Historical Memory as the deterministic, source-attributed,
-inspectable, versioned, read-only temporal layer inside Repository
-Knowledge. Historical Memory describes how repository architecture,
-capabilities, contracts, decisions, repairs, hardening, releases, and
-subsystems evolved over time without becoming model memory,
-conversation memory, an autonomous planner, a decision maker, or an
-execution mechanism.
+Defines Change Impact Analysis as deterministic, source-attributed,
+inspectable, read-only reasoning over Repository Knowledge and
+Historical Memory to identify what may be affected by a proposed or
+observed repository change. Change Impact Analysis describes impact
+subjects, entities, surfaces, relationships, paths, claims, sources,
+evidence links, scope, blast radius, queries, and reports without
+becoming model prediction, autonomous planning, a decision maker,
+enforcement, permission brokering, execution, lifecycle authority, or a
+repository mutation mechanism.
 
-No historical extraction implementation, historical memory database,
-historical memory CLI, dependency graph implementation, change impact
-analysis, source code, tests, runtime behavior, execution,
-authorization, enforcement, lifecycle behavior, Permission Broker
-behavior, Repository State behavior, Repository Skills behavior,
-Advisory behavior, Decision Evaluation behavior, Repository Transition
-Validator behavior, Notification Policy behavior, model integration,
-REST, Dashboard, Web UI, or Telegram inbound path changed.
+No impact analysis engine, impact extraction, impact database, impact
+CLI, dependency graph implementation, historical memory extraction,
+repository knowledge extraction, source code, tests, runtime behavior,
+execution, authorization, enforcement, lifecycle behavior, Permission
+Broker behavior, Repository State behavior, Evidence subsystem behavior,
+Repository Skills behavior, Advisory behavior, Decision Evaluation
+behavior, Repository Transition Validator behavior, Notification Policy
+behavior, model integration, provider orchestration, REST, Dashboard,
+Web UI, automatic patch generation, automatic refactoring, or Telegram
+inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 118C — Change Impact Analysis Architecture.
+Recommended next repo phase: 118D — Dependency Knowledge Graph Architecture.
+
+## Phase 118C Complete
+
+Phase 118C — Change Impact Analysis Architecture (completed).
+
+Architecture-only Change Impact Analysis design for Track B Repository
+Intelligence. The phase defines Change Impact Analysis as a
+deterministic, source-attributed, inspectable, read-only view over
+Repository Knowledge and Historical Memory for identifying what may be
+affected by a proposed or observed change. It defines impact subjects,
+entities, surfaces, relationships, paths, claims, sources, evidence
+links, scope, blast radius, queries, reports, source attribution,
+determinism, uncertainty, verification, query classes, and integrations
+with Evidence, Repository Skills, Advisory, and Decision Evaluation.
+
+**No-go**: no impact analysis engine, impact extraction, impact
+database, impact CLI, dependency graph implementation, historical
+memory extraction, repository knowledge extraction, source
+implementation, test implementation, runtime behavior change,
+execution, authorization, enforcement, lifecycle behavior change,
+Permission Broker change, Repository State behavior change, Evidence
+subsystem behavior change, Repository Skills behavior change, Advisory
+behavior change, Decision Evaluation change, Repository Transition
+Validator behavior change, Notification Policy behavior change, model
+integration, provider orchestration, REST, Dashboard, Web UI, automatic
+patch generation, automatic refactoring, or Telegram inbound.
+
+Recommended next repo phase: 118D — Dependency Knowledge Graph Architecture.
 
 ## Phase 118B Complete
 

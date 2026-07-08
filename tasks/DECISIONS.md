@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- Treat Phase 118C as the architecture-only Change Impact Analysis
+  phase for Track B Repository Intelligence: Change Impact Analysis is
+  deterministic, source-attributed, inspectable reasoning over
+  Repository Knowledge and Historical Memory to identify what may be
+  affected by a proposed or observed repository change. It may define
+  impact subjects, entities, surfaces, relationships, paths, claims,
+  sources, evidence links, scope, blast radius, queries, and reports;
+  may produce evidence candidates; and may strengthen Advisory through
+  bounded impact context. It must not become model prediction,
+  autonomous planning, a decision maker, an enforcement layer, a
+  Permission Broker, a lifecycle authority, an execution mechanism, a
+  repository mutator, a dependency graph implementation, an impact
+  extraction engine, an impact database, an impact CLI, a test runner,
+  automatic patch generation, automatic refactoring, or a bypass around
+  Decision Evaluation / the Repository Transition Validator.
 - Treat Phase 118B as the architecture-only Historical Memory phase for
   Track B Repository Intelligence: Historical Memory is a deterministic,
   source-attributed, inspectable, versioned, read-only temporal layer

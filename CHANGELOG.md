@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 118C — Change Impact Analysis Architecture
+  (`docs/PHASE_118_CHANGE_IMPACT_ANALYSIS_ARCHITECTURE.md`). Defines
+  Change Impact Analysis as deterministic, source-attributed,
+  inspectable, read-only reasoning over Repository Knowledge and
+  Historical Memory to identify what may be affected by a proposed or
+  observed repository change. The architecture distinguishes Change
+  Impact Analysis from Repository Knowledge, Historical Memory,
+  Repository State, Evidence, Advisory Context, Decision Evaluation, and
+  model prediction; defines impact subjects, entities, surfaces,
+  relationships, paths, claims, sources, evidence links, scope, blast
+  radius, queries, and reports; and documents source attribution,
+  determinism, uncertainty, verification, query classes, report shape,
+  and integrations with Evidence, Repository Skills, Advisory, and
+  Decision Evaluation. Architecture only; no impact engine, extraction,
+  database, CLI, dependency graph implementation, historical memory
+  extraction, repository knowledge extraction, source, test, runtime
+  behavior, execution, enforcement, lifecycle, Permission Broker,
+  Advisory, Evidence, Repository Skills, Decision Evaluation, REST,
+  Dashboard, Web UI, model integration, provider orchestration,
+  autonomous coding, automatic patch generation, automatic refactoring,
+  or Telegram inbound changes.
+
 - Phase 118B — Historical Memory Architecture
   (`docs/PHASE_118_HISTORICAL_MEMORY_ARCHITECTURE.md`). Defines
   Historical Memory as the deterministic, source-attributed, inspectable,
