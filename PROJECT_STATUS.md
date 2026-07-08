@@ -2,27 +2,26 @@
 
 ## Current Phase
 
-Phase 119F — Repository Intelligence Artifact Contract Verification
+Phase 119G — Repository Intelligence Executable Schema Architecture
 (completed).
 
-Artifact-contract-verification-only continuation of Track B: Repository
-Intelligence. Verifies the frozen Repository Intelligence artifact
-contract from Phase 119E. Concludes the artifact contract is internally
-consistent, contradiction-free, 119A-invariant-preserving, and ready to
-constrain future executable schema architecture, prototype planning,
-query/report artifacts, Repository Skills exposure, and Advisory
-consumers. Verifies the common artifact envelope, all twelve artifact
-family contracts, 27 mandatory invariants, source attribution contract
-with 14-type locator vocabulary, evidence link contract,
-uncertainty/verification contract with 14 state values,
-conflict/supersession contract, derivation disclosure contract,
-versioning/snapshot contract, 24 forbidden artifact claims, five
-conformance states, and 12×10 compatibility matrix. Assesses readiness
-for executable schema architecture, prototype planning, query/report
-artifacts, Repository Skills exposure, and Advisory consumers. Includes
-non-conformance examples, contract-preserving examples, future artifact
-conformance checklist, risks, and observations. 21 observations
-identified; none rise to contract violations.
+Executable-schema-architecture-only continuation of Track B: Repository
+Intelligence. Defines how the frozen 119E artifact contract, verified in
+119F, should later be translated into executable schema artifacts without
+changing contract meaning, adding authority, or enabling execution.
+Defines executable schemas in PCAE terms; distinguishes executable
+schemas from conceptual schemas and the artifact contract; preserves
+non-authority; defines future schema families for all twelve frozen
+artifact families; defines shared schema components, common envelope
+representation, field classification, structural versus semantic versus
+manual/future-governance validation, forbidden claim validation, source
+attribution validation, evidence link validation, uncertainty and
+verification-state validation, conflict/supersession validation,
+derivation disclosure validation, versioning and compatibility, future
+file organization, future validator boundaries, future test architecture,
+artifact generation constraints, Repository Skills integration, Advisory
+consumer integration, Decision Evaluation boundary preservation, and
+read-only/no-execution boundary preservation.
 
 No executable schema, JSON Schema, Pydantic model, dataclass, validator,
 contract verifier, CLI, automated tests, repository intelligence
@@ -43,7 +42,45 @@ changed.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119G — Repository Intelligence Executable Schema Architecture.
+Recommended next repo phase: 119H — Repository Intelligence Executable Schema Contract Freeze.
+
+## Phase 119G Complete
+
+Phase 119G — Repository Intelligence Executable Schema Architecture
+(completed).
+
+Executable-schema-architecture-only phase for Track B Repository
+Intelligence. Defines how future executable schema artifacts should
+represent the frozen 119E artifact contract verified in 119F. Establishes
+that executable schemas validate artifact structure and may support
+future conformance checks, but do not decide, authorize, execute,
+enforce, replace Evidence, replace Repository State, replace Decision
+Evaluation, or expand Advisory authority. Defines future schema families
+for all twelve frozen artifact families and shared components for the
+common envelope, repository/phase/release context, source attribution,
+evidence links, verification and uncertainty states, conflict and
+supersession states, derivation disclosure, limitations, and boundary
+disclaimers. Distinguishes structural validation from semantic validation
+and manual/future-governance validation. Recommends future canonical
+schema placement under `schemas/repository_intelligence/` without
+creating directories. Defines validator responsibilities and prohibitions,
+future test strategy, artifact generation constraints, Repository Skills
+integration, Advisory consumer integration, versioning and compatibility,
+risks, open questions, and readiness for executable schema contract
+freeze.
+
+**No-go**: no executable schema, JSON Schema, Pydantic model, dataclass,
+validator, artifact contract verifier, schema verification CLI,
+automated tests, schema directories, extraction, graph construction,
+impact engine, advisory behavior, Advisory Runtime, Advisory Context
+Package, Evidence, Repository Skills, Decision Evaluation, source, test,
+runtime behavior, execution, enforcement, lifecycle, Permission Broker,
+REST, Dashboard, Web UI, Telegram inbound, provider orchestration,
+autonomous coding, model capability expansion, repository mutation,
+automatic patch generation, or automatic refactoring.
+
+Recommended next repo phase: 119H — Repository Intelligence Executable
+Schema Contract Freeze.
 
 ## Phase 119F Complete
 

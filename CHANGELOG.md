@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Phase 119G - Repository Intelligence Executable Schema Architecture
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_ARCHITECTURE.md`).
+  Defines how PCAE should later translate the frozen Repository
+  Intelligence artifact contract from 119E, verified in 119F, into
+  executable schema artifacts without changing contract meaning, adding
+  authority, or enabling execution. Defines executable schemas in PCAE
+  terms; distinguishes executable schemas from conceptual schemas and the
+  artifact contract; preserves non-authority; defines future schema
+  families for all twelve frozen artifact families, shared schema
+  components, common envelope representation, field classification,
+  structural versus semantic versus manual/future-governance validation,
+  forbidden claim validation, source attribution validation, evidence
+  link validation, uncertainty/verification-state validation,
+  conflict/supersession validation, derivation disclosure validation,
+  versioning and compatibility, future file organization, future
+  validator boundaries, future test architecture, artifact generation
+  constraints, Repository Skills integration, Advisory consumer
+  integration, Decision Evaluation boundary preservation, read-only and
+  no-execution boundary preservation, risks, open questions, and
+  readiness for 119H executable schema contract freeze. Architecture
+  only; no executable schema, JSON Schema, Pydantic model, dataclass,
+  validator, verifier, CLI, automated tests, schema directory,
+  extraction, graph construction, impact engine, advisory behavior,
+  Evidence, Repository Skills, Decision Evaluation, source, test,
+  runtime behavior, execution, enforcement, lifecycle, Permission
+  Broker, REST, Dashboard, Web UI, provider orchestration, autonomous
+  coding, automatic patch generation, automatic refactoring, repository
+  mutation, or Telegram inbound changes.
+
 - Phase 119F - Repository Intelligence Artifact Contract Verification
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_VERIFICATION.md`).
   Verifies the frozen 119E artifact contract across all dimensions.
