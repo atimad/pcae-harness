@@ -10,7 +10,7 @@ Phase 119M Repository Intelligence first artifact-family schema
 
 ## Status
 
-active
+done
 
 ## Mode
 
