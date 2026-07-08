@@ -2,56 +2,122 @@
 
 ## Current Phase
 
-Phase 119AA — Repository Intelligence Executable Schema Implementation:
+Phase 119AB — Repository Intelligence Executable Schema Verification:
 Repository Intelligence Package
 (completed).
 
-Implementation phase for Track B Repository Intelligence. Implements
-the eighth and final artifact-family schema for the current executable
-schema implementation line:
+Verification phase for Track B Repository Intelligence. Verifies the
+Repository Intelligence Package schema implemented in 119AA:
 `schemas/repository_intelligence/artifacts/repository_intelligence_package.schema.json`.
-The schema is standalone JSON Schema Draft 2020-12, references verified
-shared components, includes the common artifact envelope relationship,
-and structurally represents package identity, package composition
-(declared included/optional/omitted artifact references and rationale),
-included artifact records (referencing any of the other seven artifact
-families), package provenance (declared/imported/manually_assembled/
-future_generated/source_claimed), an integrity disclosure (declared
-counts and consistency status, not computed checksums), compatibility
-claims (declared, not enforced), a package index, package summaries,
-package exclusions, unknowns and gaps, limitations, boundary
-disclosures, disclaimers, and the Repository Intelligence Package
-boundary disclaimer.
+Confirms JSON parse validity, JSON Schema Draft 2020-12 declaration,
+`$id` uniqueness, `$ref` resolution (477 local refs across twenty
+schema files), shared component reuse, the common artifact envelope
+relationship, package identity, package composition, included artifact
+records and their artifact type enum, package provenance and its
+provenance type enum, integrity disclosure, compatibility claims and
+their compatibility status enum, package index, package summaries,
+package exclusions, unknowns/gaps, Evidence link structure, boundary
+disclosures, disclaimers, `additionalProperties` policy, and
+authority-creep-free language. No schema or shared-component
+corrections were required.
 
-No validator, validation library, schema verification CLI, automated
-test suite, Python model, Pydantic model, dataclass, repository
-intelligence extraction, repository knowledge extraction, repository
-scanning, dependency extraction, dependency scanning, diff analysis,
-git history analysis, timeline generation, change impact analysis
-engine, impact prediction, blast-radius computation, dependency graph
-construction, graph traversal, graph query engine, query execution,
-query engine, query result generation, query ranking, package
-generation, package validation, package builder, package registry,
-package integrity computation, Advisory Intelligence Context
-generation, Advisory Context Package generation, advisory behavior
-change, Advisory Runtime change, Advisory integration, Evidence
-subsystem change, Repository Skills change, Decision Evaluation change
-or replacement, source code change, test code change, runtime behavior
-change, execution, shell mediation, enforcement, lifecycle behavior
-change, Permission Broker behavior change, Repository State behavior
-change, Repository Transition Validator behavior change, Notification
-Policy behavior change, REST, Dashboard, Web UI, provider orchestration,
-autonomous coding, model capability expansion, automatic patch
-generation, automatic refactoring, repository mutation outside planned
-schema/docs/status files, runtime plugin change, or Telegram inbound
-path changed.
+Explicitly confirmed the schema does not generate packages, validate
+packages at runtime, implement a package builder or registry, compute
+package integrity, execute queries, traverse graphs, or integrate
+Advisory: provenance/integrity/compatibility fields all carry
+in-schema disclaimers, and every artifact reference is a declared
+locator rather than computed output.
+
+Also documented an inherited, non-blocking governance-tooling defect
+discovered during 119AA finalization: `pcae phase complete`'s
+`is_phase_id_backward()` helper compares letter-suffix phase-id
+branches as plain strings, misclassifying 119AA as "before" 119Z; 119AA
+worked around it with a documentation-only metadata reformat, and the
+underlying `src/pcae/core/phase_reports.py` bug remains open for a
+future governance-repair phase.
+
+No new artifact-family schema, validator, validation library, schema
+verification CLI, automated test suite, Python model, Pydantic model,
+dataclass, repository intelligence extraction, repository knowledge
+extraction, repository scanning, dependency extraction, dependency
+scanning, diff analysis, git history analysis, timeline generation,
+change impact analysis engine, impact prediction, blast-radius
+computation, dependency graph construction, graph traversal, graph
+query engine, query execution, query engine, query result generation,
+query ranking, package generation, package validation, package
+builder, package registry, package integrity computation, Advisory
+Intelligence Context generation, Advisory Context Package generation,
+advisory behavior change, Advisory Runtime change, Advisory
+integration, Evidence subsystem change, Repository Skills change,
+Decision Evaluation change or replacement, source code change, test
+code change, runtime behavior change, execution, shell mediation,
+enforcement, lifecycle behavior change, Permission Broker behavior
+change, Repository State behavior change, Repository Transition
+Validator behavior change, Notification Policy behavior change, REST,
+Dashboard, Web UI, provider orchestration, autonomous coding, model
+capability expansion, automatic patch generation, automatic
+refactoring, repository mutation outside planned schema/docs/status
+files, runtime plugin change, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119AB — Repository Intelligence Executable
-Schema Verification: Repository Intelligence Package.
+Recommended next repo phase: 119AC — Repository Intelligence Executable
+Schema Final Review.
+
+## Phase 119AB Complete
+
+Phase 119AB — Repository Intelligence Executable Schema Verification:
+Repository Intelligence Package (completed).
+
+Narrow schema-verification-only phase, the final per-family
+verification in the current executable schema implementation line.
+Verifies
+`schemas/repository_intelligence/artifacts/repository_intelligence_package.schema.json`
+implemented in 119AA. Adds
+`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_INTELLIGENCE_PACKAGE_VERIFICATION.md`
+with 48 verification sections covering JSON parse validity, schema
+declaration, draft consistency, `$id` uniqueness, `$ref` resolution,
+shared component reuse, common artifact envelope relationship, package
+identity, package composition, included artifact records and artifact
+type enum, package provenance and provenance type enum, integrity
+disclosure, compatibility claims and compatibility status enum,
+package index, package summaries, package exclusions, unknowns/gaps,
+Evidence link structure, boundary disclosures, disclaimers,
+`additionalProperties` policy, authority-creep language review,
+documentation review, scope/no-go verification, and explicit
+package-generation-non-implementation, package-validation-non-
+implementation, package-builder-non-implementation,
+package-registry-non-implementation,
+package-integrity-computation-non-implementation,
+query-execution-non-implementation, graph-traversal-non-
+implementation, and Advisory-integration-non-implementation
+confirmations. No schema or shared-component corrections were
+required.
+
+**No-go**: no new artifact-family schema, validator, validation
+library, schema verification CLI, automated test suite, Python models,
+Pydantic models, dataclasses, Repository Intelligence extraction,
+Repository Knowledge extraction, repository scanning, dependency
+extraction, dependency scanning, diff analysis, git history analysis,
+timeline generation, change impact analysis engine, impact prediction,
+blast-radius computation, graph construction, graph traversal, graph
+query engine, query execution, query engine, query result generation,
+query ranking, package generation, package validation, package
+builder, package registry, package integrity computation, Advisory
+Intelligence Context generation, Advisory Context Package generation,
+Advisory behavior, Advisory Runtime, Advisory integration, Evidence,
+Repository Skills, Decision Evaluation change or replacement, source
+code, test code, runtime behavior, execution, shell mediation,
+Permission Broker, lifecycle redesign, REST, Dashboard, Web UI,
+Telegram inbound, provider selection, multi-model orchestration,
+autonomous coding, model capability expansion, repository mutation
+outside planned docs files, runtime plugin changes, Repository State
+changes, automatic patch generation, or automatic refactoring.
+
+Recommended next repo phase: 119AC — Repository Intelligence Executable
+Schema Final Review.
 
 ## Phase 119AA Complete
 
