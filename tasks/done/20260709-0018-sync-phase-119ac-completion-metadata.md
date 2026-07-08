@@ -10,7 +10,7 @@ Sync Phase 119AC completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
