@@ -2,64 +2,72 @@
 
 ## Current Phase
 
-Phase 120A — Repository Intelligence Read-Only Prototype Architecture
+Phase 120B — Repository Intelligence Prototype Contract Freeze
 (completed).
 
-Architecture-only phase opening Track 120. Defines
-`docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md`,
-answering how PCAE architecture should support a future read-only
-Repository Intelligence prototype that generates schema-conforming
-artifacts from the frozen 119 schema line without execution, mutation,
-Advisory authority, Decision Evaluation replacement, runtime behavior
-change, or repository-state authority. Defines nine conceptual
-prototype stages (source inventory, source attribution, deterministic
-extraction planning, artifact assembly, schema-shape alignment,
-limitation/unknown capture, boundary/disclaimer attachment, output
-persistence, verification/reporting), eight architectural layers
-(Schema Contract, Source Observation, Attribution, Artifact Assembly,
-Boundary/Disclaimer, Persistence, Verification, Human Review),
-conceptual input/output models, read-only guarantees, source
-attribution architecture, Evidence boundary architecture, uncertainty/
-unknown handling, limitation/disclaimer architecture, boundary
-disclosure architecture, conceptual (non-final) persistence
-architecture, verification architecture, governance architecture, and
-failure/no-go conditions. Names Repository Knowledge Snapshot as the
-first future prototype target, grounded in Phase 118A's read-only
-production model and 118's own "Historical Memory/Dependency Graph/
-Change Impact emerge from Repository Knowledge" architecture. Defines
-the Track 120 roadmap (120B-120F committed candidates; 121-125+
-tentative, not activated). No schema or shared-component was changed.
-
-Documented and classified the same three known inherited, non-blocking
-tooling/reporting issues carried forward from 119AC (119Q
-report-generation-ordering defect, `is_phase_id_backward()` phase-id
-comparison bug, recurring Telegram notification-timing detail); none
-blocks 120A or the 120B-120F architecture, and none was repaired in
-this phase.
-
-No implementation, generator, generated artifact, repository scanning,
-extraction, validator, validation library, schema verification CLI,
-automated test suite, Python model, Pydantic model, dataclass, runtime
-behavior change, Advisory behavior change, Decision Evaluation change
-or replacement, source code change, test code change, or execution was
-introduced. No new artifact-family schema, package generation,
-package validation, query execution, graph traversal, Advisory
-integration, Evidence subsystem change, Repository Skills change,
-Permission Broker behavior change, Repository State behavior change,
-Repository Transition Validator behavior change, Notification Policy
-behavior change, REST, Dashboard, Web UI, provider orchestration,
-autonomous coding, model capability expansion, automatic patch
-generation, automatic refactoring, repository mutation outside planned
-docs/status files, or runtime plugin change occurred. Repair of the
-known inherited tooling/reporting issues was explicitly out of scope
-for this phase.
+Documentation-only phase freezing the canonical contract governing the
+first Repository Intelligence read-only prototype. Adds
+`docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md`,
+the normative specification binding all later Track 120 implementation
+work (120D-120F). Freezes: Repository Knowledge Snapshot as the sole
+first-prototype target (no other artifact family included); the
+conceptual input model (repository working tree, repository metadata,
+tracked documentation/artifacts, governed lifecycle metadata, verified
+119 schemas — explicitly excluding external services, AI inference,
+network sources, runtime state mutation, and execution outputs); the
+conceptual output model (one schema-conformant, deterministic,
+read-only, fully attributable Repository Knowledge Snapshot per run);
+a determinism contract (identical inputs must produce identical
+structure, excluding approved metadata, with no probabilistic
+reasoning); ten read-only guarantees; a source attribution contract
+(every fact sourced, missing attribution is contract failure); the
+Evidence boundary (Repository Intelligence is not Evidence and must
+never replace it); an uncertainty contract (unknown/incomplete/
+conflicting/unverifiable must be explicit, never inferred); a
+limitation contract (limitation records, disclaimers, boundary
+disclosures, uncertainty records); the ten conceptual prototype stages
+carried forward from 120A; a persistence contract that defers the
+final output-location choice to 120D without selecting among 120A's
+three candidates; a verification contract with no validators
+implemented; a fail-closed failure contract; and a governance contract.
+Documents relationship to 120C-120F and the same three known
+inherited, non-blocking tooling/reporting issues carried forward
+unchanged from 119AC/120A. No schema, source, or test file was
+changed; no generator, validator, CLI, or automated test suite was
+implemented.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 120B — Repository Intelligence Prototype
-Contract Freeze.
+Recommended next repo phase: 120C — Repository Intelligence Prototype
+Contract Verification.
+
+## Phase 120B Complete
+
+Phase 120B — Repository Intelligence Prototype Contract Freeze
+(completed).
+
+Froze `docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md`
+as the normative specification for the first Repository Intelligence
+read-only prototype, binding on 120D-120F. Restricted the first
+prototype to generating only Repository Knowledge Snapshot artifacts.
+Froze the conceptual input model (allowed: repository working tree,
+repository metadata, tracked documentation/artifacts, governed
+lifecycle metadata, verified 119 schemas; excluded: external services,
+AI inference, network sources, runtime state mutation, execution
+outputs) and output model (one schema-conformant, deterministic,
+read-only, fully attributable snapshot per run). Froze a determinism
+contract, ten read-only guarantees, a source attribution contract, the
+Evidence boundary, an uncertainty contract, a limitation contract, the
+ten conceptual prototype stages, a persistence contract (deferring the
+final location choice to 120D among 120A's three candidates), a
+verification contract (no validators implemented), a fail-closed
+failure contract, and a governance contract. Documented relationship
+to 120C-120F and carried forward the same three known inherited,
+non-blocking tooling/reporting issues from 119AC/120A without repairing
+them. No schema, source, or test file was changed; no generator,
+validator, CLI, or automated test suite was implemented.
 
 ## Phase 120A Complete
 

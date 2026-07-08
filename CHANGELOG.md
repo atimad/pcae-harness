@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 120B - Repository Intelligence Prototype Contract Freeze
+  (`docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md`).
+  Documentation-only phase freezing the canonical contract governing
+  the first Repository Intelligence read-only prototype, normative for
+  120D-120F. Restricts the first prototype to Repository Knowledge
+  Snapshot only. Freezes the conceptual input model (allowed:
+  repository working tree, repository metadata, tracked documentation
+  and artifacts, governed lifecycle metadata, verified 119 schemas;
+  excluded: external services, AI inference, network sources, runtime
+  state mutation, execution outputs) and output model (one
+  schema-conformant, deterministic, read-only, fully attributable
+  snapshot per run). Freezes a determinism contract, ten read-only
+  guarantees, a source attribution contract (missing attribution is
+  contract failure), the Evidence boundary (Repository Intelligence is
+  not Evidence and must never replace it), an uncertainty contract, a
+  limitation contract, the ten conceptual prototype stages carried
+  forward from 120A, a persistence contract deferring the final output
+  location to 120D among 120A's three candidates, a verification
+  contract with no validators implemented, a fail-closed failure
+  contract, and a governance contract. Documents relationship to
+  120C-120F and carries forward the same three known inherited,
+  non-blocking tooling/reporting issues from 119AC/120A without
+  repairing them. Recommends 120C. Documentation-only; no generator,
+  generated artifact, validator, CLI, Python models, Pydantic models,
+  dataclasses, automated test suite, source code, test code, runtime
+  behavior change, Advisory integration, query engine, graph
+  traversal, execution planning, or execution capability.
+
 - Phase 120A - Repository Intelligence Read-Only Prototype Architecture
   (`docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md`).
   Architecture-only phase opening Track 120. Defines how PCAE
