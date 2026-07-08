@@ -10,7 +10,7 @@ Phase 119S Dependency Knowledge Graph Snapshot schema implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
