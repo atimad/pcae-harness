@@ -2,6 +2,28 @@
 
 ## Accepted
 
+- Treat Phase 119H as executable-schema-contract-freeze-only: freeze the
+  initial Repository Intelligence executable schema contract based on the
+  119G executable schema architecture and constrained by the 119E
+  artifact contract and 119F artifact-contract verification. Freeze
+  executable schema purpose, non-authority, schema family inventory,
+  shared schema components, common envelope representation, field
+  classification, structural-validation scope, semantic/manual validation
+  boundaries, forbidden-claim boundaries, source attribution, evidence
+  links, uncertainty/verification, conflict/supersession, derivation,
+  versioning/compatibility, validator constraints, test expectations,
+  file organization, generator constraints, Repository Skills exposure,
+  Advisory consumer constraints, Decision Evaluation boundary, and
+  read-only/no-execution boundary. Do not implement executable schemas,
+  JSON Schema, Pydantic models, dataclasses, validators, CLIs, tests,
+  schema directories, extraction, graph construction, impact analysis,
+  advisory behavior, Evidence changes, Repository Skills changes,
+  Decision Evaluation changes, runtime behavior, execution, enforcement,
+  Permission Broker changes, repository mutation, automatic patch
+  generation, automatic refactoring, or Telegram inbound capability.
+  Preferred next phase: 119I — Repository Intelligence Executable Schema
+  Contract Verification.
+
 - Treat Phase 119G as executable-schema-architecture-only: define how the
   frozen 119E Repository Intelligence artifact contract, verified in
   119F, should later be translated into executable schema artifacts

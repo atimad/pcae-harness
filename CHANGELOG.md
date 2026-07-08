@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 119H - Repository Intelligence Executable Schema Contract Freeze
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`).
+  Freezes the initial Repository Intelligence executable schema contract
+  based on the 119G architecture and constrained by the 119E artifact
+  contract and 119F artifact-contract verification. Freezes executable
+  schema purpose, non-authority, schema family inventory, shared schema
+  components, common envelope schema expectations, field classification,
+  structural validation scope, semantic and manual/future-governance
+  validation boundaries, forbidden-claim boundaries, source attribution,
+  evidence links, uncertainty/verification states,
+  conflict/supersession, derivation disclosure, versioning and
+  compatibility, file organization recommendation, future validator
+  constraints, future test expectations, artifact generation
+  constraints, Repository Skills integration constraints, Advisory
+  consumer constraints, Decision Evaluation boundary, read-only
+  boundary, and no-execution boundary. Includes non-conformance
+  examples, contract-preserving examples, a future executable schema
+  conformance checklist, risks, open questions, and recommends 119I —
+  Repository Intelligence Executable Schema Contract Verification.
+  Contract freeze only; no executable schema, JSON Schema, Pydantic
+  model, dataclass, validator, verifier, CLI, automated tests, schema
+  directory, extraction, graph construction, impact engine, advisory
+  behavior, Evidence, Repository Skills, Decision Evaluation, source,
+  test, runtime behavior, execution, enforcement, lifecycle, Permission
+  Broker, REST, Dashboard, Web UI, provider orchestration, autonomous
+  coding, automatic patch generation, automatic refactoring, repository
+  mutation, or Telegram inbound changes.
+
 - Phase 119G - Repository Intelligence Executable Schema Architecture
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_ARCHITECTURE.md`).
   Defines how PCAE should later translate the frozen Repository
