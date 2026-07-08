@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 120B completion metadata (20260709-0037-sync-phase-120b-completion-metadata)
 - Phase 120B: Repository Intelligence Prototype Contract Freeze (20260709-0036-phase-120b-repository-intelligence-prototype-contract-freeze)
 - Sync Phase 120A completion metadata (20260709-0030-sync-phase-120a-completion-metadata)
 - Phase 120A: Repository Intelligence Read-Only Prototype Architecture (20260709-0030-phase-120a-repository-intelligence-read-only-prototype-architecture)
