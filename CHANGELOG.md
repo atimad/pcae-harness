@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 119D - Repository Intelligence Conceptual Schema Review
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONCEPTUAL_SCHEMA_REVIEW.md`).
+  Reviews the 119C conceptual schema architecture against the 119A
+  contract and 119B verification expectations. Concludes the conceptual
+  schema family set is coherent and ready for artifact contract freeze
+  with minor clarifications. Reviews the schema family inventory, common
+  artifact envelope, each conceptual schema family, relationship model,
+  contract invariant mapping, source attribution, evidence links,
+  determinism/derivation, uncertainty/conflict/supersession,
+  versioning/snapshots, boundary representation, non-normative examples,
+  implementation leakage, completeness, overlap, simplification
+  opportunities, risks, and recommends 119E — Repository Intelligence
+  Artifact Contract Freeze. Review only; no artifact contract freeze,
+  executable schema, JSON Schema, Pydantic model, dataclass, validator,
+  verifier, CLI, automated tests, extraction, graph construction, impact
+  engine, advisory behavior, Evidence, Repository Skills, Decision
+  Evaluation, source, test, runtime behavior, execution, enforcement,
+  lifecycle, Permission Broker, REST, Dashboard, Web UI, provider
+  orchestration, autonomous coding, automatic patch generation,
+  automatic refactoring, repository mutation, or Telegram inbound
+  changes.
+
 - Phase 119C - Repository Intelligence Conceptual Schema Architecture
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONCEPTUAL_SCHEMA_ARCHITECTURE.md`).
   Defines implementation-independent conceptual schema architecture for
