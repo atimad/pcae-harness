@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 118E — Advisory Reasoning Expansion Architecture
+  (`docs/PHASE_118_ADVISORY_REASONING_EXPANSION_ARCHITECTURE.md`).
+  Defines how PCAE Advisory should eventually consume Repository
+  Intelligence context from Repository Knowledge, Historical Memory,
+  Change Impact Analysis, Dependency Knowledge Graph, Evidence,
+  Repository Skills, Advisory Repository Skills, Advisory Context
+  Packages, and canonical lifecycle artifacts while remaining
+  non-authoritative. The architecture distinguishes expanded Advisory
+  from Decision Evaluation, model inference, autonomous planning,
+  execution, Repository State, Evidence, and Repository Skills; defines
+  advisory claims, explanations, recommendations, context items,
+  evidence links, sources, uncertainty, limitations, reasoning traces,
+  knowledge/historical/impact/graph references, handoff, and reports;
+  and documents advisory input, output, reasoning trace, source
+  attribution, uncertainty, recommendation, handoff, and integration
+  models. Architecture only; no advisory behavior changes, Advisory
+  Runtime changes, Advisory Context Package changes, advisory CLI,
+  reasoning engine, model integration, provider orchestration,
+  Repository Knowledge extraction, Historical Memory extraction, Change
+  Impact Analysis engine, dependency graph construction, Evidence,
+  Repository Skills, Decision Evaluation, source, test, runtime
+  behavior, execution, enforcement, lifecycle, Permission Broker, REST,
+  Dashboard, Web UI, autonomous coding, automatic patch generation,
+  automatic refactoring, or Telegram inbound changes.
+
 - Phase 118D — Dependency Knowledge Graph Architecture
   (`docs/PHASE_118_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`). Defines
   the Dependency Knowledge Graph as a deterministic, source-attributed,

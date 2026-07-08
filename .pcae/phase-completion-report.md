@@ -1,297 +1,281 @@
-# Phase 118D Complete - Dependency Knowledge Graph Architecture
+# Phase 118E Complete - Advisory Reasoning Expansion Architecture
 
-- **Phase ID:** `118D`
+- **Phase ID:** `118E`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 9
 - **Tests run:** governance validation only
-- **Commits:** `20c5a2a9662a332534c16f92bb37743f7c7f19a9`
+- **Commits:** pending governed commit
 - **Pushed:** pending
-- **origin/main..HEAD:** 1 before push
+- **origin/main..HEAD:** pending
 
 ## Summary
 
-Phase 118D defines the Dependency Knowledge Graph as deterministic,
-source-attributed, inspectable, versioned, read-only relationship
-structure inside Repository Knowledge.
+Phase 118E defines Advisory Reasoning Expansion as the architecture by
+which PCAE Advisory may eventually consume deterministic,
+source-attributed Repository Intelligence context to produce better
+explanations, recommendations, uncertainty statements, evidence-gap
+summaries, reasoning traces, and structured handoff context.
 
-The graph represents repository entities as nodes, repository-derived
-relationships as typed directional edges, and dependency assertions as
-source-backed claims with sources, evidence links, dependency types,
-direction, strength, scope, verification states, paths, views,
-snapshots, queries, and reports.
-
-It is structured relationship knowledge, not runtime orchestration,
-execution planning, command routing, enforcement, permission brokering,
-autonomous planning, or a decision maker.
+The phase strengthens Advisory reasoning quality without increasing
+Advisory authority. Advisory may become more informed. Advisory must
+not become a decision maker, execution planner, permission broker,
+enforcement layer, lifecycle authority, model orchestration system, or
+repository mutation mechanism.
 
 ## Architecture Produced
 
-- Created `docs/PHASE_118_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`.
-- Defined the Dependency Knowledge Graph and its Track B role.
-- Distinguished the graph from Repository Knowledge, Historical Memory,
-  Change Impact Analysis, conventional code dependency graphs,
-  Repository State, Evidence, Advisory Context, Decision Evaluation, and
-  execution.
-- Defined core primitives: Graph Node, Graph Edge, Dependency Claim,
-  Dependency Source, Dependency Evidence Link, Dependency Type,
-  Dependency Direction, Dependency Strength, Dependency Scope,
-  Dependency Verification State, Dependency Path, Dependency View,
-  Dependency Snapshot, Dependency Query, and Dependency Report.
-- Defined node, edge, dependency type, directionality, source
-  attribution, determinism, uncertainty, verification, versioning,
-  query, graph view, path, and report models.
+- Created `docs/PHASE_118_ADVISORY_REASONING_EXPANSION_ARCHITECTURE.md`.
+- Defined Advisory Reasoning Expansion and its Track B role.
+- Distinguished expanded Advisory from current Advisory, Decision
+  Evaluation, model inference, autonomous planning, Repository State,
+  Evidence, Repository Skills, and execution.
+- Defined core primitives: Advisory Claim, Advisory Explanation,
+  Advisory Recommendation, Advisory Context Item, Advisory Context
+  Package, Advisory Evidence Link, Advisory Source, Advisory
+  Uncertainty, Advisory Limitation, Advisory Reasoning Trace, Advisory
+  Knowledge Reference, Advisory Historical Reference, Advisory Impact
+  Reference, Advisory Graph Reference, Advisory Handoff, and Advisory
+  Report.
+- Defined advisory input, output, reasoning trace, source attribution,
+  uncertainty, recommendation, and handoff models.
 - Defined integrations with Repository Knowledge, Historical Memory,
-  Change Impact Analysis, Evidence, Repository Skills, Advisory, and
-  Decision Evaluation.
-- Preserved the read-only, no-execution boundary.
+  Change Impact Analysis, Dependency Knowledge Graph, Evidence,
+  Repository Skills, Advisory Context Packages, and Decision Evaluation.
+- Preserved the read-only, non-authoritative, no-execution boundary.
 
-## Dependency Knowledge Graph Definition
+## Advisory Reasoning Expansion Definition
 
-Dependency Knowledge Graph is the deterministic, source-attributed,
-versioned graph view inside Repository Knowledge that represents
-repository entities as nodes and repository-derived relationships as
-typed, directional, inspectable edges with dependency claims, sources,
-evidence links, verification states, uncertainty, and snapshots.
+Advisory Reasoning Expansion is the architecture by which PCAE Advisory
+may consume deterministic, source-attributed Repository Intelligence
+context to produce better explanations, recommendations, uncertainty
+statements, evidence-gap summaries, and structured handoff context while
+remaining read-only and non-authoritative.
 
 ## Conceptual Boundaries
 
-Dependency Knowledge Graph vs Repository Knowledge:
-Repository Knowledge is the broader semantic map. The graph is the
-relationship layer inside it.
+Advisory vs Decision Evaluation:
+Advisory explains, recommends, preserves uncertainty, identifies
+evidence gaps, and packages context. Decision Evaluation remains the
+only component responsible for allow/block/escalate/more-evidence
+decisions.
 
-Dependency Knowledge Graph vs Historical Memory:
-Historical Memory is temporal lineage. The graph is structural
-relationship knowledge that can include temporal edges used by
-Historical Memory.
+Advisory vs model inference:
+Advisory may use model-produced content only as advisory/probabilistic
+evidence or explanation. Hidden model state, prompt wording,
+conversation memory, and model confidence are not canonical sources of
+truth.
 
-Dependency Knowledge Graph vs Change Impact Analysis:
-The graph provides reusable dependency paths, reverse edges, edge types,
-views, and uncertainty states. Change Impact Analysis applies those
-relationships to a specific proposed or observed change.
-
-Dependency Knowledge Graph vs conventional code dependency graph:
-The PCAE graph includes code dependencies, but also documentation,
-tests, contracts, evidence, advisory, historical, governance, lifecycle,
-release, capability, subsystem, and no-go relationships with source
-attribution and uncertainty.
+Advisory vs autonomous planning:
+Advisory may recommend review, evidence collection, or inspection. It
+must not produce authoritative executable plans, patch plans,
+refactoring plans, shell-command plans, commit/push plans, or lifecycle
+transition plans.
 
 ## Core Primitives Summary
 
-The architecture defines Graph Node, Graph Edge, Dependency Claim,
-Dependency Source, Dependency Evidence Link, Dependency Type,
-Dependency Direction, Dependency Strength, Dependency Scope, Dependency
-Verification State, Dependency Path, Dependency View, Dependency
-Snapshot, Dependency Query, and Dependency Report.
+Expanded Advisory uses source-attributed advisory claims,
+human-readable explanations, non-authoritative recommendations,
+bounded context items/packages, evidence links, sources, uncertainty,
+limitations, reasoning traces, Repository Knowledge references,
+Historical Memory references, Change Impact Analysis references,
+Dependency Knowledge Graph references, structured handoffs, and
+advisory reports.
 
-## Node Model
+## Advisory Input Model Summary
 
-Nodes may represent source modules, packages, commands, CLI surfaces,
-runtime components, repository skills, advisory skills, evidence
-artifacts, decision evaluation inputs, architecture documents, contract
-documents, verification documents, phase reports, phase metadata, task
-contracts, changelog entries, tests, suites, release records, tags,
-commits, no-go boundaries, subsystems, capabilities, and architectural
-contracts.
+Advisory may later receive structured context from Repository Knowledge,
+Historical Memory, Change Impact Analysis, Dependency Knowledge Graph,
+Evidence, Repository Skills, Advisory Repository Skills, Advisory
+Context Packages, and canonical lifecycle artifacts.
 
-## Edge Model
+Inputs must preserve source attribution, trust class, determinism,
+freshness, confidence, and limitations where available.
 
-Edges may represent imports, calls, owns, exposes, consumes, produces,
-verifies, documents, constrains, depends_on, supersedes, introduced_by,
-modified_by, hardened_by, repaired_by, released_in, tests, references,
-requires_evidence, informs_advisory, supports_decision_context,
-belongs_to_subsystem, implements_contract, and
-protected_by_no_go_boundary relationships.
+## Advisory Output Model Summary
 
-## Dependency Type Model
+Expected outputs include explanations, recommendations, risk summaries,
+uncertainty statements, evidence gaps, impact summaries, dependency
+summaries, historical lineage summaries, contract implication summaries,
+test implication summaries, documentation implication summaries,
+governance context summaries, and handoff to Decision Evaluation.
 
-Dependency classes include code, command, documentation, test, contract,
-evidence, advisory, historical, governance, lifecycle, release,
-capability, subsystem, and no-go boundary dependencies.
+All outputs are advisory-only context, not authorization.
 
-## Directionality Model
+## Advisory Reasoning Trace Model Summary
 
-Every graph edge must be directional and inspectable. Inverse
-relationships may be query projections rather than stored edges unless
-both directions carry distinct source-attributed meaning.
+A reasoning trace records the advisory question and scope, context used
+and excluded, sources referenced, relationships followed, dependency
+paths considered, historical facts considered, impact claims
+considered, evidence gaps, uncertainty, conflicts, stale or superseded
+knowledge, limitations, recommendations, and what Advisory did not
+decide.
 
-## Source Attribution
+## Source Attribution Summary
 
-Every node, edge, claim, path, view, and snapshot must link back to
-sources such as source files, tests, docs, architecture documents,
-contract documents, verification documents, phase reports,
-phase-completion metadata, changelog entries, `tasks/DONE.md`,
-`tasks/DECISIONS.md`, task contracts, release notes, tags, commits,
-evidence artifacts, repository skills, advisory skills, generated
-registry output, runtime-introspection output, and canonical lifecycle
-artifacts.
+Every advisory claim, explanation, recommendation, reasoning trace, and
+handoff item must link to sources when support exists: source files,
+tests, docs, architecture documents, contract documents, verification
+documents, phase reports, phase-completion metadata, changelog entries,
+task records, release notes, tags, commits, evidence artifacts,
+Repository Skills, Advisory Repository Skills, Advisory Context
+Packages, canonical lifecycle artifacts, and no-go boundary documents.
 
-## Uncertainty Model
+## Uncertainty Model Summary
 
-The graph preserves verified, unverified, weak, possible, inferred,
-unknown, conflicting, stale, and superseded dependency states. Unknown,
-stale, conflicting, and superseded dependencies remain inspectable and
-are not silently promoted to verified edges.
+Advisory records known, unknown, unverified, partially verified,
+conflicting, stale, superseded, inferred, advisory-only, and
+decision-required states. False certainty is avoided through explicit
+labels, limitations, source attribution, and evidence-gap reporting.
 
-## Determinism Model
+## Recommendation Model Summary
 
-Future graph construction should be reproducible from repository
-revision, source set, Repository Knowledge version, Historical Memory
-snapshot where used, relationship taxonomy version, graph builder
-version, and view/query parameters. Model inference may suggest
-candidates but does not create canonical graph truth without source
-grounding.
+Advisory may recommend review, evidence collection, test inspection,
+documentation review, contract review, historical review, graph/impact
+verification, or Decision Evaluation input. It must not say an action is
+authorized, allowed, approved, accepted, ready for execution, ready for
+commit/push, valid for lifecycle transition, or safe for artifact
+promotion.
 
-## Verification Model
+## Handoff to Decision Evaluation Summary
 
-Future verification should use fixture repositories, deterministic
-snapshot comparison, source-attribution completeness checks,
-no-unattributed-edge checks, directionality checks, taxonomy
-conformance, stale/superseded handling, conflict preservation, reverse
-dependency query checks, graph view boundary checks, no-decision/no-
-execution/no-mutation checks, and human review of sample reports.
+Advisory Handoff packages claims, recommendations, source references,
+evidence links, evidence candidates, Repository Knowledge references,
+Historical Memory references, Change Impact Analysis references,
+Dependency Knowledge Graph references, uncertainty, conflicts, stale or
+superseded context, limitations, and required evidence. It carries an
+explicit non-decision disclaimer.
 
-## Versioning and Snapshot Model
+Decision Evaluation may consume conforming Evidence derived from a
+handoff. The handoff itself is not a verdict.
 
-Dependency snapshots should record snapshot ID, repository commit,
-branch/tag context, source set, Repository Knowledge version,
-Historical Memory snapshot ID when used, relationship taxonomy version,
-graph builder version, timestamp, node/edge counts, query/view
-parameters, known omissions, limitations, and superseded snapshot
-references.
+## Integration Summaries
 
-## Query Model
+Repository Knowledge integration:
+Advisory consumes structured architectural entities, relationships,
+claims, sources, snapshots, and views without becoming a knowledge
+extractor or authority.
 
-Future query classes include dependency path, reverse dependency,
-subsystem dependency, command dependency, test coverage relationship,
-documentation relationship, contract relationship, historical lineage
-relationship, advisory relationship, governance boundary, release
-relationship, and unknown dependency queries.
+Historical Memory integration:
+Advisory uses lineage, phases, decisions, repairs, hardening, releases,
+corrections, and supersession to explain why a boundary exists and how
+it evolved.
 
-## Graph View Model
+Change Impact Analysis integration:
+Advisory uses impact subjects, surfaces, paths, claims, blast radius,
+unknowns, and evidence gaps to recommend review without deciding.
 
-Future graph views include subsystem, capability, command, test,
-documentation, contract, evidence, historical, release, advisory, and
-governance views. Views are bounded projections and do not create new
-truth apart from source-attributed graph claims.
+Dependency Knowledge Graph integration:
+Advisory uses graph paths, reverse dependencies, dependency types, edge
+direction, graph views, snapshots, and uncertainty states to make
+explanations traceable without building or mutating the graph.
 
-## Integration Summary
+Evidence integration:
+Advisory references Evidence, identifies evidence gaps, and may later
+produce advisory/model-produced Evidence through existing advisory
+skill boundaries. Advisory evidence remains probabilistic/advisory by
+default and never sole authority for Accept.
 
-Repository Knowledge:
-The graph is the relationship layer inside Repository Knowledge and
-reuses its entity, relationship, claim, source, evidence-link, snapshot,
-and versioning models.
+Repository Skills integration:
+Future Repository Skills may expose advisory-ready Repository
+Intelligence context, but remain evidence producers only.
 
-Historical Memory:
-Historical Memory uses temporal graph edges and dependency paths for
-lineage queries.
+Advisory Context Package integration:
+Repository Intelligence context must enter packages as bounded,
+labelled, provenance-preserving context with redaction, trust-class
+separation, limitations, and prompt-injection protection.
 
-Change Impact Analysis:
-Impact analysis consumes dependency paths, reverse edges, edge types,
-dependency types, graph views, verification states, uncertainty markers,
-source attribution, and limitations.
-
-Evidence:
-Graph claims can produce evidence candidates or evidence links, but must
-be converted into conforming Evidence before Decision Evaluation can use
-them.
-
-Repository Skills:
-Future skills may inspect graph snapshots or answer bounded graph
-queries as evidence-only skills.
-
-Advisory:
-Advisory can use graph knowledge for richer bounded context,
-dependency paths, tests, docs, contracts, no-go boundaries, historical
-lineage, unknowns, and limitations while remaining non-authorizing.
-
-Decision Evaluation:
-The graph can support decisions only indirectly through structured
-context or conforming Evidence. Decision Evaluation remains the only
+Decision Evaluation integration:
+Advisory supports decisions only indirectly through structured context
+or conforming Evidence. Decision Evaluation remains the only
 decision-making component.
 
-## PCAE Architecture Status
+## Boundary Confirmations
 
-### Current Runtime State
+- Decision Evaluation remains the only component responsible for
+  allow/block/escalate/more-evidence decisions.
+- Repository Transition Validator remains the canonical transition gate.
+- Advisory remains explanatory, recommendation-oriented,
+  evidence-linked, read-only, and non-authoritative.
+- Execution remains unavailable.
+- Runtime state remains `Observed`.
+- Maximum runtime capability remains `observe`.
 
-- **State:** Observed
-- **Maximum Capability:** observe
-- **Execution Availability:** unavailable
-- **Registered runtime plugins:** 0
+## Non-Goals Confirmed
+
+This phase did not implement:
+
+- advisory behavior changes
+- advisory runtime changes
+- advisory context package changes
+- advisory CLI
+- advisory reasoning engine
+- model integration
+- model selection
+- provider orchestration
+- repository knowledge extraction
+- historical memory extraction
+- change impact analysis engine
+- dependency graph construction
+- graph query engine
+- evidence subsystem changes
+- repository skills changes
+- decision evaluation changes
+- execution
+- shell mediation
+- Permission Broker changes
+- lifecycle redesign
+- REST
+- Dashboard
+- Web UI
+- Telegram inbound
+- autonomous coding
+- model capability expansion
+- repository mutation
+- runtime plugin changes
+- repository state changes
+- test execution through advisory
+- automatic patch generation
+- automatic refactoring
 
 ## Governance Results
 
-- **pcae_health:** healthy
-- **pcae_check:** passed
-- **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** nothing_to_push before commit
-- **pcae_runtime_inspect:** execution unavailable, Observed, observe,
-  zero runtime plugins
-- **telegram_runtime:** configured, enabled, ready for outbound delivery
+- `pcae health`: healthy during pre-commit validation
+- `pcae check`: passed during pre-commit validation
+- `pcae doctor task-memory`: clean during pre-commit validation
+- `pcae push check`: nothing_to_push before commit; final push pending
+- `pcae runtime inspect`: execution unavailable, Observed, observe, zero
+  runtime plugins
+- `pcae notify status`: Telegram configured, enabled, ready for outbound
+  delivery after sourcing environment
+- `pcae skill invoke phase-finalization 118E`: target resolved;
+  invocation is preview-only in current lifecycle
 
-## Validation
+## Validation Results
 
-- `pcae health` passed.
-- `pcae check` passed.
-- `pcae doctor task-memory` passed.
-- `pcae push check` passed.
-- `pcae runtime inspect` confirmed execution unavailable, runtime state
-  `Observed`, maximum plugin capability `observe`, and zero registered
-  runtime plugins.
-- `pcae notify status` after sourcing the Telegram environment confirmed
-  Telegram configured, enabled, and ready for outbound delivery.
-- `pcae skill invoke phase-finalization 118D` resolved the phase target;
-  in the current lifecycle this command is a preview/targeting command
-  and does not write completion artifacts.
-- Architecture scope check passed: no `src/` or `tests/` files changed.
+- Architecture scope check: passed; no `src/` or `tests/` changes.
+- Documentation section check: passed.
+- Full implementation test suite: not run; architecture-only phase with
+  no source or test changes.
+- Fast green: not run; not applicable for architecture-only docs unless
+  lifecycle requires it.
 
-No implementation test suite or `fast_green` run was required because
-118D changed documentation and governance memory only. No source or test
-files changed.
+## Notification Detail
 
-## No-Go Confirmations
-
-- No dependency graph construction implemented.
-- No dependency graph database implemented.
-- No dependency graph CLI implemented.
-- No graph query engine implemented.
-- No graph visualization implemented.
-- No repository knowledge extraction implemented.
-- No historical memory extraction implemented.
-- No change impact analysis engine implemented.
-- No advisory behavior changed.
-- No decision evaluation behavior changed.
-- No evidence subsystem behavior changed.
-- No repository skills behavior changed.
-- No source code changed.
-- No tests changed.
-- No runtime behavior changed.
-- No execution implemented.
-- No shell mediation implemented.
-- No Permission Broker changes.
-- No lifecycle redesign.
-- No REST.
-- No Dashboard.
-- No Web UI.
-- No Telegram inbound.
-- No provider selection.
-- No multi-model orchestration.
-- No autonomous coding.
-- No model capability expansion.
-- No repository mutation.
-- No runtime plugin changes.
-- No repository state changes.
-- No test execution through graph analysis.
-- No automatic patch generation.
-- No automatic refactoring.
-
-Execution capability remains unavailable. Runtime state remains
-`Observed`. Maximum runtime capability remains `observe`.
+The latest 118D report retained a `pending_final_telegram_delivery`
+metadata field, but 118D manual Telegram `send-report --latest`
+succeeded after completion. This is recorded as inherited report
+metadata, not a 118E blocker.
 
 ## Recommended Next Phase
 
-118E - Advisory Reasoning Expansion Architecture
+118R - Repository Intelligence Architecture Review
+
+118A through 118E define the major Track B architecture surfaces. Before
+freezing contracts or prototyping, PCAE should review coherence across
+Repository Knowledge, Historical Memory, Change Impact Analysis,
+Dependency Knowledge Graph, and Advisory Reasoning Expansion.
 
 ## Report Consistency
 
@@ -300,4 +284,4 @@ Execution capability remains unavailable. Runtime state remains
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 118D. Schema version 1.0.*
+*Report generated for PCAE Phase 118E. Schema version 1.0.*

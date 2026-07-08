@@ -2,41 +2,72 @@
 
 ## Current Phase
 
-Phase 118D — Dependency Knowledge Graph Architecture
+Phase 118E — Advisory Reasoning Expansion Architecture
 (completed).
 
 Architecture-only continuation of Track B: Repository Intelligence.
-Defines the Dependency Knowledge Graph as deterministic,
-source-attributed, inspectable, versioned, read-only relationship
-structure inside Repository Knowledge. The graph represents repository
-entities as nodes, repository-derived relationships as typed
-directional edges, and dependency assertions as source-backed claims
-with sources, evidence links, dependency types, direction, strength,
-scope, verification states, paths, views, snapshots, queries, and
-reports. It supports future Change Impact Analysis, Historical Memory,
-architectural contract mapping, Advisory reasoning, repository
-intelligence reports, subsystem lineage inspection, and traceability
-without becoming runtime orchestration, execution planning, command
-routing, permission brokering, enforcement, autonomous planning,
-lifecycle authority, or a repository mutation mechanism.
+Defines Advisory Reasoning Expansion as the architecture by which PCAE
+Advisory may eventually consume deterministic, source-attributed
+Repository Intelligence context from Repository Knowledge, Historical
+Memory, Change Impact Analysis, Dependency Knowledge Graph, Evidence,
+Repository Skills, Advisory Repository Skills, Advisory Context
+Packages, and canonical lifecycle artifacts. The phase defines advisory
+claims, explanations, recommendations, context items, evidence links,
+sources, uncertainty, limitations, reasoning traces, knowledge/
+historical/impact/graph references, handoff, reports, advisory input
+and output models, source attribution, uncertainty handling,
+recommendation boundaries, handoff to Decision Evaluation, and
+integration models. Advisory may become more informed, grounded,
+inspectable, and auditable; it does not become more authoritative.
 
-No dependency graph construction, dependency graph database, dependency
-graph CLI, graph query engine, graph visualization, repository
+No advisory behavior changes, Advisory Runtime changes, Advisory
+Context Package changes, advisory CLI, advisory reasoning engine, model
+integration, model selection, provider orchestration, repository
 knowledge extraction, historical memory extraction, change impact
-analysis engine, source code, tests, runtime behavior, execution,
-authorization, enforcement, lifecycle behavior, Permission Broker
-behavior, Repository State behavior, Evidence subsystem behavior,
-Repository Skills behavior, Advisory behavior, Decision Evaluation
-behavior, Repository Transition Validator behavior, Notification Policy
-behavior, model integration, provider orchestration, REST, Dashboard,
-Web UI, automatic patch generation, automatic refactoring, or Telegram
-inbound path changed.
+analysis engine, dependency graph construction, graph query engine,
+source code, tests, runtime behavior, execution, authorization,
+enforcement, lifecycle behavior, Permission Broker behavior, Repository
+State behavior, Evidence subsystem behavior, Repository Skills
+behavior, Decision Evaluation behavior, Repository Transition Validator
+behavior, Notification Policy behavior, REST, Dashboard, Web UI,
+autonomous coding, model capability expansion, automatic patch
+generation, automatic refactoring, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 118E — Advisory Reasoning Expansion Architecture.
+Recommended next repo phase: 118R — Repository Intelligence Architecture Review.
+
+## Phase 118E Complete
+
+Phase 118E — Advisory Reasoning Expansion Architecture (completed).
+
+Architecture-only Advisory Reasoning Expansion design for Track B
+Repository Intelligence. The phase defines how Advisory can eventually
+consume Repository Knowledge, Historical Memory, Change Impact Analysis,
+Dependency Knowledge Graph context, Evidence, Repository Skills,
+Advisory Repository Skills, Advisory Context Packages, and canonical
+lifecycle artifacts to produce better explanations, recommendations,
+uncertainty statements, evidence-gap summaries, reasoning traces, and
+Decision Evaluation handoff context while remaining read-only and
+non-authoritative.
+
+**No-go**: no advisory behavior change, Advisory Runtime change,
+Advisory Context Package change, advisory CLI, advisory reasoning
+engine, model integration, model selection, provider orchestration,
+Repository Knowledge extraction, Historical Memory extraction, Change
+Impact Analysis engine, Dependency Knowledge Graph construction, graph
+query engine, Evidence subsystem change, Repository Skills change,
+Decision Evaluation change, source implementation, test implementation,
+runtime behavior change, execution, authorization, enforcement,
+lifecycle behavior change, Permission Broker change, Repository State
+behavior change, Repository Transition Validator behavior change,
+Notification Policy behavior change, REST, Dashboard, Web UI, Telegram
+inbound, autonomous coding, model capability expansion, repository
+mutation, automatic patch generation, or automatic refactoring.
+
+Recommended next repo phase: 118R — Repository Intelligence Architecture Review.
 
 ## Phase 118D Complete
 

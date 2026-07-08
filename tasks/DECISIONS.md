@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- Treat Phase 118E as the architecture-only Advisory Reasoning
+  Expansion phase for Track B Repository Intelligence: expanded
+  Advisory may consume Repository Knowledge, Historical Memory, Change
+  Impact Analysis, Dependency Knowledge Graph context, Evidence,
+  Repository Skills, Advisory Repository Skills, Advisory Context
+  Packages, and canonical lifecycle artifacts to produce better
+  explanations, recommendations, uncertainty statements, evidence-gap
+  summaries, reasoning traces, and handoff context. Advisory may become
+  more informed but must not become more powerful. It must not decide,
+  authorize, execute, enforce, broker permissions, mutate lifecycle or
+  repository state, orchestrate providers, implement advisory behavior,
+  change Advisory Context Packages, implement a reasoning engine, build
+  graphs, run impact analysis, extract Repository Knowledge or
+  Historical Memory, generate patches, refactor automatically, or bypass
+  Decision Evaluation / the Repository Transition Validator.
 - Treat Phase 118D as the architecture-only Dependency Knowledge Graph
   phase for Track B Repository Intelligence: the Dependency Knowledge
   Graph is a deterministic, source-attributed, inspectable, versioned,
