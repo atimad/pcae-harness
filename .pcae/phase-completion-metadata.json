@@ -1,71 +1,61 @@
 {
-  "phase_id": "120A",
-  "phase_name": "Repository Intelligence Read-Only Prototype Architecture",
-  "phase_title": "Repository Intelligence Read-Only Prototype Architecture",
+  "phase_id": "120B",
+  "phase_name": "Repository Intelligence Prototype Contract Freeze",
+  "phase_title": "Repository Intelligence Prototype Contract Freeze",
   "status": "completed",
-  "summary": "Architecture-only phase opening Track 120. Defines docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md, answering how PCAE architecture should support a future read-only Repository Intelligence prototype that generates schema-conforming artifacts from the frozen 119 executable schema line, without execution, mutation, Advisory authority, Decision Evaluation replacement, runtime behavior change, or repository-state authority. Defines nine conceptual prototype stages, eight architectural layers, conceptual input/output models, read-only guarantees, source attribution architecture, Evidence boundary architecture, uncertainty/unknown handling, limitation/disclaimer architecture, boundary disclosure architecture, non-final persistence architecture (three candidate locations proposed for 120B, none chosen), verification architecture (no validators implemented), governance architecture, and failure/no-go conditions. Names Repository Knowledge Snapshot as the first future prototype target, grounded in Phase 118A's read-only production model. Defines the Track 120 roadmap: 120B-120F as committed candidates, 121-125+ as a tentative, unactivated long-range shape. Documents and classifies the three known inherited tooling/reporting issues carried forward from 119AC as non-blocking for architecture, without repairing them. No schema, source, or test file was changed; no generator, validator, CLI, or automated test suite was implemented; no generated artifact was produced.",
+  "summary": "Documentation-only phase freezing the canonical contract governing the first Repository Intelligence read-only prototype. Defines docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md, the normative specification binding all later Track 120 implementation work (120D-120F). Restricts the first prototype to generating only Repository Knowledge Snapshot artifacts. Freezes the conceptual input model (allowed: repository working tree, repository metadata, tracked documentation and artifacts, governed lifecycle metadata, verified 119 schemas; excluded: external services, AI inference, network sources, runtime state mutation, execution outputs) and output model (one schema-conformant, deterministic, read-only, fully attributable snapshot per run). Freezes a determinism contract, ten read-only guarantees, a source attribution contract, the Evidence boundary, an uncertainty contract, a limitation contract, the ten conceptual prototype stages carried forward from 120A, a persistence contract deferring the final output location to 120D among 120A's three candidates, a verification contract with no validators implemented, a fail-closed failure contract, and a governance contract. Documents relationship to 120C-120F and carries forward the same three known inherited, non-blocking tooling/reporting issues from 119AC/120A without repairing them. No schema, source, or test file was changed; no generator, validator, CLI, or automated test suite was implemented.",
   "files_changed_count": 5,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
     "tasks/TODO.md",
-    "docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md",
-    "tasks/active/20260709-0030-phase-120a-repository-intelligence-read-only-prototype-architecture.md"
+    "docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md",
+    "tasks/active/20260709-0036-phase-120b-repository-intelligence-prototype-contract-freeze.md"
   ],
   "source_files_changed": 0,
   "test_files_changed": 0,
   "tests_run": 0,
-  "tests_added_or_updated": "None. 120A was an architecture-only phase and did not add automated tests.",
-  "architecture_document_path": "docs/PHASE_120_REPOSITORY_INTELLIGENCE_READ_ONLY_PROTOTYPE_ARCHITECTURE.md",
-  "track_120_purpose": "Defines the architecture for a future read-only Repository Intelligence prototype that may later produce artifacts conforming to the frozen 119 executable schema line, without execution, mutation, Advisory authority, Decision Evaluation replacement, runtime behavior change, or repository-state authority.",
-  "relationship_to_119": "119 defines schema shape (12 shared components + 8 artifact-family schemas, frozen and finally reviewed in 119AC). 120 defines the read-only prototype architecture for producing artifacts conforming to those shapes; it does not alter or reinterpret the 119 schemas.",
-  "prototype_architecture_layers": [
-    "Schema Contract Layer",
-    "Source Observation Layer",
-    "Attribution Layer",
-    "Artifact Assembly Layer",
-    "Boundary/Disclaimer Layer",
-    "Persistence Layer",
-    "Verification Layer",
-    "Human Review Layer"
+  "tests_added_or_updated": "None. 120B was a documentation-only contract-freeze phase and did not add automated tests.",
+  "contract_document_path": "docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md",
+  "contract_scope": "Governs exactly one prototype: the first Repository Intelligence read-only prototype, whose sole implementation target is the Repository Knowledge Snapshot artifact family. Binding on 120D, 120E, and 120F.",
+  "relationship_to_119": "Does not alter, extend, or reinterpret the 119 schema line; freezes the rules under which a future prototype may produce artifacts conforming to schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json.",
+  "relationship_to_120a": "Freezes the 120A architecture into binding, normative rules. Where 120A described an option range (e.g. three candidate persistence locations), this contract either freezes a rule or explicitly defers the choice to a later phase.",
+  "first_prototype_target": "Repository Knowledge Snapshot only (schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json). No other artifact family is included in the first implementation.",
+  "input_model_summary": "Allowed: repository working tree, repository metadata, tracked documentation, tracked repository artifacts, governed lifecycle metadata, previously verified 119 schemas. Excluded: external services, AI inference, network sources, runtime state mutation, execution outputs.",
+  "output_model_summary": "Exactly one Repository Knowledge Snapshot artifact per generation run: schema-conformant, deterministic, read-only, fully attributable, bounded by explicit limitations.",
+  "determinism_contract_summary": "Identical repository inputs must produce identical snapshot structure, excluding approved metadata fields (e.g. timestamps) that do not affect substantive content. No probabilistic reasoning, sampling, or AI inference permitted.",
+  "read_only_guarantees_summary": "The prototype shall never modify repository files, modify runtime state, execute repository code, execute shell commands, invoke AI providers, invoke external APIs, mutate Repository State, mutate Evidence, mutate Advisory, or replace Decision Evaluation.",
+  "source_attribution_contract_summary": "Every extracted fact must identify its source via a deterministic Source Attribution Record; missing attribution is contract failure.",
+  "evidence_boundary_summary": "Repository Intelligence is not Evidence and must never replace it; may later support Evidence via Evidence Link Records only.",
+  "uncertainty_contract_summary": "Unknown, incomplete, conflicting, and unverifiable information must be represented explicitly using the frozen 119 uncertainty vocabulary, never inferred or collapsed.",
+  "limitation_contract_summary": "Generated artifacts must be accompanied by limitation records, disclaimer records, boundary disclosures, and uncertainty records when appropriate.",
+  "prototype_stages": [
+    "Source inventory",
+    "Source attribution",
+    "Deterministic extraction",
+    "Artifact assembly",
+    "Schema-shape alignment",
+    "Unknown/limitation capture",
+    "Boundary attachment",
+    "Persistence",
+    "Verification",
+    "Human review"
   ],
-  "input_model_summary": "Conceptual future inputs: committed repository files, phase documents, status files, task memory, schema files, canonical phase reports, governance outputs, and git history/commit metadata. 120A does not read or process any of these beyond architecture review.",
-  "output_model_summary": "Conceptual future outputs: one artifact per 119 artifact family (Repository Knowledge Snapshot first, then Historical Memory Snapshot, Dependency Knowledge Graph Snapshot, Change Impact Report, Advisory Intelligence Context Package, Query Result, Repository Intelligence Package). 120A creates no generated output artifact.",
-  "first_prototype_target": "Repository Knowledge Snapshot (schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json, implemented in 119O), grounded in Phase 118A's read-only production model and the 118 architecture's own dependency ordering (Historical Memory, Dependency Knowledge Graph, and Change Impact Analysis all emerge from or consume Repository Knowledge).",
-  "read_only_guarantees_summary": "No file mutation outside governed docs/status updates; no source modification; no execution; no shell mediation beyond existing governed commands; no package installation; no network dependency; no runtime plugin change; no Advisory behavior change; no Decision Evaluation replacement; no Evidence truth claim; no Repository State truth claim.",
-  "source_attribution_architecture_summary": "Every future generated claim must be tied to Source Attribution Records using the frozen 119 locator vocabulary (file_path, file_path_line, file_path_symbol, file_path_section, phase_id, phase_report_id, task_id, commit_sha, tag, release_id, evidence_id, decision_id, contract_document_section, canonical_report_id); an unattributable claim must be represented as unknown or inferred, never asserted as fact.",
-  "evidence_boundary_summary": "A future generator may reference Evidence only through Evidence Link Records, using evidence_gap_marker when no genuine link exists; must never claim to replace, bypass, or preempt the Evidence subsystem.",
-  "uncertainty_unknown_handling_summary": "Future artifacts must use the frozen shared uncertainty/verification-state vocabulary (known, unknown, unverified, partially_verified, weak, possible, inferred, advisory_only, decision_required, verified, invalid, stale, superseded, conflicting) and must never perform a prohibited uncertainty collapse.",
-  "limitation_disclaimer_architecture_summary": "Future artifacts must populate limitation_record entries wherever a generator's method or source coverage has bounds, and must emit all shared and family-specific disclaimer constants verbatim, never paraphrased or omitted.",
-  "boundary_disclosure_summary": "Every future generated artifact must preserve all nine boundary_disclosure const-true declarations (read_only, no_execution, non_decision, advisory_non_authority, decision_evaluation_required, no_repository_mutation, no_lifecycle_mutation, no_evidence_replacement, no_repository_state_replacement); a generator that cannot honestly declare all nine must not produce an artifact.",
-  "persistence_architecture_summary": "Conceptual only; no output location chosen. Three candidate locations proposed for 120B's contract freeze to evaluate: .pcae/repository-intelligence/, artifacts/repository-intelligence/, reports/repository-intelligence/. No path created, no file written.",
-  "verification_architecture_summary": "Later phases should verify future generated artifacts for schema parse, schema conformance (once a validator exists), source attribution completeness, unknown/limitation presence, boundary/disclaimer presence, no-authority, and no-execution. No validator, validation library, or verification CLI implemented in 120A.",
-  "governance_architecture_summary": "Future prototype phases must remain governed via the existing PCAE lifecycle (task contracts, staged-file-aware commits, task finish, phase complete); no raw git commit/push, no --no-verify, no force push; origin/main..HEAD returned to 0 at the end of every phase; runtime remains Observed/observe throughout.",
-  "failure_no_go_conditions_summary": "Missing source attribution; generated artifact implies truth/completeness, approval, or execution permission; generator attempts repository mutation, changes source files, invokes Advisory, performs Decision Evaluation, performs graph traversal, performs impact analysis, executes commands, or relies on runtime plugins beyond the observe posture.",
-  "track_120_roadmap": [
-    "120A - Repository Intelligence Read-Only Prototype Architecture (this phase)",
-    "120B - Repository Intelligence Prototype Contract Freeze",
-    "120C - Repository Intelligence Prototype Contract Verification",
-    "120D - Repository Knowledge Snapshot Prototype Plan",
-    "120E - Repository Knowledge Snapshot Prototype: Read-Only Generator",
-    "120F - Repository Knowledge Snapshot Prototype Verification",
-    "121+ (tentative, not activated) - Query/Report Layer, Advisory Context Consumption, Change Impact Read-Only Prototype, Prototype Review/Hardening, Execution Planning Architecture (125+, separately scoped)"
-  ],
+  "persistence_contract_summary": "Conceptual only; no storage implementation specified. Final output location decision deferred to 120D among 120A's three candidates (.pcae/repository-intelligence/, artifacts/repository-intelligence/, reports/repository-intelligence/); persistence must occur only through the existing PCAE governed lifecycle.",
+  "verification_contract_summary": "Conceptual verification expectations (schema parse, schema conformance once a validator exists, source attribution completeness, unknown/limitation presence, boundary/disclaimer presence, determinism) without implementing validators.",
+  "failure_contract_summary": "Fail-closed: the prototype must refuse to produce non-conformant artifacts on missing required sources, attribution failures, schema mismatch, unknown mandatory fields, or boundary violations.",
+  "governance_contract_summary": "Future prototype phases must preserve the observe-only boundary, governed lifecycle compliance, repository cleanliness, deterministic operation, auditability, and reproducibility.",
   "known_inherited_issues_reviewed": [
-    "119Q report-generation-ordering defect (Commits: pending_, recovered commit d804458fda2663d79577941f7c415a2a50fe1573, documented in 119R) - classified non-blocking for architecture",
-    "is_phase_id_backward() phase-id string-comparison bug in pcae phase complete (src/pcae/core/phase_reports.py), documented in 119AB - classified non-blocking for 120A; should be tracked before generator implementation (120E) if the 120 series reaches a letter-length transition; not repaired in this phase",
+    "119Q report-generation-ordering defect (Commits: pending_, recovered commit d804458fda2663d79577941f7c415a2a50fe1573, documented in 119R) - classified non-blocking for this contract",
+    "is_phase_id_backward() phase-id string-comparison bug in pcae phase complete (src/pcae/core/phase_reports.py), documented in 119AB - classified non-blocking for 120B; should be tracked before a letter-length transition occurs within the 120 series; not repaired in this phase",
     "recurring report_notification_tests: pending_final_telegram_delivery report-timing detail - classified non-blocking, well-understood, and consistently handled"
   ],
-  "advisory_relationship": "120 does not grant Advisory authority. A future generated artifact may become a future Advisory input via the existing Advisory Intelligence Context Package family (119W), but 120A does not implement, invoke, or modify Advisory Runtime or any Advisory subsystem.",
-  "decision_evaluation_relationship": "120 does not replace Decision Evaluation. Every 119 schema requires decision_evaluation_required to be declared true, and 120A carries that requirement forward unchanged.",
-  "execution_relationship": "120 does not introduce execution. Runtime state remains Observed, maximum plugin capability remains observe, and execution remains unavailable throughout 120A and the entire 120B-120F sequence defined here.",
   "shared_components_reviewed": [
     "common_artifact_envelope",
     "source_attribution_record",
     "evidence_link_record",
     "uncertainty_verification_state",
     "conflict_supersession_record",
-    "derivation_record",
     "boundary_disclosure",
     "limitation_record",
     "disclaimer"
@@ -102,13 +92,8 @@
       "status": "passed"
     },
     {
-      "name": "json_parse_validation",
-      "result": "20_of_20_schema_files_valid",
-      "status": "passed"
-    },
-    {
       "name": "fast_green",
-      "result": "not_applicable_architecture_only_no_source_or_tests_changed",
+      "result": "not_applicable_documentation_only_no_source_or_tests_changed",
       "status": "not_applicable"
     },
     {
@@ -118,16 +103,15 @@
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_architecture_only_no_source_or_tests_changed",
+      "result": "not_applicable_documentation_only_no_source_or_tests_changed",
       "status": "not_applicable"
     }
   ],
   "test_results": {
-    "json_parse_validation": "passed",
     "report_notification_tests": "pending_final_telegram_delivery",
-    "bootstrap_session_reporting_tests": "not_applicable_architecture_only_no_source_or_tests_changed",
-    "fast_green": "not_applicable_architecture_only_no_source_or_tests_changed",
-    "full_pytest": "not_applicable_architecture_only_no_source_or_tests_changed"
+    "bootstrap_session_reporting_tests": "not_applicable_documentation_only_no_source_or_tests_changed",
+    "fast_green": "not_applicable_documentation_only_no_source_or_tests_changed",
+    "full_pytest": "not_applicable_documentation_only_no_source_or_tests_changed"
   },
   "governance_results": [
     {
@@ -157,39 +141,39 @@
   ],
   "boundary_confirmations": [
     "No generator was implemented",
-    "No generated artifact was created",
-    "No repository scanning occurred",
-    "No extraction occurred",
+    "No repository scanner was implemented",
+    "No extraction engine was implemented",
+    "No artifact persistence implementation was created",
     "No validator or validation library was added",
     "No CLI was added",
     "No Python models, Pydantic models, or dataclasses were added",
-    "No automated test suite was added",
-    "No source code or test code was changed",
+    "No runtime plugin was added",
     "No runtime behavior changed",
-    "No Advisory behavior changed",
-    "No Decision Evaluation behavior changed or was replaced",
-    "No execution was introduced",
+    "No Advisory integration occurred",
+    "No query engine or graph traversal was implemented",
+    "No execution planning or execution capability was introduced",
+    "No source code or test code was changed",
     "No known inherited tooling/reporting issue was repaired (explicitly out of scope)"
   ],
-  "no_go_confirmation": "No No-Go conditions triggered. No generator was implemented. No generated artifact was created. No repository scanning or extraction occurred. No validator, validation library, or CLI was added. No Python models, Pydantic models, or dataclasses were added. No automated test suite was added. No source code or test code was changed. No runtime behavior changed. No Advisory behavior changed. No Decision Evaluation behavior changed or was replaced. No execution was introduced. No known inherited tooling/reporting issue was repaired (explicitly out of scope for this phase).",
+  "no_go_confirmation": "No No-Go conditions triggered. No generator was implemented. No repository scanner or extraction engine was implemented. No artifact persistence implementation was created. No validator, validation library, or CLI was added. No Python models, Pydantic models, or dataclasses were added. No runtime plugin was added. No runtime behavior changed. No Advisory integration occurred. No query engine or graph traversal was implemented. No execution planning or execution capability was introduced. No source code or test code was changed. No known inherited tooling/reporting issue was repaired (explicitly out of scope for this phase).",
   "phase_commits": [
     {
-      "hash": "1a741f2f320b872a31cbcfe30beb09d256e4fb0b",
-      "message": "Phase 120A: Repository Intelligence Read-Only Prototype Architecture"
+      "hash": "7acfd7f56af0cdc6753a2a7cb79716e1b1c95a54",
+      "message": "Phase 120B: Repository Intelligence Prototype Contract Freeze"
     },
     {
-      "hash": "7ac10ea4",
-      "message": "Finish Phase 120A task"
+      "hash": "79fb091e",
+      "message": "Finish Phase 120B task"
     }
   ],
-  "commit_attribution": "1a741f2f320b872a31cbcfe30beb09d256e4fb0b",
+  "commit_attribution": "7acfd7f56af0cdc6753a2a7cb79716e1b1c95a54",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
-  "recommended_next_phase": "Recommended next phase: 120B - Repository Intelligence Prototype Contract Freeze",
-  "recommended_next_phase_id": "120B",
-  "recommended_next_phase_name": "Repository Intelligence Prototype Contract Freeze",
+  "recommended_next_phase": "Recommended next phase: 120C - Repository Intelligence Prototype Contract Verification",
+  "recommended_next_phase_id": "120C",
+  "recommended_next_phase_name": "Repository Intelligence Prototype Contract Verification",
   "report_notification_status": "pending_final_telegram_delivery",
   "schema_version": "1.0"
 }
