@@ -2,6 +2,30 @@
 
 ## Accepted
 
+- Treat Phase 119K as a narrow shared-components implementation phase:
+  implement standalone JSON Schema Draft 2020-12 shared components
+  outside `src` under `schemas/repository_intelligence/`, following the
+  119J implementation plan and preserving the frozen 119H executable
+  schema contract verified in 119I and the 119E artifact contract.
+  Include only common reusable components: common artifact envelope,
+  repository context, phase context, release context, derivation record,
+  source attribution record, Evidence link record, uncertainty /
+  verification state, conflict / supersession record, boundary
+  disclosure, limitation record, and disclaimers. Keep validation scope
+  structural: required fields, types, enum membership, object/array
+  shape, schema version constants, artifact family declarations,
+  boundary disclosure presence, and required disclaimer text. Do not
+  implement artifact-family schemas, validators, validation libraries,
+  schema verification CLI, automated tests, fixtures, Python models,
+  Pydantic models, dataclasses, repository extraction, graph
+  construction, impact analysis, Advisory behavior, Evidence behavior,
+  Repository Skills behavior, Decision Evaluation behavior, runtime
+  behavior, execution, enforcement, lifecycle changes, Permission Broker
+  changes, repository mutation outside planned schema/docs files,
+  automatic patch generation, automatic refactoring, or Telegram inbound
+  capability. Recommended next phase: 119L — Repository Intelligence
+  Executable Schema Verification: Shared Components.
+
 - Treat Phase 119J as executable-schema-implementation-plan-only: plan
   how PCAE should later implement Repository Intelligence executable
   schemas while preserving the frozen 119H contract verified in 119I, the

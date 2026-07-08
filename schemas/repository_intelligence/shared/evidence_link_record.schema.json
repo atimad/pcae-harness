@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/evidence_link_record.schema.json",
+  "title": "Repository Intelligence Evidence Link Record",
+  "description": "Shared structural Evidence link record. It bridges Repository Intelligence claims to Evidence artifacts or candidates and does not replace, bypass, or preempt the Evidence subsystem.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_id",
+    "evidence_type",
+    "evidence_source",
+    "supported_claim",
+    "support_strength",
+    "candidate_or_accepted_state",
+    "decision_evaluation_eligibility",
+    "limitations"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_type": {
+      "type": "string",
+      "enum": [
+        "evidence_candidate",
+        "evidence_reference",
+        "evidence_derived",
+        "evidence_gap_marker"
+      ]
+    },
+    "evidence_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_type",
+        "source_identity"
+      ],
+      "properties": {
+        "source_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_identity": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "supported_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "claim_id",
+        "claim_summary"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "claim_summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "support_strength": {
+      "type": "string",
+      "enum": [
+        "strong",
+        "moderate",
+        "weak",
+        "contradicts",
+        "inconclusive"
+      ]
+    },
+    "candidate_or_accepted_state": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "accepted_by_evidence_subsystem",
+        "rejected_by_evidence_subsystem",
+        "unsubmitted"
+      ]
+    },
+    "decision_evaluation_eligibility": {
+      "type": "string",
+      "enum": [
+        "eligible",
+        "not_eligible_evidence_gap",
+        "not_eligible_candidate_only",
+        "not_eligible_insufficient_strength"
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "verification_state": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/state_value"
+    },
+    "related_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "./uncertainty_verification_state.schema.json#/$defs/artifact_reference"
+      }
+    }
+  }
+}

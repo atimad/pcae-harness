@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/boundary_disclosure.schema.json",
+  "title": "Repository Intelligence Boundary Disclosure",
+  "description": "Structural boundary disclosure for Repository Intelligence artifacts. These fields declare read-only, no-execution, non-decision, Advisory non-authority, Evidence, Repository State, repository mutation, and lifecycle mutation boundaries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "read_only",
+    "no_execution",
+    "non_decision",
+    "advisory_non_authority",
+    "decision_evaluation_required",
+    "no_repository_mutation",
+    "no_lifecycle_mutation",
+    "no_evidence_replacement",
+    "no_repository_state_replacement"
+  ],
+  "properties": {
+    "read_only": {
+      "type": "boolean",
+      "const": true
+    },
+    "no_execution": {
+      "type": "boolean",
+      "const": true
+    },
+    "non_decision": {
+      "type": "boolean",
+      "const": true
+    },
+    "advisory_non_authority": {
+      "type": "boolean",
+      "const": true
+    },
+    "decision_evaluation_required": {
+      "type": "boolean",
+      "const": true
+    },
+    "no_repository_mutation": {
+      "type": "boolean",
+      "const": true
+    },
+    "no_lifecycle_mutation": {
+      "type": "boolean",
+      "const": true
+    },
+    "no_evidence_replacement": {
+      "type": "boolean",
+      "const": true
+    },
+    "no_repository_state_replacement": {
+      "type": "boolean",
+      "const": true
+    },
+    "boundary_notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/disclaimer.schema.json",
+  "title": "Repository Intelligence Disclaimer Set",
+  "description": "Required non-authority disclaimer text for Repository Intelligence artifacts. These disclaimers preserve non-decision, no-execution, Advisory, Evidence, and Repository State boundaries.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "non_decision_disclaimer",
+    "no_execution_disclaimer",
+    "advisory_non_authority_disclaimer",
+    "evidence_boundary_disclaimer",
+    "repository_state_boundary_disclaimer"
+  ],
+  "properties": {
+    "non_decision_disclaimer": {
+      "type": "string",
+      "const": "This artifact is not a decision. Decision Evaluation remains required for PCAE decisions."
+    },
+    "no_execution_disclaimer": {
+      "type": "string",
+      "const": "This artifact does not execute commands, invoke runtimes, mediate shells, route execution, or authorize execution. Execution remains unavailable."
+    },
+    "advisory_non_authority_disclaimer": {
+      "type": "string",
+      "const": "This artifact may inform Advisory context but does not convert Advisory output into approval, permission, enforcement, or execution."
+    },
+    "evidence_boundary_disclaimer": {
+      "type": "string",
+      "const": "This artifact may link to Evidence but does not replace, bypass, or preempt the Evidence subsystem."
+    },
+    "repository_state_boundary_disclaimer": {
+      "type": "string",
+      "const": "This artifact may describe repository context but does not replace Repository State."
+    }
+  }
+}

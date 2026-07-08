@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/limitation_record.schema.json",
+  "title": "Repository Intelligence Limitation Record",
+  "description": "Structural limitation disclosure for Repository Intelligence artifacts. This schema records declared limitations and follow-up context only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "limitation_type",
+    "limitation_description"
+  ],
+  "properties": {
+    "limitation_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limitation_description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "affected_claims_or_fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "severity_or_scope": {
+      "type": "string"
+    },
+    "mitigation_or_follow_up": {
+      "type": "string"
+    }
+  }
+}

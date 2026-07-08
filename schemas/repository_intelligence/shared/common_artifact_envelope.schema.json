@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/common_artifact_envelope.schema.json",
+  "title": "Repository Intelligence Common Artifact Envelope",
+  "description": "Shared structural envelope for Repository Intelligence artifacts. Schema conformance means only that the artifact matches declared structure; it does not authorize action or execution, establish lifecycle standing, replace Decision Evaluation, grant Advisory authority, accept Evidence, or become Repository State.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "artifact_id",
+    "artifact_type",
+    "artifact_family",
+    "artifact_contract_version",
+    "schema_concept_version",
+    "executable_schema_version",
+    "repository_context",
+    "generated_at_utc",
+    "producer",
+    "source_attribution",
+    "evidence_links",
+    "verification_state",
+    "uncertainty_state",
+    "conflict_state",
+    "supersession_state",
+    "read_only_boundary",
+    "decision_boundary",
+    "execution_boundary",
+    "boundary_disclosures",
+    "limitations",
+    "disclaimers"
+  ],
+  "properties": {
+    "artifact_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_type": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/artifact_type"
+    },
+    "artifact_family": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/artifact_type"
+    },
+    "artifact_contract_version": {
+      "type": "string",
+      "const": "119E.1.0"
+    },
+    "schema_concept_version": {
+      "type": "string",
+      "const": "119C.1.0-concept"
+    },
+    "executable_schema_version": {
+      "type": "string",
+      "const": "119K.1.0-json-schema"
+    },
+    "repository_context": {
+      "$ref": "./repository_context.schema.json"
+    },
+    "phase_context": {
+      "$ref": "./phase_context.schema.json"
+    },
+    "release_context": {
+      "$ref": "./release_context.schema.json"
+    },
+    "generated_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "producer": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/producer"
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "./derivation_record.schema.json"
+      }
+    },
+    "source_attribution": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "./source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "./evidence_link_record.schema.json"
+      }
+    },
+    "verification_state": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/state_value"
+    },
+    "uncertainty_state": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/state_value"
+    },
+    "conflict_state": {
+      "oneOf": [
+        {
+          "type": "string",
+          "const": "none"
+        },
+        {
+          "$ref": "./uncertainty_verification_state.schema.json#/$defs/state_value"
+        }
+      ]
+    },
+    "supersession_state": {
+      "oneOf": [
+        {
+          "type": "string",
+          "const": "current"
+        },
+        {
+          "$ref": "./uncertainty_verification_state.schema.json#/$defs/state_value"
+        }
+      ]
+    },
+    "read_only_boundary": {
+      "type": "string",
+      "const": "This artifact is descriptive and read-only. It does not mutate repository state, lifecycle state, or any other PCAE subsystem state."
+    },
+    "decision_boundary": {
+      "type": "string",
+      "const": "This artifact is not a decision. Decision Evaluation is the sole decision maker in PCAE. This artifact provides context only."
+    },
+    "execution_boundary": {
+      "type": "string",
+      "const": "This artifact does not execute commands, invoke runtimes, mediate shells, route execution, or authorize execution. Execution remains unavailable."
+    },
+    "boundary_disclosures": {
+      "$ref": "./boundary_disclosure.schema.json"
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "./limitation_record.schema.json"
+      }
+    },
+    "disclaimers": {
+      "$ref": "./disclaimer.schema.json"
+    },
+    "related_artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "./uncertainty_verification_state.schema.json#/$defs/artifact_reference"
+      }
+    }
+  }
+}

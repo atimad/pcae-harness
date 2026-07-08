@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/phase_context.schema.json",
+  "title": "Repository Intelligence Phase Context",
+  "description": "Structural phase context for Repository Intelligence artifacts. This schema records declared phase references only and does not establish lifecycle standing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "phase_id",
+    "phase_name",
+    "phase_status_context"
+  ],
+  "properties": {
+    "phase_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase_status_context": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "phase_artifact_references": {
+      "type": "array",
+      "items": {
+        "$ref": "./uncertainty_verification_state.schema.json#/$defs/artifact_reference"
+      }
+    },
+    "canonical_report_reference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "metadata_reference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

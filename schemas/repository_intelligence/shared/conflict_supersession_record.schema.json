@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/conflict_supersession_record.schema.json",
+  "title": "Repository Intelligence Conflict / Supersession Record",
+  "description": "Shared structural record for conflict and supersession preservation. It preserves declared disagreement, staleness, and replacement history; it does not resolve conflicts, enforce resolution, or decide which claim is correct.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "conflict_id",
+    "conflicting_claims",
+    "conflict_sources",
+    "conflict_type",
+    "resolution_state",
+    "preserved_history",
+    "current_context_note",
+    "limitations"
+  ],
+  "properties": {
+    "conflict_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "conflicting_claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "claim_id",
+          "claim_text",
+          "claim_source"
+        ],
+        "properties": {
+          "claim_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "claim_source": {
+            "$ref": "./source_attribution_record.schema.json"
+          }
+        }
+      }
+    },
+    "conflict_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "./source_attribution_record.schema.json"
+      }
+    },
+    "conflict_type": {
+      "type": "string",
+      "enum": [
+        "direct_contradiction",
+        "partial_overlap",
+        "source_disagreement",
+        "version_divergence",
+        "interpretation_difference",
+        "scope_difference",
+        "temporal_inconsistency"
+      ]
+    },
+    "resolution_state": {
+      "type": "string",
+      "enum": [
+        "unresolved",
+        "resolved_by_supersession",
+        "resolved_by_clarification",
+        "resolution_deferred",
+        "preserved_as_historical"
+      ]
+    },
+    "preserved_history": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "current_context_note": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "./limitation_record.schema.json"
+      }
+    },
+    "superseded_artifact_or_claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "superseded_id",
+        "superseded_summary"
+      ],
+      "properties": {
+        "superseded_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "superseded_summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "superseded_by": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/artifact_reference"
+    },
+    "supersession_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verification_state": {
+      "$ref": "./uncertainty_verification_state.schema.json#/$defs/state_value"
+    }
+  }
+}

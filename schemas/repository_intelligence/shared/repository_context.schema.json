@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/repository_context.schema.json",
+  "title": "Repository Intelligence Repository Context",
+  "description": "Structural repository context for Repository Intelligence artifacts. This schema identifies declared repository context only; it is not Repository State and does not establish repository validity.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "repository_identity",
+    "repository_commit"
+  ],
+  "properties": {
+    "repository_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "identity_type",
+        "identity_value"
+      ],
+      "properties": {
+        "identity_type": {
+          "type": "string",
+          "enum": [
+            "canonical_remote_url",
+            "local_path_fingerprint",
+            "repository_name",
+            "composite"
+          ]
+        },
+        "identity_value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_remote_url": {
+          "type": "string"
+        },
+        "local_path_fingerprint": {
+          "type": "string"
+        }
+      }
+    },
+    "repository_path": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Declared repository path or root identity when included by a governed artifact. This field is descriptive and does not establish Repository State."
+    },
+    "repository_commit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "repository_branch": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "repository_status_context": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Declared status context when supplied by an artifact producer. This field is descriptive and does not establish lifecycle or Repository State validity."
+    },
+    "release_context_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

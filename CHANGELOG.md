@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Phase 119K - Repository Intelligence Executable Schema Implementation:
+  Shared Components
+  (`schemas/repository_intelligence/`,
+  `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_SHARED_COMPONENTS.md`).
+  Implements the first standalone JSON Schema Draft 2020-12 shared
+  components outside `src`, as planned in 119J and constrained by the
+  frozen 119H executable schema contract verified in 119I and the 119E
+  artifact contract. Adds shared schemas for the common artifact
+  envelope, repository context, phase context, release context,
+  derivation record, source attribution record, Evidence link record,
+  uncertainty / verification state, conflict / supersession record,
+  boundary disclosure, limitation record, and disclaimers. Documents the
+  schema directory layout, component inventory, structural validation
+  scope, semantic validation exclusions, read-only boundary,
+  no-execution boundary, Decision Evaluation boundary, Advisory
+  non-authority, Evidence boundary, Repository State boundary, and
+  recommended next verification phase. Shared components only; no
+  artifact-family schemas, validator, validation library, schema
+  verification CLI, automated test suite, Python models, Pydantic models,
+  dataclasses, extraction, graph construction, impact engine, advisory
+  behavior, Evidence, Repository Skills, Decision Evaluation, source
+  code, test code, runtime behavior, execution, enforcement, lifecycle,
+  Permission Broker, REST, Dashboard, Web UI, provider orchestration,
+  autonomous coding, automatic patch generation, automatic refactoring,
+  repository mutation outside planned schema/docs files, or Telegram
+  inbound changes.
+
 - Phase 119J - Repository Intelligence Executable Schema Implementation
   Plan
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`).

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/shared/release_context.schema.json",
+  "title": "Repository Intelligence Release Context",
+  "description": "Structural release context for Repository Intelligence artifacts. This schema records declared release references only and does not establish release authority or lifecycle standing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "release_id_or_version",
+    "release_status_context"
+  ],
+  "properties": {
+    "release_id_or_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tag": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_artifact_reference": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date"
+    },
+    "release_status_context": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

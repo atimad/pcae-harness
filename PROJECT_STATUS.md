@@ -2,46 +2,88 @@
 
 ## Current Phase
 
-Phase 119J — Repository Intelligence Executable Schema Implementation Plan
+Phase 119K — Repository Intelligence Executable Schema Implementation:
+Shared Components
 (completed).
 
-Executable-schema-implementation-plan-only continuation of Track B:
-Repository Intelligence. Plans how PCAE should later implement
-Repository Intelligence executable schemas while preserving the frozen
-119H contract verified in 119I, the 119E artifact contract, read-only
-boundary, Decision Evaluation boundary, Evidence boundary, Repository
-State boundary, Advisory non-authority, and execution-unavailable
-posture. Recommends JSON Schema as the first schema representation,
-outside `src`, with a shared-components-first implementation slice.
-Defines implementation principles, schema family sequencing, future file
-organization, future module boundaries, staged validator plan, future
-test plan, future fixture plan, structural validation scope, semantic
-validation deferral, manual/future-governance deferral, forbidden-claim
-handling, versioning, migration/deprecation, artifact generation
-constraints, Repository Skills exposure deferral, Advisory consumer
-deferral, governance integration, no-go boundary preservation,
-rollback/fallback, risks, and first implementation acceptance criteria.
+Implementation phase for Track B Repository Intelligence. Implements the
+first standalone JSON Schema shared components outside `src` under
+`schemas/repository_intelligence/`, preserving the frozen 119H executable
+schema contract verified in 119I, the 119E artifact contract, the 119J
+shared-components-first plan, read-only boundary, no-execution boundary,
+Decision Evaluation boundary, Evidence boundary, Repository State
+boundary, Advisory non-authority, and execution-unavailable posture.
+Creates shared schema components for the common artifact envelope,
+repository context, phase context, release context, derivation record,
+source attribution record, Evidence link record, uncertainty /
+verification state, conflict / supersession record, boundary disclosure,
+limitation record, and disclaimers. Documents the schema layout and
+implemented shared component scope.
 
-No executable schema, JSON Schema, Pydantic model, dataclass, validator,
-contract verifier, CLI, automated tests, repository intelligence
-extraction, repository knowledge extraction, historical memory
-extraction, change impact analysis engine, dependency graph
-construction, graph query engine, advisory behavior changes, Advisory
-Runtime changes, Advisory Context Package changes, Evidence subsystem
-changes, Repository Skills changes, Decision Evaluation changes, source
-code, tests, runtime behavior, execution, authorization, enforcement,
-lifecycle behavior, Permission Broker behavior, Repository State
-behavior, Repository Transition Validator behavior, Notification Policy
-behavior, REST, Dashboard, Web UI, provider orchestration, autonomous
-coding, model capability expansion, automatic patch generation,
-automatic refactoring, repository mutation, or Telegram inbound path
-changed.
+No artifact-family schema, validator, validation library, schema
+verification CLI, automated test suite, Python model, Pydantic model,
+dataclass, repository intelligence extraction, repository knowledge
+extraction, historical memory extraction, change impact analysis engine,
+dependency graph construction, graph query engine, advisory behavior
+change, Advisory Runtime change, Advisory Context Package change,
+Evidence subsystem change, Repository Skills change, Decision Evaluation
+change, source code change, test code change, runtime behavior change,
+execution, authorization, enforcement, lifecycle behavior change,
+Permission Broker behavior change, Repository State behavior change,
+Repository Transition Validator behavior change, Notification Policy
+behavior change, REST, Dashboard, Web UI, provider orchestration,
+autonomous coding, model capability expansion, automatic patch
+generation, automatic refactoring, repository mutation outside planned
+schema and documentation artifacts, or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119K — Repository Intelligence Executable Schema Implementation: Shared Components.
+Recommended next repo phase: 119L — Repository Intelligence Executable
+Schema Verification: Shared Components.
+
+## Phase 119K Complete
+
+Phase 119K — Repository Intelligence Executable Schema Implementation:
+Shared Components (completed).
+
+Narrow implementation phase for Track B Repository Intelligence.
+Implemented standalone JSON Schema Draft 2020-12 shared components
+outside `src` under `schemas/repository_intelligence/shared/`. The shared
+component slice includes the common artifact envelope, repository
+context, phase context, release context, derivation record, source
+attribution record, Evidence link record, uncertainty / verification
+state, conflict / supersession record, boundary disclosure, limitation
+record, and disclaimer schemas. Added
+`schemas/repository_intelligence/README.md` and
+`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_SHARED_COMPONENTS.md`
+to document the implemented layout, structural validation scope,
+semantic exclusions, authority boundaries, and future work.
+
+The schemas preserve structural validation only: required field presence,
+types, enum membership, object and array shape, schema version constants,
+artifact family declarations, boundary disclosure presence, and required
+disclaimer text. They do not validate source truth, source sufficiency,
+claim truth, derivation correctness, Evidence sufficiency, Advisory
+quality, architectural correctness, Decision Evaluation validity, action
+approval, execution safety, lifecycle validity, or Repository State
+validity.
+
+**No-go**: no artifact-family schemas, validator, validation library,
+schema verification CLI, automated test suite, Python models, Pydantic
+models, dataclasses, extraction, graph construction, impact engine,
+Advisory behavior, Advisory Runtime, Advisory Context Package, Evidence,
+Repository Skills, Decision Evaluation, source code, test code, runtime
+behavior, execution, shell mediation, Permission Broker, lifecycle
+redesign, REST, Dashboard, Web UI, Telegram inbound, provider selection,
+multi-model orchestration, autonomous coding, model capability expansion,
+repository mutation outside planned schema and documentation artifacts,
+runtime plugin changes, Repository State changes, automatic patch
+generation, or automatic refactoring.
+
+Recommended next repo phase: 119L — Repository Intelligence Executable
+Schema Verification: Shared Components.
 
 ## Phase 119J Complete
 
