@@ -1,12 +1,16 @@
 # Repository Intelligence Schemas
 
-Phase 119K introduces the first standalone JSON Schema artifacts for
-Repository Intelligence. These schemas live outside `src` so they remain
-language-neutral contract artifacts rather than runtime code.
+Phase 119K introduced the first standalone JSON Schema artifacts for
+Repository Intelligence. Phase 119M adds the first artifact-family schema
+on top of the verified shared components. These schemas live outside
+`src` so they remain language-neutral contract artifacts rather than
+runtime code.
 
 ## Scope
 
 Implemented in this slice:
+
+Shared components:
 
 - `shared/common_artifact_envelope.schema.json`
 - `shared/repository_context.schema.json`
@@ -21,9 +25,19 @@ Implemented in this slice:
 - `shared/limitation_record.schema.json`
 - `shared/disclaimer.schema.json`
 
+Artifact-family schemas:
+
+- `artifacts/contract_conformance_record.schema.json`
+
+The Contract Conformance Record schema is the first artifact-family
+schema because it records structural contract conformance without
+performing repository extraction, graph construction, impact analysis,
+Advisory behavior, Decision Evaluation, execution, enforcement, or
+repository mutation.
+
 Not implemented in this slice:
 
-- artifact-family schemas
+- additional artifact-family schemas
 - validators or validation libraries
 - CLI commands
 - Python models, Pydantic models, or dataclasses
@@ -67,14 +81,25 @@ Schema conformance means structural conformance only. These schemas do not:
 - authorize execution or repository mutation
 - establish lifecycle standing
 
-Future validators must preserve the same boundary.
+The Contract Conformance Record schema structurally represents an
+artifact under review, contract basis, invariant checks, named
+conformance checks, conformance status, violations, limitations,
+boundary disclosures, disclaimers, and reviewer/verifier identity. It
+does not validate source truth, evidence sufficiency, derivation
+correctness, natural-language forbidden claims, lifecycle standing,
+Repository State validity, Decision Evaluation outcomes, execution
+safety, or remediation correctness.
+
+Future validators must preserve the same boundary. Other
+artifact-family schemas remain future work.
 
 ## Next Phase
 
 The recommended next phase is:
 
-`119L - Repository Intelligence Executable Schema Verification: Shared Components`
+`119N - Repository Intelligence Executable Schema Verification: First Artifact Family`
 
 That phase should verify JSON validity, reference consistency, contract
-alignment, and authority-creep safety before artifact-family schemas are
+alignment, shared component reuse, conformance-state correctness, and
+authority-creep safety before another artifact-family schema is
 implemented.

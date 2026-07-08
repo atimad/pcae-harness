@@ -2,6 +2,25 @@
 
 ## Accepted
 
+- Treat Phase 119M as a narrow first-artifact-family implementation
+  phase: implement exactly one standalone JSON Schema Draft 2020-12
+  artifact-family schema, the Contract Conformance Record, under
+  `schemas/repository_intelligence/artifacts/contract_conformance_record.schema.json`.
+  Build on the verified shared components from 119K/119L, preserve the
+  frozen 119E Contract Conformance Record vocabulary and disclaimer, and
+  keep the schema structural and descriptive only. Update schema
+  documentation and phase documentation, but do not implement additional
+  artifact-family schemas, validators, validation libraries, CLI,
+  automated tests, Python models, Pydantic models, dataclasses,
+  extraction, graph construction, impact analysis, Advisory behavior,
+  Evidence behavior, Repository Skills behavior, Decision Evaluation
+  behavior, runtime behavior, execution, enforcement, lifecycle changes,
+  Permission Broker changes, repository mutation outside planned
+  schema/docs files, automatic patch generation, automatic refactoring,
+  or Telegram inbound capability. Recommended next phase: 119N -
+  Repository Intelligence Executable Schema Verification: First Artifact
+  Family.
+
 - Treat Phase 119L as shared-component-verification-only: verify the
   JSON Schema Draft 2020-12 shared Repository Intelligence components
   implemented in 119K without adding artifact-family schemas, validators,

@@ -1,0 +1,444 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/contract_conformance_record.schema.json",
+  "title": "Repository Intelligence Contract Conformance Record",
+  "description": "Artifact-family schema for a structural Contract Conformance Record. It records declared contract checks for another Repository Intelligence artifact and remains read-only, descriptive, non-decision, and no-execution; it does not authorize action or execution, replace Decision Evaluation, replace Evidence, or replace Repository State.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "artifact_under_review",
+    "contract_version",
+    "contract_basis",
+    "invariant_checks",
+    "source_attribution_check",
+    "determinism_check",
+    "read_only_check",
+    "decision_boundary_check",
+    "advisory_non_authority_check",
+    "execution_boundary_check",
+    "uncertainty_preservation_check",
+    "conflict_preservation_check",
+    "supersession_preservation_check",
+    "conformance_status",
+    "violations",
+    "limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "reviewer_or_verifier_identity",
+    "contract_conformance_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "artifact_under_review": {
+      "$ref": "#/$defs/artifact_under_review"
+    },
+    "contract_version": {
+      "type": "string",
+      "const": "119A.1.0/119E.1.0",
+      "description": "Frozen Repository Intelligence and artifact contract version checked by this record."
+    },
+    "contract_basis": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/contract_basis_record"
+      }
+    },
+    "invariant_checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/invariant_check"
+      }
+    },
+    "source_attribution_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "determinism_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "read_only_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "decision_boundary_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "advisory_non_authority_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "execution_boundary_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "uncertainty_preservation_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "conflict_preservation_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "supersession_preservation_check": {
+      "$ref": "#/$defs/named_conformance_check"
+    },
+    "additional_conformance_checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/named_conformance_check"
+      }
+    },
+    "conformance_status": {
+      "$ref": "#/$defs/conformance_status"
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/violation"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "reviewer_or_verifier_identity": {
+      "$ref": "#/$defs/reviewer_or_verifier_identity"
+    },
+    "contract_conformance_disclaimer": {
+      "type": "string",
+      "const": "This conformance record describes whether the inspected artifact meets the Repository Intelligence contract invariants at the time of inspection. It does not approve, reject, block, promote, quarantine, authorize, or decide. Decision Evaluation remains the sole decision maker in PCAE. This record is read-only and descriptive."
+    }
+  },
+  "$defs": {
+    "artifact_under_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifact_id",
+        "artifact_family",
+        "artifact_contract_version"
+      ],
+      "properties": {
+        "artifact_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_reference": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/artifact_reference"
+        },
+        "artifact_family": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/artifact_type"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_locator": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact_digest_or_checksum": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared digest or checksum when the governing contract permits one; this schema records the value only."
+        },
+        "artifact_producer": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json#/$defs/producer"
+        }
+      }
+    },
+    "contract_basis_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_id",
+        "contract_name",
+        "contract_version",
+        "contract_reference"
+      ],
+      "properties": {
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_kind": {
+          "type": "string",
+          "enum": [
+            "repository_intelligence_contract",
+            "artifact_contract",
+            "executable_schema_contract",
+            "schema_concept",
+            "phase_document",
+            "other"
+          ]
+        },
+        "contract_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_attribution": {
+          "$ref": "../shared/source_attribution_record.schema.json"
+        }
+      }
+    },
+    "invariant_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "invariant_id",
+        "invariant_description",
+        "check_result",
+        "check_detail"
+      ],
+      "properties": {
+        "invariant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "invariant_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check_result": {
+          "$ref": "#/$defs/invariant_check_result"
+        },
+        "check_detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checked_field_or_section": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check_sources": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "named_conformance_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "check_result",
+        "detail"
+      ],
+      "properties": {
+        "check_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check_category": {
+          "$ref": "#/$defs/check_category"
+        },
+        "check_result": {
+          "$ref": "#/$defs/invariant_check_result"
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1
+        },
+        "check_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checked_field_or_section": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_references": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "check_category": {
+      "type": "string",
+      "enum": [
+        "source_attribution",
+        "evidence_link",
+        "uncertainty_preservation",
+        "conflict_preservation",
+        "supersession_preservation",
+        "derivation_disclosure",
+        "versioning_snapshot",
+        "read_only_boundary",
+        "no_execution_boundary",
+        "non_decision_boundary",
+        "advisory_non_authority",
+        "decision_evaluation_boundary",
+        "evidence_boundary",
+        "repository_state_boundary",
+        "forbidden_field",
+        "forbidden_claim",
+        "schema_structure",
+        "determinism",
+        "other"
+      ]
+    },
+    "invariant_check_result": {
+      "type": "string",
+      "enum": [
+        "conforms",
+        "violation",
+        "unable_to_assess"
+      ]
+    },
+    "conformance_status": {
+      "type": "string",
+      "enum": [
+        "conforms",
+        "conforms_with_observations",
+        "partial_conformance",
+        "non_conformance",
+        "unable_to_assess"
+      ]
+    },
+    "violation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "invariant_id",
+        "violation_description",
+        "affected_fields"
+      ],
+      "properties": {
+        "violation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "violated_contract": {
+          "type": "string",
+          "minLength": 1
+        },
+        "invariant_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "violated_invariant": {
+          "type": "string",
+          "minLength": 1
+        },
+        "violation_description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "observation",
+            "warning",
+            "contract_violation",
+            "unable_to_assess"
+          ]
+        },
+        "affected_fields": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "affected_section": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_check_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "remediation_guidance": {
+          "type": "string",
+          "description": "Optional human review guidance only; this field does not trigger or perform remediation."
+        }
+      }
+    },
+    "reviewer_or_verifier_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_type",
+        "reviewer_identity"
+      ],
+      "properties": {
+        "reviewer_type": {
+          "type": "string",
+          "enum": [
+            "human",
+            "phase",
+            "tool",
+            "skill",
+            "unknown"
+          ]
+        },
+        "reviewer_identity": {
+          "type": "string",
+          "minLength": 1
+        },
+        "review_context": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
