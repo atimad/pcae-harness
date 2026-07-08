@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- Treat Phase 119A as the contract-freeze-only phase for Track B
+  Repository Intelligence: freeze the initial Repository Intelligence
+  contract derived from 118A through 118R, including purpose, scope,
+  component boundaries, shared primitive families, source attribution,
+  determinism, uncertainty/conflict/supersession, versioning/snapshot,
+  verification, conceptual query/report expectations, read-only
+  boundary, Advisory non-authority, Decision Evaluation boundary,
+  execution boundary, contract invariants, compatibility matrix, future
+  phase constraints, and the minor clarifications identified by 118R.
+  Do not implement extraction, graph construction, impact analysis,
+  advisory behavior, schemas as executable models, runtime behavior,
+  source changes, test changes, execution, enforcement, lifecycle
+  redesign, Permission Broker changes, provider orchestration,
+  autonomous coding, automatic patch generation, automatic refactoring,
+  repository mutation, or Telegram inbound capability in 119A.
 - Treat Phase 118R as the architecture-review-only closure of the
   initial Track B architecture set: 118A through 118E form one coherent
   Repository Intelligence architecture, with Repository Knowledge as the

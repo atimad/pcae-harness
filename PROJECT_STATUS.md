@@ -2,30 +2,26 @@
 
 ## Current Phase
 
-Phase 118R — Repository Intelligence Architecture Review
+Phase 119A — Repository Intelligence Contract Freeze
 (completed).
 
-Architecture-review-only continuation of Track B: Repository
-Intelligence. Reviews the architecture set produced by 118A through
-118E: Repository Knowledge, Historical Memory, Change Impact Analysis,
-Dependency Knowledge Graph, and Advisory Reasoning Expansion. The review
-concludes that the Track B architecture set is coherent and ready for
-contract freeze with minor clarifications. Repository Knowledge is the
-foundation; Historical Memory is the temporal layer inside Repository
-Knowledge; Dependency Knowledge Graph is the relationship layer inside
-Repository Knowledge; Change Impact Analysis is read-only change-scoped
-reasoning over Repository Knowledge, Historical Memory, and dependency
-relationships; Advisory Reasoning Expansion is a non-authoritative
-consumer of Repository Intelligence context.
+Contract-freeze-only continuation of Track B: Repository Intelligence.
+Freezes the initial Repository Intelligence contract derived from
+118A through 118R. The contract defines Repository Intelligence as
+PCAE's deterministic, source-attributed, inspectable, versioned,
+read-only understanding of repository architecture, history,
+relationships, impacts, and advisory-relevant context. It freezes
+component roles for Repository Knowledge, Historical Memory, Dependency
+Knowledge Graph, Change Impact Analysis, and Advisory Reasoning
+Expansion; freezes Evidence and Repository Skills relationships;
+freezes Decision Evaluation and Advisory authority boundaries; and
+freezes source attribution, determinism, uncertainty/conflict/
+supersession, versioning/snapshot, verification, conceptual query/report
+expectations, read-only and no-execution boundaries, contract
+invariants, compatibility matrix, future phase constraints, and the
+minor clarifications identified by 118R.
 
-The review identifies no blocking contradictions and no repair-phase
-requirement. It identifies minor contract-freeze clarifications around
-shared primitive names, source-reference schema, evidence-link bridge
-shape, uncertainty/verification vocabulary, snapshot identity,
-dependency-vs-impact relationship views, and Advisory Context Package
-integration.
-
-No repository intelligence contracts, repository knowledge extraction,
+No repository intelligence extraction, repository knowledge extraction,
 historical memory extraction, change impact analysis engine, dependency
 graph construction, graph query engine, advisory behavior changes,
 Advisory Runtime changes, Advisory Context Package changes, Evidence
@@ -35,14 +31,48 @@ authorization, enforcement, lifecycle behavior, Permission Broker
 behavior, Repository State behavior, Repository Transition Validator
 behavior, Notification Policy behavior, REST, Dashboard, Web UI,
 provider orchestration, autonomous coding, model capability expansion,
-automatic patch generation, automatic refactoring, or Telegram inbound
-path changed.
+automatic patch generation, automatic refactoring, repository mutation,
+or Telegram inbound path changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119A — Repository Intelligence Contract Freeze.
+Recommended next repo phase: 119B — Repository Intelligence Contract Verification.
+
+## Phase 119A Complete
+
+Phase 119A — Repository Intelligence Contract Freeze (completed).
+
+Contract-freeze-only phase for the Track B Repository Intelligence set.
+The phase freezes the initial Repository Intelligence contract based on
+118A through 118R. It freezes Repository Intelligence purpose and scope,
+the component roles for Repository Knowledge, Historical Memory,
+Dependency Knowledge Graph, Change Impact Analysis, and Advisory
+Reasoning Expansion, Evidence and Repository Skills relationships,
+Decision Evaluation and Advisory non-authority boundaries, source
+attribution requirements, determinism requirements,
+uncertainty/conflict/supersession vocabulary, versioning/snapshot
+expectations, verification expectations, conceptual query/report shapes,
+read-only and no-execution boundaries, contract invariants, compatibility
+matrix, future phase constraints, and the minor clarifications from
+118R.
+
+**No-go**: no Repository Intelligence extraction, Repository Knowledge
+extraction, Historical Memory extraction, Change Impact Analysis engine,
+Dependency Knowledge Graph construction, graph query engine, Advisory
+behavior change, Advisory Runtime change, Advisory Context Package
+change, Evidence subsystem change, Repository Skills change, Decision
+Evaluation change, source implementation, test implementation, runtime
+behavior change, execution, authorization, enforcement, lifecycle
+behavior change, Permission Broker change, Repository State behavior
+change, Repository Transition Validator behavior change, Notification
+Policy behavior change, REST, Dashboard, Web UI, Telegram inbound,
+provider selection, multi-model orchestration, autonomous coding, model
+capability expansion, repository mutation, automatic patch generation,
+or automatic refactoring.
+
+Recommended next repo phase: 119B — Repository Intelligence Contract Verification.
 
 ## Phase 118R Complete
 

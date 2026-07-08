@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 119A - Repository Intelligence Contract Freeze
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONTRACT_FREEZE.md`).
+  Freezes the initial Repository Intelligence contract derived from
+  118A through 118R. The contract freezes the Repository Intelligence
+  definition, component roles for Repository Knowledge, Historical
+  Memory, Dependency Knowledge Graph, Change Impact Analysis, and
+  Advisory Reasoning Expansion, plus Evidence and Repository Skills
+  relationships, Decision Evaluation and Advisory authority boundaries,
+  source attribution, determinism, uncertainty/conflict/supersession,
+  versioning/snapshot, verification, conceptual query/report
+  expectations, read-only and no-execution boundaries, contract
+  invariants, compatibility matrix, future phase constraints, and the
+  minor clarifications identified by 118R. Contract freeze only; no
+  extraction, graph construction, impact engine, advisory behavior,
+  Evidence, Repository Skills, Decision Evaluation, source, test,
+  runtime behavior, execution, enforcement, lifecycle, Permission
+  Broker, REST, Dashboard, Web UI, model integration, provider
+  orchestration, autonomous coding, automatic patch generation,
+  automatic refactoring, or Telegram inbound changes.
+
 - Phase 118R — Repository Intelligence Architecture Review
   (`docs/PHASE_118_REPOSITORY_INTELLIGENCE_ARCHITECTURE_REVIEW.md`).
   Reviews the Track B architecture set across Repository Knowledge,
