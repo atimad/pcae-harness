@@ -17,12 +17,14 @@
     "tasks/active/20260708-0218-phase-118d-dependency-knowledge-graph-architecture.md"
   ],
   "tests_added_or_updated": "None. 118D was architecture-only documentation and did not modify tests.",
-  "phase_commits": [],
-  "commit_attribution": "pending_governed_commit",
+  "phase_commits": [
+    "20c5a2a9662a332534c16f92bb37743f7c7f19a9"
+  ],
+  "commit_attribution": "phase_owned_governed_commit",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 118D is architecture-only documentation)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 0,
+  "origin_main_head_count": 1,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
