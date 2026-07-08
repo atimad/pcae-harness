@@ -1,56 +1,81 @@
-# Phase 120B Complete - Repository Intelligence Prototype Contract Freeze
+# Phase 120C Complete - Repository Intelligence Prototype Contract Verification
 
-- **Phase ID:** `120B`
-- **Phase name:** Repository Intelligence Prototype Contract Freeze
+- **Phase ID:** `120C`
+- **Phase name:** Repository Intelligence Prototype Contract Verification
 - **Status:** completed
 - **Report completeness:** complete
-- **Contract document:** `docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md`
-- **Contract scope:** the first Repository Intelligence read-only prototype, sole target Repository Knowledge Snapshot; binding on 120D, 120E, 120F
+- **Verification document:** `docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_VERIFICATION.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Implementation commit:** `7acfd7f56af0cdc6753a2a7cb79716e1b1c95a54`
-- **Task finish commit:** `79fb091e`
-- **Recommended next phase:** 120C - Repository Intelligence Prototype Contract Verification
+- **Implementation commit:** `9d5e7aa1a1236653a6c1d4cbf32c838c8bbe4932`
+- **Task finish commit:** `5b7a59ef`
+- **Recommended next phase:** 120D - Repository Knowledge Snapshot Prototype Plan
 
 ## Summary
 
-Froze the canonical contract governing the first Repository
-Intelligence read-only prototype, in
-`docs/PHASE_120_REPOSITORY_INTELLIGENCE_PROTOTYPE_CONTRACT_FREEZE.md`,
-the normative specification binding all later Track 120 implementation
-work (120D-120F). Restricted the first prototype to generating only
-Repository Knowledge Snapshot artifacts; no other artifact family is
-included.
+Independently verified the 120B Repository Intelligence Prototype
+Contract before any prototype planning or implementation begins.
+Verified contract completeness (all 20 required sections present),
+architectural consistency with the Phase 119 executable schema line
+(locator vocabulary, uncertainty vocabulary, boundary disclosure
+fields, and disclaimer constants independently cross-checked
+byte-for-byte against the schema files on disk, all exact matches) and
+with Phase 120A's architecture (no contradiction found; every
+narrowing or reframing is explicit and traceable), scope (remains
+limited to Repository Knowledge Snapshot, read-only, deterministic
+generation, no scope expansion), input model (allowed/excluded inputs,
+deterministic input assumptions), output model, determinism (precise,
+testable, no gap for non-determinism), read-only boundary (all ten
+prohibited behaviors confirmed present and fail-closed), attribution
+(deterministic, missing attribution is contract failure), Evidence
+boundary (distinct from Evidence, Repository State, Decision
+Evaluation, Advisory authority), uncertainty and limitation contracts,
+the ten conceptual prototype stages (logical ordering and completeness
+confirmed, no implementation reviewed), the fail-closed failure
+contract, governance compatibility, and sufficiency for 120D-120F
+without further architectural work.
 
-Froze the conceptual input model — allowed: repository working tree,
-repository metadata, tracked documentation and artifacts, governed
-lifecycle metadata, previously verified 119 schemas; explicitly
-excluded: external services, AI inference, network sources, runtime
-state mutation, execution outputs — and the conceptual output model
-(exactly one schema-conformant, deterministic, read-only, fully
-attributable Repository Knowledge Snapshot per generation run).
+Found one non-blocking terminology clarification: Repository Knowledge
+Snapshot's actual required field is `unknowns`, not `unknowns_gaps` as
+120B's Section 10 prose stated (`unknowns_gaps` is correct for the
+other seven artifact families, which postdate Repository Knowledge
+Snapshot's 119O implementation). Found one non-blocking structural
+framing difference: 120B's unified ten-stage list folds 120A's
+separately-described Human Review Layer into the stage sequence;
+content is identical, only the framing differs. Neither finding
+required modifying the frozen 120B contract, consistent with the
+instruction to classify ambiguities for future implementation guidance
+rather than reopen a sound contract.
 
-Froze a determinism contract (identical inputs must produce identical
-structure, excluding approved metadata, no probabilistic reasoning);
-ten read-only guarantees; a source attribution contract (missing
-attribution is contract failure); the Evidence boundary (Repository
-Intelligence is not Evidence and must never replace it); an
-uncertainty contract (unknown/incomplete/conflicting/unverifiable must
-be explicit, never inferred); a limitation contract (limitation
-records, disclaimer records, boundary disclosures, uncertainty
-records); the ten conceptual prototype stages carried forward from
-120A; a persistence contract that defers the final output-location
-choice to 120D among 120A's three candidate locations, without
-selecting one; a verification contract with no validators implemented;
-a fail-closed failure contract; and a governance contract (observe-only
-boundary, governed lifecycle compliance, repository cleanliness,
-determinism, auditability, reproducibility).
+**Conclusion: no contract modifications required.** The contract is
+verified as sound and implementable.
 
-Documented relationship to 120C-120F and carried forward the same
-three known inherited, non-blocking tooling/reporting issues from
-119AC/120A, without repairing them, consistent with the explicit
-out-of-scope instruction.
+## Contract Verification Matrix
+
+| Area | Classification |
+| --- | --- |
+| Contract completeness | Verified |
+| Architectural consistency — Phase 119 | Verified |
+| Architectural consistency — Phase 120A | Verified |
+| Architectural consistency — Repository Intelligence principles | Verified |
+| Architectural consistency — observe-only architecture | Verified |
+| Scope verification | Verified |
+| Input model verification | Verified |
+| Output model verification | Verified with clarification |
+| Determinism verification | Verified |
+| Read-only boundary verification | Verified |
+| Attribution verification | Verified |
+| Evidence boundary verification | Verified |
+| Uncertainty verification | Verified |
+| Limitation verification | Verified |
+| Prototype stage verification | Verified with clarification |
+| Failure contract verification | Verified |
+| Governance verification | Verified |
+| Phase sequencing verification (120D-120F sufficiency) | Verified |
+| Persistence storage implementation choice | Out of scope (delegated to 120D) |
+| Verification tooling implementation | Out of scope (delegated to 120F) |
+| Generator implementation detail | Requires future implementation detail (120D/120E) |
 
 ## Governance Results
 
@@ -63,37 +88,27 @@ out-of-scope instruction.
 - `pcae_notify_status`: Telegram configured, enabled, and ready after
   loading `~/.config/pcae/telegram.env`.
 
-This phase was documentation-only and did not change `src` or test
+This phase was verification-only and did not change `src` or test
 files, so the full test suite was not re-run; `fast_green` and
 `full_pytest` are not applicable.
 
 ## Confirmations
 
-- No implementation occurred: no generator, repository scanner,
-  extraction engine, artifact persistence implementation, validator,
-  validation library, schema verification CLI, CLI, Python models,
-  Pydantic models, dataclasses, runtime plugins, query engine, graph
-  traversal, execution planning, or execution capability.
+- No implementation occurred: no prototype, generator, repository
+  scanner, extraction engine, persistence implementation, validator,
+  CLI, Python code, models, dataclasses, or tests.
 - No source code or test code changed.
 - No runtime behavior changed.
 - Execution remains unavailable; runtime state remains `Observed`;
   maximum plugin capability remains `observe`.
-
-## Non-Goals
-
-No generator, generated artifact, fixture, sample artifact, validator,
-validation library, schema verification CLI, CLI of any kind, Python
-models, Pydantic models, dataclasses, runtime plugins, runtime
-behavior change, Advisory integration, query engine, graph traversal,
-execution planning, execution capability, automated test suite,
-source code change, or test code change.
+- No contract modification occurred; the frozen 120B document was not
+  edited.
 
 ## Known Inherited Issue Classification
 
-- 119Q report-generation-ordering defect: non-blocking for this
-  contract.
+- 119Q report-generation-ordering defect: non-blocking.
 - `is_phase_id_backward()` phase-id comparison bug: non-blocking for
-  120B; should still be tracked before a letter-length transition
+  120C; should still be tracked before a letter-length transition
   occurs within the 120 series.
 - Recurring `report_notification_tests: pending_final_telegram_delivery`
   reporting detail: non-blocking, well-understood, and consistently
@@ -103,9 +118,12 @@ None was repaired in this phase.
 
 ## Recommended Next Phase
 
-120C - Repository Intelligence Prototype Contract Verification.
+120D - Repository Knowledge Snapshot Prototype Plan.
 
-Reason: before any planning or implementation of the read-only
-generator begins, the frozen contract itself must be independently
-verified for internal consistency, unambiguous wording, and fidelity
-to Phase 119's schema line and Phase 120A's architecture.
+Reason: the frozen contract has now been independently verified as
+complete, internally consistent, architecturally aligned with 119 and
+120A, deterministic, read-only-bounded, attribution-rigorous,
+fail-closed, and sufficient for the remaining Track 120 sequence
+without further architectural work. 120D may now plan concrete
+implementation of the ten contract-frozen stages, including making the
+persistence-location decision the contract explicitly delegated to it.
