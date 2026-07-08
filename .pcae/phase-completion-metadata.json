@@ -17,12 +17,17 @@
     "tasks/active/20260708-0545-phase-118e-advisory-reasoning-expansion-architecture.md"
   ],
   "tests_added_or_updated": "None. 118E was architecture-only documentation and did not modify tests.",
-  "phase_commits": [],
-  "commit_attribution": "pending_governed_commit",
+  "phase_commits": [
+    {
+      "hash": "6dc2c72",
+      "message": "Document Phase 118E advisory reasoning expansion architecture"
+    }
+  ],
+  "commit_attribution": "phase_owned",
   "validator_module": "src/pcae/core/repository_transition_validator.py (unchanged; 118E is architecture-only documentation)",
   "execution_availability": "unavailable",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 0,
+  "origin_main_head_count": 1,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "execution_integration_status": {
