@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- Treat Phase 118D as the architecture-only Dependency Knowledge Graph
+  phase for Track B Repository Intelligence: the Dependency Knowledge
+  Graph is a deterministic, source-attributed, inspectable, versioned,
+  read-only relationship layer inside Repository Knowledge that
+  represents repository entities as graph nodes, repository-derived
+  relationships as typed directional edges, and dependency assertions as
+  source-backed claims. It may support Change Impact Analysis,
+  Historical Memory, architectural contract mapping, Advisory context,
+  repository intelligence reports, subsystem lineage inspection, and
+  traceability. It must not become graph construction, a graph database,
+  a graph CLI, a graph query engine, graph visualization, runtime
+  orchestration, execution planning, command routing, permission
+  brokering, enforcement, autonomous planning, lifecycle mutation,
+  repository mutation, hidden model inference, test execution,
+  automatic patch generation, automatic refactoring, or a bypass around
+  Decision Evaluation / the Repository Transition Validator.
 - Treat Phase 118C as the architecture-only Change Impact Analysis
   phase for Track B Repository Intelligence: Change Impact Analysis is
   deterministic, source-attributed, inspectable reasoning over

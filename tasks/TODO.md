@@ -34,7 +34,8 @@ understanding without execution, enforcement, or autonomy.
 | 118A | Repository Knowledge Architecture | ✅ Complete |
 | 118B | Historical Memory Architecture | ✅ Complete |
 | 118C | Change Impact Analysis Architecture | ✅ Complete |
-| 118D | Dependency Knowledge Graph Architecture | 🔜 Next (per PROJECT_STATUS.md) |
+| 118D | Dependency Knowledge Graph Architecture | ✅ Complete |
+| 118E | Advisory Reasoning Expansion Architecture | 🔜 Next (per PROJECT_STATUS.md) |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 

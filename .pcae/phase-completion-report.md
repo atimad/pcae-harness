@@ -1,195 +1,215 @@
-# Phase 118C Complete - Change Impact Analysis Architecture
+# Phase 118D Complete - Dependency Knowledge Graph Architecture
 
-- **Phase ID:** `118C`
+- **Phase ID:** `118D`
 - **Status:** completed
 - **Report completeness:** complete
 - **Missing trust fields:** none
 - **Files changed:** 9
 - **Tests run:** governance validation only
-- **Commits:** cc1fd654, 7f128fa9, f985a058, 2777f1dd
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Commits:** pending governed commit
+- **Pushed:** pending
+- **origin/main..HEAD:** pending
 
 ## Summary
 
-Phase 118C defines Change Impact Analysis as deterministic,
-source-attributed, inspectable, read-only reasoning over Repository
-Knowledge and Historical Memory to identify what may be affected by a
-proposed or observed repository change.
+Phase 118D defines the Dependency Knowledge Graph as deterministic,
+source-attributed, inspectable, versioned, read-only relationship
+structure inside Repository Knowledge.
 
-Change Impact Analysis is structured context, not a verdict. It does
-not predict by hidden model inference, decide, authorize, execute,
-enforce, mutate repository state, implement dependency graphs, run
-tests, generate patches, or refactor code.
+The graph represents repository entities as nodes, repository-derived
+relationships as typed directional edges, and dependency assertions as
+source-backed claims with sources, evidence links, dependency types,
+direction, strength, scope, verification states, paths, views,
+snapshots, queries, and reports.
+
+It is structured relationship knowledge, not runtime orchestration,
+execution planning, command routing, enforcement, permission brokering,
+autonomous planning, or a decision maker.
 
 ## Architecture Produced
 
-- Created `docs/PHASE_118_CHANGE_IMPACT_ANALYSIS_ARCHITECTURE.md`.
-- Defined Change Impact Analysis and its Track B role.
-- Distinguished Change Impact Analysis from Repository Knowledge,
-  Historical Memory, Repository State, Evidence, Advisory Context,
-  Decision Evaluation, execution, and model prediction.
-- Defined core primitives: Impact Subject, Impact Entity, Impact
-  Surface, Impact Relationship, Impact Path, Impact Claim, Impact
-  Source, Impact Evidence Link, Impact Scope, Blast Radius, Impact
-  Query, and Impact Report.
-- Defined impact entity, relationship, path, claim, blast radius, source
-  attribution, determinism, uncertainty, verification, query, and report
-  models.
+- Created `docs/PHASE_118_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`.
+- Defined the Dependency Knowledge Graph and its Track B role.
+- Distinguished the graph from Repository Knowledge, Historical Memory,
+  Change Impact Analysis, conventional code dependency graphs,
+  Repository State, Evidence, Advisory Context, Decision Evaluation, and
+  execution.
+- Defined core primitives: Graph Node, Graph Edge, Dependency Claim,
+  Dependency Source, Dependency Evidence Link, Dependency Type,
+  Dependency Direction, Dependency Strength, Dependency Scope,
+  Dependency Verification State, Dependency Path, Dependency View,
+  Dependency Snapshot, Dependency Query, and Dependency Report.
+- Defined node, edge, dependency type, directionality, source
+  attribution, determinism, uncertainty, verification, versioning,
+  query, graph view, path, and report models.
 - Defined integrations with Repository Knowledge, Historical Memory,
-  Evidence, Repository Skills, Advisory, and Decision Evaluation.
+  Change Impact Analysis, Evidence, Repository Skills, Advisory, and
+  Decision Evaluation.
 - Preserved the read-only, no-execution boundary.
 
-## Change Impact Analysis Definition
+## Dependency Knowledge Graph Definition
 
-Change Impact Analysis is the deterministic, source-attributed,
-inspectable analysis of which repository entities, relationships,
-contracts, tests, documents, historical lineages, advisory surfaces,
-evidence candidates, release records, lifecycle artifacts, governance
-boundaries, and unknowns may be affected by a proposed or observed
-change.
+Dependency Knowledge Graph is the deterministic, source-attributed,
+versioned graph view inside Repository Knowledge that represents
+repository entities as nodes and repository-derived relationships as
+typed, directional, inspectable edges with dependency claims, sources,
+evidence links, verification states, uncertainty, and snapshots.
 
 ## Conceptual Boundaries
 
-Change Impact Analysis vs Repository Knowledge:
-Repository Knowledge is the reusable semantic map of entities and
-relationships. Change Impact Analysis is a change-scoped view over that
-map.
+Dependency Knowledge Graph vs Repository Knowledge:
+Repository Knowledge is the broader semantic map. The graph is the
+relationship layer inside it.
 
-Change Impact Analysis vs Historical Memory:
-Historical Memory describes how entities evolved over time. Change
-Impact Analysis uses that lineage to identify historical impact and
-prior decisions, repairs, hardening, releases, and supersessions that
-may matter for the change.
+Dependency Knowledge Graph vs Historical Memory:
+Historical Memory is temporal lineage. The graph is structural
+relationship knowledge that can include temporal edges used by
+Historical Memory.
 
-Change Impact Analysis vs Decision Evaluation:
-Change Impact Analysis provides structured context and possible evidence
-candidates. Decision Evaluation remains the only component responsible
-for allow/block/escalate/more-evidence decisions.
+Dependency Knowledge Graph vs Change Impact Analysis:
+The graph provides reusable dependency paths, reverse edges, edge types,
+views, and uncertainty states. Change Impact Analysis applies those
+relationships to a specific proposed or observed change.
 
-Change Impact Analysis vs Evidence:
-Impact claims may become evidence candidates or evidence links, but they
-are not automatically Evidence. Any conversion must satisfy the Evidence
-Framework contract.
-
-Change Impact Analysis vs model prediction:
-Canonical impact analysis must be derived from repository artifacts and
-structured relationships. Hidden model state, conversation memory,
-prompt wording, and AI-generated prose are not sources of truth.
+Dependency Knowledge Graph vs conventional code dependency graph:
+The PCAE graph includes code dependencies, but also documentation,
+tests, contracts, evidence, advisory, historical, governance, lifecycle,
+release, capability, subsystem, and no-go relationships with source
+attribution and uncertainty.
 
 ## Core Primitives Summary
 
-The architecture defines Impact Subject, Impact Entity, Impact Surface,
-Impact Relationship, Impact Path, Impact Claim, Impact Source, Impact
-Evidence Link, Impact Scope, Blast Radius, Impact Query, and Impact
-Report. Direct, indirect, historical, contractual, test, documentation,
-advisory, evidence, release, lifecycle, governance, unknown, and
-unverified impacts are modeled as claim types or surface
-classifications, not as separate authority-bearing primitives.
+The architecture defines Graph Node, Graph Edge, Dependency Claim,
+Dependency Source, Dependency Evidence Link, Dependency Type,
+Dependency Direction, Dependency Strength, Dependency Scope, Dependency
+Verification State, Dependency Path, Dependency View, Dependency
+Snapshot, Dependency Query, and Dependency Report.
 
-## Impact Entity Model
+## Node Model
 
-Impact entities include source modules, packages, commands, CLI
-surfaces, tests, documentation, contracts, reports, phase metadata,
-lifecycle artifacts, repository skills, advisory skills, evidence
-artifacts, decision evaluation inputs, runtime architecture documents,
-release records, and no-go boundaries.
+Nodes may represent source modules, packages, commands, CLI surfaces,
+runtime components, repository skills, advisory skills, evidence
+artifacts, decision evaluation inputs, architecture documents, contract
+documents, verification documents, phase reports, phase metadata, task
+contracts, changelog entries, tests, suites, release records, tags,
+commits, no-go boundaries, subsystems, capabilities, and architectural
+contracts.
 
-## Impact Relationship Model
+## Edge Model
 
-Impact relationships include imports, implements, command ownership,
-test coverage, documentation reference, contract reference,
-constraints, dependencies, schema dependencies, phase introduction,
-phase modification, historical lineage, advisory usage, evidence
-dependency, governance dependency, release inclusion, supersession,
-repair, and hardening relationships.
+Edges may represent imports, calls, owns, exposes, consumes, produces,
+verifies, documents, constrains, depends_on, supersedes, introduced_by,
+modified_by, hardened_by, repaired_by, released_in, tests, references,
+requires_evidence, informs_advisory, supports_decision_context,
+belongs_to_subsystem, implements_contract, and
+protected_by_no_go_boundary relationships.
 
-## Blast Radius Model
+## Dependency Type Model
 
-Blast radius is a conservative classification of impact extent and type.
-Classes include local, subsystem, cross-subsystem, governance, advisory,
-documentation-only, historical-lineage, release, unknown, and
-unverified. Blast radius is not a decision.
+Dependency classes include code, command, documentation, test, contract,
+evidence, advisory, historical, governance, lifecycle, release,
+capability, subsystem, and no-go boundary dependencies.
+
+## Directionality Model
+
+Every graph edge must be directional and inspectable. Inverse
+relationships may be query projections rather than stored edges unless
+both directions carry distinct source-attributed meaning.
 
 ## Source Attribution
 
-Every impact claim must cite repository artifacts such as source files,
-tests, docs, architecture documents, contract documents, phase reports,
+Every node, edge, claim, path, view, and snapshot must link back to
+sources such as source files, tests, docs, architecture documents,
+contract documents, verification documents, phase reports,
 phase-completion metadata, changelog entries, `tasks/DONE.md`,
 `tasks/DECISIONS.md`, task contracts, release notes, tags, commits,
 evidence artifacts, repository skills, advisory skills, generated
-registry output, runtime-introspection output, or canonical lifecycle
+registry output, runtime-introspection output, and canonical lifecycle
 artifacts.
 
 ## Uncertainty Model
 
-Impact claims carry verification states such as verified, derived,
-probable, possible, unknown, unverifiable, conflicting, stale, and
-superseded. False certainty is avoided by preserving unknowns,
-limitations, conflicts, stale sources, and supersession relationships.
+The graph preserves verified, unverified, weak, possible, inferred,
+unknown, conflicting, stale, and superseded dependency states. Unknown,
+stale, conflicting, and superseded dependencies remain inspectable and
+are not silently promoted to verified edges.
 
 ## Determinism Model
 
-Future impact analysis should be reproducible from the repository
-revision, Repository Knowledge snapshot, Historical Memory snapshot,
-declared subject, source set, analyzer version, relationship taxonomy
-version, and query parameters. Model output may suggest candidates but
-does not become canonical impact knowledge without source grounding.
+Future graph construction should be reproducible from repository
+revision, source set, Repository Knowledge version, Historical Memory
+snapshot where used, relationship taxonomy version, graph builder
+version, and view/query parameters. Model inference may suggest
+candidates but does not create canonical graph truth without source
+grounding.
 
 ## Verification Model
 
 Future verification should use fixture repositories, deterministic
 snapshot comparison, source-attribution completeness checks,
-no-unattributed-claim checks, relationship taxonomy conformance,
-stale/superseded source handling, conflict preservation, query
-reproducibility, documentation-only scope checks, no-decision/no-
-execution/no-mutation boundary checks, and human review of sample
-reports.
+no-unattributed-edge checks, directionality checks, taxonomy
+conformance, stale/superseded handling, conflict preservation, reverse
+dependency query checks, graph view boundary checks, no-decision/no-
+execution/no-mutation checks, and human review of sample reports.
+
+## Versioning and Snapshot Model
+
+Dependency snapshots should record snapshot ID, repository commit,
+branch/tag context, source set, Repository Knowledge version,
+Historical Memory snapshot ID when used, relationship taxonomy version,
+graph builder version, timestamp, node/edge counts, query/view
+parameters, known omissions, limitations, and superseded snapshot
+references.
 
 ## Query Model
 
-Future query classes include changed-file, subsystem, contract, test,
-documentation, advisory, evidence, historical-lineage, release,
-governance, and unknown-impact queries. Query results must include
-sources, paths, limitations, uncertainty, and non-decision disclaimers.
+Future query classes include dependency path, reverse dependency,
+subsystem dependency, command dependency, test coverage relationship,
+documentation relationship, contract relationship, historical lineage
+relationship, advisory relationship, governance boundary, release
+relationship, and unknown dependency queries.
 
-## Impact Report Model
+## Graph View Model
 
-A future Impact Report should include the proposed change, impacted
-entities, direct impacts, indirect impacts, historical impacts, contract
-impacts, test impacts, documentation impacts, advisory impacts, evidence
-impacts, release impacts, lifecycle/governance impacts, blast radius,
-unknowns, required evidence, source attribution, verification status,
-limitations, and a non-decision disclaimer.
+Future graph views include subsystem, capability, command, test,
+documentation, contract, evidence, historical, release, advisory, and
+governance views. Views are bounded projections and do not create new
+truth apart from source-attributed graph claims.
 
 ## Integration Summary
 
 Repository Knowledge:
-Change Impact Analysis consumes Repository Knowledge entities,
-relationships, claims, sources, snapshots, and evidence links.
+The graph is the relationship layer inside Repository Knowledge and
+reuses its entity, relationship, claim, source, evidence-link, snapshot,
+and versioning models.
 
 Historical Memory:
-Historical lineage informs why an entity or boundary exists, what
-introduced or hardened it, what repaired it, and whether older guidance
-was superseded.
+Historical Memory uses temporal graph edges and dependency paths for
+lineage queries.
+
+Change Impact Analysis:
+Impact analysis consumes dependency paths, reverse edges, edge types,
+dependency types, graph views, verification states, uncertainty markers,
+source attribution, and limitations.
 
 Evidence:
-Impact claims can produce evidence candidates or evidence links, but
-Evidence remains evaluation-scoped and contract-governed.
+Graph claims can produce evidence candidates or evidence links, but must
+be converted into conforming Evidence before Decision Evaluation can use
+them.
 
 Repository Skills:
-Future skills may expose bounded impact inspection/query capabilities
-as evidence-only skills.
+Future skills may inspect graph snapshots or answer bounded graph
+queries as evidence-only skills.
 
 Advisory:
-Advisory may use impact analysis for richer bounded context,
-explanations, recommendations, and required-evidence lists, while
-remaining evidence-producing and non-authorizing.
+Advisory can use graph knowledge for richer bounded context,
+dependency paths, tests, docs, contracts, no-go boundaries, historical
+lineage, unknowns, and limitations while remaining non-authorizing.
 
 Decision Evaluation:
-Decision Evaluation may be supported only indirectly through structured
-context or conforming Evidence. It remains the only decision-making
-component.
+The graph can support decisions only indirectly through structured
+context or conforming Evidence. Decision Evaluation remains the only
+decision-making component.
 
 ## PCAE Architecture Status
 
@@ -205,8 +225,7 @@ component.
 - **pcae_health:** healthy
 - **pcae_check:** passed
 - **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** ready before governed push; post-push state
-  recorded clean
+- **pcae_push_check:** nothing_to_push before commit
 - **pcae_runtime_inspect:** execution unavailable, Observed, observe,
   zero runtime plugins
 - **telegram_runtime:** configured, enabled, ready for outbound delivery
@@ -222,24 +241,25 @@ component.
   runtime plugins.
 - `pcae notify status` after sourcing the Telegram environment confirmed
   Telegram configured, enabled, and ready for outbound delivery.
-- `pcae skill invoke phase-finalization 118C` resolved the phase target;
+- `pcae skill invoke phase-finalization 118D` resolved the phase target;
   in the current lifecycle this command is a preview/targeting command
   and does not write completion artifacts.
 - Architecture scope check passed: no `src/` or `tests/` files changed.
 
 No implementation test suite or `fast_green` run was required because
-118C changed documentation and governance memory only. No source or test
+118D changed documentation and governance memory only. No source or test
 files changed.
 
 ## No-Go Confirmations
 
-- No change impact analysis engine implemented.
-- No impact extraction implemented.
-- No impact database implemented.
-- No impact CLI implemented.
-- No dependency graph implementation.
-- No historical memory extraction implemented.
+- No dependency graph construction implemented.
+- No dependency graph database implemented.
+- No dependency graph CLI implemented.
+- No graph query engine implemented.
+- No graph visualization implemented.
 - No repository knowledge extraction implemented.
+- No historical memory extraction implemented.
+- No change impact analysis engine implemented.
 - No advisory behavior changed.
 - No decision evaluation behavior changed.
 - No evidence subsystem behavior changed.
@@ -249,14 +269,8 @@ files changed.
 - No runtime behavior changed.
 - No execution implemented.
 - No shell mediation implemented.
-- No authorization implemented.
-- No enforcement implemented.
-- No lifecycle redesign.
 - No Permission Broker changes.
-- No Repository State behavior changes.
-- No Repository Transition Validator behavior changes.
-- No Notification Policy behavior changes.
-- No model integration.
+- No lifecycle redesign.
 - No REST.
 - No Dashboard.
 - No Web UI.
@@ -265,8 +279,10 @@ files changed.
 - No multi-model orchestration.
 - No autonomous coding.
 - No model capability expansion.
+- No repository mutation.
 - No runtime plugin changes.
 - No repository state changes.
+- No test execution through graph analysis.
 - No automatic patch generation.
 - No automatic refactoring.
 
@@ -275,7 +291,7 @@ Execution capability remains unavailable. Runtime state remains
 
 ## Recommended Next Phase
 
-118D - Dependency Knowledge Graph Architecture
+118E - Advisory Reasoning Expansion Architecture
 
 ## Report Consistency
 
@@ -284,4 +300,4 @@ Execution capability remains unavailable. Runtime state remains
 - **Status:** consistent
 
 ---
-*Report generated for PCAE Phase 118C. Schema version 1.0.*
+*Report generated for PCAE Phase 118D. Schema version 1.0.*

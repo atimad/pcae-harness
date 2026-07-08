@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Phase 118D — Dependency Knowledge Graph Architecture
+  (`docs/PHASE_118_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`). Defines
+  the Dependency Knowledge Graph as a deterministic, source-attributed,
+  inspectable, versioned, read-only relationship layer inside Repository
+  Knowledge. The architecture distinguishes the graph from Repository
+  Knowledge, Historical Memory, Change Impact Analysis, conventional
+  code dependency graphs, Evidence, Advisory, Decision Evaluation,
+  Repository State, and execution; defines graph nodes, edges,
+  dependency claims, sources, evidence links, types, direction, strength,
+  scope, verification states, paths, views, snapshots, queries, and
+  reports; and documents node, edge, dependency type, directionality,
+  source attribution, determinism, uncertainty, verification,
+  versioning/snapshot, query, graph view, and integration models.
+  Architecture only; no dependency graph construction, graph database,
+  graph CLI, graph query engine, graph visualization, Repository
+  Knowledge extraction, Historical Memory extraction, Change Impact
+  Analysis engine, source, test, runtime behavior, execution,
+  enforcement, lifecycle, Permission Broker, Advisory, Evidence,
+  Repository Skills, Decision Evaluation, REST, Dashboard, Web UI,
+  model integration, provider orchestration, autonomous coding,
+  automatic patch generation, automatic refactoring, or Telegram inbound
+  changes.
+
 - Phase 118C — Change Impact Analysis Architecture
   (`docs/PHASE_118_CHANGE_IMPACT_ANALYSIS_ARCHITECTURE.md`). Defines
   Change Impact Analysis as deterministic, source-attributed,

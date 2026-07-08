@@ -2,25 +2,30 @@
 
 ## Current Phase
 
-Phase 118C — Change Impact Analysis Architecture
+Phase 118D — Dependency Knowledge Graph Architecture
 (completed).
 
 Architecture-only continuation of Track B: Repository Intelligence.
-Defines Change Impact Analysis as deterministic, source-attributed,
-inspectable, read-only reasoning over Repository Knowledge and
-Historical Memory to identify what may be affected by a proposed or
-observed repository change. Change Impact Analysis describes impact
-subjects, entities, surfaces, relationships, paths, claims, sources,
-evidence links, scope, blast radius, queries, and reports without
-becoming model prediction, autonomous planning, a decision maker,
-enforcement, permission brokering, execution, lifecycle authority, or a
-repository mutation mechanism.
+Defines the Dependency Knowledge Graph as deterministic,
+source-attributed, inspectable, versioned, read-only relationship
+structure inside Repository Knowledge. The graph represents repository
+entities as nodes, repository-derived relationships as typed
+directional edges, and dependency assertions as source-backed claims
+with sources, evidence links, dependency types, direction, strength,
+scope, verification states, paths, views, snapshots, queries, and
+reports. It supports future Change Impact Analysis, Historical Memory,
+architectural contract mapping, Advisory reasoning, repository
+intelligence reports, subsystem lineage inspection, and traceability
+without becoming runtime orchestration, execution planning, command
+routing, permission brokering, enforcement, autonomous planning,
+lifecycle authority, or a repository mutation mechanism.
 
-No impact analysis engine, impact extraction, impact database, impact
-CLI, dependency graph implementation, historical memory extraction,
-repository knowledge extraction, source code, tests, runtime behavior,
-execution, authorization, enforcement, lifecycle behavior, Permission
-Broker behavior, Repository State behavior, Evidence subsystem behavior,
+No dependency graph construction, dependency graph database, dependency
+graph CLI, graph query engine, graph visualization, repository
+knowledge extraction, historical memory extraction, change impact
+analysis engine, source code, tests, runtime behavior, execution,
+authorization, enforcement, lifecycle behavior, Permission Broker
+behavior, Repository State behavior, Evidence subsystem behavior,
 Repository Skills behavior, Advisory behavior, Decision Evaluation
 behavior, Repository Transition Validator behavior, Notification Policy
 behavior, model integration, provider orchestration, REST, Dashboard,
@@ -31,7 +36,38 @@ inbound path changed.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 118D — Dependency Knowledge Graph Architecture.
+Recommended next repo phase: 118E — Advisory Reasoning Expansion Architecture.
+
+## Phase 118D Complete
+
+Phase 118D — Dependency Knowledge Graph Architecture (completed).
+
+Architecture-only Dependency Knowledge Graph design for Track B
+Repository Intelligence. The phase defines the graph as a
+deterministic, source-attributed, inspectable, versioned, read-only
+relationship layer inside Repository Knowledge. It defines graph nodes,
+edges, dependency claims, sources, evidence links, dependency types,
+direction, strength, scope, verification states, paths, views,
+snapshots, queries, reports, node/edge/taxonomy models, source
+attribution, determinism, uncertainty, verification, versioning, graph
+views, and integrations with Repository Knowledge, Historical Memory,
+Change Impact Analysis, Evidence, Repository Skills, Advisory, and
+Decision Evaluation.
+
+**No-go**: no dependency graph construction, dependency graph database,
+dependency graph CLI, graph query engine, graph visualization,
+repository knowledge extraction, historical memory extraction, change
+impact analysis engine, source implementation, test implementation,
+runtime behavior change, execution, authorization, enforcement,
+lifecycle behavior change, Permission Broker change, Repository State
+behavior change, Evidence subsystem behavior change, Repository Skills
+behavior change, Advisory behavior change, Decision Evaluation change,
+Repository Transition Validator behavior change, Notification Policy
+behavior change, model integration, provider orchestration, REST,
+Dashboard, Web UI, automatic patch generation, automatic refactoring,
+or Telegram inbound.
+
+Recommended next repo phase: 118E — Advisory Reasoning Expansion Architecture.
 
 ## Phase 118C Complete
 
