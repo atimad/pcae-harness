@@ -77,7 +77,7 @@ TBD
 - pcae doctor task-memory
 - pcae push check
 - pcae runtime inspect
-- source ~/.config/pcae/telegram.env; pcae notify status
+- pcae notify status
 
 ## Documentation Requirements
 
