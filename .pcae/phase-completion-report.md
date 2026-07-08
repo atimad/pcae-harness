@@ -1,83 +1,75 @@
-# Phase 119N Complete - Repository Intelligence Executable Schema Verification: First Artifact Family
+# Phase 119O Complete - Repository Intelligence Executable Schema Implementation: Repository Knowledge Snapshot
 
-- **Phase ID:** `119N`
-- **Phase name:** Repository Intelligence Executable Schema Verification: First Artifact Family
+- **Phase ID:** `119O`
+- **Phase name:** Repository Intelligence Executable Schema Implementation: Repository Knowledge Snapshot
 - **Status:** completed
 - **Report completeness:** complete
-- **Verified artifact-family schema:** Contract Conformance Record Schema
-- **Schema file:** `schemas/repository_intelligence/artifacts/contract_conformance_record.schema.json`
-- **Verification document:** `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_FIRST_ARTIFACT_FAMILY_VERIFICATION.md`
+- **Artifact-family schema implemented:** Repository Knowledge Snapshot Schema
+- **Schema file:** `schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json`
+- **Documentation:** `schemas/repository_intelligence/README.md`; `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_REPOSITORY_KNOWLEDGE_SNAPSHOT.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Verification commit:** `25903dee01e9ee3554dc65dc2ccc6ab6cbf6ece3`
-- **Recommended next phase:** 119O - Repository Intelligence Executable Schema Implementation: Repository Knowledge Snapshot
+- **Implementation commit:** `be82adf946e97e980d92f834ba65ea49d57a2854`
+- **Recommended next phase:** 119P - Repository Intelligence Executable Schema Verification: Repository Knowledge Snapshot
 
 ## Summary
 
-Verified the first Repository Intelligence artifact-family schema: the
-Contract Conformance Record schema implemented in 119M. All thirteen
-Repository Intelligence schema files parse as valid JSON and declare
-JSON Schema Draft 2020-12. `$id` values are unique. The Contract
-Conformance Record schema has resolvable local `$ref` targets, reuses
-verified shared components, preserves the common artifact envelope
-relationship, preserves frozen 119E check result and
-`conformance_status` values, represents violations, uses shared
-limitation, boundary disclosure, and disclaimer schemas, requires the
-frozen non-decision disclaimer, and keeps `additionalProperties: false`
-for root and object definitions.
+Implemented exactly one new Repository Intelligence artifact-family JSON
+Schema Draft 2020-12 file: the Repository Knowledge Snapshot schema.
+This is the second artifact-family schema and the first content-bearing
+Repository Intelligence artifact-family schema.
 
-No schema or documentation corrections were required.
+The schema is standalone, lives outside `src`, references verified shared
+components, and preserves the read-only, no-execution, non-decision,
+Decision Evaluation, Evidence, Repository State, and Advisory
+non-authority boundaries.
 
-## Contract Basis Reviewed
+## Structure
 
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_FIRST_ARTIFACT_FAMILY.md`
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_SHARED_COMPONENT_VERIFICATION.md`
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_VERIFICATION.md`
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_VERIFICATION.md`
-- `docs/PHASE_119_REPOSITORY_INTELLIGENCE_ARTIFACT_CONTRACT_FREEZE.md`
+- Common artifact envelope relationship: required `envelope` references
+  the verified shared common artifact envelope schema.
+- Snapshot identity: snapshot id, subject, scope, optional timestamp, and
+  schema/artifact version constants.
+- Repository knowledge claims: claim id, type, subject, text, status,
+  source attribution, Evidence links, verification state, uncertainty
+  state, limitations, and related claims.
+- Repository entities: entity id, type, name, path or locator, role,
+  source attribution, verification state, limitations, and related
+  claims.
+- Capability and subsystem summaries: declared capabilities and subsystem
+  boundaries with source attribution, verification state, limitations,
+  and optional boundary disclosures.
+- Contract references: contract id, name, version, document locator,
+  source attribution, relationship to snapshot, and limitations.
+- Documentation references: document id, path, optional title or section,
+  source attribution, and limitations.
+- Limitations: use verified shared limitation records.
+- Boundary disclosures: use the verified shared boundary disclosure
+  schema.
+- Disclaimers: use the verified shared disclaimer schema and the frozen
+  Repository Knowledge Snapshot boundary disclaimer.
 
-## Verification Results
+## Explicit Semantic Validation Exclusions
 
-- Verification conclusion: verified and ready to serve as the first
-  artifact-family pattern.
-- JSON parse validation: passed for all 13 `.schema.json` files.
-- JSON Schema draft consistency: passed; all 13 schemas use Draft
+The schema does not validate source truth, source existence, source
+sufficiency, Evidence sufficiency, claim truth, knowledge-claim coverage,
+derivation correctness, natural-language forbidden-claim detection,
+lifecycle standing, Repository State validity, Decision Evaluation
+outcomes, execution safety, repository scanning, or Repository Knowledge
+extraction.
+
+## Validation Results
+
+- JSON parse validation: passed for all 14 `.schema.json` files.
+- JSON Schema draft consistency: passed; all 14 schemas use Draft
   2020-12.
-- `$id` uniqueness: passed; 13 unique ids.
-- `$ref` inspection: passed; 34 Contract Conformance Record refs
-  inspected with no missing local file or fragment targets.
+- `$id` uniqueness: passed; 14 unique ids.
+- `$ref` inspection: passed; 121 local refs inspected, including 22
+  Repository Knowledge Snapshot refs.
 - Shared component reuse: passed.
-- Common artifact envelope relationship: passed.
-- Artifact-under-review structure: passed.
-- Contract-basis structure: passed.
-- Conformance check structure: passed.
-- Check status enum/value: passed; frozen values are `conforms`,
-  `violation`, and `unable_to_assess`.
-- Overall conformance state: passed; frozen values are `conforms`,
-  `conforms_with_observations`, `partial_conformance`,
-  `non_conformance`, and `unable_to_assess`.
-- Violation structure: passed.
-- Boundary disclosure: passed.
-- Disclaimer: passed.
 - `additionalProperties` policy: passed.
 - Authority-creep language review: passed.
-- Documentation review: passed.
-- Scope/no-go verification: passed.
-
-## Boundary Confirmations
-
-- Read-only boundary: preserved.
-- Execution boundary: preserved; execution remains unavailable.
-- Decision Evaluation boundary: preserved.
-- Advisory non-authority boundary: preserved.
-- Evidence boundary: preserved.
-- Repository State boundary: preserved.
-
-## Governance Results
-
 - `pcae health`: healthy.
 - `pcae check`: passed.
 - `pcae doctor task-memory`: clean.
@@ -87,33 +79,37 @@ No schema or documentation corrections were required.
 - `pcae notify status`: Telegram configured, enabled, and ready for
   outbound delivery after loading `~/.config/pcae/telegram.env`.
 
+## Boundary Confirmations
+
+- Read-only boundary: preserved.
+- Execution boundary: preserved.
+- Decision Evaluation boundary: preserved.
+- Advisory non-authority boundary: preserved.
+- Evidence boundary: preserved.
+- Repository State boundary: preserved.
+
 ## Non-Goals
 
-No second artifact-family schema, Repository Intelligence Package schema,
-Repository Knowledge Snapshot schema, Historical Memory Snapshot schema,
-Dependency Knowledge Graph Snapshot schema, Change Impact Report schema,
-Advisory Intelligence Context Package schema, Query Result schema,
-validator, validation library, schema verification CLI, automated test
-suite, Python models, Pydantic models, dataclasses, repository
-intelligence extraction, repository knowledge extraction, historical
-memory extraction, change impact analysis engine, dependency graph
-construction, graph query engine, advisory behavior changes, Advisory
-Runtime changes, Advisory Context Package changes, Evidence subsystem
-changes, Repository Skills changes, Decision Evaluation changes, runtime
-behavior changes, source code changes, test code changes, execution,
-shell mediation, Permission Broker changes, lifecycle redesign, REST,
-Dashboard, Web UI, Telegram inbound, provider selection, multi-model
-orchestration, autonomous coding, model capability expansion, repository
-mutation outside allowed schema/docs corrections, runtime plugin
-changes, Repository State changes, automatic patch generation, or
-automatic refactoring.
-
-## Readiness
-
-The Contract Conformance Record schema is ready to serve as the pattern
-for the next artifact-family schema implementation.
+No more than one new artifact-family schema, Repository Intelligence
+Package schema, Historical Memory Snapshot schema, Dependency Knowledge
+Graph Snapshot schema, Change Impact Report schema, Advisory
+Intelligence Context Package schema, Query Result schema, validator,
+validation library, schema verification CLI, automated test suite,
+Python models, Pydantic models, dataclasses, repository intelligence
+extraction, repository knowledge extraction, repository scanning,
+historical memory extraction, change impact analysis engine, dependency
+graph construction, graph query engine, advisory behavior changes,
+Advisory Runtime changes, Advisory Context Package changes, Evidence
+subsystem changes, Repository Skills changes, Decision Evaluation
+changes, runtime behavior changes, source code changes, test code
+changes, execution, shell mediation, Permission Broker changes,
+lifecycle redesign, REST, Dashboard, Web UI, Telegram inbound, provider
+selection, multi-model orchestration, autonomous coding, model capability
+expansion, repository mutation outside planned schema/docs files,
+runtime plugin changes, Repository State changes, automatic patch
+generation, or automatic refactoring.
 
 ## Recommended Next Phase
 
-119O - Repository Intelligence Executable Schema Implementation:
+119P - Repository Intelligence Executable Schema Verification:
 Repository Knowledge Snapshot.
