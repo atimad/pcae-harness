@@ -10,12 +10,15 @@ Historical Memory is the temporal layer over Repository Knowledge. Phase
 119S added the Dependency Knowledge Graph Snapshot schema as the next
 content-bearing artifact-family schema because the Dependency Knowledge
 Graph is the structural relationship layer over Repository Knowledge.
-Phase 119U adds the Change Impact Report schema as the next
+Phase 119U added the Change Impact Report schema as the next
 content-bearing artifact-family schema because Change Impact Analysis
 reasons over Repository Knowledge, Historical Memory, and the Dependency
-Knowledge Graph to describe what may be affected by a change. These
-schemas live outside `src` so they remain language-neutral contract
-artifacts rather than runtime code.
+Knowledge Graph to describe what may be affected by a change. Phase 119W
+adds the Advisory Intelligence Context Package schema as the next
+artifact-family schema because it packages Repository Intelligence
+context for possible future Advisory consumption without causing
+Advisory behavior. These schemas live outside `src` so they remain
+language-neutral contract artifacts rather than runtime code.
 
 ## Scope
 
@@ -43,6 +46,7 @@ Artifact-family schemas:
 - `artifacts/historical_memory_snapshot.schema.json`
 - `artifacts/dependency_knowledge_graph_snapshot.schema.json`
 - `artifacts/change_impact_report.schema.json`
+- `artifacts/advisory_intelligence_context_package.schema.json`
 
 The Contract Conformance Record schema is the first artifact-family
 schema because it records structural contract conformance without
@@ -99,9 +103,25 @@ describe what may be affected by a change. It does not perform change
 impact analysis, impact prediction, diff analysis, blast-radius
 computation, or graph traversal.
 
+The Advisory Intelligence Context Package schema is the sixth
+artifact-family schema. It structurally represents a declared,
+source-attributed package of Repository Intelligence context intended
+for possible future Advisory consumption: package identity, an advisory
+context target, Repository Intelligence input references, context
+items, relevance declarations, advisory considerations, Decision
+Evaluation handoff requirements, exclusions, unknowns and gaps,
+limitations, boundary disclosures, and disclaimers. It follows Change
+Impact Report because it packages the four content-bearing Repository
+Intelligence artifact families (Repository Knowledge Snapshot,
+Historical Memory Snapshot, Dependency Knowledge Graph Snapshot, and
+Change Impact Report) into a single bounded context artifact. It does
+not cause Advisory consumption, does not change Advisory behavior or
+Advisory Runtime, does not generate Advisory Context Packages, and does
+not make any recommendation authoritative.
+
 Not implemented in this slice:
 
-- additional artifact-family schemas beyond the five listed above
+- additional artifact-family schemas beyond the six listed above
 - validators or validation libraries
 - CLI commands
 - Python models, Pydantic models, or dataclasses
@@ -110,7 +130,8 @@ Not implemented in this slice:
   dependency scanning, diff analysis, git history analysis, repository
   scanning, timeline generation, graph construction, graph traversal,
   graph query execution, impact analysis, impact prediction,
-  blast-radius computation, or Advisory behavior
+  blast-radius computation, Advisory Intelligence Context generation,
+  Advisory Context Package generation, or Advisory behavior
 
 ## JSON Schema Draft
 
@@ -197,6 +218,18 @@ not blast-radius computation, is not graph traversal, is not approval,
 is not execution permission, is not lifecycle standing, is not Decision
 Evaluation, is not Evidence truth, and is not Repository State truth.
 
+The Advisory Intelligence Context Package schema structurally represents
+a declared, source-attributed package of Repository Intelligence
+context. It does not validate source truth, source existence, Evidence
+sufficiency, context sufficiency, repository completeness, lifecycle
+standing, Repository State validity, Decision Evaluation outcomes,
+execution safety, or derivation correctness. Schema conformance is not
+Advisory approval, is not Advisory recommendation authority, is not
+Advisory Runtime consumption, is not context sufficiency, is not
+approval, is not execution permission, is not lifecycle standing, is not
+Decision Evaluation, is not Evidence truth, and is not Repository State
+truth. Conformance does not require Advisory to consume the package.
+
 Future validators must preserve the same boundary. Other
 artifact-family schemas remain future work.
 
@@ -204,10 +237,10 @@ artifact-family schemas remain future work.
 
 The recommended next phase is:
 
-`119V - Repository Intelligence Executable Schema Verification: Change Impact Report`
+`119X - Repository Intelligence Executable Schema Verification: Advisory Intelligence Context Package`
 
 That phase should verify JSON validity, reference consistency, contract
-alignment, shared component reuse, impact-analysis boundary preservation,
-graph-traversal boundary preservation, source attribution, uncertainty
-preservation, and authority-creep safety before another content-bearing
+alignment, shared component reuse, Advisory non-authority preservation,
+Decision Evaluation boundary preservation, source attribution,
+uncertainty preservation, and authority-creep safety before another
 artifact-family schema is implemented.

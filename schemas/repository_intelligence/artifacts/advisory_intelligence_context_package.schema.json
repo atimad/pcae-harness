@@ -1,0 +1,695 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/repository_intelligence/artifacts/advisory_intelligence_context_package.schema.json",
+  "title": "Repository Intelligence Advisory Intelligence Context Package",
+  "description": "Artifact-family schema for a structural Advisory Intelligence Context Package. It records a declared, source-attributed package of Repository Intelligence context intended for possible future Advisory consumption; it is descriptive, read-only, non-decision, and no-execution, and it does not cause Advisory consumption, does not cause Advisory behavior, does not make an Advisory recommendation authoritative, does not authorize action or execution, does not replace Decision Evaluation, does not replace Evidence, does not replace Repository State, and does not prove context sufficiency or repository completeness.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelope",
+    "package_identity",
+    "package_subject",
+    "package_scope",
+    "advisory_context_target",
+    "repository_intelligence_inputs",
+    "context_items",
+    "package_sources",
+    "unknowns_gaps",
+    "package_limitations",
+    "boundary_disclosures",
+    "disclaimers",
+    "advisory_intelligence_context_package_disclaimer"
+  ],
+  "properties": {
+    "envelope": {
+      "$ref": "../shared/common_artifact_envelope.schema.json"
+    },
+    "package_identity": {
+      "$ref": "#/$defs/package_identity"
+    },
+    "package_subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "advisory_context_target": {
+      "$ref": "#/$defs/advisory_context_target"
+    },
+    "repository_intelligence_inputs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/repository_intelligence_input"
+      }
+    },
+    "context_items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/context_item"
+      }
+    },
+    "relevance_declarations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relevance_declaration"
+      }
+    },
+    "advisory_considerations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/advisory_consideration"
+      }
+    },
+    "decision_evaluation_handoff_requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/decision_evaluation_handoff_requirement"
+      }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/exclusion"
+      }
+    },
+    "package_sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/source_attribution_record.schema.json"
+      }
+    },
+    "evidence_links": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/evidence_link_record.schema.json"
+      }
+    },
+    "unknowns_gaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/unknown_gap"
+      }
+    },
+    "package_limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "../shared/limitation_record.schema.json"
+      }
+    },
+    "conflict_or_supersession_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/conflict_supersession_record.schema.json"
+      }
+    },
+    "derivation_records": {
+      "type": "array",
+      "items": {
+        "$ref": "../shared/derivation_record.schema.json"
+      }
+    },
+    "boundary_disclosures": {
+      "$ref": "../shared/boundary_disclosure.schema.json"
+    },
+    "disclaimers": {
+      "$ref": "../shared/disclaimer.schema.json"
+    },
+    "advisory_intelligence_context_package_disclaimer": {
+      "type": "string",
+      "const": "This Advisory Intelligence Context Package describes a declared, source-attributed collection of Repository Intelligence context that may possibly inform a future Advisory workflow. It does not cause Advisory consumption, does not make an Advisory recommendation authoritative, does not replace Decision Evaluation, is not Repository State, and does not authorize action or execution."
+    }
+  },
+  "$defs": {
+    "package_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_id",
+        "package_subject",
+        "package_scope",
+        "package_purpose"
+      ],
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "package_created_at_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "artifact_contract_version": {
+          "type": "string",
+          "const": "119E.1.0"
+        },
+        "schema_concept_version": {
+          "type": "string",
+          "const": "119C.1.0-concept"
+        },
+        "executable_schema_version": {
+          "type": "string",
+          "const": "119W.1.0-json-schema"
+        }
+      }
+    },
+    "advisory_context_target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "advisory_target_id",
+        "target_type",
+        "target_name",
+        "target_scope",
+        "intended_use",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "advisory_target_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_type": {
+          "$ref": "#/$defs/advisory_target_type"
+        },
+        "target_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "intended_use": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared intended use only; this field does not imply the named target has received, consumed, or acted on this package."
+        },
+        "advisory_runtime_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "advisory_target_type": {
+      "type": "string",
+      "enum": [
+        "advisory_runtime",
+        "advisory_context_package",
+        "advisory_repository_skill",
+        "advisory_review",
+        "human_review",
+        "decision_evaluation",
+        "unknown"
+      ]
+    },
+    "repository_intelligence_input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_id",
+        "input_type",
+        "input_artifact_reference",
+        "input_contract_version",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "input_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_type": {
+          "type": "string",
+          "enum": [
+            "repository_knowledge_snapshot",
+            "historical_memory_snapshot",
+            "dependency_knowledge_graph_snapshot",
+            "change_impact_report",
+            "contract_conformance_record",
+            "query_result",
+            "repository_intelligence_package",
+            "unknown"
+          ]
+        },
+        "input_artifact_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "input_contract_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "context_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "context_item_id",
+        "context_item_type",
+        "context_item_subject",
+        "context_item_statement",
+        "relevance_rationale",
+        "source_attribution",
+        "verification_state",
+        "limitations",
+        "advisory_use_boundary"
+      ],
+      "properties": {
+        "context_item_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_item_type": {
+          "$ref": "#/$defs/context_item_type"
+        },
+        "context_item_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_item_statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "structured_value": {
+          "type": [
+            "object",
+            "array",
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "relevance_rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_artifact_reference": {
+          "$ref": "../shared/source_attribution_record.schema.json#/$defs/source_locator"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "conflict_or_supersession_records": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/conflict_supersession_record.schema.json"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "advisory_use_boundary": {
+          "type": "string",
+          "const": "This context item may inform Advisory explanation or recommendation. It is not a decision, is not Evidence, and does not authorize action."
+        }
+      }
+    },
+    "context_item_type": {
+      "type": "string",
+      "enum": [
+        "repository_knowledge_claim",
+        "historical_memory_claim",
+        "dependency_context",
+        "impact_context",
+        "contract_context",
+        "evidence_context",
+        "limitation_context",
+        "unknown_context",
+        "decision_required_context"
+      ]
+    },
+    "relevance_declaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "relevance_id",
+        "context_item_reference",
+        "relevance_subject",
+        "relevance_category",
+        "relevance_strength",
+        "relevance_rationale",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "relevance_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "context_item_reference": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relevance_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "relevance_category": {
+          "type": "string",
+          "enum": [
+            "architectural",
+            "historical",
+            "dependency",
+            "impact",
+            "contractual",
+            "evidence",
+            "governance",
+            "unknown"
+          ]
+        },
+        "relevance_strength": {
+          "$ref": "#/$defs/relevance_strength"
+        },
+        "relevance_rationale": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared relevance rationale only; this field does not constitute an Advisory or Decision Evaluation decision."
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "relevance_strength": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low",
+        "informational",
+        "unknown",
+        "not_assessed"
+      ],
+      "description": "Declared/recorded relevance value only; this field is not an Advisory decision and does not authorize action."
+    },
+    "advisory_consideration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consideration_id",
+        "consideration_type",
+        "consideration_subject",
+        "consideration_statement",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "consideration_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "consideration_type": {
+          "type": "string",
+          "enum": [
+            "explanation",
+            "recommendation",
+            "risk_summary",
+            "uncertainty_statement",
+            "evidence_gap",
+            "impact_summary",
+            "dependency_summary",
+            "historical_lineage_summary",
+            "unknown"
+          ]
+        },
+        "consideration_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "consideration_statement": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared, source-attributed advisory input only; this field does not authorize action and is not a final decision or approval."
+        },
+        "related_context_items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "evidence_links": {
+          "type": "array",
+          "items": {
+            "$ref": "../shared/evidence_link_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        },
+        "decision_required": {
+          "type": "boolean",
+          "description": "Declared marker indicating Decision Evaluation input may be needed; this field does not itself request, grant, or perform a decision."
+        }
+      }
+    },
+    "decision_evaluation_handoff_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision_requirement_id",
+        "decision_subject",
+        "decision_reason",
+        "required_evaluator",
+        "source_attribution",
+        "verification_state",
+        "limitations"
+      ],
+      "properties": {
+        "decision_requirement_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision_reason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Declared reason Decision Evaluation involvement may be needed; this field does not perform Decision Evaluation."
+        },
+        "related_context_items": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required_evaluator": {
+          "type": "string",
+          "enum": [
+            "decision_evaluation",
+            "human_review",
+            "unknown"
+          ]
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/limitation_record.schema.json"
+          }
+        }
+      }
+    },
+    "exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exclusion_id",
+        "excluded_subject",
+        "exclusion_reason",
+        "limitation",
+        "source_attribution",
+        "verification_state"
+      ],
+      "properties": {
+        "exclusion_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "excluded_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exclusion_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "source_attribution": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "../shared/source_attribution_record.schema.json"
+          }
+        },
+        "verification_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        }
+      }
+    },
+    "unknown_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unknown_id",
+        "unknown_subject",
+        "missing_evidence",
+        "affected_scope",
+        "uncertainty_state",
+        "limitation"
+      ],
+      "properties": {
+        "unknown_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "unknown_subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missing_evidence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "affected_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uncertainty_state": {
+          "$ref": "../shared/uncertainty_verification_state.schema.json"
+        },
+        "limitation": {
+          "$ref": "../shared/limitation_record.schema.json"
+        },
+        "follow_up_requirement": {
+          "type": "string",
+          "description": "Declared follow-up context only when permitted by contract; this field does not authorize action."
+        }
+      }
+    }
+  }
+}

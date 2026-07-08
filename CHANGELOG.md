@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- Phase 119W - Repository Intelligence Executable Schema Implementation:
+  Advisory Intelligence Context Package
+  (`schemas/repository_intelligence/artifacts/advisory_intelligence_context_package.schema.json`,
+  `docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_ADVISORY_INTELLIGENCE_CONTEXT_PACKAGE.md`).
+  Implements exactly one new artifact-family JSON Schema Draft 2020-12
+  file: the Advisory Intelligence Context Package schema. This is the
+  sixth artifact-family schema. It references verified shared
+  components, includes the common artifact envelope relationship, and
+  represents package identity, an advisory context target (declared
+  without invoking or implying consumption), Repository Intelligence
+  input references, context items (each carrying a frozen
+  advisory-use-boundary disclaimer), relevance declarations, advisory
+  considerations, Decision Evaluation handoff requirements, exclusions,
+  unknowns and gaps, limitations, boundary disclosures, disclaimers, and
+  the frozen Advisory Intelligence Context Package boundary disclaimer.
+  Packages Repository Intelligence context structurally without causing
+  Advisory consumption, Advisory behavior, or Advisory Runtime change.
+  Schema-only; no Repository Intelligence Package, Query Result,
+  validator, validation library, CLI, automated tests, Python models,
+  Pydantic models, dataclasses, extraction, repository scanning,
+  dependency extraction, dependency scanning, diff analysis, git history
+  analysis, timeline generation, impact analysis engine, blast-radius
+  computation, graph construction, graph traversal, graph query engine,
+  Advisory Intelligence Context generation, Advisory Context Package
+  generation, advisory behavior, Advisory Runtime, Evidence, Repository
+  Skills, Decision Evaluation or replacement, source code, test code,
+  runtime behavior, execution, enforcement, lifecycle, Permission
+  Broker, REST, Dashboard, Web UI, provider orchestration, autonomous
+  coding, automatic patch generation, automatic refactoring, repository
+  mutation outside planned schema/docs files, or Telegram inbound
+  changes.
+
 - Phase 119V - Repository Intelligence Executable Schema Verification:
   Change Impact Report
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_EXECUTABLE_SCHEMA_CHANGE_IMPACT_REPORT_VERIFICATION.md`).
