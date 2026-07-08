@@ -97,6 +97,16 @@
       "name": "fast_green",
       "result": "4389_passed_1_preexisting_unrelated_failure",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "pending_final_telegram_delivery",
+      "status": "pending"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
+      "status": "not_applicable"
     }
   ],
   "test_results": {
