@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Treat Phase 119B as a contract-verification-documentation-only phase:
+  verify that the frozen Repository Intelligence contract from 119A is
+  internally consistent, testable, future-enforceable, and ready to
+  constrain conceptual schema architecture / prototype planning. 119B
+  may define conceptual verification checks, invariant matrices,
+  non-conformance examples, contract-preserving examples, and a future
+  conformance checklist. It must not implement a verifier, CLI,
+  automated tests, Repository Intelligence extraction, Repository
+  Knowledge extraction, Historical Memory extraction, Change Impact
+  Analysis engine, Dependency Knowledge Graph construction, graph query
+  engine, Advisory behavior changes, Evidence subsystem changes,
+  Repository Skills changes, Decision Evaluation changes, runtime
+  behavior changes, source code changes, test code changes, execution,
+  shell mediation, Permission Broker changes, lifecycle redesign,
+  repository mutation, provider orchestration, autonomous coding,
+  automatic patch generation, automatic refactoring, or Telegram inbound
+  capability.
 - Treat Phase 119A as the contract-freeze-only phase for Track B
   Repository Intelligence: freeze the initial Repository Intelligence
   contract derived from 118A through 118R, including purpose, scope,

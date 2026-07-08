@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 119B - Repository Intelligence Contract Verification
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONTRACT_VERIFICATION.md`).
+  Verifies the frozen Repository Intelligence contract from 119A as
+  internally consistent, testable, future-enforceable, and ready to
+  constrain conceptual schema architecture / prototype planning. Defines
+  the contract invariant inventory, invariant verification matrix,
+  source attribution verification, determinism verification, read-only
+  verification, Decision Evaluation boundary verification, Advisory
+  non-authority verification, uncertainty/conflict/supersession
+  verification, versioning/snapshot verification, query/report
+  conformance verification, layer-specific verification expectations,
+  non-conformance examples, contract-preserving examples, a future
+  conformance checklist, risks, deferred clarifications, and prototype
+  readiness assessment. Verification documentation only; no verifier,
+  CLI, automated tests, extraction, graph construction, impact engine,
+  advisory behavior, Evidence, Repository Skills, Decision Evaluation,
+  source, test, runtime behavior, execution, enforcement, lifecycle,
+  Permission Broker, REST, Dashboard, Web UI, provider orchestration,
+  autonomous coding, automatic patch generation, automatic refactoring,
+  repository mutation, or Telegram inbound changes.
+
 - Phase 119A - Repository Intelligence Contract Freeze
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONTRACT_FREEZE.md`).
   Freezes the initial Repository Intelligence contract derived from

@@ -2,26 +2,25 @@
 
 ## Current Phase
 
-Phase 119A — Repository Intelligence Contract Freeze
+Phase 119B — Repository Intelligence Contract Verification
 (completed).
 
-Contract-freeze-only continuation of Track B: Repository Intelligence.
-Freezes the initial Repository Intelligence contract derived from
-118A through 118R. The contract defines Repository Intelligence as
-PCAE's deterministic, source-attributed, inspectable, versioned,
-read-only understanding of repository architecture, history,
-relationships, impacts, and advisory-relevant context. It freezes
-component roles for Repository Knowledge, Historical Memory, Dependency
-Knowledge Graph, Change Impact Analysis, and Advisory Reasoning
-Expansion; freezes Evidence and Repository Skills relationships;
-freezes Decision Evaluation and Advisory authority boundaries; and
-freezes source attribution, determinism, uncertainty/conflict/
-supersession, versioning/snapshot, verification, conceptual query/report
-expectations, read-only and no-execution boundaries, contract
-invariants, compatibility matrix, future phase constraints, and the
-minor clarifications identified by 118R.
+Contract-verification-documentation-only continuation of Track B:
+Repository Intelligence. Verifies that the frozen Repository
+Intelligence contract from 119A is internally consistent, testable,
+future-enforceable, and ready to constrain conceptual schema
+architecture / prototype planning. The verification defines a contract
+invariant inventory, invariant verification matrix, source attribution
+verification, determinism verification, read-only verification, Decision
+Evaluation boundary verification, Advisory non-authority verification,
+uncertainty/conflict/supersession verification, versioning/snapshot
+verification, query/report conformance verification, layer-specific
+verification expectations, non-conformance examples,
+contract-preserving examples, a future conformance checklist, risks,
+deferred clarifications, and prototype readiness assessment.
 
-No repository intelligence extraction, repository knowledge extraction,
+No contract verifier, contract verification CLI, automated tests,
+repository intelligence extraction, repository knowledge extraction,
 historical memory extraction, change impact analysis engine, dependency
 graph construction, graph query engine, advisory behavior changes,
 Advisory Runtime changes, Advisory Context Package changes, Evidence
@@ -38,7 +37,40 @@ or Telegram inbound path changed.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119B — Repository Intelligence Contract Verification.
+Recommended next repo phase: 119C — Repository Intelligence Conceptual Schema Architecture.
+
+## Phase 119B Complete
+
+Phase 119B — Repository Intelligence Contract Verification (completed).
+
+Verification-documentation-only phase for the Track B Repository
+Intelligence contract. The phase verifies that the 119A frozen contract
+is internally consistent, testable, future-enforceable, and ready to
+constrain conceptual schema architecture / prototype planning. It
+defines what it means to verify the contract, inventories mandatory and
+future-facing invariants, maps invariants to verification methods,
+defines future source attribution, determinism, read-only,
+Decision Evaluation, Advisory non-authority, uncertainty/conflict/
+supersession, versioning/snapshot, query/report, and layer-specific
+verification expectations, and provides non-conformance examples,
+contract-preserving examples, and a future conformance checklist.
+
+**No-go**: no contract verifier, contract verification CLI, automated
+tests, Repository Intelligence extraction, Repository Knowledge
+extraction, Historical Memory extraction, Change Impact Analysis engine,
+Dependency Knowledge Graph construction, graph query engine, Advisory
+behavior change, Advisory Runtime change, Advisory Context Package
+change, Evidence subsystem change, Repository Skills change, Decision
+Evaluation change, source implementation, test implementation, runtime
+behavior change, execution, authorization, enforcement, lifecycle
+behavior change, Permission Broker change, Repository State behavior
+change, Repository Transition Validator behavior change, Notification
+Policy behavior change, REST, Dashboard, Web UI, Telegram inbound,
+provider selection, multi-model orchestration, autonomous coding, model
+capability expansion, repository mutation, automatic patch generation,
+or automatic refactoring.
+
+Recommended next repo phase: 119C — Repository Intelligence Conceptual Schema Architecture.
 
 ## Phase 119A Complete
 
