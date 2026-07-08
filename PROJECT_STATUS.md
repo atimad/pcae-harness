@@ -2,42 +2,83 @@
 
 ## Current Phase
 
-Phase 119B — Repository Intelligence Contract Verification
+Phase 119C — Repository Intelligence Conceptual Schema Architecture
 (completed).
 
-Contract-verification-documentation-only continuation of Track B:
-Repository Intelligence. Verifies that the frozen Repository
-Intelligence contract from 119A is internally consistent, testable,
-future-enforceable, and ready to constrain conceptual schema
-architecture / prototype planning. The verification defines a contract
-invariant inventory, invariant verification matrix, source attribution
-verification, determinism verification, read-only verification, Decision
-Evaluation boundary verification, Advisory non-authority verification,
-uncertainty/conflict/supersession verification, versioning/snapshot
-verification, query/report conformance verification, layer-specific
-verification expectations, non-conformance examples,
-contract-preserving examples, a future conformance checklist, risks,
-deferred clarifications, and prototype readiness assessment.
+Conceptual-schema-architecture-only continuation of Track B:
+Repository Intelligence. Defines implementation-independent conceptual
+artifact shapes for future Repository Intelligence artifacts. The phase
+defines Repository Intelligence artifacts, conceptual schemas, the
+difference between conceptual and executable schemas, the common
+artifact envelope, conceptual schema families for Repository
+Intelligence Package, Repository Knowledge Snapshot, Historical Memory
+Snapshot, Dependency Knowledge Graph Snapshot, Change Impact Report,
+Advisory Intelligence Context Package, Source Attribution Record,
+Evidence Link Record, Uncertainty / Verification State, Conflict /
+Supersession Record, Query Result, and Contract Conformance Record. It
+also maps schema families to 119A/119B contract invariants and defines
+conceptual relationships, determinism/derivation representation,
+versioning/snapshot representation, read-only/no-execution boundary
+representation, non-normative examples, future implementation
+constraints, risks, open questions, and prototype-readiness sequencing.
 
-No contract verifier, contract verification CLI, automated tests,
-repository intelligence extraction, repository knowledge extraction,
-historical memory extraction, change impact analysis engine, dependency
-graph construction, graph query engine, advisory behavior changes,
-Advisory Runtime changes, Advisory Context Package changes, Evidence
-subsystem changes, Repository Skills changes, Decision Evaluation
-changes, source code, tests, runtime behavior, execution,
-authorization, enforcement, lifecycle behavior, Permission Broker
-behavior, Repository State behavior, Repository Transition Validator
-behavior, Notification Policy behavior, REST, Dashboard, Web UI,
-provider orchestration, autonomous coding, model capability expansion,
-automatic patch generation, automatic refactoring, repository mutation,
-or Telegram inbound path changed.
+No executable schema, JSON Schema, Pydantic model, dataclass, validator,
+contract verifier, CLI, automated tests, repository intelligence
+extraction, repository knowledge extraction, historical memory
+extraction, change impact analysis engine, dependency graph
+construction, graph query engine, advisory behavior changes, Advisory
+Runtime changes, Advisory Context Package changes, Evidence subsystem
+changes, Repository Skills changes, Decision Evaluation changes, source
+code, tests, runtime behavior, execution, authorization, enforcement,
+lifecycle behavior, Permission Broker behavior, Repository State
+behavior, Repository Transition Validator behavior, Notification Policy
+behavior, REST, Dashboard, Web UI, provider orchestration, autonomous
+coding, model capability expansion, automatic patch generation,
+automatic refactoring, repository mutation, or Telegram inbound path
+changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 119C — Repository Intelligence Conceptual Schema Architecture.
+Recommended next repo phase: 119D — Repository Intelligence Conceptual Schema Review.
+
+## Phase 119C Complete
+
+Phase 119C — Repository Intelligence Conceptual Schema Architecture
+(completed).
+
+Architecture-only phase for future Repository Intelligence conceptual
+artifact families. The phase defines what Repository Intelligence
+artifacts and conceptual schemas are, distinguishes conceptual schemas
+from executable schemas, defines a common artifact envelope, and defines
+conceptual schema families for Repository Intelligence Package,
+Repository Knowledge Snapshot, Historical Memory Snapshot, Dependency
+Knowledge Graph Snapshot, Change Impact Report, Advisory Intelligence
+Context Package, Source Attribution Record, Evidence Link Record,
+Uncertainty / Verification State, Conflict / Supersession Record, Query
+Result, and Contract Conformance Record. It maps those families to
+119A/119B invariants and defines relationships, derivation, versioning,
+boundary representation, non-normative examples, future implementation
+constraints, risks, open questions, and recommended next phase.
+
+**No-go**: no executable schema, JSON Schema, Pydantic model, dataclass,
+validator, contract verifier, CLI, automated tests, Repository
+Intelligence extraction, Repository Knowledge extraction, Historical
+Memory extraction, Change Impact Analysis engine, Dependency Knowledge
+Graph construction, graph query engine, Advisory behavior change,
+Advisory Runtime change, Advisory Context Package change, Evidence
+subsystem change, Repository Skills change, Decision Evaluation change,
+source implementation, test implementation, runtime behavior change,
+execution, authorization, enforcement, lifecycle behavior change,
+Permission Broker change, Repository State behavior change, Repository
+Transition Validator behavior change, Notification Policy behavior
+change, REST, Dashboard, Web UI, Telegram inbound, provider selection,
+multi-model orchestration, autonomous coding, model capability
+expansion, repository mutation, automatic patch generation, or
+automatic refactoring.
+
+Recommended next repo phase: 119D — Repository Intelligence Conceptual Schema Review.
 
 ## Phase 119B Complete
 

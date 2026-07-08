@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 119C - Repository Intelligence Conceptual Schema Architecture
+  (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONCEPTUAL_SCHEMA_ARCHITECTURE.md`).
+  Defines implementation-independent conceptual schema architecture for
+  future Repository Intelligence artifacts, including the common
+  artifact envelope, Repository Intelligence Package, Repository
+  Knowledge Snapshot, Historical Memory Snapshot, Dependency Knowledge
+  Graph Snapshot, Change Impact Report, Advisory Intelligence Context
+  Package, Source Attribution Record, Evidence Link Record, Uncertainty
+  / Verification State, Conflict / Supersession Record, Query Result,
+  and Contract Conformance Record. Maps conceptual schema families back
+  to 119A/119B invariants and defines conceptual relationships,
+  determinism/derivation representation, versioning/snapshot
+  representation, read-only/no-execution boundary representation,
+  non-normative examples, future implementation constraints, risks,
+  open questions, and recommends 119D conceptual schema review.
+  Architecture only; no executable schema, JSON Schema, Pydantic model,
+  dataclass, validator, verifier, CLI, automated tests, extraction,
+  graph construction, impact engine, advisory behavior, Evidence,
+  Repository Skills, Decision Evaluation, source, test, runtime
+  behavior, execution, enforcement, lifecycle, Permission Broker, REST,
+  Dashboard, Web UI, provider orchestration, autonomous coding,
+  automatic patch generation, automatic refactoring, repository
+  mutation, or Telegram inbound changes.
+
 - Phase 119B - Repository Intelligence Contract Verification
   (`docs/PHASE_119_REPOSITORY_INTELLIGENCE_CONTRACT_VERIFICATION.md`).
   Verifies the frozen Repository Intelligence contract from 119A as

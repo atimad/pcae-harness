@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- Treat Phase 119C as conceptual-schema-architecture-only: define
+  implementation-independent conceptual artifact families for future
+  Repository Intelligence work, including common envelope, knowledge,
+  historical, graph, impact, advisory context, source attribution,
+  evidence link, uncertainty/verification, conflict/supersession, query
+  result, and conformance record shapes. 119C may include
+  non-normative conceptual examples but must not implement executable
+  schemas, JSON Schema, Pydantic models, dataclasses, validators,
+  contract verifiers, CLIs, automated tests, extraction, graph
+  construction, impact analysis, Advisory behavior changes, runtime
+  behavior changes, source/test changes, execution, enforcement,
+  lifecycle redesign, Permission Broker changes, repository mutation,
+  provider orchestration, autonomous coding, automatic patch generation,
+  automatic refactoring, or Telegram inbound capability.
 - Treat Phase 119B as a contract-verification-documentation-only phase:
   verify that the frozen Repository Intelligence contract from 119A is
   internally consistent, testable, future-enforceable, and ready to
