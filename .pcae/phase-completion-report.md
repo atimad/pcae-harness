@@ -1,70 +1,107 @@
-# Phase 123D Complete - Repository Intelligence Change Impact Prototype Plan
+# Phase 123E Complete - Repository Intelligence Change Impact Prototype
 
-- **Phase ID:** `123D`
-- **Phase name:** Repository Intelligence Change Impact Prototype Plan
+- **Phase ID:** `123E`
+- **Phase name:** Repository Intelligence Change Impact Prototype
 - **Status:** completed
 - **Report completeness:** complete
-- **Plan document:** `docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_PLAN.md`
-- **Source files changed:** 0
-- **Test files changed:** 0
+- **Implementation document:** `docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_IMPLEMENTATION.md`
+- **Source files changed:** 8
+- **Test files changed:** 1
 - **Execution boundary:** preserved (execution unavailable)
-- **Implementation commit:** `86491b24c64ca74f6a02332f952ee694c78d569f`
-- **Task finish commit:** `1f00b23a9f9f0778c98408363c0ba2f9c52d0d19`
-- **Recommended next phase:** 123E - Repository Intelligence Change Impact Prototype
+- **Implementation commit:** `edc1524ccaefad10ac817c80f20d0da0b56f4787`
+- **Task finish commit:** `3992e121`
+- **Recommended next phase:** 123F - Repository Intelligence Change Impact Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Implementation Planning Summary
+## Implementation Summary
 
-Defined the implementation plan for the first deterministic,
-read-only Repository Intelligence Change Impact Builder prototype. The
-planned builder consumes Repository Intelligence exclusively through
-the Track 121 Query Layer and produces deterministic Change Impact
-Reports without reasoning, prioritization, recommendation, or decision
-making.
+Implemented the first deterministic, read-only Repository Intelligence
+Change Impact Builder. The builder consumes Repository Intelligence
+exclusively through the Track 121 Query Layer, identifies impacted
+entities from directly returned `entity_lookup` records, preserves
+attribution, propagates inherited limitations and boundary
+disclosures, assembles deterministic Change Impact Reports, serializes
+deterministic JSON, and exposes the minimum
+`pcae repository-intelligence change-impact` CLI.
 
-## Planned Change Impact Pipeline
+## Change Impact Builder Architecture
 
-1. Change request intake.
-2. Query request preparation.
-3. Track 121 Query Layer invocation.
-4. Candidate impact identification.
-5. Attribution preservation.
-6. Limitation propagation.
-7. Boundary disclosure propagation.
-8. Change Impact Report assembly.
-9. Report delivery.
+The implementation lives in
+`src/pcae/repository_intelligence/change_impact/` and includes bounded
+request, report, builder, serializer, and validation modules.
 
-## Planned Component Responsibilities
+The builder is a reporting component only. It performs no reasoning,
+prioritization, recommendation, Decision Evaluation, Repository
+Intelligence generation, repository scanning, runtime plugin
+registration, execution planning, or execution.
 
-The plan defines conceptual components for request intake, query
-preparation, query invocation, candidate identification, attribution
-preservation, limitation propagation, boundary disclosure propagation,
-report assembly, and report delivery. For each component it records
-responsibility, inputs, outputs, and boundaries without prescribing
-classes, modules, or source layout.
+## Query Layer Integration Summary
 
-## Planned Change Impact Report Structure
+Repository Intelligence access is exclusively through the Track 121
+`execute_query` entry point. The builder does not read Repository
+Knowledge Snapshot artifacts directly and does not duplicate Query
+Layer semantics.
 
-The planned report contains impacted entities, impact relationships,
-attribution bundle, limitation bundle, boundary disclosure bundle, and
-report metadata. It remains descriptive and non-authoritative.
+The first prototype supports direct `entity_lookup` impact
+identification only. Unsupported evaluation scopes fail closed.
 
-## Planned Verification Strategy
+## Change Impact Report Description
 
-123F should verify deterministic report generation, Query Layer
-exclusivity, no direct artifact access, attribution preservation,
-limitation propagation, boundary propagation, report structure,
-non-authority disclosures, failure handling, governance compatibility,
-runtime posture, and absence of recommendations, Advisory reasoning,
-Decision Evaluation, execution planning, and execution capability.
+The report contains:
 
-## Implementation Readiness Assessment
+- impacted entities
+- impact relationships
+- attribution bundle
+- limitation bundle
+- boundary disclosure bundle
+- report metadata
+- explicit unknown, unavailable, incomplete, and conflicting fields
+- deterministic marker
 
-The plan is ready for 123E. If relationship identification cannot be
-supported through current Track 121 Query Layer results, 123E must
-limit scope, report a limitation, or fail closed. It must not bypass
-the Query Layer or expand Track 123 authority.
+The report includes no recommendation, severity ranking, remediation
+advice, decision, Advisory result, or authority grant.
+
+## Determinism Verification
+
+Repeated report generation with equivalent Change Impact request and
+equivalent Query Layer results produces equivalent logical reports.
+The only non-load-bearing value is `assembly_timestamp` in report
+metadata. Deterministic JSON serialization uses stable key ordering.
+
+## Attribution Verification
+
+Every impacted entity and relationship preserves Query Layer
+attribution. Missing attribution for impacted content fails closed.
+
+## Limitation Verification
+
+Inherited Repository Intelligence limitations propagate into the
+report. The builder validates inherited limitations before adding its
+own prototype scope limitation, so missing source limitations cannot be
+masked by report assembly.
+
+## Boundary Propagation Verification
+
+Boundary disclosures and disclaimers returned by the Query Layer remain
+attached to the report. Missing boundary disclosure and disclaimer
+material fails closed. The report carries an explicit non-authority
+disclaimer.
+
+## Tests Added And Executed
+
+Added:
+
+- `tests/test_phase_123e_repository_intelligence_change_impact.py`
+
+Executed:
+
+- `python -m pytest tests/test_phase_123e_repository_intelligence_change_impact.py -q` — 18/18 passed
+- `python -m pytest tests/test_phase_121e_repository_intelligence_query.py -q` — 15/15 passed
+- `python -m pytest tests/test_phase_120e_repository_knowledge_snapshot.py -q` — 14/14 passed
+- `python -m pytest tests/test_phase_122e_repository_intelligence_advisory_context.py -q` — 22/22 passed
+- `python -m pytest -m "fast_green" -n auto -ra --durations=50` — 4390/4390 passed
+- `python -m compileall -q src/pcae/repository_intelligence/change_impact src/pcae/commands/repository_intelligence.py src/pcae/cli.py` — passed
 
 ## Governance Results
 
@@ -74,25 +111,25 @@ the Query Layer or expand Track 123 authority.
 - **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **pcae_notify_status:** Telegram configured and enabled after sourcing `~/.config/pcae/telegram.env`
-- **phase_finalization_skill:** `phase-finalization 123D` target resolved
+- **phase_finalization_skill:** `phase-finalization 123E` target resolved
 
-## No-Go Confirmations
+## Boundary Confirmations
 
-- No implementation occurred.
-- No source code changed.
-- No test code changed.
-- No schema changed.
-- No Change Impact engine was implemented.
-- No dependency graph traversal was implemented.
-- No recommendations were implemented.
-- No Advisory reasoning was implemented.
-- No Decision Evaluation was implemented.
-- No Repository Intelligence generation was implemented.
-- No repository scanning was implemented.
-- No runtime plugin was added.
-- No execution planning was introduced.
+- No Advisory reasoning was introduced.
+- No Decision Evaluation integration occurred.
 - No execution capability was introduced.
-- No runtime behavior changed.
+- No execution planning was introduced.
+- No Repository Intelligence generation was introduced.
+- No repository scanning was introduced.
+- No runtime plugin was added.
+- No AI provider integration was introduced.
+- No network access was introduced.
+- No dependency graph traversal was implemented.
+- No Historical Memory correlation was implemented.
+- No recommendations were implemented.
+- No schema changed.
+- Runtime behavior did not change.
+- Execution remains unavailable.
 
 ## Inherited Issue Classification
 
@@ -110,6 +147,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Change Impact prototype plan is complete and ready for
-implementation. Recommended next phase: 123E - Repository Intelligence
-Change Impact Prototype.
+The Change Impact prototype is implemented and ready for independent
+verification. Recommended next phase: 123F - Repository Intelligence
+Change Impact Verification.
