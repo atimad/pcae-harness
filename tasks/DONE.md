@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 125C completion metadata (20260709-2110-sync-phase-125c-completion-metadata)
 - Phase 125C Next Architecture Direction Contract Verification (20260709-2109-phase-125c-next-architecture-direction-contract-verification)
 - Sync Phase 125B completion metadata (20260709-2105-sync-phase-125b-completion-metadata)
 - Phase 125B Next Architecture Direction Contract Freeze (20260709-2103-phase-125b-next-architecture-direction-contract-freeze)
