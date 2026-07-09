@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Phase 125A - Repository Intelligence Chapter Review & Next Direction
+  Architecture
+  (`docs/PHASE_125_REPOSITORY_INTELLIGENCE_CHAPTER_REVIEW_AND_NEXT_DIRECTION_ARCHITECTURE.md`).
+  Chapter-level architectural review of the complete Repository
+  Intelligence subsystem (Tracks 119-124), closing out Repository
+  Intelligence Version 1. Summarizes the completed lifecycle: Track 119
+  froze a twenty-schema executable vocabulary (eight artifact families,
+  only Repository Knowledge Snapshot ever implemented); Track 120 built
+  the one real deterministic generator; Track 121 built the exclusive
+  read-only Query Layer; Tracks 122 and 123 built two symmetric sibling
+  consumers; Track 124 hardened and independently verified the whole
+  pipeline with zero behavior drift. Documents architectural
+  achievements, remaining gaps (Historical Memory, Dependency Knowledge
+  Graph, five other unimplemented schema families, Advisory reasoning,
+  Decision Evaluation integration, execution planning, execution
+  capability), a maturity assessment across determinism, governance,
+  reproducibility, explainability, attribution, limitation propagation,
+  boundary disclosures, and maintainability, and an architectural
+  readiness assessment. Evaluates six candidate future directions
+  (Historical Memory, Dependency Knowledge Graph, richer Repository
+  Intelligence, Decision Evaluation support, Execution Planning,
+  Permission Broker evolution) without selecting an implementation
+  path, and recommends a roadmap sequence suggesting Dependency
+  Knowledge Graph as the first 125B evaluation candidate. Confirms
+  observe-only runtime, execution unavailable, deterministic behavior,
+  and governance-first philosophy all remain unchanged. No
+  implementation, prototype, or runtime behavior change occurred.
+  Recommends 125B.
+
 - Phase 124F - Repository Intelligence Prototype Review & Hardening
   Verification
   (`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_VERIFICATION.md`).

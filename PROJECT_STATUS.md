@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 125A — Repository Intelligence Chapter Review & Next Direction
+Architecture
+(completed).
+
+Performed a chapter-level architectural review of the complete
+Repository Intelligence subsystem (Tracks 119-124) in
+`docs/PHASE_125_REPOSITORY_INTELLIGENCE_CHAPTER_REVIEW_AND_NEXT_DIRECTION_ARCHITECTURE.md`.
+Summarized the completed lifecycle: Track 119 froze a twenty-schema
+executable vocabulary (eight artifact families, only one — Repository
+Knowledge Snapshot — ever implemented); Track 120 built the one real
+deterministic generator; Track 121 built the exclusive read-only Query
+Layer; Tracks 122 and 123 built two symmetric sibling consumers
+(Advisory Context Builder, Change Impact Builder); Track 124
+independently hardened and verified the whole pipeline with no
+behavior drift. Documented architectural achievements, remaining gaps
+(Historical Memory, Dependency Knowledge Graph, five other
+unimplemented schema families, Advisory reasoning, Decision Evaluation
+integration, execution planning, execution capability), a maturity
+assessment (mature on determinism/governance/attribution/limitation/
+boundary-disclosure for the implemented slice; no maturity signal yet
+for the unimplemented slice), and an architectural readiness
+assessment (structurally ready to build upon, not capability-complete).
+Evaluated six candidate future directions (Historical Memory,
+Dependency Knowledge Graph, richer Repository Intelligence, Decision
+Evaluation support, Execution Planning, Permission Broker evolution)
+without selecting an implementation path, and recommended a high-level
+roadmap sequence with Dependency Knowledge Graph as the suggested first
+125B evaluation candidate. Confirmed observe-only runtime, execution
+unavailable, deterministic behavior, and governance-first philosophy
+all remain unchanged. No implementation, prototype, or runtime
+behavior change occurred.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 125B — Next Architecture Direction
+Contract Freeze.
+
+## Phase 125A Complete
+
+Phase 125A — Repository Intelligence Chapter Review & Next Direction
+Architecture (completed).
+
+Chapter-level architectural review of Tracks 119-124 (Repository
+Intelligence Version 1). Documented achievements, gaps, maturity, and
+readiness; evaluated candidate future directions without selecting one;
+recommended a roadmap. No implementation, prototype, or runtime
+behavior change occurred. Recommended next phase: 125B — Next
+Architecture Direction Contract Freeze.
+
+## Phase 124F Complete
+
 Phase 124F — Repository Intelligence Prototype Review & Hardening
 Verification
 (completed).
