@@ -10,7 +10,7 @@ Phase 125E Next Architecture Direction Evaluation
 
 ## Status
 
-active
+done
 
 ## Mode
 
