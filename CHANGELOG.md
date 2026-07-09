@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Phase 121A - Repository Intelligence Query Layer Architecture
+  (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_LAYER_ARCHITECTURE.md`).
+  Architecture-only phase opening Track 121. Defines a deterministic,
+  read-only Query Layer for consuming existing Repository Intelligence
+  artifacts, moving PCAE from generated knowledge to deterministic
+  knowledge consumption. Documents relationships to Phase 119
+  executable schemas, the Track 120 Repository Knowledge Snapshot,
+  Repository State, Evidence, Advisory, and Decision Evaluation.
+  Defines architectural scope, strict non-goals, eight conceptual
+  layers (Query Interface, Query Validation, Snapshot Access, Query
+  Evaluation, Result Assembly, Attribution, Limitation, Result
+  Formatting), conceptual query request/context/scope/filters/
+  projection/result/attribution/limitations/disclaimers, input and
+  output models, supported query categories, determinism architecture,
+  attribution preservation, boundary preservation, fail-closed failure
+  handling, governance compatibility, future consumers, and the Track
+  121 roadmap (121A-121F). No query engine, parser, CLI, API, REST,
+  Python model, validator, runtime plugin, repository scanner,
+  Repository Intelligence generation, graph traversal, dependency
+  analysis, change impact analysis, Advisory integration, execution
+  planning, execution capability, source code, schema, or test change.
+  Recommends 121B.
+
 - Phase 120F - Repository Knowledge Snapshot Prototype Verification
   (`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_VERIFICATION.md`).
   Verification-only phase independently verifying the 120E deterministic,

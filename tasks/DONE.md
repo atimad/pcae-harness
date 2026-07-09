@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 121A Repository Intelligence Query Layer Architecture (20260709-0547-phase-121a-repository-intelligence-query-layer-architecture)
 - Sync Phase 120F completion metadata (20260709-0257-sync-phase-120f-completion-metadata)
 - Phase 120F Repository Knowledge Snapshot Prototype Verification (20260709-0235-phase-120f-repository-knowledge-snapshot-prototype-verification)
 - Fix Phase 120E validation_results test entries (20260709-0119-fix-phase-120e-validation-results-test-entries)

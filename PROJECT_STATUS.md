@@ -2,43 +2,55 @@
 
 ## Current Phase
 
-Phase 120F — Repository Knowledge Snapshot Prototype Verification
+Phase 121A — Repository Intelligence Query Layer Architecture
 (completed).
 
-Independently verified the deterministic, read-only Repository
-Knowledge Snapshot generator implemented in 120E against the Phase 119
-executable schema line and the 120A architecture, 120B frozen
-contract, 120C verification conclusions, and 120D implementation plan.
-Adds
-`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_VERIFICATION.md`.
-Confirmed architecture, contract, plan, schema, determinism,
-attribution, limitation/disclaimer/boundary disclosure, unknown
-handling, persistence, read-only, failure, governance, and regression
-conformance. No functional modifications were required and no source,
-schema, or test file was changed. Focused Repository Intelligence tests
-passed (`14 passed`), temporary schema validation passed for three
-generated snapshots through the actual Repository Knowledge Snapshot
-schema and shared `$ref` chain, repeated deterministic generation was
-equivalent after replacing only the two approved timestamp fields,
-attribution completeness checked 18 source attribution records with no
-missing attribution, persistence verified `latest.json` plus
-timestamped history behavior, non-git input failed closed without
-persistence, and fast-green passed (`4390 passed`). Cross-schema
-regression scan confirmed 20 parseable schema files, unique `$id`
-values, 477 `$ref` occurrences, and zero missing referenced schema
-files. No Historical Memory Snapshot, Dependency Knowledge Graph
-Snapshot, Change Impact Report, Advisory Context Package, query engine,
-graph traversal, runtime plugin, execution planning, execution
-capability, AI provider integration, network dependency, Repository
-State mutation, Evidence mutation, or Advisory invocation was
-introduced.
+Opened Track 121 by defining the architecture for a deterministic,
+read-only Repository Intelligence Query Layer: a consumption layer over
+previously generated Repository Intelligence artifacts, not a new
+generation, scanning, inference, or execution layer. Adds
+`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_LAYER_ARCHITECTURE.md`.
+Defines the transition from generated knowledge (Track 120's verified
+Repository Knowledge Snapshot) to deterministic knowledge consumption;
+relationships to the Phase 119 executable schemas, Repository State,
+Evidence, Advisory, and Decision Evaluation; the architectural scope
+and strict non-goals; eight conceptual layers (Query Interface, Query
+Validation, Snapshot Access, Query Evaluation, Result Assembly,
+Attribution, Limitation, Result Formatting); conceptual query request,
+context, scope, filters, projection, result, attribution, limitations,
+and disclaimers; supported input/output models; query categories
+(entity, capability, contract, source attribution, documentation,
+limitation, boundary, unknown/gap, artifact metadata lookup);
+determinism, attribution, boundary, failure, governance, and
+extensibility architecture; and the 121A-121F roadmap. No query engine,
+query parser, CLI, API, REST surface, Python model, validator, runtime
+plugin, repository scanner, Repository Intelligence generator, graph
+traversal, dependency analysis, change impact analysis, Advisory
+integration, execution planning, execution capability, source code,
+schema, or test change was introduced.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 121A — Repository Intelligence Query Layer
-Architecture.
+Recommended next repo phase: 121B — Repository Intelligence Query
+Contract Freeze.
+
+## Phase 121A Complete
+
+Phase 121A — Repository Intelligence Query Layer Architecture
+(completed).
+
+Defined the Repository Intelligence Query Layer as a deterministic,
+read-only access architecture for existing Repository Intelligence
+artifacts. The layer reads artifacts, validates bounded query requests,
+performs deterministic lookup/filtering/selection, preserves
+attribution and limitations, assembles bounded results, and formats
+results without inference, generation, graph traversal, Advisory
+reasoning, Decision Evaluation replacement, Repository State mutation,
+Evidence mutation, runtime behavior change, or execution. Established
+the Track 121 roadmap through 121F and recommended 121B — Repository
+Intelligence Query Contract Freeze. No implementation occurred.
 
 ## Phase 120F Complete
 
