@@ -860,6 +860,10 @@
 - Keep Phase 61H automated task transition limited to governance lifecycle automation: complete the current task, create the next task, refresh session continuity, update governance memory files, and validate coherence/health/check state, but do not invoke runtimes, execute prompts, authorize execution, commit, push, rollback, or change unrelated source behavior.
 # Decisions
 
+- Treat Phase 123F as verification-only: independently verify the
+  123E Change Impact Builder against 123A-123E, regression suites, and
+  observe-only governance; because no functional defect was found, make
+  no source, test, schema, runtime, or behavior changes.
 - Treat Phase 123E Change Impact as a Query Layer-only reporting
   implementation: the prototype may identify impacted entities only
   from directly returned Track 121 `entity_lookup` records, preserve

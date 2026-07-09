@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Phase 123F - Repository Intelligence Change Impact Verification
+  (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_VERIFICATION.md`).
+  Independently verifies the Phase 123E Change Impact Builder against
+  the 123A architecture, 123B frozen contract, 123C verification
+  conclusions, 123D prototype plan, and 123E implementation
+  boundaries. Confirms Query Layer-only Repository Intelligence
+  consumption, no direct Repository Intelligence access, complete
+  Change Impact Report structure, deterministic repeated report
+  generation, attribution preservation, limitation propagation,
+  boundary disclosure propagation, read-only behavior, fail-closed
+  handling, and regression compatibility with Tracks 120-122. Runs
+  Change Impact Builder tests (18/18 passed), Advisory Context Builder
+  regression tests (22/22 passed), Query Layer regression tests (15/15
+  passed), Repository Knowledge Snapshot regression tests (14/14
+  passed), and `fast_green` (4390/4390 passed). No functional
+  modification was required. No source, test, or schema code changed.
+  Carries forward inherited lifecycle/tooling issues unchanged: 119Q
+  report-generation-ordering defect, 119AB phase-id comparison bug,
+  recurring `pending_final_telegram_delivery` reporting detail, GitHub
+  main-branch PR-rule bypass notification, and missing
+  `PCAE_NOTIFY_ENABLED` during governed push environment. Does not add
+  Advisory reasoning, recommendations, Decision Evaluation integration,
+  execution capability, Repository Intelligence generation, repository
+  scanning, runtime plugins, AI provider integration, network access,
+  dependency graph traversal, or Historical Memory correlation.
+  Recommends 124A.
+
 - Phase 123E - Repository Intelligence Change Impact Prototype
   (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_IMPLEMENTATION.md`).
   Implements the first deterministic, read-only Repository Intelligence
