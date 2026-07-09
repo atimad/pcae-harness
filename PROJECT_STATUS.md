@@ -2,46 +2,61 @@
 
 ## Current Phase
 
-Phase 120E — Repository Knowledge Snapshot Prototype: Read-Only
-Generator (completed).
+Phase 120F — Repository Knowledge Snapshot Prototype Verification
+(completed).
 
-First implementation phase of Track 120. Implements the deterministic,
-read-only Repository Knowledge Snapshot generator planned in 120D, at
-`src/pcae/repository_intelligence/` (`source_inventory.py`,
-`attribution.py`, `snapshot_builder.py`, `persistence.py`,
-`snapshot_generator.py`) and wired into a new CLI command,
-`pcae repository-intelligence snapshot generate` (`--output`,
-`--pretty`, `--json`). Adds
-`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_IMPLEMENTATION.md`.
-Only the Repository Knowledge Snapshot artifact family is implemented;
-no other Repository Intelligence generator, query engine, or graph
-traversal exists. Implements the full eleven-stage pipeline planned in
-120D, source attribution propagation via reusable builders shaped
-exactly to the frozen shared schemas, deterministic extraction (git
-commit/branch, sorted top-level `src/pcae` listing, narrow
-`pyproject.toml`/`PROJECT_STATUS.md` parsing — no AI inference, no
-network access), schema-conformant assembly, honest limitation/unknown
-capture, verbatim boundary-disclosure/disclaimer attachment, and
-fail-closed persistence to `.pcae/repository-intelligence/` (`latest.json`
-plus a `snapshots/` history, never overwritten). Added 14 focused
-tests (`tests/test_phase_120e_repository_knowledge_snapshot.py`)
-covering deterministic generation, schema conformance, attribution
-completeness, limitation/disclaimer/boundary-disclosure attachment,
-persistence, latest-snapshot updates, invalid-input/fail-closed
-handling, and unknown handling — all passing. Structural schema
-validation and a direct two-run determinism comparison (excluding the
-two approved timestamp fields) both passed. Generated and persisted
-the actual first Repository Knowledge Snapshot artifact as a
-deliverable. `fast_green` re-run clean except one pre-existing,
-unrelated failure confirmed present before this phase's changes
-(`test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked`).
+Independently verified the deterministic, read-only Repository
+Knowledge Snapshot generator implemented in 120E against the Phase 119
+executable schema line and the 120A architecture, 120B frozen
+contract, 120C verification conclusions, and 120D implementation plan.
+Adds
+`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_VERIFICATION.md`.
+Confirmed architecture, contract, plan, schema, determinism,
+attribution, limitation/disclaimer/boundary disclosure, unknown
+handling, persistence, read-only, failure, governance, and regression
+conformance. No functional modifications were required and no source,
+schema, or test file was changed. Focused Repository Intelligence tests
+passed (`14 passed`), temporary schema validation passed for three
+generated snapshots through the actual Repository Knowledge Snapshot
+schema and shared `$ref` chain, repeated deterministic generation was
+equivalent after replacing only the two approved timestamp fields,
+attribution completeness checked 18 source attribution records with no
+missing attribution, persistence verified `latest.json` plus
+timestamped history behavior, non-git input failed closed without
+persistence, and fast-green passed (`4390 passed`). Cross-schema
+regression scan confirmed 20 parseable schema files, unique `$id`
+values, 477 `$ref` occurrences, and zero missing referenced schema
+files. No Historical Memory Snapshot, Dependency Knowledge Graph
+Snapshot, Change Impact Report, Advisory Context Package, query engine,
+graph traversal, runtime plugin, execution planning, execution
+capability, AI provider integration, network dependency, Repository
+State mutation, Evidence mutation, or Advisory invocation was
+introduced.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 120F — Repository Knowledge Snapshot
-Prototype Verification.
+Recommended next repo phase: 121A — Repository Intelligence Query Layer
+Architecture.
+
+## Phase 120F Complete
+
+Phase 120F — Repository Knowledge Snapshot Prototype Verification
+(completed).
+
+Verified the Phase 120E Repository Knowledge Snapshot prototype as
+schema-conformant, deterministic, fully attributable for asserted
+facts, limitation/unknown preserving, persistence-consistent,
+fail-closed, read-only, governance-compatible, and regression-free
+against the existing Repository Intelligence schema line. The
+implementation remains narrow: Repository Knowledge Snapshot only,
+observe-only, no execution, no repository/runtime mutation beyond
+intended snapshot persistence, no AI inference, no network access, no
+Advisory/Decision Evaluation integration, no query layer, and no graph
+traversal. No functional fixes were required. Carried forward only the
+three known inherited, non-blocking tooling/reporting issues without
+repairing them.
 
 ## Phase 120E Complete
 

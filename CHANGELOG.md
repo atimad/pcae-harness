@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 120F - Repository Knowledge Snapshot Prototype Verification
+  (`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_VERIFICATION.md`).
+  Verification-only phase independently verifying the 120E deterministic,
+  read-only Repository Knowledge Snapshot generator against the Phase
+  119 executable schemas and the 120A architecture, 120B frozen
+  contract, 120C verification conclusions, and 120D implementation
+  plan. Confirms architecture, contract, plan, schema, determinism,
+  attribution, limitation/disclaimer/boundary disclosure, unknown
+  handling, persistence, read-only, failure, governance, and regression
+  conformance. No functional modifications were required; no source,
+  schema, or test file was changed. Focused Repository Intelligence
+  tests passed (`14 passed`), temporary schema validation passed for
+  three generated snapshots through the actual schema and shared `$ref`
+  chain, repeated generation was equivalent after replacing only the
+  two approved timestamp fields, attribution completeness checked 18
+  source attribution records with no missing attribution, persistence
+  verified `latest.json` plus timestamped history behavior, non-git
+  input failed closed without persistence, cross-schema regression scan
+  confirmed 20 parseable schemas / unique `$id`s / 477 refs / zero
+  missing referenced schema files, and fast-green passed (`4390
+  passed`). Runtime remains `Observed` / `observe` / execution
+  unavailable with zero runtime plugins. Carries forward only the three
+  known inherited, non-blocking tooling/reporting issues and recommends
+  121A.
+
 - Phase 120E - Repository Knowledge Snapshot Prototype: Read-Only
   Generator
   (`docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_IMPLEMENTATION.md`).

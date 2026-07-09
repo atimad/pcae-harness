@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- Treat Phase 120F as exactly one verification phase for the Phase 120E
+  Repository Knowledge Snapshot prototype: independently verify
+  architecture conformance, 120B contract conformance, 120C
+  verification conclusion preservation, 120D plan conformance, schema
+  conformance, determinism, attribution completeness, limitation and
+  boundary attachment, unknown handling, persistence, read-only
+  behavior, failure behavior, governance compatibility, and regression
+  safety. Do not implement Historical Memory Snapshot, Dependency
+  Knowledge Graph Snapshot, Change Impact Report, Advisory Context
+  Package, query engine, graph traversal, runtime plugins, execution
+  planning, execution capability, repository mutation beyond intended
+  persistence, AI provider integration, or network access. No
+  functional modifications were required. Recommended next phase:
+  121A - Repository Intelligence Query Layer Architecture.
+
 - Treat Phase 119Q as a schema-only Historical Memory Snapshot
   implementation phase: implement exactly one new standalone JSON Schema
   Draft 2020-12 artifact-family schema under
