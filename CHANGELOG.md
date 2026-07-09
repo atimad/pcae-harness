@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 125C - Next Architecture Direction Contract Verification
+  (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_VERIFICATION.md`).
+  Independently verifies the Phase 125B decision contract against
+  source: re-reads the full contract section by section against every
+  required element, cross-checks PROJECT_STATUS.md/CHANGELOG.md for
+  decision-neutrality leakage, and independently confirms via `git
+  diff` across the full 125A-125B commit range that zero source, test,
+  or schema files were touched. Confirms contract completeness,
+  decision-neutrality (no candidate receives implicit authorization),
+  candidate-domain evaluation-only status, evaluation-principle
+  completeness (all nine principles present with concrete tests),
+  decision-constraint enforcement (architecture -> contract ->
+  verification sequence with selection as a separate explicit act),
+  Repository Intelligence preservation, execution-boundary preservation
+  (re-confirmed via `pcae runtime inspect`), governance/compatibility
+  contract completeness, deferred-capability completeness, and
+  technical-debt classification-only discipline. Identifies one
+  non-blocking cosmetic naming variance in guessed future phase titles,
+  documented without correction. No contract modifications required. No
+  implementation path selected. Recommends 125D.
+
 - Phase 125B - Next Architecture Direction Contract Freeze
   (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_FREEZE.md`).
   Freezes the canonical decision contract for evaluating PCAE's next

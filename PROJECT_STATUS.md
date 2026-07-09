@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 125C — Next Architecture Direction Contract Verification
+(completed).
+
+Independently verified the Phase 125B Next Architecture Direction
+Contract in
+`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_VERIFICATION.md`.
+Verification re-read the full 125B contract section by section against
+required elements, cross-checked PROJECT_STATUS.md and CHANGELOG.md
+for decision-neutrality leakage, and independently confirmed via `git
+diff` across the full 125A-125B commit range that zero source, test,
+or schema files were touched. Confirmed contract completeness (all
+required sections present), decision-neutrality (no candidate receives
+implicit authorization; 125A's Dependency Knowledge Graph
+recommendation explicitly remains non-binding), candidate-domain
+evaluation-only status (all six named candidates plus an open slot for
+future candidates), evaluation-principle completeness (all nine
+required principles present with concrete, falsifiable tests),
+decision-constraint enforcement (the architecture -> contract ->
+verification sequence, with selection remaining a separate explicit
+act), Repository Intelligence preservation, execution-boundary
+preservation (re-confirmed via `pcae runtime inspect`), governance and
+compatibility contract completeness, deferred-capability completeness,
+and technical-debt classification-only discipline. Identified one
+non-blocking, cosmetic naming variance between 125B's guessed
+125D/125E/125F phase titles and this phase's own governing brief's
+titles — documented without correction, since it affects no binding
+contract term. No contract modifications were required. No
+implementation path was selected.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 125D — Next Architecture Direction
+Evaluation Plan.
+
+## Phase 125C Complete
+
+Phase 125C — Next Architecture Direction Contract Verification
+(completed).
+
+Independently verified the 125B decision contract for completeness,
+internal consistency, decision-neutrality, governance compatibility,
+Repository Intelligence compatibility, and readiness for 125D-125F. No
+contract modifications required; no implementation path selected. One
+non-blocking cosmetic naming variance documented. Recommended next
+phase: 125D — Next Architecture Direction Evaluation Plan.
+
+## Phase 125B Complete
+
 Phase 125B — Next Architecture Direction Contract Freeze
 (completed).
 
