@@ -1,79 +1,93 @@
-# Phase 124C Complete - Repository Intelligence Prototype Review & Hardening Contract Verification
+# Phase 124D Complete - Repository Intelligence Prototype Review & Hardening Plan
 
-- **Phase ID:** `124C`
-- **Phase name:** Repository Intelligence Prototype Review & Hardening Contract Verification
+- **Phase ID:** `124D`
+- **Phase name:** Repository Intelligence Prototype Review & Hardening Plan
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_CONTRACT_VERIFICATION.md`
+- **Plan document:** `docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_PLAN.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Verification commit:** `6c7bcda2dd8866a721fb464531d9cc0803e1178d`
-- **Task finish commit:** `80a66256`
-- **Recommended next phase:** 124D - Repository Intelligence Prototype Review & Hardening Plan
+- **Plan commit:** `dc553bcf9fbcd1ff1d7cd6681ddd47d194b597da`
+- **Task finish commit:** `5483c64e`
+- **Recommended next phase:** 124E - Repository Intelligence Prototype Review & Hardening Implementation
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Verification Summary
+## Implementation Planning Summary
 
-Independently verified the frozen 124B Repository Intelligence
-Prototype Review & Hardening Contract. The contract is complete,
-internally consistent, deterministic, architecturally aligned,
-governance compatible, and implementation-ready for bounded hardening
-planning.
+Defined the definitive implementation plan for bounded Repository
+Intelligence Prototype Review & Hardening. The plan improves
+consistency, maintainability, governance, and implementation quality
+while preserving externally observable behavior.
 
-No 124B contract modification was required.
+No implementation occurred.
 
-## Contract Completeness Assessment
+## Planned Hardening Pipeline
 
-Verified. Every required contractual section from 124B exists,
-including purpose, authority, scope, hardening responsibility,
-cross-track consistency, determinism, attribution, limitations,
-boundary disclosures, serialization, failure, governance,
-compatibility, technical debt classification, deferred capabilities,
-strict non-goals, inherited issues, future phases, and acceptance.
+124E shall follow this sequence:
 
-No required contractual element is missing.
+1. Cross-track review
+2. Consistency assessment
+3. Shared implementation identification
+4. Hardening application
+5. Regression validation
+6. Governance validation
+7. Final verification
 
-## Architectural Consistency Assessment
+## Planned Consistency Improvements
 
-Verified. The contract aligns with 124A Review & Hardening
-Architecture, Track 119 schemas, Track 120 Repository Knowledge
-Snapshot, Track 121 Query Layer, Track 122 Advisory Context Builder,
-Track 123 Change Impact Builder, and observe-only runtime principles.
+The plan covers:
 
-No ambiguity or contradiction requiring 124B repair was found.
+- implementation consistency
+- shared abstractions
+- interface consistency
+- serialization consistency
+- attribution consistency
+- limitation propagation consistency
+- boundary disclosure consistency
+- deterministic behavior
+- testing consistency
+- documentation consistency
 
-## Cross-Track Consistency Assessment
+## Regression Strategy
 
-Verified. The contract requires consistency across Tracks 120-123 for
-metadata, artifact structure, provenance, limitation propagation,
-boundary disclosures, deterministic behavior, version compatibility,
-and failure semantics.
+124E must validate Tracks 120, 121, 122, and 123 with focused and
+cross-track regression coverage for determinism, attribution,
+limitations, boundary disclosures, fail-closed behavior, read-only
+behavior, Query Layer exclusivity, CLI/API compatibility, and absence
+of execution authority.
 
-## Governance Compatibility Assessment
+## Verification Strategy
 
-Verified. The contract preserves observe-only runtime, deterministic
-engineering, auditability, explainability, reproducibility, execution
-unavailable, and governed lifecycle discipline.
+124F shall independently verify no functional regression,
+deterministic behavior preservation, attribution preservation,
+limitation propagation preservation, boundary disclosure preservation,
+serialization compatibility, fail-closed behavior, public interface
+and CLI compatibility, Query Layer exclusivity, no new capabilities,
+no schema change, no runtime behavior change, and execution
+unavailable.
+
+## Implementation Readiness Assessment
+
+Ready for 124E. The plan defines a bounded review pipeline, hardening
+categories, implementation boundaries, regression strategy, acceptance
+criteria, verification strategy, risks, mitigations, and non-goals.
+
+## Governance Compatibility
+
+The plan preserves observe-only runtime, execution unavailable,
+deterministic engineering, auditability, explainability,
+reproducibility, and governed lifecycle/commit/push/report/
+notification discipline.
 
 Runtime remains `Observed` / `observe` / execution unavailable with
 zero runtime plugins.
 
-## Implementation Readiness Assessment
+## Technical Debt Considerations
 
-Verified. The contract is sufficient for:
-
-- 124D - Repository Intelligence Prototype Review & Hardening Plan
-- 124E - Repository Intelligence Prototype Review & Hardening Implementation
-- 124F - Repository Intelligence Prototype Review & Hardening Verification
-
-No additional architectural work is required before 124D.
-
-## Technical Debt Assessment
-
-Verified. Technical debt classification is complete and clearly
-separated from implementation work:
+124E may classify and address only technical debt inside the 124B
+contract:
 
 - documentation
 - implementation
@@ -81,7 +95,8 @@ separated from implementation work:
 - governance
 - lifecycle/tooling
 
-No technical debt was repaired in this phase.
+Inherited lifecycle/tooling issues remain classified only unless
+separately authorized.
 
 ## Governance Results
 
@@ -100,7 +115,6 @@ No technical debt was repaired in this phase.
 - No source code changed.
 - No test code changed.
 - No schema changed.
-- No 124B contract modification was required.
 - No new Repository Intelligence capabilities were implemented.
 - No new artifact families were implemented.
 - No Dependency Knowledge Graph expansion occurred.
@@ -123,8 +137,8 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The Repository Intelligence Prototype Review & Hardening Contract is
-verified and ready for bounded hardening planning.
+The Repository Intelligence hardening plan is complete and ready for
+bounded implementation.
 
-Recommended next phase: 124D - Repository Intelligence Prototype Review
-& Hardening Plan.
+Recommended next phase: 124E - Repository Intelligence Prototype Review
+& Hardening Implementation.
