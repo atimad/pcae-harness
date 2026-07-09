@@ -10,7 +10,7 @@ Phase 125G Execution Planning Readiness Assessment
 
 ## Status
 
-active
+done
 
 ## Mode
 
