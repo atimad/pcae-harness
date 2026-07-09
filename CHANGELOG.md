@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 126D - Dependency Knowledge Graph Prototype Plan
+  (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_PLAN.md`).
+  Produces the definitive implementation plan for the first
+  deterministic Dependency Knowledge Graph Builder. Grounded in the
+  actual Track 120 generator source, discovering that Repository
+  Knowledge Snapshot's `entity_type` vocabulary and the graph's
+  `node_type` vocabulary are different enums requiring explicit
+  translation, and that a v1 graph built from any current-generation
+  snapshot will contain almost exclusively path-containment edges.
+  Defines a twelve-stage construction pipeline, a stable identifier
+  algorithm covering both `node_id` and `edge_id`, reuse of Track 124's
+  `serialize_deterministic_json` and shared consumer-validation
+  helpers, and an explicit `graph_completeness_state: partial`
+  requirement — explicitly resolving all three 126C findings. Defines
+  validation, serialization, fail-closed failure, and 126F's
+  verification strategy. Confirms compatibility with Tracks 119-123,
+  none modified. No implementation occurred; no runtime behavior
+  changed; execution remains unavailable. Recommends 126E.
+
 - Phase 126C - Dependency Knowledge Graph Contract Verification
   (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_VERIFICATION.md`).
   Independently verifies the 126B contract by re-deriving every enum,

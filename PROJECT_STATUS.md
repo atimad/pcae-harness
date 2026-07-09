@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 126D — Dependency Knowledge Graph Prototype Plan
+(completed).
+
+Produced the definitive implementation plan for the first
+deterministic Dependency Knowledge Graph Builder in
+`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_PLAN.md`.
+Grounded the plan in the actual Track 120 generator source
+(`snapshot_builder.py`), discovering that Repository Knowledge
+Snapshot's `entity_type` vocabulary and the Dependency Knowledge
+Graph's `node_type` vocabulary are two different enums requiring an
+explicit translation table, and that the current generator's own
+`module`-for-directories convention means a v1 graph will contain
+almost exclusively path-containment edges since Track 120 does not yet
+declare import/dependency relationships. Defined a twelve-stage
+construction pipeline, a stable identifier algorithm covering both
+`node_id` and `edge_id` (resolving 126C Finding 1), reuse of Track
+124's `serialize_deterministic_json` and shared consumer-validation
+helpers (resolving 126C Finding 2), and an explicit
+`graph_completeness_state: partial` requirement for any v1-generated
+graph (resolving 126C Finding 3) — all three 126C findings explicitly
+closed within this plan. Defined validation strategy, serialization
+strategy, fail-closed failure strategy, and the verification strategy
+126F will apply. Confirmed compatibility with Tracks 119-123, none of
+which this plan modifies. No implementation occurred; no runtime
+behavior changed; execution remains unavailable.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 126E — Dependency Knowledge Graph
+Prototype.
+
+## Phase 126D Complete
+
+Phase 126D — Dependency Knowledge Graph Prototype Plan (completed).
+
+Definitive implementation plan for the first Dependency Knowledge
+Graph Builder, grounded in the real Track 120 generator's actual
+entity_type behavior. Explicitly resolved all three 126C findings.
+Defined the construction pipeline, identifier algorithm, validation/
+serialization/failure strategies, and 126F's verification strategy. No
+implementation occurred; execution remains unavailable. Recommended
+next phase: 126E — Dependency Knowledge Graph Prototype.
+
+## Phase 126C Complete
+
 Phase 126C — Dependency Knowledge Graph Contract Verification
 (completed).
 
