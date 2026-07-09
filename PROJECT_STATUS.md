@@ -2,35 +2,58 @@
 
 ## Current Phase
 
-Phase 123F — Repository Intelligence Change Impact Verification
+Phase 124A — Repository Intelligence Prototype Review & Hardening Architecture
 (completed).
 
-Independently verified the first deterministic, read-only Repository
-Intelligence Change Impact Builder,
+Defined the architecture for reviewing and hardening the complete
+Repository Intelligence prototype stack,
 documented in
-`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_VERIFICATION.md`.
-Verified conformance with 123A architecture, 123B frozen contract, 123C
-verification conclusions, 123D prototype plan, and 123E implementation
-boundaries. Verified Query Layer-only Repository Intelligence
-consumption, no direct Repository Intelligence access, complete Change
-Impact Report structure, deterministic repeated report generation,
-attribution preservation, limitation propagation, boundary disclosure
-propagation, read-only behavior, fail-closed handling, and regression
-compatibility with Tracks 120-122. Change Impact Builder tests,
-Advisory Context Builder regression tests, Query Layer regression
-tests, Repository Knowledge Snapshot regression tests, and `fast_green`
-all pass. No functional modification was required. No source, test, or
-schema code changed. No Advisory reasoning, recommendations, Decision
-Evaluation integration, execution planning, execution capability,
-Repository Intelligence generation, repository scanning, runtime
-plugins, AI provider integration, or network access occurred.
+`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_ARCHITECTURE.md`.
+The architecture scopes Track 124 to review the existing Repository
+Knowledge Snapshot, Query Layer, Advisory Context Builder, and Change
+Impact Builder as one system before introducing additional Repository
+Intelligence capabilities. It defines review objectives, hardening
+categories, a cross-track consistency strategy for terminology,
+artifact structure, metadata, provenance, limitation propagation,
+boundary disclosures, fail-closed behavior, and version
+compatibility; technical debt categories; hardening principles;
+deferred capabilities; and the 124A-124F roadmap. No new Repository
+Intelligence capability, artifact family, Dependency Knowledge Graph
+traversal, Historical Memory correlation, Advisory reasoning, Decision
+Evaluation, execution planning, execution capability, runtime plugin,
+source code, test code, or schema change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 124A — Repository Intelligence Prototype
-Review & Hardening Architecture.
+Recommended next repo phase: 124B — Repository Intelligence Prototype
+Review & Hardening Contract Freeze.
+
+## Phase 124A Complete
+
+Phase 124A — Repository Intelligence Prototype Review & Hardening
+Architecture (completed).
+
+Defined Track 124 as a review-and-hardening track for the complete
+Repository Intelligence prototype pipeline from Tracks 119-123. The
+architecture reviews Repository Knowledge Snapshot, Query Layer,
+Advisory Context Builder, and Change Impact Builder as one system. It
+defines review objectives, hardening categories, cross-track
+consistency strategy, technical debt classification, hardening
+principles, deferred capabilities, known inherited issue handling, and
+the roadmap for 124B-124F. It preserves determinism, read-only
+behavior, auditability, reproducibility, explainability, fail-closed
+behavior, Query Layer exclusivity, attribution preservation,
+limitation propagation, boundary disclosure propagation, observe-only
+runtime posture, and execution-unavailable boundary. No implementation,
+source code, test code, schema change, runtime plugin, execution
+planning, execution capability, Advisory reasoning, Decision
+Evaluation, Repository Intelligence generation, repository scanning,
+new artifact family, Dependency Knowledge Graph traversal, or
+Historical Memory correlation occurred. Runtime remains `Observed` /
+`observe` / execution unavailable. Recommended next phase: 124B —
+Repository Intelligence Prototype Review & Hardening Contract Freeze.
 
 ## Phase 123F Complete
 

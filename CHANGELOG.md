@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 124A - Repository Intelligence Prototype Review & Hardening
+  Architecture
+  (`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_ARCHITECTURE.md`).
+  Defines Track 124 as a review-and-hardening track for the complete
+  Repository Intelligence prototype pipeline from Tracks 119-123 before
+  introducing additional Repository Intelligence capabilities. Reviews
+  Repository Knowledge Snapshot, Query Layer, Advisory Context Builder,
+  and Change Impact Builder as one architectural system. Defines review
+  objectives, hardening categories (architecture, contracts,
+  determinism, interfaces, artifact consistency, validation,
+  persistence, serialization, CLI consistency, documentation, testing,
+  and governance), cross-track consistency strategy, technical debt
+  classification, hardening principles, deferred work, known inherited
+  issue handling, and the 124A-124F roadmap. Carries forward inherited
+  lifecycle/tooling issues unchanged: 119Q report-generation-ordering
+  defect, 119AB phase-id comparison bug, recurring
+  `pending_final_telegram_delivery` reporting detail, GitHub
+  main-branch PR-rule bypass notification, and missing
+  `PCAE_NOTIFY_ENABLED` during governed push environment. Does not
+  implement new Repository Intelligence capabilities, new artifact
+  families, Dependency Knowledge Graph traversal, Historical Memory
+  correlation, Advisory reasoning, Decision Evaluation, execution
+  planning, execution capability, runtime plugins, source code, test
+  code, or schema changes. Recommends 124B.
+
 - Phase 123F - Repository Intelligence Change Impact Verification
   (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_VERIFICATION.md`).
   Independently verifies the Phase 123E Change Impact Builder against

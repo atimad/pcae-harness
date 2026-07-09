@@ -2,6 +2,12 @@
 
 ## Accepted
 
+- Treat Track 124 as review-and-hardening only over the complete
+  Repository Intelligence prototype stack: it may classify consistency,
+  maintainability, determinism, governance, testing, and lifecycle debt
+  across Tracks 120-123, but 124A introduces no new Repository
+  Intelligence capability, source/test/schema change, runtime behavior,
+  or execution authority.
 - Treat Phase 123D as the implementation-planning phase for the first
   deterministic Repository Intelligence Change Impact prototype: plan a
   read-only Change Impact Builder that consumes Repository Intelligence
