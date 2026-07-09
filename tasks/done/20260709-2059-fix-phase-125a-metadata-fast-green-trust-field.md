@@ -10,7 +10,7 @@ Fix Phase 125A metadata fast_green trust field
 
 ## Status
 
-active
+done
 
 ## Mode
 

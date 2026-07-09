@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix Phase 125A metadata fast_green trust field (20260709-2059-fix-phase-125a-metadata-fast-green-trust-field)
 - Sync Phase 125A completion metadata (20260709-2059-sync-phase-125a-completion-metadata)
 - Phase 125A Repository Intelligence Chapter Review Next Direction Architecture (20260709-2057-phase-125a-repository-intelligence-chapter-review-next-direction-architecture)
 - Sync Phase 124F completion metadata (20260709-2051-sync-phase-124f-completion-metadata)
