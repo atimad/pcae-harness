@@ -1,6 +1,6 @@
 {
-  "advisory_context_builder_architecture": "build_advisory_context(snapshot_path, request) is the single pipeline entry point: validate AdvisoryContextRequest, translate to existing QueryRequest, invoke execute_query (Track 121, unmodified), defensively validate the QueryResult shape, select records with an optional deterministic max_records bound, verify attribution presence for content-bearing categories, verify boundary disclosure presence, and assemble a RepositoryIntelligenceContextPackage. Every fail-closed condition raises AdvisoryContextBuilderError.",
-  "attribution_verification": "Verified. attribution_bundle is the Query Result's own attribution carried forward unchanged. ensure_attribution_present fails closed if any content-bearing category (entity/capability/architectural_contract/attribution lookup) selects records without attribution; limitation_lookup and boundary_lookup are exempted, mirroring the Query Layer's own exemption. Confirmed via test_entity_context_preserves_attribution_limitations_and_boundaries and test_missing_attribution_on_content_record_fails_closed.",
+  "architecture_conformance_assessment": "Verified. 122E's nine-stage pipeline maps stage-for-stage onto build_advisory_context()'s sequential structure. Every 122A S4 permitted operation is traceable to a specific function; every prohibited operation is independently confirmed absent by source inspection (grep for subprocess/network/AI-provider usage: zero matches).",
+  "attribution_verification": "Verified. attribution_bundle carries the Query Result's own attribution forward unchanged. ensure_attribution_present fails closed for content-bearing categories missing attribution; independently confirmed via test_missing_attribution_on_content_record_fails_closed and by direct reproduction outside the test suite.",
   "boundary_confirmations": [
     "No Advisory reasoning was introduced",
     "No recommendations were introduced",
@@ -10,8 +10,7 @@
     "No graph traversal was implemented",
     "No dependency reasoning was implemented",
     "No change impact reasoning was implemented",
-    "No Historical Memory consumption was implemented",
-    "No Dependency Knowledge Graph consumption was implemented",
+    "No Historical Memory or Dependency Knowledge Graph consumption was implemented",
     "No execution planning was introduced",
     "No execution capability was introduced",
     "No runtime plugin was added",
@@ -19,31 +18,26 @@
     "No network access was introduced",
     "No runtime behavior changed"
   ],
-  "boundary_propagation_verification": "Verified. Every boundary disclosure and disclaimer present in the Query Result propagates unchanged into boundary_disclosure_bundle; ensure_boundary_disclosure_present fails closed if both are empty. Every package additionally carries a package-level non_authority_disclaimer. Confirmed via test_entity_context_preserves_attribution_limitations_and_boundaries and test_missing_boundary_disclosure_fails_closed.",
-  "commit_attribution": "2f2f3a75228a8ee41fdd62d16f522d2a40e5439f, 21253084bdf3edcff812b4757262c9ec1c50a1d2",
-  "context_package_description": "RepositoryIntelligenceContextPackage: selected_repository_intelligence, attribution_bundle, limitation_bundle, boundary_disclosure_bundle (boundary_disclosures, disclaimers, non_authority_disclaimer), context_metadata (advisory_purpose, query_request, source_artifact, result_status, unknowns, record_count, assembly_timestamp). Structurally independent from the frozen 115W AdvisoryContextPackage; no section placement decided.",
-  "determinism_verification": "Verified. Identical Query Layer results plus identical advisory context request produce an equivalent logical context package. Record selection is a deterministic prefix of the Query Layer's own already-sorted records; attribution/limitation ordering is inherited unchanged; JSON serialization uses sorted keys. assembly_timestamp is a declared wall-clock value explicitly excluded from the logical-equality guarantee (122B S14 'logically identical', not byte-identical). Confirmed via test_repeated_context_assembly_is_deterministic (10+ repeated calls compared with assembly_timestamp excluded) and test_serialize_context_package_is_deterministic_json.",
+  "boundary_propagation_verification": "Verified. Every boundary disclosure and disclaimer present in the Query Result propagates unchanged; ensure_boundary_disclosure_present fails closed if both are empty. Package-level non_authority_disclaimer present on every package. Confirmed via test_missing_boundary_disclosure_fails_closed.",
+  "commit_attribution": "3190e54d584e8b82173ecad01a2bb9e7889356cc, 45f83f4f9be92a50ee94bf688b45e31b4f25ecd2",
+  "contract_conformance_assessment": "Verified. All 122B contract sections satisfied: Advisory responsibility contract, query contract, context contract, attribution contract, limitation contract (after repair), boundary disclosure contract, determinism contract, failure contract (after repair), governance contract. No contract violation found beyond the one repaired gap.",
+  "context_package_verification": "Verified. RepositoryIntelligenceContextPackage contains exactly the five required elements (selected_repository_intelligence, attribution_bundle, limitation_bundle, boundary_disclosure_bundle, context_metadata), independently confirmed populated with genuine content against a real generated snapshot.",
+  "determinism_verification": "Verified. Identical Query Layer results plus identical advisory context request independently re-executed ten times outside the test suite; all runs logically identical once assembly_timestamp excluded. No randomness, probabilistic ranking, AI inference, or hidden mutable caches found.",
   "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable, and zero runtime plugins are registered.",
+  "failure_verification": "Verified after repair. All seven failure modes (invalid request, invalid Query Layer result, missing attribution, missing limitation, missing boundary disclosure, unsupported schema version, corrupted artifact) fail closed, each independently confirmed by a dedicated passing test.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONTEXT_PROTOTYPE_IMPLEMENTATION.md",
-    "src/pcae/advisory/__init__.py",
-    "src/pcae/advisory/context/__init__.py",
+    "docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_VERIFICATION.md",
     "src/pcae/advisory/context/advisory_context_builder.py",
-    "src/pcae/advisory/context/context_package.py",
-    "src/pcae/advisory/context/context_request.py",
-    "src/pcae/advisory/context/context_serializer.py",
     "src/pcae/advisory/context/context_validation.py",
-    "src/pcae/cli.py",
-    "src/pcae/commands/advisory_context.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260709-1329-phase-122e-repository-intelligence-advisory-context-prototype.md",
+    "tasks/done/20260709-1346-phase-122f-repository-intelligence-advisory-consumption-verification.md",
     "tests/test_phase_122e_repository_intelligence_advisory_context.py"
   ],
-  "files_changed_count": 16,
-  "governance_compatibility": "Preserves observe-only runtime, deterministic behavior, auditability, reproducibility, explainability, human-controlled lifecycle, and governed commit/report/notification discipline. src/pcae/repository_intelligence/ (Track 119/120/121) unmodified.",
+  "files_changed_count": 9,
+  "governance_compatibility": "Preserves observe-only runtime, deterministic behavior, auditability, reproducibility, explainability, human-controlled lifecycle, and governed commit/report/notification discipline.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -70,56 +64,60 @@
       "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
     }
   ],
-  "implementation_confirmation": "Real implementation occurred: src/pcae/advisory/context/ (5 new modules), src/pcae/commands/advisory_context.py (CLI handler), src/pcae/cli.py (new 'pcae advisory context build' subcommand wiring), tests/test_phase_122e_repository_intelligence_advisory_context.py (21 new tests). src/pcae/repository_intelligence/ (Track 119/120/121) was not modified. No schema changed. No runtime behavior changed. Execution remains unavailable.",
-  "implementation_summary": "Implemented the first deterministic, read-only Advisory Context Builder under src/pcae/advisory/context/, consuming Repository Intelligence exclusively through the existing Track 121 execute_query entry point. Added the CLI command 'pcae advisory context build' nested under the existing 'pcae advisory' command group. Assembles a RepositoryIntelligenceContextPackage (deliberately distinct from the frozen 115W AdvisoryContextPackage) preserving attribution, limitations, and boundary disclosures unchanged, with fail-closed handling for seven failure modes. Added 21 focused tests; Query Layer and Repository Knowledge Snapshot regression suites pass unaffected; full fast_green suite passed 4390/4390.",
+  "implementation_confirmation": "Verification phase with one narrow, authorized repair: added ensure_limitation_present (context_validation.py), wired it into advisory_context_builder.py, added one regression test. No schema changed. No runtime behavior changed. Execution remains unavailable.",
   "known_inherited_issues_reviewed": [
     "119Q report-generation-ordering defect - non-blocking, not repaired",
     "119AB phase-id comparison bug - non-blocking, not repaired",
     "recurring pending_final_telegram_delivery reporting detail - non-blocking, not repaired"
   ],
-  "limitation_verification": "Verified. Every limitation present in the Query Result propagates unchanged into limitation_bundle; the builder adds exactly one additive context_bound limitation only when max_records truncates the selected record set, never replacing or narrowing an inherited limitation. Confirmed via test_max_records_bound_adds_disclosed_limitation.",
+  "limitation_verification": "Verified after repair. All limitations present in the Query Result now propagate unchanged; missing-limitation fail-closed handling (found absent during verification) was repaired via ensure_limitation_present, symmetric with the existing attribution/boundary checks.",
   "missing_trust_fields": [],
-  "no_advisory_reasoning_confirmation": "Confirmed. The builder performs no reasoning, ranking beyond declared query scope, or decision making. Verified structurally (no reasoning/recommendation/decision fields in RepositoryIntelligenceContextPackage.to_dict(), test_context_package_contains_no_reasoning_or_recommendation_fields) and architecturally (no wiring into any AdvisoryProvider, Repository Skill, or Decision Evaluation code path).",
-  "no_decision_evaluation_integration_confirmation": "Confirmed. No Decision Evaluation code path was touched, called, or wired to. The context package confers no authority and is never treated as a decision, approval, or Decision Evaluation output.",
-  "no_execution_capability_confirmation": "Confirmed. No shell command, subprocess, AI provider, or external API invocation was introduced. Runtime remains Observed / observe / execution unavailable.",
-  "no_go_confirmation": "No No-Go conditions triggered. No Advisory reasoning was introduced. No recommendations were introduced. No Decision Evaluation integration occurred. No Repository Intelligence generation was implemented. No repository scanning was implemented. No graph traversal was implemented. No dependency reasoning was implemented. No change impact reasoning was implemented. No Historical Memory or Dependency Knowledge Graph consumption was implemented. No execution planning was introduced. No execution capability was introduced. No runtime plugin was added. No AI provider integration was introduced. No network access was introduced. No runtime behavior changed.",
+  "no_go_confirmation": "No No-Go conditions triggered beyond the one authorized repair. No Advisory reasoning was introduced. No recommendations were introduced. No Decision Evaluation integration occurred. No Repository Intelligence generation was implemented. No repository scanning was implemented. No graph traversal was implemented. No dependency reasoning was implemented. No change impact reasoning was implemented. No Historical Memory or Dependency Knowledge Graph consumption was implemented. No execution planning was introduced. No execution capability was introduced. No runtime plugin was added. No AI provider integration was introduced. No network access was introduced. No runtime behavior changed.",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "2f2f3a75",
-      "message": "Phase 122E: Repository Intelligence Advisory Context Prototype"
+      "hash": "3190e54d",
+      "message": "Phase 122F: Repository Intelligence Advisory Consumption Verification"
     },
     {
-      "hash": "21253084",
-      "message": "Finish Phase 122E task"
+      "hash": "45f83f4f",
+      "message": "Finish Phase 122F task"
     }
   ],
-  "phase_id": "122E",
-  "phase_name": "Repository Intelligence Advisory Context Prototype",
-  "phase_title": "Repository Intelligence Advisory Context Prototype",
+  "phase_id": "122F",
+  "phase_name": "Repository Intelligence Advisory Consumption Verification",
+  "phase_title": "Repository Intelligence Advisory Consumption Verification",
+  "prototype_plan_conformance_assessment": "Verified with one repaired implementation gap. All nine 122D planned components present; all 13 122D S14 acceptance criteria for 122E independently confirmed satisfied; all 122D S16 risk mitigations confirmed present. One gap found: missing-limitation fail-closed handling was planned (122D S12) but not implemented in 122E - repaired in this phase, not a plan deviation but an implementation omission.",
   "pushed_status": "pushed",
-  "query_layer_integration_summary": "The builder's sole Repository Intelligence access path is pcae.repository_intelligence.query.query_engine.execute_query, called with an unmodified QueryRequest. SUPPORTED_CONTEXT_CATEGORIES is imported directly from query_request.SUPPORTED_QUERY_CATEGORIES, never redefined. The builder never reads a Repository Knowledge Snapshot artifact directly, never reruns the Track 120 generator, never scans repository files, and never inspects git history. src/pcae/repository_intelligence/query/ was not modified by this phase.",
-  "recommended_next_phase": "122F - Repository Intelligence Advisory Consumption Verification",
-  "recommended_next_phase_id": "122F",
-  "recommended_next_phase_name": "Repository Intelligence Advisory Consumption Verification",
+  "query_layer_integration_assessment": "Verified. Sole Repository Intelligence access path is execute_query (Track 121, unmodified). SUPPORTED_CONTEXT_CATEGORIES confirmed to be the identical frozenset object as query_request.SUPPORTED_QUERY_CATEGORIES, not a copy. src/pcae/repository_intelligence/ independently confirmed untouched by Track 122 (git log check).",
+  "recommended_next_phase": "123A - Repository Intelligence Change Impact Architecture",
+  "recommended_next_phase_id": "123A",
+  "recommended_next_phase_name": "Repository Intelligence Change Impact Architecture",
+  "regression_results": {
+    "advisory_context_builder_tests": "22 passed (up from 21; includes new test_missing_limitation_fails_closed regression test)",
+    "fast_green": "4389 passed, 1 pre-existing failure (test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked) independently confirmed unrelated via git stash against unmodified HEAD",
+    "query_layer_regression_tests": "15 passed, unaffected",
+    "repository_knowledge_snapshot_regression_tests": "14 passed, unaffected"
+  },
+  "repaired_defect_summary": "Missing-limitation fail-closed handling was required by 122B S13 and planned by 122D S12, symmetric with the already-implemented missing-attribution and missing-boundary-disclosure checks, but never implemented in 122E. Repaired with one validation function (ensure_limitation_present), one call site in build_advisory_context(), and one regression test (test_missing_limitation_fails_closed). No scope expansion occurred.",
   "report_completeness": "complete",
   "report_notification_status": "pending_final_telegram_delivery",
-  "runtime_observe_only_confirmation": "Confirmed. pcae runtime inspect output unchanged before and after implementation: runtime state Observed, maximum plugin capability observe, execution capability unavailable, zero runtime plugins registered.",
   "schema_version": "1.0",
-  "source_files_changed": 9,
+  "source_files_changed": 2,
   "status": "completed",
+  "summary": "Verification phase. Independently verified the 122E Repository Intelligence Advisory Context Builder against the 122A architecture, 122B frozen contract, 122C verification conclusions, and 122D prototype plan. Found and repaired one genuine defect: missing-limitation fail-closed handling, required by contract but never implemented. No other defect found; no scope expansion occurred.",
   "test_files_changed": 1,
   "test_results": {
-    "advisory_context_tests": "21 passed (tests/test_phase_122e_repository_intelligence_advisory_context.py)",
+    "advisory_context_tests": "22 passed",
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
-    "fast_green": "4390 passed",
-    "query_layer_regression_tests": "15 passed (tests/test_phase_121e_repository_intelligence_query.py), unaffected",
+    "fast_green": "4389 passed, 1 pre-existing unrelated failure",
+    "query_layer_regression_tests": "15 passed",
     "report_notification_tests": "pending_final_telegram_delivery",
-    "repository_knowledge_snapshot_regression_tests": "14 passed (tests/test_phase_120e_repository_knowledge_snapshot.py), unaffected",
-    "source_schema_test_diff": "source and test code changed; no schema changed"
+    "repository_knowledge_snapshot_regression_tests": "14 passed",
+    "source_schema_test_diff": "source and test code changed (one repair); no schema changed"
   },
-  "tests_added_or_updated": "Added tests/test_phase_122e_repository_intelligence_advisory_context.py (21 tests): deterministic context assembly, Query Layer integration, attribution/limitation/boundary preservation, serialization, fail-closed behavior (invalid request, missing snapshot, corrupted artifact, unsupported schema version, missing attribution, missing boundary disclosure), max_records bounding, read-only guarantees, absence of reasoning fields, and CLI integration.",
-  "tests_run": 4444,
+  "tests_added_or_updated": "Added test_missing_limitation_fails_closed to tests/test_phase_122e_repository_intelligence_advisory_context.py, reproducing the exact failure scenario found during verification.",
+  "tests_run": 4442,
   "validation_results": [
     {
       "name": "pcae_health",
@@ -153,7 +151,7 @@
     },
     {
       "name": "phase_finalization_skill",
-      "result": "phase_finalization_122E_target_resolved",
+      "result": "phase_finalization_122F_target_resolved",
       "status": "passed"
     },
     {
@@ -173,9 +171,8 @@
     },
     {
       "name": "fast_green",
-      "result": "4390_passed",
+      "result": "4389_passed_1_pre_existing_unrelated_failure",
       "status": "passed"
     }
-  ],
-  "verification_plan_status": "122F should independently verify: deterministic context generation, attribution preservation, limitation propagation, boundary propagation, governance compatibility, fail-closed behavior for all seven modes, and read-only behavior against the 122A architecture, 122B contract, 122C verification, and 122D plan."
+  ]
 }
