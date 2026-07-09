@@ -2,39 +2,62 @@
 
 ## Current Phase
 
-Phase 122B — Repository Intelligence Advisory Consumption Contract
-Freeze (completed).
+Phase 122C — Repository Intelligence Advisory Consumption Contract
+Verification (completed).
 
-Froze the canonical Repository Intelligence Advisory Consumption
-Contract, documented in
-`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_FREEZE.md`.
-Binding for 122C, 122D, 122E, and 122F. Freezes architectural
-relationships (Repository Knowledge Snapshot, Repository Intelligence
-Query Layer, Advisory Runtime, Advisory Context, Repository State,
-Evidence, Decision Evaluation, Runtime); Advisory responsibilities
-(permitted: request/consume/reference Repository Intelligence,
-preserve attribution/limitations/boundary disclosures, assemble
-context; prohibited: generate or modify Repository Intelligence,
-mutate Repository State or Evidence, replace Decision Evaluation or
-Repository State, introduce execution capability); the query contract
-restricting access to the Track 121 read-only Query Layer only; the
-context, attribution, limitation, and boundary disclosure contracts;
-the determinism contract (no inference, no probabilistic behavior, no
-AI augmentation); the fail-closed failure contract for unsupported
-snapshot, unsupported schema version, corrupted Repository
-Intelligence, missing attribution, missing limitation, missing
-boundary disclosure, and invalid query result; the governance
-contract; compatibility with Track 119, Track 120, and Track 121;
-deferred capabilities; and known inherited issues carried forward
-unrepaired. No implementation, source code, test code, or schema
-change occurred.
+Independently verified the Phase 122B Repository Intelligence Advisory
+Consumption Contract against the Phase 122A architecture, the Track
+121 Query Layer, Track 120 Repository Knowledge Snapshot, Track 119
+executable schemas, Advisory Runtime architecture, and observe-only
+runtime principles, documented in
+`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_VERIFICATION.md`.
+Verification re-derived every claim independently from source: grepped
+`src/pcae/repository_intelligence/query/query_engine.py` confirming
+exactly six implemented query categories match the contract's claim;
+confirmed `snapshot_loader.py`'s `SUPPORTED_EXECUTABLE_SCHEMA_VERSION`
+constant is unchanged; confirmed `AdvisoryContextPackage`'s frozen
+15-section shape remains unmodified and unwired; confirmed Advisory
+Runtime's own documentation still disclaims being a Repository
+Intelligence consumer. Verified contract completeness, architectural
+consistency, scope, Advisory responsibility boundaries, the query
+contract, the context/attribution/limitation/boundary disclosure
+contracts, determinism, the seven-mode fail-closed failure contract,
+governance compatibility, Track 119/120/121 compatibility, and future
+phase readiness for 122D-122F. No contract defect requiring correction
+was found; no contract modification was made. No implementation,
+source code, test code, or schema change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 122C — Repository Intelligence Advisory
-Consumption Contract Verification.
+Recommended next repo phase: 122D — Repository Intelligence Advisory
+Consumption Prototype Plan.
+
+## Phase 122C Complete
+
+Phase 122C — Repository Intelligence Advisory Consumption Contract
+Verification (completed).
+
+Independently verified the 122B contract: contract completeness
+(every required section present), architectural consistency (122A
+pipeline/context model, Track 121 Query Layer's actual six query
+categories, Track 120 Repository Knowledge Snapshot, Track 119
+schemas, Advisory Runtime disambiguation, observe-only runtime
+principles), scope (no expansion), Advisory responsibility boundaries
+(Repository Intelligence/Advisory/Repository State/Evidence/Decision
+Evaluation correctly distinguished), the query contract (Track 121
+Query Layer exclusive access, independently confirmed against source),
+the context/attribution/limitation/boundary disclosure contracts,
+determinism, the seven-mode fail-closed failure contract (cross-checked
+against 122A's eight architectural failure modes with full coverage
+confirmed), governance compatibility, and Track 119/120/121
+compatibility. One clarification recorded (AdvisoryContextPackage
+section placement deferred to a future 115W-contract amendment, not
+122D). No genuine defect found; no contract modification made; no
+implementation occurred. Runtime remains `Observed` / `observe` /
+execution unavailable. Recommended next phase: 122D — Repository
+Intelligence Advisory Consumption Prototype Plan.
 
 ## Phase 122B Complete
 
