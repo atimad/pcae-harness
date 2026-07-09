@@ -1,6 +1,6 @@
 {
-  "architectural_boundaries": "Does not generate Repository Intelligence, scan repositories, execute code, invoke AI, infer knowledge, modify artifacts, perform graph traversal, perform change impact reasoning, invoke Advisory, make decisions, mutate Repository State, mutate Evidence, or authorize execution.",
-  "architecture_summary": "Defined a deterministic, read-only Repository Intelligence Query Layer for governed access to existing Repository Intelligence artifacts. The layer reads artifacts, validates bounded conceptual requests, performs deterministic lookup/filtering/selection, preserves attribution and limitations, assembles bounded results, and formats results without inference, generation, repository scanning, graph traversal, Advisory reasoning, Decision Evaluation replacement, or execution.",
+  "architectural_boundary_confirmation": "The Query Layer never generates or modifies Repository Intelligence, scans repositories, invokes AI providers, invokes Advisory, performs Decision Evaluation, graph reasoning, dependency analysis, change impact analysis, or execution.",
+  "attribution_guarantees": "Every returned record must preserve attribution; attribution cannot be removed; missing attribution on a content-bearing result is contract failure.",
   "boundary_confirmations": [
     "No implementation occurred",
     "No source code changed",
@@ -8,8 +8,9 @@
     "No schema changed",
     "No query engine was implemented",
     "No query parser was implemented",
+    "No query language was implemented",
     "No CLI was implemented",
-    "No API or REST surface was implemented",
+    "No REST or API surface was implemented",
     "No Python models were implemented",
     "No validators were implemented",
     "No runtime plugin was added",
@@ -23,18 +24,21 @@
     "No execution capability was introduced",
     "No runtime behavior changed"
   ],
-  "commit_attribution": "a3dfeed10bdb1ce897d0de238ac78fd168810fa3, e1a5aab2dea15e6787d85316c151cc2a27c534c6",
+  "commit_attribution": "14a7479cf46b5b58243ba1e526d503c1e3bf2cff, 0a124260f1f02b6cd8d9192aab3fec920efc04a2",
+  "contract_scope": "Query Layer is deterministic, read-only, artifact-consuming, observe-only, non-reasoning, and initially limited to Repository Knowledge Snapshot artifacts.",
+  "contract_summary": "Froze the canonical Repository Intelligence Query Contract governing deterministic, read-only access to existing Repository Intelligence artifacts. The contract is binding for later Track 121 work.",
+  "deterministic_guarantees": "Identical Repository Knowledge Snapshot plus identical query request must produce identical logical result; no randomness, probabilistic behavior, AI inference, semantic summarization, network calls, ambient runtime state, or non-deterministic tie-breaking.",
   "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable, and zero runtime plugins are registered.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_LAYER_ARCHITECTURE.md",
+    "docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_FREEZE.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260709-0547-phase-121a-repository-intelligence-query-layer-architecture.md"
+    "tasks/done/20260709-0742-phase-121b-repository-intelligence-query-contract-freeze.md"
   ],
   "files_changed_count": 6,
-  "governance_compatibility": "Preserves observe-only runtime, deterministic behavior, auditability, reproducibility, explainability, human-controlled lifecycle, and governed commit/report/notification discipline.",
+  "governance_compatibility": "Compatible with observe-only runtime, deterministic engineering, auditability, explainability, reproducibility, human-controlled lifecycle, and governed commit/report/notification discipline.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -68,41 +72,39 @@
     "recurring pending_final_telegram_delivery reporting detail - non-blocking, not repaired"
   ],
   "missing_trust_fields": [],
-  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No source code changed. No test code changed. No schema changed. No query engine was implemented. No query parser was implemented. No CLI was implemented. No API or REST surface was implemented. No Python models were implemented. No validators were implemented. No runtime plugin was added. No repository scanning was implemented. No Repository Intelligence generation was implemented. No graph traversal was implemented. No dependency analysis was implemented. No change impact analysis was implemented. No Advisory integration was introduced. No execution planning was introduced. No execution capability was introduced. No runtime behavior changed.",
+  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No source code changed. No test code changed. No schema changed. No query engine was implemented. No query parser was implemented. No query language was implemented. No CLI was implemented. No REST or API surface was implemented. No Python models were implemented. No validators were implemented. No runtime plugin was added. No repository scanning was implemented. No Repository Intelligence generation was implemented. No graph traversal was implemented. No dependency analysis was implemented. No change impact analysis was implemented. No Advisory integration was introduced. No execution planning was introduced. No execution capability was introduced. No runtime behavior changed.",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "a3dfeed10bdb1ce897d0de238ac78fd168810fa3",
-      "message": "Phase 121A: Repository Intelligence Query Layer Architecture"
+      "hash": "14a7479cf46b5b58243ba1e526d503c1e3bf2cff",
+      "message": "Phase 121B: Repository Intelligence Query Contract Freeze"
     },
     {
-      "hash": "e1a5aab2dea15e6787d85316c151cc2a27c534c6",
-      "message": "Finish Phase 121A task"
+      "hash": "0a124260f1f02b6cd8d9192aab3fec920efc04a2",
+      "message": "Finish Phase 121B task"
     }
   ],
-  "phase_id": "121A",
-  "phase_name": "Repository Intelligence Query Layer Architecture",
-  "phase_title": "Repository Intelligence Query Layer Architecture",
+  "phase_id": "121B",
+  "phase_name": "Repository Intelligence Query Contract Freeze",
+  "phase_title": "Repository Intelligence Query Contract Freeze",
   "pushed_status": "pushed",
-  "query_layer_responsibilities": "Read existing Repository Intelligence artifacts; validate query scope; perform deterministic lookup, filtering, selection, result assembly, attribution preservation, limitation preservation, and deterministic formatting.",
-  "recommended_next_phase": "121B - Repository Intelligence Query Contract Freeze",
-  "recommended_next_phase_id": "121B",
-  "recommended_next_phase_name": "Repository Intelligence Query Contract Freeze",
-  "relationship_to_track_120": "Track 120 produced and verified the first Repository Knowledge Snapshot. Track 121 consumes that existing artifact as input and must not rerun generation or read the repository to fill gaps.",
+  "recommended_next_phase": "121C - Repository Intelligence Query Contract Verification",
+  "recommended_next_phase_id": "121C",
+  "recommended_next_phase_name": "Repository Intelligence Query Contract Verification",
   "report_completeness": "complete",
   "report_notification_status": "pending_final_telegram_delivery",
   "schema_version": "1.0",
   "source_files_changed": 0,
   "status": "completed",
-  "summary": "Architecture-only phase opening Track 121. Defined the Repository Intelligence Query Layer as deterministic, read-only consumption of existing Repository Intelligence artifacts, moving from generated knowledge to deterministic knowledge consumption without implementing a query engine, parser, CLI, API, models, validators, runtime plugins, repository scanning, generation, graph traversal, Advisory integration, execution planning, or execution capability.",
+  "summary": "Documentation-only contract-freeze phase. Froze the canonical Repository Intelligence Query Contract for deterministic, read-only, artifact-consuming, observe-only access to existing Repository Intelligence artifacts, initially limited to Repository Knowledge Snapshot artifacts, without implementing query syntax, parser, CLI, API, models, validators, runtime plugins, repository scanning, generation, graph traversal, Advisory integration, execution planning, or execution capability.",
   "test_files_changed": 0,
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
-    "fast_green": "not run; architecture-only documentation phase with no source/schema/test changes",
+    "fast_green": "not run; documentation-only contract-freeze phase with no source/schema/test changes",
     "report_notification_tests": "pending_final_telegram_delivery",
     "source_schema_test_diff": "no source, schema, or test code changed"
   },
-  "tests_added_or_updated": "No automated tests added or updated; 121A is architecture-only documentation.",
+  "tests_added_or_updated": "No automated tests added or updated; 121B is documentation-only contract freeze.",
   "tests_run": 0,
   "validation_results": [
     {
@@ -137,7 +139,7 @@
     },
     {
       "name": "phase_finalization_skill",
-      "result": "phase_finalization_121A_target_resolved",
+      "result": "phase_finalization_121B_target_resolved",
       "status": "passed"
     },
     {
@@ -157,7 +159,7 @@
     },
     {
       "name": "fast_green",
-      "result": "not_run_architecture_only_no_source_schema_test_change",
+      "result": "not_run_documentation_only_no_source_schema_test_change",
       "status": "not_applicable"
     }
   ]

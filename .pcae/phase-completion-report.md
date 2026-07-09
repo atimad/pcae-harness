@@ -1,57 +1,57 @@
-# Phase 121A Complete - Repository Intelligence Query Layer Architecture
+# Phase 121B Complete - Repository Intelligence Query Contract Freeze
 
-- **Phase ID:** `121A`
-- **Phase name:** Repository Intelligence Query Layer Architecture
+- **Phase ID:** `121B`
+- **Phase name:** Repository Intelligence Query Contract Freeze
 - **Status:** completed
 - **Report completeness:** complete
-- **Architecture document:** `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_LAYER_ARCHITECTURE.md`
+- **Contract document:** `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_FREEZE.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Architecture commit:** `a3dfeed10bdb1ce897d0de238ac78fd168810fa3`
-- **Task finish commit:** `e1a5aab2dea15e6787d85316c151cc2a27c534c6`
-- **Recommended next phase:** 121B - Repository Intelligence Query Contract Freeze
+- **Contract commit:** `14a7479cf46b5b58243ba1e526d503c1e3bf2cff`
+- **Task finish commit:** `0a124260f1f02b6cd8d9192aab3fec920efc04a2`
+- **Recommended next phase:** 121C - Repository Intelligence Query Contract Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Architecture Summary
+## Contract Summary
 
-Defined the Repository Intelligence Query Layer as a deterministic,
-read-only access architecture for existing Repository Intelligence
-artifacts. The layer reads artifacts, validates bounded query requests,
-performs deterministic lookup/filtering/selection, preserves attribution
-and limitations, assembles bounded results, and formats results without
-inference, generation, repository scanning, graph traversal, Advisory
-reasoning, Decision Evaluation replacement, or execution.
+Froze the canonical Repository Intelligence Query Contract governing
+deterministic, read-only access to existing Repository Intelligence
+artifacts. The contract is binding for later Track 121 work.
 
-## Query Layer Responsibilities
+## Contract Scope
 
-- Read existing Repository Intelligence artifacts.
-- Validate conceptual query request scope and supported category.
-- Perform deterministic lookup, filtering, and selection.
-- Preserve result attribution and limitations.
-- Preserve boundary disclosures and disclaimers.
-- Assemble and format deterministic results.
+The Query Layer is deterministic, read-only, artifact-consuming,
+observe-only, non-reasoning, and initially limited to Repository
+Knowledge Snapshot artifacts.
 
-## Architectural Boundaries
+## Deterministic Guarantees
 
-The Query Layer does not generate Repository Intelligence, scan
-repositories, execute repository code, invoke AI, infer knowledge, modify
-artifacts, perform graph traversal, perform dependency analysis, perform
-change impact reasoning, invoke Advisory, make decisions, mutate
-Repository State, mutate Evidence, or authorize execution.
+Identical Repository Knowledge Snapshot plus identical query request
+must produce identical logical result. No randomness, probabilistic
+behavior, AI inference, semantic summarization, network calls, ambient
+runtime state, hidden mutable caches, or non-deterministic tie-breaking
+is allowed.
 
-## Relationship to Track 120
+## Attribution Guarantees
 
-Track 120 produced and verified the first Repository Knowledge Snapshot.
-Track 121 consumes that existing artifact as input and must not rerun
-generation or read the repository to fill gaps.
+Every returned record must preserve attribution. Attribution cannot be
+removed, grouped results preserve per-record attribution, and missing
+attribution on a content-bearing result is contract failure.
 
 ## Governance Compatibility
 
-The architecture preserves observe-only runtime, deterministic behavior,
-auditability, reproducibility, explainability, human-controlled
+The contract preserves observe-only runtime, deterministic engineering,
+auditability, explainability, reproducibility, human-controlled
 lifecycle, and governed commit/report/notification discipline.
+
+## Architectural Boundary Confirmation
+
+The Query Layer never generates or modifies Repository Intelligence,
+scans repositories, invokes AI providers, invokes Advisory, performs
+Decision Evaluation, graph reasoning, dependency analysis, change impact
+analysis, execution planning, or execution capability.
 
 ## Governance Results
 
@@ -65,7 +65,7 @@ lifecycle, and governed commit/report/notification discipline.
 ## Test Results
 
 - **source_schema_test_diff:** no source, schema, or test code changed
-- **fast_green:** not run; architecture-only documentation phase with no source/schema/test changes
+- **fast_green:** not run; documentation-only contract-freeze phase with no source/schema/test changes
 - **report_notification_tests:** pending_final_telegram_delivery (known inherited reporting detail)
 - **bootstrap_session_reporting_tests:** not applicable; no bootstrap/session reporting code changed
 
@@ -78,8 +78,9 @@ lifecycle, and governed commit/report/notification discipline.
 - No schema changed.
 - No query engine was implemented.
 - No query parser was implemented.
+- No query language was implemented.
 - No CLI was implemented.
-- No API or REST surface was implemented.
+- No REST or API surface was implemented.
 - No Python models were implemented.
 - No validators were implemented.
 - No runtime plugin was added.
@@ -103,6 +104,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Repository Intelligence Query Layer architecture is ready for
-contract freeze. Recommended next phase: 121B - Repository Intelligence
-Query Contract Freeze.
+The Repository Intelligence Query Contract is frozen and ready for
+independent verification. Recommended next phase: 121C - Repository
+Intelligence Query Contract Verification.
