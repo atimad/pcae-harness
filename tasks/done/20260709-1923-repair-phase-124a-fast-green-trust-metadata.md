@@ -10,7 +10,7 @@ Repair Phase 124A fast-green trust metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
