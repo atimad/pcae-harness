@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 123C completion metadata (20260709-1517-repair-phase-123c-completion-metadata)
 - Phase 123C Repository Intelligence Change Impact Contract Verification (20260709-1514-phase-123c-repository-intelligence-change-impact-contract-verification)
 - Repair Phase 123B completion metadata (20260709-1419-repair-phase-123b-completion-metadata)
 - Governed commit recovery for Phase 123B (20260709-1417-governed-commit-recovery-for-phase-123b)
