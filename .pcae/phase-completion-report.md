@@ -1,71 +1,104 @@
-# Phase 122D Complete - Repository Intelligence Advisory Consumption Prototype Plan
+# Phase 122E Complete - Repository Intelligence Advisory Context Prototype
 
-- **Phase ID:** `122D`
-- **Phase name:** Repository Intelligence Advisory Consumption Prototype Plan
+- **Phase ID:** `122E`
+- **Phase name:** Repository Intelligence Advisory Context Prototype
 - **Status:** completed
 - **Report completeness:** complete
-- **Plan document:** `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_PROTOTYPE_PLAN.md`
-- **Source files changed:** 0
-- **Test files changed:** 0
+- **Implementation document:** `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONTEXT_PROTOTYPE_IMPLEMENTATION.md`
+- **Source files changed:** 9
+- **Test files changed:** 1
 - **Execution boundary:** preserved (execution unavailable)
-- **Plan commit:** `0394813996a6224fe523bc65bedf3a35578ab2b1`
-- **Task finish commit:** `6569870a137c4aa779519ccf91b5bf48fbd568bd`
-- **Recommended next phase:** 122E - Repository Intelligence Advisory Context Prototype
+- **Implementation commit:** `2f2f3a75228a8ee41fdd62d16f522d2a40e5439f`
+- **Task finish commit:** `21253084bdf3edcff812b4757262c9ec1c50a1d2`
+- **Recommended next phase:** 122F - Repository Intelligence Advisory Consumption Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Implementation Planning Summary
+## Implementation Summary
 
-Defined the definitive implementation plan for the first Repository
-Intelligence Advisory Consumption prototype: a deterministic,
-read-only Advisory Context Builder consuming Repository Intelligence
-exclusively through the Track 121 Query Layer, scoped to Repository
-Knowledge Snapshot and Query Layer results only. No implementation,
-source, test, or schema changes occurred.
+Implemented the first deterministic, read-only Advisory Context
+Builder under `src/pcae/advisory/context/`, consuming Repository
+Intelligence exclusively through the existing Track 121
+`execute_query` entry point. Added the CLI command `pcae advisory
+context build` nested under the existing `pcae advisory` command
+group. Assembles a `RepositoryIntelligenceContextPackage` (deliberately
+distinct from the frozen 115W `AdvisoryContextPackage`) preserving
+attribution, limitations, and boundary disclosures unchanged, with
+fail-closed handling for seven failure modes. Added 21 focused tests;
+Query Layer and Repository Knowledge Snapshot regression suites pass
+unaffected; full `fast_green` suite passed 4390/4390.
 
-## Planned Advisory Consumption Pipeline
+## Advisory Context Builder Architecture
 
-Nine-stage pipeline: advisory request intake, Repository Intelligence
-query preparation, read-only Query Layer invocation, context
-selection, attribution preservation, limitation propagation, boundary
-disclosure propagation, advisory context package assembly, advisory
-delivery. Responsibilities only, no implementation.
+`build_advisory_context(snapshot_path, request)` is the single
+pipeline entry point: validate `AdvisoryContextRequest`, translate to
+an existing `QueryRequest`, invoke `execute_query` (Track 121,
+unmodified), defensively validate the `QueryResult` shape, select
+records with an optional deterministic `max_records` bound, verify
+attribution presence for content-bearing categories, verify boundary
+disclosure presence, and assemble a `RepositoryIntelligenceContextPackage`.
+Every fail-closed condition raises `AdvisoryContextBuilderError`.
 
-## Planned Component Responsibilities
+## Query Layer Integration Summary
 
-Nine planned components, each with defined responsibility, inputs,
-outputs, and boundaries: Advisory Request Intake, Query Preparation,
-Query Invocation, Context Selection, Attribution Preservation,
-Limitation Propagation, Boundary Disclosure Propagation, Context
-Package Assembly, and Advisory Delivery. No classes, modules, or
-source layout defined.
+The builder's sole Repository Intelligence access path is
+`execute_query`, called with an unmodified `QueryRequest`.
+`SUPPORTED_CONTEXT_CATEGORIES` is imported directly from
+`query_request.SUPPORTED_QUERY_CATEGORIES`, never redefined. The
+builder never reads a Repository Knowledge Snapshot artifact directly,
+never reruns the Track 120 generator, never scans repository files,
+and never inspects git history. `src/pcae/repository_intelligence/`
+was not modified by this phase.
 
-## Planned Context Package Structure
+## Context Package Description
 
-Five required elements: selected Repository Intelligence, attribution
-bundle, limitation bundle, boundary disclosure bundle, and advisory
-metadata. No serialization format, storage location, Python type, or
-`AdvisoryContextPackage` section placement decided; placement deferred
-to a future 115W-contract amendment.
+`RepositoryIntelligenceContextPackage`: `selected_repository_intelligence`,
+`attribution_bundle`, `limitation_bundle`, `boundary_disclosure_bundle`
+(`boundary_disclosures`, `disclaimers`, `non_authority_disclaimer`),
+`context_metadata` (advisory purpose, query request, source artifact,
+result status, unknowns, record count, assembly timestamp).
+Structurally independent from the frozen 115W `AdvisoryContextPackage`;
+no section placement decided.
 
-## Planned Verification Strategy
+## Determinism Verification
 
-122F should independently verify: deterministic context generation,
-attribution preservation, limitation propagation, boundary
-propagation, governance compatibility, failure handling for all seven
-modes (missing Repository Intelligence, unsupported snapshot schema,
-invalid query response, missing attribution, missing limitation,
-missing boundary disclosure, corrupted artifact), read-only behavior,
-and scope discipline.
+Verified. Identical Query Layer results plus identical advisory
+context request produce an equivalent logical context package. Record
+selection is a deterministic prefix of the Query Layer's own
+already-sorted records; JSON serialization uses sorted keys.
+`assembly_timestamp` is explicitly excluded from the logical-equality
+guarantee (122B S14 "logically identical", not byte-identical).
+Confirmed via repeated-execution and serialization tests.
 
-## Implementation Readiness Assessment
+## Attribution Verification
 
-Ready for 122E implementation within the boundaries frozen by 122B and
-verified by 122C. Deferred implementation details: exact advisory
-context request representation, exact context package serialization
-format, exact `AdvisoryContextPackage` section placement, exact
-selection-criteria implementation, exact verification fixtures, exact
-command or call surface if any is later authorized.
+Verified. `attribution_bundle` carries the Query Result's own
+attribution forward unchanged. Missing attribution on a
+content-bearing selected record fails closed.
+
+## Limitation Verification
+
+Verified. Every limitation present in the Query Result propagates
+unchanged; the builder adds only one additive `context_bound`
+limitation when `max_records` truncates the selected record set.
+
+## Boundary Propagation Verification
+
+Verified. Every boundary disclosure and disclaimer present in the
+Query Result propagates unchanged; a package-level non-authority
+disclaimer is present on every package.
+
+## Tests Added and Executed
+
+- 21 new focused tests:
+  `tests/test_phase_122e_repository_intelligence_advisory_context.py`.
+- Query Layer regression: 15 passed
+  (`tests/test_phase_121e_repository_intelligence_query.py`),
+  unaffected.
+- Repository Knowledge Snapshot regression: 14 passed
+  (`tests/test_phase_120e_repository_knowledge_snapshot.py`),
+  unaffected.
+- Full `fast_green` suite: 4390 passed.
 
 ## Governance Results
 
@@ -78,21 +111,20 @@ command or call surface if any is later authorized.
 
 ## No-Go Confirmations
 
-- No implementation occurred.
-- No source code changed.
-- No test code changed.
-- No schema changed.
-- No query changes were made.
-- No Advisory Context Builder was implemented.
-- No Advisory runtime integration was implemented.
+- No Advisory reasoning was introduced.
+- No recommendations were introduced.
+- No Decision Evaluation integration occurred.
 - No Repository Intelligence generation was implemented.
 - No repository scanning was implemented.
 - No graph traversal was implemented.
 - No dependency reasoning was implemented.
 - No change impact reasoning was implemented.
-- No runtime plugin was added.
+- No Historical Memory or Dependency Knowledge Graph consumption was implemented.
 - No execution planning was introduced.
 - No execution capability was introduced.
+- No runtime plugin was added.
+- No AI provider integration was introduced.
+- No network access was introduced.
 - No runtime behavior changed.
 
 ## Inherited Issues
@@ -105,6 +137,7 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Repository Intelligence Advisory Consumption Prototype Plan is
-documented and ready for implementation. Recommended next phase: 122E
-- Repository Intelligence Advisory Context Prototype.
+The Repository Intelligence Advisory Context Builder prototype is
+implemented and ready for independent verification. Recommended next
+phase: 122F - Repository Intelligence Advisory Consumption
+Verification.
