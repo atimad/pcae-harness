@@ -1,83 +1,100 @@
-# Phase 126B Complete - Dependency Knowledge Graph Contract Freeze
+# Phase 126C Complete - Dependency Knowledge Graph Contract Verification
 
-- **Phase ID:** `126B`
-- **Phase name:** Dependency Knowledge Graph Contract Freeze
+- **Phase ID:** `126C`
+- **Phase name:** Dependency Knowledge Graph Contract Verification
 - **Status:** completed
 - **Report completeness:** complete
-- **Contract document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_FREEZE.md`
+- **Verification document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_VERIFICATION.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Contract freeze commit:** `82ce2934`
-- **Task finish commit:** `39153a8a`
-- **Recommended next phase:** 126C - Dependency Knowledge Graph Contract Verification
+- **Verification commit:** `52d97903`
+- **Task finish commit:** `e372d049`
+- **Recommended next phase:** 126D - Dependency Knowledge Graph Prototype Plan
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Contract Summary
+## Verification Summary
 
-Froze the canonical Dependency Knowledge Graph contract governing the
-future implementation of the graph, binding for 126C-126F. Documentation
-only; no implementation occurred.
+Independently verified the Phase 126B Dependency Knowledge Graph
+Contract for completeness, internal consistency, determinism,
+governance compatibility, and implementation readiness. Every enum,
+const string, and required-field claim in 126B was independently
+re-derived from the actual frozen
+`dependency_knowledge_graph_snapshot.schema.json` (119S/119T) rather
+than trusted — all matched exactly.
 
-## Node Contract
+## Contract Completeness Assessment
 
-Re-froze the already-frozen 119S/119T `node_type` enum as binding.
-Explicitly resolved 126A's flagged taxonomy gaps: artifact/report map
-to `evidence_artifact`; plugin maps to `runtime_component`; class and
-function granularity is explicitly out of scope for v1, deferred to a
-future, separately governed chapter. Froze stable identifier
-requirements (deterministic, stable, unique).
+Verified, with clarification. All required contract areas present.
+Two documentation completeness gaps found relative to 126A's own
+architectural basis (see Findings).
 
-## Edge Contract
+## Node Taxonomy Verification
 
-Re-froze the already-frozen 119S/119T `edge_type` enum as binding.
-Explicitly resolved gaps: imports/generates/produced_by/consumed_by
-map onto existing types; `contains` maps to `related_to` (documented
-v1 precision limitation); `implements` maps to `depends_on`
-(documented dual-use mapping); `attributed_to` confirmed not an edge
-concept (already covered by per-record source attribution).
+Verified. `node_type` enum independently re-read and confirmed
+byte-for-byte match to 126B's quotation. Completeness, uniqueness,
+stability, overlap handling, and extensibility all confirmed sound.
 
-## Graph Invariant Contract
+## Edge Taxonomy Verification
 
-Deterministic, reproducible, provenance preserving, limitation
-preserving, boundary preserving, stable identifiers, version
-compatible, fail closed.
+Verified. `edge_type` enum independently re-read and confirmed match.
+Semantic clarity, uniqueness, directionality, and evidence
+requirements all confirmed sound.
 
-## Provenance Contract
+## Graph Invariant Verification
 
-Every node and relationship must preserve source attribution,
-derivation, evidence chain, uncertainty, and limitations, without
-reinterpretation.
+Verified. All eight required invariants (deterministic, reproducible,
+provenance preserving, limitation preserving, boundary preserving,
+stable identity, version compatible, fail closed) present and
+internally sound.
 
-## Limitation Contract
+## Provenance Verification
 
-Limitations propagate without modification; snapshot-level limitations
-inherited unchanged, graph-level limitations additive only.
+Verified. Independently confirmed `source_attribution`,
+`verification_state`, and `limitations` are schema-level required
+fields on `graph_node`, `graph_edge`, and `dependency_claim` — not
+merely asserted by 126B's text.
 
-## Boundary Disclosure Contract
+## Determinism Verification
 
-Boundary disclosures propagate unchanged, including the frozen
-`dependency_knowledge_graph_snapshot_disclaimer` const string.
+Verified. No path exists in 126B's text for nondeterministic
+relationship creation.
 
-## Determinism Contract
+## Compatibility Verification
 
-Equivalent Repository Intelligence inputs must produce equivalent
-graph structure. No nondeterministic relationship creation; every
-edge traces to an explicit, deterministic derivation rule.
-
-## Compatibility Contract
-
-Remains compatible with Track 119 executable schemas, Track 120
-Repository Knowledge Snapshot, Track 121 Query Layer, Track 122
-Advisory Context, and Track 123 Change Impact — none modified by this
-contract.
+Verified, with clarification. Compatible with Tracks 119-123 and 125
+as explicitly stated or appropriately located. Track 124 informally
+referenced but not explicitly enumerated as a compatibility target
+(Finding 2).
 
 ## Governance Compatibility
 
-Observe-only runtime, deterministic behavior, auditability,
-explainability, reproducibility, and execution-unavailable boundary
-all preserved.
+Verified. Deterministic behavior, auditability, explainability,
+reproducibility, and execution-unavailable boundary all confirmed with
+concrete, checkable justifications.
+
+## Findings
+
+Three minor, non-blocking documentation completeness gaps:
+
+1. Edge-identifier (`edge_id`) stability not explicitly named
+   alongside node-identifier stability — implicitly covered by the
+   Determinism Contract's plural "identifiers."
+2. Track 124 not explicitly enumerated in the Compatibility Contract
+   despite being a natural source of reusable serialization/validation
+   helpers.
+3. `graph_completeness_state`, a named 126A architectural objective,
+   not re-frozen as its own explicit 126B requirement — implicitly
+   covered by the Provenance Contract's general honesty requirement.
+
+None required a contract amendment. All three carried forward as
+explicit recommendations for 126D.
+
+## Implementation Readiness Determination
+
+The contract is sufficient to begin 126D — Dependency Knowledge Graph
+Prototype Plan.
 
 ## Governance Results
 
@@ -87,12 +104,6 @@ all preserved.
 - **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **telegram_runtime:** configured and enabled after sourcing `~/.config/pcae/telegram.env`
-
-## Deferred Capabilities
-
-Graph builder, graph persistence, graph traversal, graph database,
-graph query engine, graph reasoning, dependency prediction, execution
-planning, execution capability.
 
 ## Confirmations
 
@@ -112,6 +123,6 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The Dependency Knowledge Graph contract is frozen and ready for
-independent verification. Recommended next phase: 126C - Dependency
-Knowledge Graph Contract Verification.
+The Dependency Knowledge Graph contract is independently verified and
+implementation-ready. Recommended next phase: 126D - Dependency
+Knowledge Graph Prototype Plan.
