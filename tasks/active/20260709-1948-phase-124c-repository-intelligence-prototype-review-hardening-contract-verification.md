@@ -106,7 +106,7 @@ advisory
 - pcae doctor task-memory
 - pcae push check
 - pcae runtime inspect
-- pcae notify status after sourcing ~/.config/pcae/telegram.env
+- source ~/.config/pcae/telegram.env && pcae notify status
 
 ## Documentation Requirements
 
