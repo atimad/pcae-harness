@@ -1,76 +1,69 @@
-# Phase 121C Complete - Repository Intelligence Query Contract Verification
+# Phase 121D Complete - Repository Intelligence Query Prototype Plan
 
-- **Phase ID:** `121C`
-- **Phase name:** Repository Intelligence Query Contract Verification
+- **Phase ID:** `121D`
+- **Phase name:** Repository Intelligence Query Prototype Plan
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_VERIFICATION.md`
+- **Plan document:** `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_PLAN.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Verification commit:** `0f6d182dabc61ea455528f95a239f55145328c7f`
-- **Task finish commit:** `f933f26b`
-- **Recommended next phase:** 121D - Repository Intelligence Query Prototype Plan
+- **Plan commit:** `0ef42dc01f41b8f1c12135a96adb572ad17eba52`
+- **Task finish commit:** `40a4cf076b24ac6fa421fdd4fb4ff5f34f222a63`
+- **Recommended next phase:** 121E - Repository Intelligence Read-Only Query Prototype
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Verification Summary
+## Implementation Planning Summary
 
-Independently verified the frozen 121B Repository Intelligence Query
-Contract for completeness, internal consistency, determinism,
-architectural alignment, governance compatibility, attribution
-preservation, boundary safety, failure behavior, versioning
-expectations, and readiness for 121D planning.
+Produced the definitive implementation plan for the first
+deterministic, read-only Repository Intelligence Query prototype over
+existing Repository Knowledge Snapshot artifacts. The first supported
+executable schema version is `119O.1.0-json-schema`.
 
-No contract corrections are required.
+No implementation occurred.
 
-## Contract Completeness Assessment
+## Planned Query Pipeline
 
-Verified. Every required 121B contractual section exists: purpose,
-relationship to 121A, relationship to Track 120, contract authority,
-implementation independence, scope, supported artifact sources, query
-request model, query result model, supported query categories,
-determinism, attribution, boundary, failure, governance, versioning,
-future extensibility, future phase sequencing, strict non-goals, known
-inherited issues, and acceptance.
+The planned ten-stage pipeline is:
 
-## Architectural Consistency Assessment
+1. Query request intake
+2. Request validation
+3. Snapshot loading
+4. Snapshot compatibility verification
+5. Query evaluation
+6. Attribution preservation
+7. Limitation propagation
+8. Boundary attachment
+9. Result assembly
+10. Result formatting
 
-Verified. The contract is consistent with 121A Query Layer architecture,
-Track 120 Repository Knowledge Snapshot boundaries, Track 119
-executable schemas, Repository Intelligence principles, and observe-only
-architecture. No architectural contradiction was found.
+The pipeline defines responsibilities only. It specifies no algorithms,
+classes, source files, commands, parsers, APIs, or runtime plugins.
 
-## Determinism Assessment
+## Planned Component Responsibilities
 
-Verified. Identical Repository Knowledge Snapshot plus identical query
-request must produce identical logical result. Randomness,
-probabilistic scoring, AI inference, semantic summarization,
-time-dependent result content, filesystem ordering, ambient runtime
-state, network calls, hidden mutable caches, and nondeterministic tie
-breaking remain prohibited.
+Planned conceptual components are Request Intake, Request Validation,
+Snapshot Access, Snapshot Compatibility, Query Evaluation, Attribution,
+Limitation and Unknown, Boundary, Result Assembly, and Result
+Formatting. Each component is defined by responsibility, inputs,
+outputs, and boundaries without prescribing classes, modules, source
+files, or command surfaces.
 
-## Attribution Assessment
+## Planned Verification Strategy
 
-Verified. Every returned content-bearing record must preserve artifact
-provenance and embedded Source Attribution Records where present.
-Missing attribution remains contract failure, and attribution cannot be
-removed by grouping, projection, or formatting.
-
-## Governance Compatibility Assessment
-
-Verified. The contract remains compatible with observe-only runtime,
-deterministic engineering, reproducibility, explainability,
-auditability, human-controlled lifecycle, and governed commit, push,
-report, and notification discipline.
+Phase 121F should verify deterministic results, attribution
+preservation, schema compatibility for `119O.1.0-json-schema`,
+governance compatibility, boundary preservation, fail-closed failure
+handling, read-only behavior, and regression safety.
 
 ## Implementation Readiness Assessment
 
-Verified for planning. The contract is sufficient for 121D planning,
-121E implementation within frozen boundaries, and 121F verification.
-Exact request representation, first supported schema version, artifact
-loading mechanism, result ordering convention, limitation/error result
-shape, and fixtures remain future implementation-planning details.
+Ready for 121E implementation within the frozen 121B contract and 121D
+plan. The implementation surface is deliberately narrow: Repository
+Knowledge Snapshot only, bounded structured requests only, read-only
+artifact consumption only, deterministic results only, and fail-closed
+behavior for invalid or unsupported inputs.
 
 ## Governance Results
 
@@ -84,7 +77,7 @@ shape, and fixtures remain future implementation-planning details.
 ## Test Results
 
 - **source_schema_test_diff:** no source, schema, or test code changed
-- **fast_green:** not run; documentation-only verification phase with no source/schema/test changes
+- **fast_green:** not run; documentation-only prototype-planning phase with no source/schema/test changes
 - **bootstrap_session_reporting_tests:** not applicable; no bootstrap/session reporting code changed
 - **report_notification_tests:** pending_final_telegram_delivery until final report dispatch
 
@@ -123,6 +116,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Repository Intelligence Query Contract is verified and ready for the
-next planning phase. Recommended next phase: 121D - Repository
-Intelligence Query Prototype Plan.
+The Repository Intelligence Query prototype plan is complete and ready
+for the first implementation phase. Recommended next phase: 121E -
+Repository Intelligence Read-Only Query Prototype.
