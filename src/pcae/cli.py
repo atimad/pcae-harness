@@ -503,6 +503,7 @@ from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.repository_intelligence import (
     run_repository_intelligence_change_impact,
+    run_repository_intelligence_dependency_graph_generate,
     run_repository_intelligence_query,
     run_repository_intelligence_snapshot_generate,
 )
@@ -4622,6 +4623,51 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ri_change_impact_parser.set_defaults(
         handler=run_repository_intelligence_change_impact
+    )
+
+    ri_dependency_graph_parser = repository_intelligence_subparsers.add_parser(
+        "dependency-graph",
+        help="Dependency Knowledge Graph generation.",
+    )
+    ri_dependency_graph_subparsers = ri_dependency_graph_parser.add_subparsers(
+        dest="repository_intelligence_dependency_graph_command",
+        required=True,
+    )
+
+    ri_dependency_graph_generate_parser = ri_dependency_graph_subparsers.add_parser(
+        "generate",
+        help=(
+            "Deterministically generate a schema-conformant Dependency "
+            "Knowledge Graph from an existing Repository Knowledge "
+            "Snapshot (read-only, no execution, no traversal, no "
+            "reasoning)."
+        ),
+    )
+    ri_dependency_graph_generate_parser.add_argument(
+        "--snapshot",
+        required=True,
+        help="Path to an existing Repository Knowledge Snapshot artifact.",
+    )
+    ri_dependency_graph_generate_parser.add_argument(
+        "--output",
+        default=None,
+        help=(
+            "Override the output directory (default: "
+            ".pcae/repository-intelligence/dependency-graph/)."
+        ),
+    )
+    ri_dependency_graph_generate_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Persist the generated graph as indented (pretty) JSON.",
+    )
+    ri_dependency_graph_generate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON generation metadata to stdout.",
+    )
+    ri_dependency_graph_generate_parser.set_defaults(
+        handler=run_repository_intelligence_dependency_graph_generate
     )
 
     architecture_parser = subparsers.add_parser(

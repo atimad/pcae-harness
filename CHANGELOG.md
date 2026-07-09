@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 126E - Dependency Knowledge Graph Prototype
+  (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_IMPLEMENTATION.md`).
+  Implements the first deterministic, read-only Dependency Knowledge
+  Graph Builder exactly as scoped by 126A-126D. Adds
+  `src/pcae/repository_intelligence/dependency_graph/` (graph builder,
+  independent validation, persistence reusing Track 124's
+  `serialize_deterministic_json`, top-level orchestration), consuming
+  Repository Intelligence exclusively through the Track 121 Query
+  Layer. Wires `pcae repository-intelligence dependency-graph
+  generate`. Verified end-to-end against a real generated Repository
+  Knowledge Snapshot: confirms the `entity_type`/`node_type`
+  translation table and the near-total absence of non-containment
+  edges (an inherited Track 120 limitation, not a defect). Two
+  independent runs against the same snapshot produce byte-identical
+  output except approved timestamps. Adds 38 focused tests. Track
+  120-124 regressions (72 tests) plus the new suite (38 tests) all
+  pass; fast_green 4390/4390. No schema modified; Tracks 119-124
+  unmodified. No graph traversal, reasoning, or execution capability
+  introduced; execution remains unavailable. Recommends 126F.
+
 - Phase 126D - Dependency Knowledge Graph Prototype Plan
   (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_PLAN.md`).
   Produces the definitive implementation plan for the first

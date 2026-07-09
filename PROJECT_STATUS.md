@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 126E — Dependency Knowledge Graph Prototype
+(completed).
+
+Implemented the first deterministic, read-only Dependency Knowledge
+Graph Builder exactly as scoped by 126A-126D
+(`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_IMPLEMENTATION.md`).
+Added `src/pcae/repository_intelligence/dependency_graph/` (graph
+builder, independent validation, persistence reusing Track 124's
+`serialize_deterministic_json`, and top-level orchestration), consuming
+Repository Intelligence exclusively through the Track 121 Query Layer.
+Wired a governed CLI command, `pcae repository-intelligence
+dependency-graph generate`. Verified end-to-end against a freshly
+generated real Repository Knowledge Snapshot: 126D's grounding
+predictions were empirically confirmed — the `entity_type`/`node_type`
+enum translation table produced exactly the expected mapping (`source_
+file` -> `file`, directory `module` entities -> `module` nodes), and
+the graph contained zero non-containment edges, confirming Track 120's
+own declared limitation (no import/symbol parsing) rather than a
+builder defect. Two independent generation runs against the same
+source snapshot produced byte-identical output except approved
+timestamps. Added 38 focused tests (deterministic generation, node/edge
+validation, duplicate-identifier rejection, fail-closed behavior across
+six failure categories, serialization determinism, persistence,
+schema-required-field conformance, no-traversal/no-reasoning/no-
+execution confirmation). Regression suites for Tracks 120-124 (72
+tests) plus the new suite (38 tests) all pass; fast_green: 4390/4390.
+No schema file was modified; Tracks 119-124 remain unmodified. No
+graph traversal, reasoning, or execution capability was introduced; no
+runtime behavior changed; execution remains unavailable.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 126F — Dependency Knowledge Graph
+Verification.
+
+## Phase 126E Complete
+
+Phase 126E — Dependency Knowledge Graph Prototype (completed).
+
+First real implementation phase of Track 126. Implemented a
+deterministic, read-only Dependency Knowledge Graph Builder consuming
+Repository Intelligence exclusively through the Query Layer, with a
+governed CLI command and 38 focused tests. Verified byte-deterministic
+across repeated runs against a real generated snapshot. Regression
+suites (Tracks 120-124) and fast_green all pass. No traversal,
+reasoning, or execution capability introduced; execution remains
+unavailable. Recommended next phase: 126F — Dependency Knowledge Graph
+Verification.
+
+## Phase 126D Complete
+
 Phase 126D — Dependency Knowledge Graph Prototype Plan
 (completed).
 

@@ -16,6 +16,10 @@ from pcae.repository_intelligence.change_impact import (
     build_change_impact_report,
     serialize_change_impact_report,
 )
+from pcae.repository_intelligence.dependency_graph import (
+    GraphGenerationError,
+    generate_dependency_graph,
+)
 from pcae.repository_intelligence.query import QueryExecutionError, QueryRequest
 from pcae.repository_intelligence.query.query_engine import execute_query
 from pcae.repository_intelligence.query.result_formatter import format_result
@@ -104,6 +108,40 @@ def run_repository_intelligence_change_impact(args: argparse.Namespace) -> int:
         print(f"  Attribution records:{len(data['attribution_bundle'])}")
         print(f"  Limitations:        {len(data['limitation_bundle'])}")
         print(f"  Unknowns:           {len(data['unknowns'])}")
+    return 0
+
+
+def run_repository_intelligence_dependency_graph_generate(args: argparse.Namespace) -> int:
+    repo_root = HarnessPath.cwd().path
+    snapshot_path = Path(args.snapshot)
+    output_dir = Path(args.output) if args.output else None
+
+    try:
+        result = generate_dependency_graph(
+            snapshot_path,
+            repo_root=repo_root,
+            output_dir=output_dir,
+            pretty=args.pretty,
+        )
+    except GraphGenerationError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print("Dependency Knowledge Graph generated")
+        print(f"  Artifact ID:          {result['artifact_id']}")
+        print(f"  Repository commit:    {result['repository_commit']}")
+        print(f"  Source snapshot:      {result['source_snapshot_path']}")
+        print(f"  Nodes:                {result['node_count']}")
+        print(f"  Edges:                {result['edge_count']}")
+        print(f"  Dependency claims:    {result['dependency_claim_count']}")
+        print(f"  Dependency sources:   {result['dependency_source_count']}")
+        print(f"  Unknown gaps:         {result['unknown_gap_count']}")
+        print(f"  Completeness state:   {result['graph_completeness_state']}")
+        print(f"  Latest graph:         {result['latest_path']}")
+        print(f"  Timestamped graph:    {result['graph_path']}")
     return 0
 
 
