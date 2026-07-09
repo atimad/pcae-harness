@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Governed commit recovery for Phase 123B (20260709-1417-governed-commit-recovery-for-phase-123b)
 - Phase 123B Repository Intelligence Change Impact Contract Freeze (20260709-1413-phase-123b-repository-intelligence-change-impact-contract-freeze)
 - Repair Phase 123A completion metadata (20260709-1359-repair-phase-123a-completion-metadata)
 - Phase 123A Repository Intelligence Change Impact Architecture (20260709-1357-phase-123a-repository-intelligence-change-impact-architecture)

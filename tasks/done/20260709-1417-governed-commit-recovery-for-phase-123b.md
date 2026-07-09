@@ -10,7 +10,7 @@ Governed commit recovery for Phase 123B
 
 ## Status
 
-active
+done
 
 ## Mode
 
