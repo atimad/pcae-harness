@@ -2,6 +2,36 @@
 
 ## Unreleased
 
+- Phase 123C - Repository Intelligence Change Impact Contract
+  Verification
+  (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_VERIFICATION.md`).
+  Independently verifies the frozen 123B Repository Intelligence
+  Change Impact Contract before implementation planning. Confirms every
+  required contract section exists; verifies architectural consistency
+  with 123A and Tracks 119-122; confirms deterministic, read-only,
+  Repository-Intelligence-consuming, descriptive-reporting scope;
+  verifies responsibility boundaries across Repository Intelligence,
+  Change Impact, Advisory, Repository State, Evidence, and Decision
+  Evaluation; verifies exclusive Track 121 Query Layer access and no
+  direct Repository Intelligence access; verifies the conceptual change
+  request and Change Impact Report models; verifies attribution,
+  limitation, boundary disclosure, determinism, fail-closed failure,
+  governance, and compatibility contracts; confirms readiness for 123D,
+  123E, and 123F. Records one implementation-planning clarification:
+  123D/123E must remain within current Query Layer capabilities unless
+  a future Track 121 contract amendment is explicitly introduced. No
+  contract modification was required. Carries forward inherited
+  lifecycle/tooling issues unchanged: 119Q report-generation-ordering
+  defect, 119AB phase-id comparison bug, recurring
+  `pending_final_telegram_delivery` reporting detail, GitHub
+  main-branch PR-rule bypass notification, and missing
+  `PCAE_NOTIFY_ENABLED` during governed push environment. Does not
+  implement a Change Impact engine, dependency graph traversal,
+  recommendations, Advisory reasoning, Decision Evaluation, Repository
+  Intelligence generation, repository scanning, runtime plugins,
+  execution planning, execution capability, source code, test code, or
+  schema changes. Recommends 123D.
+
 - Phase 123B - Repository Intelligence Change Impact Contract Freeze
   (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_FREEZE.md`).
   Freezes the canonical Repository Intelligence Change Impact Contract,

@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Treat Phase 123C as the independent verification phase for the 123B
+  Repository Intelligence Change Impact Contract: verify contract
+  completeness, architectural consistency against 123A and Tracks
+  119-122, deterministic/read-only/descriptive scope containment,
+  authority boundaries, Query Layer exclusivity, change request and
+  Change Impact Report concepts, attribution preservation, limitation
+  propagation, boundary disclosure preservation, determinism,
+  fail-closed failure handling, governance compatibility,
+  compatibility with prior Repository Intelligence tracks, future
+  readiness for 123D-123F, inherited issue handling, and strict
+  non-goals. Record one planning clarification: 123D/123E must remain
+  within current Query Layer capabilities unless a future Track 121
+  contract amendment is explicitly introduced. No contract defect was
+  found; no contract modification, implementation, source code change,
+  test code change, or schema change occurred. Recommended next phase:
+  123D - Repository Intelligence Change Impact Prototype Plan.
+
 - Treat Phase 123B as the contract-freeze phase for Repository
   Intelligence Change Impact: freeze the canonical contract binding for
   123C-123F, covering purpose, contract authority, implementation
