@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Treat Phase 121E as the first narrow implementation phase for the
+  Repository Intelligence Query Layer: implement deterministic,
+  read-only querying of existing Repository Knowledge Snapshot
+  artifacts only, with supported executable schema version
+  `119O.1.0-json-schema`. Support bounded structured query categories
+  for entity, capability, architectural contract, attribution,
+  limitation, and boundary lookup, plus the smallest CLI surface
+  `pcae repository-intelligence query`. Preserve attribution,
+  limitations, boundary disclosures, disclaimers, source metadata,
+  deterministic ordering, fail-closed compatibility, and read-only
+  behavior. Do not implement other Repository Intelligence artifact
+  family queries, query language/parser, graph traversal, dependency
+  reasoning, change impact reasoning, Advisory integration, repository
+  scanning, Repository Intelligence generation, runtime plugins, AI or
+  network integration, execution planning, or execution capability.
+  Recommended next phase: 121F - Repository Intelligence Query
+  Prototype Verification.
+
 - Treat Phase 121D as a documentation-only implementation-planning
   phase for the first Repository Intelligence Query prototype: plan
   deterministic, read-only querying of existing Repository Knowledge

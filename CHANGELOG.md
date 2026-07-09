@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 121E - Repository Intelligence Read-Only Query Prototype
+  (`src/pcae/repository_intelligence/query/`,
+  `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_IMPLEMENTATION.md`).
+  Implements the first deterministic read-only Query Layer prototype
+  over existing Repository Knowledge Snapshot artifacts only. Supports
+  executable schema version `119O.1.0-json-schema`, read-only snapshot
+  loading, compatibility verification, structured request validation,
+  deterministic exact lookup evaluation, attribution preservation,
+  limitation propagation, boundary disclosure/disclaimer propagation,
+  deterministic result assembly, and stable JSON formatting. Adds the
+  minimal CLI surface `pcae repository-intelligence query --snapshot`
+  with bounded target flags for entity, capability, contract,
+  attribution, limitations, and boundary lookup. Adds focused tests for
+  loading, schema compatibility, deterministic results, attribution,
+  limitations, boundaries, unsupported schema/query rejection, unknown
+  handling, repeated execution determinism, read-only file
+  preservation, fail-closed behavior, and CLI JSON output. Does not add
+  Historical Memory, Dependency Graph, Change Impact, or Advisory
+  queries; does not add a query language/parser, graph traversal,
+  dependency reasoning, change impact reasoning, repository scanning,
+  Repository Intelligence generation, runtime plugins, AI/network
+  integration, execution planning, execution capability, or runtime
+  behavior change. Recommends 121F.
+
 - Phase 121D - Repository Intelligence Query Prototype Plan
   (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_PLAN.md`).
   Documentation-only implementation-planning phase for the first

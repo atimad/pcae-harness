@@ -501,6 +501,7 @@ from pcae.commands.inspect import run_inspect
 from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.repository_intelligence import (
+    run_repository_intelligence_query,
     run_repository_intelligence_snapshot_generate,
 )
 from pcae.commands.session import (
@@ -4487,10 +4488,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     repo_apply_parser.set_defaults(handler=run_repo_apply)
 
-    # ── pcae repository-intelligence (Phase 120E) ────────────────────────
+    # ── pcae repository-intelligence (Phases 120E, 121E) ─────────────────
     repository_intelligence_parser = subparsers.add_parser(
         "repository-intelligence",
-        help="Read-only Repository Intelligence prototype (Phase 120E).",
+        help="Read-only Repository Intelligence prototypes.",
     )
     repository_intelligence_subparsers = repository_intelligence_parser.add_subparsers(
         dest="repository_intelligence_command",
@@ -4534,6 +4535,54 @@ def build_parser() -> argparse.ArgumentParser:
     ri_snapshot_generate_parser.set_defaults(
         handler=run_repository_intelligence_snapshot_generate
     )
+
+    ri_query_parser = repository_intelligence_subparsers.add_parser(
+        "query",
+        help="Deterministically query a Repository Knowledge Snapshot.",
+    )
+    ri_query_parser.add_argument(
+        "--snapshot",
+        required=True,
+        help="Path to an existing Repository Knowledge Snapshot artifact.",
+    )
+    ri_query_target_group = ri_query_parser.add_mutually_exclusive_group(required=True)
+    ri_query_target_group.add_argument(
+        "--entity",
+        help="Look up an architectural entity by exact id, name, or path.",
+    )
+    ri_query_target_group.add_argument(
+        "--capability",
+        help="Look up a capability by exact id or name.",
+    )
+    ri_query_target_group.add_argument(
+        "--contract",
+        help="Look up an architectural contract by exact id, name, or version.",
+    )
+    ri_query_target_group.add_argument(
+        "--attribution",
+        help="Return attribution for an entity, capability, or contract target.",
+    )
+    ri_query_target_group.add_argument(
+        "--limitations",
+        action="store_true",
+        help="Return snapshot limitation records.",
+    )
+    ri_query_target_group.add_argument(
+        "--boundary",
+        action="store_true",
+        help="Return snapshot boundary disclosures and disclaimers.",
+    )
+    ri_query_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON query result to stdout.",
+    )
+    ri_query_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Pretty-print JSON query result to stdout.",
+    )
+    ri_query_parser.set_defaults(handler=run_repository_intelligence_query)
 
     architecture_parser = subparsers.add_parser(
         "architecture",
