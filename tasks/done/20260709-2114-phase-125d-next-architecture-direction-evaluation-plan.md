@@ -10,7 +10,7 @@ Phase 125D Next Architecture Direction Evaluation Plan
 
 ## Status
 
-active
+done
 
 ## Mode
 
