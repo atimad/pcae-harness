@@ -2,40 +2,69 @@
 
 ## Current Phase
 
-Phase 122E — Repository Intelligence Advisory Context Prototype
+Phase 122F — Repository Intelligence Advisory Consumption Verification
 (completed).
 
-Implemented the first deterministic, read-only Advisory Context
-Builder, documented in
-`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONTEXT_PROTOTYPE_IMPLEMENTATION.md`.
-Added `src/pcae/advisory/context/` (`context_request.py`,
-`context_validation.py`, `advisory_context_builder.py`,
-`context_package.py`, `context_serializer.py`) and the CLI command
-`pcae advisory context build`. The builder consumes Repository
-Intelligence exclusively through the existing Track 121
-`execute_query` entry point, using only its six existing supported
-query categories; it never reads a Repository Knowledge Snapshot
-artifact directly, never reruns the Track 120 generator, and never
-scans the repository. Assembles a `RepositoryIntelligenceContextPackage`
-(selected Repository Intelligence, attribution bundle, limitation
-bundle, boundary disclosure bundle, context metadata) — structurally
-independent from the frozen 115W `AdvisoryContextPackage`, which this
-phase does not modify or place content into. Preserves attribution and
-limitations unchanged, propagates boundary disclosures plus a
-package-level non-authority disclaimer, and fails closed for invalid
-context request, invalid Query Layer result, missing attribution,
-missing boundary disclosure, unsupported schema version, and corrupted
-Repository Intelligence. Added 21 focused tests; Query Layer (15) and
-Repository Knowledge Snapshot (14) regression tests remain unaffected;
-full `fast_green` suite passed 4390/4390. No Advisory reasoning,
-recommendations, or Decision Evaluation integration were introduced.
+Independently verified the Phase 122E Repository Intelligence Advisory
+Context Builder prototype against the Phase 122A architecture, the
+Phase 122B frozen contract, the Phase 122C verification conclusions,
+and the Phase 122D prototype plan, documented in
+`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_VERIFICATION.md`.
+Verification re-derived the implementation independently from source:
+read every file in `src/pcae/advisory/context/`, grepped for
+subprocess/network/AI-provider usage (none found), independently
+re-executed context assembly ten times outside the existing test suite
+and confirmed logical equality, and confirmed no new top-level CLI
+command was introduced. **Found and repaired one genuine defect**:
+122E never implemented fail-closed handling for "missing limitation"
+(required by 122B S13 and 122D S12, and symmetric with the already-
+implemented missing-attribution and missing-boundary-disclosure
+checks) — added `ensure_limitation_present` to
+`context_validation.py`, wired it into the builder, and added one
+regression test. Confirmed Query Layer integration (exclusive
+`execute_query` access, no direct artifact access), context package
+completeness (five required elements), determinism (repeated execution
+logically identical excluding assembly timestamp), attribution and
+boundary disclosure preservation, and fail-closed behavior for all
+seven failure modes. Ran Advisory Context Builder tests (22 passed,
+including the new regression test), Query Layer regression tests (15
+passed), Repository Knowledge Snapshot regression tests (14 passed),
+and the full `fast_green` suite (4389 passed, 1 pre-existing failure
+independently confirmed unrelated to this phase via `git stash`
+against unmodified HEAD). No Advisory reasoning, recommendations,
+Decision Evaluation integration, or execution capability were
+introduced.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 122F — Repository Intelligence Advisory
-Consumption Verification.
+Recommended next repo phase: 123A — Repository Intelligence Change
+Impact Architecture.
+
+## Phase 122F Complete
+
+Phase 122F — Repository Intelligence Advisory Consumption Verification
+(completed).
+
+Independently verified the 122E Advisory Context Builder against 122A,
+122B, 122C, and 122D. Verified architecture conformance, contract
+conformance, prototype plan conformance, Query Layer integration
+(exclusive access, no direct artifact access), context package
+completeness, determinism, attribution preservation, boundary
+disclosure preservation, read-only guarantees, and regression suites.
+Found and repaired one genuine defect: missing-limitation fail-closed
+handling was planned (122D S12) and contractually required (122B S13)
+but never implemented in 122E — repaired with one validation function,
+one call site, and one regression test, mirroring the existing
+attribution/boundary pattern exactly; no scope expansion occurred.
+Advisory Context Builder tests (22 passed), Query Layer regression (15
+passed), Repository Knowledge Snapshot regression (14 passed), and
+`fast_green` (4389 passed, 1 pre-existing unrelated failure) all pass.
+No Advisory reasoning, recommendations, Decision Evaluation
+integration, or execution capability introduced. Runtime remains
+`Observed` / `observe` / execution unavailable. Recommended next
+phase: 123A — Repository Intelligence Change Impact Architecture.
 
 ## Phase 122E Complete
 

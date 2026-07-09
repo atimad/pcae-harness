@@ -239,6 +239,17 @@ def test_missing_attribution_on_content_record_fails_closed(tmp_path):
         build_advisory_context(broken, request)
 
 
+def test_missing_limitation_fails_closed(tmp_path):
+    path = _snapshot_path(tmp_path)
+    snapshot = _load_json(path)
+    snapshot["snapshot_limitations"] = []
+    broken = _write_snapshot(tmp_path, snapshot, "no-limitations.json")
+
+    request = AdvisoryContextRequest(category="boundary_lookup", advisory_purpose="x")
+    with pytest.raises(AdvisoryContextBuilderError):
+        build_advisory_context(broken, request)
+
+
 def test_missing_boundary_disclosure_fails_closed(tmp_path):
     path = _snapshot_path(tmp_path)
     snapshot = _load_json(path)

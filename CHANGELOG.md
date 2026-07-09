@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+- Phase 122F - Repository Intelligence Advisory Consumption
+  Verification
+  (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_VERIFICATION.md`).
+  Independently verifies the Phase 122E Advisory Context Builder
+  against the 122A architecture, 122B frozen contract, 122C
+  verification conclusions, and 122D prototype plan. Re-derives the
+  implementation from source: reads every file in
+  `src/pcae/advisory/context/`, greps for subprocess/network/AI-provider
+  usage (none found), independently re-executes context assembly ten
+  times and confirms logical equality, confirms no new top-level CLI
+  command. **Finds and repairs one genuine defect**: 122E never
+  implemented fail-closed handling for "missing limitation" (required
+  by 122B S13 and 122D S12, symmetric with the already-implemented
+  missing-attribution and missing-boundary-disclosure checks) — adds
+  `ensure_limitation_present` to
+  `src/pcae/advisory/context/context_validation.py`, wires it into
+  `advisory_context_builder.py`, and adds one regression test to
+  `tests/test_phase_122e_repository_intelligence_advisory_context.py`
+  (22 tests total, up from 21), mirroring the existing pattern exactly
+  with no scope expansion. Verifies Query Layer integration (exclusive
+  `execute_query` access), context package completeness (five required
+  elements), determinism, attribution/boundary disclosure preservation,
+  and fail-closed behavior for all seven failure modes. Runs Advisory
+  Context Builder tests (22 passed), Query Layer regression tests (15
+  passed), Repository Knowledge Snapshot regression tests (14 passed),
+  and the full `fast_green` suite (4389 passed, 1 pre-existing failure
+  independently confirmed unrelated via `git stash` against unmodified
+  HEAD). Does not implement Advisory reasoning, recommendations,
+  Decision Evaluation integration, Repository Intelligence generation,
+  repository scanning, graph traversal, dependency reasoning, change
+  impact reasoning, Historical Memory or Dependency Knowledge Graph
+  consumption, execution planning, or execution capability. Recommends
+  123A.
+
 - Phase 122E - Repository Intelligence Advisory Context Prototype
   (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONTEXT_PROTOTYPE_IMPLEMENTATION.md`).
   Implements the first deterministic, read-only Advisory Context

@@ -97,6 +97,23 @@ def ensure_attribution_present(
         )
 
 
+def ensure_limitation_present(limitations: list[dict[str, Any]]) -> None:
+    """Fail closed if the assembled limitation bundle would be
+    completely empty (122D S12, "missing limitation"). Every genuine
+    Repository Knowledge Snapshot always carries at least
+    snapshot-level limitations, propagated by the Query Layer into
+    every Query Result regardless of category (query_engine.py's
+    ``limitations = list(base_limitations)`` seed) -- an empty
+    limitation bundle indicates the assembly stage could not establish
+    that inherited limitations were carried forward, and the request
+    must fail closed rather than deliver a package with unverifiable
+    limitation coverage (122B S10/S13)."""
+    if not limitations:
+        raise AdvisoryContextValidationError(
+            "Query Layer result is missing required limitation records"
+        )
+
+
 def ensure_boundary_disclosure_present(
     boundary_disclosures: dict[str, Any], disclaimers: dict[str, Any]
 ) -> None:

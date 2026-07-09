@@ -13,6 +13,7 @@ from pcae.advisory.context.context_validation import (
     AdvisoryContextValidationError,
     ensure_attribution_present,
     ensure_boundary_disclosure_present,
+    ensure_limitation_present,
     validate_context_request,
     validate_query_result,
 )
@@ -84,6 +85,11 @@ def build_advisory_context(
 
     try:
         ensure_attribution_present(request.category, selected_records, attribution)
+    except AdvisoryContextValidationError as exc:
+        raise AdvisoryContextBuilderError(str(exc)) from exc
+
+    try:
+        ensure_limitation_present(limitations)
     except AdvisoryContextValidationError as exc:
         raise AdvisoryContextBuilderError(str(exc)) from exc
 

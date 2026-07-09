@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Treat Phase 122F as the independent verification phase for the 122E
+  Advisory Context Builder: verify architecture conformance (122A),
+  contract conformance (122B), prototype plan conformance (122D), Query
+  Layer integration, context package completeness, determinism,
+  attribution/limitation/boundary disclosure preservation, read-only
+  guarantees, and fail-closed behavior for all seven failure modes.
+  During verification, found that 122E never implemented fail-closed
+  handling for "missing limitation" despite it being required by 122B
+  S13 and planned by 122D S12, symmetric with the already-implemented
+  missing-attribution and missing-boundary-disclosure checks. Repaired
+  this single genuine defect (one validation function, one call site,
+  one regression test) without expanding scope. All regression suites
+  (Advisory Context Builder, Query Layer, Repository Knowledge
+  Snapshot, fast_green) pass, with one pre-existing, unrelated
+  fast_green failure independently confirmed via `git stash` against
+  unmodified HEAD. Recommended next phase: 123A - Repository
+  Intelligence Change Impact Architecture.
+
 - Treat Phase 122E as the first Track 122 implementation phase:
   implement a deterministic, read-only Advisory Context Builder under
   `src/pcae/advisory/context/`, consuming Repository Intelligence
