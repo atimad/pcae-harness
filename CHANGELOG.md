@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 125D - Next Architecture Direction Evaluation Plan
+  (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_EVALUATION_PLAN.md`).
+  Defines the structured evaluation process for determining PCAE's
+  next architectural chapter, operating inside the 125B contract and
+  125C verification without amending either. Defines an eight-stage
+  evaluation pipeline (candidate identification, architectural fit,
+  governance compatibility, dependency, risk, readiness, comparative
+  analysis, recommendation preparation) as responsibilities for 125E.
+  Defines ten measurable evaluation criteria and a five-category risk
+  methodology (technical, governance, maintenance, migration, future
+  compatibility). Requires Repository Intelligence compatibility and
+  execution-boundary preservation for every candidate. Explicitly
+  distinguishes recommendation preparation (assembling evidence) from
+  decision (selecting a candidate). Defines a verification strategy for
+  a future phase to confirm evaluation objectivity, reproducibility,
+  and governance compliance. No architectural direction was selected.
+  No implementation, prototype, or runtime behavior change occurred.
+  Recommends 125E.
+
 - Phase 125C - Next Architecture Direction Contract Verification
   (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_VERIFICATION.md`).
   Independently verifies the Phase 125B decision contract against

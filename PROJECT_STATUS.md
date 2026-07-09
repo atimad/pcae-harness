@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 125D — Next Architecture Direction Evaluation Plan
+(completed).
+
+Defined the structured evaluation process for determining PCAE's next
+architectural chapter in
+`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_EVALUATION_PLAN.md`,
+operating inside the 125B contract and its 125C verification without
+amending either. Defines an eight-stage evaluation pipeline (candidate
+identification, architectural fit assessment, governance compatibility
+assessment, dependency assessment, risk assessment, readiness
+assessment, comparative analysis, recommendation preparation) as
+responsibilities for 125E, not decisions made by 125D. Defines ten
+measurable evaluation criteria (governance compatibility, architectural
+cohesion, determinism, explainability, auditability, reproducibility,
+maintainability, safety, implementation complexity, future
+extensibility) and a five-category risk methodology (technical,
+governance, maintenance, migration, future compatibility). Requires
+every candidate to preserve Repository Intelligence compatibility
+unless an explicit governed supersession is proposed, and to remain
+evaluable and initially implementable without requiring the execution
+boundary to change. Explicitly distinguishes "recommendation
+preparation" (assembling evidence) from "decision" (selecting a
+candidate), keeping the two separately governed acts per the 125B
+contract. Defines a verification strategy for a future phase to
+confirm evaluation objectivity, reproducibility, and governance
+compliance. No architectural direction was selected. No implementation,
+prototype, or runtime behavior change occurred.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 125E — Next Architecture Direction
+Evaluation.
+
+## Phase 125D Complete
+
+Phase 125D — Next Architecture Direction Evaluation Plan (completed).
+
+Defined the eight-stage evaluation pipeline, ten evaluation criteria,
+five-category risk methodology, Repository Intelligence compatibility
+strategy, and verification strategy that 125E will use to evaluate
+candidate architectural directions. No candidate selected; no
+implementation, prototype, or runtime behavior change occurred.
+Recommended next phase: 125E — Next Architecture Direction Evaluation.
+
+## Phase 125C Complete
+
 Phase 125C — Next Architecture Direction Contract Verification
 (completed).
 
