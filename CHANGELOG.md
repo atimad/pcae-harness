@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 124D - Repository Intelligence Prototype Review & Hardening
+  Plan
+  (`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_PLAN.md`).
+  Documentation-only planning phase for Track 124. Defines the
+  definitive implementation plan for bounded Repository Intelligence
+  hardening across Repository Knowledge Snapshot, Query Layer,
+  Advisory Context Builder, and Change Impact Builder. Defines the
+  hardening objective, scope, planned review pipeline, planned
+  hardening categories, implementation boundaries, Track 120-123
+  regression strategy, 124E acceptance criteria, 124F verification
+  strategy, risk assessment and mitigations, technical debt
+  considerations, deferred capabilities, inherited issue handling,
+  strict non-goals, governance compatibility, and implementation
+  readiness. Does not implement hardening, new Repository Intelligence
+  capabilities, new artifact families, Dependency Knowledge Graph
+  expansion, Historical Memory expansion, Advisory reasoning, Decision
+  Evaluation, execution planning, execution capability, runtime
+  plugins, source code, test code, or schema changes. Recommends 124E.
+
 - Phase 124C - Repository Intelligence Prototype Review & Hardening
   Contract Verification
   (`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_CONTRACT_VERIFICATION.md`).

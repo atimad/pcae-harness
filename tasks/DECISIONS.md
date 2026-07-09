@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Treat Phase 124D as the documentation-only implementation-planning
+  phase for Repository Intelligence Prototype Review & Hardening:
+  define a bounded 124E plan for behavior-preserving consistency and
+  maintainability improvements across Repository Knowledge Snapshot,
+  Query Layer, Advisory Context Builder, and Change Impact Builder.
+  Preserve deterministic outputs, schemas, CLI compatibility, public
+  interfaces, attribution, limitations, boundary disclosures,
+  governance semantics, read-only behavior, fail-closed behavior,
+  observe-only runtime, and execution-unavailable posture. Require
+  regression validation across Tracks 120-123 and independent 124F
+  verification. Do not implement hardening, new Repository Intelligence
+  capabilities, new artifact families, Dependency Knowledge Graph
+  expansion, Historical Memory expansion, Advisory reasoning, Decision
+  Evaluation, execution planning, execution capability, runtime
+  plugins, source code changes, test code changes, or schema changes.
+  Recommended next phase: 124E - Repository Intelligence Prototype
+  Review & Hardening Implementation.
+
 - Treat Phase 124C as the independent verification phase for the
   frozen 124B Repository Intelligence Prototype Review & Hardening
   Contract: verify contract completeness, architectural consistency

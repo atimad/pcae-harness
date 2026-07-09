@@ -2,37 +2,50 @@
 
 ## Current Phase
 
-Phase 124C — Repository Intelligence Prototype Review & Hardening
-Contract Verification
+Phase 124D — Repository Intelligence Prototype Review & Hardening
+Plan
 (completed).
 
-Independently verified the Phase 124B Repository Intelligence
-Prototype Review & Hardening Contract in
-`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_CONTRACT_VERIFICATION.md`.
-Confirmed the contract is complete, internally consistent,
-deterministic, architecturally aligned with 124A and Tracks 119-123,
-governance compatible, and ready for bounded hardening planning.
-Verified contract completeness; architectural consistency; review,
-consistency, and hardening scope; hardening responsibility boundaries;
-cross-track consistency for metadata, artifact structure, provenance,
-limitations, boundary disclosures, deterministic behavior, version
-compatibility, and failure semantics; determinism; attribution;
-limitation propagation; boundary disclosures; serialization
-compatibility; fail-closed behavior; governance compatibility;
-technical debt classification; inherited issue handling; strict
-non-goals; and readiness for 124D-124F. No contract modification,
-implementation hardening, new Repository Intelligence capability,
-artifact family, Dependency Knowledge Graph expansion, Historical
-Memory expansion, Advisory reasoning, Decision Evaluation, execution
-planning, execution capability, runtime plugin, source code change,
-test code change, or schema change occurred.
+Defined the definitive implementation plan for Repository Intelligence
+Prototype Review & Hardening in
+`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_PLAN.md`.
+The plan preserves the verified 124B contract and scopes 124E to
+behavior-preserving consistency and maintainability improvements only
+across Repository Knowledge Snapshot, Repository Intelligence Query
+Layer, Advisory Context Builder, and Change Impact Builder. It defines
+the planned review pipeline, hardening categories, implementation
+boundaries, Track 120-123 regression strategy, 124E acceptance
+criteria, 124F verification strategy, risk mitigations, technical debt
+considerations, deferred capabilities, inherited issue handling, and
+strict non-goals. No implementation hardening, new Repository
+Intelligence capability, artifact family, Dependency Knowledge Graph
+expansion, Historical Memory expansion, Advisory reasoning, Decision
+Evaluation, execution planning, execution capability, runtime plugin,
+source code change, test code change, or schema change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 124D — Repository Intelligence Prototype
-Review & Hardening Plan.
+Recommended next repo phase: 124E — Repository Intelligence Prototype
+Review & Hardening Implementation.
+
+## Phase 124D Complete
+
+Phase 124D — Repository Intelligence Prototype Review & Hardening Plan
+(completed).
+
+Produced the definitive implementation plan for bounded Repository
+Intelligence hardening. The plan defines the hardening objective,
+scope, planned review pipeline, hardening categories, implementation
+boundaries, regression strategy across Tracks 120-123, measurable 124E
+acceptance criteria, 124F verification strategy, risk assessment and
+mitigations, technical debt considerations, deferred capabilities,
+known inherited issue handling, strict non-goals, governance
+compatibility, and implementation readiness. The plan authorizes only
+behavior-preserving consistency and maintainability work in 124E. No
+implementation occurred. Recommended next phase: 124E — Repository
+Intelligence Prototype Review & Hardening Implementation.
 
 ## Phase 124C Complete
 
