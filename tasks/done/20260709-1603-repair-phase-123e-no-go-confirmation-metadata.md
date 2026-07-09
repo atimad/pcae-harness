@@ -10,7 +10,7 @@ Repair Phase 123E no-go confirmation metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
