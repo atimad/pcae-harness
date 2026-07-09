@@ -1,99 +1,90 @@
-# Phase 125E Complete - Next Architecture Direction Evaluation
+# Phase 125F Complete - Next Architecture Direction Decision Review
 
-- **Phase ID:** `125E`
-- **Phase name:** Next Architecture Direction Evaluation
+- **Phase ID:** `125F`
+- **Phase name:** Next Architecture Direction Decision Review
 - **Status:** completed
 - **Report completeness:** complete
-- **Evaluation document:** `docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_EVALUATION.md`
+- **Decision document:** `docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_DECISION_REVIEW.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Evaluation commit:** `919a1be6`
-- **Task finish commit:** `a1d98eb4`
-- **Recommended next phase:** 125F - Next Architecture Direction Decision Review
+- **Decision review commit:** `ff4218ce`
+- **Task finish commit:** `367478b8`
+- **Recommended next phase:** 126A - Dependency Knowledge Graph Architecture
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Evaluation Summary
+## Decision Review Summary
 
-Executed the 125D evaluation methodology against all six recognized
-candidate architectural directions: Historical Memory, Dependency
-Knowledge Graph, Repository Intelligence expansion, Decision Evaluation
-support, Execution Planning, Permission Broker evolution. Produced an
-evidence-based comparative assessment grounded in direct inspection of
-governed sources, including previously-uncatalogued existing subsystems
-(`src/pcae/core/decision_evaluation.py`,
-`src/pcae/core/permission_broker.py`).
+Performed the formal architectural decision review for PCAE's next
+chapter, using the complete evidence chain from 125A (Repository
+Intelligence chapter review), 125B (decision contract), 125C (contract
+verification), 125D (evaluation plan), and 125E (candidate evaluation).
+**Selected Dependency Knowledge Graph as the next architectural chapter
+(Track 126).**
 
-## Candidate Assessments
+## Evidence Reviewed
 
-- **Historical Memory**: high architectural fit, low-medium overall
-  risk, frozen schema (119Q/119R), high strategic value (fills
-  temporal gap).
-- **Dependency Knowledge Graph**: high architectural fit, medium
-  overall risk (existing graph-disclaimer must be reconciled), frozen
-  schema (119S/119T), high strategic value (direct Change Impact gap
-  closure).
-- **Repository Intelligence expansion**: high but narrow fit, low
-  risk, highest technical readiness, low strategic value (no
-  identified consumer need).
-- **Decision Evaluation support**: medium fit, highest governance risk
-  of any candidate, medium technical readiness (mature target subsystem
-  115E, unbuilt integration surface), high strategic value if bounded
-  correctly.
-- **Execution Planning**: low fit (tension with execution-unavailable
-  boundary), high risk, lowest technical readiness, low strategic value
-  under current constraints.
-- **Permission Broker evolution**: low-medium fit (mature target
-  subsystem 88R, no defined use case), medium risk, low readiness
-  (purpose undefined), unclear strategic value.
+125A's chapter review, 125B's decision contract, 125C's independent
+contract verification, 125D's evaluation methodology, and 125E's
+evidence-based candidate evaluation grounded in direct inspection of
+governed sources including previously-uncatalogued existing subsystems.
 
-## Comparative Analysis
+## Candidate Comparison
 
-Historical Memory and Dependency Knowledge Graph carry the strongest
-combined readiness and strategic value. Decision Evaluation support has
-real strategic upside but the highest governance risk, since it is the
-only candidate touching PCAE's actual decision-authority boundary.
-Repository Intelligence expansion is safest to execute but weakest
-justified. Execution Planning and Permission Broker evolution both
-have unresolved preconditions. No winner declared; no implementation
-recommended.
+Six candidates compared: Historical Memory, Dependency Knowledge Graph,
+Repository Intelligence expansion, Decision Evaluation support,
+Execution Planning, Permission Broker evolution. 125E identified
+Historical Memory and Dependency Knowledge Graph as the two strongest
+candidates without ranking between them; this phase resolved that
+remaining choice.
 
-## Governance Compatibility Assessment
+## Selected Next Chapter
 
-All six candidates preserve observe-first philosophy in their
-unimplemented form. Five of six can be pursued without any
-execution-boundary change; Execution Planning's premise is in direct
-tension with that boundary. Deterministic engineering, auditability,
-reproducibility, and explainability are compatible for all six in
-principle, with varying implementation difficulty.
+**Track 126 — Dependency Knowledge Graph.**
 
-## Repository Intelligence Compatibility Assessment
+## Selection Rationale
 
-Historical Memory, Dependency Knowledge Graph, and Repository
-Intelligence expansion are direct additions, fully compatible with
-125B's addition-not-modification requirement. Decision Evaluation
-support and Permission Broker evolution would consume via the existing
-Query Layer/Advisory Context path without requiring any Repository
-Intelligence file to change. Execution Planning has no meaningful
-Repository Intelligence relationship.
+Justified against all 10 required criteria. Key drivers: frozen and
+independently verified schema (119S/119T); the strongest concretely-
+evidenced strategic value of any candidate (a named, already-built
+consumer — Track 123's Change Impact Builder — with a named,
+already-identified limitation: its current flat entity model); and a
+well-scoped, single-item precondition (reconciling the existing
+`graph_generation_method_disclosure` schema disclaimer) rather than an
+open-ended design question, unlike Historical Memory's broader
+source-boundary discipline question.
 
-## Strategic Observations
+## Deferred Alternatives
 
-Direct inspection of `decision_evaluation.py` and `permission_broker.py`
-surfaced that two candidates are "connect to an already-mature
-subsystem" propositions rather than "build from nothing" propositions,
-changing their risk profile from a purely document-level review.
-Execution Planning remains structurally different from every other
-candidate: its blocker is a standing PCAE constraint, not absent
-infrastructure.
+- Historical Memory — leading deferred alternative; lowest overall risk
+  among the two frozen-schema-ready candidates.
+- Repository Intelligence expansion — lowest risk, but no identified
+  consumer need.
+- Decision Evaluation support — highest strategic upside, highest
+  governance risk; touches PCAE's actual decision-authority boundary.
+- Execution Planning — blocked by direct tension with the
+  execution-unavailable boundary itself.
+- Permission Broker evolution — mature target subsystem, no defined
+  use case yet.
 
-## Risk Assessment
+## Roadmap Update
 
-Five categories assessed per candidate (technical, governance,
-maintenance, migration, future compatibility). Decision Evaluation
-support and Execution Planning carry the highest governance risk;
-Repository Intelligence expansion carries the lowest overall risk.
+Track 126 (Dependency Knowledge Graph) is now the active next chapter.
+Historical Memory remains the leading candidate for a subsequent
+chapter. Repository Intelligence expansion, Decision Evaluation
+support, Execution Planning, and Permission Broker evolution remain
+deferred per 125A's original sequencing logic, now with explicit
+preconditions named.
+
+## Boundary Confirmation
+
+- No implementation occurs in 125F.
+- Execution remains unavailable.
+- Runtime remains observe-only.
+- Repository Intelligence remains stable.
+- Decision Evaluation authority is unchanged.
+- Advisory authority is unchanged.
 
 ## Governance Results
 
@@ -106,7 +97,6 @@ Repository Intelligence expansion carries the lowest overall risk.
 
 ## Confirmations
 
-- No architectural direction selected.
 - No implementation occurred.
 - No runtime behavior changed.
 - Execution remains unavailable.
@@ -123,6 +113,5 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The Next Architecture Direction Evaluation is complete and ready for
-125F's independent review. Recommended next phase: 125F - Next
-Architecture Direction Decision Review.
+The next architectural chapter has been selected. Recommended next
+phase: 126A - Dependency Knowledge Graph Architecture.
