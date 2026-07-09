@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Treat Phase 121C as a documentation-only independent verification of
+  the frozen Repository Intelligence Query Contract: verify contract
+  completeness, architectural consistency, scope, conceptual request
+  and result models, supported query categories, determinism,
+  attribution preservation, boundary exclusions, fail-closed failure
+  behavior, governance compatibility, versioning expectations, and
+  future phase readiness before implementation planning. No contract
+  modifications are required. Record one future planning clarification:
+  121D should choose the exact first supported Repository Knowledge
+  Snapshot schema version. Do not implement a query engine, parser,
+  query language, CLI, REST/API, Python models, validators, runtime
+  plugins, Repository Intelligence generation, repository scanning,
+  graph traversal, dependency analysis, change impact analysis,
+  Advisory integration, execution planning, or execution capability.
+  Recommended next phase: 121D - Repository Intelligence Query
+  Prototype Plan.
+
 - Treat Phase 121B as a documentation-only contract freeze for the
   Repository Intelligence Query Layer: freeze deterministic, read-only,
   artifact-consuming, observe-only access to existing Repository

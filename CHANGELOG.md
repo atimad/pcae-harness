@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 121C - Repository Intelligence Query Contract Verification
+  (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_VERIFICATION.md`).
+  Documentation-only verification phase independently verifying the
+  frozen 121B Repository Intelligence Query Contract before
+  implementation planning. Confirms the contract is complete,
+  internally consistent, deterministic, architecturally aligned with
+  121A, compatible with the Track 120 Repository Knowledge Snapshot and
+  Track 119 executable schema line, governance compatible, and ready
+  for 121D planning. Verifies request/result models, bounded query
+  categories, determinism, attribution preservation, boundary
+  exclusions, fail-closed behavior, versioning expectations, and future
+  phase readiness. No contract modifications were required. Records one
+  121D planning clarification: choose the exact first supported
+  Repository Knowledge Snapshot schema version. No query engine,
+  parser, language, CLI, REST/API, Python model, validator, runtime
+  plugin, repository scanner, Repository Intelligence generation, graph
+  traversal, dependency analysis, change impact analysis, Advisory
+  integration, execution planning, execution capability, source code,
+  schema, or test change. Recommends 121D.
+
 - Phase 121B - Repository Intelligence Query Contract Freeze
   (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_FREEZE.md`).
   Documentation-only contract-freeze phase making the Repository
