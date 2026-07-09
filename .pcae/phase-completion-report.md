@@ -1,68 +1,98 @@
-# Phase 124F Complete - Repository Intelligence Prototype Review & Hardening Verification
+# Phase 125A Complete - Repository Intelligence Chapter Review & Next Direction Architecture
 
-- **Phase ID:** `124F`
-- **Phase name:** Repository Intelligence Prototype Review & Hardening Verification
+- **Phase ID:** `125A`
+- **Phase name:** Repository Intelligence Chapter Review & Next Direction Architecture
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_VERIFICATION.md`
+- **Architecture document:** `docs/PHASE_125_REPOSITORY_INTELLIGENCE_CHAPTER_REVIEW_AND_NEXT_DIRECTION_ARCHITECTURE.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Verification commit:** `8c92ef62`
-- **Task finish commit:** `88e56fc7`
-- **Recommended next phase:** 125A - Repository Intelligence Chapter Review & Next Direction Architecture
+- **Architecture commit:** `9128684e`
+- **Task finish commit:** `98f31acc`
+- **Recommended next phase:** 125B - Next Architecture Direction Contract Freeze
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Verification Summary
+## Chapter Review Summary
 
-Independently verified the Phase 124E Repository Intelligence
-hardening implementation against 124A architecture, 124B contract, and
-124D plan. Verification re-derived findings from source: every file in
-the 124A-124E diff footprint was read and diffed directly against its
-pre-hardening form, the shared serialization and consumer-validation
-helpers were probed independently at runtime, and all recorded
-regression and governance results were independently re-executed
-rather than trusted from the 124E report.
+Performed a chapter-level architectural review of the complete
+Repository Intelligence subsystem (Tracks 119-124), closing out
+Repository Intelligence Version 1. Track 119 froze a twenty-schema
+executable vocabulary (eight artifact families, only Repository
+Knowledge Snapshot ever implemented). Track 120 built the one real
+deterministic generator. Track 121 built the exclusive read-only Query
+Layer. Tracks 122 and 123 built two symmetric sibling consumers
+(Advisory Context Builder, Change Impact Builder). Track 124 hardened
+and independently verified the whole pipeline with zero behavior
+drift.
 
-Outcome: verified with no functional modifications required. No
-genuine defect was found.
+## Architectural Achievements
 
-## Verification Areas
+- Complete, independently verified, twenty-schema executable
+  vocabulary.
+- One real, deterministic, source-attributed, read-only generator
+  (Repository Knowledge Snapshot).
+- One exclusive, deterministic, fail-closed read-only Query Layer.
+- Two symmetric Query Layer consumers proving the sibling-consumer
+  pattern generalizes.
+- Demonstrated hardening/verification discipline (Track 124) with zero
+  behavior drift.
+- Stable terminology held across six tracks without renaming.
+- Coherent, fail-closed CLI surface.
+- Zero runtime/execution/Advisory-authority expansion across the whole
+  chapter.
 
-- Architecture conformance: verified against 124A.
-- Contract conformance: verified against 124B.
-- Plan conformance: verified against 124D.
-- Behavior preservation: verified by direct diff of all seven changed
-  source files.
-- Determinism: verified by direct runtime probe and regression
-  re-execution.
-- Schema compatibility: verified — no schema files changed across the
-  full 124A-124E diff range.
-- CLI compatibility: verified — `pcae repository-intelligence --help`
-  unchanged.
-- Public interface compatibility: verified — all serializer/validator
-  signatures unchanged.
-- Attribution: verified by direct diff and runtime probe.
-- Limitation propagation: verified by direct diff and runtime probe.
-- Boundary disclosure propagation: verified by direct diff and runtime
-  probe.
-- Serialization: verified — deterministic, sorted-key output confirmed
-  by direct probe.
-- Failure behavior: verified — fail-closed behavior confirmed intact
-  by direct probe; no fail-open path introduced.
+## Architectural Gaps
 
-## Regression Results
+Historical Memory expansion; Dependency Knowledge Graph expansion;
+five other unimplemented Track 119 schema families (Historical Memory
+Snapshot, Dependency Knowledge Graph Snapshot, Advisory Intelligence
+Context Package, persisted Query Result, Repository Intelligence
+Package); Advisory reasoning; Decision Evaluation integration;
+execution planning; execution capability.
 
-- Repository Knowledge Snapshot regression: 14 passed.
-- Query Layer regression: 15 passed.
-- Advisory Context Builder regression: 22 passed.
-- Change Impact Builder plus 124E hardening tests: 21 passed.
-- Combined: 72 passed.
-- Fast-green: 4390 passed on final run (an initial run showed one
-  unrelated failure outside the Track 124 diff footprint, tied to idle
-  task-lifecycle state; resolved once this phase's own task contract
-  existed — not a Track 124 regression).
+## Maturity Assessment
+
+Mature (implemented slice) on determinism, governance, explainability,
+attribution, limitation propagation, and boundary disclosures.
+Improving/recently-exercised on maintainability. Reproducibility mature
+for the one generated artifact family; untested for the seven
+unimplemented families. No maturity signal yet for the unimplemented
+slice overall.
+
+## Readiness Assessment
+
+Structurally ready to build upon: frozen schema vocabulary needing no
+re-architecture, proven generator pattern, proven extensible Query
+Layer, proven sibling-consumer pattern, demonstrated hardening
+discipline. Not capability-complete.
+
+## Future Direction Evaluation
+
+Six candidates evaluated (Historical Memory, Dependency Knowledge
+Graph, richer Repository Intelligence, Decision Evaluation support,
+Execution Planning, Permission Broker evolution). No implementation
+path selected. Dependency Knowledge Graph recommended as the suggested
+first 125B evaluation candidate based on highest architectural fit
+combined with well-understood, schema-disclaimed governance risk.
+
+## Governance Compatibility
+
+- Observe-only runtime preserved.
+- Execution unavailable preserved.
+- Governance-first philosophy preserved.
+- Governed lifecycle/commit/push commands used throughout; no raw git
+  commit/push, force push, or `--no-verify`.
+
+## Confirmations
+
+- No implementation occurred.
+- No prototype occurred.
+- No runtime behavior changed.
+- Execution remains unavailable.
+- No new Repository Intelligence capability was introduced.
+- No implementation path was selected among evaluated candidates.
 
 ## Governance Results
 
@@ -72,26 +102,6 @@ genuine defect was found.
 - **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **telegram_runtime:** configured and enabled after sourcing `~/.config/pcae/telegram.env`
-
-## Capability Boundary Confirmations
-
-- No new Repository Intelligence capability was introduced.
-- No runtime behavior changed.
-- No execution capability was introduced.
-- Runtime remains observe-only.
-- No new artifact family was introduced.
-- No Dependency Knowledge Graph expansion occurred.
-- No Historical Memory expansion occurred.
-- No Advisory reasoning occurred.
-- No recommendations were introduced.
-- No Decision Evaluation occurred.
-- No Repository Intelligence generation changes occurred.
-- No Query Layer capability changes occurred.
-- No Change Impact capability changes occurred.
-- No execution planning was introduced.
-- No runtime plugins were introduced.
-- No AI provider integration occurred.
-- No network access was introduced.
 
 ## Inherited Issues
 
@@ -103,20 +113,8 @@ Carried forward unchanged and not repaired:
 - GitHub main-branch PR-rule bypass notification: repository hosting policy reporting detail.
 - Missing `PCAE_NOTIFY_ENABLED` during governed push environment: notification environment detail.
 
-Newly observed and classified, not added to Track 124 hardening scope:
-
-- `test_pytest_dry_run_not_blocked` transient fast_green failure on
-  first run: task-lifecycle-state-dependent, resolved on final run,
-  not a Track 124 regression, not repaired.
-
-## Defects Found
-
-None.
-
 ## Readiness
 
-Repository Intelligence hardening (Track 124) is independently
-verified and complete. No repair was required or performed.
-
-Recommended next phase: 125A - Repository Intelligence Chapter Review
-& Next Direction Architecture.
+Repository Intelligence Version 1 (Tracks 119-124) chapter review is
+complete. Recommended next phase: 125B - Next Architecture Direction
+Contract Freeze.
