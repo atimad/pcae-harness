@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- Treat Phase 123B as the contract-freeze phase for Repository
+  Intelligence Change Impact: freeze the canonical contract binding for
+  123C-123F, covering purpose, contract authority, implementation
+  independence, architectural relationships, Change Impact permitted
+  and prohibited responsibilities, Track 121 Query Layer exclusive
+  access, change request concepts, Change Impact Report concepts,
+  attribution preservation, limitation propagation, boundary disclosure
+  preservation, determinism, fail-closed failure handling, governance
+  compatibility, compatibility with Tracks 119-122, deferred
+  capabilities, known inherited issues, and strict non-goals. Introduce
+  no implementation, source code change, test code change, or schema
+  change. Recommended next phase: 123C - Repository Intelligence Change
+  Impact Contract Verification.
+
 - Treat Phase 123A as the architecture-only phase opening Track 123:
   define Change Impact as a Repository Intelligence capability that
   identifies affected repository entities from existing Repository

@@ -2,41 +2,55 @@
 
 ## Current Phase
 
-Phase 123A — Repository Intelligence Change Impact Architecture
+Phase 123B — Repository Intelligence Change Impact Contract Freeze
 (completed).
 
-Defined the architecture for deterministic Repository Intelligence
-Change Impact analysis, documented in
-`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_ARCHITECTURE.md`.
-Change Impact identifies affected repository entities from existing
-Repository Intelligence, exclusively through the Track 121 Query
-Layer, without recommendations or decision making. Defines an
-eight-stage pipeline (change request, Repository Intelligence query,
-impact candidate identification, attribution preservation, limitation
-propagation, boundary disclosure propagation, Change Impact Report
-assembly, report delivery); the change request model (requested
-change, target entities, repository scope, evaluation scope); the
-Change Impact Report model (impacted entities, impact relationships,
-attribution bundle, limitation bundle, boundary disclosure bundle,
-report metadata); attribution/limitation/boundary architecture;
-determinism architecture; governance architecture; and fail-closed
-failure architecture for missing Repository Intelligence, unsupported
-snapshot version, invalid change request, unsupported entity, missing
-attribution, missing limitations, and missing boundary disclosures.
-Defines relationships to Track 119 executable schemas, Track 120
-Repository Knowledge Snapshot, Track 121 Query Layer, Track 122
-Advisory Context Builder, Repository State, Evidence, Decision
-Evaluation, and Advisory Runtime. Change Impact identifies impacted
-entities; it must never replace Advisory reasoning or Decision
-Evaluation. No implementation, source code, test code, or schema
-change occurred.
+Froze the canonical Repository Intelligence Change Impact Contract,
+documented in
+`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_FREEZE.md`.
+The contract is binding for 123C, 123D, 123E, and 123F. It governs
+deterministic identification of potentially affected repository
+entities from existing Repository Intelligence, exclusively through the
+Track 121 read-only Query Layer, while preserving attribution,
+limitations, boundary disclosures, governance boundaries,
+determinism, auditability, reproducibility, and execution-unavailable
+runtime posture. Defines architectural relationships to Repository
+Knowledge Snapshot, Query Layer, Advisory Context Builder, Change
+Impact Report, Repository State, Evidence, Decision Evaluation, and
+Runtime; the Change Impact responsibility contract; query contract;
+change request contract; Change Impact Report contract; attribution,
+limitation, boundary disclosure, determinism, failure, governance, and
+compatibility contracts; deferred capabilities; known inherited issues;
+and strict non-goals. No Change Impact engine, dependency graph
+traversal, recommendations, Advisory reasoning, Decision Evaluation,
+Repository Intelligence generation, repository scanning, runtime
+plugins, execution planning, execution capability, source code, test
+code, or schema change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 123B — Repository Intelligence Change
-Impact Contract Freeze.
+Recommended next repo phase: 123C — Repository Intelligence Change
+Impact Contract Verification.
+
+## Phase 123B Complete
+
+Phase 123B — Repository Intelligence Change Impact Contract Freeze
+(completed).
+
+Froze the canonical Repository Intelligence Change Impact Contract
+binding for 123C-123F: purpose, contract authority, implementation
+independence, architectural relationships, Change Impact permitted and
+prohibited responsibilities, Query Layer exclusive access, change
+request concepts, Change Impact Report concepts, attribution
+preservation, limitation propagation, boundary disclosure preservation,
+determinism, fail-closed failure handling, governance compatibility,
+Track 119/120/121/122 compatibility, deferred capabilities, known
+inherited issues, and strict non-goals. No implementation, source code,
+test code, or schema change occurred. Runtime remains `Observed` /
+`observe` / execution unavailable. Recommended next phase: 123C —
+Repository Intelligence Change Impact Contract Verification.
 
 ## Phase 123A Complete
 

@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 123B - Repository Intelligence Change Impact Contract Freeze
+  (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_FREEZE.md`).
+  Freezes the canonical Repository Intelligence Change Impact Contract,
+  binding for 123C, 123D, 123E, and 123F. Defines the immutable
+  contract governing deterministic identification of potentially
+  affected repository entities from existing Repository Intelligence,
+  exclusively through the Track 121 read-only Query Layer. Freezes
+  architectural relationships to Repository Knowledge Snapshot,
+  Repository Intelligence Query Layer, Advisory Context Builder, Change
+  Impact Report, Repository State, Evidence, Decision Evaluation, and
+  Runtime; the Change Impact responsibility contract (may consume
+  Repository Intelligence and Query Layer results, identify potentially
+  affected entities, preserve attribution/limitations/boundary
+  disclosures, and assemble deterministic reports; must never generate
+  or modify Repository Intelligence, mutate Repository State or
+  Evidence, recommend actions, prioritize changes, replace Advisory
+  reasoning or Decision Evaluation, or introduce execution capability);
+  the query contract requiring exclusive Query Layer access; the change
+  request contract; the Change Impact Report contract; attribution,
+  limitation, boundary disclosure, determinism, failure, governance,
+  and compatibility contracts; deferred capabilities; known inherited
+  issues; and strict non-goals. Carries forward only the 119Q
+  report-generation-ordering defect, 119AB phase-id comparison bug,
+  and recurring `pending_final_telegram_delivery` reporting detail.
+  Does not repair inherited tooling and does not implement a Change
+  Impact engine, dependency graph traversal, recommendations, Advisory
+  reasoning, Decision Evaluation, Repository Intelligence generation,
+  repository scanning, runtime plugins, execution planning, execution
+  capability, source code, test code, or schema changes. Recommends
+  123C.
+
 - Phase 123A - Repository Intelligence Change Impact Architecture
   (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_ARCHITECTURE.md`).
   Defines the architecture for deterministic Repository Intelligence
