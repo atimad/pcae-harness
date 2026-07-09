@@ -10,7 +10,7 @@ Phase 126C Dependency Knowledge Graph Contract Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
