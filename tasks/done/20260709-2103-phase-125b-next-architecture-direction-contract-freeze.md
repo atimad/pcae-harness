@@ -10,7 +10,7 @@ Phase 125B Next Architecture Direction Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
