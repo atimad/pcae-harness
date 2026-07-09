@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 125E - Next Architecture Direction Evaluation
+  (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_EVALUATION.md`).
+  Executes the 125D evaluation methodology against all six recognized
+  candidate architectural directions (Historical Memory, Dependency
+  Knowledge Graph, Repository Intelligence expansion, Decision
+  Evaluation support, Execution Planning, Permission Broker evolution)
+  across architectural fit, governance compatibility, technical
+  readiness, strategic value, and a five-category risk methodology.
+  Grounded in direct inspection of governed sources including
+  previously-uncatalogued existing subsystems
+  (`src/pcae/core/decision_evaluation.py`,
+  `src/pcae/core/permission_broker.py`), revealing that Decision
+  Evaluation support and Permission Broker evolution connect to already
+  -mature, already-deterministic subsystems rather than building from
+  nothing. Finds Historical Memory and Dependency Knowledge Graph carry
+  the strongest combined readiness and strategic value; Decision
+  Evaluation support carries the highest strategic upside alongside the
+  highest governance risk; Repository Intelligence expansion is
+  lowest-risk but weakest-justified; Execution Planning and Permission
+  Broker evolution both have unresolved preconditions. Identifies
+  candidates most suitable for further architectural consideration
+  without declaring a winner or recommending implementation. No
+  architectural direction was selected. No implementation, prototype,
+  or runtime behavior change occurred. Recommends 125F.
+
 - Phase 125D - Next Architecture Direction Evaluation Plan
   (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_EVALUATION_PLAN.md`).
   Defines the structured evaluation process for determining PCAE's
