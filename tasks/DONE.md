@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 123A completion metadata (20260709-1359-repair-phase-123a-completion-metadata)
 - Phase 123A Repository Intelligence Change Impact Architecture (20260709-1357-phase-123a-repository-intelligence-change-impact-architecture)
 - Repair Phase 122F completion metadata (20260709-1348-repair-phase-122f-completion-metadata)
 - Phase 122F Repository Intelligence Advisory Consumption Verification (20260709-1346-phase-122f-repository-intelligence-advisory-consumption-verification)
