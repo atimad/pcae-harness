@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Treat Phase 122D as the implementation-planning phase for the first
+  Repository Intelligence Advisory Consumption prototype: plan a
+  deterministic, read-only Advisory Context Builder that consumes
+  Repository Intelligence exclusively through the Track 121 Query
+  Layer, scoped to Repository Knowledge Snapshot and Query Layer
+  results only. Define the nine-stage consumption pipeline, nine
+  planned components (responsibility/inputs/outputs/boundaries), the
+  context package plan, the query interaction plan, attribution/
+  limitation/boundary propagation plans, the seven-mode fail-closed
+  failure plan, the 122F verification plan, 13 measurable 122E
+  acceptance criteria, risks and mitigations, and deferred
+  capabilities, without implementing an Advisory Context Builder,
+  Advisory runtime integration, Repository Intelligence generation,
+  repository scanning, query engine modifications, graph traversal,
+  dependency reasoning, change impact reasoning, runtime plugins,
+  execution planning, or execution capability. Recommended next phase:
+  122E - Repository Intelligence Advisory Context Prototype.
+
 - Treat Phase 122C as the independent verification phase for the
   Repository Intelligence Advisory Consumption Contract: verify
   contract completeness, architectural consistency against 122A/Track

@@ -2,6 +2,41 @@
 
 ## Unreleased
 
+- Phase 122D - Repository Intelligence Advisory Consumption Prototype
+  Plan
+  (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_PROTOTYPE_PLAN.md`).
+  Defines the implementation plan for the first Advisory Context
+  Builder prototype: a deterministic, read-only component that
+  consumes Repository Intelligence exclusively through the Track 121
+  Query Layer, scoped to Repository Knowledge Snapshot and Query Layer
+  results only. Defines the nine-stage consumption pipeline (advisory
+  request intake, query preparation, read-only Query Layer invocation,
+  context selection, attribution preservation, limitation propagation,
+  boundary disclosure propagation, context package assembly, advisory
+  delivery); nine planned components each with responsibility, inputs,
+  outputs, and boundaries; the context package plan (selected
+  Repository Intelligence, attribution bundle, limitation bundle,
+  boundary disclosure bundle, advisory metadata); the query interaction
+  plan restricting access to the Track 121 Query Layer only;
+  attribution, limitation, and boundary propagation plans; the
+  fail-closed failure plan for missing Repository Intelligence,
+  unsupported snapshot schema, invalid query response, missing
+  attribution, missing limitation, missing boundary disclosure, and
+  corrupted artifact; the 122F verification plan; 13 measurable 122E
+  acceptance criteria; seven risks with mitigations (query category
+  overreach, attribution loss, determinism drift, AdvisoryContextPackage
+  placement creep, boundary suppression, repository scanning
+  temptation, reasoning creep); and deferred capabilities (Historical
+  Memory, Dependency Knowledge Graph, Change Impact, Advisory
+  Intelligence Context Package consumption, graph traversal, dependency
+  reasoning, change impact reasoning, execution planning, execution
+  capability). Does not implement an Advisory Context Builder, Advisory
+  runtime integration, Repository Intelligence generation, repository
+  scanning, query engine modifications, graph traversal, dependency
+  reasoning, change impact reasoning, runtime plugins, execution
+  planning, execution capability, or any source/test/schema code
+  change. Recommends 122E.
+
 - Phase 122C - Repository Intelligence Advisory Consumption Contract
   Verification
   (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_VERIFICATION.md`).

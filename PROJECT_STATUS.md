@@ -2,37 +2,61 @@
 
 ## Current Phase
 
-Phase 122C — Repository Intelligence Advisory Consumption Contract
-Verification (completed).
+Phase 122D — Repository Intelligence Advisory Consumption Prototype
+Plan (completed).
 
-Independently verified the Phase 122B Repository Intelligence Advisory
-Consumption Contract against the Phase 122A architecture, the Track
-121 Query Layer, Track 120 Repository Knowledge Snapshot, Track 119
-executable schemas, Advisory Runtime architecture, and observe-only
-runtime principles, documented in
-`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_VERIFICATION.md`.
-Verification re-derived every claim independently from source: grepped
-`src/pcae/repository_intelligence/query/query_engine.py` confirming
-exactly six implemented query categories match the contract's claim;
-confirmed `snapshot_loader.py`'s `SUPPORTED_EXECUTABLE_SCHEMA_VERSION`
-constant is unchanged; confirmed `AdvisoryContextPackage`'s frozen
-15-section shape remains unmodified and unwired; confirmed Advisory
-Runtime's own documentation still disclaims being a Repository
-Intelligence consumer. Verified contract completeness, architectural
-consistency, scope, Advisory responsibility boundaries, the query
-contract, the context/attribution/limitation/boundary disclosure
-contracts, determinism, the seven-mode fail-closed failure contract,
-governance compatibility, Track 119/120/121 compatibility, and future
-phase readiness for 122D-122F. No contract defect requiring correction
-was found; no contract modification was made. No implementation,
-source code, test code, or schema change occurred.
+Defined the definitive implementation plan for the first Repository
+Intelligence Advisory Consumption prototype, documented in
+`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_PROTOTYPE_PLAN.md`.
+Plans a deterministic, read-only Advisory Context Builder that
+consumes Repository Intelligence exclusively through the Track 121
+Query Layer, scoped to Repository Knowledge Snapshot and Query Layer
+results only. Defines the nine-stage consumption pipeline (advisory
+request intake, query preparation, read-only Query Layer invocation,
+context selection, attribution preservation, limitation propagation,
+boundary disclosure propagation, context package assembly, advisory
+delivery); nine planned components (request intake, query preparation,
+query invocation, context selection, attribution preservation,
+limitation propagation, boundary disclosure propagation, context
+package assembly, advisory delivery) each with responsibility, inputs,
+outputs, and boundaries; the context package plan (selected Repository
+Intelligence, attribution bundle, limitation bundle, boundary
+disclosure bundle, advisory metadata); the query interaction plan
+(Track 121 Query Layer exclusive access); attribution, limitation, and
+boundary propagation plans; the fail-closed failure plan for missing
+Repository Intelligence, unsupported snapshot schema, invalid query
+response, missing attribution, missing limitation, missing boundary
+disclosure, and corrupted artifact; the 122F verification plan; 13
+measurable 122E acceptance criteria; risks and mitigations; and
+deferred capabilities. No implementation, source code, test code, or
+schema change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 122D — Repository Intelligence Advisory
-Consumption Prototype Plan.
+Recommended next repo phase: 122E — Repository Intelligence Advisory
+Context Prototype.
+
+## Phase 122D Complete
+
+Phase 122D — Repository Intelligence Advisory Consumption Prototype
+Plan (completed).
+
+Defined the implementation plan for the first Advisory Context
+Builder prototype: prototype objective (deterministic, read-only,
+never reasoning or deciding), scope (Repository Knowledge Snapshot and
+Track 121 Query Layer results only, all other Repository Intelligence
+families deferred), the nine-stage consumption pipeline, nine planned
+components with responsibility/inputs/outputs/boundaries, the context
+package plan (five required elements), the query interaction plan
+(Query Layer exclusive access), attribution/limitation/boundary
+propagation plans, the seven-mode fail-closed failure plan, the 122F
+verification plan, 13 measurable 122E acceptance criteria, seven risks
+with mitigations, and deferred capabilities. No implementation, source
+code, test code, or schema change occurred. Runtime remains `Observed`
+/ `observe` / execution unavailable. Recommended next phase: 122E —
+Repository Intelligence Advisory Context Prototype.
 
 ## Phase 122C Complete
 
