@@ -1,80 +1,79 @@
-# Phase 123A Complete - Repository Intelligence Change Impact Architecture
+# Phase 123B Complete - Repository Intelligence Change Impact Contract Freeze
 
-- **Phase ID:** `123A`
-- **Phase name:** Repository Intelligence Change Impact Architecture
+- **Phase ID:** `123B`
+- **Phase name:** Repository Intelligence Change Impact Contract Freeze
 - **Status:** completed
 - **Report completeness:** complete
-- **Architecture document:** `docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_ARCHITECTURE.md`
+- **Contract document:** `docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_FREEZE.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Architecture commit:** `68e3f7dd47df26bf42760d0f4daac16394baa228`
-- **Task finish commit:** `2718aebc530f5ebab8343c48bb1d1b1f278a8065`
-- **Recommended next phase:** 123B - Repository Intelligence Change Impact Contract Freeze
+- **Implementation commit:** `73ce5a8acc633bdd77148acfbf5381c08508d152`
+- **Task finish commit:** `f0fa4488667dbe2e2ebbb06dd638806dcd33b1f9`
+- **Recommended next phase:** 123C - Repository Intelligence Change Impact Contract Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Architecture Summary
+## Contract Summary
 
-Defined the architecture for deterministic Repository Intelligence
-Change Impact analysis: identifying affected repository entities from
-existing Repository Intelligence, exclusively through the Track 121
-read-only Query Layer, without recommendations or decision making.
-Defines an eight-stage pipeline (change request, Repository
-Intelligence query, impact candidate identification, attribution
-preservation, limitation propagation, boundary disclosure propagation,
-Change Impact Report assembly, report delivery), the change request
-model, the Change Impact Report model, attribution/limitation/boundary
-architecture, determinism architecture, governance architecture, and
-fail-closed failure architecture, without implementing any of it.
+Froze the canonical Repository Intelligence Change Impact Contract
+governing deterministic identification of potentially affected
+repository entities from existing Repository Intelligence, exclusively
+through the Track 121 read-only Query Layer.
+
+The contract is binding for 123C, 123D, 123E, and 123F. It defines
+purpose, contract authority, implementation independence,
+architectural relationships, Change Impact permitted and prohibited
+responsibilities, query exclusivity, change request concepts, Change
+Impact Report concepts, attribution preservation, limitation
+propagation, boundary disclosure preservation, determinism,
+fail-closed failure handling, governance compatibility, compatibility
+with Tracks 119-122, deferred capabilities, known inherited issues,
+and strict non-goals.
 
 ## Change Impact Responsibilities
 
-Consume Repository Intelligence exclusively through the Track 121
-read-only Query Layer; identify affected entities by deterministic,
-declared criteria bounded by already-recorded relationships,
-references, or shared attribution; preserve attribution, limitations,
-and boundary disclosures unchanged; assemble a bounded Change Impact
-Report; deliver it read-only without conferring any new authority.
+The Change Impact layer may consume Repository Intelligence and Query
+Layer results, identify potentially affected repository entities,
+preserve attribution, preserve limitations, preserve boundary
+disclosures, and assemble deterministic Change Impact Reports.
+
+The Change Impact layer must never generate Repository Intelligence,
+modify Repository Intelligence, mutate Repository State, mutate
+Evidence, recommend actions, prioritize changes, replace Advisory
+reasoning, replace Decision Evaluation, or introduce execution
+capability.
 
 ## Relationship to Tracks 119-122
 
-Track 119 froze and implemented the executable Repository Intelligence
-schema line, used only as a future point of reference, not implemented
-here. Track 120 produced and verified the Repository Knowledge Snapshot
-artifact that remains the Change Impact layer's only reachable
-Repository Intelligence source. Track 121 implemented and verified the
-deterministic, read-only Query Layer that is the Change Impact layer's
-only sanctioned access path into that artifact; 123A introduces no new
-query category and no change to
-`src/pcae/repository_intelligence/query/`. Track 122 implemented and
-verified the Advisory Context Builder, a sibling Repository
-Intelligence consumer architecturally independent from Change Impact;
-123A does not couple the two.
+Track 119 executable schemas remain compatible and unmodified. Track
+120 Repository Knowledge Snapshot remains the current source artifact
+family, reachable only through the Track 121 Query Layer. Track 121
+remains the exclusive deterministic read-only Repository Intelligence
+access path. Track 122 Advisory Consumption remains a sibling Query
+Layer consumer; 123B does not modify Advisory Context Builder behavior
+or authorize Advisory recommendations.
 
-## Deterministic Architecture Summary
+## Determinism Contract
 
-Equivalent Repository Intelligence and an equivalent change request
-must produce equivalent Change Impact Reports. No randomness,
-probabilistic scoring, AI inference, semantic summarization, or hidden
-mutable caches are permitted anywhere in the pipeline.
+Equivalent Repository Intelligence input and an equivalent change
+request must produce equivalent Change Impact Reports. No
+probabilistic behavior, AI inference, heuristic recommendations,
+inferred dependency traversal, or confidence scoring is authorized.
 
 ## Governance Compatibility
 
-Preserves observe-only runtime, deterministic behavior, auditability,
-reproducibility, explainability, human-controlled lifecycle, and
-governed commit/report/notification discipline.
+Preserves observe-only runtime, deterministic engineering,
+explainability, auditability, reproducibility, human-controlled
+lifecycle, and execution-unavailable runtime posture.
 
-## Failure Architecture Summary
+## Failure Contract Summary
 
-Defines fail-closed handling for missing Repository Intelligence,
-unsupported snapshot version, invalid change request, unsupported
-entity, missing attribution, missing limitations, and missing boundary
-disclosures. Every failure mode produces, at most, a bounded,
-non-authoritative outcome: a disclosed limitation, an explicit absence,
-or a fail-closed rejection — never repository scanning, AI inference,
-or any other compensation for missing Repository Intelligence outside
-the Track 121 Query Layer.
+Defines fail-closed handling for unsupported snapshot, unsupported
+schema version, invalid change request, unsupported entity, corrupted
+Repository Intelligence, missing attribution, missing limitation, and
+missing boundary disclosure. Failed requests must not emit partial
+reports that appear valid.
 
 ## Governance Results
 
@@ -113,6 +112,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Change Impact architecture is documented and ready for contract
-freeze. Recommended next phase: 123B - Repository Intelligence Change
-Impact Contract Freeze.
+The Change Impact contract is frozen and ready for independent
+verification. Recommended next phase: 123C - Repository Intelligence
+Change Impact Contract Verification.
