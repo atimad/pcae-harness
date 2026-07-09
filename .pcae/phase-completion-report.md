@@ -1,112 +1,88 @@
-# Phase 121F Complete - Repository Intelligence Query Prototype Verification
+# Phase 122A Complete - Repository Intelligence Advisory Consumption Architecture
 
-- **Phase ID:** `121F`
-- **Phase name:** Repository Intelligence Query Prototype Verification
+- **Phase ID:** `122A`
+- **Phase name:** Repository Intelligence Advisory Consumption Architecture
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_VERIFICATION.md`
+- **Architecture document:** `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Verification commit:** `5bae97557aaa945abd2788d663f081e303595726`
-- **Task finish commit:** `83f6d6a83a5eac747b43be81742acec96b83e34a`
-- **Recommended next phase:** 122A - Repository Intelligence Advisory Consumption Architecture
+- **Architecture commit:** `b4f2881358853e0f779e0d069f139fb08f9490d6`
+- **Task finish commit:** `2148b3f5e881d9cfcada7d3e821dbb89cb36f87f`
+- **Recommended next phase:** 122B - Repository Intelligence Advisory Consumption Contract Freeze
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Verification Summary
+## Architecture Summary
 
-Independently verified the Phase 121E Repository Intelligence Query
-prototype against the Phase 121A architecture, the Phase 121B frozen
-contract, the Phase 121C verification conclusions, and the Phase 121D
-prototype plan. The implementation was re-derived independently from
-source (every file in `src/pcae/repository_intelligence/query/` and
-the CLI wiring), not assumed from the 121E implementation report. No
-functional modification was required.
+Defined the architecture for how the Advisory subsystem may consume
+Repository Intelligence as structured advisory context, exclusively
+through the existing Track 121 read-only Query Layer. Defines a
+nine-stage advisory consumption pipeline (advisory request, Repository
+Intelligence query request, read-only Query Layer access, context
+selection, attribution preservation, limitation propagation, boundary
+disclosure propagation, advisory context package assembly, advisory
+delivery), a context model (advisory context request, Repository
+Intelligence context selection, context package, attribution bundle,
+limitation bundle, boundary disclosure bundle, advisory-facing
+metadata), attribution/limitation/boundary architecture, governance
+architecture, and fail-closed failure architecture, without
+implementing any of it.
 
-## Architecture Conformance Assessment
+## Advisory Consumption Responsibilities
 
-Verified. The 121E prototype conforms to the 121A architecture:
-Snapshot Access, Query Interface/Validation, Query Evaluation,
-Attribution, Limitation, Boundary, Result Assembly, and Result
-Formatting layers are each independently traced to source. No
-inference, graph traversal, dependency reasoning, or Advisory
-reasoning was found.
+Consume Repository Intelligence exclusively through the Track 121
+read-only Query Layer; issue bounded query requests using only the six
+existing supported categories (entity, capability, architectural
+contract, attribution, limitation, boundary lookup); select relevant
+context deterministically; preserve attribution, limitations, and
+boundary disclosures unchanged; assemble a bounded, source-attributed
+context package; deliver it read-only to a future Advisory consumer
+without conferring any new authority.
 
-## Contract Conformance Assessment
+## Relationship to Tracks 119, 120, and 121
 
-Verified. The 121E prototype satisfies the 121B scope contract
-(deterministic, read-only, artifact-consuming, observe-only,
-non-reasoning), supported-artifact-source contract, determinism
-contract, attribution contract, boundary contract, and failure
-contract. The implemented category subset (6 of 9 121B-listed
-categories) matches the narrowing explicitly authorized by 121D.
+Track 119 froze and implemented the executable Repository Intelligence
+schema line, including the Advisory Intelligence Context Package
+structural schema (119W/119X), used here only as a future point of
+reference, not implemented in this phase. Track 120 produced and
+verified the Repository Knowledge Snapshot artifact that remains the
+Advisory consumption layer's only reachable Repository Intelligence
+source. Track 121 implemented and verified the deterministic, read-only
+Query Layer that is the Advisory consumption layer's only sanctioned
+access path into that artifact; 122A introduces no new query category
+and no change to `src/pcae/repository_intelligence/query/`.
 
-## Plan Conformance Assessment
+## Architectural Boundary Confirmation
 
-Verified. The 121D ten-stage pipeline, exact-version compatibility
-plan, read-only persistence-interaction plan, and all twelve 121D
-acceptance criteria for 121E are each independently confirmed against
-source.
+The Advisory consumption layer may consume Repository Intelligence
+exclusively through the Track 121 read-only Query Layer, query it using
+only the six existing supported categories, select relevant context,
+and preserve attribution/limitations/boundary disclosures. It must
+never generate Repository Intelligence, modify Repository Intelligence,
+scan repositories, perform graph traversal, perform dependency
+reasoning, perform change impact reasoning, replace Advisory reasoning,
+replace Decision Evaluation, mutate Repository State, mutate Evidence,
+introduce execution capability, or change runtime behavior.
 
-## Schema Compatibility Results
+## Governance Compatibility
 
-Verified. Supported executable schema version `119O.1.0-json-schema`
-is accepted exactly; unsupported, missing, or malformed schema-version
-metadata fails closed with no partial trust or silent equivalence.
+Preserves observe-only runtime, deterministic behavior, auditability,
+reproducibility, explainability, human-controlled lifecycle, and
+governed commit/report/notification discipline.
 
-## Query Correctness Results
+## Failure Architecture Summary
 
-Verified for all six implemented categories: entity lookup, capability
-lookup, architectural contract lookup, attribution lookup, limitation
-lookup, and boundary lookup. Independent re-execution against a real
-snapshot generated from this repository reproduced results consistent
-with the existing test suite.
-
-## Determinism Verification
-
-Verified. Ten independently repeated executions of an identical
-entity-lookup request against an identical snapshot produced
-byte-identical results; two repeated boundary-lookup executions were
-also identical. No randomness, probabilistic scoring, time dependence,
-or filesystem-order dependence exists in the evaluation path.
-
-## Attribution Verification
-
-Verified. `require_attribution` raises before any content-bearing
-record without `source_attribution` or `capability_source` can be
-returned; re-confirmed by `test_missing_attribution_on_content_record_fails_closed`
-and by independent manual re-execution against a real generated
-snapshot.
-
-## Limitation and Boundary Verification
-
-Verified. Snapshot-level limitations are propagated via
-`base_limitations`, record-level limitations via `_record_limitations`,
-and query-specific `missing_data` limitations are added for unknown
-targets. `boundary_disclosures` and `disclaimers` are copied unmodified
-from the snapshot into every result.
-
-## Read-Only Verification
-
-Verified. Grep of the query package and CLI command module for
-`subprocess`/`socket`/`urllib`/`requests`/`http.`/`openai`/`anthropic`/
-`os.system`/`shell=True` returned no matches; snapshot-file SHA-256
-hash confirmed unchanged before and after query execution; `pcae
-runtime inspect` output unchanged before and after query execution.
-
-## Failure Verification
-
-Verified. Fail-closed behavior confirmed for missing snapshot,
-corrupted snapshot, unsupported schema version, invalid request
-(missing target), unsupported request (unrecognized category), and
-unknown entity (bounded unknown result, not an error).
-
-## Regression Results
-
-- `python -m pytest tests/test_phase_121e_repository_intelligence_query.py -q` — 15 passed
-- `python -m pytest tests/test_phase_120e_repository_knowledge_snapshot.py -q` — 14 passed
-- `python -m pytest -m "fast_green" -n auto -ra --durations=10` — 4390 passed
+Defines fail-closed handling for missing Repository Intelligence
+snapshot, unsupported snapshot schema version, unsupported query, empty
+query result, missing attribution, corrupted Repository Intelligence
+artifact, boundary disclosure mismatch, and limitation propagation
+failure. Every failure mode produces, at most, a bounded,
+non-authoritative outcome: a disclosed limitation, an explicit absence,
+or a fail-closed rejection — never repository scanning, AI inference, or
+any other compensation for missing Repository Intelligence outside the
+Track 121 Query Layer.
 
 ## Governance Results
 
@@ -119,15 +95,19 @@ unknown entity (bounded unknown result, not an error).
 
 ## No-Go Confirmations
 
-- No new query categories were implemented.
-- No query language was implemented.
+- No implementation occurred.
+- No source code changed.
+- No test code changed.
+- No schema changed.
+- No Advisory integration was implemented.
+- No context builder was implemented.
+- No Repository Intelligence generation was implemented.
+- No repository scanning was implemented.
+- No query engine changes were made.
 - No graph traversal was implemented.
 - No dependency reasoning was implemented.
 - No change impact reasoning was implemented.
-- No Advisory integration was introduced.
-- No Repository Intelligence generation occurred.
-- No repository scanning was implemented.
-- No runtime plugins were introduced.
+- No runtime plugin was added.
 - No execution planning was introduced.
 - No execution capability was introduced.
 - No runtime behavior changed.
@@ -140,17 +120,8 @@ Carried forward unchanged and not repaired in this phase:
 - 119AB phase-id comparison bug: non-blocking.
 - Recurring `pending_final_telegram_delivery` reporting detail: non-blocking.
 
-Newly observed, out-of-scope, non-blocking characteristic (not
-repaired, since it is unrelated to Track 121):
-
-- `tests/test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked`
-  is environment-dependent on active-task presence (Permission Broker
-  `blocked_by_task_contract` overrides shell gate
-  `requires_active_task` when no active task exists). Not a Query
-  Layer defect.
-
 ## Readiness
 
-The Repository Intelligence Query prototype is verified with no
-functional modifications required. Recommended next phase: 122A -
-Repository Intelligence Advisory Consumption Architecture.
+The Advisory consumption architecture is documented and ready for
+contract freeze. Recommended next phase: 122B - Repository Intelligence
+Advisory Consumption Contract Freeze.
