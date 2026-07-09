@@ -1,16 +1,16 @@
 {
   "attribution_verification": "Not applicable to this documentation-only phase. No source, test, or schema code changed.",
-  "boundary_disclosure_verification": "Preserved. The 125F decision review explicitly reconfirms in its Boundary Confirmation section that Repository Intelligence, Decision Evaluation authority, and Advisory authority all remain unchanged by this decision.",
-  "commit_attribution": "ff4218ce, 367478b8",
-  "compatibility_assessment": "No schema, CLI, source, or test files changed. Documentation-only phase; the selected next chapter (Dependency Knowledge Graph) is not implemented by this phase.",
+  "boundary_disclosure_verification": "Preserved. The 125G assessment explicitly reconfirms in its Confirmations section that no implementation occurred and execution remains unavailable, and its Section 2 (Scope) explicitly excludes designing an execution planner, workflow, engine, shell mediation, runtime execution, or permission enforcement changes.",
+  "commit_attribution": "61e3cd6b, db20053c",
+  "compatibility_assessment": "No schema, CLI, source, or test files changed. Documentation-only phase; readiness assessment does not design or implement Execution Planning.",
   "determinism_verification": "Not applicable to this documentation-only phase. No generator, query, or consumer code was touched.",
   "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable, Permission Broker status remains execution_unavailable, and zero runtime plugins are registered (re-verified via pcae runtime inspect).",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_DECISION_REVIEW.md",
+    "docs/PHASE_125_EXECUTION_PLANNING_READINESS_ASSESSMENT.md",
     "tasks/DONE.md",
-    "tasks/done/20260709-2130-phase-125f-next-architecture-direction-decision-review.md"
+    "tasks/done/20260709-2146-phase-125g-execution-planning-readiness-assessment.md"
   ],
   "files_changed_count": 5,
   "governance_results": [
@@ -39,17 +39,17 @@
       "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
     }
   ],
-  "decision_review_findings": [
-    "formal architectural decision made using the complete 125A-125E evidence chain",
-    "selected Dependency Knowledge Graph as the next architectural chapter (Track 126)",
-    "selection justified against all 10 required criteria: governance compatibility, architectural cohesion, determinism, explainability, auditability, reproducibility, maintainability, safety, strategic value, implementation readiness",
-    "Historical Memory, Repository Intelligence expansion, Decision Evaluation support, Execution Planning, and Permission Broker evolution deferred with documented rationale, not rejected",
-    "Historical Memory identified as the leading deferred alternative",
-    "roadmap updated to reflect Track 126 as the active next chapter",
-    "recommended first phase: 126A - Dependency Knowledge Graph Architecture",
-    "no implementation occurred"
+  "readiness_assessment_findings": [
+    "canonical architectural readiness assessment produced for a future Execution Planning chapter",
+    "grounded in direct inspection of Decision Evaluation (115E), Permission Broker (88R), approval gate, rollback model, audit model, and runtime registry source files",
+    "governance/permission/runtime models found substantially built, deterministic, fail-closed, and execution-compatible by design but unproven against real execution",
+    "structural dependency knowledge (Dependency Knowledge Graph) found schema-only, the largest identified gap",
+    "readiness checklist and Not Ready / Conditionally Ready / Ready decision model defined",
+    "current determination: Not Ready, explicitly because prerequisite knowledge maturity is incomplete, not because execution is architecturally incompatible with PCAE",
+    "confirmed Track 126 (Dependency Knowledge Graph) directly targets the largest identified readiness gap",
+    "no Execution Planning design occurred"
   ],
-  "implementation_summary": "Performed the formal architectural decision review for PCAE's next chapter using evidence from 125A-125E. Selected Dependency Knowledge Graph as the next architectural chapter (Track 126). Documentation-only: no implementation occurred.",
+  "implementation_summary": "Created the canonical architectural readiness assessment defining prerequisites for a future Execution Planning chapter, grounded in direct inspection of every relevant subsystem. Documentation-only: readiness assessment only, no Execution Planning design, no implementation occurred.",
   "inherited_issue_classification": [
     "119Q report-generation-ordering defect - lifecycle/tooling debt, not repaired",
     "119AB phase-id comparison bug - lifecycle/tooling debt, not repaired",
@@ -59,8 +59,8 @@
   ],
   "limitation_verification": "Not applicable to this documentation-only phase. No source, test, or schema code changed.",
   "missing_trust_fields": [],
-  "new_capability_confirmation": "No new architectural chapter was implemented. No Repository Intelligence capability, Historical Memory, Dependency Knowledge Graph, Decision Evaluation, execution planning, execution capability, runtime plugin, or schema change occurred. The next chapter was selected, not implemented.",
-  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No runtime behavior changed. No execution capability was introduced. No runtime left observe-only posture. No schema files changed. No source code changed. No test code changed. No Dependency Knowledge Graph implementation occurred. No Historical Memory implementation occurred. No Repository Intelligence expansion occurred. No Decision Evaluation occurred. No execution planning was introduced. No runtime plugins were introduced.",
+  "new_capability_confirmation": "No new architectural chapter, Execution Planning capability, execution engine, shell mediation, execution broker, runtime plugin, or schema change occurred. Readiness was assessed, not implemented.",
+  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No runtime behavior changed. No execution capability was introduced. No runtime left observe-only posture. No schema files changed. No source code changed. No test code changed. No Execution Planning was designed or implemented. No execution engine was introduced. No shell mediation was introduced. No execution broker was introduced. No runtime plugins were introduced.",
   "no_go_confirmations": [
     "No No-Go conditions triggered.",
     "No implementation occurred.",
@@ -70,27 +70,26 @@
     "Schemas unchanged.",
     "No source code changed.",
     "No test code changed.",
-    "No Dependency Knowledge Graph implementation occurred.",
-    "No Historical Memory implementation occurred.",
-    "No Repository Intelligence expansion occurred.",
-    "No Decision Evaluation occurred.",
-    "No execution planning was introduced.",
+    "No Execution Planning was designed or implemented.",
+    "No execution engine was introduced.",
+    "No shell mediation was introduced.",
+    "No execution broker was introduced.",
     "No runtime plugins were introduced."
   ],
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "ff4218ce",
-      "message": "Phase 125F: Next Architecture Direction Decision Review"
+      "hash": "61e3cd6b",
+      "message": "Phase 125G: Execution Planning Readiness Assessment"
     },
     {
-      "hash": "367478b8",
-      "message": "Finish Phase 125F task"
+      "hash": "db20053c",
+      "message": "Finish Phase 125G task"
     }
   ],
-  "phase_id": "125F",
-  "phase_name": "Next Architecture Direction Decision Review",
-  "phase_title": "Next Architecture Direction Decision Review",
+  "phase_id": "125G",
+  "phase_name": "Execution Planning Readiness Assessment",
+  "phase_title": "Execution Planning Readiness Assessment",
   "pushed_status": "pushed",
   "recommended_next_phase": "126A - Dependency Knowledge Graph Architecture",
   "recommended_next_phase_id": "126A",
@@ -102,7 +101,7 @@
   "schema_change_confirmation": "No schema files changed.",
   "source_files_changed": 0,
   "status": "completed",
-  "summary": "Documentation phase. Performed the formal architectural decision review for PCAE's next chapter using evidence from 125A-125E. Selected Dependency Knowledge Graph as the next architectural chapter (Track 126). No implementation, prototype, or runtime behavior change occurred.",
+  "summary": "Documentation phase. Created the canonical architectural readiness assessment for a future Execution Planning chapter. Determination: Not Ready, because prerequisite knowledge maturity is incomplete, not architectural incompatibility. Confirms Track 126 targets the largest identified gap. No implementation occurred.",
   "test_files_changed": 0,
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
@@ -154,7 +153,7 @@
     },
     {
       "name": "phase_finalization_skill",
-      "result": "phase_finalization_125F_target_resolved",
+      "result": "phase_finalization_125G_target_resolved",
       "status": "passed"
     },
     {

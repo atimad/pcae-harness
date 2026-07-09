@@ -1,90 +1,101 @@
-# Phase 125F Complete - Next Architecture Direction Decision Review
+# Phase 125G Complete - Execution Planning Readiness Assessment
 
-- **Phase ID:** `125F`
-- **Phase name:** Next Architecture Direction Decision Review
+- **Phase ID:** `125G`
+- **Phase name:** Execution Planning Readiness Assessment
 - **Status:** completed
 - **Report completeness:** complete
-- **Decision document:** `docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_DECISION_REVIEW.md`
+- **Assessment document:** `docs/PHASE_125_EXECUTION_PLANNING_READINESS_ASSESSMENT.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Decision review commit:** `ff4218ce`
-- **Task finish commit:** `367478b8`
+- **Assessment commit:** `61e3cd6b`
+- **Task finish commit:** `db20053c`
 - **Recommended next phase:** 126A - Dependency Knowledge Graph Architecture
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Decision Review Summary
+## Readiness Assessment Summary
 
-Performed the formal architectural decision review for PCAE's next
-chapter, using the complete evidence chain from 125A (Repository
-Intelligence chapter review), 125B (decision contract), 125C (contract
-verification), 125D (evaluation plan), and 125E (candidate evaluation).
-**Selected Dependency Knowledge Graph as the next architectural chapter
-(Track 126).**
+Created the canonical architectural readiness assessment defining
+prerequisites for a future Execution Planning chapter, grounded in
+direct inspection of every relevant subsystem rather than assumption.
+This is a readiness assessment only — it does not design an execution
+planner, workflow, engine, shell mediation, runtime execution, or any
+permission enforcement change.
 
-## Evidence Reviewed
+## Architectural Prerequisites
 
-125A's chapter review, 125B's decision contract, 125C's independent
-contract verification, 125D's evaluation methodology, and 125E's
-evidence-based candidate evaluation grounded in direct inspection of
-governed sources including previously-uncatalogued existing subsystems.
+Repository Intelligence, Advisory Context, and Change Impact are
+mature and satisfied. Dependency Knowledge Graph and Historical Memory
+are schema-frozen but ungenerated — the largest identified gaps.
+Repository Observation model is mature at the passive/inspectable
+level appropriate to an observe-only runtime.
 
-## Candidate Comparison
+## Governance Prerequisites
 
-Six candidates compared: Historical Memory, Dependency Knowledge Graph,
-Repository Intelligence expansion, Decision Evaluation support,
-Execution Planning, Permission Broker evolution. 125E identified
-Historical Memory and Dependency Knowledge Graph as the two strongest
-candidates without ranking between them; this phase resolved that
-remaining choice.
+Decision Evaluation (115E, 593 lines) is a mature, deterministic,
+evidence-only invariant engine. Auditability, reproducibility,
+explainability, and fail-closed behavior are all satisfied across
+every governance subsystem inspected. Permission and approval
+governance are mature at the read-only decision-aggregator/model level.
 
-## Selected Next Chapter
+## Runtime Prerequisites
 
-**Track 126 — Dependency Knowledge Graph.**
+Runtime registry (110E, 464 lines) is explicitly "passive... never
+loads, imports, instantiates, invokes, or executes a plugin" —
+metadata-only by design. Runtime inspection, plugin governance, and
+health verification are all satisfied for an observe-only runtime.
 
-## Selection Rationale
+## Permission Prerequisites
 
-Justified against all 10 required criteria. Key drivers: frozen and
-independently verified schema (119S/119T); the strongest concretely-
-evidenced strategic value of any candidate (a named, already-built
-consumer — Track 123's Change Impact Builder — with a named,
-already-identified limitation: its current flat entity model); and a
-well-scoped, single-item precondition (reconciling the existing
-`graph_generation_method_disclosure` schema disclaimer) rather than an
-open-ended design question, unlike Historical Memory's broader
-source-boundary discipline question.
+Permission Broker (88R, ~1950 lines combined) is a mature read-only
+decision aggregator. Approval gate, rollback model
+(`enforcement_rollback.py`, explicitly "simulation-only"), and audit
+model (`enforcement_audit.py`, explicitly "simulation-only") all exist
+as real, well-developed code, but none has been exercised against real
+execution, since none has ever occurred.
 
-## Deferred Alternatives
+## Safety Prerequisites
 
-- Historical Memory — leading deferred alternative; lowest overall risk
-  among the two frozen-schema-ready candidates.
-- Repository Intelligence expansion — lowest risk, but no identified
-  consumer need.
-- Decision Evaluation support — highest strategic upside, highest
-  governance risk; touches PCAE's actual decision-authority boundary.
-- Execution Planning — blocked by direct tension with the
-  execution-unavailable boundary itself.
-- Permission Broker evolution — mature target subsystem, no defined
-  use case yet.
+Human approval remains authoritative by design and by absence of
+counter-evidence. Bounded authority, transparent decision chain, and
+fail-closed behavior are all satisfied. Deterministic planning and
+explainable planning cannot yet be assessed since no planning
+representation exists — expected at this readiness stage, not a gap.
 
-## Roadmap Update
+## Execution Readiness Checklist
 
-Track 126 (Dependency Knowledge Graph) is now the active next chapter.
-Historical Memory remains the leading candidate for a subsequent
-chapter. Repository Intelligence expansion, Decision Evaluation
-support, Execution Planning, and Permission Broker evolution remain
-deferred per 125A's original sequencing logic, now with explicit
-preconditions named.
+Twelve-item checklist produced (Section 9 of the assessment). Two items
+unsatisfied (Dependency Knowledge Graph, Historical Memory); four
+partially satisfied at the simulation/model level (Change Impact's
+structural depth, rollback, audit chain, cross-component verification);
+six satisfied.
 
-## Boundary Confirmation
+## Current Readiness Determination
 
-- No implementation occurs in 125F.
-- Execution remains unavailable.
-- Runtime remains observe-only.
-- Repository Intelligence remains stable.
-- Decision Evaluation authority is unchanged.
-- Advisory authority is unchanged.
+**Not Ready.** Explicitly because prerequisite architectural
+capabilities (chiefly structural dependency knowledge) have not yet
+reached the required maturity — not because execution is
+architecturally incompatible with PCAE. Every governance/permission/
+runtime subsystem inspected was deliberately built to be
+execution-compatible in its design.
+
+## Explanation: Why Execution Planning Is Deferred
+
+Structural dependency knowledge does not yet exist as generated,
+queryable data, and the governance/permission models that do exist
+have not yet been exercised against any real execution event. Execution
+Planning remains a planned future chapter, evaluated as a legitimate
+candidate in 125E and deliberately not rejected in 125F.
+
+## Explanation: Why Dependency Knowledge Graph Precedes Execution Planning
+
+Dependency Knowledge Graph directly strengthens the structural
+knowledge foundation identified as the largest concrete readiness gap.
+Track 126's success will directly move the "Dependency Knowledge Graph
+mature" and "Change Impact mature" checklist items from unsatisfied/
+partial to satisfied — the most direct readiness improvement any
+candidate evaluated in 125E could make.
 
 ## Governance Results
 
@@ -113,5 +124,5 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The next architectural chapter has been selected. Recommended next
-phase: 126A - Dependency Knowledge Graph Architecture.
+The Execution Planning readiness assessment is complete and canonical.
+Recommended next phase: 126A - Dependency Knowledge Graph Architecture.
