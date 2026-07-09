@@ -10,7 +10,7 @@ Phase 126E Dependency Knowledge Graph Prototype
 
 ## Status
 
-active
+done
 
 ## Mode
 
