@@ -1,88 +1,88 @@
-# Phase 126D Complete - Dependency Knowledge Graph Prototype Plan
+# Phase 126E Complete - Dependency Knowledge Graph Prototype
 
-- **Phase ID:** `126D`
-- **Phase name:** Dependency Knowledge Graph Prototype Plan
+- **Phase ID:** `126E`
+- **Phase name:** Dependency Knowledge Graph Prototype
 - **Status:** completed
 - **Report completeness:** complete
-- **Plan document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_PLAN.md`
-- **Source files changed:** 0
-- **Test files changed:** 0
+- **Implementation document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_IMPLEMENTATION.md`
+- **Source files changed:** 6
+- **Test files changed:** 1
 - **Execution boundary:** preserved (execution unavailable)
-- **Plan commit:** `8bccb487`
-- **Task finish commit:** `52ec5305`
-- **Recommended next phase:** 126E - Dependency Knowledge Graph Prototype
+- **Implementation commit:** `7494a599`
+- **Task finish commit:** `df454ef9`
+- **Recommended next phase:** 126F - Dependency Knowledge Graph Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Implementation Plan Summary
+## Implementation Summary
 
-Produced the definitive implementation plan for the first
-deterministic, read-only Dependency Knowledge Graph Builder, grounded
-in direct inspection of the real Track 120 generator source
-(`snapshot_builder.py`) rather than conceptual reasoning alone. This
-surfaced that Repository Knowledge Snapshot's `entity_type` vocabulary
-and the graph's `node_type` vocabulary are two different enums
-requiring explicit translation, and that the current generator's
-`module`-for-directories convention means a v1 graph will contain
-almost exclusively path-containment edges since Track 120 does not yet
-declare import/dependency relationships.
+Implemented the first deterministic, read-only Dependency Knowledge
+Graph Builder exactly as scoped by 126A-126D. This is the first phase
+in Track 126 to touch `src/pcae/` source code.
 
-## Graph Construction Pipeline
+## Graph Builder Summary
 
-Twelve stages: input validation, Repository Intelligence loading,
-entity extraction, relationship extraction, graph construction,
-metadata attachment, provenance attachment, limitation attachment,
-boundary attachment, graph validation, deterministic serialization,
-persistence.
+Added `src/pcae/repository_intelligence/dependency_graph/` (graph
+builder, independent validation, persistence, top-level
+orchestration), consuming Repository Intelligence exclusively through
+the Track 121 Query Layer. Wired `pcae repository-intelligence
+dependency-graph generate`.
 
 ## Graph Model Summary
 
-Node mapping table resolves every conceptual node category (repository,
-directory, file, module, class, function, artifact, schema, command,
-runtime component, documentation entity) against both the real RKS
-`entity_type` vocabulary and the frozen DKG `node_type` enum. Class and
-function remain out of v1 scope. Edge mapping table resolves every
-conceptual edge category against the frozen `edge_type` enum per
-126B's resolutions, with an explicit finding that `imports`-derived
-edges cannot be produced by the current builder since Track 120 does
-not parse import statements.
+Confirmed against real generated output: `source_file` entities become
+`file` nodes; directory (`module`) entities remain `module` nodes;
+zero non-containment edges are produced because Track 120's own
+generator does not parse imports/symbols — an inherited limitation,
+not a defect. Zero class/function nodes, per 126B's v1 scope decision.
 
-## Validation Strategy
+## Validation Summary
 
-Unique node/edge identifiers, valid edge endpoints, valid node/edge
-categories, deterministic ordering, metadata/provenance/limitation/
-boundary completeness — all fail closed on violation.
+`graph_validation.validate_graph()` independently re-checks unique
+node/edge identifiers, valid edge endpoints, valid node/edge
+categories, deterministic ordering, and provenance/limitation/boundary
+completeness — fails closed on any violation.
 
-## Serialization Strategy
+## Serialization Summary
 
-Reuses Track 124's `serialize_deterministic_json` (resolving 126C
-Finding 2). Equivalent inputs produce equivalent outputs except
-approved timestamps.
+Reuses Track 124's `serialize_deterministic_json` directly, resolving
+126C Finding 2. Two independent runs against the same snapshot produce
+byte-identical output except approved timestamps.
 
-## Failure Strategy
+## Persistence Summary
 
-Fail closed for invalid Repository Intelligence artifacts, unsupported
-schema versions, missing provenance/limitations/boundary disclosures,
-duplicate identifiers, invalid references, and serialization failures.
-No fail-open path exists.
+Writes only, to `.pcae/repository-intelligence/dependency-graph/`,
+distinct from Track 120's own snapshot directory. Never mutates the
+source snapshot (verified by regression test).
+
+## Regression Results
+
+- Repository Knowledge Snapshot: 14 passed.
+- Query Layer: 15 passed.
+- Advisory Context Builder: 22 passed.
+- Change Impact Builder plus 124E hardening tests: 21 passed.
+- Dependency Knowledge Graph prototype tests: 38 passed.
+- Combined: 110 passed.
+- fast_green: 4390 passed, 0 failed.
+
+## Deterministic Generation Results
+
+Two independent generation runs against the same source snapshot
+produced byte-identical output except approved timestamp fields,
+verified both via direct Python invocation and dedicated regression
+test.
 
 ## Compatibility Confirmation
 
-Compatible with Tracks 119-123; none modified by this plan.
+No schema file, and no Track 119-124 source file, was modified. The
+`dependency_graph` package is purely additive.
 
-## Incorporation of 126C Findings
+## Confirmations
 
-All three findings explicitly resolved: edge-identifier stability
-algorithm defined (Finding 1); Track 124 serialization/validation
-helper reuse planned (Finding 2); explicit `graph_completeness_state:
-partial` requirement for v1 output (Finding 3).
-
-## Deferred Capabilities
-
-Graph traversal, dependency reasoning, change impact reasoning beyond
-existing Track 123 capabilities, Historical Memory integration,
-Advisory reasoning, Decision Evaluation, execution planning, execution
-capability, AI reasoning, graph database integration.
+- No graph traversal implemented.
+- No reasoning implemented.
+- No runtime behavior changed.
+- Execution remains unavailable.
 
 ## Governance Results
 
@@ -92,12 +92,6 @@ capability, AI reasoning, graph database integration.
 - **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **telegram_runtime:** configured and enabled after sourcing `~/.config/pcae/telegram.env`
-
-## Confirmations
-
-- No implementation occurred.
-- No runtime behavior changed.
-- Execution remains unavailable.
 
 ## Inherited Issues
 
@@ -111,6 +105,6 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The Dependency Knowledge Graph Prototype Plan is complete and ready
-for implementation. Recommended next phase: 126E - Dependency
-Knowledge Graph Prototype.
+The Dependency Knowledge Graph prototype is complete and ready for
+independent verification. Recommended next phase: 126F - Dependency
+Knowledge Graph Verification.
