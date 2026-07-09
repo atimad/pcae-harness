@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 125B - Next Architecture Direction Contract Freeze
+  (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_FREEZE.md`).
+  Freezes the canonical decision contract for evaluating PCAE's next
+  architectural direction following the completed Repository
+  Intelligence chapter. Governs architectural decision making only —
+  does not select the next implementation track. Defines candidate
+  architecture domains (Historical Memory, Dependency Knowledge Graph,
+  Repository Intelligence expansion, Decision Evaluation support,
+  Execution Planning, Permission Broker evolution, and other future
+  chapters) with per-candidate evaluation criteria, nine evaluation
+  principles (governance compatibility, determinism, explainability,
+  auditability, maintainability, reproducibility, architectural
+  cohesion, safety, observe-first philosophy), and a mandatory
+  three-step decision sequence (architecture -> contract ->
+  verification) that must complete for a specific candidate before any
+  future phase may select it as an implementation path. Requires
+  Repository Intelligence to remain stable during future evaluation
+  except through its own separately governed contract-freeze phases.
+  Confirms execution remains unavailable and observe-only runtime
+  remains mandatory. Classifies inherited technical debt without
+  repairing it. No implementation, prototype, runtime behavior change,
+  or implementation-path selection occurred. Binding for 125C, 125D,
+  125E, and 125F. Recommends 125C.
+
 - Phase 125A - Repository Intelligence Chapter Review & Next Direction
   Architecture
   (`docs/PHASE_125_REPOSITORY_INTELLIGENCE_CHAPTER_REVIEW_AND_NEXT_DIRECTION_ARCHITECTURE.md`).

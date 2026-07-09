@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 125B — Next Architecture Direction Contract Freeze
+(completed).
+
+Froze the canonical decision contract governing evaluation and
+selection of PCAE's next architectural direction in
+`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_FREEZE.md`. The
+contract governs architectural decision making only — it does not
+select the next implementation track. It defines evaluation criteria
+for candidate architecture domains (Historical Memory, Dependency
+Knowledge Graph, Repository Intelligence expansion, Decision
+Evaluation support, Execution Planning, Permission Broker evolution,
+and other future chapters not yet named), nine evaluation principles
+(governance compatibility, determinism, explainability, auditability,
+maintainability, reproducibility, architectural cohesion, safety,
+observe-first philosophy), and a strict three-step decision sequence
+(architecture -> contract -> verification) that must complete for a
+specific candidate before any future phase may select it as an
+implementation path. Requires Repository Intelligence (Tracks 119-124)
+to remain stable and unmodified during future evaluation except through
+its own separately governed contract-freeze phases. Confirms execution
+remains unavailable, observe-only runtime remains mandatory, and
+preserves deterministic engineering, fail-closed philosophy,
+attribution, limitation propagation, boundary disclosures,
+reproducibility, and auditability. Classifies inherited technical debt
+without repairing it. No implementation, prototype, runtime behavior
+change, or implementation-path selection occurred. Binding for 125C,
+125D, 125E, and 125F.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 125C — Next Architecture Direction
+Contract Verification.
+
+## Phase 125B Complete
+
+Phase 125B — Next Architecture Direction Contract Freeze (completed).
+
+Froze the canonical decision contract for evaluating PCAE's next
+architectural direction. Governs process only — no implementation path
+selected. Defines candidate evaluation criteria, nine evaluation
+principles, and a mandatory architecture -> contract -> verification
+decision sequence before any candidate may be selected. Requires
+Repository Intelligence to remain stable during evaluation. No
+implementation, prototype, or runtime behavior change occurred.
+Recommended next phase: 125C — Next Architecture Direction Contract
+Verification.
+
+## Phase 125A Complete
+
 Phase 125A — Repository Intelligence Chapter Review & Next Direction
 Architecture
 (completed).
