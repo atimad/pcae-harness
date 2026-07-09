@@ -10,7 +10,7 @@ Repair Phase 123D completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
