@@ -1,88 +1,105 @@
-# Phase 122A Complete - Repository Intelligence Advisory Consumption Architecture
+# Phase 122B Complete - Repository Intelligence Advisory Consumption Contract Freeze
 
-- **Phase ID:** `122A`
-- **Phase name:** Repository Intelligence Advisory Consumption Architecture
+- **Phase ID:** `122B`
+- **Phase name:** Repository Intelligence Advisory Consumption Contract Freeze
 - **Status:** completed
 - **Report completeness:** complete
-- **Architecture document:** `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md`
+- **Contract document:** `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_FREEZE.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Architecture commit:** `b4f2881358853e0f779e0d069f139fb08f9490d6`
-- **Task finish commit:** `2148b3f5e881d9cfcada7d3e821dbb89cb36f87f`
-- **Recommended next phase:** 122B - Repository Intelligence Advisory Consumption Contract Freeze
+- **Contract commit:** `464455a850ccbf5ff08bd0fea1c8a3bbbb567cd3`
+- **Task finish commit:** `d5c23864b73ef4885cd9f1368ec4195bc9ecb869`
+- **Recommended next phase:** 122C - Repository Intelligence Advisory Consumption Contract Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Architecture Summary
+## Contract Summary
 
-Defined the architecture for how the Advisory subsystem may consume
-Repository Intelligence as structured advisory context, exclusively
-through the existing Track 121 read-only Query Layer. Defines a
-nine-stage advisory consumption pipeline (advisory request, Repository
-Intelligence query request, read-only Query Layer access, context
-selection, attribution preservation, limitation propagation, boundary
-disclosure propagation, advisory context package assembly, advisory
-delivery), a context model (advisory context request, Repository
-Intelligence context selection, context package, attribution bundle,
-limitation bundle, boundary disclosure bundle, advisory-facing
-metadata), attribution/limitation/boundary architecture, governance
-architecture, and fail-closed failure architecture, without
-implementing any of it.
+Froze the canonical Repository Intelligence Advisory Consumption
+Contract, binding for 122C, 122D, 122E, and 122F. Freezes architectural
+relationships, the Advisory responsibility contract, the query
+contract (Track 121 Query Layer exclusive access), the
+context/attribution/limitation/boundary disclosure contracts, the
+determinism contract, the fail-closed failure contract, the governance
+contract, compatibility with Track 119/120/121, deferred capabilities,
+and known inherited issues, without implementing any of it.
 
-## Advisory Consumption Responsibilities
+## Architectural Relationship Summary
 
-Consume Repository Intelligence exclusively through the Track 121
-read-only Query Layer; issue bounded query requests using only the six
-existing supported categories (entity, capability, architectural
-contract, attribution, limitation, boundary lookup); select relevant
-context deterministically; preserve attribution, limitations, and
-boundary disclosures unchanged; assemble a bounded, source-attributed
-context package; deliver it read-only to a future Advisory consumer
-without conferring any new authority.
+Freezes relationships between Repository Knowledge Snapshot (sole
+reachable artifact family), Repository Intelligence Query Layer
+(exclusive access path), Advisory Runtime (architecturally distinct,
+not a consumer under this contract), Advisory Context (future
+`AdvisoryContextPackage` candidate input), Repository State (never
+mutated or asserted), Evidence (never mutated or fabricated), Decision
+Evaluation (never replaced), and Runtime (`Observed` / `observe` /
+execution unavailable, unchanged).
 
-## Relationship to Tracks 119, 120, and 121
+## Advisory Responsibility Contract
 
-Track 119 froze and implemented the executable Repository Intelligence
-schema line, including the Advisory Intelligence Context Package
-structural schema (119W/119X), used here only as a future point of
-reference, not implemented in this phase. Track 120 produced and
-verified the Repository Knowledge Snapshot artifact that remains the
-Advisory consumption layer's only reachable Repository Intelligence
-source. Track 121 implemented and verified the deterministic, read-only
-Query Layer that is the Advisory consumption layer's only sanctioned
-access path into that artifact; 122A introduces no new query category
-and no change to `src/pcae/repository_intelligence/query/`.
+Advisory may request, consume, and reference Repository Intelligence
+exclusively through the Track 121 read-only Query Layer; preserve
+attribution, limitations, and boundary disclosures unchanged; and
+assemble bounded Repository Intelligence context. Advisory must never
+generate or modify Repository Intelligence, mutate Repository State,
+mutate Evidence, replace Decision Evaluation, replace Repository
+State, or introduce execution capability.
 
-## Architectural Boundary Confirmation
+## Attribution Contract
 
-The Advisory consumption layer may consume Repository Intelligence
-exclusively through the Track 121 read-only Query Layer, query it using
-only the six existing supported categories, select relevant context,
-and preserve attribution/limitations/boundary disclosures. It must
-never generate Repository Intelligence, modify Repository Intelligence,
-scan repositories, perform graph traversal, perform dependency
-reasoning, perform change impact reasoning, replace Advisory reasoning,
-replace Decision Evaluation, mutate Repository State, mutate Evidence,
-introduce execution capability, or change runtime behavior.
+Every Repository Intelligence element included in Advisory context
+must retain provenance traceable to the originating Repository
+Knowledge Snapshot (artifact id, artifact type, snapshot id,
+executable schema version) and any embedded Source Attribution
+Records. No attribution loss is permitted; a content-bearing record
+lacking required attribution must be excluded with a disclosed
+limitation or the request must fail closed.
+
+## Limitation Contract
+
+Repository Intelligence limitations (snapshot-level, record-level,
+query-specific) must propagate unchanged into the assembled context
+package's limitation bundle. Advisory may add strictly additive
+consumption-specific limitations, but may never drop or narrow an
+inherited limitation.
+
+## Boundary Disclosure Contract
+
+Boundary disclosures must propagate unchanged from the source Query
+Result through to final delivery. Advisory must not reinterpret
+Repository Intelligence as authoritative state or evidence at any
+pipeline stage, and no formatting, grouping, projection, or
+summarization step may suppress a boundary disclosure or disclaimer.
+
+## Determinism Contract
+
+Equivalent Repository Intelligence input must produce equivalent
+Advisory context: identical Query Result(s) plus identical advisory
+context request equals identical logical advisory context package. No
+inference, no probabilistic scoring or behavior, no AI augmentation,
+no randomness, no time-dependent content beyond declared
+assembly-timestamp metadata, no filesystem ordering, no ambient
+runtime state, no network calls, no hidden mutable caches, and no
+non-deterministic tie breaking are permitted.
+
+## Failure Contract
+
+Fail closed for: unsupported snapshot, unsupported schema version,
+corrupted Repository Intelligence, missing attribution, missing
+limitation, missing boundary disclosure, and invalid query result.
+Every failure mode produces, at most, a bounded, non-authoritative
+outcome: a disclosed limitation, an explicit absence, or a fail-closed
+rejection, never repository scanning or AI inference.
 
 ## Governance Compatibility
 
 Preserves observe-only runtime, deterministic behavior, auditability,
 reproducibility, explainability, human-controlled lifecycle, and
-governed commit/report/notification discipline.
-
-## Failure Architecture Summary
-
-Defines fail-closed handling for missing Repository Intelligence
-snapshot, unsupported snapshot schema version, unsupported query, empty
-query result, missing attribution, corrupted Repository Intelligence
-artifact, boundary disclosure mismatch, and limitation propagation
-failure. Every failure mode produces, at most, a bounded,
-non-authoritative outcome: a disclosed limitation, an explicit absence,
-or a fail-closed rejection — never repository scanning, AI inference, or
-any other compensation for missing Repository Intelligence outside the
-Track 121 Query Layer.
+governed commit/report/notification discipline. Compatible with Track
+119 schemas (unmodified), Track 120 Repository Knowledge Snapshot
+(unmodified, sole reachable artifact family), and Track 121 Query
+Layer (unmodified, exclusive access path).
 
 ## Governance Results
 
@@ -99,11 +116,11 @@ Track 121 Query Layer.
 - No source code changed.
 - No test code changed.
 - No schema changed.
-- No Advisory integration was implemented.
-- No context builder was implemented.
+- No query changes were made.
+- No Advisory context builder was implemented.
+- No Repository Intelligence integration was implemented.
 - No Repository Intelligence generation was implemented.
 - No repository scanning was implemented.
-- No query engine changes were made.
 - No graph traversal was implemented.
 - No dependency reasoning was implemented.
 - No change impact reasoning was implemented.
@@ -122,6 +139,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Advisory consumption architecture is documented and ready for
-contract freeze. Recommended next phase: 122B - Repository Intelligence
-Advisory Consumption Contract Freeze.
+The Repository Intelligence Advisory Consumption Contract is frozen
+and ready for independent verification. Recommended next phase: 122C -
+Repository Intelligence Advisory Consumption Contract Verification.

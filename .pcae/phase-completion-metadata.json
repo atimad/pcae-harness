@@ -1,16 +1,17 @@
 {
-  "architectural_boundaries": "The Advisory consumption layer may consume Repository Intelligence exclusively through the Track 121 read-only Query Layer, query it using only the six existing supported categories, select relevant context, and preserve attribution/limitations/boundary disclosures. It must never generate Repository Intelligence, modify Repository Intelligence, scan repositories, perform graph traversal, perform dependency reasoning, perform change impact reasoning, replace Advisory reasoning, replace Decision Evaluation, mutate Repository State, mutate Evidence, introduce execution capability, or change runtime behavior.",
-  "architecture_summary": "Defined the architecture for how the Advisory subsystem may consume Repository Intelligence as structured advisory context, exclusively through the existing Track 121 read-only Query Layer. Defines a nine-stage advisory consumption pipeline (advisory request, Repository Intelligence query request, read-only Query Layer access, context selection, attribution preservation, limitation propagation, boundary disclosure propagation, advisory context package assembly, advisory delivery), a context model (advisory context request, Repository Intelligence context selection, context package, attribution bundle, limitation bundle, boundary disclosure bundle, advisory-facing metadata), attribution/limitation/boundary architecture, governance architecture, and fail-closed failure architecture, without implementing any of it.",
+  "advisory_responsibility_contract": "Advisory may request, consume, and reference Repository Intelligence exclusively through the Track 121 read-only Query Layer; preserve attribution, limitations, and boundary disclosures unchanged; and assemble bounded Repository Intelligence context. Advisory must never generate or modify Repository Intelligence, mutate Repository State, mutate Evidence, replace Decision Evaluation, replace Repository State, or introduce execution capability.",
+  "architectural_relationship_summary": "Freezes relationships between Repository Knowledge Snapshot (sole reachable artifact family), Repository Intelligence Query Layer (exclusive access path), Advisory Runtime (architecturally distinct, not a consumer under this contract), Advisory Context (future AdvisoryContextPackage candidate input), Repository State (never mutated or asserted), Evidence (never mutated or fabricated), Decision Evaluation (never replaced), and Runtime (Observed / observe / execution unavailable, unchanged).",
+  "attribution_contract": "Every Repository Intelligence element included in Advisory context must retain provenance traceable to the originating Repository Knowledge Snapshot (artifact id, artifact type, snapshot id, executable schema version) and any embedded Source Attribution Records. No attribution loss is permitted; a content-bearing record lacking required attribution must be excluded with a disclosed limitation or the request must fail closed.",
   "boundary_confirmations": [
     "No implementation occurred",
     "No source code changed",
     "No test code changed",
     "No schema changed",
-    "No Advisory integration was implemented",
-    "No context builder was implemented",
+    "No query changes were made",
+    "No Advisory context builder was implemented",
+    "No Repository Intelligence integration was implemented",
     "No Repository Intelligence generation was implemented",
     "No repository scanning was implemented",
-    "No query engine changes were made",
     "No graph traversal was implemented",
     "No dependency reasoning was implemented",
     "No change impact reasoning was implemented",
@@ -19,17 +20,22 @@
     "No execution capability was introduced",
     "No runtime behavior changed"
   ],
-  "commit_attribution": "b4f2881358853e0f779e0d069f139fb08f9490d6, 2148b3f5e881d9cfcada7d3e821dbb89cb36f87f",
+  "boundary_disclosure_contract": "Boundary disclosures must propagate unchanged from the source Query Result through to final delivery. Advisory must not reinterpret Repository Intelligence as authoritative state or evidence at any pipeline stage, and no formatting, grouping, projection, or summarization step may suppress a boundary disclosure or disclaimer.",
+  "commit_attribution": "464455a850ccbf5ff08bd0fea1c8a3bbbb567cd3, d5c23864b73ef4885cd9f1368ec4195bc9ecb869",
+  "contract_summary": "Froze the canonical Repository Intelligence Advisory Consumption Contract, binding for 122C, 122D, 122E, and 122F. Freezes architectural relationships, the Advisory responsibility contract, the query contract (Track 121 Query Layer exclusive access), the context/attribution/limitation/boundary disclosure contracts, the determinism contract, the fail-closed failure contract, the governance contract, compatibility with Track 119/120/121, deferred capabilities, and known inherited issues, without implementing any of it.",
+  "determinism_contract": "Equivalent Repository Intelligence input must produce equivalent Advisory context: identical Query Result(s) plus identical advisory context request equals identical logical advisory context package. No inference, no probabilistic scoring or behavior, no AI augmentation, no randomness, no time-dependent content beyond declared assembly-timestamp metadata, no filesystem ordering, no ambient runtime state, no network calls, no hidden mutable caches, and no non-deterministic tie breaking are permitted.",
   "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable, and zero runtime plugins are registered.",
+  "failure_contract": "Fail closed for: unsupported snapshot, unsupported schema version, corrupted Repository Intelligence, missing attribution, missing limitation, missing boundary disclosure, and invalid query result. Every failure mode produces, at most, a bounded, non-authoritative outcome: a disclosed limitation, an explicit absence, or a fail-closed rejection, never repository scanning or AI inference.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md",
+    "docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_FREEZE.md",
+    "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260709-1038-phase-122a-repository-intelligence-advisory-consumption-architecture.md"
+    "tasks/done/20260709-1227-phase-122b-repository-intelligence-advisory-consumption-contract-freeze.md"
   ],
-  "files_changed_count": 5,
-  "governance_compatibility": "Preserves observe-only runtime, deterministic behavior, auditability, reproducibility, explainability, human-controlled lifecycle, and governed commit/report/notification discipline.",
+  "files_changed_count": 6,
+  "governance_compatibility": "Preserves observe-only runtime, deterministic behavior, auditability, reproducibility, explainability, human-controlled lifecycle, and governed commit/report/notification discipline. Compatible with Track 119 schemas (unmodified), Track 120 Repository Knowledge Snapshot (unmodified, sole reachable artifact family), and Track 121 Query Layer (unmodified, exclusive access path).",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -62,42 +68,42 @@
     "119AB phase-id comparison bug - non-blocking, not repaired",
     "recurring pending_final_telegram_delivery reporting detail - non-blocking, not repaired"
   ],
+  "limitation_contract": "Repository Intelligence limitations (snapshot-level, record-level, query-specific) must propagate unchanged into the assembled context package's limitation bundle. Advisory may add strictly additive consumption-specific limitations, but may never drop or narrow an inherited limitation.",
   "missing_trust_fields": [],
-  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No source code changed. No test code changed. No schema changed. No Advisory integration was implemented. No context builder was implemented. No Repository Intelligence generation was implemented. No repository scanning was implemented. No query engine changes were made. No graph traversal was implemented. No dependency reasoning was implemented. No change impact reasoning was implemented. No runtime plugin was added. No execution planning was introduced. No execution capability was introduced. No runtime behavior changed.",
+  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No source code changed. No test code changed. No schema changed. No query changes were made. No Advisory context builder was implemented. No Repository Intelligence integration was implemented. No Repository Intelligence generation was implemented. No repository scanning was implemented. No graph traversal was implemented. No dependency reasoning was implemented. No change impact reasoning was implemented. No runtime plugin was added. No execution planning was introduced. No execution capability was introduced. No runtime behavior changed.",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "b4f2881358853e0f779e0d069f139fb08f9490d6",
-      "message": "Phase 122A: Repository Intelligence Advisory Consumption Architecture"
+      "hash": "464455a850ccbf5ff08bd0fea1c8a3bbbb567cd3",
+      "message": "Phase 122B: Repository Intelligence Advisory Consumption Contract Freeze"
     },
     {
-      "hash": "2148b3f5e881d9cfcada7d3e821dbb89cb36f87f",
-      "message": "Finish Phase 122A task"
+      "hash": "d5c23864b73ef4885cd9f1368ec4195bc9ecb869",
+      "message": "Finish Phase 122B task"
     }
   ],
-  "phase_id": "122A",
-  "phase_name": "Repository Intelligence Advisory Consumption Architecture",
-  "phase_title": "Repository Intelligence Advisory Consumption Architecture",
+  "phase_id": "122B",
+  "phase_name": "Repository Intelligence Advisory Consumption Contract Freeze",
+  "phase_title": "Repository Intelligence Advisory Consumption Contract Freeze",
   "pushed_status": "pushed",
-  "advisory_consumption_responsibilities": "Consume Repository Intelligence exclusively through the Track 121 read-only Query Layer; issue bounded query requests using only the six existing supported categories; select relevant context deterministically; preserve attribution, limitations, and boundary disclosures unchanged; assemble a bounded, source-attributed context package; deliver it read-only to a future Advisory consumer without conferring any new authority.",
-  "recommended_next_phase": "122B - Repository Intelligence Advisory Consumption Contract Freeze",
-  "recommended_next_phase_id": "122B",
-  "recommended_next_phase_name": "Repository Intelligence Advisory Consumption Contract Freeze",
-  "relationship_to_track_119_120_121": "Track 119 froze and implemented the executable Repository Intelligence schema line, including the Advisory Intelligence Context Package structural schema (119W/119X) used only as a future point of reference, not implemented here. Track 120 produced and verified the Repository Knowledge Snapshot artifact that remains the Advisory consumption layer's only reachable Repository Intelligence source. Track 121 implemented and verified the deterministic, read-only Query Layer that is the Advisory consumption layer's only sanctioned access path into that artifact; 122A introduces no new query category and no change to src/pcae/repository_intelligence/query/.",
+  "recommended_next_phase": "122C - Repository Intelligence Advisory Consumption Contract Verification",
+  "recommended_next_phase_id": "122C",
+  "recommended_next_phase_name": "Repository Intelligence Advisory Consumption Contract Verification",
+  "relationship_to_track_119_120_121": "Track 119 schemas remain unmodified; the Advisory Intelligence Context Package structural schema (119W/119X) remains a downstream structural reference only, not an authorized generator target. Track 120 Repository Knowledge Snapshot remains the only Repository Intelligence artifact family reachable under this contract. Track 121 Query Layer remains the exclusive, unmodified access path; this contract introduces no new query category and no change to src/pcae/repository_intelligence/query/.",
   "report_completeness": "complete",
   "report_notification_status": "pending_final_telegram_delivery",
   "schema_version": "1.0",
   "source_files_changed": 0,
   "status": "completed",
-  "summary": "Architecture-only phase opening Track 122. Defined how the Advisory subsystem may consume Repository Intelligence as structured advisory context through the Track 121 read-only Query Layer, without changing Advisory authority, Decision Evaluation authority, Repository State authority, Evidence authority, or execution boundaries. Repository Intelligence may enrich Advisory context; it must never replace Advisory reasoning or Decision Evaluation.",
+  "summary": "Contract-freeze phase. Froze the canonical Repository Intelligence Advisory Consumption Contract binding for 122C-122F, covering architectural relationships, Advisory responsibility contract, query contract, context/attribution/limitation/boundary contracts, determinism contract, fail-closed failure contract, governance contract, compatibility with Track 119/120/121, deferred capabilities, and inherited issues. No implementation, source, test, or schema changes occurred.",
   "test_files_changed": 0,
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
-    "fast_green": "not run; architecture-only documentation phase with no source/schema/test changes",
+    "fast_green": "not_run_documentation_only_no_source_schema_test_change",
     "report_notification_tests": "pending_final_telegram_delivery",
     "source_schema_test_diff": "no source, schema, or test code changed"
   },
-  "tests_added_or_updated": "No automated tests added or updated; 122A is architecture-only documentation.",
+  "tests_added_or_updated": "No automated tests added or updated; 122B is documentation-only contract freeze.",
   "tests_run": 0,
   "validation_results": [
     {
@@ -132,7 +138,7 @@
     },
     {
       "name": "phase_finalization_skill",
-      "result": "phase_finalization_122A_target_resolved",
+      "result": "phase_finalization_122B_target_resolved",
       "status": "passed"
     },
     {
