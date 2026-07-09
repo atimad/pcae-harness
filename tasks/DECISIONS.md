@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- Treat Phase 123A as the architecture-only phase opening Track 123:
+  define Change Impact as a Repository Intelligence capability that
+  identifies affected repository entities from existing Repository
+  Intelligence, exclusively through the Track 121 read-only Query
+  Layer, without recommendations or decision making. Define the
+  eight-stage Change Impact pipeline, the change request model, the
+  Change Impact Report model, attribution/limitation/boundary
+  architecture, determinism architecture, governance architecture,
+  failure architecture, Track 123 roadmap, and future extensibility
+  (Historical Memory, Dependency Knowledge Graph, Advisory Context,
+  cross-snapshot comparison) without coupling implementation to any of
+  them. Introduce no implementation, source code change, test code
+  change, or schema change. Recommended next phase: 123B - Repository
+  Intelligence Change Impact Contract Freeze.
+
 - Treat Phase 122F as the independent verification phase for the 122E
   Advisory Context Builder: verify architecture conformance (122A),
   contract conformance (122B), prototype plan conformance (122D), Query

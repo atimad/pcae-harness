@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 123A - Repository Intelligence Change Impact Architecture
+  (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_ARCHITECTURE.md`).
+  Defines the architecture for deterministic Repository Intelligence
+  Change Impact analysis: identifying affected repository entities from
+  existing Repository Intelligence, exclusively through the Track 121
+  read-only Query Layer, without recommendations or decision making.
+  Defines an eight-stage pipeline (change request, Repository
+  Intelligence query, impact candidate identification, attribution
+  preservation, limitation propagation, boundary disclosure
+  propagation, Change Impact Report assembly, report delivery); the
+  change request model (requested change, target entities, repository
+  scope, evaluation scope); the Change Impact Report model (impacted
+  entities, impact relationships, attribution bundle, limitation
+  bundle, boundary disclosure bundle, report metadata);
+  attribution/limitation/boundary architecture; determinism
+  architecture (no probabilistic behavior, no AI inference); governance
+  architecture; and fail-closed failure architecture for missing
+  Repository Intelligence, unsupported snapshot version, invalid change
+  request, unsupported entity, missing attribution, missing
+  limitations, and missing boundary disclosures. Defines relationships
+  to Track 119 executable schemas, Track 120 Repository Knowledge
+  Snapshot, Track 121 Query Layer, Track 122 Advisory Context Builder,
+  Repository State, Evidence, Decision Evaluation, and Advisory
+  Runtime. Change Impact identifies impacted entities; it must never
+  replace Advisory reasoning or Decision Evaluation. Does not implement
+  a Change Impact engine, dependency graph traversal, recommendations,
+  Advisory reasoning, Decision Evaluation, Repository Intelligence
+  generation, repository scanning, runtime plugins, execution planning,
+  execution capability, or any source/test/schema code change.
+  Recommends 123B.
+
 - Phase 122F - Repository Intelligence Advisory Consumption
   Verification
   (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_VERIFICATION.md`).

@@ -2,45 +2,61 @@
 
 ## Current Phase
 
-Phase 122F — Repository Intelligence Advisory Consumption Verification
+Phase 123A — Repository Intelligence Change Impact Architecture
 (completed).
 
-Independently verified the Phase 122E Repository Intelligence Advisory
-Context Builder prototype against the Phase 122A architecture, the
-Phase 122B frozen contract, the Phase 122C verification conclusions,
-and the Phase 122D prototype plan, documented in
-`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_VERIFICATION.md`.
-Verification re-derived the implementation independently from source:
-read every file in `src/pcae/advisory/context/`, grepped for
-subprocess/network/AI-provider usage (none found), independently
-re-executed context assembly ten times outside the existing test suite
-and confirmed logical equality, and confirmed no new top-level CLI
-command was introduced. **Found and repaired one genuine defect**:
-122E never implemented fail-closed handling for "missing limitation"
-(required by 122B S13 and 122D S12, and symmetric with the already-
-implemented missing-attribution and missing-boundary-disclosure
-checks) — added `ensure_limitation_present` to
-`context_validation.py`, wired it into the builder, and added one
-regression test. Confirmed Query Layer integration (exclusive
-`execute_query` access, no direct artifact access), context package
-completeness (five required elements), determinism (repeated execution
-logically identical excluding assembly timestamp), attribution and
-boundary disclosure preservation, and fail-closed behavior for all
-seven failure modes. Ran Advisory Context Builder tests (22 passed,
-including the new regression test), Query Layer regression tests (15
-passed), Repository Knowledge Snapshot regression tests (14 passed),
-and the full `fast_green` suite (4389 passed, 1 pre-existing failure
-independently confirmed unrelated to this phase via `git stash`
-against unmodified HEAD). No Advisory reasoning, recommendations,
-Decision Evaluation integration, or execution capability were
-introduced.
+Defined the architecture for deterministic Repository Intelligence
+Change Impact analysis, documented in
+`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_ARCHITECTURE.md`.
+Change Impact identifies affected repository entities from existing
+Repository Intelligence, exclusively through the Track 121 Query
+Layer, without recommendations or decision making. Defines an
+eight-stage pipeline (change request, Repository Intelligence query,
+impact candidate identification, attribution preservation, limitation
+propagation, boundary disclosure propagation, Change Impact Report
+assembly, report delivery); the change request model (requested
+change, target entities, repository scope, evaluation scope); the
+Change Impact Report model (impacted entities, impact relationships,
+attribution bundle, limitation bundle, boundary disclosure bundle,
+report metadata); attribution/limitation/boundary architecture;
+determinism architecture; governance architecture; and fail-closed
+failure architecture for missing Repository Intelligence, unsupported
+snapshot version, invalid change request, unsupported entity, missing
+attribution, missing limitations, and missing boundary disclosures.
+Defines relationships to Track 119 executable schemas, Track 120
+Repository Knowledge Snapshot, Track 121 Query Layer, Track 122
+Advisory Context Builder, Repository State, Evidence, Decision
+Evaluation, and Advisory Runtime. Change Impact identifies impacted
+entities; it must never replace Advisory reasoning or Decision
+Evaluation. No implementation, source code, test code, or schema
+change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 123A — Repository Intelligence Change
-Impact Architecture.
+Recommended next repo phase: 123B — Repository Intelligence Change
+Impact Contract Freeze.
+
+## Phase 123A Complete
+
+Phase 123A — Repository Intelligence Change Impact Architecture
+(completed).
+
+Defined the architecture for Change Impact as a Repository Intelligence
+capability: purpose, relationship to Tracks 119-122 and to Repository
+State, Evidence, Decision Evaluation, and Advisory Runtime,
+architectural scope (permitted/forbidden operations), the eight-stage
+Change Impact pipeline, the change request model, the Change Impact
+Report model, attribution architecture, limitation architecture,
+boundary architecture, determinism architecture, governance
+architecture, failure architecture, Track 123 roadmap, and future
+extensibility (Historical Memory, Dependency Knowledge Graph, Advisory
+Context, cross-snapshot comparison, future Repository Intelligence
+artifact families) without coupling implementation to any of them.
+Runtime remains `Observed` / `observe` / execution unavailable.
+Recommended next phase: 123B — Repository Intelligence Change Impact
+Contract Freeze.
 
 ## Phase 122F Complete
 
