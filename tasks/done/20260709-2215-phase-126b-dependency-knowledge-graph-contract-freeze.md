@@ -10,7 +10,7 @@ Phase 126B Dependency Knowledge Graph Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
