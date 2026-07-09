@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 125A completion metadata (20260709-2059-sync-phase-125a-completion-metadata)
 - Phase 125A Repository Intelligence Chapter Review Next Direction Architecture (20260709-2057-phase-125a-repository-intelligence-chapter-review-next-direction-architecture)
 - Sync Phase 124F completion metadata (20260709-2051-sync-phase-124f-completion-metadata)
 - Phase 124F Repository Intelligence Prototype Review Hardening Verification (20260709-2047-phase-124f-repository-intelligence-prototype-review-hardening-verification)
