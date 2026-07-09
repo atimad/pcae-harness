@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Phase 122A - Repository Intelligence Advisory Consumption Architecture
+  (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md`).
+  Defines the architecture for how the Advisory subsystem may consume
+  Repository Intelligence as structured advisory context, exclusively
+  through the existing Track 121 read-only Query Layer. Defines a
+  nine-stage advisory consumption pipeline (advisory request,
+  Repository Intelligence query request, read-only Query Layer access,
+  context selection, attribution preservation, limitation propagation,
+  boundary disclosure propagation, advisory context package assembly,
+  advisory delivery), the context model (advisory context request,
+  Repository Intelligence context selection, context package,
+  attribution bundle, limitation bundle, boundary disclosure bundle,
+  advisory-facing metadata), attribution/limitation/boundary
+  architecture, governance architecture, and fail-closed failure
+  architecture for missing snapshot, unsupported schema version,
+  unsupported query, empty query result, missing attribution, corrupted
+  artifact, boundary disclosure mismatch, and limitation propagation
+  failure. Defines relationships to Track 119 executable schemas, Track
+  120 Repository Knowledge Snapshot, Track 121 Query Layer, Advisory
+  (`AdvisoryProvider`/`AdvisoryContextPackage`), Advisory Runtime,
+  Repository State, Evidence, Decision Evaluation, and Runtime.
+  Repository Intelligence may enrich Advisory context but must never
+  replace Advisory reasoning or Decision Evaluation. Does not implement
+  Advisory integration, a context builder, Repository Intelligence
+  generation, repository scanning, query engine changes, graph
+  traversal, dependency reasoning, change impact reasoning, runtime
+  plugins, execution planning, execution capability, or any source/
+  test/schema code change. Recommends 122B.
+
 - Phase 121F - Repository Intelligence Query Prototype Verification
   (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_VERIFICATION.md`).
   Independently verifies the Phase 121E Query Layer prototype against

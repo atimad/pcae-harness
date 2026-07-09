@@ -2,45 +2,58 @@
 
 ## Current Phase
 
-Phase 121F — Repository Intelligence Query Prototype Verification
+Phase 122A — Repository Intelligence Advisory Consumption Architecture
 (completed).
 
-Independently verified the Phase 121E Repository Intelligence Query
-prototype against the Phase 121A architecture, the Phase 121B frozen
-contract, the Phase 121C verification conclusions, and the Phase 121D
-prototype plan, documented in
-`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_VERIFICATION.md`.
-Verification re-derived the implementation independently from source:
-read every file in `src/pcae/repository_intelligence/query/` and the
-CLI wiring, grepped for subprocess/network/AI-provider usage (none
-found), independently re-executed deterministic queries and edge cases
-outside the existing test suite, and confirmed `pcae runtime inspect`
-output is unchanged before and after query execution. Confirmed schema
-compatibility for `119O.1.0-json-schema` with fail-closed handling for
-unsupported/missing/malformed versions; confirmed correctness for all
-six implemented query categories (entity, capability, architectural
-contract, attribution, limitation, boundary lookup); confirmed
-determinism across ten repeated executions; confirmed attribution
-preservation with fail-closed handling for missing attribution;
-confirmed limitation and boundary propagation; confirmed read-only
-behavior (snapshot file hash unchanged after query execution); and
-confirmed fail-closed behavior for missing snapshot, corrupted
-snapshot, unsupported schema version, invalid request, unsupported
-request, and unknown entity. Ran focused Query Layer tests (15
-passed), Repository Knowledge Snapshot regression tests (14 passed),
-and the full `fast_green` suite (4390 passed). No functional
-modification was required. No new query categories, query language,
-graph traversal, dependency reasoning, change impact reasoning,
-Advisory integration, Repository Intelligence generation, repository
-scanning, runtime plugin, execution planning, or execution capability
-was introduced.
+Defined the architecture for how the Advisory subsystem may consume
+Repository Intelligence as structured advisory context, documented in
+`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md`.
+Defines a nine-stage advisory consumption pipeline (advisory request,
+Repository Intelligence query request, read-only Query Layer access,
+context selection, attribution preservation, limitation propagation,
+boundary disclosure propagation, advisory context package assembly,
+advisory delivery) that consumes Repository Intelligence exclusively
+through the existing Track 121 read-only Query Layer. Defines the
+context model (advisory context request, Repository Intelligence
+context selection, context package, attribution bundle, limitation
+bundle, boundary disclosure bundle, advisory-facing metadata),
+attribution/limitation/boundary architecture, governance architecture,
+and fail-closed failure architecture for missing snapshot, unsupported
+schema version, unsupported query, empty query result, missing
+attribution, corrupted artifact, boundary disclosure mismatch, and
+limitation propagation failure. Defines relationships to Track 119
+executable schemas, Track 120 Repository Knowledge Snapshot, Track 121
+Query Layer, Advisory (`AdvisoryProvider`/`AdvisoryContextPackage`),
+Advisory Runtime, Repository State, Evidence, Decision Evaluation, and
+Runtime. Repository Intelligence may enrich Advisory context but must
+never replace Advisory reasoning or Decision Evaluation. No
+implementation, source code, test code, or schema change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 122A — Repository Intelligence Advisory
-Consumption Architecture.
+Recommended next repo phase: 122B — Repository Intelligence Advisory
+Consumption Contract Freeze.
+
+## Phase 122A Complete
+
+Phase 122A — Repository Intelligence Advisory Consumption Architecture
+(completed).
+
+Defined the architecture for Advisory consumption of Repository
+Intelligence: purpose, relationship to Tracks 119-121 and to Advisory,
+Advisory Runtime, Repository State, Evidence, Decision Evaluation, and
+Runtime, architectural scope (permitted/forbidden operations), the
+nine-stage advisory consumption pipeline, the context model, attribution
+architecture, limitation architecture, boundary architecture, governance
+architecture, failure architecture, Track 122 roadmap, and future
+extensibility (Historical Memory Snapshot, Dependency Knowledge Graph
+Snapshot, Change Impact Report, Advisory Intelligence Context Package,
+future Repository Intelligence artifact families) without coupling
+implementation to any of them. Runtime remains `Observed` / `observe` /
+execution unavailable. Recommended next phase: 122B — Repository
+Intelligence Advisory Consumption Contract Freeze.
 
 ## Phase 121F Complete
 
