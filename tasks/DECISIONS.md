@@ -2,6 +2,25 @@
 
 ## Accepted
 
+- Treat Phase 122E as the first Track 122 implementation phase:
+  implement a deterministic, read-only Advisory Context Builder under
+  `src/pcae/advisory/context/`, consuming Repository Intelligence
+  exclusively through the existing Track 121 `execute_query` entry
+  point (no new query category, no direct artifact access,
+  `src/pcae/repository_intelligence/` untouched). Name the assembled
+  package `RepositoryIntelligenceContextPackage`, deliberately distinct
+  from the frozen 115W `AdvisoryContextPackage`, and decide no section
+  placement into it. Preserve attribution and limitations unchanged,
+  propagate boundary disclosures plus a package-level non-authority
+  disclaimer, and fail closed for invalid request, invalid Query Layer
+  result, missing attribution, missing boundary disclosure, unsupported
+  schema version, and corrupted Repository Intelligence. Add 21
+  focused tests; keep Query Layer and Repository Knowledge Snapshot
+  regression suites passing; keep `fast_green` green. Introduce no
+  Advisory reasoning, recommendations, or Decision Evaluation
+  integration. Recommended next phase: 122F - Repository Intelligence
+  Advisory Consumption Verification.
+
 - Treat Phase 122D as the implementation-planning phase for the first
   Repository Intelligence Advisory Consumption prototype: plan a
   deterministic, read-only Advisory Context Builder that consumes

@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+- Phase 122E - Repository Intelligence Advisory Context Prototype
+  (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONTEXT_PROTOTYPE_IMPLEMENTATION.md`).
+  Implements the first deterministic, read-only Advisory Context
+  Builder. Adds `src/pcae/advisory/context/` (`context_request.py`,
+  `context_validation.py`, `advisory_context_builder.py`,
+  `context_package.py`, `context_serializer.py`) and the CLI command
+  `pcae advisory context build --snapshot PATH (--entity|--capability|
+  --contract) [--purpose] [--output] [--json|--pretty]`. Consumes
+  Repository Intelligence exclusively through the existing Track 121
+  `execute_query` entry point, using only its six existing supported
+  query categories (reused via `SUPPORTED_QUERY_CATEGORIES`, never
+  redefined); never reads a Repository Knowledge Snapshot artifact
+  directly, never reruns the Track 120 generator, never scans the
+  repository; `src/pcae/repository_intelligence/` unmodified.
+  Assembles a `RepositoryIntelligenceContextPackage` (selected
+  Repository Intelligence, attribution bundle, limitation bundle,
+  boundary disclosure bundle, context metadata) — deliberately
+  distinct from, and structurally independent of, the frozen 115W
+  `AdvisoryContextPackage`, which this phase does not modify or place
+  content into. Preserves attribution and limitations unchanged from
+  the Query Result; propagates boundary disclosures unchanged plus a
+  package-level non-authority disclaimer; produces deterministic JSON
+  serialization. Fails closed for invalid context request, invalid
+  Query Layer result, missing attribution, missing boundary
+  disclosure, unsupported Repository Intelligence schema version, and
+  corrupted Repository Intelligence response. Adds 21 focused tests in
+  `tests/test_phase_122e_repository_intelligence_advisory_context.py`
+  covering deterministic assembly, Query Layer integration,
+  attribution/limitation/boundary preservation, serialization,
+  fail-closed behavior, `max_records` bounding, read-only guarantees,
+  and CLI integration. Query Layer (15 tests) and Repository Knowledge
+  Snapshot (14 tests) regression suites pass unaffected; full
+  `fast_green` suite passed 4390/4390. Does not implement Advisory
+  reasoning, recommendations, Decision Evaluation integration,
+  Repository Intelligence generation, repository scanning, graph
+  traversal, dependency reasoning, change impact reasoning, Historical
+  Memory or Dependency Knowledge Graph consumption, execution planning,
+  execution capability, runtime plugins, AI provider integration, or
+  network access. Recommends 122F.
+
 - Phase 122D - Repository Intelligence Advisory Consumption Prototype
   Plan
   (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_PROTOTYPE_PLAN.md`).

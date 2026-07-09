@@ -497,6 +497,7 @@ from pcae.commands.commit_push_preflight import run_commit_preflight, run_push_p
 from pcae.commands.hooks import run_hooks_install, run_hooks_status
 from pcae.commands.import_ import run_import_bundle
 from pcae.commands.init import run_init
+from pcae.commands.advisory_context import run_advisory_context_build
 from pcae.commands.inspect import run_inspect
 from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
@@ -5765,6 +5766,65 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print machine-readable JSON status.",
     )
     advisory_status_parser.set_defaults(handler=run_advisory_status)
+
+    # ── pcae advisory context (Phase 122E) ───────────────────────────────
+    advisory_context_parser = advisory_subparsers.add_parser(
+        "context",
+        help="Repository Intelligence Advisory context assembly (read-only prototype).",
+    )
+    advisory_context_subparsers = advisory_context_parser.add_subparsers(
+        dest="advisory_context_command", required=True,
+    )
+
+    advisory_context_build_parser = advisory_context_subparsers.add_parser(
+        "build",
+        help=(
+            "Deterministically assemble a Repository Intelligence Advisory "
+            "context package via the Track 121 read-only Query Layer "
+            "(no reasoning, no decisions)."
+        ),
+    )
+    advisory_context_build_parser.add_argument(
+        "--snapshot",
+        required=True,
+        help="Path to an existing Repository Knowledge Snapshot artifact.",
+    )
+    advisory_context_build_target_group = advisory_context_build_parser.add_mutually_exclusive_group(
+        required=True
+    )
+    advisory_context_build_target_group.add_argument(
+        "--entity",
+        help="Assemble context for an architectural entity by exact id, name, or path.",
+    )
+    advisory_context_build_target_group.add_argument(
+        "--capability",
+        help="Assemble context for a capability by exact id or name.",
+    )
+    advisory_context_build_target_group.add_argument(
+        "--contract",
+        help="Assemble context for an architectural contract by exact id, name, or version.",
+    )
+    advisory_context_build_parser.add_argument(
+        "--purpose",
+        default=None,
+        help="Declared advisory purpose for this context request (default: synthesized).",
+    )
+    advisory_context_build_parser.add_argument(
+        "--output",
+        default=None,
+        help="Optional file path to also write the serialized context package to.",
+    )
+    advisory_context_build_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON context package to stdout.",
+    )
+    advisory_context_build_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Pretty-print JSON context package to stdout.",
+    )
+    advisory_context_build_parser.set_defaults(handler=run_advisory_context_build)
 
     # ── pcae dry-run (Phase 89C) ────────────────────────────────────────────
     dry_run_parser = subparsers.add_parser(

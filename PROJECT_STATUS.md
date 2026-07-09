@@ -2,41 +2,64 @@
 
 ## Current Phase
 
-Phase 122D — Repository Intelligence Advisory Consumption Prototype
-Plan (completed).
+Phase 122E — Repository Intelligence Advisory Context Prototype
+(completed).
 
-Defined the definitive implementation plan for the first Repository
-Intelligence Advisory Consumption prototype, documented in
-`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_PROTOTYPE_PLAN.md`.
-Plans a deterministic, read-only Advisory Context Builder that
-consumes Repository Intelligence exclusively through the Track 121
-Query Layer, scoped to Repository Knowledge Snapshot and Query Layer
-results only. Defines the nine-stage consumption pipeline (advisory
-request intake, query preparation, read-only Query Layer invocation,
-context selection, attribution preservation, limitation propagation,
-boundary disclosure propagation, context package assembly, advisory
-delivery); nine planned components (request intake, query preparation,
-query invocation, context selection, attribution preservation,
-limitation propagation, boundary disclosure propagation, context
-package assembly, advisory delivery) each with responsibility, inputs,
-outputs, and boundaries; the context package plan (selected Repository
-Intelligence, attribution bundle, limitation bundle, boundary
-disclosure bundle, advisory metadata); the query interaction plan
-(Track 121 Query Layer exclusive access); attribution, limitation, and
-boundary propagation plans; the fail-closed failure plan for missing
-Repository Intelligence, unsupported snapshot schema, invalid query
-response, missing attribution, missing limitation, missing boundary
-disclosure, and corrupted artifact; the 122F verification plan; 13
-measurable 122E acceptance criteria; risks and mitigations; and
-deferred capabilities. No implementation, source code, test code, or
-schema change occurred.
+Implemented the first deterministic, read-only Advisory Context
+Builder, documented in
+`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONTEXT_PROTOTYPE_IMPLEMENTATION.md`.
+Added `src/pcae/advisory/context/` (`context_request.py`,
+`context_validation.py`, `advisory_context_builder.py`,
+`context_package.py`, `context_serializer.py`) and the CLI command
+`pcae advisory context build`. The builder consumes Repository
+Intelligence exclusively through the existing Track 121
+`execute_query` entry point, using only its six existing supported
+query categories; it never reads a Repository Knowledge Snapshot
+artifact directly, never reruns the Track 120 generator, and never
+scans the repository. Assembles a `RepositoryIntelligenceContextPackage`
+(selected Repository Intelligence, attribution bundle, limitation
+bundle, boundary disclosure bundle, context metadata) — structurally
+independent from the frozen 115W `AdvisoryContextPackage`, which this
+phase does not modify or place content into. Preserves attribution and
+limitations unchanged, propagates boundary disclosures plus a
+package-level non-authority disclaimer, and fails closed for invalid
+context request, invalid Query Layer result, missing attribution,
+missing boundary disclosure, unsupported schema version, and corrupted
+Repository Intelligence. Added 21 focused tests; Query Layer (15) and
+Repository Knowledge Snapshot (14) regression tests remain unaffected;
+full `fast_green` suite passed 4390/4390. No Advisory reasoning,
+recommendations, or Decision Evaluation integration were introduced.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 122E — Repository Intelligence Advisory
-Context Prototype.
+Recommended next repo phase: 122F — Repository Intelligence Advisory
+Consumption Verification.
+
+## Phase 122E Complete
+
+Phase 122E — Repository Intelligence Advisory Context Prototype
+(completed).
+
+Implemented the first Advisory Context Builder: `src/pcae/advisory/context/`
+(context request/validation/builder/package/serializer) and `pcae
+advisory context build` CLI. Consumes Repository Intelligence
+exclusively via the Track 121 `execute_query` entry point (no new
+query category, no direct artifact access, `src/pcae/repository_intelligence/`
+untouched). Assembles a deterministic `RepositoryIntelligenceContextPackage`
+(distinct from the frozen 115W `AdvisoryContextPackage`, no section
+placement decided) preserving attribution, limitations, and boundary
+disclosures unchanged, plus a package-level non-authority disclaimer.
+Fails closed for invalid request, invalid Query Layer result, missing
+attribution, missing boundary disclosure, unsupported schema version,
+and corrupted artifact. 21 new focused tests; Query Layer and
+Repository Knowledge Snapshot regression suites pass unaffected;
+`fast_green` 4390/4390 passed. No Advisory reasoning, recommendations,
+or Decision Evaluation integration introduced. Runtime remains
+`Observed` / `observe` / execution unavailable. Recommended next
+phase: 122F — Repository Intelligence Advisory Consumption
+Verification.
 
 ## Phase 122D Complete
 
