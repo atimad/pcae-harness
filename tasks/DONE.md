@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 121B Repository Intelligence Query Contract Freeze (20260709-0742-phase-121b-repository-intelligence-query-contract-freeze)
 - Sync Phase 121A completion metadata (20260709-0553-sync-phase-121a-completion-metadata)
 - Phase 121A Repository Intelligence Query Layer Architecture (20260709-0547-phase-121a-repository-intelligence-query-layer-architecture)
 - Sync Phase 120F completion metadata (20260709-0257-sync-phase-120f-completion-metadata)

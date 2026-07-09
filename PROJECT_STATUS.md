@@ -2,39 +2,53 @@
 
 ## Current Phase
 
-Phase 121A — Repository Intelligence Query Layer Architecture
+Phase 121B — Repository Intelligence Query Contract Freeze
 (completed).
 
-Opened Track 121 by defining the architecture for a deterministic,
-read-only Repository Intelligence Query Layer: a consumption layer over
-previously generated Repository Intelligence artifacts, not a new
-generation, scanning, inference, or execution layer. Adds
-`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_LAYER_ARCHITECTURE.md`.
-Defines the transition from generated knowledge (Track 120's verified
-Repository Knowledge Snapshot) to deterministic knowledge consumption;
-relationships to the Phase 119 executable schemas, Repository State,
-Evidence, Advisory, and Decision Evaluation; the architectural scope
-and strict non-goals; eight conceptual layers (Query Interface, Query
-Validation, Snapshot Access, Query Evaluation, Result Assembly,
-Attribution, Limitation, Result Formatting); conceptual query request,
-context, scope, filters, projection, result, attribution, limitations,
-and disclaimers; supported input/output models; query categories
-(entity, capability, contract, source attribution, documentation,
+Froze the canonical Repository Intelligence Query Contract in
+`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_FREEZE.md`.
+The contract is binding for later Track 121 work and governs
+deterministic, read-only access to existing Repository Intelligence
+artifacts. It freezes the Query Layer as deterministic, read-only,
+artifact-consuming, observe-only, and non-reasoning; initially supports
+only Repository Knowledge Snapshot artifacts; defines conceptual query
+request and result models without syntax, grammar, parser, CLI, API,
+or implementation; freezes supported query categories (entity,
+capability, documentation, architectural contract, attribution,
 limitation, boundary, unknown/gap, artifact metadata lookup);
-determinism, attribution, boundary, failure, governance, and
-extensibility architecture; and the 121A-121F roadmap. No query engine,
-query parser, CLI, API, REST surface, Python model, validator, runtime
-plugin, repository scanner, Repository Intelligence generator, graph
-traversal, dependency analysis, change impact analysis, Advisory
-integration, execution planning, execution capability, source code,
-schema, or test change was introduced.
+establishes determinism, attribution, boundary, fail-closed failure,
+governance, and versioning contracts; documents future extensibility
+for Historical Memory, Dependency Knowledge Graph, Change Impact, and
+Advisory without coupling them into Track 121; and sequences 121C-121F.
+No query engine, parser, query language, CLI, REST, API, Python model,
+validator, runtime plugin, repository scanning, Repository Intelligence
+generation, graph traversal, dependency analysis, change impact
+analysis, Advisory integration, execution planning, execution
+capability, source code, schema, or test change was introduced.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 121B — Repository Intelligence Query
-Contract Freeze.
+Recommended next repo phase: 121C — Repository Intelligence Query
+Contract Verification.
+
+## Phase 121B Complete
+
+Phase 121B — Repository Intelligence Query Contract Freeze
+(completed).
+
+Froze the canonical contract for deterministic, read-only querying of
+existing Repository Intelligence artifacts. The Query Layer remains a
+bounded artifact-consumption layer only: it may read supported
+Repository Knowledge Snapshot artifacts, perform deterministic lookup,
+filtering, selection, and formatting, and preserve attribution,
+limitations, boundary disclosures, and metadata. It may not become a
+reasoning engine, generate or modify Repository Intelligence, scan
+repositories, invoke AI providers, invoke Advisory, perform Decision
+Evaluation, perform graph/dependency/change-impact reasoning, change
+runtime behavior, or introduce execution. Recommended next phase:
+121C — Repository Intelligence Query Contract Verification.
 
 ## Phase 121A Complete
 

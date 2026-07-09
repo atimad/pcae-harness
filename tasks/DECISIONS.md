@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- Treat Phase 121B as a documentation-only contract freeze for the
+  Repository Intelligence Query Layer: freeze deterministic, read-only,
+  artifact-consuming, observe-only access to existing Repository
+  Intelligence artifacts, with initial support limited to Repository
+  Knowledge Snapshot artifacts. Define conceptual query request and
+  result models, supported query categories, determinism, attribution,
+  boundary, failure, governance, versioning, extensibility, and future
+  phase sequencing without implementing syntax, grammar, parser, CLI,
+  REST/API, Python models, validators, runtime plugins, repository
+  scanning, Repository Intelligence generation, graph traversal,
+  dependency analysis, change impact analysis, Advisory integration,
+  execution planning, or execution capability. Recommended next phase:
+  121C - Repository Intelligence Query Contract Verification.
+
 - Treat Phase 121A as architecture-only for a Repository Intelligence
   Query Layer: define deterministic, read-only consumption of existing
   Repository Intelligence artifacts without implementing a query
