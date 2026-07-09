@@ -2,38 +2,60 @@
 
 ## Current Phase
 
-Phase 123C — Repository Intelligence Change Impact Contract Verification
+Phase 123D — Repository Intelligence Change Impact Prototype Plan
 (completed).
 
-Independently verified the canonical Repository Intelligence Change
-Impact Contract,
+Defined the implementation plan for the first deterministic Repository
+Intelligence Change Impact prototype,
 documented in
-`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_VERIFICATION.md`.
-Verified contract completeness, architectural consistency against 123A
-and Tracks 119-122, strict scope containment, Change Impact
-responsibility boundaries, Query Layer exclusivity, change request and
-Change Impact Report models, attribution preservation, limitation
-propagation, boundary disclosure preservation, determinism,
-fail-closed failure coverage, governance compatibility, compatibility
-with prior Repository Intelligence tracks, inherited issue handling,
-strict non-goals, and readiness for 123D-123F. Classified the contract
-as complete, internally consistent, deterministic, architecturally
-aligned, governance compatible, and implementation ready. Recorded one
-implementation-planning clarification: 123D/123E must remain within the
-current Query Layer capabilities unless a future Track 121 contract
-amendment is explicitly introduced. No contract modification was
-required. No Change Impact engine, dependency graph traversal,
-recommendations, Advisory reasoning, Decision Evaluation, Repository
-Intelligence generation, repository scanning, runtime plugins,
-execution planning, execution capability, source code, test code, or
-schema change occurred.
+`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_PLAN.md`.
+The planned prototype is a deterministic, read-only Change Impact
+Builder that consumes Repository Intelligence exclusively through the
+Track 121 Query Layer and produces deterministic Change Impact Reports.
+The plan defines prototype objective, scope, a nine-stage pipeline,
+conceptual implementation components with responsibilities/inputs/
+outputs/boundaries, change request model, Change Impact Report
+structure, Query Layer interaction plan, attribution preservation plan,
+limitation propagation plan, boundary disclosure propagation plan,
+fail-closed failure plan, 123F verification plan, measurable 123E
+acceptance criteria, risks and mitigations, deferred capabilities,
+known inherited issues, and strict non-goals. It explicitly keeps 123E
+within current Query Layer capabilities; unsupported relationship
+discovery must be reported as a limitation or fail closed, not worked
+around by direct artifact access or Track 123 query expansion. No
+Change Impact engine, dependency graph traversal, recommendations,
+Advisory reasoning, Decision Evaluation, Repository Intelligence
+generation, repository scanning, runtime plugins, execution planning,
+execution capability, source code, test code, or schema change
+occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 123D — Repository Intelligence Change
-Impact Prototype Plan.
+Recommended next repo phase: 123E — Repository Intelligence Change
+Impact Prototype.
+
+## Phase 123D Complete
+
+Phase 123D — Repository Intelligence Change Impact Prototype Plan
+(completed).
+
+Defined the implementation plan for the first deterministic, read-only
+Change Impact Builder prototype. The plan scopes 123E to Repository
+Knowledge Snapshot artifacts consumed exclusively through Track 121
+Query Layer results, with no Historical Memory, Dependency Knowledge
+Graph, other Repository Intelligence artifact families, graph
+traversal, relationship inference, repository scanning, direct artifact
+access, or Query Layer contract expansion. It defines the nine-stage
+pipeline, conceptual components, change request plan, report structure
+plan, query interaction plan, attribution/limitation/boundary
+propagation plans, fail-closed failure plan, 123F verification plan,
+123E acceptance criteria, risks and mitigations, deferred capabilities,
+known inherited issues, and strict non-goals. No implementation, source
+code, test code, or schema change occurred. Runtime remains `Observed`
+/ `observe` / execution unavailable. Recommended next phase: 123E —
+Repository Intelligence Change Impact Prototype.
 
 ## Phase 123C Complete
 

@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- Phase 123D - Repository Intelligence Change Impact Prototype Plan
+  (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_PLAN.md`).
+  Defines the implementation plan for the first deterministic,
+  read-only Repository Intelligence Change Impact Builder prototype.
+  The planned builder consumes Repository Intelligence exclusively
+  through the Track 121 Query Layer and produces deterministic Change
+  Impact Reports without reasoning, prioritization, recommendation, or
+  decision making. Scopes the prototype to Repository Knowledge
+  Snapshot and Track 121 Query Layer results only, with no Historical
+  Memory, Dependency Knowledge Graph, other Repository Intelligence
+  artifact families, graph traversal, relationship inference,
+  repository scanning, direct artifact access, or Query Layer contract
+  expansion. Defines the nine-stage pipeline (change request intake,
+  query request preparation, Query Layer invocation, candidate impact
+  identification, attribution preservation, limitation propagation,
+  boundary disclosure propagation, report assembly, report delivery);
+  conceptual components and their responsibilities/inputs/outputs/
+  boundaries; change request and Change Impact Report plans; query
+  interaction plan; attribution, limitation, and boundary propagation
+  plans; fail-closed failure plan; 123F verification plan; measurable
+  123E acceptance criteria; risks and mitigations; deferred
+  capabilities; known inherited issues; and strict non-goals. Carries
+  forward inherited lifecycle/tooling issues unchanged: 119Q
+  report-generation-ordering defect, 119AB phase-id comparison bug,
+  recurring `pending_final_telegram_delivery` reporting detail, GitHub
+  main-branch PR-rule bypass notification, and missing
+  `PCAE_NOTIFY_ENABLED` during governed push environment. Does not
+  implement a Change Impact engine, dependency graph traversal,
+  recommendations, Advisory reasoning, Decision Evaluation, Repository
+  Intelligence generation, repository scanning, runtime plugins,
+  execution planning, execution capability, source code, test code, or
+  schema changes. Recommends 123E.
+
 - Phase 123C - Repository Intelligence Change Impact Contract
   Verification
   (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_VERIFICATION.md`).

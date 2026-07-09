@@ -2,6 +2,26 @@
 
 ## Accepted
 
+- Treat Phase 123D as the implementation-planning phase for the first
+  deterministic Repository Intelligence Change Impact prototype: plan a
+  read-only Change Impact Builder that consumes Repository Intelligence
+  exclusively through Track 121 Query Layer results and produces
+  deterministic Change Impact Reports, with no reasoning,
+  prioritization, recommendations, Decision Evaluation, Repository
+  Intelligence generation, repository scanning, runtime plugins,
+  execution planning, or execution capability. Scope 123E to Repository
+  Knowledge Snapshot and current Query Layer capabilities only; if
+  relationship discovery cannot be supported by current Query Layer
+  results, the prototype must report a limitation or fail closed rather
+  than bypass the Query Layer or expand Track 123 authority. Define the
+  pipeline, conceptual components, change request/report plans, query
+  interaction plan, attribution/limitation/boundary propagation plans,
+  failure plan, 123F verification plan, 123E acceptance criteria,
+  risks/mitigations, deferred capabilities, inherited issues, and
+  strict non-goals. Introduce no implementation, source code change,
+  test code change, or schema change. Recommended next phase: 123E -
+  Repository Intelligence Change Impact Prototype.
+
 - Treat Phase 123C as the independent verification phase for the 123B
   Repository Intelligence Change Impact Contract: verify contract
   completeness, architectural consistency against 123A and Tracks
