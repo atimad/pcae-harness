@@ -1,16 +1,16 @@
 {
-  "attribution_verification": "Not applicable to this documentation-only phase. No source, test, or schema code changed.",
-  "boundary_disclosure_verification": "Preserved. The 125G assessment explicitly reconfirms in its Confirmations section that no implementation occurred and execution remains unavailable, and its Section 2 (Scope) explicitly excludes designing an execution planner, workflow, engine, shell mediation, runtime execution, or permission enforcement changes.",
-  "commit_attribution": "61e3cd6b, db20053c",
-  "compatibility_assessment": "No schema, CLI, source, or test files changed. Documentation-only phase; readiness assessment does not design or implement Execution Planning.",
-  "determinism_verification": "Not applicable to this documentation-only phase. No generator, query, or consumer code was touched.",
+  "attribution_verification": "Not applicable to this architecture-only phase. No source, test, or schema code changed.",
+  "boundary_disclosure_verification": "Preserved. The 126A architecture explicitly reconfirms boundary disclosures, limitation propagation, and fail-closed behavior in its Boundary Architecture and Failure Architecture sections, unchanged from the frozen 119S/119T schema.",
+  "commit_attribution": "1a7d724b, b84f0a62",
+  "compatibility_assessment": "No schema, CLI, source, or test files changed. Architecture-only phase; adopts the already-frozen 119S/119T node/edge taxonomy without modification.",
+  "determinism_verification": "Not applicable to this architecture-only phase. No generator, query, or consumer code was touched.",
   "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable, Permission Broker status remains execution_unavailable, and zero runtime plugins are registered (re-verified via pcae runtime inspect).",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_125_EXECUTION_PLANNING_READINESS_ASSESSMENT.md",
+    "docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md",
     "tasks/DONE.md",
-    "tasks/done/20260709-2146-phase-125g-execution-planning-readiness-assessment.md"
+    "tasks/done/20260709-2158-phase-126a-dependency-knowledge-graph-architecture.md"
   ],
   "files_changed_count": 5,
   "governance_results": [
@@ -39,17 +39,17 @@
       "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
     }
   ],
-  "readiness_assessment_findings": [
-    "canonical architectural readiness assessment produced for a future Execution Planning chapter",
-    "grounded in direct inspection of Decision Evaluation (115E), Permission Broker (88R), approval gate, rollback model, audit model, and runtime registry source files",
-    "governance/permission/runtime models found substantially built, deterministic, fail-closed, and execution-compatible by design but unproven against real execution",
-    "structural dependency knowledge (Dependency Knowledge Graph) found schema-only, the largest identified gap",
-    "readiness checklist and Not Ready / Conditionally Ready / Ready decision model defined",
-    "current determination: Not Ready, explicitly because prerequisite knowledge maturity is incomplete, not because execution is architecturally incompatible with PCAE",
-    "confirmed Track 126 (Dependency Knowledge Graph) directly targets the largest identified readiness gap",
-    "no Execution Planning design occurred"
+  "architecture_findings": [
+    "Dependency Knowledge Graph defined as a second, complementary Repository Intelligence artifact family, derivative of and subordinate to Repository Knowledge Snapshot",
+    "adopted the already-frozen 119S/119T node_type and edge_type enums as the graph taxonomy rather than inventing a new one",
+    "mapped conceptual node/edge categories onto the frozen enums and identified taxonomy gaps (class/function nodes, containment edges) for 126B to resolve explicitly",
+    "explicitly resolved 125F's named first-responsibility question: graph_generation_method_disclosure does not block a real generator, it guards against a declared-but-unbuilt graph falsely implying automated construction",
+    "defined graph invariants: deterministic, acyclic-where-required (reported not enforced), stable identifiers, provenance preserved, relationship attribution preserved, boundary preservation, limitation propagation, reproducible construction",
+    "defined provenance architecture, boundary architecture, conceptual versioning strategy, seven-stage conceptual construction pipeline, and fail-closed failure architecture",
+    "confirmed graph must consume Repository Intelligence exclusively through the existing Track 121 Query Layer",
+    "no implementation occurred"
   ],
-  "implementation_summary": "Created the canonical architectural readiness assessment defining prerequisites for a future Execution Planning chapter, grounded in direct inspection of every relevant subsystem. Documentation-only: readiness assessment only, no Execution Planning design, no implementation occurred.",
+  "implementation_summary": "Defined the canonical architecture for the Dependency Knowledge Graph, opening Track 126 (selected in 125F). Architecture-only: no generator, traversal, Query Layer change, consumer change, schema change, source code, or test code.",
   "inherited_issue_classification": [
     "119Q report-generation-ordering defect - lifecycle/tooling debt, not repaired",
     "119AB phase-id comparison bug - lifecycle/tooling debt, not repaired",
@@ -57,10 +57,10 @@
     "GitHub main-branch PR-rule bypass notification - repository hosting policy reporting detail, not repaired",
     "Missing PCAE_NOTIFY_ENABLED during governed push environment - notification environment detail, not repaired"
   ],
-  "limitation_verification": "Not applicable to this documentation-only phase. No source, test, or schema code changed.",
+  "limitation_verification": "Not applicable to this architecture-only phase. No source, test, or schema code changed.",
   "missing_trust_fields": [],
-  "new_capability_confirmation": "No new architectural chapter, Execution Planning capability, execution engine, shell mediation, execution broker, runtime plugin, or schema change occurred. Readiness was assessed, not implemented.",
-  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No runtime behavior changed. No execution capability was introduced. No runtime left observe-only posture. No schema files changed. No source code changed. No test code changed. No Execution Planning was designed or implemented. No execution engine was introduced. No shell mediation was introduced. No execution broker was introduced. No runtime plugins were introduced.",
+  "new_capability_confirmation": "No new Repository Intelligence capability was introduced. No graph builder, graph storage, graph traversal, graph queries, graph database, graph serialization, graph reasoning, execution planning, execution capability, runtime plugin, or schema change occurred.",
+  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No runtime behavior changed. No execution capability was introduced. No runtime left observe-only posture. No schema files changed. No source code changed. No test code changed. No graph builder was implemented. No graph traversal was implemented. No graph database was introduced. No graph reasoning was introduced. No execution planning was introduced. No runtime plugins were introduced.",
   "no_go_confirmations": [
     "No No-Go conditions triggered.",
     "No implementation occurred.",
@@ -70,30 +70,31 @@
     "Schemas unchanged.",
     "No source code changed.",
     "No test code changed.",
-    "No Execution Planning was designed or implemented.",
-    "No execution engine was introduced.",
-    "No shell mediation was introduced.",
-    "No execution broker was introduced.",
+    "No graph builder was implemented.",
+    "No graph traversal was implemented.",
+    "No graph database was introduced.",
+    "No graph reasoning was introduced.",
+    "No execution planning was introduced.",
     "No runtime plugins were introduced."
   ],
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "61e3cd6b",
-      "message": "Phase 125G: Execution Planning Readiness Assessment"
+      "hash": "1a7d724b",
+      "message": "Phase 126A: Dependency Knowledge Graph Architecture"
     },
     {
-      "hash": "db20053c",
-      "message": "Finish Phase 125G task"
+      "hash": "b84f0a62",
+      "message": "Finish Phase 126A task"
     }
   ],
-  "phase_id": "125G",
-  "phase_name": "Execution Planning Readiness Assessment",
-  "phase_title": "Execution Planning Readiness Assessment",
+  "phase_id": "126A",
+  "phase_name": "Dependency Knowledge Graph Architecture",
+  "phase_title": "Dependency Knowledge Graph Architecture",
   "pushed_status": "pushed",
-  "recommended_next_phase": "126A - Dependency Knowledge Graph Architecture",
-  "recommended_next_phase_id": "126A",
-  "recommended_next_phase_name": "Dependency Knowledge Graph Architecture",
+  "recommended_next_phase": "126B - Dependency Knowledge Graph Contract Freeze",
+  "recommended_next_phase_id": "126B",
+  "recommended_next_phase_name": "Dependency Knowledge Graph Contract Freeze",
   "regression_results": [],
   "report_completeness": "complete",
   "report_notification_status": "pending_final_telegram_delivery",
@@ -101,19 +102,19 @@
   "schema_change_confirmation": "No schema files changed.",
   "source_files_changed": 0,
   "status": "completed",
-  "summary": "Documentation phase. Created the canonical architectural readiness assessment for a future Execution Planning chapter. Determination: Not Ready, because prerequisite knowledge maturity is incomplete, not architectural incompatibility. Confirms Track 126 targets the largest identified gap. No implementation occurred.",
+  "summary": "Architecture phase. Defined the canonical architecture for the Dependency Knowledge Graph, opening Track 126. Adopted the frozen 119S/119T taxonomy, resolved the graph-generation-disclosure question, and defined invariants, provenance, boundary, versioning, and construction-pipeline architecture. No implementation occurred.",
   "test_files_changed": 0,
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
-    "fast_green": "not_run_documentation_only_governance_validation_only",
+    "fast_green": "not_run_architecture_only_governance_validation_only",
     "report_notification_tests": "pending_final_telegram_delivery"
   },
-  "tests_added_or_updated": "No new tests added. Documentation-only phase.",
+  "tests_added_or_updated": "No new tests added. Architecture-only phase.",
   "tests_run": 0,
   "validation_results": [
     {
       "name": "fast_green",
-      "result": "not_run_documentation_only_governance_validation_only",
+      "result": "not_run_architecture_only_governance_validation_only",
       "status": "not_applicable"
     },
     {
@@ -153,7 +154,7 @@
     },
     {
       "name": "phase_finalization_skill",
-      "result": "phase_finalization_125G_target_resolved",
+      "result": "phase_finalization_126A_target_resolved",
       "status": "passed"
     },
     {

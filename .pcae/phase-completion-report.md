@@ -1,101 +1,107 @@
-# Phase 125G Complete - Execution Planning Readiness Assessment
+# Phase 126A Complete - Dependency Knowledge Graph Architecture
 
-- **Phase ID:** `125G`
-- **Phase name:** Execution Planning Readiness Assessment
+- **Phase ID:** `126A`
+- **Phase name:** Dependency Knowledge Graph Architecture
 - **Status:** completed
 - **Report completeness:** complete
-- **Assessment document:** `docs/PHASE_125_EXECUTION_PLANNING_READINESS_ASSESSMENT.md`
+- **Architecture document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Assessment commit:** `61e3cd6b`
-- **Task finish commit:** `db20053c`
-- **Recommended next phase:** 126A - Dependency Knowledge Graph Architecture
+- **Architecture commit:** `1a7d724b`
+- **Task finish commit:** `b84f0a62`
+- **Recommended next phase:** 126B - Dependency Knowledge Graph Contract Freeze
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Readiness Assessment Summary
+## Architecture Summary
 
-Created the canonical architectural readiness assessment defining
-prerequisites for a future Execution Planning chapter, grounded in
-direct inspection of every relevant subsystem rather than assumption.
-This is a readiness assessment only — it does not design an execution
-planner, workflow, engine, shell mediation, runtime execution, or any
-permission enforcement change.
+Defined the canonical architecture for the Dependency Knowledge Graph,
+opening Track 126 (selected in 125F). Clarified the distinction between
+Repository Intelligence ("what exists?") and the Dependency Knowledge
+Graph ("how are those things related?"). Architecture-only: no
+generator, traversal, Query Layer change, consumer change, schema
+change, source code, or test code.
 
-## Architectural Prerequisites
+## Graph Objectives
 
-Repository Intelligence, Advisory Context, and Change Impact are
-mature and satisfied. Dependency Knowledge Graph and Historical Memory
-are schema-frozen but ungenerated — the largest identified gaps.
-Repository Observation model is mature at the passive/inspectable
-level appropriate to an observe-only runtime.
+Deterministic relationship modeling, reproducible graph construction,
+explainable relationships, provenance preservation, auditability,
+governance compatibility, honest structural completeness reporting,
+and compatibility with Repository Intelligence via the Track 121 Query
+Layer boundary.
 
-## Governance Prerequisites
+## Node Taxonomy
 
-Decision Evaluation (115E, 593 lines) is a mature, deterministic,
-evidence-only invariant engine. Auditability, reproducibility,
-explainability, and fail-closed behavior are all satisfied across
-every governance subsystem inspected. Permission and approval
-governance are mature at the read-only decision-aggregator/model level.
+Adopted the already-frozen 119S/119T `node_type` enum (repository,
+package, module, file, document, schema, command, configuration, test,
+task, phase, release, runtime_component, advisory_component,
+evidence_artifact, repository_skill, contract, unknown) rather than
+inventing a new one. Mapped conceptual categories (class, function,
+artifact, plugin, report) onto it and identified gaps for 126B to
+resolve explicitly.
 
-## Runtime Prerequisites
+## Edge Taxonomy
 
-Runtime registry (110E, 464 lines) is explicitly "passive... never
-loads, imports, instantiates, invokes, or executes a plugin" —
-metadata-only by design. Runtime inspection, plugin governance, and
-health verification are all satisfied for an observe-only runtime.
+Adopted the already-frozen 119S/119T `edge_type` enum (depends_on,
+references, documents, tests, configures, governs, produces, consumes,
+verifies, supersedes, related_to, derived_from, unknown). Mapped
+conceptual relationships (contains, imports, generates, implements,
+attributed_to) onto it and identified gaps.
 
-## Permission Prerequisites
+## Graph Invariants
 
-Permission Broker (88R, ~1950 lines combined) is a mature read-only
-decision aggregator. Approval gate, rollback model
-(`enforcement_rollback.py`, explicitly "simulation-only"), and audit
-model (`enforcement_audit.py`, explicitly "simulation-only") all exist
-as real, well-developed code, but none has been exercised against real
-execution, since none has ever occurred.
+Deterministic, acyclic-where-required (reported, not enforced), stable
+identifiers, provenance preserved, relationship attribution preserved,
+boundary preservation, limitation propagation, reproducible
+construction.
 
-## Safety Prerequisites
+## Provenance Architecture
 
-Human approval remains authoritative by design and by absence of
-counter-evidence. Bounded authority, transparent decision chain, and
-fail-closed behavior are all satisfied. Deterministic planning and
-explainable planning cannot yet be assessed since no planning
-representation exists — expected at this readiness stage, not a gap.
+Every node, edge, and dependency claim requires source attribution,
+optional derivation records, optional evidence links, verification
+state, and limitations — unchanged from the frozen schema's existing
+requirements.
 
-## Execution Readiness Checklist
+## Relationship with Repository Intelligence
 
-Twelve-item checklist produced (Section 9 of the assessment). Two items
-unsatisfied (Dependency Knowledge Graph, Historical Memory); four
-partially satisfied at the simulation/model level (Change Impact's
-structural depth, rollback, audit chain, cross-component verification);
-six satisfied.
+Repository Intelligence remains the source of observed facts. The
+graph derives structural relationships from Repository Intelligence
+through the Track 121 Query Layer exclusively. Repository Intelligence
+remains authoritative; the graph is derivative.
 
-## Current Readiness Determination
+## Relationship with Query Layer
 
-**Not Ready.** Explicitly because prerequisite architectural
-capabilities (chiefly structural dependency knowledge) have not yet
-reached the required maturity — not because execution is
-architecturally incompatible with PCAE. Every governance/permission/
-runtime subsystem inspected was deliberately built to be
-execution-compatible in its design.
+Conceptually anticipated future query categories (node lookup, edge
+lookup, relationship lookup, boundary/limitation lookup) mirroring the
+six categories already supported for Repository Knowledge Snapshot. No
+query implementation occurred.
 
-## Explanation: Why Execution Planning Is Deferred
+## Relationship with Advisory Context
 
-Structural dependency knowledge does not yet exist as generated,
-queryable data, and the governance/permission models that do exist
-have not yet been exercised against any real execution event. Execution
-Planning remains a planned future chapter, evaluated as a legitimate
-candidate in 125E and deliberately not rejected in 125F.
+Advisory may eventually consume graph relationships through the same
+bounded Query Layer path it already uses for Repository Knowledge
+Snapshot content. No Advisory reasoning implemented or implied.
 
-## Explanation: Why Dependency Knowledge Graph Precedes Execution Planning
+## Relationship with Change Impact
 
-Dependency Knowledge Graph directly strengthens the structural
-knowledge foundation identified as the largest concrete readiness gap.
-Track 126's success will directly move the "Dependency Knowledge Graph
-mature" and "Change Impact mature" checklist items from unsatisfied/
-partial to satisfied — the most direct readiness improvement any
-candidate evaluated in 125E could make.
+Structural relationships may eventually let Change Impact replace its
+flat entity-model impact identification with real relationship
+traversal. No impact reasoning or traversal algorithm implemented.
+
+## graph_generation_method_disclosure Resolution
+
+Explicitly resolved 125F's named first-responsibility question: the
+existing schema field is a required free-text declaration that guards
+against a declared-but-unbuilt graph falsely implying automated
+construction — it does not block a real generator. A future generator
+honestly describing its own deterministic process is fully
+schema-compliant, with no schema amendment needed.
+
+## Governance Compatibility
+
+Deterministic behavior, auditability, reproducibility, explainability,
+and execution-unavailable boundary all preserved and reconfirmed.
 
 ## Governance Results
 
@@ -105,6 +111,12 @@ candidate evaluated in 125E could make.
 - **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **telegram_runtime:** configured and enabled after sourcing `~/.config/pcae/telegram.env`
+
+## Deferred Capabilities
+
+Graph implementation (generator), graph traversal, graph database,
+graph reasoning, inference engine, dependency prediction, execution
+planning, execution capability.
 
 ## Confirmations
 
@@ -124,5 +136,6 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The Execution Planning readiness assessment is complete and canonical.
-Recommended next phase: 126A - Dependency Knowledge Graph Architecture.
+The Dependency Knowledge Graph architecture is complete and ready for
+contract freeze. Recommended next phase: 126B - Dependency Knowledge
+Graph Contract Freeze.
