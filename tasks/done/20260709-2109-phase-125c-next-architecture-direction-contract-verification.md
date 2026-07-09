@@ -10,7 +10,7 @@ Phase 125C Next Architecture Direction Contract Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
