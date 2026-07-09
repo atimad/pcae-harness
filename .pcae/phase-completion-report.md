@@ -1,100 +1,88 @@
-# Phase 126C Complete - Dependency Knowledge Graph Contract Verification
+# Phase 126D Complete - Dependency Knowledge Graph Prototype Plan
 
-- **Phase ID:** `126C`
-- **Phase name:** Dependency Knowledge Graph Contract Verification
+- **Phase ID:** `126D`
+- **Phase name:** Dependency Knowledge Graph Prototype Plan
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_VERIFICATION.md`
+- **Plan document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_PLAN.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Verification commit:** `52d97903`
-- **Task finish commit:** `e372d049`
-- **Recommended next phase:** 126D - Dependency Knowledge Graph Prototype Plan
+- **Plan commit:** `8bccb487`
+- **Task finish commit:** `52ec5305`
+- **Recommended next phase:** 126E - Dependency Knowledge Graph Prototype
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Verification Summary
+## Implementation Plan Summary
 
-Independently verified the Phase 126B Dependency Knowledge Graph
-Contract for completeness, internal consistency, determinism,
-governance compatibility, and implementation readiness. Every enum,
-const string, and required-field claim in 126B was independently
-re-derived from the actual frozen
-`dependency_knowledge_graph_snapshot.schema.json` (119S/119T) rather
-than trusted — all matched exactly.
+Produced the definitive implementation plan for the first
+deterministic, read-only Dependency Knowledge Graph Builder, grounded
+in direct inspection of the real Track 120 generator source
+(`snapshot_builder.py`) rather than conceptual reasoning alone. This
+surfaced that Repository Knowledge Snapshot's `entity_type` vocabulary
+and the graph's `node_type` vocabulary are two different enums
+requiring explicit translation, and that the current generator's
+`module`-for-directories convention means a v1 graph will contain
+almost exclusively path-containment edges since Track 120 does not yet
+declare import/dependency relationships.
 
-## Contract Completeness Assessment
+## Graph Construction Pipeline
 
-Verified, with clarification. All required contract areas present.
-Two documentation completeness gaps found relative to 126A's own
-architectural basis (see Findings).
+Twelve stages: input validation, Repository Intelligence loading,
+entity extraction, relationship extraction, graph construction,
+metadata attachment, provenance attachment, limitation attachment,
+boundary attachment, graph validation, deterministic serialization,
+persistence.
 
-## Node Taxonomy Verification
+## Graph Model Summary
 
-Verified. `node_type` enum independently re-read and confirmed
-byte-for-byte match to 126B's quotation. Completeness, uniqueness,
-stability, overlap handling, and extensibility all confirmed sound.
+Node mapping table resolves every conceptual node category (repository,
+directory, file, module, class, function, artifact, schema, command,
+runtime component, documentation entity) against both the real RKS
+`entity_type` vocabulary and the frozen DKG `node_type` enum. Class and
+function remain out of v1 scope. Edge mapping table resolves every
+conceptual edge category against the frozen `edge_type` enum per
+126B's resolutions, with an explicit finding that `imports`-derived
+edges cannot be produced by the current builder since Track 120 does
+not parse import statements.
 
-## Edge Taxonomy Verification
+## Validation Strategy
 
-Verified. `edge_type` enum independently re-read and confirmed match.
-Semantic clarity, uniqueness, directionality, and evidence
-requirements all confirmed sound.
+Unique node/edge identifiers, valid edge endpoints, valid node/edge
+categories, deterministic ordering, metadata/provenance/limitation/
+boundary completeness — all fail closed on violation.
 
-## Graph Invariant Verification
+## Serialization Strategy
 
-Verified. All eight required invariants (deterministic, reproducible,
-provenance preserving, limitation preserving, boundary preserving,
-stable identity, version compatible, fail closed) present and
-internally sound.
+Reuses Track 124's `serialize_deterministic_json` (resolving 126C
+Finding 2). Equivalent inputs produce equivalent outputs except
+approved timestamps.
 
-## Provenance Verification
+## Failure Strategy
 
-Verified. Independently confirmed `source_attribution`,
-`verification_state`, and `limitations` are schema-level required
-fields on `graph_node`, `graph_edge`, and `dependency_claim` — not
-merely asserted by 126B's text.
+Fail closed for invalid Repository Intelligence artifacts, unsupported
+schema versions, missing provenance/limitations/boundary disclosures,
+duplicate identifiers, invalid references, and serialization failures.
+No fail-open path exists.
 
-## Determinism Verification
+## Compatibility Confirmation
 
-Verified. No path exists in 126B's text for nondeterministic
-relationship creation.
+Compatible with Tracks 119-123; none modified by this plan.
 
-## Compatibility Verification
+## Incorporation of 126C Findings
 
-Verified, with clarification. Compatible with Tracks 119-123 and 125
-as explicitly stated or appropriately located. Track 124 informally
-referenced but not explicitly enumerated as a compatibility target
-(Finding 2).
+All three findings explicitly resolved: edge-identifier stability
+algorithm defined (Finding 1); Track 124 serialization/validation
+helper reuse planned (Finding 2); explicit `graph_completeness_state:
+partial` requirement for v1 output (Finding 3).
 
-## Governance Compatibility
+## Deferred Capabilities
 
-Verified. Deterministic behavior, auditability, explainability,
-reproducibility, and execution-unavailable boundary all confirmed with
-concrete, checkable justifications.
-
-## Findings
-
-Three minor, non-blocking documentation completeness gaps:
-
-1. Edge-identifier (`edge_id`) stability not explicitly named
-   alongside node-identifier stability — implicitly covered by the
-   Determinism Contract's plural "identifiers."
-2. Track 124 not explicitly enumerated in the Compatibility Contract
-   despite being a natural source of reusable serialization/validation
-   helpers.
-3. `graph_completeness_state`, a named 126A architectural objective,
-   not re-frozen as its own explicit 126B requirement — implicitly
-   covered by the Provenance Contract's general honesty requirement.
-
-None required a contract amendment. All three carried forward as
-explicit recommendations for 126D.
-
-## Implementation Readiness Determination
-
-The contract is sufficient to begin 126D — Dependency Knowledge Graph
-Prototype Plan.
+Graph traversal, dependency reasoning, change impact reasoning beyond
+existing Track 123 capabilities, Historical Memory integration,
+Advisory reasoning, Decision Evaluation, execution planning, execution
+capability, AI reasoning, graph database integration.
 
 ## Governance Results
 
@@ -123,6 +111,6 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The Dependency Knowledge Graph contract is independently verified and
-implementation-ready. Recommended next phase: 126D - Dependency
-Knowledge Graph Prototype Plan.
+The Dependency Knowledge Graph Prototype Plan is complete and ready
+for implementation. Recommended next phase: 126E - Dependency
+Knowledge Graph Prototype.
