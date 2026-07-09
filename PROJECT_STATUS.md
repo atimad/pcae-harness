@@ -2,22 +2,27 @@
 
 ## Current Phase
 
-Phase 121C — Repository Intelligence Query Contract Verification
+Phase 121D — Repository Intelligence Query Prototype Plan
 (completed).
 
-Independently verified the frozen Repository Intelligence Query
-Contract in
-`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_VERIFICATION.md`.
-Confirmed the 121B contract is complete, internally consistent,
-deterministic, architecturally aligned with 121A, compatible with the
-Track 120 Repository Knowledge Snapshot and Track 119 executable schema
-line, governance compatible, and ready for implementation planning in
-121D. Verified request and result models, supported bounded query
-categories, determinism, attribution preservation, boundary exclusions,
-fail-closed behavior, versioning expectations, and future phase
-readiness. No contract modifications were required. One planning
-clarification was recorded for 121D: select the exact first supported
-Repository Knowledge Snapshot schema version in the prototype plan.
+Produced the definitive implementation plan for the first Repository
+Intelligence Query Layer prototype in
+`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_PLAN.md`.
+The planned 121E prototype is scoped exclusively to deterministic,
+read-only querying of existing Repository Knowledge Snapshot artifacts,
+with first supported executable schema version
+`119O.1.0-json-schema`. The plan defines the prototype objective,
+scope, ten-stage query pipeline, conceptual component responsibilities,
+bounded request model, deterministic result obligations, snapshot
+compatibility plan, attribution plan, unknown handling, fail-closed
+failure handling, read-only persistence interaction, 121F verification
+strategy, measurable 121E acceptance criteria, risks and mitigations,
+and deferred capabilities. No additional Repository Intelligence
+artifact family is included; Historical Memory Snapshot, Dependency
+Knowledge Graph Snapshot, Change Impact Report, Advisory Context
+Package, Query Result persistence, query language, graph traversal,
+dependency reasoning, change impact reasoning, Advisory integration,
+execution planning, and execution capability remain deferred.
 No query engine, parser, query language, CLI, REST, API, Python model,
 validator, runtime plugin, repository scanning, Repository Intelligence
 generation, graph traversal, dependency analysis, change impact
@@ -28,8 +33,27 @@ capability, source code, schema, or test change was introduced.
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 121D — Repository Intelligence Query
-Prototype Plan.
+Recommended next repo phase: 121E — Repository Intelligence Read-Only
+Query Prototype.
+
+## Phase 121D Complete
+
+Phase 121D — Repository Intelligence Query Prototype Plan
+(completed).
+
+Produced the implementation plan for the first deterministic,
+read-only Repository Intelligence Query prototype. The plan resolves
+the 121C planning clarification by selecting Repository Knowledge
+Snapshot executable schema version `119O.1.0-json-schema` as the first
+supported version. It defines a ten-stage query pipeline, conceptual
+components, bounded lookup/filter/projection requests, deterministic
+result obligations, snapshot compatibility handling, attribution
+preservation, unknown/missing/incomplete/conflicting data handling,
+fail-closed behavior, read-only interaction with persisted snapshots,
+121F verification surfaces, 121E acceptance criteria, risks,
+mitigations, deferred capabilities, and strict non-goals. No
+implementation occurred. Recommended next phase: 121E — Repository
+Intelligence Read-Only Query Prototype.
 
 ## Phase 121C Complete
 

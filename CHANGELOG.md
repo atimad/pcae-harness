@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 121D - Repository Intelligence Query Prototype Plan
+  (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_PLAN.md`).
+  Documentation-only implementation-planning phase for the first
+  deterministic, read-only Repository Intelligence Query Layer
+  prototype. Plans exactly one prototype over existing Repository
+  Knowledge Snapshot artifacts, with first supported executable schema
+  version `119O.1.0-json-schema`. Defines the prototype objective,
+  scope, ten-stage query pipeline, conceptual component
+  responsibilities, bounded lookup/filter/projection request model,
+  deterministic result obligations, snapshot compatibility plan,
+  attribution preservation, unknown handling, fail-closed failure
+  behavior, read-only persistence interaction, 121F verification
+  strategy, measurable 121E acceptance criteria, risks and mitigations,
+  deferred capabilities, and strict non-goals. Defers all other
+  Repository Intelligence artifact families, query language/parser,
+  CLI, REST/API, graph traversal, dependency reasoning, change impact
+  reasoning, Advisory integration, execution planning, and execution
+  capability. No query engine, parser, source code, schema, test,
+  runtime plugin, repository scanner, Repository Intelligence
+  generation, or runtime behavior change. Recommends 121E.
+
 - Phase 121C - Repository Intelligence Query Contract Verification
   (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_VERIFICATION.md`).
   Documentation-only verification phase independently verifying the
