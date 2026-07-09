@@ -10,7 +10,7 @@ Phase 121E Repository Intelligence Read-Only Query Prototype
 
 ## Status
 
-active
+done
 
 ## Mode
 
