@@ -10,7 +10,7 @@ Phase 126A Dependency Knowledge Graph Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
