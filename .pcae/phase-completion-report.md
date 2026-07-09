@@ -1,81 +1,119 @@
-# Phase 125B Complete - Next Architecture Direction Contract Freeze
+# Phase 125C Complete - Next Architecture Direction Contract Verification
 
-- **Phase ID:** `125B`
-- **Phase name:** Next Architecture Direction Contract Freeze
+- **Phase ID:** `125C`
+- **Phase name:** Next Architecture Direction Contract Verification
 - **Status:** completed
 - **Report completeness:** complete
-- **Contract document:** `docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_FREEZE.md`
+- **Verification document:** `docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_CONTRACT_VERIFICATION.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Contract freeze commit:** `38c5b7d2`
-- **Task finish commit:** `ae87d84f`
-- **Recommended next phase:** 125C - Next Architecture Direction Contract Verification
+- **Verification commit:** `3011ddec`
+- **Task finish commit:** `5b956b54`
+- **Recommended next phase:** 125D - Next Architecture Direction Evaluation Plan
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Contract Summary
+## Verification Summary
 
-Froze the canonical decision contract governing evaluation and
-selection of PCAE's next architectural direction following the
-completed Repository Intelligence chapter (Tracks 119-124). The
-contract governs architectural decision making only — it does not
-select the next implementation track. It is binding for 125C, 125D,
-125E, and 125F.
+Independently verified the Phase 125B Next Architecture Direction
+Contract for completeness, internal consistency, decision-neutrality,
+governance compatibility, Repository Intelligence compatibility, and
+readiness for 125D-125F. Verification re-read the full contract
+section by section against required elements rather than trusting the
+prior phase's own summary, cross-checked PROJECT_STATUS.md and
+CHANGELOG.md for decision-neutrality leakage, and independently
+confirmed via `git diff` across the full 125A-125B commit range that
+zero source, test, or schema files were touched.
 
-## Evaluation Principles
+Outcome: verified with no contract modifications required. No genuine
+defect was found.
 
-Nine principles every candidate direction must be evaluated against:
-governance compatibility, determinism, explainability, auditability,
-maintainability, reproducibility, architectural cohesion, safety, and
-observe-first philosophy.
+## Contract Completeness Assessment
 
-## Architectural Decision Constraints
+Verified. All 17 required sections present: Purpose, Contract
+Authority, Scope, Candidate Architecture Domains, Evaluation
+Principles, Decision Constraints, Preserve Repository Intelligence,
+Execution Boundary, Governance Contract, Compatibility Contract,
+Deferred Capabilities, Technical Debt Classification, Known Inherited
+Issues, Strict Non-Goals, Relationship to Future Phases, Governance
+Compatibility, Acceptance.
 
-No implementation path may be selected before, for the specific
-candidate under consideration: (1) architecture, (2) contract freeze,
-(3) contract verification have all been completed. Even after that
-three-step sequence, selection remains a separate, explicit decision —
-not an automatic consequence.
+## Decision-Neutrality Assessment
 
-## Governance Compatibility
+Verified. No candidate receives implicit authorization. 125A's
+Dependency Knowledge Graph recommendation is explicitly acknowledged
+as non-binding. Descriptive "architectural fit is low" language for
+Execution Planning and Permission Broker Evolution reflects current
+state, not selection or rejection.
 
-- Observe-only runtime preserved.
-- Execution unavailable preserved.
-- Candidate evaluation scoped through governed phases only.
-- Implementation selection explicitly gated behind the three-step
-  decision sequence.
-- Governed lifecycle/commit/push commands used throughout; no raw git
-  commit/push, force push, or `--no-verify`.
+## Candidate-Domain Assessment
 
-## Repository Intelligence Preservation Strategy
+Verified. All six named candidates (Historical Memory, Dependency
+Knowledge Graph, Repository Intelligence expansion, Decision
+Evaluation support, Execution Planning, Permission Broker evolution)
+present as evaluation-only entries, plus an explicit open slot for
+future candidates.
 
-Tracks 119-124 remain stable during future architectural evaluation.
-No phase bound by this contract may modify a Track 119 schema, the
-Track 120 generator, the Track 121 Query Layer, or the Track 122/123
-consumers without its own separate, explicitly scoped governed
-contract-freeze phase. Existing public interfaces, CLI surface,
-deterministic outputs, attribution behavior, limitation propagation,
-and boundary disclosures remain frozen as verified in 124F and
-reviewed in 125A. Future extensions are additions following the same
-proven architecture -> contract -> verification -> plan ->
-implementation -> verification sequence, not modifications of what is
-already frozen.
+## Evaluation-Principle Assessment
 
-## Deferred Capabilities
+Verified. All nine required principles present with concrete,
+falsifiable tests: governance compatibility, determinism,
+explainability, auditability, maintainability, reproducibility,
+architectural cohesion, safety, observe-first philosophy.
 
-Execution capability; autonomous decision making; Decision Evaluation
-authority; runtime mutation; autonomous repository modification;
-execution planning implementation.
+## Decision-Constraint Assessment
 
-## Confirmations
+Verified. The contract prohibits selecting an implementation path
+before architecture, contract, and verification are completed for the
+specific candidate, and explicitly states selection remains a separate
+explicit decision even after that sequence completes.
 
-- No implementation occurred.
-- No prototype occurred.
-- No runtime behavior changed.
-- Execution remains unavailable.
-- No implementation path was selected among the seven candidate
-  architecture domains.
+## Repository Intelligence Preservation Assessment
+
+Verified. Contract requires Tracks 119-124 to remain stable except
+through their own separately governed contract-freeze phases.
+Independently confirmed via git diff that zero Repository Intelligence
+source/test/schema files were touched in 125A or 125B.
+
+## Execution-Boundary Assessment
+
+Verified. Runtime state `Observed`, maximum plugin capability
+`observe`, execution capability `unavailable`, Permission Broker status
+`execution_unavailable` — independently re-confirmed via `pcae runtime
+inspect`, matching the contract exactly.
+
+## Governance Compatibility Assessment
+
+Verified. All required governance elements present: deterministic
+engineering, fail-closed philosophy, attribution, limitation
+propagation, boundary disclosures, reproducibility, auditability.
+
+## Compatibility Assessment
+
+Verified. Future chapters must consume Repository Intelligence
+exclusively through the Track 121 Query Layer and must not silently
+redefine established terminology, unless explicitly superseded through
+governance.
+
+## Deferred-Capability Assessment
+
+Verified. All required deferred capabilities present: execution
+capability, autonomous decision making, Decision Evaluation authority,
+runtime mutation, autonomous repository modification, execution
+planning implementation.
+
+## Technical Debt Verification
+
+Verified. Inherited technical debt classified only, not repaired.
+
+## Future Phase Readiness Assessment
+
+Verified with clarification. Contract content sufficient to constrain
+125D-125F without additional architectural work. One non-blocking
+cosmetic naming variance identified between 125B's guessed future
+phase titles and this phase's own governing brief's titles — documented
+without correction since it affects no binding contract term.
 
 ## Governance Results
 
@@ -85,6 +123,13 @@ execution planning implementation.
 - **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **telegram_runtime:** configured and enabled after sourcing `~/.config/pcae/telegram.env`
+
+## Confirmations
+
+- No implementation occurred.
+- No runtime behavior changed.
+- Execution remains unavailable.
+- No next implementation path was selected.
 
 ## Inherited Issues
 
@@ -96,8 +141,12 @@ Carried forward unchanged and not repaired:
 - GitHub main-branch PR-rule bypass notification: repository hosting policy reporting detail.
 - Missing `PCAE_NOTIFY_ENABLED` during governed push environment: notification environment detail.
 
+## Defects Found
+
+None.
+
 ## Readiness
 
-The Next Architecture Direction decision contract is frozen and ready
-for independent verification. Recommended next phase: 125C - Next
-Architecture Direction Contract Verification.
+The Phase 125B Next Architecture Direction Contract is independently
+verified and ready to constrain 125D-125F. Recommended next phase:
+125D - Next Architecture Direction Evaluation Plan.
