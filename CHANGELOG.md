@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 126B - Dependency Knowledge Graph Contract Freeze
+  (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_FREEZE.md`).
+  Freezes the canonical Dependency Knowledge Graph contract, binding
+  for 126C-126F. Re-freezes the already-frozen 119S/119T node/edge
+  taxonomy and explicitly resolves every taxonomy gap 126A flagged:
+  artifact/report -> `evidence_artifact`, plugin -> `runtime_component`,
+  `contains` -> `related_to` (documented v1 precision limitation),
+  `implements` -> `depends_on` (documented dual-use mapping),
+  `attributed_to` confirmed not an edge concept, and class/function-
+  level granularity explicitly deferred to a future chapter. Freezes
+  stable identifier requirements, graph invariants, provenance/
+  limitation/boundary-disclosure contracts, a determinism contract, a
+  compatibility contract (Tracks 119-124 unmodified), a relationship
+  contract (Repository Intelligence remains authoritative, the graph
+  never becomes the primary evidence source), a fail-closed failure
+  contract, and a version-compatibility contract. No schema change
+  occurred. No implementation occurred; no runtime behavior changed;
+  execution remains unavailable. Recommends 126C.
+
 - Phase 126A - Dependency Knowledge Graph Architecture
   (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`). Opens
   Track 126 (selected in 125F). Clarifies Repository Intelligence

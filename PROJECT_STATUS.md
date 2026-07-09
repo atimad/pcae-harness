@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 126B — Dependency Knowledge Graph Contract Freeze
+(completed).
+
+Froze the canonical Dependency Knowledge Graph contract in
+`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_FREEZE.md`,
+binding for 126C-126F. Re-froze the already-frozen 119S/119T node/edge
+taxonomy as the graph's binding vocabulary and **explicitly resolved
+every taxonomy gap 126A flagged**: artifact/report map to
+`evidence_artifact`, plugin maps to `runtime_component`,
+imports/produced_by/consumed_by/generates map onto existing edge
+types, `contains` maps to `related_to` (documented v1 precision
+limitation), `implements` maps to `depends_on` (documented dual-use
+mapping), `attributed_to` is confirmed not an edge concept (already
+covered by per-record `source_attribution`), and class/function-level
+node granularity is explicitly deferred to a future, separately
+governed chapter — not something 126D may plan around. Froze stable
+identifier requirements, graph invariants, provenance/limitation/
+boundary-disclosure contracts, a determinism contract, a compatibility
+contract (Tracks 119-124 unmodified), a relationship contract
+(Repository Intelligence remains authoritative, the graph is
+derivative and never becomes the primary evidence source), a
+fail-closed failure contract, and a version-compatibility contract. No
+schema change occurred — every taxonomy resolution operates entirely
+within the existing frozen enum values. No implementation occurred; no
+runtime behavior changed; execution remains unavailable.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 126C — Dependency Knowledge Graph Contract
+Verification.
+
+## Phase 126B Complete
+
+Phase 126B — Dependency Knowledge Graph Contract Freeze (completed).
+
+Froze the canonical Dependency Knowledge Graph contract, binding for
+126C-126F. Explicitly resolved every node/edge taxonomy gap 126A
+flagged within the existing frozen schema enum (no schema change).
+Deferred class/function-level node granularity to a future chapter. No
+implementation occurred; execution remains unavailable. Recommended
+next phase: 126C — Dependency Knowledge Graph Contract Verification.
+
+## Phase 126A Complete
+
 Phase 126A — Dependency Knowledge Graph Architecture
 (completed).
 
