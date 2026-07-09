@@ -6,6 +6,12 @@ from pcae.advisory.context.context_request import (
     SUPPORTED_CONTEXT_CATEGORIES,
     AdvisoryContextRequest,
 )
+from pcae.repository_intelligence.consumer_validation import (
+    ensure_boundary_material_present,
+    ensure_limitations_present,
+    ensure_records_have_attribution,
+    validate_query_result_shape,
+)
 
 #: Categories whose records carry attribution (122B S9). Limitation and
 #: boundary lookups return snapshot-level material, not attributable
@@ -67,17 +73,11 @@ def validate_query_result(result: Any) -> None:
         "disclaimers",
         "result_status",
     )
-    for field in required_fields:
-        if not hasattr(result, field):
-            raise AdvisoryContextValidationError(
-                f"invalid Query Layer result: missing field {field!r}"
-            )
-    if not isinstance(result.source_artifact, dict) or not result.source_artifact.get(
-        "executable_schema_version"
-    ):
-        raise AdvisoryContextValidationError(
-            "invalid Query Layer result: source_artifact is missing executable_schema_version"
-        )
+    validate_query_result_shape(
+        result,
+        required_fields=required_fields,
+        error_type=AdvisoryContextValidationError,
+    )
 
 
 def ensure_attribution_present(
@@ -91,10 +91,12 @@ def ensure_attribution_present(
     unattributed inclusion."""
     if category not in CONTENT_BEARING_CATEGORIES:
         return
-    if selected_records and not attribution:
-        raise AdvisoryContextValidationError(
-            "content-bearing selected records are missing required attribution"
-        )
+    ensure_records_have_attribution(
+        has_content=bool(selected_records),
+        attribution=attribution,
+        error_type=AdvisoryContextValidationError,
+        message="content-bearing selected records are missing required attribution",
+    )
 
 
 def ensure_limitation_present(limitations: list[dict[str, Any]]) -> None:
@@ -108,10 +110,9 @@ def ensure_limitation_present(limitations: list[dict[str, Any]]) -> None:
     that inherited limitations were carried forward, and the request
     must fail closed rather than deliver a package with unverifiable
     limitation coverage (122B S10/S13)."""
-    if not limitations:
-        raise AdvisoryContextValidationError(
-            "Query Layer result is missing required limitation records"
-        )
+    ensure_limitations_present(
+        limitations, error_type=AdvisoryContextValidationError
+    )
 
 
 def ensure_boundary_disclosure_present(
@@ -123,7 +124,8 @@ def ensure_boundary_disclosure_present(
     boundary-free snapshot is a Query Layer contract violation, not an
     Advisory-context-layer repair target -- it fails closed here rather
     than assembling a package with a silently missing boundary."""
-    if not boundary_disclosures and not disclaimers:
-        raise AdvisoryContextValidationError(
-            "Query Layer result is missing both boundary_disclosures and disclaimers"
-        )
+    ensure_boundary_material_present(
+        boundary_disclosures,
+        disclaimers,
+        error_type=AdvisoryContextValidationError,
+    )

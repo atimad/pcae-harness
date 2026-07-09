@@ -5,6 +5,12 @@ from typing import Any
 from pcae.repository_intelligence.change_impact.change_request import (
     ChangeImpactRequest,
 )
+from pcae.repository_intelligence.consumer_validation import (
+    ensure_boundary_material_present,
+    ensure_limitations_present,
+    ensure_records_have_attribution,
+    validate_query_result_shape,
+)
 
 
 SUPPORTED_CHANGE_IMPACT_EVALUATION_SCOPE = frozenset({"entity_lookup"})
@@ -48,17 +54,11 @@ def validate_query_result(result: Any) -> None:
         "disclaimers",
         "result_status",
     )
-    for field in required_fields:
-        if not hasattr(result, field):
-            raise ChangeImpactValidationError(
-                f"invalid Query Layer result: missing field {field!r}"
-            )
-    if not isinstance(result.source_artifact, dict) or not result.source_artifact.get(
-        "executable_schema_version"
-    ):
-        raise ChangeImpactValidationError(
-            "invalid Query Layer result: source_artifact is missing executable_schema_version"
-        )
+    validate_query_result_shape(
+        result,
+        required_fields=required_fields,
+        error_type=ChangeImpactValidationError,
+    )
 
 
 def ensure_attribution_present(
@@ -66,23 +66,23 @@ def ensure_attribution_present(
     impact_relationships: list[dict[str, Any]],
     attribution: list[dict[str, Any]],
 ) -> None:
-    if (impacted_entities or impact_relationships) and not attribution:
-        raise ChangeImpactValidationError(
-            "impacted entities or relationships are missing required attribution"
-        )
+    ensure_records_have_attribution(
+        has_content=bool(impacted_entities or impact_relationships),
+        attribution=attribution,
+        error_type=ChangeImpactValidationError,
+        message="impacted entities or relationships are missing required attribution",
+    )
 
 
 def ensure_limitation_present(limitations: list[dict[str, Any]]) -> None:
-    if not limitations:
-        raise ChangeImpactValidationError(
-            "Query Layer result is missing required limitation records"
-        )
+    ensure_limitations_present(limitations, error_type=ChangeImpactValidationError)
 
 
 def ensure_boundary_disclosure_present(
     boundary_disclosures: dict[str, Any], disclaimers: dict[str, Any]
 ) -> None:
-    if not boundary_disclosures and not disclaimers:
-        raise ChangeImpactValidationError(
-            "Query Layer result is missing both boundary_disclosures and disclaimers"
-        )
+    ensure_boundary_material_present(
+        boundary_disclosures,
+        disclaimers,
+        error_type=ChangeImpactValidationError,
+    )

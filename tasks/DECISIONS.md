@@ -2,6 +2,26 @@
 
 ## Accepted
 
+- Treat Phase 124E as the bounded implementation phase for Repository
+  Intelligence Prototype Review & Hardening: consolidate duplicated
+  deterministic JSON serialization and Query Layer consumer validation
+  into shared internal Repository Intelligence helpers while preserving
+  public interfaces, CLI behavior, schemas, serialized output
+  compatibility, deterministic behavior, attribution behavior,
+  limitation propagation, boundary disclosure propagation,
+  fail-closed behavior, read-only behavior, Query Layer exclusivity,
+  governance semantics, observe-only runtime, and execution-unavailable
+  posture. Add focused tests for the shared hardening helpers and run
+  Track 120-123 regressions plus fast-green. Introduce no new
+  Repository Intelligence capability, artifact family, Dependency
+  Knowledge Graph expansion, Historical Memory expansion, Advisory
+  reasoning, recommendation, Decision Evaluation, Repository
+  Intelligence generation change, Query Layer capability change, Change
+  Impact capability change, execution planning, execution capability,
+  runtime plugin, AI provider integration, network access, or schema
+  change. Recommended next phase: 124F - Repository Intelligence
+  Prototype Review & Hardening Verification.
+
 - Treat Phase 124D as the documentation-only implementation-planning
   phase for Repository Intelligence Prototype Review & Hardening:
   define a bounded 124E plan for behavior-preserving consistency and
