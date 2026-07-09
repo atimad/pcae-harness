@@ -1,83 +1,70 @@
-# Phase 123C Complete - Repository Intelligence Change Impact Contract Verification
+# Phase 123D Complete - Repository Intelligence Change Impact Prototype Plan
 
-- **Phase ID:** `123C`
-- **Phase name:** Repository Intelligence Change Impact Contract Verification
+- **Phase ID:** `123D`
+- **Phase name:** Repository Intelligence Change Impact Prototype Plan
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_CONTRACT_VERIFICATION.md`
+- **Plan document:** `docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_PLAN.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Implementation commit:** `091e3fcde725ac04c8585a330d4f6878c73ef33f`
-- **Task finish commit:** `af4a112284348d7f38caac34a3850ad1846e0b3d`
-- **Recommended next phase:** 123D - Repository Intelligence Change Impact Prototype Plan
+- **Implementation commit:** `86491b24c64ca74f6a02332f952ee694c78d569f`
+- **Task finish commit:** `1f00b23a9f9f0778c98408363c0ba2f9c52d0d19`
+- **Recommended next phase:** 123E - Repository Intelligence Change Impact Prototype
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Verification Summary
+## Implementation Planning Summary
 
-Independently verified the Phase 123B Repository Intelligence Change
-Impact Contract against the 123A architecture, Track 119 executable
-schemas, Track 120 Repository Knowledge Snapshot, Track 121 Query
-Layer, Track 122 Advisory Consumption, and observe-only runtime
-principles.
+Defined the implementation plan for the first deterministic,
+read-only Repository Intelligence Change Impact Builder prototype. The
+planned builder consumes Repository Intelligence exclusively through
+the Track 121 Query Layer and produces deterministic Change Impact
+Reports without reasoning, prioritization, recommendation, or decision
+making.
 
-The contract is complete, internally consistent, deterministic,
-architecturally aligned, governance compatible, and implementation
-ready. No contract modifications were required.
+## Planned Change Impact Pipeline
 
-## Contract Completeness Assessment
+1. Change request intake.
+2. Query request preparation.
+3. Track 121 Query Layer invocation.
+4. Candidate impact identification.
+5. Attribution preservation.
+6. Limitation propagation.
+7. Boundary disclosure propagation.
+8. Change Impact Report assembly.
+9. Report delivery.
 
-Every required contractual section exists: purpose, authority,
-implementation independence, architectural relationships, Change Impact
-responsibilities, query contract, change request contract, report
-contract, attribution, limitation, boundary disclosure, determinism,
-failure, governance, compatibility, deferred capabilities, inherited
-issues, strict non-goals, and 123C readiness.
+## Planned Component Responsibilities
 
-## Architectural Consistency Assessment
+The plan defines conceptual components for request intake, query
+preparation, query invocation, candidate identification, attribution
+preservation, limitation propagation, boundary disclosure propagation,
+report assembly, and report delivery. For each component it records
+responsibility, inputs, outputs, and boundaries without prescribing
+classes, modules, or source layout.
 
-The contract aligns with 123A and Tracks 119-122. It preserves the
-Repository Intelligence / Change Impact / Advisory / Repository State /
-Evidence / Decision Evaluation boundaries and keeps Change Impact as a
-sibling Query Layer consumer.
+## Planned Change Impact Report Structure
 
-## Determinism Assessment
+The planned report contains impacted entities, impact relationships,
+attribution bundle, limitation bundle, boundary disclosure bundle, and
+report metadata. It remains descriptive and non-authoritative.
 
-Equivalent Repository Intelligence input and equivalent change request
-must produce equivalent Change Impact Reports. The contract forbids
-probabilistic behavior, AI inference, heuristic recommendations,
-inferred dependency traversal, confidence scoring, and nondeterministic
-ordering.
+## Planned Verification Strategy
 
-## Attribution Assessment
-
-Every impacted entity and impact relationship must preserve provenance.
-Missing attribution remains contract failure.
-
-## Limitation Assessment
-
-All Repository Intelligence limitations must propagate unchanged.
-Change Impact may add only strictly additive limitations.
-
-## Boundary Disclosure Assessment
-
-Boundary disclosures must propagate unchanged. Repository Intelligence
-cannot be reinterpreted as Repository State, Evidence, Advisory output,
-or Decision Evaluation.
-
-## Governance Compatibility Assessment
-
-Verified compatible with observe-only runtime, deterministic
-engineering, auditability, explainability, reproducibility, and
-execution unavailable.
+123F should verify deterministic report generation, Query Layer
+exclusivity, no direct artifact access, attribution preservation,
+limitation propagation, boundary propagation, report structure,
+non-authority disclosures, failure handling, governance compatibility,
+runtime posture, and absence of recommendations, Advisory reasoning,
+Decision Evaluation, execution planning, and execution capability.
 
 ## Implementation Readiness Assessment
 
-The contract is sufficient for 123D, 123E, and 123F. One planning
-clarification is recorded: 123D/123E must stay within the current Query
-Layer capabilities unless a future Track 121 contract amendment is
-explicitly introduced.
+The plan is ready for 123E. If relationship identification cannot be
+supported through current Track 121 Query Layer results, 123E must
+limit scope, report a limitation, or fail closed. It must not bypass
+the Query Layer or expand Track 123 authority.
 
 ## Governance Results
 
@@ -87,7 +74,7 @@ explicitly introduced.
 - **pcae_push_check:** clean
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **pcae_notify_status:** Telegram configured and enabled after sourcing `~/.config/pcae/telegram.env`
-- **phase_finalization_skill:** `phase-finalization 123C` target resolved
+- **phase_finalization_skill:** `phase-finalization 123D` target resolved
 
 ## No-Go Confirmations
 
@@ -123,6 +110,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Change Impact contract is verified and ready for implementation
-planning. Recommended next phase: 123D - Repository Intelligence Change
-Impact Prototype Plan.
+The Change Impact prototype plan is complete and ready for
+implementation. Recommended next phase: 123E - Repository Intelligence
+Change Impact Prototype.
