@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 123F completion metadata (20260709-1850-repair-phase-123f-completion-metadata)
 - Phase 123F Repository Intelligence Change Impact Verification (20260709-1842-phase-123f-repository-intelligence-change-impact-verification)
 - Repair Phase 123E no-go confirmation metadata (20260709-1603-repair-phase-123e-no-go-confirmation-metadata)
 - Repair Phase 123E completion metadata (20260709-1601-repair-phase-123e-completion-metadata)
