@@ -10,7 +10,7 @@ Phase 125F Next Architecture Direction Decision Review
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 125F Next Architecture Direction Decision Review (20260709-2130-phase-125f-next-architecture-direction-decision-review)
 - Sync Phase 125E completion metadata (20260709-2121-sync-phase-125e-completion-metadata)
 - Phase 125E Next Architecture Direction Evaluation (20260709-2120-phase-125e-next-architecture-direction-evaluation)
 - Sync Phase 125D completion metadata (20260709-2115-sync-phase-125d-completion-metadata)
