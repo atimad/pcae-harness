@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 124A completion metadata (20260709-1922-repair-phase-124a-completion-metadata)
 - Phase 124A Repository Intelligence Prototype Review Hardening Architecture (20260709-1918-phase-124a-repository-intelligence-prototype-review-hardening-architecture)
 - Repair Phase 123F completion metadata (20260709-1850-repair-phase-123f-completion-metadata)
 - Phase 123F Repository Intelligence Change Impact Verification (20260709-1842-phase-123f-repository-intelligence-change-impact-verification)
