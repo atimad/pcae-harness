@@ -860,6 +860,14 @@
 - Keep Phase 61H automated task transition limited to governance lifecycle automation: complete the current task, create the next task, refresh session continuity, update governance memory files, and validate coherence/health/check state, but do not invoke runtimes, execute prompts, authorize execution, commit, push, rollback, or change unrelated source behavior.
 # Decisions
 
+- Treat Phase 123E Change Impact as a Query Layer-only reporting
+  implementation: the prototype may identify impacted entities only
+  from directly returned Track 121 `entity_lookup` records, preserve
+  attribution, propagate inherited limitations and boundary
+  disclosures, and serialize deterministic reports; it must fail closed
+  instead of using direct artifact access, graph traversal, source
+  scanning, Advisory reasoning, recommendations, Decision Evaluation,
+  execution planning, runtime plugins, AI providers, or external APIs.
 - Accepted: Treat Phase 117D as release preparation only. Draft v0.2.0
   release notes and refresh release-facing README/install/demo
   messaging to match the frozen v0.2 posture, but do not publish a

@@ -2,39 +2,59 @@
 
 ## Current Phase
 
-Phase 123D — Repository Intelligence Change Impact Prototype Plan
+Phase 123E — Repository Intelligence Change Impact Prototype
 (completed).
 
-Defined the implementation plan for the first deterministic Repository
-Intelligence Change Impact prototype,
+Implemented the first deterministic, read-only Repository Intelligence
+Change Impact Builder,
 documented in
-`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_PLAN.md`.
-The planned prototype is a deterministic, read-only Change Impact
-Builder that consumes Repository Intelligence exclusively through the
-Track 121 Query Layer and produces deterministic Change Impact Reports.
-The plan defines prototype objective, scope, a nine-stage pipeline,
-conceptual implementation components with responsibilities/inputs/
-outputs/boundaries, change request model, Change Impact Report
-structure, Query Layer interaction plan, attribution preservation plan,
-limitation propagation plan, boundary disclosure propagation plan,
-fail-closed failure plan, 123F verification plan, measurable 123E
-acceptance criteria, risks and mitigations, deferred capabilities,
-known inherited issues, and strict non-goals. It explicitly keeps 123E
-within current Query Layer capabilities; unsupported relationship
-discovery must be reported as a limitation or fail closed, not worked
-around by direct artifact access or Track 123 query expansion. No
-Change Impact engine, dependency graph traversal, recommendations,
-Advisory reasoning, Decision Evaluation, Repository Intelligence
-generation, repository scanning, runtime plugins, execution planning,
-execution capability, source code, test code, or schema change
-occurred.
+`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_IMPLEMENTATION.md`.
+The builder consumes Repository Intelligence exclusively through the
+Track 121 Query Layer, identifies impacted entities only from directly
+returned `entity_lookup` records, preserves attribution, propagates
+limitations and boundary disclosures, assembles deterministic Change
+Impact Reports, and exposes the minimum prototype CLI command
+`pcae repository-intelligence change-impact`. Focused verification
+covers deterministic report generation, Query Layer integration,
+attribution preservation, limitation propagation, boundary propagation,
+serialization, fail-closed behavior, unsupported schema rejection,
+repeated deterministic execution, read-only snapshot guarantees, CLI
+output, and absence of authority fields. No Advisory reasoning,
+recommendations, Decision Evaluation integration, execution planning,
+execution capability, Repository Intelligence generation, repository
+scanning, runtime plugins, AI provider integration, network access, or
+schema change occurred.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 123E — Repository Intelligence Change
-Impact Prototype.
+Recommended next repo phase: 123F — Repository Intelligence Change
+Impact Verification.
+
+## Phase 123E Complete
+
+Phase 123E — Repository Intelligence Change Impact Prototype
+(completed).
+
+Implemented the first deterministic, read-only Change Impact Builder:
+`src/pcae/repository_intelligence/change_impact/` plus the minimum
+`pcae repository-intelligence change-impact` CLI. The builder accepts a
+bounded Change Impact request, invokes the Track 121 Query Layer
+through `execute_query`, identifies impacted entities from directly
+returned `entity_lookup` records, preserves attribution, propagates
+Repository Intelligence limitations and boundary disclosures,
+assembles deterministic Change Impact Reports, serializes deterministic
+JSON, and fails closed for invalid request, invalid Query Layer result,
+missing/corrupt/unsupported Repository Intelligence, unsupported
+evaluation scope, missing attribution, missing inherited limitation,
+and missing boundary disclosure material. Focused tests and requested
+regression suites pass. No Advisory reasoning, recommendations,
+Decision Evaluation integration, execution capability, repository
+scanning, Repository Intelligence generation, AI provider integration,
+network access, runtime plugin, or schema change occurred. Runtime
+remains `Observed` / `observe` / execution unavailable. Recommended
+next phase: 123F — Repository Intelligence Change Impact Verification.
 
 ## Phase 123D Complete
 

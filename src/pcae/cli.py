@@ -502,6 +502,7 @@ from pcae.commands.inspect import run_inspect
 from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.repository_intelligence import (
+    run_repository_intelligence_change_impact,
     run_repository_intelligence_query,
     run_repository_intelligence_snapshot_generate,
 )
@@ -4584,6 +4585,44 @@ def build_parser() -> argparse.ArgumentParser:
         help="Pretty-print JSON query result to stdout.",
     )
     ri_query_parser.set_defaults(handler=run_repository_intelligence_query)
+
+    ri_change_impact_parser = repository_intelligence_subparsers.add_parser(
+        "change-impact",
+        help="Build a deterministic read-only Change Impact Report.",
+    )
+    ri_change_impact_parser.add_argument(
+        "--snapshot",
+        required=True,
+        help="Path to an existing Repository Knowledge Snapshot artifact.",
+    )
+    ri_change_impact_parser.add_argument(
+        "--change",
+        required=True,
+        help="Requested change description to include in report metadata.",
+    )
+    ri_change_impact_parser.add_argument(
+        "--entity",
+        action="append",
+        required=True,
+        help="Repository Intelligence entity target. May be provided more than once.",
+    )
+    ri_change_impact_parser.add_argument(
+        "--output",
+        help="Write serialized Change Impact Report JSON to this path.",
+    )
+    ri_change_impact_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON Change Impact Report to stdout.",
+    )
+    ri_change_impact_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Pretty-print JSON Change Impact Report.",
+    )
+    ri_change_impact_parser.set_defaults(
+        handler=run_repository_intelligence_change_impact
+    )
 
     architecture_parser = subparsers.add_parser(
         "architecture",

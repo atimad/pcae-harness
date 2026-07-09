@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 123E - Repository Intelligence Change Impact Prototype
+  (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_IMPLEMENTATION.md`).
+  Implements the first deterministic, read-only Repository Intelligence
+  Change Impact Builder in
+  `src/pcae/repository_intelligence/change_impact/` and adds the
+  minimum `pcae repository-intelligence change-impact` CLI. The builder
+  consumes Repository Intelligence exclusively through the Track 121
+  Query Layer, identifies impacted entities only from directly returned
+  `entity_lookup` records, preserves attribution, propagates inherited
+  Repository Intelligence limitations and boundary disclosures,
+  assembles deterministic Change Impact Reports, serializes
+  deterministic JSON, and fails closed for invalid requests, invalid
+  Query Layer results, missing/corrupt/unsupported Repository
+  Intelligence, unsupported evaluation scope, missing attribution,
+  missing inherited limitation, and missing boundary disclosure
+  material. Adds focused verification for deterministic report
+  generation, Query Layer-only integration, attribution preservation,
+  limitation propagation, boundary propagation, serialization,
+  fail-closed behavior, unsupported version rejection, repeated
+  deterministic execution, read-only guarantees, CLI behavior, and
+  absence of authority fields. Carries forward inherited
+  lifecycle/tooling issues unchanged: 119Q report-generation-ordering
+  defect, 119AB phase-id comparison bug, recurring
+  `pending_final_telegram_delivery` reporting detail, GitHub
+  main-branch PR-rule bypass notification, and missing
+  `PCAE_NOTIFY_ENABLED` during governed push environment. Does not add
+  Advisory reasoning, recommendations, Decision Evaluation integration,
+  execution capability, Repository Intelligence generation, repository
+  scanning, runtime plugins, AI provider integration, network access,
+  source execution, or schema changes. Recommends 123F.
+
 - Phase 123D - Repository Intelligence Change Impact Prototype Plan
   (`docs/PHASE_123_REPOSITORY_INTELLIGENCE_CHANGE_IMPACT_PROTOTYPE_PLAN.md`).
   Defines the implementation plan for the first deterministic,
