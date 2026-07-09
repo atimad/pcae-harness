@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 125G completion metadata (20260709-2147-sync-phase-125g-completion-metadata)
 - Phase 125G Execution Planning Readiness Assessment (20260709-2146-phase-125g-execution-planning-readiness-assessment)
 - Sync Phase 125F completion metadata (20260709-2131-sync-phase-125f-completion-metadata)
 - Phase 125F Next Architecture Direction Decision Review (20260709-2130-phase-125f-next-architecture-direction-decision-review)
