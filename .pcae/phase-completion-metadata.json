@@ -125,6 +125,7 @@
   "test_files_changed": 0,
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
+    "fast_green": "not_run_architecture_only_governance_validation_only",
     "pcae_check": "passed",
     "pcae_doctor_task_memory": "clean",
     "pcae_health": "healthy",
@@ -185,6 +186,11 @@
     {
       "name": "bootstrap_session_reporting_tests",
       "result": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
+      "status": "not_applicable"
+    },
+    {
+      "name": "fast_green",
+      "result": "not_run_architecture_only_governance_validation_only",
       "status": "not_applicable"
     }
   ]
