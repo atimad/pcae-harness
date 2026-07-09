@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Fix Phase 126E metadata no_go_confirmations count (20260709-2252-fix-phase-126e-metadata-no-go-confirmations-count)
 - Sync Phase 126E completion metadata (20260709-2252-sync-phase-126e-completion-metadata)
 - Phase 126E Dependency Knowledge Graph Prototype (20260709-2246-phase-126e-dependency-knowledge-graph-prototype)
 - Sync Phase 126D completion metadata (20260709-2233-sync-phase-126d-completion-metadata)

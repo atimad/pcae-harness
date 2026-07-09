@@ -10,7 +10,7 @@ Fix Phase 126E metadata no_go_confirmations count
 
 ## Status
 
-active
+done
 
 ## Mode
 
