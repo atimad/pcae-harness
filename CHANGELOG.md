@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 126C - Dependency Knowledge Graph Contract Verification
+  (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_VERIFICATION.md`).
+  Independently verifies the 126B contract by re-deriving every enum,
+  const string, and required-field claim directly from the frozen
+  `dependency_knowledge_graph_snapshot.schema.json` (119S/119T) rather
+  than trusting 126B's own quotations — all matched exactly. Confirms
+  node/edge taxonomy completeness, all eight graph invariants,
+  provenance requirements (confirmed schema-level `required`, not just
+  asserted), determinism, compatibility with Tracks 119-125,
+  relationship authority, boundary disclosure preservation, and
+  governance compatibility. Finds three minor, non-blocking
+  documentation completeness gaps (edge-identifier stability not
+  explicitly named; Track 124 not explicitly enumerated as a
+  compatibility target; `graph_completeness_state` not re-frozen as an
+  explicit requirement) — none requiring a contract amendment, all
+  carried forward as recommendations for 126D. **Determination: the
+  contract is implementation-ready.** No implementation occurred; no
+  runtime behavior changed; execution remains unavailable. Recommends
+  126D.
+
 - Phase 126B - Dependency Knowledge Graph Contract Freeze
   (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_FREEZE.md`).
   Freezes the canonical Dependency Knowledge Graph contract, binding
