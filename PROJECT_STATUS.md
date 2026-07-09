@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 126A — Dependency Knowledge Graph Architecture
+(completed).
+
+Defined the canonical architecture for the Dependency Knowledge Graph
+in `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`,
+opening Track 126 (selected in 125F). Clarified the distinction between
+Repository Intelligence ("what exists?") and the Dependency Knowledge
+Graph ("how are those things related?"). Adopted the already-frozen
+119S/119T node-type and edge-type taxonomy rather than inventing a new
+one, explicitly mapping conceptual node/edge categories onto it and
+identifying taxonomy gaps (class/function-level nodes, containment
+edges) for 126B to resolve rather than silently inventing schema
+extensions. **Explicitly resolved 125F's named first-responsibility
+question**: the existing `graph_generation_method_disclosure` schema
+field does not block a real generator — it only guards against a
+declared-but-unbuilt graph falsely implying automated construction —
+so a future generator honestly describing its own deterministic
+process is fully schema-compliant, no schema amendment needed. Defined
+graph invariants, provenance architecture, boundary architecture,
+versioning strategy, a conceptual seven-stage construction pipeline,
+and fail-closed failure behavior (unsupported relationships remain
+unknown, never inferred). Confirmed the graph derives from, and
+remains subordinate to, the authoritative Repository Knowledge
+Snapshot, consumed exclusively through the Track 121 Query Layer.
+Explained relationship to future chapters (Historical Memory, richer
+Change Impact, stronger Advisory Context, future Decision Evaluation,
+eventual Execution Planning) without introducing any of them. No
+implementation occurred; no runtime behavior changed; execution
+remains unavailable.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 126B — Dependency Knowledge Graph Contract
+Freeze.
+
+## Phase 126A Complete
+
+Phase 126A — Dependency Knowledge Graph Architecture (completed).
+
+Canonical architecture for the Dependency Knowledge Graph, opening
+Track 126. Adopted the frozen 119S/119T node/edge taxonomy, resolved
+the graph-generation-disclosure question explicitly, and defined graph
+invariants, provenance, boundary, versioning, and construction-pipeline
+architecture. No implementation occurred; execution remains
+unavailable. Recommended next phase: 126B — Dependency Knowledge Graph
+Contract Freeze.
+
+## Phase 125G Complete
+
 Phase 125G — Execution Planning Readiness Assessment
 (completed).
 

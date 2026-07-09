@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 126A - Dependency Knowledge Graph Architecture
+  (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`). Opens
+  Track 126 (selected in 125F). Clarifies Repository Intelligence
+  ("what exists?") vs. the Dependency Knowledge Graph ("how are those
+  things related?"). Adopts the already-frozen 119S/119T node-type and
+  edge-type taxonomy, mapping conceptual categories onto it and
+  identifying taxonomy gaps for 126B to resolve explicitly rather than
+  inventing schema extensions here. Explicitly resolves 125F's named
+  first-responsibility question: the existing
+  `graph_generation_method_disclosure` schema field does not block a
+  real generator, it only guards against a declared-but-unbuilt graph
+  falsely implying automated construction — a future generator honestly
+  describing its own process is fully schema-compliant. Defines graph
+  invariants, provenance architecture, boundary architecture,
+  versioning strategy, a conceptual seven-stage construction pipeline,
+  and fail-closed failure behavior. Confirms the graph derives from and
+  remains subordinate to Repository Knowledge Snapshot, consumed
+  exclusively through the Track 121 Query Layer. No implementation
+  occurred; no runtime behavior changed; execution remains unavailable.
+  Recommends 126B.
+
 - Phase 125G - Execution Planning Readiness Assessment
   (`docs/PHASE_125_EXECUTION_PLANNING_READINESS_ASSESSMENT.md`).
   Records the canonical architectural readiness assessment for a future
