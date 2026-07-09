@@ -10,7 +10,7 @@ Phase 122D Repository Intelligence Advisory Consumption Prototype Plan
 
 ## Status
 
-active
+done
 
 ## Mode
 
