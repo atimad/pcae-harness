@@ -106,11 +106,17 @@
   "test_files_changed": 0,
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
+    "fast_green": "not_run_architecture_only_governance_validation_only",
     "report_notification_tests": "pending_final_telegram_delivery"
   },
   "tests_added_or_updated": "No new tests added. Architecture-only phase.",
   "tests_run": 0,
   "validation_results": [
+    {
+      "name": "fast_green",
+      "result": "not_run_architecture_only_governance_validation_only",
+      "status": "not_applicable"
+    },
     {
       "name": "bootstrap_session_reporting_tests",
       "result": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
