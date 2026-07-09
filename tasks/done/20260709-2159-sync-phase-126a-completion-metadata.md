@@ -10,7 +10,7 @@ Sync Phase 126A completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
