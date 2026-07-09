@@ -1,75 +1,56 @@
-# Phase 124E Complete - Repository Intelligence Prototype Review & Hardening Implementation
+# Phase 124F Complete - Repository Intelligence Prototype Review & Hardening Verification
 
-- **Phase ID:** `124E`
-- **Phase name:** Repository Intelligence Prototype Review & Hardening Implementation
+- **Phase ID:** `124F`
+- **Phase name:** Repository Intelligence Prototype Review & Hardening Verification
 - **Status:** completed
 - **Report completeness:** complete
-- **Implementation document:** `docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_IMPLEMENTATION.md`
-- **Source files changed:** 7
-- **Test files changed:** 1
+- **Verification document:** `docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_VERIFICATION.md`
+- **Source files changed:** 0
+- **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Implementation commit:** `9a249ebe770983e23f4fdca1e2bb83906a1076e9`
-- **Task finish commit:** `3698a399`
-- **Recommended next phase:** 124F - Repository Intelligence Prototype Review & Hardening Verification
+- **Verification commit:** `8c92ef62`
+- **Task finish commit:** `88e56fc7`
+- **Recommended next phase:** 125A - Repository Intelligence Chapter Review & Next Direction Architecture
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Implementation Summary
+## Verification Summary
 
-Implemented bounded behavior-preserving Repository Intelligence
-hardening across Tracks 120-123 by consolidating duplicated
-deterministic serialization and Query Layer consumer validation logic
-into shared internal helpers.
+Independently verified the Phase 124E Repository Intelligence
+hardening implementation against 124A architecture, 124B contract, and
+124D plan. Verification re-derived findings from source: every file in
+the 124A-124E diff footprint was read and diffed directly against its
+pre-hardening form, the shared serialization and consumer-validation
+helpers were probed independently at runtime, and all recorded
+regression and governance results were independently re-executed
+rather than trusted from the 124E report.
 
-## Hardening Changes
+Outcome: verified with no functional modifications required. No
+genuine defect was found.
 
-- Added shared deterministic JSON serialization helper.
-- Routed Query Result, Advisory Context, and Change Impact serializers
-  through the shared helper.
-- Added shared Query Layer consumer validation helpers.
-- Routed Advisory Context and Change Impact validation through shared
-  fail-closed helpers.
-- Added focused 124E hardening tests.
+## Verification Areas
 
-## Shared Implementation Improvements
-
-The implementation removed duplicated serialization and consumer
-validation logic while preserving public function names, public
-interfaces, existing consumer error types, and existing error messages.
-
-The shared helpers are internal implementation support only. They do
-not introduce a new public API, Repository Intelligence capability,
-artifact family, Query Layer capability, Change Impact capability, or
-runtime plugin.
-
-## Compatibility Assessment
-
-Preserved:
-
-- deterministic outputs;
-- schemas;
-- serialized output compatibility;
-- CLI behavior;
-- public interfaces;
-- attribution behavior;
-- limitation propagation;
-- boundary disclosure propagation;
-- governance semantics;
-- read-only behavior;
-- fail-closed behavior;
-- Query Layer exclusivity;
-- observe-only runtime;
-- execution-unavailable boundary.
-
-No schema files changed. No CLI files changed.
-
-## Determinism Verification
-
-Determinism was preserved. Validation covered Track 120 deterministic
-generation, Track 121 repeated query execution, Track 122 repeated
-context assembly, Track 123 repeated Change Impact generation,
-deterministic serialization regressions, 124E helper tests, and
-fast-green.
+- Architecture conformance: verified against 124A.
+- Contract conformance: verified against 124B.
+- Plan conformance: verified against 124D.
+- Behavior preservation: verified by direct diff of all seven changed
+  source files.
+- Determinism: verified by direct runtime probe and regression
+  re-execution.
+- Schema compatibility: verified — no schema files changed across the
+  full 124A-124E diff range.
+- CLI compatibility: verified — `pcae repository-intelligence --help`
+  unchanged.
+- Public interface compatibility: verified — all serializer/validator
+  signatures unchanged.
+- Attribution: verified by direct diff and runtime probe.
+- Limitation propagation: verified by direct diff and runtime probe.
+- Boundary disclosure propagation: verified by direct diff and runtime
+  probe.
+- Serialization: verified — deterministic, sorted-key output confirmed
+  by direct probe.
+- Failure behavior: verified — fail-closed behavior confirmed intact
+  by direct probe; no fail-open path introduced.
 
 ## Regression Results
 
@@ -77,7 +58,11 @@ fast-green.
 - Query Layer regression: 15 passed.
 - Advisory Context Builder regression: 22 passed.
 - Change Impact Builder plus 124E hardening tests: 21 passed.
-- Fast-green: 4390 passed.
+- Combined: 72 passed.
+- Fast-green: 4390 passed on final run (an initial run showed one
+  unrelated failure outside the Track 124 diff footprint, tied to idle
+  task-lifecycle state; resolved once this phase's own task contract
+  existed — not a Track 124 regression).
 
 ## Governance Results
 
@@ -118,10 +103,20 @@ Carried forward unchanged and not repaired:
 - GitHub main-branch PR-rule bypass notification: repository hosting policy reporting detail.
 - Missing `PCAE_NOTIFY_ENABLED` during governed push environment: notification environment detail.
 
+Newly observed and classified, not added to Track 124 hardening scope:
+
+- `test_pytest_dry_run_not_blocked` transient fast_green failure on
+  first run: task-lifecycle-state-dependent, resolved on final run,
+  not a Track 124 regression, not repaired.
+
+## Defects Found
+
+None.
+
 ## Readiness
 
-Repository Intelligence hardening implementation is complete and ready
-for independent verification.
+Repository Intelligence hardening (Track 124) is independently
+verified and complete. No repair was required or performed.
 
-Recommended next phase: 124F - Repository Intelligence Prototype Review
-& Hardening Verification.
+Recommended next phase: 125A - Repository Intelligence Chapter Review
+& Next Direction Architecture.
