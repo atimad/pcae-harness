@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 121F - Repository Intelligence Query Prototype Verification
+  (`docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_VERIFICATION.md`).
+  Independently verifies the Phase 121E Query Layer prototype against
+  the 121A architecture, 121B frozen contract, 121C verification
+  conclusions, and 121D prototype plan. Verifies schema compatibility
+  for `119O.1.0-json-schema` with fail-closed handling for unsupported
+  versions; verifies correctness for all six implemented query
+  categories (entity, capability, architectural contract, attribution,
+  limitation, boundary lookup); verifies determinism across ten
+  independently repeated executions; verifies attribution preservation
+  with fail-closed handling for missing attribution; verifies
+  limitation and boundary propagation; verifies read-only behavior
+  (snapshot file hash unchanged after query execution); verifies
+  fail-closed behavior for missing snapshot, corrupted snapshot,
+  unsupported schema version, invalid request, unsupported request, and
+  unknown entity. Runs focused query tests (15 passed), Repository
+  Knowledge Snapshot regression tests (14 passed), and fast_green (4390
+  passed). No functional modification required. Documents one
+  out-of-scope, pre-existing, environment-dependent test characteristic
+  in `tests/test_dry_run_simulation.py`, unrelated to the Query Layer
+  and not repaired in this phase. Does not implement new query
+  categories, query language, graph traversal, dependency reasoning,
+  change impact reasoning, Advisory integration, Repository
+  Intelligence generation, repository scanning, runtime plugins,
+  execution planning, or execution capability. Recommends 122A.
+
 - Phase 121E - Repository Intelligence Read-Only Query Prototype
   (`src/pcae/repository_intelligence/query/`,
   `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_IMPLEMENTATION.md`).
