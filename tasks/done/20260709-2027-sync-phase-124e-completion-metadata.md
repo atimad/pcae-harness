@@ -10,7 +10,7 @@ Sync Phase 124E completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
