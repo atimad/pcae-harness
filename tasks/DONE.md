@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 125B completion metadata (20260709-2105-sync-phase-125b-completion-metadata)
 - Phase 125B Next Architecture Direction Contract Freeze (20260709-2103-phase-125b-next-architecture-direction-contract-freeze)
 - Fix Phase 125A metadata fast_green trust field (20260709-2059-fix-phase-125a-metadata-fast-green-trust-field)
 - Sync Phase 125A completion metadata (20260709-2059-sync-phase-125a-completion-metadata)
