@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 125G — Execution Planning Readiness Assessment
+(completed).
+
+Recorded the canonical architectural readiness assessment for a future
+Execution Planning chapter in
+`docs/PHASE_125_EXECUTION_PLANNING_READINESS_ASSESSMENT.md`, grounded
+in direct inspection of every relevant subsystem (Repository
+Intelligence, Dependency Knowledge Graph, Historical Memory, Advisory
+Context, Change Impact, Repository Observation model, Decision
+Evaluation, Permission Broker, approval gate, rollback model, audit
+model, runtime registry). Found that PCAE's governance, permission, and
+runtime models are already substantially built, deterministic,
+fail-closed, and execution-compatible by design — Decision Evaluation
+(115E), Permission Broker (88R), approval gate, rollback model, and
+audit model all exist as real, well-developed code — but remain
+unproven against real execution, while structural dependency knowledge
+(Dependency Knowledge Graph) remains schema-only. **Determination: Not
+Ready.** Execution Planning is deferred because prerequisite knowledge
+maturity is incomplete, explicitly not because execution is
+architecturally incompatible with PCAE. Confirmed Track 126
+(Dependency Knowledge Graph) directly targets the largest identified
+gap. This document is not the start of Execution Planning — it is a
+readiness assessment only, with no design of an execution planner,
+workflow, engine, shell mediation, or permission enforcement change. No
+implementation occurred; no runtime behavior changed; execution remains
+unavailable.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 126A — Dependency Knowledge Graph
+Architecture.
+
+## Phase 125G Complete
+
+Phase 125G — Execution Planning Readiness Assessment (completed).
+
+Canonical readiness assessment for a future Execution Planning chapter.
+Determination: Not Ready — governance/permission/runtime models are
+mature at the simulation/model level but unproven against real
+execution, and structural dependency knowledge (Dependency Knowledge
+Graph) remains schema-only. Confirmed Track 126 directly targets the
+gap. No implementation occurred; execution remains unavailable.
+Recommended next phase: 126A — Dependency Knowledge Graph Architecture.
+
+## Phase 125F Complete
+
 Phase 125F — Next Architecture Direction Decision Review
 (completed).
 

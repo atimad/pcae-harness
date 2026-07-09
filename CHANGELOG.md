@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 125G - Execution Planning Readiness Assessment
+  (`docs/PHASE_125_EXECUTION_PLANNING_READINESS_ASSESSMENT.md`).
+  Records the canonical architectural readiness assessment for a future
+  Execution Planning chapter, grounded in direct inspection of
+  Repository Intelligence, Dependency Knowledge Graph, Historical
+  Memory, Advisory Context, Change Impact, the Repository Observation
+  model, Decision Evaluation, Permission Broker, approval gate,
+  rollback model, audit model, and runtime registry. Finds PCAE's
+  governance/permission/runtime models already substantially built,
+  deterministic, fail-closed, and execution-compatible by design but
+  unproven against real execution, while structural dependency
+  knowledge remains schema-only. **Determination: Not Ready** —
+  explicitly because prerequisite knowledge maturity is incomplete, not
+  because execution is architecturally incompatible with PCAE. Confirms
+  Track 126 (Dependency Knowledge Graph) directly targets the largest
+  identified gap. Does not design Execution Planning itself. No
+  implementation occurred; no runtime behavior changed; execution
+  remains unavailable. Recommends 126A.
+
 - Phase 125F - Next Architecture Direction Decision Review
   (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_DECISION_REVIEW.md`).
   Formal architectural decision review for PCAE's next chapter, using
