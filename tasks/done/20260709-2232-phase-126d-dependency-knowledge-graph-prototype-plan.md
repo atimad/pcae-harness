@@ -10,7 +10,7 @@ Phase 126D Dependency Knowledge Graph Prototype Plan
 
 ## Status
 
-active
+done
 
 ## Mode
 

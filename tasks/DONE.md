@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 126D Dependency Knowledge Graph Prototype Plan (20260709-2232-phase-126d-dependency-knowledge-graph-prototype-plan)
 - Sync Phase 126C completion metadata (20260709-2223-sync-phase-126c-completion-metadata)
 - Phase 126C Dependency Knowledge Graph Contract Verification (20260709-2222-phase-126c-dependency-knowledge-graph-contract-verification)
 - Sync Phase 126B completion metadata (20260709-2216-sync-phase-126b-completion-metadata)
