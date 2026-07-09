@@ -2,42 +2,53 @@
 
 ## Current Phase
 
-Phase 126E — Dependency Knowledge Graph Prototype
+Phase 126F — Dependency Knowledge Graph Verification
 (completed).
 
-Implemented the first deterministic, read-only Dependency Knowledge
-Graph Builder exactly as scoped by 126A-126D
-(`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_IMPLEMENTATION.md`).
-Added `src/pcae/repository_intelligence/dependency_graph/` (graph
-builder, independent validation, persistence reusing Track 124's
-`serialize_deterministic_json`, and top-level orchestration), consuming
-Repository Intelligence exclusively through the Track 121 Query Layer.
-Wired a governed CLI command, `pcae repository-intelligence
-dependency-graph generate`. Verified end-to-end against a freshly
-generated real Repository Knowledge Snapshot: 126D's grounding
-predictions were empirically confirmed — the `entity_type`/`node_type`
-enum translation table produced exactly the expected mapping (`source_
-file` -> `file`, directory `module` entities -> `module` nodes), and
-the graph contained zero non-containment edges, confirming Track 120's
-own declared limitation (no import/symbol parsing) rather than a
-builder defect. Two independent generation runs against the same
-source snapshot produced byte-identical output except approved
-timestamps. Added 38 focused tests (deterministic generation, node/edge
-validation, duplicate-identifier rejection, fail-closed behavior across
-six failure categories, serialization determinism, persistence,
-schema-required-field conformance, no-traversal/no-reasoning/no-
-execution confirmation). Regression suites for Tracks 120-124 (72
-tests) plus the new suite (38 tests) all pass; fast_green: 4390/4390.
-No schema file was modified; Tracks 119-124 remain unmodified. No
-graph traversal, reasoning, or execution capability was introduced; no
-runtime behavior changed; execution remains unavailable.
+Independently verified the Phase 126E Dependency Knowledge Graph
+Builder against the complete 126A-126E architectural evidence chain
+(`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_VERIFICATION.md`).
+Re-derived every material claim from source rather than trusting the
+existing test suite: independently generated a fresh Repository
+Knowledge Snapshot and a fresh Dependency Knowledge Graph, then ran a
+from-scratch schema-conformance/integrity check script against the
+frozen 119S/119T schema file (zero errors: 13/13 unique node ids,
+12/12 unique edge ids, zero orphan edges, all node/edge categories
+schema-valid, complete metadata/provenance/limitations/boundary).
+Independently confirmed byte-deterministic output across two fresh
+generation runs. Independently probed eight fail-closed scenarios
+(missing snapshot, corrupted snapshot, missing entities, duplicate
+node id, invalid edge endpoint, missing attribution, missing
+limitations, invalid node type) — all fail closed with no fail-open
+path. Confirmed persistence never mutates the source snapshot
+(checksum-identical before/after). Re-ran the Tracks 120-124 regression
+suites (110 passed) and fast_green (4390/4390 passed once this phase's
+own task contract existed; the single failure seen before the task
+contract existed was independently confirmed to be the same
+task-lifecycle-state-dependent behavior already documented in
+125A/125G/126E, not a regression). Confirmed via `git diff --stat`
+across the full 126A-126E range that no schema file and no Track
+119-124 source file was modified. **No genuine defect was found; no
+implementation change was made.**
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 126F — Dependency Knowledge Graph
-Verification.
+Recommended next repo phase: 127A — Historical Memory Architecture.
+
+## Phase 126F Complete
+
+Phase 126F — Dependency Knowledge Graph Verification (completed).
+
+Independently verified the Phase 126E Dependency Knowledge Graph
+Builder against the complete 126A-126E architectural evidence chain.
+Re-derived architectural compliance, contract compliance, graph
+integrity, determinism, serialization/persistence behavior, and
+fail-closed behavior from source and from freshly generated real
+artifacts, not from re-trusting 126E's own report. No defect found; no
+implementation change made. Regression suites and fast_green pass.
+Recommended next phase: 127A — Historical Memory Architecture.
 
 ## Phase 126E Complete
 

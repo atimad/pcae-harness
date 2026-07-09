@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Phase 126F - Dependency Knowledge Graph Verification
+  (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_VERIFICATION.md`).
+  Independently verifies the Phase 126E Dependency Knowledge Graph
+  Builder against the complete 126A-126E architectural evidence chain.
+  Re-derives every material claim from source and freshly generated
+  real artifacts rather than trusting the existing test suite: fresh
+  schema-conformance/integrity check (zero errors), fresh
+  determinism check (byte-equal across two runs except approved
+  timestamps), eight independent fail-closed probes (all pass), and a
+  fresh Tracks 120-124 regression run (110 passed) plus fast_green
+  (4390/4390). Confirms via `git diff --stat` that no schema file and
+  no Track 119-124 source file was modified across 126A-126E. No
+  genuine defect found; no implementation change made. Recommends
+  127A.
+
 - Phase 126E - Dependency Knowledge Graph Prototype
   (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_IMPLEMENTATION.md`).
   Implements the first deterministic, read-only Dependency Knowledge
