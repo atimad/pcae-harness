@@ -1,69 +1,99 @@
-# Phase 121D Complete - Repository Intelligence Query Prototype Plan
+# Phase 121E Complete - Repository Intelligence Read-Only Query Prototype
 
-- **Phase ID:** `121D`
-- **Phase name:** Repository Intelligence Query Prototype Plan
+- **Phase ID:** `121E`
+- **Phase name:** Repository Intelligence Read-Only Query Prototype
 - **Status:** completed
 - **Report completeness:** complete
-- **Plan document:** `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_PLAN.md`
-- **Source files changed:** 0
-- **Test files changed:** 0
+- **Implementation document:** `docs/PHASE_121_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_IMPLEMENTATION.md`
+- **Source files changed:** 9
+- **Test files changed:** 1
 - **Execution boundary:** preserved (execution unavailable)
-- **Plan commit:** `0ef42dc01f41b8f1c12135a96adb572ad17eba52`
-- **Task finish commit:** `40a4cf076b24ac6fa421fdd4fb4ff5f34f222a63`
-- **Recommended next phase:** 121E - Repository Intelligence Read-Only Query Prototype
+- **Implementation commit:** `041f5c287c687d213f13693669778416ebf6485e`
+- **Task finish commit:** `737552a7005324f3323373c22703bbc67425235c`
+- **Recommended next phase:** 121F - Repository Intelligence Query Prototype Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Implementation Planning Summary
+## Implementation Summary
 
-Produced the definitive implementation plan for the first
-deterministic, read-only Repository Intelligence Query prototype over
-existing Repository Knowledge Snapshot artifacts. The first supported
-executable schema version is `119O.1.0-json-schema`.
+Implemented the first deterministic, read-only Repository Intelligence
+Query prototype for existing Repository Knowledge Snapshot artifacts.
+The prototype loads snapshots, verifies executable schema version
+`119O.1.0-json-schema`, validates bounded structured requests, evaluates
+exact deterministic lookups, preserves attribution, propagates
+limitations, preserves boundary disclosures and disclaimers, assembles
+deterministic results, exposes stable JSON formatting, and adds the
+minimal `pcae repository-intelligence query` CLI surface.
 
-No implementation occurred.
+## Query Architecture
 
-## Planned Query Pipeline
+The query architecture consists of:
 
-The planned ten-stage pipeline is:
+1. snapshot loading
+2. compatibility verification
+3. structured request validation
+4. deterministic exact lookup evaluation
+5. attribution preservation
+6. limitation propagation
+7. boundary propagation
+8. deterministic result assembly
+9. stable result formatting
 
-1. Query request intake
-2. Request validation
-3. Snapshot loading
-4. Snapshot compatibility verification
-5. Query evaluation
-6. Attribution preservation
-7. Limitation propagation
-8. Boundary attachment
-9. Result assembly
-10. Result formatting
+Implemented package: `src/pcae/repository_intelligence/query/`.
 
-The pipeline defines responsibilities only. It specifies no algorithms,
-classes, source files, commands, parsers, APIs, or runtime plugins.
+## Supported Query Categories
 
-## Planned Component Responsibilities
+- entity lookup
+- capability lookup
+- architectural contract lookup
+- attribution lookup
+- limitation lookup
+- boundary lookup
 
-Planned conceptual components are Request Intake, Request Validation,
-Snapshot Access, Snapshot Compatibility, Query Evaluation, Attribution,
-Limitation and Unknown, Boundary, Result Assembly, and Result
-Formatting. Each component is defined by responsibility, inputs,
-outputs, and boundaries without prescribing classes, modules, source
-files, or command surfaces.
+No free-text search, query language, parser, graph traversal, or
+reasoning was implemented.
 
-## Planned Verification Strategy
+## Schema Compatibility Results
 
-Phase 121F should verify deterministic results, attribution
-preservation, schema compatibility for `119O.1.0-json-schema`,
-governance compatibility, boundary preservation, fail-closed failure
-handling, read-only behavior, and regression safety.
+Supported executable schema version `119O.1.0-json-schema` is accepted.
+Unsupported schema versions, missing snapshots, corrupted snapshots,
+non-object JSON roots, and missing required query input fields fail
+closed.
 
-## Implementation Readiness Assessment
+## Determinism Verification
 
-Ready for 121E implementation within the frozen 121B contract and 121D
-plan. The implementation surface is deliberately narrow: Repository
-Knowledge Snapshot only, bounded structured requests only, read-only
-artifact consumption only, deterministic results only, and fail-closed
-behavior for invalid or unsupported inputs.
+Focused tests verify repeated execution of an equivalent query against
+an equivalent snapshot returns equivalent logical results. Result
+records, attribution records, limitations, unknowns, and JSON output
+use deterministic ordering.
+
+## Attribution Verification
+
+Focused tests verify entity lookup preserves Source Attribution
+Records, attribution lookup returns embedded attribution records, and
+missing attribution on a content-bearing record fails closed.
+
+## Limitation Verification
+
+Focused tests verify snapshot-level and record-level limitations are
+returned for successful lookups and query-specific `missing_data`
+limitations are attached for unknown or missing targets.
+
+## Tests Added and Executed
+
+Added `tests/test_phase_121e_repository_intelligence_query.py` with 15
+focused tests covering snapshot loading, compatibility, deterministic
+query results, attribution preservation, limitation propagation,
+boundary propagation, unsupported schema rejection, unsupported query
+rejection, unknown handling, repeated execution determinism, read-only
+guarantees, fail-closed behavior, missing attribution, and CLI JSON
+output.
+
+Executed:
+
+- `python -m pytest tests/test_phase_121e_repository_intelligence_query.py -q` — 15 passed
+- `python -m pytest tests/test_phase_120e_repository_knowledge_snapshot.py -q` — 14 passed
+- `python -m pytest -m "fast_green" -n auto -ra --durations=50` — 4390 passed
 
 ## Governance Results
 
@@ -74,37 +104,18 @@ behavior for invalid or unsupported inputs.
 - **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
 - **telegram_runtime:** configured and enabled after sourcing `~/.config/pcae/telegram.env`
 
-## Test Results
-
-- **source_schema_test_diff:** no source, schema, or test code changed
-- **fast_green:** not run; documentation-only prototype-planning phase with no source/schema/test changes
-- **bootstrap_session_reporting_tests:** not applicable; no bootstrap/session reporting code changed
-- **report_notification_tests:** pending_final_telegram_delivery until final report dispatch
-
 ## No-Go Confirmations
 
-- No No-Go conditions triggered.
-- No implementation occurred.
-- No source code changed.
-- No test code changed.
-- No schema changed.
-- No query engine was implemented.
-- No query parser was implemented.
-- No query language was implemented.
-- No CLI was implemented.
-- No REST or API surface was implemented.
-- No Python models were implemented.
-- No validators were implemented.
-- No runtime plugin was added.
+- No Repository Intelligence generation occurred.
+- No persisted Repository Intelligence artifact was modified.
 - No repository scanning was implemented.
-- No Repository Intelligence generation was implemented.
-- No graph traversal was implemented.
-- No dependency analysis was implemented.
-- No change impact analysis was implemented.
-- No Advisory integration was introduced.
-- No execution planning was introduced.
-- No execution capability was introduced.
+- No shell commands or subprocesses are invoked by the query implementation.
+- No AI provider integration was introduced.
+- No external API or network access was introduced.
+- No runtime plugin was introduced.
 - No runtime behavior changed.
+- No execution capability was introduced.
+- Runtime remains Observed / observe / execution unavailable.
 
 ## Inherited Issues
 
@@ -116,6 +127,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Repository Intelligence Query prototype plan is complete and ready
-for the first implementation phase. Recommended next phase: 121E -
-Repository Intelligence Read-Only Query Prototype.
+The Repository Intelligence Query prototype is implemented and ready for
+independent verification. Recommended next phase: 121F - Repository
+Intelligence Query Prototype Verification.
