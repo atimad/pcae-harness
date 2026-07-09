@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- Treat Phase 122B as the contract-freeze phase for Advisory
+  consumption of Repository Intelligence: freeze the normative
+  Repository Intelligence Advisory Consumption Contract binding for
+  122C-122F, covering architectural relationships, the Advisory
+  responsibility contract (permitted/prohibited operations), the
+  query contract (Track 121 Query Layer exclusive access), the
+  context/attribution/limitation/boundary disclosure contracts, the
+  determinism contract, the fail-closed failure contract, the
+  governance contract, compatibility with Track 119/120/121, deferred
+  capabilities, and known inherited issues. Introduce no
+  implementation, source code change, test code change, or schema
+  change. Recommended next phase: 122C - Repository Intelligence
+  Advisory Consumption Contract Verification.
+
 - Treat Phase 121E as the first narrow implementation phase for the
   Repository Intelligence Query Layer: implement deterministic,
   read-only querying of existing Repository Knowledge Snapshot

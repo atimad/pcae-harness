@@ -2,6 +2,40 @@
 
 ## Unreleased
 
+- Phase 122B - Repository Intelligence Advisory Consumption Contract
+  Freeze
+  (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_FREEZE.md`).
+  Freezes the canonical Repository Intelligence Advisory Consumption
+  Contract, binding for 122C, 122D, 122E, and 122F. Freezes
+  architectural relationships (Repository Knowledge Snapshot,
+  Repository Intelligence Query Layer, Advisory Runtime, Advisory
+  Context, Repository State, Evidence, Decision Evaluation, Runtime);
+  the Advisory responsibility contract (permitted:
+  request/consume/reference Repository Intelligence, preserve
+  attribution/limitations/boundary disclosures, assemble context;
+  prohibited: generate or modify Repository Intelligence, mutate
+  Repository State or Evidence, replace Decision Evaluation or
+  Repository State, introduce execution capability); the query
+  contract restricting access to the Track 121 read-only Query Layer
+  only; the context, attribution, limitation, and boundary disclosure
+  contracts; the determinism contract (no inference, no probabilistic
+  behavior, no AI augmentation); the fail-closed failure contract for
+  unsupported snapshot, unsupported schema version, corrupted
+  Repository Intelligence, missing attribution, missing limitation,
+  missing boundary disclosure, and invalid query result; the
+  governance contract; compatibility with Track 119, Track 120, and
+  Track 121; deferred capabilities (Historical Memory, Dependency
+  Knowledge Graph, Change Impact, Advisory Intelligence Context
+  Package consumption, graph traversal, dependency reasoning, change
+  impact reasoning, execution planning, execution capability); and
+  known inherited issues carried forward unrepaired. Does not
+  implement an Advisory context builder, Repository Intelligence
+  integration, runtime changes, source code, test code, schema
+  changes, query changes, Repository Intelligence generation,
+  repository scanning, graph traversal, dependency reasoning, change
+  impact reasoning, execution planning, or execution capability.
+  Recommends 122C.
+
 - Phase 122A - Repository Intelligence Advisory Consumption Architecture
   (`docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_ARCHITECTURE.md`).
   Defines the architecture for how the Advisory subsystem may consume
