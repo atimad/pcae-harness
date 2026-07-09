@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 125F — Next Architecture Direction Decision Review
+(completed).
+
+Performed the formal architectural decision review for PCAE's next
+chapter in
+`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_DECISION_REVIEW.md`, using
+the complete evidence chain from 125A-125E. **Selected Dependency
+Knowledge Graph as the next architectural chapter (Track 126)**,
+justified against all ten required criteria (governance compatibility,
+architectural cohesion, determinism, explainability, auditability,
+reproducibility, maintainability, safety, strategic value,
+implementation readiness): frozen and independently verified schema
+(119S/119T), the strongest concretely-evidenced strategic value of any
+candidate (a named, already-built consumer — Track 123's Change Impact
+Builder — with a named, already-identified limitation), and a
+well-scoped precondition (the existing
+`graph_generation_method_disclosure` schema disclaimer must be
+explicitly reconciled, not silently reinterpreted) rather than an
+open-ended design question. Historical Memory, Repository Intelligence
+expansion, Decision Evaluation support, Execution Planning, and
+Permission Broker evolution are all deferred with documented rationale,
+not rejected; Historical Memory remains the leading deferred
+alternative. Updated the high-level roadmap to reflect Track 126 as the
+active next chapter. Confirmed no implementation occurred, execution
+remains unavailable, runtime remains observe-only, Repository
+Intelligence remains stable, and Decision Evaluation/Advisory authority
+are unchanged.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 126A — Dependency Knowledge Graph
+Architecture.
+
+## Phase 125F Complete
+
+Phase 125F — Next Architecture Direction Decision Review (completed).
+
+Formal decision review selecting Dependency Knowledge Graph as PCAE's
+next architectural chapter (Track 126), based on the complete Track 125
+evidence chain. Historical Memory, Repository Intelligence expansion,
+Decision Evaluation support, Execution Planning, and Permission Broker
+evolution deferred with documented rationale. No implementation
+occurred; execution remains unavailable. Recommended next phase: 126A —
+Dependency Knowledge Graph Architecture.
+
+## Phase 125E Complete
+
 Phase 125E — Next Architecture Direction Evaluation
 (completed).
 

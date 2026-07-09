@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Phase 125F - Next Architecture Direction Decision Review
+  (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_DECISION_REVIEW.md`).
+  Formal architectural decision review for PCAE's next chapter, using
+  the complete 125A-125E evidence chain. **Selects Dependency Knowledge
+  Graph as the next architectural chapter (Track 126)**, justified
+  against governance compatibility, architectural cohesion,
+  determinism, explainability, auditability, reproducibility,
+  maintainability, safety, strategic value, and implementation
+  readiness: frozen and independently verified schema (119S/119T), the
+  strongest concretely-evidenced strategic value of any candidate (a
+  named, already-built consumer with a named, already-identified
+  limitation in Track 123's Change Impact Builder), and a well-scoped
+  precondition (reconciling the existing
+  `graph_generation_method_disclosure` schema disclaimer) rather than
+  an open-ended design question. Defers Historical Memory (leading
+  alternative), Repository Intelligence expansion, Decision Evaluation
+  support, Execution Planning, and Permission Broker evolution, each
+  with documented rationale. Updates the high-level roadmap to reflect
+  Track 126 as the active next chapter. Confirms no implementation
+  occurred, execution remains unavailable, runtime remains observe-
+  only, Repository Intelligence remains stable, and Decision
+  Evaluation/Advisory authority are unchanged. Recommends 126A.
+
 - Phase 125E - Next Architecture Direction Evaluation
   (`docs/PHASE_125_NEXT_ARCHITECTURE_DIRECTION_EVALUATION.md`).
   Executes the 125D evaluation methodology against all six recognized
