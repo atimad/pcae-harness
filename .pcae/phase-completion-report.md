@@ -1,98 +1,71 @@
-# Phase 122C Complete - Repository Intelligence Advisory Consumption Contract Verification
+# Phase 122D Complete - Repository Intelligence Advisory Consumption Prototype Plan
 
-- **Phase ID:** `122C`
-- **Phase name:** Repository Intelligence Advisory Consumption Contract Verification
+- **Phase ID:** `122D`
+- **Phase name:** Repository Intelligence Advisory Consumption Prototype Plan
 - **Status:** completed
 - **Report completeness:** complete
-- **Verification document:** `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_VERIFICATION.md`
+- **Plan document:** `docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_PROTOTYPE_PLAN.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Verification commit:** `c6bab47cf3847a7b3764bac3f81a0b3964bea1c2`
-- **Task finish commit:** `54155a6a3c2c35b53613d76b097e4f1f2fc665ae`
-- **Recommended next phase:** 122D - Repository Intelligence Advisory Consumption Prototype Plan
+- **Plan commit:** `0394813996a6224fe523bc65bedf3a35578ab2b1`
+- **Task finish commit:** `6569870a137c4aa779519ccf91b5bf48fbd568bd`
+- **Recommended next phase:** 122E - Repository Intelligence Advisory Context Prototype
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Verification Summary
+## Implementation Planning Summary
 
-Independently verified the Phase 122B Repository Intelligence Advisory
-Consumption Contract for completeness, internal consistency,
-determinism, architectural alignment, governance compatibility, and
-implementation readiness. Re-derived every claim from source rather
-than trusting prior-phase prose: confirmed the Query Layer's six
-implemented query categories match the contract, confirmed the
-supported executable schema version constant is unchanged, confirmed
-`AdvisoryContextPackage`'s frozen 15-section shape remains unmodified
-and unwired, confirmed Advisory Runtime's own documentation still
-disclaims Repository Intelligence consumption. No contract defect
-requiring correction was found; no contract modification was made.
+Defined the definitive implementation plan for the first Repository
+Intelligence Advisory Consumption prototype: a deterministic,
+read-only Advisory Context Builder consuming Repository Intelligence
+exclusively through the Track 121 Query Layer, scoped to Repository
+Knowledge Snapshot and Query Layer results only. No implementation,
+source, test, or schema changes occurred.
 
-## Contract Completeness Assessment
+## Planned Advisory Consumption Pipeline
 
-Verified. The 122B contract contains every required contractual
-section: purpose, relationship to 122A, contract authority,
-implementation independence, architectural relationships, Advisory
-responsibility contract, query contract, context/attribution/
-limitation/boundary disclosure contracts, determinism contract,
-failure contract, governance contract, compatibility contract,
-deferred capabilities, known inherited issues, relationship to future
-phases, strict non-goals, and acceptance.
+Nine-stage pipeline: advisory request intake, Repository Intelligence
+query preparation, read-only Query Layer invocation, context
+selection, attribution preservation, limitation propagation, boundary
+disclosure propagation, advisory context package assembly, advisory
+delivery. Responsibilities only, no implementation.
 
-## Architectural Consistency Assessment
+## Planned Component Responsibilities
 
-Verified. Cross-checked against 122A's nine-stage pipeline and context
-model, Track 121 Query Layer (source-confirmed six query categories),
-Track 120 Repository Knowledge Snapshot, Track 119 executable schemas
-(source-confirmed unmodified), Advisory Runtime architecture
-(source-confirmed disambiguation preserved), and observe-only runtime
-principles (live-confirmed via `pcae runtime inspect`). No
-architectural contradiction found.
+Nine planned components, each with defined responsibility, inputs,
+outputs, and boundaries: Advisory Request Intake, Query Preparation,
+Query Invocation, Context Selection, Attribution Preservation,
+Limitation Propagation, Boundary Disclosure Propagation, Context
+Package Assembly, and Advisory Delivery. No classes, modules, or
+source layout defined.
 
-## Determinism Assessment
+## Planned Context Package Structure
 
-Verified. Identical Query Result(s) plus identical advisory context
-request produce identical logical advisory context package; inference,
-probabilistic scoring, AI augmentation, and other non-deterministic
-behavior are explicitly excluded.
+Five required elements: selected Repository Intelligence, attribution
+bundle, limitation bundle, boundary disclosure bundle, and advisory
+metadata. No serialization format, storage location, Python type, or
+`AdvisoryContextPackage` section placement decided; placement deferred
+to a future 115W-contract amendment.
 
-## Attribution Assessment
+## Planned Verification Strategy
 
-Verified. Every Repository Intelligence element must retain provenance
-traceable to its originating Repository Knowledge Snapshot; missing
-attribution on a content-bearing record remains a contract failure.
-
-## Limitation Assessment
-
-Verified. All inherited limitations must propagate unchanged into the
-assembled context package's limitation bundle; no limitation may be
-discarded.
-
-## Boundary Disclosure Assessment
-
-Verified. Boundary disclosures propagate unchanged from source Query
-Result through final delivery; Repository Intelligence cannot be
-reinterpreted as Evidence, Repository State, or Decision Evaluation at
-any pipeline stage.
-
-## Governance Compatibility Assessment
-
-Verified. Preserves observe-only runtime, deterministic engineering,
-auditability, explainability, reproducibility, human-controlled
-lifecycle, and governed commit/report/notification discipline.
-Compatible with Track 119/120/121, all independently confirmed
-unmodified.
+122F should independently verify: deterministic context generation,
+attribution preservation, limitation propagation, boundary
+propagation, governance compatibility, failure handling for all seven
+modes (missing Repository Intelligence, unsupported snapshot schema,
+invalid query response, missing attribution, missing limitation,
+missing boundary disclosure, corrupted artifact), read-only behavior,
+and scope discipline.
 
 ## Implementation Readiness Assessment
 
-Verified for planning, not for direct implementation. Sufficient for
-122D, 122E, and 122F without additional architectural work. Areas
-intentionally deferred: exact advisory context request representation,
-exact context package serialization format, exact
-`AdvisoryContextPackage` section placement (deferred to a future 115W-
-contract amendment), exact selection-criteria implementation, exact
-verification fixtures, exact command or call surface if any is later
-authorized.
+Ready for 122E implementation within the boundaries frozen by 122B and
+verified by 122C. Deferred implementation details: exact advisory
+context request representation, exact context package serialization
+format, exact `AdvisoryContextPackage` section placement, exact
+selection-criteria implementation, exact verification fixtures, exact
+command or call surface if any is later authorized.
 
 ## Governance Results
 
@@ -110,8 +83,8 @@ authorized.
 - No test code changed.
 - No schema changed.
 - No query changes were made.
-- No Advisory context builder was implemented.
-- No Repository Intelligence integration was implemented.
+- No Advisory Context Builder was implemented.
+- No Advisory runtime integration was implemented.
 - No Repository Intelligence generation was implemented.
 - No repository scanning was implemented.
 - No graph traversal was implemented.
@@ -132,7 +105,6 @@ Carried forward unchanged and not repaired in this phase:
 
 ## Readiness
 
-The Repository Intelligence Advisory Consumption Contract is
-independently verified and ready for prototype planning. Recommended
-next phase: 122D - Repository Intelligence Advisory Consumption
-Prototype Plan.
+The Repository Intelligence Advisory Consumption Prototype Plan is
+documented and ready for implementation. Recommended next phase: 122E
+- Repository Intelligence Advisory Context Prototype.

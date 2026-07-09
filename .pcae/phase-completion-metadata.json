@@ -1,15 +1,27 @@
 {
-  "architectural_consistency_assessment": "Verified. The 122B contract's architectural relationships, query contract, and failure contract were each independently cross-checked against source: query_engine.py confirms exactly six implemented query categories matching the contract's claim; snapshot_loader.py confirms the supported executable schema version constant (119O.1.0-json-schema) is unchanged; advisory_context_package.py confirms the AdvisoryContextPackage 15-section shape remains unmodified and unwired; PCAE_ADVISORY_RUNTIME.md confirms Advisory Runtime still disclaims Repository Intelligence consumption. No architectural contradiction found.",
-  "attribution_assessment": "Verified. The contract requires every Repository Intelligence element to retain provenance traceable to the originating Repository Knowledge Snapshot and embedded Source Attribution Records; missing attribution on a content-bearing record remains a contract failure requiring exclusion with disclosed limitation or fail-closed rejection.",
-  "boundary_disclosure_assessment": "Verified. The contract requires boundary disclosures to propagate unchanged from the source Query Result through final delivery, and explicitly prohibits reinterpreting Repository Intelligence as Evidence, Repository State, or Decision Evaluation at any pipeline stage.",
+  "acceptance_criteria_for_122e": [
+    "Implements only the scoped Advisory Context Builder described in the 122D plan.",
+    "Consumes Repository Intelligence exclusively through the Track 121 execute_query entry point, using only its six existing supported query categories.",
+    "Never reads a Repository Knowledge Snapshot artifact directly, never reruns the Track 120 generator, and never scans the repository.",
+    "Produces deterministic logical context packages for identical Query Result(s) and identical advisory context requests.",
+    "Preserves artifact provenance and embedded Source Attribution Records for every selected content-bearing record.",
+    "Propagates every relevant inherited limitation unchanged, adding only strictly additive consumption-specific limitations.",
+    "Propagates every relevant inherited boundary disclosure and disclaimer unchanged, plus a consumption-specific non-authority disclaimer.",
+    "Fails closed for all seven modes: missing Repository Intelligence, unsupported snapshot schema, invalid query response, missing attribution, missing limitation, missing boundary disclosure, and corrupted artifact.",
+    "Does not generate or modify Repository Intelligence artifacts.",
+    "Does not perform graph traversal, dependency reasoning, change impact reasoning, Advisory reasoning, Decision Evaluation, execution planning, or introduce execution capability.",
+    "Does not decide AdvisoryContextPackage section placement or wire into any existing Advisory Provider, Repository Skill, Decision Evaluation, or lifecycle command.",
+    "Does not change runtime posture.",
+    "Includes focused tests or verification fixtures sufficient for 122F to independently evaluate determinism, attribution, limitation propagation, boundary propagation, failure handling, and read-only behavior."
+  ],
   "boundary_confirmations": [
     "No implementation occurred",
     "No source code changed",
     "No test code changed",
     "No schema changed",
     "No query changes were made",
-    "No Advisory context builder was implemented",
-    "No Repository Intelligence integration was implemented",
+    "No Advisory Context Builder was implemented",
+    "No Advisory runtime integration was implemented",
     "No Repository Intelligence generation was implemented",
     "No repository scanning was implemented",
     "No graph traversal was implemented",
@@ -20,17 +32,17 @@
     "No execution capability was introduced",
     "No runtime behavior changed"
   ],
-  "commit_attribution": "c6bab47cf3847a7b3764bac3f81a0b3964bea1c2, 54155a6a3c2c35b53613d76b097e4f1f2fc665ae",
-  "contract_completeness_assessment": "Verified. The 122B contract contains every required contractual section named by the 122B phase request: purpose, relationship to 122A, contract authority, implementation independence, architectural relationships, Advisory responsibility contract, query contract, context/attribution/limitation/boundary disclosure contracts, determinism contract, failure contract, governance contract, compatibility contract, deferred capabilities, known inherited issues, relationship to future phases, strict non-goals, and acceptance. Nothing required is missing.",
-  "determinism_assessment": "Verified. The contract guarantees identical Query Result(s) plus identical advisory context request produce identical logical advisory context package, explicitly excluding inference, probabilistic scoring, AI augmentation, randomness, and other non-deterministic behavior.",
+  "commit_attribution": "0394813996a6224fe523bc65bedf3a35578ab2b1, 6569870a137c4aa779519ccf91b5bf48fbd568bd",
+  "component_plan_summary": "Nine planned components: Advisory Request Intake, Query Preparation, Query Invocation, Context Selection, Attribution Preservation, Limitation Propagation, Boundary Disclosure Propagation, Context Package Assembly, and Advisory Delivery, each with defined responsibility, inputs, outputs, and boundaries. No classes, modules, or source layout defined.",
+  "context_package_plan_summary": "Five required elements: selected Repository Intelligence, attribution bundle, limitation bundle, boundary disclosure bundle, and advisory metadata. No serialization format, storage location, Python type, or AdvisoryContextPackage section placement decided; placement deferred to a future 115W-contract amendment.",
   "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable, and zero runtime plugins are registered.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_CONTRACT_VERIFICATION.md",
+    "docs/PHASE_122_REPOSITORY_INTELLIGENCE_ADVISORY_CONSUMPTION_PROTOTYPE_PLAN.md",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260709-1249-phase-122c-repository-intelligence-advisory-consumption-contract-verification.md"
+    "tasks/done/20260709-1300-phase-122d-repository-intelligence-advisory-consumption-prototype-plan.md"
   ],
   "files_changed_count": 6,
   "governance_compatibility": "Preserves observe-only runtime, deterministic behavior, auditability, reproducibility, explainability, human-controlled lifecycle, and governed commit/report/notification discipline. Compatible with Track 119 schemas (unmodified), Track 120 Repository Knowledge Snapshot (unmodified, sole reachable artifact family), and Track 121 Query Layer (unmodified, exclusive access path).",
@@ -60,42 +72,41 @@
       "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
     }
   ],
-  "implementation_readiness_assessment": "Verified for planning, not for direct implementation. The 122B contract is sufficient for 122D (Prototype Plan), 122E (Advisory Context Prototype), and 122F (Advisory Consumption Verification) without additional architectural work. Areas intentionally deferred to 122D or later: exact advisory context request representation, exact context package serialization format, exact AdvisoryContextPackage section placement (deferred to a future 115W-contract amendment), exact selection-criteria implementation, exact verification fixtures, exact command or call surface if any is later authorized.",
   "implementation_confirmation": "No implementation occurred. No source code, schema, or test file changed. No runtime behavior changed. Execution remains unavailable.",
+  "implementation_planning_summary": "Defined the definitive implementation plan for the first Repository Intelligence Advisory Consumption prototype: a deterministic, read-only Advisory Context Builder consuming Repository Intelligence exclusively through the Track 121 Query Layer, scoped to Repository Knowledge Snapshot and Query Layer results only. Defines the nine-stage consumption pipeline, nine planned components, the context package plan, the query interaction plan, attribution/limitation/boundary propagation plans, the seven-mode fail-closed failure plan, the 122F verification plan, 13 measurable 122E acceptance criteria, seven risks with mitigations, and deferred capabilities.",
+  "implementation_readiness_assessment": "Ready for 122E implementation within the boundaries frozen by 122B and verified by 122C. Deferred implementation details: exact advisory context request representation, exact context package serialization format, exact AdvisoryContextPackage section placement, exact selection-criteria implementation, exact verification fixtures, exact command or call surface if any is later authorized.",
   "known_inherited_issues_reviewed": [
     "119Q report-generation-ordering defect - non-blocking, not repaired",
     "119AB phase-id comparison bug - non-blocking, not repaired",
     "recurring pending_final_telegram_delivery reporting detail - non-blocking, not repaired"
   ],
-  "limitation_assessment": "Verified. The contract requires all snapshot-level, record-level, and query-specific limitations to propagate unchanged into the assembled context package's limitation bundle; Advisory may add strictly additive limitations but may never drop or narrow an inherited one.",
   "missing_trust_fields": [],
-  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No source code changed. No test code changed. No schema changed. No query changes were made. No Advisory context builder was implemented. No Repository Intelligence integration was implemented. No Repository Intelligence generation was implemented. No repository scanning was implemented. No graph traversal was implemented. No dependency reasoning was implemented. No change impact reasoning was implemented. No runtime plugin was added. No execution planning was introduced. No execution capability was introduced. No runtime behavior changed.",
+  "no_go_confirmation": "No No-Go conditions triggered. No implementation occurred. No source code changed. No test code changed. No schema changed. No query changes were made. No Advisory Context Builder was implemented. No Advisory runtime integration was implemented. No Repository Intelligence generation was implemented. No repository scanning was implemented. No graph traversal was implemented. No dependency reasoning was implemented. No change impact reasoning was implemented. No runtime plugin was added. No execution planning was introduced. No execution capability was introduced. No runtime behavior changed.",
   "origin_main_head_count": 0,
   "phase_commits": [
     {
-      "hash": "c6bab47c",
-      "message": "Phase 122C: Repository Intelligence Advisory Consumption Contract Verification"
+      "hash": "03948139",
+      "message": "Phase 122D: Repository Intelligence Advisory Consumption Prototype Plan"
     },
     {
-      "hash": "54155a6a",
-      "message": "Finish Phase 122C task"
+      "hash": "6569870a",
+      "message": "Finish Phase 122D task"
     }
   ],
-  "phase_id": "122C",
-  "phase_name": "Repository Intelligence Advisory Consumption Contract Verification",
-  "phase_title": "Repository Intelligence Advisory Consumption Contract Verification",
+  "phase_id": "122D",
+  "phase_name": "Repository Intelligence Advisory Consumption Prototype Plan",
+  "phase_title": "Repository Intelligence Advisory Consumption Prototype Plan",
+  "planned_pipeline_summary": "Nine-stage consumption pipeline: advisory request intake, Repository Intelligence query preparation, read-only Query Layer invocation, context selection, attribution preservation, limitation propagation, boundary disclosure propagation, advisory context package assembly, advisory delivery. Responsibilities only, no implementation.",
   "pushed_status": "pushed",
-  "recommended_next_phase": "122D - Repository Intelligence Advisory Consumption Prototype Plan",
-  "recommended_next_phase_id": "122D",
-  "recommended_next_phase_name": "Repository Intelligence Advisory Consumption Prototype Plan",
-  "relationship_to_track_119_120_121": "Independently confirmed compatibility: Track 119 schemas (repository_knowledge_snapshot.schema.json, advisory_intelligence_context_package.schema.json) remain unmodified. Track 120 Repository Knowledge Snapshot remains the only Repository Intelligence artifact family reachable under this contract. Track 121 Query Layer remains the exclusive, unmodified access path; source inspection confirms no Track 122 phase has touched src/pcae/repository_intelligence/query/.",
+  "recommended_next_phase": "122E - Repository Intelligence Advisory Context Prototype",
+  "recommended_next_phase_id": "122E",
+  "recommended_next_phase_name": "Repository Intelligence Advisory Context Prototype",
   "report_completeness": "complete",
   "report_notification_status": "pending_final_telegram_delivery",
   "schema_version": "1.0",
-  "scope_assessment": "Verified. The Advisory consumption layer remains deterministic, read-only, Repository Intelligence consumption only (exclusively via the Track 121 Query Layer), and advisory context enrichment only, never Advisory reasoning or Decision Evaluation replacement. No scope expansion relative to 122A was found.",
   "source_files_changed": 0,
   "status": "completed",
-  "summary": "Verification-only phase. Independently verified the Phase 122B Repository Intelligence Advisory Consumption Contract for completeness, internal consistency, determinism, architectural alignment, governance compatibility, and implementation readiness. Re-derived every claim from source rather than trusting prior-phase prose. No contract defect found; no contract modification made. No implementation, source, test, or schema changes occurred.",
+  "summary": "Implementation-planning phase, doc-only. Defined the definitive implementation plan for the first Repository Intelligence Advisory Consumption prototype (Advisory Context Builder): pipeline, components, context package plan, query interaction plan, attribution/limitation/boundary propagation plans, failure plan, verification plan, acceptance criteria, risks and mitigations, and deferred capabilities. No implementation, source, test, or schema changes occurred.",
   "test_files_changed": 0,
   "test_results": {
     "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
@@ -103,7 +114,7 @@
     "report_notification_tests": "pending_final_telegram_delivery",
     "source_schema_test_diff": "no source, schema, or test code changed"
   },
-  "tests_added_or_updated": "No automated tests added or updated; 122C is documentation-only contract verification.",
+  "tests_added_or_updated": "No automated tests added or updated; 122D is documentation-only implementation planning.",
   "tests_run": 0,
   "validation_results": [
     {
@@ -138,7 +149,7 @@
     },
     {
       "name": "phase_finalization_skill",
-      "result": "phase_finalization_122C_target_resolved",
+      "result": "phase_finalization_122D_target_resolved",
       "status": "passed"
     },
     {
@@ -161,5 +172,6 @@
       "result": "not_run_architecture_only_no_source_schema_test_change",
       "status": "not_applicable"
     }
-  ]
+  ],
+  "verification_plan_summary": "122F should independently verify: deterministic context generation, attribution preservation, limitation propagation, boundary propagation, governance compatibility, failure handling for all seven modes, read-only behavior, and scope discipline (no new query category, no direct access path, no deferred artifact family consumption)."
 }
