@@ -1,107 +1,83 @@
-# Phase 126A Complete - Dependency Knowledge Graph Architecture
+# Phase 126B Complete - Dependency Knowledge Graph Contract Freeze
 
-- **Phase ID:** `126A`
-- **Phase name:** Dependency Knowledge Graph Architecture
+- **Phase ID:** `126B`
+- **Phase name:** Dependency Knowledge Graph Contract Freeze
 - **Status:** completed
 - **Report completeness:** complete
-- **Architecture document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_ARCHITECTURE.md`
+- **Contract document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_CONTRACT_FREEZE.md`
 - **Source files changed:** 0
 - **Test files changed:** 0
 - **Execution boundary:** preserved (execution unavailable)
-- **Architecture commit:** `1a7d724b`
-- **Task finish commit:** `b84f0a62`
-- **Recommended next phase:** 126B - Dependency Knowledge Graph Contract Freeze
+- **Contract freeze commit:** `82ce2934`
+- **Task finish commit:** `39153a8a`
+- **Recommended next phase:** 126C - Dependency Knowledge Graph Contract Verification
 - **Pushed:** pushed
 - **origin/main..HEAD:** 0
 
-## Architecture Summary
+## Contract Summary
 
-Defined the canonical architecture for the Dependency Knowledge Graph,
-opening Track 126 (selected in 125F). Clarified the distinction between
-Repository Intelligence ("what exists?") and the Dependency Knowledge
-Graph ("how are those things related?"). Architecture-only: no
-generator, traversal, Query Layer change, consumer change, schema
-change, source code, or test code.
+Froze the canonical Dependency Knowledge Graph contract governing the
+future implementation of the graph, binding for 126C-126F. Documentation
+only; no implementation occurred.
 
-## Graph Objectives
+## Node Contract
 
-Deterministic relationship modeling, reproducible graph construction,
-explainable relationships, provenance preservation, auditability,
-governance compatibility, honest structural completeness reporting,
-and compatibility with Repository Intelligence via the Track 121 Query
-Layer boundary.
+Re-froze the already-frozen 119S/119T `node_type` enum as binding.
+Explicitly resolved 126A's flagged taxonomy gaps: artifact/report map
+to `evidence_artifact`; plugin maps to `runtime_component`; class and
+function granularity is explicitly out of scope for v1, deferred to a
+future, separately governed chapter. Froze stable identifier
+requirements (deterministic, stable, unique).
 
-## Node Taxonomy
+## Edge Contract
 
-Adopted the already-frozen 119S/119T `node_type` enum (repository,
-package, module, file, document, schema, command, configuration, test,
-task, phase, release, runtime_component, advisory_component,
-evidence_artifact, repository_skill, contract, unknown) rather than
-inventing a new one. Mapped conceptual categories (class, function,
-artifact, plugin, report) onto it and identified gaps for 126B to
-resolve explicitly.
+Re-froze the already-frozen 119S/119T `edge_type` enum as binding.
+Explicitly resolved gaps: imports/generates/produced_by/consumed_by
+map onto existing types; `contains` maps to `related_to` (documented
+v1 precision limitation); `implements` maps to `depends_on`
+(documented dual-use mapping); `attributed_to` confirmed not an edge
+concept (already covered by per-record source attribution).
 
-## Edge Taxonomy
+## Graph Invariant Contract
 
-Adopted the already-frozen 119S/119T `edge_type` enum (depends_on,
-references, documents, tests, configures, governs, produces, consumes,
-verifies, supersedes, related_to, derived_from, unknown). Mapped
-conceptual relationships (contains, imports, generates, implements,
-attributed_to) onto it and identified gaps.
+Deterministic, reproducible, provenance preserving, limitation
+preserving, boundary preserving, stable identifiers, version
+compatible, fail closed.
 
-## Graph Invariants
+## Provenance Contract
 
-Deterministic, acyclic-where-required (reported, not enforced), stable
-identifiers, provenance preserved, relationship attribution preserved,
-boundary preservation, limitation propagation, reproducible
-construction.
+Every node and relationship must preserve source attribution,
+derivation, evidence chain, uncertainty, and limitations, without
+reinterpretation.
 
-## Provenance Architecture
+## Limitation Contract
 
-Every node, edge, and dependency claim requires source attribution,
-optional derivation records, optional evidence links, verification
-state, and limitations — unchanged from the frozen schema's existing
-requirements.
+Limitations propagate without modification; snapshot-level limitations
+inherited unchanged, graph-level limitations additive only.
 
-## Relationship with Repository Intelligence
+## Boundary Disclosure Contract
 
-Repository Intelligence remains the source of observed facts. The
-graph derives structural relationships from Repository Intelligence
-through the Track 121 Query Layer exclusively. Repository Intelligence
-remains authoritative; the graph is derivative.
+Boundary disclosures propagate unchanged, including the frozen
+`dependency_knowledge_graph_snapshot_disclaimer` const string.
 
-## Relationship with Query Layer
+## Determinism Contract
 
-Conceptually anticipated future query categories (node lookup, edge
-lookup, relationship lookup, boundary/limitation lookup) mirroring the
-six categories already supported for Repository Knowledge Snapshot. No
-query implementation occurred.
+Equivalent Repository Intelligence inputs must produce equivalent
+graph structure. No nondeterministic relationship creation; every
+edge traces to an explicit, deterministic derivation rule.
 
-## Relationship with Advisory Context
+## Compatibility Contract
 
-Advisory may eventually consume graph relationships through the same
-bounded Query Layer path it already uses for Repository Knowledge
-Snapshot content. No Advisory reasoning implemented or implied.
-
-## Relationship with Change Impact
-
-Structural relationships may eventually let Change Impact replace its
-flat entity-model impact identification with real relationship
-traversal. No impact reasoning or traversal algorithm implemented.
-
-## graph_generation_method_disclosure Resolution
-
-Explicitly resolved 125F's named first-responsibility question: the
-existing schema field is a required free-text declaration that guards
-against a declared-but-unbuilt graph falsely implying automated
-construction — it does not block a real generator. A future generator
-honestly describing its own deterministic process is fully
-schema-compliant, with no schema amendment needed.
+Remains compatible with Track 119 executable schemas, Track 120
+Repository Knowledge Snapshot, Track 121 Query Layer, Track 122
+Advisory Context, and Track 123 Change Impact — none modified by this
+contract.
 
 ## Governance Compatibility
 
-Deterministic behavior, auditability, reproducibility, explainability,
-and execution-unavailable boundary all preserved and reconfirmed.
+Observe-only runtime, deterministic behavior, auditability,
+explainability, reproducibility, and execution-unavailable boundary
+all preserved.
 
 ## Governance Results
 
@@ -114,8 +90,8 @@ and execution-unavailable boundary all preserved and reconfirmed.
 
 ## Deferred Capabilities
 
-Graph implementation (generator), graph traversal, graph database,
-graph reasoning, inference engine, dependency prediction, execution
+Graph builder, graph persistence, graph traversal, graph database,
+graph query engine, graph reasoning, dependency prediction, execution
 planning, execution capability.
 
 ## Confirmations
@@ -136,6 +112,6 @@ Carried forward unchanged and not repaired:
 
 ## Readiness
 
-The Dependency Knowledge Graph architecture is complete and ready for
-contract freeze. Recommended next phase: 126B - Dependency Knowledge
-Graph Contract Freeze.
+The Dependency Knowledge Graph contract is frozen and ready for
+independent verification. Recommended next phase: 126C - Dependency
+Knowledge Graph Contract Verification.
