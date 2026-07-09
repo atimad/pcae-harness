@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Treat Phase 124B as a documentation-only contract-freeze phase for
+  Repository Intelligence prototype review and hardening: freeze a
+  binding contract for 124C-124F that permits consistency and quality
+  improvements only across Repository Knowledge Snapshot, Query Layer,
+  Advisory Context Builder, and Change Impact Builder. Preserve
+  deterministic behavior, attribution, limitation propagation, boundary
+  disclosures, fail-closed behavior, serialization compatibility,
+  observe-only runtime, reproducibility, auditability, explainability,
+  and execution-unavailable posture. Classify technical debt only into
+  documentation, implementation, testing, governance, and
+  lifecycle/tooling categories. Do not implement new Repository
+  Intelligence capabilities, new artifact families, Dependency
+  Knowledge Graph traversal, Historical Memory correlation, Advisory
+  reasoning, Decision Evaluation, execution planning, execution
+  capability, runtime plugins, source code, test code, or schema
+  changes. Recommended next phase: 124C - Repository Intelligence
+  Prototype Review & Hardening Contract Verification.
+
 - Treat Track 124 as review-and-hardening only over the complete
   Repository Intelligence prototype stack: it may classify consistency,
   maintainability, determinism, governance, testing, and lifecycle debt

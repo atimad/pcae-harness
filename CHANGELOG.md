@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 124B - Repository Intelligence Prototype Review & Hardening
+  Contract Freeze
+  (`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_CONTRACT_FREEZE.md`).
+  Documentation-only contract-freeze phase for Track 124. Freezes the
+  canonical hardening contract binding 124C-124F, scoped to review and
+  refinement of the existing Repository Knowledge Snapshot, Query
+  Layer, Advisory Context Builder, and Change Impact Builder. Allows
+  consistency and quality improvement only across implementation,
+  terminology, attribution, limitation propagation, boundary
+  disclosure, serialization, deterministic behavior, interface,
+  documentation, governance, and testing consistency; forbids
+  functionality expansion. Defines cross-track consistency,
+  determinism, attribution, limitation, boundary disclosure,
+  serialization, failure, governance, compatibility, technical debt
+  classification, deferred capabilities, inherited issue handling, and
+  strict non-goal contracts. Does not implement new Repository
+  Intelligence capabilities, new artifact families, Dependency
+  Knowledge Graph traversal, Historical Memory correlation, Advisory
+  reasoning, Decision Evaluation, execution planning, execution
+  capability, runtime plugins, source code, test code, or schema
+  changes. Recommends 124C.
+
 - Phase 124A - Repository Intelligence Prototype Review & Hardening
   Architecture
   (`docs/PHASE_124_REPOSITORY_INTELLIGENCE_PROTOTYPE_REVIEW_HARDENING_ARCHITECTURE.md`).
