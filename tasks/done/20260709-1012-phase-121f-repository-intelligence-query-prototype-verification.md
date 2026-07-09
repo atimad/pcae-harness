@@ -10,7 +10,7 @@ Phase 121F Repository Intelligence Query Prototype Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
