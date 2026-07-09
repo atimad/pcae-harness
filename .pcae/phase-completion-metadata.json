@@ -1,56 +1,142 @@
 {
-  "phase_id": "120E",
-  "phase_name": "Repository Knowledge Snapshot Prototype: Read-Only Generator",
-  "phase_title": "Repository Knowledge Snapshot Prototype: Read-Only Generator",
-  "status": "completed",
-  "summary": "First implementation phase of Track 120. Implements the deterministic, read-only Repository Knowledge Snapshot generator planned in 120D, at src/pcae/repository_intelligence/ (source_inventory.py, attribution.py, snapshot_builder.py, persistence.py, snapshot_generator.py), producing artifacts conforming to schemas/repository_intelligence/artifacts/repository_knowledge_snapshot.schema.json. Wires a new CLI command, pcae repository-intelligence snapshot generate (--output, --pretty, --json). Only the Repository Knowledge Snapshot artifact family is implemented; no other Repository Intelligence generator, query engine, or graph traversal exists. Implements the full eleven-stage pipeline planned in 120D: source discovery, attribution assignment, deterministic extraction (git commit/branch, sorted top-level src/pcae listing, narrow pyproject.toml/PROJECT_STATUS.md parsing, no AI inference, no network access), normalization, schema-conformant assembly, honest limitation/unknown capture, verbatim boundary-disclosure/disclaimer attachment, and fail-closed persistence to .pcae/repository-intelligence/ (latest.json plus an append-only, microsecond-precision snapshots/ history). Adds 14 focused tests, all passing, covering deterministic generation, schema conformance, attribution completeness, limitation/disclaimer/boundary-disclosure attachment, persistence, latest-snapshot updates, invalid-input/fail-closed handling, and unknown handling. Verified determinism directly via a two-run byte-for-byte comparison excluding the two approved timestamp fields, and structural schema conformance against the on-disk schema files. Generated and committed the actual first Repository Knowledge Snapshot artifact as a deliverable. fast_green re-run clean except one pre-existing, unrelated failure confirmed present before this phase's changes (test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked).",
-  "files_changed_count": 16,
+  "architecture_conformance_assessment": "Verified: implementation matches 120A source observation, attribution, assembly, boundary/disclaimer, persistence, and verification layers without adding authority or execution.",
+  "attribution_verification_results": "Passed: 18 source attribution records checked across entities, subsystems, and claims; no content-bearing record lacked source_attribution; locator types came from the frozen shared schema vocabulary.",
+  "boundary_confirmations": [
+    "No new functionality was introduced",
+    "No source, schema, or test file was changed",
+    "No Historical Memory Snapshot was implemented",
+    "No Dependency Knowledge Graph Snapshot was implemented",
+    "No Change Impact Report was implemented",
+    "No Advisory Context Package was implemented",
+    "No query engine was implemented",
+    "No graph traversal was implemented",
+    "No runtime plugin was added",
+    "No execution planning or execution capability was introduced",
+    "No repository mutation beyond intended snapshot persistence was introduced",
+    "No runtime mutation occurred",
+    "No Repository State mutation occurred",
+    "No Evidence mutation occurred",
+    "No Advisory invocation occurred",
+    "No AI provider integration was introduced",
+    "No network dependency was introduced"
+  ],
+  "commit_attribution": "bfa1af32b5e135d1beec98e700c8145283dd7592, 3293cc374392f68c92fd52286dd300c38b71c9f3",
+  "contract_conformance_assessment": "Verified: implementation conforms to 120B and preserves 120C conclusions; exactly one Repository Knowledge Snapshot artifact family, deterministic output, full attribution, explicit unknowns/limitations, Evidence boundary, and fail-closed behavior.",
+  "determinism_verification_results": "Passed: repeated generation produced equivalent substantive output after replacing only envelope.generated_at_utc and snapshot_identity.snapshot_created_at_utc, the two approved non-substantive timestamp fields.",
+  "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable, and zero runtime plugins are registered.",
+  "failure_verification_results": "Passed: non-git input and missing required commit observation fail closed through SnapshotGenerationError before persistence; empty required architectural entity output is refused.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "src/pcae/cli.py",
-    "tasks/TODO.md",
-    ".pcae/repository-intelligence/latest.json",
-    ".pcae/repository-intelligence/snapshots/20260708T231402432259Z.json",
-    "docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_IMPLEMENTATION.md",
-    "src/pcae/commands/repository_intelligence.py",
-    "src/pcae/repository_intelligence/__init__.py",
-    "src/pcae/repository_intelligence/attribution.py",
-    "src/pcae/repository_intelligence/persistence.py",
-    "src/pcae/repository_intelligence/snapshot_builder.py",
-    "src/pcae/repository_intelligence/snapshot_generator.py",
-    "src/pcae/repository_intelligence/source_inventory.py",
-    "tasks/active/20260709-0116-phase-120e-repository-knowledge-snapshot-prototype-read-only-generator.md",
-    "tests/test_phase_120e_repository_knowledge_snapshot.py"
+    "docs/PHASE_120_REPOSITORY_KNOWLEDGE_SNAPSHOT_PROTOTYPE_VERIFICATION.md",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/done/20260709-0235-phase-120f-repository-knowledge-snapshot-prototype-verification.md"
   ],
-  "source_files_changed": 7,
-  "test_files_changed": 1,
-  "tests_run": 4403,
-  "tests_added_or_updated": "14 new focused tests in tests/test_phase_120e_repository_knowledge_snapshot.py covering deterministic generation, schema conformance (top-level, envelope, entities/claims), attribution completeness, limitation attachment, disclaimer attachment, boundary disclosure attachment, persistence (latest+timestamped), latest-snapshot update without history loss, invalid-input/non-git-directory handling, unknown handling, fail-closed no-persistence-on-failure, and a CLI integration test.",
-  "generator_architecture_summary": "src/pcae/repository_intelligence/: source_inventory.py (read-only source discovery), attribution.py (Source Attribution Record / Uncertainty Verification State builders), snapshot_builder.py (extraction, normalization, assembly, schema alignment, limitation/unknown capture, boundary attachment), persistence.py (write-only latest.json + timestamped snapshots/ history), snapshot_generator.py (single public orchestration entry point generate_snapshot()). CLI: pcae repository-intelligence snapshot generate.",
-  "generated_artifact_description": "One Repository Knowledge Snapshot artifact conforming to repository_knowledge_snapshot.schema.json: 11 architectural entities (top-level src/pcae members, tests/, schemas/repository_intelligence/), 2 subsystems, 5 knowledge claims, 18 knowledge sources, 4 declared unknowns, all with source attribution, uncertainty/verification state, limitations, boundary disclosures, and disclaimers.",
-  "schema_validation_results": "Structural validation (required fields, additionalProperties, enum membership) passed against repository_knowledge_snapshot.schema.json and all referenced shared components (common_artifact_envelope, boundary_disclosure, disclaimer, source_attribution_record, uncertainty_verification_state); no conformant JSON Schema validator exists yet in this line, consistent with 120B/120D.",
-  "deterministic_verification_results": "Two independent generation runs against the same commit produced byte-for-byte identical output once envelope.generated_at_utc and snapshot_identity.snapshot_created_at_utc were excluded (the two approved non-substantive metadata fields per 120B Section 6); artifact_id and snapshot_id are themselves derived deterministically from the commit SHA, not a random UUID.",
-  "attribution_verification_results": "Every architectural_entity and knowledge_claim carries a non-empty source_attribution array with a locator_type drawn from the frozen source_attribution_record locator vocabulary; knowledge_sources (required, minItems 1) contains the deduplicated union of every source used anywhere in the snapshot.",
-  "persistence_summary": "Persists to .pcae/repository-intelligence/latest.json (overwritten each run) and .pcae/repository-intelligence/snapshots/<UTC-timestamp-with-microseconds>.json (append-only history, never overwritten). Write-only; the generator never reads a prior snapshot back for extraction.",
-  "known_inherited_issues_reviewed": [
-    "119Q report-generation-ordering defect (Commits: pending_, recovered commit d804458fda2663d79577941f7c415a2a50fe1573, documented in 119R) - classified non-blocking",
-    "is_phase_id_backward() phase-id string-comparison bug in pcae phase complete (src/pcae/core/phase_reports.py), documented in 119AB - classified non-blocking for 120E; should still be tracked before a letter-length transition occurs within the 120 series; not repaired in this phase",
-    "recurring report_notification_tests: pending_final_telegram_delivery report-timing detail - classified non-blocking, well-understood, and consistently handled"
-  ],
-  "shared_components_reused": [
-    "common_artifact_envelope",
-    "source_attribution_record",
-    "evidence_link_record",
-    "uncertainty_verification_state",
-    "boundary_disclosure",
-    "limitation_record",
-    "disclaimer"
-  ],
-  "validation_results": [
+  "files_changed_count": 6,
+  "governance_compatibility_assessment": "Verified: runtime remains Observed, maximum plugin capability observe, execution unavailable, zero runtime plugins; pcae health/check/task-memory/runtime/notification checks passed.",
+  "governance_results": [
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
     {
       "name": "pcae_health",
-      "result": "healthy",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "Observed, observe, execution unavailable, zero runtime plugins"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
+    }
+  ],
+  "implementation_readiness_assessment": "Verified and suitable foundation for future Track 121 architecture work. Recommended next phase: 121A - Repository Intelligence Query Layer Architecture.",
+  "known_inherited_issues_reviewed": [
+    "119Q report-generation-ordering defect - non-blocking, not repaired",
+    "119AB phase-id comparison bug - non-blocking, not repaired",
+    "recurring pending_final_telegram_delivery reporting detail - non-blocking, not repaired"
+  ],
+  "missing_trust_fields": [],
+  "no_go_confirmation": "No No-Go conditions triggered. No new Repository Intelligence functionality was introduced. No other Repository Intelligence artifact family was implemented. No Historical Memory Snapshot was implemented. No Dependency Knowledge Graph Snapshot was implemented. No Change Impact Report was implemented. No Advisory Context Package was implemented. No query engine was implemented. No graph traversal was implemented. No runtime plugin was added. No execution planning was introduced. No execution capability was introduced. No AI provider integration was introduced. No network dependency was introduced. No Repository State mutation occurred. No Evidence mutation occurred. No Advisory invocation occurred. No Decision Evaluation replacement occurred.",
+  "origin_main_head_count": 0,
+  "persistence_verification_results": "Passed: latest.json and timestamped snapshot content matched per run; two shared-output runs produced two history files; non-git failure wrote no output directory.",
+  "phase_commits": [
+    {
+      "hash": "bfa1af32b5e135d1beec98e700c8145283dd7592",
+      "message": "Phase 120F: Repository Knowledge Snapshot Prototype Verification"
+    },
+    {
+      "hash": "3293cc374392f68c92fd52286dd300c38b71c9f3",
+      "message": "Finish Phase 120F task"
+    }
+  ],
+  "phase_id": "120F",
+  "phase_name": "Repository Knowledge Snapshot Prototype Verification",
+  "phase_title": "Repository Knowledge Snapshot Prototype Verification",
+  "pushed_status": "pushed",
+  "recommended_next_phase": "121A - Repository Intelligence Query Layer Architecture",
+  "recommended_next_phase_id": "121A",
+  "recommended_next_phase_name": "Repository Intelligence Query Layer Architecture",
+  "regression_assessment": "Verified: focused Repository Intelligence tests passed, fast-green passed, and schema ref regression scan found no schema-line regression.",
+  "report_completeness": "complete",
+  "report_notification_status": "pending_final_telegram_delivery",
+  "schema_verification_results": "Passed: three generated snapshots validated against repository_knowledge_snapshot.schema.json and referenced shared components using a temporary structural validator; cross-schema scan confirmed 20 parseable schemas, unique ids, 477 refs, and zero missing referenced schema files.",
+  "schema_version": "1.0",
+  "source_files_changed": 0,
+  "status": "completed",
+  "summary": "Independently verified the Phase 120E Repository Knowledge Snapshot prototype against the Phase 119 executable schema line and the 120A architecture, 120B frozen contract, 120C verification conclusions, and 120D implementation plan. Confirmed architecture, contract, plan, schema, determinism, attribution, limitation/disclaimer/boundary disclosure, unknown handling, persistence, read-only, failure, governance, and regression conformance. No functional modifications were required and no source, schema, or test file was changed.",
+  "test_files_changed": 0,
+  "test_results": {
+    "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
+    "fast_green": "4390 passed in 75.97s; rerun during governed task finish also passed before closure",
+    "focused_tests_120e": "14 passed in 0.52s",
+    "full_pytest": "not run; fast-green and focused verification used per phase scope",
+    "schema_regression_scan": "20 schema files, unique ids true, 477 refs, 0 missing ref files",
+    "temporary_determinism_attribution_persistence_failure_script": "passed: deterministic equivalence true, attribution records checked 18, missing attribution none, history count 2, fail-closed no persistence true, unknown count 4",
+    "temporary_schema_validation": "passed for three generated snapshots through repository_knowledge_snapshot.schema.json and shared refs"
+  },
+  "tests_added_or_updated": "4404 tests/checks executed for 120F verification: 14 focused Repository Intelligence tests plus 4390 fast-green tests; no tests added or updated.",
+  "tests_run": 4404,
+  "validation_results": [
+    {
+      "name": "attribution_completeness",
+      "result": "18_records_checked_no_missing_attribution",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
+      "status": "not_applicable"
+    },
+    {
+      "name": "determinism_three_run_comparison",
+      "result": "equivalent_excluding_approved_timestamps",
+      "status": "passed"
+    },
+    {
+      "name": "failure_handling",
+      "result": "invalid_non_git_input_failed_closed_without_persistence",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "4390_passed",
+      "status": "passed"
+    },
+    {
+      "name": "focused_tests_120e",
+      "result": "14_passed",
       "status": "passed"
     },
     {
@@ -64,13 +150,8 @@
       "status": "passed"
     },
     {
-      "name": "pcae_push_check",
-      "result": "nothing_to_push",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_runtime_inspect",
-      "result": "execution_unavailable_observed_observe_zero_runtime_plugins",
+      "name": "pcae_health",
+      "result": "healthy",
       "status": "passed"
     },
     {
@@ -79,23 +160,23 @@
       "status": "passed"
     },
     {
-      "name": "focused_tests_120e",
-      "result": "14_passed",
+      "name": "pcae_push_check",
+      "result": "clean",
       "status": "passed"
     },
     {
-      "name": "schema_structural_validation",
-      "result": "passed",
+      "name": "pcae_runtime_inspect",
+      "result": "execution_unavailable_observed_observe_zero_runtime_plugins",
       "status": "passed"
     },
     {
-      "name": "determinism_two_run_comparison",
-      "result": "byte_identical_excluding_approved_timestamps",
+      "name": "persistence_behavior",
+      "result": "latest_timestamped_history_and_failure_no_write_verified",
       "status": "passed"
     },
     {
-      "name": "fast_green",
-      "result": "4389_passed_1_preexisting_unrelated_failure",
+      "name": "phase_finalization_skill",
+      "result": "phase_finalization_120F_target_resolved",
       "status": "passed"
     },
     {
@@ -104,77 +185,15 @@
       "status": "pending"
     },
     {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
-      "status": "not_applicable"
-    }
-  ],
-  "test_results": {
-    "focused_tests_120e": "14_passed_0_failed",
-    "fast_green": "4389_passed_1_preexisting_unrelated_failure_confirmed_present_before_this_phase",
-    "report_notification_tests": "pending_final_telegram_delivery",
-    "bootstrap_session_reporting_tests": "not_applicable_no_bootstrap_or_session_reporting_code_changed",
-    "full_pytest": "not_run_fast_green_tier_used_instead_consistent_with_this_phase_scope"
-  },
-  "governance_results": [
-    {
-      "name": "pcae_health",
-      "status": "healthy"
-    },
-    {
-      "name": "pcae_check",
+      "name": "schema_regression_scan",
+      "result": "20_schema_files_unique_ids_477_refs_zero_missing_ref_files",
       "status": "passed"
     },
     {
-      "name": "pcae_doctor_task_memory",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_push_check",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_runtime_inspect",
-      "status": "execution unavailable, Observed, observe, zero runtime plugins"
-    },
-    {
-      "name": "telegram_runtime",
-      "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"
+      "name": "schema_validation",
+      "result": "3_generated_snapshots_validated_against_schema_and_shared_refs",
+      "status": "passed"
     }
   ],
-  "boundary_confirmations": [
-    "No other Repository Intelligence artifact family was implemented",
-    "No query engine was implemented",
-    "No graph traversal was implemented",
-    "No repository scanner beyond the planned fixed source inventory was implemented",
-    "No runtime plugin was added",
-    "No execution planning or execution capability was introduced",
-    "No repository mutation occurred outside the generator's own governed persistence write",
-    "No runtime mutation occurred",
-    "No AI provider was invoked",
-    "No network access occurred",
-    "No known inherited tooling/reporting issue was repaired (explicitly out of scope)"
-  ],
-  "no_go_confirmation": "No No-Go conditions triggered. No other Repository Intelligence artifact family was implemented. No query engine or graph traversal was implemented. No repository scanner beyond the planned fixed source inventory was implemented. No runtime plugin was added. No execution planning or execution capability was introduced. No repository mutation occurred outside the generator's own governed persistence write. No runtime mutation occurred. No AI provider was invoked. No network access occurred. No known inherited tooling/reporting issue was repaired (explicitly out of scope for this phase).",
-  "execution_capability_confirmation": "No execution capability was introduced. Runtime state remains Observed, maximum plugin capability remains observe, execution capability remains unavailable. The only subprocess calls added are read-only `git rev-parse HEAD` and `git branch --show-current`, matching the existing pattern already used throughout src/pcae/core/ for read-only git metadata lookups.",
-  "phase_commits": [
-    {
-      "hash": "167f77cabd858c354c0d95f7c752ea84f40e87bc",
-      "message": "Phase 120E: Repository Knowledge Snapshot Prototype Read-Only Generator"
-    },
-    {
-      "hash": "fc01393c",
-      "message": "Finish Phase 120E task"
-    }
-  ],
-  "commit_attribution": "167f77cabd858c354c0d95f7c752ea84f40e87bc",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
-  "report_completeness": "complete",
-  "missing_trust_fields": [],
-  "recommended_next_phase": "Recommended next phase: 120F - Repository Knowledge Snapshot Prototype Verification",
-  "recommended_next_phase_id": "120F",
-  "recommended_next_phase_name": "Repository Knowledge Snapshot Prototype Verification",
-  "report_notification_status": "pending_final_telegram_delivery",
-  "schema_version": "1.0"
+  "verification_summary": "Repository Knowledge Snapshot prototype independently verified with no functional modifications required."
 }
