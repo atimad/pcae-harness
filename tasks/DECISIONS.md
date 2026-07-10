@@ -2,6 +2,19 @@
 
 ## Accepted
 
+- Freeze Phase 134B as the binding contract for twelve strictly ordered,
+  non-overlapping finalization stages. Bind one phase identity, Canonical
+  Engineering Evidence as sole engineering authority, deterministic Evidence
+  Extraction separate from View Composition, PFR-001 and rich Operator Report
+  views, decision/informational/semantic-freshness correctness, verifiable
+  Architecture Status, presentation-only rendering, transport-only adapters,
+  complete delivery and receipts, exactly-once logical completion,
+  fail-closed retry/correction, compatibility, governance, and versioning.
+  Treat structural, informational, decision, and semantic freshness as four
+  independent correctness dimensions. Map all fourteen confirmed debts to
+  134D planning, 134E implementation, and 134F verification; repair none in
+  134B. Recommended next phase: 134C independent contract verification.
+
 - Treat Phase 134A as the architecture for a single evidence-first,
   transport-independent finalization lifecycle. Official completion occurs
   only after canonical evidence finalization, required view generation and
