@@ -387,8 +387,42 @@ def phase_report_to_notification_event(
             "tests_run": report.tests_run,
             "explicit_no_go_confirmations": report.explicit_no_go_confirmations,
             "notification_result": report.notification_result,
+            # Phase 126G — previously omitted here despite TelegramSink's
+            # own _build_summary() reading these exact keys, which meant
+            # every Telegram summary silently rendered zero governance/
+            # test evidence lines regardless of what the canonical report
+            # actually contained.
+            "test_results": dict(report.test_results),
+            "governance_results": dict(report.governance_results),
+            "report_consistency": _report_consistency_summary(report),
+            # Phase 126G — the exact markdown the trust gate validated,
+            # embedded directly so Telegram delivery can never diverge
+            # from a possibly-stale sibling file on disk (Consistency
+            # Contract: "Telegram content shall be derived directly from
+            # the canonical report").
+            "canonical_report_markdown": report.render_markdown(),
         },
     )
+
+
+def _report_consistency_summary(report: Any) -> dict[str, Any]:
+    """Compact report-consistency summary for notification metadata.
+
+    Mirrors the same fields PhaseReport.render_markdown()'s own
+    "Report Consistency" section already computes, so the notification
+    can reflect this without re-deriving different logic.
+    """
+    consistency_warnings = [
+        w for w in report.trust_warnings
+        if "Mismatch" in w or "canonical report and metadata" in w
+        or "canonical report validation failed" in w
+        or "no canonical report artifact" in w
+    ]
+    canon_present = bool(report.canonical_report_content) or report.canonical_report_used
+    return {
+        "canonical_report_present": canon_present,
+        "status": "mismatch" if consistency_warnings else "consistent",
+    }
 
 
 def phase_report_to_partial_warning_notification_event(
@@ -435,6 +469,20 @@ def phase_report_to_partial_warning_notification_event(
             "report_completeness": report.report_completeness,
             "missing_trust_fields": report.missing_trust_fields,
             "trust_warnings": report.trust_warnings,
+            # Phase 126G — a partial report still faithfully carries
+            # whatever evidence it does have; only genuinely missing
+            # fields should be absent, never present-but-dropped.
+            "commits": report.commits,
+            "files_changed": report.files_changed,
+            "tests_run": report.tests_run,
+            "pushed_status": report.pushed_status,
+            "origin_main_head_count": report.origin_main_head_count,
+            "explicit_no_go_confirmations": report.explicit_no_go_confirmations,
+            "recommended_next_phase": report.recommended_next_phase,
+            "test_results": dict(report.test_results),
+            "governance_results": dict(report.governance_results),
+            "report_consistency": _report_consistency_summary(report),
+            "canonical_report_markdown": report.render_markdown(),
         },
     )
 
@@ -522,12 +570,50 @@ class TelegramSink:
                 error=f"sendMessage: {msg_result.get('error', 'unknown')}",
             )
 
-        # 2. Send full report document if artifact paths present
+        # 2. Send the complete canonical report as a document.
+        #
+        # Fallback contract (Phase 126G), in preferred order:
+        #   1. Deliver the complete canonical report if within limits.
+        #   2/3. Attach it as a document (Telegram's ~50MB sendDocument
+        #      limit comfortably covers every canonical text report this
+        #      system produces) alongside the executive-summary message
+        #      already sent above.
+        #   4. Only if attachment is genuinely impossible, emit a
+        #      clearly marked fallback message stating delivery was
+        #      incomplete -- never silent.
+        #
+        # Phase 126G — prefer content embedded directly on the event
+        # (``canonical_report_markdown``, populated from the trusted
+        # PhaseReport object at event-construction time) over a raw
+        # file path, so delivery can never diverge from a possibly
+        # stale sibling file on disk (Consistency Contract).
         doc_result = {"ok": True}
-        if event.artifact_paths:
+        canonical_markdown = (event.metadata or {}).get("canonical_report_markdown")
+        attempted_document = False
+        if canonical_markdown:
+            attempted_document = True
+            phase_id = (event.metadata or {}).get("phase_id") or "report"
+            filename = f"{_safe_doc_filename(phase_id)}-phase-report.md"
+            doc_result = self._send_document_bytes(
+                canonical_markdown.encode("utf-8"), filename=filename,
+            )
+        elif event.artifact_paths:
+            attempted_document = True
             for path in event.artifact_paths[:1]:  # send first artifact as document
                 doc_result = self._send_document(path)
                 break
+
+        # Fallback contract item 4 — document attachment failed: send an
+        # explicit, clearly marked follow-up message rather than leaving
+        # the operator with only a silent "document failed" field in a
+        # Python result object nobody on the mobile channel ever sees.
+        if attempted_document and not doc_result.get("ok", False):
+            self._send_message(
+                "⚠️ TRUNCATED — canonical report delivery incomplete.\n"
+                f"Document attachment failed: {doc_result.get('error', 'unknown error')}.\n"
+                "Only the summary above was delivered; the full canonical "
+                "report was not."
+            )
 
         success = msg_result["ok"] and doc_result.get("ok", False)
         return NotificationResult(
@@ -661,6 +747,11 @@ class TelegramSink:
         elif isinstance(no_go, str) and no_go:
             lines.append(f"No-go: {no_go[:120]}")
 
+        # ── Report consistency (compact) ────────────────────────────────
+        consistency = metadata.get("report_consistency") or {}
+        if consistency:
+            lines.append(f"Consistency: {consistency.get('status', 'unknown')}")
+
         # ── Next phase ──────────────────────────────────────────────────
         if next_phase:
             lines.append(f"Next: {next_phase}")
@@ -670,7 +761,14 @@ class TelegramSink:
 
         text = "\n".join(lines)
         if len(text) > self._max_message_chars:
-            text = text[:self._max_message_chars - 3] + "..."
+            # Phase 126G — silent truncation is forbidden (Fallback
+            # Contract). Truncate at a safe boundary but always append an
+            # explicit, unmissable marker rather than a bare "...", and
+            # point the reader at the full canonical report attached
+            # separately as a document.
+            marker = "\n[TRUNCATED — full canonical report attached as document]"
+            keep = max(self._max_message_chars - len(marker), 0)
+            text = text[:keep].rstrip() + marker
         return text
 
     @staticmethod
@@ -706,15 +804,21 @@ class TelegramSink:
         return self._api_call_form("sendMessage", payload_bytes)
 
     def _send_document(self, file_path: str) -> dict:
-        import json as _json
         from pathlib import Path as _Path
         path = _Path(file_path)
         if not path.exists():
             return {"ok": False, "error": f"File not found: {file_path}"}
 
-        content = path.read_bytes()
-        filename = path.name
+        return self._send_document_bytes(path.read_bytes(), filename=path.name)
 
+    def _send_document_bytes(self, content: bytes, *, filename: str) -> dict:
+        """Send raw bytes as a Telegram document (sendDocument).
+
+        Phase 126G — used to deliver canonical report content embedded
+        directly on the event (already-rendered, trusted markdown)
+        rather than requiring a file to exist on disk, so delivery can
+        never diverge from what the trust gate actually validated.
+        """
         # Multipart form-data for sendDocument
         boundary = "pcaetelegram92c"
         body_lines: list[bytes] = []
@@ -833,3 +937,9 @@ class TelegramSink:
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _safe_doc_filename(phase_id: str) -> str:
+    """Sanitize a phase_id for use as a Telegram document filename."""
+    import re
+    return re.sub(r"[^A-Za-z0-9._-]", "-", str(phase_id)) or "report"

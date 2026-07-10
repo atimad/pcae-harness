@@ -5707,6 +5707,22 @@ def build_parser() -> argparse.ArgumentParser:
     pr_create_parser.add_argument("--pushed-status", default="", help="Push status.")
     pr_create_parser.add_argument("--origin-main-head-count", type=int, default=0, help="origin/main..HEAD count.")
     pr_create_parser.add_argument("--recommended-next-phase", default="", help="Recommended next phase.")
+    pr_create_parser.add_argument(
+        "--commit", action="append", default=None,
+        help="Commit hash attributed to this phase (repeatable, first is treated as the phase commit).",
+    )
+    pr_create_parser.add_argument(
+        "--governance-result", action="append", default=None, metavar="NAME=STATUS",
+        help="Governance check result, e.g. pcae_check=passed (repeatable).",
+    )
+    pr_create_parser.add_argument(
+        "--test-result", action="append", default=None, metavar="NAME=STATUS",
+        help="Test/validation result, e.g. fast_green='4390 passed (passed)' (repeatable).",
+    )
+    pr_create_parser.add_argument(
+        "--no-go-confirmation", action="append", default=None, metavar="TEXT",
+        help="Explicit No-Go confirmation statement (repeatable).",
+    )
     pr_create_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
     pr_create_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
     pr_create_parser.set_defaults(handler=run_phase_report_create)

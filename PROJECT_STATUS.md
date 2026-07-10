@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 126G — Telegram Canonical Report Dispatch Repair
+(completed).
+
+Repaired the notification dispatch pipeline so Telegram faithfully
+delivers canonical phase reports instead of a reduced generated
+summary (`docs/PHASE_126G_TELEGRAM_CANONICAL_REPORT_DISPATCH_REPAIR.md`).
+Investigated the complete pipeline (canonical report generation, trust
+evaluation, notification formatting, Telegram sink, final dispatch)
+and found four independently verified, distinct defects: (1)
+`phase_report_to_notification_event()` never included `test_results`/
+`governance_results` in event metadata despite `TelegramSink._build_
+summary()` reading exactly those keys, silently dropping verification
+evidence from every summary regardless of report completeness; (2)
+Telegram document delivery trusted a static `latest.md` file path that
+could desync from the trust-checked report object — reproducing
+exactly what happened during 126F's own finalization; (3) summary
+truncation was silent (`"..."` with no marker), violating the Fallback
+Contract; (4) `pcae phase-report create` could not accept commits/
+governance results/test results/no-go confirmations, forcing unsafe
+manual JSON editing to reach `report_completeness: complete` — the
+same unsafe workaround that caused defect (2). Repaired all four:
+event metadata now carries `test_results`, `governance_results`, a
+`report_consistency` summary, and the exact `report.render_markdown()`
+output embedded directly (never a possibly-stale sibling file);
+truncation now appends an explicit `TRUNCATED` marker and a follow-up
+message is sent if document attachment itself fails; `pcae phase-report
+create` gained repeatable `--commit`/`--governance-result`/
+`--test-result`/`--no-go-confirmation` flags and now calls
+`apply_trust_assessment()` before writing. Verified via 10 new tests
+plus direct reproduction of each defect and its fix (not just the test
+suite). 293 notification/report-related tests pass; fast_green
+4390/4390 pass. No Dependency Knowledge Graph, Repository Intelligence,
+Historical Memory, execution, runtime plugin, Decision Evaluation,
+Advisory, or schema file was modified — confirmed via `git diff
+--stat`.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 127A — Historical Memory Architecture.
+
+## Phase 126G Complete
+
+Phase 126G — Telegram Canonical Report Dispatch Repair (completed).
+
+Repaired four verified defects in the notification dispatch pipeline
+so Telegram faithfully delivers canonical phase reports: missing
+governance/test evidence in event metadata, document-content staleness
+risk, silent truncation, and a CLI gap that forced unsafe manual report
+editing. No unrelated notification infrastructure redesigned. No
+Dependency Knowledge Graph/Repository Intelligence/Historical Memory/
+execution/schema file touched. Recommended next phase: 127A —
+Historical Memory Architecture.
+
+## Phase 126F Complete (historical — full text)
+
 Phase 126F — Dependency Knowledge Graph Verification
 (completed).
 

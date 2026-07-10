@@ -21,9 +21,40 @@ from pcae.core.phase_reports import (
 DEFAULT_REPORTS_DIR = Path(".pcae/phase-reports")
 
 
+def _parse_key_value(raw: str, *, flag: str) -> tuple[str, str]:
+    if "=" not in raw:
+        raise ValueError(f"{flag} expects NAME=STATUS, got {raw!r}")
+    name, _, value = raw.partition("=")
+    name = name.strip()
+    value = value.strip()
+    if not name or not value:
+        raise ValueError(f"{flag} expects NAME=STATUS, got {raw!r}")
+    return name, value
+
+
 def run_phase_report_create(args: argparse.Namespace) -> int:
-    """pcae phase-report create --phase-id ... [options]"""
+    """pcae phase-report create --phase-id ... [options]
+
+    Phase 126G — accepts structured governance/test/commit/no-go data
+    directly, so a complete, trust-passing report can be produced
+    through this governed command alone. Previously these fields (all
+    already supported by the underlying PhaseReport/make_phase_report)
+    were unreachable from this CLI, which forced operators to hand-edit
+    the JSON artifact directly to reach report_completeness=complete —
+    exactly the kind of unsafe workaround that caused the 126F/126G
+    canonical-report/Telegram desync incident this phase repairs.
+    """
     try:
+        governance_results: dict[str, str] = {}
+        for raw in getattr(args, "governance_result", None) or []:
+            name, value = _parse_key_value(raw, flag="--governance-result")
+            governance_results[name] = value
+
+        test_results: dict[str, str] = {}
+        for raw in getattr(args, "test_result", None) or []:
+            name, value = _parse_key_value(raw, flag="--test-result")
+            test_results[name] = value
+
         report = make_phase_report(
             phase_id=args.phase_id,
             phase_name=args.phase_name,
@@ -36,7 +67,18 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
             pushed_status=getattr(args, "pushed_status", "") or "",
             origin_main_head_count=int(getattr(args, "origin_main_head_count", 0) or 0),
             recommended_next_phase=getattr(args, "recommended_next_phase", "") or "",
+            commits=list(getattr(args, "commit", None) or []),
+            governance_results=governance_results,
+            test_results=test_results,
+            explicit_no_go_confirmations=list(getattr(args, "no_go_confirmation", None) or []),
         )
+        # Phase 126G — assess trust completeness before writing so the
+        # persisted report_completeness/missing_trust_fields reflect the
+        # data actually supplied here, rather than being left permanently
+        # blank (as before this fix) for every consumer that reads the
+        # persisted artifact directly (e.g. notification dispatch) instead
+        # of re-running `pcae phase-report trust`.
+        report.apply_trust_assessment()
     except ValueError as exc:
         if args.json:
             print(json.dumps({"error": "validation_failed", "message": str(exc)}))

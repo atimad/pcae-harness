@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 126G - Telegram Canonical Report Dispatch Repair
+  (`docs/PHASE_126G_TELEGRAM_CANONICAL_REPORT_DISPATCH_REPAIR.md`).
+  Repairs the notification pipeline so Telegram faithfully delivers
+  canonical phase reports. Root-caused and fixed four defects:
+  `phase_report_to_notification_event()` omitted `test_results`/
+  `governance_results` from event metadata despite `TelegramSink`
+  reading exactly those keys (silently dropping verification evidence
+  from every summary); Telegram document delivery trusted a static
+  `latest.md` file path that could desync from the trust-checked report
+  object (reproducing 126F's own finalization incident); summary
+  truncation was silent with no marker; `pcae phase-report create`
+  could not accept commits/governance/test/no-go data, forcing unsafe
+  manual JSON editing. Event metadata now embeds `test_results`,
+  `governance_results`, a `report_consistency` summary, and the exact
+  `report.render_markdown()` output directly; truncation now uses an
+  explicit `TRUNCATED` marker with a follow-up message on document
+  failure; `pcae phase-report create` gained repeatable `--commit`/
+  `--governance-result`/`--test-result`/`--no-go-confirmation` flags
+  and now calls `apply_trust_assessment()` before writing. 10 new
+  tests plus direct reproduction of each defect/fix; 293
+  notification/report tests pass; fast_green 4390/4390. No Dependency
+  Knowledge Graph/Repository Intelligence/Historical Memory/execution/
+  schema file modified. Recommends 127A.
+
 - Phase 126F - Dependency Knowledge Graph Verification
   (`docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_VERIFICATION.md`).
   Independently verifies the Phase 126E Dependency Knowledge Graph

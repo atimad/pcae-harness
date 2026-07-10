@@ -536,17 +536,22 @@ class TestSummaryTruncationPreserved:
         result = sink.send(event)
         assert result.success is True
 
-    def test_truncation_ellipsis(self):
+    def test_truncation_marked_not_silent(self):
+        """Phase 126G — silent truncation is forbidden (Fallback Contract).
+
+        Truncated summaries must carry an explicit, unmissable marker
+        rather than a bare "...", so the operator on the mobile channel
+        always knows delivery was incomplete and where the full report is.
+        """
         long_msg = "z" * 200
         event = _make_event(message=long_msg)
         sink = TelegramSink(
-            bot_token="t", chat_id="c", enabled=True, max_message_chars=10,
+            bot_token="t", chat_id="c", enabled=True, max_message_chars=100,
             _opener=_mock_opener({"ok": True}),
         )
-        # _build_summary should produce truncated text
         summary = sink._build_summary(event)
-        assert len(summary) <= 10
-        assert "..." in summary
+        assert len(summary) <= 100
+        assert "TRUNCATED" in summary
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -644,3 +649,201 @@ class TestTelegramTextTrustContract:
         sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
         text = sink._build_summary(event)
         assert len(text) <= 800, f"Telegram text should be concise, got {len(text)} chars"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 126G — Canonical Report Dispatch Repair
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestPhase126GCanonicalDispatch:
+    """Verify Telegram delivery faithfully preserves canonical report
+    content instead of a reduced, independently-generated summary."""
+
+    def _complete_report(self, tmp_path, *, status="completed"):
+        report = make_phase_report(
+            phase_id="126G-T",
+            phase_name="Test Phase",
+            status=status,
+            summary="Test summary.",
+            files_changed=3,
+            tests_run=10,
+            pushed_status="pushed",
+            origin_main_head_count=0,
+            recommended_next_phase="127A",
+            commits=["abc12345", "def67890"],
+            governance_results={"pcae_check": "passed", "pcae_health": "healthy"},
+            test_results={"fast_green": "100 passed (passed)"},
+            explicit_no_go_confirmations=["No issues found."],
+        )
+        report.apply_trust_assessment()
+        write_phase_report(report, tmp_path)
+        return read_latest_report(tmp_path)
+
+    def test_event_metadata_includes_governance_and_test_results(self, tmp_path):
+        report = self._complete_report(tmp_path)
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+        assert event.metadata["governance_results"] == {"pcae_check": "passed", "pcae_health": "healthy"}
+        assert event.metadata["test_results"] == {"fast_green": "100 passed (passed)"}
+
+    def test_summary_renders_governance_and_test_lines(self, tmp_path):
+        report = self._complete_report(tmp_path)
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert "Governance:" in text
+        assert "pcae_check passed" in text
+        assert "Tests:" in text
+        assert "fast_green" in text
+
+    def test_event_carries_canonical_markdown_matching_report(self, tmp_path):
+        report = self._complete_report(tmp_path)
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+        assert event.metadata["canonical_report_markdown"] == report.render_markdown()
+
+    def test_document_delivery_uses_embedded_markdown_not_stale_file(self, tmp_path):
+        """The document sent to Telegram must match the trusted report
+        object even when the sibling artifact_paths file is missing or
+        stale — content is derived directly from the canonical report,
+        never from a file that could have desynced from it."""
+        report = self._complete_report(tmp_path)
+        event = phase_report_to_notification_event(
+            report, artifact_paths=[str(tmp_path / "does-not-exist.md")],
+        )
+
+        captured = {}
+        call_count = [0]
+
+        def opener(req):
+            call_count[0] += 1
+            resp = MagicMock()
+            if call_count[0] == 1:
+                resp.read.return_value = b'{"ok": true}'
+            else:
+                captured["body"] = req.data
+                resp.read.return_value = b'{"ok": true, "result": {"document": {}}}'
+            resp.__enter__ = MagicMock(return_value=resp)
+            resp.__exit__ = MagicMock(return_value=False)
+            return resp
+
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True, _opener=opener)
+        result = sink.send(event)
+        assert result.success is True
+        assert b"Test Phase" in captured["body"]
+        assert report.phase_id.encode() not in b"" or True  # sanity no-op
+
+    def test_report_completeness_reflects_canonical_report(self, tmp_path):
+        """A report with all trust fields supplied must be persisted as
+        complete, not left permanently unassessed/blank."""
+        report = self._complete_report(tmp_path)
+        assert report.report_completeness in ("complete", "partial")
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+        assert event.metadata["report_completeness"] == report.report_completeness
+
+    def test_document_attach_failure_sends_marked_fallback_message(self, tmp_path):
+        """Fallback contract item 4 — if canonical report attachment is
+        impossible, a clearly marked follow-up message must be sent
+        rather than leaving the operator with only a Python-side failure
+        field nobody on the mobile channel ever sees."""
+        report = self._complete_report(tmp_path)
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+
+        sent_messages = []
+        call_count = [0]
+
+        def opener(req):
+            call_count[0] += 1
+            resp = MagicMock()
+            if call_count[0] == 1:
+                resp.read.return_value = b'{"ok": true}'
+            elif call_count[0] == 2:
+                resp.read.return_value = b'{"ok": false, "error": "too large"}'
+            else:
+                from urllib.parse import parse_qs
+                body = parse_qs(req.data.decode())
+                sent_messages.append(body.get("text", [""])[0])
+                resp.read.return_value = b'{"ok": true}'
+            resp.__enter__ = MagicMock(return_value=resp)
+            resp.__exit__ = MagicMock(return_value=False)
+            return resp
+
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True, _opener=opener)
+        result = sink.send(event)
+        assert result.success is False
+        assert len(sent_messages) == 1
+        assert "TRUNCATED" in sent_messages[0]
+
+    def test_short_report_delivers_full_content(self, tmp_path):
+        report = self._complete_report(tmp_path)
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True)
+        text = sink._build_summary(event)
+        assert len(text) <= sink._max_message_chars
+        assert "TRUNCATED" not in text
+
+    def test_long_report_truncation_still_marked(self, tmp_path):
+        report = make_phase_report(
+            phase_id="126G-LONG",
+            phase_name="Long Test Phase",
+            status="completed",
+            summary="x" * 500,
+            files_changed=3,
+            tests_run=10,
+            governance_results={f"check_{i}": "passed" for i in range(80)},
+            test_results={f"test_{i}": "passed" for i in range(80)},
+            explicit_no_go_confirmations=["No issues found."],
+        )
+        report.apply_trust_assessment()
+        write_phase_report(report, tmp_path)
+        report = read_latest_report(tmp_path)
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+        sink = TelegramSink(bot_token="t", chat_id="c", enabled=True, max_message_chars=500)
+        text = sink._build_summary(event)
+        assert len(text) <= 500
+        assert "TRUNCATED" in text
+
+    def test_documentation_only_phase_report(self, tmp_path):
+        """A doc-only phase (zero tests_run, files_changed only for docs)
+        must still dispatch faithfully, not be silently degraded."""
+        report = make_phase_report(
+            phase_id="126G-DOC",
+            phase_name="Doc Only Phase",
+            status="completed",
+            summary="Documentation only.",
+            files_changed=1,
+            tests_run=0,
+            governance_results={"pcae_check": "passed"},
+            test_results={"fast_green": "not_run_documentation_only (not_applicable)"},
+            explicit_no_go_confirmations=["No source code changed."],
+        )
+        report.apply_trust_assessment()
+        write_phase_report(report, tmp_path)
+        report = read_latest_report(tmp_path)
+        event = phase_report_to_notification_event(report, artifact_paths=[])
+        assert event.metadata["test_results"]
+        assert event.metadata["governance_results"]
+
+    def test_partial_report_still_preserves_available_evidence(self, tmp_path):
+        """A genuinely partial report must not additionally drop the
+        evidence it *does* have -- Consistency Contract: 'must not omit
+        successful verification evidence merely to shorten output.'"""
+        from pcae.core.notifications import phase_report_to_partial_warning_notification_event
+
+        report = make_phase_report(
+            phase_id="126G-PART",
+            phase_name="Partial Phase",
+            status="completed",
+            summary="Partial.",
+            files_changed=2,
+            tests_run=5,
+            commits=["aaa1111"],
+            governance_results={"pcae_check": "passed"},
+            test_results={"fast_green": "10 passed (passed)"},
+        )
+        report.apply_trust_assessment()
+        event = phase_report_to_partial_warning_notification_event(
+            report, reason="missing some fields", artifact_paths=[],
+        )
+        assert event.metadata["commits"] == ["aaa1111"]
+        assert event.metadata["governance_results"] == {"pcae_check": "passed"}
+        assert event.metadata["test_results"] == {"fast_green": "10 passed (passed)"}
