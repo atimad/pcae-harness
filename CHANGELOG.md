@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 133E - Canonical Engineering Evidence Contract Freeze
+  (`docs/PHASE_133_CANONICAL_ENGINEERING_EVIDENCE_CONTRACT.md`).
+  Transforms Canonical Engineering Evidence from an explored
+  architecture (133D) into the binding contract governing every future
+  Engineering Evidence implementation. Restates Purpose, Authority, and
+  Derived Evidence directly from 133D; introduces three new
+  independently named contracts — **Evidence Integrity** (immutability
+  once finalized, except through explicitly governed correction
+  mechanisms), **Non-Strengthening** (no additional certainty may be
+  introduced by a derived view), and **Non-Omission** (explicitly
+  extended across every named derived view — Phase Reports, PFN
+  notifications, release notes, milestone summaries, future evidence
+  views — filtering permitted only when explicitly disclosed).
+  Restates Lifecycle, Evidence Model (still no schema), Determinism,
+  Repository Intelligence Relationship, and Governance unweakened;
+  adds Versioning and Quality contracts (six binding properties).
+  Internal consistency review: zero BLOCKING, zero NON-BLOCKING
+  findings across seven dimensions — a clean first pass. Technical
+  debt review: four items re-confirmed, none newly BLOCKING, none
+  repaired — including independently re-verifying that **133C remains
+  outstanding**, correcting this phase's own Context, which had
+  claimed it complete. **Contract-freeze-only**: zero `src/` files
+  touched, no schema introduced, PFR-001/PFN-001 both unmodified,
+  runtime unchanged. Recommended next phase: 133F - Canonical
+  Engineering Evidence Contract Verification.
+
 - Phase 133D - Canonical Engineering Evidence Architecture
   (`docs/PHASE_133_CANONICAL_ENGINEERING_EVIDENCE_ARCHITECTURE.md`).
   Names and architects Canonical Engineering Evidence: the
