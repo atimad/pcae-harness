@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- Phase 131F - Unified Repository Intelligence Query Independent
+  Verification
+  (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_VERIFICATION.md`).
+  Independently verified the 131E implementation across sixteen
+  dimensions by re-deriving conformance from source and freshly
+  generated artifacts — never trusting 131E's own tests or report.
+  **Found and repaired one genuine BLOCKING defect**: an asymmetric
+  no-target handling gap in the Repository Knowledge Snapshot handler
+  (`_handle_rks_entity_lookup`) — the only one of seven category
+  handlers with an incorrect extra guard (`and request.target`) that
+  caused a `target=None` request to silently return an empty `"ok"`
+  response with zero references and zero uncertainty records, directly
+  violating 131B Section 15's "no silent omission" clause verbatim.
+  Independently discovered via a fresh edge-case probe none of 131E's
+  43 tests exercised. Repaired with a single-line fix aligning the
+  handler with the other six's already-correct unconditional
+  miss-handling; re-verified against the full test battery (43 own
+  tests, 129 combined Track 121/122/123/130/131 regression tests,
+  4390-test fast_green suite) — all green both before and after the
+  fix. Two NON-BLOCKING findings independently confirmed and correctly
+  left unrepaired: a cosmetic docstring overclaim in `identity.py`
+  (Track 130's `_node_id_for_entity` is imported but never directly
+  called — the reuse principle is still satisfied via Track 130's own
+  pre-computed output), and the pre-existing Track 122/123 schema/
+  reality divergence 131E first surfaced, independently re-confirmed
+  real via direct source comparison and correctly classified as
+  out of Track 131's own scope. **Track 131 — Unified Repository
+  Intelligence Query — is independently verified complete**
+  end-to-end (131A-131F). PFN-001 confirmed satisfied. No binding
+  next-chapter recommendation made — deferred to a future governed
+  planning decision.
+
 - Phase 131E - Unified Repository Intelligence Query Prototype
   (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE.md`).
   Implements the first deterministic, read-only Unified Repository

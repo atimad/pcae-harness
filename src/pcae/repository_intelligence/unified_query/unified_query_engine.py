@@ -166,9 +166,9 @@ def _handle_rks_entity_lookup(
         references.append(reference)
         if evidence_entry:
             evidence.append(evidence_entry)
-    if not references and request.target:
+    if not references:
         uncertainty.append(unresolved_identity_record(
-            target=request.target,
+            target=request.target or "",
             reason="No Repository Knowledge Snapshot entity matched the requested identifier.",
         ))
     limitations = list(result.limitations)
