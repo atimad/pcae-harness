@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Phase 133G - Canonical Engineering Evidence & Derived Evidence Views
+  Implementation Plan
+  (`docs/PHASE_133_CANONICAL_ENGINEERING_EVIDENCE_IMPLEMENTATION_PLAN.md`).
+  Defines the definitive five-stage implementation architecture (activity →
+  canonical evidence → derived views → rendering → delivery), explicit
+  component ownership, immutable canonical lifecycle and governed correction,
+  Phase Report and rich Operator Report generation, informational PFR-001
+  completeness, reusable manifest-based Derived Correctness validation,
+  lossless rendering, channel-only delivery adapters, Telegram-first PFN-001
+  integration with append-only receipts, shadow-first migration, historical
+  non-rewrite, Repository Intelligence independence, acceptance matrix, and a
+  smallest governed 133H–133N roadmap. Planning only: no schema, source, tests,
+  report/notification behavior, PFN-001, or runtime changed. Recommended next
+  phase: 133H - Canonical Engineering Evidence Executable Model Implementation.
+
 - Phase 133F - Canonical Engineering Evidence Contract Verification
   (`docs/PHASE_133_CANONICAL_ENGINEERING_EVIDENCE_CONTRACT_VERIFICATION.md`).
   Independently verifies the Canonical Engineering Evidence contract

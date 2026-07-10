@@ -2,6 +2,47 @@
 
 ## Current Phase
 
+Phase 133G — Canonical Engineering Evidence & Derived Evidence Views
+Implementation Plan (completed).
+
+Produced the definitive planning-only implementation plan in
+`docs/PHASE_133_CANONICAL_ENGINEERING_EVIDENCE_IMPLEMENTATION_PLAN.md`.
+The plan preserves five independently owned stages: Engineering Activity →
+Canonical Engineering Evidence → Derived Evidence Views → Rendering → Delivery
+Adapters. It assigns authority exclusively to one immutable canonical evidence
+record per governed phase; makes Phase Report, Operator Report, Changelog,
+Milestone, and Release artifacts deterministic sibling views; introduces a
+reusable manifest-based Derived Correctness validation plan; separates lossless
+rendering from channel mechanics; and positions Telegram as the first delivery
+adapter rather than a content or authority layer.
+
+Current-state inspection confirmed the existing `PhaseReport` mixes evidence,
+trust, and rendering; notification conversion selects summary content; and the
+Telegram sink mixes presentation, truncation/segmentation, and transport. The
+plan provides a shadow-first, explicitly activated migration that preserves all
+historical reports unchanged, retains PFN-001 trust/idempotency/visibility
+semantics, and keeps Repository Intelligence independently authoritative for
+repository facts. It replaces metadata-presence completeness with cumulative
+structural and informational PFR-001 validation across all thirteen sections.
+
+**No schema changed. No source or tests changed. No runtime behavior changed.
+No implementation occurred.**
+
+Recommended next phase: 133H — Canonical Engineering Evidence Executable Model
+Implementation.
+
+## Phase 133G Complete
+
+Phase 133G completed the Canonical Engineering Evidence and Derived Evidence
+Views implementation plan. It defines component ownership, lifecycle,
+persistence/correction strategy, initial views, rich Operator Report content,
+lossless rendering, delivery adapters, PFR-001 informational completeness,
+Derived Correctness validation, PFN-001 ordering and append-only delivery
+receipts, Repository Intelligence independence, migration, acceptance tests,
+and the smallest governed 133H–133N sequence. Planning only; runtime unchanged.
+
+## Phase 133F Complete (historical — full text)
+
 Phase 133F — Canonical Engineering Evidence Contract Verification
 (completed).
 

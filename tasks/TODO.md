@@ -11,7 +11,19 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-## Current Roadmap (Track B — Repository Intelligence)
+## Current Track 133 — Engineering Evidence
+
+`PROJECT_STATUS.md` remains authoritative. Phase 133G is complete; the
+recommended next governed phase is 133H.
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 133A–133F | PFR-001 and Canonical Engineering Evidence architecture/contract/verification | ✅ Complete |
+| 133G | Canonical Engineering Evidence & Derived Evidence Views Implementation Plan | ✅ Complete |
+| 133H | Canonical Engineering Evidence Executable Model Implementation | 🔜 Recommended next |
+| 133I–133N | Independent verification, views, rendering, delivery/PFN integration, final verification | Planned sequence; not activated |
+
+## Historical Roadmap Snapshot (Track B — Repository Intelligence)
 
 Per `PROJECT_STATUS.md`. Only the phase explicitly named "Recommended
 next repo phase" there is confirmed; everything after it is a tentative

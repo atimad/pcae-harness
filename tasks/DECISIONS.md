@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- Treat Phase 133G as the definitive planning-only implementation plan for a
+  five-stage Engineering Evidence pipeline: Engineering Activity → Canonical
+  Engineering Evidence → Derived Evidence Views → Rendering → Delivery
+  Adapters. Canonical Engineering Evidence is the sole immutable authority;
+  Phase Report, Operator Report, Changelog, Milestone, and Release artifacts
+  are deterministic sibling views; renderers are lossless and transport-
+  independent; adapters own only channel conversion, segmentation, retry, and
+  outcomes. Use reusable manifest-based Derived Correctness validation,
+  cumulative PFR structural/informational completeness, append-only delivery
+  receipts for PFN-001 linkage, shadow-first activation, and no historical
+  rewriting. Sequence implementation as 133H authority-bearing executable
+  model, 133I verification, 133J/K views and verification, 133L rendering,
+  133M delivery/PFN migration, and 133N end-to-end verification. Recommended
+  next phase: 133H - Canonical Engineering Evidence Executable Model
+  Implementation.
+
 - Treat Phase 124E as the bounded implementation phase for Repository
   Intelligence Prototype Review & Hardening: consolidate duplicated
   deterministic JSON serialization and Query Layer consumer validation
