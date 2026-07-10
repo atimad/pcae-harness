@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Phase 128B - Historical Memory Review & Hardening Contract Freeze
+  (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_CONTRACT_FREEZE.md`).
+  Freezes the canonical hardening contract binding for 128C-128F,
+  operationalizing 128A's review-and-hardening architecture into
+  normative requirements: hardening responsibility (consistency-only
+  categories, no functionality expansion), cross-track consistency
+  (Tracks 119-123, 126, 127 preserved unmodified), determinism,
+  evidence, temporal, read-only, serialization, failure, and
+  governance contracts, all restating 127B's and 128A's existing
+  contracts unchanged. Carries forward 128A's two documentation
+  findings (persistence subdirectory naming inconsistency; optional
+  Dependency Knowledge Graph CLI input scope) as hardening candidates
+  only, not repaired. Classifies technical debt without repairing any
+  of it. No implementation, schema, or runtime behavior change.
+  Recommends 128C.
+
 - Phase 128A - Historical Memory Chapter Review & Hardening
   Architecture
   (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_ARCHITECTURE.md`).

@@ -2,39 +2,47 @@
 
 ## Current Phase
 
-Phase 128A — Historical Memory Chapter Review & Hardening Architecture
+Phase 128B — Historical Memory Review & Hardening Contract Freeze
 (completed).
 
-Begins the Historical Memory hardening chapter, mirroring Track 124's
-role for Repository Intelligence directly
-(`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_ARCHITECTURE.md`).
-Reviews the complete Track 127 implementation (Builder, timeline/
-event/transition generation, evidence mapping, serialization, CLI)
-across the same eleven review categories 124A established
-(architecture, contracts, determinism, interfaces, artifact
-consistency, validation, persistence, serialization, CLI consistency,
-documentation, testing, governance). Found two genuine, concrete,
-non-blocking documentation-debt items via direct source inspection:
-(1) persistence subdirectory naming is inconsistent across sibling
-artifact families — Repository Knowledge Snapshot and Historical
-Memory Snapshot both write to `snapshots/`, but Dependency Knowledge
-Graph Snapshot uniquely writes to `graphs/`; (2) 127D scoped an
-optional Dependency Knowledge Graph structural cross-reference input
-that exists in the builder's own data model but has no CLI entry
-point. Neither is repaired in this phase — both are classified as
-debt for a future 128D plan to judge. Defines determinism, evidence,
-temporal, read-only, serialization, failure, and governance
-architecture for the hardening chapter, all restating 127B's existing
-contracts as binding, unchanged. No implementation occurred; no
-schema, source code, or test code changed; no runtime behavior
-changed.
+Freezes the canonical Historical Memory Review & Hardening Contract
+(`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_CONTRACT_FREEZE.md`),
+binding for 128C-128F. Operationalizes 128A's review-and-hardening
+architecture into normative requirements: hardening responsibility
+(implementation/terminology/persistence/evidence/limitation-
+propagation/boundary-disclosure/serialization/deterministic-behavior/
+interface/documentation/governance/testing consistency only, no
+functionality expansion), cross-track consistency (Tracks 119-123,
+126, 127 preserved unmodified), determinism, evidence, temporal,
+read-only, serialization, failure, and governance contracts, all
+restating 127B's and 128A's existing contracts unchanged. Carries
+forward 128A's two documentation findings (persistence subdirectory
+naming inconsistency; optional Dependency Knowledge Graph CLI input
+scope) as hardening candidates only, not repaired. Classifies
+technical debt without repairing any of it. No implementation
+occurred; no schema, source code, or test code changed; no runtime
+behavior changed.
 
 **Runtime posture confirmed**: runtime state `Observed`, execution
 unavailable, maximum plugin capability `observe`, and zero registered
 runtime plugins.
 
-Recommended next repo phase: 128B — Historical Memory Review &
-Hardening Contract Freeze.
+Recommended next repo phase: 128C — Historical Memory Review &
+Hardening Contract Verification.
+
+## Phase 128B Complete
+
+Phase 128B — Historical Memory Review & Hardening Contract Freeze
+(completed).
+
+Freezes the canonical hardening contract binding for 128C-128F.
+Defines hardening responsibility, cross-track consistency,
+determinism, evidence, temporal, read-only, serialization, failure,
+and governance contracts, all restating 127B/128A unchanged. Carries
+forward 128A's two documentation findings as hardening candidates
+without repairing either. No implementation, schema, or runtime
+behavior change. Recommended next phase: 128C — Historical Memory
+Review & Hardening Contract Verification.
 
 ## Phase 128A Complete
 
