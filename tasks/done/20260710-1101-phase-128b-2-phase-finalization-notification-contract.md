@@ -10,7 +10,7 @@ Phase 128B.2 Phase Finalization Notification Contract
 
 ## Status
 
-active
+done
 
 ## Mode
 
