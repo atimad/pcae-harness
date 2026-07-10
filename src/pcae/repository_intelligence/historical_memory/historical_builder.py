@@ -909,6 +909,17 @@ def build_historical_content(
         "snapshot_subject": snapshot_subject,
         "snapshot_scope": snapshot_scope,
         "historical_window": historical_window,
+        # 128E (128C Finding 1 / 128D Section 2.1): the collections below
+        # are sorted by each record's own identifier field, not by any
+        # declared time reference. Chronological ordering is already
+        # performed earlier, during construction (see `_sort_key` above,
+        # which governs the order task-derived records are *built* in).
+        # This final, separate sort is intentionally identifier-based --
+        # it exists to guarantee deterministic, stable, diffable
+        # serialization (matching what `historical_validation.py`'s
+        # `_validate_deterministic_ordering` actually checks), not to
+        # express historical/chronological ordering. Do not read this as
+        # chronological ordering.
         "historical_events": sorted(events, key=lambda e: e["event_id"]),
         "historical_claims": sorted(claims, key=lambda c: c["claim_id"]),
         "historical_sources": dependency_sources,

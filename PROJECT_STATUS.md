@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 128E — Historical Memory Review & Hardening Implementation
+(completed).
+
+Implements exactly the two bounded, non-behavioral hardening items
+128D approved
+(`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_IMPLEMENTATION.md`).
+(1) An 11-line clarifying comment block added above the final
+identifier-based array sorts in `historical_builder.py`, resolving
+128C's Finding 1 by explicitly distinguishing chronological
+processing-order construction from the intentionally identifier-based
+persisted/validated ordering (comment-only; zero executable-code lines
+changed, confirmed via direct diff inspection). (2) Forward-only
+documentation naming `historical_generator.py` explicitly within
+Historical Memory implementation scope, resolving 128C's Finding 2
+without reopening 128B's frozen contract text. Verified deterministic
+output byte-identical (modulo the two approved timestamp fields)
+between pre-change and post-change code via a real `git stash`/`git
+stash pop` before-after comparison against real repository data (858
+events, 858 claims, 858 phase-lineage records, 2 release records, 41
+repair/hardening records, 869 relationships — identical in both runs).
+Regression suites for Historical Memory, Dependency Knowledge Graph,
+Change Impact, Advisory Context, Query Layer, and Repository Knowledge
+Snapshot (334 tests) all pass; `fast_green` (4390 tests) and
+`compileall` both pass. Governance validation confirms unchanged
+posture throughout. No reasoning, inference, execution capability,
+runtime plugin, schema change, public API change, or serialization
+change introduced.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 128F — Historical Memory Review &
+Hardening Verification.
+
+## Phase 128E Complete
+
+Phase 128E — Historical Memory Review & Hardening Implementation
+(completed).
+
+Implements 128D's two approved, bounded, non-behavioral hardening
+items: an 11-line clarifying comment in `historical_builder.py`
+(128C Finding 1) and forward-only scope documentation naming
+`historical_generator.py` (128C Finding 2). Comment/documentation
+only — diff confirmed zero executable-code lines changed. Deterministic
+output verified byte-identical (modulo approved timestamps) via a real
+before/after comparison. 334 regression tests, 4390 fast_green tests,
+and compileall all pass. No schema, public API, or serialization
+change; no reasoning/inference/execution/runtime-plugin capability
+introduced. Recommended next phase: 128F — Historical Memory Review &
+Hardening Verification.
+
+## Phase 128D Complete (historical — full text)
+
 Phase 128D — Historical Memory Review & Hardening Implementation Plan
 (completed).
 

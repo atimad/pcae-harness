@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Phase 128E - Historical Memory Review & Hardening Implementation
+  (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_IMPLEMENTATION.md`).
+  Implements exactly 128D's two approved, bounded, non-behavioral
+  hardening items. (1) An 11-line clarifying comment added above the
+  final identifier-based array sorts in `historical_builder.py`,
+  resolving 128C's Finding 1 (comment-only; diff confirmed zero
+  executable-code lines changed). (2) Forward-only documentation
+  naming `historical_generator.py` explicitly within Historical Memory
+  implementation scope, resolving 128C's Finding 2 without reopening
+  128B's frozen contract text. Verified deterministic output
+  byte-identical (modulo the two approved timestamp fields) between
+  pre-change and post-change code via a real `git stash`/`git stash
+  pop` before-after comparison against real repository data (858
+  events/claims/phase-lineage records, 2 release records, 41
+  repair/hardening records, 869 relationships — identical in both
+  runs). Regression suites for Historical Memory, Dependency Knowledge
+  Graph, Change Impact, Advisory Context, Query Layer, and Repository
+  Knowledge Snapshot (334 tests), `fast_green` (4390 tests), and
+  `compileall` all pass. No schema, public API, or serialization
+  change; no reasoning/inference/execution/runtime-plugin capability
+  introduced; runtime remains Observed/observe/execution-unavailable.
+  Recommends 128F.
+
 - Phase 128D - Historical Memory Review & Hardening Implementation
   Plan
   (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_IMPLEMENTATION_PLAN.md`).
