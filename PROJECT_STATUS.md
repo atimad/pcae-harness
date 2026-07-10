@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 127F — Historical Memory Verification
+(completed).
+
+Independently verifies the Phase 127E Historical Memory Builder
+against the complete 127A-127D architectural evidence chain
+(`docs/PHASE_127_HISTORICAL_MEMORY_VERIFICATION.md`). Did not trust
+that 127E's own test suite passing implied correctness: found two
+genuine defects by independently re-reading source line by line
+(neither caught by the existing test suite, which asserted behavior
+but not the specific wording of derivation-method strings or two of
+six sortable collections' ordering). Defect 1: `historical_builder.py`
+still contained stale `source_limitations`/`state_reason` string
+literals falsely claiming `git log --follow` was used, even though
+`git_source.py` had already been correctly fixed in 127E to not use
+`--follow` — every generated artifact's own content inaccurately
+described its own derivation method. Defect 2:
+`historical_validation.py`'s ordering check omitted
+`release_lineage`/`repair_hardening_history`, two of six sortable
+collections. Both corrected with minimal, scoped fixes. Regenerated a
+fresh Historical Memory Snapshot from real repository data (not a
+reused artifact), independently confirmed zero schema errors,
+byte-deterministic across two fresh runs (851 events, 851 phase
+lineage records, 860 relationships), zero mutation of Repository
+Knowledge Snapshot/git history/task contracts (direct checksum and
+HEAD comparison), and all 12 fail-closed probes correctly fail
+closed. Track 120-124/126 regressions (160 tests), fast_green
+(4390), and compileall all pass after the fixes.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 128A — Historical Memory Chapter Review
+& Hardening Architecture.
+
+## Phase 127F Complete
+
+Phase 127F — Historical Memory Verification (completed).
+
+Independently verified the Phase 127E Historical Memory Builder by
+re-deriving correctness from source and freshly regenerated real
+output, not by trusting the existing test suite. Found and corrected
+two genuine defects: stale `git log --follow` claims baked into
+generated artifact content, and incomplete ordering-validation
+coverage. Regenerated fresh from real repository data; confirmed
+byte-deterministic, read-only, and fail-closed. Regressions and
+fast_green pass. Recommended next phase: 128A — Historical Memory
+Chapter Review & Hardening Architecture.
+
+## Phase 127E Complete (historical — full text)
+
 Phase 127E — Historical Memory Prototype
 (completed).
 

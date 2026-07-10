@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 127F - Historical Memory Verification
+  (`docs/PHASE_127_HISTORICAL_MEMORY_VERIFICATION.md`). Independently
+  verifies the Phase 127E Historical Memory Builder against the
+  complete 127A-127D architectural evidence chain. Found and corrected
+  two genuine defects by re-reading source directly (neither caught by
+  the existing test suite): stale `git log --follow` claims baked into
+  every generated artifact's `source_limitations`/`state_reason`
+  strings despite `git_source.py` already being correctly fixed to not
+  use `--follow`; and incomplete ordering-validation coverage
+  (`release_lineage`/`repair_hardening_history` were not checked).
+  Regenerated a fresh snapshot from real repository data, confirmed
+  zero schema errors, byte-determinism across two fresh runs, zero
+  mutation of RKS/git history/task contracts, and all 12 fail-closed
+  probes correctly fail closed. Track 120-124/126 regressions (160
+  tests), fast_green (4390), and compileall pass after the fixes.
+  Recommends 128A.
+
 - Phase 127E - Historical Memory Prototype
   (`docs/PHASE_127_HISTORICAL_MEMORY_PROTOTYPE_IMPLEMENTATION.md`).
   Implements the first deterministic, read-only Historical Memory

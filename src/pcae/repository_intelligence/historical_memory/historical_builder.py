@@ -369,9 +369,12 @@ def _build_phase_records(
                     source_verification_state="verified",
                     source_staleness_state="current",
                     source_limitations=[
-                        "Commit SHA observed via `git log --follow "
-                        "--diff-filter=A` for this task contract's own file "
-                        "path; commit contents beyond this path were not "
+                        "Commit SHA observed via `git log --diff-filter=A` "
+                        "for this task contract's own exact file path "
+                        "(deliberately without --follow, which would "
+                        "falsely merge unrelated files via content-"
+                        "similarity rename detection -- see git_source.py); "
+                        "commit contents beyond this path were not "
                         "enumerated."
                     ],
                 )
@@ -382,7 +385,8 @@ def _build_phase_records(
         vstate = verification_state(
             state_value=vstate_value,
             state_reason=(
-                "Introducing commit resolved via git log --follow."
+                "Introducing commit resolved via git log --diff-filter=A "
+                "against this task contract's exact file path."
                 if introduction.commit_sha
                 else "No introducing commit could be resolved for this task "
                 "contract file; existence is declared by the file itself."

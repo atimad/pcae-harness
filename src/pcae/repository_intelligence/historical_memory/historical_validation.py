@@ -205,6 +205,14 @@ def _validate_deterministic_ordering(historical: dict[str, Any]) -> None:
         raise HistoricalGenerationError(
             "historical_relationships are not deterministically ordered by relationship_id"
         )
+    release_ids = [r["release_id"] for r in historical["release_lineage"]]
+    if release_ids != sorted(release_ids):
+        raise HistoricalGenerationError("release_lineage is not deterministically ordered by release_id")
+    repair_ids = [r["record_id"] for r in historical["repair_hardening_history"]]
+    if repair_ids != sorted(repair_ids):
+        raise HistoricalGenerationError(
+            "repair_hardening_history is not deterministically ordered by record_id"
+        )
 
 
 def _validate_provenance_completeness(historical: dict[str, Any]) -> None:
