@@ -36,7 +36,7 @@
     {"name": "pcae_health", "status": "healthy with active finalization task"},
     {"name": "pcae_check", "status": "passed"},
     {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "clean after governed final push"},
+    {"name": "pcae_push_check", "status": "clean"},
     {"name": "telegram_runtime", "status": "configured and enabled after sourcing ~/.config/pcae/telegram.env"},
     {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
   ],
