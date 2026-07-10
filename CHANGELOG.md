@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 128D - Historical Memory Review & Hardening Implementation
+  Plan
+  (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_IMPLEMENTATION_PLAN.md`).
+  Scopes 128E to exactly two narrow, non-behavioral changes resolving
+  128C's two findings: a clarifying code comment (comment-only, zero
+  executable-code change) above the final identifier-based array-sort
+  in `historical_builder.py` distinguishing chronological "processing
+  order" from identifier-based "persisted/validated order"; and
+  forward-only documentation naming `historical_generator.py`
+  explicitly within 128E's own implementation report (128B's frozen
+  scope list itself is outside 128D-128F's amendment authority).
+  Defines the ten-step implementation pipeline, nine measurable 128E
+  acceptance criteria, the six-subsystem regression strategy
+  (Historical Memory, Dependency Knowledge Graph, Change Impact,
+  Advisory Context, Query Layer, Repository Knowledge Snapshot), and
+  the 128F independent re-verification strategy. Carries forward both
+  known technical-debt items and all deferred capabilities,
+  unrepaired. No implementation, schema, source code, test code, or
+  runtime behavior change. Recommends 128E.
+
 - Phase 128C - Historical Memory Review & Hardening Contract
   Verification
   (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_CONTRACT_VERIFICATION.md`).

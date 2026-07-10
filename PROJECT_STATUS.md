@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 128D — Historical Memory Review & Hardening Implementation Plan
+(completed).
+
+Produces the definitive, bounded implementation plan for 128E
+(`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_IMPLEMENTATION_PLAN.md`).
+Scopes 128E to exactly two narrow, non-behavioral changes resolving
+128C's two documentation-precision findings: (1) a clarifying code
+comment above the final identifier-based array-sort in
+`historical_builder.py`, distinguishing chronological "processing
+order" from identifier-based "persisted/validated order" — comment
+lines only, zero executable-code change; (2) forward-only
+documentation naming `historical_generator.py` explicitly within
+128E's own implementation report, since 128B's frozen scope list
+itself is outside 128D-128F's amendment authority. Defines the
+ten-step implementation pipeline (terminology refinement →
+documentation refinement → implementation/persistence/serialization/
+deterministic-behavior/CLI consistency review → regression validation
+→ governance validation → verification readiness), nine measurable
+128E acceptance criteria (no functional change, deterministic output
+preserved, evidence/attribution/temporal semantics preserved,
+read-only guarantees preserved, serialization/CLI/governance
+compatibility preserved), the regression strategy (Historical Memory,
+Dependency Knowledge Graph, Change Impact, Advisory Context, Query
+Layer, Repository Knowledge Snapshot), and the 128F independent
+re-verification strategy. Carries forward, unrepaired, only the two
+known technical-debt items (persistence naming, historical_generator
+scope) and all previously deferred capabilities. No implementation
+occurred; no schema, source code, or test code changed; no runtime
+behavior changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 128E — Historical Memory Review &
+Hardening Implementation.
+
+## Phase 128D Complete
+
+Phase 128D — Historical Memory Review & Hardening Implementation Plan
+(completed).
+
+Scopes 128E to exactly two narrow, non-behavioral (comment/
+documentation-only) changes resolving 128C's two findings. Defines the
+ten-step implementation pipeline, nine measurable 128E acceptance
+criteria, the six-subsystem regression strategy, and the 128F
+independent re-verification strategy. Carries forward both known
+technical-debt items and all deferred capabilities, unrepaired. No
+implementation, schema, or runtime behavior change. Recommended next
+phase: 128E — Historical Memory Review & Hardening Implementation.
+
+## Phase 128C Complete (historical — full text)
+
 Phase 128C — Historical Memory Review & Hardening Contract
 Verification (completed).
 
