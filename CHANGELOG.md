@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 132D - Repository Intelligence Service Prototype Plan
+  (`docs/PHASE_132_REPOSITORY_INTELLIGENCE_SERVICE_PROTOTYPE_PLAN.md`).
+  Converts the 132B contract (verified by 132C, zero BLOCKING
+  findings) into a concrete engineering plan for 132E: a nine-stage
+  lifecycle plan reusing Unified Query's own real
+  `execute_unified_query` entry point exclusively, a composition plan
+  deterministic and structurally prevented from reinterpreting/
+  strengthening/creating knowledge, a request-handling plan resolving
+  the composite-request-scope question 132B deferred (bounded to
+  independent, non-correlated per-target composition, cross-target
+  correlation explicitly deferred further), a response assembly plan
+  resolving 132C's composition-metadata-boundary finding via a
+  structurally-separated `composition_metadata` field distinct from
+  per-element provenance, a boundary disclosure plan reusing the exact
+  same real nine-field object Unified Query itself already reuses, an
+  identity plan introducing zero new resolution logic, a failure
+  handling plan that explicitly names and requires 132E to test (and
+  132F to independently re-probe) the exact silent-omission case 131F
+  discovered one layer down, a phased implementation decomposition,
+  and a verification strategy for 132F. Both 132C non-blocking
+  findings addressed by design; **neither repaired in this phase; no
+  architectural scope expansion.** No implementation, schema, source
+  code, test code, or runtime behavior change. PFN-001 confirmed
+  satisfied. Recommends 132E.
+
 - Phase 132C - Repository Intelligence Service Contract Verification
   (`docs/PHASE_132_REPOSITORY_INTELLIGENCE_SERVICE_CONTRACT_VERIFICATION.md`).
   Independently verified the 132B contract by re-deriving every
