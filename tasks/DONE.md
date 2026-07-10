@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 126G Telegram Canonical Report Dispatch Repair (20260710-0153-phase-126g-telegram-canonical-report-dispatch-repair)
 - Phase 126F Dependency Knowledge Graph Verification (20260710-0130-phase-126f-dependency-knowledge-graph-verification)
 - Fix Phase 126E metadata no_go_confirmation string count (20260709-2253-fix-phase-126e-metadata-no-go-confirmation-string-count)
 - Fix Phase 126E metadata no_go_confirmations count (20260709-2252-fix-phase-126e-metadata-no-go-confirmations-count)
