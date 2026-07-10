@@ -1,110 +1,88 @@
-# Phase 126E Complete - Dependency Knowledge Graph Prototype
+# Phase 133G Complete — Canonical Engineering Evidence & Derived Evidence Views Implementation Plan
 
-- **Phase ID:** `126E`
-- **Phase name:** Dependency Knowledge Graph Prototype
+## 1. Phase Identity
+
+- **Phase ID:** `133G`
 - **Status:** completed
+- **Phase class:** implementation plan (documentation only)
 - **Report completeness:** complete
-- **Implementation document:** `docs/PHASE_126_DEPENDENCY_KNOWLEDGE_GRAPH_PROTOTYPE_IMPLEMENTATION.md`
-- **Source files changed:** 6
-- **Test files changed:** 1
-- **Execution boundary:** preserved (execution unavailable)
-- **Implementation commit:** `7494a599`
-- **Task finish commit:** `df454ef9`
-- **Recommended next phase:** 126F - Dependency Knowledge Graph Verification
-- **Pushed:** pushed
-- **origin/main..HEAD:** 0
+- **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
-## Implementation Summary
+## 2. Executive Summary
 
-Implemented the first deterministic, read-only Dependency Knowledge
-Graph Builder exactly as scoped by 126A-126D. This is the first phase
-in Track 126 to touch `src/pcae/` source code.
+Phase 133G produced the definitive plan for a five-stage Engineering Evidence
+pipeline: Engineering Activity → Canonical Engineering Evidence → Derived
+Evidence Views → Rendering → Delivery Adapters. Canonical evidence remains the
+sole authority; Telegram is planned only as the first delivery adapter. No
+implementation or runtime change occurred.
 
-## Graph Builder Summary
+## 3. Architectural Findings
 
-Added `src/pcae/repository_intelligence/dependency_graph/` (graph
-builder, independent validation, persistence, top-level
-orchestration), consuming Repository Intelligence exclusively through
-the Track 121 Query Layer. Wired `pcae repository-intelligence
-dependency-graph generate`.
+The plan assigns independent ownership to evidence capture/canonicalization,
+view generation, correctness validation, rendering, delivery, and orchestration.
+It preserves PFN-001, PFR-001, and Repository Intelligence boundaries and uses
+append-only delivery receipts to link outcomes without mutating finalized
+evidence.
 
-## Graph Model Summary
+## 4. Implementation Findings
 
-Confirmed against real generated output: `source_file` entities become
-`file` nodes; directory (`module`) entities remain `module` nodes;
-zero non-containment edges are produced because Track 120's own
-generator does not parse imports/symbols — an inherited limitation,
-not a defect. Zero class/function nodes, per 126B's v1 scope decision.
+None. A plan is not code. No source, schema, test, report-generation,
+notification, or runtime behavior was modified.
 
-## Validation Summary
+## 5. Verification Findings
 
-`graph_validation.validate_graph()` independently re-checks unique
-node/edge identifiers, valid edge endpoints, valid node/edge
-categories, deterministic ordering, and provenance/limitation/boundary
-completeness — fails closed on any violation.
+Current report/notification source was inspected to locate mixed evidence,
+rendering, content-selection, and Telegram transport responsibilities. The plan
+was checked against 133D–133F, PFR-001, and PFN-001. No independent
+implementation verification was claimed.
 
-## Serialization Summary
+## 6. Technical Debt Review
 
-Reuses Track 124's `serialize_deterministic_json` directly, resolving
-126C Finding 2. Two independent runs against the same snapshot produce
-byte-identical output except approved timestamps.
+The current thin canonical report, metadata-presence completeness, mixed
+rendering/transport responsibilities, independently authored summaries, and
+stale Phase 126E completion sidecars remain lifecycle/tooling debt. Only the
+sidecars are synchronized here so the existing lifecycle can complete; broader
+improvements are deferred to future Track 134 work.
 
-## Persistence Summary
+## 7. Notable Engineering Knowledge
 
-Writes only, to `.pcae/repository-intelligence/dependency-graph/`,
-distinct from Track 120's own snapshot directory. Never mutates the
-source snapshot (verified by regression test).
+Delivery outcome must be linked through an append-only receipt rather than
+written back into immutable canonical evidence. View manifests provide the
+reusable basis for detecting invention, reinterpretation, strengthening, and
+silent omission.
 
-## Regression Results
+## 8. Governance Results
 
-- Repository Knowledge Snapshot: 14 passed.
-- Query Layer: 15 passed.
-- Advisory Context Builder: 22 passed.
-- Change Impact Builder plus 124E hardening tests: 21 passed.
-- Dependency Knowledge Graph prototype tests: 38 passed.
-- Combined: 110 passed.
-- fast_green: 4390 passed, 0 failed.
+- `pcae check`: passed with the scoped task active.
+- `compileall`: passed.
+- `fast_green`: 4390/4390 passed.
+- Telegram runtime: configured and enabled for final delivery.
+- Runtime remains Observed; execution remains unavailable.
 
-## Deterministic Generation Results
+## 9. Test Results
 
-Two independent generation runs against the same source snapshot
-produced byte-identical output except approved timestamp fields,
-verified both via direct Python invocation and dedicated regression
-test.
+- Python source compilation: passed.
+- fast-green suite: 4390 passed, 0 failed.
+- No tests were added or modified.
 
-## Compatibility Confirmation
+## 10. No-Go Confirmation
 
-No schema file, and no Track 119-124 source file, was modified. The
-`dependency_graph` package is purely additive.
+No implementation, source, schema, runtime, test, Canonical Engineering
+Evidence model, Derived Evidence View, renderer, delivery adapter, Phase 133H,
+Phase 134, or execution capability work occurred.
 
-## Confirmations
+## 11. Architectural Boundary Confirmation
 
-- No graph traversal implemented.
-- No reasoning implemented.
-- No runtime behavior changed.
-- Execution remains unavailable.
+Repository Intelligence still answers “what is true?” and Canonical
+Engineering Evidence will answer “what happened?”. PFN-001 still owns delivery.
+PFR-001 still owns phase-report content. None was modified.
 
-## Governance Results
+## 12. Track Progress
 
-- **pcae_health:** healthy
-- **pcae_check:** passed
-- **pcae_doctor_task_memory:** clean
-- **pcae_push_check:** clean
-- **pcae_runtime_inspect:** Observed / observe / execution unavailable / zero runtime plugins
-- **telegram_runtime:** configured and enabled after sourcing `~/.config/pcae/telegram.env`
+Track 133 is complete through its implementation-planning phase, 133G. The
+documented future sequence is 133H–133N, but no later phase has begun.
 
-## Inherited Issues
+## 13. Next Phase
 
-Carried forward unchanged and not repaired:
-
-- 119Q report-generation-ordering defect: lifecycle/tooling debt.
-- 119AB phase-id comparison bug: lifecycle/tooling debt.
-- Recurring `pending_final_telegram_delivery` reporting detail: lifecycle/tooling debt.
-- GitHub main-branch PR-rule bypass notification: repository hosting policy reporting detail.
-- Missing `PCAE_NOTIFY_ENABLED` during governed push environment: notification environment detail.
-
-## Readiness
-
-The Dependency Knowledge Graph prototype is complete and ready for
-independent verification. Recommended next phase: 126F - Dependency
-Knowledge Graph Verification.
+Recommended only: **133H — Canonical Engineering Evidence Executable Model
+Implementation**. Do not begin it as part of this finalization.
