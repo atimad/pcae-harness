@@ -2,6 +2,68 @@
 
 ## Current Phase
 
+Phase 131E — Unified Repository Intelligence Query Prototype
+(completed).
+
+Implemented the first deterministic, read-only Unified Repository
+Intelligence Query prototype exactly as scoped by 131A-131D: a new,
+additive `src/pcae/repository_intelligence/unified_query/` package
+implementing the full nine-stage query lifecycle over all six covered
+artifact families (Repository Knowledge Snapshot, Dependency Knowledge
+Graph, Historical Memory, Change Impact, Advisory Context,
+Cross-Artifact Integration). Deterministic routing (six single-family
+categories plus the one explicitly-enumerated multi-family category,
+gated by an independent allow-list so an undeclared multi-family entry
+fails closed rather than being silently accepted); artifact resolution
+reusing Track 121's `load_snapshot` and Track 130's identity-derivation
+function directly (no duplicated identity logic); response assembly
+closing all three provenance gaps 131C identified (originating record,
+derivation path, verification state — now all six elements always
+present); boundary disclosure attachment reusing Track 130's real
+nine-field `boundary_disclosure.schema.json` object verbatim, resolving
+131C's independently-discovered six-item/nine-field mapping gap;
+fail-closed failure handling (two new exception classes, four reused);
+governed CLI wiring (`pcae repository-intelligence unified-query`);
+and 43 new focused tests. **No existing Track 119-130 source file or
+schema was modified.** 86 Track 121/122/123/130 regression tests and
+the full 4390-test fast_green suite both pass unchanged. Independently
+discovered and documented (without repairing) a genuine, previously-
+undocumented schema/reality divergence in Change Impact (Track 123)
+and Advisory Context (Track 122): both real generators' output diverges
+from their own frozen schemas' declared field names, while Historical
+Memory (127) and Dependency Knowledge Graph (126) do not exhibit this
+gap.
+
+**No schema changed. No existing source or test code changed. No
+runtime behavior changed outside the new query subsystem.**
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 131F — Unified Repository Intelligence
+Query Independent Verification.
+
+## Phase 131E Complete
+
+Phase 131E — Unified Repository Intelligence Query Prototype
+(completed).
+
+Implements the first Unified Repository Intelligence Query prototype:
+new, additive `unified_query` package, nine-stage lifecycle, six
+single-family categories plus one explicitly-enumerated multi-family
+category, artifact resolution reusing Track 121/130 directly, complete
+six-element provenance, boundary disclosure reuse of the real
+nine-field schema, fail-closed failure handling, governed CLI, and 43
+new tests. Zero existing source/schema files modified. 86 regression
+tests plus 4390-test fast_green pass unchanged. Independently
+discovered (not repaired) a genuine Track 122/123 schema/reality
+divergence. PFN-001 confirmed satisfied. Recommended next phase: 131F
+— Unified Repository Intelligence Query Independent Verification.
+
+## Phase 131D Complete (historical — full text)
+
 Phase 131D — Unified Repository Intelligence Query Prototype Plan
 (completed).
 

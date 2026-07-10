@@ -508,6 +508,7 @@ from pcae.commands.repository_intelligence import (
     run_repository_intelligence_historical_memory_generate,
     run_repository_intelligence_query,
     run_repository_intelligence_snapshot_generate,
+    run_repository_intelligence_unified_query,
 )
 from pcae.commands.session import (
     run_session_bootstrap,
@@ -4787,6 +4788,79 @@ def build_parser() -> argparse.ArgumentParser:
     ri_cross_artifact_integration_generate_parser.set_defaults(
         handler=run_repository_intelligence_cross_artifact_integration_generate
     )
+
+    ri_unified_query_parser = repository_intelligence_subparsers.add_parser(
+        "unified-query",
+        help=(
+            "Unified Repository Intelligence Query prototype (Phase "
+            "131E): a single, deterministic, read-only query interface "
+            "over the six covered Repository Intelligence artifact "
+            "families (read-only, no execution, no reasoning)."
+        ),
+    )
+    ri_unified_query_parser.add_argument(
+        "--category",
+        required=True,
+        help=(
+            "Query category (one of the declared routing table "
+            "entries, e.g. rks_entity_lookup, dependency_node_lookup, "
+            "historical_event_lookup, change_impact_entity_lookup, "
+            "advisory_context_item_lookup, "
+            "cross_artifact_reference_lookup, "
+            "change_impact_to_dependency_node)."
+        ),
+    )
+    ri_unified_query_parser.add_argument(
+        "--target",
+        default=None,
+        help="Identifier to resolve, using the routed family's own existing stable identifier field.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--repository-knowledge-snapshot",
+        default=None,
+        help="Path to an existing Repository Knowledge Snapshot artifact.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--dependency-graph",
+        default=None,
+        help="Path to an existing Dependency Knowledge Graph Snapshot artifact.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--historical-memory",
+        default=None,
+        help="Path to an existing Historical Memory Snapshot artifact.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--change-impact",
+        default=None,
+        help="Path to an existing Change Impact Report artifact.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--advisory-context",
+        default=None,
+        help="Path to an existing Advisory Intelligence Context Package artifact.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--cross-artifact-integration",
+        default=None,
+        help="Path to an existing Cross-Artifact Integration Package artifact.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--include-evidence",
+        action="store_true",
+        help="Include verbatim evidence content in the response (opt-in, per 131B Section 6's 'expose' responsibility).",
+    )
+    ri_unified_query_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON query result to stdout.",
+    )
+    ri_unified_query_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Pretty-print JSON query result to stdout.",
+    )
+    ri_unified_query_parser.set_defaults(handler=run_repository_intelligence_unified_query)
 
     architecture_parser = subparsers.add_parser(
         "architecture",

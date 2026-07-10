@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Phase 131E - Unified Repository Intelligence Query Prototype
+  (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE.md`).
+  Implements the first deterministic, read-only Unified Repository
+  Intelligence Query prototype: a new, additive
+  `src/pcae/repository_intelligence/unified_query/` package
+  implementing the full nine-stage query lifecycle over all six
+  covered artifact families. Deterministic routing (six single-family
+  categories plus one explicitly-enumerated multi-family category,
+  gated by an independent allow-list); artifact resolution reusing
+  Track 121's `load_snapshot` and Track 130's identity-derivation
+  function directly; complete six-element provenance (closing all
+  three gaps 131C identified); boundary disclosure attachment reusing
+  Track 130's real nine-field `boundary_disclosure.schema.json`
+  verbatim (resolving 131C's mapping-gap finding); fail-closed failure
+  handling (two new exception classes, four reused); governed CLI
+  wiring (`pcae repository-intelligence unified-query`); and 43 new
+  focused tests. **Zero existing Track 119-130 source file or schema
+  modified.** 86 Track 121/122/123/130 regression tests and the full
+  4390-test fast_green suite both pass unchanged. Independently
+  discovered and documented (without repairing) a genuine,
+  previously-undocumented schema/reality divergence in Change Impact
+  (123) and Advisory Context (122) — both real generators' output
+  diverges from their own frozen schemas' declared field names, while
+  Historical Memory (127) and Dependency Knowledge Graph (126) do not.
+  No schema changed. No runtime behavior changed outside the new query
+  subsystem. PFN-001 confirmed satisfied. Recommends 131F.
+
 - Phase 131D - Unified Repository Intelligence Query Prototype Plan
   (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_PLAN.md`).
   Converts the 131B contract (verified by 131C, zero BLOCKING

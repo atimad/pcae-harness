@@ -231,6 +231,64 @@ def run_repository_intelligence_cross_artifact_integration_generate(
     return 0
 
 
+def run_repository_intelligence_unified_query(args: argparse.Namespace) -> int:
+    from pcae.repository_intelligence.unified_query import (
+        UnifiedQueryRequest,
+        execute_unified_query,
+    )
+    from pcae.repository_intelligence.unified_query.errors import UnifiedQueryError
+    from pcae.repository_intelligence.unified_query.routing import (
+        ADVISORY_CONTEXT,
+        CHANGE_IMPACT,
+        CROSS_ARTIFACT_INTEGRATION,
+        DEPENDENCY_KNOWLEDGE_GRAPH,
+        HISTORICAL_MEMORY,
+        REPOSITORY_KNOWLEDGE_SNAPSHOT,
+    )
+
+    artifact_paths: dict[str, Path] = {}
+    if args.repository_knowledge_snapshot:
+        artifact_paths[REPOSITORY_KNOWLEDGE_SNAPSHOT] = Path(args.repository_knowledge_snapshot)
+    if args.dependency_graph:
+        artifact_paths[DEPENDENCY_KNOWLEDGE_GRAPH] = Path(args.dependency_graph)
+    if args.historical_memory:
+        artifact_paths[HISTORICAL_MEMORY] = Path(args.historical_memory)
+    if args.change_impact:
+        artifact_paths[CHANGE_IMPACT] = Path(args.change_impact)
+    if args.advisory_context:
+        artifact_paths[ADVISORY_CONTEXT] = Path(args.advisory_context)
+    if args.cross_artifact_integration:
+        artifact_paths[CROSS_ARTIFACT_INTEGRATION] = Path(args.cross_artifact_integration)
+
+    request = UnifiedQueryRequest(
+        category=args.category,
+        target=args.target,
+        include_evidence=args.include_evidence,
+    )
+
+    try:
+        response = execute_unified_query(request, artifact_paths=artifact_paths)
+    except UnifiedQueryError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    except (SnapshotLoadError, SnapshotCompatibilityError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    data = response.to_dict()
+    if args.json or args.pretty:
+        print(json.dumps(data, indent=2 if args.pretty else None, sort_keys=True))
+    else:
+        print("Unified Repository Intelligence Query result")
+        print(f"  Status:              {data['result_status']}")
+        print(f"  Category:            {data['query_metadata']['category']}")
+        print(f"  References:          {len(data['references'])}")
+        print(f"  Evidence records:    {len(data['evidence'])}")
+        print(f"  Limitations:         {len(data['limitations'])}")
+        print(f"  Uncertainty records: {len(data['uncertainty'])}")
+    return 0
+
+
 def _request_from_query_args(args: argparse.Namespace) -> QueryRequest:
     if args.entity:
         return QueryRequest(category="entity_lookup", target=args.entity)
