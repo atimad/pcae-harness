@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 128A — Historical Memory Chapter Review & Hardening Architecture
+(completed).
+
+Begins the Historical Memory hardening chapter, mirroring Track 124's
+role for Repository Intelligence directly
+(`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_ARCHITECTURE.md`).
+Reviews the complete Track 127 implementation (Builder, timeline/
+event/transition generation, evidence mapping, serialization, CLI)
+across the same eleven review categories 124A established
+(architecture, contracts, determinism, interfaces, artifact
+consistency, validation, persistence, serialization, CLI consistency,
+documentation, testing, governance). Found two genuine, concrete,
+non-blocking documentation-debt items via direct source inspection:
+(1) persistence subdirectory naming is inconsistent across sibling
+artifact families — Repository Knowledge Snapshot and Historical
+Memory Snapshot both write to `snapshots/`, but Dependency Knowledge
+Graph Snapshot uniquely writes to `graphs/`; (2) 127D scoped an
+optional Dependency Knowledge Graph structural cross-reference input
+that exists in the builder's own data model but has no CLI entry
+point. Neither is repaired in this phase — both are classified as
+debt for a future 128D plan to judge. Defines determinism, evidence,
+temporal, read-only, serialization, failure, and governance
+architecture for the hardening chapter, all restating 127B's existing
+contracts as binding, unchanged. No implementation occurred; no
+schema, source code, or test code changed; no runtime behavior
+changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 128B — Historical Memory Review &
+Hardening Contract Freeze.
+
+## Phase 128A Complete
+
+Phase 128A — Historical Memory Chapter Review & Hardening Architecture
+(completed).
+
+Begins Track 128, mirroring Track 124's review-and-hardening role for
+Repository Intelligence. Reviewed the complete Track 127
+implementation across eleven categories; found two non-blocking
+documentation-debt items (persistence subdirectory naming, unscoped
+CLI input) without repairing either. Defined determinism, evidence,
+temporal, read-only, serialization, failure, and governance
+architecture, all restating 127B's existing contracts unchanged. No
+implementation, schema, or runtime behavior change. Recommended next
+phase: 128B — Historical Memory Review & Hardening Contract Freeze.
+
+## Phase 127F Complete (historical — full text)
+
 Phase 127F — Historical Memory Verification
 (completed).
 

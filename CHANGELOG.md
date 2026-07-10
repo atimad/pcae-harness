@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Phase 128A - Historical Memory Chapter Review & Hardening
+  Architecture
+  (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_ARCHITECTURE.md`).
+  Begins the Historical Memory hardening chapter, mirroring Track 124's
+  role for Repository Intelligence. Reviews the complete Track 127
+  implementation across eleven categories (architecture, contracts,
+  determinism, interfaces, artifact consistency, validation,
+  persistence, serialization, CLI consistency, documentation, testing,
+  governance). Found two non-blocking documentation-debt items via
+  direct inspection: persistence subdirectory naming inconsistency
+  across sibling artifact families (`snapshots/` vs DKG's `graphs/`),
+  and an unscoped-but-unexercised optional Dependency Knowledge Graph
+  CLI input. Neither repaired in this phase. Defines determinism,
+  evidence, temporal, read-only, serialization, failure, and
+  governance architecture, all restating 127B's existing contracts
+  unchanged. No implementation, schema, or runtime behavior change.
+  Recommends 128B.
+
 - Phase 127F - Historical Memory Verification
   (`docs/PHASE_127_HISTORICAL_MEMORY_VERIFICATION.md`). Independently
   verifies the Phase 127E Historical Memory Builder against the
