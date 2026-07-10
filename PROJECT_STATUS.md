@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 130D — Cross-Artifact Knowledge Integration Prototype Plan
+(completed).
+
+Produces the definitive, bounded implementation plan for 130E
+(`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_PROTOTYPE_PLAN.md`).
+Central strategic decision: no new schema shall be invented where an
+existing executable schema already provides the required structure —
+130E's primary, concrete implementation target is populating Change
+Impact's already-frozen, currently-unpopulated `dependency_context`/
+`dependency_context_reference` fields (whose `context_type` enum
+already includes `graph_node`/`graph_edge`) rather than inventing a
+new integration construct, treated as an architectural simplification
+per 130C's own independent discovery. Defines prototype scope (six
+verified-artifact inputs only; no reasoning/inference/recommendations/
+Decision Evaluation/execution planning/execution capability/runtime
+plugins), a deterministic and entirely derivative integrated knowledge
+package as output, an integration strategy (reuse stable identifiers
+and existing schemas; avoid parallel concepts), and per-artifact
+integration strategies for Change Impact, Historical Memory,
+Dependency Knowledge Graph, Advisory Context, and Query Layer
+(no traversal, no reasoning, no Query Layer expansion). Defines
+identity/provenance/uncertainty/limitation/boundary/determinism/
+serialization/failure strategies, all consistent with the frozen 130B
+contract. Explicitly resolves all four 130C carried-forward findings
+— none silently ignored: uncertainty vocabulary uses real existing
+enum values plus free-text fields for the two unmatched concepts;
+boundary disclosures use the existing `boundary_notes` free-text array
+rather than new schema fields; the Change Impact/DKG schema anchor is
+adopted as the primary implementation target; provenance linkage is
+reframed as a mechanism, not a peer relationship category. Defines
+measurable 130E acceptance criteria, the six-subsystem regression
+strategy plus fast_green/compileall, and the 130F independent
+verification strategy (fresh artifacts only, never trusting
+implementation tests). No implementation occurred; no schema, source
+code, or test code changed; no runtime behavior changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 130E — Cross-Artifact Knowledge
+Integration Prototype.
+
+## Phase 130D Complete
+
+Phase 130D — Cross-Artifact Knowledge Integration Prototype Plan
+(completed).
+
+Authorizes 130E to implement exactly one concrete, schema-anchored
+integration point (Change Impact ↔ Dependency Knowledge Graph via the
+already-existing, currently-unpopulated `dependency_context`/
+`dependency_context_reference` fields) plus the surrounding
+deterministic, read-only, provenance-preserving integration package
+infrastructure. All four 130C findings explicitly resolved. No new
+schema authorized. Defines acceptance criteria, regression strategy,
+and 130F's independent verification strategy. No implementation,
+schema, or runtime behavior change. PFN-001 confirmed satisfied.
+Recommended next phase: 130E — Cross-Artifact Knowledge Integration
+Prototype.
+
+## Phase 130C Complete (historical — full text)
+
 Phase 130C — Cross-Artifact Knowledge Integration Contract
 Verification (completed).
 

@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 130D - Cross-Artifact Knowledge Integration Prototype Plan
+  (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_PROTOTYPE_PLAN.md`).
+  Central strategic decision: no new schema shall be invented where an
+  existing executable schema already provides the required structure
+  - 130E's primary implementation target is populating Change Impact's
+  already-frozen, currently-unpopulated `dependency_context`/
+  `dependency_context_reference` fields (`context_type` enum already
+  includes `graph_node`/`graph_edge`) rather than inventing a new
+  construct. Defines prototype scope (six verified-artifact inputs
+  only; no reasoning/inference/Decision Evaluation/execution
+  planning/execution capability), a deterministic, entirely derivative
+  integrated knowledge package as output, and per-artifact integration
+  strategies (Change Impact, Historical Memory, Dependency Knowledge
+  Graph, Advisory Context, Query Layer - no traversal, no reasoning, no
+  Query Layer expansion). Defines identity/provenance/uncertainty/
+  limitation/boundary/determinism/serialization/failure strategies.
+  Explicitly resolves all four 130C carried-forward findings - none
+  silently ignored. Defines measurable 130E acceptance criteria, the
+  six-subsystem regression strategy plus fast_green/compileall, and
+  the 130F independent verification strategy (fresh artifacts only,
+  never trusting implementation tests). No implementation, schema,
+  source code, or test code change; no runtime behavior change.
+  Recommends 130E.
+
 - Phase 130C - Cross-Artifact Knowledge Integration Contract
   Verification
   (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_CONTRACT_VERIFICATION.md`).
