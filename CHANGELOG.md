@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 127C - Historical Memory Contract Verification
+  (`docs/PHASE_127_HISTORICAL_MEMORY_CONTRACT_VERIFICATION.md`).
+  Independently verifies the Phase 127B Historical Memory Contract by
+  re-deriving every enum, const string, required-field, and
+  source-code claim directly from the frozen 119Q schema file and the
+  actual Track 121 Query Layer source, not from 127A/127B's own text.
+  Found and corrected one genuine defect: 127A and 127B both cited
+  "125B §11's Failure Contract," but 125B §11 is "Deferred
+  Capabilities" — 125B has no section titled "Failure Contract"; the
+  fail-closed principle lives inside 125B §9. Traced the error to its
+  origin in 126A (not modified, out of scope) and corrected the
+  citation in 127B's own text. Found two further non-blocking
+  documentation completeness gaps (`historical_reference`/
+  `reference_type` not explicitly named; null-boundary time references
+  unaddressed by the ordering guarantee), carried forward as explicit
+  127D action items. Contract determined complete, internally
+  consistent, deterministic, governance compatible, and
+  implementation-ready. Recommends 127D.
+
 - Phase 127B - Historical Memory Contract Freeze
   (`docs/PHASE_127_HISTORICAL_MEMORY_CONTRACT_FREEZE.md`). Freezes the
   canonical Historical Memory contract, binding for 127C-127F.

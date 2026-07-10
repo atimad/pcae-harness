@@ -251,9 +251,17 @@ when an event occurred) must be represented honestly — via a
 records` entry — never silently resolved by picking one source over
 another without disclosure.
 
-**No fail-open behavior.** This restates 125B §11's Failure Contract
-and 126B §12's Failure Contract for the temporal layer. No future
-phase this contract binds (127C-127F) may introduce a fail-open path.
+**No fail-open behavior.** This restates the fail-closed philosophy
+125B §9 (Governance Contract) already established — "invalid,
+unsupported, or ambiguous evaluation inputs must not produce a default
+selection or silent candidate promotion" — and 126B §12's Failure
+Contract, for the temporal layer. *(127C correction: earlier
+Repository Intelligence documents, starting with 126A, cited this
+125B principle as "125B §11's Failure Contract"; 125B §11 is actually
+"Deferred Capabilities" — 125B has no section literally titled
+"Failure Contract". The fail-closed philosophy is a bullet inside 125B
+§9. This contract cites the correct location.)* No future phase this
+contract binds (127C-127F) may introduce a fail-open path.
 
 ## 10. Cross-Track Compatibility
 

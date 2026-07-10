@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 127C — Historical Memory Contract Verification
+(completed).
+
+Independently verifies the Phase 127B Historical Memory Contract
+(`docs/PHASE_127_HISTORICAL_MEMORY_CONTRACT_VERIFICATION.md`).
+Re-derived every enum, const string, required-field, and source-code
+claim in 127B directly from the frozen 119Q schema file and the actual
+Track 121 Query Layer source — not from 127A/127B's own text. Found
+and corrected one genuine defect: both 127A and 127B cited "125B §11's
+Failure Contract," but 125B §11 is actually "Deferred Capabilities" —
+125B has no section literally titled "Failure Contract"; the
+fail-closed principle lives as a bullet inside 125B §9 (Governance
+Contract). Traced the error to its origin in 126A (an already-completed,
+out-of-scope phase, not modified) and corrected the citation in 127B's
+own text, the only in-scope instance. Found two further minor,
+non-blocking documentation completeness gaps (the `historical_reference`
+`$def`/`reference_type` enum not explicitly named in the frozen
+conceptual model table; null-boundary time references not addressed by
+the ordering guarantee) — both carried forward as explicit 127D action
+items, mirroring 126C's own findings-forward discipline. Determination:
+the contract is complete, internally consistent, deterministic,
+governance compatible, and implementation-ready.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 127D — Historical Memory Prototype Plan.
+
+## Phase 127C Complete
+
+Phase 127C — Historical Memory Contract Verification (completed).
+
+Independently verified the Phase 127B Historical Memory Contract by
+re-deriving every claim from the frozen 119Q schema file and Track 121
+source directly. Found and corrected one genuine defect (an incorrect
+125B section citation inherited from 126A); found two non-blocking
+documentation completeness gaps carried forward to 127D. Contract
+determined complete, internally consistent, and implementation-ready.
+Recommended next phase: 127D — Historical Memory Prototype Plan.
+
+## Phase 127B Complete (historical — full text)
+
 Phase 127B — Historical Memory Contract Freeze
 (completed).
 
