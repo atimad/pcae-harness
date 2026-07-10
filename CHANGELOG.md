@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 134B.2 - External Delivery Isolation Independent Verification
+  (`docs/PHASE_134_EXTERNAL_DELIVERY_ISOLATION_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derives 134B.1's isolation repair from source and fresh
+  adversarial probes rather than trusting its report. Finds BLOCKING:
+  isolation was a five-name environment-variable deny-list plus one call
+  site's master-switch check, while a second real dispatch call site
+  (`pcae notify send-report`) bypassed that switch entirely, gated only by
+  the one existing adapter's own env check. Repairs minimally by adding a
+  fail-closed, transport-independent authorization gate inside
+  `pcae.core.notifications.dispatch()` — the shared function every call
+  site (current and future) uses — keyed on an explicit local/no-network
+  sink allowlist rather than a per-channel name list, so future adapters
+  inherit protection automatically. Adds ten fresh adversarial regression
+  tests. Production notification, PFN-001, and idempotency behavior are
+  unchanged except that `pcae notify send-report` now also requires
+  `PCAE_NOTIFY_ENABLED=1` (already set in the operator's real environment).
+
 - Phase 134B.1 - External Notification Investigation & Isolation Repair
   (`docs/PHASE_134_EXTERNAL_NOTIFICATION_INVESTIGATION_AND_ISOLATION_REPAIR.md`).
   Establishes that pytest inherited live Telegram configuration from the

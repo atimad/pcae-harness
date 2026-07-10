@@ -291,6 +291,48 @@ class MockSink:
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# External-delivery authorization boundary — Phase 134B.2
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# 134B.1 isolated *ordinary test execution* from live delivery by deleting
+# five named environment variables in tests/conftest.py. That protected
+# every call site that happened to read exactly those names, but it was not
+# an architectural boundary: `pcae notify send-report` (commands.
+# notifications.run_notify_send_report) constructs TelegramSink() and calls
+# dispatch() directly, honoring only TelegramSink's own internal env check
+# -- never PCAE_NOTIFY_ENABLED, the master switch finalize_phase_report()
+# uses. Any future adapter wired in the same way (its own env names, its
+# own is_enabled()) would inherit that same gap, and the conftest sanitizer
+# would need manual, per-adapter extension to keep covering it.
+#
+# `dispatch()` is the one function every real call site (today and future)
+# already goes through, so the fail-closed authorization gate belongs here:
+# any sink that is not a known local/no-network sink requires
+# PCAE_NOTIFY_ENABLED to be truthy, regardless of which concrete adapter it
+# is or what environment-variable names that adapter happens to use. A
+# future adapter added to the sink-construction chain inherits this
+# automatically -- no sanitizer list to extend, no per-call-site check to
+# duplicate.
+
+_LOCAL_SAFE_SINK_TYPES: tuple[type, ...] = (NoopSink, StdoutSink, FilesystemSink, MockSink)
+
+
+def _requires_external_delivery_authorization(sink: NotificationSink) -> bool:
+    """True unless `sink` is a known local/no-network sink.
+
+    Fail-closed by construction: any sink type not explicitly on the local
+    allowlist (including one that does not exist yet) is treated as a real
+    external-delivery adapter and requires authorization.
+    """
+    return not isinstance(sink, _LOCAL_SAFE_SINK_TYPES)
+
+
+def _external_delivery_authorized() -> bool:
+    import os
+    return os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Dispatcher
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -304,6 +346,12 @@ def dispatch(
     One sink failure does not prevent other sinks from being attempted.
     Each sink result is collected.  The dispatcher never raises for
     normal sink failures.
+
+    Before any non-local sink is sent to, this function requires
+    ``PCAE_NOTIFY_ENABLED`` to be truthy (Phase 134B.2 external-delivery
+    authorization boundary) -- transport-independent and enforced before
+    adapter-specific behavior runs, so it applies automatically to sinks
+    that do not exist yet.
 
     Returns a list of per-sink results.
     """
@@ -321,7 +369,24 @@ def dispatch(
             error="validation_failed",
         )]
 
+    authorized = None  # computed lazily; not every dispatch has a non-local sink
     for sink in sinks:
+        if _requires_external_delivery_authorization(sink):
+            if authorized is None:
+                authorized = _external_delivery_authorized()
+            if not authorized:
+                results.append(NotificationResult(
+                    sink_name=getattr(sink, "__class__", type(sink)).__name__,
+                    success=False,
+                    message=(
+                        "External delivery not authorized: PCAE_NOTIFY_ENABLED "
+                        "is not set to 1/true/yes."
+                    ),
+                    event_id=event.event_id,
+                    attempted_at=_utc_now_iso(),
+                    error="external_delivery_not_authorized",
+                ))
+                continue
         try:
             result = sink.send(event)
             results.append(result)

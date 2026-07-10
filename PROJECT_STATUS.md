@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 134B.2 — External Delivery Isolation Independent Verification
+(completed).
+
+Independently re-derived, from source and fresh adversarial probes, whether
+134B.1's isolation repair held at the correct architectural boundary. Found
+it did not: isolation was a five-name environment-variable deny-list plus
+one call site's (`finalize_phase_report`) master-switch check, while a
+second, independent real dispatch call site (`pcae notify send-report` /
+`run_notify_send_report`) constructed `TelegramSink()` and dispatched
+directly, honoring only that sink's own internal env check and never
+`PCAE_NOTIFY_ENABLED`. Proven with a fresh, reproducible test
+(`test_notify_send_report_now_honors_the_master_notify_switch`, originally
+written to demonstrate the bypass and confirmed failing pre-repair).
+
+BLOCKING: no shared, transport-independent external-delivery authorization
+boundary existed; a future adapter added the same way Telegram was would not
+inherit protection without manually extending both the sink-construction
+chain and the test sanitizer.
+
+Repaired minimally: `pcae.core.notifications.dispatch()` — the one function
+every real and future call site already shares — now fail-closes any sink
+not on an explicit local/no-network allowlist (`NoopSink`, `StdoutSink`,
+`FilesystemSink`, `MockSink`) unless `PCAE_NOTIFY_ENABLED` is truthy. No new
+environment variables, no sanitizer-list extension, no per-call-site
+duplication; future adapters inherit protection automatically. Full details,
+all seventeen core-question answers, and ten fresh adversarial probe results
+in
+`docs/PHASE_134_EXTERNAL_DELIVERY_ISOLATION_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134C — Canonical Phase Finalization & Reporting
+Lifecycle Contract Verification. 134C was not begun in this phase.
+
+## Phase 134B.2 Complete
+
+Independently verified and repaired the external-delivery authorization
+boundary 134B.1 did not fully close. Ten fresh adversarial tests added;
+zero notification-isolation regressions; one pre-existing, unrelated
+environment-state test failure reproduced identically on the pre-repair
+baseline commit. Production notification behavior unchanged except for
+`pcae notify send-report`, which now also requires `PCAE_NOTIFY_ENABLED=1`
+(already set in the operator's real environment). PFN-001 and exactly-once
+logical completion preserved.
+
+## Phase 134B.1 Complete (historical — full text)
+
 Phase 134B.1 — External Notification Investigation & Isolation Repair
 (completed).
 

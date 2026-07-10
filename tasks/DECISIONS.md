@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- Independently verify Phase 134B.1 rather than trust its report: re-derive
+  the isolation boundary from source and fresh adversarial probes not
+  reused from 134B.1's own test file. Found the boundary was a five-name
+  environment-variable deny-list plus one call site's master-switch check,
+  while a second real dispatch call site (`pcae notify send-report`)
+  bypassed that switch entirely. Repair minimally by adding one fail-closed,
+  transport-independent authorization gate inside
+  `pcae.core.notifications.dispatch()` keyed on an explicit local/no-network
+  sink allowlist, so future adapters inherit protection automatically
+  without sanitizer-list or per-callsite changes. Do not redesign the
+  notification subsystem, implement Track 134's Delivery Adapter
+  architecture, or begin 134C. Record the live-integration opt-in's
+  dependence on production enablement and the still-missing durable
+  per-attempt receipt ledger as transport-neutral Track 134 debt rather than
+  repair them in this phase.
+
 - Repair Phase 134B.1 strictly as a pytest environment-isolation defect:
   ordinary tests clear external notification enablement, sink selection,
   Telegram enablement, credentials, and destination before in-process and

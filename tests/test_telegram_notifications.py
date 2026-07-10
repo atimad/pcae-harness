@@ -309,7 +309,11 @@ def test_cli_send_report_json():
 
 # ── Integration: telegram sink in dispatcher ─────────────────────────────────
 
-def test_telegram_sink_in_dispatcher():
+def test_telegram_sink_in_dispatcher(monkeypatch):
+    # Phase 134B.2 — dispatch() now requires explicit external-delivery
+    # authorization (PCAE_NOTIFY_ENABLED) before sending to any non-local
+    # sink, regardless of that sink's own enabled/configured state.
+    monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
     event = _make_event()
     sink = TelegramSink(
         bot_token="t", chat_id="c", enabled=True,
