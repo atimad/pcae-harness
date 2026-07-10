@@ -10,7 +10,7 @@ Phase 134B.2 — External Delivery Isolation Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
