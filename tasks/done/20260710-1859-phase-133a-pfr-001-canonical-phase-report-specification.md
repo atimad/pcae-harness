@@ -10,7 +10,7 @@ Phase 133A PFR-001 Canonical Phase Report Specification
 
 ## Status
 
-active
+done
 
 ## Mode
 
