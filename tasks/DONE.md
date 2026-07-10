@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 127A Historical Memory Architecture (20260710-0224-phase-127a-historical-memory-architecture)
 - Phase 126G.1 Telegram Commit Trust Metadata Repair (20260710-0211-phase-126g-1-telegram-commit-trust-metadata-repair)
 - Phase 126G Telegram Canonical Report Dispatch Repair (20260710-0153-phase-126g-telegram-canonical-report-dispatch-repair)
 - Phase 126F Dependency Knowledge Graph Verification (20260710-0130-phase-126f-dependency-knowledge-graph-verification)

@@ -10,7 +10,7 @@ Phase 127A Historical Memory Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
