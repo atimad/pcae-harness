@@ -2194,3 +2194,229 @@ class TestPhase126G1CommitTrustMetadataRepair:
         report = read_latest_report(tmp_path)
         assert report.report_completeness == COMPLETENESS_COMPLETE
         assert report.trust_warnings == []
+
+
+class TestPhase128B1NotificationDispatchReliabilityRepair:
+    """`pcae phase-report create` — the documented recovery path when
+    `pcae phase complete` is rejected by the repository transition
+    validator (e.g. stale completion metadata, as in 128B) — must
+    dispatch a notification for a trust-complete report exactly once,
+    through the same certification/idempotency-marker mechanism
+    `pcae phase complete` already uses. Before this repair,
+    run_phase_report_create() never called dispatch() at all, so a
+    trust-complete report created through this path was silently never
+    notified."""
+
+    def _complete_args(self, tmp_path, **overrides):
+        from argparse import Namespace
+        defaults = dict(
+            phase_id="128B1-T", phase_name="Test Phase", status="completed",
+            summary="Test.", started_at=None, completed_at="",
+            files_changed=3, tests_run=10, pushed_status="pushed",
+            origin_main_head_count=0, recommended_next_phase="NEXT",
+            commit=["abc12345"],
+            governance_result=[
+                "pcae_check=passed", "pcae_health=healthy",
+                "pcae_doctor_task_memory=clean", "pcae_push_check=clean",
+                "telegram_runtime=configured",
+            ],
+            test_result=[
+                "fast_green=100 passed (passed)",
+                "bootstrap_session_reporting_tests=not_applicable",
+                "report_notification_tests=not_applicable",
+            ],
+            no_go_confirmation=["No issues found."],
+            reports_dir=str(tmp_path / "reports"), json=True,
+        )
+        defaults.update(overrides)
+        return Namespace(**defaults)
+
+    def _enable_noop_dispatch(self, monkeypatch, tmp_path):
+        # Isolates the shared `.pcae/phase-reports/.last-notified.json`
+        # idempotency marker and any PROJECT_STATUS.md lifecycle read to
+        # this test's own tmp_path, exactly like the existing
+        # test_notification_certification_idempotency.py /
+        # test_finalization_notification_guarantee.py convention.
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
+        monkeypatch.setenv("PCAE_NOTIFY_SINKS", "noop")
+
+    def test_untrusted_report_is_never_dispatched(self, tmp_path, monkeypatch):
+        """A report that fails to reach report_completeness=complete
+        must never dispatch — restates the existing 'a partial report
+        is never sent as final' rule for this manual path."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        args = self._complete_args(
+            tmp_path, governance_result=[], test_result=[], no_go_confirmation=[],
+        )
+        run_phase_report_create(args)
+        report = read_latest_report(Path(args.reports_dir))
+        assert report.report_completeness != COMPLETENESS_COMPLETE
+
+        marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
+        assert not marker_path.exists()
+
+    def test_trusted_report_dispatches_exactly_once(self, tmp_path, monkeypatch, capsys):
+        """The 128B scenario itself: a trust-complete report created via
+        `pcae phase-report create` must dispatch, and the idempotency
+        marker must be written afterward so a second attempt is a no-op."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        args = self._complete_args(tmp_path)
+        rc = run_phase_report_create(args)
+        assert rc == 0
+
+        report = read_latest_report(Path(args.reports_dir))
+        assert report.report_completeness == COMPLETENESS_COMPLETE
+
+        out = json.loads(capsys.readouterr().out)
+        assert out["notification"]["outcome"] == "sent"
+        assert len(out["notification"]["results"]) == 1
+        assert out["notification"]["results"][0]["success"] is True
+
+        marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
+        assert marker_path.exists()
+        marker = json.loads(marker_path.read_text())
+        assert marker["phase_id"] == "128B1-T"
+        assert marker["commit"] == "abc12345"
+
+    def test_recovery_path_after_phase_complete_rejection_dispatches(self, tmp_path, monkeypatch):
+        """Mirrors the real 128B incident: no
+        `.pcae/phase-completion-metadata.json` present at all (as if
+        `pcae phase complete` was rejected before ever reaching
+        dispatch) — the manual recovery command must still certify and
+        dispatch successfully using only its own explicit CLI-supplied
+        identity, never re-deriving identity from that file."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        assert not (tmp_path / ".pcae" / "phase-completion-metadata.json").exists()
+
+        args = self._complete_args(tmp_path, phase_id="128B1-RECOVERY")
+        run_phase_report_create(args)
+
+        marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
+        assert marker_path.exists()
+        assert json.loads(marker_path.read_text())["phase_id"] == "128B1-RECOVERY"
+
+    def test_duplicate_dispatch_is_prevented(self, tmp_path, monkeypatch, capsys):
+        """Calling `pcae phase-report create` twice for the same
+        phase_id+commit (e.g. an operator re-running the recovery
+        command) must send exactly one Telegram notification, not two."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        args = self._complete_args(tmp_path)
+        run_phase_report_create(args)
+        capsys.readouterr()
+
+        run_phase_report_create(args)
+        out = json.loads(capsys.readouterr().out)
+        assert out["notification"]["outcome"] == "already_dispatched"
+        assert "results" not in out["notification"]
+
+    def test_dispatch_ordering_report_written_before_notification(self, tmp_path, monkeypatch):
+        """The canonical report artifact must exist on disk before
+        dispatch is attempted — dispatch always occurs after (never
+        before, never instead of) the canonical report becomes
+        trusted/written."""
+        from pcae.commands.phase_reports import (
+            run_phase_report_create,
+            _dispatch_manual_report_notification,
+        )
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        write_order: list[str] = []
+
+        import pcae.commands.phase_reports as phase_reports_cli
+        real_dispatch_fn = phase_reports_cli._dispatch_manual_report_notification
+
+        def _tracking_dispatch(report, paths):
+            write_order.append("dispatch_called")
+            assert Path(paths["latest_json"]).exists(), (
+                "report artifact must already be written before dispatch is attempted"
+            )
+            return real_dispatch_fn(report, paths)
+
+        monkeypatch.setattr(phase_reports_cli, "_dispatch_manual_report_notification", _tracking_dispatch)
+        args = self._complete_args(tmp_path)
+        run_phase_report_create(args)
+        assert write_order == ["dispatch_called"]
+
+    def test_failed_dispatch_is_observable_and_not_marked_notified(self, tmp_path, monkeypatch, capsys):
+        """A dispatch failure must be visible in the command's own
+        output and must NOT write the idempotency marker — so a later
+        retry (after the transport issue is fixed) can still succeed,
+        rather than being permanently treated as already-sent."""
+        from pcae.commands.phase_reports import run_phase_report_create
+        from pcae.core.notifications import NotificationResult
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+
+        def _failing_dispatch(event, sinks):
+            return [NotificationResult(sink_name="noop", success=False, error="boom", message="failed")]
+
+        monkeypatch.setattr("pcae.core.notifications.dispatch", _failing_dispatch)
+        args = self._complete_args(tmp_path)
+        run_phase_report_create(args)
+
+        out = json.loads(capsys.readouterr().out)
+        assert out["notification"]["outcome"] == "failed"
+        assert out["notification"]["results"][0]["success"] is False
+        assert out["notification"]["results"][0]["error"] == "boom"
+
+        marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
+        assert not marker_path.exists()
+
+    def test_disabled_notify_env_skips_without_marking_notified(self, tmp_path, monkeypatch):
+        """When PCAE_NOTIFY_ENABLED is unset, dispatch must be skipped
+        (not attempted, not failed) and the marker must not be written —
+        matches `pcae phase complete`'s own existing disabled-by-default
+        behavior for this manual path too."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        monkeypatch.chdir(tmp_path)
+        args = self._complete_args(tmp_path)
+        run_phase_report_create(args)
+
+        marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
+        assert not marker_path.exists()
+
+    def test_notify_send_report_skips_duplicate_after_phase_report_create_dispatched(
+        self, tmp_path, monkeypatch, capsys,
+    ):
+        """The other documented recovery command, `pcae notify
+        send-report --latest`, must not re-send a notification
+        `pcae phase-report create` already dispatched for the same
+        phase_id+commit — alternate recovery paths must not duplicate
+        each other's dispatch."""
+        from argparse import Namespace
+        from pcae.commands.phase_reports import run_phase_report_create
+        from pcae.commands.notifications import run_notify_send_report
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        # `run_notify_send_report`'s own pre-existing 95M.1 finalization
+        # gate (unrelated to this repair) separately requires 11+
+        # "No "-prefixed confirmations and a completion-metadata file
+        # declaring commit_attribution — satisfy both so the idempotency
+        # check under test is actually reached.
+        no_go = [f"No issue {i} found." for i in range(11)]
+        args = self._complete_args(tmp_path, no_go_confirmation=no_go)
+        run_phase_report_create(args)
+        capsys.readouterr()
+
+        pcae_dir = tmp_path / ".pcae"
+        pcae_dir.mkdir(exist_ok=True)
+        (pcae_dir / "phase-completion-metadata.json").write_text(
+            json.dumps({"commit_attribution": "abc12345"})
+        )
+
+        send_args = Namespace(reports_dir=str(tmp_path / "reports"), json=True)
+        rc = run_notify_send_report(send_args)
+        assert rc == 0
+        out = json.loads(capsys.readouterr().out)
+        assert out["status"] == "skipped"
+        assert out["reason"] == "already_dispatched"

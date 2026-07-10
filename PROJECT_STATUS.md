@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 128B.1 — Notification Dispatch Reliability Repair (completed).
+
+Governance tooling repair — not part of Historical Memory, Repository
+Intelligence, or any runtime capability
+(`docs/PHASE_128B1_NOTIFICATION_DISPATCH_RELIABILITY_REPAIR.md`).
+Root-caused why Phase 128B's canonical report was generated and
+independently confirmed trust-complete but no Telegram notification was
+received: `pcae phase-report create` (the documented recovery command
+used when `pcae phase complete` is rejected by the repository
+transition validator, exactly what happened in 128B due to stale
+`.pcae/phase-completion-metadata.json`) never called
+`certify_notification_transition()`, `dispatch()`, or
+`write_notification_dispatch_marker()` — its own module docstring said
+so explicitly ("no automatic hooks, no Telegram, no notification
+dispatch"). Repaired with minimal, additive changes: a new
+`_dispatch_manual_report_notification()` helper in
+`run_phase_report_create()` (`src/pcae/commands/phase_reports.py`)
+certifies and dispatches a trust-complete report through the same
+shared certification/idempotency-marker mechanism `pcae phase complete`
+already uses, skipping dispatch entirely for a non-trust-complete
+report and never re-checking the same stale completion-metadata file
+that caused the original rejection. `pcae notify send-report --latest`
+(`src/pcae/commands/notifications.py`) gained the same idempotency
+check/marker-write it was independently missing, so all three governed
+paths (`pcae phase complete`, `pcae phase-report create`, `pcae notify
+send-report --latest`) now dispatch exactly once per trusted
+phase_id+commit and never duplicate each other. 8 new regression tests
+added (`TestPhase128B1NotificationDispatchReliabilityRepair` in
+`tests/test_phase_reports.py`); full notification/report regression
+suite (325 tests) and `fast_green` (4389 tests) pass. Verified against
+the real repository: a real trust-complete report dispatched exactly
+one Telegram notification, and a repeated dispatch attempt for the same
+phase_id+commit was correctly skipped as already-dispatched. No
+Repository Intelligence, Historical Memory, schema, or runtime-capability
+file changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 128C — Historical Memory Review &
+Hardening Contract Verification.
+
+## Phase 128B.1 Complete
+
+Phase 128B.1 — Notification Dispatch Reliability Repair (completed).
+
+Root-caused and repaired the missing Telegram dispatch path in `pcae
+phase-report create` (128B's own recovery command) and the duplicate-
+dispatch gap in `pcae notify send-report --latest`, using the existing
+certification/idempotency-marker mechanism `pcae phase complete`
+already had. No redesign; minimal, additive changes only. 8 new tests;
+325 notification/report regression tests and fast_green (4389) pass.
+Real-repository Telegram verification confirmed exactly one
+notification per trusted report and correct duplicate-skip on retry. No
+Repository Intelligence, Historical Memory, schema, or runtime-capability
+change. Recommended next phase: 128C — Historical Memory Review &
+Hardening Contract Verification.
+
+## Phase 128B Complete (historical — full text)
+
 Phase 128B — Historical Memory Review & Hardening Contract Freeze
 (completed).
 

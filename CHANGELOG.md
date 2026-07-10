@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 128B.1 - Notification Dispatch Reliability Repair
+  (`docs/PHASE_128B1_NOTIFICATION_DISPATCH_RELIABILITY_REPAIR.md`).
+  Governance tooling repair, not part of Historical Memory. Root-caused
+  why Phase 128B's trust-complete canonical report never dispatched a
+  Telegram notification: `pcae phase-report create` (the documented
+  recovery command used when `pcae phase complete` is rejected by the
+  repository transition validator, exactly 128B's own stale-metadata
+  incident) never called `certify_notification_transition()`,
+  `dispatch()`, or `write_notification_dispatch_marker()` at all — by
+  its own module docstring's design. Repaired with a new
+  `_dispatch_manual_report_notification()` helper wired into
+  `run_phase_report_create()` (`src/pcae/commands/phase_reports.py`)
+  that certifies and dispatches through the same shared mechanism
+  `pcae phase complete` already uses, deliberately without re-checking
+  the same stale completion metadata that caused the original
+  rejection. `pcae notify send-report --latest`
+  (`src/pcae/commands/notifications.py`) gained the same idempotency
+  check/marker-write it was independently missing. All three governed
+  paths now dispatch exactly once per trusted phase_id+commit and never
+  duplicate each other. 8 new regression tests
+  (`TestPhase128B1NotificationDispatchReliabilityRepair`); 325
+  notification/report regression tests and fast_green (4389) pass.
+  Real-repository Telegram verification confirmed. No Repository
+  Intelligence, Historical Memory, schema, or runtime-capability file
+  changed. Recommends 128C.
+
 - Phase 128B - Historical Memory Review & Hardening Contract Freeze
   (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_CONTRACT_FREEZE.md`).
   Freezes the canonical hardening contract binding for 128C-128F,

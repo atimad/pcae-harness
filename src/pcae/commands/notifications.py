@@ -207,6 +207,35 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
                 print(f"  Blocker: {blocker}")
         return 1
 
+    # Phase 128B.1 — idempotency: `pcae notify send-report --latest` is a
+    # documented recovery/manual re-send command (named explicitly by the
+    # phase-finalization skill's own hint text) that must not duplicate a
+    # notification `pcae phase complete` or `pcae phase-report create`
+    # already dispatched for the same phase_id+commit. Shares the exact
+    # same marker `write_notification_dispatch_marker()` writes to, so
+    # "already dispatched" is true regardless of which governed path sent
+    # it first.
+    from pcae.core.phase_reports import (
+        phase_already_notified,
+        write_notification_dispatch_marker,
+    )
+    commit_hash = report.commits[0] if report.commits else ""
+    if commit_hash and phase_already_notified(report.phase_id, commit_hash):
+        msg = (
+            f"phase {report.phase_id} final report already dispatched at commit "
+            f"{commit_hash[:8]} — skipping duplicate send (idempotent)"
+        )
+        if args.json:
+            print(json.dumps({
+                "status": "skipped",
+                "reason": "already_dispatched",
+                "message": msg,
+            }, indent=2, sort_keys=True))
+        else:
+            print("Telegram send-report: skipped (idempotent — already dispatched)")
+            print(f"  Reason: {msg}")
+        return 0
+
     event = phase_report_to_notification_event(
         report,
         artifact_paths=[str(reports_dir / "latest.md")],
@@ -214,6 +243,9 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
 
     sink = TelegramSink()
     results = dispatch(event, [sink])
+    all_ok = bool(results) and all(r.success for r in results)
+    if all_ok and commit_hash:
+        write_notification_dispatch_marker(report.phase_id, commit_hash)
 
     if args.json:
         print(json.dumps({

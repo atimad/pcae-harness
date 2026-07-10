@@ -1,20 +1,34 @@
 """CLI runners for pcae phase-report commands (Phase 92A).
 
-Manual phase report creation and inspection.  No automatic hooks,
-no Telegram, no notification dispatch.  Read-only except for
-explicit local artifact writes.
+Manual phase report creation and inspection.
+
+Phase 128B.1 — ``pcae phase-report create`` is the documented recovery
+path when ``pcae phase complete`` is rejected by the repository
+transition validator (e.g. stale ``.pcae/phase-completion-metadata.json``
+identity), so it now dispatches a notification for a trust-complete
+report through the same certification/idempotency-marker mechanism
+``pcae phase complete`` already uses (``certify_notification_transition()``
++ the shared ``.pcae/phase-reports/.last-notified.json`` marker) instead
+of silently never dispatching. Dispatch remains fully governed: disabled
+unless ``PCAE_NOTIFY_ENABLED=1``, skipped for a report that is not
+trust-complete, and skipped (never duplicated) when the same phase_id
++ commit was already dispatched by any other governed path. See
+``docs/PHASE_128B1_NOTIFICATION_DISPATCH_RELIABILITY_REPAIR.md``.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
+from typing import Any
 
 from pcae.core.phase_reports import (
     make_phase_report,
     write_phase_report,
     read_latest_report,
+    write_notification_dispatch_marker,
     PhaseReport,
 )
 
@@ -104,19 +118,152 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
     reports_dir = Path(getattr(args, "reports_dir", None) or DEFAULT_REPORTS_DIR)
     paths = write_phase_report(report, reports_dir)
 
+    # Phase 128B.1 — a trust-complete report created through this manual
+    # recovery command must dispatch identically to `pcae phase complete`,
+    # never silently. See module docstring and _dispatch_manual_report_
+    # notification()'s own docstring for the certification/idempotency
+    # contract this shares with the primary finalization path.
+    notification = _dispatch_manual_report_notification(report, paths)
+
     if args.json:
         print(json.dumps({
             "status": "created",
             "phase_id": report.phase_id,
             "paths": paths,
+            "notification": notification,
         }, indent=2, sort_keys=True))
     else:
         print(f"Phase report created: {report.phase_id}")
         print(f"  Markdown: {paths['markdown']}")
         print(f"  JSON:     {paths['json']}")
         print(f"  Latest:   {paths['latest_markdown']} / {paths['latest_json']}")
+        print(f"Notification dispatch: {notification['outcome']}")
+        if notification.get("reason"):
+            print(f"  Reason: {notification['reason']}")
+        for r in notification.get("results", []):
+            status = "OK" if r.get("success") else "FAILED"
+            print(f"  [{r.get('sink_name', '?')}]: {status} — {r.get('message', '')}")
 
     return 0
+
+
+def _dispatch_manual_report_notification(
+    report: PhaseReport, paths: dict[str, str],
+) -> dict[str, Any]:
+    """Certify and dispatch a notification for a report created via
+    ``pcae phase-report create``, mirroring ``pcae phase complete``'s own
+    certify -> dispatch -> mark-notified sequence
+    (``src/pcae/commands/phase.py``'s ``_finalize_report_and_notify()``)
+    so both governed paths guarantee exactly one dispatch per trusted
+    report and share the same idempotency marker.
+
+    A report that is not trust-complete (``report.report_completeness
+    != "complete"``) never dispatches here — restates the same
+    "a partial report is never sent as final" rule the primary path
+    already enforces, for this manual path.
+
+    Unlike ``pcae phase complete``, this command has no completion-
+    metadata file or active-task context to independently re-derive a
+    phase identity from — the operator already asserted ``--phase-id``
+    explicitly (that is the entire reason this command exists as a
+    recovery path when the primary command's own metadata-derived
+    identity check fails, e.g. 128B's stale-metadata incident). So
+    identity here is deliberately NOT re-checked against
+    ``.pcae/phase-completion-metadata.json`` (``metadata={}`` below) —
+    doing so would simply reproduce the same rejection this recovery
+    path exists to route around.
+    """
+    from pcae.core.notification_certification import certify_notification_transition
+    from pcae.core.repository_transition_validator import TransitionKind
+
+    if report.report_completeness != "complete":
+        return {
+            "outcome": "skipped",
+            "reason": "report is not trust-complete; a partial report is never dispatched",
+        }
+
+    commit_hash = report.commits[0] if report.commits else ""
+
+    try:
+        from pcae.commands.phase import _read_lifecycle_current_phase_line
+        lifecycle_line = _read_lifecycle_current_phase_line()
+    except Exception:
+        lifecycle_line = None
+
+    active_task_title: str | None = None
+    try:
+        from pcae.core.paths import HarnessPath
+        from pcae.core.tasks import find_latest_active_task
+        active_task = find_latest_active_task(HarnessPath.cwd())
+        active_task_title = active_task.title if active_task else None
+    except Exception:
+        active_task_title = None
+
+    certification = certify_notification_transition(
+        phase_id=report.phase_id,
+        requested_phase_id=report.phase_id,
+        active_task_title=active_task_title,
+        metadata={},
+        lifecycle_current_phase_line=lifecycle_line,
+        trial_report=report,
+        recommended_next_phase=report.recommended_next_phase,
+        origin_main_head_count=report.origin_main_head_count,
+        commit_hash=commit_hash,
+        source_transition_kind=TransitionKind.REPORT_GENERATION,
+        allow_partial_report=False,
+    )
+
+    if not certification.eligible:
+        return {
+            "outcome": certification.outcome.value,
+            "reason": "; ".join(certification.reasons) or certification.outcome.value,
+        }
+
+    sink_names_raw = os.environ.get("PCAE_NOTIFY_SINKS", "filesystem")
+    sink_names = [s.strip() for s in sink_names_raw.split(",") if s.strip()]
+    output_dir = Path(os.environ.get("PCAE_NOTIFY_OUTPUT_DIR", ".pcae/notifications"))
+
+    from pcae.core.notifications import (
+        NoopSink,
+        FilesystemSink,
+        TelegramSink,
+        dispatch,
+        phase_report_to_notification_event,
+    )
+
+    report_path = paths.get("markdown", paths.get("latest_markdown", ""))
+    event = phase_report_to_notification_event(
+        report, artifact_paths=[str(report_path)] if report_path else [],
+    )
+
+    sinks = []
+    for name in sink_names:
+        if name == "noop":
+            sinks.append(NoopSink())
+        elif name == "filesystem":
+            sinks.append(FilesystemSink(output_dir))
+        elif name == "telegram":
+            sinks.append(TelegramSink())
+
+    if not sinks:
+        return {
+            "outcome": "skipped",
+            "reason": "no notification sinks configured (PCAE_NOTIFY_SINKS)",
+        }
+
+    try:
+        results = dispatch(event, sinks)
+    except Exception as exc:
+        return {"outcome": "failed", "reason": str(exc)}
+
+    all_ok = bool(results) and all(r.success for r in results)
+    if all_ok and commit_hash:
+        write_notification_dispatch_marker(report.phase_id, commit_hash)
+
+    return {
+        "outcome": "sent" if all_ok else "failed",
+        "results": [r.to_dict() for r in results],
+    }
 
 
 def run_phase_report_show(args: argparse.Namespace) -> int:
