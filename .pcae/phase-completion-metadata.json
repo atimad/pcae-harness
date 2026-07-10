@@ -25,7 +25,9 @@
     {"name": "external_delivery_isolation_focused_regressions", "result": "207 passed (134B.1 + telegram + phase_reports + 134B.2 verification)", "status": "passed"},
     {"name": "related_notification_gate_suites", "result": "165 passed (finalization gate, trust hard-fail, notifications, model containment, certification idempotency, permission broker, RC audit)", "status": "passed"},
     {"name": "fast_green", "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, reproduced identically on pre-repair baseline commit ca81238a)", "status": "passed"},
-    {"name": "compileall", "result": "src compiled successfully", "status": "passed"}
+    {"name": "compileall", "result": "src compiled successfully", "status": "passed"},
+    {"name": "report_notification_tests", "result": "207 focused passed (134B.1 + telegram + phase_reports + 134B.2 verification)", "status": "passed"},
+    {"name": "bootstrap_session_reporting_tests", "result": "fast_green coverage passed", "status": "passed"}
   ],
   "test_results": {
     "external_delivery_isolation_focused_regressions": "207 passed",
