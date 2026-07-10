@@ -2,6 +2,18 @@
 
 ## Accepted
 
+- Independently verify the Track 134 contract (Phase 134C) by re-deriving
+  it from 134A/134B source text rather than trusting any prior report,
+  including 134B.1/.2/.3's own. Zero BLOCKING findings; confirmed the
+  hardening sequence preserved every frozen invariant (identity authority,
+  transport independence, PFN-001, fail-closed behavior, no model-specific
+  coupling); confirmed current implementation honestly discloses which of
+  the twelve lifecycle stages remain unimplemented rather than silently
+  claiming completeness. Recorded one NON-BLOCKING observation
+  (`metadata-repair`'s canonical-report-as-ground-truth choice vs. the
+  contract's target task-lineage authority) as migration input for
+  134D/134E rather than repairing it now. Do not begin 134D.
+
 - Harden three finalization-lifecycle weaknesses (Phase 134B.3) exposed by
   executing 134B.1/134B.2 themselves, rather than folding them into 134C:
   automatic delivery-configuration resolution via one fail-closed,
