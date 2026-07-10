@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Phase 127A - Historical Memory Architecture
+  (`docs/PHASE_127_HISTORICAL_MEMORY_ARCHITECTURE.md`). Defines the
+  canonical architecture for Historical Memory, PCAE's temporal layer
+  describing how and why the repository evolved over time. Adopts the
+  already-frozen 119Q `historical_memory_snapshot.schema.json` as the
+  binding conceptual model unchanged (mapping every requested
+  conceptual object — Historical Snapshot, Event, Timeline,
+  Relationship, Evidence, Transition, Context — onto its actual
+  `$defs`), finding no taxonomy gap requiring resolution, unlike
+  126A's own discovery of genuine gaps for the Dependency Knowledge
+  Graph. Defines relationships with Tracks 119-123/126 grounded in
+  direct schema/source inspection, temporal model, determinism,
+  evidence contract, read-only contract, failure model, and versioning.
+  Architecture only — no schema modified, no generator, source code,
+  test code, or storage introduced. Recommends 127B.
+
 - Phase 126G.1 - Telegram Commit Trust Metadata Repair
   (`docs/PHASE_126G1_TELEGRAM_COMMIT_TRUST_METADATA_REPAIR.md`).
   Repairs the final remaining trust warning from 126G:

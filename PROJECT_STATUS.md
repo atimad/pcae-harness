@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 127A — Historical Memory Architecture
+(completed).
+
+Defines the canonical architecture for Historical Memory: PCAE's
+temporal layer describing how and why the repository evolved over
+time, complementing Repository Intelligence's point-in-time
+description (`docs/PHASE_127_HISTORICAL_MEMORY_ARCHITECTURE.md`).
+Unlike Track 126's starting point, this phase found a Historical
+Memory schema already frozen by Phase 119Q
+(`schemas/repository_intelligence/artifacts/historical_memory_snapshot.schema.json`)
+and adopted it unchanged as the binding conceptual model rather than
+inventing one — independently re-read every `$defs` entry directly
+(not from the README summary alone) and confirmed the entire requested
+conceptual surface (Historical Snapshot, Event, Timeline, Relationship,
+Evidence, Transition, Context) already has a direct mapping, with no
+taxonomy gap requiring resolution in a future contract-freeze phase (a
+materially different outcome from 126A's own discovery of genuine
+gaps in the Dependency Knowledge Graph's taxonomy). Defined
+relationships with Tracks 119/120/121/122/123/126, grounded in direct
+schema/source inspection (e.g. confirmed the Query Layer's
+`historical_memory_query` category is anticipated by the 119Y schema
+but not yet implemented in `SUPPORTED_QUERY_CATEGORIES`, mirroring
+126A's identical finding for the Dependency Knowledge Graph). Defined
+temporal model, determinism, evidence contract, read-only contract,
+failure model, versioning, and deferred capabilities. No schema file
+was modified; no generator, source code, test code, or storage was
+introduced.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 127B — Historical Memory Contract Freeze.
+
+## Phase 127A Complete
+
+Phase 127A — Historical Memory Architecture (completed).
+
+Adopted the already-frozen 119Q Historical Memory Snapshot schema as
+the binding conceptual model, mapping every requested conceptual
+object onto its actual `$defs` with no taxonomy gap found. Defined
+Track 119-126 relationships, temporal model, determinism, evidence
+contract, read-only contract, and failure model, all architecture
+only. No schema, source code, or test code changed. Recommended next
+phase: 127B — Historical Memory Contract Freeze.
+
+## Phase 126G.1 Complete (historical — full text)
+
 Phase 126G.1 — Telegram Commit Trust Metadata Repair
 (completed).
 
