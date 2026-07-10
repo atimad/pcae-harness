@@ -669,6 +669,7 @@ from pcae.commands.phase import (
     run_phase_runner_sim_review,
     run_phase_runner_simulate,
     run_phase_complete,
+    run_phase_metadata_repair,
     run_phase_handoff,
     run_phase_handoff_prune,
     run_phase_handoff_show,
@@ -6857,6 +6858,20 @@ def build_parser() -> argparse.ArgumentParser:
     )
     phase_complete_parser.set_defaults(handler=run_phase_complete)
 
+    phase_metadata_repair_parser = phase_subparsers.add_parser(
+        "metadata-repair",
+        help=(
+            "Phase 134B.3: sync stale phase-completion-metadata.json "
+            "phase_id/phase_name to match the canonical phase-completion-"
+            "report.md title (one direction only; refuses without a "
+            "canonical report; auditable)."
+        ),
+    )
+    phase_metadata_repair_parser.add_argument(
+        "--json", action="store_true", help="Print machine-readable JSON output."
+    )
+    phase_metadata_repair_parser.set_defaults(handler=run_phase_metadata_repair)
+
     phase_start_parser = phase_subparsers.add_parser(
         "start",
         help="Acquire agent lock and begin a new governed phase.",
@@ -10390,6 +10405,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
+    # Phase 134B.3 — resolve governed delivery configuration once, before
+    # any subcommand runs, so `pcae phase complete` (and every other
+    # governed command) never depends on the operator having sourced a
+    # shell environment file in this same command chain. Fail-closed and a
+    # no-op under test isolation (tests/conftest.py sets
+    # PCAE_NOTIFY_CONFIG_DISABLE); never raises.
+    from pcae.core.notification_config import ensure_notification_environment_loaded
+
+    ensure_notification_environment_loaded()
+
     parser = build_parser()
     args = parser.parse_args(argv)
     try:

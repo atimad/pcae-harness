@@ -43,6 +43,17 @@ _EXTERNAL_NOTIFICATION_ENV = (
 )
 _LIVE_NOTIFICATION_TEST_OPT_IN = "PCAE_TEST_ALLOW_LIVE_NOTIFICATIONS"
 
+# Phase 134B.3 — the governed configuration resolver (pcae.core.
+# notification_config) auto-loads real delivery configuration from
+# ~/.config/pcae/notify.json for every `pcae` CLI invocation, including
+# ones a test spawns as a subprocess. Deleting only the five known
+# environment-variable names (below) is no longer sufficient on its own:
+# a subprocess's own CLI entrypoint would simply reload them from the
+# governed file. This explicit disable flag is the resolver's own,
+# unconditional escape hatch -- set for the whole isolated test session and
+# inherited by every subprocess, exactly like the five env vars already are.
+_NOTIFICATION_CONFIG_DISABLE_ENV = "PCAE_NOTIFY_CONFIG_DISABLE"
+
 
 def isolate_external_notification_env(env: dict[str, str]) -> bool:
     """Remove live-delivery configuration unless explicitly test-authorized.
@@ -57,6 +68,7 @@ def isolate_external_notification_env(env: dict[str, str]) -> bool:
         return False
     for key in _EXTERNAL_NOTIFICATION_ENV:
         env.pop(key, None)
+    env[_NOTIFICATION_CONFIG_DISABLE_ENV] = "1"
     return True
 
 
@@ -69,6 +81,7 @@ def _isolate_external_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
         return
     for key in _EXTERNAL_NOTIFICATION_ENV:
         monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv(_NOTIFICATION_CONFIG_DISABLE_ENV, "1")
 
 FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # Core governance safety

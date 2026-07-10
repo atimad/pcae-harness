@@ -655,6 +655,131 @@ def _write_completion_metadata(meta: dict) -> bool:
         return True
     except Exception:
         return False
+
+
+_CANONICAL_REPORT_TITLE_RE = re.compile(
+    r"^#\s+Phase\s+(\S+)\s+Complete\s+—\s+(.+?)\s*$"
+)
+
+
+def run_phase_metadata_repair(args: argparse.Namespace) -> int:
+    """pcae phase metadata-repair [--json]
+
+    Phase 134B.3 hardening — 134B.1/134B.2's own finalization repeatedly hit
+    stale ``.pcae/phase-completion-metadata.json`` (its ``phase_id`` field
+    lagging one phase behind the canonical narrative report), which the
+    repository transition validator correctly fail-closed on (blocking
+    ``metadata_consistency`` / ``phase_identity_consistency``), but the only
+    available recovery was hand-editing the whole JSON file with no schema
+    check, no audit trail, and no verification against any ground truth.
+
+    This command performs exactly one narrow, auditable repair: it reads
+    the *already hand-authored, reviewed* canonical narrative report
+    (``.pcae/phase-completion-report.md``) — never CLI arguments, never
+    free text, never a caller-supplied phase_id — and syncs metadata's
+    ``phase_id``/``phase_name``/``phase_title`` fields to match that
+    report's own title exactly. One direction only: canonical report ->
+    metadata, never the reverse, so this can never be used to inject an
+    arbitrary or unreviewed identity. Every other metadata field (test
+    results, governance results, push state, etc.) is left untouched.
+
+    Refuses (fails closed, no mutation) when:
+    - no phase-completion-metadata.json exists yet (nothing to repair);
+    - no canonical phase-completion-report.md exists (no ground truth);
+    - the canonical report's title does not match the expected
+      "# Phase <id> Complete — <name>" format (cannot safely parse identity);
+    - metadata already agrees with the canonical report (no-op, reported
+      as success with nothing changed — never a silent overwrite).
+
+    Every successful repair appends one line to
+    ``.pcae/phase-metadata-repairs.log`` (old id -> new id, timestamp,
+    source) — an append-only audit trail distinct from the metadata file
+    itself.
+    """
+    is_json = bool(getattr(args, "json", False))
+    meta_path = Path(".pcae/phase-completion-metadata.json")
+    canonical_path = Path(".pcae/phase-completion-report.md")
+
+    def _emit(payload: dict, human_lines: list[str]) -> int:
+        if is_json:
+            print(json.dumps(payload, indent=2, sort_keys=True))
+        else:
+            for line in human_lines:
+                print(line)
+        return 0 if payload.get("repaired") or payload.get("already_current") else 1
+
+    if not meta_path.exists():
+        return _emit(
+            {"repaired": False, "reason": "no_metadata_file"},
+            ["Phase metadata repair: refused.",
+             "  No .pcae/phase-completion-metadata.json exists — nothing to repair."],
+        )
+
+    if not canonical_path.exists():
+        return _emit(
+            {"repaired": False, "reason": "no_canonical_report"},
+            ["Phase metadata repair: refused.",
+             "  No .pcae/phase-completion-report.md exists — no ground truth to repair from."],
+        )
+
+    meta = _load_completion_metadata()
+    canonical_text = canonical_path.read_text(encoding="utf-8")
+    title_line = canonical_text.splitlines()[0] if canonical_text else ""
+    m = _CANONICAL_REPORT_TITLE_RE.match(title_line)
+    if not m:
+        return _emit(
+            {"repaired": False, "reason": "unparseable_canonical_title", "title_line": title_line},
+            ["Phase metadata repair: refused.",
+             f"  Canonical report title does not match '# Phase <id> Complete — <name>': {title_line!r}"],
+        )
+
+    canonical_phase_id, canonical_phase_name = m.group(1), m.group(2)
+    old_phase_id = meta.get("phase_id")
+    old_phase_name = meta.get("phase_name")
+
+    if old_phase_id == canonical_phase_id and old_phase_name == canonical_phase_name:
+        return _emit(
+            {"repaired": False, "already_current": True, "phase_id": canonical_phase_id},
+            [f"Phase metadata repair: already current (phase_id={canonical_phase_id!r}). Nothing to repair."],
+        )
+
+    meta["phase_id"] = canonical_phase_id
+    meta["phase_name"] = canonical_phase_name
+    meta["phase_title"] = canonical_phase_name
+    if not _write_completion_metadata(meta):
+        return _emit(
+            {"repaired": False, "reason": "write_failed"},
+            ["Phase metadata repair: failed to write metadata file."],
+        )
+
+    log_path = Path(".pcae/phase-metadata-repairs.log")
+    timestamp = datetime.now(timezone.utc).isoformat()
+    try:
+        with log_path.open("a", encoding="utf-8") as f:
+            f.write(
+                f"{timestamp} phase_id {old_phase_id!r} -> {canonical_phase_id!r} "
+                f"phase_name {old_phase_name!r} -> {canonical_phase_name!r} "
+                f"(source: .pcae/phase-completion-report.md title)\n"
+            )
+    except OSError:
+        pass  # audit-log write failure never blocks the already-committed repair
+
+    return _emit(
+        {
+            "repaired": True,
+            "old_phase_id": old_phase_id,
+            "new_phase_id": canonical_phase_id,
+            "audit_log": str(log_path),
+        },
+        [
+            "Phase metadata repair: repaired.",
+            f"  phase_id: {old_phase_id!r} -> {canonical_phase_id!r}",
+            f"  phase_name: {old_phase_name!r} -> {canonical_phase_name!r}",
+            f"  Audit entry appended: {log_path}",
+        ],
+    )
+
+
 def _read_lifecycle_current_phase_line() -> str | None:
     """Read PROJECT_STATUS.md's "## Current Phase" section text (Phase
     113X.4's "active lifecycle context" canonical-identity source) --

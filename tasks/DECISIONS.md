@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- Harden three finalization-lifecycle weaknesses (Phase 134B.3) exposed by
+  executing 134B.1/134B.2 themselves, rather than folding them into 134C:
+  automatic delivery-configuration resolution via one fail-closed,
+  channel-agnostic resolver wired into the CLI entrypoint (not a
+  per-call-site fix); a narrow, one-direction, auditable
+  `pcae phase metadata-repair` tool instead of unconstrained hand-editing
+  of phase-completion-metadata.json; and corrected cross-agent incident
+  attribution (DeepSeek -> Claude -> Codex reproduction proves a PCAE
+  substrate cause, not a DeepSeek-specific one), backed by tests
+  parametrized over synthetic caller identities. Confirmed rather than
+  rebuilt the existing repository-transition-validator identity-conflict
+  invariants, which already failed closed correctly. Did not implement a
+  full receipt ledger, a multi-adapter configuration schema, or any Track
+  134 lifecycle architecture — classified as debt instead. Do not begin
+  134C.
+
 - Independently verify Phase 134B.1 rather than trust its report: re-derive
   the isolation boundary from source and fresh adversarial probes not
   reused from 134B.1's own test file. Found the boundary was a five-name

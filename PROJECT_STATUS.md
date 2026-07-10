@@ -2,6 +2,50 @@
 
 ## Current Phase
 
+Phase 134B.3 — Finalization Configuration, Identity, and Cross-Agent
+Hardening (completed).
+
+Hardened three lifecycle weaknesses exposed by executing 134B.1/134B.2
+themselves. (1) Delivery configuration had no automatic resolution path —
+every governed finalization required manually sourcing
+`~/.config/pcae/telegram.env` in the same shell. Added
+`pcae.core.notification_config`, a fail-closed, channel-agnostic resolver
+wired into `pcae.cli.main()` that loads configuration from a governed file
+(`~/.config/pcae/notify.json`) automatically for every invocation and
+subprocess, with explicit environment always taking precedence; test
+isolation was extended (`PCAE_NOTIFY_CONFIG_DISABLE`) so this newly-global
+wiring cannot itself become a bypass. (2) Stale phase-completion metadata
+repeatedly blocked finalization during 134B.2 with no safe repair tool —
+added `pcae phase metadata-repair`, a narrow, one-direction, auditable sync
+from the canonical phase-completion-report.md's own title, confirmed to
+have no git/push dependency. The existing repository transition
+validator's identity-conflict invariants (`phase_identity_consistency`,
+`metadata_consistency`, both mandatory/blocking, dating to Phase 113T/U)
+were confirmed, not rebuilt, to already fail closed correctly. (3) The
+notification flood was first observed under DeepSeek, then reproduced
+under Claude, then under Codex — corrected here as PCAE substrate-caused,
+not DeepSeek-specific; confirmed via source inspection (zero model-identity
+branches in any lifecycle-critical module) and cross-agent tests
+parametrized over four synthetic caller identities. 26 new focused tests;
+1428 combined focused/related-suite tests passed; 4389/4390 fast-green
+passed (the same one pre-existing, unrelated, environment-state failure as
+134B.2). Full details in
+`docs/PHASE_134_FINALIZATION_CONFIGURATION_IDENTITY_CROSS_AGENT_HARDENING.md`.
+
+Recommended next phase: 134C — Canonical Phase Finalization & Reporting
+Lifecycle Contract Verification. 134C was not begun in this phase.
+
+## Phase 134B.3 Complete
+
+Hardened automatic delivery-configuration resolution, canonical
+phase-identity repair tooling, and cross-agent/model-agnostic lifecycle
+correctness. No 134C, no Track 134 lifecycle architecture, no Canonical
+Engineering Evidence, no receipt ledger, and no execution capability were
+implemented. Production notification behavior, PFN-001, and 134B.1/134B.2
+isolation guarantees preserved.
+
+## Phase 134B.2 Complete (historical — full text)
+
 Phase 134B.2 — External Delivery Isolation Independent Verification
 (completed).
 

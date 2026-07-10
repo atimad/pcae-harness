@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 134B.3 - Finalization Configuration, Identity, and Cross-Agent
+  Hardening
+  (`docs/PHASE_134_FINALIZATION_CONFIGURATION_IDENTITY_CROSS_AGENT_HARDENING.md`).
+  Adds `pcae.core.notification_config`, a fail-closed, channel-agnostic
+  configuration resolver wired into `pcae.cli.main()` so governed
+  finalization no longer depends on manually sourcing a shell environment
+  file; test isolation is extended with `PCAE_NOTIFY_CONFIG_DISABLE` so the
+  new global wiring cannot itself bypass 134B.1/134B.2's isolation. Adds
+  `pcae phase metadata-repair`, a narrow, one-direction, auditable tool that
+  syncs stale `phase-completion-metadata.json` identity fields from the
+  canonical `phase-completion-report.md` title, with no git/push
+  dependency. Confirms (does not rebuild) that the repository transition
+  validator's identity-conflict invariants already fail closed correctly.
+  Corrects the historical notification-flood attribution: reproduced under
+  DeepSeek, Claude, and Codex alike, confirming a PCAE substrate cause, not
+  a model-specific one; adds cross-agent tests parametrized over four
+  synthetic caller identities and confirms zero model-identity branches in
+  any lifecycle-critical module. 26 new focused tests; 1428 combined
+  focused/related-suite tests and 4389/4390 fast-green passed (one
+  pre-existing, unrelated environment-state failure, unchanged from
+  134B.2). No 134C or Track 134 lifecycle architecture implemented.
+
 - Phase 134B.2 - External Delivery Isolation Independent Verification
   (`docs/PHASE_134_EXTERNAL_DELIVERY_ISOLATION_INDEPENDENT_VERIFICATION.md`).
   Independently re-derives 134B.1's isolation repair from source and fresh
