@@ -1,126 +1,124 @@
-# Phase 134B.2 Complete — External Delivery Isolation Independent Verification
+# Phase 134B.3 Complete — Finalization Configuration, Identity, and Cross-Agent Hardening
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134B.2`
+- **Phase ID:** `134B.3`
 - **Status:** completed
-- **Phase class:** dedicated adversarial verification
+- **Phase class:** dedicated lifecycle hardening
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134B.2 independently re-derived, from source and fresh adversarial
-probes, whether Phase 134B.1's isolation repair held at a channel-agnostic
-architectural boundary rather than trusting 134B.1's report. It did not: a
-second real dispatch call site (`pcae notify send-report`) bypassed
-134B.1's boundary entirely. A single, minimal, shared authorization gate now
-closes that gap and applies automatically to any future delivery adapter.
+Phase 134B.3 hardened three finalization-lifecycle weaknesses that the
+execution of Phases 134B.1 and 134B.2 themselves exposed: no automatic
+delivery-configuration resolution, no safe repair tool for stale
+phase-completion metadata, and an uncorrected historical attribution of
+the original notification flood to a single agent. All three are hardened
+without beginning 134C.
 
 ## 3. Architectural Findings
 
-Isolation was a five-name environment-variable deny-list
-(`tests/conftest.py`) plus one call site's (`finalize_phase_report()`)
-master-switch check on `PCAE_NOTIFY_ENABLED`. Sink construction was a
-hardcoded `if/elif` name chain, not an adapter registry. A second real
-dispatch call site, `run_notify_send_report()` (the `pcae notify
-send-report` CLI), constructed `TelegramSink()` directly and never read
-`PCAE_NOTIFY_ENABLED` — gated only by that one adapter's own internal
-`is_enabled()` check. Protection of that call site under ordinary tests was
-coincidental: it worked only because `TelegramSink`'s three env-var names
-happened to be in the sanitizer's literal list.
+Eleven call sites across six files read `os.environ.get("PCAE_...")`
+directly with no shared resolver and no automatic load path other than
+manually sourcing a shell file. `resolve_canonical_phase_identity()` (Phase
+113X.4) and `RepositoryState`'s mandatory blocking identity-conflict
+invariants (Phase 113T/U) already existed and already failed closed
+correctly — confirmed firsthand when this phase's own task-finish
+attempted to promote a report under stale metadata and was correctly
+rejected. No model-identity branch exists in any lifecycle-critical
+module.
 
 ## 4. Implementation Findings
 
-`src/pcae/core/notifications.py`'s `dispatch()` — the one function every
-real and future call site already shares — now requires
-`PCAE_NOTIFY_ENABLED` to be truthy before invoking any sink that is not on
-an explicit local/no-network allowlist (`NoopSink`, `StdoutSink`,
-`FilesystemSink`, `MockSink`). Unlisted sinks, including ones that do not
-exist yet, are fail-closed by default. No new environment variables, no
-sanitizer-list extension, and no per-call-site duplication were required.
-`tests/test_telegram_notifications.py::test_telegram_sink_in_dispatcher`
-was updated to set `PCAE_NOTIFY_ENABLED=1` since it deliberately exercises
-an enabled `TelegramSink` through the dispatcher.
+Added `pcae.core.notification_config.ensure_notification_environment_
+loaded()`, called once at the start of `pcae.cli.main()`, which populates
+`os.environ` from a governed local file (`~/.config/pcae/notify.json`)
+only when explicit environment is absent and test isolation has not
+disabled it (`PCAE_NOTIFY_CONFIG_DISABLE`, added to `tests/conftest.py`'s
+autouse fixture). Added `pcae phase metadata-repair`, a one-direction,
+auditable sync from the canonical report's own title to metadata's
+identity fields, with no git/push dependency.
 
 ## 5. Verification Findings
 
-Ten fresh adversarial tests
-(`tests/test_external_delivery_isolation_134b2_verification.py`) prove: the
-sanitizer allowlist is name-specific, not concept-generic; a synthetic
-future adapter is blocked by `dispatch()` automatically with no new code;
-`run_notify_send_report()` previously reached a live Telegram transport
-call while `PCAE_NOTIFY_ENABLED` was unset (reproduced, then fixed);
-message and document delivery already shared one gate; no retry loop
-exists to escape isolation; the subprocess-env sanitizer strips only its
-five known names; `TelegramSink` reads environment fresh per construction
-with no caching; and a synthetic `send-report` invocation cannot write the
-real notification-dispatch idempotency marker.
+26 fresh tests
+(`tests/test_finalization_configuration_identity_cross_agent_134b3.py`)
+cover automatic resolution, fail-safe missing/invalid config, secret
+redaction, non-PCAE key rejection, future-adapter compatibility, test
+isolation compatibility (including a real subprocess CLI call), metadata
+repair's refusal/no-op/success paths and its independence from git state,
+and cross-agent equivalence parametrized over four synthetic caller
+identities (DeepSeek, Claude, Codex, an unknown future agent) plus static
+confirmation of zero model-identity branches.
 
 ## 6. Technical Debt Review
 
-Recorded transport-neutrally, none BLOCKING: (1) no durable per-attempt
-external-delivery receipt ledger across all sinks — carried to Track 134
-134D–134F; (2) the governed live-integration opt-in
-(`PCAE_TEST_ALLOW_LIVE_NOTIFICATIONS=1`) suppresses env stripping but does
-not supply independent test-only credentials — requires two deliberate
-operator actions, not an accidental-escape risk; (3) synthetic payloads are
-not visibly marked at the isolation-layer level; (4) no pytest marker
-scopes live-integration tests for collection-time exclusion.
+Carried forward transport-neutrally: the generic External Delivery Receipt
+Ledger (Track 134D–134F, unchanged from 134B.1/134B.2); the governed
+live-test opt-in's dependence on already-resolvable production
+configuration rather than fully independent test credentials; no pytest
+marker scoping live-integration tests; the governed config file's single-
+tier schema, deliberately not built into a richer per-adapter framework
+here.
 
 ## 7. Notable Engineering Knowledge
 
-A test-suite environment sanitizer that enumerates known variable names by
-hand is not the same thing as an architectural authorization boundary — it
-protects exactly the call sites and adapters a human happened to name. The
-correct boundary lives at the one function every caller already shares
-(`dispatch()`), gated by an allowlist of known-safe sink types so unlisted
-(including future) sinks fail closed by construction, not by enumeration.
+A shared, fail-closed configuration resolver belongs at the one choke
+point every invocation already passes through (the CLI entrypoint), not
+duplicated per call site — the same lesson 134B.2 established for
+delivery authorization, now applied to configuration resolution itself.
+Wiring a new global mechanism into that choke point requires its own,
+explicit test-isolation escape hatch; a resolver that "just works
+everywhere" is exactly the kind of change most likely to silently
+re-open an isolation boundary a prior phase closed. Recovery tooling for
+governance-critical files (like phase-completion-metadata.json) is safest
+when it can only copy from an already-reviewed source, in one direction,
+never from free-form input.
 
 ## 8. Governance Results
 
 - `pcae check`: passed.
 - task memory: clean.
 - governed commit/push commands only (`pcae commit implementation`, `pcae
-  push`, `pcae task new`/`finish`).
-- Telegram remains configured for the one genuine completion delivery.
+  push`, `pcae task new`/`finish`, `pcae phase metadata-repair`).
+- Telegram remains configured for the one genuine completion delivery,
+  now resolved automatically without sourcing a shell file in this
+  command chain.
 - Runtime remains Observed; execution unavailable.
 
 ## 9. Test Results
 
-- Focused external-delivery isolation regressions: 207 passed (134B.1 +
-  telegram + phase_reports + 134B.2 verification).
-- Related notification/gate/certification/permission-broker suites: 165
+- New focused suite: 26 passed.
+- Combined with 134B.1/134B.2/telegram/notifications/phase_reports/
+  finalization-gate/trust-hard-fail/certification-idempotency/model-
+  containment/permission-broker/RC-audit/session/phase suites: 1428
   passed.
 - Fast-green: 4389 passed, 1 pre-existing unrelated failure
-  (`test_pytest_dry_run_not_blocked`, reproduced identically on the
-  pre-repair baseline commit `ca81238a`).
+  (`test_pytest_dry_run_not_blocked`, unchanged from 134B.2).
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
 
-No 134C, notification/PFN-001 redesign, Canonical Engineering Evidence,
-Evidence Extraction, Derived Evidence Views, generic Delivery Adapter
-architecture, Operator Report View, Track 134 lifecycle architecture,
-Repository Intelligence, stale-metadata/Architecture-Status repair beyond
-this phase's own, schema, runtime, or execution work occurred. No raw git
-commit/push, `--no-verify`, or force push was used.
+No 134C, Track 134 lifecycle architecture, Canonical Engineering Evidence,
+Evidence Extraction, Derived Evidence Views, Operator Report View,
+Architecture Status repair, full External Delivery Receipt Ledger, PFN-001
+redesign, Repository Intelligence change, or execution capability was
+implemented. No raw git commit/push, `--no-verify`, or force push was
+used.
 
 ## 11. Architectural Boundary Confirmation
 
-PFN-001 remains mandatory and unchanged. Exactly-once certification and
-marker behavior are untouched. `pcae phase complete` / `pcae task finish
---commit` behavior is unchanged (already gated correctly). `pcae notify
-send-report` now additionally requires `PCAE_NOTIFY_ENABLED=1` — not a
-regression for the operator's real environment, which already sets it
-alongside `PCAE_TELEGRAM_ENABLED`.
+PFN-001 remains mandatory and unchanged. 134B.1/134B.2 isolation
+guarantees are preserved and independently re-verified under the new,
+globally-wired configuration resolver. Production notification behavior
+is unchanged in outcome and now additionally resolves automatically.
 
 ## 12. Track Progress
 
-134B.2 is a dedicated adversarial-verification phase inserted after
-134B.1's repair. It closes a real architectural gap 134B.1 left open
-without advancing the 134C verification or 134D–134F implementation
-sequence.
+134B.3 is a dedicated hardening phase inserted after 134B.2. It removes
+lifecycle friction and closes a corrected-attribution gap without
+advancing the 134C verification or 134D–134F implementation sequence.
 
 ## 13. Next Phase
 
