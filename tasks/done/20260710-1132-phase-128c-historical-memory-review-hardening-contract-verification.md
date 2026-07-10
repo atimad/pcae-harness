@@ -10,7 +10,7 @@ Phase 128C Historical Memory Review Hardening Contract Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
