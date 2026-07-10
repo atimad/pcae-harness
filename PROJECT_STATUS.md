@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 134A — Canonical Phase Finalization & Reporting Lifecycle Architecture
+(completed).
+
+Defined the authoritative future architecture for PCAE phase finalization in
+`docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_AND_REPORTING_LIFECYCLE_ARCHITECTURE.md`.
+The architecture establishes one evidence-first, transport-independent
+lifecycle from Engineering Activity through the completion boundary, evidence
+capture, Canonical Engineering Evidence, Derived Evidence Views, rendering,
+repository/governance certification, delivery certification/adapters, durable
+delivery confirmation, and exactly-once logical governed completion.
+
+It assigns exactly one canonical authority to phase identity, engineering
+evidence, repository state, governance state, runtime state, view content,
+rendered artifacts, notification status, completion status, and repository
+knowledge. It defines seventeen lifecycle invariants, an explicit state model,
+retry/durable-failure/acknowledgement semantics, report-promotion ordering, and
+Track 134 ownership of stale metadata, duplicate identity paths, notification
+coupling, promotion sequencing, architecture-status boundaries, and canonical
+state determination. Track 133, PFR-001, PFN-001, Runtime Governance,
+Repository Intelligence, and the Repository Intelligence Service remain
+compatible and unmodified.
+
+**No implementation occurred. No schema, source, tests, reporting,
+notification, runtime behavior, or execution capability changed.**
+
+Recommended next phase: 134B — Canonical Phase Finalization & Reporting
+Lifecycle Contract Freeze.
+
+## Phase 134A Complete
+
+Phase 134A completed the canonical phase-finalization and reporting lifecycle
+architecture: stages, non-overlapping responsibilities, single-authority model,
+state machine, completion conditions, delivery confirmation, invariants,
+technical-debt classification, compatibility, and the 134B–134F roadmap.
+Architecture only; runtime remains Observed and execution unavailable.
+
+## Phase 133G Complete (historical — full text)
+
 Phase 133G — Canonical Engineering Evidence & Derived Evidence Views
 Implementation Plan (completed).
 

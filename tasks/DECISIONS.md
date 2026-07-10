@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- Treat Phase 134A as the architecture for a single evidence-first,
+  transport-independent finalization lifecycle. Official completion occurs
+  only after canonical evidence finalization, required view generation and
+  rendering, final repository/governance certification, and successful or
+  policy-approved durably failed required delivery with append-only receipts.
+  Assign exactly one authority per concern; preserve Track 133, PFR-001,
+  PFN-001, Runtime Governance, and Repository Intelligence boundaries; define
+  exactly-once logical rather than physical delivery; and own stale metadata,
+  duplicate identity paths, notification coupling, promotion ordering,
+  architecture-status boundaries, and canonical completion-state debt in Track
+  134 without repairing them in 134A. Proceed through 134B contract freeze,
+  134C verification, 134D implementation plan, 134E implementation, and 134F
+  verification. Do not begin 134B during 134A.
+
 - Treat Phase 133G as the definitive planning-only implementation plan for a
   five-stage Engineering Evidence pipeline: Engineering Activity → Canonical
   Engineering Evidence → Derived Evidence Views → Rendering → Delivery

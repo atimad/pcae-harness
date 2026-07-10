@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Phase 134A - Canonical Phase Finalization & Reporting Lifecycle Architecture
+  (`docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_AND_REPORTING_LIFECYCLE_ARCHITECTURE.md`).
+  Defines one authoritative evidence-first lifecycle from engineering
+  completion through canonical evidence, derived views, rendering, repository
+  certification, delivery certification/adapters, durable confirmation, and
+  official completion. Establishes one authority per concern, a state model,
+  seventeen invariants, exactly-once logical completion/operator delivery,
+  retry/durable-failure/acknowledgement semantics, promotion ordering, Track
+  134 debt ownership, compatibility with Runtime Governance, Repository
+  Intelligence/Service, Track 133, PFR-001, and PFN-001, and the 134B–134F
+  roadmap. Architecture only; no source, schema, tests, reporting,
+  notification, runtime, or execution behavior changed. Recommended next
+  phase: 134B - Canonical Phase Finalization & Reporting Lifecycle Contract
+  Freeze.
+
 - Phase 133G - Canonical Engineering Evidence & Derived Evidence Views
   Implementation Plan
   (`docs/PHASE_133_CANONICAL_ENGINEERING_EVIDENCE_IMPLEMENTATION_PLAN.md`).
