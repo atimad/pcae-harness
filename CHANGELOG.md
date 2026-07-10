@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Phase 127B - Historical Memory Contract Freeze
+  (`docs/PHASE_127_HISTORICAL_MEMORY_CONTRACT_FREEZE.md`). Freezes the
+  canonical Historical Memory contract, binding for 127C-127F.
+  Re-freezes 127A's already-frozen 119Q conceptual model unchanged
+  (Historical Snapshot, Event, Timeline, Relationship, Evidence,
+  Transition, Context, plus the closed `event_type`/`relationship_type`
+  enums) — no taxonomy gap to resolve, unlike 126B's own gap-resolution
+  work for the Dependency Knowledge Graph. Defines historical
+  responsibilities, temporal contract, evidence contract, read-only
+  contract, failure contract, cross-track compatibility (Tracks
+  119-123/126), determinism contract, versioning contract, and
+  governance contract. Explicitly notes 126G/126G.1's Telegram repairs
+  are closed, verified fixes, not inherited defects. Documentation
+  only — no schema modified, no generator, source code, test code, or
+  storage introduced. Recommends 127C.
+
 - Phase 127A - Historical Memory Architecture
   (`docs/PHASE_127_HISTORICAL_MEMORY_ARCHITECTURE.md`). Defines the
   canonical architecture for Historical Memory, PCAE's temporal layer

@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 127B — Historical Memory Contract Freeze
+(completed).
+
+Freezes the canonical Historical Memory contract, operationalizing
+127A's architecture into binding, normative requirements for 127C-127F
+(`docs/PHASE_127_HISTORICAL_MEMORY_CONTRACT_FREEZE.md`). Re-freezes the
+already-frozen 119Q conceptual model (Historical Snapshot, Event,
+Timeline, Relationship, Evidence, Transition, Context, plus the closed
+21-value `event_type` and 12-value `relationship_type` enums) as
+binding, unchanged. Unlike 126B, performs no gap-resolution work — 127A
+found no taxonomy gap to resolve, and 127B carries that finding forward
+as binding while explicitly assigning 127C the job of independently
+re-verifying it against the schema file directly (not re-citing 127A's
+conclusion). Defines historical responsibilities, temporal contract,
+evidence contract, read-only contract, failure contract, cross-track
+compatibility (Tracks 119-123/126), determinism contract, versioning
+contract, and governance contract. Explicitly notes 126G/126G.1's
+Telegram repairs are closed, verified fixes — not inherited defects —
+and must not be reintroduced as open issues by any future phase in this
+sequence. No schema file was modified; no generator, source code, test
+code, or storage was introduced.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 127C — Historical Memory Contract
+Verification.
+
+## Phase 127B Complete
+
+Phase 127B — Historical Memory Contract Freeze (completed).
+
+Froze the canonical Historical Memory contract, binding for 127C-127F.
+Re-froze the already-frozen 119Q conceptual model unchanged (no
+taxonomy gap to resolve, unlike 126B). Defined temporal, evidence,
+read-only, failure, determinism, versioning, and governance contracts,
+plus cross-track compatibility with Tracks 119-123/126. No schema,
+source code, or test code changed. Recommended next phase: 127C —
+Historical Memory Contract Verification.
+
+## Phase 127A Complete (historical — full text)
+
 Phase 127A — Historical Memory Architecture
 (completed).
 
