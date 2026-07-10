@@ -2,6 +2,82 @@
 
 ## Current Phase
 
+Phase 131B — Unified Repository Intelligence Query Contract Freeze
+(completed).
+
+Transforms 131A's architecture into the binding contract governing
+131C-131F: purpose contract (deterministic access only, never creates
+knowledge, never becomes authoritative), scope contract (the same six
+artifact families 131A scoped — Repository Knowledge Snapshot,
+Dependency Knowledge Graph, Historical Memory, Change Impact, Advisory
+Context, Cross-Artifact Integration — no expansion authorized),
+authority contract (every source artifact remains authoritative;
+Unified Query remains derivative; the response layer never becomes
+evidence), query responsibility contract (may only locate/correlate/
+aggregate/expose/reference; shall never infer/reason/recommend/rank/
+evaluate/authorize/mutate/execute), routing contract (deterministic
+declared-responsibility mapping, no heuristics/optimization/indexing
+requirements), response contract (provenance/evidence/limitations/
+uncertainty/boundary disclosures preserved, no synthesized
+conclusions), provenance contract (six mandatory traceable elements),
+evidence contract (never strengthens/transforms/infers), identity
+contract (existing stable identifiers only; no alias/fuzzy/heuristic/
+probabilistic/silent-merge resolution), cross-artifact contract
+(consumes but never replaces Track 130), determinism contract,
+read-only contract, failure contract (ten enumerated fail-closed
+conditions, non-exhaustive by design), boundary disclosure contract
+(six mandatory disclosures), compatibility contract (Tracks 119-130
+directly re-verified unmodified), governance contract (observe-only,
+execution unavailable, reproducibility/explainability/auditability
+each given explicit checkable definitions for the first time,
+PFN-001), and versioning contract (frozen shape, no concrete version
+assigned). Performed an internal eight-dimension consistency review
+of this contract's own text: found no new ambiguity beyond two
+already-known, explicitly-scoped forward deferrals inherited unchanged
+from 131A (aggregation-field scrutiny; multi-family routing
+disambiguation), neither repaired here. Re-evaluated 131A's
+bootstrap-handoff-timestamp finding and four items of known tooling
+debt (stale `.pcae/phase-completion-metadata.json`, 119Q
+report-generation-ordering defect, 119AB phase-id comparison bug,
+persistence subdirectory naming inconsistency): all re-confirmed
+present, none rising to a genuine blocking architectural issue for
+this contract, none repaired per explicit instruction.
+
+**No implementation occurred. No schema changed. No source or test
+code changed. No runtime behavior changed.**
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 131C — Unified Repository Intelligence
+Query Contract Verification.
+
+## Phase 131B Complete
+
+Phase 131B — Unified Repository Intelligence Query Contract Freeze
+(completed).
+
+Freezes the binding contract governing 131C-131F: purpose, scope
+(same six artifact families, no expansion), authority, query
+responsibility, routing, response, provenance (six mandatory
+elements), evidence (three independent prohibitions), identity (five
+prohibited resolution methods), cross-artifact, determinism,
+read-only, failure (ten enumerated conditions, non-exhaustive by
+design), boundary disclosure (six mandatory disclosures),
+compatibility (ten unmodified tracks), governance (reproducibility/
+explainability/auditability given explicit definitions), and
+versioning (frozen shape only) contracts. Internal consistency review
+found no new ambiguity beyond two inherited forward deferrals;
+technical debt review re-confirmed known items, none blocking, none
+repaired. No implementation, schema, source code, test code, or
+runtime behavior change. PFN-001 confirmed satisfied. Recommended next
+phase: 131C — Unified Repository Intelligence Query Contract
+Verification.
+
+## Phase 131A Complete (historical — full text)
+
 Phase 131A — Unified Repository Intelligence Query Architecture
 (completed).
 

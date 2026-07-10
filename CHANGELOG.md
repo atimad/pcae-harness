@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 131B - Unified Repository Intelligence Query Contract Freeze
+  (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_FREEZE.md`).
+  Transforms 131A's architecture into the binding contract governing
+  131C-131F: purpose, scope (same six artifact families, no
+  expansion), authority (every source artifact remains authoritative,
+  Unified Query remains derivative), query responsibility (may only
+  locate/correlate/aggregate/expose/reference; never infer/reason/
+  recommend/rank/evaluate/authorize/mutate/execute), routing
+  (deterministic declared-responsibility mapping, no heuristics/
+  optimization/indexing requirements), response (no synthesized
+  conclusions), provenance (six mandatory elements), evidence (three
+  independent prohibitions: never strengthens/transforms/infers),
+  identity (five prohibited resolution methods), cross-artifact
+  (consumes but never replaces Track 130), determinism, read-only,
+  failure (ten enumerated fail-closed conditions, non-exhaustive by
+  design), boundary disclosure (six mandatory disclosures),
+  compatibility (Tracks 119-130 directly re-verified unmodified),
+  governance (reproducibility/explainability/auditability each given
+  explicit checkable definitions for the first time), and versioning
+  (frozen shape, no concrete version assigned) contracts. An internal
+  eight-dimension consistency review of this contract's own text found
+  no new ambiguity beyond two already-known, explicitly-scoped forward
+  deferrals inherited unchanged from 131A (aggregation-field scrutiny;
+  multi-family routing disambiguation), neither repaired. A technical
+  debt review re-confirmed 131A's bootstrap-handoff-timestamp finding
+  and four items of known tooling debt, none rising to a genuine
+  blocking architectural issue, none repaired per explicit
+  instruction. **No implementation, schema, source code, test code, or
+  runtime behavior change.** PFN-001 confirmed satisfied. Recommends
+  131C.
+
 - Phase 131A - Unified Repository Intelligence Query Architecture
   (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_ARCHITECTURE.md`).
   Selects Track 131 - Unified Repository Intelligence Query - as
