@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 128C — Historical Memory Review & Hardening Contract
+Verification (completed).
+
+Independent verification of the frozen 128B Historical Memory Review &
+Hardening Contract
+(`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_CONTRACT_VERIFICATION.md`).
+Did not trust 128B's own text — re-derived every requirement directly
+from 128A's architecture, 127B's underlying Historical Memory
+contract, the real Track 127 source
+(`historical_builder.py`/`historical_validation.py`/`git_source.py`/
+`persistence.py`), the frozen 119Q/119O/119S schemas, and the CLI
+wiring in `src/pcae/cli.py`. Confirmed: scope completeness (every real
+file/function maps to a named 128B scope item), hardening
+responsibilities (consistency-only, no functional-expansion path),
+cross-track compatibility with Tracks 119-123/126/127 (persistence
+subdirectory naming and schema version claims re-confirmed against
+current source, not merely re-cited), determinism (both the
+processing-order chronological sort and the final identifier-ordered
+persisted arrays are independently re-derived and byte-deterministic),
+evidence/attribution (every record traces to real task-contract/commit
+content, zero placeholders), temporal behavior (no inferred
+chronology), read-only behavior (no mutation path exists for the
+repository, git history, Repository Knowledge Snapshot, Dependency
+Knowledge Graph, or task contracts), serialization compatibility,
+the failure contract (independently re-enumerated all 12 fail-closed
+categories from the real test suite, exactly matching 128A/128B's
+claimed count), governance compatibility, both 128A technical-debt
+findings (still genuinely present, still correctly classified, still
+unrepaired), and all deferred capabilities (confirmed completely
+unimplemented). Found two non-blocking documentation-precision
+findings, neither repaired in this phase: (1) 127B/128B's "order by
+declared time reference" wording does not precisely describe the real
+persisted-artifact ordering, which is by record identifier
+(chronological order governs only an internal processing stage); (2)
+128B's scope list does not separately name `historical_generator.py`
+as its own line item, though its role is implicitly covered. No
+implementation occurred; no schema, source code, or test code changed;
+no runtime behavior changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 128D — Historical Memory Review &
+Hardening Implementation Plan.
+
+## Phase 128C Complete
+
+Phase 128C — Historical Memory Review & Hardening Contract
+Verification (completed).
+
+Independently re-derived every 128B requirement from 128A, 127B, real
+Track 127 source, and frozen schemas — not from 128B's own prose.
+All twelve verification categories (Purpose, Scope, Hardening
+Responsibilities, Cross-Track Compatibility, Determinism, Evidence,
+Temporal, Read-Only, Serialization, Failure, Governance, Technical
+Debt, Deferred Capabilities) reach CONFIRMED. Two non-blocking
+documentation-precision findings recorded for a future phase (temporal
+ordering-key wording; scope-list naming completeness), neither
+repaired here. No implementation, schema, or runtime behavior change.
+Recommended next phase: 128D — Historical Memory Review & Hardening
+Implementation Plan.
+
+## Phase 128B.2 Complete (historical — full text)
+
 Phase 128B.2 — Phase Finalization Notification Contract (completed).
 
 Governance documentation only — not part of Historical Memory,

@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 128C - Historical Memory Review & Hardening Contract
+  Verification
+  (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_CONTRACT_VERIFICATION.md`).
+  Independently re-derived every 128B requirement from 128A, 127B, the
+  real Track 127 source (`historical_builder.py`,
+  `historical_validation.py`, `git_source.py`, `persistence.py`), the
+  frozen 119Q/119O/119S schemas, and the CLI wiring — not from 128B's
+  own text. All twelve verification categories reach CONFIRMED,
+  including an independent re-enumeration of all 12 fail-closed
+  categories from the real test suite (exactly matching 128A/128B's
+  claimed count) and re-confirmation that both 128A technical-debt
+  findings remain genuinely present and unrepaired. Found two
+  non-blocking documentation-precision gaps, neither repaired here:
+  (1) 127B/128B's "order by declared time reference" wording does not
+  precisely describe the real persisted-artifact ordering (by record
+  identifier, not time); (2) 128B's scope list does not separately
+  name `historical_generator.py`. No implementation, schema, source
+  code, test code, or runtime behavior change. Recommends 128D.
+
 - Phase 128B.2 - Phase Finalization Notification Contract
   (`docs/PHASE_128_PHASE_FINALIZATION_NOTIFICATION_CONTRACT.md`).
   Governance documentation only, not part of Historical Memory.
