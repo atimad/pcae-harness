@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 126G.1 — Telegram Commit Trust Metadata Repair
+(completed).
+
+Repaired the final remaining trust gap from 126G: `pcae phase-report
+create` declared commits on the report but never declared their
+ownership attribution (`report.metadata["commit_attribution"]`), the
+specific field `PhaseReport.assess_completeness()`'s commit-ownership
+check requires — causing every report created through this CLI to
+carry a `commits.phase_owned not verified — no phase_commits in
+metadata` warning regardless of how many commits were supplied
+(`docs/PHASE_126G1_TELEGRAM_COMMIT_TRUST_METADATA_REPAIR.md`). Traced
+the complete commit metadata lifecycle (phase finalization -> phase
+metadata generation -> phase report generation -> report trust
+validation -> notification event creation -> Telegram dispatch) and
+found the gap was purely in step 2 (CLI wiring), not the check itself.
+Fixed with a single, minimal addition: `run_phase_report_create()` now
+sets `metadata["commit_attribution"]` from the same `--commit` flags
+already supplied, before calling `apply_trust_assessment()`. Verified
+the warning correctly disappears when commits are declared and
+correctly remains when they are not (no false suppression). 4 new
+tests added; 297 notification/report/finalization tests pass (up from
+126G's 293); fast_green 4390/4390 unchanged (this test file is not in
+`FAST_GREEN_MODULES`). Zero lines changed in canonical report
+generation, report formatting, governance/test/no-go metadata
+handling, or notification formatting — confirmed via `git diff
+--stat` touching only `src/pcae/commands/phase_reports.py` and
+`tests/test_phase_reports.py`.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 127A — Historical Memory Architecture.
+
+## Phase 126G.1 Complete
+
+Phase 126G.1 — Telegram Commit Trust Metadata Repair (completed).
+
+Repaired the final remaining trust warning from 126G by declaring
+commit ownership attribution in `pcae phase-report create`, closing
+the gap between commits being present on a report and their ownership
+being verifiable. No canonical report generation, formatting,
+governance/test/no-go metadata, or notification formatting touched.
+No Dependency Knowledge Graph/Repository Intelligence/Historical
+Memory/execution/schema file modified. Recommended next phase: 127A —
+Historical Memory Architecture.
+
+## Phase 126G Complete (historical — full text)
+
 Phase 126G — Telegram Canonical Report Dispatch Repair
 (completed).
 

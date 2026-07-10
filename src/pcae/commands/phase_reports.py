@@ -72,6 +72,21 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
             test_results=test_results,
             explicit_no_go_confirmations=list(getattr(args, "no_go_confirmation", None) or []),
         )
+        # Phase 126G.1 — declare commit ownership in report.metadata
+        # whenever --commit was explicitly supplied. assess_completeness()
+        # checks report.metadata["phase_commits"]/["commit_attribution"]
+        # (a separate field from the flat report.commits list) to verify
+        # commit ownership is not just present but *attributed* to this
+        # phase -- the same convention the internal finalize_phase_report()
+        # pipeline already uses (see its own `commit_attribution` kwarg,
+        # stored identically). 126G's CLI fix populated report.commits but
+        # never this field, so the ownership warning fired unconditionally
+        # for every report created through this command. Only set when
+        # commits were actually supplied here -- if none were given, the
+        # warning must correctly remain (false suppression is forbidden).
+        commit_list = list(getattr(args, "commit", None) or [])
+        if commit_list:
+            report.metadata["commit_attribution"] = ", ".join(commit_list)
         # Phase 126G — assess trust completeness before writing so the
         # persisted report_completeness/missing_trust_fields reflect the
         # data actually supplied here, rather than being left permanently

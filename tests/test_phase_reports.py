@@ -2086,3 +2086,111 @@ class TestReportTrustCompleteness:
         r.apply_trust_assessment()
         assert r.report_completeness != "complete"
         assert r.report_completeness == "partial"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 126G.1 — Telegram Commit Trust Metadata Repair
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestPhase126G1CommitTrustMetadataRepair:
+    """`pcae phase-report create` must declare commit_attribution when
+    --commit was explicitly supplied, so assess_completeness()'s
+    commit-ownership check is honestly satisfied rather than always
+    warning regardless of how many commits were supplied."""
+
+    def _args(self, tmp_path, **overrides):
+        from argparse import Namespace
+        defaults = dict(
+            phase_id="126G1-T", phase_name="Test Phase", status="completed",
+            summary="Test.", started_at=None, completed_at="",
+            files_changed=3, tests_run=10, pushed_status="pushed",
+            origin_main_head_count=0, recommended_next_phase="NEXT",
+            commit=None, governance_result=None, test_result=None,
+            no_go_confirmation=None, reports_dir=str(tmp_path), json=True,
+        )
+        defaults.update(overrides)
+        return Namespace(**defaults)
+
+    def test_commit_attribution_declared_when_commits_supplied(self, tmp_path, capsys):
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        args = self._args(
+            tmp_path,
+            commit=["abc12345", "def67890"],
+            governance_result=["pcae_check=passed"],
+            test_result=["fast_green=100 passed (passed)"],
+            no_go_confirmation=["No issues."],
+        )
+        rc = run_phase_report_create(args)
+        assert rc == 0
+
+        report = read_latest_report(tmp_path)
+        assert report.commits == ["abc12345", "def67890"]
+        assert report.metadata.get("commit_attribution") == "abc12345, def67890"
+        assert not any("phase_owned" in w for w in report.trust_warnings)
+
+    def test_no_phase_owned_warning_leaks_into_missing_trust_fields_section(self, tmp_path):
+        """The rendered report must not show a 'Missing Trust Fields'
+        commit-ownership warning when commits were explicitly declared."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        args = self._args(
+            tmp_path,
+            commit=["abc12345"],
+            governance_result=[
+                "pcae_check=passed", "pcae_health=healthy",
+                "pcae_doctor_task_memory=clean", "pcae_push_check=clean",
+                "telegram_runtime=configured",
+            ],
+            test_result=[
+                "fast_green=100 passed (passed)",
+                "bootstrap_session_reporting_tests=not_applicable",
+                "report_notification_tests=pending_final_telegram_delivery",
+            ],
+            no_go_confirmation=["No issues."],
+        )
+        run_phase_report_create(args)
+        report = read_latest_report(tmp_path)
+        md = report.render_markdown()
+        assert "phase_owned" not in md
+
+    def test_warning_still_present_when_no_commits_supplied(self, tmp_path):
+        """No false suppression: when --commit is never supplied, the
+        underlying check must behave exactly as before this fix."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        args = self._args(tmp_path, commit=None)
+        run_phase_report_create(args)
+        report = read_latest_report(tmp_path)
+        assert "commit_attribution" not in report.metadata
+        # files_changed>0 with commits missing entirely -> "commits" listed
+        # as a missing field (a stronger signal than the phase_owned
+        # warning, which only applies once commits ARE present).
+        assert "commits" in report.missing_trust_fields
+
+    def test_report_completeness_reaches_complete_via_cli_alone(self, tmp_path):
+        """End-to-end: a fully-specified pcae phase-report create call
+        (mirroring every trust-required field) must reach
+        report_completeness=complete with zero hand-editing."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        args = self._args(
+            tmp_path,
+            commit=["abc12345", "def67890"],
+            governance_result=[
+                "pcae_check=passed", "pcae_health=healthy",
+                "pcae_doctor_task_memory=clean", "pcae_push_check=clean",
+                "telegram_runtime=configured",
+            ],
+            test_result=[
+                "fast_green=100 passed (passed)",
+                "bootstrap_session_reporting_tests=not_applicable",
+                "report_notification_tests=pending_final_telegram_delivery",
+            ],
+            no_go_confirmation=["No issues found."],
+        )
+        run_phase_report_create(args)
+        report = read_latest_report(tmp_path)
+        assert report.report_completeness == COMPLETENESS_COMPLETE
+        assert report.trust_warnings == []

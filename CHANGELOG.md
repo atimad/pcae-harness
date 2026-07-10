@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 126G.1 - Telegram Commit Trust Metadata Repair
+  (`docs/PHASE_126G1_TELEGRAM_COMMIT_TRUST_METADATA_REPAIR.md`).
+  Repairs the final remaining trust warning from 126G:
+  `commits.phase_owned not verified — no phase_commits in metadata`.
+  Root cause: `pcae phase-report create` set `report.commits` from
+  `--commit` flags but never declared
+  `report.metadata["commit_attribution"]`, the specific field
+  `PhaseReport.assess_completeness()`'s commit-ownership check
+  requires — the check itself was already correct. Fixed by declaring
+  `metadata["commit_attribution"]` from the same `--commit` flags
+  already supplied, before `apply_trust_assessment()` runs. Verified
+  the warning disappears when commits are declared and correctly
+  remains when they are not. 4 new tests; 297 notification/report/
+  finalization tests pass; fast_green 4390/4390 unchanged. Zero lines
+  changed in canonical report generation, formatting, governance/test/
+  no-go metadata, or notification formatting. Recommends 127A.
+
 - Phase 126G - Telegram Canonical Report Dispatch Repair
   (`docs/PHASE_126G_TELEGRAM_CANONICAL_REPORT_DISPATCH_REPAIR.md`).
   Repairs the notification pipeline so Telegram faithfully delivers
