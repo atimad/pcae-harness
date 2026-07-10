@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 128A Historical Memory Chapter Review Hardening Architecture (20260710-0942-phase-128a-historical-memory-chapter-review-hardening-architecture)
 - Phase 127F Historical Memory Verification (20260710-0932-phase-127f-historical-memory-verification)
 - Phase 127E Historical Memory Prototype (20260710-0754-phase-127e-historical-memory-prototype)
 - Phase 127D Historical Memory Prototype Plan (20260710-0720-phase-127d-historical-memory-prototype-plan)

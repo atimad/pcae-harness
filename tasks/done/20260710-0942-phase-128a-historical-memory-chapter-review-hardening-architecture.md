@@ -10,7 +10,7 @@ Phase 128A Historical Memory Chapter Review Hardening Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
