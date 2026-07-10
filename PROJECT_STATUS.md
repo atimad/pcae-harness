@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 133D — Canonical Engineering Evidence Architecture (completed).
+
+Named and architected **Canonical Engineering Evidence**
+(`docs/PHASE_133_CANONICAL_ENGINEERING_EVIDENCE_ARCHITECTURE.md`): the
+authoritative substrate answering "what happened during engineering?"
+— the direct parallel, one layer up, of Repository Intelligence's own
+answer to "what is true about the repository?" **PFR-001 becomes the
+first derived-view specification within this wider architecture.**
+Defines a four-layer stack (Engineering Activity → Canonical
+Engineering Evidence → Derived Evidence Views → Consumers), an
+authority model where derived views (Phase Reports, PFN notifications,
+changelog entries, milestone summaries, release notes, historical
+engineering memory, future analytics) may filter or summarize but
+never invent information or become independently authoritative, a
+conceptual 8-stage evidence lifecycle, a conceptual 11-category
+evidence model (**no schema**), an explicit architectural separation
+from Repository Intelligence (knowledge vs. evidence — neither
+subsumes the other), a determinism guarantee, and seven frozen
+architectural principles. Documents Track 133's own evolution,
+explicitly broadening from PFR-only report governance (133A/133B) into
+Engineering Evidence governance (133D-133G anticipated), while leaving
+133C (PFR-001 Contract Verification) as a still-pending, independent
+PFR-specific verification phase this architecture does not depend on.
+**This phase is architecture-only**: no report-generation code, no
+notification code, no schema, and no runtime behavior was modified —
+confirmed via `git diff --stat` (zero `src/` files touched). PFR-001
+and PFN-001 both confirmed unmodified.
+
+**No schema changed. No runtime behavior changed. No implementation
+occurred.**
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`.
+
+**PFN-001 confirmed satisfied and unmodified.**
+
+Recommended next phase: 133E — Canonical Engineering Evidence Contract
+Freeze.
+
+## Phase 133D Complete
+
+Phase 133D — Canonical Engineering Evidence Architecture (completed).
+Names and architects Canonical Engineering Evidence — the engineering
+counterpart to Repository Intelligence — with a four-layer stack
+(Engineering Activity → Canonical Evidence → Derived Views →
+Consumers), an authority model (derived views filter/summarize, never
+invent, never become authoritative), a conceptual 8-stage lifecycle, an
+11-category conceptual evidence model (no schema), an explicit
+separation from Repository Intelligence, a determinism guarantee, and
+seven frozen architectural principles. PFR-001 becomes this
+architecture's first derived-view specification. Track 133 explicitly
+broadened from report governance to evidence governance
+(133D-133G anticipated); 133C remains pending, independent. Zero `src/`
+files touched, PFR-001/PFN-001 both unmodified, runtime unchanged.
+Recommended next phase: 133E - Canonical Engineering Evidence Contract
+Freeze. No next phase automatically begun.
+
+## Phase 133B Complete (historical — full text)
+
 Phase 133B — PFR-001 Canonical Phase Report Contract Freeze (completed).
 
 Transformed PFR-001 from an explored architecture (133A) into the
