@@ -24,12 +24,36 @@
   "tests_added_or_updated": "1428 focused test executions (26 new 134B.3 tests + 1402 combined 134B.1/134B.2/telegram/notifications/phase_reports/finalization-gate/trust-hard-fail/certification-idempotency/model-containment/permission-broker/RC-audit/session/phase regressions) plus 4390 fast_green (4389 passed, 1 pre-existing unrelated failure reproduced identically, unchanged from 134B.2).",
   "tests_run": 1428,
   "validation_results": [
-    {"name": "finalization_configuration_identity_cross_agent_focused_tests", "result": "26 passed", "status": "passed"},
-    {"name": "combined_notification_identity_finalization_regressions", "result": "1428 passed (134B.1 + 134B.2 + telegram + notifications + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + model-containment + permission-broker + RC-audit + session + phase)", "status": "passed"},
-    {"name": "fast_green", "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, unchanged from 134B.2)", "status": "passed"},
-    {"name": "compileall", "result": "src compiled successfully", "status": "passed"},
-    {"name": "report_notification_tests", "result": "26 focused passed (134B.3 configuration/identity/cross-agent hardening)", "status": "passed"},
-    {"name": "bootstrap_session_reporting_tests", "result": "fast_green coverage passed", "status": "passed"}
+    {
+      "name": "finalization_configuration_identity_cross_agent_focused_tests",
+      "result": "26 passed",
+      "status": "passed"
+    },
+    {
+      "name": "combined_notification_identity_finalization_regressions",
+      "result": "1428 passed (134B.1 + 134B.2 + telegram + notifications + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + model-containment + permission-broker + RC-audit + session + phase)",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, unchanged from 134B.2)",
+      "status": "passed"
+    },
+    {
+      "name": "compileall",
+      "result": "src compiled successfully",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "26 focused passed (134B.3 configuration/identity/cross-agent hardening)",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "fast_green coverage passed",
+      "status": "passed"
+    }
   ],
   "test_results": {
     "finalization_configuration_identity_cross_agent_focused_tests": "26 passed",
@@ -40,12 +64,30 @@
     "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
-    {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_check", "status": "passed"},
-    {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "pending"},
-    {"name": "telegram_runtime", "status": "configured and enabled for governed production finalization, resolved automatically without shell sourcing"},
-    {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "clean"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured and enabled for governed production finalization, resolved automatically without shell sourcing"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "Observed, observe, execution unavailable"
+    }
   ],
   "no_go_confirmation": "No Phase 134C work began. No Track 134 lifecycle architecture was implemented. No Canonical Engineering Evidence was implemented. No Evidence Extraction was implemented. No Derived Evidence Views were implemented. No Operator Report View was implemented. No Architecture Status repair occurred. No full External Delivery Receipt Ledger was implemented. No PFN-001 redesign occurred. No Repository Intelligence changed. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
@@ -66,8 +108,8 @@
     "No force push was used."
   ],
   "commit_attribution": "phase-owned governed task-finish commit",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
