@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- Phase 129A - Historical Memory Chapter Review & Next Direction
+  Architecture
+  (`docs/PHASE_129_HISTORICAL_MEMORY_CHAPTER_REVIEW_AND_NEXT_DIRECTION_ARCHITECTURE.md`).
+  Chapter-level architectural review of the completed Historical
+  Memory subsystem (Tracks 127-128, 14 phases) and reassessment of
+  PCAE's next architectural direction. Finds the chapter's own layered
+  self-correction (127F's two fixes, 128E's two resolved findings,
+  128F's 903-violation schema-conformance repair) demonstrates PCAE's
+  "re-derive, don't trust" verification discipline works. Assesses the
+  six-component knowledge stack (RKS, Query Layer, Advisory Context,
+  Change Impact, Dependency Knowledge Graph, Historical Memory) as
+  uniformly artifact-family-mature but still six independent silos —
+  Query Layer remains RKS-only and Change Impact still does not
+  structurally consume DKG, both confirmed by direct source
+  inspection. Documents the 128F schema-conformance lesson and
+  evaluates (without implementing) mandatory full-artifact schema
+  validation as a future candidate. Reassesses the canonical 125G
+  Execution Planning Readiness Assessment: both of 125G's named
+  mandatory gaps (DKG, Historical Memory) are now closed, yielding
+  Conditionally Ready for a narrowly-scoped Execution Planning
+  *architecture* chapter (descriptive, non-executing planning
+  representation only) and Not Ready for plan evaluation, execution
+  authorization, or execution itself — explicitly distinguishing
+  these. Evaluates 7 candidate next directions; recommends Query Layer
+  expansion (Candidate B) or Change Impact/DKG integration (Candidate
+  C) as the next chapter, without beginning either. Confirms PFN-001
+  remains globally applicable and satisfied; re-evaluates inherited
+  issues, surfacing a newly-precise finding: `.pcae/phase-completion-
+  metadata.json` staleness (still referencing Phase 126E) is a
+  genuine, recurring, unrepaired tooling-debt item every phase since
+  128B has independently worked around. No implementation, schema,
+  source code, or test code change; no runtime behavior change.
+
 - Phase 128F - Historical Memory Review & Hardening Verification
   (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_VERIFICATION.md`).
   Independently re-verified 128E's implementation without trusting its

@@ -2,6 +2,87 @@
 
 ## Current Phase
 
+Phase 129A — Historical Memory Chapter Review & Next Direction
+Architecture (completed).
+
+Chapter-level architectural review of the completed Historical Memory
+subsystem (127-128) and reassessment of PCAE's next architectural
+direction
+(`docs/PHASE_129_HISTORICAL_MEMORY_CHAPTER_REVIEW_AND_NEXT_DIRECTION_ARCHITECTURE.md`).
+Reviews the complete Tracks 127-128 lifecycle (14 phases:
+architecture → contract → verification → plan → prototype →
+verification → hardening architecture → contract → notification
+repair/contract → verification → plan → implementation →
+verification), finding the chapter's own internal correction record
+(two 127F fixes, two findings resolved in 128E, one 903-violation
+schema-conformance defect found and repaired in 128F) is itself
+evidence PCAE's layered "re-derive, don't trust" verification
+discipline functions as designed. Assesses the combined six-component
+knowledge stack (Repository Knowledge Snapshot, Query Layer, Advisory
+Context, Change Impact, Dependency Knowledge Graph, Historical Memory)
+as uniformly mature at the individual-artifact-family level for the
+first time in this repository's history, but still six independent
+silos rather than one integrated knowledge fabric — Query Layer
+remains RKS-only (zero DKG/Historical Memory categories, confirmed by
+direct source inspection) and Change Impact still does not structurally
+consume DKG (zero cross-imports, confirmed) despite DKG now existing.
+Documents the 128F schema-conformance lesson: existing focused tests
+did not prove complete executable-schema conformance, and evaluates
+(without implementing) mandatory full-artifact schema validation as a
+future candidate. Reassesses the canonical 125G Execution Planning
+Readiness Assessment against current state: both of 125G's named
+mandatory gaps (Dependency Knowledge Graph, Historical Memory) are now
+closed, producing a genuinely different determination —
+**Conditionally Ready for a narrowly-scoped Execution Planning
+*architecture* chapter** (a descriptive, non-executing planning
+representation only), **Not Ready for plan evaluation, execution
+authorization, or execution itself** (Permission Broker/approval/
+rollback/audit subsystems confirmed byte-identical/unchanged/unproven
+since 125G). Evaluates seven candidate next directions against
+explicit criteria; recommends Candidate B (Query Layer expansion to
+DKG/Historical Memory) or Candidate C (Change Impact + Dependency
+Knowledge Graph integration) as the next chapter, without beginning
+either. Confirms PFN-001 remains globally applicable and satisfied;
+re-evaluates (not copies) inherited issues, adding a newly-precise
+finding: `.pcae/phase-completion-metadata.json` staleness (still
+referencing Phase 126E) is a genuine, recurring, unrepaired tooling-
+debt item every phase since 128B has independently worked around. No
+implementation occurred; no schema, source code, or test code changed;
+no runtime behavior changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: a future governed decision phase
+selecting between Candidate B (Repository Intelligence Query
+Expansion) and Candidate C (Cross-Artifact Knowledge Integration:
+Change Impact + Dependency Knowledge Graph).
+
+## Phase 129A Complete
+
+Phase 129A — Historical Memory Chapter Review & Next Direction
+Architecture (completed).
+
+Chapter-level review of Tracks 127-128 (Historical Memory + hardening);
+finds the chapter's own layered self-correction (127F/128E/128F fixes)
+demonstrates PCAE's verification discipline works. Assesses the
+six-component knowledge stack as uniformly artifact-family-mature but
+still six independent silos (Query Layer RKS-only; Change Impact not
+yet DKG-informed). Reassesses 125G's Execution Planning readiness:
+both named mandatory gaps now closed, yielding Conditionally Ready for
+planning-*architecture*-only, Not Ready for evaluation/authorization/
+execution — explicitly distinguishing the two. Evaluates 7 candidate
+next directions; recommends Query Layer expansion (Candidate B) or
+Change Impact/DKG integration (Candidate C) without beginning either.
+PFN-001 confirmed satisfied. No implementation, schema, or runtime
+behavior change. Recommended next: a future governed decision phase
+choosing between Candidates B and C.
+
+## Phase 128F Complete (historical — full text)
+
 Phase 128F — Historical Memory Review & Hardening Verification
 (completed).
 
