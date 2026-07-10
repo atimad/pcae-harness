@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Commit Phase 133G finalization sidecars (20260710-2145-commit-phase-133g-finalization-sidecars)
 - Finalize Phase 133G completion metadata and lifecycle (20260710-2143-finalize-phase-133g-completion-metadata-and-lifecycle)
 
 - Finalize Phase 133G governed artifacts (20260710-2134-finalize-phase-133g-governed-artifacts)
