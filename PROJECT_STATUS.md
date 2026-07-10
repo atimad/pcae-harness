@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 127E — Historical Memory Prototype
+(completed).
+
+Implements the first deterministic, read-only Historical Memory
+Builder exactly as scoped by 127A-127D
+(`docs/PHASE_127_HISTORICAL_MEMORY_PROTOTYPE_IMPLEMENTATION.md`). Added
+`src/pcae/repository_intelligence/historical_memory/` (git-history/
+task-contract discovery in `git_source.py` — the only module permitted
+to invoke `git`, mirroring Track 120's `source_inventory.py`
+precedent; deterministic construction, independent validation,
+persistence reusing Track 124's `serialize_deterministic_json`, and
+top-level orchestration), consuming git-tracked `tasks/done/*.md` task
+contracts, git commit history, and an existing Repository Knowledge
+Snapshot (via the Track 121 Query Layer). Wired a governed CLI
+command, `pcae repository-intelligence historical-memory generate`.
+Verified end-to-end against this repository's own real git history and
+850 real task contracts: found and fixed a genuine defect during
+implementation verification — `git log --follow`'s content-similarity
+rename heuristic falsely collapsed distinct task contracts onto the
+same commit because they share heavy templated boilerplate; removing
+`--follow` in favor of plain `--diff-filter=A` against each file's own
+path improved commit-resolution accuracy from 237 to 806 distinct
+commits across 850 records and is also the semantically correct
+"task completed" commit for this repository's governed workflow. Both
+127C findings resolved exactly as 127D specified. Added 50 focused
+tests (48 fast synthetic-repository tests plus 2 real-repository
+integration tests). Regression suites for Tracks 120-124/126 (110
+tests) plus the new suite (50 tests) all pass; fast_green 4390/4390;
+`compileall` clean. No schema file modified; Tracks 119-124/126
+unmodified. No historical reasoning, inference, recommendations, or
+execution capability introduced; execution remains unavailable.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 127F — Historical Memory Verification.
+
+## Phase 127E Complete
+
+Phase 127E — Historical Memory Prototype (completed).
+
+First real implementation phase of Track 127. Implemented a
+deterministic, read-only Historical Memory Builder consuming
+`tasks/done/*.md` task contracts, git history, and an existing
+Repository Knowledge Snapshot, with a governed CLI command and 50
+focused tests. Found and fixed a genuine `git log --follow`
+rename-collapse defect during implementation verification. Verified
+byte-deterministic across repeated runs against this repository's own
+real 850-task-contract corpus. Regression suites (Tracks 120-124/126)
+and fast_green all pass. No reasoning, inference, or execution
+capability introduced; execution remains unavailable. Recommended next
+phase: 127F — Historical Memory Verification.
+
+## Phase 127D Complete (historical — full text)
+
 Phase 127D — Historical Memory Prototype Plan
 (completed).
 

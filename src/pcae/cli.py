@@ -504,6 +504,7 @@ from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.repository_intelligence import (
     run_repository_intelligence_change_impact,
     run_repository_intelligence_dependency_graph_generate,
+    run_repository_intelligence_historical_memory_generate,
     run_repository_intelligence_query,
     run_repository_intelligence_snapshot_generate,
 )
@@ -4668,6 +4669,52 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ri_dependency_graph_generate_parser.set_defaults(
         handler=run_repository_intelligence_dependency_graph_generate
+    )
+
+    ri_historical_memory_parser = repository_intelligence_subparsers.add_parser(
+        "historical-memory",
+        help="Historical Memory Snapshot generation.",
+    )
+    ri_historical_memory_subparsers = ri_historical_memory_parser.add_subparsers(
+        dest="repository_intelligence_historical_memory_command",
+        required=True,
+    )
+
+    ri_historical_memory_generate_parser = ri_historical_memory_subparsers.add_parser(
+        "generate",
+        help=(
+            "Deterministically generate a schema-conformant Historical "
+            "Memory Snapshot from git commit history, tasks/done/*.md "
+            "task contracts, and an existing Repository Knowledge "
+            "Snapshot (read-only, no execution, no reasoning, no "
+            "inference)."
+        ),
+    )
+    ri_historical_memory_generate_parser.add_argument(
+        "--snapshot",
+        required=True,
+        help="Path to an existing Repository Knowledge Snapshot artifact.",
+    )
+    ri_historical_memory_generate_parser.add_argument(
+        "--output",
+        default=None,
+        help=(
+            "Override the output directory (default: "
+            ".pcae/repository-intelligence/historical-memory/)."
+        ),
+    )
+    ri_historical_memory_generate_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Persist the generated snapshot as indented (pretty) JSON.",
+    )
+    ri_historical_memory_generate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON generation metadata to stdout.",
+    )
+    ri_historical_memory_generate_parser.set_defaults(
+        handler=run_repository_intelligence_historical_memory_generate
     )
 
     architecture_parser = subparsers.add_parser(

@@ -20,6 +20,10 @@ from pcae.repository_intelligence.dependency_graph import (
     GraphGenerationError,
     generate_dependency_graph,
 )
+from pcae.repository_intelligence.historical_memory import (
+    HistoricalGenerationError,
+    generate_historical_memory,
+)
 from pcae.repository_intelligence.query import QueryExecutionError, QueryRequest
 from pcae.repository_intelligence.query.query_engine import execute_query
 from pcae.repository_intelligence.query.result_formatter import format_result
@@ -142,6 +146,42 @@ def run_repository_intelligence_dependency_graph_generate(args: argparse.Namespa
         print(f"  Completeness state:   {result['graph_completeness_state']}")
         print(f"  Latest graph:         {result['latest_path']}")
         print(f"  Timestamped graph:    {result['graph_path']}")
+    return 0
+
+
+def run_repository_intelligence_historical_memory_generate(args: argparse.Namespace) -> int:
+    repo_root = HarnessPath.cwd().path
+    snapshot_path = Path(args.snapshot)
+    output_dir = Path(args.output) if args.output else None
+
+    try:
+        result = generate_historical_memory(
+            snapshot_path,
+            repo_root=repo_root,
+            output_dir=output_dir,
+            pretty=args.pretty,
+        )
+    except HistoricalGenerationError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print("Historical Memory Snapshot generated")
+        print(f"  Artifact ID:          {result['artifact_id']}")
+        print(f"  Repository commit:    {result['repository_commit']}")
+        print(f"  Source snapshot:      {result['source_snapshot_path']}")
+        print(f"  Events:               {result['event_count']}")
+        print(f"  Claims:               {result['claim_count']}")
+        print(f"  Phase lineage:        {result['phase_lineage_count']}")
+        print(f"  Release lineage:      {result['release_lineage_count']}")
+        print(f"  Repair/hardening:     {result['repair_hardening_count']}")
+        print(f"  Relationships:        {result['relationship_count']}")
+        print(f"  Historical sources:   {result['historical_source_count']}")
+        print(f"  Unknown gaps:         {result['unknown_gap_count']}")
+        print(f"  Latest snapshot:      {result['latest_path']}")
+        print(f"  Timestamped snapshot: {result['snapshot_path']}")
     return 0
 
 

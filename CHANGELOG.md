@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Phase 127E - Historical Memory Prototype
+  (`docs/PHASE_127_HISTORICAL_MEMORY_PROTOTYPE_IMPLEMENTATION.md`).
+  Implements the first deterministic, read-only Historical Memory
+  Builder exactly as scoped by 127A-127D. Adds
+  `src/pcae/repository_intelligence/historical_memory/` (git-history/
+  task-contract discovery, deterministic construction, independent
+  validation, persistence reusing Track 124's
+  `serialize_deterministic_json`, top-level orchestration), consuming
+  git-tracked `tasks/done/*.md` task contracts, git commit history,
+  and an existing Repository Knowledge Snapshot via the Track 121
+  Query Layer. Wires `pcae repository-intelligence historical-memory
+  generate`. Verified end-to-end against this repository's own real
+  git history and 850 real task contracts: found and fixed a genuine
+  `git log --follow` rename-collapse defect (content-similarity
+  heuristic falsely merged unrelated task contracts due to shared
+  template boilerplate), improving commit-resolution accuracy from 237
+  to 806 distinct commits. Resolved both 127C findings. Adds 50
+  focused tests. Track 120-124/126 regressions (110 tests) plus the
+  new suite (50 tests) all pass; fast_green 4390/4390; compileall
+  clean. No schema modified; Tracks 119-124/126 unmodified. No
+  reasoning, inference, or execution capability introduced; execution
+  remains unavailable. Recommends 127F.
+
 - Phase 127D - Historical Memory Prototype Plan
   (`docs/PHASE_127_HISTORICAL_MEMORY_PROTOTYPE_PLAN.md`). Defines the
   implementation plan for the first deterministic, read-only Historical
