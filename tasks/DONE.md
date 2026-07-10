@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Finalize Phase 133G governed artifacts (20260710-2134-finalize-phase-133g-governed-artifacts)
+- Phase 133G — Canonical Engineering Evidence & Derived Evidence Views Implementation Plan (20260710-2128-phase-133g-canonical-engineering-evidence-derived-evidence-views-implementation-plan)
 - Phase 133F Canonical Engineering Evidence Contract Verification (20260710-2018-phase-133f-canonical-engineering-evidence-contract-verification)
 - Phase 133C PFR-001 Contract Verification (lifecycle recovery) (20260710-2004-phase-133c-pfr-001-contract-verification-lifecycle-recovery)
 - Phase 133E Canonical Engineering Evidence Contract Freeze (20260710-1944-phase-133e-canonical-engineering-evidence-contract-freeze)
