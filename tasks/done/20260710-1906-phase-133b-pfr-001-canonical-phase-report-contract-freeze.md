@@ -10,7 +10,7 @@ Phase 133B PFR-001 Canonical Phase Report Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
