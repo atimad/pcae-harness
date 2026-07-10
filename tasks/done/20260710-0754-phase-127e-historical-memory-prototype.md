@@ -10,7 +10,7 @@ Phase 127E Historical Memory Prototype
 
 ## Status
 
-active
+done
 
 ## Mode
 
