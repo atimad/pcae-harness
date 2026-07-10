@@ -2,6 +2,40 @@
 
 ## Current Phase
 
+Phase 134B.1 — External Notification Investigation & Isolation Repair
+(completed).
+
+Investigated the unexpected external notifications observed during 134B
+validation and established a test/environment isolation defect. Pytest was run
+after sourcing live Telegram configuration; ordinary in-process report tests
+and inherited subprocesses therefore received production notification
+enablement, sink selection, token, and chat ID. Real production finalization
+functions correctly honored that environment for synthetic phase-report events.
+
+Repository evidence shows eight synthetic filesystem notification events in
+the incident window plus one legitimate 134B logical delivery. Exact external
+message count cannot be reconstructed because current Telegram attempts lack a
+durable per-attempt receipt ledger; this is explicitly recorded as existing
+Track 134 debt. No duplicate 134B completion, retry loop, replay, cache, or
+second production dispatch was found.
+
+Repaired only pytest isolation: ordinary tests now clear external notification
+configuration before in-process or subprocess execution. Explicit governed
+live testing remains possible through `PCAE_TEST_ALLOW_LIVE_NOTIFICATIONS=1`.
+Production notification behavior and PFN-001 are unchanged.
+
+Recommended next phase: 134C — Canonical Phase Finalization & Reporting
+Lifecycle Contract Verification.
+
+## Phase 134B.1 Complete
+
+Phase 134B.1 established and repaired the external-notification test isolation
+defect, added focused in-process/subprocess/opt-in regressions, preserved
+production delivery and PFN-001, and documented the remaining receipt-ledger
+debt. No notification redesign or Track 134 lifecycle implementation occurred.
+
+## Phase 134B Complete (historical — full text)
+
 Phase 134B — Canonical Phase Finalization & Reporting Lifecycle Contract Freeze
 (completed).
 

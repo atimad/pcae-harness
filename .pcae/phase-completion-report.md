@@ -1,106 +1,99 @@
-# Phase 134B Complete — Canonical Phase Finalization & Reporting Lifecycle Contract Freeze
+# Phase 134B.1 Complete — External Notification Investigation & Isolation Repair
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134B`
+- **Phase ID:** `134B.1`
 - **Status:** completed
-- **Phase class:** contract freeze
+- **Phase class:** dedicated implementation repair
 - **Report completeness:** complete
-- **Contract:** `docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_AND_REPORTING_LIFECYCLE_CONTRACT.md`
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134B froze the binding twelve-stage canonical phase-finalization and
-reporting lifecycle. It binds one identity/evidence authority, deterministic
-Evidence Extraction and separate View Composition, PFR and rich Operator
-Reports, four independent report-correctness dimensions, semantic freshness,
-Architecture Status correctness, presentation-only rendering, transport-only
-delivery, receipts, exactly-once logical completion, failure/correction,
-compatibility, governance, and versioning. Internal review found zero BLOCKING
-and zero NON-BLOCKING contract defects. No implementation occurred.
+Phase 134B.1 verified that pytest inherited live Telegram configuration from a
+sourced operator shell. Ordinary synthetic report tests and child processes
+could therefore invoke production finalization against the external operator
+channel. A minimal test-wide environment boundary now disables external
+delivery for ordinary tests while preserving explicit governed live opt-in and
+unchanged production PFN-001 behavior.
 
 ## 3. Architectural Findings
 
-The contract freezes 134A without changing its architecture. New binding
-clarity distinguishes structural validity, informational completeness,
-decision completeness, and semantic freshness. Evidence Extraction decides
-which canonical facts a view requires; View Composition decides how those
-facts are structured. Official completion remains the final lifecycle stage,
-never task closure, promotion, push, or notification alone.
+No architecture changed. The defect sat at the test boundary, not in PFN-001,
+production adapter selection, idempotency, retry, or phase completion.
+Production correctly honored its environment; synthetic tests supplied the
+wrong authority context by ambient inheritance.
 
 ## 4. Implementation Findings
 
-None. No lifecycle, report, notification, Architecture Status, identity,
-metadata, evidence, view, rendering, adapter, schema, source, test, runtime, or
-execution implementation changed.
+`tests/conftest.py` now clears notification enablement, sink selection,
+Telegram enablement, token, and chat ID before every ordinary test. Subprocesses
+inherit the isolated parent environment. `PCAE_TEST_ALLOW_LIVE_NOTIFICATIONS=1`
+preserves deliberate governed live integration testing. Four focused tests
+cover in-process isolation, subprocess inheritance, pre-existing live config,
+and opt-in.
 
 ## 5. Verification Findings
 
-This is a contract-freeze phase, not independent verification. Methodology was
-fresh source and artifact inspection of 134A, Track 133, PFR-001, PFN-001,
-identity/finalization/report/status/notification code and tests, and canonical
-reports for 132F, 133E, 133G, and 134A. The contract's own internal consistency
-review covered fifteen dimensions and classified all CONFIRMED, with zero
-BLOCKING and zero NON-BLOCKING defects. Independent re-derivation belongs to
-134C.
+Repository artifacts prove eight synthetic filesystem notification events in
+the incident window. The 134B idempotency marker proves one legitimate logical
+delivery and the explicit second completion skipped. Telegram has no durable
+per-attempt local ledger, so the exact external message count is not
+reconstructible from repository evidence. No retry, replay, cache, duplicate
+logical completion, or second production path was found.
 
 ## 6. Technical Debt Review
 
-Fourteen confirmed debts are mapped to 134D–134F: stale completion metadata,
-multiple identity paths, ordering defects, historical phase-ID comparison,
-structural-only completeness, minimal Operator Reports, stale Architecture
-Status, prompt-dependent quality, report/notification rendering coupling,
-missing Derived Correctness and informational-completeness validators, missing
-governed correction, clean/push promotion cycles, and stale task/roadmap status
-sources. None was repaired.
+The missing durable per-attempt Telegram receipt ledger remains Track 134 debt
+and prevents exact after-the-fact external count reconstruction. Filesystem
+test diagnostics and mixed test environment styles are non-external-risk debt.
+No broader notification or lifecycle work was performed.
 
 ## 7. Notable Engineering Knowledge
 
-“Automatically generated” is not an authority or freshness proof. Exactly-once
-delivery is logical, while physical attempts may retry. Extraction and
-composition remain independently testable because fact selection and
-organization carry distinct omission risks. A correct recovery path can still
-expose architectural ordering debt.
+Production-disabled-by-default is not a test isolation guarantee when the test
+runner inherits an enabled production environment. A safe boundary must remove
+ambient external authority before both in-process code and child processes.
+Exactly-once logical delivery remains distinct from Telegram's message plus
+document physical artifacts.
 
 ## 8. Governance Results
 
-- `pcae health`: healthy.
 - `pcae check`: passed.
 - task memory: clean.
-- push baseline: clean before phase commits.
-- Telegram runtime: configured and enabled for PFN-001 delivery.
-- Runtime: Observed; maximum capability observe; execution unavailable.
+- governed commit/push commands only.
+- Telegram remains configured for the one genuine completion delivery.
+- Runtime remains Observed; execution unavailable.
 
 ## 9. Test Results
 
-- Focused reporting/status/finalization/notification regressions: 1174 passed.
-- Canonical fast-green: 4390 passed.
+- Focused external-notification/finalization regressions: 298 passed.
+- Fast-green: 4390 passed.
 - `compileall`: passed.
-- No tests were added or modified.
+- Production notification behavior remains covered by existing fake-adapter
+  tests; no live test dispatch was required.
 
 ## 10. No-Go Confirmation
 
-No implementation, report/notification/Architecture Status/identity/metadata
-change, Canonical Engineering Evidence, extraction, view, renderer, adapter,
-PFN/PFR/Repository Intelligence change, schema, source, test, runtime,
-execution, or Phase 134C work occurred.
+No 134C, notification/PFN redesign, Track 134 lifecycle implementation,
+Canonical Engineering Evidence, Operator Report, Repository Intelligence,
+adapter, production source, schema, runtime, or execution work occurred. No raw
+git commit/push, `--no-verify`, or force push was used.
 
 ## 11. Architectural Boundary Confirmation
 
-Track 133 governs engineering-evidence authority and Derived Correctness.
-PFR-001 governs Phase Report content. PFN-001 governs mandatory delivery.
-Runtime Governance and Repository Intelligence remain independent. Track 134
-governs orchestration, correctness gates, receipts, and completion ordering
-without absorbing those systems.
+PFN-001 remains mandatory and unchanged. Exactly-once certification and marker
+behavior are untouched. Production commands outside pytest resolve and deliver
+the same configuration as before. Future Track 134 receipt architecture remains
+deferred.
 
 ## 12. Track Progress
 
-Track 134 is complete through architecture and contract freeze. The contract
-is ready for independent verification, but no implementation planning or
-implementation has begun.
+134B.1 is a dedicated repair inserted after contract freeze. It restores safe
+test isolation without advancing the 134C verification or 134D–134F
+implementation sequence.
 
 ## 13. Next Phase
 
-Recommended only: **134C — Canonical Phase Finalization & Reporting Lifecycle
+Recommended: **134C — Canonical Phase Finalization & Reporting Lifecycle
 Contract Verification**. Phase 134C has not begun.

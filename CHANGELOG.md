@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Phase 134B.1 - External Notification Investigation & Isolation Repair
+  (`docs/PHASE_134_EXTERNAL_NOTIFICATION_INVESTIGATION_AND_ISOLATION_REPAIR.md`).
+  Establishes that pytest inherited live Telegram configuration from the
+  invoking shell, allowing synthetic report-finalization tests and subprocesses
+  to reach the operator channel. Adds a test-wide external-notification
+  isolation boundary and explicit governed live-test opt-in, with focused
+  in-process/subprocess regression coverage. Production notification,
+  idempotency, lifecycle behavior, and PFN-001 remain unchanged. Records the
+  missing per-attempt Telegram receipt ledger as future Track 134 debt.
+
 - Phase 134B - Canonical Phase Finalization & Reporting Lifecycle Contract
   Freeze
   (`docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_AND_REPORTING_LIFECYCLE_CONTRACT.md`).

@@ -2,6 +2,17 @@
 
 ## Accepted
 
+- Repair Phase 134B.1 strictly as a pytest environment-isolation defect:
+  ordinary tests clear external notification enablement, sink selection,
+  Telegram enablement, credentials, and destination before in-process and
+  subprocess execution; separately governed live integration remains available
+  only through `PCAE_TEST_ALLOW_LIVE_NOTIFICATIONS=1`. Leave production
+  notification resolution, PFN-001, idempotency, adapters, and Track 134
+  lifecycle architecture unchanged. Record exact external-count reconstruction
+  as unavailable because no durable per-attempt Telegram ledger exists; carry
+  that observability gap to 134D–134F rather than invent evidence or broaden
+  this repair.
+
 - Freeze Phase 134B as the binding contract for twelve strictly ordered,
   non-overlapping finalization stages. Bind one phase identity, Canonical
   Engineering Evidence as sole engineering authority, deterministic Evidence

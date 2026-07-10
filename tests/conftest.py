@@ -23,7 +23,52 @@ Invocation:
 
 from __future__ import annotations
 
+import os
+
 import pytest
+
+
+# Phase 134B.1 — ordinary automated tests must never inherit the operator's
+# live outbound-notification configuration.  In-process production functions
+# and subprocess CLIs both resolve notification configuration from os.environ,
+# so isolating only individual sink tests is insufficient: any unrelated test
+# that calls finalize_phase_report() can otherwise reach the live adapter when
+# pytest itself was started from a shell that sourced telegram.env.
+_EXTERNAL_NOTIFICATION_ENV = (
+    "PCAE_NOTIFY_ENABLED",
+    "PCAE_NOTIFY_SINKS",
+    "PCAE_TELEGRAM_ENABLED",
+    "PCAE_TELEGRAM_BOT_TOKEN",
+    "PCAE_TELEGRAM_CHAT_ID",
+)
+_LIVE_NOTIFICATION_TEST_OPT_IN = "PCAE_TEST_ALLOW_LIVE_NOTIFICATIONS"
+
+
+def isolate_external_notification_env(env: dict[str, str]) -> bool:
+    """Remove live-delivery configuration unless explicitly test-authorized.
+
+    Returns True when isolation was applied.  The explicit opt-in is intended
+    only for separately governed live integration runs; normal unit/regression
+    suites never set it.  Production code is untouched.
+    """
+    if str(env.get(_LIVE_NOTIFICATION_TEST_OPT_IN, "")).lower() in (
+        "1", "true", "yes",
+    ):
+        return False
+    for key in _EXTERNAL_NOTIFICATION_ENV:
+        env.pop(key, None)
+    return True
+
+
+@pytest.fixture(autouse=True)
+def _isolate_external_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fail-safe test boundary for in-process and inherited subprocess env."""
+    if str(os.environ.get(_LIVE_NOTIFICATION_TEST_OPT_IN, "")).lower() in (
+        "1", "true", "yes",
+    ):
+        return
+    for key in _EXTERNAL_NOTIFICATION_ENV:
+        monkeypatch.delenv(key, raising=False)
 
 FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # Core governance safety
