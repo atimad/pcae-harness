@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 131A - Unified Repository Intelligence Query Architecture
+  (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_ARCHITECTURE.md`).
+  Selects Track 131 - Unified Repository Intelligence Query - as
+  PCAE's next architectural chapter: the Candidate B query expansion
+  129A/130A anticipated, retargeted at the independently-verified
+  Track 130 integrated substrate. Defines purpose, scope (the same
+  six Track 130-covered artifact families, no new ones), an authority
+  model (every source artifact remains authoritative; Unified Query
+  never becomes an evidence source), a conceptual nine-stage query
+  lifecycle, routing architecture (deterministic declared mapping, no
+  optimization/indexing), a strictly derivative response model,
+  provenance/evidence/identity architecture (existing stable
+  identifiers only; no alias/fuzzy/heuristic/probabilistic matching),
+  cross-artifact architecture (consumes, never replaces, Track 130's
+  integration package), determinism/uncertainty/limitation/read-only/
+  failure/boundary architecture, and a compatibility review confirming
+  Tracks 119-130 remain unmodified. An internal six-dimension
+  architectural consistency review found no duplicated
+  responsibilities, authority leakage, evidence leakage, identity
+  ambiguity, provenance ambiguity, or determinism ambiguity - only two
+  explicitly-named forward deferrals for a future 131B contract
+  freeze. Also inspected the `pcae session bootstrap` handoff-
+  staleness warning, root-caused it to a benign timestamp-comparison
+  gap in normal session/phase sequencing, and proposed (without
+  performing) a repair as a candidate for a future maintenance phase.
+  **No implementation, schema, source code, test code, or runtime
+  behavior change.** PFN-001 confirmed satisfied. Recommends 131B.
+
 - Phase 130F - Cross-Artifact Knowledge Integration Verification
   (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_VERIFICATION.md`).
   Independently re-verified 130E's completed prototype against

@@ -2,6 +2,79 @@
 
 ## Current Phase
 
+Phase 131A — Unified Repository Intelligence Query Architecture
+(completed).
+
+Selects Track 131 — Unified Repository Intelligence Query — as PCAE's
+next architectural chapter: the Candidate B query expansion 129A/130A
+anticipated, now retargeted at the independently-verified Track 130
+integrated substrate rather than at five independent artifact
+contracts. Defines purpose (a single deterministic access model over
+already-authoritative knowledge, no new knowledge), scope (the same
+six existing verified artifact families Track 130 covers, no new
+ones), an authority model reaffirming every source artifact remains
+authoritative and Unified Query never becomes an evidence source, a
+conceptual (not schema) nine-stage query lifecycle (request, routing,
+artifact resolution, integration, response assembly, provenance
+attachment, limitation propagation, boundary disclosure, deterministic
+serialization), routing architecture (deterministic declared category-
+to-artifact-family mapping, no optimization, no indexing), a strictly
+derivative response model (references/provenance/evidence/limitations/
+uncertainty/boundary disclosures only, never conclusions),
+provenance/evidence/identity architecture (reuse existing stable
+identifiers only; no alias/fuzzy/heuristic/probabilistic matching),
+cross-artifact architecture (Unified Query consumes Track 130's
+integration package, never re-derives relationships itself),
+determinism/uncertainty/limitation/read-only/failure/boundary
+architecture extending every existing guarantee to the access layer,
+and a compatibility review confirming Tracks 119–130 remain unmodified.
+Performed an internal architectural consistency review across six
+dimensions (duplicated responsibilities, authority leakage, evidence
+leakage, identity ambiguity, provenance ambiguity, determinism
+ambiguity): no defects found, only two explicitly-named forward
+deferrals scoped to a future 131B contract freeze (cross-artifact
+aggregation-field scrutiny; multi-family routing disambiguation).
+Explicitly defers reasoning, inference, recommendations, Decision
+Evaluation, execution planning, execution capability, and AI
+interpretation. Also inspected the `pcae session bootstrap`
+"handoff older than latest phase report" warning: root-caused to a
+simple timestamp comparison in `_classify_bootstrap_readiness`
+with no tolerance for the ordinary session-end/phase-complete
+sequencing gap, confirmed benign (health/check/task-memory/push all
+independently clean), and proposed — but did not perform — a repair
+(extend terminal phase finalization to write a fresh handoff
+snapshot) as a candidate for a future maintenance/hardening phase.
+
+**No implementation occurred. No schema changed. No source or test
+code changed. No runtime behavior changed.**
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 131B — Unified Repository Intelligence
+Query Contract Freeze.
+
+## Phase 131A Complete
+
+Phase 131A — Unified Repository Intelligence Query Architecture
+(completed).
+
+Formally selects Track 131 as PCAE's next architectural chapter and
+defines its canonical architecture over the six Track 130-covered
+artifact families: authority model, conceptual query lifecycle,
+routing/response/provenance/evidence/identity/cross-artifact/
+determinism/uncertainty/limitation/read-only/failure/boundary
+architecture, compatibility review, internal consistency review (no
+defects, two scoped forward deferrals), and a proposed (not performed)
+handoff-freshness repair. No implementation, schema, source code, test
+code, or runtime behavior change. PFN-001 confirmed satisfied.
+Recommended next phase: 131B — Unified Repository Intelligence Query
+Contract Freeze.
+
+## Phase 130F Complete (historical — full text)
+
 Phase 130F — Cross-Artifact Knowledge Integration Verification
 (completed).
 
