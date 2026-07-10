@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 132A — Repository Intelligence Service Architecture (completed).
+
+Formally establishes Track 132 — Repository Intelligence Service — as
+PCAE's next architectural chapter: not an expansion of Repository
+Intelligence's own knowledge substrate (Tracks 119-131, independently
+verified complete), but the canonical consumption layer that composes
+Unified Query's own single-request, single-family results into
+complete, governed, multi-family answers. Defines why Unified Query
+alone is intentionally insufficient for higher-level consumers (its
+own closed, narrow 131B contract correctly excludes composition
+across calls); the five-layer PCAE position (Repository → Repository
+Intelligence → Unified Query → Repository Intelligence Service →
+Consumers); responsibilities (consume Unified Query, assemble
+complete responses, preserve provenance/evidence/limitations/
+uncertainty/boundary disclosures, deterministic access, abstract
+internal artifact composition) and prohibitions (never create
+knowledge/become authoritative/reason/infer/recommend/rank/evaluate/
+authorize/mutate/execute); a consumer model naming Advisory,
+Repository Skills, CLI tooling, reporting, and future internal
+services without implementing any integration; a nine-stage
+conceptual service lifecycle mirroring Unified Query's own; conceptual
+(no schema) entity/artifact/scoped/composite request models and a
+composed response model; an authority model keeping the Service
+exactly as non-authoritative as every layer below it; a relationship
+to Unified Query requiring reuse, never duplication; determinism and
+fail-closed failure guarantees that directly incorporate 131F's own
+silent-omission lesson; governance guarantees; an extensibility
+strategy requiring future consumers to integrate without ever
+modifying Repository Intelligence itself; strict non-goals (no
+networking/REST/GraphQL/HTTP/dashboards/execution/Decision Evaluation
+changes/Permission Broker changes/runtime plugins); and the Track 132
+roadmap (132A-132F).
+
+**No implementation occurred. No schema changed. No source or test
+code changed. No runtime behavior changed.**
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 132B — Repository Intelligence Service
+Contract Freeze.
+
+## Phase 132A Complete
+
+Phase 132A — Repository Intelligence Service Architecture (completed).
+
+Establishes Track 132 as PCAE's next architectural chapter: the
+consumption layer over Unified Query, not an expansion of Repository
+Intelligence itself. Defines purpose, PCAE layering, responsibilities/
+prohibitions, consumer model, nine-stage conceptual lifecycle,
+conceptual request/response models (no schema), authority model,
+relationship to Unified Query (compose/normalize/present vs.
+locate/correlate/aggregate/expose/reference), determinism, fail-closed
+failure model (incorporating 131F's silent-omission lesson),
+governance guarantees, extensibility strategy, strict non-goals, and
+the Track 132 roadmap. No implementation, schema, source code, test
+code, or runtime behavior change. PFN-001 confirmed satisfied.
+Recommended next phase: 132B — Repository Intelligence Service
+Contract Freeze.
+
+## Phase 131F Complete (historical — full text)
+
 Phase 131F — Unified Repository Intelligence Query Independent
 Verification (completed).
 
