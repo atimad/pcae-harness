@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 128B.2 - Phase Finalization Notification Contract
+  (`docs/PHASE_128_PHASE_FINALIZATION_NOTIFICATION_CONTRACT.md`).
+  Governance documentation only, not part of Historical Memory.
+  Elevates notification from an implementation detail to a governed
+  lifecycle invariant. Defines PFN-001: every terminal phase outcome
+  (completed, partially completed, incomplete, failed, blocked,
+  governance-aborted, trusted recovery paths) shall produce exactly one
+  trusted canonical phase report delivered to the configured
+  notification sink; notification delivery or an explicit durable
+  delivery-failure record is mandatory; silent omission is prohibited.
+  Establishes canonical report authority (notification always reflects
+  the trusted canonical report, never console output/temporary
+  summaries/partial metadata/ad hoc messages), the finalization
+  lifecycle (notification is part of finalization, not a
+  post-finalization side effect), delivery guarantees (exactly-once,
+  trusted-report-only, ordered-after-trust, path-identical, idempotent,
+  duplicate-preventing), and failure guarantees (durable, observable,
+  never invalidating the canonical report). Applies uniformly to `pcae
+  phase complete`, `pcae phase-report create`, governed recovery paths,
+  and future governed completion paths. 128B.1's already-implemented
+  certify/dispatch/mark-notified mechanism is named as the pattern that
+  already satisfies this contract. No implementation, schema, source
+  code, test code, or runtime behavior change. Recommends 128C.
+
 - Phase 128B.1 - Notification Dispatch Reliability Repair
   (`docs/PHASE_128B1_NOTIFICATION_DISPATCH_RELIABILITY_REPAIR.md`).
   Governance tooling repair, not part of Historical Memory. Root-caused

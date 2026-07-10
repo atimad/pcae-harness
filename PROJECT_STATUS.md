@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 128B.2 — Phase Finalization Notification Contract (completed).
+
+Governance documentation only — not part of Historical Memory,
+Repository Intelligence, or any runtime capability
+(`docs/PHASE_128_PHASE_FINALIZATION_NOTIFICATION_CONTRACT.md`).
+Elevates notification from an implementation detail to a governed
+lifecycle invariant, following from 128B.1's finding that the
+canonical phase report is the authoritative completion signal for the
+human operator in long-running autonomous sessions. Defines **PFN-001**:
+every terminal phase outcome (completed, partially completed,
+incomplete, failed, blocked, governance-aborted, trusted recovery
+paths) shall produce exactly one trusted canonical phase report
+delivered to the configured notification sink; notification delivery
+or an explicit durable delivery-failure record is a mandatory
+component of governed phase finalization; silent notification
+omission is prohibited. Establishes canonical report authority
+(notification always reflects the trusted canonical report, never
+console output/temporary summaries/partial metadata/ad hoc messages),
+the finalization lifecycle (notification is part of finalization, not
+a post-finalization side effect), delivery guarantees (exactly-once,
+trusted-report-only, ordered-after-trust, path-identical, idempotent,
+duplicate-preventing), and failure guarantees (durable, observable,
+never invalidating the canonical report). Applies uniformly to `pcae
+phase complete`, `pcae phase-report create`, governed recovery paths,
+and future governed completion paths. 128B.1's already-implemented
+certify/dispatch/mark-notified mechanism is named as the pattern that
+already satisfies this contract; no new implementation was performed
+or authorized. No Repository Intelligence, Historical Memory, schema,
+source code, test code, or runtime behavior changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 128C — Historical Memory Review &
+Hardening Contract Verification (Track 128's planned roadmap resumes).
+
+## Phase 128B.2 Complete
+
+Phase 128B.2 — Phase Finalization Notification Contract (completed).
+
+Defines PFN-001: every terminal phase outcome shall produce exactly
+one trusted canonical phase report delivered to the configured
+notification sink; notification delivery or a durable failure record
+is mandatory; silent omission is prohibited. Establishes canonical
+report authority, terminal-outcome coverage, the finalization
+lifecycle (notification as part of finalization, not a side effect),
+delivery guarantees, and failure guarantees, applying uniformly across
+all completion/recovery paths, present and future. Governance
+documentation only; 128B.1's implementation already satisfies this
+contract. No implementation, schema, or runtime behavior change.
+Recommended next phase: 128C — Historical Memory Review & Hardening
+Contract Verification.
+
+## Phase 128B.1 Complete (historical — full text)
+
 Phase 128B.1 — Notification Dispatch Reliability Repair (completed).
 
 Governance tooling repair — not part of Historical Memory, Repository
