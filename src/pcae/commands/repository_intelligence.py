@@ -289,6 +289,67 @@ def run_repository_intelligence_unified_query(args: argparse.Namespace) -> int:
     return 0
 
 
+def run_repository_intelligence_service(args: argparse.Namespace) -> int:
+    from pcae.repository_intelligence.service import (
+        ServiceRequest,
+        ServiceError,
+        execute_service_request,
+    )
+    from pcae.repository_intelligence.unified_query.routing import (
+        ADVISORY_CONTEXT,
+        CHANGE_IMPACT,
+        CROSS_ARTIFACT_INTEGRATION,
+        DEPENDENCY_KNOWLEDGE_GRAPH,
+        HISTORICAL_MEMORY,
+        REPOSITORY_KNOWLEDGE_SNAPSHOT,
+    )
+
+    artifact_paths: dict[str, Path] = {}
+    if args.repository_knowledge_snapshot:
+        artifact_paths[REPOSITORY_KNOWLEDGE_SNAPSHOT] = Path(args.repository_knowledge_snapshot)
+    if args.dependency_graph:
+        artifact_paths[DEPENDENCY_KNOWLEDGE_GRAPH] = Path(args.dependency_graph)
+    if args.historical_memory:
+        artifact_paths[HISTORICAL_MEMORY] = Path(args.historical_memory)
+    if args.change_impact:
+        artifact_paths[CHANGE_IMPACT] = Path(args.change_impact)
+    if args.advisory_context:
+        artifact_paths[ADVISORY_CONTEXT] = Path(args.advisory_context)
+    if args.cross_artifact_integration:
+        artifact_paths[CROSS_ARTIFACT_INTEGRATION] = Path(args.cross_artifact_integration)
+
+    families = tuple(args.family) if args.family else ()
+    request = ServiceRequest(
+        kind=args.kind,
+        target=args.target,
+        families=families,
+        include_evidence=args.include_evidence,
+    )
+
+    try:
+        response = execute_service_request(request, artifact_paths=artifact_paths)
+    except ServiceError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+    except (SnapshotLoadError, SnapshotCompatibilityError) as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    data = response.to_dict()
+    if args.json or args.pretty:
+        print(json.dumps(data, indent=2 if args.pretty else None, sort_keys=True))
+    else:
+        print("Repository Intelligence Service result")
+        print(f"  Status:              {data['result_status']}")
+        print(f"  Kind:                {data['request_metadata']['kind']}")
+        print(f"  Families composed:   {len(data['families'])}")
+        print(f"  Composition calls:   {len(data['composition_metadata'])}")
+        print(f"  Limitations:         {len(data['limitations'])}")
+        print(f"  Uncertainty records: {len(data['uncertainty'])}")
+        print(f"  Composite responses: {len(data['composite_responses'])}")
+    return 0
+
+
 def _request_from_query_args(args: argparse.Namespace) -> QueryRequest:
     if args.entity:
         return QueryRequest(category="entity_lookup", target=args.entity)

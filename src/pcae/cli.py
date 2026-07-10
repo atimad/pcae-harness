@@ -507,6 +507,7 @@ from pcae.commands.repository_intelligence import (
     run_repository_intelligence_dependency_graph_generate,
     run_repository_intelligence_historical_memory_generate,
     run_repository_intelligence_query,
+    run_repository_intelligence_service,
     run_repository_intelligence_snapshot_generate,
     run_repository_intelligence_unified_query,
 )
@@ -4861,6 +4862,87 @@ def build_parser() -> argparse.ArgumentParser:
         help="Pretty-print JSON query result to stdout.",
     )
     ri_unified_query_parser.set_defaults(handler=run_repository_intelligence_unified_query)
+
+    ri_service_parser = repository_intelligence_subparsers.add_parser(
+        "service",
+        help=(
+            "Repository Intelligence Service prototype (Phase 132E): "
+            "the canonical, deterministic, read-only composition layer "
+            "over Unified Query (read-only, no execution, no reasoning, "
+            "no networking)."
+        ),
+    )
+    ri_service_parser.add_argument(
+        "--kind",
+        required=True,
+        choices=("entity", "artifact", "scoped"),
+        help=(
+            "Request kind. Composite requests are not exposed via this "
+            "CLI surface in this prototype; use the Python API "
+            "(pcae.repository_intelligence.service) directly."
+        ),
+    )
+    ri_service_parser.add_argument(
+        "--target",
+        required=True,
+        help="Identifier to resolve, using the routed family's own existing stable identifier field.",
+    )
+    ri_service_parser.add_argument(
+        "--family",
+        action="append",
+        default=None,
+        help=(
+            "Artifact family to include (repeatable). Required exactly "
+            "once for --kind artifact; one or more times for --kind "
+            "scoped; must be omitted for --kind entity."
+        ),
+    )
+    ri_service_parser.add_argument(
+        "--repository-knowledge-snapshot",
+        default=None,
+        help="Path to an existing Repository Knowledge Snapshot artifact.",
+    )
+    ri_service_parser.add_argument(
+        "--dependency-graph",
+        default=None,
+        help="Path to an existing Dependency Knowledge Graph Snapshot artifact.",
+    )
+    ri_service_parser.add_argument(
+        "--historical-memory",
+        default=None,
+        help="Path to an existing Historical Memory Snapshot artifact.",
+    )
+    ri_service_parser.add_argument(
+        "--change-impact",
+        default=None,
+        help="Path to an existing Change Impact Report artifact.",
+    )
+    ri_service_parser.add_argument(
+        "--advisory-context",
+        default=None,
+        help="Path to an existing Advisory Intelligence Context Package artifact.",
+    )
+    ri_service_parser.add_argument(
+        "--cross-artifact-integration",
+        default=None,
+        help="Path to an existing Cross-Artifact Integration Package artifact.",
+    )
+    ri_service_parser.add_argument(
+        "--include-evidence",
+        action="store_true",
+        help="Include verbatim evidence content in the response (opt-in).",
+    )
+    ri_service_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON service result to stdout.",
+    )
+    ri_service_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Pretty-print JSON service result to stdout.",
+    )
+    ri_service_parser.set_defaults(handler=run_repository_intelligence_service)
 
     architecture_parser = subparsers.add_parser(
         "architecture",
