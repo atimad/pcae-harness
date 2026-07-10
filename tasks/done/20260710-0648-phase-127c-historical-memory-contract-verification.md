@@ -10,7 +10,7 @@ Phase 127C Historical Memory Contract Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
