@@ -10,7 +10,7 @@ Phase 127D Historical Memory Prototype Plan
 
 ## Status
 
-active
+done
 
 ## Mode
 
