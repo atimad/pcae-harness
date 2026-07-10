@@ -2,6 +2,35 @@
 
 ## Unreleased
 
+- Phase 132B - Repository Intelligence Service Contract Freeze
+  (`docs/PHASE_132_REPOSITORY_INTELLIGENCE_SERVICE_CONTRACT.md`).
+  Transforms the 132A architecture into the binding contract governing
+  132C-132F: purpose, scope (six knowledge families plus Unified Query
+  as the sole access path, no hidden expansion), authority (every
+  artifact and Unified Query remain authoritative; Service remains
+  derivative, never becomes an evidence source), consumer classes
+  (conceptual only, no integration), the nine-stage service lifecycle
+  (no hidden stages), request/response contracts (no schema, no
+  synthesized conclusions), composition (compose never reinterpret,
+  deterministic), provenance (no loss/strengthening), evidence
+  (unchanged, no inference), boundary disclosures (the real nine-field
+  object, propagated not reconstructed), determinism, identity (reuse
+  Unified Query's own resolution, no aliases/fuzzy/probabilistic/
+  silent-merge), and a failure contract that **explicitly binds this
+  lineage's own 131F-verified silent-omission lesson as a BLOCKING
+  defect class for every future Track 132 phase**. Also freezes
+  governance, compatibility (Tracks 119-131 consumed, not redefined),
+  extensibility, and versioning (frozen shape, backward-compatible by
+  default) contracts. An internal five-dimension consistency review
+  found no authority leakage, responsibility overlap, hidden execution
+  path, or governance conflict - only one already-known forward
+  deferral (composite request scope) inherited unchanged from 132A. A
+  technical debt review re-confirmed six inherited items, none
+  classified as blocking for Track 132, none repaired. No
+  implementation, schema, source code, test code, or runtime behavior
+  change; no modification to Unified Query or Repository Intelligence.
+  PFN-001 confirmed satisfied. Recommends 132C.
+
 - Phase 132A - Repository Intelligence Service Architecture
   (`docs/PHASE_132_REPOSITORY_INTELLIGENCE_SERVICE_ARCHITECTURE.md`).
   Establishes Track 132 - Repository Intelligence Service - as PCAE's

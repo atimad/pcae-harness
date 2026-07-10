@@ -2,6 +2,78 @@
 
 ## Current Phase
 
+Phase 132B — Repository Intelligence Service Contract Freeze
+(completed).
+
+Transforms the 132A architecture into the binding contract governing
+132C-132F: purpose contract (deterministic governed consumption, never
+creates knowledge), scope contract (the six knowledge families plus
+Unified Query as the sole access path, no hidden expansion), authority
+contract (every artifact and Unified Query remain authoritative;
+Service remains derivative, never becomes an evidence source),
+consumer contract (Advisory/Repository Skills/CLI tooling/Reporting/
+future services, conceptual only, no integration), the nine-stage
+service lifecycle contract (no hidden stages), request contract
+(entity/artifact/scoped/composite, no schema/protocol), response
+contract (provenance/evidence/uncertainty/limitations/boundary
+disclosures preserved, no synthesized conclusions), composition
+contract (compose never reinterpret, deterministic), provenance
+contract (no loss, no strengthening), evidence contract (unchanged, no
+inference), boundary contract (derivative/read-only/deterministic/
+non-authoritative/non-executing), determinism contract, identity
+contract (reuse Unified Query's own resolution, no aliases/fuzzy/
+probabilistic/silent-merge), failure contract (fail-closed, explicitly
+binding this lineage's 131F-verified silent-omission lesson as a
+BLOCKING defect class for all future Track 132 phases), governance
+contract, compatibility contract (Tracks 119-131 consumed, not
+redefined), extensibility contract, and versioning contract (frozen
+shape, backward-compatible by default). Performed an internal
+five-dimension consistency review (authority leakage, responsibility
+overlap, hidden execution path, governance conflict, lifecycle
+ambiguity): no new findings, only one already-known forward deferral
+(composite request scope) inherited unchanged from 132A. Re-evaluated
+six inherited technical debt items (bootstrap handoff timestamp, stale
+phase-completion metadata, 119Q report-ordering defect, 119AB phase-id
+comparison bug, persistence subdirectory naming, Track 122/123 schema/
+reality divergence): all re-confirmed present, none classified as
+blocking for Track 132, none repaired.
+
+**No implementation occurred. No schema changed. No source or test
+code changed. No modification to Unified Query or Repository
+Intelligence. No runtime behavior changed.**
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 132C — Repository Intelligence Service
+Contract Verification.
+
+## Phase 132B Complete
+
+Phase 132B — Repository Intelligence Service Contract Freeze
+(completed).
+
+Freezes the binding contract governing 132C-132F: purpose, scope
+(six knowledge families + Unified Query as sole access path),
+authority, consumer (conceptual only), nine-stage lifecycle, request
+(no schema), response (no synthesized conclusions), composition
+(compose never reinterpret), provenance (no loss/strengthening),
+evidence (unchanged), boundary (real nine-field object propagated),
+determinism, identity (reuse, never duplicate), failure (fail-closed,
+binding the 131F silent-omission lesson as a BLOCKING defect class),
+governance, compatibility (Tracks 119-131 consumed not redefined),
+extensibility, and versioning contracts. Internal consistency review
+found no new findings beyond one inherited forward deferral; technical
+debt review re-confirmed six known items, none blocking, none
+repaired. No implementation, schema, source code, test code, or
+runtime behavior change; no modification to Unified Query or
+Repository Intelligence. PFN-001 confirmed satisfied. Recommended next
+phase: 132C — Repository Intelligence Service Contract Verification.
+
+## Phase 132A Complete (historical — full text)
+
 Phase 132A — Repository Intelligence Service Architecture (completed).
 
 Formally establishes Track 132 — Repository Intelligence Service — as
