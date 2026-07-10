@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 134B.1 — External Notification Investigation & Isolation Repair (20260710-2252-phase-134b-1-external-notification-investigation-isolation-repair)
 - Phase 134B — Canonical Phase Finalization & Reporting Lifecycle Contract Freeze (20260710-2232-phase-134b-canonical-phase-finalization-reporting-lifecycle-contract-freeze)
 - Phase 134A — Canonical Phase Finalization & Reporting Lifecycle Architecture (20260710-2217-phase-134a-canonical-phase-finalization-reporting-lifecycle-architecture)
 - Correct Phase 133G push-check trust value (20260710-2146-correct-phase-133g-push-check-trust-value)
