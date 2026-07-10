@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Phase 127D - Historical Memory Prototype Plan
+  (`docs/PHASE_127_HISTORICAL_MEMORY_PROTOTYPE_PLAN.md`). Defines the
+  implementation plan for the first deterministic, read-only Historical
+  Memory Builder. Grounded in real repository data, mirroring 126D:
+  found Repository Knowledge Snapshot carries no lineage,
+  `.pcae/phase-reports/` is gitignored (not durable), and
+  `tasks/done/*.md` (854 git-tracked task contracts) correlated with
+  git commit history is the actual deterministic historical backbone.
+  Resolved both 127C findings: explicit `historical_reference`/
+  `reference_type` mapping per record type, and a concrete null-
+  boundary time-reference ordering rule. Defines a 10-stage pipeline,
+  stable identifier algorithm, event/transition/relationship mapping
+  tables, determinism/evidence/failure/version-compatibility strategy,
+  127F verification strategy, and 127E acceptance criteria.
+  Documentation only. Recommends 127E.
+
 - Phase 127C - Historical Memory Contract Verification
   (`docs/PHASE_127_HISTORICAL_MEMORY_CONTRACT_VERIFICATION.md`).
   Independently verifies the Phase 127B Historical Memory Contract by

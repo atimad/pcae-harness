@@ -2,6 +2,53 @@
 
 ## Current Phase
 
+Phase 127D — Historical Memory Prototype Plan
+(completed).
+
+Defines the definitive implementation plan for the first
+deterministic, read-only Historical Memory Builder, bounded by the
+127B contract and independently verified in 127C
+(`docs/PHASE_127_HISTORICAL_MEMORY_PROTOTYPE_PLAN.md`). Grounded in
+real, currently-available repository data (mirroring 126D's own
+grounding discipline): direct inspection confirmed Repository
+Knowledge Snapshot carries no lineage (one commit per snapshot),
+`.pcae/phase-reports/` is gitignored and therefore not a durable
+source, and `tasks/done/*.md` (854 committed, git-tracked task
+contracts) correlated with git commit history is the actual reliable,
+deterministic historical backbone this repository has. Resolved both
+127C findings explicitly: (1) the `historical_reference`/
+`reference_type` enum is now explicitly named and mapped per
+constructed-record type; (2) null-boundary time references now have a
+concrete, binding deterministic ordering rule (non-null values first,
+stable sort; null-boundary records sort after, ordered by identifier).
+Defined a 10-stage pipeline, stable identifier algorithm, historical
+event/transition/relationship mapping tables grounded in real
+task-contract content, determinism/evidence/failure/version-
+compatibility strategy, verification strategy for 127F, and objective
+acceptance criteria for 127E. Documentation only; no schema, generator,
+source code, test code, or storage introduced.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+Recommended next repo phase: 127E — Historical Memory Prototype.
+
+## Phase 127D Complete
+
+Phase 127D — Historical Memory Prototype Plan (completed).
+
+Defined the implementation plan for the first Historical Memory
+Builder, grounded in real repository data (task contracts + git log,
+not the gitignored `.pcae/phase-reports/` or RKS's lineage-free
+snapshots). Resolved both 127C findings explicitly. Defined pipeline,
+identifier algorithm, mapping tables, determinism/failure/versioning
+strategy, verification strategy, and acceptance criteria. No schema,
+source code, or test code changed. Recommended next phase: 127E —
+Historical Memory Prototype.
+
+## Phase 127C Complete (historical — full text)
+
 Phase 127C — Historical Memory Contract Verification
 (completed).
 
