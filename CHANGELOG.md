@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 133A - PFR-001 Canonical Phase Report Specification
+  (`docs/specifications/PFR-001_CANONICAL_PHASE_REPORT_SPECIFICATION.md`).
+  Creates the first canonical specification governing every PCAE phase
+  report's content: twelve mandatory sections (phase identity,
+  executive summary, architectural findings, implementation findings,
+  verification findings, technical debt review, governance results,
+  test results, no-go confirmation, architectural boundary
+  confirmation, track progress, next phase), governing content rather
+  than formatting. Defines explicit applicability rules across six
+  phase classes via a phase-class table (architecture, contract
+  freeze, contract verification, prototype plan, prototype
+  implementation, independent verification) — a section not applicable
+  to a phase class must be explicitly stated absent, never silently
+  omitted. Cleanly separates itself from PFN-001 (delivery) without
+  modifying PFN-001's own contract text. Reserves, but does not
+  define, PFR-002 (Milestone Report), PFR-003 (Release Report), and
+  PFR-004 (Verification Report). **Architecture-only**: zero `src/`
+  files touched, no report-generation or notification code modified,
+  runtime unchanged. Recommended next phase: 133B - PFR-001 Contract
+  Freeze.
+
 - Phase 132F - Repository Intelligence Service Independent Verification
   (`docs/PHASE_132_REPOSITORY_INTELLIGENCE_SERVICE_VERIFICATION.md`).
   Independently verified the 132E implementation, re-deriving
