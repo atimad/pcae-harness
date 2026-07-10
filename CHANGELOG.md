@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- Phase 134D - Canonical Phase Finalization & Reporting Lifecycle
+  Implementation Plan
+  (`docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_IMPLEMENTATION_PLAN.md`).
+  Converts the verified 134A/134B/134C contract into a precise
+  implementation roadmap; no lifecycle behavior implemented. Decomposes
+  remaining work into ten independently-verified sub-phases (134E.1–
+  134E.10) plus a closing 134F whole-lifecycle verification, preserving
+  the Canonical Engineering Evidence → Derived Evidence Views → Renderers
+  → Delivery authority chain throughout. Maps all fourteen 134B §34 debt
+  items to their closing sub-phase, defines migration strategies
+  (metadata-repair authority, report-generation authority, Architecture
+  Status generation, receipt integration, rendering responsibilities), and
+  a risk assessment with named mitigations. Fast-green remains 4389/4390
+  passed (same pre-existing unrelated failure, unchanged since 134B.2).
+
 - Phase 134C - Canonical Phase Finalization & Reporting Lifecycle Contract
   Verification
   (`docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_LIFECYCLE_CONTRACT_VERIFICATION.md`).

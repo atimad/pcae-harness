@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- Decompose the remaining Track 134 implementation (Phase 134D) into ten
+  independently-verified sub-phases (134E.1–134E.10) plus a closing 134F
+  whole-lifecycle verification, rather than one monolithic 134E
+  implementation phase — each sub-phase implements exactly one
+  architectural capability, preserves the Canonical Engineering Evidence
+  → Derived Evidence Views → Renderers → Delivery authority chain, and is
+  followed by its own independent verification before the next sub-phase
+  begins, so implementation never becomes self-certifying. Ordered
+  sub-phases by hard dependency (evidence model first, final integration
+  last) rather than convenience. Mapped all fourteen 134B §34 debt items
+  to a specific closing sub-phase. Did not repair any debt item or
+  implement any lifecycle behavior in this planning phase. Do not begin
+  134E.1 in this phase.
+
 - Independently verify the Track 134 contract (Phase 134C) by re-deriving
   it from 134A/134B source text rather than trusting any prior report,
   including 134B.1/.2/.3's own. Zero BLOCKING findings; confirmed the
