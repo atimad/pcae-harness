@@ -26,6 +26,7 @@ from typing import Any
 from pcae.repository_intelligence.attribution import (
     limitation_record,
     source_attribution_record,
+    source_locator,
     verification_state,
 )
 from pcae.repository_intelligence.consumer_validation import (
@@ -199,6 +200,26 @@ def _relationship_id(relationship_type: str, source_ref_id: str, target_ref_id: 
 
 def _historical_reference(reference_id: str, reference_type: str) -> dict[str, Any]:
     return {"reference_id": reference_id, "reference_type": reference_type}
+
+
+def _graph_wide_period() -> dict[str, Any]:
+    """A `historical_period`-shaped object for an `unknown_gap` that is
+    not scoped to any single period.
+
+    128F repair: `unknown_gap.affected_period` is a `historical_period`
+    object per the frozen 119Q schema, not a plain string -- a
+    pre-existing, 127E-introduced schema-conformance defect independently
+    discovered by 128F's own recursive schema validation. `period_start`/
+    `period_end` are `["string", "null"]` per schema; `null` here is
+    honest (this gap is not bounded to a specific start/end), not a
+    fabricated value.
+    """
+    return {
+        "period_id": "period:graph-wide",
+        "period_description": "graph-wide",
+        "period_start": None,
+        "period_end": None,
+    }
 
 
 def _query_snapshot_material(snapshot_path: Path) -> tuple[QueryResult, QueryResult]:
@@ -453,7 +474,16 @@ def _build_phase_records(
         claims.append(
             {
                 "claim_id": _claim_id(task_id),
-                "claim_type": "phase_summary",
+                # 128F repair: the frozen 119Q `claim_type` enum has never
+                # included "phase_summary" (a pre-existing, 127E-introduced
+                # schema-conformance defect, independently discovered by
+                # 128F's own recursive schema validation -- no prior phase's
+                # test coverage checked this specific field/enum
+                # combination). "evolution" is the closest frozen enum value
+                # for a claim describing a phase reaching a completion
+                # status, matching 127A/127B's own "Historical Memory
+                # records repository evolution" framing.
+                "claim_type": "evolution",
                 "claim_subject": task_id,
                 "claim_statement": (
                     f"Phase {task_id!r} was completed with status "
@@ -481,7 +511,12 @@ def _build_phase_records(
                     "record_subject": contract.title or task_id,
                     "issue_or_boundary_addressed": (contract.goal or "Not declared.")[:2000],
                     "correction_or_hardening_summary": (contract.goal or "Not declared.")[:2000],
-                    "phase_reference": task_id,
+                    # 128F repair: the frozen 119Q schema's `phase_reference`
+                    # field is a `source_locator` object (locator_type/
+                    # locator_value), not a plain string -- a pre-existing,
+                    # 127E-introduced schema-conformance defect independently
+                    # discovered by 128F's own recursive schema validation.
+                    "phase_reference": source_locator("task_id", task_id),
                     "source_attribution": source_attribution,
                     "verification_state": vstate,
                     "limitations": record_limitations,
@@ -549,7 +584,10 @@ def _build_repair_relationships(
             m for m in _PHASE_REF_IN_TEXT_RE.findall(goal_text) if m in phase_code_index
         }
         # Exclude self-reference (a repair record referencing its own phase).
-        own_task_id = record["phase_reference"]
+        # 128F repair: phase_reference is now a source_locator object
+        # (see the append site above); read locator_value, not the record
+        # itself, to preserve the pre-existing string-comparison behavior.
+        own_task_id = record["phase_reference"]["locator_value"]
         candidates = {c for c in candidates if phase_code_index[c] != own_task_id}
         if len(candidates) != 1:
             continue
@@ -772,7 +810,7 @@ def build_historical_content(
             "unknown_id": "unknown:governance-subphase-events",
             "unknown_subject": "sub-phase governance actions",
             "missing_evidence": "governance_check_completed/report_generated/metadata_promoted/notification_sent events",
-            "affected_period": "graph-wide",
+            "affected_period": _graph_wide_period(),
             "uncertainty_state": verification_state(
                 state_value="unknown",
                 state_reason=_NO_SUBPHASE_GOVERNANCE_EVENTS_LIMITATION,
@@ -788,7 +826,7 @@ def build_historical_content(
             "unknown_id": "unknown:decision-history",
             "unknown_subject": "recorded engineering decisions",
             "missing_evidence": "decision_history_record entries",
-            "affected_period": "graph-wide",
+            "affected_period": _graph_wide_period(),
             "uncertainty_state": verification_state(
                 state_value="unknown",
                 state_reason=_NO_DECISION_RECORDS_LIMITATION,

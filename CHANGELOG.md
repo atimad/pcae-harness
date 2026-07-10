@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 128F - Historical Memory Review & Hardening Verification
+  (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_VERIFICATION.md`).
+  Independently re-verified 128E's implementation without trusting its
+  comments, documentation, tests, or reports. Confirmed both 128E
+  hardening items exactly as 128D planned. An independent,
+  dependency-free recursive JSON Schema validator run against a
+  freshly generated artifact found a genuine, pre-existing defect
+  present since Phase 127E: `historical_claim.claim_type` used the
+  non-enum value `"phase_summary"` (859 records),
+  `repair_hardening_record.phase_reference` was a plain string instead
+  of the schema-required `source_locator` object (42 records), and
+  `unknown_gap.affected_period` was a plain string instead of the
+  schema-required `historical_period` object (2 records) — 903 total
+  violations, never caught by any prior phase because existing test
+  coverage never checked these specific field/enum/type combinations.
+  Repaired with three minimal, comment-documented changes in
+  `historical_builder.py` (43 insertions, 5 deletions, one file; no
+  schema, test, or other source file changed), then re-ran the
+  complete verification clean: 0 schema violations, byte-identical
+  determinism (two independent fresh generations), read-only
+  guarantees confirmed via checksum comparison, 12 fail-closed
+  categories plus a direct CLI probe all pass, 334 regression tests,
+  fast_green (4390 tests), and compileall all pass. Runtime remains
+  Observed/observe/execution-unavailable throughout. **The Historical
+  Memory hardening chapter (128A-128F) is complete.** Recommends 129A.
+
 - Phase 128E - Historical Memory Review & Hardening Implementation
   (`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_IMPLEMENTATION.md`).
   Implements exactly 128D's two approved, bounded, non-behavioral

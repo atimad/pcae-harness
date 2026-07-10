@@ -2,6 +2,72 @@
 
 ## Current Phase
 
+Phase 128F — Historical Memory Review & Hardening Verification
+(completed).
+
+Independently re-verified 128E's completed hardening implementation
+(`docs/PHASE_128_HISTORICAL_MEMORY_REVIEW_HARDENING_VERIFICATION.md`).
+Did not trust 128E's implementation, comments, documentation, tests,
+or reports. Confirmed both 128E hardening items exactly as 128D
+planned (identifier-order clarification comment present with
+unchanged executable logic — independently confirmed via programmatic
+diff analysis; `historical_generator.py` explicitly documented; frozen
+127B/128B contracts and the 119Q schema unchanged). Wrote and ran an
+independent, dependency-free recursive JSON Schema validator against a
+freshly generated artifact rather than trusting any prior phase's
+"zero schema errors" claim — **found a genuine, pre-existing defect**
+present since Phase 127E (never introduced by 128E): every generated
+`historical_claim.claim_type` used the non-enum value `"phase_summary"`
+(859 occurrences), every `repair_hardening_record.phase_reference` was
+a plain string instead of the schema-required `source_locator` object
+(42 occurrences), and `unknown_gap.affected_period` was a plain string
+instead of the schema-required `historical_period` object (2
+occurrences) — 903 total schema violations, none caught by any prior
+phase because `TestSchemaRequiredFieldConformance`'s existing coverage
+never checked these specific field/enum/type combinations. Repaired
+with three minimal, targeted, comment-documented changes in
+`historical_builder.py` (43 insertions, 5 deletions, one file), then
+re-ran the complete verification clean: 0 schema violations,
+determinism byte-identical (two independent fresh generations, modulo
+approved timestamps), read-only guarantees confirmed via checksum
+comparison (git HEAD, task contracts, RKS snapshots, DKG absence, and
+the source file itself all unchanged before/after generation), 12
+fail-closed categories plus a direct CLI fail-closed probe all pass,
+334 regression tests pass, fast_green (4390 tests) passes, compileall
+clean. No schema, test, or non-`historical_builder.py` source file
+changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+**The Historical Memory hardening chapter (128A-128F) is complete.**
+
+Recommended next repo phase: 129A — Historical Memory Chapter Review &
+Next Direction Architecture.
+
+## Phase 128F Complete
+
+Phase 128F — Historical Memory Review & Hardening Verification
+(completed).
+
+Independently re-verified both 128E hardening items (confirmed exactly
+as planned). Independent recursive schema validation found a genuine,
+pre-existing schema-conformance defect (three related field/type
+violations, present since Phase 127E, 903 total violations across 859
++ 42 + 2 records) that no prior phase's narrower test coverage had
+caught. Repaired with three minimal, targeted changes in
+`historical_builder.py` only; re-ran the complete verification
+(determinism, schema, read-only, serialization, temporal, evidence,
+fail-closed, regression, fast_green, compileall, governance) clean
+against the repair. 0 schema violations, byte-identical determinism,
+334 regression tests + 4390 fast_green tests + compileall all pass.
+Historical Memory hardening chapter (128A-128F) complete. Recommended
+next phase: 129A — Historical Memory Chapter Review & Next Direction
+Architecture.
+
+## Phase 128E Complete (historical — full text)
+
 Phase 128E — Historical Memory Review & Hardening Implementation
 (completed).
 
