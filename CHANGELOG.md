@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 131C - Unified Repository Intelligence Query Contract
+  Verification
+  (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_VERIFICATION.md`).
+  Independently verified the 131B contract by re-deriving every
+  requirement directly from Track 119 executable schemas, Track
+  120-130 source modules, and current repository state — never from
+  131B's own prose. Verified seventeen dimensions; **zero BLOCKING
+  findings**. Five NON-BLOCKING findings: multi-family routing
+  disambiguation (re-confirmed open), response uncertainty-vocabulary
+  and per-record-provenance gaps, provenance element gaps (elements
+  2/5/6) in the one real precedent, partial fail-closed exception
+  coverage, and a newly-discovered concrete mapping gap between 131B's
+  six-item boundary disclosure list and the real, already-used
+  nine-field `boundary_disclosure.schema.json`. Identity verification
+  produced the strongest evidence of any dimension — Track 130's real
+  `integration_builder.py` already demonstrates exact-match-or-
+  explicit-unresolved identity resolution with zero fuzzy/
+  probabilistic/silent-merge behavior. Technical debt review
+  re-confirmed all five known items and refined the persistence-naming
+  inconsistency from two-way to three-way (`snapshots/`, `graphs/`,
+  `packages/`). **No repair performed** — no implementation, schema,
+  source code, test code, or runtime behavior change. PFN-001
+  confirmed satisfied. Recommends 131D.
+
 - Phase 131B - Unified Repository Intelligence Query Contract Freeze
   (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_FREEZE.md`).
   Transforms 131A's architecture into the binding contract governing
