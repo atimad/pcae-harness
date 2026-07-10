@@ -24,6 +24,10 @@ from pcae.repository_intelligence.historical_memory import (
     HistoricalGenerationError,
     generate_historical_memory,
 )
+from pcae.repository_intelligence.cross_artifact_integration import (
+    IntegrationGenerationError,
+    generate_cross_artifact_integration,
+)
 from pcae.repository_intelligence.query import QueryExecutionError, QueryRequest
 from pcae.repository_intelligence.query.query_engine import execute_query
 from pcae.repository_intelligence.query.result_formatter import format_result
@@ -182,6 +186,48 @@ def run_repository_intelligence_historical_memory_generate(args: argparse.Namesp
         print(f"  Unknown gaps:         {result['unknown_gap_count']}")
         print(f"  Latest snapshot:      {result['latest_path']}")
         print(f"  Timestamped snapshot: {result['snapshot_path']}")
+    return 0
+
+
+def run_repository_intelligence_cross_artifact_integration_generate(
+    args: argparse.Namespace,
+) -> int:
+    repo_root = HarnessPath.cwd().path
+    change_impact_path = Path(args.change_impact)
+    dependency_graph_path = Path(args.dependency_graph)
+    output_dir = Path(args.output) if args.output else None
+    rks_path = Path(args.repository_knowledge_snapshot) if args.repository_knowledge_snapshot else None
+    historical_memory_path = Path(args.historical_memory) if args.historical_memory else None
+    advisory_context_path = Path(args.advisory_context) if args.advisory_context else None
+
+    try:
+        result = generate_cross_artifact_integration(
+            change_impact_path,
+            dependency_graph_path,
+            repo_root=repo_root,
+            output_dir=output_dir,
+            pretty=args.pretty,
+            repository_knowledge_snapshot_path=rks_path,
+            historical_memory_path=historical_memory_path,
+            advisory_context_path=advisory_context_path,
+        )
+    except IntegrationGenerationError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(result, indent=2, sort_keys=True))
+    else:
+        print("Cross-Artifact Knowledge Integration Package generated")
+        print(f"  Configuration:          {result['integration_configuration']}")
+        print(f"  Change Impact input:    {result['change_impact_path']}")
+        print(f"  Dependency Graph input: {result['dependency_graph_path']}")
+        print(f"  Referenced artifacts:   {result['referenced_artifact_count']}")
+        print(f"  Dependency contexts:    {result['dependency_context_count']}")
+        print(f"  Entity resolutions:     {result['entity_resolution_count']}")
+        print(f"  Unresolved identities:  {result['unresolved_identity_count']}")
+        print(f"  Latest package:         {result['latest_path']}")
+        print(f"  Timestamped package:    {result['package_path']}")
     return 0
 
 

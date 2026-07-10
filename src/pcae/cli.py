@@ -503,6 +503,7 @@ from pcae.commands.pipeline import run_pipeline, run_pipeline_list
 from pcae.commands.repo import run_repo_apply, run_repo_trial
 from pcae.commands.repository_intelligence import (
     run_repository_intelligence_change_impact,
+    run_repository_intelligence_cross_artifact_integration_generate,
     run_repository_intelligence_dependency_graph_generate,
     run_repository_intelligence_historical_memory_generate,
     run_repository_intelligence_query,
@@ -4715,6 +4716,76 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ri_historical_memory_generate_parser.set_defaults(
         handler=run_repository_intelligence_historical_memory_generate
+    )
+
+    ri_cross_artifact_integration_parser = repository_intelligence_subparsers.add_parser(
+        "cross-artifact-integration",
+        help="Cross-Artifact Knowledge Integration package generation.",
+    )
+    ri_cross_artifact_integration_subparsers = (
+        ri_cross_artifact_integration_parser.add_subparsers(
+            dest="repository_intelligence_cross_artifact_integration_command",
+            required=True,
+        )
+    )
+
+    ri_cross_artifact_integration_generate_parser = (
+        ri_cross_artifact_integration_subparsers.add_parser(
+            "generate",
+            help=(
+                "Deterministically generate a derivative Cross-Artifact "
+                "Knowledge Integration package connecting an existing "
+                "Change Impact Report to an existing Dependency Knowledge "
+                "Graph Snapshot via already-existing stable identifiers "
+                "(read-only, no execution, no traversal, no reasoning)."
+            ),
+        )
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--change-impact",
+        required=True,
+        help="Path to an existing Change Impact Report artifact.",
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--dependency-graph",
+        required=True,
+        help="Path to an existing Dependency Knowledge Graph Snapshot artifact.",
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--repository-knowledge-snapshot",
+        default=None,
+        help="Optional path to an existing Repository Knowledge Snapshot artifact (cited as a reference only).",
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--historical-memory",
+        default=None,
+        help="Optional path to an existing Historical Memory Snapshot artifact (cited as a reference only).",
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--advisory-context",
+        default=None,
+        help="Optional path to an existing Advisory Intelligence Context Package artifact (cited as a reference only).",
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--output",
+        default=None,
+        help=(
+            "Override the output directory (default: "
+            ".pcae/repository-intelligence/cross-artifact-integration/)."
+        ),
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--pretty",
+        action="store_true",
+        help="Persist the generated package as indented (pretty) JSON.",
+    )
+    ri_cross_artifact_integration_generate_parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Print machine-readable JSON generation metadata to stdout.",
+    )
+    ri_cross_artifact_integration_generate_parser.set_defaults(
+        handler=run_repository_intelligence_cross_artifact_integration_generate
     )
 
     architecture_parser = subparsers.add_parser(

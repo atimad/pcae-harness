@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 130E - Cross-Artifact Knowledge Integration Prototype
+  (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_PROTOTYPE.md`).
+  Implements the first deterministic, read-only Cross-Artifact
+  Knowledge Integration prototype: a new
+  `src/pcae/repository_intelligence/cross_artifact_integration/`
+  package and governed CLI (`pcae repository-intelligence
+  cross-artifact-integration generate`) connecting existing Change
+  Impact impacted entities to existing Dependency Knowledge Graph
+  nodes via already-existing stable identifiers only. Independently
+  re-verified 130C's own grounding against the real Change Impact
+  builder ahead of implementation and found a refinement: the real
+  builder does not produce the full `119U` schema shape at all.
+  Reuses Change Impact's own frozen `dependency_context_reference`
+  schema shape inside the integration layer's own new derivative
+  package (never by mutating an existing Change Impact Report, which
+  the read-only contract forbids). Reuses the Dependency Knowledge
+  Graph's own deterministic node-id formula (imported, not
+  reimplemented) and `serialize_deterministic_json`; no parallel
+  identifier or serialization logic. No fuzzy, probabilistic, or
+  heuristic identity matching (verified with a synthetic near-miss
+  case). Determinism, provenance, identifier preservation, limitation
+  propagation, uncertainty propagation, and boundary disclosure
+  propagation all independently demonstrated against real repository
+  data. 31 new tests; 365 regression tests, compileall, and fast_green
+  (4390, unchanged count by design) all pass. No reasoning, inference,
+  Decision Evaluation, Execution Planning, execution capability,
+  runtime plugins, or schema changes. Recommends 130F.
+
 - Phase 130D - Cross-Artifact Knowledge Integration Prototype Plan
   (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_PROTOTYPE_PLAN.md`).
   Central strategic decision: no new schema shall be invented where an
