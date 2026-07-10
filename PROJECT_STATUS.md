@@ -2,6 +2,68 @@
 
 ## Current Phase
 
+Phase 130B — Cross-Artifact Knowledge Integration Contract Freeze
+(completed).
+
+Freezes the canonical Cross-Artifact Knowledge Integration Contract
+(`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_CONTRACT_FREEZE.md`),
+binding for 130C–130F. Operationalizes 130A's architecture into
+normative requirements: artifact authority (each of Repository
+Knowledge Snapshot, Dependency Knowledge Graph, Historical Memory,
+Change Impact, Advisory Context, and Query Result remains authoritative
+for its own evidence; the integration layer never supersedes source
+authority), derivative contract (references and explicitly-supported
+relationships only — never evidence, recommendations, or authority),
+identity contract (only existing stable identifiers; fuzzy/
+probabilistic/heuristic/name-only/silent resolution explicitly
+prohibited — unresolved identity remains unresolved), relationship
+contract (seven conceptual categories, semantic interpretation
+prohibited), integration-responsibility contract (correlate/preserve/
+expose only; never infer, rank, recommend, evaluate, authorize, or
+mutate), provenance contract (six required traceability elements, no
+provenance loss), evidence contract (evidence strength never increases
+through integration; conflicts remain conflicts), uncertainty/
+limitation/boundary-disclosure contracts, determinism contract,
+compatibility contract (Tracks 119–128), schema-conformance contract
+(directly incorporating 128F's lesson), read-only and fail-closed
+contracts, cross-track contract (Track 131 Query Expansion consumes
+the integration layer rather than independently coupling to artifact
+families; Decision Evaluation/Execution Planning may consume but never
+alter it, with no execution authority implied), versioning and
+governance contracts, and PFN-001 confirmation. Carries forward only
+genuine re-verified tooling debt (`.pcae/phase-completion-
+metadata.json` still referencing Phase 126E) without reintroducing
+closed 126G/126G.1/128B.1/128B.2 repairs. No implementation occurred;
+no schema, source code, or test code changed; no runtime behavior
+changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 130C — Cross-Artifact Knowledge
+Integration Contract Verification.
+
+## Phase 130B Complete
+
+Phase 130B — Cross-Artifact Knowledge Integration Contract Freeze
+(completed).
+
+Freezes the canonical hardening-chapter-style contract binding for
+130C–130F: artifact authority, derivative, identity, relationship,
+integration-responsibility, provenance, evidence, uncertainty,
+limitation, boundary-disclosure, determinism, compatibility,
+schema-conformance, read-only, failure, cross-track, versioning, and
+governance contracts, all restating 130A's architecture unchanged.
+Carries forward only genuine re-verified tooling debt. No
+implementation, schema, or runtime behavior change. PFN-001 confirmed
+satisfied. Recommended next phase: 130C — Cross-Artifact Knowledge
+Integration Contract Verification.
+
+## Phase 130A Complete (historical — full text)
+
 Phase 130A — Cross-Artifact Knowledge Integration Architecture
 (completed).
 

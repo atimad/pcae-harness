@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 130B - Cross-Artifact Knowledge Integration Contract Freeze
+  (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_CONTRACT_FREEZE.md`).
+  Freezes the canonical contract binding for 130C-130F, operationalizing
+  130A's architecture into normative requirements: artifact authority
+  (each of RKS/DKG/Historical Memory/Change Impact/Advisory Context/
+  Query Result remains authoritative for its own evidence), derivative
+  contract (references and explicitly-supported relationships only),
+  identity contract (only existing stable identifiers; fuzzy/
+  probabilistic/heuristic/name-only/silent resolution prohibited),
+  relationship contract (seven conceptual categories, no semantic
+  interpretation), integration-responsibility contract (correlate/
+  preserve/expose only; never infer/rank/recommend/evaluate/authorize/
+  mutate), provenance contract (six required traceability elements),
+  evidence contract (strength never increases through integration),
+  uncertainty/limitation/boundary-disclosure/determinism/compatibility/
+  schema-conformance (incorporating 128F's lesson)/read-only/failure/
+  cross-track/versioning/governance contracts, and PFN-001
+  confirmation. Carries forward only genuine re-verified tooling debt
+  without reintroducing closed 126G/126G.1/128B.1/128B.2 repairs. No
+  implementation, schema, source code, or test code change; no runtime
+  behavior change. Recommends 130C.
+
 - Phase 130A - Cross-Artifact Knowledge Integration Architecture
   (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_ARCHITECTURE.md`).
   Formally selects Track 130 - Cross-Artifact Knowledge Integration -
