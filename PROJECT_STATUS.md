@@ -2,6 +2,77 @@
 
 ## Current Phase
 
+Phase 130A — Cross-Artifact Knowledge Integration Architecture
+(completed).
+
+Formally selects Track 130 — Cross-Artifact Knowledge Integration —
+as PCAE's next architectural chapter, ahead of Candidate B (Query
+Expansion, deferred not rejected)
+(`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_ARCHITECTURE.md`).
+Rationale: the Query Layer remains RKS-only (re-confirmed via direct
+inspection of `SUPPORTED_QUERY_CATEGORIES`, unchanged since Track
+121); the six knowledge products remain independent; expanding
+queries before defining integration semantics would couple the Query
+Layer directly to five more artifact-specific contracts; integration
+establishes a stable substrate for later unified query access. Defines
+Track 130's canonical architecture: purpose (a deterministic,
+read-only integration layer over existing artifacts — no new knowledge
+claims), scope (Repository Knowledge Snapshot, Dependency Knowledge
+Graph, Historical Memory, Change Impact, Advisory Context, Query
+Result), integration responsibilities and explicit prohibitions
+(no inference, no causality, no ranking, no recommendations, no
+Decision Evaluation, no Advisory reasoning, no execution authorization,
+no mutation — extending every existing artifact family's own
+non-authority boundary to the cross-artifact level), a conceptual
+(non-schema) integration model, an artifact authority contract (each
+source remains authoritative; the integration layer is derivative,
+never an independent evidence source), stable identity architecture
+(prohibiting fuzzy/probabilistic/name-only/silent identity resolution
+— unresolved identity remains unresolved), conceptual cross-artifact
+relationships, provenance/uncertainty/limitation/boundary-disclosure/
+determinism/compatibility architecture, and a schema-conformance
+requirement directly incorporating 128F's lesson that focused tests
+did not prove complete conformance. Defines read-only and fail-closed
+architecture, relationships to Query Expansion/Change Impact/Advisory/
+Execution Planning (none implemented), and the Track 130 roadmap
+(130B–130F, hardening only if justified). Confirms PFN-001 satisfied;
+re-confirms genuine tooling debt (`.pcae/phase-completion-metadata.json`
+still referencing Phase 126E, unrepaired) without reintroducing closed
+126G/126G.1/128B.1/128B.2 repairs. No implementation occurred; no
+schema, source code, or test code changed; no runtime behavior
+changed.
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`, and zero registered
+runtime plugins.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 130B — Cross-Artifact Knowledge
+Integration Contract Freeze.
+
+## Phase 130A Complete
+
+Phase 130A — Cross-Artifact Knowledge Integration Architecture
+(completed).
+
+Formally selects Track 130 — Cross-Artifact Knowledge Integration —
+ahead of Candidate B (Query Expansion, deferred not rejected):
+integration semantics must exist before a unified Query Layer has a
+coherent substrate to query against. Defines the canonical
+architecture — purpose, six-artifact scope, integration
+responsibilities/prohibitions, conceptual integration model, artifact
+authority contract, stable identity architecture (no fuzzy/
+probabilistic/silent resolution), cross-artifact relationships,
+provenance/uncertainty/limitation/boundary-disclosure/determinism/
+compatibility architecture, schema-conformance requirements
+incorporating 128F's lesson, read-only/fail-closed architecture, and
+the Track 130 roadmap (130B–130F). No implementation, schema, or
+runtime behavior change. PFN-001 confirmed satisfied. Recommended next
+phase: 130B — Cross-Artifact Knowledge Integration Contract Freeze.
+
+## Phase 129A Complete (historical — full text)
+
 Phase 129A — Historical Memory Chapter Review & Next Direction
 Architecture (completed).
 

@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Phase 130A - Cross-Artifact Knowledge Integration Architecture
+  (`docs/PHASE_130_CROSS_ARTIFACT_KNOWLEDGE_INTEGRATION_ARCHITECTURE.md`).
+  Formally selects Track 130 - Cross-Artifact Knowledge Integration -
+  as PCAE's next architectural chapter, ahead of Candidate B (Query
+  Expansion, deferred not rejected): the Query Layer remains RKS-only,
+  the six knowledge products remain independent, and expanding queries
+  before defining integration semantics would couple the Query Layer
+  directly to five more artifact-specific contracts. Defines the
+  canonical architecture: purpose (deterministic, read-only
+  integration layer, no new knowledge claims), six-artifact scope
+  (RKS, DKG, Historical Memory, Change Impact, Advisory Context, Query
+  Result), integration responsibilities and explicit prohibitions
+  (no inference/causality/ranking/recommendations/Decision Evaluation/
+  Advisory reasoning/execution authorization/mutation), a conceptual
+  (non-schema) integration model, artifact authority contract
+  (integration layer is derivative, never an independent evidence
+  source), stable identity architecture (prohibiting fuzzy/
+  probabilistic/name-only/silent identity resolution), conceptual
+  cross-artifact relationships, provenance/uncertainty/limitation/
+  boundary-disclosure/determinism/compatibility architecture, and a
+  schema-conformance requirement incorporating 128F's lesson that
+  focused tests did not prove complete conformance. Defines read-only
+  and fail-closed architecture, relationships to Query Expansion/
+  Change Impact/Advisory/Execution Planning (none implemented), and
+  the Track 130 roadmap (130B-130F). PFN-001 confirmed satisfied;
+  genuine tooling debt re-confirmed
+  (`.pcae/phase-completion-metadata.json` still referencing Phase
+  126E) without reintroducing closed repairs. No implementation,
+  schema, source code, or test code change; no runtime behavior
+  change. Recommends 130B.
+
 - Phase 129A - Historical Memory Chapter Review & Next Direction
   Architecture
   (`docs/PHASE_129_HISTORICAL_MEMORY_CHAPTER_REVIEW_AND_NEXT_DIRECTION_ARCHITECTURE.md`).
