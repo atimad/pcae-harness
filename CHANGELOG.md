@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 131D - Unified Repository Intelligence Query Prototype Plan
+  (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_PROTOTYPE_PLAN.md`).
+  Converts the 131B contract (verified by 131C, zero BLOCKING
+  findings) into a concrete engineering plan for 131E: a nine-stage
+  query lifecycle, a routing plan requiring explicit multi-family
+  category enumeration (closing 131C's routing-disambiguation
+  finding), a response assembly plan extending the uncertainty
+  vocabulary to all six 131B categories, a boundary disclosure mapping
+  plan that resolves 131C's newly-discovered six-item/nine-field gap
+  by reusing the real, already-frozen `boundary_disclosure.schema
+  .json` verbatim, a provenance plan closing the three missing
+  elements (originating record, derivation path, verification state)
+  with concrete field-by-field guidance, a failure handling plan
+  giving every enumerated fail-closed condition a dedicated path
+  (two new exception classes, four reused), an identity resolution
+  plan requiring direct reuse of Track 130's already-proven
+  identity-derivation functions, a conceptual (no schema) request/
+  response model, a phased implementation decomposition, and a
+  verification strategy for 131F. All five 131C non-blocking findings
+  addressed by design; **none repaired in this phase; no architectural
+  scope expansion.** No implementation, schema, source code, test
+  code, or runtime behavior change. PFN-001 confirmed satisfied.
+  Recommends 131E.
+
 - Phase 131C - Unified Repository Intelligence Query Contract
   Verification
   (`docs/PHASE_131_UNIFIED_REPOSITORY_INTELLIGENCE_QUERY_CONTRACT_VERIFICATION.md`).

@@ -2,6 +2,68 @@
 
 ## Current Phase
 
+Phase 131D — Unified Repository Intelligence Query Prototype Plan
+(completed).
+
+Converted the 131B contract (independently verified by 131C with zero
+BLOCKING findings) into a concrete engineering plan for 131E: a
+nine-stage query lifecycle (request, normalization, routing, artifact
+resolution, response assembly, provenance attachment, evidence
+preservation, boundary disclosure attachment, response delivery); a
+routing plan requiring every multi-family category to be explicitly
+enumerated before implementation (closing 131C's routing-
+disambiguation finding by requiring explicitness, not heuristics); a
+response assembly plan extending the uncertainty vocabulary to all six
+131B-defined categories; a boundary disclosure mapping plan resolving
+131C's newly-discovered six-item/nine-field gap by reusing the real,
+already-frozen `boundary_disclosure.schema.json` verbatim rather than
+inventing a new shape; a provenance plan giving concrete field-by-
+field guidance for the three missing elements (originating record,
+derivation path, verification state) 131C identified; a failure
+handling plan giving every one of 131B's enumerated fail-closed
+conditions a dedicated exception or explicit uncertainty-record path,
+introducing exactly two new exception classes and reusing four
+existing ones; an identity resolution plan requiring 131E to call
+Track 130's already-proven identity-derivation functions directly
+rather than reimplementing resolution logic; a conceptual (no schema)
+request/response model; a phased implementation decomposition; and a
+verification strategy for 131F. All five 131C non-blocking findings
+are addressed by design; none repaired in this phase; no architectural
+scope expansion.
+
+**No implementation occurred. No schema changed. No source or test
+code changed. No runtime behavior changed.**
+
+**Runtime posture confirmed**: runtime state `Observed`, execution
+unavailable, maximum plugin capability `observe`.
+
+**PFN-001 confirmed satisfied.**
+
+Recommended next repo phase: 131E — Unified Repository Intelligence
+Query Prototype.
+
+## Phase 131D Complete
+
+Phase 131D — Unified Repository Intelligence Query Prototype Plan
+(completed).
+
+Converts the verified 131B contract into an engineering plan for
+131E: nine-stage query lifecycle, routing plan (closes 131C's
+multi-family disambiguation finding via required explicitness),
+response assembly plan (extends uncertainty vocabulary), boundary
+disclosure mapping (reuses the real nine-field schema verbatim,
+closing 131C's mapping gap), provenance plan (closes the three missing
+elements), failure handling plan (dedicated path per condition),
+identity resolution plan (reuses Track 130's proven pattern directly),
+conceptual request/response model, phased implementation
+decomposition, and 131F verification strategy. All five 131C
+non-blocking findings addressed by design, none repaired. No
+implementation, schema, source code, test code, or runtime behavior
+change. PFN-001 confirmed satisfied. Recommended next phase: 131E —
+Unified Repository Intelligence Query Prototype.
+
+## Phase 131C Complete (historical — full text)
+
 Phase 131C — Unified Repository Intelligence Query Contract
 Verification (completed).
 
