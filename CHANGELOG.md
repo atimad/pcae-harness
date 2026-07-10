@@ -2,6 +2,33 @@
 
 ## Unreleased
 
+- Phase 133B - PFR-001 Canonical Phase Report Contract Freeze
+  (`docs/specifications/PFR-001_CANONICAL_PHASE_REPORT_CONTRACT.md`).
+  Transforms PFR-001 from an explored architecture (133A) into the
+  binding contract governing every future PCAE phase report. Freezes
+  thirteen mandatory report sections — 133A's original twelve plus a
+  new **Notable Engineering Knowledge** section, distinct from
+  Technical Debt Review, capturing durable lessons (e.g. 131F's
+  silent-omission defect class, 131E's module-scoped-fixture
+  performance lesson) that previously had no dedicated home. Assigns
+  each section one non-overlapping responsibility, defines
+  minimum/optional/prohibited content per section, and removes all
+  ambiguity from phase-class applicability with two fully worked
+  disambiguations (Implementation Findings, Verification Findings).
+  Names five binding Quality Objectives (PFR-Q1 Historical usefulness,
+  PFR-Q2 Engineering evidence, PFR-Q3 Architectural context, PFR-Q4
+  Operational usefulness, PFR-Q5 Traceability). Restates the
+  Governance/Versioning relationship to PFN-001 (content vs. delivery)
+  without amending it; confirms compatibility with every current phase
+  class and all historical reports. Internal consistency review: zero
+  BLOCKING, two NON-BLOCKING findings, both reconciled in-document.
+  Technical debt review of reporting inconsistencies across Tracks
+  119-132: four gaps found, three resolved by this contract, one
+  confirmed permitted by design. **Contract-freeze-only**: zero `src/`
+  files touched, no report-generation or notification code modified,
+  runtime unchanged. Recommended next phase: 133C - PFR-001 Contract
+  Verification.
+
 - Phase 133A - PFR-001 Canonical Phase Report Specification
   (`docs/specifications/PFR-001_CANONICAL_PHASE_REPORT_SPECIFICATION.md`).
   Creates the first canonical specification governing every PCAE phase
