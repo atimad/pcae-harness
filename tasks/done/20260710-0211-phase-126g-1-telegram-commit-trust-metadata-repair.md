@@ -10,7 +10,7 @@ Phase 126G.1 Telegram Commit Trust Metadata Repair
 
 ## Status
 
-active
+done
 
 ## Mode
 
