@@ -10,7 +10,7 @@ Phase 127B Historical Memory Contract Freeze
 
 ## Status
 
-active
+done
 
 ## Mode
 
