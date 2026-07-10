@@ -31,13 +31,15 @@
     "external_delivery_isolation_focused_regressions": "207 passed",
     "related_notification_gate_suites": "165 passed",
     "fast_green": "4389 passed, 1 pre-existing unrelated failure",
-    "compileall": "passed"
+    "compileall": "passed",
+    "report_notification_tests": "207 focused passed (134B.1 + telegram + phase_reports + 134B.2 verification)",
+    "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
     {"name": "pcae_health", "status": "healthy"},
     {"name": "pcae_check", "status": "passed"},
     {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "pending"},
+    {"name": "pcae_push_check", "status": "clean"},
     {"name": "telegram_runtime", "status": "configured and enabled for governed production finalization"},
     {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
   ],
@@ -63,8 +65,8 @@
     "No force push was used."
   ],
   "commit_attribution": "phase-owned governed task-finish commit",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
