@@ -46,6 +46,16 @@
       "name": "compileall",
       "result": "src compiled successfully",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "passed (notification/Telegram regressions unchanged)",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "fast_green coverage passed",
+      "status": "passed"
     }
   ],
   "test_results": {
@@ -53,7 +63,9 @@
     "delivery_receipt_134e7_focused_tests": "110 passed",
     "focused_regression_suite": "1216 passed",
     "fast_green": "4389 passed, 1 pre-existing unrelated failure",
-    "compileall": "passed"
+    "compileall": "passed",
+    "report_notification_tests": "passed (notification/Telegram regressions unchanged)",
+    "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
     {
