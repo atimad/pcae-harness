@@ -10,7 +10,7 @@ Phase 134E.7 — External Delivery Receipt Model
 
 ## Status
 
-active
+done
 
 ## Mode
 
