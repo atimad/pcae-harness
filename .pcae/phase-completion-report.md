@@ -1,83 +1,79 @@
-# Phase 134E.4 Complete — Operator Report View Composition
+# Phase 134E.4V Complete — Operator Report View Composition Independent Verification
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.4`
+- **Phase ID:** `134E.4V`
 - **Status:** completed
-- **Phase class:** dedicated implementation
+- **Phase class:** dedicated independent verification
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134E.4 implemented a deterministic, structured, mobile-oriented,
-transport-independent Operator Report View Composition layer
-(`src/pcae/core/operator_report_view.py`) over the verified
-`operator_report_v1` Evidence Extraction result. Twelve operator-
-oriented sections, a distinct sibling model to PFR-001's thirteen,
-with a distinct decision-completeness dimension and a structural
-semantic-sufficiency gate addressing 134E.3V's near-status-only-report
-observation.
+Phase 134E.4V independently verified 134E.4's Operator Report View
+Composition implementation via fresh adversarial probing, rather than
+trusting its report, documentation, or its 97 tests. Found and repaired
+one genuine BLOCKING defect, discovered by direct adversarial probing
+before writing any new test.
 
 ## 3. Architectural Findings
 
-Preserved the layering: Canonical Engineering Evidence -> Evidence
-Extraction -> {Phase Report View Composition, Operator Report View
-Composition} -> Rendering -> Delivery. Confirmed the Operator Report
-View and Phase Report View are true siblings — neither derives from
-the other; `operator_report_view.py` does not import the Phase Report
-View Composition module.
+No architectural change. The Operator Report architecture's structure
+(twelve operator sections, decision-completeness mechanism, semantic-
+sufficiency gate) was independently re-confirmed against Track 133/134
+source text rather than accepted from 134E.4's own documentation.
 
 ## 4. Implementation Findings
 
-Implemented `OperatorReportView`/`OperatorSectionRecord` with a fixed,
-explicit category-to-section map, a decision-completeness dimension,
-and a structural semantic-sufficiency gate (`_SUBSTANTIVE_OUTCOME_
-CATEGORIES`). Found and fixed two defects during this phase's own
-development, before any test was written: (1) the cross-cutting
-Disclosures section was wrongly judged by the generic per-category
-empty-section logic, spuriously downgrading every composition; fixed
-by special-casing it against the report-level uncertainty/limitation
-bundles. (2) The conditionally-missing-vs-not-applicable conflation
-134E.3V found and repaired on the Phase Report View was proactively
-designed out of this module's own `_compose_section()` from the start.
-No active-lifecycle integration was introduced; the module remains
+One BLOCKING defect repaired at the smallest responsible boundary
+inside the still-isolated module: decision-completeness /
+informational-completeness divergence —
+`_compute_decision_completeness()`'s nine per-obligation checks tested
+`section.applicability == INCOMPLETE` specifically, missing the
+sibling "structurally empty required section" state
+(`applicability=UNAVAILABLE_WITH_DISCLOSURE`, `completeness=
+INCOMPLETE`). Repaired via a single `_fails_obligation()` helper using
+a completeness-rank comparison across all nine obligations. No
+active-lifecycle integration was introduced; the module remains
 isolated.
 
 ## 5. Verification Findings
 
-Implementation-phase scope: regression summary only (independent
-adversarial verification is 134E.4V's job). 97 new focused tests (all
-96 required areas) pass; 1061 combined regression tests (evidence
-model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View
-134E.3/134E.3V, phase-identity repair, phase_reports, finalization-gate,
-trust-hard-fail, certification-idempotency, 134B.1-134B.3, phase) pass
-unchanged; fast-green 4390/4390 passing this run.
+Independently re-derived requirements from Track 133 Engineering
+Evidence architecture/contract, Track 134 lifecycle architecture/
+contract, 134D's implementation plan, verified Evidence Extraction,
+Canonical Engineering Evidence, and the Phase Report View Composition
+module. 43 verification dimensions checked; the one BLOCKING defect
+was found via direct Python-REPL adversarial probing before any test
+was written (a forged extraction result with a REQUIRED category
+silently absent produced `decision_completeness=COMPLETE` while
+`completeness=INCOMPLETE`). 43 fresh adversarial tests added covering
+all 40 required probe areas plus 3 additional re-confirmations. Three
+NON-BLOCKING observations recorded, documented in full in
+`docs/PHASE_134_OPERATOR_REPORT_VIEW_COMPOSITION_INDEPENDENT_VERIFICATION.md`.
 
 ## 6. Technical Debt Review
 
-Repaired one pre-declared, expected consequence of this phase's own
-scope (not a new defect): 134E.2V's own `test_no_active_lifecycle_
-imports_fresh_scan` asserted a fixed set of isolated consumers of
-`evidence_extraction` — narrowed to admit this phase's own expected,
-still-isolated new consumer (`operator_report_view.py`) alongside the
-Phase Report View Composition module already admitted by 134E.3. Left
-all three NON-BLOCKING observations carried forward from 134E.2V/
-134E.3V open and unrepaired, as instructed, since none was proven
-genuinely BLOCKING for Operator Report composition specifically.
+No pre-existing Track 134 debt item was repaired (out of scope). Three
+NON-BLOCKING observations recorded: near-status-only semantic
+sufficiency re-confirmed reproducible but classified as an accepted,
+explicit design limitation (never free-text scoring, by design
+instruction), not a defect; two carried forward from 134E.2V/134E.3V
+(static conditionally-required semantics, private registry access),
+re-confirmed still open.
 
 ## 7. Notable Engineering Knowledge
 
-A cross-cutting section that owns no primary extraction category (by
-design) must never be judged by the same generic "no category selected
--> empty/incomplete" logic every other section uses — its materiality
-comes from a different source entirely (the report-level disclosure
-bundles), and reusing the generic path silently produces a false
-downgrade on every composition, not just an edge case. Discovered and
-fixed within this phase's own development discipline, matching the
-methodology 134E.3V's own defect-finding demonstrated is necessary even
-for a phase's own first-draft code, not only for independent
-verification of a prior phase.
+A completeness-style dimension layered on top of another (here,
+decision-completeness on top of informational completeness) must use
+the *same* underlying rank/severity source the base dimension itself
+uses, never a narrower proxy enum value that only covers one of
+several structurally distinct "this section is deficient" code paths —
+otherwise the two dimensions can silently diverge in the wrong
+direction (the derived dimension reporting "better" than its own
+foundation), which is exactly the shape of a Non-Strengthening
+violation even though no single classification value was directly
+strengthened.
 
 ## 8. Governance Results
 
@@ -88,20 +84,28 @@ verification of a prior phase.
 
 ## 9. Test Results
 
-- New focused suite: 97 passed (all 96 required areas).
-- Combined regression suite: 1061 passed.
+- New adversarial suite: 43 passed (all 40 required probe areas plus 3
+  additional re-confirmations).
+- Original 134E.4 suite (re-run against the repaired module): 97
+  passed.
+- Combined focused suite: 140 passed.
+- Combined regression suite (evidence model 134E.1/134E.1V, extraction
+  134E.2/134E.2V, Phase Report View 134E.3/134E.3V, phase-identity
+  repair, phase_reports, finalization-gate, trust-hard-fail,
+  certification-idempotency, 134B.1-134B.3, phase, Operator Report
+  View): 1104 passed.
 - Fast-green: 4390 passed, 0 failed this run.
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
 
 No activation of Canonical Engineering Evidence, no live evidence
-capture, no Markdown/plain-text/HTML rendering, no delivery adapters,
-no Telegram-specific formatting, no External Delivery Receipts, no
-Architecture Status repair, no final lifecycle integration, no
-PFN-001/PFR-001 change, no Repository Intelligence change, no 134E.4V
-work, and no execution capability were implemented. No raw git
-commit/push, `--no-verify`, or force push was used.
+capture, no rendering, no delivery adapters, no Telegram-specific
+formatting, no External Delivery Receipts, no Architecture Status
+repair, no final lifecycle integration, no PFN-001/PFR-001 change, no
+Repository Intelligence change, no 134E.5 work, and no execution
+capability were implemented. No raw git commit/push, `--no-verify`, or
+force push was used.
 
 ## 11. Architectural Boundary Confirmation
 
@@ -112,14 +116,13 @@ active authority. This phase does not self-certify.
 
 ## 12. Track Progress
 
-134E.4 adds the fourth of the six architectural layers Track 134E's
-own roadmap defines, completing the sibling pair of derived views
-(Phase Report View, Operator Report View) that both sit atop Evidence
-Extraction. It does not itself close the independent-verification gate
-134D's roadmap requires before 134E.5 may begin — that is 134E.4V's
-job.
+134E.4V closes the independent-verification gate 134D's own roadmap
+requires before 134E.5 may begin. One genuine defect was found and
+closed; the Operator Report composition layer is now demonstrably (not
+just claimedly) sound, with decision completeness never diverging from
+informational completeness in the wrong direction.
 
 ## 13. Next Phase
 
-Recommended: **134E.4V — Operator Report View Composition Independent
-Verification**. Phase 134E.4V has not begun.
+Recommended: **134E.5 — Rendering Architecture**. Phase 134E.5 has not
+begun.
