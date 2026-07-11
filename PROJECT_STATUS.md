@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 134E.2V — Evidence Extraction Independent Verification (completed).
+
+Independently verified 134E.2's Evidence Extraction implementation
+rather than trusting its report, documentation, or its 64 tests. Found
+and repaired **two genuine BLOCKING defects**, both discovered by direct
+adversarial probing before any new test was written: (1) silent profile
+overwrite — `register_profile()` unconditionally replaced any existing
+entry for the same `profile_id` with zero error; a fake profile
+registered under the real `phase_report_v1` id silently replaced it
+mid-process. Repaired by comparing against any existing entry and
+raising unless the re-registration is identical. (2) undetected
+duplicate/conflicting category rules — `ExtractionProfile` construction
+only checked that the *set* of ruled categories covered all 21
+categories, never that each category had exactly one rule; a profile
+with two conflicting rules for the same category (22 rules for 21
+categories) constructed successfully with the second rule silently
+unreachable dead code. Repaired by rejecting duplicate category rules at
+construction time. 33 new fresh adversarial tests (all 30 required probe
+areas) plus the original 64 tests (97 total) pass; 1333 combined
+regression tests (existing evidence-model/lifecycle suites, unmodified)
+pass unchanged; fast-green unaffected. Three NON-BLOCKING observations
+recorded as inputs for later sub-phases. Full details in
+`docs/PHASE_134_EVIDENCE_EXTRACTION_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134E.3 — Phase Report View Composition. 134E.3
+was not begun in this phase.
+
+## Phase 134E.2V Complete
+
+Independently verified and repaired the Evidence Extraction
+implementation. The module remains isolated, disconnected lifecycle
+authority — not yet active. Two BLOCKING defects repaired at the
+smallest responsible boundary; three NON-BLOCKING observations
+documented, not repaired. No Phase Report View or Operator Report View
+composition, rendering, delivery, or lifecycle integration was
+implemented.
+
+## Phase 134E.2 Complete (historical — full text)
+
 Phase 134E.2 — Evidence Extraction (completed).
 
 Implemented a deterministic, audience-aware, transport-independent

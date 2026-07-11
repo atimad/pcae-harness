@@ -2,6 +2,21 @@
 
 ## Accepted
 
+- Independently verify Evidence Extraction (Phase 134E.2V) by fresh
+  adversarial probing before writing any new test, rather than trusting
+  134E.2's report or its 64 tests. Found and repaired two BLOCKING
+  defects: silent profile overwrite (`register_profile()` unconditionally
+  replaced any existing entry for the same `profile_id`) and undetected
+  duplicate/conflicting category rules (`ExtractionProfile` construction
+  only checked category coverage, not uniqueness, letting a conflicting
+  duplicate rule silently become unreachable dead code). Repaired both at
+  the smallest responsible boundary inside the still-isolated module — no
+  active-lifecycle integration was introduced. Recorded three
+  NON-BLOCKING observations (planning-phase evidence-model category
+  scope, static vs. dynamic conditionally-required semantics, private
+  registry attribute bypass) as inputs for later sub-phases rather than
+  repairing them now. Do not begin 134E.3 in this phase.
+
 - Implement Evidence Extraction (Phase 134E.2) as a fully isolated,
   disconnected layer (`src/pcae/core/evidence_extraction.py`) consuming
   only the Canonical Engineering Evidence model and the standard

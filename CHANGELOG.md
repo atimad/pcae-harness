@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 134E.2V - Evidence Extraction Independent Verification
+  (`docs/PHASE_134_EVIDENCE_EXTRACTION_INDEPENDENT_VERIFICATION.md`).
+  Independently verifies 134E.2's Evidence Extraction implementation via
+  fresh adversarial probing rather than trusting its report/tests. Found
+  and repaired two BLOCKING defects in
+  `src/pcae/core/evidence_extraction.py`: (1) silent profile overwrite —
+  `register_profile()` unconditionally replaced any existing entry for
+  the same `profile_id`; fixed by raising unless a re-registration is
+  identical to the existing profile. (2) undetected duplicate/conflicting
+  category rules — `ExtractionProfile` construction only checked category
+  *coverage*, not uniqueness, letting a profile with two conflicting
+  rules for one category construct successfully with the second rule
+  silently unreachable; fixed by rejecting duplicates at construction.
+  33 new adversarial tests + original 64 (97 total) pass; 1333 combined
+  regression tests unchanged; fast-green unaffected. Three NON-BLOCKING
+  observations recorded, not repaired. No Phase Report View or Operator
+  Report View composition, rendering, delivery, or lifecycle integration
+  implemented — 134E.3 not begun.
+
 - Phase 134E.2 - Evidence Extraction
   (`docs/PHASE_134_EVIDENCE_EXTRACTION.md`). Implements a deterministic,
   audience-aware, transport-independent Evidence Extraction layer

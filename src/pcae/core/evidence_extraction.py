@@ -213,8 +213,21 @@ class ExtractionProfile:
             raise ValueError("ExtractionProfile.profile_id must be non-empty")
         if not self.profile_version:
             raise ValueError("ExtractionProfile.profile_version must be non-empty")
-        seen = {rule.category for rule in self.category_rules}
-        missing = set(EXTRACTION_CATEGORIES) - seen
+        category_list = [rule.category for rule in self.category_rules]
+        # 134E.2V finding (BLOCKING, repaired): a duplicate/conflicting
+        # CategoryRule for the same category previously went undetected --
+        # requirement_for() silently returned only the first match,
+        # leaving the later, conflicting rule dead code with no error at
+        # construction time. A profile with 22 rules covering 21
+        # categories (one category ruled twice) constructed successfully
+        # before this fix.
+        duplicates = sorted({c for c in category_list if category_list.count(c) > 1})
+        if duplicates:
+            raise ValueError(
+                f"ExtractionProfile {self.profile_id!r} has duplicate/"
+                f"conflicting category rules for: {duplicates}"
+            )
+        missing = set(EXTRACTION_CATEGORIES) - set(category_list)
         if missing:
             raise ValueError(
                 f"ExtractionProfile {self.profile_id!r} is missing category "
@@ -244,7 +257,27 @@ def register_profile(profile: ExtractionProfile) -> None:
     at registration time, so registering profiles in a different order
     (or registering a brand-new future profile) cannot change any
     existing profile's behavior.
+
+    Fail-closed against silent overwrite (134E.2V finding, BLOCKING,
+    repaired): registering a profile under an already-registered
+    ``profile_id`` previously replaced the existing profile with zero
+    error, zero warning, and no trace -- confirmed reproducible: a
+    99.0-version profile marking every category NOT_APPLICABLE could
+    silently replace the real ``phase_report_v1`` profile mid-process.
+    An identical re-registration (same id, same version, same rules) is
+    a harmless no-op; anything else -- a version bump, a rule change, or
+    both -- raises rather than silently changing behavior for every
+    caller already holding that ``profile_id``.
     """
+    existing = _PROFILE_REGISTRY.get(profile.profile_id)
+    if existing is not None and existing != profile:
+        raise ValueError(
+            f"Profile {profile.profile_id!r} is already registered "
+            f"(version {existing.profile_version!r}); refusing to silently "
+            f"overwrite with a different profile (version "
+            f"{profile.profile_version!r}). Register under a new "
+            f"profile_id instead."
+        )
     _PROFILE_REGISTRY[profile.profile_id] = profile
 
 
