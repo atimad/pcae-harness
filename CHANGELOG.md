@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 134E.6V - Delivery Pipeline Generalization Independent
+  Verification
+  (`docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION_INDEPENDENT_VERIFICATION.md`).
+  Independently verifies 134E.6's Delivery Pipeline via fresh
+  adversarial probing rather than trusting its report/tests. Found and
+  repaired two BLOCKING defects in `src/pcae/core/delivery_pipeline.py`:
+  (1) `compute_logical_delivery_id()` joined its six input fields with
+  a bare `"|"` separator before hashing, allowing field-boundary
+  collisions between semantically different inputs — repaired by
+  hashing a canonical JSON array instead; (2) `execute_delivery()`
+  called `adapter.deliver_fn(unit)` with no exception handling, letting
+  a single misbehaving adapter abort delivery of every sibling unit in
+  the plan — repaired by catching any exception per-unit and
+  normalizing it into a conservative retryable `AdapterUnitOutcome`.
+  44 new fresh adversarial tests (all 42 required probe areas plus 2
+  regression tests) pass; 149 combined with the original 105 pass; 553
+  combined 134E.3-134E.6 regression tests pass; fast-green 4390/4390
+  passing this run. One NON-BLOCKING observation recorded (adapter
+  exception diagnostics not independently secret-scrubbed). 134E.7 was
+  not begun.
+
 - Phase 134E.6 - Delivery Pipeline Generalization
   (`docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION.md`). Implements
   `src/pcae/core/delivery_pipeline.py`, a deterministic,

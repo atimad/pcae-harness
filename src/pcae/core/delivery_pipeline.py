@@ -159,11 +159,27 @@ def compute_logical_delivery_id(
     produces a *different* logical delivery identity by construction --
     "changed content under the same logical identity" is structurally
     unreachable, not merely checked after the fact.
+
+    134E.6V finding (BLOCKING, repaired): the original implementation
+    joined the six input fields with a bare ``"|"`` separator before
+    hashing. Because ``phase_id``, ``adapter_id``, and
+    ``policy_version`` are unrestricted free-text strings (nothing
+    prevents an adapter from being registered under an ``adapter_id``
+    containing ``"|"``), this was reproducibly ambiguous at field
+    boundaries: two *semantically different* input tuples -- e.g.
+    ``phase_id="X|Y", adapter_id="adapterZ"`` versus
+    ``phase_id="X", rendering_digest="Y|<real-digest>", adapter_id=
+    "adapterZ"`` -- could hash to the identical logical delivery
+    identity, confirmed via direct reproduction before any test was
+    written. Repaired by hashing an unambiguous canonical JSON array of
+    the six fields instead of a delimiter-joined string; JSON's own
+    string escaping makes every field boundary structurally
+    unambiguous regardless of field content.
     """
-    payload = "|".join((
-        phase_id, rendering_digest, purpose.value, destination.value,
-        adapter_id, policy_version,
-    ))
+    payload = json.dumps(
+        [phase_id, rendering_digest, purpose.value, destination.value, adapter_id, policy_version],
+        sort_keys=False,
+    )
     return hashlib.sha256(payload.encode()).hexdigest()
 
 
@@ -739,7 +755,28 @@ def execute_delivery(
 
     outcomes: list[AdapterUnitOutcome] = []
     for unit in plan.units:
-        outcomes.append(adapter.deliver_fn(unit))
+        # 134E.6V finding (BLOCKING, repaired): an adapter's deliver_fn
+        # raising was previously left unhandled, propagating out of
+        # execute_delivery() entirely and aborting the whole execution --
+        # violating the explicit requirement that adapter exceptions be
+        # handled deterministically and that the pipeline fail safely.
+        # A raised exception is normalized into the identical
+        # AdapterUnitOutcome shape a well-behaved adapter would return
+        # for a transport failure: not delivered, conservatively
+        # retryable (an exception carries no evidence the failure is
+        # permanent), with the exception text captured as the
+        # diagnostic. Remaining plan units still execute in order --
+        # one unit's crash never silently aborts sibling units.
+        try:
+            outcomes.append(adapter.deliver_fn(unit))
+        except Exception as exc:  # noqa: BLE001 - deliberately broad: any
+            # adapter implementation error must be normalized, not crash
+            # the generic pipeline.
+            outcomes.append(AdapterUnitOutcome(
+                unit_id=unit.unit_id, delivered=False, retryable=True,
+                adapter_response_ref=None,
+                diagnostic=f"adapter raised {type(exc).__name__}: {exc}",
+            ))
 
     delivered_count = sum(1 for o in outcomes if o.delivered)
     failed_count = len(outcomes) - delivered_count

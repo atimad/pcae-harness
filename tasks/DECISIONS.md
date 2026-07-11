@@ -2,6 +2,27 @@
 
 ## Accepted
 
+- Independently verify Delivery Pipeline Generalization (Phase
+  134E.6V) by fresh adversarial probing before writing any new test,
+  rather than trusting 134E.6's report or its 105 tests. Found and
+  repaired two BLOCKING defects, both proven first via direct REPL
+  reproduction: (1) `compute_logical_delivery_id()`'s bare `"|".join()`
+  field concatenation was vulnerable to field-boundary collisions
+  between semantically different input tuples since `phase_id`/
+  `adapter_id`/`policy_version` are unrestricted free-text; repaired by
+  hashing a canonical `json.dumps([...])` array instead. (2)
+  `execute_delivery()`'s per-unit adapter call had no exception
+  handling, so any adapter implementation error propagated out and
+  aborted delivery of every sibling unit in the same plan; repaired by
+  wrapping each call in `try`/`except Exception`, normalizing into a
+  conservative retryable `AdapterUnitOutcome`. Classified adapter
+  exception diagnostics not being independently secret-scrubbed as
+  NON-BLOCKING rather than repairing it: consistent with the rest of
+  the pipeline's existing diagnostic surfaces, secret rejection remains
+  an upstream responsibility (`CanonicalEngineeringEvidence.validate()`),
+  and no genuine secret is introduced by this code path. Do not begin
+  134E.7 in this phase.
+
 - Implement Delivery Pipeline Generalization (Phase 134E.6) as a
   transport-neutral pipeline consuming only a verified `RenderingResult`
   -- never the canonical evidence model, extraction layer, or either
