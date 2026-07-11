@@ -1086,10 +1086,36 @@ class DeliveryReceiptStore:
     def __init__(self, root: str | Path):
         self.root = Path(root)
 
+    @staticmethod
+    def _validate_store_identifier(value: str, field_name: str) -> None:
+        """Fail-closed defense against path traversal: every identifier
+        used in a persisted path must be a single safe path component.
+        Mirrors the established ``phase_reports._safe_filename`` /
+        ``notifications._safe_doc_filename`` convention (identifiers are
+        safe single-segment names) but rejects rather than silently
+        rewriting, so two distinct identifiers can never collide into the
+        same storage slot. The public receipt API only ever produces hex
+        identifiers (``compute_receipt_id`` / ``compute_logical_delivery_
+        id``) or caller-supplied correction identifiers; all of these
+        satisfy this contract. 134E.7V repair: without this check, a
+        caller-supplied ``correcting_receipt_id`` (an arbitrary string,
+        unlike ``shell_gate``'s safe-by-construction ``sg-<uuid>`` audit
+        id) containing ``..`` / separators could write outside the store
+        root, inconsistent with the repository's own filename-sanitization
+        convention.
+        """
+        if not value or "/" in value or "\\" in value or ".." in value or os.path.isabs(value):
+            raise ValueError(
+                f"unsafe store identifier for {field_name}: {value!r} "
+                "(path separators, parent references, and absolute paths are rejected)"
+            )
+
     def _receipt_path(self, logical_delivery_id: str) -> Path:
+        self._validate_store_identifier(logical_delivery_id, "logical_delivery_id")
         return self.root / "receipts" / logical_delivery_id / "receipt.json"
 
     def _corrections_dir(self, original_receipt_id: str) -> Path:
+        self._validate_store_identifier(original_receipt_id, "original_receipt_id")
         return self.root / "corrections" / original_receipt_id
 
     @staticmethod
@@ -1147,6 +1173,7 @@ class DeliveryReceiptStore:
         if corrected_receipt.correction is None:
             raise ValueError("save_correction requires a receipt carrying correction metadata")
         correction = corrected_receipt.correction
+        self._validate_store_identifier(correction.correcting_receipt_id, "correcting_receipt_id")
         corr_dir = self._corrections_dir(correction.original_receipt_id)
         path = corr_dir / f"{correction.correcting_receipt_id}.json"
         if path.exists():

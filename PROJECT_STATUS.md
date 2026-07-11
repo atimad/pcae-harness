@@ -2,46 +2,59 @@
 
 ## Current Phase
 
-Phase 134E.7 — External Delivery Receipt Model (completed).
+Phase 134E.7V — External Delivery Receipt Model Independent
+Verification (completed).
 
-Implemented a deterministic, durable, transport-neutral External
-Delivery Receipt model (`src/pcae/core/delivery_receipt.py`) built
-entirely on top of the verified Delivery Pipeline (134E.6, 134E.6V).
-Records one logical delivery, its ordered physical attempts, per-unit
-outcomes, retries, partial delivery, authorization outcomes, and
-correction/supersession relationships. Deterministic receipt/attempt
-identity (canonical JSON array hashing, never delimiter-joined
-strings — the same discipline 134E.6V's own repair established).
-Aggregate logical state derived deterministically from attempt
-history with last-attempt-wins per-unit accounting (no double-counting
-across retries). Logical exactly-once (one receipt lineage, one final
-state) explicitly distinguished from physical attempts, which are
-never claimed to be exactly-once. Ambiguous external outcomes
-representable without auto-retry. Retry lineage structurally rejects
-changed rendering/destination/adapter/purpose/policy (all baked into
-`logical_delivery_id`). Correction/supersession is purely additive —
-finalized receipts are deeply immutable (frozen dataclasses plus
-`MappingProxyType`-wrapped nested mappings) and never mutated; a
-correction gets its own distinct receipt identity and is persisted as
-an overlay, never overwriting the original. File-backed persistence
-(`DeliveryReceiptStore`) reuses existing atomic-write/digest-
-verification conventions (Phase 93C's audit-record pattern): temp-file
-+ `os.replace`, digest verified on every load, fails closed on stale/
-duplicate/post-finalization writes. Diagnostic redaction addresses
-134E.6V's NON-BLOCKING observation directly — bounded, explicit-
-pattern redaction of adapter-exception text, never a raw exception
-representation. 110 new focused tests (all 110 required areas) pass;
-760 combined 134E.2-134E.7 regression tests pass; fast-green 4389/4390
-passing this run (the one failure, `test_pytest_dry_run_not_blocked`,
-is confirmed pre-existing and unrelated via a clean-checkout
-reproduction). No production receipt artifact created; no PFN-001
-integration; module remains fully isolated. Full details in
-`docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL.md`.
+Independently verified 134E.7's External Delivery Receipt Model
+(`src/pcae/core/delivery_receipt.py`) via fresh adversarial probing —
+source inspection first, hypotheses proven via direct Python REPL
+execution before any regression test was written, rather than trusting
+134E.7's own report, documentation, or its 110 focused tests. Found and
+repaired **one genuine BLOCKING defect**: path traversal via unsanitized
+store identifiers — `DeliveryReceiptStore` interpolated raw
+caller-supplied identifiers (`logical_delivery_id`,
+`original_receipt_id`, and the explicitly-arbitrary
+`correcting_receipt_id`) directly into persisted file paths with no
+boundary validation, so a `correcting_receipt_id` containing `..` /
+separators could write outside the store root, inconsistent with the
+repository's own `phase_reports._safe_filename` /
+`notifications._safe_doc_filename` convention. Repaired by fail-closed
+identifier validation at the persistence boundary
+(`DeliveryReceiptStore._validate_store_identifier`); the repair
+preserves all public-API behavior (hex ids and `corrector-N` ids pass
+unchanged), Delivery Pipeline behavior, transport independence, and
+lifecycle inactivity. Seven NON-BLOCKING observations recorded
+(last-attempt-wins downgrade under a misbehaving caller, adapter-version
+drift, cross-receipt correction cycles, aggregate not re-derived on
+load — consistent with 93C digest-only convention, single-process
+optimistic concurrency, bounded redaction patterns, and store-level
+prefix-trust); all are within the frozen scope or documented
+limitations deferred to 134E.10. 48 fresh adversarial tests added
+(`tests/test_delivery_receipt_134e7v_verification.py`, all 42 required
+probe areas plus 6 characterization regressions); 1216-test focused
+regression suite passes; `compileall` clean; fast-green 4389/4390 (the
+one failure, `test_pytest_dry_run_not_blocked`, independently
+reproduced on pristine source as pre-existing and unrelated). The
+receipt subsystem remains fully isolated from active lifecycle
+authority — authoritative only for delivery history and delivery state.
+No PFN-001 integration, no final lifecycle integration, no production
+receipt artifact, no 134E.8 work. Full details in
+`docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL_INDEPENDENT_VERIFICATION.md`.
 
-Recommended next phase: 134E.7V — External Delivery Receipt Model
-Independent Verification. 134E.7V was not begun in this phase.
+Recommended next phase: 134E.8 — Architecture Status Generation Repair.
+134E.8 was not begun in this phase.
 
-## Phase 134E.7 Complete
+## Phase 134E.7V Complete
+
+Independently verified and repaired the External Delivery Receipt
+Model. One BLOCKING defect (path traversal via unsanitized store
+identifiers) repaired at the smallest responsible persistence boundary.
+Seven NON-BLOCKING observations recorded. The module remains isolated,
+disconnected lifecycle authority — not yet active. No PFN-001
+integration, final lifecycle integration, or production receipt artifact
+was implemented; 134E.8 was not begun.
+
+## Phase 134E.7 Complete (historical)
 
 Implemented the durable External Delivery Receipt model over the
 verified Delivery Pipeline. The module remains isolated, disconnected

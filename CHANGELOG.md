@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- Phase 134E.7V - External Delivery Receipt Model Independent
+  Verification
+  (`docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL_INDEPENDENT_VERIFICATION.md`).
+  Independently verifies 134E.7's External Delivery Receipt Model via
+  fresh adversarial probing rather than trusting its report/tests.
+  Found and repaired one BLOCKING defect in
+  `src/pcae/core/delivery_receipt.py`: `DeliveryReceiptStore` used raw
+  caller-supplied identifiers (`logical_delivery_id`,
+  `original_receipt_id`, and the explicitly-arbitrary
+  `correcting_receipt_id`) directly in persisted file paths with no
+  boundary validation, so a `correcting_receipt_id` containing `..` /
+  separators could write outside the store root — inconsistent with the
+  repository's own `phase_reports._safe_filename` /
+  `notifications._safe_doc_filename` convention. Repaired by fail-closed
+  identifier validation at the persistence boundary
+  (`DeliveryReceiptStore._validate_store_identifier`), preserving all
+  public-API behavior, Delivery Pipeline behavior, transport
+  independence, and lifecycle inactivity. Seven NON-BLOCKING
+  observations recorded (last-attempt-wins downgrade under a
+  misbehaving caller, adapter-version drift, cross-receipt correction
+  cycles, aggregate not re-derived on load — consistent with 93C
+  digest-only convention, single-process optimistic concurrency,
+  bounded redaction patterns, store-level prefix-trust); all within the
+  frozen scope or documented limitations deferred to 134E.10. 48 new
+  fresh adversarial tests (all 42 required probe areas plus 6
+  characterization regressions) pass; 1216-test focused regression
+  suite passes; `compileall` clean; fast-green 4389/4390 (one
+  pre-existing, unrelated failure independently reproduced on pristine
+  source). The receipt subsystem remains fully isolated from active
+  lifecycle authority. No PFN-001 integration, final lifecycle
+  integration, or production receipt artifact; 134E.8 was not begun.
+
 - Phase 134E.7 - External Delivery Receipt Model
   (`docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL.md`). Implements
   `src/pcae/core/delivery_receipt.py`, a deterministic, durable,

@@ -2,6 +2,31 @@
 
 ## Accepted
 
+- Independently verify External Delivery Receipt Model (Phase 134E.7V)
+  via fresh adversarial probing with REPL reproduction before any test
+  was written, rather than trusting 134E.7's report, documentation, or
+  its 110 tests. Found and repaired one BLOCKING defect: path traversal
+  via unsanitized store identifiers -- `DeliveryReceiptStore` used raw
+  caller-supplied identifiers directly in persisted paths, and
+  `correcting_receipt_id` is an explicitly arbitrary string (unlike
+  `shell_gate`'s safe-by-construction `sg-<uuid>` audit id), so a value
+  containing `..` / separators could write outside the store root.
+  Repaired by fail-closed `_validate_store_identifier` at the
+  persistence boundary (rejecting path separators, parent references,
+  and absolute paths), mirroring the established
+  `phase_reports._safe_filename` / `notifications._safe_doc_filename`
+  convention but rejecting rather than silently rewriting. The repair
+  preserves all public-API behavior (hex ids and `corrector-N` ids pass
+  unchanged). Seven NON-BLOCKING observations recorded (last-attempt-
+  wins downgrade under a misbehaving caller, adapter_version drift,
+  cross-receipt correction cycles, aggregate not re-derived on load --
+  consistent with 93C digest-only convention, single-process optimistic
+  concurrency, bounded redaction patterns, store-level prefix-trust);
+  all within the frozen scope or documented limitations deferred to
+  134E.10's lifecycle orchestration. Did not modify the Delivery
+  Pipeline, rendering, views, evidence, notifications, PFN-001, or
+  Architecture Status; the receipt subsystem remains inactive.
+
 - Implement External Delivery Receipt Model (Phase 134E.7) as a
   file-backed, deterministic, transport-neutral receipt layer over the
   verified Delivery Pipeline, consuming only `DeliveryExecutionResult`/
