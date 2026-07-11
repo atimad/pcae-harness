@@ -1,92 +1,52 @@
 {
   "schema_version": "1.0",
-  "phase_id": "134E.2",
-  "phase_name": "Evidence Extraction",
-  "phase_title": "Evidence Extraction",
+  "phase_id": "134E.2V",
+  "phase_name": "Evidence Extraction Independent Verification",
+  "phase_title": "Evidence Extraction Independent Verification",
   "status": "completed",
-  "summary": "Implemented a deterministic, audience-aware, transport-independent Evidence Extraction layer (src/pcae/core/evidence_extraction.py) over the Canonical Engineering Evidence executable model. Not yet active lifecycle authority -- isolated (only internal import is canonical_engineering_evidence; otherwise stdlib-only), never mutates source evidence, no reference from any existing lifecycle module. Implements a small explicit profile registry (not a plugin framework) with two profiles -- phase_report_v1 (all thirteen PFR-001 sections) and operator_report_v1 (broader decision-completeness for a mobile-first operator, explicitly rejecting status-only extraction) -- each defining an explicit requirement level (required/conditionally-required/optional/not-applicable) for all 21 extraction categories across all six phase classes (252 explicit rules per profile, no implicit defaults). A four-value completeness classification (complete/complete-with-limitations/incomplete/invalid) is deterministically derived; all four outcomes are ordinary, inspectable return values. Findings/repairs preserve full original-classification history; uncertainty and limitations are automatically preserved and orphan-reference-checked; filtering is always explicitly disclosed; no category ever silently strengthens. A future profile registers without touching either existing profile or Canonical Engineering Evidence itself, confirmed by test. 64 new focused tests covering all 60 required test areas; 1300 combined regression tests (existing evidence-model/phase-report/identity/finalization/notification suites) passed unchanged; fast_green unaffected. This phase does not self-certify. 134E.2V and 134E.3 not begun.",
+  "summary": "Independently verified 134E.2's Evidence Extraction implementation via fresh adversarial probing, rather than trusting its report, documentation, or its own 64 tests. Found and repaired two genuine BLOCKING defects in src/pcae/core/evidence_extraction.py, both discovered by direct adversarial probing before any new test was written. (1) Silent profile overwrite: register_profile() unconditionally replaced any existing entry for the same profile_id with zero error, zero warning; a fake profile registered under the real phase_report_v1 id silently replaced it mid-process. Repaired by comparing against any existing entry and raising unless the re-registration is identical. (2) Undetected duplicate/conflicting category rules: ExtractionProfile construction only checked that the set of ruled categories covered all 21 categories, never that each category had exactly one rule; a profile with two conflicting rules for one category (22 rules for 21 categories) constructed successfully with the second rule silently unreachable dead code. Repaired by rejecting duplicate category rules at construction time. 33 new fresh adversarial tests covering all 30 required probe areas, plus the original 64 tests (97 total), pass; 1333 combined regression tests (existing evidence-model/lifecycle suites, unmodified) pass unchanged; fast_green unaffected. Three NON-BLOCKING observations recorded as inputs for later sub-phases, not repaired: planning-phase evidence-model category scope, static vs. dynamic conditionally-required semantics, private registry attribute bypass. The module remains isolated, disconnected lifecycle authority. 134E.3 not begun.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_134_EVIDENCE_EXTRACTION.md",
+    "docs/PHASE_134_EVIDENCE_EXTRACTION_INDEPENDENT_VERIFICATION.md",
     "src/pcae/core/evidence_extraction.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260711-0730-phase-134e-2-evidence-extraction.md",
-    "tests/test_evidence_extraction_134e2.py"
+    "tasks/done/20260711-0758-phase-134e-2v-evidence-extraction-independent-verification.md",
+    "tests/test_evidence_extraction_134e2v_verification.py"
   ],
   "files_changed_count": 8,
   "source_files_changed": 1,
   "test_files_changed": 1,
-  "tests_added_or_updated": "64 new focused tests covering all 60 required test areas, plus 1300 combined regression test executions (existing evidence-model/phase-report/identity/finalization/notification suites, unmodified) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total (4389 passed, 1 pre-existing unrelated failure reproduced identically, unchanged since 134B.2).",
-  "tests_run": 1364,
+  "tests_added_or_updated": "33 new fresh adversarial tests covering all 30 required probe areas (97 total combined with the original 64), plus 1333 combined regression test executions (existing evidence-model/lifecycle suites, unmodified) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total (4389 passed, 1 pre-existing unrelated failure reproduced identically, unchanged since 134B.2).",
+  "tests_run": 1430,
   "validation_results": [
-    {
-      "name": "evidence_extraction_focused_tests",
-      "result": "64 passed (all 60 required test areas)",
-      "status": "passed"
-    },
-    {
-      "name": "combined_regression_suite",
-      "result": "1300 passed (evidence extraction + evidence model 134E.1/134E.1V + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + 134B.1/134B.2/134B.3 + phase + identity repair)",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, unchanged since 134B.2)",
-      "status": "passed"
-    },
-    {
-      "name": "compileall",
-      "result": "src compiled successfully",
-      "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "64 focused passed (evidence extraction)",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "fast_green coverage passed",
-      "status": "passed"
-    }
+    {"name": "adversarial_verification_focused_tests", "result": "33 passed (all 30 required probe areas)", "status": "passed"},
+    {"name": "combined_extraction_suite", "result": "97 passed (original 64 + new 33, all passing post-repair)", "status": "passed"},
+    {"name": "combined_regression_suite", "result": "1333 passed (extraction + evidence model 134E.1/134E.1V + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + 134B.1/134B.2/134B.3 + phase + identity repair)", "status": "passed"},
+    {"name": "fast_green", "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, unchanged since 134B.2)", "status": "passed"},
+    {"name": "compileall", "result": "src compiled successfully", "status": "passed"},
+    {"name": "report_notification_tests", "result": "97 focused passed (evidence extraction + verification)", "status": "passed"},
+    {"name": "bootstrap_session_reporting_tests", "result": "fast_green coverage passed", "status": "passed"}
   ],
   "test_results": {
-    "evidence_extraction_focused_tests": "64 passed",
-    "combined_regression_suite": "1300 passed",
+    "adversarial_verification_focused_tests": "33 passed",
+    "combined_extraction_suite": "97 passed",
+    "combined_regression_suite": "1333 passed",
     "fast_green": "4389 passed, 1 pre-existing unrelated failure",
     "compileall": "passed",
-    "report_notification_tests": "64 focused passed",
+    "report_notification_tests": "97 focused passed",
     "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
-    {
-      "name": "pcae_health",
-      "status": "healthy"
-    },
-    {
-      "name": "pcae_check",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_doctor_task_memory",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_push_check",
-      "status": "clean"
-    },
-    {
-      "name": "telegram_runtime",
-      "status": "configured and enabled for governed production finalization, resolved automatically without shell sourcing"
-    },
-    {
-      "name": "pcae_runtime_inspect",
-      "status": "Observed, observe, execution unavailable"
-    }
+    {"name": "pcae_health", "status": "healthy"},
+    {"name": "pcae_check", "status": "passed"},
+    {"name": "pcae_doctor_task_memory", "status": "clean"},
+    {"name": "pcae_push_check", "status": "pending"},
+    {"name": "telegram_runtime", "status": "configured and enabled for governed production finalization, resolved automatically without shell sourcing"},
+    {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
   ],
-  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No Phase Report View composition was implemented. No Operator Report View composition was implemented. No report prose generation occurred. No rendering pipeline was implemented. No delivery adapters were implemented. No External Delivery Receipts were implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.2V or 134E.3 work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
+  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No Phase Report View composition was implemented. No Operator Report View composition was implemented. No report prose generation occurred. No rendering pipeline was implemented. No delivery adapters were implemented. No External Delivery Receipts were implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.3 work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
     "No activation of Canonical Engineering Evidence occurred.",
     "No live evidence capture was implemented.",
@@ -101,7 +61,7 @@
     "No PFN-001 change occurred.",
     "No PFR-001 change occurred.",
     "No Repository Intelligence change occurred.",
-    "No 134E.2V or 134E.3 work began.",
+    "No 134E.3 work began.",
     "No execution capability was introduced.",
     "No raw git commit was used.",
     "No raw git push was used.",
@@ -109,14 +69,14 @@
     "No force push was used."
   ],
   "commit_attribution": "phase-owned governed task-finish commit",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
+  "pushed_status": "not_pushed",
+  "origin_main_head_count": 2,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
-  "recommended_next_phase": "Phase 134E.2V - Evidence Extraction Independent Verification",
-  "recommended_next_phase_id": "134E.2V",
-  "recommended_next_phase_name": "Evidence Extraction Independent Verification",
+  "recommended_next_phase": "Phase 134E.3 - Phase Report View Composition",
+  "recommended_next_phase_id": "134E.3",
+  "recommended_next_phase_name": "Phase Report View Composition",
   "runtime_state": "Observed",
   "maximum_plugin_capability": "observe",
   "execution_availability": "unavailable"
