@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- Phase 134E.10 - Final Lifecycle Integration
+  (`docs/PHASE_134_FINAL_LIFECYCLE_INTEGRATION.md`). Activated the seven
+  previously-inert 134E.1-134E.7 modules (Canonical Engineering Evidence,
+  Evidence Extraction, Phase Report View, Operator Report View, Rendering,
+  Delivery Pipeline, Delivery Receipt) via one new shared boundary,
+  `src/pcae/core/finalization_transaction.py`, called from all five
+  production finalization entry points strictly after each entry point's
+  existing certified-report path already succeeded — never a second
+  completion authority, never a second physical send. Deliberately
+  narrower than a literal "merge all five entry points" reading of the
+  task brief, disclosed in the phase doc (134D's own authority-boundary
+  and additive-first risk guidance favor this approach given genuinely
+  divergent existing entry-point logic). Two real defects found and fixed
+  during this phase's own full-suite regression work (not merely claimed
+  fixed): an ungated call site in `commands/task.py` that leaked real
+  checkpoint files during ordinary test runs, and an unnecessary
+  filesystem write on the transaction's own gate-rejection path — both
+  found via direct comparison against a clean baseline, both repaired at
+  the smallest correct boundary. `.pcae/finalization-transactions/` added
+  to `.pcae/.gitignore` (ephemeral bookkeeping, same convention as
+  `.pcae/delivery-receipts/`/`.pcae/phase-reports/`). 25 new tests
+  (`tests/test_finalization_transaction_134e10.py`); 10 prior-phase
+  "not yet activated" pin-tests updated (not deleted) across the 7
+  subsystem test files to reflect the intentional, disclosed activation.
+  Full-suite regression: 182 failed (exact match to a clean baseline),
+  19,347 passed — zero new failures, zero pollution; `compileall` clean;
+  fast-green 4391/4391 across three runs. Delivery Receipts explicitly
+  disclosed to record a structural model of an already-executed dispatch
+  (in-memory recording adapter, zero network I/O), not proof of physical
+  exactly-once delivery. Two 134E.9V NON-BLOCKING findings carried
+  forward, disclosed, not repaired.
+
 - Phase 134E.9V - Report Consistency / Derived Correctness Independent
   Verification
   (`docs/PHASE_134_REPORT_CONSISTENCY_DERIVED_CORRECTNESS_INDEPENDENT_VERIFICATION.md`).

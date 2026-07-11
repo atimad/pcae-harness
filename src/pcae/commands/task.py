@@ -894,6 +894,30 @@ def _finalize_task_report_and_notify(
         )
         apply_old_schema_gate(trust_result, final_gate)
 
+        # Phase 134E.10 — final lifecycle integration. Best-effort, never
+        # fatal (see finalization_transaction.py module docstring and the
+        # matching call site in commands/phase.py): captures Canonical
+        # Engineering Evidence from the report already certified/persisted
+        # above, runs it through Extraction/Views/Rendering/Delivery-
+        # modeling/Receipt. Never re-decides completeness, never
+        # re-promotes, never performs a second physical send. Only
+        # invoked when the gate actually passed -- there is nothing for
+        # it to do otherwise, and calling it unconditionally would create
+        # a needless filesystem side effect (a transaction checkpoint
+        # file) for every gate-failing call, including the many synthetic/
+        # invalid reports this codebase's own test suite constructs.
+        if final_gate.get("finalizable"):
+            try:
+                from pcae.core.finalization_transaction import run_finalization_transaction
+                run_finalization_transaction(
+                    phase_id=phase_id,
+                    phase_name=phase_name,
+                    report=report,
+                    gate=final_gate,
+                )
+            except Exception:  # noqa: BLE001 - best-effort, never fatal
+                pass
+
     result = {
         "status": "finalized",
         "phase_id": phase_id,

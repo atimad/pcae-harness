@@ -524,6 +524,36 @@ def _finalize_report_and_notify(
         if json_path:
             print(f"  JSON:     {json_path}")
 
+        # Phase 134E.10 — final lifecycle integration. Best-effort, never
+        # fatal: this only *captures* Canonical Engineering Evidence and
+        # runs it through Extraction/Views/Rendering/Delivery-modeling/
+        # Receipt from the report already certified and promoted above.
+        # It never re-decides completeness, never re-promotes, and never
+        # performs a second physical send (see finalization_transaction.py
+        # module docstring). A bug here must never affect the governed
+        # completion path that already succeeded. Only invoked when the
+        # gate actually passed (not merely "not blocked", which
+        # --allow-partial-report can also satisfy) -- there is nothing
+        # for it to do otherwise, and calling it unconditionally would
+        # create a needless filesystem side effect for every gate-failing
+        # call, including the many synthetic/invalid reports this
+        # codebase's own test suite constructs.
+        if gate.get("finalizable"):
+            try:
+                from pcae.core.finalization_transaction import run_finalization_transaction
+                txn_result = run_finalization_transaction(
+                    phase_id=phase_id,
+                    phase_name=phase_name,
+                    report=report,
+                    gate=gate,
+                )
+                print(f"Finalization transaction (134E.10): {txn_result.status}")
+                if txn_result.limitations:
+                    for limitation in txn_result.limitations:
+                        print(f"  Limitation: {limitation}")
+            except Exception as txn_exc:  # noqa: BLE001 - best-effort, never fatal
+                print(f"Finalization transaction (134E.10): error (non-fatal) — {txn_exc}")
+
     # ── Notification certification (Phase 114B) ────────────────────────────
     # The single shared eligibility decision, evaluated before dispatch was
     # even attempted -- printed unconditionally so "eligible"/"already

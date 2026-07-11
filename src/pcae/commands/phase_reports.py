@@ -175,6 +175,39 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
     # contract this shares with the primary finalization path.
     notification = _dispatch_manual_report_notification(report, paths)
 
+    # Phase 134E.10 — final lifecycle integration. Best-effort, never fatal
+    # (see finalization_transaction.py and the matching call sites in
+    # commands/phase.py / commands/task.py / commands/notifications.py).
+    # This command has no CLI-supplied ``metadata``/push-state/commit-
+    # attribution kwargs to feed ``validate_finalization_gate`` the way the
+    # other three entry points do, so the gate is recomputed here read-only
+    # from what this command already assembled -- it changes no existing
+    # behavior (this command never consulted a gate object before).
+    try:
+        from pcae.core.finalization_transaction import run_finalization_transaction
+        from pcae.core.phase_reports import validate_finalization_gate as _vfg
+        _gate = _vfg(
+            phase_id=report.phase_id,
+            report=report,
+            metadata=report.metadata,
+            pushed_status=report.pushed_status,
+            origin_main_head_count=report.origin_main_head_count,
+            governance_results=report.governance_results,
+            test_results=report.test_results,
+            no_go_confirmations=report.explicit_no_go_confirmations,
+            recommended_next_phase=report.recommended_next_phase,
+            commit_attribution=report.metadata.get("commit_attribution", ""),
+        )
+        if _gate.get("finalizable"):
+            run_finalization_transaction(
+                phase_id=report.phase_id,
+                phase_name=report.phase_name,
+                report=report,
+                gate=_gate,
+            )
+    except Exception:  # noqa: BLE001 - best-effort, never fatal
+        pass
+
     if args.json:
         print(json.dumps({
             "status": "created",

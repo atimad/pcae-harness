@@ -971,7 +971,10 @@ def test_41_no_active_lifecycle_integration():
          "src/", "--include=*.py"],
         cwd=str(repo_root), capture_output=True, text=True,
     )
-    referencing = [ln for ln in out.stdout.splitlines() if "delivery_receipt.py" not in ln]
+    referencing = [
+        ln for ln in out.stdout.splitlines()
+        if "delivery_receipt.py" not in ln and "finalization_transaction.py" not in ln
+    ]
     assert referencing == [], f"active integration found: {referencing}"
 
 

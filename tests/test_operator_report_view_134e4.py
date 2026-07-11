@@ -1173,21 +1173,27 @@ def test_existing_lifecycle_unchanged():
     assert "OK" in proc.stdout
 
 
-def test_no_consumer_references_operator_report_view_yet():
-    # 134E.5 note: Rendering (``pcae.core.rendering``) is an expected,
-    # deliberately isolated *new* consumer of this module -- the next
-    # layer in the same disconnected architecture (View Composition ->
-    # Rendering), not an active-lifecycle one.
+def test_only_the_134e10_transaction_activates_operator_report_view():
+    # 134E.10 note: this module was disconnected through 134E.9V; 134E.10
+    # ("Final Lifecycle Integration") is the phase permitted to wire it
+    # in, via exactly one boundary, ``pcae.core.finalization_
+    # transaction``. Rendering remains the other expected consumer.
     import pathlib
     src_root = pathlib.Path(orv.__file__).resolve().parent.parent
-    _EXPECTED_ISOLATED_CONSUMERS = frozenset({"operator_report_view.py", "rendering.py"})
+    _EXPECTED_CONSUMERS = frozenset({
+        "operator_report_view.py", "rendering.py", "finalization_transaction.py",
+    })
     for path in src_root.rglob("*.py"):
-        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
+        if path.name in _EXPECTED_CONSUMERS:
             continue
         if "test" in str(path):
             continue
         text = path.read_text()
-        assert "operator_report_view" not in text, f"{path} unexpectedly references operator_report_view"
+        assert "operator_report_view" not in text, (
+            f"{path} unexpectedly references operator_report_view -- only "
+            "finalization_transaction.py (134E.10) is permitted to be a "
+            "new active-lifecycle consumer of this module"
+        )
 
 
 # ─────────────────────────────────────────────────────────────────────────────

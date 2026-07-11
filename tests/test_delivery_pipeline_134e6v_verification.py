@@ -669,7 +669,7 @@ def test_no_active_lifecycle_or_durable_receipt_side_effects(monkeypatch):
     import pathlib
     src_root = pathlib.Path(DP.__file__).resolve().parent.parent
     for path in src_root.rglob("*.py"):
-        if path.name in ("delivery_pipeline.py", "delivery_receipt.py"):
+        if path.name in ("delivery_pipeline.py", "delivery_receipt.py", "finalization_transaction.py"):
             continue
         if "test" in str(path):
             continue

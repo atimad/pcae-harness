@@ -18,6 +18,7 @@ phase-prompts/
 phase-reports/
 notifications/
 delivery-receipts/
+finalization-transactions/
 shell-gate-audit/
 backend-invocations/
 backend-reviews/

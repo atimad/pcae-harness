@@ -1138,7 +1138,10 @@ def test_99_transport_independent_core():
 # 100-107: lifecycle inactivity, regressions
 # ─────────────────────────────────────────────────────────────────────────────
 
-def test_100_no_active_lifecycle_integration():
+def test_100_only_134e10_transaction_has_active_lifecycle_integration():
+    # 134E.10 ("Final Lifecycle Integration") is the phase permitted to
+    # wire this module in, via exactly one boundary,
+    # ``pcae.core.finalization_transaction``.
     import subprocess
     out = subprocess.run(
         ["grep", "-rl", "delivery_receipt", "src/", "--include=*.py"],
@@ -1146,7 +1149,7 @@ def test_100_no_active_lifecycle_integration():
     )
     referencing = [
         line for line in out.stdout.splitlines()
-        if "delivery_receipt.py" not in line
+        if "delivery_receipt.py" not in line and "finalization_transaction.py" not in line
     ]
     assert referencing == []
 

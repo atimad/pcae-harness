@@ -1111,10 +1111,15 @@ def test_current_pfn001_behavior_unchanged():
     assert "delivery_pipeline" not in inspect.getsource(nc)
 
 
-_EXPECTED_ISOLATED_CONSUMERS = frozenset({"delivery_pipeline.py", "delivery_receipt.py"})
+_EXPECTED_ISOLATED_CONSUMERS = frozenset({
+    "delivery_pipeline.py", "delivery_receipt.py", "finalization_transaction.py",
+})
 
 
-def test_no_consumer_references_delivery_pipeline_yet():
+def test_only_the_134e10_transaction_activates_delivery_pipeline():
+    # 134E.10 ("Final Lifecycle Integration") is the phase permitted to
+    # wire this module in, via exactly one boundary,
+    # ``pcae.core.finalization_transaction``.
     import pathlib
     src_root = pathlib.Path(DP.__file__).resolve().parent.parent
     for path in src_root.rglob("*.py"):
@@ -1123,7 +1128,11 @@ def test_no_consumer_references_delivery_pipeline_yet():
         if "test" in str(path):
             continue
         text = path.read_text()
-        assert "delivery_pipeline" not in text, f"{path} unexpectedly references delivery_pipeline"
+        assert "delivery_pipeline" not in text, (
+            f"{path} unexpectedly references delivery_pipeline -- only "
+            "finalization_transaction.py (134E.10) is permitted to be a "
+            "new active-lifecycle consumer of this module"
+        )
 
 
 def test_future_delivery_adapter_can_consume_generic_contract():

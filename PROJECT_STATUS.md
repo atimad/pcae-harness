@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 134E.10 — Final Lifecycle Integration (completed).
+
+Integrated Stages 9 and 12 of the frozen Track 134 lifecycle (Repository/
+Governance Certification; Exactly-Once Logical Governed Completion) with
+the seven previously-built-but-fully-inactive 134E.1-134E.7 modules
+(Canonical Engineering Evidence, Evidence Extraction, Phase Report View,
+Operator Report View, Rendering, Delivery Pipeline, Delivery Receipt) —
+134E.9V confirmed via `grep -rn` that zero command paths reached any of
+them before this phase. A new module, `src/pcae/core/
+finalization_transaction.py`, is now the one and only place any of the
+seven are invoked, called from all five production finalization entry
+points (`pcae phase complete`, `pcae task finish`, `pcae phase-report
+create`, `pcae notify send-report`, and push-time reconciliation) strictly
+*after* each entry point's existing, unmodified certified-report path has
+already validated, promoted, and (if applicable) dispatched — never
+replacing that path, never introducing a second completion authority.
+Deliberately narrower than a fully literal "merge all five entry points
+into one function" reading of the task brief: direct inspection found
+genuinely divergent, load-bearing logic between the five call sites, and
+134D's own §5 authority boundary and §7 risk table ("additive-first... not
+replace-first") favor the approach taken. Two genuine defects were found
+and repaired during this phase's own full-suite regression work, not
+merely claimed fixed: (1) `commands/task.py` initially called the new
+transaction unconditionally rather than gating on the finalization gate's
+result, causing ordinary test runs with synthetic/incomplete data to leak
+real checkpoint files into the repository; (2) the transaction's own
+internal `gate_not_passed` rejection branch persisted an unneeded
+checkpoint file even after fix (1), still triggered by a 134B.2-era test
+that deliberately monkeypatches the finalization gate to isolate an
+unrelated variable. Both found via direct, repeated, apples-to-apples
+full-suite comparison against a truly clean baseline (`git stash -u`) — not
+via review of this phase's own claims — and both repaired at the smallest
+correct boundary (an explicit gate guard at each of the three previously
+ungated call sites; removing the unnecessary write entirely). Two NON-
+BLOCKING findings carried forward from 134E.9V, disclosed, not repaired
+(the fast-green test-file-gate-coverage gap; the one pre-existing,
+already-disclosed out-of-fast-green-scope regression failure — joined by
+one further pre-existing, unrelated failure this phase's full-suite run
+additionally surfaced and confirmed, via `git stash`, to predate this
+phase entirely). Full-suite regression: 182 failed (exact match,
+test-by-test, to the clean baseline), 19,347 passed — zero new failures,
+zero fixed/flaky failures, zero filesystem pollution. `compileall` clean.
+Fast-green deterministic at 4391/4391 across three consecutive runs
+(parallel twice, serial once), identical to the 134E.9V baseline. Delivery
+Receipts record a structural model of an already-executed dispatch, via an
+in-memory recording adapter with zero network I/O — they do not, and are
+explicitly disclosed not to, prove physical exactly-once delivery; only the
+pre-existing `.last-notified.json` marker and dispatch result (unmodified
+by this phase) speak to that. Full details in `docs/
+PHASE_134_FINAL_LIFECYCLE_INTEGRATION.md`.
+
+Recommended next phase: 134E.10V — Final Lifecycle Integration Independent
+Verification.
+134E.10V was not begun in this phase. 134F was not begun.
+
+## Phase 134E.9V Complete (historical — full text)
+
 Phase 134E.9V — Report Consistency / Derived Correctness Independent Verification (completed).
 
 Independently verified the complete 134E.9/134E.9.1 Report Consistency /

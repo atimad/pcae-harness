@@ -45,10 +45,16 @@ def _init_repo_with_real_origin(tmp_path: Path) -> Path:
     # Mirrors this actual repository's own `.pcae/.gitignore` convention:
     # `phase-reports/` is untracked/ignored there too, so canonical report
     # writes (including this phase's post-push reconciliation) never dirty
-    # the tracked working tree.
+    # the tracked working tree. Phase 134E.10 activates the finalization
+    # transaction, which writes its own ephemeral bookkeeping
+    # (`finalization-transactions/`, `delivery-receipts/`) alongside the
+    # report -- same convention, same reason.
     pcae_gitignore = work / ".pcae" / ".gitignore"
     existing = pcae_gitignore.read_text(encoding="utf-8") if pcae_gitignore.exists() else ""
-    pcae_gitignore.write_text(existing + "\nphase-reports/\n", encoding="utf-8")
+    pcae_gitignore.write_text(
+        existing + "\nphase-reports/\nfinalization-transactions/\ndelivery-receipts/\n",
+        encoding="utf-8",
+    )
 
     _run_git(work, "add", ".")
     _run_git(work, "commit", "-m", "baseline")

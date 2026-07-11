@@ -1084,24 +1084,30 @@ def test_no_active_lifecycle_imports():
     assert not hasattr(mod, "notifications")
 
 
-def test_no_consumer_references_phase_report_view_yet():
-    # 134E.5 note: Rendering (``pcae.core.rendering``) is an expected,
-    # deliberately isolated *new* consumer of this module -- the next
-    # layer in the same disconnected architecture (View Composition ->
-    # Rendering), not an active-lifecycle one.
+def test_only_the_134e10_transaction_activates_phase_report_view():
+    # 134E.10 note: this module was disconnected from active lifecycle
+    # authority through 134E.9V. Phase 134E.10 ("Final Lifecycle
+    # Integration") is the phase the module's own docstring named as the
+    # one permitted to wire it in -- via exactly one boundary,
+    # ``pcae.core.finalization_transaction``, never a second/competing
+    # consumer. Rendering (``pcae.core.rendering``) remains the other
+    # expected, deliberately isolated consumer (View Composition ->
+    # Rendering).
     import pathlib
     src_root = pathlib.Path(prv.__file__).resolve().parent.parent
-    _EXPECTED_ISOLATED_CONSUMERS = frozenset({"phase_report_view.py", "rendering.py"})
+    _EXPECTED_CONSUMERS = frozenset({
+        "phase_report_view.py", "rendering.py", "finalization_transaction.py",
+    })
     for path in src_root.rglob("*.py"):
-        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
+        if path.name in _EXPECTED_CONSUMERS:
             continue
         if "test" in str(path):
             continue
         text = path.read_text()
         assert "phase_report_view" not in text, (
-            f"{path} unexpectedly references phase_report_view -- this "
-            "module must remain fully disconnected from active lifecycle "
-            "authority"
+            f"{path} unexpectedly references phase_report_view -- only "
+            "finalization_transaction.py (134E.10) is permitted to be a "
+            "new active-lifecycle consumer of this module"
         )
 
 

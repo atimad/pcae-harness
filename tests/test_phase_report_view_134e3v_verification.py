@@ -637,7 +637,9 @@ def test_no_active_lifecycle_fresh_full_tree_scan():
     # Rendering), not an active-lifecycle one.
     import pathlib
     src_root = pathlib.Path(prv.__file__).resolve().parent.parent
-    _EXPECTED_ISOLATED_CONSUMERS = frozenset({"phase_report_view.py", "rendering.py"})
+    _EXPECTED_ISOLATED_CONSUMERS = frozenset({
+        "phase_report_view.py", "rendering.py", "finalization_transaction.py",
+    })
     for path in src_root.rglob("*.py"):
         if path.name in _EXPECTED_ISOLATED_CONSUMERS:
             continue

@@ -275,6 +275,22 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
             finalization_snapshot_id=snapshot_id,
         )
 
+    # Phase 134E.10 — final lifecycle integration. Best-effort, never fatal
+    # (see finalization_transaction.py and the matching call sites in
+    # commands/phase.py / commands/task.py). The physical send already
+    # happened above via the existing, already-authorized dispatch() path;
+    # this only captures/models it through the new machinery.
+    try:
+        from pcae.core.finalization_transaction import run_finalization_transaction
+        run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=gate,
+        )
+    except Exception:  # noqa: BLE001 - best-effort, never fatal
+        pass
+
     if args.json:
         print(json.dumps({
             "event": event.to_dict(),

@@ -650,7 +650,7 @@ def test_no_active_lifecycle_imports_fresh_scan():
     src_root = pathlib.Path(ee.__file__).resolve().parent.parent
     _EXPECTED_ISOLATED_CONSUMERS = frozenset({
         "evidence_extraction.py", "phase_report_view.py", "operator_report_view.py",
-        "rendering.py",
+        "rendering.py", "finalization_transaction.py",
     })
     for path in src_root.rglob("*.py"):
         if path.name in _EXPECTED_ISOLATED_CONSUMERS:
