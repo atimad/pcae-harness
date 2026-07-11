@@ -172,6 +172,16 @@ class TestCompletedPhaseDenialAndSelfRecommendation:
         issues = validate_internal_report_coherence(report)
         assert any("recommends itself" in i for i in issues)
 
+    def test_self_recommendation_case_insensitive(self):
+        """Phase 134E.9V — independent verification found direct
+        adversarial proof that a lowercase self-recommendation
+        ("999a — Self") previously bypassed this check entirely: the
+        raw regex capture preserves input case, so a case-sensitive
+        '==' against phase_id never matched."""
+        report = _report(recommended_next_phase="999a — Self (lowercase)")
+        issues = validate_internal_report_coherence(report)
+        assert any("recommends itself" in i for i in issues)
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # 4. Recommended-next-phase already completed (general, not just self)
@@ -184,6 +194,14 @@ class TestRecommendedNextAlreadyCompleted:
         # 113A is in completed_phase_ids per _fresh_arch_status()
         issues = validate_derived_correctness(report)
         assert any("113A" in i and "already" in i for i in issues)
+
+    def test_recommending_already_completed_phase_case_insensitive(self):
+        """Same case-normalization bypass class as self-recommendation
+        above, independently found in validate_derived_correctness()'s
+        own separate comparison."""
+        report = _report(recommended_next_phase="113a — Advisory Runtime Architecture")
+        issues = validate_derived_correctness(report)
+        assert any("113a" in i and "already" in i for i in issues)
 
     def test_explicit_corrective_recovery_classification_permits_it(self):
         report = _report(recommended_next_phase="113A — Advisory Runtime Architecture")
@@ -506,6 +524,119 @@ class TestFastGreenValueValidation:
         *present* value."""
         report = _report()
         report.test_results = {}
+        assert validate_derived_correctness(report) == []
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 12.1.1. Fast-green value type-robustness (Phase 134E.9V)
+# ═══════════════════════════════════════════════════════════════════════
+#
+# Independent verification found the original proximity regex applied
+# ``str(value)`` to *any* type, proven unsound by direct adversarial
+# probing before any test was written:
+#   {"passed": 0, "failed": 5}   -> [] (false negative: 5 real failures missed)
+#   {"passed": 4390, "failed": 0} -> flagged as "4390 failures" (false positive)
+#   True / False / -1 / 0 / None -> [] (silently accepted, no finding)
+# ``_fast_green_failure_signal()`` replaces the single regex with
+# type-aware structural interpretation: Mapping read by its own
+# ``failed``/``failures`` key; bool/bare-int/None are malformed (fail
+# closed); str is interpreted by natural-language failure-count,
+# explicit "N passed", or this repository's "<passed>/<total>" fraction
+# convention (verified widely used in existing fixtures, e.g. "100/100",
+# "3305/3305", "1/1") -- anything else fails closed as malformed.
+
+
+class TestFastGreenValueTypeRobustness:
+    def test_mapping_with_failed_key_nonzero_blocks(self):
+        report = _report()
+        report.test_results = {"fast_green": {"passed": 0, "failed": 5}}
+        issues = validate_derived_correctness(report)
+        assert any("5 failure" in i for i in issues)
+
+    def test_mapping_with_failed_key_zero_passes(self):
+        report = _report()
+        report.test_results = {"fast_green": {"passed": 4390, "failed": 0}}
+        assert validate_derived_correctness(report) == []
+
+    def test_mapping_without_recognized_key_is_malformed(self):
+        report = _report()
+        report.test_results = {"fast_green": {"result": "green"}}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_mapping_failed_key_non_int_value_is_malformed(self):
+        report = _report()
+        report.test_results = {"fast_green": {"failed": "none"}}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_boolean_true_is_malformed_not_accepted_as_one(self):
+        report = _report()
+        report.test_results = {"fast_green": True}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_boolean_false_is_malformed_not_accepted_as_zero(self):
+        report = _report()
+        report.test_results = {"fast_green": False}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_bare_negative_int_is_malformed(self):
+        report = _report()
+        report.test_results = {"fast_green": -1}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_bare_positive_int_is_malformed_no_unit(self):
+        """A bare int has no unit -- it is never safe to guess whether
+        it means 'N passed' or 'N failed'."""
+        report = _report()
+        report.test_results = {"fast_green": 4391}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_none_value_is_malformed(self):
+        report = _report()
+        report.test_results = {"fast_green": None}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_unparseable_string_is_malformed(self):
+        report = _report()
+        report.test_results = {"fast_green": "xyz status unknown"}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_fraction_format_all_passed(self):
+        report = _report()
+        report.test_results = {"fast_green": "4390/4390"}
+        assert validate_derived_correctness(report) == []
+
+    def test_fraction_format_widely_used_conventions_pass(self):
+        for value in ("100/100", "3305/3305", "1/1"):
+            report = _report()
+            report.test_results = {"fast_green": value}
+            assert validate_derived_correctness(report) == [], value
+
+    def test_fraction_format_with_shortfall_blocks(self):
+        report = _report()
+        report.test_results = {"fast_green": "4389/4390"}
+        issues = validate_derived_correctness(report)
+        assert any("1 failure" in i for i in issues)
+
+    def test_fraction_passed_exceeds_total_is_malformed(self):
+        report = _report()
+        report.test_results = {"fast_green": "10/5"}
+        issues = validate_derived_correctness(report)
+        assert any("malformed" in i for i in issues)
+
+    def test_empty_string_treated_as_no_assertion_not_malformed(self):
+        """An explicitly empty string is a distinct, pre-existing
+        trust-completeness concern (empty required field), not this
+        check's malformed-value finding."""
+        report = _report()
+        report.test_results = {"fast_green": ""}
         assert validate_derived_correctness(report) == []
 
 

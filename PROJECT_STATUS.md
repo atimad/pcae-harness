@@ -2,6 +2,65 @@
 
 ## Current Phase
 
+Phase 134E.9V — Report Consistency / Derived Correctness Independent Verification (completed).
+
+Independently verified the complete 134E.9/134E.9.1 Report Consistency /
+Derived Correctness implementation via re-derivation, never trusting
+implementation claims. Found and repaired three genuine BLOCKING defects,
+each proven by direct adversarial probing before any test was written: (1)
+the fast-green value-validation regex was type-unsound against non-string
+representations — `{"passed": 0, "failed": 5}` (5 real failures) produced
+zero findings (false negative, matched the wrong leading digit), `{"passed":
+4390, "failed": 0}` (0 real failures) was wrongly flagged as 4390 failures
+(false positive), and `True`/`False`/`-1`/`0`/`None` all silently passed
+with no finding at all; (2) the fix for (1), applied first, broke this
+codebase's widely-used `"N/M"` fraction convention (`"100/100"`,
+`"3305/3305"`, `"1/1"`, found across five existing test files) — caught by
+running the full regression suite before finalizing, never shipped broken;
+(3) a case-sensitivity bypass present in two independent checks
+(self-recommendation in `validate_internal_report_coherence()`, and
+already-completed-recommendation in `validate_derived_correctness()`) — a
+lowercase phase ID (`"113a"`) silently escaped both. Repaired all three at
+the smallest shared boundary: new `_fast_green_failure_signal()` interprets
+`bool`/`Mapping`/bare-`int`/`str` (including the fraction convention)
+type-aware, failing closed on anything unresolvable; both recommendation
+checks now case-normalize before comparing. Independently re-confirmed (not
+re-implemented, no defect found): the shared validation boundary across all
+four active finalization paths, fail-closed ordering, digest/snapshot
+enforcement, phase-scoped ordinary-completion identity, the Architecture
+Status sealing contract, the 134E.9.1 dotted-sub-phase corrective identity
+model (consistent with this codebase's established convention), the
+non-hermetic dry-run test repair (re-verified isolated under parallel,
+serial, and no-active-task conditions), and transport neutrality. 17 new
+focused adversarial tests (62 total in the shared suite); 583 related-suite
+regression tests pass (the same single pre-existing, already-disclosed,
+out-of-fast-green-scope failure as 134E.9.1, unrelated to this phase);
+`compileall` clean; fast-green deterministic at 4391/4391 across three
+consecutive runs (parallel twice, serial once). Two NON-BLOCKING findings
+carried forward, disclosed, not repaired (a labeling false-positive on
+134E.9.1's own historical report; `phase_reports.py`'s own test files still
+not in the `fast_green` gate — both already disclosed by 134E.9.1). No
+Canonical Engineering Evidence, Evidence Extraction, Phase Report View,
+Operator Report View, Rendering Architecture, Delivery Pipeline, or Delivery
+Receipt activation. No execution capability. Full details in
+`docs/PHASE_134_REPORT_CONSISTENCY_DERIVED_CORRECTNESS_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134E.10 — Final Lifecycle Integration.
+134E.10 was not begun in this phase.
+
+## Phase 134E.9V Complete
+
+Independently verified 134E.9/134E.9.1's Report Consistency / Derived
+Correctness implementation via re-derivation. Found and repaired three
+BLOCKING defects: type-unsound fast-green value validation (dict/bool/int/
+None), a fraction-format regression introduced by that fix and caught
+before finalizing, and a case-sensitivity bypass in two recommendation
+checks. Zero unresolved BLOCKING findings remain; fast-green deterministic
+at 4391/4391. No new evidence/delivery lifecycle activation; no execution
+capability; 134E.10 was not begun.
+
+## Phase 134E.9.1 Complete (historical — full text)
+
 Phase 134E.9.1 — Fast-Green Regression and Report-Consistency Repair (completed).
 
 Corrective phase resolving the material contradiction between 134E.8V's

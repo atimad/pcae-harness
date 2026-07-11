@@ -15,6 +15,7 @@ import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
+from collections.abc import Mapping
 from typing import Any
 
 from pcae.core.canonical_artifact_promotion import (
@@ -1181,7 +1182,18 @@ def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
         report.recommended_next_phase.strip(),
         re.IGNORECASE,
     )
-    if report.status == "completed" and next_match and next_match.group(1) == phase_id:
+    # Phase 134E.9V — case-normalize before comparison. Confirmed by
+    # direct adversarial probing that recommended_next_phase="113a —
+    # Self" (lowercase) previously bypassed this check entirely:
+    # next_match.group(1) preserves the input's original case ("113a"),
+    # so a case-sensitive "==" against phase_id ("113A") silently never
+    # matched. Phase IDs are case-insensitive identities throughout this
+    # codebase (the grammar itself, PHASE_ID_RE, permits either case).
+    if (
+        report.status == "completed"
+        and next_match
+        and next_match.group(1).upper() == phase_id.upper()
+    ):
         issues.append(f"completed phase recommends itself ({phase_id})")
 
     test_text = "\n".join(f"{key}: {value}" for key, value in report.test_results.items())
@@ -1296,7 +1308,83 @@ ALLOWED_RUNTIME_TUPLES: frozenset[tuple[str, str, str]] = frozenset({
 # escape hatch is provided: unlike the recommended-next-phase or
 # test-evidence-linkage checks above, a governed classification cannot
 # make a real fast_green failure retroactively not have happened.
+#
+# Phase 134E.9V — independent verification found the original
+# proximity-based regex (``(\d+)[^\d]{0,40}?fail``, applied to
+# ``str(value)`` for *any* type) unsound against non-natural-language
+# representations, proven by direct adversarial probing before any test
+# was written: ``{"passed": 0, "failed": 5}`` (a real 5-failure result)
+# matched on the unrelated leading ``0`` from ``"passed": 0`` and
+# reported **zero** failures -- a false negative that would have let a
+# genuinely failing suite reach `complete`. Conversely
+# ``{"passed": 4390, "failed": 0}`` (a clean pass) matched forward onto
+# ``"failed"`` and reported 4390 failures -- a false positive. Bare
+# ``True``/``False``/``None``/negative/bare-int values passed through
+# with no finding at all, silently. ``_fast_green_failure_signal()``
+# replaces the single regex with type-aware, structural interpretation:
+# a ``Mapping`` is read by its own ``failed``/``failures`` key (never by
+# textual proximity); a ``bool`` (checked before ``int`` -- ``bool`` is
+# an ``int`` subclass in Python) or any other non-``str``/``Mapping``/
+# ``int`` type is malformed; a bare ``int`` is ambiguous (no unit) and
+# also malformed; only a ``str`` is interpreted by natural-language
+# pattern (failure count, or an explicit "N passed" clean-pass signal).
+# Anything that cannot be confidently interpreted fails closed as
+# malformed -- "unknown or unresolved values fail closed" is now a
+# structural property, not a byproduct of what the regex happened to miss.
 _FAST_GREEN_FAILURE_RE = re.compile(r'(\d+)[^\d]{0,40}?fail', re.IGNORECASE)
+_FAST_GREEN_PASSED_RE = re.compile(r'\d+\s*passed', re.IGNORECASE)
+# This repository's other well-established convention alongside "N
+# passed"/"N failed" prose: a bare "<passed>/<total>" fraction (e.g.
+# "4390/4390", used throughout PROJECT_STATUS.md and every phase report
+# preceding this one). Recognized only when no explicit failure-count
+# language matched first; failures are the implied ``total - passed``.
+_FAST_GREEN_FRACTION_RE = re.compile(r'(\d+)\s*/\s*(\d+)')
+_FAST_GREEN_FAILURE_KEYS: tuple[str, ...] = ("failed", "failures", "fail_count", "num_failed")
+
+
+def _fast_green_failure_signal(value: Any) -> tuple[int | None, bool]:
+    """Interpret one ``test_results["fast_green"]`` value.
+
+    Returns ``(failure_count, malformed)``. ``malformed=True`` means the
+    value could not be confidently interpreted as either a clean pass or
+    an explicit failure count, and must be treated as a failure (fail
+    closed) by the caller regardless of ``failure_count`` (always
+    ``None`` when malformed). ``failure_count`` is the confidently
+    resolved nonzero-or-zero failure count when ``malformed=False``.
+    """
+    if isinstance(value, bool):
+        # bool is an int subclass -- checked first so True/False are
+        # never silently treated as 1/0.
+        return None, True
+    if isinstance(value, Mapping):
+        for key in _FAST_GREEN_FAILURE_KEYS:
+            if key in value:
+                raw = value[key]
+                if isinstance(raw, bool) or not isinstance(raw, int):
+                    return None, True
+                return raw, False
+        return None, True
+    if isinstance(value, int):
+        # A bare int has no unit -- could mean "N passed" or "N failed"
+        # with equal plausibility; never guess.
+        return None, True
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None, False
+        fail_match = _FAST_GREEN_FAILURE_RE.search(text)
+        if fail_match:
+            return int(fail_match.group(1)), False
+        if _FAST_GREEN_PASSED_RE.search(text):
+            return 0, False
+        frac_match = _FAST_GREEN_FRACTION_RE.search(text)
+        if frac_match:
+            passed_n, total_n = int(frac_match.group(1)), int(frac_match.group(2))
+            if total_n >= passed_n:
+                return total_n - passed_n, False
+            return None, True  # nonsensical fraction (passed > total)
+        return None, True
+    return None, True
 
 
 def validate_derived_correctness(report: PhaseReport) -> list[str]:
@@ -1321,15 +1409,21 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
     # failure count reported in test_results["fast_green"] must block,
     # regardless of how the failure is narrated (e.g. "pre-existing",
     # "unrelated") -- that narration is not itself verified evidence.
-    fast_green_value = ""
-    if isinstance(report.test_results, dict):
-        fast_green_value = str(report.test_results.get("fast_green", ""))
-    if fast_green_value:
-        fail_match = _FAST_GREEN_FAILURE_RE.search(fast_green_value)
-        if fail_match and int(fail_match.group(1)) > 0:
+    # Absence of the key is a separate, pre-existing trust-completeness
+    # concern (_REQUIRED_BASE_TEST_RESULT_KEYS) -- this check only
+    # interprets a key that is actually present.
+    if isinstance(report.test_results, dict) and "fast_green" in report.test_results:
+        raw_fast_green = report.test_results["fast_green"]
+        fail_count, malformed = _fast_green_failure_signal(raw_fast_green)
+        if malformed:
             issues.append(
-                f"test_results['fast_green'] reports {fail_match.group(1)} "
-                f"failure(s) ({fast_green_value!r}) -- a failing fast_green "
+                f"test_results['fast_green'] value {raw_fast_green!r} is "
+                f"malformed or unresolved -- cannot certify complete"
+            )
+        elif fail_count:
+            issues.append(
+                f"test_results['fast_green'] reports {fail_count} "
+                f"failure(s) ({raw_fast_green!r}) -- a failing fast_green "
                 f"result cannot be certified complete"
             )
 
@@ -1360,11 +1454,16 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
         report.recommended_next_phase.strip(),
         re.IGNORECASE,
     )
-    completed_ids = set(arch.get("completed_phase_ids") or [])
+    # Phase 134E.9V — case-normalized comparison (same bypass class as
+    # the self-recommendation fix above: a lowercase recommendation,
+    # e.g. "113a — Something", previously escaped this check entirely
+    # because ``completed_phase_ids`` is populated in canonical
+    # uppercase but the raw regex capture preserves input case).
+    completed_ids_upper = {str(pid).upper() for pid in (arch.get("completed_phase_ids") or [])}
     next_classification = str(md.get("next_phase_classification", "")).strip()
     if (
         next_match
-        and next_match.group(1) in completed_ids
+        and next_match.group(1).upper() in completed_ids_upper
         and next_classification != "corrective_recovery_transition"
     ):
         issues.append(

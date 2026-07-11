@@ -2,6 +2,39 @@
 
 ## Unreleased
 
+- Phase 134E.9V - Report Consistency / Derived Correctness Independent
+  Verification
+  (`docs/PHASE_134_REPORT_CONSISTENCY_DERIVED_CORRECTNESS_INDEPENDENT_VERIFICATION.md`).
+  Independently verified 134E.9/134E.9.1 via re-derivation. Found and
+  repaired three BLOCKING defects, each proven by direct adversarial
+  probing before any test was written: (1) fast-green value validation
+  (`_fast_green_failure_signal()`, `src/pcae/core/phase_reports.py`) was
+  type-unsound — `{"passed": 0, "failed": 5}` produced a false negative
+  (matched the wrong leading digit), `{"passed": 4390, "failed": 0}` a
+  false positive, and `True`/`False`/`-1`/`0`/`None` all silently
+  passed; (2) the fix for (1) initially broke this codebase's widely-
+  used `"N/M"` fraction convention (`"100/100"` etc., used across five
+  existing test files) — caught by the regression suite before
+  finalizing; (3) a case-sensitivity bypass in both `validate_internal_
+  report_coherence()`'s self-recommendation check and `validate_
+  derived_correctness()`'s already-completed-recommendation check — a
+  lowercase phase ID silently escaped both. Repaired all three at the
+  smallest shared boundary. Independently re-confirmed with no defect
+  found: the shared validation boundary across all four finalization
+  paths, fail-closed ordering, digest/snapshot enforcement, phase-scoped
+  ordinary-completion identity, the Architecture Status sealing
+  contract, 134E.9.1's dotted-sub-phase corrective identity model, the
+  non-hermetic dry-run test repair, and transport neutrality. 17 new
+  focused adversarial tests (62 total); 583 related-suite regression
+  tests pass (same single pre-existing, disclosed, out-of-scope
+  failure); `compileall` clean; fast-green deterministic at 4391/4391
+  across three consecutive runs (parallel twice, serial once). Two
+  NON-BLOCKING findings carried forward, disclosed, not repaired
+  (already disclosed by 134E.9.1). No Canonical Engineering Evidence,
+  Evidence Extraction, Phase Report View, Operator Report View,
+  Rendering Architecture, Delivery Pipeline, or Delivery Receipt
+  activation; no execution capability; 134E.10 was not begun.
+
 - Phase 134E.9.1 - Fast-Green Regression and Report-Consistency Repair
   (`docs/PHASE_134_FAST_GREEN_REGRESSION_REPORT_CONSISTENCY_REPAIR.md`).
   Corrective phase resolving the contradiction between 134E.8V's
