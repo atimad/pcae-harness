@@ -40,6 +40,7 @@ from pcae.core.phase_reports import (
     compute_finalization_snapshot_id,
     compute_report_digest,
     make_phase_report,
+    read_latest_report,
     validate_derived_correctness,
     validate_finalization_gate,
     validate_internal_report_coherence,
@@ -506,6 +507,109 @@ class TestFastGreenValueValidation:
         report = _report()
         report.test_results = {}
         assert validate_derived_correctness(report) == []
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 12.2. `pcae phase-report create` shares the coherence/derived-correctness
+# boundary (Phase 134E.9.1)
+# ═══════════════════════════════════════════════════════════════════════
+#
+# Direct inspection during 134E.9.1 confirmed `run_phase_report_create()`
+# called only `report.apply_trust_assessment()` -- never `_apply_
+# canonical_and_trust()`, the function that additionally runs
+# `validate_internal_report_coherence()` and `validate_derived_
+# correctness()`. `pcae phase complete` (`phase.py`) and `pcae task
+# finish` (`task.py`) both already called the shared helper; `phase-
+# report create` silently did not, so a report built through this
+# specific governed command could reach `report_completeness: complete`
+# with contradictory evidence (self-recommendation, a stale Architecture
+# Status snapshot, a failing fast_green value) with no check ever
+# running -- exactly the gap that let 134E.9's own report through.
+
+
+class TestPhaseReportCreateSharesCoherenceBoundary:
+    def _args(self, tmp_path, **overrides):
+        from argparse import Namespace
+        defaults = dict(
+            phase_id="999A", phase_name="Test Phase", status="completed",
+            summary="Test.", started_at=None, completed_at="",
+            files_changed=3, tests_run=10, pushed_status="pushed",
+            origin_main_head_count=0, recommended_next_phase="999A — Self",
+            commit=["abc12345"],
+            governance_result=[
+                "pcae_check=passed", "pcae_health=healthy",
+                "pcae_doctor_task_memory=clean", "pcae_push_check=clean",
+                "telegram_runtime=configured",
+            ],
+            test_result=[
+                "fast_green=100 passed",
+                "bootstrap_session_reporting_tests=not_applicable",
+                "report_notification_tests=not_applicable",
+            ],
+            no_go_confirmation=[f"No issue {i}." for i in range(11)],
+            reports_dir=str(tmp_path), json=True,
+        )
+        defaults.update(overrides)
+        return Namespace(**defaults)
+
+    def test_self_recommendation_downgrades_completeness(self, tmp_path, monkeypatch):
+        """A self-recommending report (the exact 134E.8.1 defect shape)
+        must never reach complete through this command."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "PROJECT_STATUS.md").write_text(
+            "# Project Status\n\n## Current Phase\n\n"
+            "Phase 999A — Test Phase (completed).\n\n"
+            "Recommended next phase: 999B — Next.\n\n"
+            "## Phase 999A Complete\n\nPhase 999A — Test Phase.\n"
+        )
+        args = self._args(tmp_path)
+        run_phase_report_create(args)
+        report = read_latest_report(tmp_path)
+        assert report.report_completeness != "complete"
+        assert any("recommends itself" in w for w in report.trust_warnings)
+
+    def test_failing_fast_green_downgrades_completeness(self, tmp_path, monkeypatch):
+        """The exact 134E.9 defect shape: a report whose own fast_green
+        value states a failure must never reach complete through this
+        command either."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "PROJECT_STATUS.md").write_text(
+            "# Project Status\n\n## Current Phase\n\n"
+            "Phase 999A — Test Phase (completed).\n\n"
+            "Recommended next phase: 999B — Next.\n\n"
+            "## Phase 999A Complete\n\nPhase 999A — Test Phase.\n"
+        )
+        args = self._args(
+            tmp_path,
+            recommended_next_phase="999B — Next",
+            test_result=["fast_green=4389 passed, 1 failed"],
+        )
+        run_phase_report_create(args)
+        report = read_latest_report(tmp_path)
+        assert report.report_completeness != "complete"
+        assert any("fast_green" in w for w in report.trust_warnings)
+
+    def test_coherent_report_still_reaches_complete(self, tmp_path, monkeypatch):
+        """The wiring fix must not make every report incomplete -- a
+        genuinely coherent report still reaches complete."""
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "PROJECT_STATUS.md").write_text(
+            "# Project Status\n\n## Current Phase\n\n"
+            "Phase 999A — Test Phase (completed).\n\n"
+            "Recommended next phase: 999B — Next.\n\n"
+            "## Phase 999A Complete\n\nPhase 999A — Test Phase.\n"
+        )
+        args = self._args(tmp_path, recommended_next_phase="999B — Next")
+        rc = run_phase_report_create(args)
+        assert rc == 0
+        report = read_latest_report(tmp_path)
+        assert report.report_completeness == "complete"
 
 
 # ═══════════════════════════════════════════════════════════════════════

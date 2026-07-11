@@ -217,6 +217,76 @@ touched by 134E.9 or this phase** — out of this corrective phase's
 charter (fast-green regression repair specifically); left unrepaired
 and explicitly disclosed here rather than silently ignored.
 
+### 8.4 A second, deeper shared-boundary gap: `phase-report create`
+never called the coherence/derived-correctness pipeline at all
+
+While verifying `pcae phase-report consistency` against this phase's
+own report, direct source inspection revealed `run_phase_report_create()`
+(`src/pcae/commands/phase_reports.py`) called only `report.apply_trust_
+assessment()` — **never** `_apply_canonical_and_trust()`, the function
+that additionally runs `validate_internal_report_coherence()` and
+`validate_derived_correctness()`. `pcae phase complete`
+(`commands/phase.py`) and `pcae task finish` (`commands/task.py`) both
+already call the shared helper; `phase-report create` silently did not.
+This means one of the four call sites 134E.9's own documentation claimed
+shared the coherence/derived-correctness boundary did not — a report
+built through this specific governed command could reach `report_
+completeness: complete` with contradictory evidence (self-recommendation,
+a stale/invalid Architecture Status snapshot, or — as happened —
+a failing fast_green value) with no check ever running. This is
+plausibly a *third* contributing factor (beyond 8.1/8.2) in how 134E.9's
+own report reached `complete`, since it was created via `phase-report
+create`.
+
+**Repaired**: `run_phase_report_create()` now calls the same shared
+`_apply_canonical_and_trust()` helper `phase complete`/`task finish`
+already use, closing the gap at the smallest shared boundary rather
+than duplicating coherence/derived-correctness logic into this command.
+Three new fixture-based tests
+(`TestPhaseReportCreateSharesCoherenceBoundary` in `tests/test_report_
+consistency_derived_correctness_134e9.py`) directly prove: a
+self-recommending report is downgraded to non-complete through this
+command; a report with a failing fast_green value is downgraded through
+this command; and a genuinely coherent report still reaches complete
+(the fix does not over-block). Full fast-green re-confirmed clean
+(4391/4391) after this additional change.
+
+### 8.5 Disclosed, out-of-scope finding: `phase_reports.py`'s own test
+suite is not in the `fast_green` gate
+
+Adding the four-call-site test above required verifying `tests/test_
+phase_reports.py` itself — and direct inspection of `tests/conftest.py`'s
+`FAST_GREEN_MODULES` allowlist (the mechanism that auto-applies the
+`fast_green` marker to whole modules; a handful of other files, like
+`test_dry_run_simulation.py`, opt in via their own module-level
+`pytestmark` instead) revealed that **none** of `test_phase_reports.py`,
+`test_report_consistency_derived_correctness_134e9.py`,
+`test_architecture_status_generation_repair_134e8.py`,
+`test_architecture_status_canonicalization.py`,
+`test_architecture_status_generation_independent_verification_134e8v.py`,
+`test_phase_identity.py`, or `test_canonical_phase_identity_source_
+repair.py` are included by either mechanism. The `fast_green` gate this
+entire phase (and 134E.8, 134E.9) has been validated against **never
+actually exercises `phase_reports.py`'s own dedicated test files** —
+346 tests, ~3.4s combined runtime, well within the suite's own ~60s
+budget.
+
+This is a real coverage gap, disclosed rather than silently left. It was
+**not repaired in this phase**: adding these files surfaced at least one
+further pre-existing test-isolation defect of the same class this phase
+exists to fix (`TestPhase126G1CommitTrustMetadataRepair::test_report_
+completeness_reaches_complete_via_cli_alone` reads the real, live
+`PROJECT_STATUS.md` without isolating it, so it now depends on which
+phase is genuinely current — exactly the anti-pattern Sections 8.1/8.3
+already repaired elsewhere). Auditing and repairing every such
+occurrence across a 300+ test file is a materially larger scope than
+this corrective phase's charter (the specific 4390-vs-4389 fast-green
+discrepancy and the fast-green-value completeness gap); expanding
+`FAST_GREEN_MODULES` to include these files, once they are individually
+audited for the same live-state-coupling defect class, is recommended
+as explicit follow-up work — most naturally as part of 134E.9V's own
+independent verification scope.
+
 ## 9. Verifying Report-Consistency Completeness Behavior
 
 Per PFR-001/134A-134D/134E.9's own derived-correctness rules,
@@ -354,6 +424,37 @@ investigation or testing. Exactly one authorized corrective operator
 delivery occurs at this phase's own governed finalization (`pcae
 phase-report create` under `phase_id="134E.9.1"`), recorded in this
 phase's own phase-completion metadata.
+
+### 19.1 Known, Disclosed Limitation of This Phase's Own Dispatched Report
+
+`pcae phase-report consistency` run against this phase's own delivered
+report (after delivery) surfaces one finding:
+`validate_internal_report_coherence()`'s pre-existing "test evidence
+linked only to another phase identities" check flags the test-result
+key `report_consistency_derived_correctness_134e9` (a governance-
+evidence label naming the shared, extended test file `tests/test_
+report_consistency_derived_correctness_134e9.py`) because it
+pattern-matches the token `134E9` — same series (`134`) as this phase's
+own `134E.9.1`, different specific identity. This is a genuine ambiguity
+the check is designed to catch in general, but in this specific instance
+it is a false positive: the referenced tests are 134E.9.1's own
+regression suite for code 134E.9.1 modified (a legitimate `inherited_
+regression` scenario, per the escape hatch 134E.9 itself introduced),
+not evidence actually belonging only to a different phase. The
+already-dispatched historical report cannot be silently edited or
+re-sent (doing so would either duplicate the single permitted ordinary
+delivery or require a second, separately-authorized correction
+delivery, which this phase's own governance rules do not call for over
+a labeling artifact). Disclosed here rather than hidden; no production
+behavior is affected (`report.report_completeness` on the persisted
+artifact remains `complete`, since this specific coherence check runs
+only via the separate, read-only `pcae phase-report consistency`
+inspection path in this instance — see Section 8.4 for the related,
+now-repaired gap in `phase-report create`'s own construction-time
+validation). Future callers should avoid naming test-result keys with
+phase-ID-shaped substrings, or set `metadata["test_evidence_
+classification"] = "inherited_regression"` explicitly when reusing
+another phase's test file name in evidence labels.
 
 ## 20. Governance Results
 

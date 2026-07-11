@@ -27,7 +27,14 @@
   report test in `test_report_consistency_derived_correctness_134e9.py`,
   removed since its coverage is already exhaustive via fixtures).
   Fast-green verified deterministic at `4391/4391`, zero failures,
-  across three consecutive runs (parallel twice, serial once). Original
+  across three consecutive runs (parallel twice, serial once). Also
+  found and repaired a third gap: `pcae phase-report create` never
+  called the shared `_apply_canonical_and_trust()` pipeline (unlike
+  `phase complete`/`task finish`), so it could reach `complete` with
+  contradictory evidence unchecked; repaired and covered by three new
+  fixture tests. Disclosed (not repaired, out of charter): `phase_
+  reports.py`'s own test files are not in the `fast_green` gate at all
+  (346 tests, ~3.4s) — recommended follow-up under 134E.9V. Original
   134E.9 report preserved unmodified; this phase completes under its
   own new phase identity 134E.9.1, not a resend of 134E.9. No Canonical
   Engineering Evidence, Evidence Extraction, Phase Report View, Operator

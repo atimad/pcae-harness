@@ -32,10 +32,21 @@ same live-repository-state-coupling pattern in other tests
 (`test_architecture_status_generation_independent_verification_134e8v.py`'s
 hardcoded `current_phase_id == "134E.8V"`; this phase's own now-removed
 `TestRealRepositoryConsistency` real-latest-report test) — both repaired
-without weakening the invariants they protect. Verified fast-green
-deterministic at `4391/4391`, zero failures, across three consecutive runs
-(parallel twice, serial once). Original 134E.9 report preserved unmodified;
-this phase completes under its own new phase identity, not a resend of
+without weakening the invariants they protect. Separately found and
+repaired a third contributing gap: `pcae phase-report create` never
+called the shared `_apply_canonical_and_trust()` coherence/derived-
+correctness pipeline at all (only `phase complete`/`task finish` did),
+so a report built through that specific command could reach `complete`
+with contradictory evidence, unchecked — repaired by wiring in the same
+shared helper, proven by three new fixture tests. Disclosed, not
+repaired (out of this corrective phase's charter): `phase_reports.py`'s
+own dedicated test files (`test_phase_reports.py` and six others,
+346 tests, ~3.4s) are not included in the `fast_green` gate at all —
+recommended as explicit follow-up, most naturally under 134E.9V.
+Verified fast-green deterministic at `4391/4391`, zero failures, across
+three consecutive runs (parallel twice, serial once) within the gate's
+actual current scope. Original 134E.9 report preserved unmodified; this
+phase completes under its own new phase identity, not a resend of
 134E.9. No Canonical Engineering Evidence, Evidence Extraction, Phase
 Report View, Operator Report View, Rendering Architecture, Delivery
 Pipeline, or Delivery Receipt activation. No execution capability. Full

@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any
 
 from pcae.core.phase_reports import (
+    _apply_canonical_and_trust,
     compute_finalization_snapshot_id,
     compute_report_digest,
     make_phase_report,
@@ -115,7 +116,23 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
         # blank (as before this fix) for every consumer that reads the
         # persisted artifact directly (e.g. notification dispatch) instead
         # of re-running `pcae phase-report trust`.
-        report.apply_trust_assessment()
+        #
+        # Phase 134E.9.1 — this previously called only ``report.apply_
+        # trust_assessment()`` directly, which never invokes
+        # ``validate_internal_report_coherence()`` or ``validate_derived_
+        # correctness()`` (both live only inside ``_apply_canonical_and_
+        # trust()``). Confirmed by direct inspection: this was the one
+        # active construction path 134E.9's own doc claimed shared the
+        # coherence/derived-correctness boundary but did not -- `pcae
+        # phase-report create` could reach `report_completeness: complete`
+        # with contradictory evidence (e.g. a self-recommendation, a
+        # stale/invalid Architecture Status snapshot, or a failing
+        # fast_green value) with no check ever running. Replaced with the
+        # same shared helper `phase complete`/`task finish` already call,
+        # closing the gap at the smallest shared boundary rather than
+        # duplicating coherence/derived-correctness logic into this
+        # command directly.
+        _apply_canonical_and_trust(report, report.phase_id, report.phase_name, report.status)
     except ValueError as exc:
         if args.json:
             print(json.dumps({"error": "validation_failed", "message": str(exc)}))

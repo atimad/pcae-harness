@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "phase_id": "134E.9",
-  "phase_name": "Report Consistency / Derived Correctness Validation",
-  "phase_title": "Report Consistency / Derived Correctness Validation",
+  "phase_id": "134E.9.1",
+  "phase_name": "Fast-Green Regression and Report-Consistency Repair",
+  "phase_title": "Fast-Green Regression and Report-Consistency Repair",
   "status": "completed",
   "summary": "Independently verified Architecture Status generation and the incident-blocking 134E.8.1 lifecycle protections. Found and repaired five BLOCKING defects: unused digest comparison, post-certification Architecture Status regeneration, post-attempt/promotion semantic-identity pollution, insertion-order-dependent rendering, and omission of dotted/verification/corrective completed identities. 51 fresh adversarial tests, 2347 affected regressions, compileall, and fast-green 4390/4390 pass. Runtime remains Observed/observe/unavailable. Track 134 evidence/delivery pipeline remains inactive. Recommended next phase: 134E.9.",
   "files_changed": [
