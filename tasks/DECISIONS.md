@@ -2,6 +2,29 @@
 
 ## Accepted
 
+- Implement Operator Report View Composition (Phase 134E.4) as a
+  distinct sibling derived view (`src/pcae/core/operator_report_view.py`)
+  over verified `operator_report_v1` Evidence Extraction results — never
+  deriving from or depending on the Phase Report View Composition
+  module beyond the shared extraction layer both sit on, per this
+  phase's own explicit package-boundary instruction. Twelve operator-
+  oriented sections rather than PFR-001's thirteen. Added a distinct
+  decision-completeness dimension and a semantic-sufficiency gate built
+  from structured presence signals only (never free-text heuristic
+  scoring, per explicit instruction) to address 134E.3V's near-status-
+  only-report observation on the Phase Report View. Found and fixed two
+  defects during this phase's own development, before any test was
+  written: a cross-cutting Disclosures section was wrongly judged by
+  the generic per-category empty-section logic (special-cased against
+  report-level uncertainty/limitation bundles instead); the
+  conditionally-missing-vs-not-applicable conflation 134E.3V found and
+  repaired on the Phase Report View was proactively designed out of
+  this module's own `_compose_section()` from the start rather than
+  reintroduced and repeated. Carried forward all three NON-BLOCKING
+  observations from 134E.2V/134E.3V unrepaired, since none was proven
+  genuinely BLOCKING for Operator Report composition specifically. Do
+  not begin 134E.4V in this phase.
+
 - Independently verify Phase Report View Composition (Phase 134E.3V) by
   fresh adversarial probing before writing any new test, rather than
   trusting 134E.3's report or its 88 tests. Found and repaired one

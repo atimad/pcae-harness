@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 134E.4 - Operator Report View Composition
+  (`docs/PHASE_134_OPERATOR_REPORT_VIEW_COMPOSITION.md`). Implements
+  `src/pcae/core/operator_report_view.py`, a deterministic,
+  mobile-oriented, transport-independent composition layer over
+  verified `operator_report_v1` Evidence Extraction results, organizing
+  evidence into twelve operator-oriented sections (a distinct sibling
+  model from PFR-001's thirteen). Adds a distinct decision-completeness
+  dimension and a structural semantic-sufficiency gate (never free-text
+  heuristic scoring) addressing 134E.3V's near-status-only-report
+  observation. Remains isolated, not yet active lifecycle authority.
+  Two defects found and fixed during this phase's own development
+  (before finalization): a cross-cutting Disclosures section wrongly
+  judged by generic per-category logic; the conditionally-missing-vs-
+  not-applicable conflation 134E.3V found on the Phase Report View was
+  proactively designed out from the start. 97 new focused tests (all 96
+  required areas) pass; 1061 combined regression tests pass; fast-green
+  4390/4390 passing this run. No rendering, delivery, or lifecycle
+  integration was implemented. Recommended next phase: 134E.4V (not
+  begun).
+
 - Phase 134E.3V - Phase Report View Composition Independent Verification
   (`docs/PHASE_134_PHASE_REPORT_VIEW_COMPOSITION_INDEPENDENT_VERIFICATION.md`).
   Independently verifies 134E.3's Phase Report View Composition via
