@@ -21,12 +21,36 @@
   "tests_added_or_updated": "52 new focused tests covering all 40 required test areas, plus 1185 combined regression test executions (existing phase-report/notification/identity/finalization suites, unmodified) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total (4389 passed, 1 pre-existing unrelated failure reproduced identically, unchanged since 134B.2).",
   "tests_run": 1237,
   "validation_results": [
-    {"name": "canonical_engineering_evidence_focused_tests", "result": "52 passed (all 40 required test areas)", "status": "passed"},
-    {"name": "combined_regression_suite", "result": "1185 passed (phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, 134B.1, 134B.2, 134B.3, phase, unmodified)", "status": "passed"},
-    {"name": "fast_green", "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, unchanged since 134B.2)", "status": "passed"},
-    {"name": "compileall", "result": "src compiled successfully", "status": "passed"},
-    {"name": "report_notification_tests", "result": "52 focused passed (canonical engineering evidence model)", "status": "passed"},
-    {"name": "bootstrap_session_reporting_tests", "result": "fast_green coverage passed", "status": "passed"}
+    {
+      "name": "canonical_engineering_evidence_focused_tests",
+      "result": "52 passed (all 40 required test areas)",
+      "status": "passed"
+    },
+    {
+      "name": "combined_regression_suite",
+      "result": "1185 passed (phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, 134B.1, 134B.2, 134B.3, phase, unmodified)",
+      "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, unchanged since 134B.2)",
+      "status": "passed"
+    },
+    {
+      "name": "compileall",
+      "result": "src compiled successfully",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "52 focused passed (canonical engineering evidence model)",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "fast_green coverage passed",
+      "status": "passed"
+    }
   ],
   "test_results": {
     "canonical_engineering_evidence_focused_tests": "52 passed",
@@ -37,12 +61,30 @@
     "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
-    {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_check", "status": "passed"},
-    {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "pending"},
-    {"name": "telegram_runtime", "status": "configured and enabled for governed production finalization, resolved automatically without shell sourcing"},
-    {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "clean"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured and enabled for governed production finalization, resolved automatically without shell sourcing"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "Observed, observe, execution unavailable"
+    }
   ],
   "no_go_confirmation": "No activation of Canonical Engineering Evidence in finalization occurred. No live evidence capture was implemented. No Evidence Extraction was implemented. No Phase Report View composition was implemented. No Operator Report View composition was implemented. No rendering pipeline was implemented. No delivery adapters were implemented. No External Delivery Receipts were implemented. No Architecture Status repair occurred. No Derived Correctness validation was implemented. No phase-completion metadata replacement occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.2 work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
@@ -68,8 +110,8 @@
     "No force push was used."
   ],
   "commit_attribution": "phase-owned governed task-finish commit",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
