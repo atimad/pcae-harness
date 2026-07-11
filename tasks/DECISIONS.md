@@ -2,6 +2,29 @@
 
 ## Accepted
 
+- Independently verify Operator Report View Composition (Phase
+  134E.4V) by fresh adversarial probing before writing any new test,
+  rather than trusting 134E.4's report or its 97 tests. Found and
+  repaired one BLOCKING defect: `_compute_decision_completeness()`'s
+  nine per-obligation checks tested `section.applicability ==
+  OperatorSectionApplicability.INCOMPLETE` specifically, missing the
+  sibling "structurally empty required section" state (`applicability=
+  UNAVAILABLE_WITH_DISCLOSURE`, `completeness=INCOMPLETE` -- a
+  different enum value, the same informational severity), reachable via
+  a forged/tampered `ExtractionResult`. This let `decision_completeness`
+  report COMPLETE while `completeness` correctly reported INCOMPLETE --
+  backwards from the module's own stated invariant that decision
+  completeness must be at least as strict as informational completeness.
+  Repaired by introducing a single `_fails_obligation()` helper using a
+  `completeness`-rank comparison (not the `applicability` enum) across
+  all nine obligations, closing both the `any_required_missing` and the
+  "structurally empty required" paths uniformly. Re-confirmed the
+  near-status-only semantic-sufficiency observation is reproducible but
+  is an accepted, explicit design limitation (never free-text scoring,
+  by design instruction), not a defect -- left it and the two other
+  carried-forward 134E.2V/134E.3V observations open, unrepaired. Do not
+  begin 134E.5 in this phase.
+
 - Implement Operator Report View Composition (Phase 134E.4) as a
   distinct sibling derived view (`src/pcae/core/operator_report_view.py`)
   over verified `operator_report_v1` Evidence Extraction results — never

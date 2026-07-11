@@ -662,6 +662,28 @@ def _compute_decision_completeness(
 
     incomplete = False
 
+    def _fails_obligation(section: OperatorSectionRecord) -> bool:
+        # 134E.4V finding (BLOCKING, repaired): the original per-
+        # obligation checks tested ``section.applicability ==
+        # OperatorSectionApplicability.INCOMPLETE`` only, missing the
+        # sibling "structurally empty required section" path (reachable
+        # via a forged/tampered ExtractionResult, e.g. a REQUIRED
+        # category silently absent from ``selected_evidence`` with zero
+        # diagnostic) which composes as ``applicability=
+        # UNAVAILABLE_WITH_DISCLOSURE`` while ``completeness=INCOMPLETE``
+        # -- a *different* enum value with the *same* informational
+        # severity. The old check let such a section pass every
+        # decision-completeness obligation despite its own completeness
+        # already being INCOMPLETE, letting ``decision_completeness``
+        # report COMPLETE while ``completeness`` reported INCOMPLETE --
+        # decision completeness is supposed to be *at least as* strict
+        # as informational completeness, never weaker. Rank-based on
+        # ``completeness`` (not the applicability enum) closes both
+        # paths uniformly.
+        return section.completeness in (
+            OperatorSectionCompleteness.INCOMPLETE, OperatorSectionCompleteness.INVALID,
+        )
+
     # Obligation 1: objective achieved -- requires PHASE_OUTCOME
     # determinate AND at least one substantive (non-procedural) outcome
     # category genuinely selected anywhere in the record (the semantic-
@@ -672,7 +694,7 @@ def _compute_decision_completeness(
     has_substantive_outcome = any(
         cat in selected for cat in _SUBSTANTIVE_OUTCOME_CATEGORIES
     )
-    if outcome_section.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(outcome_section):
         incomplete = True
     if not has_substantive_outcome:
         incomplete = True
@@ -690,38 +712,38 @@ def _compute_decision_completeness(
     # Obligations 2-3: defects/repairs determinate (never silently
     # un-disclosed).
     discoveries = by_id[OperatorSectionId.DISCOVERIES_DEFECTS_REPAIRS]
-    if discoveries.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(discoveries):
         incomplete = True
 
     # Obligation 4: unresolved findings visible -- verification section
     # determinate.
     verification = by_id[OperatorSectionId.VERIFICATION_AND_REMAINING_FINDINGS]
-    if verification.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(verification):
         incomplete = True
 
     # Obligation 5: technical debt status determinate.
     debt = by_id[OperatorSectionId.TECHNICAL_DEBT_AND_DEFERRED_WORK]
-    if debt.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(debt):
         incomplete = True
 
     # Obligation 6: boundaries preserved -- determinate.
     boundaries = by_id[OperatorSectionId.BOUNDARIES_AND_NO_GO]
-    if boundaries.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(boundaries):
         incomplete = True
 
     # Obligation 7: tests/governance support the claim -- determinate.
     tests_gov = by_id[OperatorSectionId.TESTS_AND_GOVERNANCE]
-    if tests_gov.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(tests_gov):
         incomplete = True
 
     # Obligations 8-9: repository/runtime state determinate.
     repo_runtime = by_id[OperatorSectionId.REPOSITORY_AND_RUNTIME_STATE]
-    if repo_runtime.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(repo_runtime):
         incomplete = True
 
     # Obligation 10: next phase identified/safe -- determinate.
     next_phase = by_id[OperatorSectionId.NEXT_PHASE_AND_READINESS]
-    if next_phase.applicability == OperatorSectionApplicability.INCOMPLETE:
+    if _fails_obligation(next_phase):
         incomplete = True
 
     if incomplete:

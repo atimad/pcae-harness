@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 134E.4V - Operator Report View Composition Independent
+  Verification
+  (`docs/PHASE_134_OPERATOR_REPORT_VIEW_COMPOSITION_INDEPENDENT_VERIFICATION.md`).
+  Independently verifies 134E.4's Operator Report View Composition via
+  fresh adversarial probing rather than trusting its report/tests.
+  Found and repaired one BLOCKING defect in
+  `src/pcae/core/operator_report_view.py`: decision-completeness /
+  informational-completeness divergence —
+  `_compute_decision_completeness()`'s per-obligation checks tested the
+  wrong enum (`applicability` instead of `completeness`), missing the
+  "structurally empty required section" state and letting
+  `decision_completeness` report COMPLETE while `completeness` reported
+  INCOMPLETE; fixed via a single `_fails_obligation()` helper using a
+  completeness-rank comparison across all nine obligations. 43 new
+  adversarial tests + original 97 (140 combined) pass; 1104 combined
+  regression tests pass; fast-green 4390/4390 passing this run. Three
+  NON-BLOCKING observations recorded, not repaired (near-status-only
+  semantic sufficiency confirmed an accepted design limitation, static
+  conditionally-required semantics, private registry access). No
+  rendering, delivery, or lifecycle integration was implemented.
+
 - Phase 134E.4 - Operator Report View Composition
   (`docs/PHASE_134_OPERATOR_REPORT_VIEW_COMPOSITION.md`). Implements
   `src/pcae/core/operator_report_view.py`, a deterministic,

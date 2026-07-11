@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 134E.4V — Operator Report View Composition Independent Verification (completed).
+
+Independently verified 134E.4's Operator Report View Composition
+implementation rather than trusting its report, documentation, or its
+97 tests. Found and repaired **one genuine BLOCKING defect**, discovered
+by direct adversarial probing before any new test was written:
+`_compute_decision_completeness()`'s nine per-obligation checks tested
+`section.applicability == INCOMPLETE` specifically, missing the sibling
+"structurally empty required section" state
+(`applicability=UNAVAILABLE_WITH_DISCLOSURE`, `completeness=
+INCOMPLETE`) — letting `decision_completeness` report COMPLETE while
+`completeness` correctly reported INCOMPLETE, backwards from the
+module's own stated invariant. Repaired by switching all nine checks
+to a `completeness`-rank comparison via a single `_fails_obligation()`
+helper. 43 new fresh adversarial tests (all 40 required probe areas
+plus 3 re-confirmations) plus the original 97 tests (140 combined)
+pass; 1104 combined regression tests pass; fast-green 4390/4390 passing
+this run. Three NON-BLOCKING observations recorded: near-status-only
+semantic sufficiency re-confirmed reproducible but classified as an
+accepted, explicit design limitation (never free-text scoring, by
+design); two carried forward from 134E.2V/134E.3V, re-confirmed still
+open. Full details in
+`docs/PHASE_134_OPERATOR_REPORT_VIEW_COMPOSITION_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134E.5 — Rendering Architecture. 134E.5 was not
+begun in this phase.
+
+## Phase 134E.4V Complete
+
+Independently verified and repaired the Operator Report View
+Composition implementation. The module remains isolated, disconnected
+lifecycle authority — not yet active. One BLOCKING defect repaired at
+the smallest responsible boundary; three NON-BLOCKING observations
+documented, not repaired. No rendering, delivery, or lifecycle
+integration was implemented.
+
+## Phase 134E.4 Complete (historical)
+
 Phase 134E.4 — Operator Report View Composition (completed).
 
 Implemented a deterministic, structured, mobile-oriented, transport-
