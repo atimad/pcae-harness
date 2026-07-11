@@ -45,6 +45,16 @@
       "name": "compileall",
       "result": "src compiled successfully",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "44 focused passed (delivery pipeline generalization independent verification)",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "fast_green coverage passed",
+      "status": "passed"
     }
   ],
   "test_results": {
@@ -52,7 +62,9 @@
     "delivery_pipeline_combined_original_and_verification": "149 passed",
     "combined_134e3_through_134e6_regression_suite": "553 passed",
     "fast_green": "4390 passed, 0 failed",
-    "compileall": "passed"
+    "compileall": "passed",
+    "report_notification_tests": "44 focused passed (delivery pipeline generalization independent verification)",
+    "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
     {
@@ -101,8 +113,8 @@
     "No force push was used."
   ],
   "commit_attribution": "phase-owned governed task-finish commit",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
