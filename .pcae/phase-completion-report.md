@@ -1,78 +1,81 @@
-# Phase 134E.5V Complete — Rendering Architecture Independent Verification
+# Phase 134E.6 Complete — Delivery Pipeline Generalization
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.5V`
+- **Phase ID:** `134E.6`
 - **Status:** completed
-- **Phase class:** dedicated independent verification
+- **Phase class:** dedicated implementation
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134E.5V independently verified 134E.5's Rendering Architecture
-implementation via fresh adversarial probing, rather than trusting its
-report, documentation, or its 97/98 tests. Found and repaired one
-genuine BLOCKING defect, discovered by direct adversarial probing
-before writing any new test.
+Phase 134E.6 implemented a deterministic, transport-neutral Delivery
+Pipeline (`src/pcae/core/delivery_pipeline.py`) that accepts a verified
+`RenderingResult` and prepares/executes delivery through explicitly
+registered adapters, without changing rendered engineering content.
 
 ## 3. Architectural Findings
 
-No architectural change. The rendering architecture's structure (six
-renderers, dual-input contract, content-preservation accounting) was
-independently re-confirmed against Track 133/134 source text rather
-than accepted from 134E.5's own documentation. Independently
-re-derived that the dual-input `render(view, source, renderer_id)`
-design is necessary (views carry no content values), safe (digest
-check transitively rejects wrong-profile/wrong-phase/forged sources),
-and contract-consistent.
+Preserved the layering: Canonical Engineering Evidence -> Evidence
+Extraction -> Derived Evidence Views -> RenderingResult -> Delivery
+Pipeline -> Delivery Adapter -> Adapter Delivery Outcome -> External
+Delivery Receipt Model (134E.7, not implemented). The pipeline consumes
+only `RenderingResult`, confirmed via source-line import scan showing
+zero reference to the canonical evidence model, extraction layer, or
+either derived view.
 
 ## 4. Implementation Findings
 
-One BLOCKING defect repaired at the smallest responsible boundary
-inside the still-isolated module: undisclosed unresolved content in
-rendered prose — `_resolve_section_lines()` printed a structural
-classification line even when the underlying value could not be
-resolved, with no inline disclosure. Repaired by adding an explicit
-`[content unresolved: source value unavailable]` line inline, applying
-uniformly across all four affected prose renderers via the shared
-helper. No active-lifecycle integration was introduced; the module
-remains isolated.
+Implemented deterministic logical delivery identity, transport-neutral
+delivery modes with pure size/capability-based selection, lossless
+deterministic segmentation, explicit `DeliveryPolicy`, separated
+planning/execution, exactly-once logical semantics, and stateless
+retry planning. Two initial isolated adapters (recording, null/
+disabled). Reused the existing external-delivery authorization gate
+from `pcae.core.notifications` rather than duplicating it. Found and
+fixed one planning gap during this phase's own development, before any
+test was written: an always-disabled adapter's plan previously went
+through ordinary mode-selection, which could fail closed on oversized
+content even though delivery would never be attempted — fixed by
+short-circuiting planning for `always_disabled` adapters. No
+active-lifecycle integration was introduced; the module remains
+isolated.
 
 ## 5. Verification Findings
 
-Independently re-derived requirements from Track 133 Engineering
-Evidence architecture/contract, Track 134 lifecycle architecture/
-contract, 134D's implementation plan, verified Canonical Engineering
-Evidence, Evidence Extraction, Phase Report View, and Operator Report
-View. All 45 verification dimensions checked; the one BLOCKING defect
-was found via direct Python-REPL adversarial probing before any test
-was written (a forged/corrupted extraction result exposing a naked
-"blocking" classification claim with no finding body and no inline
-disclosure). 42 fresh adversarial tests added covering all 40 required
-probe areas plus 2 additional re-confirmations. No new NON-BLOCKING
-observations beyond those already carried forward, documented in full
-in `docs/PHASE_134_RENDERING_ARCHITECTURE_INDEPENDENT_VERIFICATION.md`.
+Implementation-phase scope: regression summary only (independent
+adversarial verification is 134E.6V's job). 105 new focused tests (all
+105 required areas) pass; 1436 combined regression tests (evidence
+model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View
+134E.3/134E.3V, Operator Report View 134E.4/134E.4V, Rendering
+134E.5/134E.5V, phase-identity repair, phase_reports, finalization-gate,
+trust-hard-fail, certification-idempotency, notification/Telegram,
+134B.1-134B.3, phase) pass unchanged; fast-green 4390/4390 passing this
+run.
 
 ## 6. Technical Debt Review
 
-No pre-existing Track 134 debt item was repaired (out of scope). No
-new NON-BLOCKING observations were recorded this phase; the three
-observations carried forward from 134E.2V/134E.3V/134E.4V remain open,
-none proven genuinely BLOCKING for Rendering specifically.
+Repaired two pre-declared, expected consequences of this phase's own
+scope (not new defects): the isolation scans in `test_rendering_134e5.
+py` and `test_rendering_134e5v_verification.py` narrowed to admit
+`delivery_pipeline.py` as the next expected, still-isolated consumer —
+the identical pattern every prior 134E.x phase already applied to its
+own predecessor. No pre-existing Track 134 debt item was otherwise
+repaired.
 
 ## 7. Notable Engineering Knowledge
 
-A structural completeness/diagnostic mechanism can correctly detect and
-record a content gap (in `RenderingResult.diagnostics`/`content_
-preserved`/`completeness`) while the *human-readable artifact itself*
-still fails to disclose that gap at the exact point a reader would
-encounter it. For a presentation layer whose entire purpose is
-human/operator consumption, disclosure must exist in the rendered text
-itself, not only in structured metadata a reader may never inspect —
-a distinct failure mode from every prior 134E.x phase's own
-"structured field lost" class of defect, worth naming explicitly for
-future rendering/presentation work.
+An always-disabled adapter's planning path must be special-cased away
+from ordinary transport-capability mode-selection — ordinary selection
+logic answers "how should this content be packaged for delivery,"
+which is a meaningless question when delivery will never be attempted
+regardless of content size. Treating "disabled" as just another
+capability-constrained adapter (rather than a structurally distinct
+planning path) produces spurious "no complete delivery mode available"
+failures for content that was never going to be sent in the first
+place — a lesson applicable to any future adapter capability that
+similarly makes packaging irrelevant.
 
 ## 8. Governance Results
 
@@ -83,30 +86,21 @@ future rendering/presentation work.
 
 ## 9. Test Results
 
-- New adversarial suite: 42 passed (all 40 required probe areas plus 2
-  authority-boundary re-confirmations).
-- Original 134E.5 suite (re-run against the repaired module): 98
-  passed.
-- Combined focused suite: 140 passed.
-- Combined regression suite (evidence model 134E.1/134E.1V, extraction
-  134E.2/134E.2V, Phase Report View 134E.3/134E.3V, Operator Report
-  View 134E.4/134E.4V, phase-identity repair, phase_reports,
-  finalization-gate, trust-hard-fail, certification-idempotency,
-  134B.1-134B.3, phase, rendering): 1264 passed.
+- New focused suite: 105 passed (all 105 required areas).
+- Combined regression suite: 1436 passed.
 - Fast-green: 4390 passed, 0 failed this run.
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
 
 No activation of Canonical Engineering Evidence, no live evidence
-capture, no replacement of current report generation, no change to
-current notification payloads, no delivery adapters, no
-Telegram-specific formatting, no message splitting, no attachment
-policy, no External Delivery Receipts, no Architecture Status repair,
-no final lifecycle integration, no PFN-001/PFR-001 change, no
-Repository Intelligence change, no 134E.6 work, and no execution
-capability were implemented. No raw git commit/push, `--no-verify`, or
-force push was used.
+capture, no replacement of current report generation, no replacement
+of current notification dispatch, no routing of production Telegram
+through the new pipeline, no durable External Delivery Receipt model,
+no Architecture Status repair, no final lifecycle integration, no
+PFN-001/PFR-001 change, no Repository Intelligence change, no 134E.6V
+work, and no execution capability were implemented. No raw git
+commit/push, `--no-verify`, or force push was used.
 
 ## 11. Architectural Boundary Confirmation
 
@@ -117,12 +111,13 @@ active authority. This phase does not self-certify.
 
 ## 12. Track Progress
 
-134E.5V closes the independent-verification gate 134D's own roadmap
-requires before 134E.6 may begin. One genuine defect was found and
-closed; the Rendering layer is now demonstrably (not just claimedly)
-sound at both the structured-result and human-readable-artifact level.
+134E.6 adds the sixth of the seven architectural layers Track 134E's
+own roadmap defines, sitting atop the verified Rendering layer without
+depending on any layer beneath it directly. It does not itself close
+the independent-verification gate 134D's roadmap requires before
+134E.7 may begin — that is 134E.6V's job.
 
 ## 13. Next Phase
 
-Recommended: **134E.6 — Delivery Pipeline Generalization**. Phase
-134E.6 has not begun.
+Recommended: **134E.6V — Delivery Pipeline Generalization Independent
+Verification**. Phase 134E.6V has not begun.

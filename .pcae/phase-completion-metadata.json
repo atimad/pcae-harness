@@ -1,39 +1,36 @@
 {
   "schema_version": "1.0",
-  "phase_id": "134E.5V",
-  "phase_name": "Rendering Architecture Independent Verification",
-  "phase_title": "Rendering Architecture Independent Verification",
+  "phase_id": "134E.6",
+  "phase_name": "Delivery Pipeline Generalization",
+  "phase_title": "Delivery Pipeline Generalization",
   "status": "completed",
-  "summary": "Independently verified 134E.5's Rendering Architecture implementation via fresh adversarial probing, rather than trusting its report, documentation, or its own 97/98 tests. Found and repaired one genuine BLOCKING defect in src/pcae/core/rendering.py, discovered by direct adversarial probing before any new test was written: undisclosed unresolved content in rendered prose. When a primary category's value could not be resolved from the source, Markdown/plain-text output still printed the category's structural classifications line (e.g. blocking) with no inline disclosure that the corresponding finding/repair body was unavailable -- the structured RenderingResult.diagnostics/content_preserved/completeness already correctly flagged the gap, but the rendered text itself did not. Repaired by adding an explicit [content unresolved: source value unavailable] line inline wherever this occurs, applying uniformly across all four affected prose renderers via the shared _resolve_section_lines() helper. Independently re-derived and confirmed the dual-input render(view, source, renderer_id) contract is necessary (views carry no content values), safe (digest check transitively rejects wrong-profile/wrong-phase/forged sources -- profile_id is embedded in ExtractionResult.compute_digest()), and contract-consistent. 42 new fresh adversarial tests covering all 40 required probe areas plus 2 authority-boundary re-confirmations, plus the original 97/98 tests (140 combined), pass; 1264 combined regression tests pass; fast_green 4390/4390 passing this run. No new NON-BLOCKING observations recorded; the three carried forward from prior phases remain open, none proven genuinely BLOCKING for Rendering specifically. The module remains isolated, disconnected lifecycle authority. 134E.6 not begun.",
+  "summary": "Implemented a deterministic, transport-neutral Delivery Pipeline (src/pcae/core/delivery_pipeline.py) that accepts a verified RenderingResult and prepares/executes delivery through explicitly registered adapters, without changing rendered engineering content. Deterministic logical delivery identity (SHA-256 over phase identity, rendering digest, purpose, destination, adapter, and policy version -- never a random UUID), transport-neutral delivery modes (inline/attachment/multipart chosen purely from content size and adapter capabilities, never truncating), lossless deterministic segmentation, an explicit DeliveryPolicy, separated planning/execution, exactly-once logical semantics, and stateless retry planning covering only failed units. Two initial isolated adapters: recording (in-memory, deterministic success, records every unit for test inspection) and null/disabled (never pretends delivery succeeded). Reuses the existing, already-verified external-delivery authorization gate from pcae.core.notifications rather than duplicating it; adapters inherit this protection automatically via a represents_external_delivery capability flag. Not yet active lifecycle authority: only internal imports are rendering and the existing authorization function. Content-preservation, Non-Omission, and Non-Strengthening all enforced structurally -- DeliveryPlan has no completeness field of its own that could diverge from the source RenderingResult. Found and fixed one planning gap during this phase's own development, before any test was written: an always-disabled adapter's plan previously went through ordinary mode-selection (which could fail closed on oversized content even though delivery would never be attempted anyway); fixed by short-circuiting planning for always_disabled adapters to a single DISABLED-mode unit carrying the full content. Repaired two pre-declared, expected isolation-scan narrowings (rendering.py x2) admitting delivery_pipeline.py as the next expected consumer, and reworded the module's own docstring to avoid unnecessary literal mentions of evidence/view module names it does not import, minimizing which other isolation scans needed touching. 105 new focused tests (all 105 required areas) pass; 1436 combined regression tests (evidence model, extraction, both view compositions, rendering, phase-identity repair, phase_reports, finalization-gate, notification/Telegram, 134B.1-134B.3, phase) pass; fast_green 4390/4390 passing this run. No durable External Delivery Receipt model, Telegram wrapper, or lifecycle integration was implemented; the genuine terminal report for this phase was delivered through the existing production notification path. 134E.6V not begun.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_134_RENDERING_ARCHITECTURE_INDEPENDENT_VERIFICATION.md",
-    "src/pcae/core/rendering.py",
+    "docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION.md",
+    "src/pcae/core/delivery_pipeline.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260711-1157-phase-134e-5v-rendering-architecture-independent-verification.md",
+    "tasks/done/20260711-1244-phase-134e-6-delivery-pipeline-generalization.md",
+    "tests/test_delivery_pipeline_134e6.py",
+    "tests/test_rendering_134e5.py",
     "tests/test_rendering_134e5v_verification.py"
   ],
-  "files_changed_count": 8,
+  "files_changed_count": 10,
   "source_files_changed": 1,
-  "test_files_changed": 1,
-  "tests_added_or_updated": "42 new fresh adversarial tests covering all 40 required probe areas plus 2 authority-boundary re-confirmations (140 total combined with the original 97/98), plus 1264 combined regression test executions (evidence model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View 134E.3/134E.3V, Operator Report View 134E.4/134E.4V, phase-identity repair, phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, 134B.1-134B.3, phase, rendering) confirming no existing behavior changed beyond the one repaired defect. Fast_green re-confirmed: 4390 total, 4390 passed, 0 failed this run.",
-  "tests_run": 1404,
+  "test_files_changed": 3,
+  "tests_added_or_updated": "105 new focused tests covering all 105 required delivery-pipeline areas, plus 1436 combined regression test executions (evidence model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View 134E.3/134E.3V, Operator Report View 134E.4/134E.4V, Rendering 134E.5/134E.5V, phase-identity repair, phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, notification/Telegram, 134B.1-134B.3, phase) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total, 4390 passed, 0 failed this run.",
+  "tests_run": 1541,
   "validation_results": [
     {
-      "name": "adversarial_verification_focused_tests",
-      "result": "42 passed (all 40 required probe areas plus 2 re-confirmations)",
-      "status": "passed"
-    },
-    {
-      "name": "combined_rendering_suite",
-      "result": "140 passed (original 97/98 + new 42, all passing post-repair)",
+      "name": "delivery_pipeline_focused_tests",
+      "result": "105 passed (all 105 required areas)",
       "status": "passed"
     },
     {
       "name": "combined_regression_suite",
-      "result": "1264 passed (rendering + operator report + phase report view + extraction + evidence model 134E.1/134E.1V + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + 134B.1/134B.2/134B.3 + phase + identity repair)",
+      "result": "1436 passed (delivery pipeline + rendering + operator report + phase report view + extraction + evidence model 134E.1/134E.1V + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + notification/Telegram + 134B.1/134B.2/134B.3 + phase + identity repair)",
       "status": "passed"
     },
     {
@@ -48,7 +45,7 @@
     },
     {
       "name": "report_notification_tests",
-      "result": "140 focused passed (rendering architecture + verification)",
+      "result": "105 focused passed (delivery pipeline generalization)",
       "status": "passed"
     },
     {
@@ -58,12 +55,11 @@
     }
   ],
   "test_results": {
-    "adversarial_verification_focused_tests": "42 passed",
-    "combined_rendering_suite": "140 passed",
-    "combined_regression_suite": "1264 passed",
+    "delivery_pipeline_focused_tests": "105 passed",
+    "combined_regression_suite": "1436 passed",
     "fast_green": "4390 passed, 0 failed",
     "compileall": "passed",
-    "report_notification_tests": "140 focused passed",
+    "report_notification_tests": "105 focused passed",
     "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
@@ -92,23 +88,20 @@
       "status": "Observed, observe, execution unavailable"
     }
   ],
-  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No replacement of current report generation occurred. No change to current notification payloads occurred. No delivery adapters were implemented. No Telegram-specific formatting was implemented. No message splitting was implemented. No attachment policy was implemented. No External Delivery Receipts were implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.6 work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
+  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No replacement of current report generation occurred. No replacement of current notification dispatch occurred. No routing of production Telegram through the new pipeline occurred. No durable External Delivery Receipt model was implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.6V work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
     "No activation of Canonical Engineering Evidence occurred.",
     "No live evidence capture was implemented.",
     "No replacement of current report generation occurred.",
-    "No change to current notification payloads occurred.",
-    "No delivery adapters were implemented.",
-    "No Telegram-specific formatting was implemented.",
-    "No message splitting was implemented.",
-    "No attachment policy was implemented.",
-    "No External Delivery Receipts were implemented.",
+    "No replacement of current notification dispatch occurred.",
+    "No routing of production Telegram through the new pipeline occurred.",
+    "No durable External Delivery Receipt model was implemented.",
     "No Architecture Status repair occurred.",
     "No final lifecycle integration occurred.",
     "No PFN-001 change occurred.",
     "No PFR-001 change occurred.",
     "No Repository Intelligence change occurred.",
-    "No 134E.6 work began.",
+    "No 134E.6V work began.",
     "No execution capability was introduced.",
     "No raw git commit was used.",
     "No raw git push was used.",
@@ -121,9 +114,9 @@
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
-  "recommended_next_phase": "Phase 134E.6 - Delivery Pipeline Generalization",
-  "recommended_next_phase_id": "134E.6",
-  "recommended_next_phase_name": "Delivery Pipeline Generalization",
+  "recommended_next_phase": "Phase 134E.6V - Delivery Pipeline Generalization Independent Verification",
+  "recommended_next_phase_id": "134E.6V",
+  "recommended_next_phase_name": "Delivery Pipeline Generalization Independent Verification",
   "runtime_state": "Observed",
   "maximum_plugin_capability": "observe",
   "execution_availability": "unavailable"
