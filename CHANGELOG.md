@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 134E.1V - Canonical Engineering Evidence Executable Model
+  Independent Verification
+  (`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_EXECUTABLE_MODEL_VERIFICATION.md`).
+  Independently verifies 134E.1's executable evidence model via fresh
+  adversarial probing rather than trusting its report/tests. Found and
+  repaired two BLOCKING defects in
+  `src/pcae/core/canonical_engineering_evidence.py`: (1) shallow
+  immutability — a caller-supplied mutable list/dict stored directly on a
+  "frozen" dataclass field remained externally mutable after
+  finalization, silently changing content/digest; fixed by force-tuple-
+  converting every collection field and freezing `applicability` into a
+  `MappingProxyType` at construction. (2) An applicability-disclosure/
+  mandatory-present bypass — `OMITTED_INVALID_INPUT` was excluded from
+  the uncertainty/limitation disclosure requirement, and the phase-class
+  mandatory-present check only rejected `NOT_APPLICABLE` specifically,
+  letting IMPLEMENTATION/VERIFICATION-class records silently omit their
+  own mandatory category; fixed by closing both gaps. 37 new adversarial
+  tests + original 52 (89 total) pass; 1222 combined regression tests
+  unchanged; fast-green unaffected. Four NON-BLOCKING observations
+  recorded, not repaired. No Evidence Extraction, views, rendering,
+  delivery, or lifecycle integration implemented — 134E.2 not begun.
+
 - Phase 134E.1 - Canonical Engineering Evidence Executable Model
   (`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_EXECUTABLE_MODEL.md`).
   Implements the first executable model for Canonical Engineering

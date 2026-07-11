@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Independently verify the Canonical Engineering Evidence executable
+  model (Phase 134E.1V) by fresh adversarial probing before writing any
+  new test, rather than trusting 134E.1's report or its 52 tests. Found
+  and repaired two BLOCKING defects: shallow immutability (caller-held
+  mutable list/dict references could silently alter a "finalized"
+  record's content and digest after finalization) and an applicability-
+  disclosure/mandatory-present bypass (`OMITTED_INVALID_INPUT` excluded
+  from the disclosure requirement; the mandatory-present check only
+  rejected `NOT_APPLICABLE` specifically, not any non-PRESENT
+  disposition). Repaired both at the smallest responsible boundary inside
+  the still-isolated model — no active-lifecycle integration was
+  introduced. Recorded four NON-BLOCKING observations (identity/task-id
+  granularity, provenance category validation, secret-scan field
+  coverage, digest order-sensitivity for reordered findings) as inputs
+  for later sub-phases rather than repairing them now. Do not begin
+  134E.2 in this phase.
+
 - Implement the Canonical Engineering Evidence executable model (Phase
   134E.1) as a fully isolated, disconnected module
   (`src/pcae/core/canonical_engineering_evidence.py`) mirroring

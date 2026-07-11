@@ -392,6 +392,11 @@ class UncertaintyItem:
     resolution_status: str = "unresolved"
 
     def __post_init__(self) -> None:
+        # 134E.1V — force tuple conversion so a caller-supplied mutable
+        # list cannot be mutated in place after construction (a frozen
+        # dataclass only blocks attribute *reassignment*, not mutation of
+        # a mutable object already stored in a field).
+        object.__setattr__(self, "affected_evidence", tuple(self.affected_evidence))
         if not self.category:
             raise ValueError("UncertaintyItem.category must be non-empty")
         if not self.description:
@@ -432,6 +437,7 @@ class LimitationItem:
     resolution_status: str = "unresolved"
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "affected_evidence", tuple(self.affected_evidence))
         if not self.category:
             raise ValueError("LimitationItem.category must be non-empty")
         if not self.description:
@@ -689,6 +695,7 @@ class CommitPushInfo:
     origin_main_head_count: int
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "commits", tuple(self.commits))
         if self.pushed_status not in _VALID_PUSHED_STATUSES:
             raise ValueError(
                 f"CommitPushInfo.pushed_status {self.pushed_status!r} is not "
@@ -789,6 +796,23 @@ _PHASE_CLASS_MANDATORY_PRESENT: dict[PhaseClass, frozenset[str]] = {
     PhaseClass.VERIFICATION: frozenset({"verification_findings"}),
 }
 
+#: Tuple-typed fields on CanonicalEngineeringEvidence that must never
+#: retain a caller-supplied mutable list/set -- deep-frozen in
+#: __post_init__ below (134E.1V finding: a frozen dataclass only blocks
+#: attribute *reassignment*; a mutable list handed in as a constructor
+#: argument remained externally mutable after "finalization," silently
+#: changing content/digest). Module-level, not a class attribute, so it
+#: is never mistaken by @dataclass for a field of the record itself.
+_EVIDENCE_TUPLE_FIELDS: tuple[str, ...] = (
+    "engineering_actions", "architectural_findings", "implementation_findings",
+    "verification_findings", "defects_discovered", "defects_repaired",
+    "incorrect_assumptions_corrected", "technical_debt_reviewed",
+    "technical_debt_introduced", "notable_engineering_knowledge",
+    "governance_results", "test_results", "no_go_confirmations",
+    "architectural_boundary_confirmations", "provenance", "uncertainty",
+    "limitations",
+)
+
 
 @dataclass(frozen=True)
 class CanonicalEngineeringEvidence:
@@ -840,6 +864,21 @@ class CanonicalEngineeringEvidence:
     # ── Construction-time structural invariants ─────────────────────
 
     def __post_init__(self) -> None:
+        for field_name in _EVIDENCE_TUPLE_FIELDS:
+            object.__setattr__(self, field_name, tuple(getattr(self, field_name)))
+        # applicability: freeze both the mapping itself and coerce every
+        # value to the Applicability enum, so a caller-held plain dict
+        # cannot be mutated after construction to silently change a
+        # finalized record's disposition for any category.
+        object.__setattr__(
+            self,
+            "applicability",
+            MappingProxyType({
+                k: (v if isinstance(v, Applicability) else Applicability(v))
+                for k, v in dict(self.applicability).items()
+            }),
+        )
+
         if self.schema_version not in SUPPORTED_SCHEMA_VERSIONS:
             raise ValueError(
                 f"Unsupported schema_version {self.schema_version!r}; "
@@ -896,17 +935,24 @@ class CanonicalEngineeringEvidence:
         # Allowed phase classes already enforced by the enum type itself
         # at construction; nothing further to check here.
 
-        # Required category applicability per phase class.
+        # Required category applicability per phase class. 134E.1V finding
+        # (BLOCKING, repaired): the original check only rejected the
+        # NOT_APPLICABLE disposition specifically, so an IMPLEMENTATION/
+        # VERIFICATION-class record could bypass its own mandatory-present
+        # category entirely by declaring it UNAVAILABLE or
+        # OMITTED_INVALID_INPUT instead -- neither of which was checked
+        # here. Any disposition other than PRESENT now blocks.
         for category, required in _PHASE_CLASS_MANDATORY_PRESENT.items():
             if self.phase_class != category:
                 continue
             for field_name in required:
                 disposition = self.applicability.get(field_name)
-                if disposition == Applicability.NOT_APPLICABLE:
+                if disposition != Applicability.PRESENT:
+                    got = disposition.value if disposition is not None else "missing"
                     issues.append(ValidationIssue(
                         "contradictory_applicability",
-                        f"{field_name} cannot be NOT_APPLICABLE for phase "
-                        f"class {self.phase_class.value!r}",
+                        f"{field_name} must be PRESENT for phase class "
+                        f"{self.phase_class.value!r}, got {got!r}",
                         field_name,
                     ))
 
@@ -948,10 +994,19 @@ class CanonicalEngineeringEvidence:
                     field_name,
                 ))
             # Missing uncertainty/limitations where certainty is
-            # unsupported: an UNKNOWN/UNAVAILABLE disposition must be
-            # explained by at least one uncertainty or limitation entry
-            # naming this category.
-            if disposition in (Applicability.UNKNOWN, Applicability.UNAVAILABLE):
+            # unsupported: an UNKNOWN/UNAVAILABLE/OMITTED_INVALID_INPUT
+            # disposition must be explained by at least one uncertainty or
+            # limitation entry naming this category. 134E.1V finding
+            # (BLOCKING, repaired): OMITTED_INVALID_INPUT was excluded
+            # from this check, so a record could finalize with a category
+            # explicitly marked "invalid input was silently dropped" and
+            # zero disclosure anywhere -- exactly the silent-omission
+            # path Non-Omission (133E Section 10) forbids.
+            if disposition in (
+                Applicability.UNKNOWN,
+                Applicability.UNAVAILABLE,
+                Applicability.OMITTED_INVALID_INPUT,
+            ):
                 named = {u.category for u in self.uncertainty} | {
                     u for item in self.uncertainty for u in item.affected_evidence
                 } | {

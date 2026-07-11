@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 134E.1V — Canonical Engineering Evidence Executable Model
+Independent Verification (completed).
+
+Independently verified 134E.1's executable evidence model rather than
+trusting its report, documentation, or its own 52 tests. Found and
+repaired **two genuine BLOCKING defects**, both discovered by direct
+adversarial probing before any new test was written: (1) shallow
+immutability — `@dataclass(frozen=True)` only blocks attribute
+reassignment, not mutation of a caller-supplied mutable list/dict stored
+directly on a field; a "finalized" record's content and digest could be
+silently changed after finalization by mutating an external reference the
+caller still held. Repaired by force-converting every tuple-typed field
+to an actual tuple and `applicability` to a `MappingProxyType` at
+construction time, across all four affected dataclasses. (2)
+Applicability-disclosure/mandatory-present bypass — `OMITTED_INVALID_
+INPUT` was excluded from the uncertainty/limitation disclosure
+requirement, and the phase-class mandatory-present check only rejected
+`NOT_APPLICABLE` specifically, letting an IMPLEMENTATION/VERIFICATION-
+class record silently omit its own mandatory category via `UNAVAILABLE`
+or `OMITTED_INVALID_INPUT` with zero disclosure. Repaired by closing both
+gaps. 37 new fresh adversarial tests (all 20 required probe areas) plus
+the original 52 tests (89 total) pass; 1222 combined regression tests
+(existing lifecycle suites, unmodified) pass unchanged; fast-green
+unaffected. Four NON-BLOCKING observations recorded as inputs for later
+sub-phases (identity/task-id granularity, provenance category validation,
+secret-scan field coverage, order-sensitivity of digest for reordered
+findings). Full details in
+`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_EXECUTABLE_MODEL_VERIFICATION.md`.
+
+Recommended next phase: 134E.2 — Evidence Extraction. 134E.2 was not
+begun in this phase.
+
+## Phase 134E.1V Complete
+
+Independently verified and repaired the Canonical Engineering Evidence
+executable model. The model remains isolated, disconnected lifecycle
+authority — not yet active. Two BLOCKING defects repaired at the smallest
+responsible boundary; four NON-BLOCKING observations documented, not
+repaired. No Evidence Extraction, views, rendering, delivery, or
+lifecycle integration was implemented.
+
+## Phase 134E.1 Complete (historical — full text)
+
 Phase 134E.1 — Canonical Engineering Evidence Executable Model
 (completed).
 
