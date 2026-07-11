@@ -24,6 +24,45 @@ from pcae.core.canonical_artifact_promotion import (
 
 SCHEMA_VERSION = "1.0"
 
+# Phase 134E.1V-repair — shared canonical-report-title phase-ID extraction.
+#
+# Previously duplicated independently in validate_canonical_report() and
+# _check_canonical_metadata_consistency() as the literal pattern
+# ``r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+)*)\b'``. That pattern's trailing
+# ``\b`` cannot be satisfied when a dotted sub-phase number is immediately
+# followed by a bare verification-suffix letter (e.g. "134E.1V",
+# "134E.10V"): after the optional ``(?:\.\d+)*`` group consumes ".1", the
+# next character "V" is a word character too, so no word boundary exists
+# there and the regex engine backtracks the *entire* dotted group away,
+# landing on the bare family prefix ("134E") instead of failing outright.
+# That silently collapsed a sub-phase's identity into its parent's,
+# exactly the "canonical title parsing collapses a sub-phase into its
+# parent" failure mode -- confirmed as the root cause of the 134E.1V
+# report/metadata mismatch this repair closes.
+#
+# Fixed by allowing one optional bare letter inside each dotted segment
+# (``\.\d+[A-Za-z]?``) so the suffix is consumed as part of the
+# identifier instead of trailing it. 134E, 134E.1, 134E.2, 134E.10,
+# 134B.3 (no trailing letter) are unaffected; 134E.1V, 134E.10V (and any
+# future dotted sub-phase with a verification suffix) now extract in
+# full, matching the identifier as declared everywhere else (CLI
+# argument, metadata, task title) rather than a truncated parent.
+_CANONICAL_TITLE_PHASE_ID_RE = re.compile(
+    r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+[A-Za-z]?)*)\b', re.MULTILINE
+)
+
+
+def _extract_canonical_title_phase_id(content: str) -> str | None:
+    """Extract the phase ID from a canonical report's title (first ``#
+    Phase <id> ...`` heading), or ``None`` if the title does not match.
+    The single shared extraction path for both ``validate_canonical_
+    report()`` and ``_check_canonical_metadata_consistency()`` -- fixes
+    the divergent-normalization risk of two independently maintained
+    copies of the same pattern by construction.
+    """
+    match = _CANONICAL_TITLE_PHASE_ID_RE.search(content)
+    return match.group(1) if match else None
+
 VALID_STATUSES: frozenset[str] = frozenset({
     "completed",
     "failed",
@@ -790,12 +829,8 @@ def validate_canonical_report(
         warnings.append(f"status '{status}' not found in canonical report")
 
     # Check for stale mismatch: compare title phase ID to expected
-    import re
-    title_match = re.search(
-        r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+)*)\b', content, re.MULTILINE
-    )
-    if title_match and phase_id:
-        title_phase_id = title_match.group(1)
+    title_phase_id = _extract_canonical_title_phase_id(content)
+    if title_phase_id and phase_id:
         if title_phase_id != phase_id:
             warnings.append(
                 f"canonical report title phase_id={title_phase_id}, "
@@ -847,11 +882,8 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
     # Ignore recommended next phase, historical context, and prose mentions.
     current_phase_id = report.phase_id
     # Match the first H1 heading: "# Phase 92D.8.3 Complete — ..."
-    title_match = re.search(
-        r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+)*)\b', content, re.MULTILINE
-    )
-    if current_phase_id and title_match:
-        title_phase_id = title_match.group(1)
+    title_phase_id = _extract_canonical_title_phase_id(content)
+    if current_phase_id and title_phase_id:
         if title_phase_id != current_phase_id:
             mismatches.append(
                 f"canonical report title phase_id={title_phase_id}, "

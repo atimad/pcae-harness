@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 134E.1V finalization repair (completed).
+
+Phase 134E.1V's technical work completed correctly, but its terminal
+report was untrusted (`report_completeness: partial`, missing trust field
+`metadata_consistency`, reported mismatch "canonical report title
+phase_id=134E, current phase_id=134E.1V"). Root cause: `pcae.core.
+phase_reports` contained two independently duplicated copies of the same
+regex (`r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+)*)\b'`) whose trailing word-
+boundary requirement could not be satisfied when a dotted sub-phase
+number was immediately followed by a bare verification-suffix letter
+("134E.1V") — the regex engine backtracked away the entire dotted group,
+collapsing the identity to the bare parent family "134E". The canonical
+report's own title was, and always had been, correct; the defect was
+purely in the comparison mechanism, not the artifact. Confirmed the
+identity invariant itself was correctly enforced (fail-closed, not
+bypassed) throughout. Repaired by introducing one shared extraction
+function, `_extract_canonical_title_phase_id()`, with a corrected pattern
+allowing one optional trailing letter per dotted segment, replacing both
+duplicated call sites. Confirmed `134E.2`/`134E.10` were never affected
+(no trailing letter); `134E.2V`/`134E.10V` would have been and now parse
+correctly. 14 new regression tests pass; 1222 combined regression tests
+unchanged; fast-green 4389/4390 (same pre-existing unrelated failure).
+The first PARTIAL WARNING delivery is preserved as historical evidence,
+not concealed; the corrected canonical report explicitly documents the
+supersession. Full details in
+`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_MODEL_VERIFICATION_FINALIZATION_REPAIR.md`.
+
+Phase 134E.1V has now reached a fully governed, trusted terminal state.
+Recommended next phase: 134E.2 — Evidence Extraction. 134E.2 was not
+begun in this phase.
+
+## Phase 134E.1V Finalization Repair Complete
+
+Root-caused and repaired the 134E-vs-134E.1V identity mismatch at its
+exact source (a shared, duplicated regex parsing bug in the canonical-
+report-title consistency check), rather than working around it.
+`report_completeness: complete`, `metadata_consistency` satisfied. No
+Evidence Extraction, views, rendering, delivery architecture, or
+lifecycle integration was implemented.
+
+## Phase 134E.1V Complete (historical — full text)
+
 Phase 134E.1V — Canonical Engineering Evidence Executable Model
 Independent Verification (completed).
 

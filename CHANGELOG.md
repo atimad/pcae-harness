@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 134E.1V finalization repair
+  (`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_MODEL_VERIFICATION_FINALIZATION_REPAIR.md`).
+  Root-causes and repairs the 134E-vs-134E.1V canonical-report identity
+  mismatch that left 134E.1V's terminal report untrusted despite correct
+  technical work. Two independently duplicated copies of the same regex
+  in `pcae.core.phase_reports` (`validate_canonical_report()`,
+  `_check_canonical_metadata_consistency()`) truncated any dotted
+  sub-phase identifier immediately followed by a bare verification-
+  suffix letter (e.g. "134E.1V") down to its bare parent family ("134E")
+  — a word-boundary backtracking artifact, not a data problem; the
+  canonical report's own title was always correct. Replaces both call
+  sites with one shared `_extract_canonical_title_phase_id()` using a
+  corrected pattern (`\.\d+[A-Za-z]?` per dotted segment). Confirms
+  `134E.2`/`134E.10` were never affected; `134E.2V`/`134E.10V` now parse
+  correctly. 14 new regression tests; 1222 combined regression tests and
+  fast-green (4389/4390, same pre-existing unrelated failure) unaffected.
+  The original PARTIAL WARNING delivery is preserved as historical
+  evidence and explicitly referenced, not concealed, by the corrected
+  canonical report. 134E.2 not begun.
+
 - Phase 134E.1V - Canonical Engineering Evidence Executable Model
   Independent Verification
   (`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_EXECUTABLE_MODEL_VERIFICATION.md`).

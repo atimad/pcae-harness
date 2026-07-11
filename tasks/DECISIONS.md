@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- Root-cause and repair the 134E-vs-134E.1V finalization identity
+  mismatch at its exact source, rather than working around it a fourth
+  time. Confirmed by direct regex re-derivation that a shared, duplicated
+  pattern in `phase_reports.py` truncated any dotted sub-phase identifier
+  followed by a bare verification-suffix letter down to its parent family
+  due to word-boundary backtracking; the canonical report's own title was
+  always correct, so this was an implementation-level defect, not an
+  artifact-level one. Consolidated both duplicated call sites into one
+  shared extraction function with a corrected pattern. Did not touch the
+  structurally-similar but incident-unrelated `_parse_leading_phase_
+  reference()` (task-title identity resolution) — recorded as the same
+  debt class for a future pass. Preserved the original PARTIAL WARNING
+  delivery as historical evidence rather than concealing it; dispatched
+  exactly one corrective delivery through the existing idempotent path,
+  no new notification architecture. Do not begin 134E.2 in this phase.
+
 - Independently verify the Canonical Engineering Evidence executable
   model (Phase 134E.1V) by fresh adversarial probing before writing any
   new test, rather than trusting 134E.1's report or its 52 tests. Found

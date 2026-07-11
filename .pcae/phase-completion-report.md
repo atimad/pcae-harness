@@ -1,5 +1,28 @@
 # Phase 134E.1V Complete — Canonical Engineering Evidence Executable Model Independent Verification
 
+## 0. Correction Note (supersedes the first terminal delivery)
+
+The first terminal delivery for this phase (commit `e1c9cb31`, dispatched
+as a clearly-labeled PARTIAL WARNING) was marked `report_completeness:
+partial` with a `metadata_consistency` blocker. Root cause: a
+pre-existing, out-of-scope-at-the-time regex defect in
+`pcae.core.phase_reports`'s canonical-report-title parser
+(`r'^#\s+Phase\s+(\d+[A-Z](?:\.\d+)*)\b'`) mis-parsed this report's own,
+always-correct title ("# Phase 134E.1V Complete — ...") as phase_id
+`134E` — the trailing `\b` word-boundary requirement could not be
+satisfied immediately after the bare verification-suffix letter "V", so
+the regex engine backtracked away the entire dotted sub-phase group,
+collapsing the parsed identity to the bare family prefix. **The
+underlying evidence, findings, and repairs below were correct and
+complete from the first delivery; only the automated title-parsing
+comparison was wrong.** This is a governed follow-up phase's own repair
+(see `docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_MODEL_VERIFICATION_
+FINALIZATION_REPAIR.md`) to the shared parser
+(`_extract_canonical_title_phase_id()`), not a rewrite of this report's
+substantive content. This corrected canonical artifact supersedes the
+first partial delivery; the original delivery record is preserved, not
+concealed.
+
 ## 1. Phase Identity
 
 - **Phase ID:** `134E.1V`
