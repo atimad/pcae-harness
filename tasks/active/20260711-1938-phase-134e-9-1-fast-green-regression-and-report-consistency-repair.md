@@ -23,6 +23,7 @@ Reproduce, identify, classify, and repair the 4389/4390 fast-green discrepancy b
 ## Allowed Files
 
 - src/pcae/core/phase_reports.py
+- src/pcae/commands/phase_reports.py
 - tests/test_dry_run_simulation.py
 - tests/test_architecture_status_generation_independent_verification_134e8v.py
 - tests/test_report_consistency_derived_correctness_134e9.py
@@ -32,6 +33,9 @@ Reproduce, identify, classify, and repair the 4389/4390 fast-green discrepancy b
 - tasks/DONE.md
 - tasks/active
 - tasks/active/20260711-1938-phase-134e-9-1-fast-green-regression-and-report-consistency-repair.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
@@ -41,9 +45,11 @@ Reproduce, identify, classify, and repair the 4389/4390 fast-green discrepancy b
 ## Allowed Zones
 
 - core
+- commands
 - tests
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
