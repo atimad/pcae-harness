@@ -22,18 +22,12 @@ Implement the reusable Report Consistency / Derived Correctness validation manif
 
 ## Allowed Files
 
-- src/pcae/core/phase_reports.py
-- src/pcae/commands/phase_reports.py
-- src/pcae/cli.py
-- docs/PHASE_134_REPORT_CONSISTENCY_DERIVED_CORRECTNESS_VALIDATION.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 - tasks/DONE.md
 - tasks/active
 - tasks/active/20260711-1832-phase-134e-9-report-consistency-derived-correctness-validation.md
-- tests/test_architecture_status_generation_repair_134e8.py
-- tests/test_phase_reports.py
-- tests/test_report_consistency_derived_correctness_134e9.py
 
 ## Forbidden Files
 
@@ -42,12 +36,9 @@ Implement the reusable Report Consistency / Derived Correctness validation manif
 
 ## Allowed Zones
 
-- core
-- commands
-- cli
-- tests
-- docs
 - tasks
+- config
+- docs
 
 ## Forbidden Zones
 
