@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 134E.5V - Rendering Architecture Independent Verification
+  (`docs/PHASE_134_RENDERING_ARCHITECTURE_INDEPENDENT_VERIFICATION.md`).
+  Independently verifies 134E.5's Rendering Architecture via fresh
+  adversarial probing rather than trusting its report/tests. Found and
+  repaired one BLOCKING defect in `src/pcae/core/rendering.py`:
+  undisclosed unresolved content in rendered prose — a primary
+  category's structural classification line (e.g. "blocking") could
+  render with no inline disclosure that its finding/repair body could
+  not be resolved from the source, even though the structured
+  `RenderingResult` already flagged the gap; fixed by adding an
+  explicit `[content unresolved: source value unavailable]` line
+  inline across all four affected prose renderers. Independently
+  re-derived and confirmed the dual-input `render(view, source,
+  renderer_id)` contract's safety, including proving the digest check
+  transitively rejects wrong-profile sources. 42 new adversarial tests
+  + original 97/98 (140 combined) pass; 1264 combined regression tests
+  pass; fast-green 4390/4390 passing this run. No delivery adapters,
+  channel-specific formatting, or lifecycle integration was
+  implemented.
+
 - Phase 134E.5 - Rendering Architecture
   (`docs/PHASE_134_RENDERING_ARCHITECTURE.md`). Implements
   `src/pcae/core/rendering.py`, a deterministic, transport-independent

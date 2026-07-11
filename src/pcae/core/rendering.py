@@ -395,6 +395,18 @@ def _resolve_section_lines(
                 rendered_categories.add(group.category)
                 for value_line in _stringify_value(item.value):
                     lines.append(f"  {value_line}")
+            else:
+                # 134E.5V finding (BLOCKING, repaired): a classification
+                # line (derived from view-level, already-composed data)
+                # was previously rendered on its own with no inline
+                # disclosure that the underlying content could not be
+                # resolved -- a reader of only the rendered prose (not
+                # the structured RenderingResult.diagnostics) would see
+                # an undisclosed, unsupported claim (e.g. "blocking"
+                # with no finding body). content_preservation_failure was
+                # already correctly recorded in diagnostics/completeness,
+                # but the visible artifact itself disclosed nothing.
+                lines.append("  [content unresolved: source value unavailable]")
         else:
             lines.append(
                 f"- {group.category} (see primary section) "

@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 134E.5V — Rendering Architecture Independent Verification (completed).
+
+Independently verified 134E.5's Rendering Architecture implementation
+rather than trusting its report, documentation, or its 97/98 tests.
+Found and repaired **one genuine BLOCKING defect**, discovered by
+direct adversarial probing before any new test was written: undisclosed
+unresolved content in rendered prose — when a primary category's value
+could not be resolved from the source, Markdown/plain-text output
+still printed the category's structural `classifications:` line (e.g.
+"blocking") with no inline disclosure that the corresponding finding/
+repair body was unavailable; the structured `RenderingResult.
+diagnostics`/`content_preserved`/`completeness` already correctly
+flagged the gap, but the rendered text itself did not. Repaired by
+adding an explicit `[content unresolved: source value unavailable]`
+line inline wherever this occurs, applying uniformly across all four
+affected prose renderers via the shared helper. Independently
+re-derived and confirmed the dual-input `render(view, source,
+renderer_id)` contract is necessary, safe, and sound — including
+proving the digest check transitively rejects wrong-profile sources
+without needing a separate check. 42 new fresh adversarial tests (all
+40 required probe areas plus 2 re-confirmations) plus the original
+97/98 tests (140 combined) pass; 1264 combined regression tests pass;
+fast-green 4390/4390 passing this run. No new NON-BLOCKING observations
+beyond those already carried forward from prior phases. Full details in
+`docs/PHASE_134_RENDERING_ARCHITECTURE_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134E.6 — Delivery Pipeline Generalization.
+134E.6 was not begun in this phase.
+
+## Phase 134E.5V Complete
+
+Independently verified and repaired the Rendering Architecture
+implementation. The module remains isolated, disconnected lifecycle
+authority — not yet active. One BLOCKING defect repaired at the
+smallest responsible boundary. No delivery adapters, channel-specific
+formatting, or lifecycle integration was implemented.
+
+## Phase 134E.5 Complete (historical)
+
 Phase 134E.5 — Rendering Architecture (completed).
 
 Implemented a deterministic, reusable, transport-independent Rendering

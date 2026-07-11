@@ -2,6 +2,27 @@
 
 ## Accepted
 
+- Independently verify Rendering Architecture (Phase 134E.5V) by fresh
+  adversarial probing before writing any new test, rather than
+  trusting 134E.5's report or its 97/98 tests. Found and repaired one
+  BLOCKING defect: `_resolve_section_lines()` (shared by all four
+  prose renderers) unconditionally printed a category's structural
+  `classifications:` line even when the corresponding value could not
+  be resolved from the source, with no inline disclosure of the gap in
+  the rendered text itself -- the structured `RenderingResult` already
+  flagged it via `content_preservation_failure`/`content_preserved`/
+  downgraded `completeness`, but a reader of only the rendered prose
+  saw an undisclosed, unsupported classification claim. Repaired by
+  adding an explicit `[content unresolved: source value unavailable]`
+  line inline. Independently re-derived and confirmed the dual-input
+  `render(view, source, renderer_id)` contract's necessity and safety,
+  including proving the existing digest check already transitively
+  rejects a source extracted under the wrong profile (profile_id is
+  embedded in `ExtractionResult.compute_digest()`'s own serialization)
+  without needing a separate profile check. Found no other BLOCKING
+  defects across all 45 required verification dimensions. Do not begin
+  134E.6 in this phase.
+
 - Implement Rendering Architecture (Phase 134E.5) with `render()`
   accepting both a composed view (Phase Report View or Operator Report
   View) and its originating `ExtractionResult`, rather than the view
