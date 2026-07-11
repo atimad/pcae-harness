@@ -408,15 +408,25 @@ def test_historical_incident_reports_are_preserved():
 
 
 def test_real_repository_status_has_no_stale_132f_plan_and_discloses_no_conflicts():
+    """Phase 134E.9.1 — ``current_phase_id``/``planned_phase_ids`` are
+    intentionally *not* pinned to the literal values true when 134E.8V
+    was authored: those fields necessarily change every time a later
+    phase completes (134E.9, then this corrective 134E.9.1), which is
+    correct evolution, not a regression. Pinning a literal here would
+    make this test fail at the next phase transition regardless of any
+    actual code defect -- the same live-repository-state coupling this
+    corrective phase found and repaired in ``test_dry_run_simulation.py``.
+    The genuinely durable invariants (132F completed and never planned,
+    Tracks 132-134 represented, 134E.8/134E.8.1 completed, no conflicts,
+    fresh) remain pinned exactly as 134E.8V asserted them."""
     status = build_architecture_status()
     assert "132F" in status["completed_phase_ids"]
     assert "132F" not in status["planned_phase_ids"]
     assert {"132", "133", "134"}.issubset({item["chapter"] for item in status["completed_chapters"]})
     assert "134E.8" in status["completed_phase_ids"]
     assert "134E.8.1" in status["completed_phase_ids"]
-    assert status["current_phase_id"] == "134E.8V"
+    assert status["current_phase_id"]
     assert "134E.8V" in status["completed_phase_ids"]
-    assert status["planned_phase_ids"] == ["134E.9"]
     assert status["conflicts"] == []
     assert status["freshness"] == FRESHNESS_FRESH
     assert validate_architecture_status(status) == []

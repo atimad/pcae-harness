@@ -1284,6 +1284,20 @@ ALLOWED_RUNTIME_TUPLES: frozenset[tuple[str, str, str]] = frozenset({
     ("Observed", "observe", "unavailable"),
 })
 
+# Phase 134E.9.1 — confirmed by direct inspection that `fast_green` (a
+# _REQUIRED_BASE_TEST_RESULT_KEYS mandatory key) was checked only for
+# *presence*, never for whether its free-text value actually reports a
+# failure: a report could declare
+# ``test_results["fast_green"] = "0 passed, 4391 failed"`` and still be
+# marked complete. Root-caused by the 134E.9 report's own "4389/4390,
+# one pre-existing unrelated failure" claim, which -- while textually
+# true of that run -- was accepted as complete without this codebase
+# ever verifying the claimed failure was actually non-blocking. No
+# escape hatch is provided: unlike the recommended-next-phase or
+# test-evidence-linkage checks above, a governed classification cannot
+# make a real fast_green failure retroactively not have happened.
+_FAST_GREEN_FAILURE_RE = re.compile(r'(\d+)[^\d]{0,40}?fail', re.IGNORECASE)
+
 
 def validate_derived_correctness(report: PhaseReport) -> list[str]:
     """Validate a terminal report's derived claims against its own sealed
@@ -1302,6 +1316,22 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
         return issues
     phase_id = report.phase_id.strip()
     md = report.metadata or {}
+
+    # ── Mandatory test evidence value, not just presence: a nonzero
+    # failure count reported in test_results["fast_green"] must block,
+    # regardless of how the failure is narrated (e.g. "pre-existing",
+    # "unrelated") -- that narration is not itself verified evidence.
+    fast_green_value = ""
+    if isinstance(report.test_results, dict):
+        fast_green_value = str(report.test_results.get("fast_green", ""))
+    if fast_green_value:
+        fail_match = _FAST_GREEN_FAILURE_RE.search(fast_green_value)
+        if fail_match and int(fail_match.group(1)) > 0:
+            issues.append(
+                f"test_results['fast_green'] reports {fail_match.group(1)} "
+                f"failure(s) ({fast_green_value!r}) -- a failing fast_green "
+                f"result cannot be certified complete"
+            )
 
     # ── Architecture Status freshness/conflicts must not be silently
     # ignored: a "fresh" classification is not a substitute for internal

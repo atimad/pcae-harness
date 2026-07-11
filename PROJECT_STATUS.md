@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 134E.9.1 — Fast-Green Regression and Report-Consistency Repair (completed).
+
+Corrective phase resolving the material contradiction between 134E.8V's
+reported fast-green `4390/4390` and 134E.9's reported `4389/4390` with "one
+pre-existing unrelated failure." Identified the exact failing test
+(`tests/test_dry_run_simulation.py::Test89dMatrixReadOnly::test_pytest_dry_run_not_blocked`)
+and proved, via a read-only detached `git worktree` at 134E.8V's exact
+commit (no destructive checkout of the active repository), that the test is
+non-hermetic: it evaluates `build_simulation()` against the real, live
+checkout's `tasks/active/` state rather than an isolated fixture, so it
+passes when a governed task happens to be active and hard-blocks
+(`blocked_by_task_contract`, correct fail-closed governance, unmodified)
+when none is. 134E.8V's fast-green ran while its own task was still open;
+134E.9's final verification ran after `pcae task finish` had already closed
+it — both numbers were accurate observations under different, undisclosed
+conditions; **134E.9 introduced no regression** (its diff touches zero
+dry-run/advisory/broker code). Repaired by making the test construct its
+own isolated task-contract fixture; added a companion test pinning the
+correct no-active-task hard-block behavior so this defect class cannot
+recur. Separately found and repaired a second, more serious defect:
+`validate_derived_correctness()` checked `test_results["fast_green"]` only
+for *presence*, never its value — a report could (and did) reach
+`report_completeness: complete` while its own embedded evidence stated a
+failure. Added an unconditional (no escape hatch) check for a nonzero
+reported fast-green failure count, wired into the same shared boundary
+134E.9 established. Repairing fast-green exposed two more instances of the
+same live-repository-state-coupling pattern in other tests
+(`test_architecture_status_generation_independent_verification_134e8v.py`'s
+hardcoded `current_phase_id == "134E.8V"`; this phase's own now-removed
+`TestRealRepositoryConsistency` real-latest-report test) — both repaired
+without weakening the invariants they protect. Verified fast-green
+deterministic at `4391/4391`, zero failures, across three consecutive runs
+(parallel twice, serial once). Original 134E.9 report preserved unmodified;
+this phase completes under its own new phase identity, not a resend of
+134E.9. No Canonical Engineering Evidence, Evidence Extraction, Phase
+Report View, Operator Report View, Rendering Architecture, Delivery
+Pipeline, or Delivery Receipt activation. No execution capability. Full
+details in
+`docs/PHASE_134_FAST_GREEN_REGRESSION_REPORT_CONSISTENCY_REPAIR.md`.
+
+Recommended next phase: 134E.9V — Report Consistency / Derived Correctness Independent Verification.
+134E.9V was not begun in this phase.
+
+## Phase 134E.9.1 Complete
+
+Resolved the 4390/4390 vs 4389/4390 fast-green contradiction: not a 134E.9
+regression, but a non-hermetic test (`test_pytest_dry_run_not_blocked`)
+whose outcome depends on live task-lifecycle state, proven via read-only
+worktree comparison at 134E.8V's commit and repaired by isolating the
+test's fixture. Also repaired `validate_derived_correctness()` to validate
+`test_results["fast_green"]`'s actual value, not just its presence, closing
+the gap that let a report reach complete status with a stated test failure.
+Fast-green now deterministic at 4391/4391. No new evidence/delivery
+lifecycle activation; no execution capability; 134E.9V was not begun.
+
+## Phase 134E.9 Complete (historical — full text)
+
 Phase 134E.9 — Report Consistency / Derived Correctness Validation (completed).
 
 Implemented the reusable Report Consistency / Derived Correctness validation

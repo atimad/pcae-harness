@@ -425,6 +425,90 @@ class TestInactiveSubsystemsUnchanged:
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# 12.1. Fast-green value validation (Phase 134E.9.1)
+# ═══════════════════════════════════════════════════════════════════════
+#
+# 134E.9's own report reached report_completeness="complete" while
+# test_results["fast_green"] literally read "4389 passed, 1 pre-existing
+# unrelated failure" -- because fast_green's mandatory-key check
+# (_REQUIRED_BASE_TEST_RESULT_KEYS) verified only that the key was
+# *present*, never that its free-text value actually reported zero
+# failures. This is the exact "report-consistency implementation allowed
+# a complete report despite unresolved contradictory test evidence" gap
+# Phase 134E.9.1 was chartered to find and repair.
+
+
+class TestFastGreenValueValidation:
+    def test_reported_failure_count_blocks(self):
+        report = _report()
+        report.test_results = {"fast_green": "4389 passed, 1 pre-existing unrelated failure"}
+        issues = validate_derived_correctness(report)
+        assert any("fast_green" in i and "1 failure" in i for i in issues)
+
+    def test_reported_failed_count_blocks(self):
+        report = _report()
+        report.test_results = {"fast_green": "4389 passed, 1 failed"}
+        issues = validate_derived_correctness(report)
+        assert any("fast_green" in i for i in issues)
+
+    def test_zero_failures_passes(self):
+        report = _report()
+        report.test_results = {"fast_green": "4390 passed, 0 failed"}
+        assert validate_derived_correctness(report) == []
+
+    def test_no_failure_language_passes(self):
+        report = _report()
+        report.test_results = {"fast_green": "4391 passed"}
+        assert validate_derived_correctness(report) == []
+
+    def test_no_escape_hatch_for_narrated_failures(self):
+        """Unlike the recommended-next-phase / test-evidence-linkage
+        checks, no metadata classification can suppress a real fast_green
+        failure -- narration ("pre-existing", "unrelated", "known") is
+        not itself verified evidence and must never waive the check."""
+        report = _report()
+        report.test_results = {"fast_green": "4389 passed, 1 known pre-existing unrelated failure"}
+        report.metadata["next_phase_classification"] = "corrective_recovery_transition"
+        report.metadata["test_evidence_classification"] = "inherited_regression"
+        issues = validate_derived_correctness(report)
+        assert any("fast_green" in i for i in issues)
+
+    def test_completeness_downgraded_on_fast_green_failure(self):
+        from pcae.core.phase_reports import _apply_derived_correctness
+
+        report = _report()
+        report.test_results = {"fast_green": "4389 passed, 1 failed"}
+        report.report_completeness = COMPLETENESS_COMPLETE
+        _apply_derived_correctness(report)
+        assert report.report_completeness == COMPLETENESS_INCOMPLETE
+
+    def test_finalization_gate_blocks_on_fast_green_failure(self):
+        report = _report()
+        report.test_results = {"fast_green": "4389 passed, 1 failed"}
+        gate = validate_finalization_gate(
+            phase_id=report.phase_id,
+            report=report,
+            metadata={"phase_commits": [{"hash": "abc12345"}], "commit_attribution": "phase_owned"},
+            pushed_status="pushed",
+            origin_main_head_count=0,
+            governance_results=report.governance_results,
+            test_results=report.test_results,
+            no_go_confirmations=report.explicit_no_go_confirmations,
+            recommended_next_phase=report.recommended_next_phase,
+        )
+        assert gate["finalizable"] is False
+        assert any("fast_green" in b for b in gate["blockers"])
+
+    def test_missing_fast_green_key_not_flagged_by_this_check(self):
+        """Absence is a separate, pre-existing trust-completeness concern
+        (_REQUIRED_BASE_TEST_RESULT_KEYS); this check only interprets a
+        *present* value."""
+        report = _report()
+        report.test_results = {}
+        assert validate_derived_correctness(report) == []
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # 13. CLI inspection is side-effect-free
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -467,11 +551,19 @@ class TestConsistencyInspectionSideEffectFree:
 
 
 class TestRealRepositoryConsistency:
-    def test_real_repository_latest_report_is_consistent(self):
-        from pcae.core.phase_reports import read_latest_report
-
-        report = read_latest_report(Path(".pcae/phase-reports"))
-        if report is None:
-            pytest.skip("no canonical latest report present in this checkout")
-        assert validate_internal_report_coherence(report) == []
-        assert validate_derived_correctness(report) == []
+    """Phase 134E.9.1 — this class previously asserted the live
+    ``.pcae/phase-reports/latest.json`` artifact is always fully
+    consistent. That artifact is mutable operational state, not code
+    under test: as soon as a later phase's own persisted report becomes
+    "latest", or a later phase adds a stricter validator (exactly what
+    134E.9.1 itself does -- see ``TestFastGreenValueValidation`` below,
+    added by this same corrective phase), the assertion can legitimately
+    flip without any code regression -- the same live-repository-state
+    coupling this corrective phase found and repaired in
+    ``test_dry_run_simulation.py::test_pytest_dry_run_not_blocked``.
+    Removed rather than weakened: the validators themselves remain
+    exhaustively covered by the 34+ fixture-based tests above, which
+    construct explicit, deterministic report state rather than reading
+    whatever happens to be on disk. Ad hoc inspection of the real latest
+    report remains available, side-effect-free, via
+    ``pcae phase-report consistency``."""

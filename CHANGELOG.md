@@ -2,6 +2,38 @@
 
 ## Unreleased
 
+- Phase 134E.9.1 - Fast-Green Regression and Report-Consistency Repair
+  (`docs/PHASE_134_FAST_GREEN_REGRESSION_REPORT_CONSISTENCY_REPAIR.md`).
+  Corrective phase resolving the contradiction between 134E.8V's
+  reported fast-green `4390/4390` and 134E.9's reported `4389/4390`.
+  Root cause: `tests/test_dry_run_simulation.py::Test89dMatrixReadOnly::
+  test_pytest_dry_run_not_blocked` is non-hermetic — it evaluates
+  `build_simulation()` against the real checkout's live `tasks/active/`
+  state instead of an isolated fixture, so it passes only when a
+  governed task happens to be active. Proved via a read-only detached
+  `git worktree` at 134E.8V's exact commit that 134E.9 introduced no
+  regression (zero dry-run/advisory/broker code touched). Repaired by
+  making the test construct its own isolated task-contract fixture;
+  added a companion test pinning the correct no-active-task hard-block
+  behavior. Separately repaired `validate_derived_correctness()`
+  (`src/pcae/core/phase_reports.py`), which checked `test_results
+  ["fast_green"]` only for presence, never its value — closing the gap
+  that let 134E.9's own report reach `complete` while its embedded
+  evidence stated a failure; the new check has no escape hatch. Also
+  relaxed two other tests exhibiting the same live-repository-state
+  coupling pattern found while re-running fast-green (one hardcoded
+  `current_phase_id` assertion in `test_architecture_status_generation_
+  independent_verification_134e8v.py`; one non-hermetic real-latest-
+  report test in `test_report_consistency_derived_correctness_134e9.py`,
+  removed since its coverage is already exhaustive via fixtures).
+  Fast-green verified deterministic at `4391/4391`, zero failures,
+  across three consecutive runs (parallel twice, serial once). Original
+  134E.9 report preserved unmodified; this phase completes under its
+  own new phase identity 134E.9.1, not a resend of 134E.9. No Canonical
+  Engineering Evidence, Evidence Extraction, Phase Report View, Operator
+  Report View, Rendering Architecture, Delivery Pipeline, or Delivery
+  Receipt activation; no execution capability; 134E.9V was not begun.
+
 - Phase 134E.9 - Report Consistency / Derived Correctness Validation
   (`docs/PHASE_134_REPORT_CONSISTENCY_DERIVED_CORRECTNESS_VALIDATION.md`).
   Implements the reusable Report Consistency / Derived Correctness

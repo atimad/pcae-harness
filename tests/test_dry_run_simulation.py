@@ -404,11 +404,41 @@ class Test89dMatrixReadOnly:
         assert data["simulation_severity"] in ("info", "caution"), \
             f"{cmd}: severity should be info or caution, got {data['simulation_severity']}"
 
-    def test_pytest_dry_run_not_blocked(self):
-        data = _sim("python -m pytest tests/test_dry_run_simulation.py -q")
+    def test_pytest_dry_run_not_blocked(self, tmp_path):
+        """Phase 134E.9.1 — repaired test-isolation defect: this test
+        previously called ``_sim()``, which evaluates against the real
+        ``REPO_ROOT`` (this checkout), so its outcome silently depended
+        on whether an ad hoc governed task happened to be active in the
+        *calling* repository at the moment the suite ran — nondeterministic
+        with respect to the code under test, not to any actual code change.
+        ``_detect_task_contract()`` (``pcae.core.gate_dry_run``) only
+        requires a ``tasks/active/*.md`` file to exist, with no other
+        state, so a minimal isolated task contract reproduces "a governed
+        session has an active task" deterministically, independent of
+        this checkout's own live task-lifecycle state. See
+        ``test_pytest_dry_run_hard_blocked_without_active_task`` below for
+        the companion, equally deterministic no-task case."""
+        (tmp_path / "tasks" / "active").mkdir(parents=True)
+        (tmp_path / "tasks" / "active" / "task.md").write_text(
+            "# Task Contract\n\n## Allowed Files\n\n- tests/**\n"
+        )
+        data = build_simulation(tmp_path, requested_command="python -m pytest tests/test_dry_run_simulation.py -q")
         # pytest without -n auto is test execution → may require task
         assert data["would_block"] is False or data["would_require_active_task"], \
             "pytest should require task or be allowed, not hard blocked"
+
+    def test_pytest_dry_run_hard_blocked_without_active_task(self, tmp_path):
+        """Phase 134E.9.1 — companion deterministic regression: with no
+        governed task active, this repository's own broker/advisory model
+        *correctly* hard-blocks test-execution commands
+        (``blocked_by_task_contract``) rather than merely flagging
+        ``would_require_active_task`` -- this is intentional fail-closed
+        governance, not a defect, and is now pinned so it can never again
+        be mistaken for flakiness in ``test_pytest_dry_run_not_blocked``
+        above."""
+        data = build_simulation(tmp_path, requested_command="python -m pytest tests/test_dry_run_simulation.py -q")
+        assert data["would_block"] is True
+        assert data["broker_decision"] == "blocked_by_task_contract"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
