@@ -583,6 +583,26 @@ def _compose_section(
         applicability = SectionApplicability.INCOMPLETE
         completeness = SectionCompleteness.INCOMPLETE
         not_applicable_reason = None
+    elif not any_present and any_conditionally_missing:
+        # 134E.3V finding (BLOCKING, repaired): a conditionally-required-
+        # and-missing category (extraction diagnostic code
+        # "conditionally_required_category_missing") was previously
+        # indistinguishable, at this point, from a category the profile
+        # genuinely marks not-applicable for this phase class (which
+        # produces zero diagnostic, only a FilteringDisclosure). Both
+        # left `any_present=False`, so the old condition below
+        # (`section_id in _CONDITIONAL_SECTIONS`) fired for either case,
+        # composing a real, disclosed extraction-level limitation as
+        # NOT_APPLICABLE + COMPLETE -- silently discarding the limitation
+        # extraction itself recorded (a Non-Strengthening violation:
+        # "conditionally missing" strengthened into "not applicable").
+        # `missing_required_categories` remained non-empty in that state,
+        # directly contradicting an applicability that claims nothing is
+        # missing. A conditionally-missing category must never be
+        # composed as NOT_APPLICABLE, regardless of `any_present`.
+        applicability = SectionApplicability.UNAVAILABLE_WITH_DISCLOSURE
+        completeness = SectionCompleteness.COMPLETE_WITH_LIMITATIONS
+        not_applicable_reason = None
     elif not any_present and section_id in _CONDITIONAL_SECTIONS:
         applicability = SectionApplicability.NOT_APPLICABLE
         completeness = SectionCompleteness.COMPLETE

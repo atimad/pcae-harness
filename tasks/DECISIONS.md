@@ -2,6 +2,31 @@
 
 ## Accepted
 
+- Independently verify Phase Report View Composition (Phase 134E.3V) by
+  fresh adversarial probing before writing any new test, rather than
+  trusting 134E.3's report or its 88 tests. Found and repaired one
+  BLOCKING defect: conditionally-missing-vs-not-applicable conflation —
+  `_compose_section()`'s NOT_APPLICABLE branch previously fired
+  identically for "profile marks this category not-applicable for the
+  phase class" (zero diagnostic) and "profile conditionally requires
+  this category and the evidence record genuinely lacks it" (a real,
+  disclosed extraction-level limitation), silently discarding the
+  latter's disclosed limitation and self-contradicting
+  `missing_required_categories`. Repaired by adding an explicit
+  conditionally-missing branch, checked before the not-applicable
+  branch, composing such a section as
+  `UNAVAILABLE_WITH_DISCLOSURE`/`COMPLETE_WITH_LIMITATIONS`. Verified
+  the fix generalizes across all four phase-class-conditional sections
+  without overcorrecting genuinely not-applicable cases. Recorded three
+  NON-BLOCKING observations (near-status-only Executive Summary
+  completeness — newly discovered, an inherent structural limitation of
+  category-level completeness rather than a defect since judging
+  free-text substance would require composition to invent a narrative
+  conclusion; static conditionally-required semantics and private
+  registry access — both carried forward from 134E.2V, re-confirmed
+  still open) as inputs for later sub-phases rather than repairing them
+  now. Do not begin 134E.4 in this phase.
+
 - Implement Phase Report View Composition (Phase 134E.3) as a
   deterministic, structured composition layer
   (`src/pcae/core/phase_report_view.py`) consuming only verified

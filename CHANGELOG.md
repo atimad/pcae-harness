@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 134E.3V - Phase Report View Composition Independent Verification
+  (`docs/PHASE_134_PHASE_REPORT_VIEW_COMPOSITION_INDEPENDENT_VERIFICATION.md`).
+  Independently verifies 134E.3's Phase Report View Composition via
+  fresh adversarial probing rather than trusting its report/tests. Found
+  and repaired one BLOCKING defect in
+  `src/pcae/core/phase_report_view.py`: conditionally-missing-vs-not-
+  applicable conflation — a category the extraction profile marks
+  CONDITIONALLY_REQUIRED and genuinely missing from the evidence record
+  (a real, disclosed limitation) was composed identically to a category
+  the profile marks NOT_APPLICABLE, silently discarding the disclosed
+  limitation; fixed by adding an explicit conditionally-missing branch
+  in `_compose_section()`, composed as
+  `UNAVAILABLE_WITH_DISCLOSURE`/`COMPLETE_WITH_LIMITATIONS` instead of
+  `NOT_APPLICABLE`/`COMPLETE`. 36 new adversarial tests + original 88
+  (124 combined) pass; 964 combined regression tests pass; fast-green
+  4390/4390 passing this run. Three NON-BLOCKING observations recorded,
+  not repaired (near-status-only Executive Summary completeness, static
+  conditionally-required semantics, private registry access). No
+  Operator Report View composition, rendering, delivery, or lifecycle
+  integration was implemented.
+
 - Phase 134E.3 - Phase Report View Composition
   (`docs/PHASE_134_PHASE_REPORT_VIEW_COMPOSITION.md`). Implements
   `src/pcae/core/phase_report_view.py`, a deterministic, structured
