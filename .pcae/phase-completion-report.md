@@ -1,78 +1,90 @@
-# Phase 134E.6V Complete — Delivery Pipeline Generalization Independent Verification
+# Phase 134E.7 Complete — External Delivery Receipt Model
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.6V`
+- **Phase ID:** `134E.7`
 - **Status:** completed
-- **Phase class:** independent verification
+- **Phase class:** dedicated implementation
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134E.6V independently verified 134E.6's Delivery Pipeline
-Generalization implementation (`src/pcae/core/delivery_pipeline.py`)
-via fresh adversarial probing rather than trusting its report,
-documentation, or its 105 tests. Found and repaired two genuine
-BLOCKING defects.
+Phase 134E.7 implemented a deterministic, durable, transport-neutral
+External Delivery Receipt model (`src/pcae/core/delivery_receipt.py`)
+built entirely on top of the verified Delivery Pipeline (134E.6,
+134E.6V), recording one logical delivery, its ordered physical
+attempts, per-unit outcomes, retries, partial delivery, authorization
+outcomes, and correction/supersession relationships.
 
 ## 3. Architectural Findings
 
-Independently re-confirmed the pipeline consumes only `RenderingResult`
-plus `pcae.core.notifications._external_delivery_authorized()`, with
-zero reference to the canonical evidence model, extraction layer, or
-either derived view — confirmed via a fresh source-line import scan.
-Confirmed zero references to `pcae.core.delivery_pipeline` anywhere
-outside its own module and test files.
+Preserved the layering: Canonical Engineering Evidence -> Derived
+Evidence Views -> RenderingResult -> Delivery Pipeline ->
+DeliveryExecutionResult -> External Delivery Receipt Model -> Final
+Lifecycle Integration (134E.10, not implemented). Confirmed via
+dedicated source-line import scan that the receipt module imports only
+`pcae.core.delivery_pipeline` -- never the canonical evidence model,
+extraction layer, either derived view, or rendering directly.
 
 ## 4. Implementation Findings
 
-Not applicable — this is a verification-only phase. No new production
-capability was implemented beyond the two defect repairs described
-below.
+Implemented deterministic receipt/attempt identity via canonical JSON
+array hashing (never delimiter-joined strings, per 134E.6V's own
+repaired discipline); last-attempt-wins aggregate unit accounting
+across retries (no double-counting); explicit logical-vs-physical
+exactly-once distinction; ambiguous-outcome support without
+auto-retry; retry lineage that structurally rejects changed
+rendering/destination/adapter/purpose/policy (all baked into
+`logical_delivery_id`); additive-only correction/supersession with
+deeply immutable finalized receipts (frozen dataclasses plus
+`MappingProxyType`-wrapped nested mappings); file-backed atomic-write/
+digest-verified persistence reusing Phase 93C's audit-record
+convention; and bounded diagnostic redaction directly addressing
+134E.6V's NON-BLOCKING observation. No active-lifecycle integration
+was introduced; the module remains fully isolated.
 
 ## 5. Verification Findings
 
-Two genuine BLOCKING defects found and repaired, both proven first via
-direct Python REPL reproduction before any regression test was
-written:
-
-1. **Ambiguous logical-delivery-identity field concatenation** —
-   `compute_logical_delivery_id()`'s original `"|".join()` approach
-   allowed two semantically different input tuples to collide by
-   shifting content across a field boundary. Repaired by hashing a
-   canonical JSON array (`json.dumps([...])`) instead.
-2. **Unhandled adapter exception** — `execute_delivery()`'s per-unit
-   loop had no exception handling, so a throwing `deliver_fn` aborted
-   delivery of every sibling unit in the plan. Repaired by wrapping
-   each call in `try`/`except Exception`, normalizing into a
-   conservative retryable `AdapterUnitOutcome`.
-
-44 new fresh adversarial tests (all 42 required probe areas plus 2
-regression tests for the exception fix) pass; 149 combined with the
-original 105 pass; 553 combined 134E.3-134E.6 regression tests pass;
-fast-green 4390/4390 passing this run.
+Implementation-phase scope: regression summary only (independent
+adversarial verification is 134E.7V's job). 110 new focused tests (all
+110 required areas) pass; 760 combined regression tests pass (evidence
+extraction 134E.2/134E.2V, Phase Report View 134E.3/134E.3V, Operator
+Report View 134E.4/134E.4V, Rendering 134E.5/134E.5V, Delivery
+Pipeline 134E.6/134E.6V, Delivery Receipt 134E.7); notification/
+Telegram/authorization/finalization/canonical-evidence regressions
+(374 tests) pass unchanged; fast-green 4389/4390 passing this run (the
+one failure, `test_pytest_dry_run_not_blocked`, confirmed pre-existing
+and unrelated via a clean-checkout reproduction before this phase's
+changes were applied).
 
 ## 6. Technical Debt Review
 
-One NON-BLOCKING observation recorded: adapter-exception diagnostic
-messages are not independently secret-scrubbed. Not repaired — this is
-consistent with the rest of the pipeline's existing diagnostic
-surfaces (an adapter's own `AdapterUnitOutcome.diagnostic` is equally
-unscrubbed today), no genuine secret is introduced by this code path,
-and secret rejection remains an upstream responsibility
-(`CanonicalEngineeringEvidence.validate()`).
+Repaired two pre-declared, expected consequences of this phase's own
+scope (not new defects): the isolation scans in
+`test_delivery_pipeline_134e6.py` and
+`test_delivery_pipeline_134e6v_verification.py` narrowed to admit
+`delivery_receipt.py` as the next expected, still-isolated consumer of
+`delivery_pipeline.py` -- the identical pattern every prior 134E.x
+phase already applied to its own predecessor. Directly addressed
+134E.6V's carried-forward NON-BLOCKING observation (adapter-exception
+diagnostics not independently secret-scrubbed) via bounded,
+explicit-pattern redaction at the receipt layer. No other pre-existing
+Track 134 debt item was repaired.
 
 ## 7. Notable Engineering Knowledge
 
-Delimiter-joined string hashing for a composite identity is unsafe
-whenever any input field is unrestricted free text — canonical
-structured serialization (e.g. a JSON array) closes the ambiguity by
-construction, not by validation. Separately: any pipeline stage that
-calls third-party/adapter code in a loop over independent units must
-isolate each call's exceptions per-unit; a single failing unit must
-never be allowed to silently cancel delivery of unrelated sibling
-units.
+Correction/supersession is safest modeled as a purely additive overlay
+with its own distinct identity (`correction.correcting_receipt_id`),
+never as a mutation of the original finalized record under its own
+identity -- this avoids both accidental storage-path collisions and
+the temptation to "patch" history, while still letting a reverse
+lookup (`list_corrections`) answer "was this receipt ever corrected."
+Separately: last-attempt-wins per-unit aggregation (keyed by a stable
+unit id reused across retry plans) is the cleanest way to avoid
+double-counting a unit that failed once and later succeeded, without
+needing to special-case "this is a retry" logic in the aggregate
+derivation itself.
 
 ## 8. Governance Results
 
@@ -83,10 +95,10 @@ units.
 
 ## 9. Test Results
 
-- New adversarial suite: 44 passed (all 42 required areas plus 2 regression tests).
-- Combined with original 134E.6 suite: 149 passed.
-- Combined 134E.3-134E.6 regression suite: 553 passed.
-- Fast-green: 4390 passed, 0 failed this run.
+- New focused suite: 110 passed (all 110 required areas).
+- Combined 134E.2-134E.7 regression suite: 760 passed.
+- Notification/authorization/finalization/canonical-evidence regression suite: 374 passed.
+- Fast-green: 4389 passed, 1 failed this run (pre-existing, unrelated -- confirmed via clean-checkout reproduction).
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
@@ -94,11 +106,12 @@ units.
 No activation of Canonical Engineering Evidence, no live evidence
 capture, no replacement of current report generation, no replacement
 of current notification dispatch, no routing of production Telegram
-through the new pipeline, no durable External Delivery Receipt model,
+through the new receipt model, no PFN-001 change, no PFR-001 change,
 no Architecture Status repair, no final lifecycle integration, no
-PFN-001/PFR-001 change, no Repository Intelligence change, no 134E.7
-work, and no execution capability were implemented. No raw git
-commit/push, `--no-verify`, or force push was used.
+Repository Intelligence change, no 134E.7V work, and no execution
+capability were implemented. No production receipt artifact was
+created. No raw git commit/push, `--no-verify`, or force push was
+used.
 
 ## 11. Architectural Boundary Confirmation
 
@@ -109,12 +122,13 @@ active authority. This phase does not self-certify.
 
 ## 12. Track Progress
 
-134E.6V closes the independent-verification gate for the sixth of
-Track 134E's seven architectural layers, confirming the Delivery
-Pipeline is sound before 134E.7 (External Delivery Receipt Model) may
-begin.
+134E.7 completes the seventh of Track 134E's architectural layers,
+sitting atop the verified Delivery Pipeline without depending on any
+layer beneath it directly. It does not itself close the
+independent-verification gate 134D's roadmap requires before 134E.8
+may begin -- that is 134E.7V's job.
 
 ## 13. Next Phase
 
-Recommended: **134E.7 — External Delivery Receipt Model**. Phase
-134E.7 has not begun.
+Recommended: **134E.7V — External Delivery Receipt Model Independent
+Verification**. Phase 134E.7V has not begun.
