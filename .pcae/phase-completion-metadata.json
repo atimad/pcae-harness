@@ -1,39 +1,35 @@
 {
   "schema_version": "1.0",
-  "phase_id": "134E.3V",
-  "phase_name": "Phase Report View Composition Independent Verification",
-  "phase_title": "Phase Report View Composition Independent Verification",
+  "phase_id": "134E.4",
+  "phase_name": "Operator Report View Composition",
+  "phase_title": "Operator Report View Composition",
   "status": "completed",
-  "summary": "Independently verified 134E.3's Phase Report View Composition implementation via fresh adversarial probing, rather than trusting its report, documentation, or its own 88 tests. Found and repaired one genuine BLOCKING defect in src/pcae/core/phase_report_view.py, discovered by direct adversarial probing before any new test was written: conditionally-missing-vs-not-applicable conflation. A category the extraction profile marks CONDITIONALLY_REQUIRED and which the evidence record genuinely lacks (extraction diagnostic conditionally_required_category_missing -- a real, disclosed limitation) was composed identically to a category the profile marks NOT_APPLICABLE for the phase class (zero diagnostic, only a FilteringDisclosure), silently discarding the disclosed limitation and self-contradicting missing_required_categories. Repaired by adding an explicit conditionally-missing branch in _compose_section(), checked before the not-applicable branch, composing such a section as UNAVAILABLE_WITH_DISCLOSURE/COMPLETE_WITH_LIMITATIONS instead of NOT_APPLICABLE/COMPLETE. Verified the fix generalizes across all four phase-class-conditional sections without overcorrecting genuinely not-applicable cases. 36 new fresh adversarial tests covering all 30 required probe areas plus 6 authority-boundary re-confirmations, plus the original 88 tests (124 combined), pass; 964 combined regression tests pass; fast_green 4390/4390 passing this run. Three NON-BLOCKING observations recorded: one newly discovered (near-status-only Executive Summary content can reach COMPLETE -- an inherent structural limitation of category-level completeness, not a defect), two carried forward from 134E.2V and re-confirmed still open (static conditionally-required semantics, private registry access). The module remains isolated, disconnected lifecycle authority. 134E.4 not begun.",
+  "summary": "Implemented a deterministic, structured, mobile-oriented, transport-independent Operator Report View Composition layer (src/pcae/core/operator_report_view.py) over the verified operator_report_v1 Evidence Extraction result. Twelve operator-oriented sections -- a distinct sibling model, not PFR-001's thirteen -- with a distinct decision-completeness dimension and a structural semantic-sufficiency gate (structured presence signals only, never free-text heuristic scoring) addressing 134E.3V's near-status-only-report observation on the Phase Report View. Not yet active lifecycle authority: only internal imports are evidence_extraction and three shared enums from canonical_engineering_evidence; does not depend on the Phase Report View Composition module beyond the shared extraction layer both sit on. Found and fixed two defects during this phase's own development, before any test was written: (1) a cross-cutting Disclosures section was wrongly judged by the generic per-category empty-section logic, spuriously downgrading every composition; fixed by special-casing it against report-level uncertainty/limitation bundles. (2) The conditionally-missing-vs-not-applicable conflation 134E.3V found and repaired on the Phase Report View was proactively designed out of this module's own _compose_section() from the start rather than reintroduced. 97 new focused tests (all 96 required areas) pass; 1061 combined regression tests (evidence model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View 134E.3/134E.3V, phase-identity repair, phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, 134B.1-134B.3, phase) pass unchanged; fast_green 4390/4390 passing this run. All three NON-BLOCKING observations carried forward from 134E.2V/134E.3V left open, unrepaired, since none was proven genuinely BLOCKING for Operator Report composition specifically. Only Operator Report View Composition implemented -- rendering, delivery, and lifecycle integration are out of scope. 134E.4V not begun.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_134_PHASE_REPORT_VIEW_COMPOSITION_INDEPENDENT_VERIFICATION.md",
-    "src/pcae/core/phase_report_view.py",
+    "docs/PHASE_134_OPERATOR_REPORT_VIEW_COMPOSITION.md",
+    "src/pcae/core/operator_report_view.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260711-0851-phase-134e-3v-phase-report-view-composition-independent-verification.md",
-    "tests/test_phase_report_view_134e3v_verification.py"
+    "tasks/done/20260711-1005-phase-134e-4-operator-report-view-composition.md",
+    "tests/test_evidence_extraction_134e2v_verification.py",
+    "tests/test_operator_report_view_134e4.py"
   ],
-  "files_changed_count": 8,
+  "files_changed_count": 9,
   "source_files_changed": 1,
-  "test_files_changed": 1,
-  "tests_added_or_updated": "36 new fresh adversarial tests covering all 30 required probe areas plus 6 authority-boundary re-confirmations (124 total combined with the original 88), plus 964 combined regression test executions (evidence model 134E.1/134E.1V, extraction 134E.2/134E.2V, phase-identity repair, phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, 134B.1-134B.3, phase, composition) confirming no existing behavior changed beyond the one repaired defect. Fast_green re-confirmed: 4390 total, 4390 passed, 0 failed this run.",
-  "tests_run": 1088,
+  "test_files_changed": 2,
+  "tests_added_or_updated": "97 new focused tests covering all 96 required composition test areas, plus 1061 combined regression test executions (evidence model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View 134E.3/134E.3V, phase-identity repair, phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, 134B.1-134B.3, phase) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total, 4390 passed, 0 failed this run.",
+  "tests_run": 1158,
   "validation_results": [
     {
-      "name": "adversarial_verification_focused_tests",
-      "result": "36 passed (all 30 required probe areas plus 6 authority-boundary re-confirmations)",
-      "status": "passed"
-    },
-    {
-      "name": "combined_composition_suite",
-      "result": "124 passed (original 88 + new 36, all passing post-repair)",
+      "name": "operator_report_focused_tests",
+      "result": "97 passed (all 96 required areas)",
       "status": "passed"
     },
     {
       "name": "combined_regression_suite",
-      "result": "964 passed (composition + extraction + evidence model 134E.1/134E.1V + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + 134B.1/134B.2/134B.3 + phase + identity repair)",
+      "result": "1061 passed (operator report + phase report view + extraction + evidence model 134E.1/134E.1V + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + 134B.1/134B.2/134B.3 + phase + identity repair)",
       "status": "passed"
     },
     {
@@ -48,7 +44,7 @@
     },
     {
       "name": "report_notification_tests",
-      "result": "124 focused passed (phase report view composition + verification)",
+      "result": "97 focused passed (operator report view composition)",
       "status": "passed"
     },
     {
@@ -58,12 +54,11 @@
     }
   ],
   "test_results": {
-    "adversarial_verification_focused_tests": "36 passed",
-    "combined_composition_suite": "124 passed",
-    "combined_regression_suite": "964 passed",
+    "operator_report_focused_tests": "97 passed",
+    "combined_regression_suite": "1061 passed",
     "fast_green": "4390 passed, 0 failed",
     "compileall": "passed",
-    "report_notification_tests": "124 focused passed",
+    "report_notification_tests": "97 focused passed",
     "bootstrap_session_reporting_tests": "fast_green coverage passed"
   },
   "governance_results": [
@@ -92,21 +87,20 @@
       "status": "Observed, observe, execution unavailable"
     }
   ],
-  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No Operator Report View composition was implemented. No report prose generation occurred. No rendering pipeline was implemented. No delivery adapters were implemented. No External Delivery Receipts were implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.4 work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
+  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No Markdown/plain-text/HTML rendering was implemented. No delivery adapters were implemented. No Telegram-specific formatting was implemented. No External Delivery Receipts were implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.4V work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
     "No activation of Canonical Engineering Evidence occurred.",
     "No live evidence capture was implemented.",
-    "No Operator Report View composition was implemented.",
-    "No report prose generation occurred.",
-    "No rendering pipeline was implemented.",
+    "No Markdown/plain-text/HTML rendering was implemented.",
     "No delivery adapters were implemented.",
+    "No Telegram-specific formatting was implemented.",
     "No External Delivery Receipts were implemented.",
     "No Architecture Status repair occurred.",
     "No final lifecycle integration occurred.",
     "No PFN-001 change occurred.",
     "No PFR-001 change occurred.",
     "No Repository Intelligence change occurred.",
-    "No 134E.4 work began.",
+    "No 134E.4V work began.",
     "No execution capability was introduced.",
     "No raw git commit was used.",
     "No raw git push was used.",
@@ -119,9 +113,9 @@
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
-  "recommended_next_phase": "Phase 134E.4 - Operator Report View Composition",
-  "recommended_next_phase_id": "134E.4",
-  "recommended_next_phase_name": "Operator Report View Composition",
+  "recommended_next_phase": "Phase 134E.4V - Operator Report View Composition Independent Verification",
+  "recommended_next_phase_id": "134E.4V",
+  "recommended_next_phase_name": "Operator Report View Composition Independent Verification",
   "runtime_state": "Observed",
   "maximum_plugin_capability": "observe",
   "execution_availability": "unavailable"
