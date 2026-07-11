@@ -216,11 +216,34 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
     # "already dispatched" is true regardless of which governed path sent
     # it first.
     from pcae.core.phase_reports import (
-        phase_already_notified,
+        compute_finalization_snapshot_id,
+        compute_report_digest,
+        notification_dispatch_state,
         write_notification_dispatch_marker,
     )
     commit_hash = report.commits[0] if report.commits else ""
-    if commit_hash and phase_already_notified(report.phase_id, commit_hash):
+    report_digest = compute_report_digest(report)
+    snapshot_id = compute_finalization_snapshot_id(report)
+    dispatch_state = notification_dispatch_state(
+        report.phase_id,
+        report_digest=report_digest,
+        finalization_snapshot_id=snapshot_id,
+    )
+    if dispatch_state == "payload_conflict":
+        msg = (
+            f"phase {report.phase_id} already has an ordinary completion with "
+            "a different bound report digest or finalization snapshot"
+        )
+        if args.json:
+            print(json.dumps({
+                "error": "payload_conflict",
+                "message": msg,
+            }, indent=2, sort_keys=True))
+        else:
+            print("Telegram send-report: BLOCKED (payload conflict)")
+            print(f"  Reason: {msg}")
+        return 1
+    if dispatch_state == "already_dispatched":
         msg = (
             f"phase {report.phase_id} final report already dispatched at commit "
             f"{commit_hash[:8]} — skipping duplicate send (idempotent)"
@@ -245,7 +268,12 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
     results = dispatch(event, [sink])
     all_ok = bool(results) and all(r.success for r in results)
     if all_ok and commit_hash:
-        write_notification_dispatch_marker(report.phase_id, commit_hash)
+        write_notification_dispatch_marker(
+            report.phase_id,
+            commit_hash,
+            report_digest=report_digest,
+            finalization_snapshot_id=snapshot_id,
+        )
 
     if args.json:
         print(json.dumps({

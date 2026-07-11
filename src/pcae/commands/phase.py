@@ -117,6 +117,8 @@ def _finalize_report_and_notify(
     finalization, writes nothing) if none resolve.
     """
     from pcae.core.phase_reports import (
+        compute_finalization_snapshot_id,
+        compute_report_digest,
         finalize_phase_report,
         is_phase_id_backward,
         resolve_canonical_phase_identity,
@@ -256,6 +258,7 @@ def _finalize_report_and_notify(
     # runs (which writes the report and may dispatch in the same call).
     from pcae.core.phase_reports import (
         _apply_canonical_and_trust,
+        build_architecture_status,
         make_phase_report,
         validate_finalization_gate,
     )
@@ -277,6 +280,11 @@ def _finalize_report_and_notify(
         recommended_next_phase=recommended_next,
     )
     trial_report.metadata["commit_attribution"] = commit_attribution
+    trial_report.metadata["phase_id"] = phase_id
+    trial_report.architecture_status = build_architecture_status()
+    trial_report.metadata["source_revision"] = trial_report.architecture_status.get(
+        "repository_revision", ""
+    )
     _apply_canonical_and_trust(trial_report, phase_id, phase_name, "completed")
 
     gate = validate_finalization_gate(
@@ -383,6 +391,16 @@ def _finalize_report_and_notify(
         source_transition_kind=TransitionKind.COMPLETE_PHASE,
         allow_partial_report=allow_partial_report,
     )
+    if certification.outcome == NotificationCertificationOutcome.PAYLOAD_CONFLICT:
+        print("Notification certification: payload_conflict")
+        for reason in certification.reasons:
+            print(f"  Blocker: {reason}")
+        print("Phase report promotion: refused — bound ordinary-completion payload differs")
+        return False
+    if certification.outcome == NotificationCertificationOutcome.ALREADY_DISPATCHED:
+        print("Notification certification: already_dispatched")
+        print("Phase report promotion: skipped — immutable ordinary completion already delivered")
+        return True
     already_notified = certification.outcome.value == "already_dispatched"
     suppressed_notify_enabled = None
     if not certification.eligible:
@@ -416,6 +434,7 @@ def _finalize_report_and_notify(
             gate=enforced_gate,
             report_is_complete=dispatch_allowed,
             report_incomplete_reason=incomplete_reason,
+            architecture_status_snapshot=trial_report.architecture_status,
         )
     finally:
         if suppressed_notify_enabled is not None:
@@ -535,7 +554,12 @@ def _finalize_report_and_notify(
     if all_ok:
         print(f"Notification dispatch: sent{kind_label}")
         if commit_for_marker:
-            write_notification_dispatch_marker(phase_id, commit_for_marker)
+            write_notification_dispatch_marker(
+                phase_id,
+                commit_for_marker,
+                report_digest=compute_report_digest(report),
+                finalization_snapshot_id=compute_finalization_snapshot_id(report),
+            )
     else:
         print(f"Notification dispatch: failed{kind_label}")
         reason = fin.get("notification_reason", "")

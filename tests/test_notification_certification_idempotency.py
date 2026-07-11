@@ -96,8 +96,8 @@ class TestCertifyNotificationTransitionAlreadyDispatched:
         assert result.outcome == NotificationCertificationOutcome.ALREADY_DISPATCHED
         assert any("already dispatched" in r for r in result.reasons)
 
-    def test_different_commit_same_phase_is_eligible(self, tmp_path, monkeypatch):
-        """A repair follow-up commit for the same phase is not a duplicate."""
+    def test_different_commit_same_phase_is_same_logical_completion(self, tmp_path, monkeypatch):
+        """A bookkeeping/repair commit cannot create another ordinary completion."""
         from pcae.core.phase_reports import write_notification_dispatch_marker
 
         marker_path = tmp_path / ".last-notified.json"
@@ -106,8 +106,8 @@ class TestCertifyNotificationTransitionAlreadyDispatched:
         monkeypatch.setenv("PCAE_NOTIFY_SINKS", "noop")
 
         result = _certify(monkeypatch, marker_path, commit_hash="def09876")
-        assert result.eligible is True
-        assert result.outcome == NotificationCertificationOutcome.ELIGIBLE
+        assert result.eligible is False
+        assert result.outcome == NotificationCertificationOutcome.ALREADY_DISPATCHED
 
 
 class TestCertifyNotificationTransitionDisabled:
@@ -204,7 +204,11 @@ class TestPhaseCompleteNotificationCertification:
         assert "Notification certification: eligible" in out
         assert "Notification dispatch: sent" in out
         marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
-        assert marker == {"phase_id": "150D", "commit": "abc12345"}
+        assert marker["phase_id"] == "150D"
+        assert marker["commit"] == "abc12345"
+        assert marker["delivery_purpose"] == "ordinary_completion"
+        assert marker["report_digest"]
+        assert marker["finalization_snapshot_id"]
 
     def test_duplicate_dispatch_is_certified_already_dispatched(self, tmp_path, monkeypatch, capsys):
         root = HarnessPath(tmp_path)
@@ -221,8 +225,8 @@ class TestPhaseCompleteNotificationCertification:
         exit_code = main(["phase", "complete", "--summary", "Finished 150D again", "--allow-partial-report"])
         out = capsys.readouterr().out
 
-        assert exit_code == 0
-        assert "Notification certification: already_dispatched" in out
+        assert exit_code == 1
+        assert "Notification certification: payload_conflict" in out
         assert "Notification dispatch: sent" not in out
 
     def test_transport_unavailable_skips_without_attempt(self, tmp_path, monkeypatch, capsys):
@@ -318,7 +322,11 @@ class TestPhaseCompleteNotificationCertification:
         assert "Notification certification: eligible" in out
         assert "Notification dispatch: sent" in out
         marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
-        assert marker == {"phase_id": "150D", "commit": "abc12345"}
+        assert marker["phase_id"] == "150D"
+        assert marker["commit"] == "abc12345"
+        assert marker["delivery_purpose"] == "ordinary_completion"
+        assert marker["report_digest"]
+        assert marker["finalization_snapshot_id"]
 
 
 # ═══════════════════════════════════════════════════════════════════════════

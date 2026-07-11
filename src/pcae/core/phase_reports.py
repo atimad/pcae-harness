@@ -9,6 +9,7 @@ No Telegram, no notification dispatch, no automatic hooks, no enforcement.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from dataclasses import dataclass, field
@@ -472,14 +473,16 @@ class PhaseReport:
         if self.governance_results:
             lines.append("## Governance Results")
             lines.append("")
-            for key, val in self.governance_results.items():
+            for key in sorted(self.governance_results):
+                val = self.governance_results[key]
                 lines.append(f"- **{key}:** {val}")
             lines.append("")
 
         if self.test_results:
             lines.append("## Test Results")
             lines.append("")
-            for key, val in self.test_results.items():
+            for key in sorted(self.test_results):
+                val = self.test_results[key]
                 lines.append(f"- **{key}:** {val}")
             lines.append("")
 
@@ -765,31 +768,78 @@ def read_notification_dispatch_marker(marker_path: Path | None = None) -> dict[s
 
 
 def phase_already_notified(
-    phase_id: str, commit_hash: str = "", marker_path: Path | None = None,
+    phase_id: str,
+    commit_hash: str = "",
+    marker_path: Path | None = None,
+    *,
+    report_digest: str = "",
+    finalization_snapshot_id: str = "",
+    delivery_purpose: str = "ordinary_completion",
 ) -> bool:
     """True if ``phase_id`` already had a final report dispatched.
 
-    When ``commit_hash`` is given, requires a commit-prefix match (either
-    direction) against the recorded commit, not just the phase ID — so a
-    genuinely new commit for the same phase ID (e.g. a report-repair
-    follow-up commit) is correctly treated as not-yet-dispatched. When
-    ``commit_hash`` is empty (read-only previews with no specific commit to
-    check), matches on ``phase_id`` alone.
+    Ordinary terminal completion is a phase-level logical outcome. A later
+    bookkeeping/report-repair commit must not manufacture a second ordinary
+    completion for the same phase. Corrections and supersessions require a
+    distinct, explicitly governed delivery purpose.
+    """
+    return notification_dispatch_state(
+        phase_id,
+        marker_path=marker_path,
+        report_digest=report_digest,
+        finalization_snapshot_id=finalization_snapshot_id,
+        delivery_purpose=delivery_purpose,
+    ) == "already_dispatched"
+
+
+def notification_dispatch_state(
+    phase_id: str,
+    *,
+    marker_path: Path | None = None,
+    report_digest: str = "",
+    finalization_snapshot_id: str = "",
+    delivery_purpose: str = "ordinary_completion",
+) -> str:
+    """Classify one logical delivery against the durable marker.
+
+    Returns ``not_dispatched``, ``already_dispatched``, or
+    ``payload_conflict``.  Digest/snapshot comparison is fail-closed whenever
+    both the stored and proposed identities are available.  Legacy unbound
+    markers remain duplicates (their historical payload cannot be recovered
+    safely).  Non-ordinary purposes are distinct identities and never consume
+    or overwrite the ordinary-completion identity implicitly.
     """
     marker = read_notification_dispatch_marker(marker_path)
-    if marker.get("phase_id") != phase_id:
-        return False
-    if not commit_hash:
-        return True
-    marker_commit = marker.get("commit", "")
-    return bool(
-        marker_commit
-        and (commit_hash.startswith(marker_commit) or marker_commit.startswith(commit_hash))
-    )
+    deliveries = marker.get("deliveries", {})
+    purpose_marker = deliveries.get(delivery_purpose) if isinstance(deliveries, dict) else None
+    if isinstance(purpose_marker, dict):
+        candidate = purpose_marker
+    elif delivery_purpose == "ordinary_completion":
+        candidate = marker
+    else:
+        return "not_dispatched"
+    if candidate.get("phase_id") != phase_id:
+        return "not_dispatched"
+    marker_purpose = candidate.get("delivery_purpose", "ordinary_completion")
+    if marker_purpose != delivery_purpose:
+        return "not_dispatched"
+    stored_report_digest = str(candidate.get("report_digest", ""))
+    stored_snapshot_id = str(candidate.get("finalization_snapshot_id", ""))
+    if stored_report_digest and report_digest and stored_report_digest != report_digest:
+        return "payload_conflict"
+    if stored_snapshot_id and finalization_snapshot_id and stored_snapshot_id != finalization_snapshot_id:
+        return "payload_conflict"
+    return "already_dispatched"
 
 
 def write_notification_dispatch_marker(
-    phase_id: str, commit_hash: str = "", marker_path: Path | None = None,
+    phase_id: str,
+    commit_hash: str = "",
+    marker_path: Path | None = None,
+    *,
+    report_digest: str = "",
+    finalization_snapshot_id: str = "",
+    delivery_purpose: str = "ordinary_completion",
 ) -> None:
     """Persist the shared notification-dispatch idempotency marker.
 
@@ -797,10 +847,60 @@ def write_notification_dispatch_marker(
     """
     path = marker_path or _NOTIFICATION_MARKER_PATH
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps({
+    entry = {
         "phase_id": phase_id,
         "commit": commit_hash[:8] if commit_hash else "",
-    }))
+        "report_digest": report_digest,
+        "finalization_snapshot_id": finalization_snapshot_id,
+        "delivery_purpose": delivery_purpose,
+    }
+    existing = read_notification_dispatch_marker(path)
+    deliveries = existing.get("deliveries", {})
+    if not isinstance(deliveries, dict):
+        deliveries = {}
+    # Upgrade a legacy ordinary record into the purpose map before adding a
+    # correction/supersession, preserving historical ordinary identity.
+    if existing.get("phase_id") and "ordinary_completion" not in deliveries:
+        legacy = {key: existing.get(key, "") for key in entry}
+        legacy["delivery_purpose"] = existing.get(
+            "delivery_purpose", "ordinary_completion"
+        )
+        deliveries[legacy["delivery_purpose"]] = legacy
+    deliveries[delivery_purpose] = entry
+    payload = dict(existing)
+    payload["deliveries"] = deliveries
+    if delivery_purpose == "ordinary_completion" or not payload.get("phase_id"):
+        payload.update(entry)
+    path.write_text(json.dumps(payload))
+
+
+def compute_report_digest(report: "PhaseReport") -> str:
+    """Digest the exact certified Markdown payload used for delivery.
+
+    ``finalize_phase_report`` records physical attempt outcome on the mutable
+    in-memory report *after* constructing the event. That post-send diagnostic
+    is intentionally excluded so marker bytes equal delivered bytes and an
+    unchanged retry remains the same logical payload.
+    """
+    import copy
+    certified = copy.deepcopy(report)
+    certified.notification_result = {}
+    return hashlib.sha256(certified.render_markdown().encode("utf-8")).hexdigest()
+
+
+def compute_finalization_snapshot_id(report: "PhaseReport") -> str:
+    """Return a stable identity for the sealed semantic finalization facts."""
+    data = report.to_dict()
+    for key in (
+        "created_at", "notification_result", "report_completeness",
+        "missing_trust_fields", "trust_warnings", "canonical_report_used",
+    ):
+        data.pop(key, None)
+    metadata = data.get("metadata")
+    if isinstance(metadata, dict):
+        metadata.pop("promotion_diagnostics", None)
+    encoded = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1045,6 +1145,94 @@ def _check_canonical_metadata_consistency(report: PhaseReport) -> None:
             report.missing_trust_fields.append("metadata_consistency")
 
 
+def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
+    """Return deterministic cross-section contradictions in a terminal report."""
+    issues: list[str] = []
+    phase_id = report.phase_id.strip()
+    no_go = "\n".join(str(item) for item in report.explicit_no_go_confirmations)
+
+    if report.status == "completed" and phase_id:
+        denied = re.search(
+            rf"\bNo\s+(?:Phase\s+)?{re.escape(phase_id)}\s+(?:work\s+)?"
+            rf"(?:began|occurred|was\s+implemented)\b",
+            no_go,
+            re.IGNORECASE,
+        )
+        if denied:
+            issues.append(f"No-Go evidence denies that completed phase {phase_id} began")
+
+    # Incident-bounded deterministic legacy-prose check: when a No-Go item
+    # explicitly says a named capability/work item did not occur or was not
+    # implemented, the summary cannot claim that same normalized phrase.
+    summary_lower = re.sub(r"\s+", " ", report.summary.lower())
+    for denied_work in re.findall(
+        r"\bNo\s+(.+?)\s+(?:occurred|was\s+implemented)\b",
+        no_go,
+        re.IGNORECASE,
+    ):
+        phrase = re.sub(r"\s+", " ", denied_work.strip().lower())
+        if len(phrase) >= 4 and phrase in summary_lower:
+            issues.append(
+                f"summary claims work explicitly denied by No-Go evidence: {denied_work.strip()}"
+            )
+
+    next_match = re.match(
+        r"^(?:Phase\s+)?([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)",
+        report.recommended_next_phase.strip(),
+        re.IGNORECASE,
+    )
+    if report.status == "completed" and next_match and next_match.group(1) == phase_id:
+        issues.append(f"completed phase recommends itself ({phase_id})")
+
+    test_text = "\n".join(f"{key}: {value}" for key, value in report.test_results.items())
+    evidence_phase_ids = {
+        token.upper()
+        for token in re.findall(
+            r"(?<![A-Za-z0-9])\d+[A-Za-z]+(?:\.?\d+[A-Za-z]*)?(?![A-Za-z0-9])",
+            test_text,
+        )
+    }
+    normalized_current_id = phase_id.upper().replace(".", "")
+    current_series = re.match(r"^\d+", phase_id)
+    normalized_evidence_ids = {item.replace(".", "") for item in evidence_phase_ids}
+    if evidence_phase_ids and normalized_current_id not in normalized_evidence_ids and current_series:
+        same_series = sorted(
+            token for token in evidence_phase_ids
+            if re.match(r"^\d+", token)
+            and re.match(r"^\d+", token).group(0) == current_series.group(0)
+        )
+        if same_series:
+            issues.append(
+                "test evidence is linked only to other phase identities: "
+                + ", ".join(same_series)
+            )
+
+    metadata_phase = str((report.metadata or {}).get("phase_id", "")).strip()
+    if metadata_phase and metadata_phase != phase_id:
+        issues.append(
+            f"report identity {phase_id} disagrees with snapshot metadata {metadata_phase}"
+        )
+    source_revision = str((report.metadata or {}).get("source_revision", "")).strip()
+    architecture_revision = str(report.architecture_status.get("repository_revision", "")).strip()
+    if source_revision and architecture_revision and source_revision != architecture_revision:
+        issues.append(
+            "report source revision disagrees with Architecture Status repository revision: "
+            f"{source_revision} vs {architecture_revision}"
+        )
+    return issues
+
+
+def _apply_internal_report_coherence(report: PhaseReport) -> None:
+    issues = validate_internal_report_coherence(report)
+    if not issues:
+        return
+    report.trust_warnings.append("internal report evidence is contradictory")
+    report.trust_warnings.extend(f"  Coherence: {issue}" for issue in issues)
+    report.report_completeness = COMPLETENESS_INCOMPLETE
+    if "internal_evidence_coherence" not in report.missing_trust_fields:
+        report.missing_trust_fields.append("internal_evidence_coherence")
+
+
 def _apply_canonical_and_trust(
     report: PhaseReport,
     phase_id: str,
@@ -1080,6 +1268,7 @@ def _apply_canonical_and_trust(
     # so mismatches can downgrade a complete report to partial/incomplete.
     if report.canonical_report_content:
         _check_canonical_metadata_consistency(report)
+    _apply_internal_report_coherence(report)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1410,6 +1599,8 @@ def validate_finalization_gate(
         )
 
     # ── Report consistency ───────────────────────────────────────────────
+    for issue in validate_internal_report_coherence(report):
+        blockers.append(f"internal report coherence: {issue}")
     if report.report_completeness != COMPLETENESS_COMPLETE:
         blockers.append(
             f"report completeness is {report.report_completeness!r}, not complete"
@@ -1885,12 +2076,14 @@ def build_architecture_status() -> dict[str, Any]:
         FRESHNESS_FRESH,
         FRESHNESS_FRESH_WITH_LIMITATIONS,
         FRESHNESS_INVALID,
+        parse_phase_id,
         phase_sort_key,
     )
 
     result: dict[str, Any] = {
         "schema_version": ARCHITECTURE_STATUS_SCHEMA_VERSION,
         "state_marker": "",
+        "repository_revision": "",
         "completed": [],
         "completed_phase_ids": [],
         "completed_chapters": [],
@@ -1908,6 +2101,7 @@ def build_architecture_status() -> dict[str, Any]:
             "project_status_md": "missing",
             "current_phase_section": "not_found",
             "runtime_snapshot": "not_attempted",
+            "repository_revision": "not_attempted",
         },
     }
 
@@ -1924,6 +2118,24 @@ def build_architecture_status() -> dict[str, Any]:
     result["source_provenance"]["project_status_md"] = "read"
     import hashlib as _hashlib
     result["state_marker"] = _hashlib.sha256(ps_text.encode("utf-8")).hexdigest()[:16]
+    try:
+        import subprocess as _subprocess
+        revision = _subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+        if revision.returncode == 0 and revision.stdout.strip():
+            result["repository_revision"] = revision.stdout.strip()
+            result["source_provenance"]["repository_revision"] = "read"
+        else:
+            result["source_provenance"]["repository_revision"] = "unavailable"
+            limitations.append("repository revision unavailable -- status cannot be bound to a commit")
+    except Exception as exc:
+        result["source_provenance"]["repository_revision"] = f"unavailable: {exc}"
+        limitations.append("repository revision unavailable -- status cannot be bound to a commit")
 
     # ── Completed: independently derived from "## Phase X Complete"
     # headers only. Never inferred, never extrapolated to phases whose
@@ -1942,8 +2154,6 @@ def build_architecture_status() -> dict[str, Any]:
     seen_ids: dict[str, tuple[str, bool]] = {}
     for m in _COMPLETED_PHASE_HEADER_RE.finditer(ps_text):
         phase_id = m.group(1)
-        if not _is_milestone_phase_id(phase_id):
-            continue
         snippet = ps_text[m.end():m.end() + 200]
         name_m = _PHASE_LABEL_LINE_RE.search(snippet)
         has_real_name = name_m is not None
@@ -1971,20 +2181,21 @@ def build_architecture_status() -> dict[str, Any]:
     # headers physically appear in the file.
     by_series: dict[str, list[tuple[str, str]]] = {}
     for pid, pname in completed_phases:
-        parsed = _parse_phase_id_shape(pid)
+        parsed = parse_phase_id(pid)
         if parsed is None:
             continue
-        series = parsed[0]
+        series = str(parsed[0])
         by_series.setdefault(series, []).append((pid, pname))
     for series in by_series:
-        by_series[series].sort(key=lambda pn: _parse_phase_id_shape(pn[0])[1:])
+        by_series[series].sort(key=lambda pn: phase_sort_key(pn[0]))
 
     completed_labels: list[str] = []
     completed_phase_ids: list[str] = []
     completed_chapters: list[dict[str, Any]] = []
     for series in sorted(by_series, key=lambda s: int(s) if s.isdigit() else s):
         phases = by_series[series]
-        label = _render_series_milestone_label(phases)
+        milestone_phases = [phase for phase in phases if _is_milestone_phase_id(phase[0])]
+        label = _render_series_milestone_label(milestone_phases or phases)
         completed_labels.append(label)
         ids_for_series = [pid for pid, _name in phases]
         completed_phase_ids.extend(ids_for_series)
@@ -2238,12 +2449,23 @@ def finalize_phase_report(
         # Phase 95I.1 — commit attribution tracking
         if kwargs.get("commit_attribution"):
             report.metadata["commit_attribution"] = kwargs["commit_attribution"]
-        # Phase 113C — Auto-derive architecture status from canonical state
-        try:
-            report.architecture_status = build_architecture_status()
-        except Exception:
-            # Best-effort — architecture status is informative, not trust-critical
-            pass
+        # Architecture Status is sealed by the caller before certification
+        # whenever available. Reuse those exact bytes/facts through promotion
+        # and delivery; never re-read mutable lifecycle sources after the
+        # finalization snapshot has been certified.
+        sealed_architecture_status = kwargs.get("architecture_status_snapshot")
+        if isinstance(sealed_architecture_status, dict):
+            report.architecture_status = json.loads(json.dumps(sealed_architecture_status))
+        else:
+            try:
+                report.architecture_status = build_architecture_status()
+            except Exception:
+                # Best-effort for legacy callers that do not seal a snapshot.
+                pass
+        report.metadata["phase_id"] = phase_id
+        report.metadata["source_revision"] = report.architecture_status.get(
+            "repository_revision", ""
+        )
 
         # Phase 92D.5/92D.8 — Apply trust assessment with canonical report
         _apply_canonical_and_trust(report, phase_id, phase_name, status)

@@ -2315,8 +2315,9 @@ class TestPhase128B1NotificationDispatchReliabilityRepair:
 
         run_phase_report_create(args)
         out = json.loads(capsys.readouterr().out)
-        assert out["notification"]["outcome"] == "already_dispatched"
-        assert "results" not in out["notification"]
+        assert out["status"] == "skipped"
+        assert out["reason"] == "already_dispatched"
+        assert "notification" not in out
 
     def test_dispatch_ordering_report_written_before_notification(self, tmp_path, monkeypatch):
         """The canonical report artifact must exist on disk before

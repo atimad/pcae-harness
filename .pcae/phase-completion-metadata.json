@@ -1,118 +1,79 @@
 {
   "schema_version": "1.0",
-  "phase_id": "134E.8",
-  "phase_name": "Architecture Status Generation Repair",
-  "phase_title": "Architecture Status Generation Repair",
+  "phase_id": "134E.8V",
+  "phase_name": "Architecture Status Generation Independent Verification",
+  "phase_title": "Architecture Status Generation Independent Verification",
   "status": "completed",
-  "summary": "Independently verified 134E.7's External Delivery Receipt Model (src/pcae/core/delivery_receipt.py) via fresh adversarial probing -- source inspection first, hypotheses proven via direct Python REPL execution before any regression test was written, rather than trusting 134E.7's own report, documentation, or its 110 focused tests. Found and repaired one genuine BLOCKING defect: path traversal via unsanitized store identifiers in DeliveryReceiptStore -- logical_delivery_id, original_receipt_id, and the explicitly-arbitrary caller-supplied correcting_receipt_id were interpolated directly into persisted file paths with no boundary validation, so a correcting_receipt_id containing '..' or separators could write outside the store root, inconsistent with the repository's own phase_reports._safe_filename / notifications._safe_doc_filename convention (and unlike shell_gate's safe-by-construction sg-<uuid> audit id). Repaired by fail-closed _validate_store_identifier at the persistence boundary (rejecting path separators, parent references, and absolute paths), preserving all public-API behavior (hex ids and corrector-N ids pass unchanged), Delivery Pipeline behavior, transport independence, and lifecycle inactivity. Seven NON-BLOCKING observations recorded (last-attempt-wins downgrade under a misbehaving caller, adapter_version drift across retries, cross-receipt correction cycles, aggregate not re-derived on load -- consistent with 93C digest-only convention, single-process optimistic concurrency, bounded redaction patterns, store-level prefix-trust); all within the frozen scope or documented limitations deferred to 134E.10. 48 fresh adversarial tests added (all 42 required probe areas plus 6 characterization regressions); 1216-test focused regression suite passes (both view compositions, rendering, delivery pipeline 134E.6/134E.6V, receipt model 134E.7/134E.7V, evidence extraction, canonical engineering evidence, notification/Telegram, authorization/configuration, finalization, phase identity, 134B.1-134B.3); compileall clean; fast_green 4389/4390 (one pre-existing, unrelated failure -- test_pytest_dry_run_not_blocked -- independently reproduced on pristine source with the 134E.7V change stashed). The receipt subsystem remains fully isolated from active lifecycle authority -- authoritative only for delivery history and delivery state. No PFN-001 integration, no final lifecycle integration, no production receipt artifact, no 134E.8 work. 134E.8 not begun.",
+  "summary": "Independently verified Architecture Status generation and the incident-blocking 134E.8.1 lifecycle protections. Found and repaired five BLOCKING defects: unused digest comparison, post-certification Architecture Status regeneration, post-attempt/promotion semantic-identity pollution, insertion-order-dependent rendering, and omission of dotted/verification/corrective completed identities. 51 fresh adversarial tests, 2347 affected regressions, compileall, and fast-green 4390/4390 pass. Runtime remains Observed/observe/unavailable. Track 134 evidence/delivery pipeline remains inactive. Recommended next phase: 134E.9.",
   "files_changed": [
+    ".pcae/phase-completion-metadata.json",
+    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL_INDEPENDENT_VERIFICATION.md",
-    "src/pcae/core/delivery_receipt.py",
+    "docs/PHASE_134_ARCHITECTURE_STATUS_GENERATION_INDEPENDENT_VERIFICATION.md",
+    "docs/PHASE_134_DUPLICATE_TERMINAL_DELIVERY_MIXED_EVIDENCE_REPAIR.md",
+    "src/pcae/commands/notifications.py",
+    "src/pcae/commands/phase.py",
+    "src/pcae/commands/phase_reports.py",
+    "src/pcae/commands/task.py",
+    "src/pcae/core/notification_certification.py",
+    "src/pcae/core/phase_reports.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260711-1516-phase-134e-7v-external-delivery-receipt-model-independent-verification.md",
-    "tests/test_delivery_receipt_134e7v_verification.py",
-    ".pcae/phase-completion-metadata.json"
+    "tests/test_architecture_status_generation_independent_verification_134e8v.py",
+    "tests/test_architecture_status_generation_repair_134e8.py",
+    "tests/test_duplicate_terminal_delivery_mixed_evidence_134e81.py",
+    "tests/test_notification_certification_idempotency.py",
+    "tests/test_phase_113v_n_notification_finalization_repair.py",
+    "tests/test_phase_reports.py",
+    "tests/test_task_finish_report_trust_notification.py"
   ],
-  "files_changed_count": 9,
-  "source_files_changed": 1,
-  "test_files_changed": 1,
-  "tests_added_or_updated": "48 new fresh adversarial tests covering all 42 required probe areas plus 6 characterization regressions (adapter_version drift, same-count overwrite, package-isolation import boundary, public-API aggregate re-derivation, ambiguous-without-redigest tamper rejection, future-adapter compatibility), plus 1216 combined focused regression test executions (delivery receipt 134E.7 + 134E.7V, delivery pipeline 134E.6/134E.6V, rendering 134E.5/134E.5V, operator report view 134E.4/134E.4V, phase report view 134E.3/134E.3V, evidence extraction 134E.2/134E.2V, canonical engineering evidence 134E.1/134E.1V, notifications/Telegram, authorization/configuration 134B.1/134B.2/134B.3, finalization, phase identity) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total, 4389 passed, 1 pre-existing unrelated failure this run (independently reproduced on pristine source).",
-  "tests_run": 1264,
+  "files_changed_count": 21,
+  "source_files_changed": 6,
+  "test_files_changed": 7,
+  "tests_added_or_updated": "51 fresh adversarial tests plus affected regression and fast-green verification",
+  "tests_run": 6788,
   "validation_results": [
-    {
-      "name": "delivery_receipt_134e7v_adversarial_tests",
-      "result": "48 passed (all 42 required probe areas plus 6 characterization regressions)",
-      "status": "passed"
-    },
-    {
-      "name": "delivery_receipt_134e7_focused_tests",
-      "result": "110 passed (re-run unmodified as baseline)",
-      "status": "passed"
-    },
-    {
-      "name": "focused_regression_suite",
-      "result": "1216 passed (delivery receipt 134E.7/134E.7V + delivery pipeline 134E.6/134E.6V + rendering 134E.5/134E.5V + operator report view 134E.4/134E.4V + phase report view 134E.3/134E.3V + evidence extraction 134E.2/134E.2V + canonical engineering evidence 134E.1/134E.1V + notifications/Telegram + authorization/configuration 134B.1/134B.2/134B.3 + finalization + phase identity)",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "4389 passed, 1 pre-existing unrelated failure (test_pytest_dry_run_not_blocked, independently reproduced on pristine source with the 134E.7V change stashed)",
-      "status": "passed"
-    },
-    {
-      "name": "compileall",
-      "result": "src compiled successfully",
-      "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "passed (notification/Telegram regressions unchanged)",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "fast_green coverage passed",
-      "status": "passed"
-    }
+    {"name": "architecture_status_generation_independent_verification_134e8v", "result": "51 passed", "status": "passed"},
+    {"name": "affected_regression_suite", "result": "2347 passed, 7 collection warnings", "status": "passed"},
+    {"name": "fast_green", "result": "4390 passed, 105 collection warnings", "status": "passed"},
+    {"name": "compileall", "result": "src compiled successfully", "status": "passed"},
+    {"name": "report_notification_tests", "result": "passed with external test delivery isolated", "status": "passed"},
+    {"name": "bootstrap_session_reporting_tests", "result": "fast_green coverage passed", "status": "passed"}
   ],
   "test_results": {
-    "delivery_receipt_134e7v_adversarial_tests": "48 passed",
-    "delivery_receipt_134e7_focused_tests": "110 passed",
-    "focused_regression_suite": "1216 passed",
-    "fast_green": "4389 passed, 1 pre-existing unrelated failure",
+    "architecture_status_generation_independent_verification_134e8v": "51 passed",
+    "affected_regression_suite": "2347 passed",
+    "fast_green": "4390 passed",
     "compileall": "passed",
-    "report_notification_tests": "passed (notification/Telegram regressions unchanged)",
-    "bootstrap_session_reporting_tests": "fast_green coverage passed"
+    "report_notification_tests": "passed",
+    "bootstrap_session_reporting_tests": "passed"
   },
   "governance_results": [
-    {
-      "name": "pcae_health",
-      "status": "healthy"
-    },
-    {
-      "name": "pcae_check",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_doctor_task_memory",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_push_check",
-      "status": "clean"
-    },
-    {
-      "name": "telegram_runtime",
-      "status": "configured and enabled for governed production finalization, resolved automatically without shell sourcing"
-    },
-    {
-      "name": "pcae_runtime_inspect",
-      "status": "Observed, observe, execution unavailable"
-    }
+    {"name": "pcae_health", "status": "healthy"},
+    {"name": "pcae_check", "status": "passed"},
+    {"name": "pcae_doctor_task_memory", "status": "clean"},
+    {"name": "pcae_push_check", "status": "clean"},
+    {"name": "telegram_runtime", "status": "configured and enabled for one governed terminal delivery"},
+    {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
   ],
-  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No replacement of current report generation occurred. No replacement of current notification dispatch occurred. No routing of production Telegram through the new receipt model occurred. No production receipt artifact was created. No Architecture Status repair occurred. No Derived Correctness validation was implemented. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.8 work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
+  "no_go_confirmation": "No 134E.9 work began. No Canonical Engineering Evidence activation occurred. No Evidence Extraction activation occurred. No Phase Report View activation occurred. No Operator Report View activation occurred. No Rendering Architecture activation occurred. No Delivery Pipeline activation occurred. No Delivery Receipt activation or persistence occurred. No Repository Intelligence change occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Telegram migration or new communication channel occurred. No broad Derived Correctness implementation occurred. No historical report was rewritten or deleted. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
-    "No activation of Canonical Engineering Evidence occurred.",
-    "No live evidence capture was implemented.",
-    "No replacement of current report generation occurred.",
-    "No replacement of current notification dispatch occurred.",
-    "No routing of production Telegram through the new receipt model occurred.",
-    "No production receipt artifact was created.",
-    "No Architecture Status repair occurred.",
-    "No Derived Correctness validation was implemented.",
-    "No final lifecycle integration occurred.",
+    "No 134E.9 work began.",
+    "No Canonical Engineering Evidence activation occurred.",
+    "No Evidence Extraction activation occurred.",
+    "No Phase Report View activation occurred.",
+    "No Operator Report View activation occurred.",
+    "No Rendering Architecture activation occurred.",
+    "No Delivery Pipeline activation occurred.",
+    "No Delivery Receipt activation or persistence occurred.",
+    "No Repository Intelligence change occurred.",
     "No PFN-001 change occurred.",
     "No PFR-001 change occurred.",
-    "No Repository Intelligence change occurred.",
-    "No 134E.8 work began.",
-    "No execution capability was introduced.",
-    "No raw git commit was used.",
-    "No raw git push was used.",
-    "No --no-verify was used.",
-    "No force push was used."
+    "No Telegram migration or new communication channel occurred.",
+    "No broad Derived Correctness implementation occurred.",
+    "No historical report was rewritten or deleted.",
+    "No execution capability was introduced."
   ],
   "commit_attribution": "phase-owned governed task-finish commit",
   "pushed_status": "pushed",
@@ -120,9 +81,9 @@
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
-  "recommended_next_phase": "Phase 134E.8 - Architecture Status Generation Repair",
-  "recommended_next_phase_id": "134E.8",
-  "recommended_next_phase_name": "Architecture Status Generation Repair",
+  "recommended_next_phase": "134E.9 - Report Consistency / Derived Correctness Validation",
+  "recommended_next_phase_id": "134E.9",
+  "recommended_next_phase_name": "Report Consistency / Derived Correctness Validation",
   "runtime_state": "Observed",
   "maximum_plugin_capability": "observe",
   "execution_availability": "unavailable"

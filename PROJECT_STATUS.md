@@ -2,6 +2,89 @@
 
 ## Current Phase
 
+Phase 134E.8V — Architecture Status Generation Independent Verification
+(completed).
+
+Independently re-derived Architecture Status and the incident-blocking
+134E.8.1 lifecycle protections from source and fresh adversarial probes.
+Found and repaired five BLOCKING defects: recorded report/snapshot digests
+were never compared; Architecture Status was regenerated after
+certification; post-promotion/post-dispatch diagnostics polluted semantic
+identity and broke stored/delivered digest equality; Governance/Test
+Markdown depended on dictionary insertion order; and structured completion
+evidence still omitted all dotted/verification/corrective phases, hiding
+Track 134 progress beyond 134D. Repairs now fail closed on changed payload,
+seal and reuse one revision-bound Architecture Status snapshot, digest the
+exact pre-attempt delivered bytes, exclude only declared volatile
+diagnostics, sort structured rendering deterministically, preserve
+per-purpose ordinary/correction/supersession identities, and retain every
+exact valid completed phase while keeping chapter labels concise. Real
+repository status now contains exact Track 132, 133, and 134 identities
+through 134E.8.1; 132F is completed and not planned; planned is 134E.9;
+freshness is fresh; conflicts and validation issues are empty; runtime is
+source-derived Observed/observe/unavailable. Historical trusted and invalid
+134E.8 reports retain their original SHA-256 digests. The active Track 134
+evidence/view/rendering/delivery/receipt pipeline remains inactive. No live
+test notification was sent. 51 fresh adversarial tests pass; 2347 affected
+regressions pass; `compileall` is clean; fast-green 4390/4390 passes. Full details in
+`docs/PHASE_134_ARCHITECTURE_STATUS_GENERATION_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134E.9 — Report Consistency / Derived Correctness Validation.
+134E.9 was not begun in this phase.
+
+## Phase 134E.8V Complete
+
+Architecture Status authority, exact identities, freshness/conflicts,
+revision binding, deterministic serialization, inspection side effects,
+snapshot/digest integrity, internal coherence, logical idempotency, purpose
+separation, stored/delivered equality, and inactive-pipeline boundaries were
+independently verified after five minimal BLOCKING repairs. No execution
+capability was introduced and 134E.9 was not begun.
+
+## Phase 134E.8.1 Complete (historical — full text)
+
+Phase 134E.8.1 — Duplicate Terminal Delivery and Mixed-Evidence Report
+Repair (completed).
+
+Investigated the two externally delivered terminal reports for Phase
+134E.8 without sending any further external notification. Preserved all
+three timestamped 134E.8 builds and established that the first
+trust-complete report (`20260711-143817-134E.8`, phase commit `160f91bf`)
+is authoritative; the later `20260711-144017-134E.8` report is a newly
+generated invalid mixed-evidence ordinary duplicate, not a replay. Root
+cause was two compounding BLOCKING defects: ordinary delivery idempotency
+was keyed by `(phase_id, commit)`, so task-finish bookkeeping commit
+`de506304` created a second logical completion; and report trust checked
+identity/presence/selected overlaps but not internal evidence coherence,
+allowing a fresh 134E.8 Architecture Status and correct summary to combine
+with stale 134E.7V tests, No-Go evidence, files, and next-phase metadata.
+Repaired the shared active lifecycle boundary: ordinary terminal identity
+is now phase-scoped; all four dispatching paths bind successful markers to
+the exact rendered report digest, deterministic finalization snapshot, and
+delivery purpose; deterministic coherence validation rejects completed-
+phase denial, self-recommendation, prior-phase-only test evidence, and
+snapshot/report identity conflict. Corrections/supersessions require an
+explicit purpose. Architecture Status inspection remains read-only. The
+Track 134 Delivery Pipeline and Delivery Receipt subsystem remain inactive.
+Runtime remains Observed, maximum capability `observe`, execution
+unavailable. Focused repair/idempotency batch 53/53 passed; affected broad
+run passed 1661 tests with one legacy expectation corrected and reverified;
+`compileall` clean; fast-green 4390/4390. Full details in
+`docs/PHASE_134_DUPLICATE_TERMINAL_DELIVERY_MIXED_EVIDENCE_REPAIR.md`.
+
+Recommended next phase: 134E.8V — Architecture Status Generation Independent Verification.
+134E.8V was not begun in this phase.
+
+## Phase 134E.8.1 Complete
+
+Repaired duplicate ordinary terminal delivery and mixed-evidence report
+acceptance at the shared reporting/finalization boundary. The first
+trust-complete 134E.8 report remains authoritative; the invalid duplicate is
+preserved as incident evidence. No corrective external message was sent, no
+new delivery subsystem was activated, and no execution capability was added.
+
+## Phase 134E.8 Complete (historical — full text)
+
 Phase 134E.8 — Architecture Status Generation Repair (completed).
 
 Repaired the persistent, highly visible defect where generated

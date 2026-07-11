@@ -578,6 +578,8 @@ def _finalize_task_report_and_notify(
         validate_phase_report_trust,
     )
     from pcae.core.phase_reports import (
+        compute_finalization_snapshot_id,
+        compute_report_digest,
         finalize_phase_report,
         phase_already_notified,
         read_latest_report,
@@ -686,32 +688,6 @@ def _finalize_task_report_and_notify(
     no_go_text = meta.get("no_go_confirmation", "")
     no_go_list = [no_go_text] if no_go_text else []
 
-    # Idempotency guard: skip dispatch if the same phase_id + commit was
-    # already successfully dispatched by a prior finalization (e.g. an
-    # earlier `pcae phase complete` for the same metadata). Uses the shared
-    # marker (Phase 113V.N) rather than `PhaseReport.notification_result`,
-    # because `finalize_phase_report()` writes the report artifact *before*
-    # attempting dispatch, so the persisted report never reflects the
-    # dispatch outcome.
-    already_sent = bool(commit_hash) and phase_already_notified(phase_id, commit_hash)
-    if already_sent:
-        existing = read_latest_report(_Path(".pcae/phase-reports"))
-        trust_result = (
-            validate_phase_report_trust(adapt_report_for_trust_check(existing.to_dict()))
-            if existing
-            else validate_phase_report_trust({})
-        )
-        _apply_push_state_gate(trust_result, existing)
-        return {
-            "status": "skipped_duplicate",
-            "message": (
-                f"report for phase {phase_id} at commit {commit_hash} was "
-                "already dispatched — skipping duplicate send"
-            ),
-            "trust": trust_result.to_dict(),
-            "phase_id": phase_id,
-        }
-
     notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED", "").lower() in ("1", "true", "yes")
 
     # Phase 105C.1 — build a trial report (no I/O: no write, no dispatch) to
@@ -720,7 +696,11 @@ def _finalize_task_report_and_notify(
     # what 105C was missing: it dispatched whenever notifications were
     # enabled, without checking whether pushed_status/origin_main_head/
     # pcae_push_check indicated final push state had actually been reached.
-    from pcae.core.phase_reports import _apply_canonical_and_trust, make_phase_report
+    from pcae.core.phase_reports import (
+        _apply_canonical_and_trust,
+        build_architecture_status,
+        make_phase_report,
+    )
 
     trial_report = make_phase_report(
         phase_id=phase_id,
@@ -738,6 +718,11 @@ def _finalize_task_report_and_notify(
         recommended_next_phase=recommended_next,
     )
     trial_report.metadata["commit_attribution"] = commit_attribution
+    trial_report.metadata["phase_id"] = phase_id
+    trial_report.architecture_status = build_architecture_status()
+    trial_report.metadata["source_revision"] = trial_report.architecture_status.get(
+        "repository_revision", ""
+    )
     _apply_canonical_and_trust(trial_report, phase_id, phase_name, status)
 
     # Phase 106H — fold in the OLD (95M.1) schema's full finalization gate
@@ -817,6 +802,27 @@ def _finalize_task_report_and_notify(
         commit_hash=commit_hash or "",
         source_transition_kind=TransitionKind.FINISH_TASK,
     )
+    if certification.outcome == NotificationCertificationOutcome.PAYLOAD_CONFLICT:
+        return {
+            "status": "payload_conflict",
+            "phase_id": phase_id,
+            "notification_status": "blocked_payload_conflict",
+            "notification_reason": "; ".join(certification.reasons),
+            "trust": trial_trust.to_dict(),
+            "report_completeness": trial_report.report_completeness,
+            "metadata_path": str(meta_path),
+        }
+    if certification.outcome == NotificationCertificationOutcome.ALREADY_DISPATCHED:
+        return {
+            "status": "skipped_duplicate",
+            "message": (
+                f"ordinary completion for phase {phase_id} is already bound "
+                "to this report digest and finalization snapshot"
+            ),
+            "phase_id": phase_id,
+            "notification_status": "skipped_duplicate",
+            "trust": trial_trust.to_dict(),
+        }
 
     # Suppress dispatch (but still finalize/write the report) when the
     # report is not yet dispatch-ready — e.g. final push state is pending —
@@ -843,6 +849,7 @@ def _finalize_task_report_and_notify(
             explicit_no_go_confirmations=no_go_list,
             recommended_next_phase=recommended_next,
             commit_attribution=commit_attribution,
+            architecture_status_snapshot=trial_report.architecture_status,
         )
     finally:
         if suppressed_notify_enabled is not None:
@@ -941,7 +948,12 @@ def _finalize_task_report_and_notify(
         if fin.get("notification_error"):
             result["notification_reason"] = fin["notification_error"]
         if all_ok and commit_hash:
-            write_notification_dispatch_marker(phase_id, commit_hash)
+            write_notification_dispatch_marker(
+                phase_id,
+                commit_hash,
+                report_digest=compute_report_digest(report),
+                finalization_snapshot_id=compute_finalization_snapshot_id(report),
+            )
 
     return result
 

@@ -28,7 +28,11 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from pcae.core.phase_reports import phase_already_notified
+from pcae.core.phase_reports import (
+    compute_finalization_snapshot_id,
+    compute_report_digest,
+    notification_dispatch_state,
+)
 from pcae.core.repository_transition_integration import (
     parse_lifecycle_phase_identity,
     parse_phase_id_from_text,
@@ -53,6 +57,7 @@ class NotificationCertificationOutcome(str, Enum):
 
     ELIGIBLE = "eligible"
     ALREADY_DISPATCHED = "already_dispatched"
+    PAYLOAD_CONFLICT = "payload_conflict"
     DISABLED = "disabled"
     TRANSPORT_UNAVAILABLE = "transport_unavailable"
     NOT_CERTIFIED = "not_certified"
@@ -121,9 +126,15 @@ def certify_notification_transition(
     active_task_phase_id = parse_phase_id_from_text(active_task_title)
     report_completeness = "complete" if allow_partial_report else trial_report.report_completeness
 
-    already_dispatched = bool(commit_hash) and phase_already_notified(
-        phase_id, commit_hash, marker_path=marker_path,
+    report_digest = compute_report_digest(trial_report)
+    snapshot_id = compute_finalization_snapshot_id(trial_report)
+    dispatch_state = notification_dispatch_state(
+        phase_id,
+        marker_path=marker_path,
+        report_digest=report_digest,
+        finalization_snapshot_id=snapshot_id,
     )
+    already_dispatched = dispatch_state in ("already_dispatched", "payload_conflict")
     notify_enabled, transport_configured, sink_names = notification_transport_status()
 
     state = RepositoryState(
@@ -171,7 +182,12 @@ def certify_notification_transition(
         )
 
     reasons = tuple(v.reason for v in result.violations)
-    if already_dispatched:
+    if dispatch_state == "payload_conflict":
+        outcome = NotificationCertificationOutcome.PAYLOAD_CONFLICT
+        reasons = reasons + (
+            "ordinary completion payload conflicts with the bound report digest or finalization snapshot",
+        )
+    elif already_dispatched:
         outcome = NotificationCertificationOutcome.ALREADY_DISPATCHED
     elif not notify_enabled:
         outcome = NotificationCertificationOutcome.DISABLED

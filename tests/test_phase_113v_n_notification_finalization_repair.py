@@ -200,12 +200,11 @@ def test_phase_already_notified_true_same_phase_and_commit(tmp_path):
     assert phase_already_notified("150D", "abc12345", marker_path=marker_path) is True
 
 
-def test_phase_already_notified_false_when_commit_differs(tmp_path):
-    """A genuinely new commit for the same phase is not treated as a
-    duplicate -- e.g. a report-repair follow-up commit must still dispatch."""
+def test_phase_already_notified_true_when_bookkeeping_commit_differs(tmp_path):
+    """A later commit does not manufacture a second ordinary completion."""
     marker_path = tmp_path / ".last-notified.json"
     write_notification_dispatch_marker("150D", "abc12345", marker_path=marker_path)
-    assert phase_already_notified("150D", "def67890", marker_path=marker_path) is False
+    assert phase_already_notified("150D", "def67890", marker_path=marker_path) is True
 
 
 def test_phase_already_notified_matches_phase_id_alone_without_commit(tmp_path):
@@ -244,7 +243,11 @@ def test_phase_complete_dispatches_and_writes_marker(tmp_path, monkeypatch, caps
     assert exit_code == 0
     assert "Notification dispatch: sent" in out
     marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
-    assert marker == {"phase_id": "150D", "commit": "abc12345"}
+    assert marker["phase_id"] == "150D"
+    assert marker["commit"] == "abc12345"
+    assert marker["delivery_purpose"] == "ordinary_completion"
+    assert marker["report_digest"]
+    assert marker["finalization_snapshot_id"]
 
 
 def test_phase_complete_second_call_is_idempotent(tmp_path, monkeypatch, capsys):
@@ -264,15 +267,14 @@ def test_phase_complete_second_call_is_idempotent(tmp_path, monkeypatch, capsys)
     exit_code = main(["phase", "complete", "--summary", "Finished 150D again", "--allow-partial-report"])
     out = capsys.readouterr().out
 
-    assert exit_code == 0
+    assert exit_code == 1
     assert "Notification dispatch: sent" not in out
-    assert "skipped (idempotent" in out
+    assert "payload_conflict" in out
     assert "already dispatched" in out
 
 
-def test_phase_complete_new_commit_same_phase_allows_resend(tmp_path, monkeypatch, capsys):
-    """A report-repair follow-up commit for the same phase must still be
-    allowed to dispatch -- idempotency is keyed on phase_id + commit."""
+def test_phase_complete_new_commit_same_phase_suppresses_ordinary_resend(tmp_path, monkeypatch, capsys):
+    """A report-repair commit requires correction purpose, not another ordinary send."""
     root = HarnessPath(tmp_path)
     init_harness(root)
     _init_git_repo(tmp_path)
@@ -288,8 +290,9 @@ def test_phase_complete_new_commit_same_phase_allows_resend(tmp_path, monkeypatc
     exit_code = main(["phase", "complete", "--summary", "Finished 150D repaired", "--allow-partial-report"])
     out = capsys.readouterr().out
 
-    assert exit_code == 0
-    assert "Notification dispatch: sent" in out
+    assert exit_code == 1
+    assert "Notification dispatch: sent" not in out
+    assert "payload_conflict" in out
 
 
 def test_phase_complete_missing_notify_enabled_reason_is_accurate(tmp_path, monkeypatch, capsys):

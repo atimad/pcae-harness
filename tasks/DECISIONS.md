@@ -2,6 +2,23 @@
 
 ## Accepted
 
+- Phase 134E.8V keeps Architecture Status a derivative view but requires full
+  exact completed-phase traceability in structured fields; concise milestone
+  labels may remain filtered. Finalization must seal one repository-revision-
+  bound Architecture Status before certification and reuse it through storage
+  and delivery. Ordinary/correction/supersession marker identities are retained
+  independently. Physical attempt history and per-adapter partial-success retry
+  isolation remain NON-BLOCKING until the already-planned receipt integration;
+  the receipt subsystem is not activated here.
+
+- Phase 134E.8.1: retain `20260711-143817-134E.8` as the authoritative
+  trust-complete report and preserve `20260711-144017-134E.8` as invalid
+  mixed-evidence incident history. Ordinary terminal delivery is phase-scoped;
+  bookkeeping commits are audit context, not new logical completions.
+  Corrections/supersessions require an explicit delivery purpose. No corrective
+  external send is authorized here, and the Track 134 Delivery Pipeline and
+  Delivery Receipt integration remain inactive.
+
 - Independently verify External Delivery Receipt Model (Phase 134E.7V)
   via fresh adversarial probing with REPL reproduction before any test
   was written, rather than trusting 134E.7's report, documentation, or

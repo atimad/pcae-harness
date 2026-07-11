@@ -305,9 +305,9 @@ class TestIdempotency:
 
         second = _finalize_task_report_and_notify("abc1234")
         assert second["status"] == "skipped_duplicate"
-        assert "already dispatched" in second["message"]
+        assert second["notification_status"] == "skipped_duplicate"
 
-    def test_different_commit_is_not_treated_as_duplicate(self, tmp_path, monkeypatch):
+    def test_changed_commit_evidence_under_same_completion_conflicts(self, tmp_path, monkeypatch):
         from pcae.commands.task import _finalize_task_report_and_notify
 
         root = _init_repo(tmp_path)
@@ -320,7 +320,8 @@ class TestIdempotency:
         assert first["status"] == "finalized"
 
         second = _finalize_task_report_and_notify("def5678")
-        assert second["status"] == "finalized"  # different commit — no marker matched
+        assert second["status"] == "payload_conflict"
+        assert second["notification_status"] == "blocked_payload_conflict"
 
 
 # ── Group E: Existing phase complete preservation ───────────────────────────

@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Phase 134E.8V independently verifies and hardens Architecture Status and
+  terminal-report snapshot/idempotency integration: exact dotted/corrective/
+  verification completion identities are retained, status is revision-bound
+  and sealed before certification, report digests bind delivered pre-attempt
+  bytes, mapping order is deterministic, changed ordinary payloads fail closed,
+  and correction/supersession records cannot erase ordinary identity.
+
+- Phase 134E.8.1 repairs duplicate terminal phase delivery: ordinary
+  completion is now phase-scoped instead of phase+commit-scoped, successful
+  delivery markers bind the rendered report digest and finalization snapshot,
+  and deterministic coherence checks reject mixed-phase tests,
+  completed-phase denials, and self-recommending completed reports.
+
 - Phase 134E.8 - Architecture Status Generation Repair
   (`docs/PHASE_134_ARCHITECTURE_STATUS_GENERATION_REPAIR.md`). Repairs
   the persistent, highly visible defect where generated Architecture

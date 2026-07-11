@@ -416,7 +416,8 @@ Recommended next phase: 113B — Advisory Runtime Contract Freeze.
 Phase 113A — Advisory Runtime Architecture.
 """)
         status = _build(tmp_path, monkeypatch)
-        assert status["freshness"] == FRESHNESS_FRESH
+        assert status["freshness"] == FRESHNESS_FRESH_WITH_LIMITATIONS
+        assert any("repository revision unavailable" in item for item in status["limitations"])
 
     def test_fresh_with_limitations_when_no_plan_disclosed(self, tmp_path, monkeypatch):
         _write_project_status(tmp_path, """\

@@ -25,7 +25,10 @@ from pathlib import Path
 from typing import Any
 
 from pcae.core.phase_reports import (
+    compute_finalization_snapshot_id,
+    compute_report_digest,
     make_phase_report,
+    build_architecture_status,
     write_phase_report,
     read_latest_report,
     write_notification_dispatch_marker,
@@ -101,6 +104,11 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
         commit_list = list(getattr(args, "commit", None) or [])
         if commit_list:
             report.metadata["commit_attribution"] = ", ".join(commit_list)
+        report.metadata["phase_id"] = report.phase_id
+        report.architecture_status = build_architecture_status()
+        report.metadata["source_revision"] = report.architecture_status.get(
+            "repository_revision", ""
+        )
         # Phase 126G — assess trust completeness before writing so the
         # persisted report_completeness/missing_trust_fields reflect the
         # data actually supplied here, rather than being left permanently
@@ -116,6 +124,31 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
         return 1
 
     reports_dir = Path(getattr(args, "reports_dir", None) or DEFAULT_REPORTS_DIR)
+    from pcae.core.phase_reports import notification_dispatch_state
+    dispatch_state = notification_dispatch_state(
+        report.phase_id,
+        report_digest=compute_report_digest(report),
+        finalization_snapshot_id=compute_finalization_snapshot_id(report),
+    )
+    if dispatch_state == "payload_conflict":
+        if args.json:
+            print(json.dumps({
+                "error": "payload_conflict",
+                "message": "ordinary completion already exists with a different bound payload",
+            }, indent=2, sort_keys=True))
+        else:
+            print("Phase report creation: BLOCKED (ordinary-completion payload conflict)")
+        return 1
+    if dispatch_state == "already_dispatched":
+        if args.json:
+            print(json.dumps({
+                "status": "skipped",
+                "reason": "already_dispatched",
+                "phase_id": report.phase_id,
+            }, indent=2, sort_keys=True))
+        else:
+            print("Phase report creation: skipped (immutable ordinary completion already delivered)")
+        return 0
     paths = write_phase_report(report, reports_dir)
 
     # Phase 128B.1 — a trust-complete report created through this manual
@@ -258,7 +291,12 @@ def _dispatch_manual_report_notification(
 
     all_ok = bool(results) and all(r.success for r in results)
     if all_ok and commit_hash:
-        write_notification_dispatch_marker(report.phase_id, commit_hash)
+        write_notification_dispatch_marker(
+            report.phase_id,
+            commit_hash,
+            report_digest=compute_report_digest(report),
+            finalization_snapshot_id=compute_finalization_snapshot_id(report),
+        )
 
     return {
         "outcome": "sent" if all_ok else "failed",
