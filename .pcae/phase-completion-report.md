@@ -1,174 +1,190 @@
-# Phase 134E.7V Complete — External Delivery Receipt Model Independent Verification
+# Phase 134E.8 Complete — Architecture Status Generation Repair
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.7V`
+- **Phase ID:** `134E.8`
 - **Status:** completed
-- **Phase class:** independent verification
+- **Phase class:** implementation (repair)
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134E.7V independently verified 134E.7's External Delivery Receipt
-Model (`src/pcae/core/delivery_receipt.py`) via fresh adversarial
-probing — source inspection first, hypotheses proven via direct Python
-REPL execution before any regression test was written, rather than
-trusting 134E.7's own report, documentation, or its 110 focused tests.
-Found and repaired one genuine BLOCKING defect; recorded seven
-NON-BLOCKING observations; the remaining dimensions are CONFIRMED.
+Repaired the persistent, highly visible defect where generated PCAE
+Architecture Status blocks reported completed Track 132 work as
+`Planned: 132F — Repository Intelligence Service` while claiming
+automatic canonical derivation. Traced the generation path from source
+and found three compounding root causes, established an explicit
+authority model and semantic-freshness contract, added a validation API
+and a read-only inspection command, and confirmed against the real
+repository that the defect is gone.
 
 ## 3. Architectural Findings
 
-Re-confirmed the layering is preserved and unchanged: Canonical
-Engineering Evidence -> Derived Evidence Views -> RenderingResult ->
-Delivery Pipeline -> DeliveryExecutionResult -> External Delivery
-Receipt Model -> Final Lifecycle Integration (134E.10, not
-implemented). Re-confirmed via AST import scan that the receipt module
-imports only `pcae.core.delivery_pipeline` plus stdlib — never the
-canonical evidence model, extraction layer, either derived view,
-rendering, or notifications directly. Re-confirmed via full-tree scan
-that zero files outside `delivery_receipt.py` reference the receipt
-model: the subsystem remains fully isolated from active lifecycle
-authority, authoritative only for delivery history and delivery state.
+Traced the full generation path from source:
+`pcae.core.phase_reports.build_architecture_status()` reads
+`PROJECT_STATUS.md` for completed/current/planned state and
+`pcae.core.runtime_snapshot.build_runtime_snapshot()` for runtime state;
+`PhaseReport.render_markdown()` embeds the result in the canonical
+report. Confirmed via direct execution against the real repository
+(before any change) that `"planned"` returned `["132F — Repository
+Intelligence Service"]` and `"in_progress"` returned `[]` even though
+the actual current phase was `134E.7V` — reproducing the reported defect
+exactly and revealing a second, undocumented defect (the current phase
+silently vanishing) alongside it.
 
 ## 4. Implementation Findings (Repair)
 
-Found and repaired one BLOCKING defect, proven via direct REPL
-reproduction before any test was written: path traversal via
-unsanitized store identifiers. `DeliveryReceiptStore` interpolated raw
-caller-supplied identifiers (`logical_delivery_id`,
-`original_receipt_id`, and the explicitly-arbitrary
-`correcting_receipt_id`) directly into persisted file paths with no
-boundary validation. Unlike `shell_gate.persist_audit_record`'s
-safe-by-construction `sg-<uuid>` audit id, `correcting_receipt_id` is
-an arbitrary caller-supplied string, so a value containing `..` or path
-separators could write outside the store root — directly reproducible.
-This was inconsistent with the repository's own
-`phase_reports._safe_filename` / `notifications._safe_doc_filename`
-filename-sanitization convention. Repaired by fail-closed
-`DeliveryReceiptStore._validate_store_identifier` at the persistence
-boundary (rejecting path separators, parent references, and absolute
-paths). The repair preserves all public-API behavior (hex ids and
-`corrector-N` ids pass unchanged), Delivery Pipeline behavior,
-transport independence, and lifecycle inactivity. No other production
-code was modified.
+Three compounding root causes, confirmed by direct source and state
+inspection: (1) the "planned" regex matched only the retired
+`"Recommended next repo phase:"` wording; the current phase's own
+`"Recommended next phase:"` sentence never matched, so generation fell
+back to a whole-file search returning the first (most historically
+distant, since `PROJECT_STATUS.md` is newest-first) match of the old
+wording — the direct, sole cause of `"Planned: 132F"`. (2) Completed
+derivation was hard-scoped to the 110-113 series only, so Tracks 125-134
+could never appear even after (1) was fixed. (3) The phase-ID grammar
+could not parse a dotted sub-phase with a trailing verification letter
+(e.g. `"134E.7V"`), so the current phase silently disappeared from "In
+Progress". A fourth defect (duplicate `"113V"` in `completed_phase_ids`
+from this repository's normal dual-header convention) and a chapter-
+label rendering defect (`_longest_common_prefix` could split inside a
+word once the 110-113 restriction was lifted, e.g. producing
+`"Con: sumption..."`) were found and fixed while widening scope. All
+four repaired in `pcae.core.phase_reports.build_architecture_status()`
+and its supporting regexes/helpers; new module
+`pcae.core.architecture_status` added for canonical phase-ID parsing/
+ordering (reusing 134B.3's identity grammar), freshness constants, and
+`validate_architecture_status()`. New CLI `pcae architecture-status
+inspect` (read-only).
 
 ## 5. Verification Findings
 
-All 42 required dimensions checked: 34 CONFIRMED outright, 1 CONFIRMED
-after repair (persistence, post path-traversal repair), 7 NON-BLOCKING
-observations recorded, zero unresolved BLOCKING findings. Receipt and
-attempt identity proven deterministic and unambiguous (canonical JSON
-array hashing, two-level attempt slot + content-digest scheme).
-Aggregate derivation independently re-derived and challenged.
-Logical/physical exactly-once distinction confirmed (no physical
-exactly-once overclaim). Ambiguous outcomes preserved honestly. Retry
-lineage validated. Correction/supersession primitives validated
-(self-cycle and same-receipt re-correction rejected; cross-receipt
-cycle detection deferred to 134E.10 per frozen scope). Deep
-immutability proven. Receipt and attempt digests proven complete via a
-material-field matrix. Diagnostic redaction and destination privacy
-verified (bearer/webhook/raw-exception all redacted; only safe
-alias + classification persisted). Persistence, atomicity, and
-stale-write behavior verified after repair. Operator completeness
-verified. PFN-001 readiness established without integration. Transport
-and model independence confirmed. 48 fresh adversarial tests added
-(all 42 required probe areas plus 6 characterization regressions),
-each proven via REPL before the test was written.
+Verified against the real repository, not a hard-coded expected block:
+`planned` now correctly shows the current phase's own recommendation
+(`134E.8` before this phase's own completion, `134E.8V` after);
+`current_phase_id` correctly resolves `134E.7V`/`134E.8`; Tracks
+132/133/134 are represented in `completed_phase_ids`; `freshness` is
+`fresh`; zero conflicts; the duplicate `113V` is gone.
+`validate_architecture_status()` on the real repository's derived status
+returns zero issues. Deterministic ordering verified directly:
+`["134E", "134E.1", "134E.1V", "134E.2", "134E.8", "134E.10",
+"134E.10V"]` is exactly the order `phase_sort_key()` produces regardless
+of input order. 51 new focused tests
+(`tests/test_architecture_status_generation_repair_134e8.py`); the
+existing Phase 113X.5 suite (`tests/test_architecture_status_
+canonicalization.py`) updated — one test that encoded the 110-113
+restriction this phase deliberately removes was replaced with two tests
+confirming the corrected, evidence-based scope.
 
 ## 6. Technical Debt Review
 
-Seven NON-BLOCKING observations recorded, all within the frozen scope
-or documented limitations deferred to 134E.10: (1) last-attempt-wins
-silently downgrades a delivered unit if a misbehaving caller re-attempts
-it (governed `plan_retry` prevents this); (2) `adapter_version`/
-`renderer_id`/`renderer_version` not enforced equal across retries
-(governed path preserves them); (3) cross-receipt mutual
-correction/supersession cycles constructible (no global graph; out of
-scope); (4) aggregate fields not semantically re-derived on load
-(consistent with 93C digest-only convention; digest is the integrity
-boundary); (5) single-process optimistic concurrency, last-writer-wins
-without `expected_previous_digest` (documented limitation); (6) bounded
-explicit-pattern redaction, not a universal secret scanner (consistent
-with established conventions); (7) `save()` enforces count-monotonicity
-but not prefix-consistency (public API preserves prefix; opt-in digest
-gate is the defense). No other pre-existing Track 134 debt item was
-repaired.
+Carried forward, unrepaired (none block Architecture Status
+correctness), all seven NON-BLOCKING observations recorded by 134E.7V's
+independent verification of the External Delivery Receipt Model: (1)
+last-attempt-wins downgrade under a misbehaving caller; (2)
+`adapter_version`/`renderer_id`/`renderer_version` not enforced equal
+across retries; (3) cross-receipt mutual correction/supersession cycles
+constructible; (4) aggregate fields not semantically re-derived on load
+(consistent with 93C digest-only convention); (5) single-process
+optimistic concurrency, last-writer-wins without
+`expected_previous_digest`; (6) bounded explicit-pattern redaction, not
+a universal secret scanner; (7) `save()` enforces count-monotonicity but
+not prefix-consistency of existing attempts (public API preserves
+prefix; opt-in digest gate is the defense). New technical debt from this
+phase (see `docs/PHASE_134_ARCHITECTURE_STATUS_GENERATION_REPAIR.md`
+Section 15): no caching exists for `build_architecture_status()`
+(deliberate — "prefer no cache over an unsafe cache"); `completed_
+chapters` currently only carries mainline milestone phase IDs, matching
+the pre-existing 113X.5 convention (a future phase view wanting full
+sub-phase/verification traceability within a chapter would need a
+secondary field, deliberately not added here).
 
 ## 7. Notable Engineering Knowledge
 
-A persistence layer that interpolates caller-supplied identifiers into
-file paths must validate those identifiers at the boundary even when
-the public API produces safe-by-construction values — because a frozen
-dataclass is always directly constructible, and an explicitly arbitrary
-identifier field (like `correcting_receipt_id`) is a path-traversal
-vector unless rejected. The repository's own `phase_reports._safe_
-filename` convention exists for exactly this reason; the receipt store
-now matches it (reject rather than silently rewrite, so two distinct
-identifiers can never collide into the same storage slot). Separately:
-a two-level identity scheme (a stable slot id `compute_attempt_id` over
-logical-delivery + sequence, plus a content fingerprint
-`attempt_digest` over all material fields) cleanly separates "this is
-the same attempt slot" from "this attempt's content changed" without
-conflating attempt identity with logical receipt identity.
+A generator that claims "canonical automatic derivation" must condition
+that claim on its own freshness, not assert it unconditionally — the
+same defect pattern (an automated claim outstripping what was actually
+verified) recurs across this codebase's history (113X.5's SERIES_MAP
+over-claim, this phase's stale-recommendation over-claim) and is best
+closed by making the claim itself conditional in the renderer, not just
+fixing the specific derivation bug. Separately: a whole-file fallback
+search over a newest-first-ordered history file is a trap — "first
+match" silently means "most historically distant match," the opposite
+of what a fallback usually intends; removing the fallback entirely (and
+disclosing its absence) is safer than trying to make the fallback
+"smarter." Separately: a character-level longest-common-prefix algorithm
+is unsafe against real natural-language titles — it can split inside a
+word the moment titles diverge before a word boundary; word-level
+comparison is the correct primitive, with a bounded compact fallback for
+degenerate cases (many phases, duplicate remainders, excessive length)
+rather than trying to make prefix-matching "work" for every case.
 
 ## 8. Governance Results
 
 - `pcae check`: passed.
+- `pcae health`: healthy.
 - task memory: clean.
 - governed commit/push/task/phase commands only; no raw git, no
   `--no-verify`, no force push.
-- Runtime remains Observed; execution unavailable.
+- Runtime remains Observed; execution unavailable (independently
+  re-derived by `build_architecture_status()`'s own runtime-snapshot
+  call, not hard-coded).
 - Repository clean and pushed; `origin/main..HEAD = 0`.
 
 ## 9. Test Results
 
-- New adversarial suite: 48 passed (all 42 required probe areas plus 6
-  characterization regressions).
-- 134E.7 focused tests re-run as baseline: 110 passed.
-- Focused regression suite: 1216 passed (delivery receipt 134E.7/
-  134E.7V + delivery pipeline 134E.6/134E.6V + rendering 134E.5/134E.5V
-  + operator report view 134E.4/134E.4V + phase report view 134E.3/
-  134E.3V + evidence extraction 134E.2/134E.2V + canonical engineering
-  evidence 134E.1/134E.1V + notifications/Telegram + authorization/
-  configuration 134B.1/134B.2/134B.3 + finalization + phase identity).
-- Fast-green: 4389 passed, 1 failed this run (pre-existing, unrelated
-  `test_pytest_dry_run_not_blocked` — independently reproduced on
-  pristine source with the 134E.7V change stashed).
+- New focused suite: 51 passed
+  (`tests/test_architecture_status_generation_repair_134e8.py`).
+- Updated Phase 113X.5 suite: 16 passed
+  (`tests/test_architecture_status_canonicalization.py`).
+- Related-suite regression (phase_report/phase_identity/metadata_repair/
+  finaliz*/notification/notify/canonical_phase_identity/
+  architecture_status filter): 914 passed.
+- `tests/test_model_containment_drill.py`,
+  `tests/test_handoff_verification.py`, `tests/test_phase_identity.py`:
+  49 passed.
+- Fast-green: 4390 passed, 0 failed this run (no known pre-existing
+  failure reproduced).
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
 
-No activation of Canonical Engineering Evidence, no live evidence
-capture, no replacement of current report generation, no replacement of
-current notification dispatch, no routing of production Telegram through
-the new receipt model, no production receipt artifact created, no
-Architecture Status repair, no Derived Correctness validation, no final
-lifecycle integration, no PFN-001 change, no PFR-001 change, no
-Repository Intelligence change, no 134E.8 work, and no execution
-capability were implemented. No raw git commit/push, `--no-verify`, or
-force push was used.
+No activation of Canonical Engineering Evidence, Evidence Extraction,
+Phase Report View, Operator Report View, the new Rendering Architecture,
+the new Delivery Pipeline, or Delivery Receipts occurred. No replacement
+of current notification dispatch, no Telegram migration, no final
+lifecycle integration, no historical phase reports rewritten, no PFN-001
+change, no PFR-001 change, no Repository Intelligence change, no
+134E.8V work, no 134E.9 work, and no execution capability were
+implemented. No raw git commit/push, `--no-verify`, or force push was
+used.
 
 ## 11. Architectural Boundary Confirmation
 
 PFN-001 and PFR-001 remain mandatory and unmodified. Repository
-Intelligence authority is unmodified and unreferenced by the module.
-The current governed reporting and finalization path remains the sole
-active authority. The Delivery Pipeline, rendering, views, evidence,
-and notification layers are unchanged (1216-test focused regression
-suite passes). This phase does not self-certify.
+Intelligence authority is unmodified and unreferenced by
+`build_architecture_status()` (confirmed by source-scan test). The
+current governed reporting and finalization path remains the sole active
+authority; `render_markdown()` continues to embed the structured status
+through the existing report formatter, not the new Rendering
+Architecture. The Delivery Pipeline, Delivery Receipt, rendering, views,
+and notification layers are unchanged (914-test related-suite regression
+passes). This phase does not self-certify; 134E.8V (independent
+verification) is required next.
 
 ## 12. Track Progress
 
-134E.7V independently verifies the seventh of Track 134E's
-architectural layers, closing the independent-verification gate that
-134D's roadmap requires before 134E.8 may begin. One genuine BLOCKING
-defect (path traversal) was found and repaired — surviving 134E.7's own
-110-test suite, proven via direct REPL reproduction before any
-regression test was written.
+134E.8 repairs the Architecture Status generation defect that 134D's
+roadmap and 133G/134A's own forensic notes had already identified but
+not yet fixed. It does not advance Track 134E's evidence/delivery
+architecture chapters (134E.1-134E.7V remain the full implemented+
+verified chain); it is a governance-correctness repair sitting alongside
+that chain, gating a clean and truthful Architecture Status before any
+further Track 134E work continues.
 
 ## 13. Next Phase
 
-Recommended: **134E.8 — Architecture Status Generation Repair**. Phase
-134E.8 has not begun.
+Recommended: **134E.8V — Architecture Status Generation Independent
+Verification**. Phase 134E.8V has not begun. Phase 134E.9 has not
+begun.
