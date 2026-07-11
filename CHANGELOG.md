@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 134E.1 - Canonical Engineering Evidence Executable Model
+  (`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_EXECUTABLE_MODEL.md`).
+  Implements the first executable model for Canonical Engineering
+  Evidence (`src/pcae/core/canonical_engineering_evidence.py`),
+  disconnected by design from active lifecycle behavior — stdlib-only
+  imports, zero internal PCAE dependencies, mirroring `core/evidence.py`
+  (115C)'s isolation discipline. Deterministic identity
+  (`phase_id#version`, no random UUID), six phase classes with explicit
+  per-category applicability, deterministic serialization/digest, three-
+  way finding classification with repair records that preserve the
+  original finding, first-class uncertainty/limitation structures (133F's
+  Non-Omission refinement), a prepared correction/supersession envelope,
+  and frozen-dataclass immutability. 52 new tests covering 40 required
+  test areas; 1185 combined regression tests passed unchanged; fast-green
+  unaffected. This phase does not self-certify — recommended next phase
+  is 134E.1V (independent verification), not begun here, nor is 134E.2.
+
 - Phase 134D - Canonical Phase Finalization & Reporting Lifecycle
   Implementation Plan
   (`docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_IMPLEMENTATION_PLAN.md`).

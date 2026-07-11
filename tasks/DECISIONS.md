@@ -2,6 +2,22 @@
 
 ## Accepted
 
+- Implement the Canonical Engineering Evidence executable model (Phase
+  134E.1) as a fully isolated, disconnected module
+  (`src/pcae/core/canonical_engineering_evidence.py`) mirroring
+  `core/evidence.py` (115C)'s own stdlib-only, zero-internal-import
+  discipline, rather than wiring it into the active reporting/
+  finalization path in the same phase. Deterministic identity is the
+  governed phase_id plus a monotonic record version — no random UUID, no
+  new phase-identity authority. Treated the 133F uncertainty/limitations-
+  under-Non-Omission clarification as binding implementation guidance
+  (per 133G's own treatment) even though it remains formally a
+  NON-BLOCKING clarification pending contract amendment. Did not
+  implement live evidence capture, Evidence Extraction, views, rendering,
+  delivery, or the governed correction workflow (fields prepared only).
+  Do not begin 134E.1V or 134E.2 in this phase — 134E.1V is required
+  before 134E.2, and implementation must never self-certify.
+
 - Decompose the remaining Track 134 implementation (Phase 134D) into ten
   independently-verified sub-phases (134E.1–134E.10) plus a closing 134F
   whole-lifecycle verification, rather than one monolithic 134E
