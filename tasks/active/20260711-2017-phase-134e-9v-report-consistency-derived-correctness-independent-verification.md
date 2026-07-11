@@ -30,6 +30,9 @@ Independently verify the complete 134E.9/134E.9.1 Report Consistency / Derived C
 - tasks/DONE.md
 - tasks/active
 - tasks/active/20260711-2017-phase-134e-9v-report-consistency-derived-correctness-independent-verification.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
@@ -42,6 +45,7 @@ Independently verify the complete 134E.9/134E.9.1 Report Consistency / Derived C
 - tests
 - docs
 - tasks
+- config
 
 ## Forbidden Zones
 
