@@ -1,85 +1,78 @@
-# Phase 134E.5 Complete — Rendering Architecture
+# Phase 134E.5V Complete — Rendering Architecture Independent Verification
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.5`
+- **Phase ID:** `134E.5V`
 - **Status:** completed
-- **Phase class:** dedicated implementation
+- **Phase class:** dedicated independent verification
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134E.5 implemented a deterministic, reusable, transport-
-independent Rendering layer (`src/pcae/core/rendering.py`) over the
-verified Phase Report View and Operator Report View. Six renderers
-(Markdown, plain text, canonical JSON, for each of the two view types)
-registered via a small explicit registry mirroring
-`evidence_extraction.py`'s own profile-registry convention.
+Phase 134E.5V independently verified 134E.5's Rendering Architecture
+implementation via fresh adversarial probing, rather than trusting its
+report, documentation, or its 97/98 tests. Found and repaired one
+genuine BLOCKING defect, discovered by direct adversarial probing
+before writing any new test.
 
 ## 3. Architectural Findings
 
-Preserved the layering: Canonical Engineering Evidence -> Evidence
-Extraction -> {Phase Report View, Operator Report View} -> Rendering ->
-Delivery Pipeline (not implemented) -> Delivery Adapters (not
-implemented). `render(view, source, renderer_id)` deliberately accepts
-both the composed view and its originating `ExtractionResult` — a
-documented design decision (Section 5 of
-`docs/PHASE_134_RENDERING_ARCHITECTURE.md`) satisfying both genuine
-content richness and forged-input rejection, without recomposing a
-view.
+No architectural change. The rendering architecture's structure (six
+renderers, dual-input contract, content-preservation accounting) was
+independently re-confirmed against Track 133/134 source text rather
+than accepted from 134E.5's own documentation. Independently
+re-derived that the dual-input `render(view, source, renderer_id)`
+design is necessary (views carry no content values), safe (digest
+check transitively rejects wrong-profile/wrong-phase/forged sources),
+and contract-consistent.
 
 ## 4. Implementation Findings
 
-Implemented `RenderingResult`/`RendererDescriptor`/renderer registry
-with six registered renderers, content-preservation accounting,
-rendering-completeness floor (never exceeding view completeness or,
-for Operator Reports, decision completeness), Markdown/plain-text
-escaping, and full traceability metadata. Found and fixed one defect
-during this phase's own development, before any test was written:
-content-preservation accounting counted a primary category as
-"preserved" merely because its label was printed, even when its value
-could not be resolved from the source — fixed across all three
-affected render functions. No active-lifecycle integration was
-introduced; the module remains isolated.
+One BLOCKING defect repaired at the smallest responsible boundary
+inside the still-isolated module: undisclosed unresolved content in
+rendered prose — `_resolve_section_lines()` printed a structural
+classification line even when the underlying value could not be
+resolved, with no inline disclosure. Repaired by adding an explicit
+`[content unresolved: source value unavailable]` line inline, applying
+uniformly across all four affected prose renderers via the shared
+helper. No active-lifecycle integration was introduced; the module
+remains isolated.
 
 ## 5. Verification Findings
 
-Implementation-phase scope: regression summary only (independent
-adversarial verification is 134E.5V's job). 97 new focused tests (all
-96 required areas) pass; 1222 combined regression tests (evidence
-model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View
-134E.3/134E.3V, Operator Report View 134E.4/134E.4V, phase-identity
-repair, phase_reports, finalization-gate, trust-hard-fail,
-certification-idempotency, 134B.1-134B.3, phase) pass unchanged;
-fast-green 4390/4390 passing this run.
+Independently re-derived requirements from Track 133 Engineering
+Evidence architecture/contract, Track 134 lifecycle architecture/
+contract, 134D's implementation plan, verified Canonical Engineering
+Evidence, Evidence Extraction, Phase Report View, and Operator Report
+View. All 45 verification dimensions checked; the one BLOCKING defect
+was found via direct Python-REPL adversarial probing before any test
+was written (a forged/corrupted extraction result exposing a naked
+"blocking" classification claim with no finding body and no inline
+disclosure). 42 fresh adversarial tests added covering all 40 required
+probe areas plus 2 additional re-confirmations. No new NON-BLOCKING
+observations beyond those already carried forward, documented in full
+in `docs/PHASE_134_RENDERING_ARCHITECTURE_INDEPENDENT_VERIFICATION.md`.
 
 ## 6. Technical Debt Review
 
-Repaired four pre-declared, expected consequences of this phase's own
-scope (not new defects): the isolation scans in
-`test_evidence_extraction_134e2v_verification.py`,
-`test_phase_report_view_134e3.py`,
-`test_phase_report_view_134e3v_verification.py`, and
-`test_operator_report_view_134e4.py` each narrowed to admit
-`rendering.py` as the next expected, still-isolated consumer — the
-identical pre-declared narrowing pattern 134E.3 and 134E.4 already
-applied to their own predecessors. No pre-existing Track 134 debt item
-was otherwise repaired.
+No pre-existing Track 134 debt item was repaired (out of scope). No
+new NON-BLOCKING observations were recorded this phase; the three
+observations carried forward from 134E.2V/134E.3V/134E.4V remain open,
+none proven genuinely BLOCKING for Rendering specifically.
 
 ## 7. Notable Engineering Knowledge
 
-A content-preservation accounting mechanism must record "preserved"
-only at the exact point a value is genuinely resolved and written —
-never at the point a category's mere *label* is emitted. The two are
-easy to conflate in generic per-category rendering loops (label always
-printed; value conditionally printed), and the resulting bug is
-silent: `content_preserved=True` even when a value was actually
-missing. This is the rendering-layer analogue of a lesson multiple
-prior 134E.x phases already independently rediscovered at their own
-layer (composition, extraction, registry) — any accounting/proof
-mechanism must gate on the actual event it claims to prove, not a
-correlated-but-weaker signal.
+A structural completeness/diagnostic mechanism can correctly detect and
+record a content gap (in `RenderingResult.diagnostics`/`content_
+preserved`/`completeness`) while the *human-readable artifact itself*
+still fails to disclose that gap at the exact point a reader would
+encounter it. For a presentation layer whose entire purpose is
+human/operator consumption, disclosure must exist in the rendered text
+itself, not only in structured metadata a reader may never inspect —
+a distinct failure mode from every prior 134E.x phase's own
+"structured field lost" class of defect, worth naming explicitly for
+future rendering/presentation work.
 
 ## 8. Governance Results
 
@@ -90,8 +83,16 @@ correlated-but-weaker signal.
 
 ## 9. Test Results
 
-- New focused suite: 97 passed (all 96 required areas).
-- Combined regression suite: 1222 passed.
+- New adversarial suite: 42 passed (all 40 required probe areas plus 2
+  authority-boundary re-confirmations).
+- Original 134E.5 suite (re-run against the repaired module): 98
+  passed.
+- Combined focused suite: 140 passed.
+- Combined regression suite (evidence model 134E.1/134E.1V, extraction
+  134E.2/134E.2V, Phase Report View 134E.3/134E.3V, Operator Report
+  View 134E.4/134E.4V, phase-identity repair, phase_reports,
+  finalization-gate, trust-hard-fail, certification-idempotency,
+  134B.1-134B.3, phase, rendering): 1264 passed.
 - Fast-green: 4390 passed, 0 failed this run.
 - `compileall`: passed.
 
@@ -103,7 +104,7 @@ current notification payloads, no delivery adapters, no
 Telegram-specific formatting, no message splitting, no attachment
 policy, no External Delivery Receipts, no Architecture Status repair,
 no final lifecycle integration, no PFN-001/PFR-001 change, no
-Repository Intelligence change, no 134E.5V work, and no execution
+Repository Intelligence change, no 134E.6 work, and no execution
 capability were implemented. No raw git commit/push, `--no-verify`, or
 force push was used.
 
@@ -116,14 +117,12 @@ active authority. This phase does not self-certify.
 
 ## 12. Track Progress
 
-134E.5 adds the fifth of the six architectural layers Track 134E's own
-roadmap defines, sitting atop both sibling derived views (Phase Report
-View, Operator Report View) without depending on either beyond the
-shared extraction layer. It does not itself close the
-independent-verification gate 134D's roadmap requires before 134E.6
-may begin — that is 134E.5V's job.
+134E.5V closes the independent-verification gate 134D's own roadmap
+requires before 134E.6 may begin. One genuine defect was found and
+closed; the Rendering layer is now demonstrably (not just claimedly)
+sound at both the structured-result and human-readable-artifact level.
 
 ## 13. Next Phase
 
-Recommended: **134E.5V — Rendering Architecture Independent
-Verification**. Phase 134E.5V has not begun.
+Recommended: **134E.6 — Delivery Pipeline Generalization**. Phase
+134E.6 has not begun.
