@@ -1,81 +1,78 @@
-# Phase 134E.6 Complete — Delivery Pipeline Generalization
+# Phase 134E.6V Complete — Delivery Pipeline Generalization Independent Verification
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.6`
+- **Phase ID:** `134E.6V`
 - **Status:** completed
-- **Phase class:** dedicated implementation
+- **Phase class:** independent verification
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134E.6 implemented a deterministic, transport-neutral Delivery
-Pipeline (`src/pcae/core/delivery_pipeline.py`) that accepts a verified
-`RenderingResult` and prepares/executes delivery through explicitly
-registered adapters, without changing rendered engineering content.
+Phase 134E.6V independently verified 134E.6's Delivery Pipeline
+Generalization implementation (`src/pcae/core/delivery_pipeline.py`)
+via fresh adversarial probing rather than trusting its report,
+documentation, or its 105 tests. Found and repaired two genuine
+BLOCKING defects.
 
 ## 3. Architectural Findings
 
-Preserved the layering: Canonical Engineering Evidence -> Evidence
-Extraction -> Derived Evidence Views -> RenderingResult -> Delivery
-Pipeline -> Delivery Adapter -> Adapter Delivery Outcome -> External
-Delivery Receipt Model (134E.7, not implemented). The pipeline consumes
-only `RenderingResult`, confirmed via source-line import scan showing
+Independently re-confirmed the pipeline consumes only `RenderingResult`
+plus `pcae.core.notifications._external_delivery_authorized()`, with
 zero reference to the canonical evidence model, extraction layer, or
-either derived view.
+either derived view — confirmed via a fresh source-line import scan.
+Confirmed zero references to `pcae.core.delivery_pipeline` anywhere
+outside its own module and test files.
 
 ## 4. Implementation Findings
 
-Implemented deterministic logical delivery identity, transport-neutral
-delivery modes with pure size/capability-based selection, lossless
-deterministic segmentation, explicit `DeliveryPolicy`, separated
-planning/execution, exactly-once logical semantics, and stateless
-retry planning. Two initial isolated adapters (recording, null/
-disabled). Reused the existing external-delivery authorization gate
-from `pcae.core.notifications` rather than duplicating it. Found and
-fixed one planning gap during this phase's own development, before any
-test was written: an always-disabled adapter's plan previously went
-through ordinary mode-selection, which could fail closed on oversized
-content even though delivery would never be attempted — fixed by
-short-circuiting planning for `always_disabled` adapters. No
-active-lifecycle integration was introduced; the module remains
-isolated.
+Not applicable — this is a verification-only phase. No new production
+capability was implemented beyond the two defect repairs described
+below.
 
 ## 5. Verification Findings
 
-Implementation-phase scope: regression summary only (independent
-adversarial verification is 134E.6V's job). 105 new focused tests (all
-105 required areas) pass; 1436 combined regression tests (evidence
-model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View
-134E.3/134E.3V, Operator Report View 134E.4/134E.4V, Rendering
-134E.5/134E.5V, phase-identity repair, phase_reports, finalization-gate,
-trust-hard-fail, certification-idempotency, notification/Telegram,
-134B.1-134B.3, phase) pass unchanged; fast-green 4390/4390 passing this
-run.
+Two genuine BLOCKING defects found and repaired, both proven first via
+direct Python REPL reproduction before any regression test was
+written:
+
+1. **Ambiguous logical-delivery-identity field concatenation** —
+   `compute_logical_delivery_id()`'s original `"|".join()` approach
+   allowed two semantically different input tuples to collide by
+   shifting content across a field boundary. Repaired by hashing a
+   canonical JSON array (`json.dumps([...])`) instead.
+2. **Unhandled adapter exception** — `execute_delivery()`'s per-unit
+   loop had no exception handling, so a throwing `deliver_fn` aborted
+   delivery of every sibling unit in the plan. Repaired by wrapping
+   each call in `try`/`except Exception`, normalizing into a
+   conservative retryable `AdapterUnitOutcome`.
+
+44 new fresh adversarial tests (all 42 required probe areas plus 2
+regression tests for the exception fix) pass; 149 combined with the
+original 105 pass; 553 combined 134E.3-134E.6 regression tests pass;
+fast-green 4390/4390 passing this run.
 
 ## 6. Technical Debt Review
 
-Repaired two pre-declared, expected consequences of this phase's own
-scope (not new defects): the isolation scans in `test_rendering_134e5.
-py` and `test_rendering_134e5v_verification.py` narrowed to admit
-`delivery_pipeline.py` as the next expected, still-isolated consumer —
-the identical pattern every prior 134E.x phase already applied to its
-own predecessor. No pre-existing Track 134 debt item was otherwise
-repaired.
+One NON-BLOCKING observation recorded: adapter-exception diagnostic
+messages are not independently secret-scrubbed. Not repaired — this is
+consistent with the rest of the pipeline's existing diagnostic
+surfaces (an adapter's own `AdapterUnitOutcome.diagnostic` is equally
+unscrubbed today), no genuine secret is introduced by this code path,
+and secret rejection remains an upstream responsibility
+(`CanonicalEngineeringEvidence.validate()`).
 
 ## 7. Notable Engineering Knowledge
 
-An always-disabled adapter's planning path must be special-cased away
-from ordinary transport-capability mode-selection — ordinary selection
-logic answers "how should this content be packaged for delivery,"
-which is a meaningless question when delivery will never be attempted
-regardless of content size. Treating "disabled" as just another
-capability-constrained adapter (rather than a structurally distinct
-planning path) produces spurious "no complete delivery mode available"
-failures for content that was never going to be sent in the first
-place — a lesson applicable to any future adapter capability that
-similarly makes packaging irrelevant.
+Delimiter-joined string hashing for a composite identity is unsafe
+whenever any input field is unrestricted free text — canonical
+structured serialization (e.g. a JSON array) closes the ambiguity by
+construction, not by validation. Separately: any pipeline stage that
+calls third-party/adapter code in a loop over independent units must
+isolate each call's exceptions per-unit; a single failing unit must
+never be allowed to silently cancel delivery of unrelated sibling
+units.
 
 ## 8. Governance Results
 
@@ -86,8 +83,9 @@ similarly makes packaging irrelevant.
 
 ## 9. Test Results
 
-- New focused suite: 105 passed (all 105 required areas).
-- Combined regression suite: 1436 passed.
+- New adversarial suite: 44 passed (all 42 required areas plus 2 regression tests).
+- Combined with original 134E.6 suite: 149 passed.
+- Combined 134E.3-134E.6 regression suite: 553 passed.
 - Fast-green: 4390 passed, 0 failed this run.
 - `compileall`: passed.
 
@@ -98,7 +96,7 @@ capture, no replacement of current report generation, no replacement
 of current notification dispatch, no routing of production Telegram
 through the new pipeline, no durable External Delivery Receipt model,
 no Architecture Status repair, no final lifecycle integration, no
-PFN-001/PFR-001 change, no Repository Intelligence change, no 134E.6V
+PFN-001/PFR-001 change, no Repository Intelligence change, no 134E.7
 work, and no execution capability were implemented. No raw git
 commit/push, `--no-verify`, or force push was used.
 
@@ -111,13 +109,12 @@ active authority. This phase does not self-certify.
 
 ## 12. Track Progress
 
-134E.6 adds the sixth of the seven architectural layers Track 134E's
-own roadmap defines, sitting atop the verified Rendering layer without
-depending on any layer beneath it directly. It does not itself close
-the independent-verification gate 134D's roadmap requires before
-134E.7 may begin — that is 134E.6V's job.
+134E.6V closes the independent-verification gate for the sixth of
+Track 134E's seven architectural layers, confirming the Delivery
+Pipeline is sound before 134E.7 (External Delivery Receipt Model) may
+begin.
 
 ## 13. Next Phase
 
-Recommended: **134E.6V — Delivery Pipeline Generalization Independent
-Verification**. Phase 134E.6V has not begun.
+Recommended: **134E.7 — External Delivery Receipt Model**. Phase
+134E.7 has not begun.

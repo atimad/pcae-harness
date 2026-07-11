@@ -1,36 +1,39 @@
 {
   "schema_version": "1.0",
-  "phase_id": "134E.6",
-  "phase_name": "Delivery Pipeline Generalization",
-  "phase_title": "Delivery Pipeline Generalization",
+  "phase_id": "134E.6V",
+  "phase_name": "Delivery Pipeline Generalization Independent Verification",
+  "phase_title": "Delivery Pipeline Generalization Independent Verification",
   "status": "completed",
-  "summary": "Implemented a deterministic, transport-neutral Delivery Pipeline (src/pcae/core/delivery_pipeline.py) that accepts a verified RenderingResult and prepares/executes delivery through explicitly registered adapters, without changing rendered engineering content. Deterministic logical delivery identity (SHA-256 over phase identity, rendering digest, purpose, destination, adapter, and policy version -- never a random UUID), transport-neutral delivery modes (inline/attachment/multipart chosen purely from content size and adapter capabilities, never truncating), lossless deterministic segmentation, an explicit DeliveryPolicy, separated planning/execution, exactly-once logical semantics, and stateless retry planning covering only failed units. Two initial isolated adapters: recording (in-memory, deterministic success, records every unit for test inspection) and null/disabled (never pretends delivery succeeded). Reuses the existing, already-verified external-delivery authorization gate from pcae.core.notifications rather than duplicating it; adapters inherit this protection automatically via a represents_external_delivery capability flag. Not yet active lifecycle authority: only internal imports are rendering and the existing authorization function. Content-preservation, Non-Omission, and Non-Strengthening all enforced structurally -- DeliveryPlan has no completeness field of its own that could diverge from the source RenderingResult. Found and fixed one planning gap during this phase's own development, before any test was written: an always-disabled adapter's plan previously went through ordinary mode-selection (which could fail closed on oversized content even though delivery would never be attempted anyway); fixed by short-circuiting planning for always_disabled adapters to a single DISABLED-mode unit carrying the full content. Repaired two pre-declared, expected isolation-scan narrowings (rendering.py x2) admitting delivery_pipeline.py as the next expected consumer, and reworded the module's own docstring to avoid unnecessary literal mentions of evidence/view module names it does not import, minimizing which other isolation scans needed touching. 105 new focused tests (all 105 required areas) pass; 1436 combined regression tests (evidence model, extraction, both view compositions, rendering, phase-identity repair, phase_reports, finalization-gate, notification/Telegram, 134B.1-134B.3, phase) pass; fast_green 4390/4390 passing this run. No durable External Delivery Receipt model, Telegram wrapper, or lifecycle integration was implemented; the genuine terminal report for this phase was delivered through the existing production notification path. 134E.6V not begun.",
+  "summary": "Independently verified 134E.6's Delivery Pipeline Generalization implementation (src/pcae/core/delivery_pipeline.py) via fresh adversarial probing rather than trusting its report, documentation, or its 105 tests. Found and repaired two genuine BLOCKING defects, both proven first via direct Python REPL reproduction before any regression test was written: (1) ambiguous logical-delivery-identity field concatenation -- compute_logical_delivery_id() joined its six input fields with a bare \"|\" separator before hashing, allowing two semantically different input tuples to collide by shifting content across a field boundary; repaired by hashing a canonical JSON array (json.dumps) instead. (2) unhandled adapter exception -- execute_delivery()'s per-unit loop called adapter.deliver_fn(unit) with no exception handling, so a throwing adapter aborted delivery of every sibling unit in the plan; repaired by catching any exception per-unit and normalizing it into a conservative retryable AdapterUnitOutcome. 44 new fresh adversarial tests (all 42 required probe areas plus 2 regression tests for the exception fix) pass; 149 combined with the original 105 pass; 553 combined 134E.3-134E.6 regression tests pass; fast_green 4390/4390 passing this run. One NON-BLOCKING observation recorded: adapter-exception diagnostic messages are not independently secret-scrubbed -- not repaired, consistent with the rest of the pipeline's existing diagnostic surfaces and secret rejection remains an upstream responsibility. No durable External Delivery Receipt model, Telegram wrapper, or lifecycle integration was implemented. 134E.7 not begun.",
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION.md",
+    "docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION_INDEPENDENT_VERIFICATION.md",
     "src/pcae/core/delivery_pipeline.py",
     "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/done/20260711-1244-phase-134e-6-delivery-pipeline-generalization.md",
-    "tests/test_delivery_pipeline_134e6.py",
-    "tests/test_rendering_134e5.py",
-    "tests/test_rendering_134e5v_verification.py"
+    "tasks/done/20260711-1321-phase-134e-6v-delivery-pipeline-generalization-independent-verification.md",
+    "tests/test_delivery_pipeline_134e6v_verification.py"
   ],
-  "files_changed_count": 10,
+  "files_changed_count": 8,
   "source_files_changed": 1,
-  "test_files_changed": 3,
-  "tests_added_or_updated": "105 new focused tests covering all 105 required delivery-pipeline areas, plus 1436 combined regression test executions (evidence model 134E.1/134E.1V, extraction 134E.2/134E.2V, Phase Report View 134E.3/134E.3V, Operator Report View 134E.4/134E.4V, Rendering 134E.5/134E.5V, phase-identity repair, phase_reports, finalization-gate, trust-hard-fail, certification-idempotency, notification/Telegram, 134B.1-134B.3, phase) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total, 4390 passed, 0 failed this run.",
-  "tests_run": 1541,
+  "test_files_changed": 1,
+  "tests_added_or_updated": "44 new fresh adversarial tests covering all 42 required probe areas plus 2 regression tests for the adapter-exception fix, plus 553 combined regression test executions (delivery pipeline 134E.6, rendering 134E.5/134E.5V, operator report view 134E.4/134E.4V, phase report view 134E.3/134E.3V) confirming no existing behavior changed. Fast_green re-confirmed: 4390 total, 4390 passed, 0 failed this run.",
+  "tests_run": 4539,
   "validation_results": [
     {
-      "name": "delivery_pipeline_focused_tests",
-      "result": "105 passed (all 105 required areas)",
+      "name": "delivery_pipeline_verification_adversarial_tests",
+      "result": "44 passed (all 42 required areas plus 2 regression tests)",
       "status": "passed"
     },
     {
-      "name": "combined_regression_suite",
-      "result": "1436 passed (delivery pipeline + rendering + operator report + phase report view + extraction + evidence model 134E.1/134E.1V + phase_reports + finalization-gate + trust-hard-fail + certification-idempotency + notification/Telegram + 134B.1/134B.2/134B.3 + phase + identity repair)",
+      "name": "delivery_pipeline_combined_original_and_verification",
+      "result": "149 passed (105 original + 44 new)",
+      "status": "passed"
+    },
+    {
+      "name": "combined_134e3_through_134e6_regression_suite",
+      "result": "553 passed (phase report view + operator report view + rendering + delivery pipeline, focused + verification)",
       "status": "passed"
     },
     {
@@ -42,25 +45,14 @@
       "name": "compileall",
       "result": "src compiled successfully",
       "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "105 focused passed (delivery pipeline generalization)",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "fast_green coverage passed",
-      "status": "passed"
     }
   ],
   "test_results": {
-    "delivery_pipeline_focused_tests": "105 passed",
-    "combined_regression_suite": "1436 passed",
+    "delivery_pipeline_verification_adversarial_tests": "44 passed",
+    "delivery_pipeline_combined_original_and_verification": "149 passed",
+    "combined_134e3_through_134e6_regression_suite": "553 passed",
     "fast_green": "4390 passed, 0 failed",
-    "compileall": "passed",
-    "report_notification_tests": "105 focused passed",
-    "bootstrap_session_reporting_tests": "fast_green coverage passed"
+    "compileall": "passed"
   },
   "governance_results": [
     {
@@ -88,7 +80,7 @@
       "status": "Observed, observe, execution unavailable"
     }
   ],
-  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No replacement of current report generation occurred. No replacement of current notification dispatch occurred. No routing of production Telegram through the new pipeline occurred. No durable External Delivery Receipt model was implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.6V work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
+  "no_go_confirmation": "No activation of Canonical Engineering Evidence occurred. No live evidence capture was implemented. No replacement of current report generation occurred. No replacement of current notification dispatch occurred. No routing of production Telegram through the new pipeline occurred. No durable External Delivery Receipt model was implemented. No Architecture Status repair occurred. No final lifecycle integration occurred. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence change occurred. No 134E.7 work began. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
     "No activation of Canonical Engineering Evidence occurred.",
     "No live evidence capture was implemented.",
@@ -101,7 +93,7 @@
     "No PFN-001 change occurred.",
     "No PFR-001 change occurred.",
     "No Repository Intelligence change occurred.",
-    "No 134E.6V work began.",
+    "No 134E.7 work began.",
     "No execution capability was introduced.",
     "No raw git commit was used.",
     "No raw git push was used.",
@@ -114,9 +106,9 @@
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
-  "recommended_next_phase": "Phase 134E.6V - Delivery Pipeline Generalization Independent Verification",
-  "recommended_next_phase_id": "134E.6V",
-  "recommended_next_phase_name": "Delivery Pipeline Generalization Independent Verification",
+  "recommended_next_phase": "Phase 134E.7 - External Delivery Receipt Model",
+  "recommended_next_phase_id": "134E.7",
+  "recommended_next_phase_name": "External Delivery Receipt Model",
   "runtime_state": "Observed",
   "maximum_plugin_capability": "observe",
   "execution_availability": "unavailable"
