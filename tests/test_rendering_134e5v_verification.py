@@ -650,8 +650,9 @@ def test_no_active_lifecycle_filesystem_network_side_effects(monkeypatch):
         R.render(view, res, rid)
     import pathlib
     src_root = pathlib.Path(R.__file__).resolve().parent.parent
+    _EXPECTED_ISOLATED_CONSUMERS = frozenset({"rendering.py", "delivery_pipeline.py"})
     for path in src_root.rglob("*.py"):
-        if path.name == "rendering.py":
+        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
             continue
         if "test" in str(path):
             continue

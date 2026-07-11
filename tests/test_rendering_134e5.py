@@ -832,10 +832,15 @@ def test_no_active_lifecycle_imports():
 
 
 def test_no_consumer_references_rendering_yet():
+    # 134E.6 note: Delivery Pipeline (``pcae.core.delivery_pipeline``)
+    # is an expected, deliberately isolated *new* consumer of this
+    # module -- the next layer in the same disconnected architecture
+    # (Rendering -> Delivery Pipeline), not an active-lifecycle one.
     import pathlib
     src_root = pathlib.Path(R.__file__).resolve().parent.parent
+    _EXPECTED_ISOLATED_CONSUMERS = frozenset({"rendering.py", "delivery_pipeline.py"})
     for path in src_root.rglob("*.py"):
-        if path.name == "rendering.py":
+        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
             continue
         if "test" in str(path):
             continue

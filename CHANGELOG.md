@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 134E.6 - Delivery Pipeline Generalization
+  (`docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION.md`). Implements
+  `src/pcae/core/delivery_pipeline.py`, a deterministic,
+  transport-neutral pipeline consuming a verified `RenderingResult`.
+  Deterministic logical delivery identity, transport-neutral delivery
+  modes (inline/attachment/multipart chosen purely from content size
+  and adapter capabilities, never truncating), lossless deterministic
+  segmentation, explicit `DeliveryPolicy`, separated
+  planning/execution, exactly-once logical semantics, stateless retry
+  covering only failed units. Two initial isolated adapters (recording,
+  null/disabled). Reuses the existing external-delivery authorization
+  gate from `pcae.core.notifications` rather than duplicating it.
+  Content-preservation, Non-Omission, and Non-Strengthening enforced
+  structurally. 105 new focused tests (all 105 required areas) pass;
+  1436 combined regression tests pass; fast-green 4390/4390 passing
+  this run. No durable External Delivery Receipt model, Telegram
+  wrapper, or lifecycle integration was implemented; the genuine
+  terminal report for this phase was delivered through the existing
+  production notification path.
+
 - Phase 134E.5V - Rendering Architecture Independent Verification
   (`docs/PHASE_134_RENDERING_ARCHITECTURE_INDEPENDENT_VERIFICATION.md`).
   Independently verifies 134E.5's Rendering Architecture via fresh

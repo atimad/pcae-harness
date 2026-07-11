@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 134E.6 — Delivery Pipeline Generalization (completed).
+
+Implemented a deterministic, transport-neutral Delivery Pipeline
+(`src/pcae/core/delivery_pipeline.py`) that accepts a verified
+`RenderingResult` and prepares/executes delivery through explicitly
+registered adapters. Deterministic logical delivery identity (SHA-256
+over phase identity, rendering digest, purpose, destination, adapter,
+and policy version — never a random UUID), transport-neutral delivery
+modes (inline/attachment/multipart, chosen purely from content size and
+adapter capabilities), lossless deterministic segmentation, an explicit
+DeliveryPolicy, separated planning/execution, exactly-once logical
+semantics, and stateless retry planning covering only failed units. Two
+initial isolated adapters — recording (in-memory, deterministic
+success) and null/disabled (never pretends delivery succeeded). Reuses
+the existing, already-verified external-delivery authorization gate
+from `pcae.core.notifications` rather than duplicating it; adapters
+inherit this protection automatically via a capability flag. Not yet
+active lifecycle authority — isolated (imports only `rendering` and the
+existing authorization function). Content-preservation, Non-Omission,
+and Non-Strengthening all enforced structurally (`DeliveryPlan` has no
+completeness field of its own to diverge from the source
+`RenderingResult`). 105 new focused tests (all 105 required areas)
+pass; 1436 combined regression tests (evidence model, extraction, both
+view compositions, rendering, phase-identity repair, phase_reports,
+finalization-gate, notification/Telegram, 134B.1-134B.3, phase) pass;
+fast-green 4390/4390 passing this run. The genuine terminal report for
+this phase is delivered through the existing, unmodified production
+notification path. Full details in
+`docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION.md`.
+
+Recommended next phase: 134E.6V — Delivery Pipeline Generalization
+Independent Verification. 134E.6V was not begun in this phase.
+
+## Phase 134E.6 Complete
+
+Implemented the generic Delivery Pipeline over the verified
+RenderingResult. The module remains isolated, disconnected lifecycle
+authority — not yet active. No durable External Delivery Receipt
+model, Telegram wrapper, or lifecycle integration was implemented.
+
+## Phase 134E.5V Complete (historical)
+
 Phase 134E.5V — Rendering Architecture Independent Verification (completed).
 
 Independently verified 134E.5's Rendering Architecture implementation

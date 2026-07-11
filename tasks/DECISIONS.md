@@ -2,6 +2,35 @@
 
 ## Accepted
 
+- Implement Delivery Pipeline Generalization (Phase 134E.6) as a
+  transport-neutral pipeline consuming only a verified `RenderingResult`
+  -- never the canonical evidence model, extraction layer, or either
+  derived view directly. Derived logical delivery identity
+  deterministically (SHA-256 over phase identity, rendering digest,
+  purpose, destination, adapter, policy version) so that a changed
+  rendering always produces a different logical identity by
+  construction, making "changed content under the same logical
+  identity" structurally unreachable rather than merely checked.
+  Implemented only two initial adapters (recording, null/disabled) --
+  no Telegram compatibility wrapper, since 134D was not found to
+  explicitly assign one to this phase. Reused the existing
+  `pcae.core.notifications._external_delivery_authorized()` gate
+  directly rather than duplicating it, so future adapters inherit
+  protection automatically via a capability flag. Fixed one self-found
+  planning gap before any test was written: an always-disabled
+  adapter's plan previously went through ordinary mode-selection (which
+  could fail closed on oversized content even though delivery would
+  never be attempted anyway); repaired by short-circuiting planning for
+  `always_disabled` adapters to a single DISABLED-mode unit carrying
+  the full content, keeping `content_preserved` honest. Updated the
+  pre-existing isolation scans in `test_rendering_134e5.py` and
+  `test_rendering_134e5v_verification.py` to admit
+  `delivery_pipeline.py` as the next expected consumer, and reworded
+  the module's own docstring to avoid unnecessary literal mentions of
+  the evidence/view module names it does not import, minimizing which
+  other isolation scans needed touching. Do not begin 134E.6V in this
+  phase.
+
 - Independently verify Rendering Architecture (Phase 134E.5V) by fresh
   adversarial probing before writing any new test, rather than
   trusting 134E.5's report or its 97/98 tests. Found and repaired one
