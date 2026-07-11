@@ -10,7 +10,7 @@ Phase 134E.4V — Operator Report View Composition Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
