@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+- Phase 134E.8 - Architecture Status Generation Repair
+  (`docs/PHASE_134_ARCHITECTURE_STATUS_GENERATION_REPAIR.md`). Repairs
+  the persistent, highly visible defect where generated Architecture
+  Status blocks reported completed Track 132 work as `Planned: 132F —
+  Repository Intelligence Service` while claiming automatic canonical
+  derivation. Root cause traced to three compounding defects in
+  `pcae.core.phase_reports.build_architecture_status()`: (1) the
+  "planned" regex matched only the retired `"Recommended next repo
+  phase:"` wording, so the current phase's own `"Recommended next
+  phase:"` sentence never matched and generation fell back to a
+  whole-file search returning the first (most historically distant)
+  match of the old wording; (2) completed-phase derivation was
+  hard-scoped to the 110-113 series only, so Tracks 125-134 could never
+  appear even after (1) was fixed; (3) the phase-ID grammar could not
+  parse a dotted sub-phase with a trailing verification letter (e.g.
+  `134E.7V`), so the actual current phase silently vanished from "In
+  Progress". A fourth defect (duplicate `113V` from this repo's normal
+  dual-header convention) and a chapter-label word-splitting defect
+  (`_longest_common_prefix` could split inside a word once the 110-113
+  scope was lifted) were found and fixed while widening scope. Added
+  `pcae.core.architecture_status` (canonical phase-ID parsing/ordering
+  reusing 134B.3's identity grammar, freshness constants,
+  `validate_architecture_status()`) and `pcae architecture-status
+  inspect` (read-only). Established an explicit authority model and a
+  semantic freshness contract (`fresh` / `fresh_with_limitations` /
+  `stale` / `invalid`); completed/planned overlap now fails closed
+  (dropped + disclosed as a conflict). Verified against the real
+  repository: `planned` correctly shows the current phase's own
+  recommendation instead of `132F`; Tracks 132/133/134 are represented
+  in `completed_phase_ids`; `freshness` is `fresh`; zero conflicts. 51
+  new focused tests
+  (`tests/test_architecture_status_generation_repair_134e8.py`); the
+  existing Phase 113X.5 suite updated to match the corrected,
+  evidence-based scope; 914 related-suite regression tests pass;
+  `compileall` clean; fast-green 4390/4390 passing this run. No
+  Canonical Engineering Evidence, Evidence Extraction, Phase Report
+  View, Operator Report View, Rendering Architecture, Delivery
+  Pipeline, or Delivery Receipt activation; no execution capability;
+  134E.8V was not begun.
+
 - Phase 134E.7V - External Delivery Receipt Model Independent
   Verification
   (`docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL_INDEPENDENT_VERIFICATION.md`).

@@ -389,12 +389,31 @@ class PhaseReport:
         if self.architecture_status:
             lines.append("## PCAE Architecture Status")
             lines.append("")
-            lines.append(
-                "*Generated automatically from canonical project state. "
-                "Never manually maintained.*"
-            )
-            lines.append("")
             arch = self.architecture_status
+            # Phase 134E.8 — the "Never manually maintained" authority
+            # claim is now conditioned on the generator's own disclosed
+            # freshness rather than stated unconditionally: an
+            # automatically-derived block can still be incomplete or
+            # conflicted, and asserting "canonical" over that is exactly
+            # the over-claim this phase repairs.
+            freshness = arch.get("freshness", "")
+            if freshness == "fresh":
+                lines.append(
+                    "*Generated automatically from canonical project state. "
+                    "Never manually maintained.*"
+                )
+            elif freshness:
+                lines.append(
+                    f"*Generated automatically from canonical project state "
+                    f"(freshness: {freshness}). Never manually maintained; "
+                    f"see Limitations/Conflicts below.*"
+                )
+            else:
+                lines.append(
+                    "*Generated automatically from canonical project state. "
+                    "Never manually maintained.*"
+                )
+            lines.append("")
 
             if arch.get("completed"):
                 lines.append("### Completed")
@@ -408,6 +427,11 @@ class PhaseReport:
                 lines.append("")
                 for item in arch["in_progress"]:
                     lines.append(f"- ◐ {item}")
+                lines.append("")
+            elif not arch.get("current_phase_id"):
+                lines.append("### In Progress")
+                lines.append("")
+                lines.append("- (none — no active governed phase)")
                 lines.append("")
 
             if arch.get("planned"):
@@ -429,6 +453,20 @@ class PhaseReport:
                     lines.append(f"- **Maximum Capability:** {max_capability}")
                 if exec_availability:
                     lines.append(f"- **Execution Availability:** {exec_availability}")
+                lines.append("")
+
+            if arch.get("limitations"):
+                lines.append("### Limitations")
+                lines.append("")
+                for item in arch["limitations"]:
+                    lines.append(f"- {item}")
+                lines.append("")
+
+            if arch.get("conflicts"):
+                lines.append("### Conflicts")
+                lines.append("")
+                for item in arch["conflicts"]:
+                    lines.append(f"- {item}")
                 lines.append("")
 
         if self.governance_results:
@@ -1612,22 +1650,41 @@ def validate_phase_identity(
     return issues
 
 
+#
+# Phase 134E.8: the phase-ID capture group below uses the same grammar as
+# ``_CANONICAL_TITLE_PHASE_ID_RE`` (134B.3's canonical identity
+# resolution) -- ``\d+[A-Z](?:\.\d+[A-Za-z]?)*`` -- instead of the
+# previous ``\d{3}[A-Z](?:\.\d+)?``, which could not parse a dotted
+# sub-phase with a trailing verification letter (e.g. "134E.7V") at all.
+# That silent parse failure was the direct cause of the *current* phase
+# vanishing from "In Progress" once Track 134 reached its first ".<N>V"
+# verification phase.
 _COMPLETED_PHASE_HEADER_RE = re.compile(
-    r"^##\s+Phase\s+(\d{3}[A-Z](?:\.\d+)?)\s*(?:Complete|—.*?Complete)",
+    r"^##\s+Phase\s+(\d+[A-Z](?:\.\d+[A-Za-z]?)*)\s*(?:Complete|—.*?Complete)",
     re.MULTILINE,
 )
 _PHASE_LABEL_LINE_RE = re.compile(
-    r"^Phase\s+\d{3}[A-Z](?:\.\d+)?\s*[—–-]\s*(.+)$", re.MULTILINE,
+    r"^Phase\s+\d+[A-Z](?:\.\d+[A-Za-z]?)*\s*[—–-]\s*(.+)$", re.MULTILINE,
 )
 _CURRENT_PHASE_SECTION_RE = re.compile(
     r"^##\s+Current\s+Phase\s*$\n\n(.*?)(?=\n##\s|\Z)",
     re.MULTILINE | re.DOTALL,
 )
 _CURRENT_PHASE_LINE_RE = re.compile(
-    r"^Phase\s+(\d{3}[A-Z](?:\.\d+)?)\s*[—–-]\s*(.+)$", re.MULTILINE,
+    r"^Phase\s+(\d+[A-Z](?:\.\d+[A-Za-z]?)*)\s*[—–-]\s*(.+)$", re.MULTILINE,
 )
-_RECOMMENDED_NEXT_REPO_PHASE_RE = re.compile(
-    r"Recommended\s+next\s*\n?\s*repo\s+phase:\s*(.+)$",
+# Phase 134E.8: "repo " is now optional. Current phase reports write
+# "Recommended next phase: ..."; only historical reports (pre-134-series
+# wording) wrote "Recommended next repo phase: ...". The previous
+# regex matched the old wording only, so the *current* phase's own
+# recommendation sentence never matched it -- this was the direct cause
+# of falling through to the stale whole-file fallback that produced
+# "Planned: 132F" long after Track 132 completed. The fallback itself is
+# removed below (see build_architecture_status): a recommendation is
+# now read only from the current phase's own bounded section text, never
+# reached-back-into-history.
+_RECOMMENDED_NEXT_PHASE_RE = re.compile(
+    r"^Recommended\s+next\s*\n?\s*(?:repo\s+)?phase:\s*(.+)$",
     re.MULTILINE | re.IGNORECASE,
 )
 
@@ -1652,20 +1709,46 @@ def _is_milestone_phase_id(phase_id: str) -> bool:
 
 
 def _longest_common_prefix(strings: list[str]) -> str:
-    """Deterministic longest-common-prefix across a list of strings.
-    Returns ``""`` for an empty list or when there is no common prefix."""
+    """Deterministic longest-common *word* prefix across a list of
+    strings. Returns ``""`` for an empty list or when there is no common
+    prefix.
+
+    Phase 134E.8: compares whole words, not characters. A character-level
+    prefix (the pre-134E.8 behavior) can stop mid-word when two titles
+    share a stem but diverge inside it -- e.g. "...Advisory Consumption
+    Architecture" vs "...Advisory Context Prototype" share only "Con" at
+    the character level, producing a garbled "Con: sumption ... text
+    Prototype" label once chapters wider than the narrow 110-113 series
+    (each hand-verified to have clean short common prefixes) were
+    included. Comparing whole words instead means the prefix always ends
+    on a real word boundary, so the remainder is always readable prose,
+    never a split fragment.
+    """
     if not strings:
         return ""
-    prefix = strings[0]
-    for s in strings[1:]:
-        i = 0
-        limit = min(len(prefix), len(s))
-        while i < limit and prefix[i] == s[i]:
-            i += 1
-        prefix = prefix[:i]
-        if not prefix:
+    word_lists = [s.split() for s in strings]
+    shortest = min(len(w) for w in word_lists)
+    common: list[str] = []
+    for i in range(shortest):
+        candidate = word_lists[0][i]
+        if all(w[i] == candidate for w in word_lists):
+            common.append(candidate)
+        else:
             break
-    return prefix
+    return " ".join(common)
+
+
+# Phase 134E.8: guardrails on the "prefix + remainders" milestone label
+# format -- correct for a handful of short, cleanly-related titles (the
+# 110-113 series this format was designed against), but unreadable once
+# applied unconditionally to a series with many phases or with duplicate/
+# degenerate remainders (observed directly against real repository state
+# for series 119, 122, and 124 once the 110-113 scope restriction was
+# lifted). Beyond these guardrails, ``_render_series_milestone_label()``
+# falls back to a compact, always-readable, always-deterministic form
+# instead of an ever-growing concatenated line.
+_MILESTONE_LABEL_MAX_PHASES = 8
+_MILESTONE_LABEL_MAX_LENGTH = 200
 
 
 def _render_series_milestone_label(phases: list[tuple[str, str]]) -> str:
@@ -1677,29 +1760,46 @@ def _render_series_milestone_label(phases: list[tuple[str, str]]) -> str:
     for one series, sorted by phase letter (never inferred, never
     including a phase whose own "## Phase X Complete" header wasn't
     found). A single completed phase renders as its own full title
-    (there's nothing to abbreviate against). Multiple phases render as
-    their titles' longest-common-prefix (the shared "track name", e.g.
-    "Advisory Runtime"), followed by each phase's own distinguishing
-    remainder joined with " + ", in phase order -- so the label always
-    grows exactly in step with which phases have actually completed,
-    and never shows a milestone whose own phase never completed.
+    (there's nothing to abbreviate against). A small series of related
+    titles renders as their titles' longest common *word* prefix (the
+    shared "track name", e.g. "Advisory Runtime"), followed by each
+    phase's own distinguishing remainder joined with " + ", in phase
+    order -- so the label always grows exactly in step with which phases
+    have actually completed, and never shows a milestone whose own phase
+    never completed. A larger or degenerate series (many phases, no
+    common prefix, an empty/duplicate remainder, or an excessively long
+    rendered line) falls back to a compact ``"<first phase's title>
+    (<first id>-<last id>, N phases)"`` form -- full traceability to the
+    underlying phase IDs remains available via ``completed_phase_ids``/
+    ``completed_chapters`` regardless of which form is used here.
     """
     if not phases:
         return ""
     if len(phases) == 1:
         return phases[0][1]
+
+    ids = [pid for pid, _name in phases]
     names = [name for _pid, name in phases]
+    id_range = f"{ids[0]}-{ids[-1]}"
+    compact_fallback = f"{names[0]} ({id_range}, {len(phases)} phases)"
+
+    if len(phases) > _MILESTONE_LABEL_MAX_PHASES:
+        return compact_fallback
+
     prefix = _longest_common_prefix(names)
-    prefix = prefix.rstrip()
     if not prefix:
-        return " + ".join(names)
+        return compact_fallback
     remainders = [name[len(prefix):].strip() for name in names]
-    if not all(remainders):
-        # No clean common-prefix split (e.g. one title equals the prefix
-        # exactly) -- fall back to listing full titles rather than
-        # guessing.
-        return " + ".join(names)
-    return f"{prefix}: {' + '.join(remainders)}"
+    if not all(remainders) or len(set(remainders)) != len(remainders):
+        # Empty remainder (a title equals the prefix exactly) or a
+        # duplicate remainder (two titles collapse to the same
+        # distinguishing text) -- neither is a safe "+"-joined summary.
+        return compact_fallback
+
+    label = f"{prefix}: {' + '.join(remainders)}"
+    if len(label) > _MILESTONE_LABEL_MAX_LENGTH:
+        return compact_fallback
+    return label
 
 
 def build_architecture_status() -> dict[str, Any]:
@@ -1715,21 +1815,47 @@ def build_architecture_status() -> dict[str, Any]:
 
     Phase 113X.5 — canonicalized (113X Finding 4): milestone labels are
     no longer a static per-series lookup table describing a series'
-    *eventual, full* scope regardless of actual progress (e.g. the
-    retired ``"Advisory Runtime (Architecture, Contract, Prototype)"``,
-    which over-claimed completion the moment any one phase in the "113"
-    series completed). Each series' label is now rendered from exactly
-    the phases whose own "## Phase X Complete" header actually exists,
-    sorted deterministically by phase letter (independent of the
-    section's physical position in the file -- 113X audit Finding 6's
-    "out-of-order documentation" risk), via
-    ``_render_series_milestone_label()``. ``completed``, ``in_progress``,
-    and ``planned`` are derived independently from disjoint evidence
-    (completed-phase headers; the "## Current Phase" section, only if
-    not marked completed; that same section's own "Recommended next
-    repo phase" sentence) -- none is inferred from another.
+    *eventual, full* scope regardless of actual progress. Each series'
+    label is now rendered from exactly the phases whose own "## Phase X
+    Complete" header actually exists, sorted deterministically by
+    phase-ID shape (independent of the section's physical position in
+    the file -- 113X audit Finding 6's "out-of-order documentation"
+    risk), via ``_render_series_milestone_label()``.
+
+    Phase 134E.8 — repaired three compounding defects that together
+    produced a stale "Planned: 132F" claim long after Track 132
+    completed, discovered by direct source and state inspection (see
+    ``docs/PHASE_134_ARCHITECTURE_STATUS_GENERATION_REPAIR.md``):
+    (1) the "planned" regex only matched the retired "Recommended next
+    repo phase:" wording, so the current phase's own "Recommended next
+    phase:" sentence never matched and generation silently fell back to
+    a whole-file search that returned the *first* (most historically
+    distant) match of the old wording; the fallback is removed entirely
+    -- a recommendation is now read only from the current phase's own
+    bounded section text, and its absence is disclosed rather than
+    papered over with historical text. (2) "completed" derivation was
+    hard-scoped to the 110-113 series only, so Tracks 125-134 could
+    never appear even after (1) was fixed; the scope restriction is
+    removed -- every series with at least one genuine "## Phase X
+    Complete" mainline header now gets its own chapter entry. (3) the
+    phase-ID grammar used throughout could not parse a dotted sub-phase
+    with a trailing verification letter (e.g. "134E.7V"), so the actual
+    current phase silently disappeared from "In Progress"; the grammar
+    now matches ``pcae.core.architecture_status.PHASE_ID_RE`` (134B.3's
+    canonical identity resolution) exactly. ``completed``,
+    ``in_progress``, and ``planned`` remain derived independently from
+    disjoint evidence (completed-phase headers; the "## Current Phase"
+    section, only if not marked completed; that same section's own
+    recommendation sentence) -- none is inferred from another, and any
+    resulting overlap (a completed phase still appearing planned) is
+    treated as a conflict: dropped from ``planned`` and recorded in
+    ``conflicts`` rather than silently displayed.
 
     Returns a dict with keys:
+        schema_version: str — architecture_status.ARCHITECTURE_STATUS_SCHEMA_VERSION
+        state_marker: str — short deterministic digest of the
+            PROJECT_STATUS.md content this status was derived from (no
+            wall-clock time; equal content always yields the same marker)
         completed: list[str] — completed architectural milestones (display)
         completed_phase_ids: list[str] — the exact phase IDs behind
             ``completed``, sorted deterministically -- structured
@@ -1737,50 +1863,90 @@ def build_architecture_status() -> dict[str, Any]:
             to regex-parse the human-readable ``completed`` strings
             (the fragility that let Finding 4's impossible-combination
             check silently never fire).
+        completed_chapters: list[dict] — one entry per series with keys
+            ``chapter`` (series id), ``label`` (display string), and
+            ``phase_ids`` (the mainline phase IDs behind that label) --
+            structured chapter membership for validation/traceability.
         in_progress: list[str] — current work in progress
-        planned: list[str] — planned next milestones
+        current_phase_id: str — exact current phase ID, or "" if none
+        planned: list[str] — planned next milestones (display)
+        planned_phase_ids: list[str] — exact phase IDs behind ``planned``
         current_runtime_state: str
         current_maximum_capability: str
         execution_availability: str
+        freshness: str — one of architecture_status.VALID_FRESHNESS_STATES
+        limitations: list[str] — disclosed gaps (e.g. no explicit plan)
+        conflicts: list[str] — disclosed conflicts (fail-closed detections)
+        source_provenance: dict[str, str] — per-source read outcome
     """
     from pathlib import Path as _Path
+    from pcae.core.architecture_status import (
+        ARCHITECTURE_STATUS_SCHEMA_VERSION,
+        FRESHNESS_FRESH,
+        FRESHNESS_FRESH_WITH_LIMITATIONS,
+        FRESHNESS_INVALID,
+        phase_sort_key,
+    )
 
     result: dict[str, Any] = {
+        "schema_version": ARCHITECTURE_STATUS_SCHEMA_VERSION,
+        "state_marker": "",
         "completed": [],
         "completed_phase_ids": [],
+        "completed_chapters": [],
         "in_progress": [],
+        "current_phase_id": "",
         "planned": [],
+        "planned_phase_ids": [],
         "current_runtime_state": "",
         "current_maximum_capability": "",
         "execution_availability": "",
+        "freshness": FRESHNESS_INVALID,
+        "limitations": [],
+        "conflicts": [],
+        "source_provenance": {
+            "project_status_md": "missing",
+            "current_phase_section": "not_found",
+            "runtime_snapshot": "not_attempted",
+        },
     }
+
+    limitations: list[str] = []
+    conflicts: list[str] = []
 
     # ── Derive from PROJECT_STATUS.md ──────────────────────────────────
     ps_path = _Path("PROJECT_STATUS.md")
     if not ps_path.exists():
+        result["limitations"] = ["PROJECT_STATUS.md not found -- no canonical state source available"]
         return result
 
     ps_text = ps_path.read_text(encoding="utf-8")
+    result["source_provenance"]["project_status_md"] = "read"
+    import hashlib as _hashlib
+    result["state_marker"] = _hashlib.sha256(ps_text.encode("utf-8")).hexdigest()[:16]
 
     # ── Completed: independently derived from "## Phase X Complete"
     # headers only. Never inferred, never extrapolated to phases whose
-    # own header is absent.
+    # own header is absent. This repository's convention gives most
+    # phases *two* such headers -- one "(historical — full text)" section
+    # with the full "Phase X — Title (completed)." declaration line, and
+    # one short recap section that often has no such line at all -- so
+    # duplicate headers are expected, not evidence of a documentation
+    # error, and are deduplicated by first occurrence. A conflict is
+    # disclosed only when *both* occurrences yield an actual parsed
+    # title (never when one occurrence merely fell back to the bare
+    # phase ID for lack of a title line) and those titles disagree --
+    # that is a genuine title disagreement, not this repo's normal
+    # dual-header shape.
     completed_phases: list[tuple[str, str]] = []
+    seen_ids: dict[str, tuple[str, bool]] = {}
     for m in _COMPLETED_PHASE_HEADER_RE.finditer(ps_text):
         phase_id = m.group(1)
-        # Scope: the 110-113 architectural-foundation-track series only
-        # (unchanged from the pre-113X.5 behavior) -- Architecture Status
-        # describes the Runtime/Advisory-Runtime build-out specifically,
-        # not every phase in the project's history. This is a scope
-        # boundary, not a maturity claim -- distinct from Finding 4's
-        # actual defect (the *label text* claiming unearned completion).
-        series_prefix_match = re.match(r"(1(?:1[0-3]|10))\d*", phase_id)
-        if not series_prefix_match:
-            continue
         if not _is_milestone_phase_id(phase_id):
             continue
         snippet = ps_text[m.end():m.end() + 200]
         name_m = _PHASE_LABEL_LINE_RE.search(snippet)
+        has_real_name = name_m is not None
         phase_name = name_m.group(1).strip() if name_m else phase_id
         # Strip a trailing "(completed)."/"(not started)." style status
         # marker -- part of the phase declaration line's own formatting,
@@ -1788,6 +1954,16 @@ def build_architecture_status() -> dict[str, Any]:
         phase_name = re.sub(r"\s*\([^()]*\)\.?\s*$", "", phase_name).rstrip(".").strip()
         if not phase_name:
             phase_name = phase_id
+            has_real_name = False
+        if phase_id in seen_ids:
+            prev_name, prev_has_real = seen_ids[phase_id]
+            if has_real_name and prev_has_real and prev_name != phase_name:
+                conflicts.append(
+                    f"conflicting titles for phase {phase_id!r}: "
+                    f"{prev_name!r} vs {phase_name!r}"
+                )
+            continue
+        seen_ids[phase_id] = (phase_name, has_real_name)
         completed_phases.append((phase_id, phase_name))
 
     # Group by series, each group sorted by phase-ID shape (series,
@@ -1805,52 +1981,89 @@ def build_architecture_status() -> dict[str, Any]:
 
     completed_labels: list[str] = []
     completed_phase_ids: list[str] = []
+    completed_chapters: list[dict[str, Any]] = []
     for series in sorted(by_series, key=lambda s: int(s) if s.isdigit() else s):
         phases = by_series[series]
-        completed_labels.append(_render_series_milestone_label(phases))
-        completed_phase_ids.extend(pid for pid, _name in phases)
+        label = _render_series_milestone_label(phases)
+        completed_labels.append(label)
+        ids_for_series = [pid for pid, _name in phases]
+        completed_phase_ids.extend(ids_for_series)
+        completed_chapters.append({
+            "chapter": series,
+            "label": label,
+            "phase_ids": ids_for_series,
+        })
 
     result["completed"] = completed_labels
     result["completed_phase_ids"] = completed_phase_ids
+    result["completed_chapters"] = completed_chapters
+    completed_id_set = set(completed_phase_ids)
 
-    # ── In progress: independently derived from the "## Current Phase"
-    # section only -- never inferred from the completed list above.
+    # ── In progress / current: independently derived from the "## Current
+    # Phase" section only -- never inferred from the completed list above.
     current_section = _CURRENT_PHASE_SECTION_RE.search(ps_text)
     current_section_text = current_section.group(1) if current_section else ""
     if current_section_text:
+        result["source_provenance"]["current_phase_section"] = "found"
         current_match = _CURRENT_PHASE_LINE_RE.match(current_section_text)
         if current_match:
             current_id = current_match.group(1)
             current_name = current_match.group(2).strip()
+            result["current_phase_id"] = current_id
             # If the current phase is marked as "(completed)", it is
             # not in-progress — it is already captured in completed above.
             if "(completed)" not in current_section_text[:100]:
                 result["in_progress"].append(f"{current_name} ({current_id})")
+        else:
+            limitations.append(
+                "## Current Phase section present but its phase-ID/title "
+                "line did not parse -- current phase could not be identified"
+            )
+    else:
+        limitations.append("no ## Current Phase section found -- no active phase state")
 
-    # ── Planned: independently derived from the "Recommended next repo
-    # phase" sentence. Preferentially read from *within* the "## Current
+    # ── Planned: independently derived from the "Recommended next
+    # [repo ]phase:" sentence, read *only* from within the "## Current
     # Phase" section's own bounded text (the actual latest phase's own
-    # recommendation) rather than "nearest the top of the whole file" --
-    # closing 113X audit Finding 6's latent fragility, where a
-    # mis-ordered file section could make the wrong recommendation win.
-    # Falls back to a whole-file search only if the current section
-    # doesn't contain the sentence at all.
+    # recommendation). Phase 134E.8: the whole-file fallback that used
+    # to run when this sentence wasn't found in-section is removed --
+    # that fallback (searching the entire, newest-first history for the
+    # first matching sentence) is exactly what surfaced a Track-132-era
+    # recommendation as "current" long after Track 132 completed. Its
+    # absence is now disclosed via ``limitations`` instead.
     recommended: list[str] = []
-    search_scope = current_section_text or ps_text
-    for m in _RECOMMENDED_NEXT_REPO_PHASE_RE.finditer(search_scope):
-        rec = m.group(1).strip()
-        rec = re.sub(r"\s*\(not\s+started\)\s*\.?\s*$", "", rec).rstrip(".").strip()
-        if rec and rec not in recommended:
-            recommended.append(rec)
-    if not recommended and current_section_text:
-        for m in _RECOMMENDED_NEXT_REPO_PHASE_RE.finditer(ps_text):
+    if current_section_text:
+        for m in _RECOMMENDED_NEXT_PHASE_RE.finditer(current_section_text):
             rec = m.group(1).strip()
             rec = re.sub(r"\s*\(not\s+started\)\s*\.?\s*$", "", rec).rstrip(".").strip()
             if rec and rec not in recommended:
                 recommended.append(rec)
+        if not recommended:
+            limitations.append(
+                "current phase section has no explicit 'Recommended next "
+                "phase' sentence -- no planned phase disclosed"
+            )
 
-    if recommended:
-        result["planned"] = recommended[:1]
+    planned_display: list[str] = []
+    planned_ids: list[str] = []
+    for rec in recommended[:1]:
+        rec_id_match = re.match(r"^(\d+[A-Za-z]+(?:\.\d+[A-Za-z]?)*)", rec)
+        rec_id = rec_id_match.group(1) if rec_id_match else None
+        if rec_id and rec_id in completed_id_set:
+            # Fail closed: never display a completed phase as planned,
+            # even defensively, after the primary regex/fallback repair
+            # above -- disclose the conflict instead of the stale claim.
+            conflicts.append(
+                f"recommended next phase {rec_id!r} is already completed -- "
+                f"dropped from planned"
+            )
+            continue
+        planned_display.append(rec)
+        if rec_id:
+            planned_ids.append(rec_id)
+
+    result["planned"] = planned_display
+    result["planned_phase_ids"] = sorted(set(planned_ids), key=phase_sort_key)
 
     # ── Derive from Runtime Snapshot ───────────────────────────────────
     try:
@@ -1863,9 +2076,23 @@ def build_architecture_status() -> dict[str, Any]:
         result["current_runtime_state"] = snapshot.health.current_runtime_state
         result["current_maximum_capability"] = snapshot.health.current_maximum_plugin_capability
         result["execution_availability"] = snapshot.health.execution_availability
-    except Exception:
+        result["source_provenance"]["runtime_snapshot"] = "read"
+    except Exception as exc:
         # Best-effort — if snapshot can't be built, leave fields empty
-        pass
+        # and disclose why rather than silently reusing stale values.
+        result["source_provenance"]["runtime_snapshot"] = f"unavailable: {exc}"
+        limitations.append("runtime snapshot unavailable -- runtime fields not derived")
+
+    result["limitations"] = limitations
+    result["conflicts"] = conflicts
+
+    # ── Freshness ────────────────────────────────────────────────────
+    if conflicts:
+        result["freshness"] = FRESHNESS_INVALID
+    elif limitations:
+        result["freshness"] = FRESHNESS_FRESH_WITH_LIMITATIONS
+    else:
+        result["freshness"] = FRESHNESS_FRESH
 
     return result
 

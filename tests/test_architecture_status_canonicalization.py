@@ -189,9 +189,13 @@ Phase 113A — Advisory Runtime Architecture.
         assert "113C" not in str(status["completed_phase_ids"])
         assert status["completed_phase_ids"] == ["113A"]
 
-    def test_out_of_series_scope_phases_excluded(self, tmp_path, monkeypatch):
-        """Phases outside the 110-113 architectural-foundation-track
-        scope (e.g. release/permission-broker work) are not swept in."""
+    def test_all_series_with_genuine_evidence_included(self, tmp_path, monkeypatch):
+        """Phase 134E.8: Architecture Status is no longer hard-scoped to
+        the 110-113 series -- that restriction is exactly what made
+        later completed tracks (125-134) permanently invisible even
+        after the "planned" stale-132F regex was fixed. Every series
+        with its own genuine "## Phase X Complete" header evidence is
+        now included; there is no other gate on series membership."""
         _write_project_status(tmp_path, """\
 # Project Status
 
@@ -208,7 +212,28 @@ Phase 113A — Advisory Runtime Architecture.
 Phase 107C — Execution Readiness No-Go Gate Freeze.
 """)
         status = _build(tmp_path, monkeypatch)
+        assert set(status["completed_phase_ids"]) == {"113A", "107C"}
+
+    def test_phase_with_no_header_not_swept_in(self, tmp_path, monkeypatch):
+        """A phase merely *mentioned* in prose, with no "## Phase X
+        Complete" header of its own, is never treated as completed --
+        document existence/mention alone is not completion evidence."""
+        _write_project_status(tmp_path, """\
+# Project Status
+
+## Current Phase
+
+Phase 113A — Advisory Runtime Architecture (completed).
+
+Recommended next phase: 113B — Advisory Runtime Contract Freeze.
+
+## Phase 113A Complete
+
+Phase 113A — Advisory Runtime Architecture. Mentions 999Z in passing.
+""")
+        status = _build(tmp_path, monkeypatch)
         assert status["completed_phase_ids"] == ["113A"]
+        assert "999Z" not in status["completed_phase_ids"]
 
 
 # ── Objective 7: deterministic, order-independent output ───────────────────

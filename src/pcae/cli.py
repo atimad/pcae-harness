@@ -430,6 +430,9 @@ from pcae.commands.phase_reports import (
     run_phase_report_show,
     run_phase_report_trust,
 )
+from pcae.commands.architecture_status import (
+    run_architecture_status_inspect,
+)
 from pcae.commands.notifications import (
     run_notify_status,
     run_notify_test,
@@ -6022,6 +6025,26 @@ def build_parser() -> argparse.ArgumentParser:
     pr_trust_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
     pr_trust_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
     pr_trust_parser.set_defaults(handler=run_phase_report_trust)
+
+    # ── pcae architecture-status (Phase 134E.8) ──────────────────────────
+    # Narrow, read-only inspection of the corrected Architecture Status
+    # generator -- shows exactly what the next phase report would embed
+    # (completed/current/planned state, freshness, provenance, conflicts,
+    # runtime state) without finalizing a phase. No mutation.
+    arch_status_parser = subparsers.add_parser(
+        "architecture-status",
+        help="Inspect the generated PCAE Architecture Status snapshot (read-only).",
+    )
+    arch_status_subparsers = arch_status_parser.add_subparsers(
+        dest="architecture_status_command", required=True,
+    )
+    arch_status_inspect_parser = arch_status_subparsers.add_parser(
+        "inspect",
+        help="Show the current structured Architecture Status: completed/current/planned "
+             "state, freshness, provenance, conflicts, and runtime state.",
+    )
+    arch_status_inspect_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
+    arch_status_inspect_parser.set_defaults(handler=run_architecture_status_inspect)
 
     # ── pcae notify (Phase 92B) ──────────────────────────────────────────
     notify_parser = subparsers.add_parser(

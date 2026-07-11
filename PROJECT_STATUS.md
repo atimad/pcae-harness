@@ -2,6 +2,76 @@
 
 ## Current Phase
 
+Phase 134E.8 — Architecture Status Generation Repair (completed).
+
+Repaired the persistent, highly visible defect where generated
+Architecture Status blocks reported completed Track 132 work as
+`Planned: 132F — Repository Intelligence Service` while claiming
+automatic canonical derivation. Traced the generation path from source
+(never assumed from the incident description) and found **three
+compounding root causes**: (1) the "planned" regex matched only the
+retired `"Recommended next repo phase:"` wording, so the current phase's
+own `"Recommended next phase:"` sentence never matched and generation
+fell back to a whole-file search returning the first (most historically
+distant, since `PROJECT_STATUS.md` is newest-first) match of the old
+wording; (2) completed-phase derivation was hard-scoped to the 110-113
+series only, so Tracks 125-134 could never appear even after (1) was
+fixed; (3) the phase-ID grammar could not parse a dotted sub-phase with
+a trailing verification letter (e.g. `134E.7V`), so the actual current
+phase silently vanished from "In Progress". A fourth defect (duplicate
+`113V` in `completed_phase_ids` from this repo's normal dual-header
+convention) was found and fixed while widening scope. Repaired all four
+at the smallest responsible layer in `pcae.core.phase_reports.
+build_architecture_status()`; added `pcae.core.architecture_status`
+(canonical phase-ID parsing/ordering reusing 134B.3's identity grammar,
+freshness constants, and `validate_architecture_status()`); added
+`pcae architecture-status inspect` (read-only). Established an explicit
+authority model (historical completion / current lifecycle / future
+plan / runtime state, none inferred from another) and a semantic
+freshness contract (`fresh` / `fresh_with_limitations` / `stale` /
+`invalid`) — the block's "Never manually maintained" claim is now
+conditioned on `freshness == "fresh"`. Completed/planned overlap fails
+closed (dropped + disclosed as a conflict) rather than displayed. Fixed
+a latent chapter-label rendering defect (`_longest_common_prefix` could
+split inside a word, e.g. producing "Con: sumption..." once the 110-113
+scope restriction was lifted) with a word-boundary-safe prefix plus a
+bounded compact fallback for large/degenerate series. Verified against
+the real repository: `planned` now correctly shows `134E.8` (this
+phase) instead of `132F`; `current_phase_id` correctly resolves
+`134E.7V`; Tracks 132/133/134 are represented in `completed_phase_ids`;
+`freshness` is `fresh`; zero conflicts. Carried all seven 134E.7V
+NON-BLOCKING receipt observations forward unrepaired (none block
+Architecture Status correctness). 51 new focused tests
+(`tests/test_architecture_status_generation_repair_134e8.py`); the
+existing Phase 113X.5 suite updated (one test that encoded the 110-113
+restriction replaced with two tests confirming the corrected, evidence-
+based scope); 914 related-suite regression tests pass; `compileall`
+clean; fast-green 4390/4390 passing this run (no known pre-existing
+failure reproduced). No Canonical Engineering Evidence, Evidence
+Extraction, Phase Report View, Operator Report View, Rendering
+Architecture, Delivery Pipeline, or Delivery Receipt activation. No
+execution capability. Full details in
+`docs/PHASE_134_ARCHITECTURE_STATUS_GENERATION_REPAIR.md`.
+
+Recommended next phase: 134E.8V — Architecture Status Generation Independent Verification.
+134E.8V was not begun in this phase.
+
+## Phase 134E.8 Complete
+
+Repaired Architecture Status generation's three compounding root causes
+(stale-wording regex + whole-file fallback, 110-113 completed-phase
+scope restriction, dotted+verification phase-ID grammar gap), plus a
+duplicate-header and a chapter-label word-splitting defect found while
+widening scope. Established an explicit authority model, a semantic
+freshness contract, fail-closed conflict handling, deterministic
+dotted/verification-aware phase-ID ordering, a validation API, and a
+read-only `pcae architecture-status inspect` command. Verified against
+the real repository that the stale `132F` claim is gone. No new
+evidence/delivery lifecycle activation; no execution capability;
+134E.8V was not begun.
+
+## Phase 134E.7V Complete (historical — full text)
+
 Phase 134E.7V — External Delivery Receipt Model Independent
 Verification (completed).
 
