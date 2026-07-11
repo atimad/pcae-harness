@@ -429,6 +429,7 @@ from pcae.commands.phase_reports import (
     run_phase_report_create,
     run_phase_report_show,
     run_phase_report_trust,
+    run_phase_report_consistency,
 )
 from pcae.commands.architecture_status import (
     run_architecture_status_inspect,
@@ -6025,6 +6026,15 @@ def build_parser() -> argparse.ArgumentParser:
     pr_trust_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
     pr_trust_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
     pr_trust_parser.set_defaults(handler=run_phase_report_trust)
+
+    pr_consistency_parser = pr_subparsers.add_parser(
+        "consistency",
+        help="Show Report Consistency / Derived Correctness findings for the latest "
+             "canonical report (Phase 134E.9). Read-only.",
+    )
+    pr_consistency_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
+    pr_consistency_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
+    pr_consistency_parser.set_defaults(handler=run_phase_report_consistency)
 
     # ── pcae architecture-status (Phase 134E.8) ──────────────────────────
     # Narrow, read-only inspection of the corrected Architecture Status

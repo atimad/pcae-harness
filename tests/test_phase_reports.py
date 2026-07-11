@@ -2240,6 +2240,21 @@ class TestPhase128B1NotificationDispatchReliabilityRepair:
         monkeypatch.chdir(tmp_path)
         monkeypatch.setenv("PCAE_NOTIFY_ENABLED", "1")
         monkeypatch.setenv("PCAE_NOTIFY_SINKS", "noop")
+        # Phase 134E.9 — build_architecture_status() now feeds a
+        # freshness/conflicts-aware derived-correctness gate
+        # (validate_derived_correctness()); an absent PROJECT_STATUS.md
+        # correctly derives freshness="invalid" and would now legitimately
+        # block finalization, which is not what these dispatch-focused
+        # tests exercise. Provide a minimal, internally coherent
+        # PROJECT_STATUS.md so Architecture Status derives "fresh".
+        (tmp_path / "PROJECT_STATUS.md").write_text(
+            "# Project Status\n\n"
+            "## Current Phase\n\n"
+            "Phase 128B1-T — Test Phase (completed).\n\n"
+            "Recommended next phase: NEXT — Next Phase.\n\n"
+            "## Phase 128B1-T Complete\n\n"
+            "Phase 128B1-T — Test Phase.\n"
+        )
 
     def test_untrusted_report_is_never_dispatched(self, tmp_path, monkeypatch):
         """A report that fails to reach report_completeness=complete

@@ -1195,7 +1195,19 @@ def validate_internal_report_coherence(report: PhaseReport) -> list[str]:
     normalized_current_id = phase_id.upper().replace(".", "")
     current_series = re.match(r"^\d+", phase_id)
     normalized_evidence_ids = {item.replace(".", "") for item in evidence_phase_ids}
-    if evidence_phase_ids and normalized_current_id not in normalized_evidence_ids and current_series:
+    # Phase 134E.9 — a verification/regression phase legitimately re-runs
+    # another phase's tests as inherited baseline evidence; an explicit
+    # governed classification (never inferred from prose) is the only way
+    # to suppress this check, so silent omission still fails closed.
+    test_evidence_classification = str(
+        (report.metadata or {}).get("test_evidence_classification", "")
+    ).strip()
+    if (
+        evidence_phase_ids
+        and normalized_current_id not in normalized_evidence_ids
+        and current_series
+        and test_evidence_classification != "inherited_regression"
+    ):
         same_series = sorted(
             token for token in evidence_phase_ids
             if re.match(r"^\d+", token)
@@ -1231,6 +1243,162 @@ def _apply_internal_report_coherence(report: PhaseReport) -> None:
     report.report_completeness = COMPLETENESS_INCOMPLETE
     if "internal_evidence_coherence" not in report.missing_trust_fields:
         report.missing_trust_fields.append("internal_evidence_coherence")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Phase 134E.9 — Report Consistency / Derived Correctness Validation
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# The 134D implementation plan's authoritative scope for 134E.9 is "a
+# reusable validation manifest comparing any derived view/rendering back
+# to its source canonical record, checking for invented content, silent
+# omission, or unauthorized strengthening of uncertainty/classification"
+# (134B §17), wired fail-closed into the existing finalization gate --
+# not a second competing gate, not a new evidence pipeline. In this
+# repository's currently *active* production lifecycle (the new
+# Canonical Engineering Evidence / Evidence Extraction / Derived Views
+# chain from 134E.1-134E.7 remains disconnected — confirmed inactive by
+# every 134E.xV so far), the one "source canonical record" that is
+# actually live is the sealed finalization snapshot 134E.8.1/134E.8V
+# already established: ``report.architecture_status`` is the certified,
+# immutable Architecture Status snapshot bound into the report at
+# construction time (``finalize_phase_report()``), never re-read after.
+#
+# ``validate_derived_correctness()`` is the reusable manifest that checks
+# the *rest* of the report's derived claims against that one sealed
+# snapshot -- gaps confirmed absent from both ``validate_internal_report_
+# coherence()`` and ``validate_finalization_gate()`` by direct source
+# inspection before this phase began: neither function ever read
+# ``architecture_status["freshness"]`` or ``["conflicts"]``, so a report
+# could be promoted and dispatched even while carrying a `stale`/
+# `invalid` or conflicted Architecture Status snapshot; and only
+# self-recommendation (`recommended_next_phase == phase_id`) was
+# rejected, not a recommendation pointing at a *different* already-
+# completed phase (e.g. a stale-132F-style regression).
+
+# The one runtime tuple every governed phase in this repository has ever
+# certified (Phase 110A's Runtime State Model — Observed is the
+# non-executing ceiling). Not a general-purpose runtime-state registry;
+# extending this set is itself a governed decision, never an inferred one.
+ALLOWED_RUNTIME_TUPLES: frozenset[tuple[str, str, str]] = frozenset({
+    ("Observed", "observe", "unavailable"),
+})
+
+
+def validate_derived_correctness(report: PhaseReport) -> list[str]:
+    """Validate a terminal report's derived claims against its own sealed
+    Architecture Status snapshot (``report.architecture_status``) --
+    never against a freshly re-read/regenerated snapshot, so a
+    post-certification change can never silently "fix" a report that
+    already failed. Returns a list of human-readable issues; empty means
+    the derived claims checked here are internally correct. Never raises
+    on a malformed/absent snapshot -- an empty snapshot simply yields no
+    findings from checks that require it (already-caught elsewhere as a
+    missing-trust-field condition).
+    """
+    issues: list[str] = []
+    arch = report.architecture_status or {}
+    if not isinstance(arch, dict):
+        return issues
+    phase_id = report.phase_id.strip()
+    md = report.metadata or {}
+
+    # ── Architecture Status freshness/conflicts must not be silently
+    # ignored: a "fresh" classification is not a substitute for internal
+    # coherence, and a "stale"/"invalid" classification must itself
+    # block -- neither was checked by any existing gate before 134E.9.
+    freshness = arch.get("freshness", "")
+    if freshness in ("stale", "invalid"):
+        issues.append(
+            f"Architecture Status snapshot is {freshness!r} -- cannot "
+            f"certify a report on unresolved/conflicted project state"
+        )
+    conflicts = arch.get("conflicts") or []
+    if conflicts:
+        issues.append(
+            "Architecture Status snapshot carries unresolved conflicts: "
+            + "; ".join(str(c) for c in conflicts)
+        )
+
+    # ── Recommended next phase must not already be completed (general
+    # case -- self-recommendation is covered separately by
+    # validate_internal_report_coherence; this covers recommending a
+    # *different* already-completed phase, the exact stale-132F defect
+    # shape). An explicit governed classification is the only escape.
+    next_match = re.match(
+        r"^(?:Phase\s+)?([\d]+[A-Za-z]*(?:\.[\d]+[A-Za-z]*)*)",
+        report.recommended_next_phase.strip(),
+        re.IGNORECASE,
+    )
+    completed_ids = set(arch.get("completed_phase_ids") or [])
+    next_classification = str(md.get("next_phase_classification", "")).strip()
+    if (
+        next_match
+        and next_match.group(1) in completed_ids
+        and next_classification != "corrective_recovery_transition"
+    ):
+        issues.append(
+            f"recommended_next_phase {next_match.group(1)!r} is already "
+            f"completed per the sealed Architecture Status snapshot"
+        )
+
+    # ── Regression guard: the exact defect 134E.8 repaired must never
+    # resurface as a planned claim in any certified report.
+    if "132F" in (arch.get("planned_phase_ids") or []):
+        issues.append(
+            "Architecture Status snapshot plans already-completed phase "
+            "'132F' -- the stale-132F defect has resurfaced"
+        )
+
+    # ── Runtime tuple validity: the three runtime fields, when all
+    # present, must form one of this repository's governed-allowed
+    # tuples -- never an ungoverned combination.
+    runtime_state = arch.get("current_runtime_state", "")
+    max_capability = arch.get("current_maximum_capability", "")
+    exec_availability = arch.get("execution_availability", "")
+    if runtime_state and max_capability and exec_availability:
+        tup = (runtime_state, max_capability, exec_availability)
+        if tup not in ALLOWED_RUNTIME_TUPLES:
+            issues.append(
+                f"runtime tuple {tup!r} is not a governed-allowed "
+                f"(state, capability, execution_availability) combination"
+            )
+
+    # ── Current-phase coherence: the sealed snapshot's own current phase
+    # identity, when present, must not name a *different* phase family
+    # than this report -- sub-phases of the same report are allowed to
+    # complete independently (matches validate_phase_identity's existing
+    # sub-phase allowance).
+    snapshot_current = str(arch.get("current_phase_id", "")).strip()
+    if snapshot_current and phase_id and not phase_id.startswith("."):
+        report_base = re.match(r"(\d+[A-Za-z]+)", phase_id)
+        snapshot_base = re.match(r"(\d+[A-Za-z]+)", snapshot_current)
+        is_sub_phase = "." in phase_id
+        if (
+            not is_sub_phase
+            and report_base
+            and snapshot_base
+            and report_base.group(1) != snapshot_base.group(1)
+            and snapshot_current != phase_id
+        ):
+            issues.append(
+                f"sealed Architecture Status current_phase_id "
+                f"{snapshot_current!r} disagrees with report phase_id "
+                f"{phase_id!r}"
+            )
+
+    return issues
+
+
+def _apply_derived_correctness(report: PhaseReport) -> None:
+    issues = validate_derived_correctness(report)
+    if not issues:
+        return
+    report.trust_warnings.append("derived correctness validation failed")
+    report.trust_warnings.extend(f"  DerivedCorrectness: {issue}" for issue in issues)
+    report.report_completeness = COMPLETENESS_INCOMPLETE
+    if "derived_correctness" not in report.missing_trust_fields:
+        report.missing_trust_fields.append("derived_correctness")
 
 
 def _apply_canonical_and_trust(
@@ -1269,6 +1437,7 @@ def _apply_canonical_and_trust(
     if report.canonical_report_content:
         _check_canonical_metadata_consistency(report)
     _apply_internal_report_coherence(report)
+    _apply_derived_correctness(report)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1601,6 +1770,12 @@ def validate_finalization_gate(
     # ── Report consistency ───────────────────────────────────────────────
     for issue in validate_internal_report_coherence(report):
         blockers.append(f"internal report coherence: {issue}")
+    # Phase 134E.9 — derived-correctness manifest, checked independently
+    # of report_completeness below so a caller that bypasses
+    # _apply_canonical_and_trust (never happens today, but the gate must
+    # not rely on that) still fails closed here.
+    for issue in validate_derived_correctness(report):
+        blockers.append(f"derived correctness: {issue}")
     if report.report_completeness != COMPLETENESS_COMPLETE:
         blockers.append(
             f"report completeness is {report.report_completeness!r}, not complete"
@@ -2111,7 +2286,16 @@ def build_architecture_status() -> dict[str, Any]:
     # ── Derive from PROJECT_STATUS.md ──────────────────────────────────
     ps_path = _Path("PROJECT_STATUS.md")
     if not ps_path.exists():
+        # Phase 134E.9 — an absent source is a disclosed limitation, not
+        # a detected contradiction. "invalid" is now reserved exclusively
+        # for genuine conflicts (completed/planned overlap, disagreeing
+        # duplicate-header titles) so that validate_derived_correctness()
+        # can safely fail closed on "invalid" without also rejecting the
+        # legitimate bootstrap/explicit-identity scenario where no
+        # PROJECT_STATUS.md exists yet (e.g. a fresh repository, or a
+        # caller supplying phase identity entirely via --phase-id).
         result["limitations"] = ["PROJECT_STATUS.md not found -- no canonical state source available"]
+        result["freshness"] = FRESHNESS_FRESH_WITH_LIMITATIONS
         return result
 
     ps_text = ps_path.read_text(encoding="utf-8")

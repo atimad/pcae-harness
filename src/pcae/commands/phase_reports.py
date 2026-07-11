@@ -549,3 +549,73 @@ def run_phase_report_trust(args: argparse.Namespace) -> int:
         _print_trust_human(payload, result.complete)
 
     return 0 if result.complete else 1
+
+
+def run_phase_report_consistency(args: argparse.Namespace) -> int:
+    """pcae phase-report consistency [--reports-dir DIR] [--json]
+
+    Phase 134E.9 — read-only Report Consistency / Derived Correctness
+    inspection. Re-derives ``validate_internal_report_coherence()`` and
+    ``validate_derived_correctness()`` against the latest canonical
+    report's own sealed Architecture Status snapshot (``report.
+    architecture_status``) -- never re-reads mutable latest lifecycle
+    sources, never regenerates Architecture Status, never promotes,
+    never notifies, never mutates any latest pointer or delivery marker.
+    Exit codes: 0 = consistent, 1 = inconsistent, 2 = usage/IO error.
+    """
+    from pcae.core.phase_reports import (
+        validate_derived_correctness,
+        validate_internal_report_coherence,
+    )
+
+    reports_dir = Path(getattr(args, "reports_dir", None) or DEFAULT_REPORTS_DIR)
+    report = read_latest_report(reports_dir)
+    if report is None:
+        payload = {"error": "no_report", "message": "No phase report found."}
+        if args.json:
+            print(json.dumps(payload, indent=2))
+        else:
+            print("No phase report found. Create one with: pcae phase-report create ...")
+        return 2
+
+    coherence_issues = validate_internal_report_coherence(report)
+    derived_issues = validate_derived_correctness(report)
+    arch = report.architecture_status or {}
+
+    payload = {
+        "phase_id": report.phase_id,
+        "source_revision": arch.get("repository_revision", ""),
+        "state_marker": arch.get("state_marker", ""),
+        "report_digest": compute_report_digest(report),
+        "finalization_snapshot_id": compute_finalization_snapshot_id(report),
+        "report_completeness": report.report_completeness,
+        "architecture_status_freshness": arch.get("freshness", ""),
+        "coherence_issues": coherence_issues,
+        "derived_correctness_issues": derived_issues,
+        "consistent": not coherence_issues and not derived_issues,
+    }
+
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print(f"Report Consistency / Derived Correctness: {report.phase_id}")
+        print(f"  Source revision:            {payload['source_revision'] or 'unknown'}")
+        print(f"  Architecture Status marker: {payload['state_marker'] or 'unknown'}")
+        print(f"  Report digest:              {payload['report_digest']}")
+        print(f"  Finalization snapshot id:   {payload['finalization_snapshot_id']}")
+        print(f"  Report completeness:        {payload['report_completeness']}")
+        print(f"  Architecture Status freshness: {payload['architecture_status_freshness'] or 'unknown'}")
+        if coherence_issues:
+            print("  Coherence issues:")
+            for issue in coherence_issues:
+                print(f"    - {issue}")
+        if derived_issues:
+            print("  Derived correctness issues:")
+            for issue in derived_issues:
+                print(f"    - {issue}")
+        if payload["consistent"]:
+            print("  Result: consistent")
+        else:
+            print("  Result: INCONSISTENT")
+
+    return 0 if payload["consistent"] else 1

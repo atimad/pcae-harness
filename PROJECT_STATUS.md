@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 134E.9 — Report Consistency / Derived Correctness Validation (completed).
+
+Implemented the reusable Report Consistency / Derived Correctness validation
+manifest the 134D implementation plan names as 134E.9's authoritative scope,
+wired fail-closed into the existing shared finalization gate rather than a
+second competing gate. Direct source inspection before this phase began
+confirmed a real gap: neither `validate_internal_report_coherence()` nor
+`validate_finalization_gate()` ever read `architecture_status["freshness"]`
+or `["conflicts"]`, so a report could be promoted and dispatched while
+carrying a stale/invalid or conflicted sealed Architecture Status snapshot;
+and only a phase recommending itself was rejected, not a recommendation
+naming a different already-completed phase (the exact stale-132F defect
+shape). New `validate_derived_correctness()` checks the report's own sealed
+`architecture_status` snapshot (never a fresh re-read) for: stale/invalid
+freshness, unresolved conflicts, a recommended-next phase already completed
+(with an explicit `corrective_recovery_transition` escape hatch), a
+dedicated stale-132F regression guard, runtime-tuple validity against
+`ALLOWED_RUNTIME_TUPLES`, and sealed-snapshot current-phase coherence
+(sub-phase-aware). Wired into `_apply_canonical_and_trust()` (all four
+active construction paths) and directly into `validate_finalization_gate()`
+as a second, independent fail-closed layer. Extended the existing "test
+evidence linked only to another phase" coherence check with an explicit
+`test_evidence_classification="inherited_regression"` escape hatch.
+Refined Architecture Status freshness semantics: a missing PROJECT_STATUS.md
+now yields `fresh_with_limitations` (disclosed gap), reserving `invalid`
+exclusively for genuine detected conflicts. Added read-only `pcae
+phase-report consistency` inspection (source revision, snapshot id, digest,
+completeness, coherence/derived-correctness findings, Architecture Status
+freshness; no mutation, no promotion, no notification). One real
+implementation bug was introduced and self-caught during this work (an edit
+displaced `run_phase_report_trust()`'s return statement, making trust checks
+always exit 0) — found via the regression suite, root-caused, and repaired.
+35 new focused adversarial tests; 1181 related-suite regression tests pass;
+`compileall` clean; fast-green 4389/4390 (the one failure is the same
+pre-existing unrelated `test_pytest_dry_run_not_blocked` documented across
+every prior 134-series phase). No Canonical Engineering Evidence, Evidence
+Extraction, Phase Report View, Operator Report View, Rendering Architecture,
+Delivery Pipeline, or Delivery Receipt activation. No execution capability.
+Full details in
+`docs/PHASE_134_REPORT_CONSISTENCY_DERIVED_CORRECTNESS_VALIDATION.md`.
+
+Recommended next phase: 134E.9V — Report Consistency / Derived Correctness Independent Verification.
+134E.9V was not begun in this phase.
+
+## Phase 134E.9 Complete
+
+Implemented the reusable Report Consistency / Derived Correctness manifest
+(`validate_derived_correctness()`) checking the report's sealed Architecture
+Status snapshot for stale/invalid freshness, unresolved conflicts, an
+already-completed recommended-next phase, a dedicated stale-132F regression
+guard, runtime-tuple validity, and snapshot current-phase coherence — wired
+into the existing shared finalization gate, not a second gate. Added
+read-only `pcae phase-report consistency` inspection. No new evidence/
+delivery lifecycle activation; no execution capability; 134E.9V was not
+begun.
+
+## Phase 134E.8V Complete (historical — full text)
+
 Phase 134E.8V — Architecture Status Generation Independent Verification
 (completed).
 

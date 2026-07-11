@@ -4,6 +4,7 @@
 
 - Close out Phase 134E.8V task lifecycle (20260711-1754-close-out-phase-134e-8v-task-lifecycle)
 - Phase 134E.8V — Architecture Status Generation Independent Verification (20260711-1728-phase-134e-8v-architecture-status-generation-independent-verification)
+- Review Phase 134E.8.1 incident repair before commit (20260711-1709-review-phase-134e-8-1-incident-repair-before-commit)
 - Phase 134E.8.1 — Duplicate Terminal Delivery and Mixed-Evidence Report Repair (20260711-1654-phase-134e-8-1-duplicate-terminal-delivery-and-mixed-evidence-report-repair)
 - Converge 134E.8 task lifecycle to clean tree (20260711-1642-converge-134e-8-task-lifecycle-to-clean-tree)
 - Final closeout commit for Phase 134E.8 task lifecycle (20260711-1642-final-closeout-commit-for-phase-134e-8-task-lifecycle)

@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+- Phase 134E.9 - Report Consistency / Derived Correctness Validation
+  (`docs/PHASE_134_REPORT_CONSISTENCY_DERIVED_CORRECTNESS_VALIDATION.md`).
+  Implements the reusable Report Consistency / Derived Correctness
+  validation manifest authoritative per the 134D implementation plan,
+  wired fail-closed into the existing shared finalization gate rather
+  than a second competing gate. Confirmed by direct source inspection
+  that neither `validate_internal_report_coherence()` nor `validate_
+  finalization_gate()` ever checked `architecture_status["freshness"]`/
+  `["conflicts"]`, and only self-recommendation (not recommending a
+  *different* already-completed phase) was rejected. New `validate_
+  derived_correctness()` in `src/pcae/core/phase_reports.py` checks the
+  report's own sealed Architecture Status snapshot for stale/invalid
+  freshness, unresolved conflicts, an already-completed recommended-next
+  phase (with an explicit `corrective_recovery_transition` escape
+  hatch), a dedicated stale-132F regression guard, runtime-tuple
+  validity (`ALLOWED_RUNTIME_TUPLES`), and sub-phase-aware snapshot
+  current-phase coherence. Wired into `_apply_canonical_and_trust()`
+  (all four active construction paths) and `validate_finalization_
+  gate()`. Extended the existing cross-phase test-evidence coherence
+  check with an explicit `inherited_regression` classification escape
+  hatch. Refined Architecture Status freshness semantics: a missing
+  `PROJECT_STATUS.md` now yields `fresh_with_limitations` rather than
+  `invalid`, reserving `invalid` for genuine detected conflicts. Added
+  read-only `pcae phase-report consistency`. One real bug (a misplaced
+  `return` statement from an editing mistake, silently making `pcae
+  phase-report trust` always exit 0) was introduced and self-caught by
+  the regression suite during this work, root-caused, and repaired. 35
+  new focused adversarial tests
+  (`tests/test_report_consistency_derived_correctness_134e9.py`); 1181
+  related-suite regression tests pass; `compileall` clean; fast-green
+  4389/4390 (same known pre-existing unrelated failure as every prior
+  134-series phase). No Canonical Engineering Evidence, Evidence
+  Extraction, Phase Report View, Operator Report View, Rendering
+  Architecture, Delivery Pipeline, or Delivery Receipt activation; no
+  execution capability; 134E.9V was not begun.
+
 - Phase 134E.8V independently verifies and hardens Architecture Status and
   terminal-report snapshot/idempotency integration: exact dotted/corrective/
   verification completion identities are retained, status is revision-bound

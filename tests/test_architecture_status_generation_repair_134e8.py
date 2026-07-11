@@ -383,10 +383,15 @@ Phase 113A — Advisory Runtime Architecture.
         assert any("no active phase" in lim for lim in status["limitations"])
         assert status["freshness"] == FRESHNESS_FRESH_WITH_LIMITATIONS
 
-    def test_missing_project_status_md_is_invalid_not_fresh(self, tmp_path, monkeypatch):
+    def test_missing_project_status_md_is_limited_not_plain_fresh(self, tmp_path, monkeypatch):
+        """Phase 134E.9 refinement: an absent source is a disclosed
+        limitation, not a detected contradiction -- 'invalid' is reserved
+        for genuine conflicts so validate_derived_correctness() can fail
+        closed on 'invalid' without also rejecting the legitimate
+        bootstrap/explicit-identity scenario (no PROJECT_STATUS.md yet)."""
         monkeypatch.chdir(tmp_path)
         status = build_architecture_status()
-        assert status["freshness"] == FRESHNESS_INVALID
+        assert status["freshness"] == FRESHNESS_FRESH_WITH_LIMITATIONS
         assert status["limitations"]
 
 
