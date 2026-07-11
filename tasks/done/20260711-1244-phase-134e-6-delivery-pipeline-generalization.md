@@ -10,7 +10,7 @@ Phase 134E.6 — Delivery Pipeline Generalization
 
 ## Status
 
-active
+done
 
 ## Mode
 
