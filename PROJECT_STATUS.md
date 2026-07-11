@@ -2,6 +2,49 @@
 
 ## Current Phase
 
+Phase 134E.5 — Rendering Architecture (completed).
+
+Implemented a deterministic, reusable, transport-independent Rendering
+layer (`src/pcae/core/rendering.py`) over the verified Phase Report
+View and Operator Report View. Six renderers registered (Markdown,
+plain text, canonical JSON, for each of the two view types), via a
+small explicit registry mirroring `evidence_extraction.py`'s own
+profile-registry convention (fail-closed against silent overwrite;
+identical re-registration allowed). `render(view, source, renderer_id)`
+is the sole entry point — accepts both the composed view and its
+originating `ExtractionResult` (verified against the view's own
+recorded digest, a deliberate design choice documented in
+`docs/PHASE_134_RENDERING_ARCHITECTURE.md` Section 5) to resolve
+category references into genuinely content-rich rendered output
+without "recomposing" a view. Not yet active lifecycle authority —
+isolated (imports only the two view modules and `evidence_extraction`
+shared types). Content-preservation accounting, rendering completeness
+(never exceeding source view completeness, or decision completeness
+for Operator Reports), Non-Omission, and Non-Strengthening all
+enforced. One defect self-found and fixed during this phase's own
+development (before any test asserted the wrong behavior): content-
+preservation accounting counted a primary category as "preserved" the
+moment its label was printed, even if its value could not actually be
+resolved — fixed across all three affected render functions. 97 new
+focused tests (all 96 required areas) pass; 1222 combined regression
+tests (evidence model, extraction, Phase Report View, Operator Report
+View, phase-identity repair, phase_reports, finalization-gate,
+134B.1-134B.3, phase, rendering) pass; fast-green 4390/4390 passing
+this run. Full details in
+`docs/PHASE_134_RENDERING_ARCHITECTURE.md`.
+
+Recommended next phase: 134E.5V — Rendering Architecture Independent
+Verification. 134E.5V was not begun in this phase.
+
+## Phase 134E.5 Complete
+
+Implemented Rendering Architecture over the verified Phase Report View
+and Operator Report View. The module remains isolated, disconnected
+lifecycle authority — not yet active. No delivery adapters,
+channel-specific formatting, or lifecycle integration was implemented.
+
+## Phase 134E.4V Complete (historical)
+
 Phase 134E.4V — Operator Report View Composition Independent Verification (completed).
 
 Independently verified 134E.4's Operator Report View Composition

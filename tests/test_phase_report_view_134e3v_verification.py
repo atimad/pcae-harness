@@ -631,10 +631,15 @@ def test_no_filesystem_network_rendering_delivery_side_effects(monkeypatch):
 
 
 def test_no_active_lifecycle_fresh_full_tree_scan():
+    # 134E.5 note: Rendering (``pcae.core.rendering``) is an expected,
+    # deliberately isolated *new* consumer of this module -- the next
+    # layer in the same disconnected architecture (View Composition ->
+    # Rendering), not an active-lifecycle one.
     import pathlib
     src_root = pathlib.Path(prv.__file__).resolve().parent.parent
+    _EXPECTED_ISOLATED_CONSUMERS = frozenset({"phase_report_view.py", "rendering.py"})
     for path in src_root.rglob("*.py"):
-        if path.name == "phase_report_view.py":
+        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
             continue
         if "test" in str(path):
             continue

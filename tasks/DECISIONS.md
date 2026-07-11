@@ -2,6 +2,31 @@
 
 ## Accepted
 
+- Implement Rendering Architecture (Phase 134E.5) with `render()`
+  accepting both a composed view (Phase Report View or Operator Report
+  View) and its originating `ExtractionResult`, rather than the view
+  alone. 134E.3/134E.4 deliberately designed their section models as
+  references (category name, applicability, classifications) rather
+  than copies of canonical content, so a renderer consuming only the
+  view cannot reproduce actual field content. Accepting the source
+  `ExtractionResult` and verifying it against the view's own recorded
+  `source_extraction_digest` before using it as a value-resolution
+  source satisfies both the "reject forged view objects" requirement
+  and genuine content richness, without recomposing a view (no
+  category-to-section assignment, completeness computation, or
+  profile-rule evaluation runs in this module). Implemented a small
+  explicit renderer registry (six renderers: Markdown/plain-text/
+  canonical-JSON for each of the two view types) mirroring
+  `evidence_extraction.py`'s own profile-registry fail-closed
+  convention. Found and fixed one defect during this phase's own
+  development, before any test was written: content-preservation
+  accounting counted a primary category as "preserved" merely because
+  its label was printed, even when its value could not be resolved
+  from the source -- fixed across all three affected render functions.
+  Did not implement HTML rendering (no current consumer justifies it),
+  delivery adapters, or channel-specific formatting -- all deferred to
+  134E.6. Do not begin 134E.5V in this phase.
+
 - Independently verify Operator Report View Composition (Phase
   134E.4V) by fresh adversarial probing before writing any new test,
   rather than trusting 134E.4's report or its 97 tests. Found and

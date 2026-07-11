@@ -1174,10 +1174,15 @@ def test_existing_lifecycle_unchanged():
 
 
 def test_no_consumer_references_operator_report_view_yet():
+    # 134E.5 note: Rendering (``pcae.core.rendering``) is an expected,
+    # deliberately isolated *new* consumer of this module -- the next
+    # layer in the same disconnected architecture (View Composition ->
+    # Rendering), not an active-lifecycle one.
     import pathlib
     src_root = pathlib.Path(orv.__file__).resolve().parent.parent
+    _EXPECTED_ISOLATED_CONSUMERS = frozenset({"operator_report_view.py", "rendering.py"})
     for path in src_root.rglob("*.py"):
-        if path.name == "operator_report_view.py":
+        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
             continue
         if "test" in str(path):
             continue

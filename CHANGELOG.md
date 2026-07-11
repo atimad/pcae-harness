@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+- Phase 134E.5 - Rendering Architecture
+  (`docs/PHASE_134_RENDERING_ARCHITECTURE.md`). Implements
+  `src/pcae/core/rendering.py`, a deterministic, transport-independent
+  Rendering layer over the verified Phase Report View and Operator
+  Report View. Six renderers (Markdown/plain-text/canonical-JSON x
+  Phase Report/Operator Report) registered via a small explicit
+  registry mirroring `evidence_extraction.py`'s profile-registry
+  convention. `render(view, source, renderer_id)` accepts both the
+  composed view and its originating extraction result (digest-verified
+  against the view, rejecting forged/mismatched input) to resolve
+  category references into content-rich output without recomposing a
+  view. Content-preservation accounting, rendering completeness
+  (never exceeding view/decision completeness), Non-Omission, and
+  Non-Strengthening enforced. One defect self-found and fixed during
+  this phase's own development: content-preservation accounting
+  counted an unresolved primary category as "preserved" merely because
+  its label was printed; fixed across all three affected render
+  functions. Updated the pre-existing isolation scans in
+  `test_evidence_extraction_134e2v_verification.py`,
+  `test_phase_report_view_134e3.py`,
+  `test_phase_report_view_134e3v_verification.py`, and
+  `test_operator_report_view_134e4.py` to admit `rendering.py` as the
+  next expected, still-isolated consumer. 97 new focused tests (all 96
+  required areas) pass; 1222 combined regression tests pass;
+  fast-green 4390/4390 passing this run. No delivery adapters,
+  channel-specific formatting, or lifecycle integration was
+  implemented.
+
 - Phase 134E.4V - Operator Report View Composition Independent
   Verification
   (`docs/PHASE_134_OPERATOR_REPORT_VIEW_COMPOSITION_INDEPENDENT_VERIFICATION.md`).

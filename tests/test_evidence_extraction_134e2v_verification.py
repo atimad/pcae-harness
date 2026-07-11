@@ -633,22 +633,24 @@ def test_unknown_future_agent_provenance_independence():
 # ─────────────────────────────────────────────────────────────────────────────
 
 def test_no_active_lifecycle_imports_fresh_scan():
-    # 134E.3/134E.4 note: Phase Report View Composition
-    # (``pcae.core.phase_report_view``) and Operator Report View
-    # Composition (``pcae.core.operator_report_view``) are expected,
-    # deliberately isolated *sibling* consumers of this module -- the
-    # next layer in the same disconnected architecture (Evidence
-    # Extraction -> View Composition), not active-lifecycle ones. Every
-    # other file in the source tree must still reference zero
-    # occurrences of ``evidence_extraction`` -- narrowed here from "the
-    # empty set of consumers" (134E.2V's original, now-outdated
-    # assumption) to "the empty set of consumers other than the named,
-    # still-isolated modules this repository's own architecture roadmap
-    # always intended to add next."
+    # 134E.3/134E.4/134E.5 note: Phase Report View Composition
+    # (``pcae.core.phase_report_view``), Operator Report View
+    # Composition (``pcae.core.operator_report_view``), and Rendering
+    # (``pcae.core.rendering``) are expected, deliberately isolated
+    # consumers of this module -- successive layers in the same
+    # disconnected architecture (Evidence Extraction -> View Composition
+    # -> Rendering), not active-lifecycle ones. Every other file in the
+    # source tree must still reference zero occurrences of
+    # ``evidence_extraction`` -- narrowed here from "the empty set of
+    # consumers" (134E.2V's original, now-outdated assumption) to "the
+    # empty set of consumers other than the named, still-isolated
+    # modules this repository's own architecture roadmap always intended
+    # to add next."
     import pathlib
     src_root = pathlib.Path(ee.__file__).resolve().parent.parent
     _EXPECTED_ISOLATED_CONSUMERS = frozenset({
         "evidence_extraction.py", "phase_report_view.py", "operator_report_view.py",
+        "rendering.py",
     })
     for path in src_root.rglob("*.py"):
         if path.name in _EXPECTED_ISOLATED_CONSUMERS:
