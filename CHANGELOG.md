@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- Phase 134E.3 - Phase Report View Composition
+  (`docs/PHASE_134_PHASE_REPORT_VIEW_COMPOSITION.md`). Implements
+  `src/pcae/core/phase_report_view.py`, a deterministic, structured
+  composition layer over verified `phase_report_v1` Evidence Extraction
+  results, organizing extracted evidence into all thirteen PFR-001
+  sections (section assignment, ordering, phase-class treatment,
+  completeness classification, filtering-disclosure placement — never
+  rendered prose). Enforces Non-Omission (assignment-accounting check;
+  every uncertainty/limitation/filtering-disclosure category preserved
+  at both per-section and report-level bundles) and Non-Strengthening
+  (view completeness never better-ranked than the source extraction's
+  own; classifications copied verbatim, never re-derived). Remains
+  isolated, not yet active lifecycle authority (imports only
+  `evidence_extraction` and three shared enums from
+  `canonical_engineering_evidence`). 88 new focused tests (all 86
+  required areas) pass; 928 combined regression tests unchanged;
+  fast-green 4390/4390 passing this run. Repairs (as a pre-declared,
+  expected consequence of this phase's own scope, not a new defect)
+  134E.2V's own `test_no_active_lifecycle_imports_fresh_scan`, narrowing
+  its "zero consumers of `evidence_extraction`" assertion to admit this
+  phase's own expected, still-isolated new consumer. No Operator Report
+  View composition, rendering, delivery, or lifecycle integration was
+  implemented. Recommended next phase: 134E.3V (not begun).
+
 - Phase 134E.2V - Evidence Extraction Independent Verification
   (`docs/PHASE_134_EVIDENCE_EXTRACTION_INDEPENDENT_VERIFICATION.md`).
   Independently verifies 134E.2's Evidence Extraction implementation via

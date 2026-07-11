@@ -633,10 +633,24 @@ def test_unknown_future_agent_provenance_independence():
 # ─────────────────────────────────────────────────────────────────────────────
 
 def test_no_active_lifecycle_imports_fresh_scan():
+    # 134E.3 note: Phase Report View Composition
+    # (``pcae.core.phase_report_view``) is an expected, deliberately
+    # isolated *new* consumer of this module -- the next layer in the
+    # same disconnected architecture (Evidence Extraction -> View
+    # Composition), not an active-lifecycle one. Every other file in the
+    # source tree must still reference zero occurrences of
+    # ``evidence_extraction`` -- narrowed here from "the empty set of
+    # consumers" (134E.2V's original, now-outdated assumption) to "the
+    # empty set of consumers other than the one new, named, still-isolated
+    # module this repository's own architecture roadmap always intended
+    # to add next."
     import pathlib
     src_root = pathlib.Path(ee.__file__).resolve().parent.parent
+    _EXPECTED_ISOLATED_CONSUMERS = frozenset({
+        "evidence_extraction.py", "phase_report_view.py",
+    })
     for path in src_root.rglob("*.py"):
-        if path.name == "evidence_extraction.py":
+        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
             continue
         if "test" in str(path):
             continue

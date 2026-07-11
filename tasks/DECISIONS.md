@@ -2,6 +2,33 @@
 
 ## Accepted
 
+- Implement Phase Report View Composition (Phase 134E.3) as a
+  deterministic, structured composition layer
+  (`src/pcae/core/phase_report_view.py`) consuming only verified
+  `phase_report_v1` Evidence Extraction results — never Canonical
+  Engineering Evidence directly, never re-running extraction. Organizes
+  extracted evidence into all thirteen PFR-001 sections via a fixed,
+  explicit category-to-section map (never heuristic text
+  classification), with an assignment-accounting mechanism enforcing
+  Non-Omission and a completeness floor derived from the source
+  extraction's own completeness enforcing Non-Strengthening. Repaired,
+  as a pre-declared and expected consequence of this phase's own scope
+  (not a newly discovered defect), 134E.2V's own
+  `test_no_active_lifecycle_imports_fresh_scan`, which asserted zero
+  consumers of `evidence_extraction` anywhere in the source tree — that
+  assertion was always going to be falsified by this phase's own
+  architecture (Phase Report View Composition is the next, still-isolated
+  layer the roadmap always intended); narrowed to admit this phase's one
+  new named consumer without weakening the underlying no-active-lifecycle
+  invariant. Left the three NON-BLOCKING observations 134E.2V carried
+  forward mostly open: resolved the planning-phase evidence-scope
+  question directly (existing categories are sufficient; no model
+  expansion needed), left the other two (conditionally-required
+  semantics, private registry access) unrepaired as instructed, since
+  neither was proven genuinely BLOCKING. Implemented Phase Report View
+  Composition only — Operator Report View Composition, rendering, and
+  delivery remain out of scope. Do not begin 134E.3V in this phase.
+
 - Independently verify Evidence Extraction (Phase 134E.2V) by fresh
   adversarial probing before writing any new test, rather than trusting
   134E.2's report or its 64 tests. Found and repaired two BLOCKING
