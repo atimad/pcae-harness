@@ -10,7 +10,7 @@ Phase 134E.6V — Delivery Pipeline Generalization Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
