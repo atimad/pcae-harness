@@ -2,36 +2,53 @@
 
 ## Current Phase
 
-Phase 134E.6V — Delivery Pipeline Generalization Independent
-Verification (completed).
+Phase 134E.7 — External Delivery Receipt Model (completed).
 
-Independently verified 134E.6's Delivery Pipeline Generalization
-implementation rather than trusting its report, documentation, or its
-105 tests. Found and repaired **two genuine BLOCKING defects**,
-discovered by direct adversarial probing (REPL reproduction before any
-new test was written): (1) ambiguous logical-delivery-identity field
-concatenation — `compute_logical_delivery_id()` joined its six input
-fields with a bare `"|"` separator before hashing, letting two
-semantically different input tuples collide by shifting content across
-a field boundary; repaired by hashing a canonical JSON array instead.
-(2) unhandled adapter exception — `execute_delivery()` called `adapter.
-deliver_fn(unit)` with no exception handling, so any adapter
-implementation error aborted delivery of every sibling unit in the same
-plan; repaired by catching any exception per-unit and normalizing it
-into a conservative retryable `AdapterUnitOutcome`. 44 new fresh
-adversarial tests (all 42 required probe areas plus 2 regression tests
-for the exception fix) plus the original 105 tests (149 combined) pass;
-553 combined 134E.3-134E.6 regression tests pass; fast-green 4390/4390
-passing this run. One NON-BLOCKING observation recorded (adapter
-exception diagnostics are not independently secret-scrubbed, consistent
-with the rest of the pipeline's existing diagnostic surfaces). Full
-details in
-`docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION_INDEPENDENT_VERIFICATION.md`.
+Implemented a deterministic, durable, transport-neutral External
+Delivery Receipt model (`src/pcae/core/delivery_receipt.py`) built
+entirely on top of the verified Delivery Pipeline (134E.6, 134E.6V).
+Records one logical delivery, its ordered physical attempts, per-unit
+outcomes, retries, partial delivery, authorization outcomes, and
+correction/supersession relationships. Deterministic receipt/attempt
+identity (canonical JSON array hashing, never delimiter-joined
+strings — the same discipline 134E.6V's own repair established).
+Aggregate logical state derived deterministically from attempt
+history with last-attempt-wins per-unit accounting (no double-counting
+across retries). Logical exactly-once (one receipt lineage, one final
+state) explicitly distinguished from physical attempts, which are
+never claimed to be exactly-once. Ambiguous external outcomes
+representable without auto-retry. Retry lineage structurally rejects
+changed rendering/destination/adapter/purpose/policy (all baked into
+`logical_delivery_id`). Correction/supersession is purely additive —
+finalized receipts are deeply immutable (frozen dataclasses plus
+`MappingProxyType`-wrapped nested mappings) and never mutated; a
+correction gets its own distinct receipt identity and is persisted as
+an overlay, never overwriting the original. File-backed persistence
+(`DeliveryReceiptStore`) reuses existing atomic-write/digest-
+verification conventions (Phase 93C's audit-record pattern): temp-file
++ `os.replace`, digest verified on every load, fails closed on stale/
+duplicate/post-finalization writes. Diagnostic redaction addresses
+134E.6V's NON-BLOCKING observation directly — bounded, explicit-
+pattern redaction of adapter-exception text, never a raw exception
+representation. 110 new focused tests (all 110 required areas) pass;
+760 combined 134E.2-134E.7 regression tests pass; fast-green 4389/4390
+passing this run (the one failure, `test_pytest_dry_run_not_blocked`,
+is confirmed pre-existing and unrelated via a clean-checkout
+reproduction). No production receipt artifact created; no PFN-001
+integration; module remains fully isolated. Full details in
+`docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL.md`.
 
-Recommended next phase: 134E.7 — External Delivery Receipt Model.
-134E.7 was not begun in this phase.
+Recommended next phase: 134E.7V — External Delivery Receipt Model
+Independent Verification. 134E.7V was not begun in this phase.
 
-## Phase 134E.6V Complete
+## Phase 134E.7 Complete
+
+Implemented the durable External Delivery Receipt model over the
+verified Delivery Pipeline. The module remains isolated, disconnected
+lifecycle authority — not yet active. No PFN-001 integration, final
+lifecycle integration, or production receipt artifact was implemented.
+
+## Phase 134E.6V Complete (historical)
 
 Independently verified and repaired the Delivery Pipeline
 Generalization implementation. The module remains isolated,

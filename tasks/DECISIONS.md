@@ -2,6 +2,32 @@
 
 ## Accepted
 
+- Implement External Delivery Receipt Model (Phase 134E.7) as a
+  file-backed, deterministic, transport-neutral receipt layer over the
+  verified Delivery Pipeline, consuming only `DeliveryExecutionResult`/
+  `DeliveryPlan`/`DeliveryRequest` -- never the canonical evidence
+  model, extraction layer, either derived view, or rendering directly.
+  Reused Phase 93C's audit-record atomic-write/digest-verification
+  convention rather than inventing a new persistence pattern.
+  Correction/supersession implemented as a purely additive overlay
+  (own distinct receipt identity via `correction.correcting_receipt_
+  id`, never overwriting or mutating the original finalized receipt)
+  rather than full lifecycle orchestration, per the phase's own scope
+  boundary. Deep immutability enforced via `MappingProxyType` on
+  nested provenance/authorization-evidence mappings, not just an outer
+  frozen dataclass. Addressed 134E.6V's NON-BLOCKING observation
+  (adapter-exception diagnostics not secret-scrubbed) with bounded,
+  explicit-pattern redaction reusing `canonical_engineering_evidence`/
+  `shell_gate`'s existing redaction conventions -- not a universal
+  secret scanner. Storage layout grouped by logical delivery identity
+  (`receipts/<logical_delivery_id>/`), never an adapter-specific
+  directory, avoiding the historical snapshots/graphs naming
+  inconsistency 128A flagged by introducing a genuinely new noun
+  (`receipts`) rather than another synonym. `.pcae/.gitignore` updated
+  to add `delivery-receipts/` alongside the existing ephemeral
+  `phase-reports/`/`notifications/` entries. Do not begin 134E.7V in
+  this phase.
+
 - Independently verify Delivery Pipeline Generalization (Phase
   134E.6V) by fresh adversarial probing before writing any new test,
   rather than trusting 134E.6's report or its 105 tests. Found and

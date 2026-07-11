@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 134E.7 - External Delivery Receipt Model
+  (`docs/PHASE_134_EXTERNAL_DELIVERY_RECEIPT_MODEL.md`). Implements
+  `src/pcae/core/delivery_receipt.py`, a deterministic, durable,
+  transport-neutral receipt model over the verified Delivery Pipeline
+  (134E.6/134E.6V). Deterministic receipt/attempt identity via
+  canonical JSON array hashing, last-attempt-wins aggregate unit
+  accounting (no double-counting across retries), explicit logical
+  vs. physical exactly-once distinction, ambiguous-outcome support
+  without auto-retry, structurally-rejected retry-lineage tampering
+  (rendering/destination/adapter/purpose/policy all baked into
+  `logical_delivery_id`), additive-only correction/supersession with
+  deeply immutable finalized receipts, file-backed atomic-write/
+  digest-verified persistence (reusing Phase 93C's audit-record
+  convention), and bounded diagnostic redaction addressing 134E.6V's
+  NON-BLOCKING observation. 110 new focused tests (all 110 required
+  areas) pass; 760 combined 134E.2-134E.7 regression tests pass;
+  fast-green 4389/4390 passing this run (one pre-existing, unrelated
+  failure confirmed via clean-checkout reproduction). No production
+  receipt artifact created; no PFN-001 integration; module remains
+  fully isolated.
+
 - Phase 134E.6V - Delivery Pipeline Generalization Independent
   Verification
   (`docs/PHASE_134_DELIVERY_PIPELINE_GENERALIZATION_INDEPENDENT_VERIFICATION.md`).

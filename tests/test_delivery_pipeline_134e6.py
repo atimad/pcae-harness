@@ -1111,11 +1111,14 @@ def test_current_pfn001_behavior_unchanged():
     assert "delivery_pipeline" not in inspect.getsource(nc)
 
 
+_EXPECTED_ISOLATED_CONSUMERS = frozenset({"delivery_pipeline.py", "delivery_receipt.py"})
+
+
 def test_no_consumer_references_delivery_pipeline_yet():
     import pathlib
     src_root = pathlib.Path(DP.__file__).resolve().parent.parent
     for path in src_root.rglob("*.py"):
-        if path.name == "delivery_pipeline.py":
+        if path.name in _EXPECTED_ISOLATED_CONSUMERS:
             continue
         if "test" in str(path):
             continue
