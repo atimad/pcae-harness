@@ -1,73 +1,72 @@
-# Phase 134E.1 Complete — Canonical Engineering Evidence Executable Model
+# Phase 134E.1V Complete — Canonical Engineering Evidence Executable Model Independent Verification
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.1`
+- **Phase ID:** `134E.1V`
 - **Status:** completed
-- **Phase class:** dedicated implementation (isolated model)
+- **Phase class:** dedicated independent verification
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Phase 134E.1 implemented the first executable code model for Canonical
-Engineering Evidence, per the frozen Track 133 contract and 134D's
-implementation plan. The model is not yet active lifecycle authority — it
-is fully isolated (stdlib-only imports, zero internal PCAE dependencies)
-and does not affect any existing command's behavior.
+Phase 134E.1V independently verified 134E.1's Canonical Engineering
+Evidence executable model via fresh adversarial probing, rather than
+trusting its report, documentation, or its own 52 tests. Found and
+repaired two genuine BLOCKING defects, both discovered by direct
+adversarial probing before writing any new test.
 
 ## 3. Architectural Findings
 
-`src/pcae/core/canonical_engineering_evidence.py` mirrors `core/
-evidence.py` (Phase 115C)'s isolation discipline exactly: zero internal
-PCAE imports (confirmed by AST inspection), zero I/O, zero network, zero
-execution capability. Identity is deterministic (`phase_id#version`, no
-random UUID) and does not create a new phase-identity authority —
-`EvidencePhaseIdentity` mirrors `phase_reports.CanonicalPhaseIdentity`'s
-shape by convention, not by import.
+No architectural change. The model's structure (identity, phase-class
+applicability, findings/repairs, uncertainty/limitations, correction
+envelope, versioning) was independently re-confirmed against Track 133/
+134 source text rather than accepted from 134E.1's own documentation.
 
 ## 4. Implementation Findings
 
-Implemented: `EvidenceIdentity`/`EvidencePhaseIdentity`, six `PhaseClass`
-values with explicit per-category `Applicability` (five dispositions),
-`FindingRecord`/`RepairRecord` (three-way classification, repairs
-preserve the original finding), `EvidenceProvenanceRecord`,
-`UncertaintyItem`/`LimitationItem` (133F's Non-Omission refinement as
-first-class structure), `GovernanceResultItem`/`TestResultItem`,
-`RepositoryStateSnapshot`/`RuntimeStateSnapshot`/`CommitPushInfo`,
-`CorrectionMetadata` (prepared fields only), and the top-level
-`CanonicalEngineeringEvidence` record with `validate()`, `finalize()`
-(returns a new object, never mutates in place), `to_dict()`/`from_dict()`
-round-trip serialization, and `compute_digest()` (SHA-256 over
-sorted-key JSON, excluding approved timestamps, following the existing
-`backend_invocations.py` digest convention). No CLI surface added — none
-was required.
+Two BLOCKING defects repaired at the smallest responsible boundary inside
+the still-isolated model: (1) shallow immutability — force-tuple
+conversion of every collection field and `MappingProxyType` freezing of
+`applicability` at construction time, across `CanonicalEngineeringEvidence`,
+`UncertaintyItem`, `LimitationItem`, and `CommitPushInfo`. (2)
+Applicability-disclosure/mandatory-present bypass — `OMITTED_INVALID_
+INPUT` added to the disclosure-required dispositions; the phase-class
+mandatory-present check changed from rejecting only `NOT_APPLICABLE` to
+rejecting any non-`PRESENT` disposition. No active-lifecycle integration
+was introduced; the model remains isolated.
 
 ## 5. Verification Findings
 
-Regression-only for this phase (implementation phase; per 133B §6,
-implementation phases receive a regression summary, not independent
-re-derivation — that is 134E.1V's job). 52 new focused tests pass,
-covering all 40 required test areas. 1185 combined regression tests
-(existing phase-report/notification/identity/finalization suites,
-unmodified) pass unchanged, confirming no existing behavior was altered.
+Independently re-derived requirements from Track 133 architecture/
+contract/verification/implementation-plan, Track 134 architecture/
+contract/verification/implementation-plan, PFR-001, and PFN-001. 31
+verification dimensions checked; both BLOCKING defects found via direct
+Python-REPL adversarial probing before any test was written (external
+mutation of a "finalized" record changed its digest; an
+`OMITTED_INVALID_INPUT`-marked category finalized with zero disclosure).
+37 fresh adversarial tests added covering all 20 required probe areas.
+Four NON-BLOCKING observations recorded, documented in full in
+`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_EXECUTABLE_MODEL_
+VERIFICATION.md`.
 
 ## 6. Technical Debt Review
 
-No existing debt item was repaired (out of scope). This phase's own
-scope-limitations are documented in
-`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_EXECUTABLE_MODEL.md`
-Section 16: no live capture, no lifecycle integration, no Evidence
-Extraction/views/rendering/delivery, no governed correction workflow
-(prepared fields only).
+No pre-existing Track 134 debt item was repaired (out of scope). Four new
+NON-BLOCKING observations recorded as inputs for 134E.2 onward or a
+future hardening pass: identity/task-id granularity, provenance category
+validation, secret-scan field coverage, digest order-sensitivity for
+reordered findings.
 
 ## 7. Notable Engineering Knowledge
 
-Building the evidence authority in genuine isolation first — before any
-consumer exists — makes "is this a real dependency or a convenience
-import" a mechanically checkable question (AST import inspection) rather
-than a judgment call. The same discipline `core/evidence.py` established
-in Phase 115C for a different subsystem generalizes cleanly to this one.
+Names like "canonical," "deterministic," and "immutable," a passing
+52-test suite, and frozen dataclasses were, exactly as this phase's own
+brief warned, insufficient evidence — both BLOCKING defects were real,
+reproducible with a handful of lines of adversarial Python, and had
+survived 134E.1's own test suite because that suite tested the model's
+own claims from the inside rather than adversarially challenging them
+from the outside.
 
 ## 8. Governance Results
 
@@ -78,41 +77,43 @@ in Phase 115C for a different subsystem generalizes cleanly to this one.
 
 ## 9. Test Results
 
-- New focused suite: 52 passed (all 40 required test areas covered).
-- Combined regression suite (phase_reports, finalization-gate, trust-
-  hard-fail, certification-idempotency, 134B.1/134B.2/134B.3, phase):
-  1185 passed.
+- New adversarial suite: 37 passed (all 20 required probe areas).
+- Original 134E.1 suite (unmodified): 52 passed.
+- Combined: 89 passed.
+- Combined regression suite (134B.1/134B.2/134B.3, telegram, notifications,
+  phase_reports, finalization-gate, trust-hard-fail, certification-
+  idempotency, phase): 1222 passed.
 - Fast-green: 4389 passed, 1 pre-existing unrelated failure
   (`test_pytest_dry_run_not_blocked`, unchanged since 134B.2).
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
 
-No activation of Canonical Engineering Evidence in finalization, no live
-evidence capture, no Evidence Extraction, no Phase Report View
-composition, no Operator Report View composition, no rendering, no
-delivery adapters, no External Delivery Receipts, no Architecture Status
-repair, no Derived Correctness validation, no phase-completion-metadata
-replacement, no PFN-001/PFR-001 change, no Repository Intelligence
-change, no 134E.2 work, and no execution capability were implemented. No
-raw git commit/push, `--no-verify`, or force push was used.
+No activation of Canonical Engineering Evidence, no live evidence
+capture, no Evidence Extraction, no Phase Report View composition, no
+Operator Report View composition, no rendering, no delivery adapters, no
+External Delivery Receipts, no Architecture Status repair, no final
+lifecycle integration, no PFN-001/PFR-001 change, no Repository
+Intelligence change, no 134E.2 work, and no execution capability were
+implemented. No raw git commit/push, `--no-verify`, or force push was
+used.
 
 ## 11. Architectural Boundary Confirmation
 
-PFN-001 and PFR-001 remain mandatory and unmodified. Repository
-Intelligence authority is unmodified and unreferenced by the new module.
-The current governed reporting and finalization path remains the sole
-active authority. This phase does not self-certify.
+PFN-001 and PFR-001 remain mandatory and unmodified. The model remains
+isolated, disconnected lifecycle authority — confirmed by source
+inspection that no existing lifecycle module references it. Both repairs
+stayed strictly inside the model's own construction/validation boundary.
 
 ## 12. Track Progress
 
-134E.1 is the first executable-code phase of Track 134's implementation
-sequence (134D's own roadmap). It establishes the evidence authority in
-isolation, as the smallest safe next step, before any downstream
-consumer (extraction, views, rendering, delivery) can be correctly built.
+134E.1V closes the independent-verification gate 134D's own roadmap
+requires before 134E.2 may begin. Two genuine defects were found and
+closed; the model is now demonstrably (not just claimedly) deeply
+immutable and fail-closed against the disclosure/mandatory-present
+bypasses probed.
 
 ## 13. Next Phase
 
-Recommended: **134E.1V — Canonical Engineering Evidence Executable Model
-Independent Verification**. 134E.1V has not begun. 134E.2 shall not
-begin until 134E.1V completes with no unresolved BLOCKING findings.
+Recommended: **134E.2 — Evidence Extraction**. Phase 134E.2 has not
+begun.
