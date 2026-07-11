@@ -2,6 +2,51 @@
 
 ## Current Phase
 
+Phase 134E.2 — Evidence Extraction (completed).
+
+Implemented a deterministic, audience-aware, transport-independent
+Evidence Extraction layer (`src/pcae/core/evidence_extraction.py`) over
+the Canonical Engineering Evidence executable model. **Not yet active
+lifecycle authority** — isolated (only internal import is
+`canonical_engineering_evidence`; otherwise stdlib-only), never mutates
+source evidence, no reference from any existing lifecycle module.
+Implements a small explicit profile registry (not a plugin framework)
+with two profiles — `phase_report_v1` (all thirteen PFR-001 sections) and
+`operator_report_v1` (broader decision-completeness for a mobile-first
+operator, explicitly rejecting a status-only extraction) — each defining
+an explicit `RequirementLevel` (required/conditionally-required/optional/
+not-applicable) for all 21 extraction categories across all six phase
+classes (252 explicit rules per profile, no implicit defaults). A
+four-value `ExtractionCompleteness` (complete/complete-with-limitations/
+incomplete/invalid) is deterministically derived per extraction; all four
+outcomes are ordinary, inspectable return values, never hidden behind an
+exception. Findings/repairs preserve full original-classification
+history (a repair never overwrites its original finding); uncertainty
+and limitations are automatically preserved and orphan-reference-checked;
+filtering is always explicitly disclosed; no category ever silently
+strengthens (BLOCKING never becomes CONFIRMED, UNAVAILABLE never becomes
+PRESENT). A future profile registers without touching either existing
+profile or Canonical Engineering Evidence itself, confirmed by test. 64
+new focused tests covering all 60 required test areas; 1300 combined
+regression tests (existing evidence-model/phase-report/identity/
+finalization/notification suites) passed unchanged; fast-green
+unaffected. Full details in
+`docs/PHASE_134_EVIDENCE_EXTRACTION.md`.
+
+This phase does not self-certify. Recommended next phase: 134E.2V —
+Evidence Extraction Independent Verification. 134E.2V was not begun in
+this phase, nor was 134E.3.
+
+## Phase 134E.2 Complete
+
+Implemented the isolated, disconnected Evidence Extraction layer. No
+lifecycle behavior was activated; the current governed reporting/
+finalization path remains the sole authority. Zero regressions in
+existing evidence-model/phase-report/identity/finalization/notification
+tests.
+
+## Phase 134E.1V finalization repair Complete (historical — full text)
+
 Phase 134E.1V finalization repair (completed).
 
 Phase 134E.1V's technical work completed correctly, but its terminal

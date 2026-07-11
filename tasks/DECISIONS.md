@@ -2,6 +2,25 @@
 
 ## Accepted
 
+- Implement Evidence Extraction (Phase 134E.2) as a fully isolated,
+  disconnected layer (`src/pcae/core/evidence_extraction.py`) consuming
+  only the Canonical Engineering Evidence model and the standard
+  library, mirroring 134E.1's own isolation discipline, rather than
+  wiring it into the active reporting/finalization path in the same
+  phase. Extraction categories map 1:1 to exact CEE field names (no
+  invented pseudo-categories). A small explicit profile registry (dict,
+  not a plugin framework) holds two profiles — Phase Report (PFR-001's
+  thirteen sections) and Operator Report (broader decision-completeness)
+  — each with an explicit requirement level for every category across
+  every phase class, no implicit defaults. Deliberately excluded
+  "notification/finalization result" as an extraction category, per
+  Track 133F's own confirmed authority split (delivery facts belong to
+  PFN-001, not Canonical Engineering Evidence). Did not implement Phase
+  Report View or Operator Report View composition, rendering, delivery,
+  or lifecycle integration. Do not begin 134E.2V or 134E.3 in this
+  phase — 134E.2V is required before 134E.3, and implementation must
+  never self-certify.
+
 - Root-cause and repair the 134E-vs-134E.1V finalization identity
   mismatch at its exact source, rather than working around it a fourth
   time. Confirmed by direct regex re-derivation that a shared, duplicated

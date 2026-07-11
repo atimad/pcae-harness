@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 134E.2 - Evidence Extraction
+  (`docs/PHASE_134_EVIDENCE_EXTRACTION.md`). Implements a deterministic,
+  audience-aware, transport-independent Evidence Extraction layer
+  (`src/pcae/core/evidence_extraction.py`) over the Canonical Engineering
+  Evidence executable model, disconnected by design (only internal
+  import is `canonical_engineering_evidence`; otherwise stdlib-only; no
+  reference from any existing lifecycle module). Two profiles —
+  `phase_report_v1` (all thirteen PFR-001 sections) and
+  `operator_report_v1` (broader decision-completeness, rejects
+  status-only extraction) — each with 252 explicit per-category,
+  per-phase-class requirement rules and no implicit defaults. Four-value
+  completeness classification (complete/complete-with-limitations/
+  incomplete/invalid), all reachable as ordinary return values. Findings/
+  repairs preserve full history; uncertainty/limitations automatically
+  preserved with orphan-reference rejection; filtering always disclosed;
+  no evidence strengthening possible by construction. A future profile
+  registers without touching either existing profile. 64 new tests
+  covering all 60 required test areas; 1300 combined regression tests and
+  fast-green (4389/4390, same pre-existing unrelated failure) unaffected.
+  This phase does not self-certify — recommended next phase is 134E.2V
+  (independent verification), not begun here, nor is 134E.3.
+
 - Phase 134E.1V finalization repair
   (`docs/PHASE_134_CANONICAL_ENGINEERING_EVIDENCE_MODEL_VERIFICATION_FINALIZATION_REPAIR.md`).
   Root-causes and repairs the 134E-vs-134E.1V canonical-report identity
