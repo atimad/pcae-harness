@@ -1,82 +1,75 @@
-# Phase 134E.9.1 Complete — Fast-Green Regression and Report-Consistency Repair
+# Phase 134E.9V Complete — Report Consistency / Derived Correctness Independent Verification
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.9.1`
+- **Phase ID:** `134E.9V`
 - **Status:** completed
-- **Phase class:** corrective
+- **Phase class:** independent verification with blocking repairs
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Corrective phase resolving the material contradiction between 134E.8V's
-reported fast-green `4390/4390` and 134E.9's reported `4389/4390`.
-Identified the exact failing test, proved by read-only historical
-comparison that 134E.9 introduced no regression, repaired the test's
-non-hermetic isolation defect at its source, and separately repaired a
-report-consistency gap that let a report reach `complete` status while
-its own embedded evidence stated a test failure. This report is a
-correction/reconciliation of 134E.9's historical claim, not a resend of
-134E.9 — it completes under its own new phase identity.
+Independently verified the complete 134E.9/134E.9.1 Report Consistency /
+Derived Correctness implementation via re-derivation, never trusting
+implementation claims. Found and repaired three genuine BLOCKING
+defects, each proven by direct adversarial probing before any test was
+written. Zero unresolved BLOCKING findings remain.
 
 ## 3. Architectural Findings
 
-`tests/test_dry_run_simulation.py`'s `_sim()` helper evaluates
-`build_simulation()` against the real checkout's live `tasks/active/`
-state (via a hardcoded `REPO_ROOT`), not an isolated fixture. The
-permission broker (`pcae.core.permission_broker`/`gate_dry_run`)
-correctly, intentionally hard-blocks test-execution commands when no
-governed task is active (`blocked_by_task_contract`) — confirmed
-correct fail-closed governance design, unmodified. `validate_derived_
-correctness()` (134E.9) checked `test_results["fast_green"]` for
-presence only, never its value.
+Re-confirmed the shared validation boundary spans all four active
+finalization paths (`pcae phase complete`, `pcae task finish`, `pcae
+phase-report create`, `pcae notify send-report`) via `_apply_canonical_
+and_trust()` or the equivalent `certify_notification_transition()` ->
+`notification_dispatch_state()` path. No competing validator exists; no
+path validates only after promotion or notification.
 
-## 4. Implementation Findings
+## 4. Implementation Findings (Repairs)
 
-Repaired `test_pytest_dry_run_not_blocked` to construct its own
-isolated `tmp_path` with a minimal task-contract fixture instead of
-reading live repository state; added a companion test pinning the
-correct no-active-task hard-block behavior. Added an unconditional
-(no escape hatch) fast-green failure-count check to `validate_derived_
-correctness()` in `src/pcae/core/phase_reports.py`
-(`_FAST_GREEN_FAILURE_RE`), wired into the same shared boundary 134E.9
-established. Relaxed two other tests found exhibiting the identical
-live-repository-state-coupling pattern while re-running fast-green
-(one hardcoded phase-identity assertion; one non-hermetic real-latest-
-report test, removed since its coverage is already exhaustive via
-fixtures).
+Three BLOCKING defects found and repaired: (1) fast-green value
+validation was type-unsound against `Mapping`/`bool`/`int`/`None`
+representations, replaced with type-aware `_fast_green_failure_
+signal()`; (2) the fix for (1) initially broke the widely-used `"N/M"`
+fraction convention, caught by the regression suite and repaired with
+`_FAST_GREEN_FRACTION_RE` before finalizing; (3) case-sensitivity
+bypassed both the self-recommendation coherence check and the
+already-completed-recommendation derived-correctness check, repaired by
+uppercasing both sides of each comparison.
 
 ## 5. Verification Findings
 
-Verified via a read-only detached `git worktree` at 134E.8V's exact
-commit (`3d89d381`) that the failing test passed there because its own
-implementation task was still active at that commit — not because of
-any code difference. Confirmed `git diff --stat 4df8b7a7..4004f7ed`
-(134E.8V to 134E.9) touches zero dry-run/advisory/broker code. Verified
-fast-green deterministic at `4391/4391`, zero failures, across three
-consecutive runs (parallel twice, serial once).
+Direct REPL reproduction preceded every fix. Re-confirmed with no
+defect found: digest/snapshot enforcement at all four dispatch sites;
+phase-scoped ordinary-completion identity (a second finalization
+attempt during this phase's own task-lifecycle cleanup was correctly
+blocked, not silently sent); the Architecture Status sealing contract;
+the 134E.9.1 dotted-sub-phase corrective identity model (consistent
+with this codebase's established convention); the non-hermetic dry-run
+test repair (re-verified isolated under parallel, serial, and
+no-active-task conditions); transport neutrality; inactive Track 134
+subsystem boundaries.
 
 ## 6. Technical Debt Review
 
-`tests/test_scope_matching_consistency.py::test_cli_gate_dry_run_
-blocks_readme` was observed failing during broad (non-fast-green-scoped)
-regression sweeping but confirmed not part of the `fast_green` marker
-selection and not touched by 134E.9 or this phase — likely the same
-live-state-coupling defect class, but out of this corrective phase's
-charter; disclosed, not repaired.
+Two NON-BLOCKING findings carried forward, disclosed, not repaired: a
+labeling false-positive coherence finding on 134E.9.1's own historical
+report (a test-result key naming pattern-matches a same-series phase
+identity); `phase_reports.py`'s own test files remain outside the
+`fast_green` gate (disclosed by 134E.9.1, out of this phase's charter
+too — auditing 300+ tests for the same live-state-coupling defect class
+is a materially larger scope than this verification phase).
 
 ## 7. Notable Engineering Knowledge
 
-A test that reads live ambient repository/session state instead of an
-isolated fixture is not "flaky" in the usual sense — it is fully
-deterministic with respect to that ambient state, which makes its
-failures look like intermittent regressions when the actual cause is
-simply "which governed task happened to be open when the suite ran."
-Separately: a mandatory test-result field's *presence* being validated
-is not the same as its *value* being validated — a report-consistency
-manifest must check both, or a narrated failure can hide in plain sight
-behind a required key that's merely non-empty.
+A single proximity-based regex applied to `str(value)` for an
+unconstrained input type is unsound by construction — the fix must be
+type-aware from the start (check type, then interpret structurally),
+not a series of ad hoc pattern additions. Separately: repairing a
+value-validation gap can itself introduce a regression against an
+established but undocumented data-format convention; the regression
+suite, run before finalizing rather than after, is what caught it here
+before it shipped.
 
 ## 8. Governance Results
 
@@ -90,12 +83,11 @@ behind a required key that's merely non-empty.
 
 ## 9. Test Results
 
-- `tests/test_dry_run_simulation.py`: 221 passed.
-- `tests/test_report_consistency_derived_correctness_134e9.py`: 42 passed.
-- `tests/test_architecture_status_generation_independent_verification_134e8v.py`: unchanged count, passing.
-- Combined direct file run: 398 passed, 0 failed.
-- Related-suite regression: 325 passed, 0 failed.
-- Fast-green: 4391 passed, 0 failed (three consecutive runs).
+- New focused tests: 17 (62 total in the shared suite).
+- Combined regression (`test_phase_reports.py` + 6 directly relevant
+  files): 583 passed, 1 pre-existing disclosed out-of-scope failure.
+- Fast-green: 4391 passed, 0 failed — three consecutive runs (parallel
+  twice, serial once).
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
@@ -104,28 +96,26 @@ No activation of Canonical Engineering Evidence, Evidence Extraction,
 Phase Report View, Operator Report View, the new Rendering Architecture,
 the new Delivery Pipeline, or Delivery Receipts occurred. No replacement
 of current notification dispatch, no Telegram migration, no historical
-report rewritten or deleted, no 134E.9V work, no 134E.10 work, and no
-execution capability were implemented. No raw git commit/push,
-`--no-verify`, or force push was used. No external test delivery
-occurred. No second ordinary 134E.9 completion was created.
+report rewritten or deleted, no 134E.10 work, and no execution
+capability were implemented. No raw git commit/push, `--no-verify`, or
+force push was used. No external test delivery occurred. No second
+ordinary 134E.9/134E.9.1 completion was created.
 
 ## 11. Architectural Boundary Confirmation
 
 The active production report/notification lifecycle remains the only
-connected authority. The original 134E.9 report artifacts remain
-byte-identical on disk, untouched by this phase. The 134E.8.1 incident's
-preserved historical 134E.8 reports remain byte-identical (SHA-256-pinned
-assertions unchanged). The new Track 134 evidence-to-receipt chain
-remains isolated.
+connected authority. All historical reports (134E.8 trusted/invalid,
+134E.9, 134E.9.1) remain preserved unmodified. The new Track 134
+evidence-to-receipt chain remains isolated.
 
 ## 12. Track Progress
 
-Phase 134E.9.1 is a corrective phase repairing test determinism and a
-report-consistency gap discovered while closing out 134E.9. It does not
-advance Track 134E's evidence/delivery architecture chapters.
+Phase 134E.9V closes independent verification of Track 134E's Report
+Consistency / Derived Correctness sub-phase with zero unresolved
+BLOCKING findings, clearing the path to 134E.10's final lifecycle
+integration.
 
 ## 13. Next Phase
 
-Recommended: **134E.9V — Report Consistency / Derived Correctness
-Independent Verification**. Phase 134E.9V has not begun. Phase 134E.10
+Recommended: **134E.10 — Final Lifecycle Integration**. Phase 134E.10
 has not begun.
