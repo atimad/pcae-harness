@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 135D metadata commit (20260712-2223-sync-phase-135d-metadata-commit)
 - Sync Phase 135D completion metadata (20260712-2221-sync-phase-135d-completion-metadata)
 - Phase 135D: Cross-Representation Invariant Architecture and State-Machine Verification (20260712-2147-phase-135d-cross-representation-invariant-architecture-and-state-machine-verification)
 - Repair Phase 135C canonical report metadata (20260712-2057-repair-phase-135c-canonical-report-metadata)
