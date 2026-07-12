@@ -10,7 +10,7 @@ Phase 135A: Canonical Lifecycle State Authority Architecture
 
 ## Status
 
-active
+done
 
 ## Mode
 
