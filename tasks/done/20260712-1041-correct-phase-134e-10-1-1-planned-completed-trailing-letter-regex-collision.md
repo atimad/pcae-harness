@@ -10,7 +10,7 @@ Correct Phase 134E.10.1.1 planned/completed trailing-letter regex collision
 
 ## Status
 
-active
+done
 
 ## Mode
 
