@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Phase 134E.10.1 - Final Lifecycle Integration Transaction-Span Repair
+  (`docs/PHASE_134_FINAL_LIFECYCLE_INTEGRATION_TRANSACTION_SPAN_REPAIR.md`).
+  Repaired 134E.10V's central BLOCKING finding by inverting control:
+  `run_finalization_transaction()` now accepts a `promote_and_dispatch`
+  callback (wrapping the existing, unmodified `finalize_phase_report`/
+  `write_phase_report`/`dispatch` machinery as an adapter, per 134D's own
+  permission) and invokes it only if the 7 newly-integrated modules'
+  mandatory pre-promotion stages succeed first -- a pre-promotion failure
+  now means no promotion, no dispatch, no marker, no receipt. All 4
+  production entry points rewired. Resumability strengthened: retry for
+  identical content never re-invokes the callback. Receipt honesty
+  (134E.10V's repair) preserved unchanged. Explicitly disclosed scope:
+  does not wrap raw `pcae commit`/`pcae push` themselves, only
+  identity-through-final-result for one finalization attempt, matching
+  the corrective brief's own concrete stage list. 37 focused tests
+  (rewritten in full for the new API); full-suite regression exact
+  node-ID match to baseline (182 pre-existing failures, zero new);
+  fast_green 4391/4391 x3.
+
 - Phase 134E.10V - Final Lifecycle Integration Independent Verification
   (`docs/PHASE_134_FINAL_LIFECYCLE_INTEGRATION_INDEPENDENT_VERIFICATION.md`).
   Independently re-derived 134D's authoritative scope for 134E.10 and

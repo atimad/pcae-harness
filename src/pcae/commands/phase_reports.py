@@ -166,47 +166,78 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
         else:
             print("Phase report creation: skipped (immutable ordinary completion already delivered)")
         return 0
-    paths = write_phase_report(report, reports_dir)
+    # Phase 134E.10.1 — transaction-span repair: the gate is computed here,
+    # read-only, from what this command already assembled (this command has
+    # no CLI-supplied metadata/push-state/commit-attribution kwargs to feed
+    # validate_finalization_gate the way the other entry points do), and
+    # used to decide whether promotion (write_phase_report) and dispatch
+    # (_dispatch_manual_report_notification) happen INSIDE the authoritative
+    # finalization transaction -- gated on the seven newly-integrated
+    # modules' mandatory pre-promotion stages succeeding first. A
+    # pre-promotion failure means neither write_phase_report nor dispatch is
+    # ever called.
+    from pcae.core.phase_reports import validate_finalization_gate as _vfg
+    _gate = _vfg(
+        phase_id=report.phase_id,
+        report=report,
+        metadata=report.metadata,
+        pushed_status=report.pushed_status,
+        origin_main_head_count=report.origin_main_head_count,
+        governance_results=report.governance_results,
+        test_results=report.test_results,
+        no_go_confirmations=report.explicit_no_go_confirmations,
+        recommended_next_phase=report.recommended_next_phase,
+        commit_attribution=report.metadata.get("commit_attribution", ""),
+    )
 
-    # Phase 128B.1 — a trust-complete report created through this manual
-    # recovery command must dispatch identically to `pcae phase complete`,
-    # never silently. See module docstring and _dispatch_manual_report_
-    # notification()'s own docstring for the certification/idempotency
-    # contract this shares with the primary finalization path.
-    notification = _dispatch_manual_report_notification(report, paths)
+    def _promote_and_dispatch() -> dict:
+        promoted_paths = write_phase_report(report, reports_dir)
+        # Phase 128B.1 — a trust-complete report created through this manual
+        # recovery command must dispatch identically to `pcae phase
+        # complete`, never silently. See module docstring and
+        # _dispatch_manual_report_notification()'s own docstring for the
+        # certification/idempotency contract this shares with the primary
+        # finalization path.
+        dispatch_outcome = _dispatch_manual_report_notification(report, promoted_paths)
+        report.notification_result = {
+            "dispatched": dispatch_outcome.get("outcome") not in ("skipped",),
+            "sinks": [r.get("sink_name") for r in dispatch_outcome.get("results", [])],
+            "success": dispatch_outcome.get("outcome") == "sent",
+            "error": dispatch_outcome.get("reason") if dispatch_outcome.get("outcome") == "failed" else None,
+            "outcome": dispatch_outcome.get("outcome"),
+            "reason": dispatch_outcome.get("reason", ""),
+            "kind": "complete",
+        }
+        return {"report": report, "paths": promoted_paths, "notification": dispatch_outcome}
 
-    # Phase 134E.10 — final lifecycle integration. Best-effort, never fatal
-    # (see finalization_transaction.py and the matching call sites in
-    # commands/phase.py / commands/task.py / commands/notifications.py).
-    # This command has no CLI-supplied ``metadata``/push-state/commit-
-    # attribution kwargs to feed ``validate_finalization_gate`` the way the
-    # other three entry points do, so the gate is recomputed here read-only
-    # from what this command already assembled -- it changes no existing
-    # behavior (this command never consulted a gate object before).
-    try:
+    if _gate.get("finalizable"):
         from pcae.core.finalization_transaction import run_finalization_transaction
-        from pcae.core.phase_reports import validate_finalization_gate as _vfg
-        _gate = _vfg(
+        txn_result = run_finalization_transaction(
             phase_id=report.phase_id,
+            phase_name=report.phase_name,
             report=report,
-            metadata=report.metadata,
-            pushed_status=report.pushed_status,
-            origin_main_head_count=report.origin_main_head_count,
-            governance_results=report.governance_results,
-            test_results=report.test_results,
-            no_go_confirmations=report.explicit_no_go_confirmations,
-            recommended_next_phase=report.recommended_next_phase,
-            commit_attribution=report.metadata.get("commit_attribution", ""),
+            gate=_gate,
+            promote_and_dispatch=_promote_and_dispatch,
         )
-        if _gate.get("finalizable"):
-            run_finalization_transaction(
-                phase_id=report.phase_id,
-                phase_name=report.phase_name,
-                report=report,
-                gate=_gate,
-            )
-    except Exception:  # noqa: BLE001 - best-effort, never fatal
-        pass
+        if txn_result.status in (
+            "pre_promotion_certification_failed", "promotion_and_dispatch_failed",
+        ):
+            if args.json:
+                print(json.dumps({
+                    "error": txn_result.status,
+                    "limitations": txn_result.limitations,
+                }, indent=2, sort_keys=True))
+            else:
+                print(f"Phase report creation: BLOCKED ({txn_result.status})")
+                for limitation in txn_result.limitations:
+                    print(f"  {limitation}")
+            return 1
+        outcome = txn_result.promotion_and_dispatch or {}
+    else:
+        outcome = _promote_and_dispatch()
+
+    paths = outcome["paths"]
+    notification = outcome["notification"]
 
     if args.json:
         print(json.dumps({

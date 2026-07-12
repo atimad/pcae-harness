@@ -1,32 +1,31 @@
-"""Tests for Phase 134E.10 — Final Lifecycle Integration.
+"""Tests for Phase 134E.10 / 134E.10.1 — Final Lifecycle Integration +
+Transaction-Span Repair.
 
-The 134D implementation plan's authoritative scope for 134E.10 (see
-docs/PHASE_134_CANONICAL_PHASE_FINALIZATION_IMPLEMENTATION_PLAN.md,
-"134E.10 — Final Lifecycle Integration"): integrate Stages 9 and 12
-(repository/governance certification; exactly-once logical governed
-completion) with 134E.1-134E.9's previously-inert machinery, without
-introducing a second completion authority and without regressing the
-existing, already-governed finalization path.
-
-``src/pcae/core/finalization_transaction.py`` is the one place any of the
-seven 134E.1-134E.7 modules (Canonical Engineering Evidence, Evidence
-Extraction, Phase Report View, Operator Report View, Rendering, Delivery
-Pipeline, Delivery Receipt) are invoked. It is called from four production
-entry points (``commands/phase.py``, ``commands/task.py``,
-``commands/phase_reports.py``, ``commands/notifications.py`` -- a fifth,
-push-time reconciliation, funnels into ``phase.py``) strictly *after* each
-entry point's existing, unmodified certified-report path has already
-promoted the report and (if applicable) already dispatched. The module
-never re-decides completeness, never re-promotes, and never performs a
-second physical send -- see its own module docstring for the full
-authority-boundary rationale.
+134E.10V independently found, via direct line-number tracing, that
+134E.10's original design called ``run_finalization_transaction`` strictly
+*after* certification, promotion, and physical dispatch had already
+completed via the entirely unmodified legacy path -- a post-success
+observer with no ability to prevent, reject, or accurately classify a
+failure in any of the seven newly-integrated modules (Canonical
+Engineering Evidence, Evidence Extraction, Phase Report View, Operator
+Report View, Rendering, Delivery Pipeline, Delivery Receipt). 134E.10.1
+repairs this by inverting control: the caller now supplies a
+``promote_and_dispatch`` callback (the existing, unmodified
+``finalize_phase_report``/``write_phase_report``/``dispatch`` machinery,
+wrapped as an adapter per 134D's own permission), and
+``run_finalization_transaction`` calls it *only if* the seven modules'
+mandatory pre-promotion stages (evidence capture, extraction, view
+composition, rendering) succeed first.
 
 No test in this file sets a live notification environment variable or
 exercises a real Telegram/HTTP call -- ``tests/conftest.py``'s autouse
 ``_isolate_external_notifications`` fixture applies to every test here
-regardless, and the transaction's own "delivery" step only ever uses the
-in-memory, no-network ``RECORDING_ADAPTER_ID`` adapter (see
-``delivery_pipeline.py``), never ``pcae.core.notifications``.
+regardless, and the transaction's own post-dispatch "delivery" step only
+ever uses the in-memory, no-network ``RECORDING_ADAPTER_ID`` adapter (see
+``delivery_pipeline.py``), never ``pcae.core.notifications``. No test's
+``promote_and_dispatch`` callback performs real I/O either -- each is a
+synthetic closure recording whether it was called and returning a
+caller-controlled outcome.
 """
 
 from __future__ import annotations
@@ -77,14 +76,15 @@ def _certified_report(
     (``make_phase_report`` -> ``_apply_canonical_and_trust`` ->
     ``validate_finalization_gate``), hermetically -- ``load_canonical_
     report()`` is patched to ``None`` so this never depends on this real
-    repository's own ``.pcae/phase-completion-report.md``.
+    repository's own ``.pcae/phase-completion-report.md``. All synthetic
+    phase IDs use a dotted sub-phase form (``"999X.1-..."``) so
+    ``validate_phase_identity()``'s own live-``PROJECT_STATUS.md`` check
+    never collides with this test file's fixtures (134E.10V finding).
 
-    ``dispatch_succeeded`` sets ``report.notification_result`` to mirror
-    what the existing, unmodified dispatch path would have recorded for a
-    genuinely successful send (default, matching the common case these
-    tests exercise) or leaves it empty (``dispatch_succeeded=False``) to
-    exercise the 134E.10V receipt-honesty repair: no receipt may be
-    created unless the real dispatch outcome reports success.
+    ``dispatch_succeeded`` sets what the caller's ``promote_and_dispatch``
+    callback should report on its returned report's ``notification_
+    result`` -- tests build their own callback and read this flag to
+    decide what to simulate; it is not applied here directly.
     """
     defaults = dict(
         phase_id=phase_id,
@@ -133,72 +133,88 @@ def _certified_report(
             recommended_next_phase=report.recommended_next_phase,
             commit_attribution=report.commits[0],
         )
-        if dispatch_succeeded:
-            report.notification_result = {
-                "dispatched": True,
-                "sinks": ["noop"],
-                "success": True,
-                "error": None,
-                "outcome": "sent",
-                "reason": "",
-                "kind": "complete",
-            }
     return report, gate
 
 
+def _successful_promote_and_dispatch(report, calls: list, *, dispatch_succeeded: bool = True):
+    """A synthetic ``promote_and_dispatch`` callback: records that it was
+    called, mutates ``report.notification_result`` to simulate a real
+    dispatch outcome, and returns the shape the real entry points'
+    callbacks return (``{"report": ..., ...}``). No I/O, no promotion of
+    any real artifact.
+    """
+    def _callback() -> dict:
+        calls.append(True)
+        report.notification_result = {
+            "dispatched": True, "sinks": ["noop"], "success": dispatch_succeeded,
+            "error": None if dispatch_succeeded else "synthetic failure",
+            "outcome": "sent" if dispatch_succeeded else "failed",
+            "reason": "", "kind": "complete",
+        }
+        return {"report": report, "blocked": False, "report_error": None}
+    return _callback
+
+
+def _raising_promote_and_dispatch(calls: list, exc: Exception):
+    def _callback() -> dict:
+        calls.append(True)
+        raise exc
+    return _callback
+
+
+def _never_call_promote_and_dispatch(calls: list):
+    def _callback() -> dict:
+        calls.append(True)
+        raise AssertionError("promote_and_dispatch must not be called")
+    return _callback
+
+
 # ═══════════════════════════════════════════════════════════════════════
-# 1. End-to-end happy path
+# 1. End-to-end happy path: pre-promotion succeeds, callback IS invoked
 # ═══════════════════════════════════════════════════════════════════════
 
 
 class TestEndToEndTransaction:
-    def test_gate_passing_report_completes_all_new_pipeline_steps(self, tmp_path):
+    def test_gate_passing_report_completes_all_stages_and_invokes_callback(self, tmp_path):
         report, gate = _certified_report()
-        assert gate["finalizable"] is True
-
+        calls: list = []
         result = run_finalization_transaction(
             phase_id=report.phase_id,
             phase_name=report.phase_name,
             report=report,
             gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(report, calls),
             transaction_root=tmp_path / "txns",
             receipt_root=tmp_path / "receipts",
         )
         assert isinstance(result, TransactionResult)
         assert result.status == "completed"
+        assert calls == [True]  # invoked exactly once
         assert result.evidence_id
         assert result.extraction_digests.get("phase_report")
-        assert result.extraction_digests.get("operator_report")
         assert result.view_digests.get("phase_report")
-        assert result.view_digests.get("operator_report")
         assert result.rendering_digests.get("phase_report")
+        assert result.promotion_and_dispatch is not None
         assert result.receipt_logical_delivery_id
         assert result.receipt_path
 
     def test_no_receipt_when_real_dispatch_did_not_succeed(self, tmp_path):
-        """134E.10V finding, repaired: the recording adapter used to
-        unconditionally report success, so a receipt could be created
-        even when the real, existing dispatch path never attempted a
-        send or the send genuinely failed. A receipt must only be
-        created when ``report.notification_result`` itself reports
-        ``success: True``."""
-        report, gate = _certified_report(
-            phase_id="999X.1-no-dispatch-test", dispatch_succeeded=False
-        )
-        assert report.notification_result == {}
+        report, gate = _certified_report(phase_id="999X.1-no-dispatch-test")
+        calls: list = []
         result = run_finalization_transaction(
             phase_id=report.phase_id,
             phase_name=report.phase_name,
             report=report,
             gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(
+                report, calls, dispatch_succeeded=False
+            ),
             transaction_root=tmp_path / "txns",
             receipt_root=tmp_path / "receipts",
         )
+        assert calls == [True]  # promotion still happened -- only receipt is gated
         assert result.status == "completed"
-        # Evidence/extraction/views/rendering are unaffected -- only
-        # delivery modeling and receipt creation are gated.
         assert result.evidence_id
-        assert result.rendering_digests.get("phase_report")
         assert result.receipt_logical_delivery_id is None
         assert result.receipt_path is None
         assert any(
@@ -206,94 +222,126 @@ class TestEndToEndTransaction:
             for lim in result.limitations
         )
 
-    def test_no_receipt_when_real_dispatch_failed(self, tmp_path):
-        report, gate = _certified_report(
-            phase_id="999X.1-failed-dispatch-test", dispatch_succeeded=False
-        )
-        report.notification_result = {
-            "dispatched": True, "sinks": ["telegram"], "success": False,
-            "error": "HTTP 500", "outcome": "failed_with_reason",
-            "reason": "HTTP 500", "kind": "complete",
-        }
-        result = run_finalization_transaction(
-            phase_id=report.phase_id,
-            phase_name=report.phase_name,
-            report=report,
-            gate=gate,
-            transaction_root=tmp_path / "txns",
-            receipt_root=tmp_path / "receipts",
-        )
-        assert result.receipt_logical_delivery_id is None
-        assert result.receipt_path is None
-
     def test_unresolved_rendering_divergence_is_disclosed_not_hidden(self, tmp_path):
         """The new rendering pipeline is an independent presentation
         stage from ``PhaseReport.render_markdown()`` -- if their output
         differs, that must be recorded as a limitation, never silently
-        papered over (134A invariant against silent strengthening)."""
+        papered over, and must never by itself block promotion (134A
+        invariant against silent strengthening)."""
         report, gate = _certified_report(phase_id="999X.1-divergence-test")
+        calls: list = []
         result = run_finalization_transaction(
             phase_id=report.phase_id,
             phase_name=report.phase_name,
             report=report,
             gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(report, calls),
             transaction_root=tmp_path / "txns",
             receipt_root=tmp_path / "receipts",
         )
+        assert calls == [True]
         assert "phase_report_markdown" in result.rendering_content_matches_existing
         if not result.rendering_content_matches_existing["phase_report_markdown"]:
             assert any("diverges" in lim for lim in result.limitations)
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# 2. Gate enforcement — the existing certified path is authoritative
+# 2. Central 134E.10.1 repair: pre-promotion failure means the callback
+#    is NEVER invoked -- no promotion, no dispatch, no marker.
 # ═══════════════════════════════════════════════════════════════════════
 
 
-class TestGateEnforcement:
-    def test_gate_not_passed_blocks_before_any_new_pipeline_step(self, tmp_path):
-        report, _ = _certified_report(phase_id="999X.1-blocked-test")
-        failing_gate = {"finalizable": False, "blockers": ["synthetic blocker"]}
+class TestPrePromotionGatingIsAuthoritative:
+    @pytest.mark.parametrize(
+        "broken_module,broken_fn",
+        [
+            ("pcae.core.finalization_transaction._capture_evidence", "capture_evidence"),
+            ("pcae.core.finalization_transaction._extraction.extract", "extraction"),
+            (
+                "pcae.core.finalization_transaction._prview.compose_phase_report_view",
+                "phase_report_view",
+            ),
+            (
+                "pcae.core.finalization_transaction._orview.compose_operator_report_view",
+                "operator_report_view",
+            ),
+            ("pcae.core.finalization_transaction._rendering.render", "rendering"),
+        ],
+    )
+    def test_mandatory_stage_failure_prevents_promotion_and_dispatch(
+        self, broken_module, broken_fn, tmp_path
+    ):
+        report, gate = _certified_report(phase_id=f"999X.1-{broken_fn}-fail-test")
+        calls: list = []
+        with mock.patch(broken_module, side_effect=RuntimeError(f"synthetic {broken_fn} bug")):
+            result = run_finalization_transaction(
+                phase_id=report.phase_id,
+                phase_name=report.phase_name,
+                report=report,
+                gate=gate,
+                promote_and_dispatch=_never_call_promote_and_dispatch(calls),
+                transaction_root=tmp_path / "txns",
+                receipt_root=tmp_path / "receipts",
+            )
+        assert calls == []  # never invoked
+        assert result.status == "pre_promotion_certification_failed"
+        assert result.promotion_and_dispatch is None
+        assert any("promote_and_dispatch was NOT invoked" in lim for lim in result.limitations)
 
+    def test_promote_and_dispatch_callback_exception_is_represented_accurately(self, tmp_path):
+        report, gate = _certified_report(phase_id="999X.1-callback-raises-test")
+        calls: list = []
         result = run_finalization_transaction(
             phase_id=report.phase_id,
             phase_name=report.phase_name,
             report=report,
-            gate=failing_gate,
+            gate=gate,
+            promote_and_dispatch=_raising_promote_and_dispatch(
+                calls, RuntimeError("synthetic promotion bug")
+            ),
             transaction_root=tmp_path / "txns",
             receipt_root=tmp_path / "receipts",
         )
-        assert result.status == "gate_not_passed"
-        assert result.evidence_id is None
+        assert calls == [True]  # it WAS invoked (pre-promotion succeeded) but it failed
+        assert result.status == "promotion_and_dispatch_failed"
         assert result.receipt_logical_delivery_id is None
 
-    def test_incomplete_report_completeness_blocks_even_if_gate_dict_lies(self, tmp_path):
-        """Defense in depth: the transaction re-checks ``report.report_
-        completeness`` itself rather than trusting a caller-supplied gate
-        dict's ``finalizable`` flag alone."""
-        report, _ = _certified_report(phase_id="999X.1-lying-gate-test")
-        report.report_completeness = "incomplete"
-        lying_gate = {"finalizable": True, "blockers": []}
+    def test_promote_and_dispatch_blocked_result_is_treated_as_failure(self, tmp_path):
+        report, gate = _certified_report(phase_id="999X.1-blocked-result-test")
+        calls: list = []
+
+        def _blocked_callback() -> dict:
+            calls.append(True)
+            return {"report": report, "blocked": True, "paths": {}}
 
         result = run_finalization_transaction(
             phase_id=report.phase_id,
             phase_name=report.phase_name,
             report=report,
-            gate=lying_gate,
+            gate=gate,
+            promote_and_dispatch=_blocked_callback,
             transaction_root=tmp_path / "txns",
             receipt_root=tmp_path / "receipts",
         )
-        assert result.status == "gate_not_passed"
+        assert calls == [True]
+        assert result.status == "promotion_and_dispatch_failed"
 
+    def test_pre_promotion_failure_prevents_marker_persistence(self, tmp_path):
+        """A pre-promotion failure must prevent the successful-completion
+        marker from ever being written -- the marker is written only
+        inside the real (here, synthetic) promote_and_dispatch callback,
+        so proving the callback is never invoked (already covered above)
+        is equivalent to proving no marker is written; this test makes
+        that specific consequence explicit by using a callback that would
+        write a marker file if called, and confirming the file never
+        appears."""
+        report, gate = _certified_report(phase_id="999X.1-marker-gating-test")
+        marker_path = tmp_path / "would-be-marker.json"
 
-# ═══════════════════════════════════════════════════════════════════════
-# 3. Capture failure never affects the already-certified report
-# ═══════════════════════════════════════════════════════════════════════
-
-
-class TestCaptureFailureIsNonFatal:
-    def test_capture_exception_yields_capture_failed_not_a_raise(self, tmp_path):
-        report, gate = _certified_report(phase_id="999X.1-capture-fail-test")
+        def _callback_that_writes_a_marker() -> dict:
+            marker_path.write_text("{}")
+            report.notification_result = {"success": True}
+            return {"report": report}
 
         with mock.patch(
             "pcae.core.finalization_transaction._capture_evidence",
@@ -304,87 +352,156 @@ class TestCaptureFailureIsNonFatal:
                 phase_name=report.phase_name,
                 report=report,
                 gate=gate,
+                promote_and_dispatch=_callback_that_writes_a_marker,
                 transaction_root=tmp_path / "txns",
                 receipt_root=tmp_path / "receipts",
             )
-        assert result.status == "capture_failed"
-        assert any("capture_evidence failed" in lim for lim in result.limitations)
-        # The critical non-regression property: the report object itself
-        # (already written by the caller before this function was ever
-        # invoked) is completely untouched.
-        assert report.report_completeness == "complete"
+        assert result.status == "pre_promotion_certification_failed"
+        assert not marker_path.exists()
 
-    def test_post_capture_step_exception_yields_best_effort_incomplete(self, tmp_path):
-        report, gate = _certified_report(phase_id="999X.1-post-capture-fail-test")
+    def test_receipt_creation_happens_only_after_promote_and_dispatch_returns(self, tmp_path):
+        """Ordering proof: the receipt must be created strictly after the
+        callback returns (it needs the callback's real dispatch outcome),
+        never before or concurrently."""
+        report, gate = _certified_report(phase_id="999X.1-ordering-test")
+        order: list[str] = []
 
-        with mock.patch(
-            "pcae.core.finalization_transaction._extraction.extract",
-            side_effect=RuntimeError("synthetic extraction bug"),
-        ):
-            result = run_finalization_transaction(
-                phase_id=report.phase_id,
-                phase_name=report.phase_name,
-                report=report,
-                gate=gate,
-                transaction_root=tmp_path / "txns",
-                receipt_root=tmp_path / "receipts",
-            )
-        assert result.status == "best_effort_incomplete"
-        # Evidence capture itself still succeeded before the injected failure.
-        assert result.evidence_id
-        assert report.report_completeness == "complete"
+        def _callback() -> dict:
+            order.append("promote_and_dispatch")
+            report.notification_result = {"success": True}
+            return {"report": report}
+
+        result = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=gate,
+            promote_and_dispatch=_callback,
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+        assert result.receipt_logical_delivery_id is not None
+        order.append("receipt_confirmed_present")
+        assert order == ["promote_and_dispatch", "receipt_confirmed_present"]
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# 4. Resumability / idempotency
+# 3. Gate enforcement — the existing certified path is authoritative
+# ═══════════════════════════════════════════════════════════════════════
+
+
+class TestGateEnforcement:
+    def test_gate_not_passed_blocks_before_callback_is_invoked(self, tmp_path):
+        report, _ = _certified_report(phase_id="999X.1-blocked-test")
+        failing_gate = {"finalizable": False, "blockers": ["synthetic blocker"]}
+        calls: list = []
+
+        result = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=failing_gate,
+            promote_and_dispatch=_never_call_promote_and_dispatch(calls),
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+        assert calls == []
+        assert result.status == "gate_not_passed"
+        assert result.evidence_id is None
+        assert result.promotion_and_dispatch is None
+
+    def test_incomplete_report_completeness_blocks_even_if_gate_dict_lies(self, tmp_path):
+        """Defense in depth: the transaction re-checks ``report.report_
+        completeness`` itself rather than trusting a caller-supplied gate
+        dict's ``finalizable`` flag alone."""
+        report, _ = _certified_report(phase_id="999X.1-lying-gate-test")
+        report.report_completeness = "incomplete"
+        lying_gate = {"finalizable": True, "blockers": []}
+        calls: list = []
+
+        result = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=lying_gate,
+            promote_and_dispatch=_never_call_promote_and_dispatch(calls),
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+        assert calls == []
+        assert result.status == "gate_not_passed"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# 4. Resumability / idempotency — retry must not re-promote or re-dispatch
 # ═══════════════════════════════════════════════════════════════════════
 
 
 class TestResumability:
-    def test_second_call_for_same_certified_content_short_circuits(self, tmp_path):
+    def test_second_call_for_same_certified_content_does_not_reinvoke_callback(self, tmp_path):
         report, gate = _certified_report(phase_id="999X.1-resume-test")
         txn_root = tmp_path / "txns"
         rcpt_root = tmp_path / "receipts"
+        calls: list = []
 
         first = run_finalization_transaction(
             phase_id=report.phase_id, phase_name=report.phase_name,
-            report=report, gate=gate, transaction_root=txn_root, receipt_root=rcpt_root,
+            report=report, gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(report, calls),
+            transaction_root=txn_root, receipt_root=rcpt_root,
         )
         assert first.status == "completed"
+        assert calls == [True]
 
-        with mock.patch(
-            "pcae.core.finalization_transaction._capture_evidence",
-            side_effect=AssertionError("must not be called on resume"),
-        ):
-            second = run_finalization_transaction(
-                phase_id=report.phase_id, phase_name=report.phase_name,
-                report=report, gate=gate, transaction_root=txn_root, receipt_root=rcpt_root,
-            )
+        second = run_finalization_transaction(
+            phase_id=report.phase_id, phase_name=report.phase_name,
+            report=report, gate=gate,
+            promote_and_dispatch=_never_call_promote_and_dispatch(calls),
+            transaction_root=txn_root, receipt_root=rcpt_root,
+        )
         assert second.status == "resumed_completed"
+        assert calls == [True]  # still exactly one call, ever
         assert second.evidence_id == first.evidence_id
         assert second.receipt_logical_delivery_id == first.receipt_logical_delivery_id
+        # Retry preserves the exact certified semantic snapshot and digest
+        # -- these must never drift between the original run and a retry
+        # for identical content.
+        assert second.report_digest == first.report_digest
+        assert second.finalization_snapshot_id == first.finalization_snapshot_id
+        assert second.extraction_digests == first.extraction_digests
+        assert second.view_digests == first.view_digests
+        assert second.rendering_digests == first.rendering_digests
 
     def test_distinct_certified_content_does_not_collide_with_prior_completion(self, tmp_path):
         """A genuinely different certified report for the same phase_id
-        (e.g. a corrective re-run) produces its own transaction record --
-        it must not be silently treated as the already-completed one."""
+        (e.g. a corrective re-run) produces its own transaction record and
+        invokes its own callback -- it must not be silently treated as the
+        already-completed one."""
         txn_root = tmp_path / "txns"
         rcpt_root = tmp_path / "receipts"
         report_a, gate_a = _certified_report(
             phase_id="999X.1-distinct-test", summary="First summary."
         )
+        calls_a: list = []
         result_a = run_finalization_transaction(
             phase_id=report_a.phase_id, phase_name=report_a.phase_name,
-            report=report_a, gate=gate_a, transaction_root=txn_root, receipt_root=rcpt_root,
+            report=report_a, gate=gate_a,
+            promote_and_dispatch=_successful_promote_and_dispatch(report_a, calls_a),
+            transaction_root=txn_root, receipt_root=rcpt_root,
         )
 
         report_b, gate_b = _certified_report(
             phase_id="999X.1-distinct-test", summary="Second, different summary."
         )
+        calls_b: list = []
         result_b = run_finalization_transaction(
             phase_id=report_b.phase_id, phase_name=report_b.phase_name,
-            report=report_b, gate=gate_b, transaction_root=txn_root, receipt_root=rcpt_root,
+            report=report_b, gate=gate_b,
+            promote_and_dispatch=_successful_promote_and_dispatch(report_b, calls_b),
+            transaction_root=txn_root, receipt_root=rcpt_root,
         )
+        assert calls_a == [True]
+        assert calls_b == [True]  # distinct content -> its own callback invocation
         assert result_b.status == "completed"
         assert result_b.report_digest != result_a.report_digest
         assert result_b.receipt_logical_delivery_id != result_a.receipt_logical_delivery_id
@@ -409,15 +526,18 @@ class TestStorageIdentifierSafety:
     )
     def test_unsafe_phase_id_is_rejected(self, bad_id, tmp_path):
         report, gate = _certified_report(phase_id="999X.1-safe-holder")
+        calls: list = []
         with pytest.raises(ValueError):
             run_finalization_transaction(
                 phase_id=bad_id,
                 phase_name="x",
                 report=report,
                 gate=gate,
+                promote_and_dispatch=_never_call_promote_and_dispatch(calls),
                 transaction_root=tmp_path / "txns",
                 receipt_root=tmp_path / "receipts",
             )
+        assert calls == []
 
     def test_validate_identifier_accepts_ordinary_phase_ids(self):
         for ok_id in ("134E.10", "999X.1-safe-test", "113B.2", "134E.1V"):
@@ -425,7 +545,8 @@ class TestStorageIdentifierSafety:
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# 6. The shared boundary — no command constructs the new modules directly
+# 6. The shared boundary — no command constructs the new modules directly,
+#    and every entry point routes promotion/dispatch through the callback.
 # ═══════════════════════════════════════════════════════════════════════
 
 
@@ -443,7 +564,26 @@ class TestSharedBoundary:
         repo_root = Path(__file__).resolve().parent.parent
         content = (repo_root / path).read_text()
         assert "run_finalization_transaction" in content, (
-            f"{path} does not call the shared 134E.10 finalization transaction"
+            f"{path} does not call the shared 134E.10.1 finalization transaction"
+        )
+
+    @pytest.mark.parametrize(
+        "path",
+        [
+            "src/pcae/commands/phase.py",
+            "src/pcae/commands/task.py",
+            "src/pcae/commands/phase_reports.py",
+            "src/pcae/commands/notifications.py",
+        ],
+    )
+    def test_entry_point_supplies_promote_and_dispatch_callback(self, path):
+        repo_root = Path(__file__).resolve().parent.parent
+        content = (repo_root / path).read_text()
+        assert "promote_and_dispatch=_promote_and_dispatch" in content, (
+            f"{path} calls run_finalization_transaction without routing its own "
+            "promotion/dispatch through the promote_and_dispatch callback -- "
+            "134E.10.1 requires the transaction to gate promotion/dispatch, not "
+            "merely observe it afterward"
         )
 
     @pytest.mark.parametrize(
@@ -488,9 +628,11 @@ class TestExternalDeliveryIsolation:
 
     def test_transaction_delivery_step_uses_recording_adapter_only(self, tmp_path):
         report, gate = _certified_report(phase_id="999X.1-isolation-test")
+        calls: list = []
         result = run_finalization_transaction(
             phase_id=report.phase_id, phase_name=report.phase_name,
             report=report, gate=gate,
+            promote_and_dispatch=_successful_promote_and_dispatch(report, calls),
             transaction_root=tmp_path / "txns", receipt_root=tmp_path / "receipts",
         )
         assert result.status == "completed"

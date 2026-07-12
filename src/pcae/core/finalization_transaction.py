@@ -1,91 +1,103 @@
-"""Phase 134E.10 — Final Lifecycle Integration.
+"""Phase 134E.10 / 134E.10.1 — Final Lifecycle Integration + Transaction-Span
+Repair.
 
 This module is the single, shared, resumable finalization transaction that
 wires the seven previously-inert Phase 134E.1-134E.7 modules (Canonical
 Engineering Evidence, Extraction, Phase/Operator Report Views, Rendering,
-Delivery Pipeline, Delivery Receipt) into the existing, already-governed
-phase/task finalization path.
+Delivery Pipeline, Delivery Receipt) into the governed phase/task
+finalization path.
 
-Authority boundaries (134D plan, section "Authority Boundary Review"):
+**134E.10.1 architectural repair.** 134E.10V independently found, via
+direct line-number tracing, that 134E.10's original design called this
+module strictly *after* certification, promotion, and physical dispatch
+had already completed via the entirely unmodified legacy path -- making it
+a post-success observer with no ability to prevent, reject, or accurately
+classify a failure in any of the seven newly-integrated stages. 134D's own
+completion criteria for 134E.10 require "one resumable transaction [that]
+spans the full lifecycle." This module now satisfies that requirement by
+*inverting control*: :func:`run_finalization_transaction` is called
+*before* promotion and dispatch, runs the seven modules' mandatory
+pre-promotion stages (evidence capture, extraction, view composition,
+rendering) with veto power, and only if they all succeed does it *call*
+the entry point's own certification-and-promotion logic (still exactly the
+existing, unmodified ``finalize_phase_report``/``write_phase_report``/
+``dispatch`` machinery -- 134D's own "wrap it behind the transaction; treat
+it as an adapter" permission, not a rewrite of that machinery) through a
+caller-supplied ``promote_and_dispatch`` callback. A failure in any
+mandatory pre-promotion stage means the callback is **never invoked at
+all** -- no promotion, no latest-pointer change, no external delivery, no
+successful marker, exactly as 134D requires.
 
-- This module does not create, alter, strengthen, or re-derive any fact.
-  It only *captures* what an already-certified ``PhaseReport`` (from
-  ``pcae.core.phase_reports``) already established, after that report has
-  already passed ``validate_finalization_gate`` and already been written
-  by the existing, unmodified ``finalize_phase_report``/``write_phase_report``
-  path.
-- It does not introduce a second completion authority. The existing
-  ``PhaseReport`` + ``validate_finalization_gate`` + the notification
-  dispatch marker (``phase_reports.write_notification_dispatch_marker``)
-  remain the sole, unmodified source of truth for whether a phase is
-  finalized and whether it has been notified exactly once.
-- It does not perform a second physical delivery. The actual send already
-  happens through the existing, already-authorized dispatch path (called by
-  ``finalize_phase_report`` or by each command's own notification helper)
-  *before* this transaction ever runs. This module's own "delivery" step
-  only *models*, via the in-memory, no-network ``RECORDING_ADAPTER_ID``
-  adapter from ``pcae.core.delivery_pipeline``, what was already sent, and
-  records that model as a receipt via ``pcae.core.delivery_receipt``. It
-  never calls ``pcae.core.notifications`` or any live sink, and it never
-  re-checks or re-uses ``_external_delivery_authorized`` for a live send.
-  **134E.10V finding, repaired:** the recording adapter unconditionally
-  reports success by construction, so delivery modeling and receipt
-  creation are only attempted when ``report.notification_result`` (the
-  real, already-recorded outcome of the existing dispatch path) itself
-  reports ``success: True`` -- otherwise a receipt would misrepresent a
-  delivery that was never attempted or did not succeed. A skipped receipt
-  is recorded as an explicit, honest limitation on the ``TransactionResult``
-  instead.
+Authority boundaries (134D plan, section "Authority Boundary Review"),
+updated for 134E.10.1:
 
-Deviation from the full step sequence sketched in the Phase 134E.10 task
-brief, documented honestly: identity resolution, ``PhaseReport`` construction,
-``validate_finalization_gate``, promotion (``finalize_phase_report`` /
-``write_phase_report``), and the physical notification dispatch itself
-remain exactly where they already are in each of the five call sites
-(``phase.py``, ``task.py``, ``phase_reports.py``, ``notifications.py``, and
-transitively ``push.py`` via ``phase.py``). Those code paths differ from
-each other in load-bearing, entry-point-specific ways (different trust
-schemas, different Repository Transition Validator invocations, different
-certification call sites) that are outside this sub-phase's stated
-non-goals ("no evidence-model change", "integrates ordering and completion,
-not content"). Consolidating *that* logic into one function was judged too
-high-risk to attempt safely in this pass without threatening the single
-most important correctness property of this phase: the already-working,
-governed completion path (100% of existing behavior) must never regress.
+- This module does not create, alter, strengthen, or re-derive any fact
+  beyond what the caller-supplied, already-gate-passed trial ``PhaseReport``
+  already established. It still does not reimplement
+  ``validate_finalization_gate``/``_apply_canonical_and_trust`` -- those
+  remain the caller's responsibility, run *before* this function is
+  invoked, exactly as before 134E.10.1. What changed is *what runs after*
+  a passing gate: promotion and dispatch are now behind, not before, this
+  module's own mandatory stages.
+- It does not introduce a second completion authority in the sense that
+  matters: it still never independently writes ``latest.md``/``latest.json``,
+  never independently dispatches, and never independently writes the
+  ``.last-notified.json`` marker -- all three remain the exclusive
+  responsibility of the ``promote_and_dispatch`` callback (i.e., the
+  existing, unmodified ``finalize_phase_report``/``write_phase_report``/
+  dispatch functions), invoked *by* this module rather than *before* it.
+- It does not perform a second physical delivery. The real send still
+  happens exactly once, inside the caller-supplied ``promote_and_dispatch``
+  callback, using the existing, already-authorized dispatch path. This
+  module's own "delivery" step (post-dispatch) only *models*, via the
+  in-memory, no-network ``RECORDING_ADAPTER_ID`` adapter from
+  ``pcae.core.delivery_pipeline``, what the callback's real dispatch
+  actually did, and records that model as a receipt via
+  ``pcae.core.delivery_receipt``. It never calls
+  ``pcae.core.notifications`` or any live sink itself.
+  **134E.10V finding, repaired (unchanged by 134E.10.1):** the recording
+  adapter unconditionally reports success by construction, so delivery
+  modeling and receipt creation are only attempted when the *actually
+  promoted* report's ``notification_result`` (read from
+  ``promote_and_dispatch()``'s own return value, not the pre-promotion
+  trial report) reports ``success: True`` -- otherwise a receipt would
+  misrepresent a delivery that was never attempted or did not succeed.
 
-Instead, this module is called *after* each entry point has already
-produced (or retrieved) a certified, gate-passed ``PhaseReport`` -- it is
-the ONE place, and the only place, where any of the seven new-machinery
-modules are invoked. No command file constructs
-``CanonicalEngineeringEvidence``, calls ``extract``/``compose_*``/``render``/
-``build_delivery_request``/``open_receipt`` directly; they all funnel
-through :func:`run_finalization_transaction`.
+No command file constructs ``CanonicalEngineeringEvidence``, calls
+``extract``/``compose_*``/``render``/``build_delivery_request``/
+``open_receipt`` directly; they all funnel through
+:func:`run_finalization_transaction`, and (134E.10.1) they now also funnel
+their own promotion/dispatch calls through it via the
+``promote_and_dispatch`` callback, rather than calling
+``finalize_phase_report``/``write_phase_report``/``dispatch`` directly
+themselves.
 
 Resumability model (mirrors the PER/RER promotion-idempotency pattern in
 ``pcae.core.agent`` around ``build_promotion_execution``): a transaction
-record is persisted to
-``.pcae/finalization-transactions/<phase_id>.json`` with
-``status="in_progress"`` before the first new-pipeline step and rewritten
-after every step. A second invocation for the same ``phase_id`` whose
-certified content (``report_digest`` + ``finalization_snapshot_id``, the
-same identity pair the existing notification marker already uses) matches
-a prior ``status="completed"`` record short-circuits immediately without
-re-running any step (no duplicate evidence/views/renderings/receipt is
-produced). If the certified content differs (a new, distinct certified
-report), a fresh transaction record is written and evidence/extraction/
-views/rendering/receipt are (re)produced for the new content -- this is
-still safe because it never touches promotion or physical delivery, which
-already happened via the existing path before this function is called.
+record is persisted to ``.pcae/finalization-transactions/<phase_id>.json``
+with ``status="in_progress"`` before the first pre-promotion step and
+rewritten after every step. A second invocation for the same ``phase_id``
+whose certified content (``report_digest`` + ``finalization_snapshot_id``,
+computed from the pre-promotion trial report -- the same identity pair the
+existing notification marker already uses) matches a prior
+``status="completed"`` record short-circuits immediately: the
+``promote_and_dispatch`` callback is **not called again**, so a retry can
+never re-promote or re-dispatch for content already known to be finalized
+-- this is a stronger, structural exactly-once guarantee than 134E.10's
+original design offered (which relied solely on the pre-existing
+``.last-notified.json`` marker for dedup, checked independently by each
+entry point).
 
-Fail-closed-but-non-fatal design: everything in this module after evidence
-capture begins is wrapped so that ANY exception is recorded as a
-transaction limitation and returned to the caller as a
-``TransactionResult`` with a non-"completed" status -- it never raises out
-to the caller (except for a deliberate, immediate ``ValueError`` on unsafe
-storage identifiers, which is a defensive input-validation failure, not a
-"this step didn't work" outcome). Callers are expected to invoke this
-function defensively (already-written report / already-sent notification
-must never be affected by a bug in this module).
+Fail-closed-but-non-fatal-*after-promotion* design: pre-promotion stage
+failures are fail-closed and fatal to the *transaction* (the callback is
+never invoked, so nothing irreversible has happened yet -- returning
+failure to the caller is safe and correct). Once ``promote_and_dispatch``
+has been called, its outcome is authoritative and irreversible; this
+module's remaining post-dispatch steps (receipt modeling) are then
+best-effort and non-fatal, matching 134E.10's original design for that
+specific, inherently-after-the-fact portion of the sequence -- a receipt
+bug must never be able to un-promote or un-send something that already,
+legitimately happened.
 """
 
 from __future__ import annotations
@@ -97,7 +109,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
-from typing import Any
+from typing import Any, Callable
 
 from pcae.core.phase_reports import (
     PhaseReport,
@@ -164,21 +176,32 @@ class TransactionResult:
     """Outcome of a single :func:`run_finalization_transaction` call.
 
     ``status`` values:
-      - ``"completed"``: all new-pipeline steps (capture through receipt)
-        succeeded.
+      - ``"completed"``: all mandatory pre-promotion stages succeeded, the
+        ``promote_and_dispatch`` callback was invoked and returned, and
+        post-dispatch receipt modeling ran (a skipped-but-honest receipt,
+        per the 134E.10V repair, still counts as ``"completed"`` -- see
+        ``limitations``).
       - ``"resumed_completed"``: a prior transaction for the same
-        certified content had already completed; nothing was re-run.
+        certified content had already completed; the callback was
+        **not** invoked this call (no re-promotion, no re-dispatch).
       - ``"gate_not_passed"``: the caller-supplied gate/report was not
-        finalizable; no new-pipeline step was attempted (this is the
+        finalizable; the callback was never invoked (this is the
         expected, ordinary outcome any time the existing gate itself
         blocked -- not a failure of this module).
-      - ``"capture_failed"``: evidence construction/validation/finalize
-        failed. The already-certified, already-promoted ``PhaseReport``
-        that the caller wrote *before* calling this function is
-        completely unaffected.
-      - ``"best_effort_incomplete"``: capture succeeded but a later step
-        (extraction/composition/rendering/delivery-model/receipt) failed;
-        again, the existing certified report is unaffected.
+      - ``"pre_promotion_certification_failed"``: a mandatory
+        pre-promotion stage (evidence capture, extraction, view
+        composition, or rendering) raised. **The ``promote_and_dispatch``
+        callback was never invoked** -- no promotion, no latest-pointer
+        change, no external delivery, no successful marker. This is the
+        134E.10.1 repair's central new behavior: 134E.10's original
+        design had no status equivalent to this because the callback
+        (then just the legacy path, called directly by the entry point)
+        had already run unconditionally before this module was ever
+        reached.
+      - ``"promotion_and_dispatch_failed"``: pre-promotion stages
+        succeeded, the callback was invoked, but it raised or returned a
+        result indicating failure (``blocked``/``report_error``). No
+        further transaction steps ran.
     """
 
     phase_id: str
@@ -195,6 +218,7 @@ class TransactionResult:
     checkpoint_path: str | None = None
     report_digest: str | None = None
     finalization_snapshot_id: str | None = None
+    promotion_and_dispatch: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -467,26 +491,65 @@ def _capture_evidence(
     return evidence.finalize()
 
 
+def _build_pre_promotion_artifacts(report: PhaseReport, phase_id: str, phase_name: str):
+    """Run the mandatory pre-promotion stages (134E.10.1). Raises on any
+    failure -- the caller (:func:`run_finalization_transaction`) treats any
+    exception here as fatal to the transaction, and never invokes
+    ``promote_and_dispatch`` when this raises. Returns the tuple of
+    artifacts the post-promotion steps need.
+    """
+    evidence = _capture_evidence(report, phase_id, phase_name)
+    extraction_phase = _extraction.extract(evidence, _extraction.PROFILE_ID_PHASE_REPORT)
+    extraction_operator = _extraction.extract(evidence, _extraction.PROFILE_ID_OPERATOR_REPORT)
+    view_phase = _prview.compose_phase_report_view(extraction_phase)
+    view_operator = _orview.compose_operator_report_view(extraction_operator)
+    render_phase_md = _rendering.render(
+        view_phase, extraction_phase, _rendering.RENDERER_ID_PHASE_REPORT_MARKDOWN
+    )
+    render_operator_md = _rendering.render(
+        view_operator, extraction_operator, _rendering.RENDERER_ID_OPERATOR_REPORT_MARKDOWN
+    )
+    return (
+        evidence, extraction_phase, extraction_operator,
+        view_phase, view_operator, render_phase_md, render_operator_md,
+    )
+
+
 def run_finalization_transaction(
     *,
     phase_id: str,
     phase_name: str,
     report: PhaseReport,
     gate: dict[str, Any],
+    promote_and_dispatch: Callable[[], dict[str, Any]],
     transaction_root: Path | str | None = None,
     receipt_root: Path | str | None = None,
 ) -> TransactionResult:
-    """Run (or resume) the shared new-pipeline finalization transaction for
-    an already-certified, already-promoted ``PhaseReport``.
+    """Run (or resume) the authoritative finalization transaction (134E.10.1).
+
+    Unlike 134E.10's original design, this function is called *before*
+    promotion and dispatch, not after. ``report`` is the caller's
+    already-gate-passed *trial* report (identical in content to what the
+    caller would otherwise pass directly to ``finalize_phase_report``/
+    ``write_phase_report``, but not yet promoted). ``promote_and_dispatch``
+    is a zero-argument callback the caller supplies that performs the
+    actual, unmodified legacy promotion-and-dispatch work (calling
+    ``finalize_phase_report``, ``write_phase_report``, ``dispatch``, etc.)
+    and returns a dict containing at least a ``"report"`` key -- the real,
+    now-promoted ``PhaseReport`` object, with ``notification_result``
+    populated if a dispatch was attempted.
+
+    This function calls the seven newly-integrated modules' mandatory
+    pre-promotion stages (evidence capture, extraction, view composition,
+    rendering) *before* calling ``promote_and_dispatch``. **If any of them
+    raises, ``promote_and_dispatch`` is never invoked** -- no promotion, no
+    dispatch, no marker, no external delivery. This is the 134E.10.1
+    repair's central behavior change from 134E.10's original design.
 
     Preconditions the caller is responsible for (this function re-checks
     them defensively but does not re-derive them): ``report`` has already
     passed ``validate_finalization_gate`` (``gate["finalizable"]`` is
-    True) and has already been written via the existing
-    ``finalize_phase_report``/``write_phase_report`` path, and any
-    physical notification dispatch has already been attempted through the
-    existing, already-authorized dispatch path. This function never writes
-    ``latest.md``/``latest.json`` and never sends a live notification.
+    True).
     """
 
     _validate_identifier(phase_id, "phase_id")
@@ -505,21 +568,16 @@ def run_finalization_transaction(
         and existing.get("finalization_snapshot_id") == finalization_snapshot_id
         and existing.get("status") == "completed"
     ):
+        # Resumed: the callback is NOT invoked -- this content was already
+        # promoted/dispatched by a prior call. Retrying a completed
+        # transaction must never re-promote or re-dispatch.
         existing["_checkpoint_path"] = str(checkpoint_path)
         return _result_from_checkpoint(existing)
 
     if not gate.get("finalizable") or report.report_completeness != "complete":
-        # Nothing to persist: no new-pipeline step was attempted, and a
-        # future call for this phase_id with a passing gate will simply
-        # proceed and write its own fresh checkpoint. Writing a "why this
-        # was rejected" record here would be a filesystem side effect for
-        # what is, by construction, the common/expected outcome any time
-        # this function is called before its documented precondition
-        # (gate already passed) holds -- including every caller that
-        # (correctly, per this function's own preconditions contract)
-        # only calls it after checking the gate itself, where a stale or
-        # synthetic report can still legitimately fail this defense-in-
-        # depth re-check.
+        # Nothing to persist and, critically, promote_and_dispatch is NOT
+        # called: a gate-failing report must never be promoted or
+        # dispatched, exactly as before 134E.10.1.
         return TransactionResult(
             phase_id=phase_id,
             status="gate_not_passed",
@@ -548,99 +606,109 @@ def run_finalization_transaction(
         checkpoint_path=str(checkpoint_path),
     )
 
-    # Step: capture evidence. Kept outside the broad best-effort try/except
-    # below because a capture failure is the one new-pipeline failure mode
-    # explicitly called out as needing its own terminal status
-    # ("capture_failed") rather than being folded into the generic
-    # "best_effort_incomplete" bucket.
+    # ── Mandatory pre-promotion stages (134E.10.1: gating, fatal to the
+    # transaction; promote_and_dispatch is never called if this raises) ──
     try:
-        evidence = _capture_evidence(report, phase_id, phase_name)
-    except Exception as exc:  # noqa: BLE001 - deliberately broad, fail-closed-but-non-fatal
-        checkpoint["steps"]["capture_evidence"] = "failed"
-        checkpoint["limitations"].append(f"capture_evidence failed: {type(exc).__name__}: {exc}")
-        checkpoint["status"] = "capture_failed"
+        (
+            evidence, extraction_phase, extraction_operator,
+            view_phase, view_operator, render_phase_md, render_operator_md,
+        ) = _build_pre_promotion_artifacts(report, phase_id, phase_name)
+    except Exception as exc:  # noqa: BLE001 - deliberately broad, fail-closed
+        checkpoint["steps"]["pre_promotion_certification"] = "failed"
+        checkpoint["limitations"].append(
+            f"pre_promotion_certification failed: {type(exc).__name__}: {exc} "
+            "-- promote_and_dispatch was NOT invoked"
+        )
+        checkpoint["status"] = "pre_promotion_certification_failed"
         _save_checkpoint(checkpoint_path, checkpoint)
-        result.status = "capture_failed"
+        result.status = "pre_promotion_certification_failed"
         result.limitations = list(checkpoint["limitations"])
         return result
 
-    checkpoint["steps"]["capture_evidence"] = "completed"
-    checkpoint["evidence_id"] = evidence.identity.evidence_id
     result.evidence_id = evidence.identity.evidence_id
+    result.extraction_digests = {
+        "phase_report": extraction_phase.compute_digest(),
+        "operator_report": extraction_operator.compute_digest(),
+    }
+    result.view_digests = {
+        "phase_report": view_phase.compute_digest(),
+        "operator_report": view_operator.compute_digest(),
+    }
+    result.rendering_digests = {
+        "phase_report": render_phase_md.compute_digest(),
+        "operator_report": render_operator_md.compute_digest(),
+    }
+    # Honest divergence check (never forced to match): the two rendering
+    # pipelines are independent presentation stages; if they happen to
+    # disagree, that is recorded as a known limitation, not papered over,
+    # and (unchanged from 134E.10) never blocks promotion by itself.
+    existing_markdown = report.render_markdown()
+    matches = existing_markdown.strip() == render_phase_md.rendered_content.strip()
+    result.rendering_content_matches_existing = {"phase_report_markdown": matches}
+    if not matches:
+        checkpoint["limitations"].append(
+            "known limitation: phase_report_markdown_v1 rendering output "
+            "diverges from PhaseReport.render_markdown() output for this "
+            "report; both derive from the same certified report/evidence "
+            "but are independent presentation stages and are not forced "
+            "to be byte-identical"
+        )
+
+    checkpoint["steps"]["pre_promotion_certification"] = "completed"
+    checkpoint["evidence_id"] = evidence.identity.evidence_id
+    checkpoint["extraction_digests"] = dict(result.extraction_digests)
+    checkpoint["view_digests"] = dict(result.view_digests)
+    checkpoint["rendering_digests"] = dict(result.rendering_digests)
+    checkpoint["rendering_content_matches_existing"] = dict(
+        result.rendering_content_matches_existing
+    )
     _save_checkpoint(checkpoint_path, checkpoint)
 
+    # ── Promotion and dispatch: the caller-supplied adapter, invoked ONLY
+    # because pre-promotion certification succeeded. This is the real,
+    # unmodified legacy machinery (finalize_phase_report/write_phase_
+    # report/dispatch) -- 134D's "wrap it behind the transaction; treat it
+    # as an adapter" permission, not a reimplementation. ─────────────────
     try:
-        extraction_phase = _extraction.extract(evidence, _extraction.PROFILE_ID_PHASE_REPORT)
-        extraction_operator = _extraction.extract(evidence, _extraction.PROFILE_ID_OPERATOR_REPORT)
-        result.extraction_digests = {
-            "phase_report": extraction_phase.compute_digest(),
-            "operator_report": extraction_operator.compute_digest(),
-        }
-        checkpoint["steps"]["extraction"] = "completed"
-        checkpoint["extraction_digests"] = dict(result.extraction_digests)
-        _save_checkpoint(checkpoint_path, checkpoint)
-
-        view_phase = _prview.compose_phase_report_view(extraction_phase)
-        view_operator = _orview.compose_operator_report_view(extraction_operator)
-        result.view_digests = {
-            "phase_report": view_phase.compute_digest(),
-            "operator_report": view_operator.compute_digest(),
-        }
-        checkpoint["steps"]["composition"] = "completed"
-        checkpoint["view_digests"] = dict(result.view_digests)
-        _save_checkpoint(checkpoint_path, checkpoint)
-
-        render_phase_md = _rendering.render(
-            view_phase, extraction_phase, _rendering.RENDERER_ID_PHASE_REPORT_MARKDOWN
+        promotion_result = promote_and_dispatch()
+    except Exception as exc:  # noqa: BLE001 - the callback itself failing is authoritative
+        checkpoint["steps"]["promotion_and_dispatch"] = "failed"
+        checkpoint["limitations"].append(
+            f"promote_and_dispatch raised: {type(exc).__name__}: {exc}"
         )
-        render_operator_md = _rendering.render(
-            view_operator, extraction_operator, _rendering.RENDERER_ID_OPERATOR_REPORT_MARKDOWN
-        )
-        result.rendering_digests = {
-            "phase_report": render_phase_md.compute_digest(),
-            "operator_report": render_operator_md.compute_digest(),
-        }
-        checkpoint["steps"]["rendering"] = "completed"
-        checkpoint["rendering_digests"] = dict(result.rendering_digests)
-
-        # Honest divergence check (never forced to match): the two
-        # rendering pipelines are independent presentation stages; if they
-        # happen to disagree, that is recorded as a known limitation, not
-        # papered over.
-        existing_markdown = report.render_markdown()
-        matches = existing_markdown.strip() == render_phase_md.rendered_content.strip()
-        result.rendering_content_matches_existing = {"phase_report_markdown": matches}
-        checkpoint["rendering_content_matches_existing"] = dict(
-            result.rendering_content_matches_existing
-        )
-        if not matches:
-            checkpoint["limitations"].append(
-                "known limitation: phase_report_markdown_v1 rendering output "
-                "diverges from PhaseReport.render_markdown() output for this "
-                "report; both derive from the same certified report/evidence "
-                "but are independent presentation stages and are not forced "
-                "to be byte-identical"
-            )
+        checkpoint["status"] = "promotion_and_dispatch_failed"
         _save_checkpoint(checkpoint_path, checkpoint)
+        result.status = "promotion_and_dispatch_failed"
+        result.limitations = list(checkpoint["limitations"])
+        return result
 
-        # Delivery: MODEL the already-executed dispatch, do not re-send.
-        # 134E.10V finding (repaired): the RECORDING_ADAPTER_ID adapter's
-        # own deliver function unconditionally reports success ("no
-        # external I/O... deterministically reports success", see its
-        # docstring in delivery_pipeline.py) -- calling it unconditionally
-        # here would make the receipt claim a successful delivery even
-        # when the real dispatch was never attempted or genuinely failed,
-        # violating the receipt-honesty contract ("must not claim adapter
-        # execution if the generalized adapter did not execute", "must
-        # not imply remote acceptance without evidence"). The receipt
-        # step now only runs when `report.notification_result` -- the
-        # real, existing dispatch outcome already recorded by the
-        # existing, unmodified dispatch path before this function was
-        # ever called -- itself reports `success: True`. Any other case
-        # (not attempted, disabled, no sinks, failed) skips delivery
-        # modeling and receipt creation entirely and records an explicit,
-        # honest limitation instead of a misleading synthetic receipt.
-        notification_result = getattr(report, "notification_result", None) or {}
+    if promotion_result.get("blocked") or promotion_result.get("report_error"):
+        checkpoint["steps"]["promotion_and_dispatch"] = "failed"
+        checkpoint["limitations"].append(
+            "promote_and_dispatch reported failure: "
+            f"blocked={promotion_result.get('blocked')!r} "
+            f"report_error={promotion_result.get('report_error')!r}"
+        )
+        checkpoint["status"] = "promotion_and_dispatch_failed"
+        _save_checkpoint(checkpoint_path, checkpoint)
+        result.status = "promotion_and_dispatch_failed"
+        result.limitations = list(checkpoint["limitations"])
+        return result
+
+    checkpoint["steps"]["promotion_and_dispatch"] = "completed"
+    _save_checkpoint(checkpoint_path, checkpoint)
+    result.promotion_and_dispatch = promotion_result
+    promoted_report = promotion_result.get("report") or report
+
+    # ── Post-dispatch: receipt modeling (best-effort, non-fatal -- the
+    # promotion/dispatch above already, irreversibly, happened). ─────────
+    try:
+        # 134E.10V finding (repaired, preserved unchanged by 134E.10.1):
+        # the RECORDING_ADAPTER_ID adapter unconditionally reports success
+        # by construction, so delivery modeling and receipt creation are
+        # only attempted when the REAL, now-promoted report's
+        # notification_result itself reports success: True.
+        notification_result = getattr(promoted_report, "notification_result", None) or {}
         real_dispatch_succeeded = bool(notification_result.get("success"))
         completed_at = _utc_now_iso()
         if not real_dispatch_succeeded:
@@ -689,11 +757,13 @@ def run_finalization_transaction(
         checkpoint["completed_at"] = completed_at
         result.status = "completed"
     except Exception as exc:  # noqa: BLE001 - deliberately broad, fail-closed-but-non-fatal
-        checkpoint["status"] = "best_effort_incomplete"
+        # Promotion/dispatch already, irreversibly, succeeded above -- a
+        # receipt-modeling bug must never be represented as un-doing that.
+        checkpoint["status"] = "completed_receipt_best_effort_incomplete"
         checkpoint["limitations"].append(
-            f"new-pipeline step failed after capture: {type(exc).__name__}: {exc}"
+            f"post-dispatch receipt modeling failed: {type(exc).__name__}: {exc}"
         )
-        result.status = "best_effort_incomplete"
+        result.status = "completed_receipt_best_effort_incomplete"
 
     result.steps = dict(checkpoint["steps"])
     result.limitations = list(checkpoint["limitations"])

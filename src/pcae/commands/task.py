@@ -833,27 +833,61 @@ def _finalize_task_report_and_notify(
     if (not dispatch_allowed or not certification.eligible) and notify_enabled:
         suppressed_notify_enabled = os.environ.get("PCAE_NOTIFY_ENABLED")
         os.environ["PCAE_NOTIFY_ENABLED"] = ""
-    try:
-        fin = finalize_phase_report(
+    def _promote_and_dispatch() -> dict:
+        try:
+            return finalize_phase_report(
+                phase_id=phase_id,
+                phase_name=phase_name,
+                status=status,
+                summary=summary,
+                files_changed=files_changed,
+                tests_run=tests_run,
+                test_results=test_results,
+                governance_results=governance_results,
+                commits=commits,
+                pushed_status=pushed_status,
+                origin_main_head_count=origin_count,
+                explicit_no_go_confirmations=no_go_list,
+                recommended_next_phase=recommended_next,
+                commit_attribution=commit_attribution,
+                architecture_status_snapshot=trial_report.architecture_status,
+            )
+        finally:
+            if suppressed_notify_enabled is not None:
+                os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
+
+    # Phase 134E.10.1 — transaction-span repair: when the trial gate
+    # genuinely passed, promotion and dispatch now happen INSIDE the
+    # authoritative finalization transaction, gated on the seven
+    # newly-integrated modules' mandatory pre-promotion stages succeeding
+    # first. A pre-promotion failure means _promote_and_dispatch() above is
+    # never called at all -- no promotion, no dispatch, no marker.
+    if gate.get("finalizable"):
+        from pcae.core.finalization_transaction import run_finalization_transaction
+        txn_result = run_finalization_transaction(
             phase_id=phase_id,
             phase_name=phase_name,
-            status=status,
-            summary=summary,
-            files_changed=files_changed,
-            tests_run=tests_run,
-            test_results=test_results,
-            governance_results=governance_results,
-            commits=commits,
-            pushed_status=pushed_status,
-            origin_main_head_count=origin_count,
-            explicit_no_go_confirmations=no_go_list,
-            recommended_next_phase=recommended_next,
-            commit_attribution=commit_attribution,
-            architecture_status_snapshot=trial_report.architecture_status,
+            report=trial_report,
+            gate=gate,
+            promote_and_dispatch=_promote_and_dispatch,
         )
-    finally:
-        if suppressed_notify_enabled is not None:
-            os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
+        if txn_result.status == "pre_promotion_certification_failed":
+            return {
+                "status": "pre_promotion_certification_failed",
+                "message": "finalization transaction blocked promotion and dispatch",
+                "phase_id": phase_id,
+                "limitations": txn_result.limitations,
+            }
+        if txn_result.status == "promotion_and_dispatch_failed":
+            return {
+                "status": "promotion_and_dispatch_failed",
+                "message": "finalize_phase_report failed inside the finalization transaction",
+                "phase_id": phase_id,
+                "limitations": txn_result.limitations,
+            }
+        fin = txn_result.promotion_and_dispatch or {}
+    else:
+        fin = _promote_and_dispatch()
 
     if fin.get("report_error"):
         return {
@@ -893,30 +927,6 @@ def _finalize_task_report_and_notify(
             commit_attribution=commit_attribution,
         )
         apply_old_schema_gate(trust_result, final_gate)
-
-        # Phase 134E.10 — final lifecycle integration. Best-effort, never
-        # fatal (see finalization_transaction.py module docstring and the
-        # matching call site in commands/phase.py): captures Canonical
-        # Engineering Evidence from the report already certified/persisted
-        # above, runs it through Extraction/Views/Rendering/Delivery-
-        # modeling/Receipt. Never re-decides completeness, never
-        # re-promotes, never performs a second physical send. Only
-        # invoked when the gate actually passed -- there is nothing for
-        # it to do otherwise, and calling it unconditionally would create
-        # a needless filesystem side effect (a transaction checkpoint
-        # file) for every gate-failing call, including the many synthetic/
-        # invalid reports this codebase's own test suite constructs.
-        if final_gate.get("finalizable"):
-            try:
-                from pcae.core.finalization_transaction import run_finalization_transaction
-                run_finalization_transaction(
-                    phase_id=phase_id,
-                    phase_name=phase_name,
-                    report=report,
-                    gate=final_gate,
-                )
-            except Exception:  # noqa: BLE001 - best-effort, never fatal
-                pass
 
     result = {
         "status": "finalized",

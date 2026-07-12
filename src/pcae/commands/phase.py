@@ -415,31 +415,69 @@ def _finalize_report_and_notify(
     # — it still writes the report canonically and proceeds. The gate is
     # only enforced (passed through) when that override was not given.
     enforced_gate = None if allow_partial_report else gate
-    try:
-        fin = finalize_phase_report(
+
+    def _promote_and_dispatch() -> dict:
+        try:
+            return finalize_phase_report(
+                phase_id=phase_id,
+                phase_name=phase_name,
+                status="completed",
+                summary=summary,
+                files_changed=files_changed,
+                tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
+                test_results=test_results,
+                governance_results=governance_results,
+                commits=commits,
+                pushed_status=pushed_status,
+                origin_main_head_count=origin_count,
+                explicit_no_go_confirmations=no_go_list,
+                recommended_next_phase=recommended_next,
+                commit_attribution=commit_attribution,
+                gate=enforced_gate,
+                report_is_complete=dispatch_allowed,
+                report_incomplete_reason=incomplete_reason,
+                architecture_status_snapshot=trial_report.architecture_status,
+            )
+        finally:
+            if suppressed_notify_enabled is not None:
+                import os as _os
+                _os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
+
+    # Phase 134E.10.1 — transaction-span repair: when the gate genuinely
+    # passed (not the explicit --allow-partial-report human override, which
+    # must keep its own pre-existing unconditional-proceed behavior exactly
+    # -- see project memory), promotion and dispatch now happen INSIDE the
+    # authoritative finalization transaction, gated on the seven
+    # newly-integrated modules' mandatory pre-promotion stages succeeding
+    # first. A pre-promotion failure means _promote_and_dispatch() above is
+    # never called at all -- no promotion, no dispatch, no marker.
+    if gate.get("finalizable") and not allow_partial_report:
+        from pcae.core.finalization_transaction import run_finalization_transaction
+        txn_result = run_finalization_transaction(
             phase_id=phase_id,
             phase_name=phase_name,
-            status="completed",
-            summary=summary,
-            files_changed=files_changed,
-            tests_run=int(tests_added.split()[0]) if tests_added and tests_added.split()[0].isdigit() else 0,
-            test_results=test_results,
-            governance_results=governance_results,
-            commits=commits,
-            pushed_status=pushed_status,
-            origin_main_head_count=origin_count,
-            explicit_no_go_confirmations=no_go_list,
-            recommended_next_phase=recommended_next,
-            commit_attribution=commit_attribution,
-            gate=enforced_gate,
-            report_is_complete=dispatch_allowed,
-            report_incomplete_reason=incomplete_reason,
-            architecture_status_snapshot=trial_report.architecture_status,
+            report=trial_report,
+            gate=gate,
+            promote_and_dispatch=_promote_and_dispatch,
         )
-    finally:
-        if suppressed_notify_enabled is not None:
-            import os as _os
-            _os.environ["PCAE_NOTIFY_ENABLED"] = suppressed_notify_enabled
+        if txn_result.status == "pre_promotion_certification_failed":
+            print("Finalization transaction (134E.10.1): BLOCKED — pre-promotion certification failed")
+            for limitation in txn_result.limitations:
+                print(f"  {limitation}")
+            print("  Phase completion refused. Promotion and dispatch were never attempted.")
+            return False
+        if txn_result.status == "promotion_and_dispatch_failed":
+            print("Finalization transaction (134E.10.1): promotion/dispatch failed")
+            for limitation in txn_result.limitations:
+                print(f"  {limitation}")
+            return False
+        fin = txn_result.promotion_and_dispatch or {}
+        print(f"Finalization transaction (134E.10.1): {txn_result.status}")
+        if txn_result.limitations:
+            for limitation in txn_result.limitations:
+                print(f"  Limitation: {limitation}")
+    else:
+        fin = _promote_and_dispatch()
 
     if already_notified:
         fin["notification_reason"] = (
@@ -523,36 +561,6 @@ def _finalize_report_and_notify(
             print(f"  Markdown: {md_path}")
         if json_path:
             print(f"  JSON:     {json_path}")
-
-        # Phase 134E.10 — final lifecycle integration. Best-effort, never
-        # fatal: this only *captures* Canonical Engineering Evidence and
-        # runs it through Extraction/Views/Rendering/Delivery-modeling/
-        # Receipt from the report already certified and promoted above.
-        # It never re-decides completeness, never re-promotes, and never
-        # performs a second physical send (see finalization_transaction.py
-        # module docstring). A bug here must never affect the governed
-        # completion path that already succeeded. Only invoked when the
-        # gate actually passed (not merely "not blocked", which
-        # --allow-partial-report can also satisfy) -- there is nothing
-        # for it to do otherwise, and calling it unconditionally would
-        # create a needless filesystem side effect for every gate-failing
-        # call, including the many synthetic/invalid reports this
-        # codebase's own test suite constructs.
-        if gate.get("finalizable"):
-            try:
-                from pcae.core.finalization_transaction import run_finalization_transaction
-                txn_result = run_finalization_transaction(
-                    phase_id=phase_id,
-                    phase_name=phase_name,
-                    report=report,
-                    gate=gate,
-                )
-                print(f"Finalization transaction (134E.10): {txn_result.status}")
-                if txn_result.limitations:
-                    for limitation in txn_result.limitations:
-                        print(f"  Limitation: {limitation}")
-            except Exception as txn_exc:  # noqa: BLE001 - best-effort, never fatal
-                print(f"Finalization transaction (134E.10): error (non-fatal) — {txn_exc}")
 
     # ── Notification certification (Phase 114B) ────────────────────────────
     # The single shared eligibility decision, evaluated before dispatch was

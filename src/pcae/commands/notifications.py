@@ -264,32 +264,60 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
         artifact_paths=[str(reports_dir / "latest.md")],
     )
 
+    # Phase 134E.10.1 — transaction-span repair: this entry point has no
+    # promotion step of its own (the report was already promoted by a prior
+    # entry point's run) -- only dispatch. Dispatch still now happens
+    # INSIDE the authoritative finalization transaction, gated on the seven
+    # newly-integrated modules' mandatory pre-promotion stages succeeding
+    # first. `gate["finalizable"]` was already confirmed True earlier in
+    # this function (the earlier `if not gate["finalizable"]: return 1`
+    # check), so the transaction is entered unconditionally here.
     sink = TelegramSink()
-    results = dispatch(event, [sink])
-    all_ok = bool(results) and all(r.success for r in results)
-    if all_ok and commit_hash:
-        write_notification_dispatch_marker(
-            report.phase_id,
-            commit_hash,
-            report_digest=report_digest,
-            finalization_snapshot_id=snapshot_id,
-        )
 
-    # Phase 134E.10 — final lifecycle integration. Best-effort, never fatal
-    # (see finalization_transaction.py and the matching call sites in
-    # commands/phase.py / commands/task.py). The physical send already
-    # happened above via the existing, already-authorized dispatch() path;
-    # this only captures/models it through the new machinery.
-    try:
-        from pcae.core.finalization_transaction import run_finalization_transaction
-        run_finalization_transaction(
-            phase_id=report.phase_id,
-            phase_name=report.phase_name,
-            report=report,
-            gate=gate,
-        )
-    except Exception:  # noqa: BLE001 - best-effort, never fatal
-        pass
+    def _promote_and_dispatch() -> dict:
+        dispatch_results = dispatch(event, [sink])
+        dispatch_all_ok = bool(dispatch_results) and all(r.success for r in dispatch_results)
+        if dispatch_all_ok and commit_hash:
+            write_notification_dispatch_marker(
+                report.phase_id,
+                commit_hash,
+                report_digest=report_digest,
+                finalization_snapshot_id=snapshot_id,
+            )
+        report.notification_result = {
+            "dispatched": bool(dispatch_results),
+            "sinks": [r.sink_name for r in dispatch_results],
+            "success": dispatch_all_ok,
+            "error": None,
+            "outcome": "sent" if dispatch_all_ok else "failed",
+            "reason": "",
+            "kind": "complete",
+        }
+        return {"report": report, "results": dispatch_results}
+
+    from pcae.core.finalization_transaction import run_finalization_transaction
+    txn_result = run_finalization_transaction(
+        phase_id=report.phase_id,
+        phase_name=report.phase_name,
+        report=report,
+        gate=gate,
+        promote_and_dispatch=_promote_and_dispatch,
+    )
+    if txn_result.status in (
+        "pre_promotion_certification_failed", "promotion_and_dispatch_failed",
+    ):
+        if args.json:
+            print(json.dumps({
+                "error": txn_result.status,
+                "limitations": txn_result.limitations,
+            }, indent=2, sort_keys=True))
+        else:
+            print(f"Telegram send-report: BLOCKED ({txn_result.status})")
+            for limitation in txn_result.limitations:
+                print(f"  {limitation}")
+        return 1
+    dispatch_outcome = txn_result.promotion_and_dispatch or {}
+    results = dispatch_outcome.get("results", [])
 
     if args.json:
         print(json.dumps({

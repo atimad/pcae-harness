@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 134E.10.1 — Final Lifecycle Integration Transaction-Span Repair (completed).
+
+Repaired the central BLOCKING finding 134E.10V independently established:
+`finalization_transaction.py` was a post-success observer, invoked
+strictly after certification, promotion, and physical dispatch had
+already completed via the entirely unmodified legacy path, with no
+ability to prevent, reject, or accurately classify a failure in any of
+the seven newly-integrated modules. Repaired by inverting control:
+`run_finalization_transaction()` now accepts a `promote_and_dispatch`
+callback — wrapping the existing, entirely unmodified `finalize_phase_
+report`/`write_phase_report`/`dispatch` machinery, per 134D's own "wrap
+it behind the transaction; treat it as an adapter" permission, not a
+reimplementation — and invokes it **only if** the seven modules'
+mandatory pre-promotion stages (evidence capture, extraction, view
+composition, rendering) succeed first. A pre-promotion failure now means
+the callback is never invoked at all: no promotion, no dispatch, no
+marker, no receipt. All four production entry points (`phase.py`,
+`task.py`, `phase_reports.py`, `notifications.py`) were rewired
+accordingly; `push.py` needed no separate change (it funnels through
+`phase.py`). Resumability strengthened as a structural consequence: a
+retry for identical certified content now never re-invokes the callback,
+never re-promotes, never re-dispatches. Receipt honesty (134E.10V's own
+repair) preserved unchanged, adapted to read the real, now-promoted
+report's dispatch outcome. Explicitly disclosed scope interpretation:
+this repair does not wrap raw `pcae commit`/`pcae push` themselves —
+only identity-resolution-through-final-result for one finalization
+attempt, matching the corrective brief's own concrete 21-stage
+requirement list (which begins at "resolve canonical phase identity," not
+"git commit"), since this codebase's governed lifecycle already treats
+commit/push as prior, separate, human/CLI-driven actions. 37 focused
+tests (rewritten in full for the new callback-based API, including five
+parametrized mandatory-stage-failure tests each proving the callback is
+never invoked, explicit marker-non-persistence and receipt-ordering
+proofs, and strengthened-resumability digest/snapshot equality
+assertions). Full-suite regression is an exact node-ID match to the
+established clean baseline (182 pre-existing failures, zero new, zero
+pollution); fast-green deterministic at 4391/4391 across three
+consecutive runs. Full details in `docs/
+PHASE_134_FINAL_LIFECYCLE_INTEGRATION_TRANSACTION_SPAN_REPAIR.md`.
+
+Recommended next phase: 134E.10.1V — Final Lifecycle Integration
+Transaction-Span Repair Independent Verification.
+134E.10.1V was not begun in this phase. 134F was not begun.
+
+## Phase 134E.10V Complete (historical — full text)
+
 Phase 134E.10V — Final Lifecycle Integration Independent Verification (completed).
 
 Independently verified 134E.10's claim to implement "Final Lifecycle
