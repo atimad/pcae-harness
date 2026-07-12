@@ -23,7 +23,7 @@
   "tests_run": 19529,
   "validation_results": [
     {
-      "name": "finalization_transaction_134e10",
+      "name": "finalization_transaction_regression_suite",
       "result": "27 passed",
       "status": "passed"
     },
@@ -64,7 +64,7 @@
     }
   ],
   "test_results": {
-    "finalization_transaction_134e10": "27/27",
+    "finalization_transaction_regression_suite": "27/27",
     "seven_subsystem_module_suite": "921/922",
     "full_suite_regression": "19349/19531",
     "fast_green": "4391/4391",
