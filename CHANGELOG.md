@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 134F - Whole-Lifecycle Independent Verification (`docs/
+  PHASE_134_WHOLE_LIFECYCLE_INDEPENDENT_VERIFICATION.md`). Independently
+  re-derived the entire Track 134 lifecycle (134A-134E.10.1V.1) from
+  architecture/contracts/source/tests/Git history, not from prior phase
+  reports. Confirmed all four production entry points share one
+  finalization transaction, authority map, projected post-completion
+  state, identity parsing, commit ownership, snapshot certification,
+  promotion, PFN-001 notification, and marker/receipt logic; zero
+  BLOCKING findings. Disclosed NON-BLOCKING gaps: the transaction's own
+  resume logic doesn't treat `completed_receipt_best_effort_incomplete`
+  as terminal (currently safe only because every entry point's
+  independent marker check intercepts retries first); non-atomic
+  `latest.md`/`latest.json` writes; the pre-existing fabricated-hash gap
+  re-confirmed unchanged. **Corrected the prior canonical report's
+  full-suite baseline**: 3 independent full-suite runs (2 parallel, 1
+  serial) each reproduced exactly 19390 passed / 182 failed with an
+  identical node-ID set -- not "19562 passed, 7 inherited failures" as
+  134E.10.1V.1 claimed. 178 of 182 are pre-existing non-hermetic tests
+  unrelated to Track 134; the other 2 touch Track-134-adjacent files but
+  are test-fixture staleness, not lifecycle defects (all 316 Track 134
+  focused tests pass). IRG challenge's 6 persistent concerns
+  independently classified, none a current integrity violation, all
+  outside Track 134's scope. **Verdict: CONDITIONALLY CLOSED.** No
+  production source changed. Recommended next: 135A - Canonical
+  Lifecycle State Authority Architecture (not started).
+
 - Phase 134E.10.1V.1 repairs completed-phase Architecture Status
   transitions by sealing a deterministic post-completion lifecycle projection
   before certification. Finalization now fails closed when a completed report

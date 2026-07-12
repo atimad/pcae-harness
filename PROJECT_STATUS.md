@@ -2,6 +2,41 @@
 
 ## Current Phase
 
+Phase 134F — Whole-Lifecycle Independent Verification (completed).
+
+Independently re-derived and verified the complete Track 134 lifecycle
+(134A-134E.10.1V.1) as one coherent governed transaction, from architecture,
+contracts, source, tests, and Git history rather than from prior phase
+reports. Confirmed: all four production entry points (`phase complete`,
+`task finish`, `phase-report create`, `notify send-report`) share the same
+finalization transaction, authority map, projected post-completion state,
+identity parsing, commit-ownership check, snapshot certification, promotion,
+notification (PFN-001), and marker/receipt logic; no BLOCKING lifecycle
+contradiction exists anywhere in this span. Found and disclosed several
+NON-BLOCKING structural gaps (transaction resume logic doesn't treat
+`completed_receipt_best_effort_incomplete` as terminal; non-atomic
+`latest.md`/`latest.json` writes; the pre-existing fabricated-hash gap,
+re-confirmed unchanged) — all currently mitigated by existing command-layer
+guards, none repaired in this verification-only phase. **Corrected a material
+inaccuracy in the prior canonical phase report**: three independent full-suite
+runs (2 parallel, 1 serial) in this phase each reproduced exactly **19390
+passed / 182 failed** with an identical failing node-ID set — not the "19562
+passed, 7 inherited failures" the 134E.10.1V.1 report claimed. Root-caused: 178
+of the 182 failures are pre-existing, unrelated non-hermetic tests (hard-coded
+`cwd`=repo-root, real `.pcae`/`git status`/`src` assertions that drifted as the
+codebase legitimately grew); the remaining 2 touch Track-134-adjacent files but
+were independently traced to test-fixture staleness, not a lifecycle defect —
+all 316 Track 134 focused tests pass cleanly. IRG challenge's 6 persistent
+concerns were independently classified; none is a current integrity violation,
+all are outside Track 134's engineering scope. **Verdict: CONDITIONALLY
+CLOSED.** No production source was changed. Full details in `docs/
+PHASE_134_WHOLE_LIFECYCLE_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 135A — Canonical Lifecycle State Authority
+Architecture (not started).
+
+## Phase 134F Complete
+
 Phase 134E.10.1V.1 — Completed-Phase Architecture Status Transition Repair (completed).
 
 Repaired the shared lifecycle/Architecture Status boundary. A completion report
