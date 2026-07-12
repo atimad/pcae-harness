@@ -2067,12 +2067,22 @@ def validate_phase_identity(
         planned = arch_status.get("planned", [])
         completed_ids = set(arch_status.get("completed_phase_ids", []))
 
+        # Phase 134E.10.1.1 note: previously ``(?:\.\d+)*`` dropped a
+        # trailing letter suffix immediately after the LAST dot-digit
+        # group (e.g. "134E.10.1V" -> "134E.10.1", not "134E.10.1V"),
+        # falsely colliding a *planned* verification phase's own label
+        # with its already-completed corrective-phase namesake. Found
+        # blocking this phase's own governed finalization once the first
+        # doubly-dotted-then-lettered planned identity ("134E.10.1V")
+        # appeared. ``(?:\.\d+[A-Za-z]?)*`` matches the grammar already
+        # used by ``_CANONICAL_TITLE_PHASE_ID_RE`` elsewhere in this
+        # module.
         def _leading_phase_id(text: str) -> str | None:
-            m = _re.match(r"^(\d{3}[A-Za-z]*(?:\.\d+)*)", text.strip())
+            m = _re.match(r"^(\d{3}[A-Za-z]*(?:\.\d+[A-Za-z]?)*)", text.strip())
             return m.group(1) if m else None
 
         def _parenthetical_phase_id(text: str) -> str | None:
-            m = _re.search(r"\((\d{3}[A-Za-z]*(?:\.\d+)*)\)", text)
+            m = _re.search(r"\((\d{3}[A-Za-z]*(?:\.\d+[A-Za-z]?)*)\)", text)
             return m.group(1) if m else None
 
         planned_ids = [pid for p in planned if (pid := _leading_phase_id(p))]
