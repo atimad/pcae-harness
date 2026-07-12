@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 135A — Canonical Lifecycle State Authority Architecture (completed).
+
+Designed the authoritative future architecture for a canonical lifecycle
+transition record in
+`docs/PHASE_135_CANONICAL_LIFECYCLE_STATE_AUTHORITY_ARCHITECTURE.md`. The
+architecture defines one canonical transition record per governed lifecycle
+transition, from which every other lifecycle artifact (canonical phase
+report, completion metadata, Architecture Status, immutable snapshot,
+checkpoint, promoted `latest` report/metadata, notification payload,
+completion marker, finalization receipt, Git attribution view, repository
+transition view) must be an immutable representation, deterministic
+derivative, external projection, or verification result — never an
+independent authority.
+
+It re-derives (rather than reuses) a minimum coherent lifecycle state
+machine (`PROPOSED → CERTIFYING → CERTIFIED → PROMOTING → PROMOTED →
+NOTIFYING → NOTIFIED/NOTIFIED_UNCONFIRMED → TERMINAL_SUCCESS/
+TERMINAL_PARTIAL_EXTERNAL`, plus orthogonal `QUARANTINED`/`SUPERSEDED`);
+defines a fact-by-fact authority table naming which current artifacts must
+stop acting as competing authorities; defines transition semantics that
+give the canonical record itself — not entry-point-specific marker checks —
+ownership of recognizing `completed_receipt_best_effort_incomplete`
+(renamed `NOTIFIED_UNCONFIRMED`) as terminal, directly answering 134F's
+central disclosed gap; analyzes the non-atomic `latest.md`/`latest.json`
+write finding and evaluates five candidate atomic-persistence mechanisms
+without selecting one; defines identity, commit-ownership, cross-
+representation invariant, failure-model, resume/recovery, legacy-authority-
+retirement, and compatibility architectures; keeps the six persistent IRG
+strategic-governance concerns explicitly out of Track 135 scope (classified
+as strategic governance authority concerns, not lifecycle state authority
+concerns); and re-derives a 135A–135I+ roadmap.
+
+**No implementation occurred. No schema was frozen. No source, tests,
+finalization behavior, entry-point behavior, or the three 134F-disclosed
+gaps were changed. Runtime remains Observed/observe/execution unavailable.
+PFN-001 and PFR-001 remain unchanged.**
+
+Recommended next phase: 135B — Canonical Lifecycle Transition Record
+Contract Freeze (not started).
+
+## Phase 135A Complete
+
 Phase 134F — Whole-Lifecycle Independent Verification (completed).
 
 Independently re-derived and verified the complete Track 134 lifecycle

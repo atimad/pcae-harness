@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 135A - Canonical Lifecycle State Authority Architecture (`docs/
+  PHASE_135_CANONICAL_LIFECYCLE_STATE_AUTHORITY_ARCHITECTURE.md`). Defines
+  one canonical lifecycle transition record per governed transition, from
+  which every other lifecycle artifact must be an immutable representation,
+  deterministic derivative, external projection, or verification result --
+  never an independent authority. Re-derives a minimum coherent state
+  machine (PROPOSED/CERTIFYING/CERTIFIED/PROMOTING/PROMOTED/NOTIFYING/
+  NOTIFIED/NOTIFIED_UNCONFIRMED/TERMINAL_SUCCESS/TERMINAL_PARTIAL_EXTERNAL,
+  plus orthogonal QUARANTINED/SUPERSEDED); defines a fact-by-fact authority
+  table; gives the canonical record itself ownership of recognizing
+  `completed_receipt_best_effort_incomplete` (renamed `NOTIFIED_UNCONFIRMED`)
+  as terminal, directly answering 134F's central disclosed gap; analyzes the
+  non-atomic `latest.md`/`latest.json` finding against five candidate atomic
+  mechanisms without selecting one; defines identity, commit-ownership,
+  invariant, failure-model, resume/recovery, legacy-authority-retirement,
+  and compatibility architectures; keeps the six persistent IRG strategic-
+  governance concerns out of Track 135 scope; re-derives a 135A-135I+
+  roadmap. Architecture only; no implementation, schema freeze, source,
+  test, or entry-point behavior changed; none of the three 134F-disclosed
+  gaps repaired. Recommended next phase: 135B - Canonical Lifecycle
+  Transition Record Contract Freeze.
+
 - Phase 134F - Whole-Lifecycle Independent Verification (`docs/
   PHASE_134_WHOLE_LIFECYCLE_INDEPENDENT_VERIFICATION.md`). Independently
   re-derived the entire Track 134 lifecycle (134A-134E.10.1V.1) from
