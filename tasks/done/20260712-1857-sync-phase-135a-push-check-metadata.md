@@ -10,7 +10,7 @@ Sync Phase 135A push-check metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 

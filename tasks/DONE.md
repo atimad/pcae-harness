@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 135A push-check metadata (20260712-1857-sync-phase-135a-push-check-metadata)
 - Sync Phase 135A completion metadata (20260712-1845-sync-phase-135a-completion-metadata)
 - Phase 135A: Canonical Lifecycle State Authority Architecture (20260712-1843-phase-135a-canonical-lifecycle-state-authority-architecture)
 - Sync Phase 134F completion metadata (20260712-1630-sync-phase-134f-completion-metadata)
