@@ -2,6 +2,55 @@
 
 ## Current Phase
 
+Phase 135B — Canonical Lifecycle Transition Record Contract Freeze (completed).
+
+Froze the binding contract for the Canonical Lifecycle Transition Record in
+`docs/PHASE_135_CANONICAL_LIFECYCLE_TRANSITION_RECORD_CONTRACT.md`
+(**CLTR-001, version 1.0**), converting 135A's architecture into explicit
+normative requirements: contract identity and its relationship to 135A,
+Track 134, PFN-001, and PFR-001; a purpose contract (what the record must
+and must not do); a per-fact authority contract (role S/R/D/E/V for every
+lifecycle fact 135A named); the sole-authority invariant with nine
+explicitly forbidden competing-authority patterns; a record identity and
+normalization contract (transition ID as the new primitive, dotted/multi-
+dotted phase ID preservation, forbidden normalizations); semantic content
+requirements for the record (deliberately not a wire schema); the frozen
+minimum state machine (`PROPOSED → CERTIFYING → CERTIFIED → PROMOTING →
+PROMOTED → NOTIFYING → NOTIFIED/NOTIFIED_UNCONFIRMED →
+TERMINAL_SUCCESS/TERMINAL_PARTIAL_EXTERNAL`, plus orthogonal
+`QUARANTINED`/`SUPERSEDED`) with full per-state entry/exit/terminality/
+retryability definitions; mandatory transition-order invariants; a
+projected-state contract; a commit-ownership contract with a frozen
+three-outcome (verified/contaminated/unverifiable) hash-verification model
+for future implementation; evidence-binding, derived-representation,
+atomic-visibility, immutable-history, and digest contracts; a retry/resume
+contract that explicitly classifies `NOTIFIED_UNCONFIRMED` as
+resume-terminal at the core-authority level — the direct contract-level
+closure of 134F's central disclosed gap; duplicate/replay and failure
+contracts; marker, receipt, and notification contracts (PFN-001 preserved
+unamended); an Architecture Status contract; a repository-final-state
+contract that resolves the final-revision binding circularity via staged
+binding semantics; compatibility and legacy-authority classification
+tables; a 33-entry numbered cross-representation invariant inventory (all
+Blocking severity); versioning, governance, and strategic-governance-
+boundary contracts; a conformance model; a forbidden-claims list; and a
+contract-verdict section classifying every unresolved question as deferred
+(none Blocking for 135B's own completion).
+
+**This is contract freeze only. No implementation occurred. No JSON schema
+was frozen. No source, tests, finalization behavior, or entry-point
+behavior changed. None of the three 134F-disclosed structural gaps (resume
+classification, non-atomic `latest.md`/`latest.json` writes, fabricated-
+hash silent skip) was repaired — all three were independently re-confirmed
+still present in current source during this phase's own research. Runtime
+remains Observed/observe/execution unavailable. PFN-001 and PFR-001 remain
+unchanged.**
+
+Recommended next phase: 135C — Canonical Lifecycle Transition Record
+Contract Verification (not started).
+
+## Phase 135B Complete
+
 Phase 135A — Canonical Lifecycle State Authority Architecture (completed).
 
 Designed the authoritative future architecture for a canonical lifecycle

@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 135B - Canonical Lifecycle Transition Record Contract Freeze (`docs/
+  PHASE_135_CANONICAL_LIFECYCLE_TRANSITION_RECORD_CONTRACT.md`, CLTR-001
+  v1.0). Converts 135A's architecture into 33 numbered, binding normative
+  sections: contract identity, purpose, per-fact authority table, sole-
+  authority invariant, record identity/normalization rules, semantic
+  content requirements (no wire schema), the frozen state machine with
+  per-state entry/exit/terminality/retryability, transition-order
+  invariants, projected-state rules, commit-ownership and three-outcome
+  hash-verification model, evidence-binding rules, per-derivative
+  binding table, atomic-visibility invariants, immutable-history rules,
+  digest requirements, retry/resume rules (explicitly classifying
+  NOTIFIED_UNCONFIRMED as resume-terminal, closing 134F's central gap at
+  the contract level), duplicate/replay decision table, failure contract,
+  marker/receipt/notification contracts, Architecture Status contract,
+  repository-final-state contract (resolving the final-revision
+  circularity via staged binding), compatibility and legacy-authority
+  classifications, a 33-entry numbered invariant inventory (all Blocking),
+  versioning, governance, strategic-governance-boundary, conformance
+  model, forbidden-claims list, and a deferred/blocking question
+  inventory. Contract freeze only; no implementation, no JSON schema, no
+  runtime behavior changed; none of the three 134F-disclosed gaps (resume
+  classification, non-atomic latest writes, fabricated-hash silent skip)
+  repaired -- all three re-confirmed still present in current source.
+  Recommended next phase: 135C - Canonical Lifecycle Transition Record
+  Contract Verification.
+
 - Phase 135A - Canonical Lifecycle State Authority Architecture (`docs/
   PHASE_135_CANONICAL_LIFECYCLE_STATE_AUTHORITY_ARCHITECTURE.md`). Defines
   one canonical lifecycle transition record per governed transition, from
