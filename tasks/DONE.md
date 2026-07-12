@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 135C canonical report metadata (20260712-2057-repair-phase-135c-canonical-report-metadata)
 - Sync Phase 135C completion metadata (20260712-2057-sync-phase-135c-completion-metadata)
 - Phase 135C: Canonical Lifecycle Transition Record Contract Verification (20260712-2056-phase-135c-canonical-lifecycle-transition-record-contract-verification)
 - Repair Phase 135B canonical report metadata (20260712-1956-repair-phase-135b-canonical-report-metadata)
