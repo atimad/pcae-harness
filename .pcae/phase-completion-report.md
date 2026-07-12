@@ -1,75 +1,88 @@
-# Phase 134E.10.1.1 Complete — Phase-Owned Commit Attribution Repair
+# Phase 134E.10.1V Complete — Final Lifecycle Integration Transaction-Span Repair Independent Verification
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.10.1.1`
+- **Phase ID:** `134E.10.1V`
 - **Status:** completed
-- **Phase class:** corrective reporting/lifecycle-evidence repair
+- **Phase class:** independent verification, zero unresolved BLOCKING findings
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Repaired a commit-attribution defect in 134E.10.1's own governed report:
-`1844b05b` (134E.10V's own final commit) was incorrectly attributed to
-134E.10.1's phase-owned commit list. Root cause: `commands/phase.py`'s
-`run_phase_complete` fell back to an unconditional `git log --oneline -5`
-whenever `phase_commits` was absent from metadata — true of every phase
-this session. Repaired at the actual root cause, plus a new, generic,
-additive cross-phase-commit-contamination check wired into both
-`phase.py` and `task.py`. Issued under this phase's own distinct
-corrective identity; 134E.10.1's original report untouched, no second
-ordinary 134E.10.1 completion created.
+Independently verified both 134E.10.1's transaction-span control-inversion
+repair and 134E.10.1.1's commit-attribution repair via re-derivation from
+134D and direct reproduction against real source and git history — not
+trust in either phase's own report. Verdict: both repairs hold. One
+genuine, real gap found and disclosed as NON-BLOCKING: fabricated commit
+hashes currently pass the cross-phase contamination check unchallenged
+(a deliberate design tradeoff for hermetic-test permissiveness, not a
+reopening of the actual defect this track exists to prevent). Zero
+unresolved BLOCKING findings.
 
 ## 3. Architectural Findings
 
-`commands/task.py`'s equivalent commit-derivation fallback was already
-safe (a single explicit `--commit` hash or an empty list, never a blind
-recent-commit guess) — the defect was isolated to `commands/phase.py`'s
-own fallback. This is now confirmed via direct git-history inspection:
-`a17efc1b` (134E.10.1's own first commit)'s parent is exactly `1844b05b`
-(134E.10V's own last commit) — unambiguous proof of the phase boundary
-and of `1844b05b`'s true ownership.
+Re-derived the 134D transaction-span requirement matrix directly (not
+accepted from 134E.10.1's own 21-stage framing) and re-traced actual
+runtime ordering via fresh line-number `grep` across all four command
+files: pre-promotion certification (evidence, extraction, both views,
+rendering) now runs strictly before promotion, dispatch, and marker
+persistence in every path where the trial gate genuinely passes. The two
+non-transaction `_promote_and_dispatch()` call sites (the pre-existing
+`--allow-partial-report` override; the gate-already-failed case) are both
+safe, confirmed via direct trace, not a bypass.
 
-## 4. Implementation Findings (Repair)
+## 4. Implementation Findings (None — Verification Only)
 
-Two changes: (1) `commands/phase.py`'s `_gather_commits()` removed
-entirely, fallback now an explicit unresolved/empty list matching
-`task.py`'s precedent; (2) new `pcae.core.phase_reports.detect_cross_
-phase_commit_contamination()` — reads each candidate commit's own subject
-line (this repo's governed commits reliably name their owning phase) and
-fails closed on a cross-phase mismatch — wired into both `phase.py` and
-`task.py`'s gate computation.
+No production code was modified. This phase's own findings were
+established via direct REPL reproduction (five separate probes: mandatory
+pre-promotion stage failure never invokes the callback; callback failure
+propagates as transaction failure; a resumed transaction never re-invokes
+the callback; a fabricated commit hash passes the contamination check
+silently; the repaired phase-ID regexes agree across all three call
+sites) plus re-running the existing 37/12/18-test suites as corroborating
+evidence.
 
 ## 5. Verification Findings
 
-Direct reproduction against real git history: the original, defective
-five-commit list produces exactly one contamination warning (for
-`1844b05b`, citing "Phase 134E.10V"); the corrected four-commit list
-(`a17efc1b`, `36266ac7`, `3bde236b`, `441a2142`) produces zero warnings.
-134E.10.1's own transaction-span repair (control inversion, pre-promotion
-gating) re-verified intact via the full, unmodified `test_finalization_
-transaction_134e10.py` suite (37 tests, all passing).
+Five of the seven integrated modules (Canonical Engineering Evidence,
+Evidence Extraction, Phase Report View, Operator Report View, Rendering)
+are precisely reclassified as "required validating participants" — real
+gating authority over whether finalization proceeds, though still no
+authority over report content or the physical dispatch mechanism
+(Delivery Pipeline and Delivery Receipt remain shadow/receipt-projection,
+unchanged from 134E.10V's own classification). All seven relevant commit
+hashes' ownership independently re-derived via fresh `git log` calls,
+matching every prior claim exactly.
 
 ## 6. Technical Debt Review
 
-Incidentally found and repaired one genuine, pre-existing (confirmed via
-`git stash`, not caused by this phase's production changes) test
-hermeticity gap in `tests/test_rc_audit_findings_repair.py`: a
-phase-identity regex that silently truncated a doubly-dotted phase ID,
-and a synthetic-report fixture that never isolated the real, live
-canonical report file. Both repaired; all 18 tests in that file now pass.
+One genuine, real gap found and disclosed as NON-BLOCKING:
+`detect_cross_phase_commit_contamination()` silently skips commit hashes
+that don't resolve to real commits, by deliberate design (permissive for
+this session's own extensive hermetic-test convention using synthetic
+hashes). A fabricated hash in an explicitly-declared `phase_commits` list
+currently passes unchallenged. Does not reopen the actual defect this
+track exists to prevent (a *genuine* prior-phase commit slipping
+through); closing it robustly would require a design change out of
+proportion to a verification phase's own repair scope. A second, smaller
+asymmetry disclosed: `phase_reports.py`/`notifications.py` lack the
+additive contamination check `phase.py`/`task.py` carry — non-blocking,
+since neither entry point was ever exposed to the root-cause defect
+(neither has a blind-guess fallback to begin with).
 
 ## 7. Notable Engineering Knowledge
 
-A free-text `commit_attribution` label and a verified, structured
-`phase_commits` list are not interchangeable — the pre-existing gate
-logic treated any truthy attribution string as sufficient proof of
-phase-ownership, even when the actual commits list behind it was an
-unaudited heuristic guess. This is exactly the kind of "presence over
-verification" gap this track has repeatedly found and closed (fast-green
-value validation in 134E.9V; receipt honesty in 134E.10V) — a label that
-merely *asserts* correctness is not evidence of it.
+Re-deriving "what does this receipt/marker/check actually prove" from
+source, rather than from a prior phase's own careful documentation of it,
+is what surfaced the one real gap in this phase: the contamination
+detector's own docstring already honestly disclosed its permissive
+design, but only direct reproduction (constructing a fabricated hash and
+running the actual function) converted that disclosed design choice into
+a concretely-demonstrated, precisely-scoped finding — the same discipline
+that has repaired a genuine defect in every prior phase of this
+sub-track, this time confirming an existing design choice as acceptable
+rather than finding a new defect.
 
 ## 8. Governance Results
 
@@ -84,44 +97,45 @@ merely *asserts* correctness is not evidence of it.
 
 ## 9. Test Results
 
-- Focused tests: 12 new (`tests/test_commit_attribution_repair_
-  134e10_1_1.py`), 18 repaired-and-passing (`tests/test_rc_audit_
-  findings_repair.py`), 37 re-confirmed unchanged (`tests/test_
-  finalization_transaction_134e10.py`).
-- Broader affected regression: 306 passed, 1 pre-existing unrelated
+- No new tests added — findings established via direct reproduction.
+- Re-confirmed unchanged: 37 (`test_finalization_transaction_134e10.py`),
+  12 (`test_commit_attribution_repair_134e10_1_1.py`), 18 (`test_rc_
+  audit_findings_repair.py`).
+- Broader affected regression: 426 passed, 1 pre-existing unrelated
   failure.
 - Full-suite regression: 19371 passed, 182 failed — exact node-ID match
-  to the established clean baseline; zero new failures, zero pollution
-  (confirmed across two full runs in this phase).
+  to the established clean baseline; zero new failures, zero pollution.
 - Fast-green: 4391 passed, 0 failed — three consecutive runs.
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
 
-No 134F work began. No 134E.10.1V work began. No second ordinary
-134E.10.1 completion was created. No historical report was rewritten or
-deleted. No specific commit hash or phase list is hard-coded in the
-repair. No new execution capability or communication channel was
-introduced. No raw git commit/push, `--no-verify`, or force push was
-used. No external test delivery occurred.
+No 134F work began. No new lifecycle implementation was attempted. No
+second completion authority was introduced. No second physical delivery
+occurred. No historical report was rewritten or deleted. No second
+ordinary completion was created for any already-completed phase. No
+Repository Intelligence authority expansion, Decision Evaluation change,
+PFN-001 change, or PFR-001 change occurred. No raw git commit/push,
+`--no-verify`, or force push was used. No external test delivery
+occurred.
 
 ## 11. Architectural Boundary Confirmation
 
-`commands/phase.py` and `commands/task.py` now share identical,
-generic, defense-in-depth cross-phase commit validation. Neither hard-
-codes any specific commit, phase identity, or list. Historical reports
-for 134E.10V and 134E.10.1 remain preserved unmodified.
+The existing, unmodified legacy machinery (`finalize_phase_report`/
+`write_phase_report`/`dispatch`) remains the sole authority for *how*
+promotion and dispatch actually happen; the seven integrated modules now
+have genuine authority over *whether* they are allowed to happen at all.
+Both distinctions independently re-confirmed. All historical reports
+remain preserved unmodified.
 
 ## 12. Track Progress
 
-Phase 134E.10.1.1 closes a lifecycle-evidence integrity gap discovered
-via cross-referencing two adjacent governed reports — demonstrating the
-value of this track's own established discipline of re-deriving from
-source rather than trusting a predecessor phase's own claims, applied
-here to this session's own immediately preceding reports.
+Phase 134E.10.1V closes independent verification of Track 134's own
+corrective sub-track (134E.10 → 134E.10V → 134E.10.1 → 134E.10.1.1) with
+zero unresolved BLOCKING findings — clearing the path to 134F's
+whole-lifecycle closing verification.
 
 ## 13. Next Phase
 
-Recommended: **134E.10.1V — Final Lifecycle Integration Transaction-Span
-Repair Independent Verification**. Phase 134E.10.1V has not begun. Phase
+Recommended: **134F — Whole-Lifecycle Independent Verification**. Phase
 134F has not begun.
