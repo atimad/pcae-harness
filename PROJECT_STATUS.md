@@ -2,6 +2,46 @@
 
 ## Current Phase
 
+Phase 134E.10.1.1 — Phase-Owned Commit Attribution Repair (completed).
+
+134E.10.1's own governed canonical report cited five commits as
+phase-owned, including `1844b05b` — direct git-history inspection proved
+this is unambiguously `134E.10V`'s own final commit (the direct parent of
+134E.10.1's own first commit), not part of 134E.10.1's work. Root cause:
+`commands/phase.py`'s `run_phase_complete` fell back to an unconditional
+`git log --oneline -5` (`_gather_commits()`) whenever `.pcae/phase-
+completion-metadata.json` lacked an explicit `phase_commits` declaration
+— true of every phase in this session, which only ever hand-authored the
+flat `files_changed` list. `commands/task.py`'s equivalent fallback
+never exhibited this defect (already safe: a single explicit hash or an
+empty list, never a blind guess). Repaired: the blind fallback is
+removed entirely (matching `task.py`'s precedent — an explicit,
+"unresolved" empty list instead of a guess); a new, generic, additive
+`detect_cross_phase_commit_contamination()` check (reads each commit's
+own subject line — this repo's governed commits reliably name their
+owning phase — and fails closed on a mismatch) is now wired into both
+`phase.py` and `task.py`'s gate computation, verified directly against
+real git history to correctly flag `1844b05b` and clear the true
+four-commit `134E.10.1` set (`a17efc1b`, `36266ac7`, `3bde236b`,
+`441a2142`). Incidentally found and repaired a second, genuine
+pre-existing defect during this phase's own regression run: `tests/
+test_rc_audit_findings_repair.py`'s phase-identity regex silently
+truncated a doubly-dotted phase ID, and its synthetic-report fixture
+never isolated the real, live canonical report file — both fixed. 12 new
+focused tests; full-suite regression exact node-ID match to the
+established clean baseline (182 pre-existing failures, zero new, zero
+pollution, confirmed across two full runs); fast-green 4391/4391 across
+three runs. Issued under this phase's own distinct corrective identity —
+134E.10.1's original report is untouched, and no second ordinary
+134E.10.1 completion was created. Full details in `docs/
+PHASE_134_PHASE_OWNED_COMMIT_ATTRIBUTION_REPAIR.md`.
+
+Recommended next phase: 134E.10.1V — Final Lifecycle Integration
+Transaction-Span Repair Independent Verification.
+134E.10.1V was not begun in this phase. 134F was not begun.
+
+## Phase 134E.10.1 Complete (historical — full text)
+
 Phase 134E.10.1 — Final Lifecycle Integration Transaction-Span Repair (completed).
 
 Repaired the central BLOCKING finding 134E.10V independently established:

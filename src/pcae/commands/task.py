@@ -743,6 +743,17 @@ def _finalize_task_report_and_notify(
         recommended_next_phase=recommended_next,
         commit_attribution=commit_attribution,
     )
+
+    # Phase 134E.10.1.1 — cross-phase commit rejection (defense in depth,
+    # matching the identical check in commands/phase.py).
+    from pcae.core.phase_reports import detect_cross_phase_commit_contamination
+    cross_phase_warnings = detect_cross_phase_commit_contamination(commits, phase_id)
+    if cross_phase_warnings:
+        gate["finalizable"] = False
+        gate.setdefault("blockers", [])
+        for warning in cross_phase_warnings:
+            gate["blockers"].append(f"cross-phase commit contamination: {warning}")
+
     trial_trust = validate_phase_report_trust(
         adapt_report_for_trust_check(trial_report.to_dict())
     )

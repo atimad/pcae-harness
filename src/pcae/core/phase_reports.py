@@ -1770,6 +1770,65 @@ def resolve_canonical_phase_identity(
     return None
 
 
+_COMMIT_SUBJECT_PHASE_TOKEN_RE = re.compile(
+    r"Phase\s+(\d+[A-Za-z]*(?:\.\d+)*[A-Za-z]?)\b"
+)
+
+
+def detect_cross_phase_commit_contamination(
+    commits: list[str], phase_id: str,
+) -> list[str]:
+    """Phase 134E.10.1.1 — cross-phase commit rejection (defense in depth).
+
+    This repository's own governed commit messages reliably name their
+    owning phase in their subject line (e.g. "Phase 134E.10V: ..."/"Finish
+    Phase 134E.10V ..."/"Sync Phase 134E.10V ..."), a convention already
+    established and unmodified by this phase. For each commit hash, read
+    its subject via ``git log -1 --format=%s`` (read-only) and, if the
+    subject names a *different* phase identity than ``phase_id``, return a
+    human-readable contamination warning. This directly generalizes the
+    defect this phase repairs: a prior-phase commit incorrectly attributed
+    to the current phase's own ``commits`` field, found via 134E.10.1's own
+    governed report citing "1844b05b" (subject: "Finish Phase 134E.10V
+    test-evidence-key correction task") as one of ITS commits.
+
+    Deliberately conservative: unresolvable hashes (a synthetic/test hash,
+    a git failure, a commit whose subject cites no phase at all) are
+    silently skipped, never treated as contamination -- this is an
+    additive safety net on top of, never a replacement for, explicit
+    ``phase_commits`` declaration, and must never make an ordinary,
+    correctly-attributed governed commit (whose subject may legitimately
+    omit an explicit "Phase <ID>" token) fail closed by accident.
+    """
+    import subprocess
+
+    warnings: list[str] = []
+    current = phase_id.strip().upper()
+    for commit_hash in commits:
+        if not commit_hash:
+            continue
+        try:
+            result = subprocess.run(
+                ["git", "log", "-1", "--format=%s", commit_hash],
+                capture_output=True, text=True, timeout=5,
+            )
+        except Exception:
+            continue
+        if result.returncode != 0:
+            continue
+        subject = result.stdout.strip()
+        match = _COMMIT_SUBJECT_PHASE_TOKEN_RE.search(subject)
+        if not match:
+            continue
+        cited = match.group(1).strip().upper()
+        if cited and cited != current:
+            warnings.append(
+                f"commit {commit_hash} subject names phase {cited!r}, not "
+                f"the current phase {phase_id!r}: {subject!r}"
+            )
+    return warnings
+
+
 def validate_finalization_gate(
     *,
     phase_id: str,

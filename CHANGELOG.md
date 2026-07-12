@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+- Phase 134E.10.1.1 - Phase-Owned Commit Attribution Repair
+  (`docs/PHASE_134_PHASE_OWNED_COMMIT_ATTRIBUTION_REPAIR.md`). Repaired a
+  commit-attribution defect in 134E.10.1's own governed report: `1844b05b`
+  (134E.10V's own final commit) was incorrectly attributed to 134E.10.1.
+  Root cause: `commands/phase.py`'s fallback (`_gather_commits()`, an
+  unconditional `git log --oneline -5`) had zero phase-boundary awareness
+  and fired whenever `.pcae/phase-completion-metadata.json` lacked an
+  explicit `phase_commits` declaration -- true of every phase this
+  session. Removed the blind fallback (now an explicit unresolved/empty
+  list, matching `commands/task.py`'s already-safe precedent); added a
+  new, generic `detect_cross_phase_commit_contamination()` check (reads
+  each commit's own subject line and fails closed on a cross-phase
+  mismatch), wired into both `phase.py` and `task.py`. Verified directly
+  against real git history. Also fixed a genuine pre-existing test
+  hermeticity gap found during this phase's own regression run
+  (`tests/test_rc_audit_findings_repair.py`: a truncating phase-ID regex
+  and an unmocked live canonical-report dependency). 12 new tests;
+  full-suite regression exact node-ID match to baseline (zero new
+  failures); fast_green 4391/4391 x3. Issued under its own corrective
+  identity; 134E.10.1's original report untouched, no second ordinary
+  134E.10.1 completion created.
+
 - Phase 134E.10.1 - Final Lifecycle Integration Transaction-Span Repair
   (`docs/PHASE_134_FINAL_LIFECYCLE_INTEGRATION_TRANSACTION_SPAN_REPAIR.md`).
   Repaired 134E.10V's central BLOCKING finding by inverting control:

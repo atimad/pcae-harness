@@ -51,9 +51,17 @@ def golden_workflow_text() -> str:
 
 
 def _current_project_phase_id() -> str:
+    # 134E.10.1.1 note: previously matched at most one "." suffix group
+    # (e.g. "134E.10"/"134E.10V"), silently truncating a multiply-dotted
+    # corrective identity like "134E.10.1" to "134E.10" -- found via this
+    # phase's own regression run once PROJECT_STATUS.md's current phase
+    # first became doubly-dotted (confirmed pre-existing, not caused by
+    # this phase's own commit-attribution changes: identical failure
+    # reproduced with those changes stashed out). ``*`` (zero or more)
+    # instead of ``?`` (zero or one) supports arbitrary corrective depth.
     text = (REPO_ROOT / "PROJECT_STATUS.md").read_text(encoding="utf-8")
     current = text.split("## Current Phase", 1)[1].split("## Phase", 1)[0]
-    match = __import__("re").search(r"Phase\s+(\d{3}[A-Z](?:\.[A-Z0-9]+)?)", current)
+    match = __import__("re").search(r"Phase\s+(\d{3}[A-Z](?:\.[A-Za-z0-9]+)*)", current)
     assert match is not None
     return match.group(1)
 
@@ -87,7 +95,21 @@ def _synthetic_report(**overrides):
     )
     common.update(overrides)
     report = make_phase_report(**common)
-    _apply_canonical_and_trust(report, common["phase_id"], common["phase_name"], common["status"])
+    # 134E.10.1.1 note: previously called _apply_canonical_and_trust()
+    # without isolating load_canonical_report() from this real repository's
+    # own live .pcae/phase-completion-report.md -- found via this phase's
+    # own regression run to coincidentally collide whenever the real
+    # canonical report's own prose happens to mention "fast_green" near a
+    # different N/M value than this synthetic report's own
+    # test_results["fast_green"], producing a spurious "canonical report
+    # and metadata disagree" / metadata_consistency trust-field gap
+    # entirely unrelated to what any individual test here actually
+    # exercises. Isolated the same way every other 134E.9-onward fixture
+    # in this session already isolates it.
+    from unittest import mock
+    import pcae.core.phase_reports as _pr
+    with mock.patch.object(_pr, "load_canonical_report", return_value=None):
+        _apply_canonical_and_trust(report, common["phase_id"], common["phase_name"], common["status"])
     return report, common
 
 

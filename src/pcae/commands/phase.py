@@ -212,8 +212,22 @@ def _finalize_report_and_notify(
             governance_results[name] = gstatus
 
     # Commits: prefer metadata phase_commits if explicitly declared.
-    # Explicit declaration (even empty list) is authoritative over git log.
-    # Only fall back to git log when the key is absent from metadata entirely.
+    # Explicit declaration (even empty list) is authoritative.
+    #
+    # Phase 134E.10.1.1 — commit-attribution repair. Previously, when
+    # ``phase_commits`` was absent from metadata, this fell back to
+    # ``_gather_commits()`` — an unconditional ``git log --oneline -5``
+    # with zero phase-boundary awareness. Direct reproduction (134E.10.1's
+    # own governed report) proved this silently attributes a PRIOR phase's
+    # own final commit to the current phase whenever the current phase's
+    # own commit count is smaller than the fixed window (134E.10.1 had 4
+    # real commits; the fallback grabbed 5, pulling in 134E.10V's own
+    # last commit, "1844b05b"). ``commands/task.py``'s equivalent fallback
+    # already does the safe thing (an explicit, bounded ``commit_hash``
+    # or an empty list — never a blind recent-commit guess); this now
+    # matches that precedent instead of guessing. Fail-closed, not
+    # silently wrong: no declared ``phase_commits`` means the commits list
+    # is UNRESOLVED, not a best-effort approximation presented as fact.
     commit_attribution = meta.get("commit_attribution", "")
     if "phase_commits" in meta:
         # Metadata explicitly declares phase commits — authoritative (may be empty)
@@ -223,7 +237,9 @@ def _finalize_report_and_notify(
         if not commit_attribution:
             commit_attribution = "phase_owned" if meta_hashes else "none (no commits for this phase)"
     else:
-        commits = _gather_commits()
+        commits = []
+        if not commit_attribution:
+            commit_attribution = "unresolved (no phase_commits declared in metadata)"
 
     # Phase 114C — live git state is authoritative for current push state
     # whenever it can be determined (Objective 2). Declared metadata is
@@ -304,6 +320,19 @@ def _finalize_report_and_notify(
         # other callers, unused here.
         identity_conflict=None,
     )
+
+    # Phase 134E.10.1.1 — cross-phase commit rejection (defense in depth,
+    # additive to the phase_commits-declaration check above). Fails closed:
+    # a commit whose own subject names a different phase is never silently
+    # accepted as this phase's own.
+    from pcae.core.phase_reports import detect_cross_phase_commit_contamination
+    cross_phase_warnings = detect_cross_phase_commit_contamination(commits, phase_id)
+    if cross_phase_warnings:
+        gate["finalizable"] = False
+        gate.setdefault("blockers", [])
+        for warning in cross_phase_warnings:
+            gate["blockers"].append(f"cross-phase commit contamination: {warning}")
+
     trust_result = compute_final_trust(
         trial_report.to_dict(), old_schema_missing_fields=trial_report.missing_trust_fields,
     )
@@ -635,21 +664,6 @@ def _redact_error(error: str) -> str:
     if chat_id:
         safe = safe.replace(chat_id, "[REDACTED_CHAT_ID]")
     return safe
-
-
-def _gather_commits() -> list[str]:
-    """Return recent commit hashes for the current branch."""
-    import subprocess
-    try:
-        result = subprocess.run(
-            ["git", "log", "--oneline", "-5"],
-            capture_output=True, text=True, timeout=10,
-        )
-        if result.returncode == 0:
-            return [line.split()[0] for line in result.stdout.strip().splitlines() if line]
-    except Exception:
-        pass
-    return []
 
 
 def _gather_files_changed() -> int:
