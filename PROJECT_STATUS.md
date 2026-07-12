@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 135D — Cross-Representation Invariant Architecture and State-Machine
+Verification (completed).
+
+Turned the verified CLTR-001 v1.0 contract into a precise,
+implementation-independent behavioral model in
+`docs/PHASE_135_CROSS_REPRESENTATION_INVARIANT_ARCHITECTURE_AND_STATE_MACHINE_VERIFICATION.md`,
+independently re-deriving (not copying) the state inventory, transition
+inventory, invariant model, and representation model from CLTR-001's
+frozen text, 135C's verified findings, 135A's architecture, 134F's
+independently verified lifecycle behavior, PFN-001, and PFR-001.
+
+Produced: a re-derived 14-state minimum inventory (12 spine + 2
+orthogonal) evaluated fresh against 21 named candidates; a complete
+state-definition table; a 16-transition inventory with no implicit
+transitions; a 14-item forbidden-transition inventory; a certification-
+boundary definition; an 8-category irreversibility model; a 15-
+representation cross-representation model and representation-state
+matrix; a 36-invariant formal model (the 33 CLTR-001 invariants plus
+CLTR-ORDER-5/6/7, minted as derived clarifications closing a numbering
+gap 135C identified); formal identity, authority, state, ordering,
+commit-ownership, projected-state, evidence, atomic-visibility,
+notification, marker, and receipt invariants; a complete retry/resume
+matrix; a formalized NOTIFIED_UNCONFIRMED analysis; a duplicate/replay
+matrix; a failure-state model; a conformance-state mapping; a
+compatibility-state classification; an Architecture Status grouping
+investigation; a temporal model; a final-revision staged-binding
+re-verification; a state-machine determinism proof; a reachability
+analysis; a terminal-state analysis; and a safety proof.
+
+Dispositioned all ten of 135C's non-blocking deferred questions (two
+resolved via derived clarification, eight further constrained or
+re-verified); found zero additional Blocking findings of its own. All
+three 134F-disclosed structural gaps (resume-terminal classification,
+non-atomic `latest.md`/`latest.json` at three write sites, fabricated-
+hash silent acceptance) were independently re-confirmed **still live,
+unrepaired, in current production source** — not repaired by this phase.
+
+**Verdict: B — VERIFIED WITH NON-BLOCKING DEFERRED QUESTIONS.** The
+state-machine and invariant architecture is complete, deterministic, and
+sound: no ambiguous canonical authority, no overlapping/contradictory
+lifecycle states, no nondeterministic retry result, no missing terminal
+classification, no irreversible transition without prior certification,
+no path to duplicate external delivery, no path for fabricated commit
+ownership to become authoritative, no mixed-generation canonical
+visibility, no unresolvable final-revision circularity, no compatibility
+path preserving unsafe authority, and no invariant that cannot be
+evaluated deterministically. CLTR-001 requires no amendment.
+
+**This is architecture and formal verification only. No implementation,
+JSON schema, source, test, finalization, or entry-point change occurred.
+Runtime remains Observed/observe/execution unavailable. PFN-001 and
+PFR-001 remain unchanged.**
+
+Recommended next phase: 135E — Canonical Transition Record Prototype Plan
+(not started).
+
+## Phase 135D Complete
+
 Phase 135C — Canonical Lifecycle Transition Record Contract Verification (completed).
 
 Independently verified CLTR-001 v1.0 in

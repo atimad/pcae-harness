@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Phase 135D - Cross-Representation Invariant Architecture and State-Machine
+  Verification
+  (`docs/PHASE_135_CROSS_REPRESENTATION_INVARIANT_ARCHITECTURE_AND_STATE_MACHINE_VERIFICATION.md`).
+  Turned CLTR-001 v1.0 into a precise, implementation-independent behavioral
+  model. Re-derived a 14-state minimum inventory from 21 candidates, a
+  16-transition inventory with no implicit transitions, a 14-item forbidden-
+  transition inventory, a certification-boundary definition, an 8-category
+  irreversibility model, a 15-representation cross-representation model and
+  representation-state matrix, a 36-invariant formal model (33 original plus
+  CLTR-ORDER-5/6/7 closing a numbering gap 135C identified), formal identity/
+  authority/state/ordering/commit-ownership/projected-state/evidence/atomic-
+  visibility/notification/marker/receipt invariants, a complete retry/resume
+  matrix, a formalized NOTIFIED_UNCONFIRMED analysis, a duplicate/replay
+  matrix, a failure-state model, a conformance mapping, a compatibility-state
+  classification, an Architecture Status grouping investigation, a temporal
+  model, a final-revision staged-binding re-verification, a determinism
+  proof, a reachability analysis, a terminal-state analysis, and a safety
+  proof. Dispositioned all ten 135C deferred questions (two resolved, eight
+  constrained/re-verified); zero blocking findings. Verdict: VERIFIED WITH
+  NON-BLOCKING DEFERRED QUESTIONS. CLTR-001 requires no amendment. No
+  implementation, schema, source, or test change occurred.
 - Phase 135C - Canonical Lifecycle Transition Record Contract Verification
   (`docs/PHASE_135_CANONICAL_LIFECYCLE_TRANSITION_RECORD_CONTRACT_VERIFICATION.md`).
   Independently re-derived and verified CLTR-001 v1.0 (RE-DERIVE, DO NOT
