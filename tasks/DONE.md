@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 135D: Cross-Representation Invariant Architecture and State-Machine Verification (20260712-2147-phase-135d-cross-representation-invariant-architecture-and-state-machine-verification)
 - Repair Phase 135C canonical report metadata (20260712-2057-repair-phase-135c-canonical-report-metadata)
 - Sync Phase 135C completion metadata (20260712-2057-sync-phase-135c-completion-metadata)
 - Phase 135C: Canonical Lifecycle Transition Record Contract Verification (20260712-2056-phase-135c-canonical-lifecycle-transition-record-contract-verification)
