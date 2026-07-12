@@ -8,6 +8,8 @@
   remains Current/In Progress, lifecycle groupings overlap, or an In Progress
   entry carries an explicit `(completed)` status marker. Long completed Current
   Phase titles are no longer misclassified by an arbitrary 100-character scan.
+  Canonical commit-subject parsing also preserves triply-dotted corrective and
+  verification identities such as `134E.10.1V.1` without truncation.
 
 - Phase 134E.10.1V - Final Lifecycle Integration Transaction-Span Repair
   Independent Verification (`docs/

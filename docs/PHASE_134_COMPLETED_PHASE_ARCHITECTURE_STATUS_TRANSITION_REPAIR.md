@@ -76,3 +76,10 @@ The seven inherited failing node IDs were the two advisory-runtime new-directory
 sentinels, three stale TODO/current-roadmap consistency checks,
 `TestPhase126G1CommitTrustMetadataRepair::test_report_completeness_reaches_complete_via_cli_alone`,
 and `test_rendering_134e5.py::test_current_report_generation_remains_unchanged`.
+
+Finalization preflight exposed and repaired one directly in-scope canonical
+grammar defect: commit-subject attribution truncated `134E.10.1V.1` to
+`134E.10.1V`. Both attribution regex sites now accept every dotted numeric
+segment with its optional verification suffix; the exact triply-dotted identity
+has a focused pass/mismatch regression. The refused attempt promoted and
+delivered nothing.

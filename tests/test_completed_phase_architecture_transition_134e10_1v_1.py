@@ -10,6 +10,7 @@ from pcae.core.architecture_status import parse_phase_id, validate_architecture_
 from pcae.core.finalization_transaction import run_finalization_transaction
 from pcae.core.phase_reports import (
     build_architecture_status,
+    detect_cross_phase_commit_contamination,
     make_phase_report,
     validate_derived_correctness,
 )
@@ -181,3 +182,14 @@ def test_projection_does_not_mutate_pre_transition_snapshot(tmp_path, monkeypatc
     )
     assert before == frozen
     assert "132F" not in before["planned_phase_ids"]
+
+
+def test_commit_subject_parser_preserves_triply_dotted_identity(monkeypatch):
+    class Result:
+        returncode = 0
+        stdout = "Phase 134E.10.1V.1: repair transition\n"
+
+    monkeypatch.setattr("subprocess.run", lambda *args, **kwargs: Result())
+    assert detect_cross_phase_commit_contamination(["5d02165c"], "134E.10.1V.1") == []
+    warnings = detect_cross_phase_commit_contamination(["5d02165c"], "134E.10.1V")
+    assert warnings and "134E.10.1V.1" in warnings[0]

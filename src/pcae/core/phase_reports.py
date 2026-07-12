@@ -1811,7 +1811,8 @@ def resolve_canonical_phase_identity(
 
 
 _COMMIT_SUBJECT_PHASE_TOKEN_RE = re.compile(
-    r"Phase\s+(\d+[A-Za-z]*(?:\.\d+)*[A-Za-z]?)\b"
+    r"Phase\s+(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b",
+    re.IGNORECASE,
 )
 
 
@@ -2236,11 +2237,13 @@ def validate_phase_identity(
             commit.get("message", "") if isinstance(commit, dict) else ""
         )
         commit_phase_match = _re.search(
-            r"(?:Phase|phase)\s+(\d+[A-Z](?:\.\d+)*)", commit_msg
+            r"Phase\s+(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b",
+            commit_msg,
+            _re.IGNORECASE,
         )
         if commit_phase_match:
-            commit_phase = commit_phase_match.group(1)
-            if commit_phase != phase_id:
+            commit_phase = commit_phase_match.group(1).upper()
+            if commit_phase != phase_id.upper():
                 # Sub-phases may reference their parent phase (113B.2 → 113B)
                 is_sub = "." in phase_id
                 parent = phase_id.split(".")[0] if is_sub else ""
