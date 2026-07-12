@@ -8,6 +8,7 @@ import pytest
 
 from pcae.core.architecture_status import parse_phase_id, validate_architecture_status
 from pcae.core.finalization_transaction import run_finalization_transaction
+from pcae.core.repository_transition_integration import parse_phase_id_from_text
 from pcae.core.phase_reports import (
     build_architecture_status,
     detect_cross_phase_commit_contamination,
@@ -193,3 +194,8 @@ def test_commit_subject_parser_preserves_triply_dotted_identity(monkeypatch):
     assert detect_cross_phase_commit_contamination(["5d02165c"], "134E.10.1V.1") == []
     warnings = detect_cross_phase_commit_contamination(["5d02165c"], "134E.10.1V")
     assert warnings and "134E.10.1V.1" in warnings[0]
+
+
+def test_transition_adapter_preserves_triply_dotted_active_task_identity():
+    text = "Phase 134E.10.1V.1: Completed-Phase Architecture Status Transition Repair"
+    assert parse_phase_id_from_text(text) == "134E.10.1V.1"

@@ -188,5 +188,7 @@ def parse_lifecycle_phase_identity(line: str | None) -> tuple[str | None, bool]:
 def parse_phase_id_from_text(text: str | None) -> str | None:
     if not text:
         return None
-    match = re.search(r"\b(\d{3}[A-Z](?:\.[A-Z0-9]+)?)\b", text)
+    match = re.search(
+        r"\b(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\b", text, re.IGNORECASE
+    )
     return match.group(1) if match else None

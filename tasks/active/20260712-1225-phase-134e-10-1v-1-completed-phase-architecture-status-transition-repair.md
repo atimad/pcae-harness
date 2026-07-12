@@ -33,6 +33,7 @@ Repair the shared finalization/Architecture Status boundary so a completed phase
 - src/pcae/core/phase_reports.py
 - src/pcae/core/architecture_status.py
 - src/pcae/core/finalization_transaction.py
+- src/pcae/core/repository_transition_integration.py
 - src/pcae/commands/phase.py
 - src/pcae/commands/task.py
 - src/pcae/commands/phase_reports.py

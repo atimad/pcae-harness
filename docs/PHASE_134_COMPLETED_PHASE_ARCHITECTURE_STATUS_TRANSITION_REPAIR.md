@@ -83,3 +83,8 @@ grammar defect: commit-subject attribution truncated `134E.10.1V.1` to
 segment with its optional verification suffix; the exact triply-dotted identity
 has a focused pass/mismatch regression. The refused attempt promoted and
 delivered nothing.
+
+The next governed preflight exposed the same stale one-dot grammar in the
+shared Repository Transition adapter's active-task-title parser. That adapter
+now uses the full dotted-segment grammar and has an exact `134E.10.1V.1`
+regression; the refused attempt again promoted and delivered nothing.
