@@ -2,6 +2,32 @@
 
 ## Unreleased
 
+- Phase 134E.10V - Final Lifecycle Integration Independent Verification
+  (`docs/PHASE_134_FINAL_LIFECYCLE_INTEGRATION_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived 134D's authoritative scope for 134E.10 and
+  found it requires "a single, explicitly resumable transaction spanning
+  commit → push → certification → promotion → delivery → completion"
+  replacing the split flow -- direct line-number tracing of all 5
+  production entry points confirms `finalization_transaction.py` instead
+  runs strictly after certification/promotion/delivery already complete
+  via the unmodified legacy path, with `commands/commit.py` having zero
+  references to it. **BLOCKING** relative to 134D's completion criteria;
+  the genuine fix is too large for this verification phase and is
+  reported with a recommended dedicated corrective sub-phase (134E.10.1)
+  instead of being attempted here. A second BLOCKING finding was found
+  and repaired: the recording adapter used to model delivery
+  unconditionally reports success with zero real I/O, so receipts could
+  claim a delivery that never happened or failed -- fixed by gating
+  receipt creation on the real `report.notification_result["success"]`
+  value (2 new tests). Two further test-suite-only defects (non-hermetic
+  phase identity; a stale "never activated" assumption in two 134E.7
+  tests) found and fixed during this phase's own regression re-run.
+  Full-suite regression is an exact node-ID match to the established
+  clean baseline (182 pre-existing failures, zero new); fast-green
+  4391/4391 across 4 runs. All 7 subsystem modules reclassified: none is
+  a production semantic authority after 134E.10 -- all remain certified
+  derivative observers of the unchanged legacy path.
+
 - Phase 134E.10 - Final Lifecycle Integration
   (`docs/PHASE_134_FINAL_LIFECYCLE_INTEGRATION.md`). Activated the seven
   previously-inert 134E.1-134E.7 modules (Canonical Engineering Evidence,

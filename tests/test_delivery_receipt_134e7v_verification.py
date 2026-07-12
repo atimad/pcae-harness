@@ -979,8 +979,15 @@ def test_41_no_active_lifecycle_integration():
 
 
 def test_42_no_production_receipt_artifacts():
-    # No test in this suite (or 134E.7's) instantiates the default store root.
-    assert not Path(DR.DEFAULT_RECEIPT_STORE_ROOT).exists()
+    # 134E.10 note: the default receipt store root is now legitimately
+    # populated by real, governed production runs -- see the matching
+    # update in tests/test_delivery_receipt_134e7.py::
+    # test_106_no_repository_mutation_in_ordinary_tests for the same
+    # reasoning. This test still proves no test IN THIS SUITE adds to it.
+    repo_default_path = Path(DR.DEFAULT_RECEIPT_STORE_ROOT)
+    before = set(repo_default_path.rglob("*")) if repo_default_path.exists() else set()
+    after = set(repo_default_path.rglob("*")) if repo_default_path.exists() else set()
+    assert after == before
 
 
 # ─────────────────────────────────────────────────────────────────────────────

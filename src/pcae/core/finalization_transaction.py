@@ -28,6 +28,14 @@ Authority boundaries (134D plan, section "Authority Boundary Review"):
   records that model as a receipt via ``pcae.core.delivery_receipt``. It
   never calls ``pcae.core.notifications`` or any live sink, and it never
   re-checks or re-uses ``_external_delivery_authorized`` for a live send.
+  **134E.10V finding, repaired:** the recording adapter unconditionally
+  reports success by construction, so delivery modeling and receipt
+  creation are only attempted when ``report.notification_result`` (the
+  real, already-recorded outcome of the existing dispatch path) itself
+  reports ``success: True`` -- otherwise a receipt would misrepresent a
+  delivery that was never attempted or did not succeed. A skipped receipt
+  is recorded as an explicit, honest limitation on the ``TransactionResult``
+  instead.
 
 Deviation from the full step sequence sketched in the Phase 134E.10 task
 brief, documented honestly: identity resolution, ``PhaseReport`` construction,
@@ -616,41 +624,66 @@ def run_finalization_transaction(
         _save_checkpoint(checkpoint_path, checkpoint)
 
         # Delivery: MODEL the already-executed dispatch, do not re-send.
-        # The physical send (if any) already happened via the existing
-        # dispatch()/finalize_phase_report() path before this function was
-        # called. Using RECORDING_ADAPTER_ID guarantees no network I/O and
-        # (because it does not represent_external_delivery) never consults
-        # or duplicates pcae.core.notifications._external_delivery_authorized.
-        delivery_request = _delivery.build_delivery_request(
-            result=render_operator_md,
-            adapter_id=_delivery.RECORDING_ADAPTER_ID,
-            adapter_version="1.0",
-            destination=_delivery.DestinationClassification.SYNTHETIC_RECORDING,
-            purpose=_delivery.DeliveryPurpose.OPERATOR_TERMINAL_REPORT,
-            policy_version=_delivery.DEFAULT_POLICY.policy_version,
-        )
-        delivery_plan = _delivery.plan_delivery(delivery_request)
-        delivery_execution = _delivery.execute_delivery(delivery_plan)
-        checkpoint["steps"]["delivery_model"] = "completed"
-        _save_checkpoint(checkpoint_path, checkpoint)
-
-        started_at = checkpoint.get("started_at") or _utc_now_iso()
+        # 134E.10V finding (repaired): the RECORDING_ADAPTER_ID adapter's
+        # own deliver function unconditionally reports success ("no
+        # external I/O... deterministically reports success", see its
+        # docstring in delivery_pipeline.py) -- calling it unconditionally
+        # here would make the receipt claim a successful delivery even
+        # when the real dispatch was never attempted or genuinely failed,
+        # violating the receipt-honesty contract ("must not claim adapter
+        # execution if the generalized adapter did not execute", "must
+        # not imply remote acceptance without evidence"). The receipt
+        # step now only runs when `report.notification_result` -- the
+        # real, existing dispatch outcome already recorded by the
+        # existing, unmodified dispatch path before this function was
+        # ever called -- itself reports `success: True`. Any other case
+        # (not attempted, disabled, no sinks, failed) skips delivery
+        # modeling and receipt creation entirely and records an explicit,
+        # honest limitation instead of a misleading synthetic receipt.
+        notification_result = getattr(report, "notification_result", None) or {}
+        real_dispatch_succeeded = bool(notification_result.get("success"))
         completed_at = _utc_now_iso()
-        receipt = _receipt.open_receipt(
-            delivery_execution,
-            delivery_plan,
-            delivery_request,
-            started_at=started_at,
-            completed_at=completed_at,
-        )
-        receipt = _receipt.finalize_receipt(receipt, finalized_at=completed_at)
-        store = _receipt.DeliveryReceiptStore(rcpt_root)
-        save_out = store.save(receipt)
-        result.receipt_logical_delivery_id = receipt.logical_delivery_id
-        result.receipt_path = save_out.get("path")
-        checkpoint["steps"]["receipt"] = "completed"
-        checkpoint["receipt_logical_delivery_id"] = receipt.logical_delivery_id
-        checkpoint["receipt_path"] = save_out.get("path")
+        if not real_dispatch_succeeded:
+            checkpoint["steps"]["delivery_model"] = "skipped"
+            checkpoint["steps"]["receipt"] = "skipped"
+            checkpoint["limitations"].append(
+                "no receipt recorded: the underlying report.notification_result "
+                f"does not report success ({notification_result!r}) -- a receipt "
+                "would misrepresent a delivery that was not attempted or did not "
+                "succeed"
+            )
+            _save_checkpoint(checkpoint_path, checkpoint)
+        else:
+            delivery_request = _delivery.build_delivery_request(
+                result=render_operator_md,
+                adapter_id=_delivery.RECORDING_ADAPTER_ID,
+                adapter_version="1.0",
+                destination=_delivery.DestinationClassification.SYNTHETIC_RECORDING,
+                purpose=_delivery.DeliveryPurpose.OPERATOR_TERMINAL_REPORT,
+                policy_version=_delivery.DEFAULT_POLICY.policy_version,
+            )
+            delivery_plan = _delivery.plan_delivery(delivery_request)
+            delivery_execution = _delivery.execute_delivery(delivery_plan)
+            checkpoint["steps"]["delivery_model"] = "completed"
+            _save_checkpoint(checkpoint_path, checkpoint)
+
+            started_at = checkpoint.get("started_at") or _utc_now_iso()
+            completed_at = _utc_now_iso()
+            receipt = _receipt.open_receipt(
+                delivery_execution,
+                delivery_plan,
+                delivery_request,
+                started_at=started_at,
+                completed_at=completed_at,
+            )
+            receipt = _receipt.finalize_receipt(receipt, finalized_at=completed_at)
+            store = _receipt.DeliveryReceiptStore(rcpt_root)
+            save_out = store.save(receipt)
+            result.receipt_logical_delivery_id = receipt.logical_delivery_id
+            result.receipt_path = save_out.get("path")
+            checkpoint["steps"]["receipt"] = "completed"
+            checkpoint["receipt_logical_delivery_id"] = receipt.logical_delivery_id
+            checkpoint["receipt_path"] = save_out.get("path")
 
         checkpoint["status"] = "completed"
         checkpoint["completed_at"] = completed_at

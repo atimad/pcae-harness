@@ -69,13 +69,22 @@ def _fresh_arch_status(phase_id: str, **overrides) -> dict:
     return base
 
 
-def _certified_report(phase_id: str = "999X-txn-test", **overrides):
+def _certified_report(
+    phase_id: str = "999X.1-txn-test", *, dispatch_succeeded: bool = True, **overrides
+):
     """Build a report that passes ``validate_finalization_gate`` end to
     end, exactly the way ``commands/phase.py``/``commands/task.py`` do
     (``make_phase_report`` -> ``_apply_canonical_and_trust`` ->
     ``validate_finalization_gate``), hermetically -- ``load_canonical_
     report()`` is patched to ``None`` so this never depends on this real
     repository's own ``.pcae/phase-completion-report.md``.
+
+    ``dispatch_succeeded`` sets ``report.notification_result`` to mirror
+    what the existing, unmodified dispatch path would have recorded for a
+    genuinely successful send (default, matching the common case these
+    tests exercise) or leaves it empty (``dispatch_succeeded=False``) to
+    exercise the 134E.10V receipt-honesty repair: no receipt may be
+    created unless the real dispatch outcome reports success.
     """
     defaults = dict(
         phase_id=phase_id,
@@ -124,6 +133,16 @@ def _certified_report(phase_id: str = "999X-txn-test", **overrides):
             recommended_next_phase=report.recommended_next_phase,
             commit_attribution=report.commits[0],
         )
+        if dispatch_succeeded:
+            report.notification_result = {
+                "dispatched": True,
+                "sinks": ["noop"],
+                "success": True,
+                "error": None,
+                "outcome": "sent",
+                "reason": "",
+                "kind": "complete",
+            }
     return report, gate
 
 
@@ -156,12 +175,63 @@ class TestEndToEndTransaction:
         assert result.receipt_logical_delivery_id
         assert result.receipt_path
 
+    def test_no_receipt_when_real_dispatch_did_not_succeed(self, tmp_path):
+        """134E.10V finding, repaired: the recording adapter used to
+        unconditionally report success, so a receipt could be created
+        even when the real, existing dispatch path never attempted a
+        send or the send genuinely failed. A receipt must only be
+        created when ``report.notification_result`` itself reports
+        ``success: True``."""
+        report, gate = _certified_report(
+            phase_id="999X.1-no-dispatch-test", dispatch_succeeded=False
+        )
+        assert report.notification_result == {}
+        result = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=gate,
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+        assert result.status == "completed"
+        # Evidence/extraction/views/rendering are unaffected -- only
+        # delivery modeling and receipt creation are gated.
+        assert result.evidence_id
+        assert result.rendering_digests.get("phase_report")
+        assert result.receipt_logical_delivery_id is None
+        assert result.receipt_path is None
+        assert any(
+            "no receipt recorded" in lim and "does not report success" in lim
+            for lim in result.limitations
+        )
+
+    def test_no_receipt_when_real_dispatch_failed(self, tmp_path):
+        report, gate = _certified_report(
+            phase_id="999X.1-failed-dispatch-test", dispatch_succeeded=False
+        )
+        report.notification_result = {
+            "dispatched": True, "sinks": ["telegram"], "success": False,
+            "error": "HTTP 500", "outcome": "failed_with_reason",
+            "reason": "HTTP 500", "kind": "complete",
+        }
+        result = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=gate,
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+        assert result.receipt_logical_delivery_id is None
+        assert result.receipt_path is None
+
     def test_unresolved_rendering_divergence_is_disclosed_not_hidden(self, tmp_path):
         """The new rendering pipeline is an independent presentation
         stage from ``PhaseReport.render_markdown()`` -- if their output
         differs, that must be recorded as a limitation, never silently
         papered over (134A invariant against silent strengthening)."""
-        report, gate = _certified_report(phase_id="999X-divergence-test")
+        report, gate = _certified_report(phase_id="999X.1-divergence-test")
         result = run_finalization_transaction(
             phase_id=report.phase_id,
             phase_name=report.phase_name,
@@ -182,7 +252,7 @@ class TestEndToEndTransaction:
 
 class TestGateEnforcement:
     def test_gate_not_passed_blocks_before_any_new_pipeline_step(self, tmp_path):
-        report, _ = _certified_report(phase_id="999X-blocked-test")
+        report, _ = _certified_report(phase_id="999X.1-blocked-test")
         failing_gate = {"finalizable": False, "blockers": ["synthetic blocker"]}
 
         result = run_finalization_transaction(
@@ -201,7 +271,7 @@ class TestGateEnforcement:
         """Defense in depth: the transaction re-checks ``report.report_
         completeness`` itself rather than trusting a caller-supplied gate
         dict's ``finalizable`` flag alone."""
-        report, _ = _certified_report(phase_id="999X-lying-gate-test")
+        report, _ = _certified_report(phase_id="999X.1-lying-gate-test")
         report.report_completeness = "incomplete"
         lying_gate = {"finalizable": True, "blockers": []}
 
@@ -223,7 +293,7 @@ class TestGateEnforcement:
 
 class TestCaptureFailureIsNonFatal:
     def test_capture_exception_yields_capture_failed_not_a_raise(self, tmp_path):
-        report, gate = _certified_report(phase_id="999X-capture-fail-test")
+        report, gate = _certified_report(phase_id="999X.1-capture-fail-test")
 
         with mock.patch(
             "pcae.core.finalization_transaction._capture_evidence",
@@ -245,7 +315,7 @@ class TestCaptureFailureIsNonFatal:
         assert report.report_completeness == "complete"
 
     def test_post_capture_step_exception_yields_best_effort_incomplete(self, tmp_path):
-        report, gate = _certified_report(phase_id="999X-post-capture-fail-test")
+        report, gate = _certified_report(phase_id="999X.1-post-capture-fail-test")
 
         with mock.patch(
             "pcae.core.finalization_transaction._extraction.extract",
@@ -272,7 +342,7 @@ class TestCaptureFailureIsNonFatal:
 
 class TestResumability:
     def test_second_call_for_same_certified_content_short_circuits(self, tmp_path):
-        report, gate = _certified_report(phase_id="999X-resume-test")
+        report, gate = _certified_report(phase_id="999X.1-resume-test")
         txn_root = tmp_path / "txns"
         rcpt_root = tmp_path / "receipts"
 
@@ -301,7 +371,7 @@ class TestResumability:
         txn_root = tmp_path / "txns"
         rcpt_root = tmp_path / "receipts"
         report_a, gate_a = _certified_report(
-            phase_id="999X-distinct-test", summary="First summary."
+            phase_id="999X.1-distinct-test", summary="First summary."
         )
         result_a = run_finalization_transaction(
             phase_id=report_a.phase_id, phase_name=report_a.phase_name,
@@ -309,7 +379,7 @@ class TestResumability:
         )
 
         report_b, gate_b = _certified_report(
-            phase_id="999X-distinct-test", summary="Second, different summary."
+            phase_id="999X.1-distinct-test", summary="Second, different summary."
         )
         result_b = run_finalization_transaction(
             phase_id=report_b.phase_id, phase_name=report_b.phase_name,
@@ -338,7 +408,7 @@ class TestStorageIdentifierSafety:
         ],
     )
     def test_unsafe_phase_id_is_rejected(self, bad_id, tmp_path):
-        report, gate = _certified_report(phase_id="999X-safe-holder")
+        report, gate = _certified_report(phase_id="999X.1-safe-holder")
         with pytest.raises(ValueError):
             run_finalization_transaction(
                 phase_id=bad_id,
@@ -350,7 +420,7 @@ class TestStorageIdentifierSafety:
             )
 
     def test_validate_identifier_accepts_ordinary_phase_ids(self):
-        for ok_id in ("134E.10", "999X-safe-test", "113B.2", "134E.1V"):
+        for ok_id in ("134E.10", "999X.1-safe-test", "113B.2", "134E.1V"):
             _validate_identifier(ok_id, "phase_id")  # must not raise
 
 
@@ -417,7 +487,7 @@ class TestExternalDeliveryIsolation:
         assert "TelegramSink" not in content
 
     def test_transaction_delivery_step_uses_recording_adapter_only(self, tmp_path):
-        report, gate = _certified_report(phase_id="999X-isolation-test")
+        report, gate = _certified_report(phase_id="999X.1-isolation-test")
         result = run_finalization_transaction(
             phase_id=report.phase_id, phase_name=report.phase_name,
             report=report, gate=gate,

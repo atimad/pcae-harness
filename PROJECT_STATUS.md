@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 134E.10V — Final Lifecycle Integration Independent Verification (completed).
+
+Independently verified 134E.10's claim to implement "Final Lifecycle
+Integration" via re-derivation from the authoritative 134D plan, not trust
+in 134E.10's own report — including of this session's own immediately
+preceding work. **Central verdict: `finalization_transaction.py` is a
+post-success observational/compatibility layer, not the authoritative
+lifecycle-spanning transaction 134D's architectural scope requires.** 134D's
+own text demands "a single, explicitly resumable transaction spanning
+commit → push → certification → promotion → delivery → completion" that
+replaces today's split flow and makes the clean/push circular dependency
+"structurally impossible." Direct line-number tracing of all five
+production entry points confirms the transaction runs strictly *after*
+certification, promotion, and delivery already complete via the entirely
+unmodified legacy path in every case; `commands/commit.py` has zero
+references to it; `task.py`/`phase.py` each still independently call
+`finalize_phase_report()` with their own separately-built gate objects,
+exactly as before 134E.10. **BLOCKING** relative to 134D's completion
+criteria — the genuine fix is far too large for "smallest safe repair" in a
+verification phase and was not attempted; reported honestly with a
+recommended dedicated corrective sub-phase (134E.10.1) instead.
+
+A second, independently-discovered BLOCKING finding was found **and
+repaired**: the in-memory recording adapter 134E.10 uses to model delivery
+"deterministically reports success" with zero real I/O — the original
+`finalization_transaction.py` could therefore create a Delivery Receipt
+claiming successful delivery even when the real dispatch was never
+attempted or genuinely failed. Repaired by gating receipt creation on the
+real `report.notification_result["success"]` value; 2 new tests added.
+Two further genuine test-suite defects (non-hermetic phase identity;
+a stale "never activated" assumption in two 134E.7 tests, now falsified by
+134E.10's own legitimate activation) were found and repaired during this
+phase's own regression re-run. Full-suite regression: exact node-ID match
+to the established clean baseline (182 pre-existing failures, zero new,
+zero pollution); fast-green deterministic at 4391/4391 across four runs
+(one pre-repair sanity check, three required post-repair runs). Seven
+subsystem modules independently reclassified: none is a production
+semantic authority — all remain certified derivative observers of the
+unchanged legacy path (compatibility projection / comparison artifact /
+shadow-adapter, per module). No execution capability introduced; no new
+lifecycle implementation attempted. Full details in `docs/
+PHASE_134_FINAL_LIFECYCLE_INTEGRATION_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134E.10.1 — Final Lifecycle Integration
+Transaction-Span Repair (a dedicated corrective sub-phase; NOT 134F, since
+134F's whole-lifecycle-verification premise does not hold while the
+lifecycle transaction itself does not yet span what 134D requires).
+134E.10.1 was not begun in this phase. 134F was not begun.
+
+## Phase 134E.10 Complete (historical — full text)
+
 Phase 134E.10 — Final Lifecycle Integration (completed).
 
 Integrated Stages 9 and 12 of the frozen Track 134 lifecycle (Repository/
