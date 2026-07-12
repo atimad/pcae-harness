@@ -28,7 +28,7 @@
     {"name": "pcae_health", "status": "healthy"},
     {"name": "pcae_check", "status": "passed"},
     {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "not_ready (working tree dirty pending this metadata-sync closure; 2 commits unpushed pending push authorization)"},
+    {"name": "pcae_push_check", "status": "clean"},
     {"name": "telegram_runtime", "status": "configured for one governed terminal delivery only"},
     {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
   ],
