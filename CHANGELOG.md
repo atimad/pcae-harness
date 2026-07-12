@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- Phase 134E.10.1V - Final Lifecycle Integration Transaction-Span Repair
+  Independent Verification (`docs/
+  PHASE_134_FINAL_LIFECYCLE_INTEGRATION_TRANSACTION_SPAN_REPAIR_INDEPENDENT_VERIFICATION.md`).
+  Independently verified both 134E.10.1's control-inversion repair and
+  134E.10.1.1's commit-attribution repair via re-derivation, not trust.
+  Confirmed: promotion/dispatch is genuinely gated behind mandatory
+  pre-promotion stages across all 4 entry points; no competing legacy
+  authority; commit-subject detection used only as rejection evidence,
+  never positive ownership proof; missing/empty `phase_commits` cannot
+  reach "complete" (pre-existing structural check); all 7 relevant
+  commits' ownership independently re-derived via fresh `git log`,
+  matching every prior claim. One genuine gap disclosed as NON-BLOCKING:
+  `detect_cross_phase_commit_contamination()` silently skips
+  unresolvable commit hashes (deliberate, to stay permissive for
+  hermetic tests) -- a fabricated hash currently passes unchallenged;
+  does not reopen the actual defect this track prevents, disclosed with
+  a recommended future follow-up rather than repaired. Zero unresolved
+  BLOCKING findings. Full-suite regression exact node-ID match to
+  baseline; fast_green 4391/4391 x3.
+
 - Phase 134E.10.1.1 - Phase-Owned Commit Attribution Repair
   (`docs/PHASE_134_PHASE_OWNED_COMMIT_ATTRIBUTION_REPAIR.md`). Repaired a
   commit-attribution defect in 134E.10.1's own governed report: `1844b05b`

@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 134E.10.1V — Final Lifecycle Integration Transaction-Span Repair Independent Verification (completed).
+
+Independently verified both 134E.10.1's transaction-span control-inversion
+repair and 134E.10.1.1's commit-attribution repair via re-derivation from
+134D and direct reproduction against real source and git history — not
+trust in either phase's own report, comments, function names, or the
+tests written during implementation. **Verdict: both repairs hold.**
+Control inversion genuinely gates promotion and dispatch behind the seven
+integrated modules' mandatory pre-promotion stages, confirmed via fresh
+line-number tracing across all four command files plus direct REPL
+reproduction (a mandatory-stage failure never invokes the
+`promote_and_dispatch` callback; a resumed transaction for identical
+content never re-invokes it either). Five of the seven subsystems (CEE,
+extraction, both views, rendering) are now precisely reclassified as
+"required validating participants" — real gating authority over whether
+finalization proceeds at all, though still no authority over report
+*content* or the physical dispatch mechanism (Delivery Pipeline/Delivery
+Receipt remain shadow/receipt-projection, unchanged). All 7 relevant
+commits' ownership independently re-derived via fresh `git log` calls,
+matching every prior claim exactly. One genuine, real gap found and
+disclosed as **NON-BLOCKING**: `detect_cross_phase_commit_contamination()`
+silently skips commit hashes that don't resolve to real commits (by
+deliberate design, to remain permissive for this session's own extensive
+hermetic-test convention) — a fabricated hash in an explicitly-declared
+`phase_commits` list currently passes unchallenged. This does not reopen
+the actual defect this track exists to prevent (a genuine prior-phase
+commit slipping through); closing it robustly would require a design
+change out of proportion to a verification phase's own repair scope, so
+it is disclosed with a recommended future follow-up rather than repaired
+here. Zero unresolved BLOCKING findings. Full-suite regression exact
+node-ID match to the established clean baseline; fast-green deterministic
+at 4391/4391 across three runs. Full details in `docs/
+PHASE_134_FINAL_LIFECYCLE_INTEGRATION_TRANSACTION_SPAN_REPAIR_INDEPENDENT_VERIFICATION.md`.
+
+Recommended next phase: 134F — Whole-Lifecycle Independent Verification.
+134F was not begun in this phase.
+
+## Phase 134E.10.1.1 Complete (historical — full text)
+
 Phase 134E.10.1.1 — Phase-Owned Commit Attribution Repair (completed).
 
 134E.10.1's own governed canonical report cited five commits as
