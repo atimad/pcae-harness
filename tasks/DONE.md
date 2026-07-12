@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Revert erroneous Phase 135D metadata-repair phase-id corruption (20260712-2228-revert-erroneous-phase-135d-metadata-repair-phase-id-corruption)
 - Repair Phase 135D canonical report metadata (20260712-2224-repair-phase-135d-canonical-report-metadata)
 - Sync Phase 135D metadata commit (20260712-2223-sync-phase-135d-metadata-commit)
 - Sync Phase 135D completion metadata (20260712-2221-sync-phase-135d-completion-metadata)
