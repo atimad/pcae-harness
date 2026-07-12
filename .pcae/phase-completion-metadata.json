@@ -1,130 +1,50 @@
 {
   "schema_version": "1.0",
-  "phase_id": "134E.10.1V",
-  "phase_name": "Final Lifecycle Integration Transaction-Span Repair Independent Verification",
-  "phase_title": "Final Lifecycle Integration Transaction-Span Repair Independent Verification",
+  "phase_id": "134E.10.1V.1",
+  "phase_name": "Completed-Phase Architecture Status Transition Repair",
+  "phase_title": "Completed-Phase Architecture Status Transition Repair",
   "status": "completed",
-  "summary": "Independently verified both 134E.10.1's transaction-span control-inversion repair and 134E.10.1.1's commit-attribution repair via re-derivation from 134D and direct reproduction against real source and git history, not trust in either phase's own report. Verdict: both repairs hold. Control inversion genuinely gates promotion and dispatch behind the seven integrated modules' mandatory pre-promotion stages, confirmed via fresh line-number tracing across all four command files plus direct REPL reproduction. Five of the seven subsystems (Canonical Engineering Evidence, Evidence Extraction, both views, Rendering) are now precisely reclassified as required validating participants -- real gating authority over whether finalization proceeds at all, though still no authority over report content or the physical dispatch mechanism. All 7 relevant commits' ownership independently re-derived via fresh git log calls, matching every prior claim exactly. One genuine gap found and disclosed as NON-BLOCKING: detect_cross_phase_commit_contamination() silently skips commit hashes that do not resolve to real commits (deliberate design tradeoff to remain permissive for this session's own hermetic-test convention) -- a fabricated hash in an explicitly-declared phase_commits list currently passes unchallenged. Does not reopen the actual defect this track exists to prevent; disclosed with a recommended future follow-up rather than repaired, since closing it robustly would require a design change out of proportion to a verification phase's own repair scope. Zero unresolved BLOCKING findings. Full-suite regression exact node-ID match to the established clean baseline; fast_green 4391/4391 across 3 runs. Recommended next phase: 134F.",
-  "phase_commits": [
-    {"hash": "467fac3b18f832706ccbafca2b19278f54f890e5"},
-    {"hash": "6e8fe99b7b4f77d03c3e62f66db62616679aa65b"}
-  ],
-  "files_changed": [
-    "CHANGELOG.md",
-    "PROJECT_STATUS.md",
-    "docs/PHASE_134_FINAL_LIFECYCLE_INTEGRATION_TRANSACTION_SPAN_REPAIR_INDEPENDENT_VERIFICATION.md",
-    "tasks/DONE.md",
-    "tasks/active/20260712-1201-phase-134e-10-1v-final-lifecycle-integration-transaction-span-repair-independent-verification.md"
-  ],
-  "files_changed_count": 5,
-  "source_files_changed": 0,
-  "test_files_changed": 0,
-  "tests_added_or_updated": "0 new test files -- this phase's findings were established via direct REPL reproduction and re-run of the existing 37/12/18-test suites from 134E.10.1/134E.10.1.1, no new tests required for a clean verification with zero BLOCKING findings",
-  "tests_run": 19553,
+  "summary": "Reproduced and repaired the completed/In Progress Architecture Status contradiction at the shared lifecycle boundary. Completion reports now seal a deterministic projected post-completion state before immutable snapshot certification; the shared finalization transaction rejects semantic disagreement before checkpoint creation, promotion, dispatch, marker persistence, or receipt creation. Fixed the independent long-title completed-marker scan. All four production entry points share the repair; transaction-span authority, sealing, PFN-001, PFR-001, and runtime Observed/observe/unavailable remain intact. Original 134E.10.1V artifacts are preserved. The fabricated-hash observation remains NON-BLOCKING and unchanged. Fast-green passed 4391/4391 across two parallel and one serial run after final code changes. Current full-suite parallel and serial runs each produced 19562 passed and the same 7 inherited failures; the historical 182-failure count was not reproduced and is not claimed. No external test delivery occurred. No 134F work began.",
+  "phase_commits": [{"hash": "5d02165c395cd36b912ee4736f0f73c87029e902"}, {"hash": "2ad32144626bbe9f9c51cdea62573a043fb22cb6"}],
+  "files_changed": ["CHANGELOG.md", "PROJECT_STATUS.md", "docs/PHASE_134_COMPLETED_PHASE_ARCHITECTURE_STATUS_TRANSITION_REPAIR.md", "src/pcae/commands/phase.py", "src/pcae/commands/phase_reports.py", "src/pcae/commands/task.py", "src/pcae/core/architecture_status.py", "src/pcae/core/finalization_transaction.py", "src/pcae/core/phase_reports.py", "tasks/DECISIONS.md", "tasks/active/20260712-1225-phase-134e-10-1v-1-completed-phase-architecture-status-transition-repair.md", "tests/test_completed_phase_architecture_transition_134e10_1v_1.py", "tests/test_report_consistency_derived_correctness_134e9.py"],
+  "files_changed_count": 13,
+  "source_files_changed": 6,
+  "test_files_changed": 2,
+  "tests_added_or_updated": "18 adversarial corrective tests plus one inherited coherent-report fixture update",
+  "tests_run": 19569,
   "validation_results": [
-    {
-      "name": "finalization_transaction_regression_suite",
-      "result": "37 passed",
-      "status": "passed"
-    },
-    {
-      "name": "commit_attribution_repair_regression_suite",
-      "result": "12 passed",
-      "status": "passed"
-    },
-    {
-      "name": "rc_audit_findings_repair_suite",
-      "result": "18 passed",
-      "status": "passed"
-    },
-    {
-      "name": "broader_affected_regression",
-      "result": "426 passed, 1 pre-existing unrelated failure",
-      "status": "passed"
-    },
-    {
-      "name": "full_suite_regression",
-      "result": "19371 passed, 182 failed (exact node-ID match to clean baseline, zero new failures)",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "4391 passed, 0 failed (3 consecutive runs: parallel x2, serial x1)",
-      "status": "passed"
-    },
-    {
-      "name": "compileall",
-      "result": "src and tests compiled successfully",
-      "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "passed with external test delivery isolated",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "fast_green coverage passed",
-      "status": "passed"
-    }
+    {"name": "architecture_transition_adversarial_suite", "result": "18 passed", "status": "passed"},
+    {"name": "focused_architecture_and_finalization_suite", "result": "218 passed", "status": "passed"},
+    {"name": "broader_affected_regression", "result": "583 passed, 1 inherited non-hermetic failure", "status": "passed"},
+    {"name": "full_suite_regression", "result": "19562 passed, 7 inherited failures; exact same IDs parallel and serial; historical 182 count not reproduced", "status": "passed"},
+    {"name": "fast_green", "result": "4391 passed, 0 failed (final code: parallel x2, serial x1)", "status": "passed"},
+    {"name": "compileall", "result": "src and tests compiled successfully", "status": "passed"},
+    {"name": "report_notification_tests", "result": "passed with live notification configuration scrubbed; no external test delivery", "status": "passed"},
+    {"name": "bootstrap_session_reporting_tests", "result": "fast_green coverage passed", "status": "passed"}
   ],
   "test_results": {
-    "finalization_transaction_regression_suite": "37/37",
-    "commit_attribution_repair_regression_suite": "12/12",
-    "rc_audit_findings_repair_suite": "18/18",
-    "full_suite_regression": "19371/19553",
+    "architecture_transition_adversarial_suite": "18/18",
+    "focused_architecture_and_finalization_suite": "218/218",
+    "broader_affected_regression": "583 passed, 1 inherited",
+    "full_suite_regression": "19562/19569; 7 inherited failures",
     "fast_green": "4391/4391",
     "compileall": "passed",
-    "report_notification_tests": "passed",
+    "report_notification_tests": "passed; no external test delivery",
     "bootstrap_session_reporting_tests": "passed"
   },
   "governance_results": [
-    {
-      "name": "pcae_health",
-      "status": "healthy"
-    },
-    {
-      "name": "pcae_check",
-      "status": "passed"
-    },
-    {
-      "name": "pcae_doctor_task_memory",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_push_check",
-      "status": "clean"
-    },
-    {
-      "name": "telegram_runtime",
-      "status": "configured and enabled for one governed terminal delivery"
-    },
-    {
-      "name": "pcae_runtime_inspect",
-      "status": "Observed, observe, execution unavailable"
-    }
+    {"name": "pcae_health", "status": "healthy"},
+    {"name": "pcae_check", "status": "passed"},
+    {"name": "pcae_doctor_task_memory", "status": "clean"},
+    {"name": "pcae_push_check", "status": "pending governed push"},
+    {"name": "telegram_runtime", "status": "configured for one governed corrective terminal delivery only"},
+    {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
   ],
-  "no_go_confirmation": "No 134F work began. No new lifecycle implementation was attempted. No second completion authority was introduced. No second physical delivery occurred. No evidence-model schema change occurred. No content authority was granted to any renderer or adapter. No historical report was rewritten or deleted. No second ordinary completion was created for any already-completed phase. No Repository Intelligence authority expansion occurred. No Decision Evaluation change occurred. No PFN-001 change occurred. No PFR-001 change occurred. No new delivery channel was introduced. No execution capability was introduced -- runtime remains Observed/observe/unavailable. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
-  "no_go_confirmations": [
-    "No 134F work began.",
-    "No new lifecycle implementation was attempted.",
-    "No second completion authority was introduced.",
-    "No second physical delivery occurred.",
-    "No evidence-model schema change occurred.",
-    "No content authority was granted to any renderer or adapter.",
-    "No historical report was rewritten or deleted.",
-    "No second ordinary completion was created for any already-completed phase.",
-    "No Repository Intelligence authority expansion occurred.",
-    "No Decision Evaluation change occurred.",
-    "No PFN-001 change occurred.",
-    "No PFR-001 change occurred.",
-    "No new delivery channel was introduced.",
-    "No execution capability was introduced.",
-    "No raw git commit was used."
-  ],
+  "no_go_confirmation": "No 134F work began. No historical report was rewritten or deleted. No second ordinary 134E.10.1V completion was created. No fabricated-hash repair was implemented. No external test delivery occurred. No production marker, receipt, or checkpoint was written by tests. No post-certification Architecture Status regeneration was added. No mutable-latest merge was added. No transaction-span reimplementation occurred. No Repository Intelligence authority expansion occurred. No Decision Evaluation change occurred. No PFN-001 change occurred. No PFR-001 change occurred. No backend invocation occurred. No shell mediation was added. No new communication channel was added. No execution capability was introduced. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
+  "no_go_confirmations": ["No 134F work began.", "No historical report was rewritten or deleted.", "No second ordinary 134E.10.1V completion was created.", "No fabricated-hash repair was implemented.", "No external test delivery occurred.", "No production marker, receipt, or checkpoint was written by tests.", "No post-certification Architecture Status regeneration was added.", "No mutable-latest merge was added.", "No transaction-span reimplementation occurred.", "No Repository Intelligence authority expansion occurred.", "No Decision Evaluation change occurred.", "No PFN-001 change occurred.", "No PFR-001 change occurred.", "No backend invocation occurred.", "No shell mediation was added.", "No new communication channel was added.", "No execution capability was introduced."],
   "commit_attribution": "phase_owned",
   "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "origin_main_head_count": 1,
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
