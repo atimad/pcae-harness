@@ -10,7 +10,7 @@ Sync Phase 134E.10.1.1 completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
