@@ -10,7 +10,7 @@ Sync Phase 135A completion metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
