@@ -10,7 +10,7 @@ Correct Phase 134E.10V test-evidence-key phase-token collision
 
 ## Status
 
-active
+done
 
 ## Mode
 
