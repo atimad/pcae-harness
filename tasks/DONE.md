@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 135B completion metadata (20260712-1951-sync-phase-135b-completion-metadata)
 - Phase 135B: Canonical Lifecycle Transition Record Contract Freeze (20260712-1941-phase-135b-canonical-lifecycle-transition-record-contract-freeze)
 - Sync Phase 135A push-check metadata (20260712-1857-sync-phase-135a-push-check-metadata)
 - Sync Phase 135A completion metadata (20260712-1845-sync-phase-135a-completion-metadata)
