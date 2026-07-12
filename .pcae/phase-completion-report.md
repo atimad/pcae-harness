@@ -1,93 +1,76 @@
-# Phase 134E.10V Complete — Final Lifecycle Integration Independent Verification
+# Phase 134E.10.1 Complete — Final Lifecycle Integration Transaction-Span Repair
 
 ## 1. Phase Identity
 
-- **Phase ID:** `134E.10V`
+- **Phase ID:** `134E.10.1`
 - **Status:** completed
-- **Phase class:** independent verification with blocking finding (reported, not repaired) plus one blocking repair
+- **Phase class:** corrective implementation repair
 - **Report completeness:** complete
 - **Runtime:** Observed; maximum capability `observe`; execution unavailable
 
 ## 2. Executive Summary
 
-Independently verified 134E.10's claim to implement Final Lifecycle
-Integration via re-derivation from the authoritative 134D plan, not trust
-in 134E.10's own report — including of this session's own immediately
-preceding work. Central verdict: `finalization_transaction.py` is a
-post-success observational/compatibility layer, not the authoritative
-lifecycle-spanning transaction 134D's architectural scope requires.
-BLOCKING relative to 134D's completion criteria; too large to repair as
-"smallest safe repair" in a verification phase, reported honestly with a
-recommended dedicated corrective sub-phase instead. A second, smaller
-BLOCKING defect (receipt-honesty) was found and repaired.
+Repaired 134E.10V's BLOCKING finding: `finalization_transaction.py` was a
+post-success observer, invoked strictly after certification, promotion,
+and physical dispatch had already completed via the entirely unmodified
+legacy path, unable to gate them. Repaired by inverting control:
+`run_finalization_transaction()` now accepts a `promote_and_dispatch`
+callback, invoked only if the seven integrated modules' mandatory
+pre-promotion stages succeed first. All four production entry points
+rewired. Full-suite regression exact node-ID match to baseline;
+fast_green 4391/4391 across three runs.
 
 ## 3. Architectural Findings
 
-134D's own text for 134E.10 (`docs/PHASE_134_CANONICAL_PHASE_
-FINALIZATION_IMPLEMENTATION_PLAN.md` §3) requires "a single, explicitly
-resumable transaction spanning commit → push → certification → promotion
-→ delivery → completion" that replaces today's split flow and makes the
-clean/push circular dependency "structurally impossible." Direct
-line-number tracing of all five production entry points confirms
-`finalization_transaction.py` runs strictly after certification,
-promotion, and delivery already complete via the entirely unmodified
-legacy path in every case; `commands/commit.py` has zero references to
-it; `task.py`/`phase.py` each still independently call `finalize_phase_
-report()` with their own separately-constructed gate objects, exactly as
-before 134E.10.
+134D's own completion criteria for 134E.10 required "one resumable
+transaction [that] spans the full lifecycle." The corrective brief's own
+concrete 21-stage list (identity resolution through final lifecycle
+result) was adopted as the authoritative, tractable specification of what
+"spans" means in practice — disclosed explicitly as an interpretation
+choice, since raw `git commit`/`git push` are not among the 21 listed
+stages and remain, as before this phase, prior governed human/CLI actions
+outside the transaction's own scope.
 
 ## 4. Implementation Findings (Repair)
 
-One genuine BLOCKING defect repaired: the in-memory `RECORDING_ADAPTER_ID`
-adapter's own docstring admits it "deterministically reports success"
-with zero real I/O — meaning the pre-repair transaction could produce a
-Delivery Receipt claiming successful delivery even when the real dispatch
-was never attempted or genuinely failed. Repaired by gating delivery-
-modeling and receipt-creation on `report.notification_result["success"]`
-being `True` — the real, already-recorded outcome of the existing,
-unmodified dispatch path. 2 new regression tests added.
+`run_finalization_transaction()` now takes a `promote_and_dispatch:
+Callable[[], dict]` parameter. Mandatory pre-promotion stages (evidence
+capture, extraction, view composition, rendering) run first; any failure
+means the callback — which wraps the existing, entirely unmodified
+`finalize_phase_report`/`write_phase_report`/`dispatch` machinery as an
+adapter, per 134D's own explicit permission — is never invoked. All four
+production entry points (`phase.py`, `task.py`, `phase_reports.py`,
+`notifications.py`) rewired to build a `_promote_and_dispatch` closure and
+route through the transaction; `push.py` needed no separate change.
 
 ## 5. Verification Findings
 
-The central architectural finding (Section 3) is NOT repaired in this
-phase — its genuine fix requires building the actual commit-to-completion
-resumable transaction 134D specifies, touching `pcae commit`/`pcae push`/
-`task finish`/`phase complete` simultaneously, which is far too large for
-"the smallest safe repair" a verification phase is permitted. Reported
-honestly instead, with a recommended dedicated corrective sub-phase
-(134E.10.1), matching this track's own established precedent (134B.1-
-134B.3; 134E.9.1).
+Resumability strengthened as a structural consequence of the control
+inversion: a retry for identical certified content now short-circuits
+before the callback is ever reached, so retrying can never re-promote or
+re-dispatch — proven by new tests asserting the callback raises if
+invoked on a resumed transaction. Receipt honesty (134E.10V's own repair)
+preserved unchanged in spirit, adapted to read the real, now-promoted
+report's dispatch outcome rather than the pre-promotion trial report's.
 
 ## 6. Technical Debt Review
 
-Two genuine test-suite-only defects (not production defects) found and
-fixed during this verification's own regression re-run: (1) a
-non-hermetic synthetic phase_id in `test_finalization_transaction_
-134e10.py` collided with live `PROJECT_STATUS.md` content via the
-existing, unmodified `validate_phase_identity()` — repaired using this
-codebase's established dotted-sub-phase escape hatch; (2) two 134E.7-era
-tests asserted the receipt store default path never exists, falsified by
-134E.10's own legitimate production activation — repaired to check
-test-suite-caused mutation instead of blanket non-existence.
-
-Both 134E.9V NON-BLOCKING findings re-confirmed carried forward
-accurately, unworsened, not made material by 134E.10's actual (narrower
-than claimed) integration.
+No new technical debt introduced. Both 134E.9V NON-BLOCKING findings
+remain carried forward, unworsened, unaffected by this phase (which
+touches only the finalization transaction and its four call sites, not
+the fast_green gate configuration or the unrelated pre-existing
+regression failure).
 
 ## 7. Notable Engineering Knowledge
 
-A phase's own report/documentation, however carefully written, is not
-itself evidence — 134E.10's own report disclosed its design honestly but
-still described "final lifecycle integration" in a way that, read against
-134D's actual completion criteria rather than against 134E.10's own
-framing, does not satisfy them. Re-deriving from the authoritative source
-document, not from the immediately preceding phase's own summary of it —
-even when that summary was written carefully and in good faith — is what
-this track's entire verification discipline exists to catch, and it did.
-Separately: an adapter whose own docstring says "deterministically
-reports success" is a red flag that should be checked for real-outcome
-gating the moment it is wired into anything claiming to represent a real
-event, not assumed safe because it performs no I/O.
+Control inversion — making the new component the *caller* of the legacy
+logic rather than a function invoked *after* it — is often the smallest
+safe way to give new machinery real authority over an existing, proven
+path without rewriting that path: the legacy function's own internals,
+error handling, and edge-case behavior are entirely preserved verbatim;
+only the calling convention changes. This avoided the much higher-risk
+alternative (merging five entry points' genuinely divergent certification
+logic into one function) that 134E.10 had correctly declined to attempt.
 
 ## 8. Governance Results
 
@@ -102,56 +85,52 @@ event, not assumed safe because it performs no I/O.
 
 ## 9. Test Results
 
-- New/updated focused tests: 2 new receipt-honesty tests (27 total in
-  `test_finalization_transaction_134e10.py`); 2 test-suite defects fixed.
-- Seven-subsystem-module suite plus verification siblings: 921 passed, 1
-  pre-existing unrelated failure (independently re-confirmed via
-  `git stash -u`).
-- Broader affected regression: 1118 passed, 2 pre-existing unrelated
-  failures, zero new.
-- Full-suite regression: 19349 passed, 182 failed — exact node-ID match
-  to the established clean baseline; correctly classified as
-  baseline-equivalent, not "passed."
-- Fast-green: 4391 passed, 0 failed — four runs (one pre-repair sanity
-  check, three required post-repair: parallel twice, serial once).
+- Focused tests: 37 (`tests/test_finalization_transaction_134e10.py`,
+  rewritten in full for the callback-based API).
+- Seven-subsystem-module suite plus verification siblings: 931 passed, 1
+  pre-existing unrelated failure.
+- Broader affected regression: 257 passed, 1 pre-existing unrelated
+  failure.
+- Full-suite regression: 19359 passed, 182 failed — exact node-ID match
+  to the established clean baseline; zero new failures, zero pollution.
+- Fast-green: 4391 passed, 0 failed — three consecutive runs (parallel
+  twice, serial once).
 - `compileall`: passed.
 
 ## 10. No-Go Confirmation
 
-No 134F work began. No new lifecycle implementation was attempted — the
-BLOCKING architectural finding was reported, not repaired, per the
-smallest-safe-repair governance rule. No second completion authority was
-introduced. No second physical delivery occurred. No evidence-model
-schema change occurred. No content authority was granted to any renderer
-or adapter. No historical report was rewritten or deleted. No second
-ordinary completion was created for any already-completed phase. No
-Repository Intelligence authority expansion, Decision Evaluation change,
-PFN-001 change, or PFR-001 change occurred. No new delivery channel was
-introduced. No execution capability was introduced. No raw git commit/
-push, `--no-verify`, or force push was used. No external test delivery
-occurred.
+No 134F work began. No 134E.10.1V work began. No new execution capability
+was introduced. No new communication channel was introduced. No second
+completion authority was introduced. No second physical delivery
+occurred. No evidence-model schema change occurred. No content authority
+was granted to any renderer or adapter. No historical report was
+rewritten or deleted. No second ordinary completion was created for any
+already-completed phase. No Repository Intelligence authority expansion,
+Decision Evaluation change, PFN-001 change, or PFR-001 change occurred.
+No raw git commit/push, `--no-verify`, or force push was used. No
+external test delivery occurred.
 
 ## 11. Architectural Boundary Confirmation
 
-The existing, already-governed certification/promotion/dispatch path
-remains the sole authority for whether a phase is complete and whether it
-has been notified exactly once — unmodified by this phase. None of the
-seven 134E.1-134E.7 modules is a production semantic authority after
-134E.10 — all remain certified derivative observers of the unchanged
-legacy path. All historical reports remain preserved unmodified.
+The seven 134E.1-134E.7 modules now have genuine veto power over
+promotion and dispatch for the first time — a mandatory pre-promotion
+stage failure structurally prevents both, exactly as 134D's completion
+criteria require. The existing, unmodified `finalize_phase_report`/
+`write_phase_report`/`dispatch` machinery remains the sole authority for
+*how* promotion and dispatch actually happen (this repair did not rewrite
+that machinery, only when and whether it is invoked). All historical
+reports remain preserved unmodified.
 
 ## 12. Track Progress
 
-Phase 134E.10V closes independent verification of 134E.10's own claim
-with one unresolved BLOCKING architectural finding honestly reported
-(not papered over) and one smaller BLOCKING defect repaired, establishing
-that Track 134's final lifecycle integration is not yet complete in the
-sense 134D's own completion criteria require — 134F's whole-lifecycle
-verification premise cannot honestly apply until a dedicated corrective
-sub-phase closes this gap.
+Phase 134E.10.1 closes the corrective repair 134E.10V's own verification
+required, establishing that the finalization transaction genuinely gates
+the lifecycle span 134D specifies — clearing the path to 134E.10.1V's own
+independent verification before Track 134's eventual whole-lifecycle
+closing verification (134F) can honestly begin.
 
 ## 13. Next Phase
 
-Recommended: **134E.10.1 — Final Lifecycle Integration Transaction-Span
-Repair** (a dedicated corrective sub-phase; explicitly NOT 134F). Phase
-134E.10.1 has not begun. Phase 134F has not begun.
+Recommended: **134E.10.1V — Final Lifecycle Integration Transaction-Span
+Repair Independent Verification**. Phase 134E.10.1V has not begun. Phase
+134F has not begun.
