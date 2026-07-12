@@ -106,7 +106,12 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
         if commit_list:
             report.metadata["commit_attribution"] = ", ".join(commit_list)
         report.metadata["phase_id"] = report.phase_id
-        report.architecture_status = build_architecture_status()
+        report.architecture_status = build_architecture_status(
+            completing_phase_id=report.phase_id,
+            completing_phase_name=report.phase_name,
+            report_status=report.status,
+            recommended_next_phase=report.recommended_next_phase,
+        )
         report.metadata["source_revision"] = report.architecture_status.get(
             "repository_revision", ""
         )

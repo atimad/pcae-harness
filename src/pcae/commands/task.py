@@ -719,7 +719,12 @@ def _finalize_task_report_and_notify(
     )
     trial_report.metadata["commit_attribution"] = commit_attribution
     trial_report.metadata["phase_id"] = phase_id
-    trial_report.architecture_status = build_architecture_status()
+    trial_report.architecture_status = build_architecture_status(
+        completing_phase_id=phase_id,
+        completing_phase_name=phase_name,
+        report_status=status,
+        recommended_next_phase=recommended_next,
+    )
     trial_report.metadata["source_revision"] = trial_report.architecture_status.get(
         "repository_revision", ""
     )

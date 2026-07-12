@@ -561,6 +561,38 @@ def run_finalization_transaction(
     report_digest = compute_report_digest(report)
     finalization_snapshot_id = compute_finalization_snapshot_id(report)
 
+    # Phase 134E.10.1V.1 -- the transaction is the last shared boundary
+    # used by all four production entry points.  Re-check the sealed
+    # lifecycle projection here before resume lookup or checkpoint I/O so
+    # an Architecture Status contradiction can never invoke the callback,
+    # create a success marker/receipt, or be disguised by an old completed
+    # checkpoint.  Validation consumes only the report's frozen snapshot;
+    # it never regenerates Architecture Status from mutable latest state.
+    from pcae.core.architecture_status import parse_phase_id, validate_architecture_status
+    from pcae.core.phase_reports import validate_derived_correctness
+
+    semantic_issues: list[str] = []
+    if parse_phase_id(report.phase_id) is not None:
+        semantic_issues.extend(validate_architecture_status(report.architecture_status))
+        semantic_issues.extend(validate_derived_correctness(report))
+    if report.phase_id.upper() != phase_id.upper():
+        semantic_issues.append(
+            f"transaction phase_id {phase_id!r} disagrees with report "
+            f"phase_id {report.phase_id!r}"
+        )
+    if semantic_issues:
+        return TransactionResult(
+            phase_id=phase_id,
+            status="pre_promotion_certification_failed",
+            limitations=[
+                "sealed lifecycle/Architecture Status contradiction: " + issue
+                for issue in semantic_issues
+            ],
+            report_digest=report_digest,
+            finalization_snapshot_id=finalization_snapshot_id,
+            checkpoint_path=str(checkpoint_path),
+        )
+
     existing = _load_checkpoint(checkpoint_path)
     if (
         existing is not None

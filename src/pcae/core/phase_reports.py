@@ -1404,6 +1404,47 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
         return issues
     phase_id = report.phase_id.strip()
     md = report.metadata or {}
+    from pcae.core.architecture_status import parse_phase_id as _parse_arch_phase_id
+    canonical_phase_identity = _parse_arch_phase_id(phase_id) is not None
+    completed_ids_upper = {
+        str(pid).upper() for pid in (arch.get("completed_phase_ids") or [])
+    }
+    planned_ids_upper = {
+        str(pid).upper() for pid in (arch.get("planned_phase_ids") or [])
+    }
+    current_id = str(arch.get("current_phase_id", "")).strip().upper()
+    in_progress = [str(item) for item in (arch.get("in_progress") or [])]
+    own_in_progress = current_id == phase_id.upper() or any(
+        re.search(rf"\({re.escape(phase_id)}\)\s*$", item, re.IGNORECASE)
+        for item in in_progress
+    )
+
+    if canonical_phase_identity and report.status == "completed":
+        if own_in_progress:
+            issues.append(
+                f"completed report phase {phase_id!r} remains current/in-progress "
+                "in the sealed Architecture Status snapshot"
+            )
+        projected_transition = str(
+            (arch.get("source_provenance") or {}).get("lifecycle_projection", "")
+        ).lower() == f"completed:{phase_id}".lower()
+        if projected_transition and phase_id.upper() not in completed_ids_upper:
+            issues.append(
+                f"completed report phase {phase_id!r} is absent from sealed "
+                "Architecture Status completed_phase_ids"
+            )
+    elif canonical_phase_identity and phase_id.upper() in completed_ids_upper:
+        issues.append(
+            f"non-completed report phase {phase_id!r} is claimed completed by "
+            "the sealed Architecture Status snapshot"
+        )
+    if canonical_phase_identity and phase_id.upper() in completed_ids_upper and own_in_progress:
+        issues.append(f"phase {phase_id!r} appears under both Completed and In Progress")
+    if canonical_phase_identity and phase_id.upper() in planned_ids_upper and own_in_progress:
+        issues.append(f"phase {phase_id!r} appears under both In Progress and Planned")
+    for item in in_progress:
+        if re.search(r"\(completed\)", item, re.IGNORECASE):
+            issues.append(f"In Progress entry claims completed state: {item!r}")
 
     # ── Mandatory test evidence value, not just presence: a nonzero
     # failure count reported in test_results["fast_green"] must block,
@@ -1459,7 +1500,6 @@ def validate_derived_correctness(report: PhaseReport) -> list[str]:
     # e.g. "113a — Something", previously escaped this check entirely
     # because ``completed_phase_ids`` is populated in canonical
     # uppercase but the raw regex capture preserves input case).
-    completed_ids_upper = {str(pid).upper() for pid in (arch.get("completed_phase_ids") or [])}
     next_classification = str(md.get("next_phase_classification", "")).strip()
     if (
         next_match
@@ -2366,7 +2406,13 @@ def _render_series_milestone_label(phases: list[tuple[str, str]]) -> str:
     return label
 
 
-def build_architecture_status() -> dict[str, Any]:
+def build_architecture_status(
+    *,
+    completing_phase_id: str = "",
+    completing_phase_name: str = "",
+    report_status: str = "",
+    recommended_next_phase: str = "",
+) -> dict[str, Any]:
     """Derive a PCAE Architecture Status snapshot from canonical project state.
 
     Reads PROJECT_STATUS.md to discover completed architectural phases,
@@ -2605,7 +2651,7 @@ def build_architecture_status() -> dict[str, Any]:
             result["current_phase_id"] = current_id
             # If the current phase is marked as "(completed)", it is
             # not in-progress — it is already captured in completed above.
-            if "(completed)" not in current_section_text[:100]:
+            if "(completed)" not in current_match.group(2).lower():
                 result["in_progress"].append(f"{current_name} ({current_id})")
         else:
             limitations.append(
@@ -2657,6 +2703,77 @@ def build_architecture_status() -> dict[str, Any]:
 
     result["planned"] = planned_display
     result["planned_phase_ids"] = sorted(set(planned_ids), key=phase_sort_key)
+
+    # Phase 134E.10.1V.1 -- a completion report is certified before the
+    # mutable lifecycle files are advanced.  Seal the intended
+    # post-completion transition into the same snapshot instead of either
+    # preserving the pre-transition state or regenerating after
+    # certification.  This projection is a pure function of the already
+    # resolved report identity/status/recommendation and the source snapshot.
+    if completing_phase_id and report_status == "completed":
+        parsed_completing = parse_phase_id(completing_phase_id)
+        if parsed_completing is not None:
+            if completing_phase_id not in completed_id_set:
+                completed_phase_ids.append(completing_phase_id)
+                completed_phase_ids.sort(key=phase_sort_key)
+                completed_id_set.add(completing_phase_id)
+                result["completed_phase_ids"] = completed_phase_ids
+
+                chapter_id = str(parsed_completing[0])
+                chapter = next(
+                    (c for c in completed_chapters if c.get("chapter") == chapter_id),
+                    None,
+                )
+                if chapter is None:
+                    chapter = {
+                        "chapter": chapter_id,
+                        "label": completing_phase_name or completing_phase_id,
+                        "phase_ids": [],
+                    }
+                    completed_chapters.append(chapter)
+                    completed_chapters.sort(key=lambda c: int(c["chapter"]))
+                    completed_labels.append(chapter["label"])
+                chapter_ids = list(chapter.get("phase_ids") or [])
+                chapter_ids.append(completing_phase_id)
+                chapter["phase_ids"] = sorted(set(chapter_ids), key=phase_sort_key)
+
+            if result.get("current_phase_id") == completing_phase_id:
+                result["current_phase_id"] = ""
+            result["in_progress"] = [
+                item for item in result["in_progress"]
+                if completing_phase_id.upper() not in str(item).upper()
+            ]
+
+            # The structured report recommendation is part of the frozen
+            # transition input and therefore outranks pre-transition prose
+            # for this projection.  It is never read from mutable state after
+            # certification.
+            projected_planned: list[str] = []
+            projected_planned_ids: list[str] = []
+            rec = recommended_next_phase.strip()
+            if rec:
+                rec_match = re.match(
+                    r"^(?:Phase\s+)?(\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)",
+                    rec,
+                    re.IGNORECASE,
+                )
+                rec_id = rec_match.group(1).upper() if rec_match else ""
+                if rec_id and rec_id in {pid.upper() for pid in completed_id_set}:
+                    conflicts.append(
+                        f"projected recommended next phase {rec_id!r} is already "
+                        "completed -- dropped from planned"
+                    )
+                else:
+                    projected_planned = [re.sub(r"^Phase\s+", "", rec, flags=re.I)]
+                    if rec_id:
+                        projected_planned_ids = [rec_id]
+            result["planned"] = projected_planned
+            result["planned_phase_ids"] = sorted(
+                set(projected_planned_ids), key=phase_sort_key
+            )
+            result["source_provenance"]["lifecycle_projection"] = (
+                f"completed:{completing_phase_id}"
+            )
 
     # ── Derive from Runtime Snapshot ───────────────────────────────────
     try:
@@ -2840,7 +2957,12 @@ def finalize_phase_report(
             report.architecture_status = json.loads(json.dumps(sealed_architecture_status))
         else:
             try:
-                report.architecture_status = build_architecture_status()
+                report.architecture_status = build_architecture_status(
+                    completing_phase_id=phase_id,
+                    completing_phase_name=phase_name,
+                    report_status=status,
+                    recommended_next_phase=recommended_next_phase,
+                )
             except Exception:
                 # Best-effort for legacy callers that do not seal a snapshot.
                 pass

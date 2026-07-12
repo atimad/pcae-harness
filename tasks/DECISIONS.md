@@ -1416,3 +1416,19 @@
   state that PCAE is non-executing by design, runtime state is
   `Observed`, execution is unavailable, advisory evidence does not
   authorize action, and PCAE is not an autonomous coding agent.
+# 2026-07-12 — Phase 134E.10.1V.1 lifecycle projection boundary
+
+- Architecture Status for a terminal completion report represents the frozen
+  intended post-completion lifecycle transition, not the mutable pre-transition
+  `PROJECT_STATUS.md` view and not a post-certification regeneration.
+- The resolved phase identity, terminal report status, and structured next-phase
+  recommendation are projected into the Architecture Status snapshot before its
+  digest/finalization snapshot is certified.
+- The shared finalization transaction independently rejects disagreement between
+  the sealed lifecycle projection and report status before checkpoint creation,
+  promotion, dispatch, marker persistence, or receipt creation.
+- The fabricated/unresolvable explicitly declared commit-hash observation from
+  134E.10.1V remains NON-BLOCKING and out of scope; this repair does not make it
+  materially worse and does not change commit-attribution behavior.
+- The original 134E.10.1V report and all historical reports remain immutable.
+  Phase 134F is not activated by this decision.

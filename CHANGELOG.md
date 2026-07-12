@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Phase 134E.10.1V.1 repairs completed-phase Architecture Status
+  transitions by sealing a deterministic post-completion lifecycle projection
+  before certification. Finalization now fails closed when a completed report
+  remains Current/In Progress, lifecycle groupings overlap, or an In Progress
+  entry carries an explicit `(completed)` status marker. Long completed Current
+  Phase titles are no longer misclassified by an arbitrary 100-character scan.
+
 - Phase 134E.10.1V - Final Lifecycle Integration Transaction-Span Repair
   Independent Verification (`docs/
   PHASE_134_FINAL_LIFECYCLE_INTEGRATION_TRANSACTION_SPAN_REPAIR_INDEPENDENT_VERIFICATION.md`).

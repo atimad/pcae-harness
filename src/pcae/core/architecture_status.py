@@ -150,6 +150,12 @@ def validate_architecture_status(status: dict[str, Any]) -> list[str]:
     completed_ids = status.get("completed_phase_ids", []) or []
     planned_ids = status.get("planned_phase_ids", []) or []
     current_id = status.get("current_phase_id", "") or ""
+    in_progress = [str(item) for item in (status.get("in_progress", []) or [])]
+    in_progress_ids = {
+        match.group(1).upper()
+        for item in in_progress
+        if (match := re.search(r"\((\d+[A-Za-z](?:\.\d+[A-Za-z]?)*)\)\s*$", item))
+    }
 
     # Exact phase-identity syntax and uniqueness.
     seen: set[str] = set()
@@ -173,12 +179,28 @@ def validate_architecture_status(status: dict[str, Any]) -> list[str]:
     # Current/completed consistency: an active phase already marked
     # completed elsewhere is a lifecycle conflict, not current work.
     if current_id and current_id in completed_set:
-        in_progress = status.get("in_progress", []) or []
         if any(current_id in item for item in in_progress):
             issues.append(
                 f"current_phase_id {current_id!r} is also present in "
                 f"completed_phase_ids while still listed as in-progress"
             )
+
+    planned_set = set(planned_ids)
+    if current_id and current_id in planned_set:
+        issues.append(
+            f"current_phase_id {current_id!r} is also planned "
+            "(in-progress and planned sets must be disjoint)"
+        )
+    completed_upper = {str(pid).upper() for pid in completed_ids}
+    planned_upper = {str(pid).upper() for pid in planned_ids}
+    for pid in sorted(in_progress_ids):
+        if pid in completed_upper:
+            issues.append(f"phase {pid!r} appears under both Completed and In Progress")
+        if pid in planned_upper:
+            issues.append(f"phase {pid!r} appears under both In Progress and Planned")
+    for item in in_progress:
+        if re.search(r"\(completed\)", item, re.IGNORECASE):
+            issues.append(f"In Progress entry claims completed state: {item!r}")
 
     if current_id and not is_valid_phase_id(current_id):
         issues.append(f"invalid phase-ID syntax for current_phase_id: {current_id!r}")
