@@ -1,5 +1,11 @@
 # Changelog
 
+- Investigated the missing Phase 135H terminal report and proved that
+  task-finish rejected mixed 135G/135H identity evidence before the shared
+  finalization transaction; no report promotion, Telegram attempt, marker, or
+  receipt occurred. Documented a duplicate-safe governed report recovery while
+  preserving the stale-metadata guard and all production lifecycle contracts.
+
 ## Unreleased
 
 - Phase 135H - Lifecycle Integration and Legacy Authority Retirement Plan

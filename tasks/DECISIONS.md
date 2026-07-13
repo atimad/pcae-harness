@@ -1427,6 +1427,21 @@
 - Keep Phase 61H automated task transition limited to governance lifecycle automation: complete the current task, create the next task, refresh session continuity, update governance memory files, and validate coherence/health/check state, but do not invoke runtimes, execute prompts, authorize execution, commit, push, rollback, or change unrelated source behavior.
 # Decisions
 
+# 2026-07-13 — Phase 135H.1 terminal-report recovery boundary
+
+- Treat the 135H task-finish validator rejection as correct fail-closed
+  behavior: stale 135G metadata must not be relabeled or overwritten as 135H.
+- Classify the missing durable terminal outcome as a task-finish integration
+  and ordering gap, because task closure committed before report finalization
+  and the rejection produced neither a canonical 135H report nor a durable
+  PFN-001 delivery-failure outcome.
+- Recover through the existing governed `pcae phase-report create` path only,
+  with the 135H.1 task temporarily paused so active-task identity certification
+  remains effective. The recovery is the first 135H ordinary completion, not a
+  replay or second logical completion.
+- Do not alter completion metadata, PFN-001, PFR-001, CLTR-001, production
+  lifecycle source, runtime behavior, or any 135H engineering output.
+
 - Treat Phase 123F as verification-only: independently verify the
   123E Change Impact Builder against 123A-123E, regression suites, and
   observe-only governance; because no functional defect was found, make
