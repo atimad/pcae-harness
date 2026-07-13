@@ -10,7 +10,7 @@ Phase 135H.2: Lifecycle Recovery Hardening and Exactly-Once Promotion
 
 ## Status
 
-active
+done
 
 ## Mode
 

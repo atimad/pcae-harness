@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 135H.2: Lifecycle Recovery Hardening and Exactly-Once Promotion (20260713-2017-phase-135h-2-lifecycle-recovery-hardening-and-exactly-once-promotion)
 - Phase 135H.1: Converge recovery task lifecycle (20260713-2008-phase-135h-1-converge-recovery-task-lifecycle)
 - Phase 135H.1: Missing Terminal Report and PFN-001 Delivery Recovery (20260713-1954-phase-135h-1-missing-terminal-report-and-pfn-001-delivery-recovery)
 - Phase 135H: Governed terminal-report recovery transaction (20260713-2000-phase-135h-governed-terminal-report-recovery-transaction)
