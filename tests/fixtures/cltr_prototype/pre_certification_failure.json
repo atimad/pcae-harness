@@ -1,0 +1,18 @@
+{
+  "scenario": "pre_certification_failure",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-precert-failure-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "bbbbbbb2222222222222222222222222222222",
+  "steps": [
+    {"transition": "T1_propose_transition", "at": "2026-07-13T09:10:00Z"},
+    {"transition": "T2_begin_certification", "at": "2026-07-13T09:11:00Z"},
+    {"transition": "T4_certification_fail", "at": "2026-07-13T09:12:00Z", "detail": "sealed-snapshot check contradiction: declared evidence does not resolve"}
+  ]
+}

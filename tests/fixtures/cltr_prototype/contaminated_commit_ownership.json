@@ -1,0 +1,24 @@
+{
+  "scenario": "contaminated_commit_ownership",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-contaminated-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "eeeeeee5555555555555555555555555555555",
+  "declared_commits": [
+    {"commit_hash": "1111111contaminated111111111111111111111", "declared_role": "source_change"}
+  ],
+  "commit_classifications": [
+    {"commit_hash": "1111111contaminated111111111111111111111", "classification": "contaminated", "reason": "subject names phase 130A, not this transition's declared phase 135F"}
+  ],
+  "steps": [
+    {"transition": "T1_propose_transition", "at": "2026-07-13T09:40:00Z"},
+    {"transition": "T2_begin_certification", "at": "2026-07-13T09:41:00Z"},
+    {"transition": "T3_certify", "at": "2026-07-13T09:42:00Z", "certified_state": {"phase_id": "135F"}}
+  ]
+}

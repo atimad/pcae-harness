@@ -10434,6 +10434,48 @@ def build_parser() -> argparse.ArgumentParser:
     )
     push_check_parser.set_defaults(handler=run_push_check)
 
+    # ── pcae cltr-prototype (Phase 135F — read-only prototype, prototype-only) ──
+    from pcae.commands.cltr_prototype import (
+        run_cltr_prototype_compare,
+        run_cltr_prototype_generate,
+        run_cltr_prototype_list,
+        run_cltr_prototype_show,
+        run_cltr_prototype_verify,
+    )
+
+    cltr_prototype_parser = subparsers.add_parser(
+        "cltr-prototype",
+        help="Phase 135F: read-only Canonical Lifecycle Transition Record prototype (not canonical, not an authorization).",
+    )
+    cltr_prototype_subparsers = cltr_prototype_parser.add_subparsers(dest="cltr_prototype_command", required=True)
+
+    cltr_generate_parser = cltr_prototype_subparsers.add_parser(
+        "generate", help="Generate a candidate CLTR record from an explicit fixture bundle."
+    )
+    cltr_generate_parser.add_argument("--input", required=True, help="Path to a fixture bundle JSON file.")
+    cltr_generate_parser.add_argument("--json", action="store_true")
+    cltr_generate_parser.set_defaults(handler=run_cltr_prototype_generate)
+
+    cltr_show_parser = cltr_prototype_subparsers.add_parser("show", help="Render a persisted prototype record human-readably.")
+    cltr_show_parser.add_argument("--record", required=True, help="transition_id of the persisted generation to show.")
+    cltr_show_parser.add_argument("--json", action="store_true")
+    cltr_show_parser.set_defaults(handler=run_cltr_prototype_show)
+
+    cltr_verify_parser = cltr_prototype_subparsers.add_parser("verify", help="Independently re-verify a persisted prototype record (digest + invariants + state validity).")
+    cltr_verify_parser.add_argument("--record", required=True, help="transition_id of the persisted generation to verify.")
+    cltr_verify_parser.add_argument("--json", action="store_true")
+    cltr_verify_parser.set_defaults(handler=run_cltr_prototype_verify)
+
+    cltr_compare_parser = cltr_prototype_subparsers.add_parser("compare", help="Read-only comparison of a persisted record against named representation targets.")
+    cltr_compare_parser.add_argument("--record", required=True, help="transition_id of the persisted generation to compare.")
+    cltr_compare_parser.add_argument("--against", required=True, help="Path to a JSON manifest naming comparison target paths/kinds.")
+    cltr_compare_parser.add_argument("--json", action="store_true")
+    cltr_compare_parser.set_defaults(handler=run_cltr_prototype_compare)
+
+    cltr_list_parser = cltr_prototype_subparsers.add_parser("list", help="List prototype generation directories.")
+    cltr_list_parser.add_argument("--json", action="store_true")
+    cltr_list_parser.set_defaults(handler=run_cltr_prototype_list)
+
     return parser
 
 

@@ -1,0 +1,10 @@
+{
+  "scenario": "stale_pointer",
+  "phase_id": "135F",
+  "corrupt_pointer_entry": {
+    "transition_id": "txn-fixture-stale-pointer-MISSING",
+    "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "written_at": "2020-01-01T00:00:00Z"
+  },
+  "_note": "a test writes this entry directly into latest.json for phase_id 135F, pointing at a transition_id with no generation directory at all -- persistence.read_latest('135F') must detect the corrupt/incomplete pointer and fall back to scanning generations/ for the most recent complete generation instead of trusting the pointer"
+}

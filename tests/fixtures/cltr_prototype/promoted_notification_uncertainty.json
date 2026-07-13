@@ -1,0 +1,23 @@
+{
+  "scenario": "promoted_notification_uncertainty",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-notify-uncertain-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "ccccccc3333333333333333333333333333333",
+  "steps": [
+    {"transition": "T1_propose_transition", "at": "2026-07-13T09:20:00Z"},
+    {"transition": "T2_begin_certification", "at": "2026-07-13T09:21:00Z"},
+    {"transition": "T3_certify", "at": "2026-07-13T09:22:00Z", "certified_state": {"phase_id": "135F"}},
+    {"transition": "T5_begin_promotion", "at": "2026-07-13T09:23:00Z"},
+    {"transition": "T6_promote_succeed", "at": "2026-07-13T09:24:00Z", "promotion_binding": {"evidence_id": "promotion-2", "evidence_type": "runtime_snapshot", "verification_status": "bound"}},
+    {"transition": "T8_begin_notification", "at": "2026-07-13T09:25:00Z"},
+    {"transition": "T10_notify_unconfirmed", "at": "2026-07-13T09:26:00Z", "notification_binding": {"evidence_id": "notification-2", "evidence_type": "runtime_snapshot", "verification_status": "bound"}, "marker_binding": {"evidence_id": "marker-2", "evidence_type": "runtime_snapshot", "verification_status": "bound", "limitation": "best-effort marker, receipt bookkeeping incomplete"}},
+    {"transition": "T14_close_partial", "at": "2026-07-13T09:27:00Z"}
+  ]
+}

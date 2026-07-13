@@ -1,0 +1,13 @@
+{
+  "scenario": "stale_report",
+  "declared_identity": {
+    "transition_id": "txn-fixture-stale-report-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "narrative_artifact_path": "tests/fixtures/cltr_prototype/stale_report.md",
+  "narrative_artifact_kind": "canonical_report",
+  "_note": "the narrative artifact's own title names phase 134E.10.1, an older phase, while the declared identity is 135F -- compatibility.classify_legacy_artifact must report a conflict, and identity.py must never have parsed the title in the first place"
+}

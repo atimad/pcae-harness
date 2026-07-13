@@ -1,0 +1,22 @@
+{
+  "scenario": "fabricated_commit_hash",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-fabricated-hash-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "ddddddd4444444444444444444444444444444",
+  "declared_commits": [
+    {"commit_hash": "0000000fabricated0000000000000000000000", "declared_role": "source_change"}
+  ],
+  "steps": [
+    {"transition": "T1_propose_transition", "at": "2026-07-13T09:30:00Z"},
+    {"transition": "T2_begin_certification", "at": "2026-07-13T09:31:00Z"},
+    {"transition": "T3_certify", "at": "2026-07-13T09:32:00Z", "certified_state": {"phase_id": "135F"}}
+  ],
+  "_note": "no commit_classifications hint is supplied for the declared hash -- generator.classify_commits must classify it unverifiable, never silently verified"
+}

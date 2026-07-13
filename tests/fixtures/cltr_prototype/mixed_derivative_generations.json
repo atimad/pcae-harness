@@ -1,0 +1,10 @@
+{
+  "scenario": "mixed_derivative_generations",
+  "record_transition_id": "txn-fixture-mixed-gen-1",
+  "record_phase_id": "135F",
+  "targets": {
+    "canonical_report": {"transition_id": "txn-fixture-mixed-gen-1", "phase_id": "135F"},
+    "completion_metadata": {"transition_id": "txn-fixture-mixed-gen-OLD", "phase_id": "135F"}
+  },
+  "_note": "the report target belongs to txn-fixture-mixed-gen-1 while the metadata target belongs to a different, older generation (txn-fixture-mixed-gen-OLD) -- comparison.compare() must set mixed_generation_detected=True"
+}

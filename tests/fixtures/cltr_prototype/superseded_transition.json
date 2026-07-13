@@ -1,0 +1,22 @@
+{
+  "scenario": "superseded_transition",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "original": {
+    "identity": {
+      "transition_id": "txn-fixture-superseded-original-1",
+      "phase_id": "135F",
+      "repository_identity": "pcae-harness",
+      "branch_identity": "main",
+      "task_id": null
+    },
+    "source_revision": "5555555888888888888888888888888888888",
+    "steps": [
+      {"transition": "T1_propose_transition", "at": "2026-07-13T10:10:00Z"},
+      {"transition": "T2_begin_certification", "at": "2026-07-13T10:11:00Z"},
+      {"transition": "T3_certify", "at": "2026-07-13T10:12:00Z", "certified_state": {"phase_id": "135F"}}
+    ]
+  },
+  "superseding_transition_id": "txn-fixture-superseded-corrective-1",
+  "_note": "a test generates the 'original' record, then applies T16_supersede to it referencing the corrective transition -- the original record's superseded flag must be True and superseded_by must equal the corrective transition_id, and no content is deleted or rewritten"
+}

@@ -1,0 +1,19 @@
+{
+  "scenario": "conflicting_replay",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-successful-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "ffffffff9999999999999999999999999999999",
+  "steps": [
+    {"transition": "T1_propose_transition", "at": "2026-07-13T09:00:00Z"},
+    {"transition": "T2_begin_certification", "at": "2026-07-13T09:01:00Z"},
+    {"transition": "T3_certify", "at": "2026-07-13T09:02:00Z", "certified_state": {"phase_id": "135F", "note": "different evidence than the original txn-fixture-successful-1 generation"}}
+  ],
+  "_note": "same transition_id as successful_transition.json but different source_revision/certified_state -- persisting this after successful_transition.json must be rejected as a conflicting replay (ImmutableGenerationExistsError), never silently overwritten"
+}

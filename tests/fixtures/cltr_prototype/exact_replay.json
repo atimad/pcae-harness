@@ -1,0 +1,104 @@
+{
+  "scenario": "exact_replay",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-successful-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "aaaaaaa1111111111111111111111111111111",
+  "declared_commits": [
+    {
+      "commit_hash": "aaaaaaa1111111111111111111111111111111",
+      "declared_role": "source_change"
+    }
+  ],
+  "commit_classifications": [
+    {
+      "commit_hash": "aaaaaaa1111111111111111111111111111111",
+      "classification": "verified",
+      "reason": "resolves in bound repository/revision context"
+    }
+  ],
+  "evidence_refs": [
+    {
+      "evidence_id": "test-suite-1",
+      "evidence_type": "test_suite_result",
+      "verification_status": "bound",
+      "digest": "deadbeef",
+      "observation_timestamp": "2026-07-13T09:00:00Z"
+    }
+  ],
+  "steps": [
+    {
+      "transition": "T1_propose_transition",
+      "at": "2026-07-13T09:00:00Z"
+    },
+    {
+      "transition": "T2_begin_certification",
+      "at": "2026-07-13T09:01:00Z"
+    },
+    {
+      "transition": "T3_certify",
+      "at": "2026-07-13T09:02:00Z",
+      "certified_state": {
+        "phase_id": "135F"
+      },
+      "report_binding": {
+        "evidence_id": "report-1",
+        "evidence_type": "report",
+        "verification_status": "bound",
+        "digest": "reportdigest1"
+      },
+      "metadata_binding": {
+        "evidence_id": "metadata-1",
+        "evidence_type": "metadata",
+        "verification_status": "bound",
+        "digest": "metadatadigest1"
+      }
+    },
+    {
+      "transition": "T5_begin_promotion",
+      "at": "2026-07-13T09:03:00Z"
+    },
+    {
+      "transition": "T6_promote_succeed",
+      "at": "2026-07-13T09:04:00Z",
+      "promotion_binding": {
+        "evidence_id": "promotion-1",
+        "evidence_type": "runtime_snapshot",
+        "verification_status": "bound"
+      }
+    },
+    {
+      "transition": "T8_begin_notification",
+      "at": "2026-07-13T09:05:00Z"
+    },
+    {
+      "transition": "T9_notify_confirm",
+      "at": "2026-07-13T09:06:00Z",
+      "notification_binding": {
+        "evidence_id": "notification-1",
+        "evidence_type": "runtime_snapshot",
+        "verification_status": "bound"
+      },
+      "marker_binding": {
+        "evidence_id": "marker-1",
+        "evidence_type": "runtime_snapshot",
+        "verification_status": "bound"
+      },
+      "receipt_binding": {
+        "evidence_id": "receipt-1",
+        "evidence_type": "runtime_snapshot",
+        "verification_status": "bound"
+      }
+    },
+    {
+      "transition": "T13_close_success",
+      "at": "2026-07-13T09:07:00Z"
+    }
+  ]
+}

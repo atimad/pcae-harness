@@ -1,0 +1,6 @@
+{
+  "scenario": "legacy_artifact_no_transition_id",
+  "artifact_path": "tests/fixtures/cltr_prototype/legacy_metadata_no_transition_id.json",
+  "artifact_kind": "completion_metadata",
+  "_note": "a Track-134-style completion metadata file with no transition_id at all -- compatibility.classify_legacy_artifact() must classify it conformant_with_legacy_adapter (or incomplete, depending on which fields are present) and disclose missing_fields explicitly, never inventing a retroactive transition_id"
+}

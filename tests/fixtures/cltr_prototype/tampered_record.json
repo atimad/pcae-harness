@@ -1,0 +1,19 @@
+{
+  "scenario": "tampered_record",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-tampered-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "4444444777777777777777777777777777777",
+  "steps": [
+    {"transition": "T1_propose_transition", "at": "2026-07-13T10:00:00Z"},
+    {"transition": "T2_begin_certification", "at": "2026-07-13T10:01:00Z"},
+    {"transition": "T3_certify", "at": "2026-07-13T10:02:00Z", "certified_state": {"phase_id": "135F"}}
+  ],
+  "_note": "a test persists this record then deliberately mutates the persisted record.json's source_revision field, expecting verifier.verify_record() to report manifest_consistent=False and digest_valid=False"
+}

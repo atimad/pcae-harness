@@ -1,0 +1,25 @@
+{
+  "scenario": "unverifiable_ownership",
+  "schema_version": "cltr-prototype-0.1",
+  "contract_version": "CLTR-001/1.0",
+  "identity": {
+    "transition_id": "txn-fixture-unverifiable-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "source_revision": "22222226666666666666666666666666666666",
+  "declared_commits": [
+    {"commit_hash": "3333333unresolvable33333333333333333333", "declared_role": "source_change"}
+  ],
+  "commit_classifications": [
+    {"commit_hash": "3333333unresolvable33333333333333333333", "classification": "unverifiable", "reason": "hash cannot be resolved against the bound repository_identity/branch_identity"}
+  ],
+  "steps": [
+    {"transition": "T1_propose_transition", "at": "2026-07-13T09:50:00Z"},
+    {"transition": "T2_begin_certification", "at": "2026-07-13T09:51:00Z"},
+    {"transition": "T3_certify", "at": "2026-07-13T09:52:00Z", "certified_state": {"phase_id": "135F"}}
+  ],
+  "_note": "distinct from fabricated_commit_hash.json: this fixture exercises the explicit unverifiable *classification* path (an explicit hint), while fabricated_commit_hash.json exercises the default-to-unverifiable path when no hint is supplied at all"
+}

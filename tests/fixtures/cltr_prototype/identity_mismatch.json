@@ -1,0 +1,15 @@
+{
+  "scenario": "identity_mismatch",
+  "declared_identity": {
+    "transition_id": "txn-fixture-identity-mismatch-1",
+    "phase_id": "135F",
+    "repository_identity": "pcae-harness",
+    "branch_identity": "main",
+    "task_id": null
+  },
+  "embedded_identity_from_bound_artifact": {
+    "phase_id": "134E",
+    "transition_id": "txn-fixture-identity-mismatch-1"
+  },
+  "_note": "declared phase_id (135F) disagrees with a bound artifact's own embedded phase_id (134E) -- identity.check_identity_conflict must report a structured conflict, never silently prefer either side"
+}
