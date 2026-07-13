@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- Phase 135H - Lifecycle Integration and Legacy Authority Retirement Plan
+  (`docs/PHASE_135_LIFECYCLE_INTEGRATION_AND_LEGACY_AUTHORITY_RETIREMENT_PLAN.md`).
+  Re-derived every current lifecycle authority and produced the planning-only
+  migration architecture: fact-scoped authority retirement, permanent versus
+  temporary compatibility, production/shadow/authority/rollback boundaries,
+  five-barrier cross-representation verification, staged read/write cutover,
+  immutable-generation atomic publication, state-based resume and notification
+  reconciliation, forward-only recovery after irreversible effects, and
+  independent production verification. Carried forward all three 135G
+  Non-Blocking findings and all eight repaired Blocking families as production
+  hazards. Resolved the 135G planned-successor observation to one sealed
+  snapshot with failed line-anchored narrative extraction followed by a
+  correct structured projection, confirming the need for one future
+  machine-readable CLTR successor binding. Verdict: not ready for
+  implementation because no production wire/canonicalization/versioning/
+  manifest/adapter contract is frozen. Recommended 135I as a contract-only
+  prerequisite. No production source, lifecycle behavior, schema
+  implementation, PFN-001, PFR-001, or CLTR-001 changed.
 - Phase 135G - Canonical Transition Record Prototype Independent Verification
   (`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_INDEPENDENT_VERIFICATION.md`).
   Independently re-derived and adversarially verified the 135F prototype,

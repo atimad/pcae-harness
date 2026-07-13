@@ -2,6 +2,24 @@
 
 ## Accepted
 
+- Phase 135H adopts a staged, fact-scoped migration: current production stays
+  authoritative throughout shadow mode; a production CLTR may gain authority
+  only after a frozen schema/versioning/adapter contract, independent model
+  verification, complete semantic comparison coverage, atomic-publication
+  proof, notification-uncertainty proof, and a clean shadow exit. Select
+  immutable generation publication plus one atomic current-pointer switch.
+  After any CLTR-authoritative publication or external delivery, rollback is
+  forward recovery, quarantine, or supersession — never restoration of a
+  legacy authority for the same transition. Historical reports, metadata,
+  markers, receipts, and snapshots remain immutable and readable; compatibility
+  never grants lifecycle authority. Treat the verified behavioral inventory as
+  37 and require its normative schema crosswalk before implementation. Resolve
+  planned successor to one explicit machine-readable CLTR binding; retain
+  narrative extraction for historical presentation compatibility only.
+  Recommend 135I — Production CLTR Schema, Canonicalization, and Versioning
+  Contract Freeze — as the next contract-only prerequisite; do not begin it in
+  135H.
+
 - Phase 135G independently verifies the 135F prototype by fresh contract
   derivation and adversarial reproduction, not by treating 135F's report or
   tests as proof. Invoke the verification-phase repair policy for eight

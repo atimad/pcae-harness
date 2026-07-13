@@ -2,6 +2,44 @@
 
 ## Current Phase
 
+Phase 135H — Lifecycle Integration and Legacy Authority Retirement Plan
+(completed). Re-derived the production migration boundary from CLTR-001, the
+verified 37-invariant 135D model, the independently hardened prototype, Track
+134, and current source. The plan inventories current lifecycle authorities,
+defines fact-scoped retirement and compatibility, separates prototype/
+production/authority/compatibility/rollback boundaries, specifies shadow and
+cross-representation verification, stages authority cutover, selects immutable
+generation plus atomic pointer publication, and defines state-based resume and
+forward-only recovery after irreversible effects.
+
+**Verdict: NOT READY FOR IMPLEMENTATION.** Current production has no frozen
+CLTR wire schema, canonical serialization, state-dependent field rules,
+manifest/pointer contract, unknown-field/version behavior, or complete
+fifteen-representation adapter contract. Phase 135H carries forward all three
+135G Non-Blocking findings and treats all eight repaired prototype Blocking
+families as fresh production hazards. It classifies certified-content presence
+as an existing CLTR-001/135D semantic requirement whose concrete conditional
+encoding belongs in the production schema, not a new semantic.
+
+The 135G planned-successor discrepancy was independently resolved: the
+limitation and Planned 135H entry came from the same sealed snapshot. A
+line-anchored narrative extractor found no recommendation because the phrase
+appeared mid-line, while the structured report recommendation deterministically
+populated the post-completion Planned projection. This was harmless and
+disclosed, but confirms multiple current successor inputs; the future CLTR must
+own one explicit machine-readable successor binding and relegate narrative
+extraction to historical presentation compatibility.
+
+Full plan:
+`docs/PHASE_135_LIFECYCLE_INTEGRATION_AND_LEGACY_AUTHORITY_RETIREMENT_PLAN.md`.
+No implementation, production integration, authority cutover, schema
+implementation, production lifecycle behavior, PFN-001, PFR-001, or CLTR-001
+change occurred. Runtime remains Observed / observe / execution unavailable.
+Recommended next phase: **135I — Production CLTR Schema, Canonicalization, and
+Versioning Contract Freeze** (contract only; not started).
+
+## Phase 135G Complete
+
 Phase 135G — Canonical Transition Record Prototype Independent Verification
 (completed). Independently re-derived the 135F prototype from CLTR-001, the
 135C/135D model, the 135E plan, and the 135D.1 incident protections before
