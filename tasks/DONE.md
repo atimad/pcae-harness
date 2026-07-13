@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 135H.1: Converge recovery task lifecycle (20260713-2008-phase-135h-1-converge-recovery-task-lifecycle)
 - Phase 135H.1: Missing Terminal Report and PFN-001 Delivery Recovery (20260713-1954-phase-135h-1-missing-terminal-report-and-pfn-001-delivery-recovery)
 - Phase 135H: Governed terminal-report recovery transaction (20260713-2000-phase-135h-governed-terminal-report-recovery-transaction)
 - Phase 135H: Lifecycle Integration and Legacy Authority Retirement Plan (20260713-1918-phase-135h-lifecycle-integration-and-legacy-authority-retirement-plan)
