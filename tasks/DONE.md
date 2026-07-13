@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 135F: Canonical Transition Record Read-Only Prototype (20260713-1424-phase-135f-canonical-transition-record-read-only-prototype)
 - Sync Phase 135E test-evidence metadata (20260713-1154-sync-phase-135e-test-evidence-metadata)
 - Repair Phase 135E lifecycle metadata fields (20260713-1152-repair-phase-135e-lifecycle-metadata-fields)
 - Repair Phase 135E canonical report metadata (20260713-1150-repair-phase-135e-canonical-report-metadata)
