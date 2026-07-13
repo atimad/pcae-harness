@@ -10,7 +10,7 @@ Sync Phase 135E test-evidence metadata
 
 ## Status
 
-active
+done
 
 ## Mode
 
