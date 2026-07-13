@@ -86,3 +86,24 @@ def test_wrong_transition_identity_fails():
 
     relabeled = sealed.with_updates(identity=sealed.identity.__class__(transition_id="t-different", phase_id="135F", repository_identity="r", branch_identity="main"))
     assert digest_mod.verify_self(relabeled) is False  # identity is digested content; relabeling breaks the digest
+
+
+def test_unsupported_schema_version_never_verifies_conformant():
+    from pcae.cltr_prototype import digest as digest_mod
+
+    result = generator.generate(_load("successful_transition.json"))
+    unsupported = digest_mod.seal(result.record.with_updates(schema_version="unsupported-9"))
+    report = verifier.verify_record_object(unsupported)
+    assert report.state_valid is False
+    assert report.conformance == "quarantined"
+    assert any("unsupported record version" in item for item in report.limitations)
+
+
+def test_forged_manifest_identity_is_rejected(tmp_path):
+    result = generator.generate(_load("successful_transition.json"))
+    gen_dir = persistence.persist(result.record, result.invariant_results, base_dir=tmp_path)
+    manifest_path = gen_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["transition_id"] = "different-transition"
+    manifest_path.write_text(json.dumps(manifest))
+    assert persistence.read_generation(result.record.identity.transition_id, base_dir=tmp_path) is None

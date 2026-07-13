@@ -23,6 +23,7 @@ import hashlib
 import json
 import os
 import tempfile
+import shutil
 from dataclasses import asdict
 from pathlib import Path
 from typing import Optional
@@ -30,6 +31,7 @@ from typing import Optional
 from pcae.cltr_prototype.canonicalization import record_to_dict
 from pcae.cltr_prototype.digest import verify_self
 from pcae.cltr_prototype.invariants import InvariantResult
+from pcae.cltr_prototype.identity import IdentityError, validate_transition_id
 from pcae.cltr_prototype.models import TransitionRecord
 
 PROTOTYPE_DIR_NAME = ".pcae/cltr-prototypes"
@@ -47,6 +49,14 @@ class ImmutableGenerationExistsError(Exception):
     pass
 
 
+class UnsafePrototypePathError(ValueError):
+    pass
+
+
+class RecordIntegrityError(ValueError):
+    pass
+
+
 def _prototype_root(base_dir: Optional[Path] = None) -> Path:
     if base_dir is not None:
         return Path(base_dir)
@@ -59,6 +69,39 @@ def _generations_dir(base_dir: Optional[Path] = None) -> Path:
 
 def _latest_path(base_dir: Optional[Path] = None) -> Path:
     return _prototype_root(base_dir) / "latest.json"
+
+
+def _validated_transition_id(transition_id: str) -> str:
+    try:
+        return validate_transition_id(transition_id)
+    except IdentityError as exc:
+        raise UnsafePrototypePathError(str(exc)) from exc
+
+
+def _safe_generations_dir(base_dir: Optional[Path] = None, *, create: bool = False) -> Path:
+    root = _prototype_root(base_dir)
+    generations = root / "generations"
+    if generations.is_symlink():
+        raise UnsafePrototypePathError("prototype generations directory must not be a symlink")
+    if create:
+        root.mkdir(parents=True, exist_ok=True)
+        if root.is_symlink():
+            raise UnsafePrototypePathError("prototype root must not be a symlink")
+        generations.mkdir(parents=True, exist_ok=True)
+    if generations.exists() and generations.resolve().parent != root.resolve():
+        raise UnsafePrototypePathError("prototype generations directory escapes the prototype root")
+    return generations
+
+
+def _safe_generation_dir(transition_id: str, base_dir: Optional[Path] = None, *, create_root: bool = False) -> Path:
+    safe_id = _validated_transition_id(transition_id)
+    generations = _safe_generations_dir(base_dir, create=create_root)
+    generation = generations / safe_id
+    if generation.is_symlink():
+        raise UnsafePrototypePathError(f"generation path for {safe_id!r} must not be a symlink")
+    if generation.parent.resolve() != generations.resolve():
+        raise UnsafePrototypePathError(f"generation path for {safe_id!r} escapes the generations directory")
+    return generation
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -104,9 +147,14 @@ def persist(
     never silently overwritten in place, 135E §15).
     """
 
-    transition_id = record.identity.transition_id
+    transition_id = _validated_transition_id(record.identity.transition_id)
     phase_id = record.identity.phase_id
-    gen_dir = _generations_dir(base_dir) / transition_id
+    gen_dir = _safe_generation_dir(transition_id, base_dir, create_root=True)
+
+    if record.certified_state is not None and record.record_digest is None:
+        raise RecordIntegrityError("CERTIFIED-or-later records must be sealed before persistence")
+    if record.record_digest is not None and not verify_self(record):
+        raise RecordIntegrityError("record digest does not match record content; refusing publication")
 
     record_bytes = json.dumps(record_to_dict(record), sort_keys=True, separators=(",", ":")).encode("utf-8")
 
@@ -126,24 +174,29 @@ def persist(
         separators=(",", ":"),
     ).encode("utf-8")
 
-    # Write into a temp staging directory first, then publish record.json and
-    # verification.json, then a manifest that references their digests, so a
-    # crash between any two files leaves an incomplete (never partial-visible
-    # single file) directory a reader can detect via manifest mismatch.
-    _atomic_write(gen_dir / "record.json", record_bytes)
-    _atomic_write(gen_dir / "verification.json", verification_bytes)
+    generations = _safe_generations_dir(base_dir)
+    staging = Path(tempfile.mkdtemp(prefix=".tmp-generation-", dir=str(generations)))
+    try:
+        _atomic_write(staging / "record.json", record_bytes)
+        _atomic_write(staging / "verification.json", verification_bytes)
 
-    manifest = {
-        "transition_id": transition_id,
-        "phase_id": phase_id,
-        "written_at": written_at or record.timestamps.get("final") or max(record.timestamps.values(), default=""),
-        "files": {
-            "record.json": {"digest": _sha256_bytes(record_bytes), "size": len(record_bytes)},
-            "verification.json": {"digest": _sha256_bytes(verification_bytes), "size": len(verification_bytes)},
-        },
-    }
-    manifest_bytes = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    _atomic_write(gen_dir / "manifest.json", manifest_bytes)
+        manifest = {
+            "transition_id": transition_id,
+            "phase_id": phase_id,
+            "written_at": written_at or record.timestamps.get("final") or max(record.timestamps.values(), default=""),
+            "files": {
+                "record.json": {"digest": _sha256_bytes(record_bytes), "size": len(record_bytes)},
+                "verification.json": {"digest": _sha256_bytes(verification_bytes), "size": len(verification_bytes)},
+            },
+        }
+        manifest_bytes = json.dumps(manifest, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        _atomic_write(staging / "manifest.json", manifest_bytes)
+        if not _manifest_is_consistent(staging, expected_transition_id=transition_id):
+            raise PartialWriteError("staged generation failed manifest verification")
+        os.rename(staging, gen_dir)
+    except BaseException:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
 
     _update_latest_pointer(phase_id, transition_id, record.record_digest, manifest["written_at"], base_dir=base_dir)
 
@@ -163,7 +216,9 @@ def _update_latest_pointer(phase_id: str, transition_id: str, digest: Optional[s
     _atomic_write(latest_path, data)
 
 
-def _manifest_is_consistent(gen_dir: Path) -> bool:
+def _manifest_is_consistent(gen_dir: Path, *, expected_transition_id: Optional[str] = None) -> bool:
+    if gen_dir.is_symlink() or not gen_dir.is_dir():
+        return False
     manifest_path = gen_dir / "manifest.json"
     if not manifest_path.exists():
         return False
@@ -171,12 +226,24 @@ def _manifest_is_consistent(gen_dir: Path) -> bool:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
         return False
-    for filename, meta in manifest.get("files", {}).items():
+    if set(manifest.get("files", {})) != {"record.json", "verification.json"}:
+        return False
+    if expected_transition_id is not None and manifest.get("transition_id") != expected_transition_id:
+        return False
+    for filename, meta in manifest["files"].items():
         file_path = gen_dir / filename
         if not file_path.exists():
             return False
         if _sha256_bytes(file_path.read_bytes()) != meta.get("digest"):
             return False
+    record_dict = _load_record_dict(gen_dir)
+    if record_dict is None:
+        return False
+    record_identity = record_dict.get("identity", {})
+    if record_identity.get("transition_id") != manifest.get("transition_id"):
+        return False
+    if record_identity.get("phase_id") != manifest.get("phase_id"):
+        return False
     return True
 
 
@@ -191,12 +258,21 @@ def _load_record_dict(gen_dir: Path) -> Optional[dict]:
 
 
 def list_generations(*, base_dir: Optional[Path] = None) -> list[str]:
-    """List transition_ids under `generations/`, complete or not."""
+    """List published, safe transition IDs under `generations/`."""
 
-    gens_dir = _generations_dir(base_dir)
+    gens_dir = _safe_generations_dir(base_dir)
     if not gens_dir.exists():
         return []
-    return sorted(p.name for p in gens_dir.iterdir() if p.is_dir())
+    result = []
+    for path in gens_dir.iterdir():
+        if path.name.startswith(".tmp-generation-") or path.is_symlink() or not path.is_dir():
+            continue
+        try:
+            _validated_transition_id(path.name)
+        except UnsafePrototypePathError:
+            continue
+        result.append(path.name)
+    return sorted(result)
 
 
 def read_latest(phase_id: str, *, base_dir: Optional[Path] = None) -> Optional[dict]:
@@ -215,8 +291,8 @@ def read_latest(phase_id: str, *, base_dir: Optional[Path] = None) -> Optional[d
             pointer_map = json.loads(latest_path.read_text(encoding="utf-8"))
             entry = pointer_map.get(phase_id)
             if entry is not None:
-                gen_dir = _generations_dir(base_dir) / entry["transition_id"]
-                if _manifest_is_consistent(gen_dir):
+                gen_dir = _safe_generation_dir(entry["transition_id"], base_dir)
+                if _manifest_is_consistent(gen_dir, expected_transition_id=entry["transition_id"]):
                     return _load_record_dict(gen_dir)
         except (json.JSONDecodeError, OSError, KeyError):
             pass
@@ -225,8 +301,8 @@ def read_latest(phase_id: str, *, base_dir: Optional[Path] = None) -> Optional[d
     # belonging to this phase_id (crash recovery, 135E §15).
     candidates = []
     for transition_id in list_generations(base_dir=base_dir):
-        gen_dir = _generations_dir(base_dir) / transition_id
-        if not _manifest_is_consistent(gen_dir):
+        gen_dir = _safe_generation_dir(transition_id, base_dir)
+        if not _manifest_is_consistent(gen_dir, expected_transition_id=transition_id):
             continue
         record_dict = _load_record_dict(gen_dir)
         if record_dict is None:
@@ -245,7 +321,7 @@ def read_latest(phase_id: str, *, base_dir: Optional[Path] = None) -> Optional[d
 def read_generation(transition_id: str, *, base_dir: Optional[Path] = None) -> Optional[dict]:
     """Read one generation's record dict by transition_id, verifying manifest completeness first."""
 
-    gen_dir = _generations_dir(base_dir) / transition_id
-    if not _manifest_is_consistent(gen_dir):
+    gen_dir = _safe_generation_dir(transition_id, base_dir)
+    if not _manifest_is_consistent(gen_dir, expected_transition_id=transition_id):
         return None
     return _load_record_dict(gen_dir)

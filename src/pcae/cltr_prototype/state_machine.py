@@ -80,6 +80,17 @@ def _reject_if_superseded(record: TransitionRecord, attempted: TransitionType) -
         raise ForbiddenTransitionError("F8", attempted, record.spine_state, "a superseded record cannot re-enter the active spine")
 
 
+def _reject_ordinary_transition(record: TransitionRecord, attempted: TransitionType) -> None:
+    """Apply the orthogonal/terminal guards shared by every spine transition."""
+
+    _reject_if_superseded(record, attempted)
+    if record.quarantined:
+        raise ForbiddenTransitionError(
+            "F9", attempted, record.spine_state, "a quarantined record requires explicit human-reviewed recovery before any spine transition"
+        )
+    _reject_if_terminal(record, attempted)
+
+
 def t1_propose_transition(identity, source_revision: str, *, at: str, declared_commits=(), evidence_refs=()) -> TransitionResult:
     """T1: (none) -> PROPOSED."""
 
@@ -97,6 +108,7 @@ def t1_propose_transition(identity, source_revision: str, *, at: str, declared_c
 def t2_begin_certification(record: TransitionRecord, *, at: str) -> TransitionResult:
     """T2: PROPOSED -> CERTIFYING."""
 
+    _reject_ordinary_transition(record, TransitionType.BEGIN_CERTIFICATION)
     if record.spine_state != SpineState.PROPOSED:
         raise ForbiddenTransitionError("F1/F2/F12", TransitionType.BEGIN_CERTIFICATION, record.spine_state, "begin_certification requires PROPOSED")
     new_timestamps = {**record.timestamps, "CERTIFYING": at}
@@ -117,6 +129,7 @@ def t3_certify(
 ) -> TransitionResult:
     """T3: CERTIFYING -> CERTIFIED. Sealed: digest fixed by digest.py later."""
 
+    _reject_ordinary_transition(record, TransitionType.CERTIFY)
     if record.spine_state != SpineState.CERTIFYING:
         raise ForbiddenTransitionError("F1/F2/F4/F12", TransitionType.CERTIFY, record.spine_state, "certify requires CERTIFYING")
     new_timestamps = {**record.timestamps, "CERTIFIED": at}
@@ -137,6 +150,7 @@ def t3_certify(
 def t4_certification_fail(record: TransitionRecord, *, at: str, detail: str) -> TransitionResult:
     """T4: CERTIFYING -> FAILED_PRE_CERT."""
 
+    _reject_ordinary_transition(record, TransitionType.CERTIFICATION_FAIL)
     if record.spine_state != SpineState.CERTIFYING:
         raise ForbiddenTransitionError("F3", TransitionType.CERTIFICATION_FAIL, record.spine_state, "certification_fail requires CERTIFYING")
     new_timestamps = {**record.timestamps, "FAILED_PRE_CERT": at}
@@ -153,6 +167,7 @@ def t4_certification_fail(record: TransitionRecord, *, at: str, detail: str) -> 
 def t5_begin_promotion(record: TransitionRecord, *, at: str) -> TransitionResult:
     """T5: CERTIFIED -> PROMOTING."""
 
+    _reject_ordinary_transition(record, TransitionType.BEGIN_PROMOTION)
     if record.spine_state != SpineState.CERTIFIED:
         forbidden_id = _FORBIDDEN_SOURCE_FOR[TransitionType.BEGIN_PROMOTION][1]
         raise ForbiddenTransitionError(forbidden_id, TransitionType.BEGIN_PROMOTION, record.spine_state, "begin_promotion requires CERTIFIED")
@@ -164,6 +179,7 @@ def t5_begin_promotion(record: TransitionRecord, *, at: str) -> TransitionResult
 def t6_promote_succeed(record: TransitionRecord, *, at: str, promotion_binding) -> TransitionResult:
     """T6: PROMOTING -> PROMOTED."""
 
+    _reject_ordinary_transition(record, TransitionType.PROMOTE_SUCCEED)
     if record.spine_state != SpineState.PROMOTING:
         raise ForbiddenTransitionError("F5", TransitionType.PROMOTE_SUCCEED, record.spine_state, "promote_succeed requires PROMOTING")
     new_timestamps = {**record.timestamps, "PROMOTED": at}
@@ -176,6 +192,7 @@ def t6_promote_succeed(record: TransitionRecord, *, at: str, promotion_binding) 
 def t7_promote_fail(record: TransitionRecord, *, at: str, observation_detail: str) -> TransitionResult:
     """T7: PROMOTING -> FAILED_POST_CERT."""
 
+    _reject_ordinary_transition(record, TransitionType.PROMOTE_FAIL)
     if record.spine_state != SpineState.PROMOTING:
         raise ForbiddenTransitionError("F13", TransitionType.PROMOTE_FAIL, record.spine_state, "promote_fail requires PROMOTING")
     new_timestamps = {**record.timestamps, "FAILED_POST_CERT": at}
@@ -192,6 +209,7 @@ def t7_promote_fail(record: TransitionRecord, *, at: str, observation_detail: st
 def t8_begin_notification(record: TransitionRecord, *, at: str) -> TransitionResult:
     """T8: PROMOTED -> NOTIFYING."""
 
+    _reject_ordinary_transition(record, TransitionType.BEGIN_NOTIFICATION)
     if record.spine_state != SpineState.PROMOTED:
         forbidden_id = _FORBIDDEN_SOURCE_FOR[TransitionType.BEGIN_NOTIFICATION][1]
         raise ForbiddenTransitionError(forbidden_id, TransitionType.BEGIN_NOTIFICATION, record.spine_state, "begin_notification requires PROMOTED")
@@ -203,6 +221,7 @@ def t8_begin_notification(record: TransitionRecord, *, at: str) -> TransitionRes
 def t9_notify_confirm(record: TransitionRecord, *, at: str, notification_binding, marker_binding=None, receipt_binding=None) -> TransitionResult:
     """T9: NOTIFYING -> NOTIFIED."""
 
+    _reject_ordinary_transition(record, TransitionType.NOTIFY_CONFIRM)
     if record.spine_state != SpineState.NOTIFYING:
         raise ForbiddenTransitionError("F6", TransitionType.NOTIFY_CONFIRM, record.spine_state, "notify_confirm requires NOTIFYING")
     new_timestamps = {**record.timestamps, "NOTIFIED": at}
@@ -220,6 +239,7 @@ def t9_notify_confirm(record: TransitionRecord, *, at: str, notification_binding
 def t10_notify_unconfirmed(record: TransitionRecord, *, at: str, notification_binding, marker_binding=None) -> TransitionResult:
     """T10: NOTIFYING -> NOTIFIED_UNCONFIRMED."""
 
+    _reject_ordinary_transition(record, TransitionType.NOTIFY_UNCONFIRMED)
     if record.spine_state != SpineState.NOTIFYING:
         raise ForbiddenTransitionError("F6", TransitionType.NOTIFY_UNCONFIRMED, record.spine_state, "notify_unconfirmed requires NOTIFYING")
     new_timestamps = {**record.timestamps, "NOTIFIED_UNCONFIRMED": at}
@@ -236,6 +256,7 @@ def t10_notify_unconfirmed(record: TransitionRecord, *, at: str, notification_bi
 def t11_notify_retry(record: TransitionRecord, *, at: str) -> TransitionResult:
     """T11: NOTIFYING -> NOTIFYING (self-loop; the only legal notification retry)."""
 
+    _reject_ordinary_transition(record, TransitionType.NOTIFY_RETRY)
     if record.spine_state != SpineState.NOTIFYING:
         raise ForbiddenTransitionError(
             "CLTR-NOTIFY-2", TransitionType.NOTIFY_RETRY, record.spine_state, "notify_retry is only entered from NOTIFYING, never NOTIFIED/NOTIFIED_UNCONFIRMED"
@@ -246,20 +267,29 @@ def t11_notify_retry(record: TransitionRecord, *, at: str) -> TransitionResult:
 
 
 def t12_reconcile_receipt(record: TransitionRecord, *, at: str, receipt_binding, resolved: bool) -> TransitionResult:
-    """T12: NOTIFIED_UNCONFIRMED -> NOTIFIED_UNCONFIRMED (constrained repair; receipt only)."""
+    """T12: receipt-only reconciliation, either self-loop or upgrade to NOTIFIED."""
 
+    _reject_ordinary_transition(record, TransitionType.RECONCILE_RECEIPT)
     if record.spine_state != SpineState.NOTIFIED_UNCONFIRMED:
         raise ForbiddenTransitionError(
             "F6", TransitionType.RECONCILE_RECEIPT, record.spine_state, "reconcile_receipt requires NOTIFIED_UNCONFIRMED; it never re-triggers delivery"
         )
     new_timestamps = {**record.timestamps, f"RECEIPT_RECONCILE_{at}": at}
-    new_record = record.with_updates(receipt_binding=receipt_binding, timestamps=new_timestamps)
+    if resolved:
+        new_timestamps["NOTIFIED"] = at
+    new_record = record.with_updates(
+        spine_state=SpineState.NOTIFIED if resolved else SpineState.NOTIFIED_UNCONFIRMED,
+        prior_state=SpineState.NOTIFIED_UNCONFIRMED if resolved else record.prior_state,
+        receipt_binding=receipt_binding,
+        timestamps=new_timestamps,
+    )
     return TransitionResult(TransitionOutcome.APPLIED, TransitionType.RECONCILE_RECEIPT, new_record, at)
 
 
 def t13_close_success(record: TransitionRecord, *, at: str) -> TransitionResult:
     """T13: NOTIFIED -> TERMINAL_SUCCESS."""
 
+    _reject_ordinary_transition(record, TransitionType.CLOSE_SUCCESS)
     if record.spine_state != SpineState.NOTIFIED:
         raise ForbiddenTransitionError("F7", TransitionType.CLOSE_SUCCESS, record.spine_state, "close_success requires NOTIFIED")
     new_timestamps = {**record.timestamps, "TERMINAL_SUCCESS": at, "final": at}
@@ -270,6 +300,7 @@ def t13_close_success(record: TransitionRecord, *, at: str) -> TransitionResult:
 def t14_close_partial(record: TransitionRecord, *, at: str) -> TransitionResult:
     """T14: NOTIFIED_UNCONFIRMED -> TERMINAL_PARTIAL_EXTERNAL."""
 
+    _reject_ordinary_transition(record, TransitionType.CLOSE_PARTIAL)
     if record.spine_state != SpineState.NOTIFIED_UNCONFIRMED:
         raise ForbiddenTransitionError("F7", TransitionType.CLOSE_PARTIAL, record.spine_state, "close_partial requires NOTIFIED_UNCONFIRMED")
     new_timestamps = {**record.timestamps, "TERMINAL_PARTIAL_EXTERNAL": at, "final": at}
@@ -285,7 +316,7 @@ def t14_close_partial(record: TransitionRecord, *, at: str) -> TransitionResult:
 def t15_quarantine(record: TransitionRecord, *, at: str, mismatch_detail: str) -> TransitionResult:
     """T15 (orthogonal): any CERTIFIED-or-later state -> QUARANTINED flag."""
 
-    if record.spine_state == SpineState.PROPOSED or record.spine_state == SpineState.CERTIFYING:
+    if record.certified_state is None:
         raise ForbiddenTransitionError("F9", TransitionType.QUARANTINE, record.spine_state, "quarantine requires CERTIFIED-or-later")
     new_record = record.with_updates(quarantined=True, limitations=record.limitations + (mismatch_detail,))
     return TransitionResult(TransitionOutcome.APPLIED, TransitionType.QUARANTINE, new_record, at)

@@ -4,7 +4,7 @@ from pcae.cltr_prototype import digest as digest_mod
 from pcae.cltr_prototype import invariants as inv
 from pcae.cltr_prototype import state_machine as sm
 from pcae.cltr_prototype.identity import resolve_identity
-from pcae.cltr_prototype.models import EvidenceRef, EvidenceType, EvidenceVerificationStatus, InvariantResultOutcome
+from pcae.cltr_prototype.models import EvidenceRef, EvidenceType, EvidenceVerificationStatus, InvariantResultOutcome, SpineState
 
 
 def _ident(transition_id="t-inv-1"):
@@ -83,6 +83,13 @@ def test_cltr_order_6_fails_on_early_marker():
     result = inv.evaluate_cltr_order_6(r2)
     assert result.outcome == InvariantResultOutcome.FAIL
     assert result.quarantine_recommendation is True
+
+
+def test_cltr_state_4_rejects_impossible_direct_predecessor():
+    r = _certified_record().with_updates(prior_state=SpineState.PROPOSED)
+    result = inv.evaluate_cltr_state_4(r)
+    assert result.outcome == InvariantResultOutcome.FAIL
+    assert result.failure_reason == "invalid predecessor"
 
 
 def test_cltr_order_6_passes_when_marker_bound_at_notified():

@@ -16,6 +16,7 @@ from pcae.cltr_prototype.models import Identity
 # Reused verbatim from src/pcae/core/architecture_status.py:51 (135E §8.2) —
 # applied exactly once, here, never re-implemented at any other call site.
 PHASE_ID_RE = re.compile(r"^(\d+)([A-Za-z])((?:\.\d+[A-Za-z]?)*)$")
+TRANSITION_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 
 class IdentityErrorKind:
@@ -54,6 +55,25 @@ def _validate_plain_id(value: object, field_name: str) -> str:
     return value
 
 
+def validate_transition_id(value: object) -> str:
+    """Validate a transition ID as one opaque, filesystem-safe segment.
+
+    Persistence uses transition IDs as immutable generation-directory names.
+    Restricting the prototype ID grammar here prevents path separators,
+    traversal components, absolute paths, drive prefixes, and Unicode lookalike
+    separators from ever reaching that boundary.
+    """
+
+    value = _validate_plain_id(value, "transition_id")
+    if TRANSITION_ID_RE.fullmatch(value) is None:
+        raise IdentityError(
+            IdentityErrorKind.MALFORMED,
+            "transition_id",
+            "transition_id must be one ASCII alphanumeric/underscore/hyphen path segment",
+        )
+    return value
+
+
 def resolve_identity(declared: dict) -> Identity:
     """Resolve an `Identity` from an explicit declared-field dict.
 
@@ -70,7 +90,7 @@ def resolve_identity(declared: dict) -> Identity:
         if required not in declared:
             raise IdentityError(IdentityErrorKind.MISSING_FIELD, required, f"{required} was not explicitly declared")
 
-    transition_id = _validate_plain_id(declared["transition_id"], "transition_id")
+    transition_id = validate_transition_id(declared["transition_id"])
     _validate_phase_id(declared["phase_id"])
     phase_id = declared["phase_id"]
     repository_identity = _validate_plain_id(declared["repository_identity"], "repository_identity")

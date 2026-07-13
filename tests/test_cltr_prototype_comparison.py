@@ -43,6 +43,32 @@ def test_conflicting_target_transition_id_flagged():
     assert report.target_results[0].quarantine_recommended is True
 
 
+def test_inline_phase_mismatch_is_conflicting():
+    r = _certified_record()
+    report = comparison.compare(
+        r,
+        {"architecture_status": {"transition_id": r.identity.transition_id, "phase_id": "999Z"}},
+    )
+    assert report.target_results[0].classification == "conflicting"
+    assert report.target_results[0].quarantine_recommended is True
+
+
+def test_inline_digest_mismatch_is_conflicting():
+    r = _certified_record()
+    report = comparison.compare(r, {"mutable_latest_pointer": {"record_digest": "0" * 64}})
+    assert report.target_results[0].classification == "conflicting"
+
+
+def test_unknown_inline_semantics_fail_closed_as_unverifiable():
+    r = _certified_record()
+    report = comparison.compare(
+        r,
+        {"notification_result": {"transition_id": r.identity.transition_id, "notification_outcome": "confirmed"}},
+    )
+    assert report.target_results[0].classification == "unverifiable"
+    assert "not implemented" in (report.target_results[0].limitation or "")
+
+
 def test_legacy_missing_field_target():
     fixture = _load("legacy_artifact_no_transition_id.json")
     # The legacy metadata's own phase_id (134E.10) must match the record's

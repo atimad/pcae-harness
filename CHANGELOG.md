@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Phase 135G - Canonical Transition Record Prototype Independent Verification
+  (`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived and adversarially verified the 135F prototype,
+  reproducing and repairing eight Blocking defect families strictly within
+  `src/pcae/cltr_prototype/`: persistence containment, atomic/digest-verified
+  publication, terminal/overlay transition guards, T12 reconciliation,
+  strict schema reconstruction, fail-closed comparison, deep immutability and
+  predecessor validation, and repository-bound commit verification. Added
+  focused adversarial regressions and proof-bound fixtures. Three
+  Non-Blocking findings remain (legacy comparator breadth, JSON disclosure
+  consistency, and pre-existing invariant-count prose errors). Verdict: B -
+  VERIFIED WITH NON-BLOCKING FINDINGS. No production lifecycle source,
+  canonical authority, notification path, PFN-001, or PFR-001 changed.
 - Phase 135F - Canonical Transition Record Read-Only Prototype
   (`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_READ_ONLY_PROTOTYPE.md`).
   Implemented 135E's Stages 1-6 plan exactly within its frozen prototype

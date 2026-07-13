@@ -75,6 +75,23 @@ def test_fabricated_commit_hash_classified_unverifiable_never_verified():
     assert classifications["0000000fabricated0000000000000000000000"] == CommitOwnershipClassification.UNVERIFIABLE
 
 
+def test_unbound_verified_hint_is_downgraded_to_unverifiable():
+    bundle = _load("fabricated_commit_hash.json")
+    commit_hash = bundle["declared_commits"][0]["commit_hash"]
+    bundle["commit_classifications"] = [
+        {"commit_hash": commit_hash, "classification": "verified", "reason": "unsupported caller assertion"}
+    ]
+    result = generator.generate(bundle)
+    assert result.commit_classifications[0].classification == CommitOwnershipClassification.UNVERIFIABLE
+
+
+def test_verified_hint_with_wrong_repository_is_downgraded():
+    bundle = _load("successful_transition.json")
+    bundle["commit_classifications"][0]["repository_identity"] = "different-repository"
+    result = generator.generate(bundle)
+    assert result.commit_classifications[0].classification == CommitOwnershipClassification.UNVERIFIABLE
+
+
 def test_contaminated_commit_ownership_classified():
     result = generator.generate(_load("contaminated_commit_ownership.json"))
     classifications = {c.commit_hash: c.classification for c in result.commit_classifications}

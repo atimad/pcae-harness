@@ -2,6 +2,35 @@
 
 ## Current Phase
 
+Phase 135G — Canonical Transition Record Prototype Independent Verification
+(completed). Independently re-derived the 135F prototype from CLTR-001, the
+135C/135D model, the 135E plan, and the 135D.1 incident protections before
+using the implementation's own tests as evidence. The verification reproduced
+and repaired eight Blocking defect families, all strictly inside
+`src/pcae/cltr_prototype/`: persistence traversal/symlink escape; non-atomic
+publication without prepublication digest verification; invalid continuation
+from quarantined/superseded and pre-certification failure states; missing T12
+notification-reconciliation upgrade; acceptance of unsupported schemas and
+unknown fields; false-conformant comparison targets; shallow immutability and
+invalid predecessors; and trust in unbound `verified` commit hints.
+
+**Verdict: B — VERIFIED WITH NON-BLOCKING FINDINGS.** No Blocking finding
+remains after repair. Three Non-Blocking findings remain: the disposable
+comparator does not deeply interpret every legacy target schema but fails
+closed to unavailable; some JSON/error CLI forms do not repeat every prototype
+boundary disclosure; and the frozen source documents contain invariant-count
+arithmetic errors (34 CLTR IDs and 37 implemented IDs, not the stated 33/36).
+No CLTR-001 amendment was required. No production entry point, finalization
+module, canonical authority, notification path, PFN-001, or PFR-001 changed.
+Full evidence is in
+`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_INDEPENDENT_VERIFICATION.md`.
+
+Runtime remains Observed / observe / execution unavailable. Recommended next
+phase: 135H — Lifecycle Integration and Legacy Authority Retirement Plan
+(planning only; not started).
+
+## Phase 135F Complete
+
 Phase 135F — Canonical Transition Record Read-Only Prototype (completed).
 Implemented 135E's staged plan (Stages 1-6) exactly within its frozen
 prototype boundary: `src/pcae/cltr_prototype/` (models, identity,

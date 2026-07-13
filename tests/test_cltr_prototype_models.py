@@ -61,6 +61,21 @@ def test_with_updates_produces_new_immutable_value():
     assert record is not updated
 
 
+def test_transition_record_nested_authoritative_content_is_immutable():
+    ident = Identity(transition_id="immutable-1", phase_id="135F", repository_identity="repo", branch_identity="main")
+    record = TransitionRecord(
+        identity=ident,
+        spine_state=SpineState.CERTIFIED,
+        source_revision="rev",
+        certified_state={"nested": {"value": 1}},
+        timestamps={"CERTIFIED": "now"},
+    )
+    with pytest.raises(TypeError):
+        record.certified_state["nested"]["value"] = 2
+    with pytest.raises(TypeError):
+        record.timestamps["MUTATED"] = "later"
+
+
 def test_is_terminal():
     ident = Identity(transition_id="t1", phase_id="135F", repository_identity="r", branch_identity="main")
     for state in SpineState:
@@ -68,7 +83,7 @@ def test_is_terminal():
             identity=ident,
             spine_state=state,
             source_revision="abc",
-            certified_state={"x": 1} if state != SpineState.PROPOSED and state != SpineState.CERTIFYING else None,
+            certified_state={"x": 1} if state not in (SpineState.PROPOSED, SpineState.CERTIFYING, SpineState.FAILED_PRE_CERT) else None,
         )
         assert record.is_terminal == (state in TERMINAL_SPINE_STATES)
 

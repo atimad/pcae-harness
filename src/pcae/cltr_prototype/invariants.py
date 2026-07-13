@@ -171,6 +171,29 @@ def evaluate_cltr_state_3(record: TransitionRecord, *, comparison_bundle: Option
 def evaluate_cltr_state_4(record: TransitionRecord, *, comparison_bundle: Optional[dict] = None) -> InvariantResult:
     if record.spine_state != SpineState.PROPOSED and record.prior_state is None:
         return _result("CLTR-STATE-4", "State", InvariantResultOutcome.FAIL, "record beyond PROPOSED carries no prior_state, implying a skipped predecessor", failure_reason="missing prior_state")
+    permitted_predecessors = {
+        SpineState.PROPOSED: {None},
+        SpineState.CERTIFYING: {SpineState.PROPOSED},
+        SpineState.CERTIFIED: {SpineState.CERTIFYING},
+        SpineState.PROMOTING: {SpineState.CERTIFIED},
+        SpineState.PROMOTED: {SpineState.PROMOTING},
+        SpineState.NOTIFYING: {SpineState.PROMOTED},
+        SpineState.NOTIFIED: {SpineState.NOTIFYING, SpineState.NOTIFIED_UNCONFIRMED},
+        SpineState.NOTIFIED_UNCONFIRMED: {SpineState.NOTIFYING},
+        SpineState.TERMINAL_SUCCESS: {SpineState.NOTIFIED},
+        SpineState.TERMINAL_PARTIAL_EXTERNAL: {SpineState.NOTIFIED_UNCONFIRMED},
+        SpineState.FAILED_PRE_CERT: {SpineState.CERTIFYING},
+        SpineState.FAILED_POST_CERT: {SpineState.PROMOTING},
+    }
+    if record.prior_state not in permitted_predecessors[record.spine_state]:
+        return _result(
+            "CLTR-STATE-4",
+            "State",
+            InvariantResultOutcome.FAIL,
+            f"{record.spine_state.value} has forbidden prior_state={record.prior_state.value if record.prior_state else None}",
+            failure_reason="invalid predecessor",
+            quarantine_recommendation=True,
+        )
     return _result("CLTR-STATE-4", "State", InvariantResultOutcome.PASS, "record's prior_state is consistent with its current spine_state")
 
 
@@ -400,7 +423,7 @@ def evaluate_cltr_receipt_1(record: TransitionRecord, *, comparison_bundle: Opti
     if record.receipt_binding is None:
         return _result("CLTR-RECEIPT-1", "Receipt", InvariantResultOutcome.INAPPLICABLE, "no receipt bound on this record")
     claims_success = comparison_bundle.get("receipt_claims_confirmed", False) if comparison_bundle else False
-    if claims_success and record.spine_state != SpineState.NOTIFIED:
+    if claims_success and record.spine_state not in (SpineState.NOTIFIED, SpineState.TERMINAL_SUCCESS):
         return _result("CLTR-RECEIPT-1", "Receipt", InvariantResultOutcome.FAIL, "receipt claims confirmed delivery but record is not NOTIFIED", failure_reason="optimistic receipt", quarantine_recommendation=True)
     return _result("CLTR-RECEIPT-1", "Receipt", InvariantResultOutcome.PASS, "receipt's claimed outcome does not exceed the record's actual state")
 

@@ -130,7 +130,14 @@ class GenerationResult:
     commit_classifications: tuple
 
 
-def classify_commits(declared_commits: tuple, classification_hints: dict, *, repository_identity: str) -> tuple:
+def classify_commits(
+    declared_commits: tuple,
+    classification_hints: dict,
+    *,
+    repository_identity: str,
+    branch_identity: str,
+    source_revision: str,
+) -> tuple:
     """Classify each declared commit into the frozen three-outcome model
     (135E §12.1). `classification_hints` is an explicit, caller-supplied
     dict of {commit_hash: {"classification": ..., "reason": ...}} — the
@@ -154,10 +161,27 @@ def classify_commits(declared_commits: tuple, classification_hints: dict, *, rep
                 )
             )
             continue
+        requested = CommitOwnershipClassification(hint["classification"])
+        if requested == CommitOwnershipClassification.VERIFIED:
+            proof_bound = (
+                hint.get("resolvable") is True
+                and hint.get("repository_identity") == repository_identity
+                and hint.get("branch_identity") == branch_identity
+                and hint.get("source_revision") == source_revision
+            )
+            if not proof_bound:
+                results.append(
+                    CommitClassificationResult(
+                        commit_hash=commit.commit_hash,
+                        classification=CommitOwnershipClassification.UNVERIFIABLE,
+                        reason="verified hint lacked matching resolvability, repository, branch, or revision evidence; downgraded fail-closed",
+                    )
+                )
+                continue
         results.append(
             CommitClassificationResult(
                 commit_hash=commit.commit_hash,
-                classification=CommitOwnershipClassification(hint["classification"]),
+                classification=requested,
                 reason=hint.get("reason", ""),
             )
         )
@@ -199,7 +223,13 @@ def generate(bundle: dict, *, fail_closed_on_invariant_failure: bool = False) ->
         for c in bundle.get("declared_commits", [])
     )
     classification_hints = {c["commit_hash"]: c for c in bundle.get("commit_classifications", [])}
-    commit_classifications = classify_commits(declared_commits, classification_hints, repository_identity=ident.repository_identity)
+    commit_classifications = classify_commits(
+        declared_commits,
+        classification_hints,
+        repository_identity=ident.repository_identity,
+        branch_identity=ident.branch_identity,
+        source_revision=bundle["source_revision"],
+    )
 
     steps = bundle["steps"]
     first_step = steps[0]

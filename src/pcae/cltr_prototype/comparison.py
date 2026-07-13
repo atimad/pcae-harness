@@ -88,16 +88,46 @@ def compare(record: TransitionRecord, targets: dict) -> ComparisonReport:
             target_transition_id = target.get("transition_id")
             if target_transition_id is not None:
                 seen_transition_ids.add(target_transition_id)
-            if target_transition_id is not None and target_transition_id != record.identity.transition_id:
+            identity_mismatches = {}
+            for field_name in ("transition_id", "phase_id", "repository_identity", "branch_identity", "task_id"):
+                if field_name in target and target[field_name] != declared_identity.get(field_name):
+                    identity_mismatches[field_name] = {
+                        "record": declared_identity.get(field_name),
+                        "target": target[field_name],
+                    }
+            digest_mismatch = None
+            if "record_digest" in target and target["record_digest"] != record.record_digest:
+                digest_mismatch = {"record": record.record_digest, "target": target["record_digest"]}
+            if identity_mismatches or digest_mismatch is not None:
+                detail_parts = []
+                if identity_mismatches:
+                    detail_parts.append(f"identity mismatch: {identity_mismatches}")
+                if digest_mismatch is not None:
+                    detail_parts.append(f"record_digest mismatch: {digest_mismatch}")
                 results.append(
                     TargetComparisonResult(
                         kind=kind,
                         source="<inline>",
                         classification=ConformanceClassification.CONFLICTING.value,
-                        disclosed_identity={"transition_id": target_transition_id},
+                        disclosed_identity={k: v for k, v in target.items() if k in declared_identity},
                         missing_fields=(),
-                        limitation=f"target transition_id={target_transition_id!r} disagrees with record transition_id={record.identity.transition_id!r}",
+                        limitation="; ".join(detail_parts),
                         quarantine_recommended=True,
+                    )
+                )
+                continue
+            recognized_inline_fields = set(declared_identity) | {"record_digest"}
+            unsupported_fields = sorted(set(target) - recognized_inline_fields)
+            if unsupported_fields:
+                results.append(
+                    TargetComparisonResult(
+                        kind=kind,
+                        source="<inline>",
+                        classification=ConformanceClassification.UNVERIFIABLE.value,
+                        disclosed_identity={k: v for k, v in target.items() if k in declared_identity},
+                        missing_fields=(),
+                        limitation=f"inline semantic field(s) are not implemented by this prototype comparator: {unsupported_fields}",
+                        quarantine_recommended=False,
                     )
                 )
                 continue

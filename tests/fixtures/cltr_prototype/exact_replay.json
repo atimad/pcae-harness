@@ -20,6 +20,10 @@
     {
       "commit_hash": "aaaaaaa1111111111111111111111111111111",
       "classification": "verified",
+      "resolvable": true,
+      "repository_identity": "pcae-harness",
+      "branch_identity": "main",
+      "source_revision": "aaaaaaa1111111111111111111111111111111",
       "reason": "resolves in bound repository/revision context"
     }
   ],

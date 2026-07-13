@@ -16,6 +16,7 @@ from __future__ import annotations
 import dataclasses
 import enum
 import json
+from collections.abc import Mapping
 from typing import Any, Optional
 
 from pcae.cltr_prototype.models import (
@@ -57,7 +58,7 @@ def _to_jsonable(value: Any) -> Any:
         if all(isinstance(v, str) for v in items):
             return sorted(items)
         return items
-    if isinstance(value, dict):
+    if isinstance(value, Mapping):
         return {str(k): _to_jsonable(v) for k, v in sorted(value.items())}
     return value
 
@@ -123,7 +124,19 @@ def record_from_dict(d: dict) -> TransitionRecord:
     performs no repair; it either reconstructs faithfully or raises.
     """
 
+    allowed_record_fields = {field.name for field in dataclasses.fields(TransitionRecord)}
+    unknown_record_fields = set(d) - allowed_record_fields
+    if unknown_record_fields:
+        raise ValueError(f"unknown TransitionRecord field(s): {sorted(unknown_record_fields)}")
+    if d.get("schema_version", "cltr-prototype-0.1") != "cltr-prototype-0.1":
+        raise ValueError(f"unsupported schema_version: {d.get('schema_version')!r}")
+    if d.get("contract_version", "CLTR-001/1.0") != "CLTR-001/1.0":
+        raise ValueError(f"unsupported contract_version: {d.get('contract_version')!r}")
+
     identity_dict = d["identity"]
+    unknown_identity_fields = set(identity_dict) - {field.name for field in dataclasses.fields(Identity)}
+    if unknown_identity_fields:
+        raise ValueError(f"unknown Identity field(s): {sorted(unknown_identity_fields)}")
     identity = Identity(
         transition_id=identity_dict["transition_id"],
         phase_id=identity_dict["phase_id"],

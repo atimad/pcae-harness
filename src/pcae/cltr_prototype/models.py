@@ -14,11 +14,22 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Optional
 
 
 SCHEMA_VERSION = "cltr-prototype-0.1"
 CONTRACT_VERSION = "CLTR-001/1.0"
+
+
+def _deep_freeze(value):
+    if isinstance(value, dict):
+        return MappingProxyType({key: _deep_freeze(item) for key, item in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_deep_freeze(item) for item in value)
+    if isinstance(value, (set, frozenset)):
+        return frozenset(_deep_freeze(item) for item in value)
+    return value
 
 
 class SpineState(str, Enum):
@@ -352,9 +363,17 @@ class TransitionRecord:
     def __post_init__(self) -> None:
         if not self.source_revision:
             raise ValueError("TransitionRecord.source_revision is required")
-        if self.spine_state == SpineState.CERTIFIED and self.certified_state is None:
-            # CERTIFIED-or-later must carry a certified_state (135E §5).
+        certified_or_later = self.spine_state not in {
+            SpineState.PROPOSED,
+            SpineState.CERTIFYING,
+            SpineState.FAILED_PRE_CERT,
+        }
+        if certified_or_later and self.certified_state is None:
             raise ValueError("TransitionRecord: certified_state is required from CERTIFIED onward")
+        object.__setattr__(self, "projected_state", _deep_freeze(self.projected_state))
+        object.__setattr__(self, "certified_state", _deep_freeze(self.certified_state))
+        object.__setattr__(self, "timestamps", _deep_freeze(self.timestamps))
+        object.__setattr__(self, "compatibility_metadata", _deep_freeze(self.compatibility_metadata))
 
     def with_updates(self, **kwargs) -> "TransitionRecord":
         """Produce a new immutable record value with the given fields replaced."""

@@ -2,6 +2,20 @@
 
 ## Accepted
 
+- Phase 135G independently verifies the 135F prototype by fresh contract
+  derivation and adversarial reproduction, not by treating 135F's report or
+  tests as proof. Invoke the verification-phase repair policy for eight
+  reproduced Blocking defect families, but confine every repair to the
+  disposable `cltr_prototype` boundary and its focused tests/fixtures. Accept
+  verdict B after those defects are closed, with three Non-Blocking findings
+  deferred to lifecycle-integration planning: comparator adapter breadth,
+  JSON/error disclosure consistency, and invariant-count prose arithmetic.
+  Treat the frozen contract's table as authoritative: it contains 34 unique
+  CLTR IDs, and the implemented registry contains 37 after ORDER-5/6/7; do not
+  amend CLTR-001 merely to repair the older 33/36 prose counts. Recommend 135H
+  as a planning-only lifecycle integration and legacy-authority retirement
+  phase; do not begin production integration in 135G.
+
 - Phase 134E.8V keeps Architecture Status a derivative view but requires full
   exact completed-phase traceability in structured fields; concise milestone
   labels may remain filtered. Finalization must seal one repository-revision-

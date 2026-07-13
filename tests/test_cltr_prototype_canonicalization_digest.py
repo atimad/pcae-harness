@@ -37,6 +37,14 @@ def test_record_to_dict_round_trip_preserves_digest():
     assert digest_mod.verify_self(rt)
 
 
+def test_record_from_dict_rejects_unknown_authority_field():
+    d = canon.record_to_dict(digest_mod.seal(_certified_record()))
+    d["unknown_authority"] = "must not be silently ignored"
+    import pytest
+    with pytest.raises(ValueError, match="unknown TransitionRecord"):
+        canon.record_from_dict(d)
+
+
 def test_digest_stable_same_content_same_digest():
     r1 = _certified_record()
     r2 = _certified_record()

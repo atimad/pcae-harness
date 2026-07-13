@@ -68,6 +68,21 @@ def test_notified_unconfirmed_path(ident):
     assert r3.is_terminal
 
 
+def test_notified_unconfirmed_successful_receipt_reconciliation_upgrades_then_closes(ident):
+    r = sm.t1_propose_transition(ident, "rev1", at="t0").new_record
+    r = sm.t2_begin_certification(r, at="t1").new_record
+    r = sm.t3_certify(r, at="t2", certified_state={"x": 1}).new_record
+    r = sm.t5_begin_promotion(r, at="t3").new_record
+    r = sm.t6_promote_succeed(r, at="t4", promotion_binding=None).new_record
+    r = sm.t8_begin_notification(r, at="t5").new_record
+    r = sm.t10_notify_unconfirmed(r, at="t6", notification_binding=None).new_record
+    reconciled = sm.t12_reconcile_receipt(r, at="t7", receipt_binding=None, resolved=True).new_record
+    assert reconciled.spine_state == SpineState.NOTIFIED
+    assert reconciled.prior_state == SpineState.NOTIFIED_UNCONFIRMED
+    closed = sm.t13_close_success(reconciled, at="t8").new_record
+    assert closed.spine_state == SpineState.TERMINAL_SUCCESS
+
+
 def test_promote_fail_path(ident):
     r = sm.t1_propose_transition(ident, "rev1", at="t0").new_record
     r = sm.t2_begin_certification(r, at="t1").new_record
@@ -175,12 +190,30 @@ def test_f8_superseded_reactivation_rejected_via_close(ident):
     r = sm.t8_begin_notification(r, at="t5").new_record
     r = sm.t16_supersede(r, at="t5b", superseding_transition_id="other").new_record
     assert sm.retry_classification(r) == RetryClassification.REJECT_SUPERSEDED_REDIRECT
+    with pytest.raises(sm.ForbiddenTransitionError) as exc:
+        sm.t9_notify_confirm(r, at="t6", notification_binding=None)
+    assert exc.value.forbidden_id == "F8"
+
+
+def test_f9_quarantined_record_cannot_continue_spine(ident):
+    r = sm.t1_propose_transition(ident, "rev1", at="t0").new_record
+    r = sm.t2_begin_certification(r, at="t1").new_record
+    r = sm.t3_certify(r, at="t2", certified_state={"x": 1}).new_record
+    r = sm.t15_quarantine(r, at="t3", mismatch_detail="mismatch").new_record
+    with pytest.raises(sm.ForbiddenTransitionError) as exc:
+        sm.t5_begin_promotion(r, at="t4")
+    assert exc.value.forbidden_id == "F9"
 
 
 def test_f9_quarantine_requires_certified_or_later(ident):
     r = sm.t1_propose_transition(ident, "rev1", at="t0").new_record
     with pytest.raises(sm.ForbiddenTransitionError):
         sm.t15_quarantine(r, at="t1", mismatch_detail="x")
+
+    r = sm.t2_begin_certification(r, at="t1").new_record
+    r = sm.t4_certification_fail(r, at="t2", detail="bad evidence").new_record
+    with pytest.raises(sm.ForbiddenTransitionError):
+        sm.t15_quarantine(r, at="t3", mismatch_detail="x")
 
 
 def test_f10_marker_before_notified_is_a_generator_level_concern():

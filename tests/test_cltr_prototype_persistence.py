@@ -117,3 +117,66 @@ def test_no_production_paths_touched(tmp_path):
     all_paths = [str(p) for p in tmp_path.rglob("*")]
     for forbidden in (".pcae/canonical-reports", ".pcae/phase-completion-metadata.json", ".pcae/finalization-transactions", ".pcae/delivery-receipts", "phase-completion-report.md"):
         assert not any(forbidden in p for p in all_paths)
+
+
+@pytest.mark.parametrize("transition_id", ["../escape", "../../../escape", "/absolute", "nested/name", r"nested\\name"])
+def test_persistence_rejects_unsafe_transition_id_even_for_direct_record_construction(tmp_path, transition_id):
+    result = generator.generate(_load("successful_transition.json"))
+    unsafe = result.record.with_updates(
+        identity=result.record.identity.__class__(
+            transition_id=transition_id,
+            phase_id=result.record.identity.phase_id,
+            repository_identity=result.record.identity.repository_identity,
+            branch_identity=result.record.identity.branch_identity,
+            task_id=result.record.identity.task_id,
+        )
+    )
+    unsafe = digest_mod.seal(unsafe)
+    with pytest.raises(persistence.UnsafePrototypePathError):
+        persistence.persist(unsafe, result.invariant_results, base_dir=tmp_path)
+
+
+def test_persistence_rejects_generation_symlink_escape(tmp_path):
+    result = generator.generate(_load("successful_transition.json"))
+    outside = tmp_path.parent / f"{tmp_path.name}-outside"
+    outside.mkdir()
+    generations = tmp_path / "generations"
+    generations.mkdir()
+    (generations / result.record.identity.transition_id).symlink_to(outside, target_is_directory=True)
+    with pytest.raises(persistence.UnsafePrototypePathError):
+        persistence.persist(result.record, result.invariant_results, base_dir=tmp_path)
+    assert not (outside / "record.json").exists()
+
+
+def test_persistence_rejects_generations_root_symlink_escape(tmp_path):
+    result = generator.generate(_load("successful_transition.json"))
+    outside = tmp_path.parent / f"{tmp_path.name}-outside-root"
+    outside.mkdir()
+    (tmp_path / "generations").symlink_to(outside, target_is_directory=True)
+    with pytest.raises(persistence.UnsafePrototypePathError):
+        persistence.persist(result.record, result.invariant_results, base_dir=tmp_path)
+    assert not (outside / result.record.identity.transition_id).exists()
+
+
+def test_persistence_rejects_tampered_sealed_record(tmp_path):
+    result = generator.generate(_load("successful_transition.json"))
+    tampered = result.record.with_updates(limitations=("tampered after sealing",))
+    with pytest.raises(persistence.RecordIntegrityError):
+        persistence.persist(tampered, result.invariant_results, base_dir=tmp_path)
+
+
+def test_staging_generation_is_not_listed(tmp_path):
+    generations = tmp_path / "generations"
+    generations.mkdir()
+    (generations / ".tmp-generation-interrupted").mkdir()
+    assert persistence.list_generations(base_dir=tmp_path) == []
+
+
+def test_manifest_rejects_unexpected_or_traversing_file_entries(tmp_path):
+    result = generator.generate(_load("successful_transition.json"))
+    gen_dir = persistence.persist(result.record, result.invariant_results, base_dir=tmp_path)
+    manifest_path = gen_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["files"]["../../outside"] = {"digest": "0" * 64, "size": 0}
+    manifest_path.write_text(json.dumps(manifest))
+    assert persistence.read_generation(result.record.identity.transition_id, base_dir=tmp_path) is None

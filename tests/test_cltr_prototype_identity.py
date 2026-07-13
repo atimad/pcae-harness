@@ -46,6 +46,23 @@ def test_malformed_phase_id_rejected(bad_phase_id):
         )
 
 
+@pytest.mark.parametrize(
+    "bad_transition_id",
+    ["../escape", "../../escape", "/absolute", "nested/name", r"nested\\name", ".", "..", "txn∕escape"],
+)
+def test_filesystem_unsafe_transition_id_rejected(bad_transition_id):
+    with pytest.raises(IdentityError) as exc:
+        resolve_identity(
+            {
+                "transition_id": bad_transition_id,
+                "phase_id": "135F",
+                "repository_identity": "r",
+                "branch_identity": "main",
+            }
+        )
+    assert exc.value.kind == IdentityErrorKind.MALFORMED
+
+
 def test_task_id_bound_to_declaring_phase_only():
     ident = resolve_identity(
         {

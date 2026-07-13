@@ -49,7 +49,7 @@ def _state_valid(record: TransitionRecord) -> bool:
 def classify_conformance(record: TransitionRecord, invariant_results: list, *, digest_valid: bool, manifest_consistent: bool) -> ConformanceClassification:
     if record.superseded:
         return ConformanceClassification.SUPERSEDED
-    if record.quarantined or not digest_valid:
+    if record.quarantined or not digest_valid or not manifest_consistent:
         return ConformanceClassification.QUARANTINED
     blocking_fail = [r for r in invariant_results if r.outcome == InvariantResultOutcome.FAIL]
     if blocking_fail:
@@ -75,9 +75,15 @@ def verify_record_object(record: TransitionRecord, *, manifest_consistent: bool 
     """Verify an in-memory `TransitionRecord` value directly (no filesystem read)."""
 
     digest_valid = verify_self(record) if record.record_digest is not None else False
-    state_valid = _state_valid(record)
+    version_supported = record.schema_version == "cltr-prototype-0.1" and record.contract_version == "CLTR-001/1.0"
+    state_valid = _state_valid(record) and version_supported
     invariant_results = evaluate_invariants(record)
     conformance = classify_conformance(record, invariant_results, digest_valid=digest_valid, manifest_consistent=manifest_consistent)
+    if not state_valid:
+        conformance = ConformanceClassification.QUARANTINED
+    limitations = list(record.limitations)
+    if not version_supported:
+        limitations.append(f"unsupported record version: schema={record.schema_version!r}, contract={record.contract_version!r}")
 
     return VerificationReport(
         transition_id=record.identity.transition_id,
@@ -89,7 +95,7 @@ def verify_record_object(record: TransitionRecord, *, manifest_consistent: bool 
         invariant_results=tuple(invariant_results),
         conformance=conformance.value,
         terminal=record.is_terminal,
-        limitations=record.limitations,
+        limitations=tuple(limitations),
     )
 
 
@@ -113,5 +119,19 @@ def verify_record(transition_id: str, *, base_dir: Optional[Path] = None) -> Ver
             terminal=False,
             limitations=("generation directory missing or incomplete",),
         )
-    record = record_from_dict(record_dict)
+    try:
+        record = record_from_dict(record_dict)
+    except (KeyError, TypeError, ValueError) as exc:
+        return VerificationReport(
+            transition_id=transition_id,
+            phase_id=str(record_dict.get("identity", {}).get("phase_id", "")),
+            lifecycle_state=str(record_dict.get("spine_state", "UNKNOWN")),
+            manifest_consistent=manifest_consistent,
+            digest_valid=False,
+            state_valid=False,
+            invariant_results=(),
+            conformance=ConformanceClassification.QUARANTINED.value,
+            terminal=False,
+            limitations=(f"record structure rejected: {exc}",),
+        )
     return verify_record_object(record, manifest_consistent=manifest_consistent)
