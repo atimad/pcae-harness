@@ -10,6 +10,11 @@
   while exposing that the manual recovery fallback can still publish a partial
   candidate as latest. Generated the missing 135H completion narrative without
   overwriting completion metadata or changing production lifecycle source.
+- Recovered Phase 135H reporting with one trust-complete canonical report and
+  one Telegram ordinary-completion delivery, then reconciled the matching
+  immutable marker into one completed checkpoint and one finalized receipt
+  without redispatch. Documented the remaining manual-recovery fallback defects
+  and recommended a future 135H.2 hardening phase before 135I.
 
 ## Unreleased
 

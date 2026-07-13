@@ -2,6 +2,37 @@
 
 ## Current Phase
 
+Phase 135H.1 — Missing Terminal Report and PFN-001 Delivery Recovery
+(completed). Re-derived the 135H lifecycle from primary artifacts and proved
+that task closure committed before the report hook rejected mixed 135G/135H
+identity and stale-successor evidence. The rejection correctly preserved
+metadata integrity, but the finalization transaction never began, leaving no
+135H report, checkpoint, notification, marker, or receipt.
+
+Recovery classification: **D — governed report generation followed by one
+corrective terminal notification**. The missing 135H canonical narrative was
+generated without overwriting completion metadata. The trust-complete 135H
+report is now latest; exactly one 135H ordinary-completion marker exists;
+Telegram acknowledged one summary and one document in that single delivery;
+and the matching digest/snapshot checkpoint plus one immutable receipt were
+reconciled without redispatch. The report binds the original two 135H commits,
+is pushed, and recommends 135I.
+
+Two additional integration defects were observed and left unchanged: the
+manual recovery command can publish a partial report when its finalization gate
+is false, and it can dispatch from that same fallback outside the shared
+checkpoint/receipt transaction. A separately authorized **135H.2 lifecycle
+recovery hardening phase is recommended before 135I** to remove that fallback,
+make paused-task identity semantics consistent, and add public marker-to-
+checkpoint/receipt reconciliation. No production source or contract changed in
+135H.1. Runtime remains Observed / observe / execution unavailable. Phase 135I
+was not started.
+
+Full analysis:
+`docs/PHASE_135H.1_MISSING_TERMINAL_REPORT_AND_PFN_001_DELIVERY_RECOVERY.md`.
+
+## Phase 135H Complete
+
 Phase 135H — Lifecycle Integration and Legacy Authority Retirement Plan
 (completed). Re-derived the production migration boundary from CLTR-001, the
 verified 37-invariant 135D model, the independently hardened prototype, Track

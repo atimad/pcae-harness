@@ -166,3 +166,61 @@ generation of the missing 135H completion narrative (metadata remains
 untouched), followed by one re-derived trust-complete recovery transaction.
 This exposes a future architectural issue: manual recovery must never promote
 partial output when its finalization gate is false.
+
+After the 135H narrative was generated and pushed, the second governed report
+creation produced trust-complete artifact
+`20260713-180349-135H.{md,json}`. Telegram returned success for one summary and
+one document (`ntf-8a5aa921c47f`), and the ordinary-completion marker was bound
+to report digest `bc6f811b...` and finalization snapshot `f544e5e5...`.
+
+That invocation exposed the fallback's second defect: one compound No-Go item
+failed the gate's 11-item shape requirement, yet the fallback promoted and
+dispatched outside the shared transaction. It therefore created the marker and
+one real delivery but no checkpoint or receipt. No resend was permitted.
+
+The existing authoritative transaction was then used only to reconcile the
+already-promoted, already-delivered payload. Hard preconditions required the
+latest report digest and snapshot to equal the immutable marker, zero existing
+135H checkpoints and receipts, and a passing gate after losslessly splitting
+the compound No-Go statement into its fourteen individually equivalent
+confirmations. The callback performed no promotion and no dispatch; it verified
+the marker and returned the existing successful delivery. The transaction
+created:
+
+- checkpoint `.pcae/finalization-transactions/135H.json`, status `completed`;
+- one immutable receipt with logical delivery ID
+  `fa24431c5c9e192d2bd1a68df21eaae54f3332a98f9d5b9f1c854291a70eb42a`;
+- completed pre-promotion, promotion/dispatch reconciliation, delivery-model,
+  and receipt steps;
+- no marker change and no second notification.
+
+Final counts and identity:
+
+| Item | Final 135H state |
+|---|---|
+| Logical engineering completion | exactly one; original two commits |
+| Trust-complete canonical report | exactly one; latest is 135H |
+| Failed partial candidate | one, retained as noncanonical audit evidence |
+| Ordinary-completion marker | exactly one |
+| Telegram ordinary delivery | exactly one event; summary + document both acknowledged |
+| Completion checkpoint | exactly one, completed |
+| Immutable receipt | exactly one, finalized |
+| Completion metadata | still 135G; preserved, not overwritten |
+| Tracked completion narrative | 135H |
+| Recommended successor | 135I, not started |
+
+The strict “no duplicate promotion” objective could not be literally preserved:
+the governed recovery command itself temporarily promoted the partial candidate
+before its trust guard skipped notification. There is still exactly one
+trust-complete/canonical 135H report and exactly one final notification. The
+partial artifact remains visible in history so the lifecycle record is honest.
+
+## Future architecture recommendation
+
+A future **135H.2 lifecycle recovery hardening phase is required before 135I**.
+It should make a false finalization gate return without any report write or
+dispatch, route every successful manual recovery through the shared
+checkpoint/receipt transaction, align paused-task discovery with task status,
+persist explicit durable failure when task closure outlives report rejection,
+and provide a public idempotent marker-to-receipt reconciliation command. This
+phase is only recommended; it was not started here.

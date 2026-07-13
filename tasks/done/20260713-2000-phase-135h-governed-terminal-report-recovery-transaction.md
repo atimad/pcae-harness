@@ -10,7 +10,7 @@ Phase 135H: Governed terminal-report recovery transaction
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -23,6 +23,7 @@ Execute exactly one duplicate-safe governed 135H report promotion and PFN-001 or
 ## Allowed Files
 
 - tasks/active
+- tasks/done/*
 - tasks/paused/*
 - docs/PHASE_135H.1_MISSING_TERMINAL_REPORT_AND_PFN_001_DELIVERY_RECOVERY.md
 - CHANGELOG.md
