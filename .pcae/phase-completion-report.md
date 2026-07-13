@@ -1,53 +1,47 @@
-# Phase 135I Complete — Production CLTR Schema, Canonicalization, and Versioning Contract Freeze
+# Phase 135J Complete — Production CLTR Schema and Integration Contract Verification
 
 ## Phase identity
 
-- Phase ID: `135I`
+- Phase ID: `135J`
 - Status: completed
-- Verdict: **CONTRACT FROZEN — DOCUMENTATION ONLY**
+- Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS**
 - Report completeness: complete
 
 ## Summary
 
-Phase 135I froze `CLTR-SCHEMA-001` version `1.0.0`, the production wire
-schema and serialization contract that satisfies CLTR-001 (135B), independently
-derived — never simply restated — from CLTR-001, 135D (Cross-Representation
+Phase 135J independently verified `CLTR-SCHEMA-001` (135I) — re-derived, not
+trusted — against CLTR-001 (135B), 135C, 135D (Cross-Representation
 Invariant Architecture & State-Machine Verification), 135G (Read-Only
-Prototype Independent Verification), and 135H (Production Integration &
-Legacy Authority Retirement Plan). Every normative clause is tagged
-`[CLARIFICATION]`, `[ENCODING]`, or `[GUIDANCE]` so the document never
-conflates restating an existing requirement with making a new wire-format
-decision.
-
-The contract freezes: schema identity and semantic versioning with
-fail-closed unknown-version handling; the 14-state/16-transition lifecycle
-model and five-role authority model as production enums; 15
-representation-kind bindings; a state-dependent mandatory/optional/prohibited
-field table making "every CERTIFIED-or-later state shall contain certified
-content" mechanically explicit (a clarification of CLTR-001 §7.3 and 135D
-§7.1/§7.6, per 135H §15's instruction); the required/optional field catalog
-with an explicit absent/null/populated distinction; every production enum
-including a normative 37-invariant crosswalk resolving the 33/34/36/37
-documentation-arithmetic discrepancy across CLTR-001/135D/135G; commit
-ownership encoding prohibiting git-history reconstruction; SHA-256 digest and
-UTF-8/sorted-key/NFC-normalized canonical serialization contracts; a
-persistence and nine-step atomic-publication specification (specification
-only, no implementation) adopting 135H §8's frozen ordering and 135G's
-proven crash-safe generation-directory/pointer-switch primitives; a
-failure/reconciliation contract adopting 135H.2 §7's production-proven
-five-outcome reconciliation surface; notification/marker/receipt binding
-contracts preventing orphaned representations; a 15-kind
-compatibility-adapter contract resolving 135G's NB-1 finding; a seven-value
-conformance contract; explicit limitations that never strengthen authority;
-deferred migration guidance; and a standardized diagnostic envelope
-resolving 135H's NB-2 finding. A full Cross-Reference Matrix traces every
-section to CLTR-001/135D/135G/135H.
+Prototype Independent Verification), and 135H/135H.2 (Production Integration
+& Recovery Hardening), including a direct independent count of CLTR-001's
+own §26.1 invariant table (confirmed 34, not 33) and direct inspection of
+current production source (`finalization_transaction.py`,
+`canonical_artifact_promotion.py`, `phase_reports.py`, all four entry-point
+command modules). One genuine Blocking defect was found and repaired within
+the documentation-only boundary: §21's fifteen-representation-kind adapter
+contract defined the five-mode comparison taxonomy but left the per-kind
+assignment incomplete, contradicting its own §21.3 completeness gate and
+135H §7.1's cutover prerequisite. Repaired via a new §21.4 assigning all 15
+kinds to a concrete comparison mode, using only the already-frozen taxonomy
+(no new field, enum value, or binding; `schema_version` bumped `1.0.0` to
+`1.0.1`, PATCH; `compatibility_id` unchanged; no CLTR-001 amendment). Four
+Non-Blocking findings were confirmed and left as disclosed debt: internal
+cross-reference numbering errors within 135I's own text; 135H.2's
+`delivery_recorded_bookkeeping_incomplete` reconciliation outcome never
+defined in prose by either 135H.2 or 135I despite an unambiguous production
+meaning; the 37-invariant crosswalk not enumerating all 37 IDs in one
+table; and two pre-existing, correctly-disclosed production gaps
+(three-outcome commit classification, atomic `latest.*` publication) still
+unimplemented, exactly as 135I already discloses.
 
 ## Evidence and validation
 
-- Governed phase commits: `54b9b6a3` (content: docs, PROJECT_STATUS.md,
-  CHANGELOG.md) and `67a5d013` (governed task-finish closure).
-- Four phase-owned repository files changed (the new contract document,
+- Governed phase commits: `1ab0e0c3` (content: the 135J verification
+  document, the one-repair amendment to 135I's contract document,
+  PROJECT_STATUS.md, CHANGELOG.md, active task contract) and `c15a7121`
+  (governed task-finish closure).
+- Five phase-owned repository files changed (the new verification
+  document, the amended CLTR-SCHEMA-001 contract document,
   PROJECT_STATUS.md, CHANGELOG.md, and the task contract under
   `tasks/active/`/`tasks/done/`).
 - No production source or test file was created or modified. Fast-green
@@ -60,17 +54,18 @@ section to CLTR-001/135D/135G/135H.
 
 ## Safety and no-go confirmation
 
-No production CLTR implementation occurred. No production lifecycle
-modification occurred. No shadow integration occurred. No schema parser or
+No production CLTR implementation occurred. No shadow integration occurred.
+No production lifecycle modification occurred. No schema parser or
 serializer implementation occurred. No persistence was introduced. No
 notification flow, finalization, or report generation modification
 occurred. No legacy authority retirement occurred. No runtime behavior
 change or execution capability introduction occurred. No prototype behavior
-modification occurred. CLTR-001, PFN-001, and PFR-001 remain unchanged. No
-raw git commit, raw git push, force push, or verifier bypass was used.
-Phase 135J was not started.
+modification occurred. CLTR-001, PFN-001, and PFR-001 remain unchanged;
+CLTR-SCHEMA-001 was amended only by the one independently-justified
+Blocking repair described above. No raw git commit, raw git push, force
+push, or verifier bypass was used. Phase 135K was not started.
 
 ## Recommended next phase
 
-Phase 135J — Production CLTR Schema and Integration Contract Verification
-(not started).
+Phase 135K — Production CLTR Shadow Integration Implementation (not
+started).
