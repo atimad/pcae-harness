@@ -2,6 +2,31 @@
 
 ## Unreleased
 
+- Phase 135F - Canonical Transition Record Read-Only Prototype
+  (`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_READ_ONLY_PROTOTYPE.md`).
+  Implemented 135E's Stages 1-6 plan exactly within its frozen prototype
+  boundary: `src/pcae/cltr_prototype/` (models, identity, state_machine,
+  invariants, canonicalization, digest, generator, verifier, compatibility,
+  comparison, persistence) plus `src/pcae/commands/cltr_prototype.py` and
+  a `pcae cltr-prototype generate|show|verify|compare|list` CLI. All 14
+  lifecycle states and 16 permitted transitions represented with no generic
+  `set_state`; all 14 forbidden transitions rejected deterministically; an
+  evaluator for every invariant ID named in 135D's table (37, with the
+  36-vs-37 count discrepancy in 135D's own prose documented rather than
+  silently resolved); explicit-only identity resolution with zero
+  title/filename/commit-subject/recent-Git inference; fail-closed
+  three-outcome commit-ownership classification (unhinted hash defaults to
+  `unverifiable`, never `verified`); SHA-256 digest sealing with
+  self-exclusion, tamper and cross-transition-substitution detection; a
+  standalone offline verifier; a read-only cross-representation comparator
+  with mixed-generation detection; atomic prototype-only persistence under
+  `.pcae/cltr-prototypes/`. 15 hermetic fixtures and 170 focused tests
+  (models, identity, state machine, invariants, canonicalization/digest,
+  generator, verifier, compatibility, comparison, persistence, CLI, and 30
+  import-graph/source-inspection safety tests). Verdict: A - PROTOTYPE
+  COMPLETE. No production entry point, finalization module, or legacy
+  authority was touched; fast-green (4391/4391, 2 parallel + 1 serial)
+  shows zero regressions.
 - Phase 135E - Canonical Transition Record Prototype Plan
   (`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_PLAN.md`).
   Translated CLTR-001 v1.0 (135B frozen, 135C verified with zero Blocking

@@ -2,6 +2,72 @@
 
 ## Current Phase
 
+Phase 135F — Canonical Transition Record Read-Only Prototype (completed).
+Implemented 135E's staged plan (Stages 1-6) exactly within its frozen
+prototype boundary: `src/pcae/cltr_prototype/` (models, identity,
+state_machine, invariants, canonicalization, digest, generator, verifier,
+compatibility, comparison, persistence) plus a minimal `pcae
+cltr-prototype` CLI (`generate`/`show`/`verify`/`compare`/`list`), 15
+hermetic fixtures, and 170 focused tests. Full narrative in
+`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_READ_ONLY_PROTOTYPE.md`.
+Predecessor: Phase 135E — Canonical Transition Record Prototype Plan
+(completed; full architecture summary retained below in "Phase 135E
+Complete").
+
+Proved, by implementation rather than plan: deterministic candidate-record
+generation (byte-identical digest across repeated runs and process
+restarts); all 14 lifecycle states and all 16 permitted transitions
+represented, with all 14 forbidden transitions rejected deterministically
+(no generic `set_state` escape hatch anywhere in the module); an evaluator
+for every invariant ID named in 135D §11's table (37 — the 36-vs-37
+discrepancy in 135D's own prose is documented as a pre-existing
+inconsistency in the frozen source, not silently resolved either way),
+with no applicable invariant ever silently skipped; explicit-only identity
+resolution with zero title/filename/commit-subject/recent-Git-history code
+path (the direct, generalized 135D.1 rehearsal); a fail-closed three-outcome
+commit-ownership classifier (an unhinted commit hash is `unverifiable` by
+default, never silently `verified`); SHA-256 digest sealing with
+self-exclusion, tamper detection, and cross-transition-substitution
+detection; a standalone offline verifier that never repairs, only reports;
+a read-only cross-representation comparator with mixed-generation
+detection; atomic, prototype-only persistence under `.pcae/cltr-prototypes/`
+with manifest-based crash recovery, entirely disjoint from every production
+canonical path.
+
+**No production entry point, finalization module, or legacy authority was
+touched.** `src/pcae/core/finalization_transaction.py` and the four
+production entry points do not import, and are not imported by, any
+`cltr_prototype` module — verified structurally by 30 import-graph/source-
+inspection safety tests, not merely asserted. The three 134F/135A/135D-
+disclosed production gaps (non-atomic `latest.md`/`latest.json`, fabricated-
+hash silent acceptance, NOTIFIED_UNCONFIRMED resume-classification gap)
+remain exactly as found — this prototype only demonstrates that its own
+model does not repeat them.
+
+**Verdict: A — PROTOTYPE COMPLETE.** All acceptance criteria from 135E §28
+were met: deterministic output; stable digest with tamper/substitution
+detection; full dotted-identity preservation; no implicit transitions; all
+37 invariants evaluable with no silent skip; all 14 forbidden transitions
+rejected under test; exact replay resolves to the existing record;
+conflicting replay is rejected (`ImmutableGenerationExistsError`); commit
+ownership classified into exactly one of three outcomes, never defaulting
+to `verified`; mixed-generation comparison targets detected; digest
+tampering detected; historical/legacy compatibility disclosed honestly
+(missing fields named, never invented); zero production lifecycle mutation
+(asserted by a before/after `.pcae/` snapshot-style test); zero external
+notification sent by the prototype; zero execution capability introduced;
+170/170 focused tests pass; fast-green (4391/4391, 2 parallel + 1 serial
+run) shows zero regressions; governance (`pcae health`/`check`/`doctor
+task-memory`/`push check`) remains clean throughout.
+
+**Runtime remains Observed/observe/execution unavailable. PFN-001 and
+PFR-001 remain unchanged. No CLTR-001 amendment occurred.**
+
+Recommended next phase: 135G — Canonical Transition Record Prototype
+Independent Verification (not started).
+
+## Phase 135E Complete
+
 Phase 135E — Canonical Transition Record Prototype Plan (completed).
 Translated CLTR-001 v1.0 (135B, frozen; 135C, verified with zero Blocking
 findings), 135A's architecture, 135D's full formal state-machine/invariant
@@ -67,8 +133,8 @@ JSON schema, source, test, finalization, or entry-point change occurred.
 Runtime remains Observed/observe/execution unavailable. PFN-001 and
 PFR-001 remain unchanged.**
 
-Recommended next phase: 135E — Canonical Transition Record Prototype Plan
-(not started).
+Recommended next phase (as of 135E): 135F — Canonical Transition Record
+Read-Only Prototype (now completed above).
 
 ## Phase 135D.1 Complete
 
