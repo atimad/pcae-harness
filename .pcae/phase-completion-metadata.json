@@ -22,16 +22,34 @@
   "source_files_changed": 0,
   "test_files_changed": 0,
   "tests_added_or_updated": "0 -- planning and documentation phase only, no test files touched",
-  "tests_run": 0,
+  "tests_run": 4391,
   "validation_results": [
     {
       "name": "compileall",
       "result": "src/pcae package compiled successfully (sanity check only; no production source was changed by this phase)",
       "status": "passed"
+    },
+    {
+      "name": "fast_green",
+      "result": "4391 passed, 0 failed, re-run to confirm zero regressions from this planning-only phase",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "existing fast_green coverage passed",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "existing fast_green coverage passed",
+      "status": "passed"
     }
   ],
   "test_results": {
-    "compileall": "passed"
+    "compileall": "passed",
+    "fast_green": "4391/4391",
+    "report_notification_tests": "passed",
+    "bootstrap_session_reporting_tests": "passed"
   },
   "governance_results": [
     {

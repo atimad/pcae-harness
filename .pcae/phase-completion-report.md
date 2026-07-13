@@ -189,8 +189,8 @@ is required or attempted anywhere in this plan.
   file, or JSON schema was created or modified.
 - `pcae health`: healthy. `pcae check`: passed. `pcae doctor task-memory`:
   clean. `compileall` over `src/pcae` (unmodified): passed, as a sanity
-  check only — no source change occurred, so no broader regression suite
-  was required or run.
+  check only — no source change occurred. `fast_green`: 4391/4391 passed,
+  re-run to confirm zero regressions from this planning-only phase.
 
 ## 14. No-Go confirmation
 
