@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 135H.2.1 — Governed Terminal Reporting Recovery for Phase 135H.2
+  (`docs/PHASE_135H.2.1_GOVERNED_TERMINAL_REPORTING_RECOVERY.md`). Recovered
+  the missing 135H.2 terminal lifecycle: regenerated the stale canonical
+  narrative to 135H.2 identity, independently reproduced and fixed a
+  Blocking defect in `pcae phase-report create` (an unchanged retry of an
+  already-completed finalization transaction crashed with `KeyError:
+  'paths'` instead of reporting the existing `resumed_completed` outcome —
+  added a regression test that fails against the pre-fix source and passes
+  against the fix), and completed exactly one governed promotion,
+  checkpoint, marker, and Telegram ordinary-completion delivery bound to
+  the original two 135H.2 engineering commits. No engineering work was
+  rerun; no second logical completion was created; existing 135H
+  checkpoint/receipt evidence is unchanged. Focused lifecycle tests pass
+  410/410; fast-green passes 19776/19779 with the same three pre-existing,
+  independently confirmed unrelated failures 135H.2 already documented.
+  PFN-001, PFR-001, CLTR-001, runtime capability, and execution
+  availability remain unchanged; 135I was not started.
+
 - Phase 135H.2 — Lifecycle Recovery Hardening and Exactly-Once Promotion
   (`docs/PHASE_135H.2_LIFECYCLE_RECOVERY_HARDENING_AND_EXACTLY_ONCE_PROMOTION.md`).
   Reproduced the 135H.1 manual-recovery authority escape and removed every

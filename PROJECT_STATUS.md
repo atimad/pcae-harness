@@ -2,6 +2,32 @@
 
 ## Current Phase
 
+Phase 135H.2.1 — Governed Terminal Reporting Recovery for Phase 135H.2
+(completed). Phase 135H.2's engineering work was already complete, governed,
+committed, and pushed, but had no terminal lifecycle artifact set — read-only
+reconciliation confirmed zero 135H.2 report, checkpoint, marker, or receipt
+existed anywhere, not even a rejected quarantine candidate. This recovery
+regenerated the stale canonical narrative (`.pcae/phase-completion-report.md`
+was still titled 135H) to 135H.2 identity, independently reproduced and fixed
+a Blocking defect in `pcae phase-report create` (an unchanged retry of an
+already-completed finalization transaction crashed with `KeyError: 'paths'`
+instead of reporting the existing `resumed_completed` outcome — the
+transaction layer itself behaved correctly and never re-promoted or
+re-dispatched), and completed exactly one governed promotion, checkpoint,
+marker, and Telegram ordinary-completion delivery for 135H.2. The original
+two 135H.2 engineering commits (`a8e8a7e7`, `16d3910c`) remain solely
+authoritative; no engineering work was rerun and no second logical completion
+was created. Existing 135H checkpoint and receipt evidence remain
+byte-identical to their pre-recovery state.
+
+Full analysis:
+`docs/PHASE_135H.2.1_GOVERNED_TERMINAL_REPORTING_RECOVERY.md`.
+Runtime remains Observed / observe / execution unavailable. Phase 135I was not
+started. Recommended next phase: **135I — Production CLTR Schema,
+Canonicalization, and Versioning Contract Freeze**.
+
+## Phase 135H.2 Complete
+
 Phase 135H.2 — Lifecycle Recovery Hardening and Exactly-Once Promotion
 (completed). Independently reproduced 135H.1's partial-report promotion and
 proved the escape was a manual-recovery fallback that called promotion and
@@ -31,11 +57,7 @@ pre-existing rendering comment.
 Full analysis:
 `docs/PHASE_135H.2_LIFECYCLE_RECOVERY_HARDENING_AND_EXACTLY_ONCE_PROMOTION.md`.
 Runtime remains Observed / observe / execution unavailable. Phase 135I was not
-started. Recommended next phase: **135I — Production CLTR Schema,
-Canonicalization, and Versioning Contract Freeze**.
-
-Recommended next repo phase: 135I — Production CLTR Schema, Canonicalization,
-and Versioning Contract Freeze (not started).
+started.
 
 ## Phase 135H.1 Complete
 
