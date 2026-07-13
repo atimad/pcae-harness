@@ -27,6 +27,7 @@ Execute exactly one duplicate-safe governed 135H report promotion and PFN-001 or
 - docs/PHASE_135H.1_MISSING_TERMINAL_REPORT_AND_PFN_001_DELIVERY_RECOVERY.md
 - CHANGELOG.md
 - tasks/DECISIONS.md
+- .pcae/phase-completion-report.md
 - .pcae/phase-reports
 - .pcae/finalization-transactions
 - .pcae/delivery-receipts

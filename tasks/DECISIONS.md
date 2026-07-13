@@ -1441,6 +1441,12 @@
   replay or second logical completion.
 - Do not alter completion metadata, PFN-001, PFR-001, CLTR-001, production
   lifecycle source, runtime behavior, or any 135H engineering output.
+- Preserve the first recovery command's partial 135H artifact as failed-attempt
+  evidence. It is not a canonical terminal report because trust completeness
+  failed and no checkpoint, dispatch, marker, or receipt exists. Generate the
+  missing tracked 135H completion narrative, then require the next governed
+  attempt to enter the shared transaction and produce the sole PFN-001
+  ordinary completion.
 
 - Treat Phase 123F as verification-only: independently verify the
   123E Change Impact Builder against 123A-123E, regression suites, and

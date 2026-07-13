@@ -5,6 +5,11 @@
   finalization transaction; no report promotion, Telegram attempt, marker, or
   receipt occurred. Documented a duplicate-safe governed report recovery while
   preserving the stale-metadata guard and all production lifecycle contracts.
+- Recorded the first 135H recovery attempt's fail-closed trust result: a stale
+  135G canonical narrative made the candidate partial and prevented delivery,
+  while exposing that the manual recovery fallback can still publish a partial
+  candidate as latest. Generated the missing 135H completion narrative without
+  overwriting completion metadata or changing production lifecycle source.
 
 ## Unreleased
 

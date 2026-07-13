@@ -152,5 +152,17 @@ identity is falsified and no certification rule is disabled.
 
 ## Post-recovery verification
 
-This section will be sealed after the governed transaction and direct
-inspection of its report, checkpoint, receipt, marker, and notification result.
+The first governed recovery invocation discovered a second fail-closed boundary:
+`phase-report create` loaded the still-135G tracked canonical completion
+narrative, downgraded the 135H candidate to `partial` with
+`metadata_consistency`, and correctly skipped notification. However, because
+the finalization gate was not finalizable, the command's fallback branch still
+wrote the partial timestamped candidate and made it `latest` outside the shared
+transaction. It created no checkpoint, marker, receipt, or notification.
+
+That partial candidate is retained as truthful failed-recovery evidence. It is
+not trust-complete or PFN-001 canonical. The smallest next action is governed
+generation of the missing 135H completion narrative (metadata remains
+untouched), followed by one re-derived trust-complete recovery transaction.
+This exposes a future architectural issue: manual recovery must never promote
+partial output when its finalization gate is false.
