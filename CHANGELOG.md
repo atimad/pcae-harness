@@ -1,5 +1,23 @@
 # Changelog
 
+- Phase 135J — Production CLTR Schema and Integration Contract Verification
+  (`docs/PHASE_135_PRODUCTION_CLTR_SCHEMA_AND_INTEGRATION_CONTRACT_VERIFICATION.md`).
+  Independently re-verified CLTR-SCHEMA-001 v1.0.0 (135I) by re-derivation
+  against CLTR-001/135C/135D/135G/135H/135H.2 and current production
+  source, not by trusting 135I's own tags or claims. Found and repaired one
+  Blocking defect: §21's 15-representation-kind adapter contract left the
+  per-kind comparison-mode assignment incomplete — repaired in place with a
+  new §21.4 (all 15 kinds assigned; `schema_version` 1.0.0 → 1.0.1, PATCH;
+  no new field/enum/binding; no CLTR-001 amendment). Confirmed four
+  Non-Blocking findings (internal cross-reference numbering errors in
+  135I's own text; an undefined reconciliation-outcome value inherited
+  from 135H.2; an incomplete 37-ID invariant enumeration; two pre-existing,
+  correctly-disclosed production gaps). Verdict: VERIFIED WITH
+  NON-BLOCKING FINDINGS, zero Blocking findings remaining after repair.
+  Documentation and contract-verification only — no production
+  implementation, shadow integration, or lifecycle behavior change
+  occurred. Recommends 135K — Production CLTR Shadow Integration
+  Implementation (not started).
 - Phase 135I — Production CLTR Schema, Canonicalization, and Versioning
   Contract Freeze
   (`docs/PHASE_135_PRODUCTION_CLTR_SCHEMA_AND_VERSIONING_CONTRACT.md`).

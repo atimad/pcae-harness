@@ -6,7 +6,11 @@
 **Architecture predecessors this phase derives from:** CLTR-001 (135B, contract), 135C (independent verification of CLTR-001), 135D (Cross-Representation Invariant Architecture & State-Machine Verification), 135G (Read-Only Prototype Independent Verification), 135H (Production Integration & Legacy Authority Retirement Plan).
 **Non-goal:** Begin 135J (Production CLTR Schema Contract Independent Verification) or any later Track 135 phase.
 
-**Schema identifier declared by this document:** **CLTR-SCHEMA-001**, version **1.0.0**. This is a new identifier, distinct from CLTR-001. CLTR-001 remains the binding semantic contract; CLTR-SCHEMA-001 is the wire-format contract that satisfies it. Both are frozen and both remain in force; neither supersedes the other.
+**Schema identifier declared by this document:** **CLTR-SCHEMA-001**, version **1.0.1** (originally frozen at 1.0.0; amended to 1.0.1 by Phase 135J's independent-verification repair, §21.4 — see Amendment history below). This is a new identifier, distinct from CLTR-001. CLTR-001 remains the binding semantic contract; CLTR-SCHEMA-001 is the wire-format contract that satisfies it. Both are frozen and both remain in force; neither supersedes the other.
+
+**Amendment history:**
+- `1.0.0` (Phase 135I) — original freeze.
+- `1.0.1` (Phase 135J) — PATCH per §2.1 ("clarifying documentation change... zero wire-format effect"). Phase 135J's independent verification classified §21's adapter-output contract as a genuine Blocking gap for shadow-integration readiness: §21.1 defined the five-value `adapter_comparison_mode` taxonomy but left the per-kind assignment for the 15 representation kinds illustrative/partial rather than complete, contradicting §21.3's own guidance that cutover readiness requires "a fully specified adapter (not merely `unsupported` placeholders)" for every kind. §21.4 below closes this gap by assigning each of the 15 kinds named in §5 to exactly one of the five already-frozen comparison modes. No new field, enum value, or representation binding is introduced; `compatibility_id` is unchanged.
 
 ---
 
@@ -30,7 +34,7 @@ CLTR-001's own semantics are never modified by this document. Where this documen
 |---|---|---|
 | `schema_id` | `CLTR-SCHEMA-001` | Yes — never reassigned to a different schema family |
 | `schema_family` | `pcae.cltr` | Yes — the dotted namespace root for every CLTR wire type |
-| `schema_version` | `1.0.0` | No — bumped per §2; `1.0.0` itself, once published, is immutable in content |
+| `schema_version` | `1.0.1` | No — bumped per §2; each published value (`1.0.0`, `1.0.1`, ...), once released, is immutable in content |
 | `contract_version` | `CLTR-001/1.0` | Yes for this schema version — the exact CLTR-001 version this schema conforms to; a future CLTR-001 version bump requires a new `schema_version`, never a silent reinterpretation under the same `schema_version` |
 | `compatibility_id` | `pcae.cltr.v1` | No — bumped only on a breaking change (§2.3); distinct from `schema_version` so additive `1.x.y` releases can share one `compatibility_id` |
 | `canonical_namespace` | `pcae.cltr.v1` | Same value as `compatibility_id` for `1.x`; kept as a separate field because a future major version's namespace and compatibility identifier could diverge (e.g., a namespace rename without a compatibility break, or vice versa) |
@@ -655,6 +659,30 @@ Every adapter, given the same CLTR record and the same target representation ins
 ### 21.3 Cutover cannot occur until complete [GUIDANCE]
 
 Per 135H §12 NB-1: a future implementation phase may not treat production cutover as ready until every one of the 15 representation kinds has a fully specified adapter (not merely `unsupported` placeholders). This is guidance for that future phase, not a gate 135I itself enforces (135I has no implementation to gate).
+
+### 21.4 Per-kind comparison-mode assignment [ENCODING] — added by Phase 135J
+
+135I's original freeze (v1.0.0) defined the five-mode taxonomy above (§21.1) and gave illustrative examples but did not assign a mode to every one of the 15 representation kinds named in §5, leaving §21.3's own completeness gate unsatisfied by the frozen text itself. Phase 135J's independent verification classified this as a genuine Blocking gap for §21.3's cutover-readiness guidance and 135H §7.1's cutover prerequisite ("all fifteen representation adapters specified"), and closes it here using only §21.1's already-frozen taxonomy and §5's already-frozen kind list — no new mode, field, or binding is introduced:
+
+| # | Representation kind (§5) | `adapter_comparison_mode` | Rationale |
+|---|---|---|---|
+| 1 | Canonical phase report | `exact_identity_digest` | §5 promises `report_digest`; byte-exact comparison is possible and required |
+| 2 | Completion metadata | `exact_identity_digest` | §5 promises `metadata_digest` |
+| 3 | Architecture Status | `normalized_semantic` | Regenerable projection with no own digest (§5 row 3); compared field-by-field after normalization |
+| 4 | Immutable snapshot | `exact_identity_digest` | §5 promises `snapshot_digest` |
+| 5 | Checkpoint | `normalized_semantic` | Structured in-progress spine state, no own digest (§5 row 5); compared field-by-field |
+| 6 | Promoted generation (report) | `exact_identity_digest` | Same digest as kind #1 (§5 row 6) |
+| 7 | Promoted generation (metadata) | `exact_identity_digest` | Same digest as kind #2 (§5 row 7) |
+| 8 | Notification payload | `normalized_semantic` | Rich structured content (135G's own named example, "rich notification-outcome... dictionaries," NB-1) |
+| 9 | Marker | `normalized_semantic` | Carries only a staleness reference to `record_digest` (§5 row 9), not its own promised byte-exact content; compared field-by-field |
+| 10 | Receipt | `normalized_semantic` | Rich structured content (135G's own named example, "optimistic-receipt dictionaries," NB-1) |
+| 11 | Repository transition view | `observational` | Live V-role measurement (§5 row 11), matching §21.1's own named example |
+| 12 | Git attribution view | `observational` | Live V-role measurement (§5 row 12), matching §21.1's own named example |
+| 13 | Compatibility/legacy-format view | `normalized_semantic` | Matches §21.1's own named example ("historical/legacy formats") |
+| 14 | Diagnostic envelope | `presentation_only` | Rendering convenience, not persisted record content (§5 row 14; §25.1) — no independently checkable content per §21.1's own definition |
+| 15 | Reconciliation view | `observational` | Read-only, regenerable cross-check of marker/checkpoint/receipt agreement (§5 row 15), not a sealed or digested artifact — same nature as the live views in rows 11–12 |
+
+No kind is assigned `unsupported`. This satisfies §21.3's completeness gate as written; it does not itself authorize cutover, which remains additionally gated by every other unmet item in 135H §7.1 (e.g., production model implementation, adversarial containment proof, shadow-exit criteria) — none of which this phase implements or waives.
 
 ---
 

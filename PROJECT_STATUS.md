@@ -2,6 +2,45 @@
 
 ## Current Phase
 
+Phase 135J — Production CLTR Schema and Integration Contract Verification
+(completed). Independently re-verified CLTR-SCHEMA-001 v1.0.0 (135I) against
+CLTR-001 (135B), 135C, 135D (Cross-Representation Invariant Architecture &
+State-Machine Verification), 135G (Read-Only Prototype Independent
+Verification), and 135H/135H.2 (Production Integration & Recovery
+Hardening) — re-derived, not trusted, including a direct independent count
+of CLTR-001's own §26.1 invariant table (confirmed 34, not 33) and current
+production source (`finalization_transaction.py`, `canonical_artifact_promotion.py`,
+`phase_reports.py`, all four entry-point command modules). Found and
+repaired one genuine Blocking defect: §21's fifteen-representation-kind
+adapter contract defined the five-mode comparison taxonomy but left the
+per-kind assignment incomplete, contradicting its own completeness gate and
+135H §7.1's cutover prerequisite — repaired in place with a new §21.4
+assigning all 15 kinds to a concrete mode, using only the already-frozen
+taxonomy (no new field, enum value, or binding; `schema_version` bumped
+`1.0.0` → `1.0.1`, PATCH). Four Non-Blocking findings were confirmed and
+left as disclosed debt: internal cross-reference numbering errors within
+135I's own text; one of 135H.2's five reconciliation outcomes
+(`delivery_recorded_bookkeeping_incomplete`) never defined in prose by
+either 135H.2 or 135I despite an unambiguous production meaning; the
+37-invariant crosswalk not enumerating all 37 IDs in one table; and two
+pre-existing, correctly-disclosed production gaps (three-outcome commit
+classification, atomic `latest.*` publication) still unimplemented, exactly
+as 135I already discloses. **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.**
+Zero Blocking findings remain after repair. Documentation and contract
+only — no production implementation, shadow integration, schema parser,
+serializer, persistence, notification-flow change, finalization change,
+report-generation change, legacy-authority retirement, runtime behavior
+change, or execution-capability introduction occurred. Runtime remains
+Observed / observe / execution unavailable. PFN-001, PFR-001, and CLTR-001
+all unchanged; CLTR-SCHEMA-001 amended only by the one justified repair.
+
+Full analysis:
+`docs/PHASE_135_PRODUCTION_CLTR_SCHEMA_AND_INTEGRATION_CONTRACT_VERIFICATION.md`.
+Recommended next phase: **135K — Production CLTR Shadow Integration
+Implementation** (not started).
+
+## Phase 135I Complete
+
 Phase 135I — Production CLTR Schema, Canonicalization, and Versioning
 Contract Freeze (completed). Froze the complete production wire schema and
 serialization contract for the Canonical Lifecycle Transition Record,
@@ -9,7 +48,8 @@ independently derived from CLTR-001 (135B), 135D (Cross-Representation
 Invariant Architecture & State-Machine Verification), 135G (Read-Only
 Prototype Independent Verification), and 135H (Production Integration &
 Legacy Authority Retirement Plan) — never simply restated. Freezes a new
-identifier, `CLTR-SCHEMA-001` version `1.0.0`, distinct from and additive to
+identifier, `CLTR-SCHEMA-001` version `1.0.0` (later amended to `1.0.1` by
+135J's independent-verification repair), distinct from and additive to
 CLTR-001, which remains the binding semantic contract. Every normative
 clause is tagged `[CLARIFICATION]`, `[ENCODING]`, or `[GUIDANCE]` so the
 document never conflates restating an existing requirement with making a
@@ -53,8 +93,8 @@ unavailable. PFN-001, PFR-001, and CLTR-001 all unchanged.
 
 Full analysis:
 `docs/PHASE_135_PRODUCTION_CLTR_SCHEMA_AND_VERSIONING_CONTRACT.md`.
-Recommended next phase: **135J — Production CLTR Schema and Integration
-Contract Verification** (not started).
+Independently verified by Phase 135J (VERIFIED WITH NON-BLOCKING FINDINGS;
+one Blocking defect found and repaired in place, see above).
 
 ## Phase 135H.2.1 Complete
 
