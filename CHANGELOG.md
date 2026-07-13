@@ -2,6 +2,29 @@
 
 ## Unreleased
 
+- Phase 135E - Canonical Transition Record Prototype Plan
+  (`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_PLAN.md`).
+  Translated CLTR-001 v1.0 (135B frozen, 135C verified with zero Blocking
+  findings), 135A's architecture, 135D's formal 14-state/16-transition/
+  36-invariant state-machine model (VERIFIED WITH NON-BLOCKING DEFERRED
+  QUESTIONS), and 135D.1's incident lessons into a staged prototype
+  implementation plan: purpose/scope/boundary (fixture-driven generator +
+  standalone offline verifier, zero production coupling), module
+  architecture (12 prototype-only modules), data model, serialization,
+  SHA-256 canonicalization/digest plan, identity-resolution plan (no
+  title/filename/recent-Git inference), full state-machine and 36-
+  invariant implementation plan, S/R/D/E/V authority-role enforcement plan,
+  three-outcome commit-ownership plan, evidence-reference plan, 15-target
+  cross-representation comparison plan, atomic prototype-only persistence
+  plan (`.pcae/cltr-prototypes/`), minimal CLI plan, 15-fixture strategy,
+  full test-category plan, compatibility-adapter plan, migration-boundary
+  scoping, 8 explicit 135D.1-incident protections, structured error model,
+  conformance-vs-lifecycle-state separation, safety proof, 7-stage
+  implementation sequence, file-by-file plan, 17 acceptance criteria, 8
+  prototype-verification criteria, 11 deferred decisions, and a 14-row risk
+  register. Verdict: A - READY FOR PROTOTYPE IMPLEMENTATION. Planning and
+  documentation only; no source, test, schema, or CLI code was added; no
+  production entry point or finalization behavior changed.
 - Phase 135D.1 - Metadata-Repair Incident Investigation and Staleness Guard
   (`docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md`).
   Investigated the `pcae phase metadata-repair` phase_id corruption

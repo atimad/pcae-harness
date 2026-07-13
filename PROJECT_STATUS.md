@@ -2,11 +2,19 @@
 
 ## Current Phase
 
-Phase 135D.1 — Metadata-Repair Incident Investigation and Staleness Guard
-(completed). Narrow forensic follow-up to Phase 135D — Cross-Representation
-Invariant Architecture and State-Machine Verification (also completed; full
-architecture summary retained below). See the "Phase 135D.1 Complete"
-section below for the investigation's own findings; full evidence chain in
+Phase 135E — Canonical Transition Record Prototype Plan (completed).
+Translated CLTR-001 v1.0 (135B, frozen; 135C, verified with zero Blocking
+findings), 135A's architecture, 135D's full formal state-machine/invariant
+model (VERIFIED WITH NON-BLOCKING DEFERRED QUESTIONS), and 135D.1's
+incident lessons into a staged, reviewable prototype implementation plan in
+`docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_PLAN.md`. Planning
+and documentation only — no implementation, no schema, no tests, no CLI,
+no production integration. Predecessor: Phase 135D.1 — Metadata-Repair
+Incident Investigation and Staleness Guard (completed; narrow forensic
+follow-up to Phase 135D — Cross-Representation Invariant Architecture and
+State-Machine Verification, also completed; full architecture summary
+retained below). See the "Phase 135D.1 Complete" section below for the
+investigation's own findings; full evidence chain in
 `docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md`.
 
 Turned the verified CLTR-001 v1.0 contract into a precise,
