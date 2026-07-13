@@ -2,8 +2,12 @@
 
 ## Current Phase
 
-Phase 135D — Cross-Representation Invariant Architecture and State-Machine
-Verification (completed).
+Phase 135D.1 — Metadata-Repair Incident Investigation and Staleness Guard
+(completed). Narrow forensic follow-up to Phase 135D — Cross-Representation
+Invariant Architecture and State-Machine Verification (also completed; full
+architecture summary retained below). See the "Phase 135D.1 Complete"
+section below for the investigation's own findings; full evidence chain in
+`docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md`.
 
 Turned the verified CLTR-001 v1.0 contract into a precise,
 implementation-independent behavioral model in

@@ -1,95 +1,88 @@
-# Phase 135D Complete — Cross-Representation Invariant Architecture and State-Machine Verification
+# Phase 135D.1 Complete — Metadata-Repair Incident Investigation and Staleness Guard
 
 ## 1. Phase Identity
 
-- **Phase ID:** `135D`
+- **Phase ID:** `135D.1`
 - **Status:** completed
-- **Phase class:** architecture + formal verification (Track 135, fourth phase)
+- **Phase class:** narrow forensic investigation and repair (not a Track 135 architecture phase)
 - **Report completeness:** complete
 
 ## 2. Summary
 
-Turned the verified CLTR-001 v1.0 contract into a precise,
-implementation-independent behavioral model in
-`docs/PHASE_135_CROSS_REPRESENTATION_INVARIANT_ARCHITECTURE_AND_STATE_MACHINE_VERIFICATION.md`.
-Independently re-derived (not copied) the state inventory, transition
-inventory, invariant model, and representation model from CLTR-001's frozen
-text, 135C's verified findings, 135A's architecture, 134F's independently
-verified lifecycle behavior, PFN-001, and PFR-001.
+Investigated the `pcae phase metadata-repair` phase_id corruption disclosed
+during 135D's own finalization, documented in
+`docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md`. Independently
+re-derived the causal chain from source rather than trusting a real-time
+assumption made during 135D's finalization (which incorrectly attributed
+the corruption to 135C's Architecture Status title cross-attribution
+finding).
 
-## 3. State model and transition inventory
+## 3. Root cause
 
-Re-derived a 14-state minimum inventory (12 spine + 2 orthogonal) evaluated
-fresh against 21 named candidates from first principles, not copied from
-135A/135B. Produced a complete state-definition table, a 16-transition
-inventory with no implicit transitions, and a 14-item forbidden-transition
-inventory.
+`.pcae/phase-completion-report.md` (this file) — a separate, tracked,
+hand-authored canonical narrative file, distinct from both Architecture
+Status and the auto-generated phase report — was never updated past its
+135A content across 135B, 135C, and 135D (confirmed: zero commits touched
+it since `cdcbb926`). `pcae phase metadata-repair` reads this file's title
+as authoritative ground truth by explicit design, with no staleness check,
+so it correctly-per-its-own-logic overwrote valid 135D metadata to match
+the stale 135A content.
 
-## 4. Invariant architecture
+## 4. Timing
 
-Produced a 36-invariant formal model: the 33 CLTR-001 invariants plus
-`CLTR-ORDER-5`/`-6`/`-7`, minted as derived clarifications closing a
-numbering gap 135C identified (three of CLTR-001 §8.2's seven ordering
-requirements previously lacked a dedicated numbered invariant entry).
-Formalized identity, authority, state, ordering, commit-ownership,
-projected-state, evidence, atomic-visibility, notification, marker, and
-receipt invariants as evaluable predicates, not restatements of contract
-prose.
+The rewrite occurred 18 seconds after certification, promotion, and
+Telegram notification dispatch for 135D. It never entered a checkpoint or
+immutable snapshot (structurally skipped whenever `--allow-partial-report`
+is used). It never touched the promoted `latest.md`/`latest.json`, the
+`.last-notified.json` marker, or the Telegram payload — all four
+independently and exclusively identified phase 135D throughout, unaffected.
+Reverted within approximately 71 seconds.
 
-## 5. Cross-representation and retry/failure models
+## 5. Classification
 
-Produced a 15-representation cross-representation model and
-representation-state matrix; a complete retry/resume matrix; a formalized
-`NOTIFIED_UNCONFIRMED` analysis; a duplicate/replay matrix; a failure-state
-model; a conformance-state mapping; a compatibility-state classification; an
-Architecture Status grouping investigation; a temporal model; and a
-final-revision staged-binding re-verification.
+**A — certified 135D evidence is internally correct; only the terminal
+report's self-assessed trust/completeness derivation was degraded**, by
+comparison against this same stale file, not by any identity corruption.
+The mixed-generation `latest.md`/`latest.json` hypothesis was tested
+directly and rejected. The `--allow-partial-report` override was
+independently confirmed, by source trace, to be structurally incapable of
+overriding a genuine phase-identity disagreement between the certified
+report and metadata.
 
-## 6. Formal proofs
+## 6. Repair
 
-Produced a state-machine determinism proof, a reachability analysis, a
-terminal-state analysis, and a safety proof (no execution, no backend
-invocation, no shell mediation, no Telegram inbound, no Decision Evaluation
-replacement, no Repository Intelligence authority expansion, no execution
-authorization, no irreversible effect before certification).
+Corrected this file's own content to reflect 135D's actual completion (and
+now this file, to reflect 135D.1's own). Added a staleness guard to
+`run_phase_metadata_repair()` (`src/pcae/commands/phase.py`) that refuses
+to overwrite metadata when the canonical report disagrees with
+PROJECT_STATUS.md's own actively-maintained Current Phase line and metadata
+already agrees with it — directly preventing recurrence of the proven
+failure mode.
 
-## 7. Deferred-question disposition
+## 7. Verification
 
-Dispositioned all ten of 135C's non-blocking deferred questions: two
-resolved via derived clarification (the ORDER-series numbering gap; the
-NOTIFIED→TERMINAL_SUCCESS modeling-depth question), eight further
-constrained or re-verified without requiring any CLTR-001 text change. Found
-zero additional Blocking findings of its own.
-
-## 8. Structural gaps re-confirmed still live (not repaired)
-
-All three 134F-disclosed structural gaps (resume-terminal classification;
-non-atomic `latest.md`/`latest.json`, confirmed at three write sites, not
-two; fabricated-hash silent acceptance) were independently re-confirmed
-still live, unrepaired, in current production source directly via source
-inspection in this phase's own session.
-
-## 9. Verification
-
-- Fast-green: 4391/4391 passed (unchanged since 135C; no production source
-  or test file changed by 135D's own architecture work).
+- Fast-green: 4391/4391 passed, re-run after the source change.
 - Compileall: passed.
-- No production source, test, schema, or entry-point behavior changed by
-  135D's own architecture/verification work.
+- 3 new regression tests added to
+  `tests/test_finalization_configuration_identity_cross_agent_134b3.py`,
+  covering the disclosed failure mode, the tool's legitimate use case
+  (unaffected), and backward compatibility when no lifecycle line is
+  available.
 
-## 10. No-Go confirmation
+## 8. No-Go confirmation
 
-No implementation occurred. No JSON schema was frozen. No source code was
-added or modified by 135D's own architecture work. No test was added or
-modified. No finalization or entry-point behavior changed. None of the three
-134F-disclosed structural gaps were repaired. No historical report was
-rewritten. No immutable snapshot was modified. PFN-001 and PFR-001 are
-unchanged. No Repository Intelligence, Advisory, or Decision Evaluation
-authority change occurred. No execution capability, shell mediation,
-Telegram inbound control, or new communication channel was added. Runtime
-remains Observed/observe/unavailable. CLTR-001 requires no amendment. Phase
-135E was not begun by 135D itself.
+No CLTR-001 contract change occurred. No JSON schema was frozen. No
+finalization or entry-point behavior changed for ordinary phase completion.
+No atomic-latest-write repair occurred. No resume-logic repair occurred. No
+fabricated-hash repair occurred. No historical report was rewritten. No
+immutable snapshot was modified. PFN-001 and PFR-001 are unchanged. No
+Repository Intelligence, Advisory, or Decision Evaluation authority change
+occurred. No execution capability, shell mediation, Telegram inbound
+control, or new communication channel was added. No identity-consistency
+invariant was weakened — the staleness guard only narrows an existing
+overwrite path. No promoted 135D artifact was altered. Phase 135E was not
+begun.
 
-## 11. Recommended next phase
+## 9. Recommended next phase
 
 Phase 135E — Canonical Transition Record Prototype Plan (not started).
