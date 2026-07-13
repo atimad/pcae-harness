@@ -1,5 +1,32 @@
 # Changelog
 
+- Phase 135I — Production CLTR Schema, Canonicalization, and Versioning
+  Contract Freeze
+  (`docs/PHASE_135_PRODUCTION_CLTR_SCHEMA_AND_VERSIONING_CONTRACT.md`).
+  Froze `CLTR-SCHEMA-001` v1.0.0, the production wire schema satisfying
+  CLTR-001, independently derived (not restated) from CLTR-001/135D/135G/
+  135H with every clause tagged clarification/encoding/guidance. Freezes:
+  semantic versioning with fail-closed unknown-version handling; the
+  14-state/16-transition lifecycle model and five-role authority model as
+  enums; 15 representation-kind bindings; a state-dependent field-presence
+  table making CLTR-001/135D's certified-content requirement mechanically
+  explicit; the required/optional field catalog with an explicit
+  absent/null/populated distinction; a normative 37-invariant crosswalk
+  resolving the prior 33/34/36/37 documentation-arithmetic discrepancy;
+  commit-ownership encoding prohibiting git-history reconstruction;
+  SHA-256 digest and UTF-8/sorted-key/NFC-normalized canonical
+  serialization contracts; a persistence and nine-step atomic-publication
+  specification adopting 135H's frozen ordering and 135G's proven
+  crash-safe primitives; a failure/reconciliation contract adopting
+  135H.2's production-proven five-outcome reconciliation surface;
+  notification/marker/receipt binding contracts preventing orphaned
+  representations; a 15-kind compatibility-adapter contract; a seven-value
+  conformance contract; and a standardized diagnostic envelope. Includes a
+  full Cross-Reference Matrix. Documentation and contract only — no
+  production implementation, shadow integration, or runtime behavior
+  change occurred; PFN-001, PFR-001, and CLTR-001 remain unchanged.
+  Recommended next phase: 135J — Production CLTR Schema and Integration
+  Contract Verification.
 - Phase 135H.2.1 — Governed Terminal Reporting Recovery for Phase 135H.2
   (`docs/PHASE_135H.2.1_GOVERNED_TERMINAL_REPORTING_RECOVERY.md`). Recovered
   the missing 135H.2 terminal lifecycle: regenerated the stale canonical

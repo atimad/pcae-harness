@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 135I — Production CLTR Schema, Canonicalization, and Versioning
+Contract Freeze (completed). Froze the complete production wire schema and
+serialization contract for the Canonical Lifecycle Transition Record,
+independently derived from CLTR-001 (135B), 135D (Cross-Representation
+Invariant Architecture & State-Machine Verification), 135G (Read-Only
+Prototype Independent Verification), and 135H (Production Integration &
+Legacy Authority Retirement Plan) — never simply restated. Freezes a new
+identifier, `CLTR-SCHEMA-001` version `1.0.0`, distinct from and additive to
+CLTR-001, which remains the binding semantic contract. Every normative
+clause is tagged `[CLARIFICATION]`, `[ENCODING]`, or `[GUIDANCE]` so the
+document never conflates restating an existing requirement with making a
+new wire-format decision. Covers: schema identity/versioning (semver,
+forward/backward compatibility, fail-closed unknown-version handling); the
+14-state/16-transition lifecycle model as enums; the authority model
+(five-role tagging inherited from CLTR-001 §3.1, never exceeded); 15
+representation-kind bindings (report, metadata, Architecture Status,
+snapshot, checkpoint, promoted report/metadata, notification payload,
+marker, receipt, repository transition view, Git attribution view,
+compatibility view, diagnostic envelope, reconciliation view); a
+state-dependent mandatory/optional/prohibited field table that makes
+"every CERTIFIED-or-later state shall contain certified content"
+mechanically explicit (a clarification of CLTR-001 §7.3 and 135D §7.1/§7.6,
+per 135H §15's instruction, not a new semantic requirement); the required-
+and optional-field catalog with an explicit absent/null/populated
+three-state distinction; every production enum including a normative
+37-invariant crosswalk resolving the 33/34/36/37 documentation-arithmetic
+discrepancy across CLTR-001/135D/135G per 135H's NB-3 instruction; commit-
+ownership encoding with an explicit prohibition on git-history
+reconstruction; evidence-reference and digest contracts (SHA-256, full
+self-excluding coverage); a canonicalization/serialization contract (UTF-8
+sorted-key compact JSON, NFC normalization, deterministic set-vs-sequence
+collection ordering); a persistence and nine-step atomic-publication
+contract adopting 135H §8's frozen ordering and 135G's proven crash-safe
+generation-directory/pointer-switch primitives (specification only, no
+implementation); a failure/reconciliation contract adopting 135H.2 §7's
+production-proven five-outcome reconciliation surface; notification,
+marker, and receipt binding contracts preventing orphaned representations;
+a 15-kind compatibility-adapter contract resolving 135G's NB-1 finding; a
+seven-value conformance contract; explicit limitations that never
+strengthen authority; deferred migration guidance; and a standardized
+diagnostic envelope resolving 135H's NB-2 finding. A full Cross-Reference
+Matrix traces every section to CLTR-001/135D/135G/135H. Documentation and
+contract only — no production implementation, shadow integration, schema
+parser, serializer, persistence, notification-flow change, finalization
+change, report-generation change, legacy-authority retirement, runtime
+behavior change, execution-capability introduction, or prototype behavior
+change occurred. Runtime remains Observed / observe / execution
+unavailable. PFN-001, PFR-001, and CLTR-001 all unchanged.
+
+Full analysis:
+`docs/PHASE_135_PRODUCTION_CLTR_SCHEMA_AND_VERSIONING_CONTRACT.md`.
+Recommended next phase: **135J — Production CLTR Schema and Integration
+Contract Verification** (not started).
+
+## Phase 135H.2.1 Complete
+
 Phase 135H.2.1 — Governed Terminal Reporting Recovery for Phase 135H.2
 (completed). Phase 135H.2's engineering work was already complete, governed,
 committed, and pushed, but had no terminal lifecycle artifact set — read-only
