@@ -1,13 +1,17 @@
 {
   "schema_version": "1.0",
-  "phase_id": "135D.1",
-  "phase_name": "Metadata-Repair Incident Investigation and Staleness Guard",
-  "phase_title": "Metadata-Repair Incident Investigation and Staleness Guard",
+  "phase_id": "135E",
+  "phase_name": "Canonical Transition Record Prototype Plan",
+  "phase_title": "Canonical Transition Record Prototype Plan",
   "status": "completed",
   "summary": "Phase 135D.1: Metadata-Repair Incident Investigation and Staleness Guard. Investigated the pcae phase metadata-repair phase_id corruption disclosed during 135D's own finalization, in docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md. Root-caused it to .pcae/phase-completion-report.md, a separate tracked hand-authored file never updated past an earlier phase across three subsequent phases -- not the Architecture Status generation mechanism a prior real-time assumption had blamed. Proved via exact timestamps that the rewrite occurred after certification, promotion, and Telegram dispatch, and never touched the promoted report, marker, or delivery payload -- all correctly and exclusively named the current phase throughout. Tested and rejected a mixed-generation latest.md/latest.json hypothesis. Traced the --allow-partial-report override precisely and confirmed it cannot mask a genuine cross-source phase-identity disagreement, only the completeness/trust dimension. Classification: A -- certified evidence internally correct, only the terminal report's trust/completeness derivation was affected. Corrected the stale canonical narrative file and added a staleness guard to run_phase_metadata_repair() in src/pcae/commands/phase.py that refuses to overwrite metadata when the canonical report disagrees with PROJECT_STATUS.md's own current phase and metadata already agrees with it. Added 3 regression tests to tests/test_finalization_configuration_identity_cross_agent_134b3.py.",
   "phase_commits": [
-    {"hash": "70013215"},
-    {"hash": "db9cb4b7"}
+    {
+      "hash": "70013215"
+    },
+    {
+      "hash": "db9cb4b7"
+    }
   ],
   "files_changed": [
     ".pcae/phase-completion-report.md",
@@ -25,10 +29,26 @@
   "tests_added_or_updated": "3 -- staleness-guard regression coverage added to tests/test_finalization_configuration_identity_cross_agent_134b3.py",
   "tests_run": 4391,
   "validation_results": [
-    {"name": "fast_green", "result": "4391 passed, 0 failed, re-run after the source change", "status": "passed"},
-    {"name": "compileall", "result": "src/pcae/commands/phase.py and the updated test file compiled successfully", "status": "passed"},
-    {"name": "report_notification_tests", "result": "existing fast_green coverage passed", "status": "passed"},
-    {"name": "bootstrap_session_reporting_tests", "result": "existing fast_green coverage passed", "status": "passed"}
+    {
+      "name": "fast_green",
+      "result": "4391 passed, 0 failed, re-run after the source change",
+      "status": "passed"
+    },
+    {
+      "name": "compileall",
+      "result": "src/pcae/commands/phase.py and the updated test file compiled successfully",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "existing fast_green coverage passed",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "existing fast_green coverage passed",
+      "status": "passed"
+    }
   ],
   "test_results": {
     "fast_green": "4391/4391",
@@ -37,12 +57,30 @@
     "bootstrap_session_reporting_tests": "passed"
   },
   "governance_results": [
-    {"name": "pcae_health", "status": "healthy"},
-    {"name": "pcae_check", "status": "clean"},
-    {"name": "pcae_doctor_task_memory", "status": "clean"},
-    {"name": "pcae_push_check", "status": "clean"},
-    {"name": "telegram_runtime", "status": "configured for one governed terminal delivery only"},
-    {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "clean"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured for one governed terminal delivery only"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "Observed, observe, execution unavailable"
+    }
   ],
   "no_go_confirmation": "No CLTR-001 contract change occurred. No JSON schema was frozen. No finalization or entry-point behavior changed for ordinary phase completion. No atomic-latest-write repair occurred. No resume-logic repair occurred. No fabricated-hash repair occurred. No Architecture Status label defect was touched (it was never the cause). No historical report was rewritten. No immutable snapshot was modified. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence authority expansion occurred. No Advisory authority change occurred. No Decision Evaluation change occurred. No execution capability was introduced. No shell mediation was added. No Telegram inbound control or new communication channel was added. No identity-consistency invariant was weakened -- the staleness guard only narrows an existing overwrite path. No promoted 135D artifact was altered. Phase 135E was not begun. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
