@@ -4,57 +4,34 @@
   "phase_name": "Canonical Transition Record Prototype Plan",
   "phase_title": "Canonical Transition Record Prototype Plan",
   "status": "completed",
-  "summary": "Phase 135D.1: Metadata-Repair Incident Investigation and Staleness Guard. Investigated the pcae phase metadata-repair phase_id corruption disclosed during 135D's own finalization, in docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md. Root-caused it to .pcae/phase-completion-report.md, a separate tracked hand-authored file never updated past an earlier phase across three subsequent phases -- not the Architecture Status generation mechanism a prior real-time assumption had blamed. Proved via exact timestamps that the rewrite occurred after certification, promotion, and Telegram dispatch, and never touched the promoted report, marker, or delivery payload -- all correctly and exclusively named the current phase throughout. Tested and rejected a mixed-generation latest.md/latest.json hypothesis. Traced the --allow-partial-report override precisely and confirmed it cannot mask a genuine cross-source phase-identity disagreement, only the completeness/trust dimension. Classification: A -- certified evidence internally correct, only the terminal report's trust/completeness derivation was affected. Corrected the stale canonical narrative file and added a staleness guard to run_phase_metadata_repair() in src/pcae/commands/phase.py that refuses to overwrite metadata when the canonical report disagrees with PROJECT_STATUS.md's own current phase and metadata already agrees with it. Added 3 regression tests to tests/test_finalization_configuration_identity_cross_agent_134b3.py.",
+  "summary": "Phase 135E: Canonical Transition Record Prototype Plan. Produced docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_PLAN.md, translating 135A's architecture, CLTR-001 v1.0 (135B frozen, 135C verified with zero Blocking findings), 135D's full 14-state/16-transition/36-invariant formal model (VERIFIED WITH NON-BLOCKING DEFERRED QUESTIONS), and 135D.1's incident lessons into a staged prototype implementation plan. Selected a fixture-driven generator plus standalone offline verifier as the smallest safe prototype boundary, explicitly rejecting a live shadow-generator hook into the finalization transaction. Planned module architecture, data model, serialization, SHA-256 canonicalization/digest, identity resolution (no title/filename/recent-Git inference), full state-machine and invariant-engine implementation, S/R/D/E/V authority-role enforcement, three-outcome commit-ownership classification, evidence-reference model, 15-target cross-representation comparison, atomic prototype-only persistence under .pcae/cltr-prototypes/, minimal CLI, 15-fixture strategy, full test-category plan, compatibility adapters, migration-boundary scoping, 8 explicit 135D.1-incident protections, structured error model, conformance-vs-lifecycle-state separation, safety proof, 7-stage implementation sequence, file-by-file plan, 17 acceptance criteria, 8 prototype-verification criteria, 11 deferred decisions, and a 14-row risk register. Verdict: A -- READY FOR PROTOTYPE IMPLEMENTATION. Planning and documentation only.",
   "phase_commits": [
     {
-      "hash": "70013215"
+      "hash": "49033030"
     },
     {
-      "hash": "db9cb4b7"
+      "hash": "9b26e748"
     }
   ],
   "files_changed": [
-    ".pcae/phase-completion-report.md",
-    "CHANGELOG.md",
-    "PROJECT_STATUS.md",
-    "docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md",
-    "src/pcae/commands/phase.py",
+    "docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_PLAN.md",
     "tasks/DONE.md",
-    "tasks/done/20260713-1004-phase-135d-1-metadata-repair-incident-investigation-and-staleness-guard.md",
-    "tests/test_finalization_configuration_identity_cross_agent_134b3.py"
+    "tasks/done/20260713-1145-phase-135e-canonical-transition-record-prototype-plan.md"
   ],
-  "files_changed_count": 8,
-  "source_files_changed": 1,
-  "test_files_changed": 1,
-  "tests_added_or_updated": "3 -- staleness-guard regression coverage added to tests/test_finalization_configuration_identity_cross_agent_134b3.py",
-  "tests_run": 4391,
+  "files_changed_count": 3,
+  "source_files_changed": 0,
+  "test_files_changed": 0,
+  "tests_added_or_updated": "0 -- planning and documentation phase only, no test files touched",
+  "tests_run": 0,
   "validation_results": [
     {
-      "name": "fast_green",
-      "result": "4391 passed, 0 failed, re-run after the source change",
-      "status": "passed"
-    },
-    {
       "name": "compileall",
-      "result": "src/pcae/commands/phase.py and the updated test file compiled successfully",
-      "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "existing fast_green coverage passed",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "existing fast_green coverage passed",
+      "result": "src/pcae package compiled successfully (sanity check only; no production source was changed by this phase)",
       "status": "passed"
     }
   ],
   "test_results": {
-    "fast_green": "4391/4391",
-    "compileall": "passed",
-    "report_notification_tests": "passed",
-    "bootstrap_session_reporting_tests": "passed"
+    "compileall": "passed"
   },
   "governance_results": [
     {
@@ -82,15 +59,15 @@
       "status": "Observed, observe, execution unavailable"
     }
   ],
-  "no_go_confirmation": "No CLTR-001 contract change occurred. No JSON schema was frozen. No finalization or entry-point behavior changed for ordinary phase completion. No atomic-latest-write repair occurred. No resume-logic repair occurred. No fabricated-hash repair occurred. No Architecture Status label defect was touched (it was never the cause). No historical report was rewritten. No immutable snapshot was modified. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence authority expansion occurred. No Advisory authority change occurred. No Decision Evaluation change occurred. No execution capability was introduced. No shell mediation was added. No Telegram inbound control or new communication channel was added. No identity-consistency invariant was weakened -- the staleness guard only narrows an existing overwrite path. No promoted 135D artifact was altered. Phase 135E was not begun. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
+  "no_go_confirmation": "No CLTR-001 contract change occurred. No JSON schema was frozen. No finalization or entry-point behavior changed. No production source or test file was created or modified. No CLI command was added. No prototype artifact was created under .pcae/cltr-prototypes/ or anywhere else. No Track 134 structural gap was repaired. No historical report was rewritten. No immutable snapshot was modified. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence authority expansion occurred. No Advisory authority change occurred. No Decision Evaluation change occurred. No execution capability was introduced. No shell mediation was added. No Telegram inbound control or new communication channel was added. No identity-consistency invariant was weakened. No promoted 135D.1 artifact was altered. Phase 135F was not begun. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used.",
   "no_go_confirmations": [
     "No CLTR-001 contract change occurred.",
     "No JSON schema was frozen.",
-    "No finalization or entry-point behavior changed for ordinary phase completion.",
-    "No atomic-latest-write repair occurred.",
-    "No resume-logic repair occurred.",
-    "No fabricated-hash repair occurred.",
-    "No Architecture Status label defect was touched.",
+    "No finalization or entry-point behavior changed.",
+    "No production source or test file was created or modified.",
+    "No CLI command was added.",
+    "No prototype artifact was created under .pcae/cltr-prototypes/ or anywhere else.",
+    "No Track 134 structural gap was repaired.",
     "No historical report was rewritten.",
     "No immutable snapshot was modified.",
     "No PFN-001 change occurred.",
@@ -102,8 +79,8 @@
     "No shell mediation was added.",
     "No Telegram inbound control or new communication channel was added.",
     "No identity-consistency invariant was weakened.",
-    "No promoted 135D artifact was altered.",
-    "Phase 135E was not begun."
+    "No promoted 135D.1 artifact was altered.",
+    "Phase 135F was not begun."
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
@@ -111,9 +88,9 @@
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "report_notification_status": "pending_final_telegram_delivery",
-  "recommended_next_phase": "135E - Canonical Transition Record Prototype Plan",
-  "recommended_next_phase_id": "135E",
-  "recommended_next_phase_name": "Canonical Transition Record Prototype Plan",
+  "recommended_next_phase": "135F - Canonical Transition Record Read-Only Prototype",
+  "recommended_next_phase_id": "135F",
+  "recommended_next_phase_name": "Canonical Transition Record Read-Only Prototype",
   "runtime_state": "Observed",
   "maximum_plugin_capability": "observe",
   "execution_availability": "unavailable"
