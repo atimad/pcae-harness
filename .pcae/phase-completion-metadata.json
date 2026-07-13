@@ -1,23 +1,16 @@
 {
   "schema_version": "1.0",
-  "phase_id": "135F",
-  "phase_name": "Canonical Transition Record Read-Only Prototype",
-  "phase_title": "Canonical Transition Record Read-Only Prototype",
+  "phase_id": "135G",
+  "phase_name": "Canonical Transition Record Prototype Independent Verification",
+  "phase_title": "Canonical Transition Record Prototype Independent Verification",
   "status": "completed",
-  "summary": "Phase 135F: Canonical Transition Record Read-Only Prototype. Implemented the 135E plan's Stages 1-6 exactly within the frozen prototype boundary: src/pcae/cltr_prototype/ (models.py -- typed enums for all 14 lifecycle states, 16 transitions, retry/terminal/conformance/authority-role/commit-ownership/invariant-result/evidence/representation/failure/compatibility classifications, plus frozen TransitionRecord/Identity/EvidenceRef/CommitDeclaration dataclasses; identity.py -- explicit-only identity resolution reusing architecture_status.py's PHASE_ID_RE verbatim, zero title/filename/commit-subject/Git-history inference; state_machine.py -- one function per named transition T1-T16, no generic set_state, all 14 forbidden transitions rejected deterministically; invariants.py -- one evaluator per invariant ID from 135D Section 11's table (37 IDs; the 36-vs-37 discrepancy in 135D's own prose is documented, not silently resolved), never silently skipping an applicable invariant; canonicalization.py/digest.py -- deterministic JSON canonicalization and SHA-256 digesting with self-exclusion, tamper and cross-transition-substitution detection; generator.py -- fixture-driven orchestration with fail-closed three-outcome commit classification (unverifiable by default, never silently verified); verifier.py -- standalone offline re-verification; compatibility.py -- read-only legacy-artifact adapters, the only module permitted to parse a narrative title, comparison-only; comparison.py -- read-only cross-representation comparison with mixed-generation detection; persistence.py -- atomic, prototype-only writes under .pcae/cltr-prototypes/ with manifest-based crash recovery). Added the pcae cltr-prototype CLI (generate/show/verify/compare/list) wired into src/pcae/cli.py, disclosing prototype-only/non-canonical/non-authorization status on every invocation. Authored 15 hermetic fixtures covering the full required scenario set (successful transition, pre-certification failure, notification uncertainty, exact and conflicting replay, identity mismatch, stale report, mixed derivative generations, fabricated/contaminated/unverifiable commit ownership, tampered record, stale pointer, superseded transition, legacy artifact with no transition_id) and 170 focused tests (models, identity, state machine incl. all 16 permitted and 14 forbidden transitions, invariants, canonicalization/digest, generator, verifier, compatibility, comparison, persistence, CLI, and 30 import-graph/source-inspection safety tests). No production entry point, finalization module, or legacy authority was touched or repaired.",
-  "phase_commits": [
-    {
-      "hash": "d6944026"
-    }
-  ],
+  "files_changed_count": 26,
   "files_changed": [
-    "docs/PHASE_135_CANONICAL_TRANSITION_RECORD_READ_ONLY_PROTOTYPE.md",
-    "src/pcae/cli.py",
-    "src/pcae/cltr_prototype/__init__.py",
+    "CHANGELOG.md",
+    "PROJECT_STATUS.md",
+    "docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_INDEPENDENT_VERIFICATION.md",
     "src/pcae/cltr_prototype/canonicalization.py",
     "src/pcae/cltr_prototype/comparison.py",
-    "src/pcae/cltr_prototype/compatibility.py",
-    "src/pcae/cltr_prototype/digest.py",
     "src/pcae/cltr_prototype/generator.py",
     "src/pcae/cltr_prototype/identity.py",
     "src/pcae/cltr_prototype/invariants.py",
@@ -25,138 +18,96 @@
     "src/pcae/cltr_prototype/persistence.py",
     "src/pcae/cltr_prototype/state_machine.py",
     "src/pcae/cltr_prototype/verifier.py",
-    "src/pcae/commands/cltr_prototype.py",
-    "tasks/active/20260713-1424-phase-135f-canonical-transition-record-read-only-prototype.md",
-    "tests/fixtures/cltr_prototype/conflicting_replay.json",
-    "tests/fixtures/cltr_prototype/contaminated_commit_ownership.json",
+    "tasks/DECISIONS.md",
+    "tasks/DONE.md",
+    "tasks/done/20260713-1647-phase-135g-canonical-transition-record-prototype-independent-verification.md",
     "tests/fixtures/cltr_prototype/exact_replay.json",
-    "tests/fixtures/cltr_prototype/fabricated_commit_hash.json",
-    "tests/fixtures/cltr_prototype/identity_mismatch.json",
-    "tests/fixtures/cltr_prototype/legacy_artifact_no_transition_id.json",
-    "tests/fixtures/cltr_prototype/legacy_metadata_no_transition_id.json",
-    "tests/fixtures/cltr_prototype/mixed_derivative_generations.json",
-    "tests/fixtures/cltr_prototype/pre_certification_failure.json",
-    "tests/fixtures/cltr_prototype/promoted_notification_uncertainty.json",
-    "tests/fixtures/cltr_prototype/stale_pointer.json",
-    "tests/fixtures/cltr_prototype/stale_report.json",
-    "tests/fixtures/cltr_prototype/stale_report.md",
     "tests/fixtures/cltr_prototype/successful_transition.json",
-    "tests/fixtures/cltr_prototype/superseded_transition.json",
-    "tests/fixtures/cltr_prototype/tampered_record.json",
-    "tests/fixtures/cltr_prototype/unverifiable_ownership.json",
     "tests/test_cltr_prototype_canonicalization_digest.py",
-    "tests/test_cltr_prototype_cli.py",
     "tests/test_cltr_prototype_comparison.py",
-    "tests/test_cltr_prototype_compatibility.py",
     "tests/test_cltr_prototype_generator.py",
     "tests/test_cltr_prototype_identity.py",
     "tests/test_cltr_prototype_invariants.py",
     "tests/test_cltr_prototype_models.py",
     "tests/test_cltr_prototype_persistence.py",
-    "tests/test_cltr_prototype_safety.py",
     "tests/test_cltr_prototype_state_machine.py",
     "tests/test_cltr_prototype_verifier.py"
   ],
-  "files_changed_count": 45,
-  "source_files_changed": 14,
-  "test_files_changed": 12,
-  "tests_added_or_updated": "170 new focused tests across 12 new test files (models, identity, state_machine, invariants, canonicalization+digest, generator, verifier, compatibility, comparison, persistence, cli, safety), plus 17 new fixture files",
+  "source_files_changed": 9,
+  "test_files_changed": 11,
+  "tests_added_or_updated": "200 focused prototype tests exercised after adversarial repairs",
   "tests_run": 4391,
-  "validation_results": [
-    {
-      "name": "cltr_prototype_focused_tests",
-      "result": "170 passed, 0 failed (tests/test_cltr_prototype*.py)",
-      "status": "passed"
-    },
-    {
-      "name": "compileall",
-      "result": "src/pcae package compiled successfully, including the new cltr_prototype package and CLI wiring",
-      "status": "passed"
-    },
-    {
-      "name": "fast_green",
-      "result": "4391 passed, 0 failed -- 2 parallel runs (-n auto) plus 1 serial run, all identical, zero regressions from this implementation phase",
-      "status": "passed"
-    },
-    {
-      "name": "report_notification_tests",
-      "result": "existing fast_green coverage passed",
-      "status": "passed"
-    },
-    {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "existing fast_green coverage passed",
-      "status": "passed"
-    }
-  ],
-  "test_results": {
-    "cltr_prototype_focused_tests": "170/170",
-    "compileall": "passed",
-    "fast_green": "4391/4391 (x2 parallel + x1 serial)",
-    "report_notification_tests": "passed",
-    "bootstrap_session_reporting_tests": "passed"
-  },
-  "governance_results": [
-    {
-      "name": "pcae_health",
-      "status": "healthy"
-    },
-    {
-      "name": "pcae_check",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_doctor_task_memory",
-      "status": "clean"
-    },
-    {
-      "name": "pcae_push_check",
-      "status": "clean"
-    },
-    {
-      "name": "telegram_runtime",
-      "status": "configured for one governed terminal delivery only"
-    },
-    {
-      "name": "pcae_runtime_inspect",
-      "status": "Observed, observe, execution unavailable"
-    }
-  ],
-  "no_go_confirmation": "No CLTR-001 contract change occurred. No JSON schema was frozen. No finalization or entry-point behavior changed. No production source file (finalization_transaction.py, the four entry points, phase_reports.py, canonical_artifact_promotion.py, architecture_status.py) was modified. No production canonical report, completion metadata, checkpoint, marker, or receipt was written by the prototype. No prototype artifact was written outside .pcae/cltr-prototypes/. No Track 134/135A/135D structural gap (non-atomic latest.*, fabricated-hash silent-continue, NOTIFIED_UNCONFIRMED resume gap) was repaired in production code. No historical report was rewritten. No immutable snapshot was modified. No PFN-001 change occurred. No PFR-001 change occurred. No Repository Intelligence authority expansion occurred. No Advisory authority change occurred. No Decision Evaluation change occurred. No execution capability was introduced. No shell mediation or subprocess execution was added anywhere in the prototype package. No Telegram or other notification was sent by the prototype. No task-state mutation occurred outside this phase's own governed task contract. No raw git commit was used. No raw git push was used. No --no-verify was used. No force push was used. Phase 135G was not begun.",
-  "no_go_confirmations": [
-    "No CLTR-001 contract change occurred.",
-    "No JSON schema was frozen.",
-    "No production finalization or entry-point behavior changed.",
-    "No production canonical report, completion metadata, checkpoint, marker, or receipt was written by the prototype.",
-    "No prototype artifact was written outside .pcae/cltr-prototypes/.",
-    "No Track 134/135A/135D structural gap was repaired in production code.",
-    "No historical report was rewritten.",
-    "No immutable snapshot was modified.",
-    "No PFN-001 change occurred.",
-    "No PFR-001 change occurred.",
-    "No Repository Intelligence authority expansion occurred.",
-    "No Advisory authority change occurred.",
-    "No Decision Evaluation change occurred.",
-    "No execution capability was introduced.",
-    "No shell mediation or subprocess execution was added.",
-    "No Telegram or other notification was sent by the prototype.",
-    "No task-state mutation occurred outside this phase's own governed task contract.",
-    "No raw git commit was used.",
-    "No raw git push was used.",
-    "No --no-verify was used.",
-    "No force push was used.",
-    "Phase 135G was not begun."
+  "phase_commits": [
+    {"hash": "52142380d729f2fc4f49c7a44f66f1d6d91f198b"},
+    {"hash": "da3fbc8c"}
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pending",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
+  "summary": "Phase 135G independently re-derived and adversarially verified the 135F CLTR prototype, repaired eight reproduced Blocking defect families strictly inside the prototype boundary, and concluded B — VERIFIED WITH NON-BLOCKING FINDINGS. Three Non-Blocking findings remain. No production integration began. Next: 135H — Lifecycle Integration and Legacy Authority Retirement Plan.",
+  "governance_results": [
+    {"name": "pcae_health", "status": "healthy"},
+    {"name": "pcae_check", "status": "clean"},
+    {"name": "pcae_doctor_task_memory", "status": "clean"},
+    {"name": "pcae_push_check", "status": "clean"},
+    {"name": "telegram_runtime", "status": "configured, enabled, outbound-only"},
+    {"name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable"}
+  ],
+  "validation_results": [
+    {"name": "cltr_prototype_focused_tests", "result": "200/200 serial and 200/200 xdist", "status": "passed"},
+    {"name": "cltr_prototype_cli_model_persistence_tests", "result": "included in focused 200/200", "status": "passed"},
+    {"name": "compileall", "result": "src/pcae compiled successfully", "status": "passed"},
+    {"name": "determinism", "result": "byte-identical persisted output across fresh processes, CWDs, and hash seeds", "status": "passed"},
+    {"name": "fast_green", "result": "4391/4391 twice parallel plus once serial", "status": "passed"},
+    {"name": "report_notification_tests", "result": "existing fast_green coverage passed", "status": "passed"},
+    {"name": "bootstrap_session_reporting_tests", "result": "existing fast_green coverage passed", "status": "passed"}
+  ],
+  "test_results": {
+    "cltr_prototype_focused_tests": "200/200 serial and xdist",
+    "compileall": "passed",
+    "determinism": "byte-identical",
+    "fast_green": "4391/4391 (x2 parallel + x1 serial)",
+    "report_notification_tests": "passed in fast_green",
+    "bootstrap_session_reporting_tests": "passed in fast_green"
+  },
+  "notification_dispatch_result": "pending single governed terminal delivery",
+  "report_notification_status": "pending governed finalization",
+  "no_go_confirmation": "No production lifecycle source changed. No production entry point changed. No finalization transaction implementation changed. No production canonical authority was introduced. No real backend invocation occurred. No adapter execution occurred. No subprocess execution capability was introduced. No network call was made by the prototype. No shell interception was introduced. No Telegram inbound capability was introduced. No enforcement was enabled. No automatic apply was enabled. No apply execution occurred. No commit or push authorization capability was introduced. No real AI backend call occurred. No raw git commit was used. No raw git push was used. No force push was used. No PFN-001 change occurred. No PFR-001 change occurred. No CLTR-001 amendment occurred. No production integration began. No historical artifact was rewritten. No immutable snapshot was modified. No execution capability was introduced. No new communication channel was introduced. Phase 135H was not started.",
+  "no_go_confirmations": [
+    "No production lifecycle source changed.",
+    "No production entry point changed.",
+    "No finalization transaction implementation changed.",
+    "No production canonical authority was introduced.",
+    "No real backend invocation occurred.",
+    "No adapter execution occurred.",
+    "No subprocess execution capability was introduced.",
+    "No network call was made by the prototype.",
+    "No shell interception was introduced.",
+    "No Telegram inbound capability was introduced.",
+    "No enforcement was enabled.",
+    "No automatic apply was enabled.",
+    "No apply execution occurred.",
+    "No commit or push authorization capability was introduced.",
+    "No real AI backend call occurred.",
+    "No raw git commit was used.",
+    "No raw git push was used.",
+    "No force push was used.",
+    "No PFN-001 change occurred.",
+    "No PFR-001 change occurred.",
+    "No CLTR-001 amendment occurred.",
+    "No production integration began.",
+    "No historical artifact was rewritten.",
+    "No immutable snapshot was modified.",
+    "No execution capability was introduced.",
+    "No new communication channel was introduced.",
+    "No next phase was started."
+  ],
+  "recommended_next_phase": "135H - Lifecycle Integration and Legacy Authority Retirement Plan",
+  "recommended_next_phase_id": "135H",
+  "recommended_next_phase_name": "Lifecycle Integration and Legacy Authority Retirement Plan",
   "report_completeness": "complete",
   "missing_trust_fields": [],
-  "report_notification_status": "pending_final_telegram_delivery",
-  "recommended_next_phase": "135G - Canonical Transition Record Prototype Independent Verification",
-  "recommended_next_phase_id": "135G",
-  "recommended_next_phase_name": "Canonical Transition Record Prototype Independent Verification",
   "runtime_state": "Observed",
-  "maximum_plugin_capability": "observe",
-  "execution_availability": "unavailable"
+  "execution_availability": "unavailable",
+  "maximum_plugin_capability": "observe"
 }
