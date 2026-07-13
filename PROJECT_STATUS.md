@@ -58,6 +58,58 @@ PFR-001 remain unchanged.**
 Recommended next phase: 135E — Canonical Transition Record Prototype Plan
 (not started).
 
+## Phase 135D.1 Complete
+
+Phase 135D.1 — Metadata-Repair Incident Investigation and Staleness Guard
+(completed, narrow forensic investigation, not a Track 135 architecture
+phase).
+
+During 135D's own finalization, `pcae phase metadata-repair` rewrote
+`.pcae/phase-completion-metadata.json`'s `phase_id` from `135D` to `135A`.
+Independently investigated from source rather than trusting the real-time
+assumption made at the time (which incorrectly attributed this to 135C's
+Architecture Status title-cross-attribution finding).
+
+**Root cause, proven from source:** `.pcae/phase-completion-report.md` — a
+separate, tracked, hand-authored canonical narrative file, distinct from
+both Architecture Status and the auto-generated phase report — was never
+updated past its 135A content across 135B, 135C, and 135D (confirmed: zero
+commits touched it since `cdcbb926`). `pcae phase metadata-repair` reads
+this file's title as authoritative ground truth by explicit design
+(one-directional sync, canonical report → metadata) with no staleness
+check, so it "correctly" (per its own logic) overwrote valid 135D metadata
+to match the stale 135A content.
+
+**Timing, independently established:** the rewrite occurred 18 seconds
+*after* certification, promotion, and Telegram notification dispatch. It
+never entered a checkpoint or immutable snapshot (that mechanism is
+structurally skipped whenever `--allow-partial-report` is used). It never
+touched the promoted `latest.md`/`latest.json`, the `.last-notified.json`
+marker, or the Telegram payload — all four independently and exclusively
+identified phase 135D throughout, unaffected. Reverted within ~71 seconds
+(commit `d8e440754b`).
+
+**Classification: A — certified 135D evidence is internally correct; only
+the terminal report's self-assessed trust/completeness derivation was
+degraded**, by comparison against the same stale file, not by any identity
+corruption. The mixed-generation `latest.md`/`latest.json` hypothesis was
+tested directly and rejected (both files agree exactly, identical
+mtime). The `--allow-partial-report` override was independently confirmed,
+by source trace, to be structurally incapable of overriding a genuine
+phase-identity disagreement — it affects only the completeness/trust
+dimension.
+
+**Repair:** hand-corrected `.pcae/phase-completion-report.md` to reflect
+135D; added a staleness guard to `run_phase_metadata_repair()`
+(`src/pcae/commands/phase.py`) that refuses to overwrite metadata when the
+canonical report disagrees with PROJECT_STATUS.md's own actively-maintained
+Current Phase line and metadata already agrees with it — directly
+preventing recurrence of the proven failure mode. 3 new regression tests
+added; fast_green 4391/4391 passed; zero regressions.
+
+Full evidence chain:
+`docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md`.
+
 ## Phase 135D Complete
 
 Phase 135C — Canonical Lifecycle Transition Record Contract Verification (completed).

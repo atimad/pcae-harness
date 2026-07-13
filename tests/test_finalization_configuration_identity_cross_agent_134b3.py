@@ -337,6 +337,92 @@ def test_metadata_repair_does_not_require_clean_or_pushed_state(tmp_path, monkey
     assert "pushed_status" not in src
 
 
+def test_metadata_repair_refuses_when_canonical_report_is_stale_relative_to_current_phase(
+    tmp_path, monkeypatch
+):
+    """Phase 135D.1 — regression for the disclosed incident: metadata
+    already agrees with PROJECT_STATUS.md's Current Phase, but the
+    canonical report (.pcae/phase-completion-report.md) was never updated
+    past an earlier phase. The repair command must refuse rather than
+    overwrite already-correct metadata with the stale canonical identity.
+    """
+    from pcae.commands.phase import run_phase_metadata_repair
+    import argparse
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    (tmp_path / ".pcae" / "phase-completion-metadata.json").write_text(
+        json.dumps({"phase_id": "135D", "phase_name": "Current Phase Name"})
+    )
+    (tmp_path / ".pcae" / "phase-completion-report.md").write_text(
+        "# Phase 135A Complete — Stale Older Phase\n\nbody\n"
+    )
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase 135D — Current Phase Name (completed).\n"
+    )
+    args = argparse.Namespace(json=True)
+    exit_code = run_phase_metadata_repair(args)
+    assert exit_code == 1
+
+    unchanged = json.loads((tmp_path / ".pcae" / "phase-completion-metadata.json").read_text())
+    assert unchanged["phase_id"] == "135D"
+    assert not (tmp_path / ".pcae" / "phase-metadata-repairs.log").exists()
+
+
+def test_metadata_repair_still_syncs_when_canonical_report_matches_current_phase(
+    tmp_path, monkeypatch
+):
+    """The staleness guard must not block the tool's legitimate purpose:
+    when the canonical report genuinely reflects the current phase and
+    metadata is the stale side, the repair still proceeds.
+    """
+    from pcae.commands.phase import run_phase_metadata_repair
+    import argparse
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    (tmp_path / ".pcae" / "phase-completion-metadata.json").write_text(
+        json.dumps({"phase_id": "135C", "phase_name": "Old Stale Metadata Name"})
+    )
+    (tmp_path / ".pcae" / "phase-completion-report.md").write_text(
+        "# Phase 135D Complete — Genuinely Current Phase\n\nbody\n"
+    )
+    (tmp_path / "PROJECT_STATUS.md").write_text(
+        "# Project Status\n\n## Current Phase\n\nPhase 135D — Genuinely Current Phase (completed).\n"
+    )
+    args = argparse.Namespace(json=True)
+    exit_code = run_phase_metadata_repair(args)
+    assert exit_code == 0
+
+    repaired = json.loads((tmp_path / ".pcae" / "phase-completion-metadata.json").read_text())
+    assert repaired["phase_id"] == "135D"
+    assert repaired["phase_name"] == "Genuinely Current Phase"
+
+
+def test_metadata_repair_proceeds_when_lifecycle_line_unavailable(tmp_path, monkeypatch):
+    """No PROJECT_STATUS.md (or unparseable Current Phase section) must
+    not block repair -- the staleness guard is an additional safety check,
+    not a new hard requirement, preserving prior behavior for repositories
+    or fixtures without this exact convention.
+    """
+    from pcae.commands.phase import run_phase_metadata_repair
+    import argparse
+
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / ".pcae").mkdir()
+    (tmp_path / ".pcae" / "phase-completion-metadata.json").write_text(
+        json.dumps({"phase_id": "134B.2", "phase_name": "Old"})
+    )
+    (tmp_path / ".pcae" / "phase-completion-report.md").write_text(
+        "# Phase 134B.3 Complete — New Canonical Name\n\nbody\n"
+    )
+    args = argparse.Namespace(json=True)
+    exit_code = run_phase_metadata_repair(args)
+    assert exit_code == 0
+    repaired = json.loads((tmp_path / ".pcae" / "phase-completion-metadata.json").read_text())
+    assert repaired["phase_id"] == "134B.3"
+
+
 def test_report_notification_and_completion_identity_are_the_single_source():
     """Requirement #15: report identity, notification identity, and
     completion identity all derive from the same RepositoryState.phase_id

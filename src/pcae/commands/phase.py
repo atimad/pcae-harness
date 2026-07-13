@@ -824,6 +824,55 @@ def run_phase_metadata_repair(args: argparse.Namespace) -> int:
             [f"Phase metadata repair: already current (phase_id={canonical_phase_id!r}). Nothing to repair."],
         )
 
+    # Phase 135D.1 — staleness guard. The canonical report
+    # (.pcae/phase-completion-report.md) is hand-authored and has no
+    # freshness signal of its own; if a phase's own authoring step is
+    # skipped, this file can silently lag behind reality for multiple
+    # subsequent phases (observed: stuck at one phase's title across three
+    # later phases' completions). Cross-check the parsed canonical phase id
+    # against PROJECT_STATUS.md's "Current Phase" line -- the one file this
+    # repository's governed workflow reliably updates every phase -- and
+    # refuse (fail closed, no mutation) rather than overwrite metadata with
+    # an identity that looks older than the repository's own current phase.
+    # This does not require the canonical report to always match (a
+    # genuinely up-to-date canonical report for the current phase still
+    # passes); it only blocks the specific failure mode of a stale
+    # canonical report silently winning over already-correct metadata.
+    lifecycle_phase_id = None
+    try:
+        from pcae.commands.task import _read_lifecycle_current_phase_line
+        from pcae.core.repository_transition_integration import (
+            parse_lifecycle_phase_identity,
+        )
+        lifecycle_phase_id, _ = parse_lifecycle_phase_identity(
+            _read_lifecycle_current_phase_line()
+        )
+    except Exception:
+        lifecycle_phase_id = None
+
+    if (
+        lifecycle_phase_id
+        and canonical_phase_id != lifecycle_phase_id
+        and old_phase_id == lifecycle_phase_id
+    ):
+        return _emit(
+            {
+                "repaired": False,
+                "reason": "stale_canonical_report",
+                "canonical_phase_id": canonical_phase_id,
+                "lifecycle_phase_id": lifecycle_phase_id,
+                "metadata_phase_id": old_phase_id,
+            },
+            [
+                "Phase metadata repair: refused.",
+                f"  .pcae/phase-completion-report.md names phase {canonical_phase_id!r}, but "
+                f"PROJECT_STATUS.md's Current Phase names {lifecycle_phase_id!r}, which already "
+                f"matches the current metadata ({old_phase_id!r}).",
+                "  The canonical report looks stale, not the metadata. Update "
+                ".pcae/phase-completion-report.md to the current phase before repairing metadata.",
+            ],
+        )
+
     meta["phase_id"] = canonical_phase_id
     meta["phase_name"] = canonical_phase_name
     meta["phase_title"] = canonical_phase_name

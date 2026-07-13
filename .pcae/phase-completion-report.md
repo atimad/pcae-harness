@@ -1,113 +1,95 @@
-# Phase 135A Complete — Canonical Lifecycle State Authority Architecture
+# Phase 135D Complete — Cross-Representation Invariant Architecture and State-Machine Verification
 
 ## 1. Phase Identity
 
-- **Phase ID:** `135A`
+- **Phase ID:** `135D`
 - **Status:** completed
-- **Phase class:** architecture (Track 135 opening phase)
+- **Phase class:** architecture + formal verification (Track 135, fourth phase)
 - **Report completeness:** complete
 
 ## 2. Summary
 
-Designed the authoritative future architecture for a canonical lifecycle
-transition record in
-`docs/PHASE_135_CANONICAL_LIFECYCLE_STATE_AUTHORITY_ARCHITECTURE.md`. Defines
-one canonical lifecycle transition record per governed transition, from which
-every other lifecycle artifact (canonical phase report, completion metadata,
-Architecture Status, immutable snapshot, checkpoint, promoted `latest`
-report/metadata, notification payload, completion marker, finalization
-receipt, Git attribution view, repository transition view) must be an
-immutable representation, deterministic derivative, external projection, or
-verification result — never an independent authority.
+Turned the verified CLTR-001 v1.0 contract into a precise,
+implementation-independent behavioral model in
+`docs/PHASE_135_CROSS_REPRESENTATION_INVARIANT_ARCHITECTURE_AND_STATE_MACHINE_VERIFICATION.md`.
+Independently re-derived (not copied) the state inventory, transition
+inventory, invariant model, and representation model from CLTR-001's frozen
+text, 135C's verified findings, 135A's architecture, 134F's independently
+verified lifecycle behavior, PFN-001, and PFR-001.
 
-## 3. Relationship to Track 134
+## 3. State model and transition inventory
 
-Track 134 (134A–134F) proved the current governed finalization lifecycle is
-coherent; 134F closed the track CONDITIONALLY CLOSED with zero BLOCKING
-contradictions but three disclosed NON-BLOCKING structural gaps. Track 135
-exists to remove the *structural possibility* of future divergence among the
-~11 cooperating representations Track 134 proved currently agree, rather than
-to re-verify that agreement.
+Re-derived a 14-state minimum inventory (12 spine + 2 orthogonal) evaluated
+fresh against 21 named candidates from first principles, not copied from
+135A/135B. Produced a complete state-definition table, a 16-transition
+inventory with no implicit transitions, and a 14-item forbidden-transition
+inventory.
 
-## 4. Canonical lifecycle transition record and authority model
+## 4. Invariant architecture
 
-Defines field responsibilities (identity, transition classification,
-provenance/ownership, evidence-reference, temporal/integrity fields) without
-freezing an exact schema, and a fact-by-fact authority table (sole authority /
-authority reference / immutable event record / deterministic derivation
-source / verification anchor) naming which current artifacts (active-task
-inference, `.last-notified.json` marker, ad hoc regex identity parsing,
-entry-point-specific resume checks) must stop acting as competing
-authorities.
+Produced a 36-invariant formal model: the 33 CLTR-001 invariants plus
+`CLTR-ORDER-5`/`-6`/`-7`, minted as derived clarifications closing a
+numbering gap 135C identified (three of CLTR-001 §8.2's seven ordering
+requirements previously lacked a dedicated numbered invariant entry).
+Formalized identity, authority, state, ordering, commit-ownership,
+projected-state, evidence, atomic-visibility, notification, marker, and
+receipt invariants as evaluable predicates, not restatements of contract
+prose.
 
-## 5. State machine and transition semantics
+## 5. Cross-representation and retry/failure models
 
-Re-derives (not copies) a minimum coherent state machine: `PROPOSED →
-CERTIFYING → CERTIFIED → PROMOTING → PROMOTED → NOTIFYING → NOTIFIED` /
-`NOTIFIED_UNCONFIRMED → TERMINAL_SUCCESS` / `TERMINAL_PARTIAL_EXTERNAL`, plus
-orthogonal `QUARANTINED`/`SUPERSEDED`. Directly answers 134F's central
-disclosed gap: the canonical record's own resume logic — not
-entry-point-specific marker checks — must recognize
-`completed_receipt_best_effort_incomplete` (renamed `NOTIFIED_UNCONFIRMED`)
-as terminal.
+Produced a 15-representation cross-representation model and
+representation-state matrix; a complete retry/resume matrix; a formalized
+`NOTIFIED_UNCONFIRMED` analysis; a duplicate/replay matrix; a failure-state
+model; a conformance-state mapping; a compatibility-state classification; an
+Architecture Status grouping investigation; a temporal model; and a
+final-revision staged-binding re-verification.
 
-## 6. Persistence and the non-atomic latest.md/latest.json finding
+## 6. Formal proofs
 
-Confirms and analyzes the 134F finding (`canonical_artifact_promotion.py`
-writes `latest.md`/`latest.json` as two independent non-atomic
-`path.write_text()` calls) against five candidate atomic-persistence
-mechanisms (single canonical record plus derived files; atomic directory
-promotion; manifest-based promotion; generation directories plus pointer
-switch; transactional local storage) without selecting one.
+Produced a state-machine determinism proof, a reachability analysis, a
+terminal-state analysis, and a safety proof (no execution, no backend
+invocation, no shell mediation, no Telegram inbound, no Decision Evaluation
+replacement, no Repository Intelligence authority expansion, no execution
+authorization, no irreversible effect before certification).
 
-## 7. Commit ownership and the fabricated-hash gap
+## 7. Deferred-question disposition
 
-Re-evaluates the pre-existing fabricated-hash gap in
-`detect_cross_phase_commit_contamination` architecturally: the future
-contract must make "unverifiable" a distinct, recorded outcome, never
-silently equivalent to "verified." Not repaired in this phase.
+Dispositioned all ten of 135C's non-blocking deferred questions: two
+resolved via derived clarification (the ORDER-series numbering gap; the
+NOTIFIED→TERMINAL_SUCCESS modeling-depth question), eight further
+constrained or re-verified without requiring any CLTR-001 text change. Found
+zero additional Blocking findings of its own.
 
-## 8. Strategic governance relationship
+## 8. Structural gaps re-confirmed still live (not repaired)
 
-All six persistent IRG advisory concerns (SRR-66C-002 age, SLR-69P-001/
-SRR-66B-001 lineage mismatch, OBJ-004 thin primary coverage, strategic_
-governance capability growth, 69P missing registered successor, and their
-contradiction-synthesis pairs) were classified as strategic-governance-
-authority concerns, not lifecycle-state-authority concerns, and kept
-explicitly out of Track 135 scope.
+All three 134F-disclosed structural gaps (resume-terminal classification;
+non-atomic `latest.md`/`latest.json`, confirmed at three write sites, not
+two; fabricated-hash silent acceptance) were independently re-confirmed
+still live, unrepaired, in current production source directly via source
+inspection in this phase's own session.
 
-## 9. Track 135 roadmap
+## 9. Verification
 
-Re-derives a 135A–135I+ sequence (135B Contract Freeze, 135C Contract
-Verification, 135D Cross-Representation Invariant Architecture & State-
-Machine Verification, 135E Prototype Plan, 135F Read-Only Prototype, 135G
-Prototype Verification, 135H Integration & Legacy Retirement Plan, 135I+
-later implementation only if architecture/contracts survive verification),
-matching the shape Track 134 and Repository Intelligence's tracks already
-proved at this granularity.
-
-## 10. Verification
-
-- Fast-green: 4391/4391 passed.
+- Fast-green: 4391/4391 passed (unchanged since 135C; no production source
+  or test file changed by 135D's own architecture work).
 - Compileall: passed.
-- No production source, test, schema, or entry-point behavior changed (no
-  full-suite regression run was required or performed — architecture-only
-  phase, no source/test files changed).
+- No production source, test, schema, or entry-point behavior changed by
+  135D's own architecture/verification work.
 
-## 11. No-Go confirmation
+## 10. No-Go confirmation
 
-No implementation occurred. No transition record was built. No schema was
-frozen. No source code was added or modified. No test was added or modified.
-No finalization or entry-point behavior changed. None of the three
-134F-disclosed structural gaps (resume-logic terminal classification, atomic
-latest-write, fabricated-hash gap) were repaired. No historical report was
+No implementation occurred. No JSON schema was frozen. No source code was
+added or modified by 135D's own architecture work. No test was added or
+modified. No finalization or entry-point behavior changed. None of the three
+134F-disclosed structural gaps were repaired. No historical report was
 rewritten. No immutable snapshot was modified. PFN-001 and PFR-001 are
 unchanged. No Repository Intelligence, Advisory, or Decision Evaluation
 authority change occurred. No execution capability, shell mediation,
 Telegram inbound control, or new communication channel was added. Runtime
-remains Observed/observe/unavailable. Phase 135B was not begun.
+remains Observed/observe/unavailable. CLTR-001 requires no amendment. Phase
+135E was not begun by 135D itself.
 
-## 12. Recommended next phase
+## 11. Recommended next phase
 
-Phase 135B — Canonical Lifecycle Transition Record Contract Freeze (not
-started).
+Phase 135E — Canonical Transition Record Prototype Plan (not started).

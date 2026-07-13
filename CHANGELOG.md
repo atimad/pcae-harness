@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Phase 135D.1 - Metadata-Repair Incident Investigation and Staleness Guard
+  (`docs/PHASE_135D.1_METADATA_REPAIR_INCIDENT_INVESTIGATION.md`).
+  Investigated the `pcae phase metadata-repair` phase_id corruption
+  disclosed during 135D's own finalization. Root-caused it to
+  `.pcae/phase-completion-report.md` (a separate, tracked, hand-authored
+  file, not Architecture Status) never being updated past 135A across
+  135B/135C/135D. Proved the rewrite occurred after certification/
+  promotion/notification and never touched the promoted report, marker,
+  or Telegram payload -- all correctly identified 135D throughout.
+  Classification: A -- certified 135D evidence internally correct, only
+  the terminal report's trust/completeness derivation was degraded, not
+  its identity. Repaired `.pcae/phase-completion-report.md` and added a
+  staleness guard to `run_phase_metadata_repair()`
+  (`src/pcae/commands/phase.py`) that refuses to overwrite metadata when
+  the canonical report disagrees with PROJECT_STATUS.md's own current
+  phase and metadata already agrees with it. 3 new regression tests;
+  fast_green 4391/4391; zero regressions.
 - Phase 135D - Cross-Representation Invariant Architecture and State-Machine
   Verification
   (`docs/PHASE_135_CROSS_REPRESENTATION_INVARIANT_ARCHITECTURE_AND_STATE_MACHINE_VERIFICATION.md`).
