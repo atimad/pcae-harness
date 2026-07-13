@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Sync Phase 135D.1 completion metadata (20260713-1012-sync-phase-135d-1-completion-metadata)
 - Phase 135D.1: Metadata-Repair Incident Investigation and Staleness Guard (20260713-1004-phase-135d-1-metadata-repair-incident-investigation-and-staleness-guard)
 - Revert erroneous Phase 135D metadata-repair phase-id corruption (20260712-2228-revert-erroneous-phase-135d-metadata-repair-phase-id-corruption)
 - Repair Phase 135D canonical report metadata (20260712-2224-repair-phase-135d-canonical-report-metadata)
