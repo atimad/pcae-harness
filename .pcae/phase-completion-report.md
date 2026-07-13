@@ -1,212 +1,191 @@
-# Phase 135E Complete — Canonical Transition Record Prototype Plan
+# Phase 135F Complete — Canonical Transition Record Read-Only Prototype
 
 ## 1. Phase Identity
 
-- **Phase ID:** `135E`
+- **Phase ID:** `135F`
 - **Status:** completed
-- **Phase class:** prototype plan (Track 135, sixth phase) — planning and documentation only
+- **Phase class:** prototype implementation (Track 135, seventh phase)
 - **Report completeness:** complete
 
 ## 2. Summary
 
-Produced `docs/PHASE_135_CANONICAL_TRANSITION_RECORD_PROTOTYPE_PLAN.md`, translating
-135A's architecture, CLTR-001 v1.0 (135B, frozen; 135C, verified with zero
-Blocking findings), 135D's full formal state-machine/invariant model
-(VERIFIED WITH NON-BLOCKING DEFERRED QUESTIONS), and 135D.1's incident
-lessons into a precise, staged prototype implementation plan for the first
-Canonical Lifecycle Transition Record prototype.
+Implemented `docs/PHASE_135_CANONICAL_TRANSITION_RECORD_READ_ONLY_PROTOTYPE.md`,
+the 135E-planned Stages 1-6 prototype: a fixture-driven generator, a
+standalone offline verifier, a read-only cross-representation comparator,
+atomic prototype-only persistence under `.pcae/cltr-prototypes/`, a minimal
+`pcae cltr-prototype` CLI, 15 fixtures, and 170 focused tests.
 
-## 3. Planning methodology
+## 3. Prototype boundary implemented (135E §3)
 
-Re-derived the prototype boundary from the four frozen/verified inputs
-rather than adopting the assignment's candidate list uncritically. Selected
-a **generator plus standalone offline verifier**, fixture-driven by default
-with one explicit read-only "reconstruct from named live artifacts" mode —
-rejecting a live shadow-generator hook into `finalization_transaction.py` as
-not the smallest safe boundary, per 135D §41.3's own recommendation.
-Reconciled the assignment's "15-representation" figure against 135D §9's
-literal 16-row table by treating the canonical record itself as the
-comparison anchor (row 1) and the other 15 rows as the comparison-target
-set (documented explicitly in the plan's §0 methodology note, not silently
-asserted as a 135D discrepancy).
+Selected model implemented exactly: generator + standalone offline
+verifier, fixture-driven. Writes confined to `.pcae/cltr-prototypes/` only
+(`persistence.py`'s write prefix is a hardcoded module constant). Zero
+import coupling to `finalization_transaction.py` or any production entry
+point, re-verified structurally (not merely asserted) by 30 import-graph/
+source-inspection safety tests. No shell execution, no backend invocation,
+no network call, no Telegram delivery, no phase completion, no commit/
+push, no write outside the prototype path exists anywhere in the module
+graph.
 
-## 4. Selected prototype purpose and scope (plan §1-§2)
+## 4. Module architecture, data model, serialization, digest (135E §4-§7)
 
-Defined ten things the prototype must prove (deterministic representation,
-state derivation, exact identity binding, evidence-without-strengthening,
-comparison against one record, all-36-invariant reporting, retry/terminal
-classification, digest tamper detection, historical compatibility
-disclosure, no authority replacement) and six things it explicitly does not
-prove (concurrency safety, final production schema, full legacy migration,
-commit-ownership policy resolution, CLI production status, scale/
-performance). Selected nine minimum transition-slice scenarios (normal
-success; pre-certification failure; post-promotion notification
-uncertainty; exact replay; conflicting replay; tamper detection; identity
-mismatch; commit-ownership contamination/unverifiable; mixed derivative
-generation) plus a full 14-state/16-transition fixture superset.
+Implemented all 12 prototype-only modules named in the plan: `models.py`,
+`identity.py`, `state_machine.py`, `invariants.py`, `canonicalization.py`,
+`digest.py`, `generator.py`, `verifier.py`, `compatibility.py`,
+`comparison.py`, `persistence.py`, `commands/cltr_prototype.py`. Data
+model implemented as a frozen `TransitionRecord` dataclass with
+state-dependent required-field validation enforced structurally (no
+`certified_state` at CERTIFIED raises; each transition function requires
+the fields its target state needs). Serialization: sorted keys, UTF-8,
+omitted-not-null optional fields, sorted commit lists for output
+determinism, `schema_version`/`contract_version` fields present and
+distinct. Digest: SHA-256 with self-exclusion, full-content binding,
+transition-ID co-binding, tamper detection (byte-level mutation to a
+persisted record changes the digest), and cross-transition-substitution
+detection (a different transition's record never produces the same
+digest) — all verified directly by test.
 
-## 5. Prototype boundary (plan §3)
+## 5. Identity, state machine, invariants, authority roles (135E §8-§11)
 
-Frozen as: fixture-driven generator + standalone offline verifier, explicit-
-bundle integration mode only for named real artifacts (never directory
-scans or "latest" globbing). Writes confined to `.pcae/cltr-prototypes/`
-only. Zero import coupling to `finalization_transaction.py` or any
-production entry point. Explicit prohibited-side-effect list matches the
-assignment's list verbatim (no canonical report/metadata/Architecture
-Status change, no checkpoint, no promotion, no notification, no marker/
-receipt write, no active-task mutation, no completion authorization, no
-command execution beyond bounded read-only `git` inspection of explicitly
-supplied hashes/revisions).
+`identity.py` resolves identity exclusively from explicit declared fields,
+reusing `architecture_status.py:51`'s `PHASE_ID_RE` verbatim, applied
+exactly once. Zero title/filename/commit-subject/recent-Git-history code
+path (verified by AST-based inspection of the module's executable
+statements, not merely a textual absence check). All 14 states (12 spine +
+2 orthogonal flags) and all 16 permitted transitions are implemented as
+one function each, with no generic `set_state` escape hatch anywhere in
+the module (verified by test). All 14 forbidden transitions are rejected
+deterministically under test, each raising `ForbiddenTransitionError`
+carrying the matched forbidden-transition ID. The invariant engine
+evaluates one function per invariant ID named in 135D §11's table — 37
+distinct IDs are named there (135D §11.1's own prose says "36"; this
+discrepancy is documented in the implementation report as a pre-existing
+inconsistency in the frozen source, not silently resolved). No applicable
+invariant is ever silently skipped (`evaluate_invariants()` always returns
+exactly `INVARIANT_COUNT` results). S/R/D/E/V authority roles are enforced
+structurally: only `TransitionRecord` carries spine-authority fields, no
+derivative module can construct one, evidence references never carry a
+`status` field the record would read back as ground truth, and `verifier.py`
+always re-measures rather than trusting a prior verification result.
 
-## 6. Module architecture, data model, serialization, digest (plan §4-§7)
+## 6. Commit ownership, evidence, comparison, persistence, CLI (135E §12-§16)
 
-Planned 12 prototype-only modules (`models.py`, `identity.py`,
-`state_machine.py`, `invariants.py`, `canonicalization.py`, `digest.py`,
-`generator.py`, `verifier.py`, `compatibility.py`, `comparison.py`,
-`persistence.py`, `commands/cltr_prototype.py`), each with responsibility,
-allowed dependencies, prohibited responsibilities, public API, error model,
-and test boundary. Translated CLTR-001 §6.2's 30-item field list into
-required/conditional/state-dependent/derived classification without
-freezing a production schema. Planned prototype-local JSON serialization
-(sorted keys, UTF-8, omitted-not-null optional fields, sorted commit lists,
-ISO-8601 UTC timestamps, explicit `schema_version`/`contract_version`
-fields) explicitly disposable and distinct from any future production wire
-format. Planned SHA-256 canonicalization/digest with self-exclusion,
-full-content binding, transition-ID co-binding, and explicit tamper/stale/
-cross-transition-substitution detection behavior.
+Implemented CLTR-001 §10.4's three-outcome commit model literally: a
+declared commit hash with no explicit classification hint defaults to
+`unverifiable`, never silently `verified` — the direct prototype-level
+avoidance of production `phase_reports.py`'s known silent-`continue` gap
+(not repaired in production; only never repeated here). Evidence
+references (`EvidenceRef`) carry identity, digest, and an honest
+`verification_status`/`limitation`, never copied content.
+`comparison.compare()` implements read-only comparison against the 15
+non-anchor representation kinds from 135D §9, with mixed-generation
+detection (two targets in one comparison call disclosing different
+`transition_id`s) verified by test. `persistence.py` implements the exact
+atomic layout from the plan
+(`.pcae/cltr-prototypes/generations/<transition-id>/{record,verification,manifest}.json`
++ per-phase `latest.json`), using temp-file/fsync/`os.replace()`, with
+manifest-based crash-recovery fallback when the pointer is missing,
+corrupt, or incomplete. The CLI implements exactly the five commands
+planned (`generate`, `show`, `verify`, `compare`, `list`), namespaced
+`cltr-prototype`, with no `repair`/`promote`/`complete`/`notify` command
+existing anywhere in the argparse wiring.
 
-## 7. Identity, state machine, invariants, authority roles (plan §8-§11)
+## 7. Fixtures, tests, compatibility, migration boundary (135E §17-§20)
 
-Planned identity resolution reusing the existing generalized phase-ID
-grammar (`architecture_status.py:51`) applied exactly once, at binding
-time, with explicit rejection of prefix inference, regex truncation,
-commit-subject-as-authority, recent-Git fallback, report-field-presence-as-
-proof, and ambiguous aliases. Mapped all 14 states and all 16 permitted/14
-forbidden transitions to one function per named transition with no generic
-"set state" escape hatch. Planned an invariant engine covering all 36
-formal invariants (135D §11) with mandatory non-skippable evaluation and
-explicit `inapplicable` (not `pass`) for out-of-lifecycle-scope invariants.
-Mapped S/R/D/E/V authority roles to concrete type-level enforcement
-(frozen dataclasses, one-way derivative construction, append-only event
-lists, timestamped observations).
+Implemented all 15 fixtures named in the plan (plus 2 companion legacy
+artifacts), each hermetic and using fixed literal timestamps. Implemented
+170 focused tests across unit, integration, adversarial, determinism,
+persistence, CLI, and safety categories — every category named in 135E
+§18 is represented. `compatibility.py` implements read-only adapters for
+every legacy/current artifact kind named in the plan, disclosing
+`missing_fields` explicitly and never manufacturing an identity value; it
+is the only module in the package permitted to parse a narrative title,
+and only for comparison/disclosure, never as generator input. No
+production integration, legacy-authority retirement, or historical-
+artifact upgrade occurred — all remain out of scope, deferred to a future
+135H-class phase.
 
-## 8. Commit ownership, evidence, comparison, persistence, CLI (plan §12-§16)
+## 8. 135D.1 protections, error model, conformance, safety (135E §21-§25)
 
-Implemented CLTR-001 §10.4's three-outcome commit model
-(verified/contaminated/unverifiable) literally, with no production-repair
-claim and no policy decision on `unverifiable`'s severity (left deferred).
-Planned evidence references as identity+digest+limitation, never copies.
-Planned comparison against the 15 non-anchor representation rows from
-135D §9 (report, metadata, Architecture Status, snapshot, checkpoint,
-promoted report, promoted metadata, mutable latest pointer, notification
-payload, notification result, marker, receipt, Git attribution view,
-repository transition view, terminal repository-state observations), each
-field classified exact-match/digest-bound/derived/presentation-only/
-tolerated-legacy-absent/conflict/unverifiable/quarantine-recommended.
-Planned an atomic, disjoint persistence path
-(`.pcae/cltr-prototypes/generations/<transition-id>/...` +
-`latest.json`) using the same temp-file-fsync-then-`os.replace()` pattern
-already proven in production. Planned a minimal five-command CLI namespaced
-`cltr-prototype` (distinct from any future production `cltr` family),
-structurally incapable of completing phases, promoting artifacts, sending
-notifications, or authorizing execution.
+All eight 135D.1-derived safeguards from the plan are implemented and
+independently tested: explicit identity outranks narrative identity;
+`compatibility.py`'s narrative adapter is read-only, comparison-only;
+source disagreement (`identity.check_identity_conflict()`,
+`compatibility.classify_legacy_artifact(..., declared_identity=...)`)
+always produces a `conflict`/`conflicting` result, never a silent
+resolution in either direction; this prototype has no repair module at
+all. The structured error model (`MissingInputAuthorityError`,
+`IdentityError`, `ForbiddenTransitionError`, `UnsupportedSchemaVersionError`,
+`UnsupportedContractVersionError`, `ImmutableGenerationExistsError`,
+`PointerCorruptError`, etc.) is implemented as distinct exception classes,
+never a bare string. Conformance (`ConformanceClassification`, 7 values)
+is computed by `verifier.py` as a dimension separate from
+`lifecycle_state`, never merged into one status string. The safety proof
+(no shell execution beyond none at all — this prototype has zero `git`
+subprocess calls, not even the bounded read-only ones the plan allowed for
+an integration-fixture mode that was not implemented this phase; no
+backend invocation; no network calls; no Telegram; no phase completion; no
+commit/push; no write outside `.pcae/cltr-prototypes/`) is verified
+structurally by 30 dedicated safety tests, not merely stated.
 
-## 9. Fixtures, tests, compatibility, migration boundary (plan §17-§20)
+## 9. Acceptance criteria and verdict
 
-Planned 15 deterministic, hermetic-by-default fixtures covering every
-required scenario plus tamper/stale/superseded/legacy-no-transition-ID
-cases. Planned unit, integration, adversarial, and determinism test
-categories (test creation itself out of scope for this planning phase).
-Planned read-only compatibility adapters for every legacy/current artifact
-kind, each required to disclose missing fields honestly, never manufacture
-authority, and never mutate source artifacts. Explicitly bounded the
-migration scope: no production integration, no legacy-authority retirement,
-no historical-artifact upgrade to newly authoritative status — all deferred
-to a future 135H-class integration-planning phase.
+All 17 acceptance criteria from 135E §28 were met: deterministic output;
+stable digest with tamper/mutation detection; full dotted/multi-dotted/
+suffixed identity preservation; no implicit transitions; all 37 invariants
+evaluable with no silent skip; all 14 forbidden transitions rejected under
+test; exact replay resolves to the existing record (idempotent re-persist);
+conflicting replay rejected (`ImmutableGenerationExistsError`); commit
+ownership classified into exactly one of three outcomes, with no silent
+default to `verified`; mixed-generation comparison targets detected;
+tampering detected via digest mismatch; historical/legacy compatibility
+disclosed honestly; zero production lifecycle mutation (verified directly
+by a before/after path-snapshot-style test); zero external notification
+sent; zero execution capability introduced; all 170 planned focused tests
+pass; governance remains clean throughout implementation.
 
-## 10. 135D.1 protections, error model, conformance, safety (plan §21-§25)
+**Verdict: A — PROTOTYPE COMPLETE.** No required prototype behavior or
+acceptance criterion is missing; no gap required inventing policy CLTR-001/
+135D/135E left deferred (the two genuine documented gaps — the 36-vs-37
+invariant count discrepancy in 135D's own prose, and the "applicable but
+unevaluable" tri-state interpretation for invariants lacking a supplied
+comparison bundle — are both disclosed explicitly in the implementation
+report, not silently absorbed, and neither affects authority, identity,
+determinism, state-machine correctness, invariant evaluation, digest
+integrity, or safety isolation).
 
-Encoded eight explicit 135D.1-derived safeguards (explicit identity beats
-narrative identity; no repair capability at the prototype layer at all;
-source disagreement always produces a `conflict` result, never a silent
-resolution in either direction; source age/identity always disclosed by
-compatibility adapters; no title-parsing anywhere in `identity.py`).
-Planned a structured, machine-readable error model (14 named error
-classes/result-tags). Planned conformance as a dimension separate from
-lifecycle state (seven values: conformant, conformant_with_legacy_adapter,
-incomplete, conflicting, unverifiable, quarantined, superseded). Planned an
-explicit safety proof (no shell mediation beyond bounded read-only `git`
-calls, no backend invocation, no network calls, no Telegram, no phase
-completion, no commit/push, no write outside the prototype path, no
-Decision Evaluation, no execution authorization, no Repository Intelligence
-authority) as a structurally verifiable claim, not merely a stated
-intention.
+## 10. Verification
 
-## 11. Staging, files, acceptance, verification, deferrals, risk (plan §26-§31)
-
-Planned a 7-stage dependency-ordered implementation sequence (foundation;
-identity+state-machine; invariants; generation+persistence; verification+
-comparison; CLI+full fixture set; adversarial/determinism verification).
-Listed every proposed future file with responsibility, dependencies, test
-file, and prototype-only status (14 files; zero production-file
-modifications). Defined 17 acceptance criteria and 8 independent prototype-
-verification criteria for a future 135G-class phase. Classified 11 deferred
-decisions (atomic-visibility mechanism choice, `unverifiable`-severity
-policy, transition-ID scheme, production serialization bytes, event schema,
-final-revision grace-period bound, historical backfill, legacy-authority
-migration sequencing, CLTR-001's own carried-forward findings, module
-layout, CLI naming) by resolution stage. Produced a 14-row risk register
-(accidental production coupling; derivative-becoming-authority; adapter
-strengthening evidence; serialization/digest instability; state-machine
-drift; implicit transitions; non-hermetic tests; path confusion; stale
-source selection; policy leakage; terminal-replay bugs; atomic-pointer
-failure; overbuilding), each with likelihood, impact, mitigation, and
-verification method.
-
-## 12. Phase sequence recommendation and verdict (plan §32-§33)
-
-Recommended 135F (Read-Only Prototype implementation) → 135G (Prototype
-Verification) → 135H (Lifecycle Integration and Legacy Authority Retirement
-Plan), explicitly non-binding on exact titles. Explained why no separate
-executable schema-freeze phase is required before 135F: CLTR-001 and 135D
-already freeze every semantic/state-machine/invariant requirement a schema
-must satisfy; only disposable wire-format bytes remain open, and CLTR-001
-itself repeatedly defers those to be resolved empirically via prototyping,
-not via a prior schema freeze.
-
-**Verdict: A — READY FOR PROTOTYPE IMPLEMENTATION.** No lifecycle
-semantics remain unresolved beyond what CLTR-001/135D already froze and
-verified; the serialization plan is deterministic and explicitly disposable;
-the state-machine implementation path is explicit with no generic
-transition escape hatch; all 36 invariants are evaluable by design; the
-prototype boundary is isolated with a disjoint persistence path; the test
-plan is complete relative to required scenarios; no production integration
-is required or attempted anywhere in this plan.
-
-## 13. Verification
-
-- This is a planning and documentation phase only. No source file, test
-  file, or JSON schema was created or modified.
+- Focused tests: `tests/test_cltr_prototype*.py` — 170 passed, 0 failed.
+- `compileall` over `src/pcae` (including the new `cltr_prototype` package
+  and CLI wiring): passed.
+- `fast_green`: 4391/4391 passed, 0 failed — 2 parallel (`-n auto`) runs
+  plus 1 serial run, all identical, zero regressions from this
+  implementation phase.
 - `pcae health`: healthy. `pcae check`: passed. `pcae doctor task-memory`:
-  clean. `compileall` over `src/pcae` (unmodified): passed, as a sanity
-  check only — no source change occurred. `fast_green`: 4391/4391 passed,
-  re-run to confirm zero regressions from this planning-only phase.
+  clean. `pcae push check`: clean (after push). `pcae runtime inspect`:
+  Observed / observe / execution unavailable (unchanged).
 
-## 14. No-Go confirmation
+## 11. No-Go confirmation
 
 No CLTR-001 contract change occurred. No JSON schema was frozen. No
-finalization or entry-point behavior changed. No production source or test
-file was created or modified. No CLI command was added. No prototype
-artifact was created under `.pcae/cltr-prototypes/` or anywhere else. No
-Track 134 structural gap (non-atomic `latest.*` pair; fabricated-hash
-silent acceptance; NOTIFIED_UNCONFIRMED-equivalent production resume
-classification) was repaired. No historical report was rewritten. No
+production finalization or entry-point behavior changed —
+`finalization_transaction.py` and the four production entry points do not
+import, and are not imported by, any `cltr_prototype` module. No
+production canonical report, completion metadata, checkpoint, marker, or
+receipt was written by the prototype. No prototype artifact was written
+outside `.pcae/cltr-prototypes/`. No Track 134/135A/135D structural gap
+(non-atomic `latest.*` pair; fabricated-hash silent acceptance;
+NOTIFIED_UNCONFIRMED-equivalent production resume classification) was
+repaired in production code — this prototype only demonstrates its own
+model does not repeat these gaps. No historical report was rewritten. No
 immutable snapshot was modified. PFN-001 and PFR-001 are unchanged. No
 Repository Intelligence, Advisory, or Decision Evaluation authority change
-occurred. No execution capability, shell mediation, Telegram inbound
-control, or new communication channel was added. No identity-consistency
-invariant was weakened. Phase 135F was not begun.
+occurred. No execution capability, shell mediation, subprocess call,
+Telegram inbound control, or new communication channel was added. No
+identity-consistency invariant was weakened. Phase 135G was not begun.
 
-## 15. Recommended next phase
+## 12. Recommended next phase
 
-Phase 135F — Canonical Transition Record Read-Only Prototype (not started).
+Phase 135G — Canonical Transition Record Prototype Independent
+Verification (not started).
