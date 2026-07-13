@@ -31,6 +31,7 @@ from pcae.core.phase_reports import (
     make_phase_report,
     build_architecture_status,
     write_phase_report,
+    write_quarantined_report,
     read_latest_report,
     write_notification_dispatch_marker,
     PhaseReport,
@@ -226,6 +227,7 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
         )
         if txn_result.status in (
             "pre_promotion_certification_failed", "promotion_and_dispatch_failed",
+            "promotion_outcome_unconfirmed",
         ):
             if args.json:
                 print(json.dumps({
@@ -239,7 +241,34 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
             return 1
         outcome = txn_result.promotion_and_dispatch or {}
     else:
-        outcome = _promote_and_dispatch()
+        # Phase 135H.2 — recovery is not a promotion override.  The old
+        # fallback called ``write_phase_report`` here, which made a blocked
+        # or partial recovery candidate canonical before dispatch correctly
+        # declined it.  Preserve the attempt as immutable quarantine evidence
+        # and stop: no canonical write, transaction, marker, receipt, or
+        # notification is authorized by a failed gate.
+        blockers = [str(item) for item in _gate.get("blockers", [])]
+        paths = write_quarantined_report(report, reports_dir, blockers)
+        if args.json:
+            print(json.dumps({
+                "status": "rejected",
+                "phase_id": report.phase_id,
+                "promotion_status": "quarantined",
+                "blockers": blockers,
+                "paths": paths,
+                "notification": {
+                    "outcome": "skipped",
+                    "reason": "finalization gate did not pass; rejected recovery candidates are never promoted",
+                },
+            }, indent=2, sort_keys=True))
+        else:
+            print(f"Phase report creation: BLOCKED ({report.phase_id})")
+            for blocker in blockers:
+                print(f"  Blocker: {blocker}")
+            print(f"  Quarantine markdown: {paths['quarantine_markdown']}")
+            print(f"  Quarantine JSON:     {paths['quarantine_json']}")
+            print("Notification dispatch: skipped")
+        return 1
 
     paths = outcome["paths"]
     notification = outcome["notification"]
@@ -264,6 +293,164 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
             print(f"  [{r.get('sink_name', '?')}]: {status} — {r.get('message', '')}")
 
     return 0
+
+
+def run_phase_report_reconcile(args: argparse.Namespace) -> int:
+    """Inspect marker/checkpoint/receipt agreement without causing effects.
+
+    Phase 135H.2 makes recovery reconciliation a public, deterministic,
+    read-only operation.  A marker is never treated as sufficient proof on
+    its own: the bound canonical report, completed checkpoint, and finalized
+    receipt must all agree before the result is ``reconciled``.  This command
+    never promotes, dispatches, writes a marker, or synthesizes a receipt.
+    """
+    reports_dir = Path(getattr(args, "reports_dir", None) or DEFAULT_REPORTS_DIR)
+    phase_id = str(args.phase_id)
+    transaction_root = Path(
+        getattr(args, "transaction_root", None) or ".pcae/finalization-transactions"
+    )
+
+    report: PhaseReport | None = None
+    report_path: Path | None = None
+    candidates = [reports_dir / "latest.json"] + sorted(
+        (
+            path for path in reports_dir.glob("*.json")
+            if path.name != "latest.json" and path.name[:1].isdigit()
+        ),
+        reverse=True,
+    )
+    seen: set[Path] = set()
+    promoted_generation_count = 0
+    for path in candidates:
+        if path in seen or not path.is_file():
+            continue
+        seen.add(path)
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if data.get("phase_id") != phase_id:
+            continue
+        if path.name != "latest.json":
+            promoted_generation_count += 1
+        if report is None:
+            try:
+                report = PhaseReport(**data)
+                report_path = path
+            except TypeError:
+                continue
+
+    marker_path = Path(
+        getattr(args, "marker_path", None)
+        or ".pcae/phase-reports/.last-notified.json"
+    )
+    checkpoint_path = transaction_root / f"{phase_id}.json"
+    checkpoint: dict[str, Any] = {}
+    if checkpoint_path.is_file():
+        try:
+            raw = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+            if isinstance(raw, dict):
+                checkpoint = raw
+        except (OSError, json.JSONDecodeError):
+            checkpoint = {"status": "corrupt"}
+
+    report_digest = compute_report_digest(report) if report is not None else ""
+    snapshot_id = compute_finalization_snapshot_id(report) if report is not None else ""
+    from pcae.core.phase_reports import notification_dispatch_state
+    marker_state = notification_dispatch_state(
+        phase_id,
+        marker_path=marker_path,
+        report_digest=report_digest,
+        finalization_snapshot_id=snapshot_id,
+    )
+
+    checkpoint_state = str(checkpoint.get("status", "absent"))
+    checkpoint_matches = bool(
+        checkpoint
+        and checkpoint.get("phase_id") == phase_id
+        and checkpoint.get("report_digest") == report_digest
+        and checkpoint.get("finalization_snapshot_id") == snapshot_id
+    )
+    receipt_path_raw = str(checkpoint.get("receipt_path", ""))
+    receipt_path = Path(receipt_path_raw) if receipt_path_raw else None
+    receipt_state = "absent"
+    if receipt_path is not None and receipt_path.is_file():
+        try:
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            if (
+                isinstance(receipt, dict)
+                and receipt.get("phase_id") == phase_id
+                and receipt.get("finalized") is True
+            ):
+                receipt_state = "finalized"
+            else:
+                receipt_state = "conflict"
+        except (OSError, json.JSONDecodeError):
+            receipt_state = "corrupt"
+
+    blockers: list[str] = []
+    if report is None:
+        blockers.append("no promoted report generation found for phase")
+    elif report.report_completeness != "complete":
+        blockers.append("promoted report is not trust-complete")
+    if marker_state == "payload_conflict":
+        blockers.append("notification marker payload conflicts with the promoted report")
+    if checkpoint and not checkpoint_matches:
+        blockers.append("checkpoint identity conflicts with the promoted report")
+    if receipt_state in ("conflict", "corrupt"):
+        blockers.append("receipt is corrupt or conflicts with the phase identity")
+
+    if blockers:
+        reconciliation_status = "conflict"
+    elif (
+        marker_state == "already_dispatched"
+        and checkpoint_state == "completed"
+        and checkpoint_matches
+        and receipt_state == "finalized"
+    ):
+        reconciliation_status = "reconciled"
+    elif marker_state == "already_dispatched":
+        reconciliation_status = "delivery_recorded_bookkeeping_incomplete"
+    elif (
+        checkpoint_state == "in_progress"
+        and checkpoint.get("steps", {}).get("promotion_and_dispatch") == "in_progress"
+    ):
+        reconciliation_status = "promotion_outcome_unconfirmed"
+    else:
+        reconciliation_status = "not_delivered"
+
+    payload = {
+        "phase_id": phase_id,
+        "reconciliation_status": reconciliation_status,
+        "report_path": str(report_path) if report_path else None,
+        "report_digest": report_digest or None,
+        "finalization_snapshot_id": snapshot_id or None,
+        "report_completeness": report.report_completeness if report else None,
+        "promoted_generation_count": promoted_generation_count,
+        "marker_state": marker_state,
+        "marker_path": str(marker_path),
+        "checkpoint_state": checkpoint_state,
+        "checkpoint_matches": checkpoint_matches,
+        "checkpoint_path": str(checkpoint_path),
+        "receipt_state": receipt_state,
+        "receipt_path": str(receipt_path) if receipt_path else None,
+        "blockers": blockers,
+        "mutation_performed": False,
+        "redispatch_performed": False,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    else:
+        print(f"Phase report reconciliation: {phase_id}")
+        print(f"  Status: {reconciliation_status}")
+        print(f"  Promoted generations: {promoted_generation_count}")
+        print(f"  Marker: {marker_state}")
+        print(f"  Checkpoint: {checkpoint_state}")
+        print(f"  Receipt: {receipt_state}")
+        for blocker in blockers:
+            print(f"  Blocker: {blocker}")
+        print("  Mutation: none (inspection only)")
+    return 0 if reconciliation_status == "reconciled" else 1
 
 
 def _dispatch_manual_report_notification(
@@ -312,8 +499,10 @@ def _dispatch_manual_report_notification(
     active_task_title: str | None = None
     try:
         from pcae.core.paths import HarnessPath
-        from pcae.core.tasks import find_latest_active_task
-        active_task = find_latest_active_task(HarnessPath.cwd())
+        from pcae.core.tasks import find_latest_active_task_with_status
+        # A paused contract is lifecycle context, not active recovery
+        # identity.  Recovery must never inherit a stale paused title.
+        active_task = find_latest_active_task_with_status(HarnessPath.cwd(), "active")
         active_task_title = active_task.title if active_task else None
     except Exception:
         active_task_title = None

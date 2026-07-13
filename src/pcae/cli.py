@@ -427,6 +427,7 @@ from pcae.commands.permission_broker import (
 )
 from pcae.commands.phase_reports import (
     run_phase_report_create,
+    run_phase_report_reconcile,
     run_phase_report_show,
     run_phase_report_trust,
     run_phase_report_consistency,
@@ -6005,6 +6006,17 @@ def build_parser() -> argparse.ArgumentParser:
     pr_create_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
     pr_create_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
     pr_create_parser.set_defaults(handler=run_phase_report_create)
+
+    pr_reconcile_parser = pr_subparsers.add_parser(
+        "reconcile",
+        help="Inspect promoted-report, marker, checkpoint, and receipt agreement.",
+    )
+    pr_reconcile_parser.add_argument("--phase-id", required=True, help="Phase identifier.")
+    pr_reconcile_parser.add_argument("--reports-dir", default=None, help="Reports directory (default: .pcae/phase-reports).")
+    pr_reconcile_parser.add_argument("--transaction-root", default=None, help="Finalization transaction directory.")
+    pr_reconcile_parser.add_argument("--marker-path", default=None, help="Notification marker path.")
+    pr_reconcile_parser.add_argument("--json", action="store_true", help="Machine-readable JSON output.")
+    pr_reconcile_parser.set_defaults(handler=run_phase_report_reconcile)
 
     pr_show_parser = pr_subparsers.add_parser(
         "show",

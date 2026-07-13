@@ -1485,3 +1485,26 @@
   materially worse and does not change commit-attribution behavior.
 - The original 134E.10.1V report and all historical reports remain immutable.
   Phase 134F is not activated by this decision.
+# 2026-07-13 — Phase 135H.2 exactly-once promotion boundary
+
+- Treat report recovery as a first-class production finalization attempt, not
+  as authority to bypass a failed finalization gate.
+- Persist rejected, partial, and failed-pre-certification candidates only as
+  uniquely identified quarantine evidence; never write a normal generation or
+  canonical pointer for them.
+- Require every gate-passing production entry point to enter the shared
+  finalization transaction before promotion and dispatch.
+- Persist `promotion_and_dispatch: in_progress` immediately before irreversible
+  adapter entry. If completion cannot be confirmed, prohibit automatic replay
+  and require observation/reconciliation.
+- Keep `--allow-partial-report` command-success compatibility, but remove its
+  ability to confer promotion or notification authority.
+- Use only embedded-status `active` tasks as manual recovery identity context;
+  paused task files are not active identity.
+- Expose marker/checkpoint/receipt reconciliation as read-only inspection in
+  135H.2. Do not synthesize receipts, alter checkpoints, or redispatch from a
+  marker alone.
+- Preserve the historical 135H partial promoted generation as audit evidence;
+  do not rewrite history to make the pre-repair count appear compliant.
+- Leave PFN-001, PFR-001, CLTR-001, runtime capability, and execution
+  availability unchanged. Stop after 135H.2; do not begin 135I.

@@ -1,5 +1,20 @@
 # Changelog
 
+- Phase 135H.2 — Lifecycle Recovery Hardening and Exactly-Once Promotion
+  (`docs/PHASE_135H.2_LIFECYCLE_RECOVERY_HARDENING_AND_EXACTLY_ONCE_PROMOTION.md`).
+  Reproduced the 135H.1 manual-recovery authority escape and removed every
+  gate-failing promotion fallback across manual report recovery, phase
+  completion, and task finish. Rejected and partial candidates now persist
+  only as uniquely named quarantine evidence. Added a persisted irreversible-
+  adapter intent barrier so uncertain promotion outcomes never auto-replay,
+  status-aware paused-task identity discovery, and public read-only
+  report/marker/checkpoint/receipt reconciliation. Focused lifecycle tests pass
+  369/369; fast-green passes 4391/4391; all 23 change-related failures exposed
+  by a full-suite audit were corrected and the affected modules pass 439/439.
+  Three independently reproduced legacy assertion failures remain unrelated.
+  PFN-001, PFR-001, CLTR-001, runtime capability, and execution availability
+  remain unchanged; 135I was not started.
+
 - Investigated the missing Phase 135H terminal report and proved that
   task-finish rejected mixed 135G/135H identity evidence before the shared
   finalization transaction; no report promotion, Telegram attempt, marker, or

@@ -442,13 +442,11 @@ def _finalize_report_and_notify(
         suppressed_notify_enabled = _os.environ.get("PCAE_NOTIFY_ENABLED")
         _os.environ["PCAE_NOTIFY_ENABLED"] = ""
 
-    # Phase 113X.1 — finalization gate enforcement (113X Finding 1): a
-    # blocked gate must quarantine the report instead of overwriting
-    # latest.md/latest.json. --allow-partial-report is the pre-existing,
-    # explicit human override (105D) and keeps its prior behavior exactly
-    # — it still writes the report canonically and proceeds. The gate is
-    # only enforced (passed through) when that override was not given.
-    enforced_gate = None if allow_partial_report else gate
+    # Phase 135H.2 — no override may confer canonical promotion authority.
+    # ``--allow-partial-report`` may preserve the command's logical
+    # proceed/exit behavior, but a blocked or partial candidate is still
+    # quarantined and never promoted.
+    enforced_gate = gate
 
     def _promote_and_dispatch() -> dict:
         try:
@@ -485,7 +483,7 @@ def _finalize_report_and_notify(
     # newly-integrated modules' mandatory pre-promotion stages succeeding
     # first. A pre-promotion failure means _promote_and_dispatch() above is
     # never called at all -- no promotion, no dispatch, no marker.
-    if gate.get("finalizable") and not allow_partial_report:
+    if gate.get("finalizable"):
         from pcae.core.finalization_transaction import run_finalization_transaction
         txn_result = run_finalization_transaction(
             phase_id=phase_id,
@@ -504,6 +502,12 @@ def _finalize_report_and_notify(
             print("Finalization transaction (134E.10.1): promotion/dispatch failed")
             for limitation in txn_result.limitations:
                 print(f"  {limitation}")
+            return False
+        if txn_result.status == "promotion_outcome_unconfirmed":
+            print("Finalization transaction (135H.2): BLOCKED — prior promotion outcome is unconfirmed")
+            for limitation in txn_result.limitations:
+                print(f"  {limitation}")
+            print("  Automatic replay is forbidden; inspect/reconcile without redispatch.")
             return False
         fin = txn_result.promotion_and_dispatch or {}
         print(f"Finalization transaction (134E.10.1): {txn_result.status}")

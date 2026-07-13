@@ -463,7 +463,7 @@ class TestExistingBehaviorPreservation:
         exit_code = main(["phase-report", "trust", "--reports-dir", str(reports_dir), "--json"])
         assert exit_code == 0
 
-    def test_phase_report_show_trust_unchanged(self, tmp_path, monkeypatch, capsys):
+    def test_phase_report_show_does_not_activate_rejected_candidate(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         reports_dir = tmp_path / "phase-reports"
         exit_code = main([
@@ -471,10 +471,12 @@ class TestExistingBehaviorPreservation:
             "--status", "completed", "--summary", "s", "--reports-dir", str(reports_dir),
         ])
         capsys.readouterr()
+        assert exit_code == 1
         exit_code = main(["phase-report", "show", "--reports-dir", str(reports_dir), "--trust"])
         output = capsys.readouterr().out
-        assert exit_code == 0
-        assert "Trust Gate (Phase 105B)" in output
+        assert exit_code == 1
+        assert "No phase report found" in output
+        assert list((reports_dir / "quarantine").glob("*.blocked.json"))
 
 
 # ── Group G: No-execution guards ─────────────────────────────────────────────

@@ -24,6 +24,15 @@ def _json(args: list[str]) -> dict:
     return json.loads(result.stdout)
 
 
+def _seed_report(directory: str, *, phase_id: str, phase_name: str, summary: str, files_changed: int = 0, tests_run: int = 0) -> None:
+    from pcae.core.phase_reports import make_phase_report, write_phase_report
+    report = make_phase_report(
+        phase_id=phase_id, phase_name=phase_name, status="completed",
+        summary=summary, files_changed=files_changed, tests_run=tests_run,
+    )
+    write_phase_report(report, Path(directory))
+
+
 # ── create ───────────────────────────────────────────────────────────────────
 
 
@@ -37,23 +46,25 @@ def test_create_text():
             "--summary", "All done.",
             "--reports-dir", td,
         ])
-        assert result.returncode == 0
+        assert result.returncode == 1
         assert "90A-test" in result.stdout
-        assert Path(td, "latest.md").exists()
-        assert Path(td, "latest.json").exists()
+        assert not Path(td, "latest.md").exists()
+        assert list(Path(td, "quarantine").glob("*.blocked.json"))
 
 
 def test_create_json():
     with tempfile.TemporaryDirectory() as td:
-        data = _json([
+        result = _run([
             "create",
             "--phase-id", "90A-test",
             "--phase-name", "Test Phase",
             "--status", "completed",
             "--summary", "All done.",
-            "--reports-dir", td,
+            "--reports-dir", td, "--json",
         ])
-        assert data["status"] == "created"
+        assert result.returncode == 1
+        data = json.loads(result.stdout)
+        assert data["status"] == "rejected"
         assert data["phase_id"] == "90A-test"
 
 
@@ -83,7 +94,8 @@ def test_create_with_all_fields():
             "--recommended-next-phase", "91A",
             "--reports-dir", td,
         ])
-        assert result.returncode == 0
+        assert result.returncode == 1
+        assert list(Path(td, "quarantine").glob("*.blocked.json"))
 
 
 def test_create_missing_required():
@@ -96,14 +108,7 @@ def test_create_missing_required():
 
 def test_show_text():
     with tempfile.TemporaryDirectory() as td:
-        _run([
-            "create",
-            "--phase-id", "90A-test",
-            "--phase-name", "Show Test",
-            "--status", "completed",
-            "--summary", "Show me.",
-            "--reports-dir", td,
-        ])
+        _seed_report(td, phase_id="90A-test", phase_name="Show Test", summary="Show me.")
         result = _run(["show", "--reports-dir", td])
         assert result.returncode == 0
         assert "Show Test" in result.stdout
@@ -111,14 +116,7 @@ def test_show_text():
 
 def test_show_json():
     with tempfile.TemporaryDirectory() as td:
-        _run([
-            "create",
-            "--phase-id", "90A-test",
-            "--phase-name", "JSON Test",
-            "--status", "completed",
-            "--summary", "JSON output.",
-            "--reports-dir", td,
-        ])
+        _seed_report(td, phase_id="90A-test", phase_name="JSON Test", summary="JSON output.")
         data = _json(["show", "--reports-dir", td])
         assert data["phase_name"] == "JSON Test"
         assert data["schema_version"] == "1.0"
@@ -135,16 +133,10 @@ def test_show_no_report():
 
 def test_round_trip_json():
     with tempfile.TemporaryDirectory() as td:
-        _run([
-            "create",
-            "--phase-id", "91A",
-            "--phase-name", "Round Trip",
-            "--status", "completed",
-            "--summary", "Full circle.",
-            "--files-changed", "3",
-            "--tests-run", "55",
-            "--reports-dir", td,
-        ])
+        _seed_report(
+            td, phase_id="91A", phase_name="Round Trip", summary="Full circle.",
+            files_changed=3, tests_run=55,
+        )
         data = _json(["show", "--reports-dir", td])
         assert data["phase_id"] == "91A"
         assert data["files_changed"] == 3

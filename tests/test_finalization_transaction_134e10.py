@@ -222,6 +222,41 @@ class TestEndToEndTransaction:
             for lim in result.limitations
         )
 
+    def test_crash_after_irreversible_adapter_start_never_replays_callback(self, tmp_path):
+        """A process stop after adapter entry leaves a durable uncertain
+        checkpoint; retry must observe it and never promote/dispatch again."""
+        report, gate = _certified_report(phase_id="999X.1-crash-window-test")
+        calls: list[str] = []
+
+        def _crash_after_start():
+            calls.append("started")
+            raise KeyboardInterrupt("synthetic process stop")
+
+        with pytest.raises(KeyboardInterrupt):
+            run_finalization_transaction(
+                phase_id=report.phase_id,
+                phase_name=report.phase_name,
+                report=report,
+                gate=gate,
+                promote_and_dispatch=_crash_after_start,
+                transaction_root=tmp_path / "txns",
+                receipt_root=tmp_path / "receipts",
+            )
+
+        retry = run_finalization_transaction(
+            phase_id=report.phase_id,
+            phase_name=report.phase_name,
+            report=report,
+            gate=gate,
+            promote_and_dispatch=_never_call_promote_and_dispatch(calls),
+            transaction_root=tmp_path / "txns",
+            receipt_root=tmp_path / "receipts",
+        )
+        assert retry.status == "promotion_outcome_unconfirmed"
+        assert calls == ["started"]
+        checkpoint = json.loads((tmp_path / "txns" / f"{report.phase_id}.json").read_text())
+        assert checkpoint["steps"]["promotion_and_dispatch"] == "in_progress"
+
     def test_unresolved_rendering_divergence_is_disclosed_not_hidden(self, tmp_path):
         """The new rendering pipeline is an independent presentation
         stage from ``PhaseReport.render_markdown()`` -- if their output

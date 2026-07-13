@@ -866,6 +866,8 @@ def _finalize_task_report_and_notify(
                 explicit_no_go_confirmations=no_go_list,
                 recommended_next_phase=recommended_next,
                 commit_attribution=commit_attribution,
+                gate=gate,
+                report_is_complete=dispatch_allowed,
                 architecture_status_snapshot=trial_report.architecture_status,
             )
         finally:
@@ -898,6 +900,13 @@ def _finalize_task_report_and_notify(
             return {
                 "status": "promotion_and_dispatch_failed",
                 "message": "finalize_phase_report failed inside the finalization transaction",
+                "phase_id": phase_id,
+                "limitations": txn_result.limitations,
+            }
+        if txn_result.status == "promotion_outcome_unconfirmed":
+            return {
+                "status": "promotion_outcome_unconfirmed",
+                "message": "prior promotion outcome is unconfirmed; automatic replay is forbidden",
                 "phase_id": phase_id,
                 "limitations": txn_result.limitations,
             }

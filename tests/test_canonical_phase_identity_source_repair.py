@@ -390,7 +390,7 @@ class TestBackwardCompatibility:
         assert "Report quarantined" in output
         assert (tmp_path / ".pcae" / "phase-reports" / "latest.json").read_text() == valid_latest
 
-    def test_allow_partial_report_still_works(self, tmp_path, monkeypatch, capsys):
+    def test_allow_partial_report_never_promotes_partial_candidate(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         _write_metadata(tmp_path, phase_id="205D", files_changed_count=0)
         monkeypatch.chdir(tmp_path)
@@ -402,7 +402,8 @@ class TestBackwardCompatibility:
 
         assert exit_code == 0
         assert "--allow-partial-report" in output
-        assert (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
+        assert list((tmp_path / ".pcae" / "phase-reports" / "quarantine").glob("*.blocked.json"))
 
     def test_branch_aware_backward_check_still_works(self, tmp_path, monkeypatch, capsys):
         """113X.3's branch-aware fix (113D from 113X.2 not backward)

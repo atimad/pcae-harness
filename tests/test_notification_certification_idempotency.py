@@ -188,7 +188,7 @@ def _write_phase_metadata(root: Path, phase_id: str, commit_hash: str, **overrid
 
 
 class TestPhaseCompleteNotificationCertification:
-    def test_eligible_dispatch_is_certified_and_sent(self, tmp_path, monkeypatch, capsys):
+    def test_eligible_notification_cannot_override_partial_promotion_gate(self, tmp_path, monkeypatch, capsys):
         root = HarnessPath(tmp_path)
         init_harness(root)
         _init_git_repo(tmp_path)
@@ -202,13 +202,10 @@ class TestPhaseCompleteNotificationCertification:
 
         assert exit_code == 0
         assert "Notification certification: eligible" in out
-        assert "Notification dispatch: sent" in out
+        assert "Notification dispatch: sent" not in out
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
         marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
-        assert marker["phase_id"] == "150D"
-        assert marker["commit"] == "abc12345"
-        assert marker["delivery_purpose"] == "ordinary_completion"
-        assert marker["report_digest"]
-        assert marker["finalization_snapshot_id"]
+        assert marker == {}
 
     def test_duplicate_dispatch_is_certified_already_dispatched(self, tmp_path, monkeypatch, capsys):
         root = HarnessPath(tmp_path)
@@ -225,8 +222,8 @@ class TestPhaseCompleteNotificationCertification:
         exit_code = main(["phase", "complete", "--summary", "Finished 150D again", "--allow-partial-report"])
         out = capsys.readouterr().out
 
-        assert exit_code == 1
-        assert "Notification certification: payload_conflict" in out
+        assert exit_code == 0
+        assert "Notification certification: eligible" in out
         assert "Notification dispatch: sent" not in out
 
     def test_transport_unavailable_skips_without_attempt(self, tmp_path, monkeypatch, capsys):
@@ -267,10 +264,7 @@ class TestPhaseCompleteNotificationCertification:
         marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
         assert marker == {}
 
-    def test_canonical_report_written_even_when_dispatch_fails(self, tmp_path, monkeypatch, capsys):
-        """Notification failure must never corrupt canonical repository
-        state: latest.md/latest.json are written regardless of whether the
-        transport attempt succeeds."""
+    def test_partial_report_never_reaches_transport_or_canonical_paths(self, tmp_path, monkeypatch, capsys):
         root = HarnessPath(tmp_path)
         init_harness(root)
         _init_git_repo(tmp_path)
@@ -287,17 +281,14 @@ class TestPhaseCompleteNotificationCertification:
 
         assert exit_code == 0
         assert "Notification certification: eligible" in out
-        assert "Notification dispatch: failed" in out
+        assert "Notification dispatch: failed" not in out
         latest_json = tmp_path / ".pcae" / "phase-reports" / "latest.json"
-        assert latest_json.exists()
-        assert json.loads(latest_json.read_text())["phase_id"] == "150D"
+        assert not latest_json.exists()
+        assert list((tmp_path / ".pcae" / "phase-reports" / "quarantine").glob("*.blocked.json"))
         marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
         assert marker == {}
 
-    def test_retry_after_failed_dispatch_is_not_blocked(self, tmp_path, monkeypatch, capsys):
-        """A failed dispatch attempt never writes the idempotency marker,
-        so retrying (e.g. once Telegram is actually configured) must still
-        be certified eligible -- retries are safe by construction."""
+    def test_retry_of_partial_candidate_remains_non_promotable(self, tmp_path, monkeypatch, capsys):
         root = HarnessPath(tmp_path)
         init_harness(root)
         _init_git_repo(tmp_path)
@@ -320,13 +311,9 @@ class TestPhaseCompleteNotificationCertification:
 
         assert exit_code == 0
         assert "Notification certification: eligible" in out
-        assert "Notification dispatch: sent" in out
+        assert "Notification dispatch: sent" not in out
         marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
-        assert marker["phase_id"] == "150D"
-        assert marker["commit"] == "abc12345"
-        assert marker["delivery_purpose"] == "ordinary_completion"
-        assert marker["report_digest"]
-        assert marker["finalization_snapshot_id"]
+        assert marker == {}
 
 
 # ═══════════════════════════════════════════════════════════════════════════

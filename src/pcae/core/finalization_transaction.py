@@ -606,6 +606,32 @@ def run_finalization_transaction(
         existing["_checkpoint_path"] = str(checkpoint_path)
         return _result_from_checkpoint(existing)
 
+    # Phase 135H.2 — once the durable checkpoint says the irreversible
+    # promotion/dispatch adapter may have started, an automatic retry must
+    # never invoke it again.  A crash can occur after the external effects
+    # and before the completion checkpoint is updated; treating that state
+    # as a fresh attempt duplicates promotion (and potentially delivery).
+    # Fail closed and require observation/reconciliation instead.
+    if (
+        existing is not None
+        and existing.get("status") == "in_progress"
+        and existing.get("steps", {}).get("promotion_and_dispatch") == "in_progress"
+    ):
+        limitation = (
+            "promotion/dispatch outcome is unconfirmed from a prior attempt; "
+            "automatic replay was not invoked"
+        )
+        return TransactionResult(
+            phase_id=phase_id,
+            status="promotion_outcome_unconfirmed",
+            limitations=[limitation],
+            report_digest=str(existing.get("report_digest", report_digest)),
+            finalization_snapshot_id=str(
+                existing.get("finalization_snapshot_id", finalization_snapshot_id)
+            ),
+            checkpoint_path=str(checkpoint_path),
+        )
+
     if not gate.get("finalizable") or report.report_completeness != "complete":
         # Nothing to persist and, critically, promote_and_dispatch is NOT
         # called: a gate-failing report must never be promoted or
@@ -701,6 +727,10 @@ def run_finalization_transaction(
     # unmodified legacy machinery (finalize_phase_report/write_phase_
     # report/dispatch) -- 134D's "wrap it behind the transaction; treat it
     # as an adapter" permission, not a reimplementation. ─────────────────
+    # Persist intent immediately before the first irreversible adapter call.
+    # If the process stops after this write, replay fails closed above.
+    checkpoint["steps"]["promotion_and_dispatch"] = "in_progress"
+    _save_checkpoint(checkpoint_path, checkpoint)
     try:
         promotion_result = promote_and_dispatch()
     except Exception as exc:  # noqa: BLE001 - the callback itself failing is authoritative

@@ -286,9 +286,9 @@ class TestPhaseCompleteEnforcement:
         assert (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
         assert (tmp_path / ".pcae" / "phase-reports" / "latest.md").exists()
 
-    def test_allow_partial_report_still_bypasses_as_before(self, tmp_path, monkeypatch, capsys):
-        """The pre-existing --allow-partial-report override (105D) is
-        unrelated scope to 113X.1 and must keep writing canonically."""
+    def test_allow_partial_report_never_confers_promotion_authority(self, tmp_path, monkeypatch, capsys):
+        """The override may preserve logical completion, but a partial
+        candidate is quarantined and never made canonical (135H.2)."""
         root = _init_repo(tmp_path)
         _write_metadata(tmp_path, files_changed_count=0)
         monkeypatch.chdir(tmp_path)
@@ -300,7 +300,8 @@ class TestPhaseCompleteEnforcement:
 
         assert exit_code == 0
         assert "--allow-partial-report" in output
-        assert (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
+        assert list((tmp_path / ".pcae" / "phase-reports" / "quarantine").glob("*.blocked.json"))
 
     def test_blocked_completion_suppresses_notification_dispatch(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)

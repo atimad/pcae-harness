@@ -11,10 +11,18 @@ disagree. See the full source-of-truth precedence order and the stale
 [docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md](../docs/PHASE_112_PLANNING_BOOTSTRAP_CONSISTENCY_HARDENING.md)
 (Phase 112B.1).
 
-## Current Track 133 — Engineering Evidence
+## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 133G is complete; the
-recommended next governed phase is 133H.
+`PROJECT_STATUS.md` remains authoritative. Phase 135H.2 is complete; the
+recommended next governed phase is 135I. It is not activated.
+
+| Phase | Name | Status |
+|-------|------|--------|
+| 135I | Production CLTR Schema, Canonicalization, and Versioning Contract Freeze | 🔜 Next |
+
+## Historical: Track 133 — Engineering Evidence
+
+Historical planning snapshot only; superseded by completed Tracks 133–135.
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -83,7 +91,7 @@ understanding without execution, enforcement, or autonomy.
 | 120C | Repository Intelligence Prototype Contract Verification | ✅ Complete |
 | 120D | Repository Knowledge Snapshot Prototype Plan | ✅ Complete |
 | 120E | Repository Knowledge Snapshot Prototype: Read-Only Generator | ✅ Complete |
-| 120F | Repository Knowledge Snapshot Prototype Verification | 🔜 Next (per PROJECT_STATUS.md) |
+| 120F | Repository Knowledge Snapshot Prototype Verification | Historical candidate; re-evaluate before activation |
 
 ## Historical: Repository State Kernel Track (113S-114B)
 

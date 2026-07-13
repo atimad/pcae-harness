@@ -253,7 +253,8 @@ class TestPhaseCompleteReconciliation:
 
         assert exit_code == 0
         assert "Notification certification: eligible" in out
-        assert "Notification dispatch: sent" in out
+        assert "Notification dispatch: skipped" in out
+        assert not (work / ".pcae" / "phase-reports" / "latest.json").exists()
 
 
 # ═══════════════════════════════════════════════════════════════════════════

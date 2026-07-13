@@ -216,7 +216,7 @@ class TestCompleteReportStillNotifiesNormally:
 
 
 class TestPartialFinalizedSendsWarningNotification:
-    def test_partial_finalized_sends_clearly_labeled_warning(self, tmp_path, monkeypatch, capsys):
+    def test_partial_candidate_is_quarantined_without_warning_delivery(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         _write_metadata(tmp_path, files_changed_count=0)  # a gate blocker
         monkeypatch.chdir(tmp_path)
@@ -229,9 +229,9 @@ class TestPartialFinalizedSendsWarningNotification:
         output = capsys.readouterr().out
 
         assert exit_code == 0
-        assert "Notification dispatch: sent" in output
-        assert "PARTIAL WARNING" in output
-        assert "mobile operator attention" in output.lower()
+        assert "Notification dispatch: skipped" in output
+        assert "PARTIAL WARNING" not in output
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
     def test_partial_report_never_looks_like_normal_completion(self, tmp_path, monkeypatch, capsys):
         """105D's rule preserved: the partial warning is a genuinely
@@ -244,15 +244,10 @@ class TestPartialFinalizedSendsWarningNotification:
 
         main(["phase", "complete", "--summary", "Phase 205D: done.", "--allow-partial-report"])
 
-        notif_dir = tmp_path / ".pcae" / "notifications"
-        files = list(notif_dir.glob("*.json"))
-        assert files
-        sent_event = json.loads(files[0].read_text())
-        assert "PHASE FINALIZED BUT REPORT PARTIAL" in sent_event["title"]
-        assert not sent_event["title"].startswith("Phase COMPLETED")
-        assert sent_event["severity"] == "warning"
+        assert not (tmp_path / ".pcae" / "notifications").exists()
+        assert list((tmp_path / ".pcae" / "phase-reports" / "quarantine").glob("*.blocked.json"))
 
-    def test_warning_includes_the_reason(self, tmp_path, monkeypatch, capsys):
+    def test_quarantine_includes_the_reason(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         _write_metadata(tmp_path, files_changed_count=0)
         monkeypatch.chdir(tmp_path)
@@ -261,9 +256,8 @@ class TestPartialFinalizedSendsWarningNotification:
 
         main(["phase", "complete", "--summary", "Phase 205D: done.", "--allow-partial-report"])
 
-        notif_dir = tmp_path / ".pcae" / "notifications"
-        sent_event = json.loads(next(notif_dir.glob("*.json")).read_text())
-        assert "Reason report is partial" in sent_event["message"]
+        rejected = json.loads(next((tmp_path / ".pcae" / "phase-reports" / "quarantine").glob("*.blocked.json")).read_text())
+        assert any("files_changed" in reason for reason in rejected["finalization_blockers"])
 
 
 # ── Requirement 5: Telegram skip/failure recorded with explicit reason ──────

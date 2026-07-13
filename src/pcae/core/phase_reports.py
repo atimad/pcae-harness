@@ -676,9 +676,12 @@ def write_quarantined_report(
     quarantine_dir = reports_dir / "quarantine"
     quarantine_dir.mkdir(parents=True, exist_ok=True)
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    # Microseconds plus the candidate digest make every rejected attempt a
+    # distinct, immutable audit artifact even under rapid retries.
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f")
     safe_id = _safe_filename(report.phase_id)
-    base = f"{ts}-{safe_id}.blocked"
+    attempt_digest = compute_report_digest(report)[:12]
+    base = f"{ts}-{safe_id}-{attempt_digest}.blocked"
 
     md_path = quarantine_dir / f"{base}.md"
     json_path = quarantine_dir / f"{base}.json"

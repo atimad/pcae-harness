@@ -29,6 +29,7 @@ exercises a live sink).
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -697,9 +698,10 @@ class TestPhaseReportCreateSharesCoherenceBoundary:
         )
         args = self._args(tmp_path)
         run_phase_report_create(args)
-        report = read_latest_report(tmp_path)
-        assert report.report_completeness != "complete"
-        assert any("recommends itself" in w for w in report.trust_warnings)
+        assert read_latest_report(tmp_path) is None
+        data = json.loads(next((tmp_path / "quarantine").glob("*.blocked.json")).read_text())
+        assert data["report_completeness"] == "blocked"
+        assert any("recommends itself" in w for w in data["trust_warnings"])
 
     def test_failing_fast_green_downgrades_completeness(self, tmp_path, monkeypatch):
         """The exact 134E.9 defect shape: a report whose own fast_green
@@ -720,9 +722,10 @@ class TestPhaseReportCreateSharesCoherenceBoundary:
             test_result=["fast_green=4389 passed, 1 failed"],
         )
         run_phase_report_create(args)
-        report = read_latest_report(tmp_path)
-        assert report.report_completeness != "complete"
-        assert any("fast_green" in w for w in report.trust_warnings)
+        assert read_latest_report(tmp_path) is None
+        data = json.loads(next((tmp_path / "quarantine").glob("*.blocked.json")).read_text())
+        assert data["report_completeness"] == "blocked"
+        assert any("fast_green" in w for w in data["trust_warnings"])
 
     def test_coherent_report_still_reaches_complete(self, tmp_path, monkeypatch):
         """The wiring fix must not make every report incomplete -- a

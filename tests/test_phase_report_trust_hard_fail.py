@@ -214,15 +214,7 @@ class TestPhaseCompleteHardFail:
         assert exit_code == 0
         assert "--allow-partial-report" in output
 
-    def test_allow_partial_report_sends_partial_warning_notification(self, tmp_path, monkeypatch, capsys):
-        """Phase 113X.3 — a finalized-but-partial report (canonical
-        latest.* were written, via --allow-partial-report) is no longer
-        silently un-notified: it sends a clearly-labeled WARNING
-        notification instead of the normal "Phase COMPLETED" one and
-        instead of pure silence (105D's rule that partial reports are
-        never sent as *normal* final reports is preserved -- this is a
-        distinctly different, warning-labeled notification, not the
-        suppressed normal one)."""
+    def test_allow_partial_report_quarantines_without_warning_delivery(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         _write_metadata(tmp_path, files_changed_count=0)
         monkeypatch.chdir(tmp_path)
@@ -235,12 +227,10 @@ class TestPhaseCompleteHardFail:
         output = capsys.readouterr().out
 
         assert exit_code == 0
-        assert "Notification dispatch: sent" in output
-        assert "PARTIAL WARNING" in output
-        assert "Notification dispatch: skipped" not in output
-        # The warning notification was actually dispatched to the
-        # configured (filesystem) sink -- not suppressed.
-        assert (tmp_path / ".pcae" / "notifications").exists()
+        assert "Notification dispatch: skipped" in output
+        assert "PARTIAL WARNING" not in output
+        assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
+        assert not (tmp_path / ".pcae" / "notifications").exists()
 
 
 # ── Group B: Push-check integration ─────────────────────────────────────────
@@ -521,7 +511,7 @@ class TestBackwardCompatibility:
         exit_code = main(["phase-report", "trust", "--reports-dir", str(reports_dir), "--json"])
         assert exit_code == 0
 
-    def test_phase_report_show_trust_still_works(self, tmp_path, monkeypatch, capsys):
+    def test_phase_report_show_ignores_rejected_candidate(self, tmp_path, monkeypatch, capsys):
         root = _init_repo(tmp_path)
         reports_dir = tmp_path / "phase-reports"
         main(["phase-report", "create", "--phase-id", "205D-BC2", "--phase-name", "X",
@@ -529,5 +519,6 @@ class TestBackwardCompatibility:
         capsys.readouterr()
         exit_code = main(["phase-report", "show", "--reports-dir", str(reports_dir), "--trust"])
         output = capsys.readouterr().out
-        assert exit_code == 0
-        assert "Trust Gate (Phase 105B)" in output
+        assert exit_code == 1
+        assert "No phase report found" in output
+        assert list((reports_dir / "quarantine").glob("*.blocked.json"))

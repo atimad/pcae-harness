@@ -228,7 +228,7 @@ def _write_metadata(root: Path, phase_id: str, commit_hash: str) -> None:
     (root / ".pcae" / "phase-completion-metadata.json").write_text(json.dumps(meta))
 
 
-def test_phase_complete_dispatches_and_writes_marker(tmp_path, monkeypatch, capsys):
+def test_partial_phase_complete_never_dispatches_or_writes_marker(tmp_path, monkeypatch, capsys):
     root = HarnessPath(tmp_path)
     init_harness(root)
     _init_git_repo(tmp_path)
@@ -241,13 +241,10 @@ def test_phase_complete_dispatches_and_writes_marker(tmp_path, monkeypatch, caps
     out = capsys.readouterr().out
 
     assert exit_code == 0
-    assert "Notification dispatch: sent" in out
+    assert "Notification dispatch: skipped" in out
     marker = read_notification_dispatch_marker(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json")
-    assert marker["phase_id"] == "150D"
-    assert marker["commit"] == "abc12345"
-    assert marker["delivery_purpose"] == "ordinary_completion"
-    assert marker["report_digest"]
-    assert marker["finalization_snapshot_id"]
+    assert marker == {}
+    assert not (tmp_path / ".pcae" / "phase-reports" / "latest.json").exists()
 
 
 def test_phase_complete_second_call_is_idempotent(tmp_path, monkeypatch, capsys):
@@ -267,10 +264,10 @@ def test_phase_complete_second_call_is_idempotent(tmp_path, monkeypatch, capsys)
     exit_code = main(["phase", "complete", "--summary", "Finished 150D again", "--allow-partial-report"])
     out = capsys.readouterr().out
 
-    assert exit_code == 1
+    assert exit_code == 0
     assert "Notification dispatch: sent" not in out
-    assert "payload_conflict" in out
-    assert "already dispatched" in out
+    assert "Notification dispatch: skipped" in out
+    assert len(list((tmp_path / ".pcae" / "phase-reports" / "quarantine").glob("*.blocked.json"))) == 2
 
 
 def test_phase_complete_new_commit_same_phase_suppresses_ordinary_resend(tmp_path, monkeypatch, capsys):
@@ -290,15 +287,12 @@ def test_phase_complete_new_commit_same_phase_suppresses_ordinary_resend(tmp_pat
     exit_code = main(["phase", "complete", "--summary", "Finished 150D repaired", "--allow-partial-report"])
     out = capsys.readouterr().out
 
-    assert exit_code == 1
+    assert exit_code == 0
     assert "Notification dispatch: sent" not in out
-    assert "payload_conflict" in out
+    assert "Notification dispatch: skipped" in out
 
 
-def test_phase_complete_missing_notify_enabled_reason_is_accurate(tmp_path, monkeypatch, capsys):
-    """Absence of PCAE_NOTIFY_ENABLED must be reported as exactly that --
-    never conflated with the unrelated skill-invoke 'target_unresolved'
-    concept."""
+def test_partial_candidate_reports_gate_reason_before_notify_configuration(tmp_path, monkeypatch, capsys):
     root = HarnessPath(tmp_path)
     init_harness(root)
     _init_git_repo(tmp_path)
@@ -311,5 +305,5 @@ def test_phase_complete_missing_notify_enabled_reason_is_accurate(tmp_path, monk
 
     assert exit_code == 0
     assert "Notification dispatch: skipped" in out
-    assert "PCAE_NOTIFY_ENABLED is not set" in out
+    assert "report was quarantined by the finalization gate" in out
     assert "target_unresolved" not in out

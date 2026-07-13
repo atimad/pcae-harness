@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 135H.2 — Lifecycle Recovery Hardening and Exactly-Once Promotion
+(completed). Independently reproduced 135H.1's partial-report promotion and
+proved the escape was a manual-recovery fallback that called promotion and
+dispatch outside the shared transaction after the finalization gate failed.
+Removed that authority leak across manual recovery, phase completion, and task
+finish: rejected/partial candidates now persist only as uniquely identified
+quarantine evidence and never touch canonical pointers, delivery, markers,
+checkpoints, or receipts.
+
+The shared transaction now persists irreversible adapter intent before entry;
+an interrupted outcome fails closed as `promotion_outcome_unconfirmed` and is
+never automatically replayed. Paused tasks no longer contaminate recovery
+identity. Added public read-only `pcae phase-report reconcile`, which requires
+matching report digest/snapshot, marker, completed checkpoint, and finalized
+receipt and never mutates or redispatches. The historical 135H partial
+generation remains retained as audit evidence; exactly one trust-complete 135H
+report remains canonical and the real 135H marker/checkpoint/receipt state
+reconciles cleanly. PFN-001, PFR-001, CLTR-001, runtime capability, and
+execution availability are unchanged.
+
+Verification: 369 focused lifecycle tests and 4391 fast-green tests pass. The
+full-suite audit's 23 change-related failures were corrected and their affected
+modules pass 439/439; the only three remaining failures were reproduced as
+unrelated legacy assertions about the pre-existing advisory directory and a
+pre-existing rendering comment.
+
+Full analysis:
+`docs/PHASE_135H.2_LIFECYCLE_RECOVERY_HARDENING_AND_EXACTLY_ONCE_PROMOTION.md`.
+Runtime remains Observed / observe / execution unavailable. Phase 135I was not
+started. Recommended next phase: **135I — Production CLTR Schema,
+Canonicalization, and Versioning Contract Freeze**.
+
+Recommended next repo phase: 135I — Production CLTR Schema, Canonicalization,
+and Versioning Contract Freeze (not started).
+
+## Phase 135H.1 Complete
+
 Phase 135H.1 — Missing Terminal Report and PFN-001 Delivery Recovery
 (completed). Re-derived the 135H lifecycle from primary artifacts and proved
 that task closure committed before the report hook rejected mixed 135G/135H

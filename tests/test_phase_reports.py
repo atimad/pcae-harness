@@ -2123,12 +2123,11 @@ class TestPhase126G1CommitTrustMetadataRepair:
             no_go_confirmation=["No issues."],
         )
         rc = run_phase_report_create(args)
-        assert rc == 0
-
-        report = read_latest_report(tmp_path)
-        assert report.commits == ["abc12345", "def67890"]
-        assert report.metadata.get("commit_attribution") == "abc12345, def67890"
-        assert not any("phase_owned" in w for w in report.trust_warnings)
+        assert rc == 1
+        assert not (tmp_path / "latest.json").exists()
+        data = json.loads(next((tmp_path / "quarantine").glob("*.blocked.json")).read_text())
+        assert data["commits"] == ["abc12345", "def67890"]
+        assert data["metadata"]["commit_attribution"] == "abc12345, def67890"
 
     def test_no_phase_owned_warning_leaks_into_missing_trust_fields_section(self, tmp_path):
         """The rendered report must not show a 'Missing Trust Fields'
@@ -2151,8 +2150,7 @@ class TestPhase126G1CommitTrustMetadataRepair:
             no_go_confirmation=["No issues."],
         )
         run_phase_report_create(args)
-        report = read_latest_report(tmp_path)
-        md = report.render_markdown()
+        md = next((tmp_path / "quarantine").glob("*.blocked.md")).read_text()
         assert "phase_owned" not in md
 
     def test_warning_still_present_when_no_commits_supplied(self, tmp_path):
@@ -2162,14 +2160,14 @@ class TestPhase126G1CommitTrustMetadataRepair:
 
         args = self._args(tmp_path, commit=None)
         run_phase_report_create(args)
-        report = read_latest_report(tmp_path)
-        assert "commit_attribution" not in report.metadata
+        data = json.loads(next((tmp_path / "quarantine").glob("*.blocked.json")).read_text())
+        assert "commit_attribution" not in data["metadata"]
         # files_changed>0 with commits missing entirely -> "commits" listed
         # as a missing field (a stronger signal than the phase_owned
         # warning, which only applies once commits ARE present).
-        assert "commits" in report.missing_trust_fields
+        assert "commits" in data["missing_trust_fields"]
 
-    def test_report_completeness_reaches_complete_via_cli_alone(self, tmp_path):
+    def test_report_completeness_reaches_complete_via_cli_alone(self, tmp_path, monkeypatch):
         """End-to-end: a fully-specified pcae phase-report create call
         (mirroring every trust-required field) must reach
         report_completeness=complete with zero hand-editing."""
@@ -2188,7 +2186,14 @@ class TestPhase126G1CommitTrustMetadataRepair:
                 "bootstrap_session_reporting_tests=not_applicable",
                 "report_notification_tests=pending_final_telegram_delivery",
             ],
-            no_go_confirmation=["No issues found."],
+            no_go_confirmation=[f"No issue {i}." for i in range(11)],
+        )
+        monkeypatch.chdir(tmp_path)
+        (tmp_path / "PROJECT_STATUS.md").write_text(
+            "# Project Status\n\n## Current Phase\n\n"
+            "Phase 126G1-T — Test Phase (completed).\n\n"
+            "Recommended next phase: NEXT — Next Phase.\n\n"
+            "## Phase 126G1-T Complete\n\nPhase 126G1-T — Test Phase.\n"
         )
         run_phase_report_create(args)
         report = read_latest_report(tmp_path)
@@ -2225,7 +2230,7 @@ class TestPhase128B1NotificationDispatchReliabilityRepair:
                 "bootstrap_session_reporting_tests=not_applicable",
                 "report_notification_tests=not_applicable",
             ],
-            no_go_confirmation=["No issues found."],
+            no_go_confirmation=[f"No issue {i}." for i in range(11)],
             reports_dir=str(tmp_path / "reports"), json=True,
         )
         defaults.update(overrides)
@@ -2266,9 +2271,12 @@ class TestPhase128B1NotificationDispatchReliabilityRepair:
         args = self._complete_args(
             tmp_path, governance_result=[], test_result=[], no_go_confirmation=[],
         )
-        run_phase_report_create(args)
-        report = read_latest_report(Path(args.reports_dir))
-        assert report.report_completeness != COMPLETENESS_COMPLETE
+        rc = run_phase_report_create(args)
+        assert rc == 1
+        assert not (Path(args.reports_dir) / "latest.json").exists()
+        rejected = list((Path(args.reports_dir) / "quarantine").glob("*.blocked.json"))
+        assert len(rejected) == 1
+        assert json.loads(rejected[0].read_text())["report_completeness"] == "blocked"
 
         marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
         assert not marker_path.exists()
@@ -2311,6 +2319,12 @@ class TestPhase128B1NotificationDispatchReliabilityRepair:
         assert not (tmp_path / ".pcae" / "phase-completion-metadata.json").exists()
 
         args = self._complete_args(tmp_path, phase_id="128B1-RECOVERY")
+        (tmp_path / "PROJECT_STATUS.md").write_text(
+            "# Project Status\n\n## Current Phase\n\n"
+            "Phase 128B1-RECOVERY — Test Phase (completed).\n\n"
+            "Recommended next phase: NEXT — Next Phase.\n\n"
+            "## Phase 128B1-RECOVERY Complete\n\nPhase 128B1-RECOVERY — Test Phase.\n"
+        )
         run_phase_report_create(args)
 
         marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
@@ -2384,8 +2398,50 @@ class TestPhase128B1NotificationDispatchReliabilityRepair:
         assert out["notification"]["results"][0]["success"] is False
         assert out["notification"]["results"][0]["error"] == "boom"
 
-        marker_path = tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"
-        assert not marker_path.exists()
+    def test_paused_task_title_is_not_recovery_identity(self, tmp_path, monkeypatch):
+        from pcae.commands.phase_reports import run_phase_report_create
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        active_dir = tmp_path / "tasks" / "active"
+        active_dir.mkdir(parents=True)
+        (active_dir / "20990101-paused.md").write_text(
+            "# Task Contract\n\n## Task ID\n\npaused\n\n## Title\n\n"
+            "Phase 999Z: stale identity\n\n## Status\n\npaused\n"
+        )
+        args = self._complete_args(tmp_path)
+        assert run_phase_report_create(args) == 0
+        assert (Path(args.reports_dir) / "latest.json").exists()
+
+    def test_public_reconciliation_requires_report_marker_checkpoint_and_receipt(
+        self, tmp_path, monkeypatch, capsys,
+    ):
+        from argparse import Namespace
+        from pcae.commands.phase_reports import (
+            run_phase_report_create,
+            run_phase_report_reconcile,
+        )
+
+        self._enable_noop_dispatch(monkeypatch, tmp_path)
+        args = self._complete_args(tmp_path)
+        assert run_phase_report_create(args) == 0
+        capsys.readouterr()
+
+        rc = run_phase_report_reconcile(Namespace(
+            phase_id="128B1-T",
+            reports_dir=args.reports_dir,
+            transaction_root=str(tmp_path / ".pcae" / "finalization-transactions"),
+            marker_path=str(tmp_path / ".pcae" / "phase-reports" / ".last-notified.json"),
+            json=True,
+        ))
+        payload = json.loads(capsys.readouterr().out)
+        assert rc == 0
+        assert payload["reconciliation_status"] == "reconciled"
+        assert payload["promoted_generation_count"] == 1
+        assert payload["marker_state"] == "already_dispatched"
+        assert payload["checkpoint_state"] == "completed"
+        assert payload["receipt_state"] == "finalized"
+        assert payload["mutation_performed"] is False
+        assert payload["redispatch_performed"] is False
 
     def test_disabled_notify_env_skips_without_marking_notified(self, tmp_path, monkeypatch):
         """When PCAE_NOTIFY_ENABLED is unset, dispatch must be skipped
