@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Repair Phase 135E lifecycle metadata fields (20260713-1152-repair-phase-135e-lifecycle-metadata-fields)
 - Repair Phase 135E canonical report metadata (20260713-1150-repair-phase-135e-canonical-report-metadata)
 - Sync Phase 135E completion metadata (20260713-1149-sync-phase-135e-completion-metadata)
 - Phase 135E: Canonical Transition Record Prototype Plan (20260713-1145-phase-135e-canonical-transition-record-prototype-plan)
