@@ -239,6 +239,36 @@ def run_phase_report_create(args: argparse.Namespace) -> int:
                 for limitation in txn_result.limitations:
                     print(f"  {limitation}")
             return 1
+        if txn_result.status == "resumed_completed":
+            # Phase 135H.2.1 — an unchanged retry of an already-completed
+            # transaction (same report digest + finalization snapshot) must
+            # report the existing outcome, not crash. Before this fix,
+            # falling through to ``outcome = txn_result.promotion_and_
+            # dispatch or {}`` produced ``{}`` (the resumed path never
+            # populates that field -- see ``_result_from_checkpoint``), and
+            # the unconditional ``outcome["paths"]`` below raised
+            # ``KeyError``. No promotion, dispatch, marker, or receipt is
+            # attempted here -- this only reports the prior, already-sealed
+            # checkpoint result, exactly as the transaction's own
+            # idempotency contract requires.
+            if args.json:
+                print(json.dumps({
+                    "status": "resumed_completed",
+                    "phase_id": report.phase_id,
+                    "report_digest": txn_result.report_digest,
+                    "finalization_snapshot_id": txn_result.finalization_snapshot_id,
+                    "checkpoint_path": txn_result.checkpoint_path,
+                    "receipt_path": txn_result.receipt_path,
+                    "steps": txn_result.steps,
+                    "limitations": txn_result.limitations,
+                }, indent=2, sort_keys=True))
+            else:
+                print(f"Phase report creation: resumed (already completed for {report.phase_id})")
+                print(f"  Checkpoint: {txn_result.checkpoint_path}")
+                print(f"  Report digest: {txn_result.report_digest}")
+                for limitation in txn_result.limitations:
+                    print(f"  {limitation}")
+            return 0
         outcome = txn_result.promotion_and_dispatch or {}
     else:
         # Phase 135H.2 — recovery is not a promotion override.  The old

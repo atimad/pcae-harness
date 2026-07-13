@@ -141,3 +141,90 @@ def test_round_trip_json():
         assert data["phase_id"] == "91A"
         assert data["files_changed"] == 3
         assert data["tests_run"] == 55
+
+
+# ── Phase 135H.2.1 — resumed_completed must not crash the CLI ──────────────
+#
+# Independently reproduced during the Phase 135H.2.1 governed terminal
+# reporting recovery: an unchanged retry of `pcae phase-report create` for a
+# report whose finalization transaction had already reached a completed
+# checkpoint (same report digest + finalization snapshot) crashed with
+# `KeyError: 'paths'`. `run_finalization_transaction()` correctly refuses to
+# re-invoke the promotion/dispatch callback (it returns `status="resumed_
+# completed"` with `promotion_and_dispatch=None`), but `run_phase_report_
+# create()`'s status switch had no branch for that value, so it fell through
+# to `outcome = txn_result.promotion_and_dispatch or {}` and then crashed on
+# the unconditional `outcome["paths"]`. `pcae phase complete` and `pcae task
+# finish` do not share this bug: both read `outcome`/`fin` with `.get()`
+# throughout instead of `[...]`.
+
+
+def _complete_create_args(phase_id: str, reports_dir: str) -> list[str]:
+    return [
+        "create",
+        "--phase-id", phase_id,
+        "--phase-name", "Resumed Completed Regression",
+        "--status", "completed",
+        "--summary", "Regression coverage for the resumed_completed CLI crash.",
+        "--files-changed", "1",
+        "--tests-run", "0",
+        "--pushed-status", "pushed",
+        "--origin-main-head-count", "0",
+        "--recommended-next-phase", "999Z — Next Phase",
+        "--commit", "abc1234500000000",
+        "--governance-result", "pcae_health=healthy",
+        "--governance-result", "pcae_check=clean",
+        "--governance-result", "pcae_doctor_task_memory=clean",
+        "--governance-result", "pcae_push_check=clean",
+        "--governance-result", "telegram_runtime=configured, enabled, ready",
+        "--test-result", "fast_green=1 passed (0 failed)",
+        "--test-result", "report_notification_tests=1 passed (0 failed)",
+        "--test-result", "bootstrap_session_reporting_tests=1 passed (0 failed)",
+    ] + [
+        item
+        for text in [
+            "No engineering work was rerun.",
+            "No second logical engineering completion was created.",
+            "No completion metadata was overwritten in place.",
+            "No production lifecycle source changed.",
+            "No CLTR-001 amendment occurred.",
+            "No PFN-001 change occurred.",
+            "No PFR-001 change occurred.",
+            "No runtime capability change occurred.",
+            "No duplicate canonical completion was permitted.",
+            "No existing marker, checkpoint, or receipt was modified.",
+            "No resend of a prior notification occurred.",
+            "No next-phase work began.",
+            "No raw git commit or push was used.",
+            "No force push was used.",
+            "No execution capability was introduced.",
+        ]
+        for item in ("--no-go-confirmation", text)
+    ] + ["--reports-dir", reports_dir, "--json"]
+
+
+def test_create_resumed_completed_does_not_crash(tmp_path, monkeypatch):
+    from pcae.cli import main
+    from pcae.commands.init import init_harness
+    from pcae.core.paths import HarnessPath
+
+    init_harness(HarnessPath(tmp_path))
+    subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "config", "user.name", "Test User"], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
+    subprocess.run(["git", "commit", "-m", "baseline"], cwd=tmp_path, check=True, capture_output=True)
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("PCAE_NOTIFY_SINKS", "filesystem")
+    monkeypatch.setenv("PCAE_NOTIFY_OUTPUT_DIR", str(tmp_path / "notifications"))
+
+    reports_dir = str(tmp_path / "reports")
+    args = _complete_create_args("999Z.1-resume-cli-test", reports_dir)
+
+    first_argv = ["phase-report"] + args
+    exit_code_first = main(first_argv)
+    assert exit_code_first == 0
+
+    exit_code_second = main(first_argv)
+    assert exit_code_second == 0  # must not raise KeyError('paths')
