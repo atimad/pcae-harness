@@ -10,7 +10,7 @@ Phase 135H.2.1: Governed Terminal Reporting Recovery for Phase 135H.2
 
 ## Status
 
-paused
+done
 
 ## Mode
 
