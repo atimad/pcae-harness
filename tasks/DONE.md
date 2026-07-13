@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 135I: Production CLTR Schema, Canonicalization, and Versioning Contract Freeze (20260713-2341-phase-135i-production-cltr-schema-canonicalization-and-versioning-contract-freeze)
 - Phase 135H.2.1: closure documentation commit (20260713-2240-phase-135h-2-1-closure-documentation-commit)
 - Phase 135H.2.1: Governed Terminal Reporting Recovery for Phase 135H.2 (20260713-2143-phase-135h-2-1-governed-terminal-reporting-recovery-for-phase-135h-2)
 - Phase 135H.2: Lifecycle Recovery Hardening and Exactly-Once Promotion (20260713-2017-phase-135h-2-lifecycle-recovery-hardening-and-exactly-once-promotion)

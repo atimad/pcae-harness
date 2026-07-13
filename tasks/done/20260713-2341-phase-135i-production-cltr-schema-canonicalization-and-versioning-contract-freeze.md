@@ -10,7 +10,7 @@ Phase 135I: Production CLTR Schema, Canonicalization, and Versioning Contract Fr
 
 ## Status
 
-active
+done
 
 ## Mode
 
