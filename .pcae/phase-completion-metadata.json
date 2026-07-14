@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
-  "phase_id": "135U",
-  "phase_name": "Rollback Rehearsal Implementation and Independent Verification",
-  "phase_title": "Rollback Rehearsal Implementation and Independent Verification",
+  "phase_id": "135V",
+  "phase_name": "Stage 3 Authority-Cutover Readiness Architecture",
+  "phase_title": "Stage 3 Authority-Cutover Readiness Architecture",
   "status": "completed",
   "files_changed_count": 19,
   "files_changed": [
@@ -31,21 +31,45 @@
   "tests_added_or_updated": "tests/test_cltr_rehearsal_rollback.py (43 new implementation tests: request model/identity, target validation, atomic pointer rollback, immutable history, idempotency/conflicting replay, full crash-injection matrix, CLI, production/notification isolation, containment/symlink attacks); tests/test_cltr_rehearsal_135u_independent_verification.py (26 new, separately-written adversarial tests re-deriving expectations from 135Q section 33/36/37/38 directly rather than trusting the implementation; found and drove the repair of F-135U-1 and F-135U-2)",
   "tests_run": 69,
   "phase_commits": [
-    { "hash": "053c0cf4679457f283abc0d748611c76369c4eac" },
-    { "hash": "d1d6ca50a36c6966d59f97c291879c68447728ac" },
-    { "hash": "7ffb313e52f3efb043e3c95d58ab9145dd6b9095" }
+    {
+      "hash": "053c0cf4679457f283abc0d748611c76369c4eac"
+    },
+    {
+      "hash": "d1d6ca50a36c6966d59f97c291879c68447728ac"
+    },
+    {
+      "hash": "7ffb313e52f3efb043e3c95d58ab9145dd6b9095"
+    }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "summary": "Phase 135U implements the rollback-rehearsal capability 135Q section 33/36/37/38 froze and 135T's F-135R-4 disposition confirmed 135S left unimplemented, then independently attacks that implementation within the same governed phase. Re-derived the frozen rollback contract directly from 135Q's own text (section 36 scope, section 37 roll-forward preference, section 38 split-brain prevention) and 135R's independent confirmation, rather than inventing a new model. Implemented in src/pcae/cltr/migration/rehearsal/rollback.py (new): a deterministic rollback-request identity (pure function of phase_id, transition_id, migration_epoch, authority_epoch, source and target rehearsal-generation IDs, and reason; confirmed stable across a fresh Python subprocess); strict target validation (manifest schema, per-artifact and generation digest recomputed fresh from on-disk bytes, epoch/transition binding, quarantine rejection, symlink containment on both the generation directory and every artifact file); an 11-step atomic rollback sequence reusing the exact same os.replace-backed pointer primitive and containment/verification logic ordinary forward publication uses (refactored pointer.py's validate_publication_target into a shared validate_generation_target, and added publish_generation() for rollback's by-ID/digest publication, so no parallel/divergent validation logic exists); a section-33-shaped rollback evidence record with a 10-value RollbackOutcome vocabulary; idempotent replay with zero evidence duplication; fail-closed conflicting-replay detection (write_immutable-backed, routed to a dedicated rollback-conflicts namespace, never published); a full crash-injection matrix at every named boundary from the phase brief, including correct recovery for a rollback whose atomic pointer replace had already durably succeeded before a crash interrupted evidence persistence (completes evidence recording on replay rather than either silently re-mutating or incorrectly rejecting as stale); and the pcae cltr migration rehearsal rollback / rollback-status CLI (operator-command-only; not wired into any of the four production finalization entry points or any recovery path, confirmed by static source inspection). After implementation, independently attacked the new capability in a separately-written adversarial test module (tests/test_cltr_rehearsal_135u_independent_verification.py) that re-derives expectations from the frozen contract text rather than importing implementation constants as expected truth. Found and repaired two genuine, Non-Blocking defects within this same governed phase, before any regression suite was run for the record: F-135U-1, post-rollback reconcile/rollback-status silently lost the requesting phase_id because phase-to-transition resolution only checked the current generation's own embedded phase_id, not rollback history -- repaired by also matching against persisted rollback evidence in reconciliation.py. F-135U-2, the authority-epoch validation used a substring check (\"legacy\" in value) bypassable by a value like \"cltr|not-legacy\" -- repaired to an exact \"legacy|...\" prefix check. Rollback to \"no current rehearsal,\" cross-epoch rollback reconciliation, and a dedicated concurrent-rollback-vs-forward-race stress test are explicitly disclosed as out of this phase's bounded scope, not silently assumed either way; no roll-forward mechanism was invented beyond issuing an ordinary new rollback request targeting a newer generation, matching 135Q section 37's preference framing rather than a distinct command. Fresh regression, all passing at 100 percent on first run, no inherited or new-and-unrepaired failure found anywhere: rollback focused 43/43, rollback independent adversarial 26/26, Stage 2 focused 44/44 (unchanged), combined migration 214/214, production CLTR combined 499/499, affected finalization (exact 135S/135T node set) 117/117, notification/marker/receipt/report/Architecture-Status 1185/1185, Fast Green 4391/4391 (unchanged). Production isolation independently re-verified via live filesystem-snapshot equality before/after every rollback outcome (success, rejection, conflict, no-op-retain): no production report, completion metadata, Architecture Status, checkpoint, notification, marker, or receipt path was created, modified, or touched. No Telegram dispatch, subprocess, socket, or network reference exists anywhere in rollback.py. Runtime re-confirmed Observed / observe / execution unavailable both before and after this phase's changes. No Stage 3 implementation, authority cutover, legacy demotion, or legacy retirement occurred. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS (implementation plus independent verification, two Non-Blocking defects found and repaired within this same phase; zero Blocking defects survive). Recommends a small bounded follow-on closing the disclosed cross-epoch/concurrency gaps, or 135V -- Stage 3 Authority-Cutover Readiness Architecture next (a design judgment for the next contract/planning phase to confirm, not asserted as final).",
   "governance_results": [
-    { "name": "pcae_health", "status": "healthy" },
-    { "name": "pcae_check", "status": "passed" },
-    { "name": "pcae_doctor_task_memory", "status": "clean" },
-    { "name": "pcae_push_check", "status": "clean" },
-    { "name": "telegram_runtime", "status": "configured, enabled, outbound-only" },
-    { "name": "pcae_runtime_inspect", "status": "Observed, observe, execution unavailable" }
+    {
+      "name": "pcae_health",
+      "status": "healthy"
+    },
+    {
+      "name": "pcae_check",
+      "status": "passed"
+    },
+    {
+      "name": "pcae_doctor_task_memory",
+      "status": "clean"
+    },
+    {
+      "name": "pcae_push_check",
+      "status": "clean"
+    },
+    {
+      "name": "telegram_runtime",
+      "status": "configured, enabled, outbound-only"
+    },
+    {
+      "name": "pcae_runtime_inspect",
+      "status": "Observed, observe, execution unavailable"
+    }
   ],
   "validation_results": [
     {
