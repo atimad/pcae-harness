@@ -2,6 +2,62 @@
 
 ## Current Phase
 
+Phase 135R — Atomic Publication Rehearsal Contract Verification
+(completed). Independent architecture/contract verification phase —
+no Stage 2 implementation, no rehearsal generation, no rehearsal
+pointer, no production pointer change, no authority cutover, no
+legacy-authority demotion or retirement, and no execution capability
+were introduced. Independently re-derived and verified 135Q's Stage 2
+("Atomic Publication Rehearsal, Legacy Authority") contract by reading
+135Q's full 1,174-line document directly, cross-checking every
+section-number citation against the actual headers of CLTR-001 and
+CLTR-SCHEMA-001 v1.0.1, and independently re-grepping current source
+(`finalization_transaction.py`, `src/pcae/cltr/migration/*.py`) for
+every load-bearing factual claim in 135Q's §3 finding dispositions and
+§39 entry-point table rather than trusting 135Q's own prose.
+**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** Zero Blocking
+findings survive independent re-derivation across all 55 required
+verification areas (Stage 2 definition, authority matrix, generation
+identity, namespace isolation, candidate inventory and per-artifact
+contracts, manifest/digest, assembly sequence, preconditions, mismatch
+policy, pointer contract, atomicity, filesystem assumptions, crash
+matrix, recovery, idempotency, replay, quarantine, comparison,
+progression eligibility, evidence record, read-only commands,
+rollback/roll-forward, split-brain analysis, four-entry-point and
+recovery-path coverage, 135H.1 escape resistance, exactly-once,
+notification/marker/receipt isolation, feature configuration, security
+and containment, no-execution boundary, planned package/test/fault-
+injection plans, acceptance criteria, inherited-finding dispositions,
+cross-reference and internal-consistency review, and implementation-
+readiness). Four Non-Blocking findings recorded (F-135R-1..4): a
+citation defect (135Q cites a nonexistent `persistence.py:137-233`
+range for the atomic-rename precedent; corrected to the real
+file-level precedent at lines 84-112, with a disclosed caveat that
+generation-finalization directory rename is a new, unprecedented
+— though still POSIX-atomic — primitive); an undercounted
+`NON_AUTHORITY_DISCLOSURE` hardcoding count (7 repo-wide, not 5 — the
+2 extra copies live in the out-of-scope Stage 0 shadow namespace); a
+missing risk-register row for the citation defect; and a disclosed,
+not-separately-repaired split-brain completeness note (concurrent
+rollback-vs-ordinary-publication race, covered by mechanism but not
+named as its own row/test). All three repairable findings were
+repaired documentation-only, entirely within the new 135R document;
+135Q's frozen document was not edited. No production source or test
+file was modified. Legacy lifecycle remains the sole production
+authority; CLTR remains derivative; runtime remains Observed / observe
+/ execution unavailable. CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001,
+PFR-001, and the 135M/135N migration contract all unchanged.
+
+Full analysis: `docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_VERIFICATION.md`.
+Recommended next phase: **135S — Atomic Publication Rehearsal
+Implementation** (not started). 135S must resolve F-135P-1, F-135P-3,
+F-135P-4, and the `EXPECTED_REPRESENTATION_DIFFERENCE` half of
+F-135P-2 before the Stage 2 rehearsal flag is enabled beyond isolated
+testing, must remain legacy-authoritative and rehearsal-only, and must
+not implement CLTR authority cutover, legacy demotion, or retirement.
+
+## Phase 135Q Complete
+
 Phase 135Q — Atomic Publication Rehearsal Contract and Implementation
 Plan (completed). Architecture, contract-freeze, and implementation-
 planning phase only — no Stage 2 implementation, no rehearsal
@@ -38,9 +94,6 @@ and PFR-001 all unchanged.
 
 Full analysis:
 `docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_AND_IMPLEMENTATION_PLAN.md`.
-Recommended next phase: **135R — Atomic Publication Rehearsal Contract
-Verification** (not started). 135R must independently re-derive and
-verify the Stage 2 contract before any Stage 2 implementation begins.
 
 ## Phase 135P Complete
 

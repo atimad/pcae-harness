@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 135R — Atomic Publication Rehearsal Contract Verification
+  (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_VERIFICATION.md`).
+  Independent architecture/contract-verification phase over 135Q's
+  Stage 2 contract — no Stage 2 implementation, no rehearsal
+  generation, no rehearsal pointer, no production pointer change.
+  Independently re-derived and verified all 55 required areas by
+  reading 135Q's full document directly, cross-checking every
+  section-number citation against CLTR-001/CLTR-SCHEMA-001 v1.0.1, and
+  re-grepping current source for every load-bearing factual claim.
+  **Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** Zero Blocking
+  findings. Four Non-Blocking findings recorded (F-135R-1..4): a
+  citation defect (nonexistent `persistence.py:137-233` range,
+  corrected to the real file-level precedent at lines 84-112, with a
+  disclosed directory-rename-vs-file-rename precedent caveat); an
+  undercounted `NON_AUTHORITY_DISCLOSURE` hardcoding count (7
+  repo-wide, not 5); a missing risk-register row; and a disclosed
+  split-brain completeness note (concurrent rollback-vs-publication
+  race, covered by mechanism, not named as its own row/test). Three
+  findings repaired documentation-only within the new 135R document;
+  135Q's frozen document was not edited; no production source or test
+  file was modified. Legacy lifecycle remains sole production
+  authority; CLTR remains derivative; runtime remains Observed /
+  observe / execution unavailable. Recommends 135S — Atomic
+  Publication Rehearsal Implementation next.
 - Phase 135Q — Atomic Publication Rehearsal Contract and Implementation
   Plan
   (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_AND_IMPLEMENTATION_PLAN.md`).
@@ -251,6 +275,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase to Phase 135R: Atomic Publication Rehearsal Contract Verification; session refreshed and governance continuity revalidated.
 - Phase 135M — Production CLTR Dual-Derivation and Atomic Publication
   Contract / Migration Plan
   (`docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_ATOMIC_PUBLICATION_MIGRATION_PLAN.md`).
