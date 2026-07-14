@@ -49,7 +49,7 @@
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pending",
+  "pushed_status": "pushed",
   "origin_main_head_count": 0,
   "summary": "Phase 135K implemented the first production CLTR integration, in strict shadow mode only: a new src/pcae/cltr package implementing CLTR-SCHEMA-001 v1.0.1 exactly (14 states, 16 transitions, 14 forbidden transitions, 37 invariants, 15 representation adapters with 135J's own repaired comparison-mode assignment), deterministic canonicalization/SHA-256 digesting, immutable generation persistence with an atomic current pointer and crash-safe staging/quarantine, and a read-only pcae cltr shadow CLI. Wired into all four production finalization entry points at the one shared boundary (run_finalization_transaction), behind a default-off PCAE_CLTR_SHADOW_ENABLED feature flag; a shadow failure is recorded and disclosed but never blocks production. Constructs one shadow record per finalized transition (a terminal snapshot), a disclosed scope reduction per the phase brief's own smallest-complete-integration guidance. 80 new tests pass; 1325 affected lifecycle regression tests and Fast Green (4391/4391) pass unchanged with the flag both unset and enabled; a real non-mocked end-to-end smoke test confirmed the wiring. All four of 135J's inherited Non-Blocking findings are carried forward and dispositioned. No authority cutover, no legacy authority retirement, no execution capability introduced. Next: 135L - Production CLTR Shadow Integration Independent Verification.",
   "governance_results": [
