@@ -25,6 +25,7 @@ Commit the tasks/done move and tasks/DONE.md entry for Phase 135K's own closure-
 - tasks/done/**
 - tasks/DONE.md
 - tasks/active/**
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
@@ -35,6 +36,7 @@ Commit the tasks/done move and tasks/DONE.md entry for Phase 135K's own closure-
 
 - tasks
 - docs
+- config
 
 ## Forbidden Zones
 
