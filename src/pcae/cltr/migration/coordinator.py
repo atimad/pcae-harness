@@ -22,6 +22,7 @@ from pcae.cltr.migration.assembly import SharedInputValidationError, assemble_pr
 from pcae.cltr.migration.cltr_derivation import derive_cltr
 from pcae.cltr.migration.comparison import compare
 from pcae.cltr.migration.configuration import MigrationConfiguration, MigrationConfigurationError, load_configuration
+from pcae.cltr.migration.disclosure import NON_AUTHORITY_DISCLOSURE as _SHARED_DISCLOSURE
 from pcae.cltr.migration.enums import MigrationRecoveryClassification, MigrationStage, ProductionAuthority
 from pcae.cltr.migration.evidence import MigrationEvidenceRecord, build_evidence
 from pcae.cltr.migration.legacy_derivation import derive_legacy
@@ -34,14 +35,7 @@ from pcae.cltr.migration.persistence import (
 from pcae.cltr.migration.shared_input import SharedTransitionInputPackage
 from pcae.cltr.migration.transition_identity import resolve_transition_id
 
-NON_AUTHORITY_DISCLOSURE = {
-    "migration_stage": None,
-    "production_authority": ProductionAuthority.LEGACY.value,
-    "migration_evidence_only": True,
-    "authoritative": False,
-    "authority_cutover": False,
-    "runtime_boundary": "observe",
-}
+NON_AUTHORITY_DISCLOSURE = {**_SHARED_DISCLOSURE, "migration_stage": None}
 
 
 @dataclasses.dataclass(frozen=True)

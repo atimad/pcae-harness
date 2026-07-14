@@ -10,15 +10,11 @@ import json
 from pathlib import Path
 
 from pcae.cltr.migration.configuration import MigrationConfigurationError, load_configuration
+from pcae.cltr.migration.disclosure import NON_AUTHORITY_DISCLOSURE as _SHARED_DISCLOSURE
 from pcae.cltr.migration.enums import ComparisonResultClass
 from pcae.cltr.migration.persistence import DEFAULT_MIGRATION_ROOT
 
-NON_AUTHORITY_DISCLOSURE = {
-    "migration_evidence_only": True,
-    "authoritative": False,
-    "mutation": "none",
-    "runtime_boundary": "observe",
-}
+NON_AUTHORITY_DISCLOSURE = {**_SHARED_DISCLOSURE, "mutation": "none"}
 
 
 def _iter_evidence_files(migration_root: Path):

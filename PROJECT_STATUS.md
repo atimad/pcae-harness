@@ -2,6 +2,54 @@
 
 ## Current Phase
 
+Phase 135S — Atomic Publication Rehearsal Implementation (completed).
+Implements Stage 2 (Atomic Publication Rehearsal, Legacy Authority)
+under `src/pcae/cltr/migration/rehearsal/`, per the contract 135Q froze
+and 135R independently verified. Legacy lifecycle remains the sole
+production authority throughout; the rehearsal generation and pointer
+are non-authoritative by construction. Implements: 10 file-producing
+candidate artifacts (of the 23-item inventory; the remaining 13 bound
+into the manifest/evidence record, disclosed in
+`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_IMPLEMENTATION.md` §11);
+deterministic rehearsal-generation identity; manifest and
+per-artifact/generation SHA-256 digests with split-brain cross-reference
+checks; directory-level atomic finalization
+(`candidates/`→`generations/`, disclosed per F-135R-1 as a new
+primitive, with a bounded retry for the disclosed Windows-transient
+caveat); an atomic, per-transition, non-authoritative `current-rehearsal`
+pointer rejecting dangling/digest-mismatched/quarantined targets;
+precondition/mismatch/quarantine/idempotent-replay handling; test-only
+fault injection; and one shared coordinator invoked identically from
+all four production finalization entry points (`phase_complete`,
+`task_finish`, `phase_report_create`, `notify_send_report`), gated
+behind `PCAE_CLTR_ATOMIC_REHEARSAL_ENABLED` (disabled by default,
+invalid configuration fails closed). Adds read-only
+`pcae cltr migration rehearsal status` /
+`rehearsal reconcile --phase-id`. Resolves all four Stage-2-
+implementation Blocking prerequisites: F-135P-1 (entry-point recovery
+classification), F-135P-2's `EXPECTED_REPRESENTATION_DIFFERENCE` half
+(notification/marker/receipt comparison), F-135P-3 (`derive_cltr`
+no longer crashes on non-empty commit ownership), and F-135P-4 (one
+shared `NON_AUTHORITY_DISCLOSURE` constant replaces five independently
+hardcoded copies). No production pointer, marker, receipt, or
+notification dispatch was touched by Stage 2; no execution capability
+was introduced; runtime remains Observed / observe / execution
+unavailable. 28 new focused tests
+(`tests/test_cltr_rehearsal_coordinator.py`, all passing); Fast Green
+4391/4391 unchanged; 8 pre-existing, 135S-unrelated test failures (a
+sandbox-local receipt-modeling defect, independently confirmed via
+`git stash` to reproduce identically on unmodified `main` before this
+phase) disclosed, not hidden or fixed.
+
+Full analysis: `docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_IMPLEMENTATION.md`.
+Recommended next phase: **135T — Atomic Publication Rehearsal
+Independent Verification** (not started). 135T must independently
+attack this implementation before any Stage 3 design, authority-cutover
+planning, CLTR authority activation, legacy-authority demotion, or
+legacy-authority retirement.
+
+## Phase 135R Complete
+
 Phase 135R — Atomic Publication Rehearsal Contract Verification
 (completed). Independent architecture/contract verification phase —
 no Stage 2 implementation, no rehearsal generation, no rehearsal
@@ -49,12 +97,6 @@ authority; CLTR remains derivative; runtime remains Observed / observe
 PFR-001, and the 135M/135N migration contract all unchanged.
 
 Full analysis: `docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_VERIFICATION.md`.
-Recommended next phase: **135S — Atomic Publication Rehearsal
-Implementation** (not started). 135S must resolve F-135P-1, F-135P-3,
-F-135P-4, and the `EXPECTED_REPRESENTATION_DIFFERENCE` half of
-F-135P-2 before the Stage 2 rehearsal flag is enabled beyond isolated
-testing, must remain legacy-authoritative and rehearsal-only, and must
-not implement CLTR authority cutover, legacy demotion, or retirement.
 
 ## Phase 135Q Complete
 

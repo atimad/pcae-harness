@@ -12,6 +12,7 @@ from typing import Optional
 
 from pcae.cltr.digest import compute_dict_digest
 from pcae.cltr.migration.comparison import ComparisonResult
+from pcae.cltr.migration.disclosure import NON_AUTHORITY_DISCLOSURE
 from pcae.cltr.migration.enums import (
     NON_PROGRESSABLE_RECOVERY_CLASSIFICATIONS,
     ComparisonResultClass,
@@ -22,14 +23,6 @@ from pcae.cltr.migration.enums import (
 
 EVIDENCE_SCHEMA_ID = "CLTR-MIGRATION-EVIDENCE-001"
 EVIDENCE_SCHEMA_VERSION = "1.0.0"
-
-NON_AUTHORITY_DISCLOSURE = {
-    "migration_evidence_only": True,
-    "authoritative": False,
-    "production_authority": ProductionAuthority.LEGACY.value,
-    "authority_cutover": False,
-    "execution_capability": False,
-}
 
 
 @dataclasses.dataclass(frozen=True)

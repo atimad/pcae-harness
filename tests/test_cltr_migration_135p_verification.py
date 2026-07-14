@@ -81,16 +81,22 @@ class TestEntryPointRecoveryClassificationWiring:
         assert _recovery_classification_for("task_finish") == MigrationRecoveryClassification.TASK_FINISH
         assert _recovery_classification_for("phase_complete") == MigrationRecoveryClassification.PHASE_COMPLETE
 
-    def test_report_create_and_manual_recovery_are_unmapped_gap(self):
-        # F-135P-1: these SHOULD resolve to REPORT_CREATE_RECOVERY and
-        # MANUAL_RECOVERY respectively per the dedicated enum values that
-        # exist for exactly this purpose (enums.py:146,148), but currently
-        # both silently collapse to ORDINARY. Locking in current (buggy)
-        # behavior; flip this assertion when F-135P-1 is repaired.
-        assert _recovery_classification_for("phase_report_create") == MigrationRecoveryClassification.ORDINARY
-        assert _recovery_classification_for("notify_send_report") == MigrationRecoveryClassification.ORDINARY
-        assert "phase_report_create" not in _ENTRY_POINT_RECOVERY_CLASSIFICATION
-        assert "notify_send_report" not in _ENTRY_POINT_RECOVERY_CLASSIFICATION
+    def test_report_create_and_manual_recovery_are_correctly_mapped(self):
+        # F-135P-1 repair (Phase 135S): these now resolve to their
+        # dedicated classifications (enums.py:146,148) instead of
+        # silently collapsing to ORDINARY -- required so Stage 2's
+        # four-entry-point/recovery-path guarantees (135Q §36/§39) rest
+        # on a truthful classification field.
+        assert (
+            _recovery_classification_for("phase_report_create")
+            == MigrationRecoveryClassification.REPORT_CREATE_RECOVERY
+        )
+        assert (
+            _recovery_classification_for("notify_send_report")
+            == MigrationRecoveryClassification.MANUAL_RECOVERY
+        )
+        assert "phase_report_create" in _ENTRY_POINT_RECOVERY_CLASSIFICATION
+        assert "notify_send_report" in _ENTRY_POINT_RECOVERY_CLASSIFICATION
 
     def test_misclassification_does_not_leak_into_comparison_or_eligibility(self):
         # Prove the gap is evidence-only: recovery_classification is never
@@ -120,10 +126,21 @@ class TestNonAuthorityDisclosureConsistency:
         "reconciliation": reconciliation_mod.NON_AUTHORITY_DISCLOSURE,
     }
 
-    def test_five_independent_copies_exist(self):
-        # Documents the duplication: there is no single shared source of
-        # truth for this disclosure; each module hardcodes its own dict.
-        assert len({id(d) for d in self._MODULES.values()}) == 5
+    def test_five_copies_now_share_one_source_of_truth(self):
+        # F-135P-4 repair (Phase 135S): all five modules now build their
+        # (possibly module-extended) dict from
+        # ``pcae.cltr.migration.disclosure.NON_AUTHORITY_DISCLOSURE``
+        # instead of independently hardcoding it. The five module-level
+        # dict objects remain distinct objects (persistence/evidence are
+        # direct re-exports so may share identity; coordinator/status/
+        # reconciliation build extended copies), but their shared keys
+        # must trace to, and agree with, the one shared constant.
+        import pcae.cltr.migration.disclosure as disclosure_mod
+
+        for name, disclosure in self._MODULES.items():
+            for key, value in disclosure_mod.NON_AUTHORITY_DISCLOSURE.items():
+                if key in disclosure:
+                    assert disclosure[key] == value, (name, key)
 
     def test_universal_keys_agree_across_all_five(self):
         for name, disclosure in self._MODULES.items():
@@ -346,46 +363,45 @@ class TestComparisonClassFieldCoverage:
         result = compare(tampered, cltr)
         assert ComparisonResultClass.RECEIPT_MISMATCH in {c.result_class for c in result.comparisons}
 
-    def test_commit_ownership_mismatch_is_currently_unreachable(self, tmp_path, monkeypatch):
-        # F-135P-3 (NON-BLOCKING, dormant): cltr_derivation.py:123 forwards
-        # whatever raw value the shared input's "phase_commit_ownership"
-        # field holds directly into ProductionCltrRecord, which is typed
-        # ``tuple[CommitOwnershipEntry, ...]`` (models.py:104) and whose
-        # CLTR-COMMIT-2 invariant evaluator dereferences
-        # ``c.certification_state`` on every entry (invariants.py:226).
-        # Nothing in the migration package ever constructs a
-        # CommitOwnershipEntry -- raw commit-hash strings are forwarded
-        # as-is. Any non-empty phase_commit_ownership therefore crashes
-        # derive_cltr with AttributeError. This is dormant today only
-        # because every real production call site
-        # (finalization_transaction.py:1014) hardcodes
-        # ``phase_commit_ownership=()`` -- the same disclosed limitation
-        # 135J's F5 already covers (three-outcome commit-ownership model
-        # unimplemented). complete()'s outer try/except contains the
-        # crash (never reaches production code), but it does mean
-        # COMMIT_OWNERSHIP_MISMATCH is currently untestable end-to-end
-        # and will need real CommitOwnershipEntry construction before any
-        # future phase can wire non-empty commit ownership through.
+    def test_commit_ownership_no_longer_crashes_derivation(self, tmp_path, monkeypatch):
+        # F-135P-3 repair (Phase 135S): cltr_derivation.py now normalizes
+        # raw commit-hash strings into typed ``CommitOwnershipEntry``
+        # values (``_normalize_commit_ownership``, mirroring the Stage-0
+        # shadow observer's own CertificationState.UNVERIFIABLE pattern)
+        # before constructing ``ProductionCltrRecord``, so CLTR-COMMIT-2's
+        # ``.certification_state`` dereference no longer raises
+        # ``AttributeError`` for a non-empty ``phase_commit_ownership``.
+        from pcae.cltr.enums import CertificationState
+
         package = _pre_transaction_package(phase_commit_ownership=("a" * 40,))
         package = enrich_legacy_completion(package, fields=dict(_COMPLETION_FIELDS))
-        with pytest.raises(AttributeError):
-            derive_cltr(package)
+        result = derive_cltr(package)
+        assert result.status == "constructed"
+        assert len(result.record.phase_commit_ownership) == 1
+        entry = result.record.phase_commit_ownership[0]
+        assert entry.commit_hash == "a" * 40
+        assert entry.certification_state == CertificationState.UNVERIFIABLE
 
-        # Confirm the crash is fully contained when driven through the
-        # coordinator's public best-effort entrypoint (production never
-        # sees this exception).
+        # Confirm the fix holds end-to-end through the coordinator's
+        # public best-effort entrypoint too. ``complete()`` performs its
+        # own legacy-completion enrichment internally, so it is given a
+        # fresh pre-transaction-only package here (passing the
+        # already-enriched ``package`` above would itself be an invalid,
+        # double-enrichment call per ``assembly.enrich_legacy_completion``'s
+        # own "cannot enrich a package whose latest revision is already
+        # ...LEGACY_COMPLETION" guard, an unrelated failure mode).
         monkeypatch.setenv("PCAE_CLTR_DUAL_DERIVATION_ENABLED", "1")
         monkeypatch.setenv("PCAE_CLTR_MIGRATION_STAGE", "dual_derivation_legacy_authority")
         monkeypatch.setenv("PCAE_CLTR_MIGRATION_EPOCH", "epoch-commit-ownership")
+        pre_transaction_package = _pre_transaction_package(phase_commit_ownership=("a" * 40,))
         result = complete(
-            package,
+            pre_transaction_package,
             legacy_completion_fields=dict(_COMPLETION_FIELDS),
             recovery_classification=MigrationRecoveryClassification.PHASE_COMPLETE,
             production_completion_continued=True,
             migration_root=tmp_path / "migration",
         )
-        assert result.status == "failed"
-        assert result.migration_progression_eligible is False
+        assert result.status == "completed"
 
     def test_production_call_site_always_passes_empty_commit_ownership_today(self):
         # Confirms the dormancy claim above directly from source: the

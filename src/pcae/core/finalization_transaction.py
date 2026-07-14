@@ -871,7 +871,7 @@ def run_finalization_transaction(
     # legacy's own already-completed sequential path, at this same point).
     # No-op when ``migration_package`` is None (Stage 1 not active, or
     # pre-transaction capture itself was skipped/failed). Never raises.
-    _complete_stage1_migration(
+    migration_result = _complete_stage1_migration(
         migration_package=migration_package,
         phase_id=phase_id,
         entry_point=entry_point,
@@ -881,6 +881,14 @@ def run_finalization_transaction(
         report_digest=report_digest,
         finalization_snapshot_id=finalization_snapshot_id,
     )
+
+    # Phase 135S — Stage 2 atomic publication rehearsal (135Q §50's
+    # integration point: strictly after Stage 1 completion, gated
+    # entirely by PCAE_CLTR_ATOMIC_REHEARSAL_ENABLED). No-op when Stage 1
+    # did not complete for this transition. Never raises; a rehearsal-
+    # side defect is recorded as failure evidence, never propagated, and
+    # never alters `result` or any production artifact.
+    _run_stage2_atomic_rehearsal(migration_result=migration_result)
 
     return result
 
@@ -986,6 +994,8 @@ def _observe_shadow_cltr(
 _ENTRY_POINT_RECOVERY_CLASSIFICATION = {
     "phase_complete": "phase_complete_finalization",
     "task_finish": "task_finish_finalization",
+    "phase_report_create": "report_create_recovery",
+    "notify_send_report": "manual_governed_recovery",
 }
 
 
@@ -1030,15 +1040,18 @@ def _complete_stage1_migration(
     result: "TransactionResult",
     report_digest: str,
     finalization_snapshot_id: str,
-) -> None:
+):
     """Phase 135O — Stage 1 dual-derivation completion (135M §8.4's second
     capture point). No-op when ``migration_package`` is None. Never raises;
     a migration-side defect is recorded as failure evidence, never
     propagated (phase brief §21, "failures in migration logic must not
-    corrupt authoritative production state")."""
+    corrupt authoritative production state"). Returns the Stage 1
+    ``MigrationResult`` (Phase 135S — consumed only by the Stage 2
+    rehearsal call site immediately below this function's own call
+    site; production behavior is unaffected by this return value)."""
 
     if migration_package is None:
-        return
+        return None
     try:
         from pcae.cltr.migration.coordinator import run_stage1_best_effort_completion
 
@@ -1047,7 +1060,7 @@ def _complete_stage1_migration(
         notification_state = "confirmed" if notify_success else "unconfirmed"
         receipt_id = result.receipt_logical_delivery_id if notify_success else None
 
-        run_stage1_best_effort_completion(
+        return run_stage1_best_effort_completion(
             migration_package,
             legacy_completion_fields={
                 "transition_type": "close_success" if notify_success else "close_partial",
@@ -1068,6 +1081,52 @@ def _complete_stage1_migration(
             production_completion_continued=True,
         )
     except Exception:  # noqa: BLE001 - migration observation must never affect production finalization
+        return None
+
+
+def _run_stage2_atomic_rehearsal(*, migration_result) -> None:
+    """Phase 135S — Stage 2 atomic publication rehearsal, invoked only
+    after Stage 1 dual-derivation has already completed for this
+    transition (135Q §50's integration point). No-op unless
+    ``PCAE_CLTR_ATOMIC_REHEARSAL_ENABLED`` is set (checked inside the
+    rehearsal coordinator itself, mirroring Stage 1's own gating
+    pattern) or Stage 1 did not complete. Never raises into this caller;
+    the rehearsal coordinator contains every failure as disclosed,
+    non-authoritative evidence and never touches a production pointer,
+    marker, receipt, or notification path."""
+
+    if migration_result is None or migration_result.status != "completed" or migration_result.package is None:
+        return
+    try:
+        from pcae.cltr.migration.cltr_derivation import derive_cltr
+        from pcae.cltr.migration.comparison import compare
+        from pcae.cltr.migration.legacy_derivation import derive_legacy
+        from pcae.cltr.migration.rehearsal.coordinator import run_stage2_best_effort
+        from pcae.core.runtime_introspection import (
+            CURRENT_MAXIMUM_PLUGIN_CAPABILITY,
+            CURRENT_RUNTIME_STATE,
+            EXECUTION_AVAILABILITY,
+        )
+
+        package = migration_result.package
+        legacy_result = derive_legacy(package)
+        cltr_result = derive_cltr(package)
+        stage1_comparison_result = compare(legacy_result, cltr_result)
+
+        run_stage2_best_effort(
+            package=package,
+            stage1_status=migration_result.status,
+            stage1_evidence_digest=migration_result.evidence.evidence_digest if migration_result.evidence else None,
+            cltr_result=cltr_result,
+            legacy_result=legacy_result,
+            stage1_comparison_result=stage1_comparison_result,
+            runtime_snapshot={
+                "current_runtime_state": CURRENT_RUNTIME_STATE,
+                "current_maximum_capability": CURRENT_MAXIMUM_PLUGIN_CAPABILITY,
+                "execution_availability": EXECUTION_AVAILABILITY,
+            },
+        )
+    except Exception:  # noqa: BLE001 - Stage 2 rehearsal must never affect production finalization
         pass
 
 

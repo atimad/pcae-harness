@@ -31,14 +31,11 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-DEFAULT_MIGRATION_ROOT = Path(".pcae/cltr-migration")
+# Phase 135S — fixes F-135P-4: single source of truth, imported by every
+# Stage 1/Stage 2 migration-namespace consumer instead of hardcoded here.
+from pcae.cltr.migration.disclosure import NON_AUTHORITY_DISCLOSURE
 
-NON_AUTHORITY_DISCLOSURE = {
-    "migration_evidence_only": True,
-    "authoritative": False,
-    "authority_cutover": False,
-    "execution_capability": False,
-}
+DEFAULT_MIGRATION_ROOT = Path(".pcae/cltr-migration")
 
 
 class PathContainmentError(ValueError):

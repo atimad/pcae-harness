@@ -1,5 +1,47 @@
 # Changelog
 
+- Phase 135S — Atomic Publication Rehearsal Implementation
+  (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_IMPLEMENTATION.md`).
+  Implements Stage 2 (Atomic Publication Rehearsal, Legacy Authority)
+  under `src/pcae/cltr/migration/rehearsal/`: 10 file-producing
+  candidate artifacts (of 135Q's 23-item inventory; the remaining 13
+  bound into the manifest/evidence record, disclosed), deterministic
+  rehearsal-generation identity, manifest + per-artifact/generation
+  SHA-256 digests, directory-level atomic finalization
+  (`candidates/`→`generations/`, disclosed as a new primitive per
+  F-135R-1, with a bounded retry for the disclosed Windows-transient
+  caveat), an atomic non-authoritative `current-rehearsal` pointer
+  (per-transition, rejecting dangling/digest-mismatched/quarantined
+  targets), precondition/mismatch/quarantine/idempotent-replay
+  handling, fault injection (test-only), and a shared coordinator
+  invoked identically from all four production finalization entry
+  points (`phase_complete`, `task_finish`, `phase_report_create`,
+  `notify_send_report`) strictly after Stage 1 completes. Adds
+  read-only `pcae cltr migration rehearsal status` /
+  `rehearsal reconcile --phase-id`. Gated behind
+  `PCAE_CLTR_ATOMIC_REHEARSAL_ENABLED` (disabled by default; invalid
+  configuration fails closed). Resolves all four Stage-2-implementation
+  Blocking prerequisites: F-135P-1 (entry-point recovery
+  classification now correctly maps `phase_report_create`/
+  `notify_send_report`), F-135P-2's `EXPECTED_REPRESENTATION_DIFFERENCE`
+  half (wired for notification/marker/receipt candidate comparisons),
+  F-135P-3 (`derive_cltr` no longer crashes on non-empty commit
+  ownership — raw hashes now normalized to typed
+  `CommitOwnershipEntry`), and F-135P-4 (one shared
+  `pcae.cltr.migration.disclosure.NON_AUTHORITY_DISCLOSURE` constant
+  replaces five independently-hardcoded copies). Legacy lifecycle
+  remains sole production authority throughout; the rehearsal
+  generation and pointer are non-authoritative by construction, never
+  merely by policy; no production pointer, marker, receipt, or
+  notification dispatch was touched; no execution capability was
+  introduced; runtime remains Observed / observe / execution
+  unavailable. 28 new focused tests
+  (`tests/test_cltr_rehearsal_coordinator.py`); Fast Green 4391/4391
+  unchanged; 8 pre-existing, 135S-unrelated test failures (a
+  sandbox-local receipt-modeling defect, independently confirmed via
+  `git stash` to reproduce identically on unmodified `main`) disclosed,
+  not hidden or fixed. Recommends 135T — Atomic Publication Rehearsal
+  Independent Verification next.
 - Phase 135R — Atomic Publication Rehearsal Contract Verification
   (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_VERIFICATION.md`).
   Independent architecture/contract-verification phase over 135Q's

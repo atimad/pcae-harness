@@ -34,8 +34,43 @@ from pcae.cltr.enums import (
 from pcae.cltr.invariants import InvariantContext, evaluate_all, has_blocking_failure
 from pcae.cltr.migration.enums import InputStage
 from pcae.cltr.migration.shared_input import SharedTransitionInputPackage
-from pcae.cltr.models import InvariantEvaluation, ProductionCltrRecord
+from pcae.cltr.models import CommitOwnershipEntry, InvariantEvaluation, ProductionCltrRecord
 from pcae.cltr.validation import ValidationError, validate_record
+
+
+def _normalize_commit_ownership(package: SharedTransitionInputPackage) -> tuple[CommitOwnershipEntry, ...]:
+    """Phase 135S — fixes F-135P-3: ``phase_commit_ownership`` may arrive
+    on the shared input as bare commit-hash strings (135M §8.4 captures
+    only the hash, not a full ownership record). Normalizes each into a
+    typed ``CommitOwnershipEntry`` the same way the Stage-0 shadow
+    observer already does (``finalization_transaction.py``'s
+    ``commit_ownership`` construction), rather than forwarding raw
+    strings that would later crash ``CLTR-COMMIT-2``'s
+    ``.certification_state`` dereference. Any entry already typed is
+    passed through unchanged."""
+
+    from pcae.cltr.enums import CertificationState
+
+    raw = package.field("phase_commit_ownership") or ()
+    entries = []
+    for item in raw:
+        if isinstance(item, CommitOwnershipEntry):
+            entries.append(item)
+            continue
+        entries.append(
+            CommitOwnershipEntry(
+                commit_hash=str(item),
+                repository_identity=package.phase_id,
+                branch_identity="main",
+                # Honest disclosure, matching the Stage-0 shadow
+                # observer's own precedent: production does not yet
+                # implement the three-outcome commit-ownership
+                # verification model (135H §1, 135J F5) -- Stage 1/Stage 2
+                # derivation never fabricates a `verified` classification.
+                certification_state=CertificationState.UNVERIFIABLE,
+            )
+        )
+    return tuple(entries)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -120,7 +155,7 @@ def derive_cltr(
             final_revision=package.field("staged_final_revision"),
             prior_state=package.predecessor_transition_id or "none",
             certified_state=certified_state,
-            phase_commit_ownership=package.field("phase_commit_ownership") or (),
+            phase_commit_ownership=_normalize_commit_ownership(package),
             report_id=package.field("report_id"),
             report_digest=package.field("report_digest"),
             metadata_id=package.field("metadata_id"),

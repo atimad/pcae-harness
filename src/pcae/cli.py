@@ -10538,7 +10538,12 @@ def build_parser() -> argparse.ArgumentParser:
     cltr_shadow_reconcile_parser.set_defaults(handler=run_cltr_shadow_reconcile)
 
     # ── pcae cltr migration (Phase 135O — Stage 1 dual derivation, read-only CLI) ──
-    from pcae.commands.cltr_migration import run_cltr_migration_reconcile, run_cltr_migration_status
+    from pcae.commands.cltr_migration import (
+        run_cltr_migration_reconcile,
+        run_cltr_migration_rehearsal_reconcile,
+        run_cltr_migration_rehearsal_status,
+        run_cltr_migration_status,
+    )
 
     cltr_migration_parser = cltr_subparsers.add_parser(
         "migration",
@@ -10558,6 +10563,26 @@ def build_parser() -> argparse.ArgumentParser:
     cltr_migration_reconcile_parser.add_argument("--phase-id", required=True)
     cltr_migration_reconcile_parser.add_argument("--json", action="store_true")
     cltr_migration_reconcile_parser.set_defaults(handler=run_cltr_migration_reconcile)
+
+    # ── pcae cltr migration rehearsal (Phase 135S — Stage 2 atomic publication rehearsal, read-only CLI) ──
+    cltr_rehearsal_parser = cltr_migration_subparsers.add_parser(
+        "rehearsal",
+        help="Stage 2 atomic publication rehearsal evidence (Phase 135S, legacy authority, read-only).",
+    )
+    cltr_rehearsal_subparsers = cltr_rehearsal_parser.add_subparsers(dest="cltr_rehearsal_command", required=True)
+
+    cltr_rehearsal_status_parser = cltr_rehearsal_subparsers.add_parser(
+        "status", help="Show Stage 2 rehearsal configuration and per-transition pointer status."
+    )
+    cltr_rehearsal_status_parser.add_argument("--json", action="store_true")
+    cltr_rehearsal_status_parser.set_defaults(handler=run_cltr_migration_rehearsal_status)
+
+    cltr_rehearsal_reconcile_parser = cltr_rehearsal_subparsers.add_parser(
+        "reconcile", help="Read-only reconciliation of a phase's Stage 2 rehearsal evidence (never mutates)."
+    )
+    cltr_rehearsal_reconcile_parser.add_argument("--phase-id", required=True)
+    cltr_rehearsal_reconcile_parser.add_argument("--json", action="store_true")
+    cltr_rehearsal_reconcile_parser.set_defaults(handler=run_cltr_migration_rehearsal_reconcile)
 
     return parser
 
