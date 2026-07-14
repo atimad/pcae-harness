@@ -10,7 +10,7 @@ Phase 135T: Atomic Publication Rehearsal Independent Verification
 
 ## Status
 
-done
+active
 
 ## Mode
 
@@ -31,6 +31,8 @@ Independently verify Stage 2 (135S), reproduce and attack all claims, repair any
 - tasks/DONE.md
 - tasks/active/**
 - tasks/done/**
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 
 ## Forbidden Files
 
