@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 135T — Atomic Publication Rehearsal Independent Verification
+(completed, VERIFIED WITH NON-BLOCKING FINDINGS — independent
+verification plus bounded repair). Independently re-derived 135Q's
+Stage 2 contract directly from its own text (not from 135S's paraphrase)
+and attacked 135S's implementation. Found and repaired two Blocking
+defects, both within the Stage 2 implementation boundary: (1) a real,
+live-reproduced symlink-escape containment gap — `coordinator.py` wrote
+every candidate artifact and the manifest via a bare
+`Path.write_text`/`write_bytes` call, bypassing
+`persistence.write_candidate_artifact`'s pre-existing-symlink abort
+entirely (the helper existed but was never called); repaired by wiring
+the coordinator to the existing, correct helper. (2) 135S's own
+regression-baseline claim (5/8/10 "pre-existing, sandbox-local,
+receipt-modeling" test failures across four named regression suites)
+did not reproduce on independent re-run; the actual 2 failures were a
+genuine, small, Stage-2-caused regression — two stale test assertions
+in `tests/test_cltr_migration_135p_verification.py` left over from
+before F-135P-1's fix landed, misclassified as inherited/unrelated;
+repaired by correcting the two assertions to the genuinely-fixed
+classifications. Independent baseline reproduction used an isolated
+`git worktree` at the exact pre-135S commit, never mutating the primary
+repository: pre-135S, all 4 parametrized cases pass; on the unrepaired
+135S tree, 2 fail — confirming the regression was new, not inherited.
+Post-repair, all four regression suites 135S's own report names pass at
+100% (Stage 2 focused 44/44 incl. 16 fresh adversarial tests; combined
+migration 129/129; production CLTR combined 414/414; affected
+finalization 117/117; notification/marker/receipt/report 1183/1183);
+Fast Green 4391/4391 unchanged. Every other verification area (authority
+matrix, deterministic identity — independently re-derived and confirmed
+stable across a fresh subprocess, exact 23-item inventory with honest
+disclosure of the 10 file-backed items vs. 13 folded/manifest-bound
+fields, 19-step sequence trace, manifest/digest tamper detection via
+live on-disk mutation, atomic pointer, crash/recovery, idempotency,
+quarantine, all-four-entry-point wiring, 135H.1 escape resistance,
+production side-effect/notification/marker/receipt isolation — verified
+live via filesystem snapshot equality, no-execution import-graph proof)
+independently confirms the Stage 2 contract holds. Legacy lifecycle
+remains the sole production authority; the rehearsal generation and
+pointer remain non-authoritative; no Stage 3 implementation, authority
+cutover, legacy demotion, or legacy retirement occurred; no execution
+capability was introduced; runtime remains Observed / observe /
+execution unavailable.
+
+Full analysis: `docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **135U — Rollback Rehearsal Implementation and
+Independent Verification** (not started; a design judgment for the next
+contract/planning phase to confirm, not asserted as final by 135T).
+
+## Phase 135S Complete
+
 Phase 135S — Atomic Publication Rehearsal Implementation (completed).
 Implements Stage 2 (Atomic Publication Rehearsal, Legacy Authority)
 under `src/pcae/cltr/migration/rehearsal/`, per the contract 135Q froze

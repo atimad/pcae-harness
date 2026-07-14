@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-135S) (20260714-2024-idle-awaiting-next-governed-phase-post-135s)
 - Phase 135S: Atomic Publication Rehearsal Implementation (20260714-1956-phase-135s-atomic-publication-rehearsal-implementation)
 - Idle: awaiting next governed phase (post-135R) (20260714-1814-idle-awaiting-next-governed-phase-post-135r)
 - Phase 135R: Atomic Publication Rehearsal Contract Verification (20260714-1804-phase-135r-atomic-publication-rehearsal-contract-verification)

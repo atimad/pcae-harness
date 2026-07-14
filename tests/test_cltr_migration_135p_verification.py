@@ -577,10 +577,12 @@ class TestFourEntryPointsThroughRealFinalizationBoundary:
         transition = payload["transitions"][0]
         assert transition["production_authority"] == "legacy"
 
-        # This is the live, end-to-end confirmation of F-135P-1: the two
-        # mapped entry points get their dedicated classification; the two
-        # unmapped ones fall back to ordinary_finalization. Read directly
-        # from persisted evidence, not from the internal helper function.
+        # This is the live, end-to-end confirmation of F-135P-1's repair
+        # (Phase 135S, finalization_transaction.py's
+        # _ENTRY_POINT_RECOVERY_CLASSIFICATION): all four entry points now
+        # get their own dedicated, truthful classification -- none falls
+        # back to ordinary_finalization. Read directly from persisted
+        # evidence, not from the internal helper function.
         evidence_dir = tmp_path / ".pcae" / "cltr-migration" / "epochs" / f"epoch-{entry_point}" / "transitions"
         transition_dirs = list(evidence_dir.iterdir())
         assert len(transition_dirs) == 1
@@ -590,8 +592,8 @@ class TestFourEntryPointsThroughRealFinalizationBoundary:
         expected = {
             "task_finish": "task_finish_finalization",
             "phase_complete": "phase_complete_finalization",
-            "phase_report_create": "ordinary_finalization",  # F-135P-1 gap
-            "notify_send_report": "ordinary_finalization",  # F-135P-1 gap
+            "phase_report_create": "report_create_recovery",
+            "notify_send_report": "manual_governed_recovery",
         }[entry_point]
         assert evidence_json["recovery_classification"] == expected
         # Regardless of the classification gap, production authority and

@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 135T — Atomic Publication Rehearsal Independent Verification
+  (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_INDEPENDENT_VERIFICATION.md`).
+  Verdict: VERIFIED WITH NON-BLOCKING FINDINGS (independent verification
+  plus bounded repair). Independently re-derived 135Q's Stage 2 contract
+  and attacked 135S's implementation rather than trusting its own claims.
+  Found and repaired two Blocking defects within the Stage 2 boundary:
+  (1) a real, live-reproduced symlink-escape containment gap —
+  `coordinator.py` wrote every candidate artifact and the manifest via a
+  bare `Path.write_text`/`write_bytes` call, never calling
+  `persistence.write_candidate_artifact` (which implements the
+  pre-existing-symlink abort 135Q §7/§25/§47 require); repaired by
+  wiring the coordinator to the existing helper. (2) 135S's own
+  regression-baseline claim (5/8/10 "pre-existing, sandbox-local,
+  receipt-modeling" failures) did not reproduce; the real 2 failures
+  were a genuine, small, Stage-2-caused regression (two stale
+  pre-F-135P-1-fix test assertions), independently confirmed via an
+  isolated `git worktree` at the pre-135S baseline commit (all 4
+  parametrized cases pass there; 2 fail on the unrepaired 135S tree);
+  repaired by correcting the two assertions. Added 16 fresh adversarial
+  tests (`tests/test_cltr_rehearsal_135t_independent_verification.py`):
+  symlink-escape regression, identity determinism (incl. cross-process
+  stability), honest 23-item inventory disclosure, and live on-disk
+  manifest-tamper detection. Post-repair: Stage 2 focused 44/44,
+  combined migration 129/129, production CLTR combined 414/414,
+  affected finalization 117/117, notification/marker/receipt/report
+  1183/1183, Fast Green 4391/4391 unchanged. Every other verification
+  area (authority matrix, atomicity, crash/recovery, idempotency,
+  quarantine, all-four-entry-point wiring, 135H.1 escape resistance,
+  isolation, no-execution) independently confirmed. No Stage 3
+  implementation, authority cutover, legacy demotion, or legacy
+  retirement occurred.
+
 - Phase 135S — Atomic Publication Rehearsal Implementation
   (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_IMPLEMENTATION.md`).
   Implements Stage 2 (Atomic Publication Rehearsal, Legacy Authority)

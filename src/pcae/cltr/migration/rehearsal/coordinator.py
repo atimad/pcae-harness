@@ -46,6 +46,7 @@ from pcae.cltr.migration.rehearsal.persistence import (
     quarantine_dir,
     read_generation_artifacts,
     read_json,
+    write_candidate_artifact,
 )
 from pcae.cltr.migration.rehearsal.pointer import PointerRejectedError, publish, verify_published_target
 from pcae.cltr.migration.shared_input import SharedTransitionInputPackage
@@ -259,9 +260,7 @@ def run_stage2_rehearsal(
         for kind in CANDIDATE_ORDER:
             fault_injector(f"before_write_{kind.value}")
             artifact = candidates[kind]
-            (candidate_dir / artifact.filename).write_text(
-                canonicalize_dict(artifact.content).decode("utf-8"), encoding="utf-8"
-            )
+            write_candidate_artifact(candidate_dir, artifact.filename, artifact.content)
             fault_injector(f"after_write_{kind.value}")
 
         step = "digest_candidates"
@@ -285,7 +284,7 @@ def run_stage2_rehearsal(
         )
         manifest_payload = manifest.digestible_payload()
         manifest_payload["generation_digest"] = manifest.generation_digest
-        (candidate_dir / "manifest.json").write_bytes(canonicalize_dict(manifest_payload))
+        write_candidate_artifact(candidate_dir, "manifest.json", manifest_payload)
         fault_injector("after_manifest_write")
 
         step = "verification"
