@@ -84,6 +84,8 @@
     "fast_green": "4396/4396 (inherited from 135L, not re-executed)",
     "production_cltr_focused_tests": "80/80 (inherited from 135L, not re-executed)",
     "affected_lifecycle_regression_subset": "1245/1245 (inherited from 135L, not re-executed)",
+    "report_notification_tests": "inherited from 135L (included in fast_green there); not re-executed by this documentation-only phase",
+    "bootstrap_session_reporting_tests": "inherited from 135L (included in fast_green there); not re-executed by this documentation-only phase",
     "governance_reinspection": "passed"
   },
   "notification_dispatch_result": "pending",
