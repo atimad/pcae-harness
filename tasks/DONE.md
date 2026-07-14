@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 135Q: Atomic Publication Rehearsal Contract and Implementation Plan (20260714-1548-phase-135q-atomic-publication-rehearsal-contract-and-implementation-plan)
+- Idle: awaiting next governed phase (20260714-1449-idle-awaiting-next-governed-phase)
 - Idle: awaiting next governed phase (20260714-1211-idle-awaiting-next-governed-phase)
 - Phase 135P: Shared Transition Input and Dual-Derivation Independent Verification (20260714-1440-phase-135p-shared-transition-input-and-dual-derivation-independent-verification)
 - Phase 135O: Shared Transition Input and Dual-Derivation Implementation (20260714-1155-phase-135o-shared-transition-input-and-dual-derivation-implementation)

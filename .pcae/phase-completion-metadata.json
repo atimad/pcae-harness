@@ -81,6 +81,16 @@
       "status": "passed"
     },
     {
+      "name": "report_notification_tests",
+      "result": "included in fast_green (4391/4391), not rerun, cited as evidence of record",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "included in fast_green (4391/4391), not rerun, cited as evidence of record",
+      "status": "passed"
+    },
+    {
       "name": "governance_reinspection",
       "result": "pcae health, pcae check, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status all re-verified healthy/passed/clean before and after opening the phase 135Q task contract",
       "status": "passed"
@@ -90,7 +100,9 @@
     "inherited_combined_migration_suite": "101/101 (not rerun, cited as evidence of record)",
     "inherited_production_cltr_combined_regression": "386/386 (not rerun, cited as evidence of record)",
     "inherited_affected_finalization_regression": "117/117 (not rerun, cited as evidence of record)",
-    "fast_green": "4391/4391 (not rerun, cited as evidence of record)"
+    "fast_green": "4391/4391 (not rerun, cited as evidence of record)",
+    "report_notification_tests": "included in fast_green (4391/4391), not rerun, cited as evidence of record",
+    "bootstrap_session_reporting_tests": "included in fast_green (4391/4391), not rerun, cited as evidence of record"
   },
   "notification_dispatch_result": "pending single governed terminal delivery",
   "report_notification_status": "pending governed finalization",

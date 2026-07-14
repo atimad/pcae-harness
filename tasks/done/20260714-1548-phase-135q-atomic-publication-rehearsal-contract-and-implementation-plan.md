@@ -10,7 +10,7 @@ Phase 135Q: Atomic Publication Rehearsal Contract and Implementation Plan
 
 ## Status
 
-active
+done
 
 ## Mode
 
