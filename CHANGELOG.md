@@ -120,6 +120,47 @@
 
 ## Unreleased
 
+- Phase 135M — Production CLTR Dual-Derivation and Atomic Publication
+  Contract / Migration Plan
+  (`docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_ATOMIC_PUBLICATION_MIGRATION_PLAN.md`).
+  Documentation-only contract and migration-planning phase — no
+  implementation, no dual-derivation activation, no atomic-publication
+  implementation, no authority cutover, no legacy-authority demotion or
+  retirement, no production source or test change. Independently
+  inspected CLTR-001, CLTR-SCHEMA-001 v1.0.1, and every named 135D/135G/
+  135H/135H.1/135H.2/135J/135K/135L source rather than trusting
+  summaries. Dispositioned all four 135L Non-Blocking findings
+  individually (two reclassified must-resolve-before-dual-derivation;
+  one may-remain-until-cutover; one accepted as a long-term, out-of-scope
+  legacy-tooling limitation), all four 135K inherited limitations, and
+  all four 135J inherited Non-Blocking findings. Froze migration
+  terminology; a six-stage single-authority model (Shadow Observation →
+  Dual Derivation, Legacy Authority → Dual Publication Rehearsal → CLTR
+  Authority With Legacy Verification → Legacy Demotion → Legacy
+  Retirement) with exactly one lifecycle authority per stage; per-stage
+  entry/exit gates; a shared explicit dual-derivation input contract
+  prohibiting fallback inference from titles, filenames, commit subjects,
+  or Git history; a comparison contract built on CLTR-SCHEMA-001 §21.4's
+  already-frozen 15-kind adapter-mode assignment; comparison result
+  classes with a stage-dependent mismatch policy; an atomic-generation
+  and publication-pointer contract with an explicit local-atomicity-
+  versus-external-effects boundary (Telegram delivery is never described
+  as filesystem-atomic); a publication failure model, recovery contract,
+  and exactly-once contract generalizing 135H.2's proven intent-barrier/
+  reconciliation discipline; staged migration behavior for notification,
+  marker, receipt, checkpoint, completion metadata, canonical report,
+  Architecture Status, and Git attribution; a legacy authority inventory
+  with explicit demotion and retirement criteria; a rollback/roll-forward
+  architecture that never rewrites history; an authority-epoch model; a
+  mandatory operator cutover-approval gate; a multi-flag architecture
+  with fail-closed invalid-configuration handling; a cross-reference
+  matrix and risk register; and a recommended ten-phase staged
+  implementation sequence (135N-135W) that never combines implementation
+  with its own independent verification. Runtime remains Observed /
+  observe / execution unavailable. PFN-001, PFR-001, CLTR-001, and
+  CLTR-SCHEMA-001 v1.0.1 all unchanged. Recommends 135N — Production CLTR
+  Dual-Derivation and Migration Contract Verification (not started); does
+  not proceed directly from planning to implementation.
 - Phase 135L — Production CLTR Shadow Integration Independent Verification
   (`docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_INDEPENDENT_VERIFICATION.md`).
   Independently re-derived and adversarially attacked the 135K production shadow

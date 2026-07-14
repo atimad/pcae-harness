@@ -2,42 +2,58 @@
 
 ## Current Phase
 
-Phase 135L — Production CLTR Shadow Integration Independent Verification
-(completed). Independently re-derived, reproduced, and adversarially
-attacked the 135K production shadow implementation rather than trusting
-its report, tests, or comments: exact contract inventory (14 states / 16
-transitions / 14 forbidden transitions / 37 invariants / 15 adapters),
-typed-model immutability, digest/canonicalization sensitivity, atomic
-publication and crash containment, subprocess/network isolation via
-monkeypatch (not AST alone), the single shared four-entry-point call path,
-and feature-flag isolation. **No Blocking defect found.** Four genuine
-Non-Blocking findings were independently reproduced and disclosed: (1)
-`InvariantContext`'s live-comparison fields are declared but never
-populated or read (dead parameter threading, no false pass/fail caused);
-(2) the one real production call site never wires `AdapterSources`, so
-11/15 representation adapters resolve `unverifiable` (never a false
-conformant) on every real invocation today, and `transition_id == phase_id`
-means a same-phase content correction is safely contained as
-`publish_failed` rather than published; (3) 135K's own canonical report was
-re-promoted under the same `phase_id` by a later closure-documentation
-bookkeeping task, producing a `phase_name` display anomaly and a genuine
-`pcae phase-report reconcile` conflict — a PFR/task-lifecycle tooling gap
-entirely outside `src/pcae/cltr`, documented but explicitly not repaired
-(out of this phase's shadow-only boundary); (4) `repository_identity`/
-`branch_identity` in production wiring are placeholder values, not
-actually-observed repository/branch state. Five new independent regression
-tests were added (`tests/test_cltr_135l_independent_verification.py`); no
-repair to `src/pcae/cltr` was required. All four of 135J's inherited
-Non-Blocking findings were independently re-verified unchanged (F1 already
-resolved prior to 135K). Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS.**
-No authority cutover, no legacy authority retirement, no execution
-capability introduced. Runtime remains Observed / observe / execution
-unavailable. PFN-001, PFR-001, and CLTR-001 all unchanged.
+Phase 135M — Production CLTR Dual-Derivation and Atomic Publication
+Contract / Migration Plan (completed). A documentation-only contract and
+migration-planning phase — no implementation, no dual-derivation
+activation, no atomic-publication implementation, no authority cutover,
+no legacy-authority demotion or retirement, and no production source or
+production test change occurred. Independently inspected CLTR-001,
+CLTR-SCHEMA-001 v1.0.1, 135D's state machine, 135G's prototype findings,
+135H's integration/retirement plan, 135H.1/135H.2's recovery hardening,
+135J's schema verification and four Non-Blocking findings, 135K's shadow
+implementation and inherited limitations, and 135L's independent
+verification and four Non-Blocking findings, rather than trusting
+summaries. Dispositioned all four 135L Non-Blocking findings individually:
+two (`InvariantContext` live-comparison fields unused; unwired
+`adapter_sources` and colliding `transition_id == phase_id` identity) are
+reclassified **must resolve before dual-derivation implementation**; one
+(placeholder `repository_identity`/`branch_identity`) **may remain during
+dual derivation but must resolve before cutover**; one (135K's
+re-promoted-report reconciliation conflict, outside `src/pcae/cltr`) is an
+**accepted long-term limitation**, unscheduled and out of Track 135's
+migration sequence. Froze: migration terminology; a six-stage
+single-authority model (Shadow Observation → Dual Derivation, Legacy
+Authority → Dual Publication Rehearsal → CLTR Authority With Legacy
+Verification → Legacy Demotion → Legacy Retirement) with exactly one
+lifecycle authority named at every stage; per-stage entry/exit gates;
+a shared explicit dual-derivation input contract preventing either path
+from independently reconstructing mandatory facts; a comparison contract
+reusing CLTR-SCHEMA-001 §21.4's already-frozen 15-kind adapter-mode
+assignment; comparison result classes and a stage-dependent (never
+one-size-fits-all) mismatch policy; an atomic-generation and
+publication-pointer contract with an explicit local-atomicity-versus-
+external-effects boundary (never claiming Telegram delivery is
+filesystem-atomic); a publication failure model, recovery contract, and
+exactly-once contract generalizing 135H.2's proven intent-barrier/
+reconciliation discipline; staged migration behavior for notification,
+marker, receipt, checkpoint, completion metadata, canonical report,
+Architecture Status, and Git attribution; a legacy authority inventory
+with explicit demotion and retirement criteria; a rollback/roll-forward
+architecture that never rewrites history; an authority-epoch model; a
+mandatory operator cutover-approval gate (no implicit cutover through a
+feature flag alone); a multi-flag architecture with fail-closed invalid-
+configuration handling; a 55-entry-plus cross-reference matrix and a
+16-row risk register; and a ten-phase recommended staged implementation
+sequence (135N–135W) that never combines implementation with its own
+independent verification. Runtime remains Observed / observe / execution
+unavailable throughout every migration stage this document defines.
+PFN-001, PFR-001, CLTR-001, and CLTR-SCHEMA-001 v1.0.1 all unchanged.
 
 Full analysis:
-`docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_INDEPENDENT_VERIFICATION.md`.
-Recommended next phase: **135M — Production CLTR Dual-Derivation and Atomic
-Publication Contract / Migration Plan** (not started).
+`docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_ATOMIC_PUBLICATION_MIGRATION_PLAN.md`.
+Recommended next phase: **135N — Production CLTR Dual-Derivation and
+Migration Contract Verification** (not started). Do not proceed directly
+from planning to implementation.
 
 ## Phase 135K Complete
 

@@ -2,6 +2,9 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (20260714-0837-idle-awaiting-next-governed-phase)
+- Phase 135L: session handoff after completion (20260714-0836-phase-135l-session-handoff-after-completion)
+- Phase 135L: Production CLTR Shadow Integration Independent Verification (20260714-0815-phase-135l-production-cltr-shadow-integration-independent-verification)
 - Phase 135K: closure-of-closure documentation commit (20260714-0418-phase-135k-closure-of-closure-documentation-commit)
 - Phase 135K: closure documentation commit (20260714-0417-phase-135k-closure-documentation-commit)
 - Phase 135K: Production CLTR Shadow Integration Implementation (20260714-0136-phase-135k-production-cltr-shadow-integration-implementation)
