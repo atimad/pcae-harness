@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 135N — Production CLTR Dual-Derivation and Migration Contract
+Verification (completed). An independent contract-verification phase —
+no implementation, no dual-derivation activation, no atomic-publication
+implementation, no authority cutover, no legacy-authority demotion or
+retirement, and no production source or production test change occurred.
+Independently re-derived and verified 135M's migration contract against
+CLTR-001, CLTR-SCHEMA-001 v1.0.1, 135A, 135D, 135D.1, 135G, 135H, 135H.1,
+135H.2, 135J, and 135L's own text (not 135M's summaries of them), and
+against current production source (`finalization_transaction.py`,
+`src/pcae/cltr/*`, notification/marker/receipt/checkpoint mechanisms,
+the legacy promotion pointer, Architecture Status generation, commit
+attribution, and the reconciliation command). Found and repaired one
+genuine **Blocking** documentation defect: §8's shared-input field list
+and §9's "assembled before either derivation begins" requirement
+described a temporal impossibility for the terminal-snapshot Stage 1
+model 135M itself preserves — repaired via a new §8.4 distinguishing
+pre-transaction facts (genuinely assemblable upfront) from in-transaction
+completion identities (captured once, from legacy's own single
+computation, at the point `_observe_shadow_cltr` already occupies today,
+then bound immutably into the same package before CLTR reads them).
+Resolved the one open design choice 135M explicitly deferred to this
+phase: `transition_id` (§8.3) will be an independently generated
+identifier decoupled from `phase_id`/`entry_point`/any durable
+attempt-sequence counter, not a composite string — binding on 135O.
+Disclosed three further Non-Blocking findings, none touching authority,
+recovery, or exactly-once safety: a missing predecessor-transition-
+identity field in §8.1's list; an inventory-table wording overstatement
+for current Git-attribution risk (commit attribution is already
+explicit-list-based and fail-closed, pre-Track-135; only ownership
+*verification* remains unimplemented); and several editorial-precision
+notes (terminology-glossary completeness, an incident-description
+mismatch, an Architecture-Status-mechanism description, and a citation
+precision note) bundled for the already-scheduled 135S editorial-hygiene
+pass. Zero Blocking findings remain after repair. CLTR-001,
+CLTR-SCHEMA-001 v1.0.1, PFN-001, and PFR-001 all unchanged (the one
+repair touches only 135M, a migration-planning document, not the wire
+schema). Runtime remains Observed / observe / execution unavailable.
+
+Full analysis:
+`docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_MIGRATION_CONTRACT_VERIFICATION.md`.
+Amended contract: `docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_ATOMIC_PUBLICATION_MIGRATION_PLAN.md`
+(135M, amended by this phase's §8.3 resolution and new §8.4).
+Recommended next phase: **135O — Shared Transition Input and
+Dual-Derivation Implementation** (not started). 135O implements only the
+first legacy-authoritative dual-derivation stage (Stage 1); it must not
+implement CLTR authority cutover, retire legacy authority, or make CLTR
+control publication, notification, markers, or receipts.
+
+## Phase 135M Complete
+
 Phase 135M — Production CLTR Dual-Derivation and Atomic Publication
 Contract / Migration Plan (completed). A documentation-only contract and
 migration-planning phase — no implementation, no dual-derivation
@@ -49,11 +99,8 @@ independent verification. Runtime remains Observed / observe / execution
 unavailable throughout every migration stage this document defines.
 PFN-001, PFR-001, CLTR-001, and CLTR-SCHEMA-001 v1.0.1 all unchanged.
 
-Full analysis:
+Full analysis (as originally frozen; see 135N above for the amendment):
 `docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_ATOMIC_PUBLICATION_MIGRATION_PLAN.md`.
-Recommended next phase: **135N — Production CLTR Dual-Derivation and
-Migration Contract Verification** (not started). Do not proceed directly
-from planning to implementation.
 
 ## Phase 135K Complete
 

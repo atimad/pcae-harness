@@ -3,6 +3,8 @@
 **Phase classification:** architecture, contract, migration planning, cutover-readiness definition.
 **Not:** implementation, dual-derivation activation, atomic-publication implementation, authority cutover, legacy-authority demotion, legacy-authority retirement.
 
+**Amended by Phase 135N** (independent contract verification, documentation-only): §8.3's `transition_id` identity decision is resolved (design (b) selected); a new §8.4 is added, reconciling §8.1's field list with §9's assembly-timing requirement. See `docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_MIGRATION_CONTRACT_VERIFICATION.md`.
+
 **Binding semantic authority:** CLTR-001 v1.0 (frozen, 135B; verified 135C, 135D, 135G).
 **Production wire contract:** CLTR-SCHEMA-001 v1.0.1 (frozen 135I; amended 135J).
 **Latest completed phase:** 135L — Production CLTR Shadow Integration Independent Verification (VERIFIED WITH NON-BLOCKING FINDINGS; zero Blocking findings; commits `5f1234f968f3a3e50ae490229430ea3c20f6df5d`, `977bb1436f73e0ce263d2715335a6fe088cb9a2c`).
@@ -270,6 +272,22 @@ Neither derivation path may reconstruct any mandatory input from: report titles;
 - **(b) Separate transition and phase identity fields:** `transition_id` becomes independently generated (e.g., a UUID or monotonic counter bound to the finalization-transaction invocation), with `phase_id` remaining a separate, always-present field in the shared input package and every derived record.
 
 135N must select one of these (or a third design meeting the same requirement) before 135O implements the shared input assembler. Either design must guarantee: two distinct finalization attempts for the same `phase_id` never produce colliding `transition_id` values, and a superseding correction is always modeled as `predecessor_transition_id`/`successor_transition_id` (already frozen fields, CLTR-SCHEMA-001 §7), never as an overwrite.
+
+**Resolved by Phase 135N:** design (b) is selected — an independently generated `transition_id` (e.g., a UUID4 or another opaque, sortable identifier; the exact generation function is 135O's implementation choice), with `phase_id` remaining a permanently separate, always-present field. Design (a) was rejected because it requires a new durable per-`(phase_id, entry_point)` attempt-sequence counter as additional migration state whose own consistency would itself need protecting; because a composite string identifier invites exactly the "parse the identifier to recover a fact" anti-pattern this document otherwise permanently prohibits (§8.2, §25, §34); and because two different entry points recovering the same `phase_id` could otherwise both produce `attempt_sequence = 1`, requiring `predecessor_transition_id` linkage regardless — which design (b) requires identically, without the composite string's downsides. Full reasoning: `docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_MIGRATION_CONTRACT_VERIFICATION.md` §8. This decision is binding on 135O.
+
+### 8.4 Assembly timing and field availability (added by Phase 135N)
+
+§8.1's required-field list and §9's "runs... before either derivation path begins" requirement are reconciled as follows, for Stage 1 specifically (where legacy's own derivation path remains unchanged and still produces its outputs sequentially, per §6 Stage 1 and per 135K limitation 1's disposition in §4, which this document explicitly carries forward unresolved into 135O's design scope):
+
+**Pre-transaction facts** — phase identity; task identity; transition identity; predecessor transition identity; entry-point identity; source revision; staged final revision; explicit commit ownership; recovery classification; and the assembler's own disclosed limitations — are genuinely assemblable, and must be assembled, at a fixed point before either derivation path begins, exactly as originally described in §9.
+
+**In-transaction completion identities** — report identity and digest; promotion identity; checkpoint identity; marker identity; receipt identity; and notification identity and state — are, for Stage 1, outputs of legacy's own unchanged, sequential finalization path, and cannot exist before that path runs. For these fields specifically, the assembler captures each value from legacy's own single, already-completed computation at the same point in the pipeline `_observe_shadow_cltr` already occupies today (i.e., after legacy's existing sequential path has completed), and binds each value, immutably, into the same package object CLTR's derivation subsequently reads. This satisfies §8.2's anti-fallback rule and §9's single-computation requirement exactly: there remains exactly one computation of each such field (legacy's own), and CLTR reads it by reference, never independently recomputing, reconstructing, or interpreting it a second way.
+
+This two-part structure is required only because Stage 1 preserves legacy's existing sequential derivation unchanged. From **Stage 2** onward, once the atomic generation contract (§20) begins jointly producing legacy-compatible and CLTR outputs within one candidate-preparation sequence (§21), a single, genuinely upfront assembly of the complete field set (as §9 originally, and still, describes for the general case) becomes achievable, because both derivations' outputs are then produced together within the same governed transaction rather than legacy running to completion first.
+
+This clarification changes no downstream contract: the single-authority rule (§2), the anti-circularity rule (§9's original text), the isolation rule (§10), and the exactly-once contract (§26) all continue to apply exactly as originally written, now without the timing contradiction §8.1/§9 previously contained as literally stated.
+
+**Amendment record:** this §8.4 and the design-(b) resolution above §8.4 were added by Phase 135N (independent contract verification) after finding that §8.1/§9, as originally frozen, described a temporal impossibility for the terminal-snapshot derivation model this document itself preserves unchanged for Stage 1. This is a documentation-only clarification; it requires no change to CLTR-001 or CLTR-SCHEMA-001, and no production source or production test was changed as a result. Full finding and reasoning: `docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_MIGRATION_CONTRACT_VERIFICATION.md` §8, §62 (finding F-135N-1), §63 (repair record).
 
 ---
 

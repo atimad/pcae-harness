@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (20260714-0933-idle-awaiting-next-governed-phase)
 - Phase 135M: closure documentation commit (20260714-0933-phase-135m-closure-documentation-commit)
 - Phase 135M: Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan (20260714-0926-phase-135m-production-cltr-dual-derivation-and-atomic-publication-contract-migration-plan)
 - Idle: awaiting next governed phase (20260714-0837-idle-awaiting-next-governed-phase)

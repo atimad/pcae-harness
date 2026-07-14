@@ -1,5 +1,35 @@
 # Changelog
 
+- Phase 135N — Production CLTR Dual-Derivation and Migration Contract
+  Verification
+  (`docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_MIGRATION_CONTRACT_VERIFICATION.md`).
+  Independently re-derived and verified 135M's migration contract against
+  CLTR-001, CLTR-SCHEMA-001 v1.0.1, and 135A/135D/135D.1/135G/135H/135H.1/
+  135H.2/135J/135L's own text, and against current production source
+  (`finalization_transaction.py`, `src/pcae/cltr/*`, notification/marker/
+  receipt/checkpoint mechanisms, the legacy promotion pointer, Architecture
+  Status generation, commit attribution, `pcae phase-report reconcile`),
+  rather than trusting 135M's summaries. Found and repaired one Blocking
+  documentation defect (135M's §8.1 shared-input field list and §9's
+  assembly-timing requirement described a temporal impossibility for the
+  terminal-snapshot Stage 1 model 135M itself preserves; repaired via a new
+  §8.4 in 135M distinguishing pre-transaction facts from in-transaction
+  completion identities, and re-verified for cross-section consistency).
+  Resolved 135M's one explicitly deferred open design choice: `transition_id`
+  (§8.3) will be an independently generated identifier, decoupled from
+  `phase_id`/`entry_point`/any durable attempt-sequence counter — binding on
+  135O. Disclosed three further Non-Blocking findings (missing predecessor-
+  transition-identity field; an inventory-table wording overstatement for
+  current Git-attribution risk, since commit attribution is already
+  explicit-list-based and fail-closed pre-Track-135; and several editorial-
+  precision notes bundled for 135S). Verdict: VERIFIED WITH NON-BLOCKING
+  FINDINGS, zero Blocking findings remaining after repair. No production
+  source or production test changed; no dual derivation enabled; no atomic
+  publication implemented; no authority cutover; no legacy authority
+  demoted or retired; CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, and PFR-001
+  all unchanged. Recommends 135O — Shared Transition Input and
+  Dual-Derivation Implementation.
+
 - Phase 135K — Production CLTR Shadow Integration Implementation
   (`docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_IMPLEMENTATION.md`).
   Implemented the first production CLTR integration in strict shadow mode:
