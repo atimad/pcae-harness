@@ -10537,6 +10537,28 @@ def build_parser() -> argparse.ArgumentParser:
     cltr_shadow_reconcile_parser.add_argument("--json", action="store_true")
     cltr_shadow_reconcile_parser.set_defaults(handler=run_cltr_shadow_reconcile)
 
+    # ── pcae cltr migration (Phase 135O — Stage 1 dual derivation, read-only CLI) ──
+    from pcae.commands.cltr_migration import run_cltr_migration_reconcile, run_cltr_migration_status
+
+    cltr_migration_parser = cltr_subparsers.add_parser(
+        "migration",
+        help="Stage 1 dual-derivation migration evidence (Phase 135O, legacy authority, read-only).",
+    )
+    cltr_migration_subparsers = cltr_migration_parser.add_subparsers(dest="cltr_migration_command", required=True)
+
+    cltr_migration_status_parser = cltr_migration_subparsers.add_parser(
+        "status", help="Show Stage 1 migration configuration and evidence aggregate status."
+    )
+    cltr_migration_status_parser.add_argument("--json", action="store_true")
+    cltr_migration_status_parser.set_defaults(handler=run_cltr_migration_status)
+
+    cltr_migration_reconcile_parser = cltr_migration_subparsers.add_parser(
+        "reconcile", help="Read-only reconciliation of a phase's Stage 1 migration evidence (never mutates)."
+    )
+    cltr_migration_reconcile_parser.add_argument("--phase-id", required=True)
+    cltr_migration_reconcile_parser.add_argument("--json", action="store_true")
+    cltr_migration_reconcile_parser.set_defaults(handler=run_cltr_migration_reconcile)
+
     return parser
 
 

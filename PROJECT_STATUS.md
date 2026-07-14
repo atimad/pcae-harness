@@ -2,6 +2,38 @@
 
 ## Current Phase
 
+Phase 135O — Shared Transition Input and Dual-Derivation Implementation
+(completed). Implements Stage 1 ("Dual Derivation, Legacy Authority") of
+the verified 135M/135N migration contract: a new `src/pcae/cltr/migration/`
+package (shared immutable transition-input package with 135M §8.4's
+two-capture-point staged assembly, design-B `transition_id`, legacy and
+CLTR derivation adapters, deterministic comparison across 18 wire result
+classes, migration-evidence persistence, and two read-only CLI surfaces
+— `pcae cltr migration status` / `reconcile --phase-id`), integrated
+through the one shared `run_finalization_transaction()` boundary all
+four production entry points (`phase_complete`, `task_finish`,
+`phase_report_create`, `notify_send_report`) already funnel through.
+Disabled by default (`PCAE_CLTR_DUAL_DERIVATION_ENABLED`); legacy
+lifecycle remains the sole production authority throughout — no atomic
+authoritative publication, authority cutover, or legacy-authority
+demotion/retirement occurred. Migration evidence is persisted in a
+dedicated non-authoritative namespace (`.pcae/cltr-migration/`),
+disjoint from the shadow generation store and every authoritative
+report/checkpoint/marker/receipt path. 77 new focused tests
+added; 362/362 combined CLTR + migration tests pass; 4391/4391 Fast
+Green; runtime remains Observed / observe / execution unavailable.
+CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, and PFR-001 all unchanged.
+
+Full analysis:
+`docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_IMPLEMENTATION.md`.
+Recommended next phase: **135P — Shared Transition Input and
+Dual-Derivation Independent Verification** (not started). 135P must
+independently re-derive and adversarially verify this Stage 1
+implementation before any Stage 2 atomic-publication rehearsal work
+begins.
+
+## Phase 135N Complete
+
 Phase 135N — Production CLTR Dual-Derivation and Migration Contract
 Verification (completed). An independent contract-verification phase —
 no implementation, no dual-derivation activation, no atomic-publication

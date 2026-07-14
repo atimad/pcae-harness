@@ -594,6 +594,15 @@ def run_finalization_transaction(
             checkpoint_path=str(checkpoint_path),
         )
 
+    # Phase 135O — Stage 1 dual-derivation pre-transaction capture (135M
+    # §8.4's first binding capture point: "genuinely assemblable, and must
+    # be assembled, at a fixed point before either derivation path
+    # begins"). No-op (returns None) when Stage 1 is not effectively
+    # active. Never raises into this caller.
+    migration_package = _capture_stage1_migration_pre_transaction(
+        phase_id=phase_id, entry_point=entry_point, report=report, report_digest=report_digest,
+    )
+
     existing = _load_checkpoint(checkpoint_path)
     if (
         existing is not None
@@ -857,6 +866,22 @@ def run_finalization_transaction(
         finalization_snapshot_id=finalization_snapshot_id,
     )
 
+    # Phase 135O — Stage 1 dual-derivation completion (135M §8.4's second
+    # binding capture point: legacy-completion identities, captured from
+    # legacy's own already-completed sequential path, at this same point).
+    # No-op when ``migration_package`` is None (Stage 1 not active, or
+    # pre-transaction capture itself was skipped/failed). Never raises.
+    _complete_stage1_migration(
+        migration_package=migration_package,
+        phase_id=phase_id,
+        entry_point=entry_point,
+        report=report,
+        promoted_report=promoted_report,
+        result=result,
+        report_digest=report_digest,
+        finalization_snapshot_id=finalization_snapshot_id,
+    )
+
     return result
 
 
@@ -956,3 +981,97 @@ def _observe_shadow_cltr(
         observe_finalized_transition_best_effort(shadow_input)
     except Exception:  # noqa: BLE001 - shadow observation must never affect production finalization
         pass
+
+
+_ENTRY_POINT_RECOVERY_CLASSIFICATION = {
+    "phase_complete": "phase_complete_finalization",
+    "task_finish": "task_finish_finalization",
+}
+
+
+def _capture_stage1_migration_pre_transaction(
+    *,
+    phase_id: str,
+    entry_point: str,
+    report: PhaseReport,
+    report_digest: str,
+):
+    """Phase 135O — Stage 1 dual-derivation pre-transaction capture
+    (135M §8.4's first capture point). No-op and never raises; returns
+    ``None`` when Stage 1 is not effectively active or on any migration-
+    side defect (mirrors the shadow-observation containment discipline)."""
+
+    try:
+        from pcae.cltr.migration.coordinator import run_stage1_best_effort_pre_transaction
+        from pcae.cltr.migration.enums import MigrationRecoveryClassification
+
+        recovery_value = _ENTRY_POINT_RECOVERY_CLASSIFICATION.get(entry_point, "ordinary_finalization")
+        return run_stage1_best_effort_pre_transaction(
+            phase_id=phase_id,
+            entry_point=entry_point,
+            source_revision=report_digest,
+            staged_final_revision=report_digest,
+            phase_commit_ownership=(),
+            intended_transition=entry_point,
+            recovery_classification=MigrationRecoveryClassification(recovery_value),
+            task_id=getattr(report, "task_id", None),
+        )
+    except Exception:  # noqa: BLE001 - migration observation must never affect production finalization
+        return None
+
+
+def _complete_stage1_migration(
+    *,
+    migration_package,
+    phase_id: str,
+    entry_point: str,
+    report: PhaseReport,
+    promoted_report: PhaseReport,
+    result: "TransactionResult",
+    report_digest: str,
+    finalization_snapshot_id: str,
+) -> None:
+    """Phase 135O — Stage 1 dual-derivation completion (135M §8.4's second
+    capture point). No-op when ``migration_package`` is None. Never raises;
+    a migration-side defect is recorded as failure evidence, never
+    propagated (phase brief §21, "failures in migration logic must not
+    corrupt authoritative production state")."""
+
+    if migration_package is None:
+        return
+    try:
+        from pcae.cltr.migration.coordinator import run_stage1_best_effort_completion
+
+        notification_result = getattr(promoted_report, "notification_result", None) or {}
+        notify_success = bool(notification_result.get("success"))
+        notification_state = "confirmed" if notify_success else "unconfirmed"
+        receipt_id = result.receipt_logical_delivery_id if notify_success else None
+
+        run_stage1_best_effort_completion(
+            migration_package,
+            legacy_completion_fields={
+                "transition_type": "close_success" if notify_success else "close_partial",
+                "lifecycle_state": "TERMINAL_SUCCESS" if notify_success else "TERMINAL_PARTIAL_EXTERNAL",
+                "report_id": phase_id,
+                "report_digest": report_digest,
+                "metadata_id": phase_id,
+                "metadata_digest": finalization_snapshot_id,
+                "snapshot_id": phase_id,
+                "snapshot_digest": finalization_snapshot_id,
+                "promotion_id": finalization_snapshot_id,
+                "notification_ids": (f"{phase_id}:{entry_point}",) if notification_result else (),
+                "notification_state": notification_state,
+                "notification_suppressed": not notification_result,
+                "receipt_id": receipt_id,
+            },
+            recovery_classification=_recovery_classification_for(entry_point),
+            production_completion_continued=True,
+        )
+    except Exception:  # noqa: BLE001 - migration observation must never affect production finalization
+        pass
+
+
+def _recovery_classification_for(entry_point: str):
+    from pcae.cltr.migration.enums import MigrationRecoveryClassification
+
+    return MigrationRecoveryClassification(_ENTRY_POINT_RECOVERY_CLASSIFICATION.get(entry_point, "ordinary_finalization"))

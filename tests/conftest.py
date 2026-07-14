@@ -98,6 +98,19 @@ def _isolate_external_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
 def _isolate_cltr_shadow_flag(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("PCAE_CLTR_SHADOW_ENABLED", raising=False)
 
+
+# Phase 135O — the Stage 1 dual-derivation coordinator (pcae.cltr.migration)
+# writes to ``.pcae/cltr-migration/`` (relative to cwd) whenever
+# ``PCAE_CLTR_DUAL_DERIVATION_ENABLED`` is set, from the same
+# ``run_finalization_transaction()`` call sites as the shadow observer.
+# Same rationale as ``_isolate_cltr_shadow_flag`` above: delete by default,
+# tests that specifically exercise Stage 1 set it explicitly.
+@pytest.fixture(autouse=True)
+def _isolate_cltr_migration_flags(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PCAE_CLTR_DUAL_DERIVATION_ENABLED", raising=False)
+    monkeypatch.delenv("PCAE_CLTR_MIGRATION_STAGE", raising=False)
+    monkeypatch.delenv("PCAE_CLTR_MIGRATION_EPOCH", raising=False)
+
 FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # Core governance safety
     "test_check",

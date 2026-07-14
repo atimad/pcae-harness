@@ -1,5 +1,40 @@
 # Changelog
 
+- Phase 135O — Shared Transition Input and Dual-Derivation Implementation
+  (`docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_IMPLEMENTATION.md`).
+  Implemented Stage 1 ("Dual Derivation, Legacy Authority") of the
+  verified 135M/135N migration contract: a new `src/pcae/cltr/migration/`
+  package with one shared, immutable transition-input package assembled
+  at exactly the two capture points 135M §8.4 binds (pre-transaction
+  facts; legacy-completion enrichment), a design-B independent
+  `transition_id` (retry-stable via a durable per-`(phase_id, entry_point)`
+  logical-key registry, never colliding with `phase_id`), a
+  dual-derivation coordinator running the existing legacy path and the
+  existing production CLTR package against the same shared input,
+  deterministic comparison across all 18 of 135M §12's wire result
+  classes, migration-evidence persistence in a dedicated non-authoritative
+  namespace (`.pcae/cltr-migration/`), and two strictly read-only CLI
+  surfaces (`pcae cltr migration status` / `reconcile --phase-id`).
+  Integrated through the one shared `run_finalization_transaction()`
+  boundary all four production entry points (`phase_complete`,
+  `task_finish`, `phase_report_create`, `notify_send_report`) already
+  funnel through, at two new, entry-point-agnostic call sites; no entry
+  point's own file was modified. Disabled by default
+  (`PCAE_CLTR_DUAL_DERIVATION_ENABLED`, `PCAE_CLTR_MIGRATION_STAGE`,
+  `PCAE_CLTR_MIGRATION_EPOCH`); legacy lifecycle remains the sole
+  production authority throughout — no atomic authoritative publication,
+  no authority cutover, no legacy-authority demotion or retirement.
+  Resolved 135N's predecessor-transition-identity Non-Blocking finding;
+  disclosed three new Non-Blocking findings (entry-point-derived, not
+  scenario-specific, recovery classification; unwired `adapter_sources`
+  inherited from 135L's F-135L-2; no cross-derivation comparison for
+  `intended_transition`/`recovery_classification` by design). 77 new
+  focused tests added; 362/362 combined CLTR + migration regression;
+  4391/4391 Fast Green (unchanged from the pre-135O baseline); 117/117
+  affected finalization regression. CLTR-001, CLTR-SCHEMA-001 v1.0.1,
+  PFN-001, and PFR-001 all unchanged. Recommends 135P — Shared Transition
+  Input and Dual-Derivation Independent Verification.
+
 - Phase 135N — Production CLTR Dual-Derivation and Migration Contract
   Verification
   (`docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_MIGRATION_CONTRACT_VERIFICATION.md`).
