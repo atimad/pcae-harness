@@ -10,7 +10,7 @@ Phase 135T: Atomic Publication Rehearsal Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 
