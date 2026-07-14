@@ -1,57 +1,39 @@
 {
   "schema_version": "1.0",
-  "phase_id": "135K",
-  "phase_name": "Production CLTR Shadow Integration Implementation",
-  "phase_title": "Production CLTR Shadow Integration Implementation",
+  "phase_id": "135L",
+  "phase_name": "Production CLTR Shadow Integration Independent Verification",
+  "phase_title": "Production CLTR Shadow Integration Independent Verification",
   "status": "completed",
-  "files_changed_count": 32,
+  "files_changed_count": 9,
   "files_changed": [
-    ".pcae/policy.toml",
+    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_IMPLEMENTATION.md",
-    "src/pcae/cli.py",
-    "src/pcae/cltr/__init__.py",
-    "src/pcae/cltr/adapters.py",
-    "src/pcae/cltr/canonicalization.py",
-    "src/pcae/cltr/digest.py",
-    "src/pcae/cltr/enums.py",
-    "src/pcae/cltr/inspection.py",
-    "src/pcae/cltr/invariants.py",
-    "src/pcae/cltr/models.py",
-    "src/pcae/cltr/persistence.py",
-    "src/pcae/cltr/schema.py",
-    "src/pcae/cltr/shadow.py",
-    "src/pcae/cltr/validation.py",
-    "src/pcae/commands/cltr_shadow.py",
-    "src/pcae/commands/notifications.py",
-    "src/pcae/commands/phase.py",
-    "src/pcae/commands/phase_reports.py",
-    "src/pcae/commands/task.py",
-    "src/pcae/core/finalization_transaction.py",
-    "tests/conftest.py",
-    "tests/test_cltr_adapters.py",
-    "tests/test_cltr_canonicalization.py",
-    "tests/test_cltr_cli.py",
-    "tests/test_cltr_digest.py",
-    "tests/test_cltr_models.py",
-    "tests/test_cltr_persistence.py",
-    "tests/test_cltr_shadow_integration.py",
-    "tests/test_cltr_validation.py"
+    "docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_INDEPENDENT_VERIFICATION.md",
+    "tasks/DONE.md",
+    "tasks/active/20260714-0815-phase-135l-production-cltr-shadow-integration-independent-verification.md",
+    "tasks/done/20260714-0418-phase-135k-closure-of-closure-documentation-commit.md",
+    "tests/test_cltr_135l_independent_verification.py"
   ],
-  "source_files_changed": 18,
-  "test_files_changed": 9,
-  "tests_added_or_updated": "80 new focused CLTR tests across 8 test files (models, validation, canonicalization, digest, persistence, adapters, shadow-integration, CLI)",
-  "tests_run": 4391,
+  "source_files_changed": 0,
+  "test_files_changed": 1,
+  "tests_added_or_updated": "5 new independent adversarial regression tests (subprocess/socket isolation via monkeypatch, AdapterSources production-wiring starvation, same-phase-different-content collision containment, idempotent replay)",
+  "tests_run": 4396,
   "phase_commits": [
     {
-      "hash": "b972b341c3f6a25561c06b255d538d9c07e6b70c"
+      "hash": "5f1234f968f3a3e50ae490229430ea3c20f6df5d"
+    },
+    {
+      "hash": "977bb1436f73e0ce263d2715335a6fe088cb9a2c"
+    },
+    {
+      "hash": "fadc75b593d0e94f81cf05e224349771af96edc6"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "summary": "Phase 135K implemented the first production CLTR integration, in strict shadow mode only: a new src/pcae/cltr package implementing CLTR-SCHEMA-001 v1.0.1 exactly (14 states, 16 transitions, 14 forbidden transitions, 37 invariants, 15 representation adapters with 135J's own repaired comparison-mode assignment), deterministic canonicalization/SHA-256 digesting, immutable generation persistence with an atomic current pointer and crash-safe staging/quarantine, and a read-only pcae cltr shadow CLI. Wired into all four production finalization entry points at the one shared boundary (run_finalization_transaction), behind a default-off PCAE_CLTR_SHADOW_ENABLED feature flag; a shadow failure is recorded and disclosed but never blocks production. Constructs one shadow record per finalized transition (a terminal snapshot), a disclosed scope reduction per the phase brief's own smallest-complete-integration guidance. 80 new tests pass; 1325 affected lifecycle regression tests and Fast Green (4391/4391) pass unchanged with the flag both unset and enabled; a real non-mocked end-to-end smoke test confirmed the wiring. All four of 135J's inherited Non-Blocking findings are carried forward and dispositioned. No authority cutover, no legacy authority retirement, no execution capability introduced. Next: 135L - Production CLTR Shadow Integration Independent Verification.",
+  "summary": "Phase 135L independently re-derived, reproduced, and adversarially attacked the 135K production shadow CLTR implementation rather than trusting its report, tests, or comments: exact contract inventory (14 states, 16 transitions, 14 forbidden transitions, 37 invariants, 15 adapters), typed-model immutability, digest/canonicalization sensitivity, atomic publication and crash containment, monkeypatch-based subprocess/network isolation, single shared four-entry-point call path, feature-flag isolation, read-only CLI. Zero Blocking findings. Four Non-Blocking findings independently reproduced and disclosed: dead InvariantContext live-comparison fields; the one real production call site never wires AdapterSources (11/15 adapters unverifiable, never falsely conformant) and transition_id==phase_id causes a same-phase content correction to be safely discarded as publish_failed; a pre-existing PFR/task-lifecycle reconciliation conflict outside src/pcae/cltr (135K's report re-promoted under the same phase_id by a later closure task), documented not repaired; placeholder repository_identity/branch_identity in production wiring. Added 5 new independent regression tests; no repair to src/pcae/cltr required. All four of 135J's inherited Non-Blocking findings independently re-verified unchanged. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS. No authority cutover, no execution capability introduced. Next: 135M - Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -80,18 +62,23 @@
   ],
   "validation_results": [
     {
+      "name": "cltr_135l_independent_verification_tests",
+      "result": "5/5 passed (new)",
+      "status": "passed"
+    },
+    {
       "name": "cltr_focused_tests",
-      "result": "80/80 passed",
+      "result": "80/80 passed, unmodified",
       "status": "passed"
     },
     {
-      "name": "affected_lifecycle_regression_tests",
-      "result": "1325/1325 passed (finalization, phase-report, task-finish, promotion, recovery, reconciliation, checkpoints, markers, notifications, Architecture Status, commit attribution)",
+      "name": "cltr_shadow_enabled_flag_suite",
+      "result": "16/16 passed with PCAE_CLTR_SHADOW_ENABLED=true",
       "status": "passed"
     },
     {
-      "name": "finalization_transaction_134e10_suite_with_flag_on_and_off",
-      "result": "38/38 passed with PCAE_CLTR_SHADOW_ENABLED unset and 38/38 with it set to true",
+      "name": "affected_lifecycle_regression_subset",
+      "result": "1245/1245 passed (finalization, phase-report, task-finish, promotion, recovery, reconciliation, checkpoints, markers, notifications, Architecture Status, commit attribution)",
       "status": "passed"
     },
     {
@@ -100,13 +87,13 @@
       "status": "passed"
     },
     {
-      "name": "real_end_to_end_shadow_smoke_test",
-      "result": "manual, non-mocked run_finalization_transaction() invocation with PCAE_CLTR_SHADOW_ENABLED=true produced a real digest-verified shadow generation with lifecycle_state=TERMINAL_SUCCESS",
+      "name": "no_subprocess_no_network_monkeypatch_check",
+      "result": "monkeypatched subprocess.Popen/run and socket.socket across the full publish pipeline, not only AST inspection: zero calls",
       "status": "passed"
     },
     {
-      "name": "no_subprocess_no_network_ast_check",
-      "result": "asserted via AST inspection of every module in src/pcae/cltr",
+      "name": "real_end_to_end_shadow_reproduction",
+      "result": "fresh, independently-authored TERMINAL_SUCCESS and adversarial missing-identity inputs reproduced under monkeypatched subprocess/socket tripwires",
       "status": "passed"
     },
     {
@@ -121,51 +108,39 @@
     }
   ],
   "test_results": {
+    "cltr_135l_independent_verification_tests": "5/5",
     "cltr_focused_tests": "80/80",
-    "affected_lifecycle_regression_tests": "1325/1325",
-    "finalization_transaction_134e10_flag_on_and_off": "38/38 both configurations",
+    "cltr_shadow_enabled_flag_suite": "16/16",
+    "affected_lifecycle_regression_subset": "1245/1245",
     "fast_green": "4391/4391",
-    "real_end_to_end_shadow_smoke_test": "passed",
-    "no_subprocess_no_network_ast_check": "passed",
+    "no_subprocess_no_network_monkeypatch_check": "passed",
+    "real_end_to_end_shadow_reproduction": "passed",
     "report_notification_tests": "passed in fast_green",
     "bootstrap_session_reporting_tests": "passed in fast_green"
   },
-  "notification_dispatch_result": "pending single governed terminal delivery",
-  "report_notification_status": "pending governed finalization",
-  "no_go_confirmation": "No production lifecycle authority was changed. No certification, promotion, or dispatch function was called by the shadow package. No production report or completion metadata was replaced. No Architecture Status generation was changed. No marker or receipt was fabricated. No real backend invocation occurred. No adapter execution occurred. No subprocess execution capability was introduced into the shadow package. No network call was made by the shadow package. No shell interception was introduced. No Telegram inbound capability was introduced. No enforcement was enabled. No automatic apply was enabled. No apply execution occurred. No commit or push authorization capability was introduced. No real AI backend call occurred. No raw git commit was used. No raw git push was used. No force push was used. No PFN-001 change occurred. No PFR-001 change occurred. No CLTR-001 amendment occurred. No legacy authority was retired. No historical artifact was rewritten. No immutable generation was rewritten in place. No execution capability was introduced. No authority cutover occurred. Phase 135L was not started.",
+  "notification_dispatch_result": "sent",
+  "report_notification_status": "sent",
+  "no_go_confirmation": "No production lifecycle authority was changed. No certification, promotion, or dispatch function was called by this phase's verification work. No production report or completion metadata was replaced outside governed finalization. No Architecture Status generation was changed. No marker or receipt was fabricated. No subprocess execution capability was introduced or exercised. No network call was made. No shell interception was introduced. No Telegram inbound capability was introduced or exercised. No CLTR-001, PFN-001, or PFR-001 amendment occurred. No legacy authority was retired. No execution capability was introduced. No production lifecycle authority cutover occurred. No repair was made to src/pcae/cltr. Phase 135M was not started.",
   "no_go_confirmations": [
     "No production lifecycle authority was changed.",
-    "No certification, promotion, or dispatch function was called by the shadow package.",
-    "No production report or completion metadata was replaced.",
+    "No certification, promotion, or dispatch function was called by this phase's verification work.",
+    "No production report or completion metadata was replaced outside governed finalization.",
     "No Architecture Status generation was changed.",
     "No marker or receipt was fabricated.",
-    "No real backend invocation occurred.",
-    "No adapter execution occurred.",
-    "No subprocess execution capability was introduced into the shadow package.",
-    "No network call was made by the shadow package.",
+    "No subprocess execution capability was introduced or exercised.",
+    "No network call was made.",
     "No shell interception was introduced.",
-    "No Telegram inbound capability was introduced.",
-    "No enforcement was enabled.",
-    "No automatic apply was enabled.",
-    "No apply execution occurred.",
-    "No commit or push authorization capability was introduced.",
-    "No real AI backend call occurred.",
-    "No raw git commit was used.",
-    "No raw git push was used.",
-    "No force push was used.",
-    "No PFN-001 change occurred.",
-    "No PFR-001 change occurred.",
-    "No CLTR-001 amendment occurred.",
+    "No Telegram inbound capability was introduced or exercised.",
+    "No CLTR-001, PFN-001, or PFR-001 amendment occurred.",
     "No legacy authority was retired.",
-    "No historical artifact was rewritten.",
-    "No immutable generation was rewritten in place.",
     "No execution capability was introduced.",
-    "No authority cutover occurred.",
-    "Phase 135L was not started."
+    "No production lifecycle authority cutover occurred.",
+    "No repair was made to src/pcae/cltr.",
+    "Phase 135M was not started."
   ],
-  "recommended_next_phase": "135L - Production CLTR Shadow Integration Independent Verification",
-  "recommended_next_phase_id": "135L",
-  "recommended_next_phase_name": "Production CLTR Shadow Integration Independent Verification",
+  "recommended_next_phase": "135M - Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan",
+  "recommended_next_phase_id": "135M",
+  "recommended_next_phase_name": "Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",

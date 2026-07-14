@@ -22,8 +22,9 @@ Phase 135L: Production CLTR Shadow Integration Independent Verification
 
 ## Allowed Files
 
-- .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
