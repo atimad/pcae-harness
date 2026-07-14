@@ -1,5 +1,37 @@
 # Changelog
 
+- Phase 135P — Shared Transition Input and Dual-Derivation Independent
+  Verification
+  (`docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived and adversarially verified 135O's Stage 1
+  dual-derivation implementation against CLTR-001, CLTR-SCHEMA-001
+  v1.0.1, and the verified 135M/135N migration contract. Read all 13
+  modules under `src/pcae/cltr/migration/`, the shared finalization
+  boundary, all four production entry-point call sites, and all 77
+  pre-existing migration tests in full. Added 24 new adversarial tests
+  (`tests/test_cltr_migration_135p_verification.py`), including the
+  first test to drive all four entry points (`task_finish`,
+  `phase_complete`, `phase_report_create`, `notify_send_report`)
+  through the real `run_finalization_transaction()` boundary
+  end-to-end. Found zero Blocking defects. Disclosed four new
+  Non-Blocking findings: F-135P-1 (two of four entry points fall back
+  to a generic recovery classification instead of their dedicated one
+  — proven inert for comparison/eligibility); F-135P-2
+  (`temporal_order_mismatch`/`expected_representation_difference` are
+  declared but currently unreachable and undisclosed as such);
+  F-135P-3 (`derive_cltr` would crash on non-empty commit ownership —
+  dormant, since production always passes an empty tuple); F-135P-4
+  (the non-authority disclosure constant is independently hardcoded
+  five times). No production source file under `src/` was modified;
+  all findings are locked in by new regression tests. 101/101 combined
+  migration tests pass (77 existing + 24 new); 386/386 combined CLTR
+  tests pass; 117/117 affected finalization regressions pass;
+  4391/4391 Fast Green; runtime remains Observed / observe / execution
+  unavailable. CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, and PFR-001
+  all unchanged. Recommended next phase: 135Q — Atomic Publication
+  Rehearsal Contract and Implementation Plan (architecture/contract/
+  planning only).
+
 - Phase 135O — Shared Transition Input and Dual-Derivation Implementation
   (`docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_IMPLEMENTATION.md`).
   Implemented Stage 1 ("Dual Derivation, Legacy Authority") of the

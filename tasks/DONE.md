@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (20260714-1211-idle-awaiting-next-governed-phase)
+- Phase 135P: Shared Transition Input and Dual-Derivation Independent Verification (20260714-1440-phase-135p-shared-transition-input-and-dual-derivation-independent-verification)
 - Phase 135O: Shared Transition Input and Dual-Derivation Implementation (20260714-1155-phase-135o-shared-transition-input-and-dual-derivation-implementation)
 - Phase 135N: closure documentation commit (20260714-1049-phase-135n-closure-documentation-commit)
 - Phase 135N: Production CLTR Dual-Derivation and Migration Contract Verification (20260714-1028-phase-135n-production-cltr-dual-derivation-and-migration-contract-verification)

@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 135P — Shared Transition Input and Dual-Derivation Independent
+Verification (completed). An independent implementation-verification
+and adversarial-hardening phase over 135O's Stage 1 dual-derivation
+package — no Stage 2 implementation, no atomic authoritative
+publication, no authority cutover, no legacy-authority demotion or
+retirement occurred. Independently re-derived and verified 135O's
+implementation against CLTR-001, CLTR-SCHEMA-001 v1.0.1, and the
+verified 135M/135N migration contract (not 135O's own report), reading
+all 13 modules under `src/pcae/cltr/migration/`, the shared
+finalization boundary, and all four production entry-point call sites
+in full, and independently locating and reading all 77 pre-existing
+migration tests. Added 24 new adversarial tests
+(`tests/test_cltr_migration_135p_verification.py`) driving real
+production code paths — including the first test in the repository to
+exercise all four entry points (`task_finish`, `phase_complete`,
+`phase_report_create`, `notify_send_report`) through the real
+`run_finalization_transaction()` boundary end-to-end. Found **zero
+Blocking defects** and four new Non-Blocking findings, none weakening
+authority separation, exactly-once guarantees, transition-identity
+determinism, deep immutability, or progression-eligibility safety:
+two of the four production entry points fall back to a generic
+recovery classification instead of their dedicated one (evidence-
+truthfulness gap only, proven inert for comparison and eligibility);
+two contractually-named comparison classes
+(`temporal_order_mismatch`, `expected_representation_difference`) are
+currently unreachable and undisclosed as such; `derive_cltr` would
+crash on non-empty commit ownership (dormant — production always
+passes an empty tuple today); and the non-authority disclosure
+constant is independently hardcoded five times with no shared source
+of truth. No production source file under `src/` was modified; all
+findings are documented with regression tests locking in current
+behavior. 101/101 combined migration tests pass (77 pre-existing + 24
+new); 386/386 combined CLTR tests pass; 117/117 affected finalization
+regressions pass; 4391/4391 Fast Green; runtime remains Observed /
+observe / execution unavailable. CLTR-001, CLTR-SCHEMA-001 v1.0.1,
+PFN-001, and PFR-001 all unchanged.
+
+Full analysis:
+`docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **135Q — Atomic Publication Rehearsal Contract
+and Implementation Plan** (not started, architecture/contract/planning
+only). 135Q must not proceed directly to authoritative atomic
+publication.
+
+## Phase 135O Complete
+
 Phase 135O — Shared Transition Input and Dual-Derivation Implementation
 (completed). Implements Stage 1 ("Dual Derivation, Legacy Authority") of
 the verified 135M/135N migration contract: a new `src/pcae/cltr/migration/`
@@ -26,11 +72,6 @@ CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, and PFR-001 all unchanged.
 
 Full analysis:
 `docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_IMPLEMENTATION.md`.
-Recommended next phase: **135P — Shared Transition Input and
-Dual-Derivation Independent Verification** (not started). 135P must
-independently re-derive and adversarially verify this Stage 1
-implementation before any Stage 2 atomic-publication rehearsal work
-begins.
 
 ## Phase 135N Complete
 
