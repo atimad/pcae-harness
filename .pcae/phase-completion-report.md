@@ -1,144 +1,137 @@
-# Phase 135N Complete — Production CLTR Dual-Derivation and Migration Contract Verification
+# Phase 135O Complete — Shared Transition Input and Dual-Derivation Implementation
 
 ## Phase identity
 
-- Phase ID: `135N`
+- Phase ID: `135O`
 - Status: completed
-- Classification: independent contract verification, migration architecture verification, implementation-readiness verification, authority-safety verification (documentation-only)
+- Classification: production implementation (Stage 1 — Dual Derivation, Legacy Authority)
+- Verdict: **STAGE 1 IMPLEMENTED, LEGACY AUTHORITY PRESERVED, ZERO PRODUCTION AUTHORITY CHANGE**
 - Report completeness: complete
 
 ## Summary
 
-Phase 135N independently re-derives and verifies the migration contract
-135M froze (`docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_ATOMIC_PUBLICATION_MIGRATION_PLAN.md`).
-This phase re-derives requirements from upstream authority and current
-production source rather than trusting 135M's own prose, tables, or
-cross-reference matrix. No implementation, no dual-derivation activation,
-no atomic-publication implementation, no authority cutover, no
-legacy-authority demotion or retirement, and no production source or
-production test change occurred.
+Phase 135O implements Stage 1 of the verified 135M/135N migration
+contract. A new `src/pcae/cltr/migration/` package provides: one shared,
+immutable transition-input package assembled at exactly the two capture
+points 135M §8.4 binds (pre-transaction facts; legacy-completion
+enrichment, at the same point `_observe_shadow_cltr` already occupies)
+— a disclosed fidelity decision rather than the phase brief's
+illustrative four-way Stage A/B/C/D split, documented in
+`enums.InputStage`'s docstring; a design-B independent `transition_id`
+(UUID4, retry-stable via a durable per-`(phase_id, entry_point)`
+logical-key registry, never colliding with `phase_id`); a
+dual-derivation coordinator running the existing legacy path and the
+existing, unmodified production CLTR package (schema v1.0.1, all 37
+invariants, all 15 representation adapters) against the same shared
+input; deterministic comparison across all 18 of 135M §12's wire result
+classes; migration-evidence persistence in a dedicated
+non-authoritative namespace (`.pcae/cltr-migration/`); and two strictly
+read-only CLI surfaces (`pcae cltr migration status` /
+`reconcile --phase-id`). Integrated through the one shared
+`run_finalization_transaction()` boundary all four production entry
+points already funnel through, at two new, entry-point-agnostic call
+sites; no entry-point file itself was modified.
 
-Independently inspected CLTR-001 v1.0, CLTR-SCHEMA-001 v1.0.1, 135A's
-architecture origin, 135D's cross-representation invariant/state-machine
-model, 135D.1's metadata-staleness incident, 135G's prototype
-verification findings, 135H's lifecycle integration and legacy-authority
-retirement plan, 135H.1's terminal-report recovery investigation, 135H.2's
-exactly-once promotion hardening, 135J's schema-contract verification and
-exact four Non-Blocking findings, 135K's shadow implementation, and 135L's
-independent verification and exact four Non-Blocking findings — each read
-from its own primary text, not from 135M's summaries. Also independently
-inspected current production source: `run_finalization_transaction()`
-and the four entry points (`src/pcae/core/finalization_transaction.py`,
-`src/pcae/commands/{phase,task,phase_reports,notifications}.py`), the
-CLTR shadow package (`src/pcae/cltr/*`), notification dispatch (three
-call sites sharing one idempotency marker), the legacy promotion pointer
-(`src/pcae/core/canonical_artifact_promotion.py`, confirmed non-atomic),
-Architecture Status generation (`build_architecture_status`, confirmed
-structured-header regex extraction, not free narrative parsing), commit
-attribution (confirmed explicit-list-based and fail-closed since a
-pre-Track-135 repair, 134E.10.1.1), and `pcae phase-report reconcile`.
-
-Found and repaired one genuine **Blocking** documentation defect: 135M's
-§8.1 shared-input field list and §9's "assembled before either derivation
-path begins" requirement jointly describe a temporal impossibility for
-the terminal-snapshot Stage 1 derivation model 135M itself preserves
-unchanged (per its own disposition of 135K's inherited limitation 1).
-Several of §8.1's required fields (report identity/digest, promotion
-identity, checkpoint identity, marker identity, receipt identity,
-notification identity/state) are themselves outputs of legacy's own
-unchanged, sequential Stage 1 finalization path and cannot exist before
-that path runs. Repaired via a new §8.4 added to 135M, distinguishing
-pre-transaction facts (genuinely assemblable upfront) from in-transaction
-completion identities (captured once, from legacy's own single
-computation, at the point `_observe_shadow_cltr` already occupies today,
-then bound immutably into the same package object before CLTR's
-derivation reads them) — preserving every downstream single-authority,
-anti-circularity, isolation, and exactly-once guarantee while removing
-the temporal contradiction. Re-verified for cross-section consistency
-after the repair.
-
-Resolved the one open design choice 135M explicitly deferred to this
-phase: 135M §8.3's `transition_id` identity decision. Selected design
-(b) — an independently generated `transition_id` (e.g. a UUID4 or another
-opaque, sortable identifier), decoupled from `phase_id`, `entry_point`,
-and any durable attempt-sequence counter, with `phase_id` remaining a
-permanently separate, always-present field. Rejected the composite-string
-design (a) because it requires new durable per-`(phase_id, entry_point)`
-counter state, invites the identifier-parsing anti-pattern this contract
-otherwise permanently prohibits, and does not avoid the
-`predecessor_transition_id` linkage requirement it was meant to reduce.
-Binding on 135O.
-
-Disclosed three further **Non-Blocking** findings, none touching
-authority, recovery, or exactly-once safety: a missing predecessor-
-transition-identity field in 135M §8.1's shared-input list (F-135N-2,
-resolution phase 135O); an inventory-table wording overstatement in
-135M §35's Git-attribution row ("narrative-inference-prone"), when direct
-source inspection shows commit *attribution* is already explicit-list-
-based and fail-closed since a pre-Track-135 repair — only ownership
-*verification* (the three-outcome model) remains unimplemented
-(F-135N-3); and several editorial-precision notes (terminology-glossary
-completeness gaps, a 135D.1 incident-description mismatch, an Architecture
-Status mechanism-description overstatement, and a citation-precision
-note on 135A) bundled for the already-scheduled 135S editorial-hygiene
-pass alongside 135J's F2–F4.
-
-Independently confirmed, by direct source inspection rather than by
-trusting 135M's prose: the legacy promotion pointer
-(`canonical_artifact_promotion.py`) is genuinely a plain, non-atomic
-overwrite, corroborating (not merely repeating) 135M's stated motivation
-for its atomic-generation contract; all four production finalization
-entry points genuinely share the single `run_finalization_transaction()`
-boundary with no entry-point-specific branching; the CLTR shadow package
-is genuinely non-authoritative and exception-contained today; and no
-authority-like production source was found omitted from 135M's legacy
-authority inventory.
-
-**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS.** Zero Blocking findings
-remain after repair. CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, and
-PFR-001 all unchanged — the one repair touches only 135M, a
-migration-planning document, not the wire-contract schema.
+Stage 1 is disabled by default. Legacy lifecycle remains the sole
+production authority throughout — no code path, flag, or flag
+combination this phase's code can construct resolves
+`production_authority` to `CLTR`.
 
 ## Evidence and validation
 
-- No production source or production test file changed; no new tests
-  added. 135L's 4396 executed tests (Fast Green), 80 production CLTR
-  focused tests, and the 1245-test affected-lifecycle regression subset
-  are cited as inherited evidence, not re-executed by this
-  documentation-only phase.
-- `pcae phase-report reconcile --phase-id 135M`: `reconciled`, 1 promoted
-  generation, marker `already_dispatched`, checkpoint `completed`,
-  receipt `finalized`, `mutation: none (inspection only)` — 135M's own
-  finalization confirmed sound; no repair required.
-- `pcae health` healthy; `pcae check` passed; `pcae doctor task-memory`
-  clean; `pcae push check` clean; `pcae runtime inspect`: Observed /
-  observe / execution unavailable; `pcae notify status`: Telegram
-  configured, enabled, outbound-only.
-- Runtime remains Observed / observe / execution unavailable throughout.
+- Governed phase commit: `a7f9f094` (30 files: the new
+  `src/pcae/cltr/migration/` package (14 modules), `src/pcae/commands/
+  cltr_migration.py`, the `pcae cltr migration` CLI registration in
+  `cli.py`, two new call sites in `finalization_transaction.py`, one new
+  autouse env-isolation fixture in `tests/conftest.py`, 7 new test files
+  totaling 77 tests, the phase documentation, `PROJECT_STATUS.md`,
+  `CHANGELOG.md`, and task-contract bookkeeping).
+- 77/77 new focused migration tests passed
+  (`tests/test_cltr_migration_config.py`,
+  `test_cltr_migration_transition_identity.py`,
+  `test_cltr_migration_shared_input.py`,
+  `test_cltr_migration_derivation.py`,
+  `test_cltr_migration_coordinator.py`,
+  `test_cltr_migration_cli.py`,
+  `test_cltr_135o_integration.py`).
+- 362/362 combined CLTR + migration regression
+  (`python -m pytest tests/test_cltr_*.py -q`: 285 pre-existing,
+  unmodified tests + 77 new).
+- 117/117 affected finalization regression
+  (`test_finalization_transaction_134e10`, `test_finalization_gate_enforcement`,
+  `test_finalization_notification_guarantee`,
+  `test_finalization_configuration_identity_cross_agent_134b3`,
+  `test_phase_113v_n_notification_finalization_repair`).
+- Fast Green: 4391/4391 — unchanged from the pre-phase baseline,
+  confirmed via `--collect-only` before and after this phase's changes.
+- Full suite: 39 pre-existing-task-contract-scope failures resolved by
+  opening this phase's own task contract with matching `--allowed-file`
+  patterns; re-running the 10 affected files after opening the contract:
+  680/685 passed, with exactly 5 inherited failures confirmed unrelated
+  to 135O (`test_bootstrap_todo_consistency` x2, `test_advisory_runtime_
+  contract`/`architecture` x2, `test_rendering_134e5` x1 — none of the
+  files these exercise were touched by this phase; the `src/pcae/advisory`
+  directory dates to Phase 124E and `tasks/TODO.md` was last modified
+  2026-07-13, before Phase 135J).
+- No-go/execution-boundary tests: `subprocess.run`/`Popen`/`call` and
+  `socket.socket` monkeypatched to raise across a full capture-to-evidence
+  cycle; the cycle completes normally, proving no migration code path
+  ever reaches them. Structural checks confirm zero `subprocess`/`socket`
+  imports anywhere in `src/pcae/cltr/migration/`.
+- `pcae health` healthy; `pcae check` passed; task memory clean; push
+  check clean; runtime inspect Observed/observe/execution unavailable;
+  Telegram outbound delivery configured, enabled, ready.
+
+## Inherited finding dispositions
+
+- **135N F-135N-2** (missing predecessor-transition-identity field) —
+  **resolved**: `predecessor_transition_id` is now a first-class
+  `PRE_TRANSACTION_FIELDS` entry.
+- **135N F-135N-3** (135M §35 Git-attribution wording) — deferred,
+  unchanged (135S editorial-hygiene scope, not implementation).
+- **135L's 4 Non-Blocking findings** — individually dispositioned in
+  full detail in
+  `docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_IMPLEMENTATION.md`
+  §37. F-135L-2's `transition_id == phase_id` collision half is resolved
+  by construction for migration evidence (design-B `transition_id` is
+  never `phase_id`); its `adapter_sources`-unwired half remains, carried
+  forward as N-135O-3.
+- **135J's 4 Non-Blocking findings** — citation/prose-precision notes,
+  not applicable to this implementation phase's scope.
+- **New findings this phase**: N-135O-1 (`intended_transition`/
+  `recovery_classification` intentionally excluded from cross-derivation
+  comparison — genuinely distinct vocabularies), N-135O-2 (recovery
+  classification is currently entry-point-derived, not scenario-specific),
+  N-135O-3 (`adapter_sources` not yet wired into the migration
+  coordinator, inherited from F-135L-2). None touch authority, recovery
+  safety, or exactly-once correctness; full detail and required-future-phase
+  disposition in the phase documentation §37-§38.
 
 ## Safety and no-go confirmation
 
-No production implementation occurred. No dual derivation was enabled.
-No atomic publication was implemented. No authority cutover occurred. No
-legacy authority was demoted. No legacy authority was retired. No
-production lifecycle source was modified. No CLTR shadow implementation
-was modified. No execution capability was introduced. No backend
-invocation was introduced. No shell mediation was introduced. No
-Telegram inbound control was introduced. No notification behavior was
-modified. No marker or receipt behavior was modified. No report or
-metadata generation behavior was modified. No Architecture Status
-generation was modified. CLTR-001 was not amended. CLTR-SCHEMA-001 v1.0.1
-was not amended. PFN-001 was not amended. PFR-001 was not amended. Phase
-135O was not started.
+Legacy lifecycle remains the sole production authority. CLTR remains
+derivative. Dual derivation does not mean dual authority. No atomic
+authoritative publication occurred. No authority cutover occurred. No
+legacy authority was demoted or retired. Migration code never calls
+production certification, promotion, notification dispatch, checkpoint,
+marker, or receipt functions — verified structurally and by the full
+no-go test suite. No production report, completion metadata, or
+Architecture Status generation was changed. No CLTR generation was
+published into the shadow store by migration code (avoiding two
+competing "current" pointers for one transition). No production latest
+pointer was changed. No execution capability, backend invocation, or
+Telegram inbound capability was introduced. No raw git commit, raw git
+push, force push, or hook bypass was used. CLTR-001, CLTR-SCHEMA-001
+v1.0.1, PFN-001, and PFR-001 remain unchanged. Runtime remains Observed
+/ observe / execution unavailable throughout. Phase 135P was not
+started.
 
 ## Recommended next phase
 
-135O — Shared Transition Input and Dual-Derivation Implementation.
-Implements 135M §8–§10 as amended by this phase's §8.4 repair and
-`transition_id` design selection (§8.3). Must resolve F-135L-1, F-135L-2
-(adapter wiring; identity design now resolved), the commit-ownership
-verification (three-outcome model) limitation, and this phase's
-F-135N-2 (predecessor-transition-identity field). Must not implement
-CLTR authority cutover, retire legacy authority, or make CLTR control
-publication, notification, markers, or receipts — 135O implements only
-the first legacy-authoritative dual-derivation stage (Stage 1).
+Phase 135P — Shared Transition Input and Dual-Derivation Independent
+Verification (not started). Per the phase brief's explicit instruction,
+135P must independently re-derive and adversarially verify this Stage 1
+implementation — particularly the two-capture-point simplification of
+135M's Stage A/B/C/D framing, the entry-point-derived recovery
+classification, and the unwired adapter sources — before any Stage 2
+atomic-publication rehearsal work begins.
