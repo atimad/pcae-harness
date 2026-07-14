@@ -83,6 +83,21 @@ def _isolate_external_notifications(monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.delenv(key, raising=False)
     monkeypatch.setenv(_NOTIFICATION_CONFIG_DISABLE_ENV, "1")
 
+
+# Phase 135K — the shadow CLTR observer (pcae.cltr.shadow) writes to
+# ``.pcae/cltr-shadow/`` (relative to cwd) whenever ``PCAE_CLTR_SHADOW_
+# ENABLED`` is set, from inside ``run_finalization_transaction()``. Tests
+# that exercise finalization without an isolated cwd would otherwise leak
+# real shadow-generation artifacts into this repository's own working tree
+# if a developer's shell happens to export the flag. Tests that
+# specifically exercise the shadow feature set it explicitly via
+# ``monkeypatch.setenv`` within their own scope, which still applies after
+# this autouse deletion (fixture order: this one runs first per normal
+# autouse-then-explicit-fixture ordering within the same test).
+@pytest.fixture(autouse=True)
+def _isolate_cltr_shadow_flag(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PCAE_CLTR_SHADOW_ENABLED", raising=False)
+
 FAST_GREEN_MODULES: frozenset[str] = frozenset({
     # Core governance safety
     "test_check",

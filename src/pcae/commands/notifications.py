@@ -302,6 +302,7 @@ def run_notify_send_report(args: argparse.Namespace) -> int:
         report=report,
         gate=gate,
         promote_and_dispatch=_promote_and_dispatch,
+        entry_point="notify_send_report",
     )
     if txn_result.status in (
         "pre_promotion_certification_failed", "promotion_and_dispatch_failed",

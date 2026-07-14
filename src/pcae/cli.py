@@ -10488,6 +10488,55 @@ def build_parser() -> argparse.ArgumentParser:
     cltr_list_parser.add_argument("--json", action="store_true")
     cltr_list_parser.set_defaults(handler=run_cltr_prototype_list)
 
+    # ── pcae cltr shadow (Phase 135K — production shadow CLTR, read-only CLI) ──
+    from pcae.commands.cltr_shadow import (
+        run_cltr_shadow_list,
+        run_cltr_shadow_reconcile,
+        run_cltr_shadow_show,
+        run_cltr_shadow_status,
+        run_cltr_shadow_verify,
+    )
+
+    cltr_parser = subparsers.add_parser(
+        "cltr",
+        help="Production Canonical Lifecycle Transition Record (Phase 135K, shadow mode only).",
+    )
+    cltr_subparsers = cltr_parser.add_subparsers(dest="cltr_command", required=True)
+
+    cltr_shadow_parser = cltr_subparsers.add_parser(
+        "shadow",
+        help="Read-only inspection of the non-authoritative shadow CLTR observation stream.",
+    )
+    cltr_shadow_subparsers = cltr_shadow_parser.add_subparsers(dest="cltr_shadow_command", required=True)
+
+    cltr_shadow_status_parser = cltr_shadow_subparsers.add_parser("status", help="Show the shadow feature-flag state.")
+    cltr_shadow_status_parser.add_argument("--json", action="store_true")
+    cltr_shadow_status_parser.set_defaults(handler=run_cltr_shadow_status)
+
+    cltr_shadow_show_parser = cltr_shadow_subparsers.add_parser("show", help="Show a shadow generation.")
+    cltr_shadow_show_group = cltr_shadow_show_parser.add_mutually_exclusive_group(required=True)
+    cltr_shadow_show_group.add_argument("--latest", action="store_true", help="Show the current shadow generation.")
+    cltr_shadow_show_group.add_argument("--phase-id", default=None, help="Show the shadow generation for this phase_id.")
+    cltr_shadow_show_parser.add_argument("--json", action="store_true")
+    cltr_shadow_show_parser.set_defaults(handler=run_cltr_shadow_show)
+
+    cltr_shadow_verify_parser = cltr_shadow_subparsers.add_parser("verify", help="Verify the current shadow generation's digest/manifest chain.")
+    cltr_shadow_verify_parser.add_argument("--latest", action="store_true", default=True)
+    cltr_shadow_verify_parser.add_argument("--json", action="store_true")
+    cltr_shadow_verify_parser.set_defaults(handler=run_cltr_shadow_verify)
+
+    cltr_shadow_list_parser = cltr_shadow_subparsers.add_parser("list", help="List shadow generation identities.")
+    cltr_shadow_list_parser.add_argument("--limit", type=int, default=None)
+    cltr_shadow_list_parser.add_argument("--json", action="store_true")
+    cltr_shadow_list_parser.set_defaults(handler=run_cltr_shadow_list)
+
+    cltr_shadow_reconcile_parser = cltr_shadow_subparsers.add_parser(
+        "reconcile", help="Read-only reconciliation of a phase's shadow generation (never mutates)."
+    )
+    cltr_shadow_reconcile_parser.add_argument("--phase-id", required=True)
+    cltr_shadow_reconcile_parser.add_argument("--json", action="store_true")
+    cltr_shadow_reconcile_parser.set_defaults(handler=run_cltr_shadow_reconcile)
+
     return parser
 
 

@@ -1,5 +1,29 @@
 # Changelog
 
+- Phase 135K — Production CLTR Shadow Integration Implementation
+  (`docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_IMPLEMENTATION.md`).
+  Implemented the first production CLTR integration in strict shadow mode:
+  a new `src/pcae/cltr/` package implementing CLTR-SCHEMA-001 v1.0.1
+  exactly (14 states, 16 transitions, 14 forbidden transitions, 37
+  invariants, 15 representation adapters per 135J's §21.4 comparison-mode
+  table), deterministic canonicalization, SHA-256 digesting, immutable
+  generation persistence with an atomic current pointer and crash-safe
+  staging/quarantine, and a read-only `pcae cltr shadow` CLI
+  (`status`/`show`/`verify`/`list`/`reconcile`). Wired into all four
+  production finalization entry points (`pcae phase complete`, `pcae task
+  finish`, `pcae phase-report create`, `pcae notify send-report`) at the
+  one shared boundary (`run_finalization_transaction()`), behind a
+  default-off `PCAE_CLTR_SHADOW_ENABLED` feature flag; a shadow failure is
+  recorded and disclosed but never blocks or alters production
+  finalization. Constructs one shadow record per finalized transition
+  (a terminal snapshot) rather than a full multi-stage spine progression —
+  a disclosed scope reduction, not an oversight. 80 new tests added; 1325
+  affected lifecycle regression tests and Fast Green (4391/4391) pass
+  unchanged with the flag both unset and enabled. All four of 135J's
+  inherited Non-Blocking findings are carried forward and dispositioned.
+  No authority cutover, no legacy authority retirement, no execution
+  capability introduced. Recommends 135L — Production CLTR Shadow
+  Integration Independent Verification (not started).
 - Phase 135J — Production CLTR Schema and Integration Contract Verification
   (`docs/PHASE_135_PRODUCTION_CLTR_SCHEMA_AND_INTEGRATION_CONTRACT_VERIFICATION.md`).
   Independently re-verified CLTR-SCHEMA-001 v1.0.0 (135I) by re-derivation

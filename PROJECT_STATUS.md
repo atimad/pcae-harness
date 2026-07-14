@@ -2,6 +2,43 @@
 
 ## Current Phase
 
+Phase 135K — Production CLTR Shadow Integration Implementation (completed).
+Implemented the first production CLTR integration, in strict shadow mode
+only: a new `src/pcae/cltr/` package implementing CLTR-SCHEMA-001 v1.0.1
+exactly (14 states, 16 transitions, 14 forbidden transitions, 37
+invariants, 15 representation adapters with 135J's §21.4 comparison-mode
+assignment), deterministic canonicalization/SHA-256 digesting, immutable
+generation persistence with an atomic current pointer and crash-safe
+staging/quarantine, and a read-only `pcae cltr shadow` CLI. Wired into all
+four production finalization entry points (`pcae phase complete`, `pcae
+task finish`, `pcae phase-report create`, `pcae notify send-report`) at the
+one point they already share — the end of `run_finalization_transaction()`
+— behind an explicit, default-off feature flag
+(`PCAE_CLTR_SHADOW_ENABLED`). The shadow observer never controls
+certification, promotion, notification, markers, or receipts; a shadow
+failure is recorded and disclosed but never blocks production completion.
+Constructs one shadow record per finalized transition (a terminal
+snapshot), not a full multi-stage spine progression — a deliberate,
+disclosed scope reduction per the phase brief's own "smallest complete
+shadow integration" guidance. 80 new focused tests pass; 1325 affected
+lifecycle regression tests pass unchanged (with the flag both unset and
+enabled); Fast Green remains 4391/4391. A real, non-mocked end-to-end
+smoke test confirmed the wiring produces a genuine, digest-verified shadow
+generation outside the test harness. All four of 135J's inherited
+Non-Blocking findings are carried forward and dispositioned (one resolved
+within this implementation's own artifact, three unchanged/inherited as
+honestly disclosed debt — see the phase document §23). No authority
+cutover, no legacy authority retirement, no execution capability
+introduced. Runtime remains Observed / observe / execution unavailable.
+PFN-001, PFR-001, and CLTR-001 all unchanged.
+
+Full analysis:
+`docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_IMPLEMENTATION.md`.
+Recommended next phase: **135L — Production CLTR Shadow Integration
+Independent Verification** (not started).
+
+## Phase 135J Complete
+
 Phase 135J — Production CLTR Schema and Integration Contract Verification
 (completed). Independently re-verified CLTR-SCHEMA-001 v1.0.0 (135I) against
 CLTR-001 (135B), 135C, 135D (Cross-Representation Invariant Architecture &

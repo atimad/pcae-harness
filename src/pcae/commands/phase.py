@@ -491,6 +491,7 @@ def _finalize_report_and_notify(
             report=trial_report,
             gate=gate,
             promote_and_dispatch=_promote_and_dispatch,
+            entry_point="phase_complete",
         )
         if txn_result.status == "pre_promotion_certification_failed":
             print("Finalization transaction (134E.10.1): BLOCKED — pre-promotion certification failed")

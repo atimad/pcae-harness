@@ -524,6 +524,7 @@ def run_finalization_transaction(
     promote_and_dispatch: Callable[[], dict[str, Any]],
     transaction_root: Path | str | None = None,
     receipt_root: Path | str | None = None,
+    entry_point: str = "unknown",
 ) -> TransactionResult:
     """Run (or resume) the authoritative finalization transaction (134E.10.1).
 
@@ -830,4 +831,128 @@ def run_finalization_transaction(
     result.steps = dict(checkpoint["steps"])
     result.limitations = list(checkpoint["limitations"])
     _save_checkpoint(checkpoint_path, checkpoint)
+
+    # Phase 135K — shadow CLTR observation. This runs only here, after
+    # production promotion/dispatch/receipt modeling have already
+    # irreversibly completed (or completed with a disclosed best-effort
+    # receipt gap) -- the one point in the shared finalization boundary
+    # where every entry point has explicit, already-computed evidence
+    # (report_digest, finalization_snapshot_id, promotion/notification/
+    # receipt outcomes) available without inferring anything from
+    # narrative artifacts. It never runs on gate_not_passed,
+    # pre_promotion_certification_failed, promotion_and_dispatch_failed,
+    # promotion_outcome_unconfirmed, or resumed_completed paths (all of
+    # which return earlier, above) -- exactly the phase-135K-brief
+    # requirement that shadow observation never run before identity is
+    # resolved or before production has actually finalized. A shadow
+    # failure here is recorded and disclosed; it never raises into this
+    # caller and never alters `result` or `checkpoint`.
+    _observe_shadow_cltr(
+        phase_id=phase_id,
+        entry_point=entry_point,
+        report=report,
+        promoted_report=promoted_report,
+        result=result,
+        report_digest=report_digest,
+        finalization_snapshot_id=finalization_snapshot_id,
+    )
+
     return result
+
+
+def _observe_shadow_cltr(
+    *,
+    phase_id: str,
+    entry_point: str,
+    report: PhaseReport,
+    promoted_report: PhaseReport,
+    result: "TransactionResult",
+    report_digest: str,
+    finalization_snapshot_id: str,
+) -> None:
+    """Best-effort, non-blocking shadow CLTR observation (Phase 135K).
+
+    Constructs one explicit :class:`~pcae.cltr.models.ShadowTransitionInput`
+    from values this function already has -- never from git log, commit
+    subjects, report titles, or task titles -- and calls the shared shadow
+    integration service. No-op when ``PCAE_CLTR_SHADOW_ENABLED`` is unset.
+    Any exception is contained; this function never raises.
+    """
+
+    try:
+        from pcae.cltr.enums import (
+            CertificationState,
+            LifecycleState,
+            NotificationState,
+            TransitionType,
+        )
+        from pcae.cltr.models import CommitOwnershipEntry, EvidenceReference, ShadowTransitionInput
+        from pcae.cltr.shadow import observe_finalized_transition_best_effort
+
+        notification_result = getattr(promoted_report, "notification_result", None) or {}
+        notify_success = bool(notification_result.get("success"))
+        terminal_state = LifecycleState.TERMINAL_SUCCESS if notify_success else LifecycleState.TERMINAL_PARTIAL_EXTERNAL
+        notification_state = NotificationState.CONFIRMED if notify_success else NotificationState.UNCONFIRMED
+        notification_suppressed = not notification_result
+
+        commit_ownership = tuple(
+            CommitOwnershipEntry(
+                commit_hash=commit_hash,
+                repository_identity=phase_id,
+                branch_identity="main",
+                # Honest disclosure: production does not yet implement the
+                # three-outcome commit-ownership verification model
+                # (135H §1, 135J's inherited Non-Blocking finding F5) --
+                # this shadow observer never fabricates a `verified`
+                # classification it cannot itself independently establish.
+                certification_state=CertificationState.UNVERIFIABLE,
+            )
+            for commit_hash in (report.commits or [])
+        )
+
+        evidence_refs = ()
+        if result.evidence_id:
+            evidence_refs = (
+                EvidenceReference(
+                    evidence_id=result.evidence_id,
+                    evidence_kind="canonical_engineering_evidence",
+                    reference=f"finalization_transaction:{phase_id}:{result.evidence_id}",
+                    captured_at=None,
+                ),
+            )
+
+        receipt_id = result.receipt_logical_delivery_id if notify_success else None
+
+        shadow_input = ShadowTransitionInput(
+            entry_point=entry_point,
+            phase_id=phase_id,
+            transition_type=TransitionType.CLOSE_SUCCESS if notify_success else TransitionType.CLOSE_PARTIAL,
+            intended_lifecycle_state=terminal_state,
+            source_revision=report_digest,
+            final_revision=report_digest,
+            repository_identity=phase_id,
+            branch_identity="main",
+            report_id=phase_id,
+            report_digest=report_digest,
+            metadata_id=phase_id,
+            metadata_digest=finalization_snapshot_id,
+            snapshot_id=phase_id,
+            snapshot_digest=finalization_snapshot_id,
+            promotion_id=finalization_snapshot_id,
+            notification_ids=(f"{phase_id}:{entry_point}",) if notification_result else (),
+            notification_state=notification_state,
+            notification_suppressed=notification_suppressed,
+            receipt_id=receipt_id,
+            phase_commit_ownership=commit_ownership,
+            evidence_refs=evidence_refs,
+            limitations=(
+                "metadata_digest and snapshot_digest both reuse finalization_snapshot_id: "
+                "production does not yet expose a completion-metadata digest independent "
+                "from the finalization snapshot digest (disclosed limitation, not fabricated equality)",
+                "phase_commit_ownership entries are all classified unverifiable: production "
+                "does not yet implement the three-outcome commit-ownership verification model",
+            ),
+        )
+        observe_finalized_transition_best_effort(shadow_input)
+    except Exception:  # noqa: BLE001 - shadow observation must never affect production finalization
+        pass
