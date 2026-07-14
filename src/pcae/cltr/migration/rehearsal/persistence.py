@@ -83,6 +83,29 @@ def pointer_path(migration_root: Path, migration_epoch: str, transition_id: str)
     return root / "current-rehearsal"
 
 
+def rollbacks_dir(migration_root: Path, migration_epoch: str, transition_id: str) -> Path:
+    """135U -- rollback-rehearsal evidence and conflict storage, nested
+    under the same isolated per-transition rehearsal namespace as
+    ``generations/``/``candidates/``/``failures/``/``quarantine/`` --
+    never a new top-level directory (135Q §7's namespace contract,
+    extended)."""
+
+    root = rehearsals_root(migration_root, migration_epoch, transition_id)
+    return safe_join(root, "rollbacks")
+
+
+def rollback_request_path(migration_root: Path, migration_epoch: str, transition_id: str, rollback_request_id: str) -> Path:
+    directory = rollbacks_dir(migration_root, migration_epoch, transition_id)
+    if not is_safe_segment(f"{rollback_request_id}.json"):
+        raise PathContainmentError(f"unsafe rollback request id: {rollback_request_id!r}")
+    return directory / f"{rollback_request_id}.json"
+
+
+def rollback_conflicts_dir(migration_root: Path, migration_epoch: str, transition_id: str) -> Path:
+    root = rehearsals_root(migration_root, migration_epoch, transition_id)
+    return safe_join(root, "rollback-conflicts")
+
+
 def rehearsal_evidence_pointer_path(migration_root: Path) -> Path:
     return migration_root / "status" / "current-rehearsal-evidence"
 

@@ -41,3 +41,41 @@ def compute_rehearsal_generation_id(
             "production_authority_disclosure": PRODUCTION_AUTHORITY_DISCLOSURE,
         }
     )
+
+
+ROLLBACK_STAGE = "stage_2_rollback_rehearsal"
+
+
+def compute_rollback_request_id(
+    *,
+    phase_id: str,
+    transition_id: str,
+    migration_epoch: str,
+    authority_epoch: str,
+    source_rehearsal_generation_id: Optional[str],
+    target_rehearsal_generation_id: str,
+    reason: str,
+) -> str:
+    """135U -- deterministic rollback-request identity, frozen from 135Q
+    §33/§36's exactly-once binding ("rollback rehearsal (per-rollback-
+    target idempotency, §36)"). Never random/timestamp-derived; stable
+    across processes, working directories, hash seeds, environment
+    ordering, locale, temporary roots, and filesystem timestamps because
+    it is a pure function of these bound, verified fields only. Changes
+    if -- and only if -- one of these contract-bound inputs changes,
+    which is exactly the conflicting-replay detection surface (135U
+    phase brief §8)."""
+
+    return compute_dict_digest(
+        {
+            "phase_id": phase_id,
+            "transition_id": transition_id,
+            "migration_epoch": migration_epoch,
+            "authority_epoch": authority_epoch,
+            "source_rehearsal_generation_id": source_rehearsal_generation_id,
+            "target_rehearsal_generation_id": target_rehearsal_generation_id,
+            "reason": reason,
+            "rollback_stage": ROLLBACK_STAGE,
+            "production_authority_disclosure": PRODUCTION_AUTHORITY_DISCLOSURE,
+        }
+    )

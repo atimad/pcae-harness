@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Optional
 
-from pcae.cltr.migration.rehearsal.enums import ArtifactRole, CandidateKind, RehearsalOutcome, VerificationStatus
+from pcae.cltr.migration.rehearsal.enums import ArtifactRole, CandidateKind, RehearsalOutcome, RollbackOutcome, VerificationStatus
 
 
 @dataclasses.dataclass(frozen=True)
@@ -106,4 +106,64 @@ class RehearsalEvidenceRecord:
         return payload
 
     def with_digest(self, digest: str) -> "RehearsalEvidenceRecord":
+        return dataclasses.replace(self, record_digest=digest)
+
+
+@dataclasses.dataclass(frozen=True)
+class RollbackRequest:
+    """135U -- typed rollback-rehearsal request (135Q §33/§36's frozen
+    scope, applied to a rollback attempt). Bound with explicit, verified
+    values only -- never inferred from newest/oldest file, modification
+    timestamps, report titles, task titles, recent Git history, directory
+    ordering, or stale metadata (135U phase brief §1)."""
+
+    rollback_request_id: str
+    phase_id: str
+    transition_id: str
+    migration_epoch: str
+    authority_epoch: str
+    current_rehearsal_generation_id: Optional[str]
+    target_rehearsal_generation_id: str
+    source_result_evidence_digest: Optional[str]
+    expected_pointer_generation_id: Optional[str]
+    reason: str
+    non_authority_disclosure: dict
+
+
+@dataclasses.dataclass(frozen=True)
+class RollbackEvidenceRecord:
+    """135U -- §33-shaped rollback-rehearsal evidence record (135Q §36:
+    "Recording rollback evidence (a `rollback_rehearsal` evidence record,
+    §33-shaped, noting the prior and new targets)")."""
+
+    evidence_id: str
+    schema_version: str
+    migration_stage: str
+    migration_epoch: str
+    authority_epoch: str
+    production_authority: str
+    transition_id: str
+    phase_id: str
+    rollback_request_id: str
+    source_rehearsal_generation_id: Optional[str]
+    target_rehearsal_generation_id: str
+    pointer_state_before: Optional[dict]
+    pointer_state_after: Optional[dict]
+    target_manifest_digest: Optional[str]
+    target_generation_digest: Optional[str]
+    outcome: RollbackOutcome
+    verification_result: str
+    publication_result: str
+    limitations: tuple[str, ...]
+    non_authority_disclosure: dict
+    created_at: str
+    record_digest: Optional[str] = None
+
+    def digestible_payload(self) -> dict:
+        payload = dataclasses.asdict(self)
+        payload.pop("record_digest", None)
+        payload["outcome"] = self.outcome.value
+        return payload
+
+    def with_digest(self, digest: str) -> "RollbackEvidenceRecord":
         return dataclasses.replace(self, record_digest=digest)

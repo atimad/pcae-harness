@@ -13,6 +13,7 @@ from pathlib import Path
 from pcae.cltr.migration.disclosure import NON_AUTHORITY_DISCLOSURE
 from pcae.cltr.migration.rehearsal.persistence import DEFAULT_MIGRATION_ROOT, generations_dir, read_json
 from pcae.cltr.migration.rehearsal.recovery import classify, current_pointer_generation_id, list_transition_ids
+from pcae.cltr.migration.rehearsal.rollback import list_rollback_evidence
 
 
 def _find_rehearsal_transitions_for_phase(migration_root: Path, phase_id: str) -> list[dict]:
@@ -38,7 +39,19 @@ def _find_rehearsal_transitions_for_phase(migration_root: Path, phase_id: str) -
                     if artifact:
                         observed_phase_id = artifact.get("phase_id")
             if observed_phase_id != phase_id:
-                continue
+                # 135U -- a rollback may have moved the current-rehearsal
+                # pointer to a generation finalized under a *different*
+                # phase_id than the one that requested the rollback. The
+                # rollback's own evidence records the requesting phase_id
+                # explicitly, so a phase_id that authored a rollback for
+                # this transition must still resolve here (never silently
+                # lost from status/reconcile just because the pointer no
+                # longer points at "its own" generation).
+                rollback_phase_ids = {
+                    record.get("phase_id") for record in list_rollback_evidence(migration_root, migration_epoch, transition_id)
+                }
+                if phase_id not in rollback_phase_ids:
+                    continue
             matches.append(
                 {
                     "migration_epoch": migration_epoch,
@@ -70,6 +83,7 @@ def reconcile(phase_id: str, migration_root: Path = DEFAULT_MIGRATION_ROOT) -> d
         evidence = match["evidence"] or {}
         if not evidence.get("progression_eligibility"):
             blockers.append(f"transition {match['transition_id']} is not rehearsal-progression-eligible")
+        rollback_history = list_rollback_evidence(Path(migration_root), match["migration_epoch"], match["transition_id"])
         transitions.append(
             {
                 "transition_id": match["transition_id"],
@@ -80,6 +94,7 @@ def reconcile(phase_id: str, migration_root: Path = DEFAULT_MIGRATION_ROOT) -> d
                 "outcome": evidence.get("outcome"),
                 "progression_eligibility": evidence.get("progression_eligibility", False),
                 "recovery_state": recovery_state.value,
+                "rollback_history": rollback_history,
             }
         )
 

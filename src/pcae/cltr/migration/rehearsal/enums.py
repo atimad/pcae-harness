@@ -121,3 +121,24 @@ class RehearsalOutcome(str, Enum):
     IDEMPOTENT_REPLAY = "idempotent_replay"
     CONFLICT = "conflict"
     QUARANTINED = "quarantined"
+
+
+class RollbackOutcome(str, Enum):
+    """135U -- rollback-rehearsal-specific outcomes (135Q §33's evidence
+    shape, applied to a rollback attempt rather than a forward rehearsal
+    attempt). Distinct from ``RehearsalOutcome`` because a rollback
+    attempt has its own terminal vocabulary (135U phase brief:
+    "distinguish rollback requested / rejected / verified / published /
+    publication uncertain / idempotent replay / conflicting replay /
+    recovery required / reconciled / quarantined")."""
+
+    REQUESTED = "rollback_requested"
+    REJECTED = "rollback_rejected"
+    VERIFIED = "rollback_verified"
+    PUBLISHED = "rollback_published"
+    PUBLICATION_UNCERTAIN = "rollback_publication_uncertain"
+    IDEMPOTENT_REPLAY = "rollback_idempotent_replay"
+    CONFLICT = "rollback_conflict"
+    RECOVERY_REQUIRED = "rollback_recovery_required"
+    RECONCILED = "rollback_reconciled"
+    QUARANTINED = "rollback_quarantined"

@@ -1,5 +1,57 @@
 # Changelog
 
+- Phase 135U — Rollback Rehearsal Implementation and Independent
+  Verification
+  (`docs/PHASE_135_ROLLBACK_REHEARSAL_IMPLEMENTATION_AND_INDEPENDENT_VERIFICATION.md`).
+  Verdict: VERIFIED WITH NON-BLOCKING FINDINGS. Implements the rollback-
+  rehearsal contract 135Q §33/§36/§37/§38 froze and 135T's F-135R-4
+  disposition confirmed 135S left unimplemented: `rollback.py` (new) —
+  deterministic rollback-request identity (pure function of phase_id/
+  transition_id/migration_epoch/authority_epoch/source+target generation
+  IDs/reason, stable across a fresh subprocess); strict target
+  validation (schema, per-artifact and generation digest recomputed
+  fresh from disk, epoch/transition binding, quarantine rejection,
+  symlink containment on both the generation directory and every
+  artifact file); an 11-step atomic rollback sequence reusing the exact
+  same `os.replace`-backed pointer primitive and containment/
+  verification logic ordinary forward publication uses (refactored
+  `pointer.py`'s `validate_publication_target` into a shared
+  `validate_generation_target`, and added `publish_generation()` for
+  rollback's by-ID/digest publication); a §33-shaped rollback evidence
+  record with a 10-value `RollbackOutcome` vocabulary; idempotent replay
+  with zero evidence duplication; fail-closed conflicting-replay
+  detection (`write_immutable`-backed, routed to a dedicated
+  `rollback-conflicts/` namespace, never published); a full crash-
+  injection matrix at every named boundary, including correct recovery
+  for a rollback whose atomic pointer replace had already durably
+  succeeded before a crash interrupted evidence persistence (completes
+  evidence recording on replay rather than either silently re-mutating
+  or incorrectly rejecting as stale); and the
+  `pcae cltr migration rehearsal rollback`/`rollback-status` CLI
+  (operator-command-only; not wired into any of the four production
+  finalization entry points or any recovery path). A dedicated,
+  separately-written adversarial verification module
+  (`tests/test_cltr_rehearsal_135u_independent_verification.py`,
+  re-deriving expectations from the frozen contract text rather than
+  trusting the implementation) found and this phase repaired two
+  genuine Non-Blocking defects: (1) post-rollback `reconcile`/
+  `rollback-status` silently lost the requesting `phase_id` because
+  phase-to-transition resolution only checked the *current* generation's
+  own embedded phase_id, not rollback history (`reconciliation.py`
+  repaired to also match against persisted rollback evidence); (2) the
+  authority-epoch validation used a substring check bypassable by a
+  value like `"cltr|not-legacy"`, repaired to an exact `"legacy|..."`
+  prefix check. Fresh regression, all passing at 100% on first run:
+  rollback focused 43/43; rollback independent adversarial 26/26; Stage
+  2 focused 44/44 (unchanged); combined migration 214/214; production
+  CLTR combined 499/499; affected finalization (exact 135S/135T node
+  set) 117/117; notification/marker/receipt/report/Architecture-Status
+  1185/1185; Fast Green 4391/4391 (unchanged). Rollback to "no current
+  rehearsal," cross-epoch rollback reconciliation, and a dedicated
+  concurrent-rollback-vs-forward-race stress test are disclosed
+  limitations, not silently assumed. No Stage 3 implementation,
+  authority cutover, legacy demotion, or legacy retirement occurred.
+
 - Phase 135T — Atomic Publication Rehearsal Independent Verification
   (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_INDEPENDENT_VERIFICATION.md`).
   Verdict: VERIFIED WITH NON-BLOCKING FINDINGS (independent verification

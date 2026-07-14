@@ -2,6 +2,57 @@
 
 ## Current Phase
 
+Phase 135U — Rollback Rehearsal Implementation and Independent
+Verification (completed, VERIFIED WITH NON-BLOCKING FINDINGS —
+implementation plus independent verification within the same governed
+phase). Implemented the rollback-rehearsal contract 135Q §33/§36/§37/§38
+froze and 135T confirmed 135S left unimplemented: a deterministic
+rollback-request identity; strict source/target validation (schema,
+digest, epoch/transition binding, quarantine, symlink containment); an
+atomic rollback sequence reusing the same `os.replace`-backed pointer
+primitive and the same containment/verification logic ordinary forward
+publication uses (`pointer.validate_generation_target`, shared by both
+`publish()` and the new `publish_generation()`); a §33-shaped rollback
+evidence record; idempotent replay; fail-closed conflicting-replay
+detection; a full crash-injection matrix at every named boundary with
+correct post-crash recovery (including completing evidence recording
+for a rollback whose atomic pointer replace had already durably
+succeeded before a crash interrupted evidence persistence); quarantine
+enforcement; and the `pcae cltr migration rehearsal rollback`/
+`rollback-status` CLI. A dedicated, separately-written adversarial
+verification module (re-deriving expectations from the frozen contract
+text rather than trusting the implementation) then attacked the new
+capability and found two genuine, Non-Blocking defects, both repaired
+within this same phase: (1) post-rollback `reconcile`/`rollback-status`
+silently lost the requesting `phase_id` because phase-to-transition
+resolution only checked the *current* generation's own embedded
+phase_id, not rollback history — repaired by also matching against
+persisted rollback evidence; (2) the authority-epoch validation used a
+substring check (`"legacy" in value`) instead of a prefix check,
+bypassable by a value like `"cltr|not-legacy"` — repaired to an exact
+`"legacy|..."` prefix check. Fresh regression, all passing at 100% on
+first run: rollback focused 43/43; rollback independent adversarial
+26/26; Stage 2 focused 44/44 (unchanged); combined migration 214/214;
+production CLTR combined 499/499; affected finalization (exact 135S/T
+node set) 117/117; notification/marker/receipt/report/Architecture-
+Status 1185/1185; Fast Green 4391/4391 (unchanged). Legacy lifecycle
+remains the sole production authority; CLTR remains derivative;
+rollback rehearsal touched only the non-authoritative rehearsal
+namespace; no production pointer/report/checkpoint/metadata/marker/
+receipt changed; no external notification originated from this phase;
+no Stage 3 implementation, authority cutover, legacy demotion, or
+legacy retirement occurred; no execution capability was introduced;
+runtime remains Observed / observe / execution unavailable.
+
+Full analysis: `docs/PHASE_135_ROLLBACK_REHEARSAL_IMPLEMENTATION_AND_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: a small, bounded follow-on closing the disclosed
+cross-epoch-rollback and concurrent-rollback-vs-forward-race gaps, or
+**135V — Stage 3 Authority-Cutover Readiness Architecture** (not
+started; a design judgment for the next contract/planning phase to
+confirm, not asserted as final by 135U).
+
+## Phase 135T Complete
+
 Phase 135T — Atomic Publication Rehearsal Independent Verification
 (completed, VERIFIED WITH NON-BLOCKING FINDINGS — independent
 verification plus bounded repair). Independently re-derived 135Q's

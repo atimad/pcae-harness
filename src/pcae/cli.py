@@ -10541,6 +10541,8 @@ def build_parser() -> argparse.ArgumentParser:
     from pcae.commands.cltr_migration import (
         run_cltr_migration_reconcile,
         run_cltr_migration_rehearsal_reconcile,
+        run_cltr_migration_rehearsal_rollback,
+        run_cltr_migration_rehearsal_rollback_status,
         run_cltr_migration_rehearsal_status,
         run_cltr_migration_status,
     )
@@ -10583,6 +10585,24 @@ def build_parser() -> argparse.ArgumentParser:
     cltr_rehearsal_reconcile_parser.add_argument("--phase-id", required=True)
     cltr_rehearsal_reconcile_parser.add_argument("--json", action="store_true")
     cltr_rehearsal_reconcile_parser.set_defaults(handler=run_cltr_migration_rehearsal_reconcile)
+
+    # ── pcae cltr migration rehearsal rollback (Phase 135U — rollback rehearsal) ──
+    cltr_rollback_status_parser = cltr_rehearsal_subparsers.add_parser(
+        "rollback-status", help="Read-only rollback-target readiness for a phase's Stage 2 rehearsal transition (never mutates)."
+    )
+    cltr_rollback_status_parser.add_argument("--phase-id", required=True)
+    cltr_rollback_status_parser.add_argument("--json", action="store_true")
+    cltr_rollback_status_parser.set_defaults(handler=run_cltr_migration_rehearsal_rollback_status)
+
+    cltr_rollback_parser = cltr_rehearsal_subparsers.add_parser(
+        "rollback",
+        help="Roll the Stage 2 rehearsal-only pointer back to a prior verified generation (mutates only the rehearsal namespace).",
+    )
+    cltr_rollback_parser.add_argument("--phase-id", required=True)
+    cltr_rollback_parser.add_argument("--target-generation", required=True)
+    cltr_rollback_parser.add_argument("--reason", default=None)
+    cltr_rollback_parser.add_argument("--json", action="store_true")
+    cltr_rollback_parser.set_defaults(handler=run_cltr_migration_rehearsal_rollback)
 
     return parser
 
