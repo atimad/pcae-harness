@@ -22,15 +22,8 @@ Phase 135L: Production CLTR Shadow Integration Independent Verification
 
 ## Allowed Files
 
-- tasks/active/**
-- tasks/done/**
-- tasks/TODO.md
-- tasks/DONE.md
-- tasks/DECISIONS.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_INDEPENDENT_VERIFICATION.md
-- tests/test_cltr_135l_independent_verification.py
+- .pcae/phase-completion-report.md
+- .pcae/phase-completion-metadata.json
 
 ## Forbidden Files
 
