@@ -84,6 +84,16 @@
       "name": "affected_lifecycle_regression_subset",
       "result": "1245/1245 (inherited from 135L, not re-executed)",
       "status": "inherited"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "inherited from 135L (included in fast_green there); not re-executed by this documentation-only phase",
+      "status": "inherited"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "inherited from 135L (included in fast_green there); not re-executed by this documentation-only phase",
+      "status": "inherited"
     }
   ],
   "test_results": {
