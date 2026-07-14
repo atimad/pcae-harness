@@ -275,6 +275,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 135R: Atomic Publication Rehearsal Contract Verification to Idle: awaiting next governed phase (post-135R); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase to Phase 135R: Atomic Publication Rehearsal Contract Verification; session refreshed and governance continuity revalidated.
 - Phase 135M — Production CLTR Dual-Derivation and Atomic Publication
   Contract / Migration Plan
