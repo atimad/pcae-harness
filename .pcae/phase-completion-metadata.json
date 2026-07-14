@@ -1,33 +1,42 @@
 {
   "schema_version": "1.0",
-  "phase_id": "135T",
-  "phase_name": "Atomic Publication Rehearsal Independent Verification",
-  "phase_title": "Atomic Publication Rehearsal Independent Verification",
+  "phase_id": "135U",
+  "phase_name": "Rollback Rehearsal Implementation and Independent Verification",
+  "phase_title": "Rollback Rehearsal Implementation and Independent Verification",
   "status": "completed",
-  "files_changed_count": 9,
+  "files_changed_count": 18,
   "files_changed": [
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_INDEPENDENT_VERIFICATION.md",
-    "src/pcae/cltr/migration/rehearsal/coordinator.py",
+    "docs/PHASE_135_ROLLBACK_REHEARSAL_IMPLEMENTATION_AND_INDEPENDENT_VERIFICATION.md",
+    "src/pcae/cli.py",
+    "src/pcae/cltr/migration/rehearsal/enums.py",
+    "src/pcae/cltr/migration/rehearsal/identity.py",
+    "src/pcae/cltr/migration/rehearsal/models.py",
+    "src/pcae/cltr/migration/rehearsal/persistence.py",
+    "src/pcae/cltr/migration/rehearsal/pointer.py",
+    "src/pcae/cltr/migration/rehearsal/reconciliation.py",
+    "src/pcae/cltr/migration/rehearsal/rollback.py",
+    "src/pcae/commands/cltr_migration.py",
     "tasks/DONE.md",
-    "tasks/active/20260714-2134-phase-135t-atomic-publication-rehearsal-independent-verification.md",
-    "tasks/done/20260714-2024-idle-awaiting-next-governed-phase-post-135s.md",
-    "tests/test_cltr_migration_135p_verification.py",
-    "tests/test_cltr_rehearsal_135t_independent_verification.py"
+    "tasks/active/20260714-2202-idle-awaiting-next-governed-phase-post-135t.md",
+    "tasks/active/20260714-2303-phase-135u-rollback-rehearsal-implementation-and-independent-verification.md",
+    "tasks/done/20260714-2202-idle-awaiting-next-governed-phase-post-135t.md",
+    "tests/test_cltr_rehearsal_135u_independent_verification.py",
+    "tests/test_cltr_rehearsal_rollback.py"
   ],
-  "source_files_changed": 1,
+  "source_files_changed": 9,
   "test_files_changed": 2,
-  "tests_added_or_updated": "tests/test_cltr_rehearsal_135t_independent_verification.py (16 new fresh adversarial tests: symlink-escape regression covering the F-135T-1 repair, identity determinism including cross-process stability, honest 23-item inventory disclosure, live on-disk manifest-tamper detection); tests/test_cltr_migration_135p_verification.py repaired in place (2 stale pre-F-135P-1-fix assertions corrected to the genuinely-fixed recovery classifications, resolving the F-135T-2 false regression-baseline finding)",
-  "tests_run": 16,
+  "tests_added_or_updated": "tests/test_cltr_rehearsal_rollback.py (43 new implementation tests: request model/identity, target validation, atomic pointer rollback, immutable history, idempotency/conflicting replay, full crash-injection matrix, CLI, production/notification isolation, containment/symlink attacks); tests/test_cltr_rehearsal_135u_independent_verification.py (26 new, separately-written adversarial tests re-deriving expectations from 135Q section 33/36/37/38 directly rather than trusting the implementation; found and drove the repair of F-135U-1 and F-135U-2)",
+  "tests_run": 69,
   "phase_commits": [
-    { "hash": "8670312e7cf8af2a2943be63b81e8d9f7f9c61b7" },
-    { "hash": "e0484051ef1624bd71fa4e2b6160ee1864dfe6f3" }
+    { "hash": "053c0cf4679457f283abc0d748611c76369c4eac" },
+    { "hash": "d1d6ca50a36c6966d59f97c291879c68447728ac" }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
-  "summary": "Phase 135T independently verifies Phase 135S (Atomic Publication Rehearsal, Legacy Authority) per the 135Q contract and 135R's own verification -- re-derived directly from the frozen contract text, never accepted from 135S's own claims. Found and repaired two Blocking defects, both within the Stage 2 implementation boundary (independent verification plus bounded repair): (1) F-135T-1, a real, live-reproduced symlink-escape containment gap -- coordinator.py wrote every candidate artifact and the manifest via a bare Path.write_text/write_bytes call, bypassing persistence.write_candidate_artifact's pre-existing-symlink abort entirely (135Q section 7/25/47's required protection existed in source but was never called from the only production call site); a pre-placed symlink at a candidate artifact's target path was silently followed and the linked-to file's content overwritten. Repaired by wiring coordinator.py to call write_candidate_artifact for every candidate and the manifest; verified the attack now raises PathContainmentError and leaves the outside file untouched. (2) F-135T-2, 135S's own regression-baseline claim (5/8/10 pre-existing, sandbox-local, receipt-modeling failures across four named regression suites) did not reproduce on independent re-run. The actual failures were exactly 2, both the same parametrized test in tests/test_cltr_migration_135p_verification.py, caused directly by 135S's own F-135P-1 source fix landing without its regression test being updated -- a genuine, small, Stage-2-caused regression misclassified as inherited/unrelated. Independently confirmed via an isolated git worktree at the exact pre-135S baseline commit (7fb4dbc1), never mutating the primary repository: all 4 parametrized cases pass there; 2 fail on the unrepaired 135S tree. Repaired by correcting the two stale assertions to the genuinely-fixed classifications (report_create_recovery, manual_governed_recovery). Post-repair, all four regression suites 135S's own report names pass at 100 percent: Stage 2 focused 44/44 (28 inherited plus 16 fresh), combined migration 129/129, production CLTR combined 414/414, affected finalization 117/117, notification/marker/receipt/report 1183/1183; Fast Green 4391/4391 unchanged. Every other verification area independently confirmed by direct re-derivation and live reproduction rather than trusting 135S's claims: Stage 2 authority matrix and configuration; precondition contract attacked with missing LEGACY_COMPLETION revision, incomplete Stage 1 status, and authority-relevant mismatch; deterministic rehearsal-generation identity re-derived and confirmed stable across a fresh Python subprocess, with each of 8 bound fields independently changing the identity when varied; exact 23-item candidate inventory independently re-derived from 135Q section 9 directly (not copied from source), confirming 10 genuinely file-backed items with honest, disclosed folding of items 11-14 into other artifacts/commands (confirmed present in a real end-to-end-produced manifest, not merely in source); candidate honesty (no candidate can claim production terminal state); 19-step assembly sequence traced to code; manifest/generation-digest tamper detection confirmed via live on-disk mutation of a finalized artifact, not merely an in-memory fixture; atomic pointer publication and crash/recovery/idempotency/quarantine verified by direct source re-reading; all-four-production-entry-point wiring confirmed via a single shared coordinator call site with no entry-point branching; 135H.1 escape resistance confirmed by real call-path tracing; production side-effect, notification, marker, and receipt isolation confirmed via a live filesystem-snapshot-equality test (byte-for-byte unchanged before/after CLI invocation) plus import-graph proof (zero subprocess/socket/telegram-import occurrences); no-execution boundary confirmed structurally, not merely by a passing test. F-135R-1 through F-135R-4 and F-135P-1 through F-135P-4 dispositions independently re-verified against current source. No production phase report, completion metadata, Architecture Status, checkpoint, marker, or receipt was created or modified by Stage 2. No production pointer changed because of Stage 2. No external delivery originated from Stage 2. No Stage 3 implementation, authority cutover, legacy demotion, or legacy retirement occurred. No execution capability was introduced. Runtime remains Observed / observe / execution unavailable. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS (independent verification plus bounded repair). Recommends 135U -- Rollback Rehearsal Implementation and Independent Verification next (a design judgment for the next phase to confirm, not asserted as final).",
+  "pushed_status": "pending",
+  "origin_main_head_count": 2,
+  "summary": "Phase 135U implements the rollback-rehearsal capability 135Q section 33/36/37/38 froze and 135T's F-135R-4 disposition confirmed 135S left unimplemented, then independently attacks that implementation within the same governed phase. Re-derived the frozen rollback contract directly from 135Q's own text (section 36 scope, section 37 roll-forward preference, section 38 split-brain prevention) and 135R's independent confirmation, rather than inventing a new model. Implemented in src/pcae/cltr/migration/rehearsal/rollback.py (new): a deterministic rollback-request identity (pure function of phase_id, transition_id, migration_epoch, authority_epoch, source and target rehearsal-generation IDs, and reason; confirmed stable across a fresh Python subprocess); strict target validation (manifest schema, per-artifact and generation digest recomputed fresh from on-disk bytes, epoch/transition binding, quarantine rejection, symlink containment on both the generation directory and every artifact file); an 11-step atomic rollback sequence reusing the exact same os.replace-backed pointer primitive and containment/verification logic ordinary forward publication uses (refactored pointer.py's validate_publication_target into a shared validate_generation_target, and added publish_generation() for rollback's by-ID/digest publication, so no parallel/divergent validation logic exists); a section-33-shaped rollback evidence record with a 10-value RollbackOutcome vocabulary; idempotent replay with zero evidence duplication; fail-closed conflicting-replay detection (write_immutable-backed, routed to a dedicated rollback-conflicts namespace, never published); a full crash-injection matrix at every named boundary from the phase brief, including correct recovery for a rollback whose atomic pointer replace had already durably succeeded before a crash interrupted evidence persistence (completes evidence recording on replay rather than either silently re-mutating or incorrectly rejecting as stale); and the pcae cltr migration rehearsal rollback / rollback-status CLI (operator-command-only; not wired into any of the four production finalization entry points or any recovery path, confirmed by static source inspection). After implementation, independently attacked the new capability in a separately-written adversarial test module (tests/test_cltr_rehearsal_135u_independent_verification.py) that re-derives expectations from the frozen contract text rather than importing implementation constants as expected truth. Found and repaired two genuine, Non-Blocking defects within this same governed phase, before any regression suite was run for the record: F-135U-1, post-rollback reconcile/rollback-status silently lost the requesting phase_id because phase-to-transition resolution only checked the current generation's own embedded phase_id, not rollback history -- repaired by also matching against persisted rollback evidence in reconciliation.py. F-135U-2, the authority-epoch validation used a substring check (\"legacy\" in value) bypassable by a value like \"cltr|not-legacy\" -- repaired to an exact \"legacy|...\" prefix check. Rollback to \"no current rehearsal,\" cross-epoch rollback reconciliation, and a dedicated concurrent-rollback-vs-forward-race stress test are explicitly disclosed as out of this phase's bounded scope, not silently assumed either way; no roll-forward mechanism was invented beyond issuing an ordinary new rollback request targeting a newer generation, matching 135Q section 37's preference framing rather than a distinct command. Fresh regression, all passing at 100 percent on first run, no inherited or new-and-unrepaired failure found anywhere: rollback focused 43/43, rollback independent adversarial 26/26, Stage 2 focused 44/44 (unchanged), combined migration 214/214, production CLTR combined 499/499, affected finalization (exact 135S/135T node set) 117/117, notification/marker/receipt/report/Architecture-Status 1185/1185, Fast Green 4391/4391 (unchanged). Production isolation independently re-verified via live filesystem-snapshot equality before/after every rollback outcome (success, rejection, conflict, no-op-retain): no production report, completion metadata, Architecture Status, checkpoint, notification, marker, or receipt path was created, modified, or touched. No Telegram dispatch, subprocess, socket, or network reference exists anywhere in rollback.py. Runtime re-confirmed Observed / observe / execution unavailable both before and after this phase's changes. No Stage 3 implementation, authority cutover, legacy demotion, or legacy retirement occurred. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS (implementation plus independent verification, two Non-Blocking defects found and repaired within this same phase; zero Blocking defects survive). Recommends a small bounded follow-on closing the disclosed cross-epoch/concurrency gaps, or 135V -- Stage 3 Authority-Cutover Readiness Architecture next (a design judgment for the next contract/planning phase to confirm, not asserted as final).",
   "governance_results": [
     { "name": "pcae_health", "status": "healthy" },
     { "name": "pcae_check", "status": "passed" },
@@ -38,68 +47,68 @@
   ],
   "validation_results": [
     {
+      "name": "rollback_focused_implementation_tests",
+      "result": "43/43 passed (tests/test_cltr_rehearsal_rollback.py)",
+      "status": "passed"
+    },
+    {
+      "name": "rollback_independent_adversarial_tests",
+      "result": "26/26 passed (tests/test_cltr_rehearsal_135u_independent_verification.py); found and drove repair of F-135U-1 and F-135U-2",
+      "status": "passed"
+    },
+    {
       "name": "stage2_focused_tests",
-      "result": "44/44 passed (tests/test_cltr_rehearsal_coordinator.py + tests/test_cltr_rehearsal_135t_independent_verification.py)",
+      "result": "44/44 passed (tests/test_cltr_rehearsal_coordinator.py + tests/test_cltr_rehearsal_135t_independent_verification.py), unchanged by this phase's pointer.py refactor",
       "status": "passed"
     },
     {
       "name": "combined_migration_suite",
-      "result": "129/129 passed (tests/test_cltr_migration_*.py tests/test_cltr_135o_integration.py tests/test_cltr_rehearsal_coordinator.py tests/test_cltr_rehearsal_135t_independent_verification.py); 0 failures after repair (was 2 unrepaired, misclassified by 135S as 8 pre-existing)",
+      "result": "214/214 passed (tests/test_cltr_migration_*.py tests/test_cltr_135o_integration.py tests/test_cltr_rehearsal_coordinator.py tests/test_cltr_rehearsal_135t_independent_verification.py tests/test_cltr_rehearsal_rollback.py tests/test_cltr_rehearsal_135u_independent_verification.py)",
       "status": "passed"
     },
     {
       "name": "production_cltr_combined_regression",
-      "result": "414/414 passed (tests/test_cltr_*.py); 0 failures after repair",
+      "result": "499/499 passed (tests/test_cltr_*.py)",
       "status": "passed"
     },
     {
       "name": "affected_finalization_regression",
-      "result": "117/117 passed; 0 failures (135S's claimed 5 pre-existing failures did not independently reproduce)",
+      "result": "117/117 passed (exact 135S/135T node set: test_finalization_transaction_134e10.py, test_finalization_gate_enforcement.py, test_finalization_notification_guarantee.py, test_finalization_configuration_identity_cross_agent_134b3.py, test_phase_113v_n_notification_finalization_repair.py)",
       "status": "passed"
     },
     {
       "name": "notification_marker_receipt_report_regression",
-      "result": "1183/1183 passed; 0 failures after repair (was 2 unrepaired, misclassified by 135S as 10 pre-existing)",
+      "result": "1185/1185 passed (pytest tests/ -k \"finalization or notification or marker or receipt or phase_report or architecture_status\")",
       "status": "passed"
     },
     {
-      "name": "independent_baseline_reproduction",
-      "result": "isolated git worktree at pre-135S commit 7fb4dbc1: 101/101 passed on tests/test_cltr_migration_*.py tests/test_cltr_135o_integration.py; the specific 4-case parametrized test (later found failing 2/4 on unrepaired 135S tree) passed 4/4 on baseline, confirming the 2 failures were a new Stage-2-caused regression, not inherited",
+      "name": "crash_matrix_and_recovery",
+      "result": "tests/test_cltr_rehearsal_rollback.py::TestCrashInjection (9 tests incl. 7-boundary parametrized pre-replace sweep, post-replace durability, and recovery-completion-on-replay) passed",
       "status": "passed"
     },
     {
-      "name": "f_135t_1_symlink_escape_repair",
-      "result": "tests/test_cltr_rehearsal_135t_independent_verification.py::TestSymlinkEscapeRepaired (3 tests) passed; live pre-repair reproduction confirmed the escape, post-repair reproduction confirmed PathContainmentError and unchanged outside file",
+      "name": "containment_and_symlink_attacks",
+      "result": "tests/test_cltr_rehearsal_rollback.py::TestContainment (4 tests) + tests/test_cltr_rehearsal_135u_independent_verification.py::TestIndependentTargetValidation/TestIndependentSplitBrainAttacks (9 tests) passed",
       "status": "passed"
     },
     {
-      "name": "f_135t_2_regression_baseline_repair",
-      "result": "tests/test_cltr_migration_135p_verification.py::TestFourEntryPointsThroughRealFinalizationBoundary::test_migration_evidence_recovery_classification_for_each_entry_point (4 parametrized cases) passed after repair",
+      "name": "f_135u_1_reconcile_phase_id_after_rollback_repair",
+      "result": "tests/test_cltr_rehearsal_135u_independent_verification.py::TestIndependentNoExecutionAndReadOnly::test_reconcile_reflects_rollback_without_mutating passed after repairing reconciliation.py to also match rollback evidence's own phase_id",
       "status": "passed"
     },
     {
-      "name": "identity_determinism",
-      "result": "tests/test_cltr_rehearsal_135t_independent_verification.py::TestIdentityDeterminism (8 tests, incl. fresh-subprocess stability) passed",
-      "status": "passed"
-    },
-    {
-      "name": "honest_inventory_disclosure",
-      "result": "tests/test_cltr_rehearsal_135t_independent_verification.py::TestHonestInventoryDisclosure (2 tests) passed",
-      "status": "passed"
-    },
-    {
-      "name": "manifest_tamper_detection",
-      "result": "tests/test_cltr_rehearsal_135t_independent_verification.py::TestManifestTamperDetection (1 test, live on-disk mutation) passed",
+      "name": "f_135u_2_authority_epoch_prefix_check_repair",
+      "result": "tests/test_cltr_rehearsal_135u_independent_verification.py::TestIndependentTargetValidation::test_wrong_authority_epoch_rejected passed after repairing the substring check to an exact prefix check",
       "status": "passed"
     },
     {
       "name": "read_only_cli_filesystem_snapshot",
-      "result": "pcae cltr migration rehearsal status / reconcile against an empty temp directory: filesystem byte-for-byte unchanged before and after (0 entries both times)",
+      "result": "pcae cltr migration rehearsal rollback-status / reconcile --phase-id 135U against the real repository (no Stage 2 namespace present): .pcae/cltr-migration confirmed absent before and after both commands, found: False, blockers reported honestly, 0 mutation",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "4391/4391 passed, unchanged",
+      "result": "4391/4391 passed, unchanged (new 135U test modules not fast_green-marked, matching 135T's own precedent)",
       "status": "passed"
     },
     {
@@ -114,43 +123,50 @@
     },
     {
       "name": "governance_reinspection",
-      "result": "pcae health, pcae check, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status all re-verified healthy/passed/clean/configured throughout this phase; pcae phase-report reconcile --phase-id 135S re-run read-only, reconciled, mutation none",
+      "result": "pcae health, pcae check, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status all re-verified healthy/passed/clean/configured throughout this phase; pcae phase-report reconcile --phase-id 135T re-run read-only before implementation began, reconciled, mutation none",
       "status": "passed"
     }
   ],
   "test_results": {
+    "rollback_focused_implementation_tests": "43/43 passed",
+    "rollback_independent_adversarial_tests": "26/26 passed",
     "stage2_focused_tests": "44/44 passed",
-    "combined_migration_suite": "129/129 passed (0 failures after repair)",
-    "production_cltr_combined_regression": "414/414 passed (0 failures after repair)",
-    "affected_finalization_regression": "117/117 passed (0 failures; claimed 5 pre-existing failures did not reproduce)",
-    "notification_marker_receipt_report_regression": "1183/1183 passed (0 failures after repair)",
-    "independent_baseline_reproduction": "101/101 passed on pre-135S isolated worktree; confirms the 2 repaired failures were a new regression, not inherited",
+    "combined_migration_suite": "214/214 passed",
+    "production_cltr_combined_regression": "499/499 passed",
+    "affected_finalization_regression": "117/117 passed",
+    "notification_marker_receipt_report_regression": "1185/1185 passed",
     "fast_green": "4391/4391 passed",
     "report_notification_tests": "included in fast_green (4391/4391), passed",
     "bootstrap_session_reporting_tests": "included in fast_green (4391/4391), passed"
   },
   "notification_dispatch_result": "pending single governed terminal delivery",
   "report_notification_status": "pending governed finalization",
-  "no_go_confirmation": "No lifecycle authority other than legacy exists; legacy lifecycle remains the sole production authority. No CLTR authority exists; CLTR remains derivative. No authoritative status was granted to the Stage 2 rehearsal generation; it remains non-authoritative. No authoritative status was granted to the Stage 2 rehearsal pointer; it remains non-authoritative. No production pointer changed because of Stage 2. No external delivery originated from Stage 2. No production marker was created or modified by Stage 2. No production receipt was created or finalized by Stage 2. No Stage 3 implementation was begun in this phase. No authority-cutover design work was performed in this phase. No legacy authority was demoted. No legacy authority was retired. No execution capability was introduced; runtime remains Observed, maximum capability observe, execution availability unavailable. No raw git commit or git push was used; no --no-verify hook bypass; no force push.",
+  "no_go_confirmation": "No real backend invocation occurred. No adapter execution occurred. No subprocess execution occurred. No network call occurred. No shell interception occurred. No Telegram inbound occurred. No enforcement was introduced. No automatic apply occurred. No apply execution occurred. No commit/push authorization was granted outside governed commands. No real AI backend calls occurred. Next phase not started. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Rollback rehearsal affected only the non-authoritative rehearsal namespace. No production pointer, report, completion metadata, Architecture Status, checkpoint, marker, or receipt changed because of rollback rehearsal. No external notification originated from rollback rehearsal. No immutable rehearsal generation was rewritten or deleted. No Stage 3 implementation, authority cutover, legacy demotion, or legacy retirement occurred. No execution capability was introduced; runtime remains Observed, maximum capability observe, execution availability unavailable. No raw git commit or git push was used; no --no-verify hook bypass; no force push.",
   "no_go_confirmations": [
-    "No lifecycle authority other than legacy exists; legacy lifecycle remains the sole production authority.",
-    "No CLTR authority exists; CLTR remains derivative.",
-    "No authoritative status was granted to the Stage 2 rehearsal generation; it remains non-authoritative.",
-    "No authoritative status was granted to the Stage 2 rehearsal pointer; it remains non-authoritative.",
-    "No production pointer changed because of Stage 2.",
-    "No external delivery originated from Stage 2.",
-    "No production marker was created or modified by Stage 2.",
-    "No production receipt was created or finalized by Stage 2.",
-    "No Stage 3 implementation was begun in this phase.",
-    "No authority-cutover design work was performed in this phase.",
-    "No legacy authority was demoted.",
-    "No legacy authority was retired.",
+    "No real backend invocation occurred.",
+    "No adapter execution occurred.",
+    "No subprocess execution occurred.",
+    "No network call occurred.",
+    "No shell interception occurred.",
+    "No Telegram inbound occurred.",
+    "No enforcement was introduced.",
+    "No automatic apply occurred.",
+    "No apply execution occurred.",
+    "No commit/push authorization was granted outside governed commands.",
+    "No real AI backend calls occurred.",
+    "Next phase not started.",
+    "Legacy lifecycle remains the sole production authority; CLTR remains derivative.",
+    "Rollback rehearsal affected only the non-authoritative rehearsal namespace.",
+    "No production pointer, report, completion metadata, Architecture Status, checkpoint, marker, or receipt changed because of rollback rehearsal.",
+    "No external notification originated from rollback rehearsal.",
+    "No immutable rehearsal generation was rewritten or deleted.",
+    "No Stage 3 implementation, authority cutover, legacy demotion, or legacy retirement occurred.",
     "No execution capability was introduced; runtime remains Observed, maximum capability observe, execution availability unavailable.",
     "No raw git commit or git push was used; no --no-verify hook bypass; no force push."
   ],
-  "recommended_next_phase": "135U - Rollback Rehearsal Implementation and Independent Verification",
-  "recommended_next_phase_id": "135U",
-  "recommended_next_phase_name": "Rollback Rehearsal Implementation and Independent Verification",
+  "recommended_next_phase": "135V - Stage 3 Authority-Cutover Readiness Architecture",
+  "recommended_next_phase_id": "135V",
+  "recommended_next_phase_name": "Stage 3 Authority-Cutover Readiness Architecture",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",
