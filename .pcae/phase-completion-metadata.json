@@ -21,11 +21,17 @@
   "phase_commits": [
     {
       "hash": "ec6f3be3d3c0a3d610cbfe472375ee412fa77660"
+    },
+    {
+      "hash": "d7322e7bd09f9a0445271d789a8a1fe1c64ba10c"
+    },
+    {
+      "hash": "6ad1b11e4f0dab6e91c78a40923b9157814c340c"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pending",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "summary": "Phase 135N independently re-derives and verifies the migration contract 135M froze. Independently inspected CLTR-001 v1.0, CLTR-SCHEMA-001 v1.0.1, 135A's architecture origin, 135D's invariant/state-machine model, 135D.1's metadata-staleness incident, 135G's prototype verification findings, 135H's integration/retirement plan, 135H.1's recovery incident, 135H.2's exactly-once model, 135J's exact four Non-Blocking findings, 135K's shadow implementation, and 135L's exact four Non-Blocking findings, each read from its own primary text, not from 135M's summaries. Also independently inspected current production source (finalization_transaction.py and the four entry points, the CLTR shadow package, notification dispatch, the legacy promotion pointer confirmed non-atomic, Architecture Status generation confirmed structured-header regex extraction, commit attribution confirmed explicit-list-based and fail-closed since a pre-Track-135 repair, and pcae phase-report reconcile). Found and repaired one genuine Blocking documentation defect: 135M section 8.1's shared-input field list and section 9's assembly-before-either-derivation requirement jointly described a temporal impossibility for the terminal-snapshot Stage 1 model 135M itself preserves; repaired via a new section 8.4 distinguishing pre-transaction facts from in-transaction completion identities, re-verified for cross-section consistency. Resolved the transition_id identity design 135M explicitly deferred to this phase (section 8.3): selected an independently generated transition_id, decoupled from phase_id/entry_point/any durable attempt-sequence counter, binding on 135O. Disclosed three further Non-Blocking findings: a missing predecessor-transition-identity field in the shared-input list; an inventory-table wording overstatement for current Git-attribution risk (attribution is already explicit-list-based and fail-closed; only ownership verification remains unimplemented); and several editorial-precision notes bundled for the already-scheduled 135S editorial-hygiene pass. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS, zero Blocking findings remaining after repair. No production source or production test file changed. CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, and PFR-001 all unchanged. Recommends 135O - Shared Transition Input and Dual-Derivation Implementation.",
   "governance_results": [
     {
