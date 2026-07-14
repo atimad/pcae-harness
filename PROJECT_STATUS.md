@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 135Q — Atomic Publication Rehearsal Contract and Implementation
+Plan (completed). Architecture, contract-freeze, and implementation-
+planning phase only — no Stage 2 implementation, no rehearsal
+generation, no rehearsal pointer, no production pointer change, no
+authority cutover, no legacy-authority demotion or retirement, and no
+execution capability were introduced. Froze the Stage 2 ("Atomic
+Publication Rehearsal, Legacy Authority") contract: a Stage 2 authority
+matrix; a deterministic, retry-safe rehearsal-generation identity; an
+isolated `.pcae/cltr-migration/epochs/<epoch>/rehearsals/` namespace
+sibling to Stage 1's `transitions/`; candidate-vs-authoritative
+terminology; a 23-item candidate artifact inventory with per-artifact
+contracts (report, metadata, Architecture Status, checkpoint,
+notification-intent, marker, receipt, commit-attribution, and more);
+a manifest and generation-digest contract; a deterministic 19-step
+candidate-assembly sequence; precondition, mismatch, crash, recovery,
+idempotency, conflicting-replay, and quarantine contracts; an atomic
+non-authoritative rehearsal-pointer contract; rollback-rehearsal and
+roll-forward guidance; split-brain prevention; behavior across all
+four production entry points and all recovery paths; an explicit
+135H.1-escape-resistance proof; feature-configuration and invalid-
+configuration matrices; security/containment and no-execution
+boundaries; a planned package structure under
+`src/pcae/cltr/migration/rehearsal/`, integration points, a 23-module
+test plan, a fault-injection plan, and acceptance criteria. Explicitly
+dispositioned all four open 135P Non-Blocking findings
+(F-135P-1/2/3/4), reclassifying F-135P-1, F-135P-3, F-135P-4, and the
+`EXPECTED_REPRESENTATION_DIFFERENCE` half of F-135P-2 as Blocking
+prerequisites for Stage 2 *implementation* (not for this phase, and
+not for continued Stage 1 operation). No production source or test
+file was modified. Legacy lifecycle remains the sole production
+authority; CLTR remains derivative; runtime remains Observed / observe
+/ execution unavailable. CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001,
+and PFR-001 all unchanged.
+
+Full analysis:
+`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_AND_IMPLEMENTATION_PLAN.md`.
+Recommended next phase: **135R — Atomic Publication Rehearsal Contract
+Verification** (not started). 135R must independently re-derive and
+verify the Stage 2 contract before any Stage 2 implementation begins.
+
+## Phase 135P Complete
+
 Phase 135P — Shared Transition Input and Dual-Derivation Independent
 Verification (completed). An independent implementation-verification
 and adversarial-hardening phase over 135O's Stage 1 dual-derivation

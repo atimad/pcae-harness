@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 135Q — Atomic Publication Rehearsal Contract and Implementation
+  Plan
+  (`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_AND_IMPLEMENTATION_PLAN.md`).
+  Architecture, contract-freeze, and implementation-planning phase
+  only. Froze the Stage 2 ("Atomic Publication Rehearsal, Legacy
+  Authority") contract: Stage 2 authority matrix; deterministic
+  rehearsal-generation identity; isolated
+  `.pcae/cltr-migration/epochs/<epoch>/rehearsals/` namespace;
+  candidate-vs-authoritative terminology; 23-item candidate artifact
+  inventory with per-artifact contracts (report, metadata, Architecture
+  Status, checkpoint, notification-intent, marker, receipt,
+  commit-attribution, and more); manifest and generation-digest
+  contract; deterministic 19-step candidate-assembly sequence;
+  precondition, mismatch, crash, recovery, idempotency,
+  conflicting-replay, and quarantine contracts; atomic
+  non-authoritative rehearsal-pointer contract; rollback-rehearsal and
+  roll-forward guidance; split-brain prevention; four-entry-point and
+  recovery-path behavior; explicit 135H.1-escape-resistance proof;
+  feature-configuration and invalid-configuration matrices;
+  security/containment and no-execution boundaries; planned package
+  structure under `src/pcae/cltr/migration/rehearsal/`, integration
+  points, a 23-module test plan, fault-injection plan, and acceptance
+  criteria. Dispositioned all four open 135P Non-Blocking findings
+  (F-135P-1/2/3/4), reclassifying F-135P-1, F-135P-3, F-135P-4, and the
+  `EXPECTED_REPRESENTATION_DIFFERENCE` half of F-135P-2 as Blocking
+  prerequisites for Stage 2 implementation only. No production source
+  or test file was modified. Legacy lifecycle remains the sole
+  production authority; CLTR remains derivative; runtime remains
+  Observed / observe / execution unavailable. CLTR-001,
+  CLTR-SCHEMA-001 v1.0.1, PFN-001, and PFR-001 all unchanged.
+  Recommended next phase: 135R — Atomic Publication Rehearsal Contract
+  Verification (architecture/contract verification only; must precede
+  any Stage 2 implementation).
+
 - Phase 135P — Shared Transition Input and Dual-Derivation Independent
   Verification
   (`docs/PHASE_135_SHARED_TRANSITION_INPUT_AND_DUAL_DERIVATION_INDEPENDENT_VERIFICATION.md`).
