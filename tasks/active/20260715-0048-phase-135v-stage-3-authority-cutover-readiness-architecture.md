@@ -30,6 +30,7 @@ Determine architectural readiness to freeze a Stage 3 authority-cutover contract
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
