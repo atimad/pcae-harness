@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (20260714-1604-idle-awaiting-next-governed-phase)
 - Phase 135Q: Atomic Publication Rehearsal Contract and Implementation Plan (20260714-1548-phase-135q-atomic-publication-rehearsal-contract-and-implementation-plan)
 - Idle: awaiting next governed phase (20260714-1449-idle-awaiting-next-governed-phase)
 - Idle: awaiting next governed phase (20260714-1211-idle-awaiting-next-governed-phase)
