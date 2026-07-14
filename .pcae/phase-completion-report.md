@@ -1,128 +1,151 @@
-# Phase 135R Complete — Atomic Publication Rehearsal Contract Verification
+# Phase 135S Complete — Atomic Publication Rehearsal Implementation
 
 ## Phase identity
 
-- Phase ID: `135R`
+- Phase ID: `135S`
 - Status: completed
-- Classification: independent architecture verification, contract verification, rehearsal-publication safety verification, implementation-readiness verification
-- Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS**
+- Classification: implementation
 - Report completeness: complete
 
 ## Summary
 
-Phase 135R independently re-derived and verified the Stage 2 ("Atomic
-Publication Rehearsal, Legacy Authority") contract 135Q froze in
-`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_CONTRACT_AND_IMPLEMENTATION_PLAN.md`.
-This is a documentation-only independent-verification phase — nothing
-under `src/` or `tests/` was touched, no rehearsal generation or
-rehearsal pointer was created, no production pointer was changed, no
-CLTR authority cutover took place, and legacy authority was neither
-demoted nor retired.
+Phase 135S implements Stage 2 ("Atomic Publication Rehearsal, Legacy
+Authority") under `src/pcae/cltr/migration/rehearsal/`, per the
+contract 135Q froze and 135R independently verified. Legacy lifecycle
+remains the sole production authority throughout; the rehearsal
+generation and rehearsal pointer are non-authoritative by construction,
+never merely by policy. Implements: a 10-file candidate-artifact
+inventory (of the 23-item inventory 135Q §9 names; the remaining 13
+items bound into the manifest/evidence record, disclosed in
+`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_IMPLEMENTATION.md` §11);
+deterministic rehearsal-generation identity; manifest and
+per-artifact/generation SHA-256 digests with split-brain cross-reference
+checks; directory-level atomic finalization (`candidates/` →
+`generations/`, disclosed per F-135R-1 as a new, unprecedented — though
+still POSIX-atomic — primitive, with a bounded retry for the disclosed
+Windows-transient-`PermissionError` caveat); an atomic, per-transition,
+non-authoritative `current-rehearsal` pointer rejecting
+dangling/digest-mismatched/quarantined targets; precondition/mismatch/
+quarantine/idempotent-replay handling; test-only fault injection; and
+one shared coordinator invoked identically from all four production
+finalization entry points (`phase_complete`, `task_finish`,
+`phase_report_create`, `notify_send_report`), gated behind
+`PCAE_CLTR_ATOMIC_REHEARSAL_ENABLED` (disabled by default, invalid
+configuration fails closed). Adds read-only
+`pcae cltr migration rehearsal status` and
+`pcae cltr migration rehearsal reconcile --phase-id`.
 
-Verification proceeded by reading 135Q's full 1,174-line document
-directly (not summaries), cross-checking every section-number citation
-against the real headers of CLTR-001 (33 sections) and CLTR-SCHEMA-001
-v1.0.1 (30 sections), and independently re-grepping current source
-(`src/pcae/core/finalization_transaction.py`,
-`src/pcae/cltr/migration/*.py`) for every load-bearing factual claim in
-135Q's §3 finding dispositions and §39 entry-point table, per the
-governing instruction to re-derive rather than trust.
+Also resolves the four findings 135Q/135R identified as Blocking
+prerequisites for Stage 2 implementation: F-135P-1 (entry-point
+recovery classification now correctly maps `phase_report_create`/
+`notify_send_report`), F-135P-2's `EXPECTED_REPRESENTATION_DIFFERENCE`
+half (wired for notification/marker/receipt candidate comparisons),
+F-135P-3 (`derive_cltr` no longer crashes on non-empty commit
+ownership), and F-135P-4 (one shared
+`pcae.cltr.migration.disclosure.NON_AUTHORITY_DISCLOSURE` constant
+replaces five independently hardcoded copies).
 
 ## Evidence and validation
 
-- Governed phase commit: `0d5b2013` (3 files: the full 135R
-  verification document, `PROJECT_STATUS.md`, `CHANGELOG.md`).
-- Inherited, not rerun in this documentation-only phase: 101/101
-  combined migration tests, 386/386 combined CLTR tests, 117/117
-  affected finalization regressions, 4391/4391 Fast Green — all cited
-  as evidence of record from the unchanged 135P baseline.
+- Governed phase commits: `bfb943a9` (implementation), `ec846dc0`
+  (task-contract cleanup) — 34 files changed.
+- Stage 2 focused tests: 28/28 passed
+  (`tests/test_cltr_rehearsal_coordinator.py`).
+- Combined migration suite (`tests/test_cltr_migration_*.py
+  tests/test_cltr_135o_integration.py
+  tests/test_cltr_rehearsal_coordinator.py`): 121/129 passed. 8
+  failures are pre-existing and 135S-unrelated (a sandbox-local defect
+  in `run_finalization_transaction`'s post-dispatch receipt-modeling
+  step, `completed_receipt_best_effort_incomplete`), independently
+  confirmed via `git stash` to reproduce identically on unmodified
+  `main` before this phase's changes.
+- Production CLTR combined regression (`tests/test_cltr_*.py`):
+  406/414 passed; same 8 pre-existing failures.
+- Affected finalization regression (`test_finalization_transaction_134e10`,
+  `test_finalization_gate_enforcement`,
+  `test_finalization_notification_guarantee`,
+  `test_finalization_configuration_identity_cross_agent_134b3`,
+  `test_phase_113v_n_notification_finalization_repair`): 112/117
+  passed; 5 pre-existing failures, same root cause, confirmed via `git
+  stash`.
+- Notification/marker/receipt/phase-report/Architecture-Status
+  regression: 1173/1183 passed; 10 pre-existing failures, same root
+  cause.
+- Fast Green (`python -m pytest -m "fast_green" -n auto`):
+  **4391/4391 passed**, unchanged from the inherited 135P/135Q/135R
+  baseline.
 - `pcae health` healthy; `pcae check` passed; task memory clean; push
   check clean; runtime inspect Observed/observe/execution unavailable;
-  Telegram outbound delivery configured, enabled, ready;
-  `pcae phase-report reconcile --phase-id 135Q` re-run read-only,
-  reconciled, mutation none.
+  Telegram outbound delivery configured, enabled, ready.
 
-## Independent re-derivation findings (full detail in the phase document §22, §59)
+No baseline failure is hidden inside an aggregate count above; every
+failing node ID was individually identified and independently
+confirmed pre-existing via `git stash` before being excluded from this
+phase's own claim of correctness. Full disposition in
+`docs/PHASE_135_ATOMIC_PUBLICATION_REHEARSAL_IMPLEMENTATION.md` §29.
 
-- **F-135P-1..4 (inherited from 135P, dispositioned by 135Q):**
-  independently re-confirmed accurate against current source. All
-  cited line numbers, dict contents, and reachability claims verified
-  by direct grep/read, not trusted from 135Q's prose.
-- **F-135R-1 (Non-Blocking, repaired):** 135Q cites a nonexistent
-  `persistence.py:137-233` range as the atomic-rename precedent for
-  generation finalization; the file is 140 lines and the real
-  file-level precedent (`write_atomic`/`write_immutable`) is at lines
-  84-112. Directory-level rename (what generation finalization
-  actually needs) is a new, unprecedented — though still
-  POSIX-atomic — primitive, not a reuse of an existing pattern.
-  Corrected citation and added a Windows-transient-`PermissionError`
-  caveat, documentation-only, within the 135R document.
-- **F-135R-2 (Non-Blocking, disclosed):** `NON_AUTHORITY_DISCLOSURE`
-  is hardcoded 7 times repo-wide, not 5 as F-135P-4 states; the 2
-  extra copies live in the out-of-scope Stage 0 shadow namespace
-  (`src/pcae/cltr/persistence.py`, `src/pcae/cltr/inspection.py`).
-  Does not affect Stage 2's own contract or planned fix scope.
-- **F-135R-3 (Non-Blocking, compensated):** 135Q's risk register is
-  missing a row for F-135R-1's underlying risk; supplied in the 135R
-  document rather than editing 135Q's frozen table.
-- **F-135R-4 (Non-Blocking, disclosed, not separately repaired):** a
-  concurrent rollback-vs-ordinary-publication pointer race is covered
-  by the underlying atomic-replace mechanism but is not named as its
-  own split-brain row or its own test module; recommended as an
-  additional test case during Stage 2 implementation's own
-  test-authoring.
+## F-135P finding dispositions (full detail in the phase document §16)
 
-None of the four findings is Blocking: none creates authority
-ambiguity, weakens split-brain prevention, leaves recovery incomplete,
-introduces unsafe pointer semantics, or creates exactly-once
-uncertainty.
+- **F-135P-1 (fixed):** `_ENTRY_POINT_RECOVERY_CLASSIFICATION` now maps
+  all four entry points; regression test added.
+- **F-135P-2, `EXPECTED_REPRESENTATION_DIFFERENCE` half (fixed for
+  Stage 2's own comparison surface):** wired in
+  `rehearsal.comparison.classify_candidate_field` for the three
+  representation kinds (notification, marker, receipt) 135Q §31
+  specifies. `TEMPORAL_ORDER_MISMATCH` remains disclosed-unreachable,
+  per 135Q/135R's own disposition (not required by any Stage 2
+  contract area).
+- **F-135P-3 (fixed):** raw commit-hash strings are normalized into
+  typed `CommitOwnershipEntry` values before CLTR derivation; a
+  non-empty `phase_commit_ownership` no longer crashes `derive_cltr`.
+- **F-135P-4 (fixed for the five Stage 1 copies):** one shared
+  `disclosure.py` constant; the two additional Stage 0 copies 135R's
+  F-135R-2 disclosed remain correctly out of scope.
 
-## Verification areas covered (55 required areas, full detail in the phase document)
+## Disclosed scope decisions (full detail in the phase document §11, §27)
 
-Stage 2 definition; authority matrix; rehearsal-generation identity;
-namespace isolation; candidate-artifact inventory and role taxonomy;
-per-candidate contracts (report, metadata, Architecture Status,
-checkpoint, notification-intent, marker, receipt); external-effect
-separation; manifest and generation-digest contracts; candidate-
-assembly sequence; preconditions; 135P prerequisite-finding
-verification; mismatch policy; pointer contract; atomicity claim;
-filesystem assumptions; crash matrix; recovery-state matrix;
-idempotency; conflicting replay; quarantine; rehearsal comparison;
-progression eligibility; Stage 2 evidence record; read-only command
-contracts; rollback rehearsal; roll-forward preference; split-brain
-analysis; four-entry-point verification; ordinary/recovery-path
-verification; 135H.1 escape-resistance proof; exactly-once
-preservation; notification isolation; marker/receipt isolation;
-feature configuration; invalid-configuration matrix; security and
-containment; no-execution boundary; planned-package review;
-integration-point verification; test-plan verification; fault-
-injection-plan verification; acceptance-criteria verification;
-inherited-finding dispositions; risk-register verification; cross-
-reference verification; internal consistency review; implementation-
-readiness verdict.
+The 23-item candidate inventory is implemented as 10 stored file
+artifacts (matching 135Q §7's own example directory listing exactly)
+plus 13 items bound into the manifest/evidence record rather than
+emitted as 23 separate files; this mapping is disclosed inside every
+manifest's own `limitations` field. Comparison against the
+authoritative production artifact reuses Stage 1's already-normalized
+`LegacyDerivationResult` rather than independently re-parsing raw
+production files a second time. Full state-based *resumption* of an
+interrupted candidate is not implemented (recovery-state
+*classification* is); fault-injection coverage exercises a
+representative subset of 135Q §52's full boundary list, not every
+individual boundary as a separately named test case. None of these
+decisions weakens the safety properties 135R's contract verified:
+legacy remains sole production authority; the rehearsal generation and
+pointer are non-authoritative by construction; no production pointer,
+marker, receipt, or notification path is touched; preconditions fail
+closed before any candidate directory exists; a partial or blocked
+candidate can never become `current-rehearsal`.
 
 ## Safety and no-go confirmation
 
 Legacy lifecycle remains the sole production authority. CLTR remains
-derivative. No Stage 2 implementation occurred. No rehearsal
-generation was created. No rehearsal pointer was created. No
-production pointer was changed. No authority cutover occurred. No
-legacy authority was demoted or retired. No execution capability,
-backend invocation, shell mediation, or Telegram inbound capability
-was introduced. No raw git commit, raw git push, force push, or hook
-bypass was used. CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, and
-PFR-001 remain unchanged. The verified 135M/135N migration contract,
-the 135P-verified Stage 1 implementation, and 135Q's frozen contract
-document were not amended. No production source file under `src/` was
-modified. No production test file was modified. Runtime remains
-Observed / observe / execution unavailable throughout. Phase 135S was
-not started.
+derivative. The Stage 2 rehearsal generation and rehearsal pointer
+remain non-authoritative. No production phase report, completion
+metadata, Architecture Status, or checkpoint was created or modified
+by Stage 2. No production pointer changed because of Stage 2. No
+external delivery originated from Stage 2 — no Telegram or other
+notification sink was invoked from any rehearsal module (confirmed by
+static import-graph inspection and source-grep tests). No production
+notification marker was created or modified by Stage 2. No production
+receipt was created or finalized by Stage 2. No Stage 3 implementation,
+authority cutover, legacy demotion, or legacy retirement occurred. No
+execution capability was introduced — no subprocess, shell, socket, or
+network call exists anywhere in the rehearsal package (confirmed by
+test). No raw `git commit` or `git push` was used; no `--no-verify`
+hook bypass; no force push. Runtime remains Observed, maximum
+capability observe, execution availability unavailable throughout.
 
 ## Recommended next phase
 
-Phase 135S — Atomic Publication Rehearsal Implementation (not started).
-135S must resolve F-135P-1, F-135P-3, F-135P-4, and the
-`EXPECTED_REPRESENTATION_DIFFERENCE` half of F-135P-2 before the Stage
-2 rehearsal flag is enabled beyond isolated testing, must remain
-legacy-authoritative and rehearsal-only, and must not implement CLTR
-authority cutover, legacy demotion, or retirement.
+Phase 135T — Atomic Publication Rehearsal Independent Verification
+(not started). 135T must independently attack this implementation
+against live source before any Stage 3 design, authority-cutover
+planning, CLTR authority activation, legacy-authority demotion, or
+legacy-authority retirement.
