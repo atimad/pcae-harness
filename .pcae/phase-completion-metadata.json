@@ -1,39 +1,34 @@
 {
   "schema_version": "1.0",
-  "phase_id": "135L",
-  "phase_name": "Production CLTR Shadow Integration Independent Verification",
-  "phase_title": "Production CLTR Shadow Integration Independent Verification",
+  "phase_id": "135M",
+  "phase_name": "Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan",
+  "phase_title": "Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan",
   "status": "completed",
-  "files_changed_count": 9,
+  "files_changed_count": 6,
   "files_changed": [
-    ".pcae/phase-completion-report.md",
-    "CHANGELOG.md",
+    "docs/PHASE_135_PRODUCTION_CLTR_DUAL_DERIVATION_AND_ATOMIC_PUBLICATION_MIGRATION_PLAN.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_135_PRODUCTION_CLTR_SHADOW_INTEGRATION_INDEPENDENT_VERIFICATION.md",
+    "CHANGELOG.md",
     "tasks/DONE.md",
-    "tasks/active/20260714-0815-phase-135l-production-cltr-shadow-integration-independent-verification.md",
-    "tasks/done/20260714-0418-phase-135k-closure-of-closure-documentation-commit.md",
-    "tests/test_cltr_135l_independent_verification.py"
+    "tasks/active/20260714-0926-phase-135m-production-cltr-dual-derivation-and-atomic-publication-contract-migration-plan.md",
+    "tasks/done/20260714-0837-idle-awaiting-next-governed-phase.md"
   ],
   "source_files_changed": 0,
-  "test_files_changed": 1,
-  "tests_added_or_updated": "5 new independent adversarial regression tests (subprocess/socket isolation via monkeypatch, AdapterSources production-wiring starvation, same-phase-different-content collision containment, idempotent replay)",
+  "test_files_changed": 0,
+  "tests_added_or_updated": "none (documentation and contract-planning phase only; no source or test changes)",
   "tests_run": 4396,
   "phase_commits": [
     {
-      "hash": "5f1234f968f3a3e50ae490229430ea3c20f6df5d"
+      "hash": "bfe1e11801d463b36d6579632cf1564718be4133"
     },
     {
-      "hash": "977bb1436f73e0ce263d2715335a6fe088cb9a2c"
-    },
-    {
-      "hash": "fadc75b593d0e94f81cf05e224349771af96edc6"
+      "hash": "c134a2b94583f88f54e7e9830e048eff62143f8b"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pushed",
-  "origin_main_head_count": 0,
-  "summary": "Phase 135L independently re-derived, reproduced, and adversarially attacked the 135K production shadow CLTR implementation rather than trusting its report, tests, or comments: exact contract inventory (14 states, 16 transitions, 14 forbidden transitions, 37 invariants, 15 adapters), typed-model immutability, digest/canonicalization sensitivity, atomic publication and crash containment, monkeypatch-based subprocess/network isolation, single shared four-entry-point call path, feature-flag isolation, read-only CLI. Zero Blocking findings. Four Non-Blocking findings independently reproduced and disclosed: dead InvariantContext live-comparison fields; the one real production call site never wires AdapterSources (11/15 adapters unverifiable, never falsely conformant) and transition_id==phase_id causes a same-phase content correction to be safely discarded as publish_failed; a pre-existing PFR/task-lifecycle reconciliation conflict outside src/pcae/cltr (135K's report re-promoted under the same phase_id by a later closure task), documented not repaired; placeholder repository_identity/branch_identity in production wiring. Added 5 new independent regression tests; no repair to src/pcae/cltr required. All four of 135J's inherited Non-Blocking findings independently re-verified unchanged. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS. No authority cutover, no execution capability introduced. Next: 135M - Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan.",
+  "pushed_status": "not_yet_pushed",
+  "origin_main_head_count": 2,
+  "summary": "Phase 135M is a documentation-only contract and migration-planning phase. No implementation, no dual-derivation activation, no atomic-publication implementation, no authority cutover, no legacy-authority demotion or retirement, and no production source or production test change occurred. Independently inspected CLTR-001, CLTR-SCHEMA-001 v1.0.1, 135D's state machine, 135G's prototype findings, 135H's integration/retirement plan, 135H.1/135H.2's recovery hardening, 135J's schema verification and four Non-Blocking findings, 135K's shadow implementation and inherited limitations, and 135L's independent verification and four Non-Blocking findings, rather than trusting summaries. Dispositioned all four 135L Non-Blocking findings individually: two (InvariantContext live-comparison fields unused; unwired adapter_sources and colliding transition_id==phase_id identity) reclassified must-resolve-before-dual-derivation-implementation; one (placeholder repository_identity/branch_identity) may-remain-during-dual-derivation-but-must-resolve-before-cutover; one (135K's re-promoted-report reconciliation conflict, outside src/pcae/cltr) accepted as a long-term, out-of-scope legacy-tooling limitation. Also dispositioned all four inherited 135K limitations and all four inherited 135J Non-Blocking findings. Froze migration terminology; a six-stage single-authority model (Shadow Observation, Dual Derivation with Legacy Authority, Dual Publication Rehearsal, CLTR Authority With Legacy Verification, Legacy Demotion, Legacy Retirement) with exactly one lifecycle authority named at every stage; per-stage entry/exit gates; a shared explicit dual-derivation input contract prohibiting fallback inference from titles, filenames, commit subjects, or Git history; a comparison contract built on CLTR-SCHEMA-001 section 21.4's already-frozen 15-kind adapter-mode assignment; comparison result classes with a stage-dependent mismatch policy; an atomic-generation and publication-pointer contract with an explicit local-atomicity-versus-external-effects boundary (Telegram delivery is never described as filesystem-atomic); a publication failure model, recovery contract, and exactly-once contract generalizing 135H.2's proven intent-barrier/reconciliation discipline; staged migration behavior for notification, marker, receipt, checkpoint, completion metadata, canonical report, Architecture Status, and Git attribution; a legacy authority inventory with explicit demotion and retirement criteria; a rollback/roll-forward architecture that never rewrites history; an authority-epoch model; a mandatory operator cutover-approval gate; a multi-flag architecture with fail-closed invalid-configuration handling; a cross-reference matrix and risk register; and a recommended ten-phase staged implementation sequence (135N-135W) that never combines implementation with its own independent verification. Runtime remains Observed / observe / execution unavailable. PFN-001, PFR-001, CLTR-001, and CLTR-SCHEMA-001 v1.0.1 all unchanged. Recommends 135N - Production CLTR Dual-Derivation and Migration Contract Verification (not started); does not proceed directly from planning to implementation.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -62,85 +57,63 @@
   ],
   "validation_results": [
     {
-      "name": "cltr_135l_independent_verification_tests",
-      "result": "5/5 passed (new)",
+      "name": "governance_reinspection",
+      "result": "pcae health, pcae check, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status all re-verified clean/healthy/passed after the documentation commits",
       "status": "passed"
     },
     {
-      "name": "cltr_focused_tests",
-      "result": "80/80 passed, unmodified",
-      "status": "passed"
-    },
-    {
-      "name": "cltr_shadow_enabled_flag_suite",
-      "result": "16/16 passed with PCAE_CLTR_SHADOW_ENABLED=true",
-      "status": "passed"
-    },
-    {
-      "name": "affected_lifecycle_regression_subset",
-      "result": "1245/1245 passed (finalization, phase-report, task-finish, promotion, recovery, reconciliation, checkpoints, markers, notifications, Architecture Status, commit attribution)",
+      "name": "phase_135l_reconciliation",
+      "result": "pcae phase-report reconcile --phase-id 135L: reconciled, 1 promoted generation, marker already_dispatched, checkpoint completed, receipt finalized, mutation: none (inspection only)",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "4391/4391",
-      "status": "passed"
-    },
-    {
-      "name": "no_subprocess_no_network_monkeypatch_check",
-      "result": "monkeypatched subprocess.Popen/run and socket.socket across the full publish pipeline, not only AST inspection: zero calls",
-      "status": "passed"
-    },
-    {
-      "name": "real_end_to_end_shadow_reproduction",
-      "result": "fresh, independently-authored TERMINAL_SUCCESS and adversarial missing-identity inputs reproduced under monkeypatched subprocess/socket tripwires",
-      "status": "passed"
+      "result": "4396/4396 (inherited from 135L; no source or test changed by 135M, so the full production suite was not re-executed by this documentation-only phase)",
+      "status": "inherited"
     },
     {
       "name": "report_notification_tests",
-      "result": "included in fast_green",
-      "status": "passed"
+      "result": "inherited from 135L (included in fast_green there); not re-executed by this documentation-only phase",
+      "status": "inherited"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "included in fast_green",
-      "status": "passed"
+      "result": "inherited from 135L (included in fast_green there); not re-executed by this documentation-only phase",
+      "status": "inherited"
     }
   ],
   "test_results": {
-    "cltr_135l_independent_verification_tests": "5/5",
-    "cltr_focused_tests": "80/80",
-    "cltr_shadow_enabled_flag_suite": "16/16",
-    "affected_lifecycle_regression_subset": "1245/1245",
-    "fast_green": "4391/4391",
-    "no_subprocess_no_network_monkeypatch_check": "passed",
-    "real_end_to_end_shadow_reproduction": "passed",
-    "report_notification_tests": "passed in fast_green",
-    "bootstrap_session_reporting_tests": "passed in fast_green"
+    "fast_green": "4396/4396 (inherited from 135L, not re-executed)",
+    "report_notification_tests": "inherited from 135L, included in fast_green there",
+    "bootstrap_session_reporting_tests": "inherited from 135L, included in fast_green there",
+    "governance_reinspection": "passed"
   },
-  "notification_dispatch_result": "sent",
-  "report_notification_status": "sent",
-  "no_go_confirmation": "No production lifecycle authority was changed. No certification, promotion, or dispatch function was called by this phase's verification work. No production report or completion metadata was replaced outside governed finalization. No Architecture Status generation was changed. No marker or receipt was fabricated. No subprocess execution capability was introduced or exercised. No network call was made. No shell interception was introduced. No Telegram inbound capability was introduced or exercised. No CLTR-001, PFN-001, or PFR-001 amendment occurred. No legacy authority was retired. No execution capability was introduced. No production lifecycle authority cutover occurred. No repair was made to src/pcae/cltr. Phase 135M was not started.",
+  "notification_dispatch_result": "pending",
+  "report_notification_status": "pending",
+  "no_go_confirmation": "No implementation occurred. No dual derivation was enabled. No atomic publication was implemented. No authority cutover occurred. No legacy authority was demoted. No legacy authority was retired. No production lifecycle source was modified. No CLTR shadow implementation was modified. No execution capability was introduced. No backend invocation was introduced. No shell mediation was introduced. No Telegram inbound control was introduced. No notification behavior was modified. No marker or receipt behavior was modified. No report or metadata generation behavior was modified. No Architecture Status generation was modified. No CLTR-001, CLTR-SCHEMA-001, PFN-001, or PFR-001 amendment occurred. Phase 135N was not started.",
   "no_go_confirmations": [
-    "No production lifecycle authority was changed.",
-    "No certification, promotion, or dispatch function was called by this phase's verification work.",
-    "No production report or completion metadata was replaced outside governed finalization.",
-    "No Architecture Status generation was changed.",
-    "No marker or receipt was fabricated.",
-    "No subprocess execution capability was introduced or exercised.",
-    "No network call was made.",
-    "No shell interception was introduced.",
-    "No Telegram inbound capability was introduced or exercised.",
-    "No CLTR-001, PFN-001, or PFR-001 amendment occurred.",
+    "No implementation occurred.",
+    "No dual derivation was enabled.",
+    "No atomic publication was implemented.",
+    "No authority cutover occurred.",
+    "No legacy authority was demoted.",
     "No legacy authority was retired.",
+    "No production lifecycle source was modified.",
+    "No CLTR shadow implementation was modified.",
     "No execution capability was introduced.",
-    "No production lifecycle authority cutover occurred.",
-    "No repair was made to src/pcae/cltr.",
-    "Phase 135M was not started."
+    "No backend invocation was introduced.",
+    "No shell mediation was introduced.",
+    "No Telegram inbound control was introduced.",
+    "No notification behavior was modified.",
+    "No marker or receipt behavior was modified.",
+    "No report or metadata generation behavior was modified.",
+    "No Architecture Status generation was modified.",
+    "No CLTR-001, CLTR-SCHEMA-001, PFN-001, or PFR-001 amendment occurred.",
+    "Phase 135N was not started."
   ],
-  "recommended_next_phase": "135M - Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan",
-  "recommended_next_phase_id": "135M",
-  "recommended_next_phase_name": "Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan",
+  "recommended_next_phase": "135N - Production CLTR Dual-Derivation and Migration Contract Verification",
+  "recommended_next_phase_id": "135N",
+  "recommended_next_phase_name": "Production CLTR Dual-Derivation and Migration Contract Verification",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",
