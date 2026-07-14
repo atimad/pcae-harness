@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-135U) (20260714-2327-idle-awaiting-next-governed-phase-post-135u)
 - Phase 135U: Rollback Rehearsal Implementation and Independent Verification (20260714-2303-phase-135u-rollback-rehearsal-implementation-and-independent-verification)
 - Idle: awaiting next governed phase (post-135T) (20260714-2202-idle-awaiting-next-governed-phase-post-135t)
 - Phase 135T: Atomic Publication Rehearsal Independent Verification (20260714-2134-phase-135t-atomic-publication-rehearsal-independent-verification)

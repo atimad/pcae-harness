@@ -1,5 +1,80 @@
 # Changelog
 
+- Phase 135V — Stage 3 Authority-Cutover Readiness Architecture
+  (`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_READINESS_ARCHITECTURE.md`).
+  Verdict: CONDITIONALLY READY — PREREQUISITES REQUIRED. Architecture
+  and readiness-analysis only; evaluates readiness to freeze the Stage 3
+  authority-cutover contract specifically (one of five distinct
+  milestones this document separates: design / contract-freeze /
+  implement / activate / retire-legacy), not readiness to implement,
+  activate, or retire. Re-derived every requirement from primary sources
+  (135A–135U contract freezes, verifications, and implementations;
+  CLTR-001 v1.0; CLTR-SCHEMA-001 v1.0.1; PFN-001; PFR-001; the
+  finalization-transaction, migration, and rehearsal source) rather than
+  from report summaries, and from live read-only inspection (`pcae cltr
+  migration status`, `pcae cltr migration rehearsal status`, `pcae
+  phase-report reconcile --phase-id 135U`, `pcae runtime inspect`, `pcae
+  notify status`) confirming `production_authority: legacy`,
+  `authoritative: false`, and Observed/observe/execution-unavailable
+  runtime throughout. Reconstructs the full Stage 0 through
+  later-stage migration model; enumerates the current authority
+  inventory (finding Architecture Status's narrative-parsing derivation
+  and legacy's non-atomic `latest.*` writes as the two live
+  authority-adjacent hazards — neither a second authority today, both
+  requiring resolution before Stage 3 activation); names the exact
+  target Stage 3 authoritative object (a certified, manifest-bound CLTR
+  generation, identified by `transition_id` and content digest) and a
+  single shared production authority resolver as the only path any of
+  the four entry points may use to resolve lifecycle truth; architects
+  the authority-transition event and proves the single-authority
+  invariant holds using one atomic pointer-replace primitive (reused
+  from Stage 2/rollback, `os.replace`-based) extended with
+  compare-and-swap; resolves the authority-epoch architecture, finding
+  the current string-prefix check (tightened by 135U's F-135U-2 repair)
+  sufficient only for non-authoritative Stage 2 and requiring a typed
+  model before Stage 3; defines the full pre-cutover gate; disposes of
+  all four 135U-disclosed limitations (rollback-to-no-current-rehearsal
+  — legacy is the implicit default production authority absent a
+  published CLTR pointer, never a "null authority" state; cross-epoch
+  rollback reconciliation — permanently forbidden, cross-epoch movement
+  is always a new transition; concurrent rollback-vs-forward race —
+  135U's last-write-wins resolution is confirmed sufficient only because
+  neither side is authoritative today, and is reclassified as a
+  prerequisite-for-implementation once a production pointer exists;
+  separate roll-forward command — not required, an ordinary new
+  transition suffices); architects concurrency (serialization boundary,
+  compare-and-swap inputs, stale-writer rejection), the
+  all-four-entry-point cutover model, finalization-transaction changes
+  (authority publication placed after local-artifact verification but
+  before external dispatch), notification/marker/receipt/report/
+  Architecture-Status/checkpoint-and-promotion migration (all preserving
+  PFN-001 and PFR-001 unchanged), recovery for every named crash
+  boundary (recorded-state-only, never inferred), post-cutover
+  rollback/roll-forward policy (rollback permitted only pre-external-
+  effect; roll-forward/compensating-notification required after),
+  split-brain prevention across 8 named forms, security/containment
+  sufficiency, CLTR-SCHEMA-001 v1.0.1 schema-readiness disposition
+  (insufficient as-is but every gap found is additive, no MAJOR bump
+  required), configuration architecture (multiple independent controls,
+  no single Boolean), and a human-authorization model (single-transition
+  scope, generation-digest-bound, revocable pre-publication). States 20
+  acceptance criteria (all satisfied at the design level) and confirms
+  zero no-go conditions apply to contract freeze specifically, while the
+  findings register names three genuine prerequisite-for-implementation
+  gaps (typed authority-epoch model, compare-and-swap concurrency
+  protocol, adapter-source wiring carried forward from F-135L-2) that
+  must close before Stage 3 implementation, not before contract freeze.
+  Stages Stage 3 cutover and legacy-authority retirement as four
+  distinct future stages (3A–3C, 4), never one event. No production
+  source changed; no test source changed; no Stage 3 code added; no
+  cutover feature flag activated; no CLTR authority created; no
+  production pointer or authority epoch changed; no legacy authority
+  demoted or retired; no notification, marker, or receipt behavior
+  changed; no execution capability introduced. Legacy lifecycle remains
+  the sole production authority; CLTR remains derivative; Stage 2
+  rehearsal and rollback remain non-authoritative. Recommended next
+  phase: 135W — Stage 3 Authority-Cutover Contract Freeze.
+
 - Phase 135U — Rollback Rehearsal Implementation and Independent
   Verification
   (`docs/PHASE_135_ROLLBACK_REHEARSAL_IMPLEMENTATION_AND_INDEPENDENT_VERIFICATION.md`).
