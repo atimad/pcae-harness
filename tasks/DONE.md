@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 135M: Production CLTR Dual-Derivation and Atomic Publication Contract / Migration Plan (20260714-0926-phase-135m-production-cltr-dual-derivation-and-atomic-publication-contract-migration-plan)
 - Idle: awaiting next governed phase (20260714-0837-idle-awaiting-next-governed-phase)
 - Phase 135L: session handoff after completion (20260714-0836-phase-135l-session-handoff-after-completion)
 - Phase 135L: Production CLTR Shadow Integration Independent Verification (20260714-0815-phase-135l-production-cltr-shadow-integration-independent-verification)

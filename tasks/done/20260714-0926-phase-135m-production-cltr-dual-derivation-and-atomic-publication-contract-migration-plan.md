@@ -10,7 +10,7 @@ Phase 135M: Production CLTR Dual-Derivation and Atomic Publication Contract / Mi
 
 ## Status
 
-active
+done
 
 ## Mode
 
