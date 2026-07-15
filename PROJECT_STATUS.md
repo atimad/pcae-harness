@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 136B — Stage 3 Companion Executable Schema Architecture (completed,
+architecture-only, per CLTR-CUTOVER-SCHEMAS-001 §43 Layer 1 scope: shared
+envelope and enums). Translated the frozen CLTR-CUTOVER-SCHEMAS-001 v1.0
+contract (135Z, independently verified 136A, VERIFIED WITH PREREQUISITES)
+into a concrete JSON Schema package architecture: dialect (draft 2020-12,
+matching the existing `schemas/repository_intelligence/` precedent),
+package layout (`schemas/cltr_cutover/shared/` and `records/`, sixteen
+companion-schema files reconciled exactly against 135Z's twenty-item
+inventory), shared envelope/enum/identity/digest/reference components,
+per-record-family schema architecture for all sixteen required companion
+schemas plus the one embedded component (CasExpectation) and the explicit
+no-file dispositions for the derived view (ReconciliationResult), the
+absorbed family (Authority Transition Receipt), and the runtime-only
+typed model (HistoricalAuthorityReference), a six-layer validation
+model (JSON parsing → schema validation → canonicalization/digest →
+cross-record semantic validation → live-state/CAS → authority resolver),
+schema registry/fixture/test/security/secret-handling/versioning
+architecture, implementation grouping, and a traceability-matrix
+template. Explicitly resolved both new prerequisites 136A found:
+**PREREQUISITE-136A-1** (schema vehicle — CLTR-CUTOVER-SCHEMAS-001, not a
+CLTR-SCHEMA-001 revision, closes 135W's PREREQ-4 for thirteen of sixteen
+companion-schema families; a CLTR-SCHEMA-001 v1.1.0 revision remains an
+optional future consolidation for the three binding families, never a
+precondition) and **PREREQUISITE-136A-2** (froze a
+`compatibility-state/<compatibility_state_id>.json` history path in the
+namespace, closing the gap between 135Z §36's general history-preserving
+claim and §38.2's frozen namespace). Carried forward, rather than
+silently closed, **F-135Z-3** (the 62-item CSCH-REQ verification matrix
+remains unpublished in full) — bound explicitly to the next phase, since
+architecture work cannot fabricate the missing matrix. Also disclosed and
+dispositioned (non-blocking, not repaired) a `reconciliation_status:
+conflict` found via mandatory read-only `pcae phase-report reconcile
+--phase-id 136A` before this phase began: 136A's notification
+marker/checkpoint were finalized against an earlier report digest before
+136A's own later corrective commits updated the promoted report content;
+exactly one promoted 136A generation and one delivery receipt exist (no
+duplicate delivery); 136A was not mutated or redispatched. Documented in
+`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_ARCHITECTURE.md`.
+Architecture verdict: **EXECUTABLE SCHEMA ARCHITECTURE COMPLETE WITH
+PREREQUISITES — READY FOR CONTRACT FREEZE**. No executable schema,
+typed model, validator, or Stage 3 implementation of any kind was
+created. Legacy lifecycle remains the sole production authority; CLTR
+remains derivative; runtime remains Observed / observe / execution
+unavailable.
+
+Recommended next phase: **136C — Stage 3 Companion Executable Schema
+Contract Freeze** — publish the full 62-item verification matrix
+verbatim (closing F-135Z-3), freeze this phase's architecture into
+binding contract text, and mint the fifteen remaining companion
+`schema_id` values. Executable schema implementation must not begin
+before 136C completes and is independently verified.
+
+## Phase 136A Complete
+
 Phase 136A — Stage 3 Companion Schemas and Typed Authority Model Contract
 Independent Verification (completed, **VERIFIED WITH PREREQUISITES**).
 Documentation-only, per governed scope — no Stage 3 implementation, no

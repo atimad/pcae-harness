@@ -2,6 +2,28 @@
 
 ## Accepted
 
+- Human explicitly activates Phase 136B — Stage 3 Companion Executable
+  Schema Architecture (architecture-only, per CLTR-CUTOVER-SCHEMAS-001 §43
+  Layer 1 scope: shared envelope and enums). Scope folds in the 62-item
+  verification matrix disposition (F-135Z-3, still open), PREREQUISITE-136A-1
+  (schema vehicle: separate companion contract vs. CLTR-SCHEMA-001 v1.1.0),
+  PREREQUISITE-136A-2 (CompatibilityState immutable history), and 135Z's own
+  five findings. 136B must not add executable schemas, typed models,
+  validators, authority resolution, or any Stage 3 implementation; it
+  produces `docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_ARCHITECTURE.md`
+  only. Legacy lifecycle remains sole production authority; CLTR remains
+  derivative; runtime remains Observed / observe / execution unavailable.
+  Read-only reconciliation of 136A before starting 136B found reconciliation
+  status `conflict`: the notification marker and finalization checkpoint were
+  finalized against an earlier `latest.json` report digest before later
+  136A corrective commits (title/next-phase-framing fixes) updated the
+  promoted report content, so marker/checkpoint digests now predate the
+  final report digest. Exactly one promoted 136A generation and one delivery
+  receipt exist (no duplicate delivery, no redispatch); no Stage 3/CLTR
+  schema artifacts exist. This is disclosed and carried forward as an
+  inherited, non-blocking presentation/bookkeeping defect — 136A is not
+  mutated or redispatched to fix it, per explicit instruction.
+
 - Phase 135H adopts a staged, fact-scoped migration: current production stays
   authoritative throughout shadow mode; a production CLTR may gain authority
   only after a frozen schema/versioning/adapter contract, independent model

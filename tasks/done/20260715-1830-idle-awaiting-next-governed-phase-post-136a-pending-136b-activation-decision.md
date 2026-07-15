@@ -2,15 +2,15 @@
 
 ## Task ID
 
-20260715-1449-idle-awaiting-next-governed-phase-post-136a
+20260715-1830-idle-awaiting-next-governed-phase-post-136a-pending-136b-activation-decision
 
 ## Title
 
-Idle: awaiting next governed phase (post-136A)
+Idle: awaiting next governed phase (post-136A, pending 136B activation decision)
 
 ## Status
 
-active
+done
 
 ## Mode
 
@@ -18,7 +18,7 @@ documentation
 
 ## Goal
 
-Idle: awaiting next governed phase (post-136A)
+Idle: awaiting explicit human decision to activate Phase 136B (Stage 3 Companion Executable Schema Architecture) or other next governed phase.
 
 ## Allowed Files
 
@@ -33,6 +33,7 @@ Idle: awaiting next governed phase (post-136A)
 ## Forbidden Files
 
 - TBD
+
 
 ## Allowed Zones
 
@@ -56,13 +57,7 @@ strict
 
 ## Forbidden Changes
 
-- No runtime invocation
-- No prompt execution
-- No source behavior changes outside task/session/handoff governance
-- No execution authorization
-- No commit
-- No push
-- No rollback
+- TBD
 
 ## Acceptance Criteria
 
@@ -73,7 +68,6 @@ strict
 - pcae status coherence passes
 - pcae health passes
 - pcae check passes
-- python -m pytest -n auto passes
 
 ## Documentation Requirements
 
@@ -81,4 +75,4 @@ strict
 
 ## Created Timestamp
 
-2026-07-15T14:49:30.000000+00:00
+2026-07-15T18:30:10.917799+02:00
