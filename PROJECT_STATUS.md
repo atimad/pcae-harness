@@ -2,6 +2,52 @@
 
 ## Current Phase
 
+Phase 135X — Stage 3 Authority-Cutover Contract Independent Verification
+(completed, **VERIFIED WITH PREREQUISITES — READY FOR IMPLEMENTATION
+PLANNING**). Independent-verification-only, per governed scope — no
+Stage 3 implementation, no implementation plan, no CLTR authority
+activation, no production pointer or authority-epoch change, no legacy
+demotion or retirement, no schema change. Independently re-derived and
+adversarially attacked all 32 verification-matrix requirements
+(CLTR-CUTOVER-001 §37, VR-1..VR-32) against fresh source reads (not
+135W's citations alone) and against CLTR-001, CLTR-SCHEMA-001 v1.0.1,
+PFN-001, and PFR-001. Independently re-confirmed: all four production
+entry points current; no authority resolver, authority pointer, or
+Stage 3 code exists anywhere in source; `_save_checkpoint`,
+`promote_artifact`, and `write_canonical_report` remain non-atomic/non-CAS
+as claimed; Architecture Status's narrative-parsing derivation remains
+live and unmigrated. Found zero BLOCKING contract defects — made no
+repair to CLTR-CUTOVER-001, CLTR-SCHEMA-001, PFN-001, or PFR-001.
+Independently re-confirmed all ten of 135W's PREREQ-1..10 classifications
+correct, and added two new prerequisites: PREREQUISITE-135X-1 (§15's
+concurrency model assumes existing checkpoint-level serialization that
+this phase's own CAS analysis shows does not currently exist) and
+PREREQUISITE-135X-2 (§29 quarantine does not explicitly cross-reference
+§16 item 6's implicit-legacy-default rule for a post-publication
+quarantined generation — answer is derivable but not stated in §29
+itself). Investigated the inherited `delivery_recorded_bookkeeping_incomplete`
+reconciliation finding for 135V in full: confirmed 135V's notification
+dispatch genuinely succeeded (PFN-001 satisfied) and only a post-dispatch
+receipt-modeling step failed, disclosed via the checkpoint's own
+`limitations` field — legacy, pre-Track-135 operational debt, not a
+Stage 3 contract gap; also independently discovered that re-running the
+same reconciliation command for 135V today returns a *different* result
+(`not_delivered`) than 135W originally reported, because the shared
+`.last-notified.json` marker is a mutable most-recent-dispatch record,
+not a per-phase historical log — recorded as a non-blocking documentation
+finding, not a contradiction. Produced
+`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md`
+covering all 38 requested verification areas. Legacy lifecycle remains
+the sole production authority; CLTR remains derivative; runtime remains
+Observed / observe / execution unavailable.
+
+Full verification: `docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: **135Y — Stage 3 Authority-Cutover Implementation
+Plan** (planning-only; must not begin Stage 3 implementation or
+activation).
+
+## Phase 135W Complete
+
 Phase 135W — Stage 3 Authority-Cutover Contract Freeze (completed,
 CONTRACT FROZEN WITH PREREQUISITES — READY FOR INDEPENDENT
 VERIFICATION). Contract-only, per governed scope — no Stage 3
