@@ -898,32 +898,48 @@ schema cannot check.
 | `source_authority` | yes | `enums#/$defs/authority_kind` (must be `legacy` at v1.0) |
 | `source_epoch`, `target_epoch` | yes, yes | `record_reference` → `authority_epoch` |
 | `evidence_requirements` | yes | array of `reason_code`-shaped strings |
-| `readiness_package_reference` | conditional | `record_reference`, **forbidden** at request-creation time, permitted only once a `readiness_package` exists that itself references this request — see circularity resolution below |
+| `readiness_package_reference` | yes | `record_reference` → `readiness_package` — restates `CLTR-CUTOVER-SCHEMAS-001` §6.1's frozen `readiness_package_id`/`readiness_package_digest` bound fields; see §19.1 (repaired) |
 | `authorization_requirement` | yes | boolean, `const true` at v1.0 (human authorization always required) |
 | `final_revision` | yes | string |
 | `contract_version` | yes | per envelope |
 | `limitations` | yes | array |
 | `digest` | yes | `sha256_hex` |
 
-### 19.1 Circular-reference resolution
+### 19.1 Creation-order resolution (repaired by Phase 136D)
 
-The risk: a `cutover_request` might seem to require a `readiness_package`
-that itself requires the request's identity to exist. **Resolution, frozen:**
-the base `cutover_request` document is created and digested **without**
-`readiness_package_reference` present (the field is entirely **absent**, not
-null, at creation — per §7.4's absent-vs-null rule). A `readiness_package` is
-then created that references the request by `record_reference` (id+digest).
-The request's `readiness_package_reference` field, if ever populated, is
-populated in a **subsequent, separately-digested version** of the request
-document (a new `record_id`/`record_digest`, immutable like every other
-record here) — never a mutation of the original. This resolves the
-dependency cycle by breaking it into two immutable documents in a strict
-creation order (request → package → request-v2), never requiring either to
-exist before the other in a single atomic step.
+> **136D repair notice.** The paragraph below replaces this document's
+> original §19.1 text, which asserted an invented "request v1 → package →
+> request v2" resolution not supported by any upstream contract and
+> inconsistent with this document's own §19 field table. Phase 136D
+> independently found: (1) `CLTR-CUTOVER-SCHEMAS-001` §6.1 already freezes
+> `readiness_package_id`/`readiness_package_digest` as **unconditionally
+> bound fields of `CutoverRequest`**, not as a conditional, post-creation
+> addition; and (2) `CutoverRequest`'s own canonical identity formula (§6.2
+> of that same contract) does **not** include those fields, and
+> `ReadinessEvidencePackage`'s `package_id` is independently content-derived
+> (Phase 136B architecture §19: "`package_id` is independent of
+> `request_id`") — meaning no cycle exists in the first place, and no
+> versioned "request-v2" mechanism was ever required or authorized upstream.
+> This is a documentation-only correction; no schema, fixture, or code
+> exists yet for either family. See `CSCH-EXEC-REQ-047` (§51.2, repaired)
+> and finding **BLOCKING-136D-1** (136D report, "Findings" section).
 
-Similarly, `human_authorization` requires a `request_reference` (§7.2) — it
-is always created strictly after the (v1, package-less) request exists, so
-no cycle exists there either.
+There is no dependency cycle. `readiness_package` is created first — its
+`record_id`/`record_digest` are content-derived solely from its own bound
+fields (§20) and never depend on any `cutover_request` identity. The
+`cutover_request` document is created second, and its (unconditionally
+required) `readiness_package_reference` field binds it to the
+already-existing `readiness_package` by `record_reference` (id+digest+
+family). Because `readiness_package_reference` is not part of
+`cutover_request`'s own identity-deriving field set, this ordering is
+non-circular by construction, exactly mirroring `CLTR-CUTOVER-SCHEMAS-001`
+§6.2's frozen identity formula. No versioned "request-v2" re-creation is
+needed or permitted; `cutover_request` is created exactly once, like every
+other record in this package.
+
+`human_authorization` requires a `request_reference` (§7.2) and is always
+created strictly after the (single-version) request exists, so no cycle
+exists there either.
 
 ---
 
@@ -1306,8 +1322,17 @@ an in-place edit) — this is the same pattern as `authority_epoch` (§17).
 schema-validated record in this package, analogous to the existing
 current-generation pointer pattern) identifies which `compatibility_state`
 document is current; that pointer's own persistence is a Layer 6/runtime
-concern, not schema-governed here. Persistence path, restating 136B's
-resolution: `.pcae/cltr-authority/epochs/<migration_epoch>/compatibility/<compatibility_state_id>.json`, mirroring `.../authority-state/<state_id>.json`.
+concern, not schema-governed here. Persistence path, restating 136B §7's
+resolution exactly (**repaired by Phase 136D** — this document's original
+text dropped the `compatibility-state/` history subdirectory that
+`PREREQUISITE-136A-2`'s resolution depends on, which would have collapsed
+the history file and the `current-compatibility-state` operational pointer
+into the same directory):
+`.pcae/cltr-authority/epochs/<migration_epoch>/compatibility/compatibility-state/<compatibility_state_id>.json`,
+with the operational pointer at
+`.pcae/cltr-authority/epochs/<migration_epoch>/compatibility/current-compatibility-state`,
+mirroring `.../authority-state/<state_id>.json` and
+`.../current-authority-state` exactly.
 
 ---
 
@@ -1878,7 +1903,7 @@ re-checking this same matrix before it is treated as final (§52).
 | CSCH-EXEC-REQ-044 | §16, §33 | ReceiptAuthorityBinding | `receipt_state == "finalized"` ⇒ `marker_reference`+`publication_evidence_reference`+`generation_reference` all required | Layer 4 | 10 | `if`/`then` presence + fixture | Group 10 |
 | CSCH-EXEC-REQ-045 | §17 | AuthorityEpoch | `activation_state == "active"` ⇒ `generation_binding` required; no valid document has `activation_state: "active"` at initial creation without it | Layer 6 (actual activation event) | 2 | `if`/`then` presence + fixture demonstrating `proposed` is the only schema-valid creation-time state without the binding | Group 2 |
 | CSCH-EXEC-REQ-046 | §18 | AuthorityState | Full field set (§18 table) matches exactly; one-way pointer→state→generation relationship documented, not schema-enforced across documents | Layer 6 | 2 | Schema-content diff + `description` disclaimer presence check | Group 2 |
-| CSCH-EXEC-REQ-047 | §19 | CutoverRequest | Full field set matches §19 exactly; `readiness_package_reference` absent at v1 creation, populated only in a v2 document (§19.1 circularity resolution) | Layer 6 (actual two-step creation enforcement) | 3 | Schema-content diff + fixture demonstrating v1 (field absent) and v2 (field present) are both independently schema-valid | Group 3 |
+| CSCH-EXEC-REQ-047 | §19 (repaired by 136D) | CutoverRequest | Full field set matches §19 exactly (repaired); `readiness_package_reference` is an unconditionally required field bound at creation, restating `CLTR-CUTOVER-SCHEMAS-001` §6.1's frozen `readiness_package_id`/`readiness_package_digest` fields; `readiness_package` is created first, `cutover_request` second, no versioned re-creation | Layer 4 (actual referenced-package existence/digest match) | 3, 4 | Schema-content diff against the repaired §19 table + fixture demonstrating a `readiness_package_reference`-absent document is schema-invalid | Groups 3, 4 |
 | CSCH-EXEC-REQ-048 | §20 | ReadinessPackage | `evidence_references` deterministically ordered (documented); `state == "conflict"` ⇒ at least one `BLOCKING` finding | Layer 4 (actual sort-order + finding-content check) | 4 | `if`/`then` (minItems-style) + fixture; ordering itself flagged Layer 4 | Group 4 |
 | CSCH-EXEC-REQ-049 | §21 | HumanAuthorization | Full field set matches §21 exactly; no reusable-credential-shaped field present; `expires_at` required (24h window is Layer 4) | Layer 4 (freshness comparison) | 5 | Schema-content diff + secret-shape negative fixture | Group 5 |
 | CSCH-EXEC-REQ-050 | §22 | CutoverCandidate | Full field set matches §22 exactly; `authority_role` forbidden from `authoritative` | — | 6 | Schema-content diff | Group 6 |

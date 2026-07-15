@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 136D — Stage 3 Companion Executable Schema Contract Independent
+Verification (completed, verification-plus-documentation-only-repair).
+Independently re-verified **CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0**
+(frozen by 136C) against `CLTR-CUTOVER-001`, `CLTR-CUTOVER-SCHEMAS-001`,
+and 136B directly — not against 136B's restatement alone. Re-extracted
+(not trusted) the 62-item verification matrix count, no duplicates or
+gaps; independently reproduced `CONFIRMED-136C-1` (digest shape) and
+`CONFIRMED-136C-2` (matrix-count independence) as true; reconfirmed
+`PREREQUISITE-136A-1`/`-136A-2` and `PREREQUISITE-136C-1` correctly
+disposed. **Found and repaired two genuine Blocking contract defects**,
+documentation-only, in 136C's own freeze document: (1)
+**BLOCKING-136D-1** — §19.1's invented "request v1 → package →
+request v2" circular-reference resolution contradicted
+`CLTR-CUTOVER-SCHEMAS-001` §6.1's unconditional
+`readiness_package_id`/`readiness_package_digest` binding and 136B's own
+dependency diagram (`package_id` independent of `request_id`); repaired
+to the correct, non-circular, single-version creation order. (2)
+**BLOCKING-136D-2** — §34's `CompatibilityState` persistence path dropped
+the `compatibility-state/` history subdirectory that 136B §7's actual
+resolution of `PREREQUISITE-136A-2` requires, which would have collapsed
+the history file and the operational pointer into one directory; repaired
+to match 136B §7 exactly. Also found and disclosed (not repaired, scoped
+to a future phase): **PREREQUISITE-136D-1** — no JSON-Schema-Draft-2020-12
+-conformant validation engine (third-party or hand-rolled) exists
+anywhere in this repository today; the only existing schema-file
+consumers (`schemas/repository_intelligence/**` tests) validate only
+`required`/`additionalProperties` key existence, never `pattern`,
+`enum`, `if`/`then`/`else`, `oneOf`, or `$ref` — a materially larger
+tooling gap than 136C's own findings disclosed. Three `NON-BLOCKING`
+findings (family row-order cosmetics, an informal `record_id` prefix
+table, an unbounded free-text field-length gap) were found and left open
+for 136E. F-135Z-3 and `PREREQUISITE-136C-2` are now genuinely closed.
+Verdict: **VERIFIED WITH PREREQUISITES — READY FOR EXECUTABLE SCHEMA
+IMPLEMENTATION PLAN** (not ready to implement). Documented in
+`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+No executable schema, fixture, Python typed model, loader, registry,
+validator, authority resolver, authority-state persistence, authority
+pointer, cutover request, readiness package, authorization, candidate,
+certification, publication attempt, conflict record, or recovery journal
+was created. No authority epoch changed. No CLTR authority was created.
+No legacy authority was demoted or retired. No production behavior
+changed. No execution capability was introduced. No source, test, schema,
+or fixture file was touched — only 136C's own contract documentation, this
+new verification document, and status/task artifacts. Legacy lifecycle
+remains the sole production authority; CLTR remains derivative; runtime
+remains Observed / observe / execution unavailable.
+
+Recommended next phase: **136E — Stage 3 Companion Executable Schema
+Implementation Plan** — planning-only; must resolve
+PREREQUISITE-136D-1 (JSON Schema tooling decision), tighten the
+NON-BLOCKING-136D-2 prefix table, address the NON-BLOCKING-136D-3
+free-text length-bound gap, and sequence the 11 implementation groups
+(§46, unaffected by 136D's repairs) with explicit per-group independent-
+verification gates. Executable-schema implementation must not begin
+before 136E completes.
+
+## Phase 136C Complete
+
 Phase 136C — Stage 3 Companion Executable Schema Contract Freeze
 (completed, contract-only). Froze **CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001
 v1.0**, translating Phase 136B's executable-schema architecture into
@@ -49,13 +107,6 @@ behavior changed. No execution capability was introduced. Legacy
 lifecycle remains the sole production authority; CLTR remains
 derivative; runtime remains Observed / observe / execution
 unavailable.
-
-Recommended next phase: **136D — Stage 3 Companion Executable Schema
-Contract Independent Verification** — independently re-derive (not
-merely re-read) the 62-item matrix, confirm or dispute the count,
-confirm every requirement's traceability, and confirm both carried-
-forward prerequisites' scoping before any executable-schema
-implementation group may begin.
 
 ## Phase 136B Complete
 

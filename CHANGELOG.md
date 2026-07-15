@@ -1,5 +1,64 @@
 # Changelog
 
+- Phase 136D — Stage 3 Companion Executable Schema Contract Independent
+  Verification
+  (`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_INDEPENDENT_VERIFICATION.md`).
+  Verdict: **VERIFIED WITH PREREQUISITES — READY FOR EXECUTABLE SCHEMA
+  IMPLEMENTATION PLAN**. Classified independent verification plus
+  documentation-only contract repair. Independently re-verified
+  **CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0** (frozen 136C) against
+  `CLTR-CUTOVER-001`, `CLTR-CUTOVER-SCHEMAS-001`, and Phase 136B
+  directly, not merely against 136B's restatement. Independently
+  re-extracted the 62-item verification matrix (no duplicates, no gaps,
+  no placeholder rows) rather than trusting 136C's stated count;
+  independently reproduced `CONFIRMED-136C-1` (digest shape, checked
+  directly against `src/pcae/cltr/digest.py`) and `CONFIRMED-136C-2`
+  (matrix-count independence) as true; reconfirmed
+  `PREREQUISITE-136A-1`/`-136A-2` and `PREREQUISITE-136C-1` correctly
+  disposed. **Found and repaired two genuine Blocking defects,
+  documentation-only, inside 136C's own freeze document**:
+  **BLOCKING-136D-1** — §19.1's "request v1 → package → request v2"
+  circular-reference resolution contradicted `CLTR-CUTOVER-SCHEMAS-001`
+  §6.1's unconditional `readiness_package_id`/`readiness_package_digest`
+  binding and Phase 136B's own dependency diagram (`package_id`
+  independent of `request_id`); repaired to the correct, non-circular,
+  single-version creation order, with `CSCH-EXEC-REQ-047` updated to
+  match. **BLOCKING-136D-2** — §34's `CompatibilityState` persistence
+  path dropped the `compatibility-state/` history subdirectory that
+  Phase 136B §7's actual resolution of `PREREQUISITE-136A-2` requires,
+  which would have collapsed the history file and the
+  `current-compatibility-state` operational pointer into one directory;
+  repaired to match 136B §7 exactly. Also found and disclosed (not
+  repaired — scoped to Phase 136E): **PREREQUISITE-136D-1** — no
+  JSON-Schema-Draft-2020-12-conformant validation engine (third-party or
+  hand-rolled) exists anywhere in this repository; `pyproject.toml`
+  declares zero dependencies and the only existing schema-file consumers
+  (`schemas/repository_intelligence/**` tests) validate only `required`/
+  `additionalProperties` key existence, never `pattern`, `enum`,
+  `if`/`then`/`else`, `oneOf`, or `$ref` — a materially larger tooling
+  gap than 136C's own findings disclosed. Three `NON-BLOCKING` findings
+  (family row-order cosmetics vs. 135Z/136B, an informal `record_id`
+  prefix table, an unbounded free-text field-length gap) were found and
+  left open for Phase 136E. **F-135Z-3 and `PREREQUISITE-136C-2` are now
+  genuinely closed.** No unresolved Blocking defect remains. Read-only
+  reconciliation of 136C (clean, `reconciled`), 136A (disclosed
+  historical `conflict`, unchanged, not repaired or redispatched), and
+  136B (independently observed `not_delivered` this run, differing from
+  136C's own `reconciled` record at freeze time — disclosed as a
+  governance observation out of this contract's scope, not repaired) was
+  performed before this phase began. No executable schema, fixture,
+  Python typed model, loader, registry, validator, authority resolver,
+  authority-state persistence, or authority pointer was implemented or
+  changed; no cutover request/readiness package/authorization/candidate/
+  certification/publication attempt/conflict record/recovery journal was
+  created; no authority-epoch change; no CLTR authority created; no
+  legacy demotion or retirement; no production or test source changed;
+  no schema or fixture file changed — only 136C's own contract text, a
+  new verification document, and status/task artifacts. Legacy lifecycle
+  remains the sole production authority; CLTR remains derivative;
+  runtime remains Observed, maximum capability observe, execution
+  availability unavailable. Recommended next phase: 136E — Stage 3
+  Companion Executable Schema Implementation Plan (planning-only).
 - Phase 136C — Stage 3 Companion Executable Schema Contract Freeze
   (`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`).
   Verdict: **EXECUTABLE SCHEMA CONTRACT FROZEN WITH PREREQUISITES —
