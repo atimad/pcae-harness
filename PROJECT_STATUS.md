@@ -45,9 +45,10 @@ derivative; runtime remains Observed / observe / execution unavailable.
 
 Full verification:
 `docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md`.
-Recommended next phase: a future executable-schema implementation phase
-(CLTR-CUTOVER-SCHEMAS-001 §43 Layer 1: shared envelope and enums) that
-folds in this phase's two new prerequisite findings, 135Z's own five
+Recommended next phase: **136B — Stage 3 Companion Executable Schema
+Architecture** (architecture-only — CLTR-CUTOVER-SCHEMAS-001 §43 Layer 1
+scope: shared envelope and enums; not executable-schema implementation)
+that folds in this phase's two new prerequisite findings, 135Z's own five
 findings, and 135X's still-open PREREQUISITE-135X-1 — not yet activated.
 
 ## Phase 135Z Complete

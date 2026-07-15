@@ -1170,11 +1170,13 @@ PREREQUISITE-135X-1 (checkpoint-level CAS/serialization).
 
 ## Recommended next phase
 
-Per CLTR-CUTOVER-SCHEMAS-001 §43's planned sequence, the next governed phase
-should begin **Layer 1** of the executable-schema implementation sequence
-(shared envelope and enums, §3/§24) — but only after explicitly folding in
-this phase's two new PREREQUISITE findings (§16 above) into that phase's own
-scope, alongside 135Z's own five findings and 135X's still-open
+**136B — Stage 3 Companion Executable Schema Architecture** (architecture-
+only). Per CLTR-CUTOVER-SCHEMAS-001 §43's planned sequence, this next
+governed phase covers **Layer 1** architecture (shared envelope and enums,
+§3/§24) — architecture, not executable-schema implementation — and must
+explicitly fold in this phase's two new PREREQUISITE findings (§16 above),
+alongside 135Z's own five findings and 135X's still-open
 PREREQUISITE-135X-1. That future phase must remain bounded by 135Z's §44
-typed-model-sequence plan and must not begin authority activation, legacy
-demotion, or legacy retirement.
+typed-model-sequence plan and must not begin executable-schema
+implementation, authority activation, legacy demotion, or legacy
+retirement.

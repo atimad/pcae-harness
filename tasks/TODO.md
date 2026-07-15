@@ -16,15 +16,15 @@ disagree. See the full source-of-truth precedence order and the stale
 `PROJECT_STATUS.md` remains authoritative. Phase 136A (Stage 3 Companion
 Schemas and Typed Authority Model Contract Independent Verification) is
 complete (VERIFIED WITH PREREQUISITES). The recommended next governed
-phase (candidate ID 136B, not yet activated) is Layer 1 of the
-executable-schema implementation sequence per CLTR-CUTOVER-SCHEMAS-001
-§43 (shared envelope and enums), folding in 136A's two new prerequisite
-findings, 135Z's own five findings, and 135X's still-open
-PREREQUISITE-135X-1.
+phase is **136B — Stage 3 Companion Executable Schema Architecture**
+(not yet activated), architecture-only per CLTR-CUTOVER-SCHEMAS-001 §43
+Layer 1 scope (shared envelope and enums) — not executable-schema
+implementation — folding in 136A's two new prerequisite findings, 135Z's
+own five findings, and 135X's still-open PREREQUISITE-135X-1.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 136B | Stage 3 Executable-Schema Implementation, Layer 1 (shared envelope and enums) | 🔜 Next |
+| 136B | Stage 3 Companion Executable Schema Architecture (Layer 1: shared envelope and enums) | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 
