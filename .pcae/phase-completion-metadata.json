@@ -35,8 +35,8 @@
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 4,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "summary": "Phase 135Y translates CLTR-CUTOVER-001 v1.0 (frozen Phase 135W, independently verified zero-Blocking in Phase 135X) into the complete, staged, dependency-aware implementation plan required before any Stage 3 prerequisite work begins. Planning-only: no Stage 3 implementation, no prerequisite implementation, no authority resolver, no authority pointer, no cutover request, no authority-epoch change, no CLTR authority, no legacy demotion or retirement, no production/test/schema source change. Read and independently correlated CLTR-CUTOVER-001, its independent verification (135X), the Stage 3 readiness architecture (135V), CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, PFR-001, and the verified Stage 1/Stage 2/rollback implementation and evidence. Produced docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_IMPLEMENTATION_PLAN.md covering all 44 requested sections: planning scope; current-state baseline; a contract-to-component decomposition (32 components); 11 non-circular implementation layers; a definitive prerequisite table (135W's PREREQ-1..10 plus 135X's PREREQUISITE-135X-1/-2 and NONBLOCKING-135X-6); an additive-only CLTR-SCHEMA-001 minor-revision schema plan; a typed authority-epoch model plan; a single shared read-only authority-resolver plan; a non-colliding Stage 3 persistence-namespace plan; a compare-and-swap/concurrency plan directly addressing 135X's finding that _save_checkpoint is atomic-write only, not CAS; a 15-state recovery-journal plan; a human-authorization plan barring environment variables from authorizing cutover; a readiness-package and pure pre-cutover-gate plan; a certification plan; an authority-publication plan with two independent mechanically-enforced inactive-mode controls; per-adapter production-derivative migration plans; a PFN-001-preserving notification migration plan as its own bounded sub-track; marker/receipt migration plans; a report/metadata migration plan; an Architecture Status migration plan confirming presentation-only status; a checkpoint/promotion migration plan; a six-stage all-four-entry-point migration plan (run_phase_complete, run_task_finish, run_phase_report_create, run_notify_send_report, all converging on run_finalization_transaction, re-identified fresh from source); a Stage-3-specific cutover-rehearsal plan distinct from Stage 2's rehearsal; a narrowly-scoped activation plan; a post-activation verification plan; staged legacy-demotion and separately-justified legacy-retirement plans; a rollback/roll-forward plan that never assumes pointer rollback is valid after notification dispatch; a two-gate security plan; a per-platform durability plan; an observability/audit plan; a 19-layer test strategy; an exact phase roadmap (135Z through an unnumbered activation/demotion/retirement tail); a phase dependency graph; a commit strategy; a feature-configuration rollout with no direct unavailable-to-active transition; a no-history-rewrite compatibility strategy; per-milestone acceptance and no-go criteria; an 18-item risk register; independent-verification requirements; and the final planning verdict. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed, maximum capability observe, execution availability unavailable. Recommended next phase: 135Z -- Stage 3 Companion Schemas and Typed Authority Model Contract Freeze.",
   "governance_results": [
     {
@@ -57,7 +57,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "ready"
+      "status": "clean"
     },
     {
       "name": "telegram_runtime",
