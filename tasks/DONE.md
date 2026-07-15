@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136A: prepare canonical phase-completion metadata and report (20260715-1810-phase-136a-prepare-canonical-phase-completion-metadata-and-report)
 - Phase 136A: correct 136B next-phase framing to architecture-only (20260715-1742-phase-136a-correct-136b-next-phase-framing-to-architecture-only)
 - Phase 136A: Stage 3 Companion Schemas and Typed Authority Model Contract Independent Verification (20260715-1436-phase-136a-stage-3-companion-schemas-and-typed-authority-model-contract-independent-verification)
 - Idle: awaiting next governed phase (post-135Z) (20260715-1239-idle-awaiting-next-governed-phase-post-135z)
