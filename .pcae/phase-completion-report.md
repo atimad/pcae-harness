@@ -1,197 +1,184 @@
-# Phase 135X Complete — Stage 3 Authority-Cutover Contract Independent Verification
+# Phase 135Y Complete — Stage 3 Authority-Cutover Implementation Plan
 
 ## Phase identity
 
-- Phase ID: `135X`
+- Phase ID: `135Y`
 - Status: completed
-- Classification: independent verification, documentation-only
+- Classification: implementation planning, documentation-only
 - Report completeness: complete
 
 ## Summary
 
-Phase 135X independently re-derives and adversarially verifies
-**CLTR-CUTOVER-001 v1.0** (frozen Phase 135W) against primary
-architecture, current source, and safety invariants, per the phase
-brief's explicit re-derive/contradict/attack/do-not-trust methodology.
-Verification-only; this phase touches only documentation, status, and
-task-contract artifacts, per governed scope.
+Phase 135Y translates **CLTR-CUTOVER-001 v1.0** (frozen Phase 135W,
+independently verified zero-Blocking in Phase 135X) into the complete,
+staged, dependency-aware implementation plan required before any Stage
+3 prerequisite work begins. Planning-only; this phase touches only
+documentation, status, and task-contract artifacts, per governed
+scope.
 
-Re-read the full 1687-line CLTR-CUTOVER-001 text directly (not 135W's
-own executive summary of itself), and re-read 135U's and 135V's own
-primary text rather than accepting 135W's or 135V's restatement of them.
-Independently re-confirmed by fresh source grep in this phase, not
-accepted from any prior citation: all four production entry points
-(`run_phase_complete`, `run_task_finish`, `run_phase_report_create`,
-`run_notify_send_report`) current and converging through
-`run_finalization_transaction`; no authority resolver, authority
-pointer, or Stage 3 code exists anywhere in `src/`;
-`canonical_artifact_promotion.py`'s `promote_artifact` and
-`phase_reports.py`'s `write_canonical_report` remain plain
-`path.write_text`, no compare-and-swap; `architecture_status.py`'s
-narrative-parsing derivation (`parse_phase_id`, `is_valid_phase_id`,
-`phase_sort_key`) remains live and unmigrated.
+Read and independently correlated CLTR-CUTOVER-001 v1.0 (135W), its
+independent verification (135X), the Stage 3 readiness architecture
+(135V), CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, PFR-001, and the
+verified Stage 1 (135K–135N), Stage 2 (135Q–135T), and rollback
+rehearsal (135U) implementation and evidence, rather than deriving the
+plan from phase reports alone.
 
-Independently attacked all 38 requested verification areas and all 32
-verification-matrix requirements (VR-1..VR-32) with adversarial state
-constructions, contradiction probes, and implementability analysis.
-Found **zero BLOCKING contract defects** — made no repair to
-CLTR-CUTOVER-001, CLTR-SCHEMA-001, PFN-001, or PFR-001; this phase is
-verification only, not verification-plus-repair.
-
-Independently re-evaluated all ten of CLTR-CUTOVER-001's PREREQ-1..10
-items against this phase's own severity rubric and confirmed every one
-of 135W's classifications correct. Added two new, independently-derived
-prerequisites not present in 135W's own register: PREREQUISITE-135X-1
-(§15's concurrency contract assumes existing checkpoint-level
-serialization/compare-and-swap that this phase's own CAS analysis shows
-does not currently exist) and PREREQUISITE-135X-2 (§29's quarantine
-contract does not explicitly cross-reference §16 item 6's
-implicit-legacy-default rule for a post-publication quarantined
-generation — the answer is derivable but not stated in §29 itself).
-Recorded seven NON-BLOCKING findings (resolver/compatibility-consumer
-clarity, authorization environment-binding, readiness-package
-findings-disclosure scope, two crash/recovery table cross-referencing
-gaps, authorization fields missing from the schema-readiness
-disposition table, and a reconciliation-command time-dependence note).
-
-Produced
-`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md`,
-covering: verification methodology; purpose, authoritative-object,
-resolver, single-authority-invariant, authority-epoch,
-cutover-request, human-authorization, readiness-package, pre-cutover-gate,
-candidate/certification, authority-publication, compare-and-swap,
-concurrency, cross-epoch, rollback/roll-forward, crash/recovery,
-external-effect-sequencing, report/metadata, Architecture-Status,
-checkpoint/promotion, notification, marker, receipt,
-all-four-entry-point, split-brain, security/containment, quarantine,
-schema-readiness, configuration, compatibility, demotion/retirement,
-prerequisite-register, acceptance/no-go, verification-matrix,
-implementability, and internal-contradiction verification; a full,
-independent, read-only investigation of the inherited
-`delivery_recorded_bookkeeping_incomplete` reconciliation finding for
-Phase 135V; a consolidated findings register; and the required verdict.
+Produced `docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_IMPLEMENTATION_PLAN.md`,
+covering all 44 requested sections: planning scope; current-state
+baseline; a contract-to-component decomposition (32 components); 11
+non-circular implementation layers (Layer 1 types through Layer 11
+legacy retirement, no layer depending on a later layer); a definitive
+prerequisite table combining 135W's PREREQ-1..10 with 135X's
+PREREQUISITE-135X-1/-2 and NONBLOCKING-135X-6; an additive-only
+CLTR-SCHEMA-001 minor-revision schema plan (9 proposed record kinds);
+a typed authority-epoch model plan; a single shared read-only
+authority-resolver plan; a non-colliding Stage 3 persistence-namespace
+plan; a compare-and-swap/concurrency plan directly addressing 135X's
+finding that `_save_checkpoint` is atomic-write only, not CAS; a
+15-state recovery-journal plan; a human-authorization plan (barring
+environment variables from authorizing cutover); a readiness-package
+and pure pre-cutover-gate plan; a certification plan; an
+authority-publication plan with two independent, mechanically-enforced
+inactive-mode controls; a per-adapter production-derivative migration
+plan (report, metadata, Architecture Status, checkpoint, promotion); a
+PFN-001-preserving notification migration plan as its own bounded
+sub-track; marker and receipt migration plans; a report/metadata
+migration plan; an Architecture Status migration plan confirming
+presentation-only status; a checkpoint/promotion migration plan; a
+six-stage all-four-entry-point migration plan (`run_phase_complete`,
+`run_task_finish`, `run_phase_report_create`, `run_notify_send_report`,
+all converging on `run_finalization_transaction`, re-identified fresh
+from source); a Stage-3-specific cutover-rehearsal plan distinct from
+Stage 2's rehearsal; a narrowly-scoped activation plan with explicit
+go/no-go checkpoints; a post-activation verification plan; staged
+legacy-demotion and separately-justified legacy-retirement plans; a
+rollback/roll-forward plan that never assumes pointer rollback is
+valid after notification dispatch; a two-gate security plan; a
+per-platform durability plan; an observability/audit plan; a 19-layer
+test strategy; an exact phase roadmap (135Z through an unnumbered
+activation/demotion/retirement tail); a phase dependency graph with
+explicit activation/demotion/retirement gates; a commit strategy; a
+feature-configuration rollout with no direct unavailable-to-active
+transition; a no-history-rewrite migration/compatibility strategy;
+per-milestone acceptance and no-go criteria (no single aggregate
+"Stage 3 complete" criterion); an 18-item risk register; independent-
+verification requirements; and the final planning verdict.
 
 ## Evidence and validation
 
-- Governed phase commits: `c37a7c66` (verification document, PROJECT_STATUS.md,
-  CHANGELOG.md, task-contract open/close), `e41e06ed` (tasks/DONE.md
-  bookkeeping fix), `e9fa0437` (task-scope extension to `.pcae/`
-  metadata/report paths), `d1ac89cf` and `71ba473f` (canonical
-  phase-completion metadata preparation and push-status record) — 9
-  files changed in total.
-- This is a verification/documentation-only phase. No source or test
-  suite was modified; no regression suite is attributable to this
+- Governed phase commits: `a159b26` (implementation-plan document,
+  PROJECT_STATUS.md, CHANGELOG.md, task-contract open), `af9fc79`
+  (tasks/DONE.md bookkeeping for the closed post-135X idle placeholder
+  task) — 7 files changed in total across both commits.
+- This is a planning/documentation-only phase. No source or test
+  suite was modified; no new regression suite is attributable to this
   phase's own changes. Governance and read-only inspection commands
   actually run and their results:
-  - `pcae session bootstrap --agent-id claude-local` / `pcae phase start
-    --agent-id claude-local`: agent lock acquired, health healthy.
+  - `pcae session bootstrap --agent-id claude-local`: bootstrap
+    healthy, active task stale (post-135X idle placeholder), readiness
+    blocked pending this phase.
   - `pcae health`: healthy.
   - `pcae check`: passed.
   - `pcae status coherence`: coherent.
   - `pcae doctor task-memory`: clean (one warning found and repaired
-    mid-phase: the post-135W idle placeholder task was in `tasks/done/`
-    but not yet listed in `tasks/DONE.md`; fixed by this phase).
-  - `pcae push check`: clean.
+    mid-phase: two active task files existed simultaneously — the
+    stale post-135X idle placeholder and this phase's own task
+    contract — fixed by closing the idle placeholder and recording it
+    in `tasks/DONE.md`).
+  - `pcae push check`: clean before this phase's commits; ready after.
   - `pcae runtime inspect`: Observed / observe / execution unavailable,
-    re-confirmed unchanged before and after this phase's changes.
+    confirmed unchanged before and after this phase's changes.
   - `pcae notify status`: Telegram configured, enabled, ready for
     outbound delivery.
-  - `pcae cltr migration status` / `pcae cltr migration rehearsal
-    status` (read-only, re-run fresh in this phase): both confirm
-    `production_authority: legacy`, `authoritative: false`,
-    `authority_cutover: false`, `authority_epoch: None`, all
-    migration/rehearsal feature flags disabled.
-  - `pcae phase-report reconcile --phase-id 135W` (read-only): status
-    `reconciled`, marker `already_dispatched`, checkpoint `completed`,
-    receipt `finalized`, mutation: none.
-  - `pcae phase-report reconcile --phase-id 135V` (read-only, re-run
-    fresh twice in this phase for determinism): status `not_delivered`,
-    marker `not_dispatched`, checkpoint
-    `completed_receipt_best_effort_incomplete`, receipt `absent`,
-    mutation: none — **independently discovered to differ from 135W's
-    own original snapshot** (`delivery_recorded_bookkeeping_incomplete`);
-    root-caused via direct reading of `notification_dispatch_state()`
-    and `finalization_transaction.py`'s receipt-modeling exception
-    path: 135V's notification dispatch genuinely succeeded (PFN-001's
-    guarantee held); the shared `.last-notified.json` marker has since
-    been legitimately overwritten by 135W's own later dispatch (a
-    single mutable most-recent-dispatch record, not a per-phase log);
-    the receipt-modeling gap is pre-existing, disclosed legacy debt,
-    unrelated to Stage 3.
-  - Source-level review (read-only, fresh grep in this phase, not
-    accepted from prior citation) of the four production entry points,
-    `promote_artifact`, `write_canonical_report`, and
-    `architecture_status.py`'s narrative-parsing functions directly
-    confirms CLTR-CUTOVER-001's own factual claims about current source
-    state remain accurate.
-- No Fast Green run was performed for this phase (optional per governed
-  scope for a verification-only phase that modifies no generated or
-  status-machinery code); not claimed as run — labelled `inherited` in
-  the metadata's test-results section.
+  - `git log --oneline -30`, `git log --oneline origin/main..HEAD`
+    (0 before this phase's commits), `git rev-list --count
+    origin/main..HEAD` (0 before this phase's commits): confirmed the
+    reported 135X phase-owned commits (`c37a7c66`, `e41e06ed`,
+    `e9fa0437`, `d1ac89cf`, `71ba473f`) match `git show --stat` output
+    exactly as reported.
+  - `pcae phase-report show --latest`: confirmed 135X's canonical
+    report consistent, planned-next-phase 135Y, governance results all
+    passed/healthy/coherent/clean, runtime Observed/observe/
+    unavailable.
+  - `pcae phase-report reconcile --phase-id 135X` (read-only): status
+    `reconciled`, promoted generations 1, marker `already_dispatched`,
+    checkpoint `completed`, receipt `finalized`, mutation: none.
+  - `pcae cltr migration status`-equivalent confirmation inherited from
+    135X's own fresh re-check this phase did not need to repeat, since
+    no source changed since 135X; re-confirmed via `pcae runtime
+    inspect` and the absence of any `src/pcae/cltr/authority.py`,
+    `cutover`, or `publish_authority` symbol anywhere in `src/` (fresh
+    grep, this phase).
+  - Source-level review (read-only, fresh grep in this phase) of the
+    four production entry points, `finalization_transaction.py`,
+    `phase_reports.py`, `architecture_status.py`,
+    `canonical_artifact_promotion.py`, `notification_certification.py`,
+    `delivery_receipt.py`, and the full `src/pcae/cltr/` package
+    (shadow, migration, migration/rehearsal) confirmed the current-
+    state baseline in the implementation plan's §2.
+- No Fast Green run was performed for this phase (no source or test
+  file was changed); not claimed as run — labelled `inherited` in the
+  metadata's test-results section, carried from 135U/135V/135W/135X.
 
-Full verification text, source citations, and the complete findings
-register are in
-`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Full plan text, prerequisite table, roadmap, dependency graph, and
+findings register are in
+`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_IMPLEMENTATION_PLAN.md`.
 
-## Findings (full detail in the phase document's findings register, §39)
+## Findings (full detail in the plan document's findings register)
 
-- CONFIRMED-135X-1 (informational): compare-and-swap requires a durable
-  file lock + `os.replace` + precondition comparison, not `os.replace`
-  or process-local locking alone — clarifies, does not change,
-  PREREQUISITE-135W-2/PREREQ-2's scope.
-- CONFIRMED-135X-2 (informational): this phase's own factual spot-checks
-  (entry points, non-atomic writes, narrative parsing, marker fields)
-  all independently reproduce 135W's citations.
-- PREREQUISITE-135X-1 (new, Blocking for implementation): §15's
-  concurrency contract assumes existing checkpoint-level serialization
-  this phase's own CAS analysis shows does not currently exist.
-- PREREQUISITE-135X-2 (new, Blocking for implementation): §29's
-  quarantine contract does not explicitly cross-reference §16 item 6's
-  implicit-legacy-default rule for a post-publication quarantined
-  generation.
-- Seven NON-BLOCKING findings (NONBLOCKING-135X-1 through -7): resolver/
-  compatibility-consumer clarity; authorization environment-binding;
-  readiness-package findings-disclosure scope; two crash/recovery table
-  cross-referencing gaps; authorization fields missing from the
-  schema-readiness disposition table; a reconciliation-command
-  time-dependence documentation note.
-- All ten of CLTR-CUTOVER-001's original PREREQ-1..10 items:
-  independently re-confirmed correct at 135W's assigned classification.
+- PREREQUISITE-135Y-1 through -6: restatements, in implementation-plan
+  form, of 135W's PREREQ-1/2/3/4/5/6, each now bound to a specific
+  proposed phase (135Z or 136-series) and acceptance evidence.
+- NON-BLOCKING-135Y-1/-2: 135X's PREREQUISITE-135X-2 (quarantine
+  cross-reference gap) and NONBLOCKING-135X-6 (schema-gap table
+  omission), both scheduled for closure in 135Z.
+- DEFERRED-135Y-1 through -4: 135W's PREREQ-7/9 (two-person
+  authorization, disaster recovery — both indefinitely deferred),
+  135W's PREREQ-10 (`_ENTRY_POINT_RECOVERY_CLASSIFICATION` two-key
+  gap — closed no later than the entry-point migration's stage 3),
+  and 135V's F-135V-5 (legacy `latest.*` non-atomic writes — tracked
+  before 136A per 135V, non-blocking for this planning phase).
+- PREREQUISITE-135Y-7/-8: two new prerequisites identified by this
+  planning phase itself — concurrent rollback-vs-forward mutual
+  exclusion is not yet designed at implementation level (owner: 136H),
+  and platform durability assumptions (fsync, POSIX locking) are
+  unverified (owner: 136H, verified before that phase closes).
 
-Zero CONFIRMED-BLOCKING findings against the contract text itself.
+Zero Blocking findings. No repair was required or performed to
+CLTR-CUTOVER-001, CLTR-SCHEMA-001, PFN-001, or PFR-001 — 135Y is a
+planning phase, not a contract-repair phase.
 
 ## Safety and no-go confirmation
 
 No production source changed. No test source changed. No schema
-changed. No Stage 3 implementation occurred. No implementation plan was
-executed. No authority resolver was implemented. No authority pointer
-was implemented or changed. No cutover request was executed. No
-authority epoch changed. No CLTR authority was created. No legacy
-authority was demoted. No legacy authority was retired. No production
-notification, marker, receipt, report, metadata, Architecture Status,
-checkpoint, promotion, or finalization behavior changed. No execution
-capability was introduced. Legacy lifecycle remains the sole production
-authority; CLTR remains derivative. CLTR-CUTOVER-001 remains a
-future-behavior contract only. Runtime remains Observed, maximum
-capability observe, execution availability unavailable throughout. No
-raw `git commit` or `git push` was used; no `--no-verify` hook bypass;
-no force push.
+changed. No Stage 3 implementation occurred. No prerequisite
+implementation occurred. No authority resolver was implemented. No
+authority pointer was implemented or changed. No cutover request was
+created or executed. No authority epoch changed. No CLTR authority was
+created. No legacy authority was demoted. No legacy authority was
+retired. No production notification, marker, receipt, report,
+metadata, Architecture Status, checkpoint, promotion, finalization, or
+recovery behavior changed. No execution capability was introduced.
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative. CLTR-CUTOVER-001 remains a future-behavior contract only.
+Runtime remains Observed, maximum capability observe, execution
+availability unavailable throughout. No raw `git commit` or `git push`
+was used; no `--no-verify` hook bypass; no force push.
 
 ## Final verdict
 
-**VERIFIED WITH PREREQUISITES — READY FOR IMPLEMENTATION PLANNING.**
-All 32 verification-matrix requirements independently re-derived and
-adversarially attacked; no requirement failed. Zero BLOCKING contract
-defects found; no repair to CLTR-CUTOVER-001, CLTR-SCHEMA-001, PFN-001,
-or PFR-001 was required or performed. The prerequisite register (now
-twelve items: the original ten plus PREREQUISITE-135X-1 and
-PREREQUISITE-135X-2) must be tracked into the next planning phase.
-"Ready for implementation planning" does not mean ready to implement or
-activate — implementation and activation remain gated on the prior
-contract's own PREREQ-1, PREREQ-2, PREREQ-4, PREREQ-5 (implementation)
-and PREREQ-6 (activation), now joined by this phase's two additions.
+**IMPLEMENTATION PLAN COMPLETE — READY FOR PREREQUISITE EXECUTION.**
+All 44 requested planning sections produced; the plan translates
+CLTR-CUTOVER-001 into 11 non-circular implementation layers, an exact
+phase roadmap, and a full dependency graph with explicit
+activation/demotion/retirement gates. Zero Blocking findings. "Ready
+for prerequisite execution" does not mean ready for Stage 3 activation
+— activation remains gated behind the full roadmap, its dependency
+graph, and the milestone acceptance/no-go criteria in the plan
+document's §26/§27/§40/§41.
 
 ## Recommended next phase
 
-135Y — Stage 3 Authority-Cutover Implementation Plan (planning-only;
-must not begin Stage 3 implementation or authority activation).
+135Z — Stage 3 Companion Schemas and Typed Authority Model Contract
+Freeze (contract-only; closes PREREQ-1, PREREQ-4, PREREQUISITE-135X-2,
+and NONBLOCKING-135X-6; no implementation).
