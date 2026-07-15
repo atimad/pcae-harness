@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.test/schema_runtime/unresolved_ref_package/dangling-ref.schema.json",
+  "type": "object",
+  "properties": {
+    "thing": {
+      "$ref": "https://pcae.test/schema_runtime/does-not-exist.schema.json#/$defs/nope"
+    }
+  }
+}

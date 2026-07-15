@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.test/schema_runtime/duplicate_key_schema_package/dup-key.schema.json",
+  "type": "object",
+  "type": "string"
+}

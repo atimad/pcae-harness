@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 136F — Draft 2020-12 Validation Engine and Strict JSON Parsing
+Prerequisite (completed, implementation). Implemented only the generic
+prerequisite infrastructure planned by 136E, in
+`docs/PHASE_136_DRAFT_2020_12_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_PREREQUISITE.md`.
+Added the project's first runtime dependency, `jsonschema>=4.18,<5`
+(installed 4.25.1), with all transitive dependencies (`referencing`,
+`jsonschema-specifications`, `rpds-py`, `attrs`) MIT-licensed and
+network-free at runtime. New package `src/pcae/schema_runtime/`: a
+hand-written recursive-descent strict JSON parser
+(`json_parser.py`) rejecting duplicate keys at every nesting level and
+non-finite numbers (`NaN`/`Infinity`/`-Infinity`) with JSON-Pointer
+error paths — chosen over `json.loads(object_pairs_hook=...)` because
+that mechanism cannot report an ancestor path for a duplicate key; a
+13-code Layer-1/Layer-2 error vocabulary (`errors.py`); immutable
+result models with a three-way valid/invalid/infrastructure-failure
+outcome (`models.py`); an offline, containment-and-symlink-checked
+schema resource loader enforcing Draft 2020-12 dialect, unique `$id`,
+and meta-schema conformance (`loader.py`); an offline-only
+`referencing.Registry`-backed registry that fails closed on any
+unregistered lookup, proven never to fetch even a URI-shaped `$id`
+remotely (`registry.py`); and a generic `validate_record_shape()`
+Layer-2 shape-validation API with deterministic issue ordering and no
+semantic/authority claim (`validation.py`). **Resolved
+PREREQUISITE-136E-1**: new package `src/pcae/schema_resources/`
+(Option A — schemas packaged inside `src/pcae`, chosen because
+`packages = ["src/pcae"]` already reliably includes non-`.py` resources
+in both wheel and sdist without further hatchling configuration) with a
+generic, explicitly non-Stage-3 smoke schema, proven present and
+loadable via `importlib.resources` from an editable install, a built
+wheel, a built source distribution, and an installed wheel in an
+isolated venv — no source-tree-relative fallback required in installed
+mode. 69 new focused tests across six files (JSON parser, loader,
+registry, Draft-2020-12-capability/validation, no-network/no-authority/
+no-execution boundaries, packaging), all passing; Fast Green unchanged
+at 4391/4391; full unmarked suite freshly run with zero regressions
+(see phase-completion report for the exact count). Verdict:
+**PREREQUISITE INFRASTRUCTURE COMPLETE — READY FOR INDEPENDENT
+VERIFICATION**. No Stage 3 record schema, typed model, semantic
+validator, authority resolver, authority state, or authority pointer
+was created. No cutover request, readiness package, authorization,
+candidate, certification, publication attempt, conflict record, or
+recovery journal was created. Schema validity establishes no lifecycle
+authority, cutover eligibility, authorization, publication success, or
+recovery truth. No authority epoch changed; no CLTR authority was
+created; no legacy authority was demoted or retired; no production
+lifecycle behavior changed; no execution capability was introduced.
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable.
+
+Recommended next phase: **136G — Validation Engine and Strict JSON
+Parsing Independent Verification** — must independently attack Draft
+2020-12 conformance, duplicate-key rejection, offline-only registry
+behavior, packaging, containment, no-network behavior, no-authority
+behavior, and no-execution behavior. Must not begin Stage 3 schema
+authoring.
+
+## Phase 136E Complete
+
 Phase 136E — Stage 3 Companion Executable Schema Implementation Plan
 (completed, planning-only). Produced a complete, dependency-aware
 implementation plan for the Stage 3 companion executable-schema package

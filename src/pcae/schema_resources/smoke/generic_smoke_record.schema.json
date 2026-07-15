@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.dev/schema_runtime/smoke/generic-smoke-record.schema.json",
+  "title": "Generic Packaging Smoke Record",
+  "description": "Non-production, non-Stage-3 generic schema used only to prove that a schema resource packaged under src/pcae/schema_resources is included in editable installs, wheels, and source distributions, and is loadable offline. Carries no authority or lifecycle semantics.",
+  "type": "object",
+  "properties": {
+    "smoke_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "note": {
+      "type": "string"
+    }
+  },
+  "required": ["smoke_record_id"],
+  "additionalProperties": false
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.test/schema_runtime/valid_package/format-check.schema.json",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email"
+    }
+  },
+  "required": ["email"],
+  "additionalProperties": false
+}

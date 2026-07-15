@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.test/schema_runtime/valid_package/root-features.schema.json",
+  "$defs": {
+    "widget": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": ["a", "b"]
+        },
+        "value": {
+          "$ref": "#/$defs/widgetValue"
+        }
+      },
+      "required": ["kind"],
+      "unevaluatedProperties": false
+    },
+    "widgetValue": {
+      "type": "number"
+    }
+  },
+  "type": "object",
+  "properties": {
+    "name": {
+      "$ref": "shared-defs.schema.json#/$defs/nonEmptyString"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "widgets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/widget"
+      }
+    },
+    "amount": {
+      "type": "number"
+    }
+  },
+  "required": ["name", "mode"],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "mode": {
+            "const": "strict"
+          }
+        }
+      },
+      "then": {
+        "required": ["amount"]
+      },
+      "else": true
+    }
+  ],
+  "oneOf": [
+    { "required": ["widgets"] },
+    { "not": { "required": ["widgets"] } }
+  ],
+  "additionalProperties": false
+}

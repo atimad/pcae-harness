@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.test/schema_runtime/invalid_schema_package/broken.schema.json",
+  "type": "object",
+  "properties": "this-should-be-an-object-not-a-string"
+}

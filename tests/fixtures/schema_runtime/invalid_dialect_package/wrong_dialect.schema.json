@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://pcae.test/schema_runtime/invalid_dialect_package/wrong-dialect.schema.json",
+  "type": "object"
+}
