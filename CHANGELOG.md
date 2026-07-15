@@ -1,5 +1,65 @@
 # Changelog
 
+- Phase 135Y — Stage 3 Authority-Cutover Implementation Plan
+  (`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_IMPLEMENTATION_PLAN.md`).
+  Verdict: **IMPLEMENTATION PLAN COMPLETE — READY FOR PREREQUISITE
+  EXECUTION**. Planning-only — no Stage 3 implementation, no
+  prerequisite implementation, no authority resolver, pointer, cutover
+  request, or authority-epoch change; no CLTR authority created; no
+  legacy demotion or retirement; no production, test, or schema source
+  changed. Read and correlated CLTR-CUTOVER-001 v1.0 (135W), its
+  independent verification (135X), the Stage 3 readiness architecture
+  (135V), CLTR-001, CLTR-SCHEMA-001 v1.0.1, PFN-001, PFR-001, and the
+  verified Stage 1/Stage 2/rollback implementation and evidence.
+  Decomposed CLTR-CUTOVER-001 into 32 implementation components across
+  11 non-circular implementation layers (Layers 1–11: types through
+  legacy retirement, each layer depending only on earlier layers).
+  Produced a definitive prerequisite table combining 135W's
+  PREREQ-1..10 with 135X's PREREQUISITE-135X-1/-2 and
+  NONBLOCKING-135X-6 — none newly classified as Blocking. Planned an
+  additive-only CLTR-SCHEMA-001 minor-revision schema sequence (9
+  proposed record kinds), a typed authority-epoch model replacing the
+  current string-prefix encoding, a single shared read-only authority
+  resolver, a non-colliding Stage 3 persistence namespace, a genuine
+  compare-and-swap and cross-process-serialization plan directly
+  addressing 135X's finding that `_save_checkpoint` is atomic-write
+  only (not CAS), a 15-state recovery journal, a human-authorization
+  plan (environment variables explicitly barred from authorizing
+  cutover), a readiness-package and pure pre-cutover-gate plan, a
+  certification plan, and an authority-publication plan with two
+  independent mechanically-enforced inactive-mode controls (no
+  activation CLI/configuration exists; publication requires an
+  `activation_supported` marker absent until a future activation
+  phase). Planned per-adapter production-derivative migration (report,
+  metadata, Architecture Status — confirmed presentation-only per
+  PREREQ-6 — checkpoint, promotion), a PFN-001-preserving notification
+  migration as its own bounded sub-track, marker/receipt migration, and
+  a six-stage all-four-entry-point migration plan (`run_phase_complete`,
+  `run_task_finish`, `run_phase_report_create`, `run_notify_send_report`,
+  all converging on `run_finalization_transaction`, re-identified fresh
+  from source) requiring all four to move together at every stage.
+  Planned a Stage-3-specific cutover rehearsal distinct from Stage 2's
+  rehearsal, a narrowly-scoped activation phase with explicit go/no-go
+  checkpoints, post-activation verification, staged legacy demotion,
+  and separately-justified legacy retirement (not scheduled within
+  Track 135/136). Planned rollback/roll-forward that never assumes
+  pointer rollback is valid after notification dispatch, a two-gate
+  security-verification plan, a per-platform durability-assumption
+  plan, an observability/audit plan, and a 19-layer test strategy.
+  Produced an exact phase roadmap (135Z through an unnumbered
+  activation/demotion/retirement tail), a phase dependency graph with
+  explicit activation/demotion/retirement gates, a feature-configuration
+  rollout with no direct unavailable-to-active transition, a
+  no-history-rewrite compatibility strategy, per-milestone acceptance
+  and no-go criteria (no single aggregate "Stage 3 complete"
+  criterion), an 18-item risk register, and a findings register (0
+  Blocking, 6 Prerequisite, 2 Non-Blocking, 4 Deferred). Legacy
+  lifecycle remains the sole production authority; CLTR remains
+  derivative; CLTR-CUTOVER-001 remains a future-behavior contract
+  only; runtime remains Observed / observe / execution unavailable.
+  Recommended next phase: **135Z — Stage 3 Companion Schemas and Typed
+  Authority Model Contract Freeze**.
+
 - Phase 135X — Stage 3 Authority-Cutover Contract Independent Verification
   (`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md`).
   Verdict: **VERIFIED WITH PREREQUISITES — READY FOR IMPLEMENTATION
