@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136A: Stage 3 Companion Schemas and Typed Authority Model Contract Independent Verification (20260715-1436-phase-136a-stage-3-companion-schemas-and-typed-authority-model-contract-independent-verification)
 - Idle: awaiting next governed phase (post-135Z) (20260715-1239-idle-awaiting-next-governed-phase-post-135z)
 - Phase 135Z: Stage 3 Companion Schemas and Typed Authority Model Contract Freeze (20260715-1219-phase-135z-stage-3-companion-schemas-and-typed-authority-model-contract-freeze)
 - Idle: awaiting next governed phase (post-135Y) (20260715-1134-idle-awaiting-next-governed-phase-post-135y)

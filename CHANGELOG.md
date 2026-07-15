@@ -738,6 +738,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 136A: Stage 3 Companion Schemas and Typed Authority Model Contract Independent Verification to Idle: awaiting next governed phase (post-136A); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-135Z) to Phase 136A: Stage 3 Companion Schemas and Typed Authority Model Contract Independent Verification; began independent re-derivation and verification of CLTR-CUTOVER-SCHEMAS-001 v1.0.
 - Completed Phase 136A: Stage 3 Companion Schemas and Typed Authority Model Contract Independent Verification. Independently re-derived CLTR-CUTOVER-SCHEMAS-001 v1.0 (135Z) against CLTR-001, CLTR-SCHEMA-001 v1.0.1, CLTR-CUTOVER-001 v1.0 (135W/135X), 135Y, PFN-001, and PFR-001 in `docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md`. Verdict: VERIFIED WITH PREREQUISITES — no BLOCKING finding; two new PREREQUISITE findings (PREREQ-4 vehicle-reconciliation gap; `CompatibilityState` history-namespace gap) and six NON-BLOCKING findings (including a "twelve" vs. thirteen PFR-001 mandatory-section miscount and a citation in 135Z §0.7 not present in its cited 135Y §11). Documentation-only; no source, test, or schema change.
 - Transitioned active task from Phase 135Z: Stage 3 Companion Schemas and Typed Authority Model Contract Freeze to Idle: awaiting next governed phase (post-135Z); session refreshed and governance continuity revalidated.
