@@ -1,5 +1,67 @@
 # Changelog
 
+- Phase 135Z — Stage 3 Companion Schemas and Typed Authority Model
+  Contract Freeze
+  (`docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_FREEZE.md`).
+  Verdict: **COMPANION SCHEMA CONTRACT FROZEN — READY FOR INDEPENDENT
+  VERIFICATION**. Contract-only — no Stage 3 implementation, no
+  executable schema, no Stage 3 Python model or validator, no authority
+  resolver or authority-state persistence, no authority pointer
+  implemented or changed, no cutover request/readiness package/
+  authorization/certification/publication attempt created, no
+  authority-epoch change, no CLTR authority created, no legacy demotion
+  or retirement, no production/test/schema source changed. Independently
+  re-derived (not copied from 135Y's illustrative list) a twenty-item
+  record-family inventory against CLTR-001, CLTR-SCHEMA-001 v1.0.1,
+  CLTR-CUTOVER-001 v1.0 (135W), its independent verification (135X), the
+  135Y implementation plan, PFN-001, PFR-001, and verified Stage 1/2/
+  rollback evidence, classifying 16 families as required companion
+  schemas, 1 as an embedded component (CAS expectation), 1 as a derived
+  view (reconciliation result), 1 as a runtime-only typed model
+  (historical authority reference), and 1 as not required (a dedicated
+  authority transition receipt). Froze **CLTR-CUTOVER-SCHEMAS-001 v1.0**
+  covering: seven typed authority enums (AuthorityKind, AuthorityRole,
+  MigrationStage, GenerationRole, PublicationState, RecoveryState,
+  CompatibilityMode) with exact wire values and fail-closed unknown-value
+  behavior; a typed AuthorityEpoch model with deterministic identity,
+  closing 135W's PREREQ-1; an AuthorityState record whose exact
+  relationship to the production pointer is frozen (pointer-first,
+  state-second, never a second authority); a deterministic cutover-
+  request identity formula; a readiness-evidence package; a human-
+  authorization schema resolving replay/one-time-use/expiry/revocation
+  without timestamp-based identity; cutover-candidate and certification
+  schemas distinct from a relabelled Stage 2 rehearsal generation; a CAS
+  expectation schema with an explicit no-wildcard rule directly closing
+  135X's PREREQUISITE-135X-1; a publication-attempt/evidence schema with
+  a first-class, never-collapsed `publication_uncertain` outcome; a
+  concurrency-conflict schema; a mandatory hash-chained, append-only
+  recovery-journal schema; a read-only `mutation: none` reconciliation-
+  result shape; a quarantine schema whose post-publication
+  integrity-failure case neither reactivates legacy nor leaves no
+  authority (registered as PREREQUISITE-135Z-1, deferred to a future
+  activation-adjacent phase); notification/marker/finalization-receipt
+  authority-binding companion records extending, without modifying,
+  CLTR-SCHEMA-001; a compatibility-state schema structurally incapable of
+  reactivating legacy authority; a historical-authority-reference typed
+  model; a shared envelope, identity-rule catalog, canonicalization
+  profile (reusing CLTR-SCHEMA-001's, plus one additive path-
+  normalization rule), digest profile (SHA-256, unchanged), temporal
+  model (no authority- or identity-bearing timestamps anywhere), 24-item
+  failure vocabulary, 15-item cross-record invariant matrix, an
+  authority-object boundary table, a persistence classification table, a
+  pointer inventory confirming exactly one authority-bearing pointer, a
+  namespace contract (`.pcae/cltr-authority/`, disjoint from Stage 0/1/2/
+  rollback namespaces), security and secret-handling profiles, a
+  CLTR-SCHEMA-001 disposition table (no field changed), companion-schema
+  versioning rules, an 11-group executable-schema implementation sequence
+  and a separate typed-runtime-model sequence (both planned, neither
+  implemented), a summarized 62-item verification matrix, and five
+  findings (0 Confirmed, 0 Blocking, 2 Prerequisite, 1 Non-Blocking, 2
+  Deferred). Legacy lifecycle remains the sole production authority; CLTR
+  remains derivative; runtime remains Observed, maximum capability
+  observe, execution availability unavailable. Recommended next phase:
+  136A — Stage 3 Companion Schemas and Typed Authority Model Contract
+  Independent Verification.
 - Phase 135Y — Stage 3 Authority-Cutover Implementation Plan
   (`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_IMPLEMENTATION_PLAN.md`).
   Verdict: **IMPLEMENTATION PLAN COMPLETE — READY FOR PREREQUISITE
