@@ -738,6 +738,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 135Z: Stage 3 Companion Schemas and Typed Authority Model Contract Freeze to Idle: awaiting next governed phase (post-135Z); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 135Y: Stage 3 Authority-Cutover Implementation Plan to Idle: awaiting next governed phase (post-135Y); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 135X: Stage 3 Authority-Cutover Contract Independent Verification to Idle: awaiting next governed phase (post-135X); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 135V: Stage 3 Authority-Cutover Readiness Architecture to Idle: awaiting next governed phase (post-135V); session refreshed and governance continuity revalidated.

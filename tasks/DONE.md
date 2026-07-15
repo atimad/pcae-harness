@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 135Z: Stage 3 Companion Schemas and Typed Authority Model Contract Freeze (20260715-1219-phase-135z-stage-3-companion-schemas-and-typed-authority-model-contract-freeze)
 - Idle: awaiting next governed phase (post-135Y) (20260715-1134-idle-awaiting-next-governed-phase-post-135y)
 - Phase 135Y: Stage 3 Authority-Cutover Implementation Plan (20260715-1119-phase-135y-stage-3-authority-cutover-implementation-plan)
 - Idle: awaiting next governed phase (post-135X) (20260715-0920-idle-awaiting-next-governed-phase-post-135x)
