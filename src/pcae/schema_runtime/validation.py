@@ -16,7 +16,7 @@ from jsonschema.exceptions import SchemaError as _JsonSchemaError
 from referencing.exceptions import Unresolvable as _Unresolvable
 
 from .errors import SchemaRegistryError
-from .limits import DEFAULT_MAX_ISSUE_COUNT
+from .limits import DEFAULT_MAX_ISSUE_COUNT, DEFAULT_MAX_RECORD_DEPTH
 from .models import OutcomeStatus, ShapeValidationResult, ValidationIssue
 from .registry import SchemaRegistry
 
@@ -28,20 +28,70 @@ def _json_pointer(parts) -> str:
     return "/" + "/".join(escaped)
 
 
+def _exceeds_max_depth(record: object, max_depth: int) -> bool:
+    """Iteratively (never recursively) determine whether ``record`` nests
+    dict/list containers deeper than ``max_depth``.
+
+    Phase 136G finding: ``Draft202012Validator.iter_errors`` recurses once
+    per nesting level of both the *schema* (for a self-referential ``$ref``,
+    e.g. ``{"type": "array", "items": {"$ref": "#"}}``) and the *record*
+    being validated. Independent adversarial testing showed a record only
+    ~300 levels deep -- well inside what ``parse_strict_json`` alone would
+    accept before this phase's separate nesting-depth repair -- could raise
+    an uncaught ``RecursionError`` from inside ``iter_errors`` itself, a
+    crash this function's own contract (no mutation, no exception on
+    ordinary invalid input; see module docstring) does not permit. This
+    check is walked with an explicit stack, not recursion, specifically so
+    that guarding against deep input cannot itself be defeated by the same
+    class of attack.
+    """
+    stack: list[tuple[object, int]] = [(record, 0)]
+    while stack:
+        value, depth = stack.pop()
+        if depth > max_depth:
+            return True
+        if isinstance(value, dict):
+            for child in value.values():
+                stack.append((child, depth + 1))
+        elif isinstance(value, (list, tuple)):
+            for child in value:
+                stack.append((child, depth + 1))
+    return False
+
+
 def validate_record_shape(
     record: Mapping[str, object],
     *,
     schema_id: str,
     registry: SchemaRegistry,
     max_issues: int = DEFAULT_MAX_ISSUE_COUNT,
+    max_record_depth: int = DEFAULT_MAX_RECORD_DEPTH,
 ) -> ShapeValidationResult:
     """Validate ``record`` against the schema registered as ``schema_id``.
 
     ``record`` must already have been produced by strict parsing.
     Unknown ``schema_id`` and unresolved ``$ref`` both fail closed as
     :attr:`OutcomeStatus.INFRASTRUCTURE_FAILURE`, distinct from an
-    :attr:`OutcomeStatus.INVALID` record.
+    :attr:`OutcomeStatus.INVALID` record. A record nested deeper than
+    ``max_record_depth`` also fails closed as
+    :attr:`OutcomeStatus.INFRASTRUCTURE_FAILURE` (code
+    ``internal_validation_error``) *before* the underlying validator is
+    invoked, rather than risking an uncaught ``RecursionError`` from a
+    self-referential schema traversing deep data (Phase 136G repair).
     """
+    if _exceeds_max_depth(record, max_record_depth):
+        return ShapeValidationResult(
+            status=OutcomeStatus.INFRASTRUCTURE_FAILURE,
+            schema_id=schema_id,
+            issues=(
+                ValidationIssue(
+                    code="internal_validation_error",
+                    message=f"Record nesting exceeds maximum depth of {max_record_depth}; refusing to validate",
+                    schema_id=schema_id,
+                ),
+            ),
+        )
+
     try:
         schema = registry.document(schema_id)
     except SchemaRegistryError:
@@ -89,6 +139,13 @@ def validate_record_shape(
         for err in errors[:max_issues]
     )
 
-    if issues:
+    # Phase 136G repair: status must reflect whether the record actually
+    # failed validation (``errors``), not whether the *returned, possibly
+    # truncated* ``issues`` tuple happens to be non-empty. Deciding status
+    # from the truncated tuple meant max_issues=0 (or any cap smaller than
+    # the true error count in an unlucky ordering) could silently report
+    # OutcomeStatus.VALID for a genuinely invalid record -- a fail-open
+    # misclassification of exactly the kind this package must never permit.
+    if errors:
         return ShapeValidationResult(status=OutcomeStatus.INVALID, schema_id=schema_id, issues=issues)
     return ShapeValidationResult(status=OutcomeStatus.VALID, schema_id=schema_id, issues=())

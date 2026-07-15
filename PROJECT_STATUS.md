@@ -2,6 +2,73 @@
 
 ## Current Phase
 
+Phase 136G — Validation Engine and Strict JSON Parsing Independent
+Verification (completed, verification-plus-repair). Independently
+re-derived, reproduced, mutated, and adversarially attacked the generic
+Draft 2020-12 validation-engine, strict-parser, loader, registry, and
+shape-validation infrastructure introduced by Phase 136F, in
+`docs/PHASE_136_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_INDEPENDENT_VERIFICATION.md`.
+Trusted none of 136F's own tests or report prose; wrote 68 new
+independent adversarial tests
+(`tests/test_schema_runtime_136g_independent_verification.py`) against
+fresh 136G-authored fixture schemas
+(`tests/fixtures/schema_runtime_136g/`) exercising Draft 2020-12
+features 136F's own fixtures did not cover (`prefixItems`,
+`contains`/`minContains`/`maxContains`, `dependentRequired`, `$anchor`,
+Boolean schemas). **Found and repaired two genuine Blocking defects**,
+both within the generic schema-runtime boundary: (1)
+`BLOCKING-136G-1`/`-1b` — both `parse_strict_json` and (independently)
+`validate_record_shape` could raise an **uncaught `RecursionError`** on
+deeply nested input, contradicting the parser's own documented "never
+raises on ordinary invalid input" contract; repaired with a new,
+independently-configurable `DEFAULT_MAX_NESTING_DEPTH` (parser) and
+`DEFAULT_MAX_RECORD_DEPTH` (shape validation, checked via an explicitly
+iterative, non-recursive depth scan). (2) `BLOCKING-136G-2` —
+`validate_record_shape(..., max_issues=0)` silently reported
+`OutcomeStatus.VALID` for a genuinely invalid record (a fail-open
+misclassification caused by computing status from the truncated issue
+tuple instead of the full validator error list); repaired. Both repairs
+are covered by new regression tests; Fast Green re-run after both
+repairs: 4391/4391, identical to the 136F baseline, zero regressions.
+Independently rebuilt the dependency in a second, fully clean-room
+virtual environment (system Python 3.14.5, no lockfile), confirming
+future patch/minor `jsonschema` upgrades within `<5` do not silently
+change the selected validator class. Independently proved no-network
+behavior against a wider set of transport primitives than 136F's own
+tests, and independently proved the no-authority AST/text-scan boundary
+cannot be defeated by a dynamic-import mechanism — an item 136F's own
+doc explicitly flagged as untested. Disclosed several non-blocking
+findings (two frozen vocabulary codes remain unreachable dead code;
+inconsistent dependency-failure exception wrapping for a below-floor
+`jsonschema` install; a fail-closed usability quirk with an unresolved
+symlink-backed trusted root) and one prerequisite finding deferred to
+136H (`validate_record_shape`'s `Mapping` contract is
+documentation-only, not runtime-enforced). Verdict: **VERIFIED WITH
+NON-BLOCKING FINDINGS — READY FOR COMPANION EXECUTABLE SCHEMA SHARED
+CORE**. No Stage 3 schema, fixture, typed model, semantic validator, or
+authority resolver/state/pointer was created. No cutover request,
+readiness package, authorization, candidate, certification, publication
+attempt, conflict record, or recovery journal was created. Schema
+validity establishes no lifecycle authority, cutover eligibility,
+authorization, publication success, or recovery truth. No authority
+epoch changed; no CLTR authority was created; no legacy authority was
+demoted or retired; no production lifecycle behavior changed; no
+execution capability was introduced. Legacy lifecycle remains the sole
+production authority; CLTR remains derivative; runtime remains Observed
+/ observe / execution unavailable.
+
+Recommended next phase: **136H — Companion Executable Schema Shared
+Core Implementation** — may implement only shared schema definitions,
+identifiers, digests, references, timestamps, limitations, disclosures,
+enums, a schema manifest foundation, and fixtures/tests for that shared
+core; must not implement authority-bearing record schemas; must
+explicitly re-derive `DEFAULT_MAX_RECORD_DEPTH`/`DEFAULT_MAX_NESTING_DEPTH`
+against its own actual schema shapes and make a deliberate decision
+about the deferred `Mapping` runtime-contract finding before giving
+`validate_record_shape` its first real caller.
+
+## Phase 136F Complete
+
 Phase 136F — Draft 2020-12 Validation Engine and Strict JSON Parsing
 Prerequisite (completed, implementation). Implemented only the generic
 prerequisite infrastructure planned by 136E, in

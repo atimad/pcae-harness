@@ -1,5 +1,63 @@
 # Changelog
 
+- Phase 136G — Validation Engine and Strict JSON Parsing Independent
+  Verification
+  (`docs/PHASE_136_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_INDEPENDENT_VERIFICATION.md`).
+  Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR COMPANION
+  EXECUTABLE SCHEMA SHARED CORE**. Independently re-derived, reproduced,
+  mutated, and adversarially attacked every claim made by Phase 136F's
+  generic Draft 2020-12 validation-engine, strict-parser, loader,
+  registry, and shape-validation infrastructure, trusting none of 136F's
+  own tests or report prose. Wrote 68 new independent adversarial tests
+  (`tests/test_schema_runtime_136g_independent_verification.py`) against
+  fresh, 136G-authored fixture schemas
+  (`tests/fixtures/schema_runtime_136g/`) exercising Draft 2020-12
+  features 136F's own fixtures did not cover (`prefixItems`,
+  `contains`/`minContains`/`maxContains`, `dependentRequired`,
+  `$anchor`, Boolean schemas). **Found and repaired two genuine Blocking
+  defects**, both within the generic schema-runtime boundary: (1)
+  `BLOCKING-136G-1`/`-1b` — `parse_strict_json` and (independently)
+  `validate_record_shape` could each raise an **uncaught
+  `RecursionError`** on deeply nested input (a byte-tiny ~500-level-deep
+  document for the parser; a ~300-level-deep record against a
+  self-referential schema for shape validation), directly contradicting
+  the parser's own documented "never raises on ordinary invalid input"
+  contract; repaired with a new `DEFAULT_MAX_NESTING_DEPTH` (parser) and
+  `DEFAULT_MAX_RECORD_DEPTH` (shape validation, checked via an explicitly
+  iterative, non-recursive depth-scan so the guard itself cannot be
+  defeated by the same attack class) in `limits.py`, both configurable
+  per call. (2) `BLOCKING-136G-2` — `validate_record_shape(...,
+  max_issues=0)` silently reported `OutcomeStatus.VALID` for a
+  genuinely invalid record, because status was computed from the
+  *truncated* issue tuple instead of the full, untruncated validator
+  error list — a fail-open misclassification; repaired by deciding
+  status from the untruncated error list. Both repairs are covered by
+  new regression tests; Fast Green re-run after both repairs: 4391/4391,
+  identical to the 136F baseline, zero regressions. Independently
+  rebuilt the dependency in a second, fully clean-room virtual
+  environment (system Python 3.14.5, no lockfile, `pip`-resolved
+  `jsonschema` 4.26.0/`referencing` 0.37.0, both newer than 136F's
+  pinned versions and both still within `>=4.18,<5`), confirming future
+  patch/minor upgrades do not silently change the selected validator
+  class. Independently proved no-network behavior against a wider set of
+  transport primitives than 136F's own tests (added `socket.create_connection`,
+  `socket.getaddrinfo`, and `urllib.request.urlopen` blocking) and
+  independently proved the no-authority AST/text-scan boundary cannot be
+  defeated by a dynamic-import mechanism (`importlib.import_module`,
+  `__import__`, `eval`/`exec`) — an item 136F's own doc explicitly
+  flagged as untested. Disclosed several non-blocking findings (two of
+  the frozen vocabulary's 13 error codes remain unreachable dead code;
+  inconsistent dependency-failure exception wrapping for a below-floor
+  `jsonschema` install; a fail-closed usability quirk when a caller
+  passes an unresolved, symlink-backed trusted root) and one
+  prerequisite finding deferred to 136H (`validate_record_shape`'s
+  `Mapping` contract is documentation-only, not runtime-enforced). No
+  Stage 3 schema, fixture, typed model, semantic validator, or authority
+  resolver/state/pointer was created. Legacy lifecycle remains the sole
+  production authority; CLTR remains derivative; runtime remains
+  Observed / observe / execution unavailable. Recommended next phase:
+  **136H — Companion Executable Schema Shared Core Implementation**.
+
 - Phase 136F — Draft 2020-12 Validation Engine and Strict JSON Parsing
   Prerequisite
   (`docs/PHASE_136_DRAFT_2020_12_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_PREREQUISITE.md`).

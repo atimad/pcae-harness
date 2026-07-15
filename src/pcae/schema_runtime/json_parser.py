@@ -18,13 +18,17 @@ This module:
 * rejects non-finite numbers;
 * optionally requires a top-level object;
 * imposes a configurable input-size limit;
+* imposes a configurable object/array nesting-depth limit (Phase 136G
+  repair: closes an uncaught-``RecursionError`` gap found by independent
+  adversarial testing -- see ``DEFAULT_MAX_NESTING_DEPTH`` in
+  ``limits.py``);
 * does not access the network, follow paths, or mutate input;
 * returns a structured :class:`JsonParseResult`, never raising on
   ordinary invalid input.
 """
 from __future__ import annotations
 
-from .limits import DEFAULT_MAX_INPUT_BYTES
+from .limits import DEFAULT_MAX_INPUT_BYTES, DEFAULT_MAX_NESTING_DEPTH
 from .models import JsonParseResult, OutcomeStatus, ValidationIssue
 
 _WHITESPACE = " \t\n\r"
@@ -62,12 +66,13 @@ def _json_pointer(path: tuple[str, ...]) -> str:
 class _Parser:
     """Minimal recursive-descent JSON parser with duplicate-key tracking."""
 
-    __slots__ = ("text", "length", "pos")
+    __slots__ = ("text", "length", "pos", "max_depth")
 
-    def __init__(self, text: str) -> None:
+    def __init__(self, text: str, max_depth: int = DEFAULT_MAX_NESTING_DEPTH) -> None:
         self.text = text
         self.length = len(text)
         self.pos = 0
+        self.max_depth = max_depth
 
     def parse(self) -> object:
         self._skip_ws()
@@ -117,7 +122,16 @@ class _Parser:
             )
         raise _StrictJsonError("invalid_json", f"Unexpected character {ch!r}", path)
 
+    def _check_depth(self, path: tuple[str, ...]) -> None:
+        if len(path) > self.max_depth:
+            raise _StrictJsonError(
+                "invalid_json",
+                f"Maximum object/array nesting depth of {self.max_depth} exceeded",
+                path,
+            )
+
     def _parse_object(self, path: tuple[str, ...]) -> dict:
+        self._check_depth(path)
         self.pos += 1  # consume '{'
         obj: dict = {}
         self._skip_ws()
@@ -152,6 +166,7 @@ class _Parser:
             raise _StrictJsonError("invalid_json", "Expected ',' or '}' in object", path)
 
     def _parse_array(self, path: tuple[str, ...]) -> list:
+        self._check_depth(path)
         self.pos += 1  # consume '['
         arr: list = []
         self._skip_ws()
@@ -274,6 +289,7 @@ def parse_strict_json(
     *,
     max_bytes: int = DEFAULT_MAX_INPUT_BYTES,
     require_top_level_object: bool = False,
+    max_depth: int = DEFAULT_MAX_NESTING_DEPTH,
 ) -> JsonParseResult:
     """Strictly parse ``data`` as JSON.
 
@@ -297,7 +313,7 @@ def parse_strict_json(
         raise TypeError(f"parse_strict_json expects bytes or str, got {type(data).__name__}")
 
     try:
-        value = _Parser(text).parse()
+        value = _Parser(text, max_depth=max_depth).parse()
     except _StrictJsonError as exc:
         return _failure(exc.code, exc.message, exc.path)
 

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.test/schema_runtime_136g/conformance_package/feature-matrix.schema.json",
+  "$defs": {
+    "positiveNumber": {
+      "$anchor": "positiveNumber",
+      "type": "number",
+      "exclusiveMinimum": 0
+    }
+  },
+  "type": "object",
+  "properties": {
+    "tuple": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "string" },
+        { "$ref": "#positiveNumber" }
+      ],
+      "items": false
+    },
+    "tagged": {
+      "type": "array",
+      "contains": { "const": "required-tag" },
+      "minContains": 1,
+      "maxContains": 2
+    },
+    "conditionalGroup": {
+      "type": "object",
+      "dependentRequired": {
+        "partner": ["escort"]
+      }
+    },
+    "blockedField": false,
+    "always": true
+  },
+  "required": ["tuple"],
+  "additionalProperties": false
+}
