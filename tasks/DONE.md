@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136B) (20260715-1910-idle-awaiting-next-governed-phase-post-136b)
 - Phase 136B: Stage 3 Companion Executable Schema Architecture (20260715-1832-phase-136b-stage-3-companion-executable-schema-architecture)
 - Idle: awaiting next governed phase (post-136A, pending 136B activation decision) (20260715-1830-idle-awaiting-next-governed-phase-post-136a-pending-136b-activation-decision)
 - Idle: awaiting next governed phase (post-136A) (20260715-1449-idle-awaiting-next-governed-phase-post-136a)

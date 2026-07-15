@@ -1,5 +1,63 @@
 # Changelog
 
+- Phase 136C — Stage 3 Companion Executable Schema Contract Freeze
+  (`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`).
+  Verdict: **EXECUTABLE SCHEMA CONTRACT FROZEN WITH PREREQUISITES —
+  READY FOR INDEPENDENT VERIFICATION**. Contract-only — no executable
+  schema, fixture, Python typed model, validator, schema registry,
+  authority resolver, authority-state persistence, or authority pointer
+  implemented or changed; no cutover request/readiness package/
+  authorization/candidate/certification/publication attempt/conflict
+  record/recovery journal created; no authority-epoch change; no CLTR
+  authority created; no legacy demotion or retirement; no production or
+  test source changed. Froze **CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001
+  v1.0**, translating Phase 136B's architecture into binding normative
+  requirements: JSON Schema draft 2020-12 dialect frozen with an exact
+  keyword-usage table; the exact package layout
+  (`schemas/cltr_cutover/{shared,records,bindings,views}/`); the exact
+  16-standalone / 7-shared-`$defs` / 1-embedded / 0-derived-view /
+  1-runtime-only / 1-not-required executable-schema inventory (24 files
+  at full implementation); a two-tier `additionalProperties` envelope
+  contract (strict `false` for 8 authority-bearing families, one
+  reserved `_extensions` key for 8 evidentiary families); all 21 enums
+  (7 shared typed authority enums plus 14 local enums) with exact wire
+  values and fail-closed unknown-value behavior; an authority-role
+  restriction preventing any companion schema from self-declaring
+  `authoritative` outside two narrowly gated exceptions; identifier,
+  digest, reference, and timestamp shape contracts — notably confirming
+  the digest shape as a bare 64-character lowercase hexadecimal string
+  with no `sha256:` prefix, matching this repository's actual
+  `src/pcae/cltr/digest.py` implementation rather than a differently
+  prefixed convention, recorded as finding CONFIRMED-136C-1; local
+  conditional-validation rules for every state-dependent field across
+  all 16 families; a resolution of the CutoverRequest/ReadinessPackage
+  circular-reference risk via a two-step immutable-document creation
+  order; per-family schema contracts for all 16 standalone families
+  plus the embedded CasExpectation component (all 11 CAS fields
+  unconditionally required, no wildcard); a mandatory hash-chained
+  recovery-journal entry contract; a preserved CompatibilityState
+  history path (PREREQUISITE-136A-2); an unmodified CLTR-SCHEMA-001
+  relationship table; 11 frozen implementation groups; the 6-layer
+  validation model; and — most significantly — an **independently
+  re-derived and fully published 62-item verification matrix**
+  (`CSCH-EXEC-REQ-001`..`062`), resolving the publication gap that
+  finding F-135Z-3 identified in Phase 135Z and that Phases 136A and
+  136B both carried forward without closing. The 62-count is an
+  independently derived result, not a confirmation of a previously
+  enumerated but never-published list (finding CONFIRMED-136C-2).
+  Contract freeze is qualified "WITH PREREQUISITES" because the newly
+  derived matrix requires Phase 136D's independent re-verification
+  before F-135Z-3 is considered fully closed (PREREQUISITE-136C-2); one
+  further prerequisite (PREREQUISITE-136C-1: full production-integrity
+  recovery for un-quarantining) is deferred to any future live cutover,
+  not to schema implementation. No BLOCKING finding exists. Read-only
+  reconciliation of both 136A (disclosed historical `conflict`, not
+  repaired or redispatched) and 136B (clean, `reconciled`) was performed
+  before this phase began. Legacy lifecycle remains the sole production
+  authority; CLTR remains derivative; runtime remains Observed, maximum
+  capability observe, execution availability unavailable. Recommended
+  next phase: 136D — Stage 3 Companion Executable Schema Contract
+  Independent Verification.
 - Phase 135Z — Stage 3 Companion Schemas and Typed Authority Model
   Contract Freeze
   (`docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_FREEZE.md`).

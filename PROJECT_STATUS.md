@@ -2,6 +2,63 @@
 
 ## Current Phase
 
+Phase 136C — Stage 3 Companion Executable Schema Contract Freeze
+(completed, contract-only). Froze **CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001
+v1.0**, translating Phase 136B's executable-schema architecture into
+binding normative requirements across all 52 required contract areas:
+purpose/scope boundary (schema validates local wire shape only), dialect
+(draft 2020-12, frozen), package layout (`schemas/cltr_cutover/` with
+`shared/`, `records/`, reserved `bindings/`, `views/`), the exact 16
+standalone + 7 shared + 1 embedded + 0 derived-view + 1 runtime-only + 1
+not-required executable-schema inventory, shared definitions, the
+two-tier `additionalProperties` envelope contract, all 21 enums (7
+shared typed authority enums + 14 local), the authority-role
+restriction preventing self-declared authority, identifier/digest/
+reference/timestamp shape contracts (digest confirmed as bare 64-char
+lowercase hex, no `sha256:` prefix, matching the repository's actual
+`src/pcae/cltr/digest.py` implementation rather than a differently
+prefixed suggested default), local conditional-validation rules for
+every state-dependent field, all 16 per-family schema contracts
+including resolution of the CutoverRequest/ReadinessPackage circular-
+reference risk, the canonicalization and semantic-validation boundaries,
+schema registry/fixture/security/secret-handling contracts, the
+CLTR-SCHEMA-001 relationship (unmodified), the 11 implementation
+groups, the 6-layer validation model, and — most significantly —
+**independently re-derived and fully published the 62-item verification
+matrix** (`CSCH-EXEC-REQ-001`..`062`), resolving the publication gap
+that finding F-135Z-3 identified back in Phase 135Z and that Phases
+136A and 136B both carried forward without closing. The 62-count is an
+independent result, not a confirmation of a previously enumerated but
+never-published list (recorded as finding CONFIRMED-136C-2). Contract
+verdict: **EXECUTABLE SCHEMA CONTRACT FROZEN WITH PREREQUISITES — READY
+FOR INDEPENDENT VERIFICATION** — qualified because the newly-derived
+62-item matrix itself requires Phase 136D's independent re-verification
+before F-135Z-3 is considered fully closed (PREREQUISITE-136C-2); this
+does not block the contract freeze itself. One additional prerequisite
+was disclosed (PREREQUISITE-136C-1: full production-integrity recovery
+for un-quarantining remains deferred to any future live cutover, not to
+schema implementation). No BLOCKING finding exists. Documented in
+`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md`.
+No executable schema, fixture, Python typed model, validator, schema
+registry, authority resolver, authority-state persistence, authority
+pointer, cutover request, readiness package, authorization, candidate,
+certification, publication attempt, conflict record, or recovery
+journal was created. No authority epoch changed. No CLTR authority was
+created. No legacy authority was demoted or retired. No production
+behavior changed. No execution capability was introduced. Legacy
+lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution
+unavailable.
+
+Recommended next phase: **136D — Stage 3 Companion Executable Schema
+Contract Independent Verification** — independently re-derive (not
+merely re-read) the 62-item matrix, confirm or dispute the count,
+confirm every requirement's traceability, and confirm both carried-
+forward prerequisites' scoping before any executable-schema
+implementation group may begin.
+
+## Phase 136B Complete
+
 Phase 136B — Stage 3 Companion Executable Schema Architecture (completed,
 architecture-only, per CLTR-CUTOVER-SCHEMAS-001 §43 Layer 1 scope: shared
 envelope and enums). Translated the frozen CLTR-CUTOVER-SCHEMAS-001 v1.0
@@ -46,13 +103,6 @@ typed model, validator, or Stage 3 implementation of any kind was
 created. Legacy lifecycle remains the sole production authority; CLTR
 remains derivative; runtime remains Observed / observe / execution
 unavailable.
-
-Recommended next phase: **136C — Stage 3 Companion Executable Schema
-Contract Freeze** — publish the full 62-item verification matrix
-verbatim (closing F-135Z-3), freeze this phase's architecture into
-binding contract text, and mint the fifteen remaining companion
-`schema_id` values. Executable schema implementation must not begin
-before 136C completes and is independently verified.
 
 ## Phase 136A Complete
 
