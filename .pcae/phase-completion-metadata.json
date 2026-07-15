@@ -1,51 +1,33 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136A",
-  "phase_name": "Stage 3 Companion Schemas and Typed Authority Model Contract Independent Verification",
-  "phase_title": "Stage 3 Companion Schemas and Typed Authority Model Contract Independent Verification",
+  "phase_id": "136B",
+  "phase_name": "Stage 3 Companion Executable Schema Architecture",
+  "phase_title": "Stage 3 Companion Executable Schema Architecture",
   "status": "completed",
-  "files_changed_count": 11,
+  "files_changed_count": 8,
   "files_changed": [
-    ".pcae/phase-completion-metadata.json",
-    ".pcae/phase-completion-report.md",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md",
+    "docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_ARCHITECTURE.md",
+    "tasks/DECISIONS.md",
     "tasks/DONE.md",
-    "tasks/TODO.md",
-    "tasks/active/20260715-1449-idle-awaiting-next-governed-phase-post-136a.md",
-    "tasks/done/20260715-1239-idle-awaiting-next-governed-phase-post-135z.md",
-    "tasks/done/20260715-1436-phase-136a-stage-3-companion-schemas-and-typed-authority-model-contract-independent-verification.md",
-    "tasks/done/20260715-1742-phase-136a-correct-136b-next-phase-framing-to-architecture-only.md"
+    "tasks/active/20260715-1832-phase-136b-stage-3-companion-executable-schema-architecture.md",
+    "tasks/done/20260715-1449-idle-awaiting-next-governed-phase-post-136a.md",
+    "tasks/done/20260715-1830-idle-awaiting-next-governed-phase-post-136a-pending-136b-activation-decision.md"
   ],
   "source_files_changed": 0,
   "test_files_changed": 0,
-"tests_added_or_updated": "4391 fast_green (high-signal governance/core) tests executed via `python -m pytest -m fast_green -n auto`: 4391 passed, 0 failed -- fully green, matching the stable 4391 fast_green baseline held since Phase 106D. Additionally, as extra due diligence for this recovery, the full unmarked `python -m pytest -n auto` suite (20078 tests) was executed twice: the initial run surfaced 6 failures, one of which (tests/test_bootstrap_todo_consistency.py::test_real_todo_not_flagged_stale_against_real_project_status) was a genuine regression this phase's own tasks/TODO.md edit introduced by advancing PROJECT_STATUS.md's current-phase number past a stale tasks/TODO.md next-phase marker; it was fixed in this phase's own first commit. The final full-suite re-run showed 20072 passed, 6 failed -- 5 confirmed pre-existing against a clean pre-136A baseline, outside the fast_green gate (2 in tests/test_bootstrap_todo_consistency.py concerning an unrelated Track B/Repository-Intelligence roadmap phase-id parse, 3 in tests/test_advisory_runtime_contract.py, tests/test_advisory_runtime_architecture.py, and tests/test_rendering_134e5.py), 1 environment-dependent (tests/test_gate_dry_run_context.py::test_git_ahead_count_returns_int_in_clean_repo, which asserts the live repo's origin/main ahead-count is 0 and is expected to pass once this phase's commits are pushed). No production or test source was changed by this phase.",
+  "tests_added_or_updated": "4391 fast_green (high-signal governance/core) tests executed via `python -m pytest -m fast_green -n auto`: 4391 passed, 0 failed -- fully green, matching the stable 4391 fast_green baseline held since Phase 106D. Additionally, as extra due diligence, the full unmarked `python -m pytest -n auto` suite (20078 tests) was executed once: 20073 passed, 5 failed. All 5 failures were independently reconfirmed pre-existing and unrelated to this phase by reproducing them identically against the pre-136B baseline commit (0afebf51, via `git stash`): tests/test_advisory_runtime_contract.py::test_no_new_directory_added_for_advisory, tests/test_advisory_runtime_architecture.py::test_no_new_directory_added_for_advisory, tests/test_rendering_134e5.py::test_current_report_generation_remains_unchanged, tests/test_bootstrap_todo_consistency.py::test_real_todo_no_longer_marks_90_series_as_next, tests/test_bootstrap_todo_consistency.py::test_real_todo_current_roadmap_lists_recommended_phase_as_next. No production or test source was changed by this documentation-only phase.",
   "tests_run": 4391,
   "phase_commits": [
     {
-      "hash": "326f92182e3a51e15f1986f3df8b7a8889b936f9"
-    },
-    {
-      "hash": "39c2364b440a69cc7994431776333b041c665563"
-    },
-    {
-      "hash": "0819cf921190188c8ea1b6ec264e8ee7d73044ab"
-    },
-    {
-      "hash": "84b34a9d6e6cd3bd7d975a8e5b569f37a5a42871"
-    },
-    {
-      "hash": "6e4c9e1515987da5fd090ab1a5a0ad853cb4240e"
-    },
-    {
-      "hash": "8f9bd1342961a9c433d8e9d8238e0aac27d4fa9b"
+      "hash": "96d4cad02767c1e342c972130cae19999c87eafe"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "summary": "Phase 136A independently re-derives and verifies CLTR-CUTOVER-SCHEMAS-001 v1.0 (frozen Phase 135Z) against CLTR-001, CLTR-SCHEMA-001 v1.0.1, CLTR-CUTOVER-001 v1.0 (135W) and its independent verification (135X), the non-binding 135Y implementation plan, PFN-001, and PFR-001. Documentation-only, per governed scope -- no Stage 3 implementation, no executable schema, no typed-model authoring, no authority activation, no production/test/schema source change. Produced docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md (1180 lines, 17 sections), independently re-deriving rather than copying: the twenty-item record-family inventory (16 required companion schemas, 1 embedded component, 1 derived view, 1 runtime-only typed model, 1 not-required family -- all twenty independently reconfirmed, one NON-BLOCKING citation-precision finding in the summary sentence's row enumeration only); the seven typed authority enums (AuthorityKind, AuthorityRole, MigrationStage, GenerationRole, PublicationState, RecoveryState, CompatibilityMode) and their exact-match/fail-closed behavior (PASS, three NON-BLOCKING labeling/presentation findings, no substantive weakening); the AuthorityEpoch/AuthorityState model and pointer-then-state ordering; the CutoverRequest-through-PublicationEvidence chain; the CAS expectation embedding and no-wildcard-on-missing-value closure of PREREQUISITE-135X-1; the concurrency/recovery-journal/reconciliation/quarantine group (independently found to close PREREQUISITE-135X-2 more conservatively than required); the receipt/binding/compatibility/historical group; the shared envelope/identity/canonicalization/digest/temporal model; the authority-object boundary, persistence-classification, pointer-inventory, namespace, security, and privacy sections; and the cross-record invariant/versioning/sequencing group. Final verdict: VERIFIED WITH PREREQUISITES. Zero BLOCKING findings. Two new PREREQUISITE findings, not present in 135Z's own five-item Findings table: PREREQUISITE-136A-1 (135Z's choice of a separate companion contract, rather than the CLTR-SCHEMA-001 1.1.0 minor revision 135Y's own schema plan assumed, as the vehicle closing 135W's PREREQ-4 for 13 of 16 companion-schema families, is sound on the merits but never explicitly reconciled against PREREQ-4's own register wording or 135Y's differently-vehicled plan) and PREREQUISITE-136A-2 (135Z Section 36's claim that every 'atomic current pointer' family has a history-preserving sibling is not reflected in Section 38.2's frozen namespace for CompatibilityState, unlike the parallel path given to AuthorityState). Six NON-BLOCKING findings (documentation accuracy, citation precision, labeling consistency, cross-reference completeness), including a factual miscount (135Z Section 0.5 states PFR-001 freezes 'twelve mandatory sections'; PFR-001 itself, 135W, and 135X all independently confirm thirteen) and a citation that does not exist in its cited source (135Z Section 0.7 cites '135Y Section 11, do not automatically create schemas ahead of need'; 135Y Section 11 is titled 'Recovery-journal plan' and contains no such phrase anywhere in 135Y/135W/135X; the substantive conclusion the citation was offered to support still holds on other, independently verified grounds). Governed recovery disclosure: 135Z's own Findings table scheduled finding F-135Z-3 (the 62-item verification matrix, summarized rather than fully enumerated in 135Z itself) for full verbatim publication at Phase 136A. The committed 136A document instead independently cross-checked the twelve representative CSCH-REQ entries 135Z itself presented against this phase's own section-by-section findings (all twelve independently reconfirmed sound) but did not publish the full 62-item matrix verbatim. This governed recovery discloses that gap explicitly rather than marking F-135Z-3 resolved: it remains open and is carried forward, not silently closed. This recovery also corrected a post-hoc framing error: the committed 136A document and PROJECT_STATUS.md initially mislabeled the recommended next phase as 'a future executable-schema implementation phase'; the correct next phase is 136B -- Stage 3 Companion Executable Schema Architecture, which is architecture-only, not executable-schema implementation. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed, maximum capability observe, execution availability unavailable. Recommended next phase: 136B -- Stage 3 Companion Executable Schema Architecture (architecture-only).",
+  "summary": "Phase 136B translates the frozen CLTR-CUTOVER-SCHEMAS-001 v1.0 contract (135Z, independently verified 136A, VERIFIED WITH PREREQUISITES) into a concrete JSON Schema executable-schema architecture. Architecture-only, per CLTR-CUTOVER-SCHEMAS-001 §43 Layer 1 scope (shared envelope and enums). Produced docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_ARCHITECTURE.md covering: dialect selection (JSON Schema draft 2020-12, matching the existing schemas/repository_intelligence/ precedent), package layout (schemas/cltr_cutover/shared and records, sixteen companion-schema files exactly reconciled against 135Z's twenty-item record-family inventory), shared envelope/enum/identity/digest/reference components, per-family schema architecture for all sixteen required companion schemas plus the embedded CasExpectation component and explicit no-file dispositions for the derived view (ReconciliationResult), the absorbed family (Authority Transition Receipt), and the runtime-only typed model (HistoricalAuthorityReference), a six-layer validation model, schema registry/fixture/test/security/secret-handling/versioning architecture, implementation grouping, and a traceability-matrix template. Explicitly resolved PREREQUISITE-136A-1 (schema vehicle: CLTR-CUTOVER-SCHEMAS-001, not a CLTR-SCHEMA-001 revision, closes 135W PREREQ-4 for thirteen of sixteen companion-schema families) and PREREQUISITE-136A-2 (froze a compatibility-state/<compatibility_state_id>.json history-preservation namespace path). Carried forward F-135Z-3 (62-item verification matrix remains unpublished in full) bound explicitly to Phase 136C rather than silently closed. Before starting, a mandatory read-only `pcae phase-report reconcile --phase-id 136A` found and disclosed (non-blocking, not repaired) a reconciliation_status: conflict in 136A's own finalization bookkeeping (notification marker/checkpoint predating 136A's later corrective commits); exactly one promoted 136A generation and one delivery receipt exist, no duplicate delivery, 136A was not mutated or redispatched. Architecture verdict: EXECUTABLE SCHEMA ARCHITECTURE COMPLETE WITH PREREQUISITES -- READY FOR CONTRACT FREEZE. No executable schema, typed model, validator, or Stage 3 implementation of any kind was created; no production or test source changed (fast_green: 20073 passed, 5 pre-existing failures reconfirmed unrelated to this phase by baseline reproduction against the pre-136B commit). Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Recommended next phase: 136C -- Stage 3 Companion Executable Schema Contract Freeze.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -78,58 +60,59 @@
   ],
   "validation_results": [
     {
-      "name": "read_only_lifecycle_inspection",
-      "result": "Before any mutation: pcae phase-report show --latest (showed stale 135Z as latest canonical report), pcae phase-report reconcile --phase-id 136A (read-only: status conflict, promoted generations 0, marker not_dispatched, checkpoint absent, receipt absent, blocker 'no promoted report generation found for phase', mutation: none), pcae phase-report reconcile --phase-id 135Z (read-only, control: status reconciled, promoted generations 1, marker already_dispatched, checkpoint completed, receipt finalized, mutation: none), cat .pcae/phase-completion-metadata.json (confirmed stale, still identified 135Z), find .pcae/phase-reports and .pcae/finalization-transactions (confirmed no 136A timestamped report or finalization transaction existed)",
+      "name": "read_only_136a_reconciliation",
+      "result": "pcae phase-report reconcile --phase-id 136A (read-only, mutation: none): reconciliation_status=conflict, promoted_generation_count=1, marker_state=payload_conflict, checkpoint_state=completed, receipt_state=finalized. Root cause identified: marker/checkpoint report_digest predates 136A's own later corrective commits (84b34a9d, 6e4c9e15, 8f9bd134) that updated latest.json content after notification/checkpoint finalization. Exactly one promoted 136A generation, one delivery receipt -- no duplicate delivery. 136A not mutated or redispatched.",
+      "status": "passed (disclosed, not repaired)"
+    },
+    {
+      "name": "initial_inspection",
+      "result": "git status/log/rev-list confirmed clean baseline, 0 commits ahead of origin/main. git show --stat for all six 136A phase-owned commits reconfirmed docs/CHANGELOG/PROJECT_STATUS/tasks-only scope. pcae health/check/status coherence/doctor task-memory/push check/runtime inspect all re-verified healthy/passed/coherent/clean/ready/Observed. schemas/ directory inspected: only pre-existing unrelated schemas/repository_intelligence/ family present -- no Stage 3/CLTR schema artifact of any kind exists.",
       "status": "passed"
     },
     {
-      "name": "phase_owned_commit_verification",
-      "result": "git show --stat --summary and git show --name-status --format=fuller for all six full commit hashes (326f92182e3a51e15f1986f3df8b7a8889b936f9, 39c2364b440a69cc7994431776333b041c665563, 0819cf921190188c8ea1b6ec264e8ee7d73044ab, 84b34a9d6e6cd3bd7d975a8e5b569f37a5a42871, 6e4c9e1515987da5fd090ab1a5a0ad853cb4240e, 8f9bd1342961a9c433d8e9d8238e0aac27d4fa9b): each independently classified (verification/status/task content; task lifecycle transition; stray-tracked-file cleanup; 136B-framing correction; corrective-task closure; corrective-task DONE.md bookkeeping fix) and confirmed to touch only docs/CHANGELOG.md/PROJECT_STATUS.md/tasks/** -- zero src/, tests/, or schemas/ files in any commit",
+      "name": "source_material_review",
+      "result": "Read in full: docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_FREEZE.md (CLTR-CUTOVER-001 v1.0, 135W), docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_FREEZE.md (CLTR-CUTOVER-SCHEMAS-001 v1.0, 135Z, all 2180 lines), the exact PREREQUISITE-136A-1/136A-2 wording from docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md. Inspected existing schema conventions (schemas/repository_intelligence/, draft 2020-12, $id/additionalProperties:false pattern), CLTR canonicalization/digest/enums modules (src/pcae/cltr/{canonicalization,digest,enums}.py, src/pcae/cltr/migration/enums.py), confirming no schema-loader/registry module exists yet for any executable-schema family in this repository.",
       "status": "passed"
     },
     {
-      "name": "136a_result_validation",
-      "result": "Confirmed the 136A independent-verification document's rendered verdict is exactly 'VERIFIED WITH PREREQUISITES' (grep-matched verbatim), confirmed zero BLOCKING findings (document's own Section 16 findings register and Section 'Contract verdict' both state 'No BLOCKING finding was identified'), confirmed no src/tests/schemas file changed across the full phase commit range (git diff --name-only across all six commits), confirmed via `pcae runtime inspect` that runtime remains Observed/observe/execution-unavailable, confirmed 136B framing corrected to 'Stage 3 Companion Executable Schema Architecture' (architecture-only, not executable-schema implementation) consistently across PROJECT_STATUS.md, the verification document's own Recommended-next-phase section, and tasks/TODO.md",
-      "status": "passed"
-    },
-    {
-      "name": "f135z3_disposition_audit",
-      "result": "135Z's own Findings table schedules F-135Z-3 (62-item verification matrix, summarized not fully enumerated) for verbatim publication at Phase 136A. Independently confirmed the committed 136A document (Section 15) cross-checks only the twelve representative CSCH-REQ entries against this phase's own findings and does not publish the full 62-item matrix verbatim. This finding is disclosed as NOT resolved by 136A as originally scheduled, carried forward rather than marked closed; this governed recovery did not rerun or expand 136A's own engineering content to close it, consistent with the recovery's own bounded scope",
-      "status": "passed (gap disclosed, not silently closed)"
-    },
-    {
-      "name": "governance_reinspection",
-      "result": "pcae health, pcae check, pcae status coherence, pcae doctor task-memory, pcae push check, pcae runtime inspect, pcae notify status all re-verified healthy/passed/coherent/clean/configured/ready throughout this recovery, including after each corrective commit",
+      "name": "no_implementation_verification",
+      "result": "git diff --name-only and git status confirmed the entire phase diff is docs/CHANGELOG/PROJECT_STATUS/tasks-only; zero src/, tests/, or schemas/ files touched. schemas/cltr_cutover/ does not exist on disk -- the architecture document describes it, it does not create it.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "4391/4391 passed, 0 failed (`python -m pytest -m fast_green -n auto`) -- fully green, matching the stable 4391 fast_green baseline held since Phase 106D; no source or test file was changed by this documentation-only phase 136A. As additional due diligence beyond the required gate, the full unmarked suite (20078 tests) was also executed twice: 20072/20078 passed on the final run, 6 failed -- 5 confirmed pre-existing against a clean pre-136A baseline (outside the fast_green gate; unrelated to this phase, 2 in tests/test_bootstrap_todo_consistency.py concerning an unrelated Track B roadmap phase-id parse, 3 in tests/test_advisory_runtime_contract.py, tests/test_advisory_runtime_architecture.py, tests/test_rendering_134e5.py), 1 environment-dependent (tests/test_gate_dry_run_context.py::test_git_ahead_count_returns_int_in_clean_repo, expected to resolve after this phase's governed push)",
+      "result": "python -m pytest -m fast_green -n auto: 4391/4391 passed, 0 failed -- fully green, matching the stable 4391 fast_green baseline held since Phase 106D. No source or test file was changed by this documentation-only phase 136B.",
       "status": "passed"
     },
     {
+      "name": "full_unmarked_suite_baseline_reproduction",
+      "result": "Full unmarked `python -m pytest -n auto` suite executed once this phase: 20073 passed, 5 failed, 105 warnings in 965.66s. All 5 failures independently reconfirmed pre-existing and unrelated to this phase by reproducing them identically against the pre-136B baseline commit (0afebf51, via `git stash`): tests/test_advisory_runtime_contract.py::test_no_new_directory_added_for_advisory, tests/test_advisory_runtime_architecture.py::test_no_new_directory_added_for_advisory, tests/test_rendering_134e5.py::test_current_report_generation_remains_unchanged, tests/test_bootstrap_todo_consistency.py::test_real_todo_no_longer_marks_90_series_as_next, tests/test_bootstrap_todo_consistency.py::test_real_todo_current_roadmap_lists_recommended_phase_as_next. All 5 are outside the fast_green gate.",
+      "status": "passed (5 pre-existing, unrelated failures confirmed and disclosed)"
+    },
+    {
       "name": "report_notification_tests",
-      "result": "included in fast_green above; no report/notification source was changed by this documentation-only phase",
+      "result": "included in fast_green (phase 136B); no report/notification source was changed by this documentation-only phase",
       "status": "passed"
     },
     {
       "name": "bootstrap_session_reporting_tests",
-      "result": "included in fast_green above; no bootstrap/session-reporting source was changed by this documentation-only phase",
+      "result": "included in fast_green (phase 136B); no bootstrap/session-reporting source was changed by this documentation-only phase",
       "status": "passed"
     }
   ],
   "test_results": {
-    "fast_green": "4391/4391 passed, 0 failed -- fully green (stable baseline since Phase 106D). Full unmarked suite additionally run twice as due diligence: 20072/20078 passed on final run, 6 failed, all outside the fast_green gate (5 pre-existing baseline failures unrelated to this phase, 1 environment-dependent origin-ahead-count assertion expected to resolve after governed push)",
-    "report_notification_tests": "included in fast_green (phase 136A)",
-    "bootstrap_session_reporting_tests": "included in fast_green (phase 136A)"
+    "fast_green": "4391/4391 passed, 0 failed -- fully green (stable baseline since Phase 106D).",
+    "report_notification_tests": "included in fast_green (phase 136B); no report/notification source was changed by this documentation-only phase",
+    "bootstrap_session_reporting_tests": "included in fast_green (phase 136B); no bootstrap/session-reporting source was changed by this documentation-only phase",
+    "full_unmarked_suite": "20073 passed, 5 failed, 105 warnings in 965.66s -- all 5 failures confirmed pre-existing and unrelated to this phase by reproduction against the pre-136B baseline commit (0afebf51); outside the fast_green gate."
   },
   "notification_dispatch_result": "pending single governed terminal delivery",
   "report_notification_status": "pending governed finalization",
-  "no_go_confirmation": "No production source changed. No test source changed. No executable schema changed. No Stage 3 Python model was implemented. No validator was implemented. No authority resolver was implemented. No authority-state persistence was implemented. No authority pointer was implemented or changed. No cutover request was created or executed. No readiness package was created. No authorization was created. No certification was created. No CAS or recovery journal was implemented. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production behavior changed. No execution capability was introduced. No Blocking finding was identified anywhere in this phase's independent verification. No finding was silently marked resolved without independent confirmation -- F-135Z-3 (the 62-item verification-matrix verbatim-publication requirement 135Z scheduled for closure at 136A) is disclosed as not fully resolved by the committed 136A document, which cross-checked only the twelve representative entries, and is carried forward rather than marked closed. No raw git commit or git push was used for this recovery's own corrective/bookkeeping commits (the 136B-framing correction, its task closure, and its tasks/DONE.md bookkeeping fix), which used the governed `pcae commit implementation` path; this phase discloses, rather than conceals, that the three original 136A phase commits were made via raw git commit prior to this governed recovery being invoked. No push had occurred as of this metadata's initial preparation. No --no-verify hook bypass or force push was used at any point. No second logical 136A completion was created. No redispatch of 135Z occurred. Legacy lifecycle remains the sole production authority; CLTR remains derivative. CLTR-CUTOVER-001 and CLTR-CUTOVER-SCHEMAS-001 remain future-behavior/future-data contracts only. Runtime remains Observed, maximum capability observe, execution availability unavailable.",
+  "no_go_confirmation": "No production source changed. No test source changed. No executable schema was added or modified. No Stage 3 Python model was implemented. No validator was implemented. No authority resolver was implemented. No authority-state persistence was implemented. No authority pointer was implemented or changed. No cutover request was created or executed. No readiness package was created. No authorization was created. No certification was created. No CAS or recovery journal was implemented. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production behavior changed. No execution capability was introduced. No Blocking finding was identified anywhere in this phase's architecture work. F-135Z-3 (62-item verification matrix) was not marked resolved; it is disclosed as open and carried forward to Phase 136C, not silently closed. PREREQUISITE-136A-1 and PREREQUISITE-136A-2 were both explicitly resolved by this phase's architecture document, not silently deferred. The 136A phase-report reconciliation conflict found via mandatory read-only inspection was disclosed, not repaired; 136A was not mutated or redispatched. No raw git commit or git push was used; the governed `pcae commit implementation` and `pcae push` paths were used throughout. No --no-verify hook bypass or force push was used at any point. No second logical 136B completion was created. No redispatch of 136A occurred. Legacy lifecycle remains the sole production authority; CLTR remains derivative. CLTR-CUTOVER-001 and CLTR-CUTOVER-SCHEMAS-001 remain future-behavior and future-data contracts only. Runtime remains Observed, maximum capability observe, execution availability unavailable.",
   "no_go_confirmations": [
     "No production source changed.",
     "No test source changed.",
-    "No executable schema changed.",
+    "No executable schema was added or modified.",
     "No Stage 3 Python model was implemented.",
     "No validator was implemented.",
     "No authority resolver was implemented.",
@@ -146,20 +129,21 @@
     "No legacy authority was retired.",
     "No production behavior changed.",
     "No execution capability was introduced.",
-    "No Blocking finding was identified anywhere in this phase's independent verification.",
-    "No finding was silently marked resolved without independent confirmation -- F-135Z-3 is disclosed as not fully resolved and carried forward, not silently closed.",
-    "No raw git commit or git push was used for this recovery's own three corrective/bookkeeping commits, which used the governed `pcae commit implementation` path; the three original 136A phase commits made via raw git commit prior to this governed recovery are disclosed, not concealed.",
-    "No push had occurred as of this metadata's initial preparation.",
+    "No Blocking finding was identified anywhere in this phase's architecture work.",
+    "F-135Z-3 (62-item verification matrix) was not marked resolved; it is disclosed as open and carried forward to Phase 136C, not silently closed.",
+    "PREREQUISITE-136A-1 and PREREQUISITE-136A-2 were both explicitly resolved by this phase's architecture document, not silently deferred.",
+    "The 136A phase-report reconciliation conflict found via mandatory read-only inspection was disclosed, not repaired; 136A was not mutated or redispatched.",
+    "No raw git commit or git push was used; the governed `pcae commit implementation` and `pcae push` paths were used throughout.",
     "No --no-verify hook bypass or force push was used at any point.",
-    "No second logical 136A completion was created.",
-    "No redispatch of 135Z occurred.",
+    "No second logical 136B completion was created.",
+    "No redispatch of 136A occurred.",
     "Legacy lifecycle remains the sole production authority; CLTR remains derivative.",
-    "CLTR-CUTOVER-001 and CLTR-CUTOVER-SCHEMAS-001 remain future-behavior/future-data contracts only.",
+    "CLTR-CUTOVER-001 and CLTR-CUTOVER-SCHEMAS-001 remain future-behavior and future-data contracts only.",
     "Runtime remains Observed, maximum capability observe, execution availability unavailable."
   ],
-  "recommended_next_phase": "136B - Stage 3 Companion Executable Schema Architecture",
-  "recommended_next_phase_id": "136B",
-  "recommended_next_phase_name": "Stage 3 Companion Executable Schema Architecture",
+  "recommended_next_phase": "136C - Stage 3 Companion Executable Schema Contract Freeze",
+  "recommended_next_phase_id": "136C",
+  "recommended_next_phase_name": "Stage 3 Companion Executable Schema Contract Freeze",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",

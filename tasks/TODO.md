@@ -13,18 +13,18 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 136A (Stage 3 Companion
-Schemas and Typed Authority Model Contract Independent Verification) is
-complete (VERIFIED WITH PREREQUISITES). The recommended next governed
-phase is **136B — Stage 3 Companion Executable Schema Architecture**
-(not yet activated), architecture-only per CLTR-CUTOVER-SCHEMAS-001 §43
-Layer 1 scope (shared envelope and enums) — not executable-schema
-implementation — folding in 136A's two new prerequisite findings, 135Z's
-own five findings, and 135X's still-open PREREQUISITE-135X-1.
+`PROJECT_STATUS.md` remains authoritative. Phase 136B (Stage 3 Companion
+Executable Schema Architecture) is complete (EXECUTABLE SCHEMA
+ARCHITECTURE COMPLETE WITH PREREQUISITES — READY FOR CONTRACT FREEZE).
+The recommended next governed phase is **136C — Stage 3 Companion
+Executable Schema Contract Freeze** (not yet activated): publish the
+full 62-item CSCH-REQ verification matrix verbatim (closing F-135Z-3),
+freeze 136B's architecture into binding contract text, and mint the
+fifteen remaining companion `schema_id` values.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 136B | Stage 3 Companion Executable Schema Architecture (Layer 1: shared envelope and enums) | 🔜 Next |
+| 136C | Stage 3 Companion Executable Schema Contract Freeze | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 
