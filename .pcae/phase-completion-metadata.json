@@ -26,11 +26,17 @@
     },
     {
       "hash": "e41e06edd189f661ac14f264ba5cbe180aea036d"
+    },
+    {
+      "hash": "e9fa043755e07376df6c29cc91cc82ce5f44dd4a"
+    },
+    {
+      "hash": "d1ac89cf1f9fd859259ab0ebcf74112d720d5b5c"
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 2,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "summary": "Phase 135X independently re-derives and adversarially verifies CLTR-CUTOVER-001 v1.0 (frozen Phase 135W) against primary architecture, current source, and safety invariants, per the phase brief's explicit re-derive/contradict/attack/do-not-trust methodology. Verification-only: no Stage 3 implementation, no implementation plan, no CLTR authority activation, no production pointer or authority-epoch change, no legacy demotion or retirement, no schema change, no execution introduced. Re-read the full 1687-line CLTR-CUTOVER-001 text directly (not 135W's own executive summary), and re-read 135U/135V/135W's own primary text rather than accepting inherited restatements. Independently re-confirmed by fresh source grep in this phase: all four production entry points (run_phase_complete, run_task_finish, run_phase_report_create, run_notify_send_report) current and converging through run_finalization_transaction; no authority resolver, authority pointer, or Stage 3 code exists anywhere in src/; canonical_artifact_promotion.py's promote_artifact and phase_reports.py's write_canonical_report remain plain path.write_text, no CAS; architecture_status.py's parse_phase_id/is_valid_phase_id/phase_sort_key narrative-parsing derivation remains live and unmigrated. Independently attacked all 38 requested verification areas and all 32 verification-matrix requirements (VR-1..VR-32) with adversarial state constructions, contradiction probes, and implementability analysis. Found zero BLOCKING contract defects -- made no repair to CLTR-CUTOVER-001, CLTR-SCHEMA-001, PFN-001, or PFR-001; this phase is verification only, not verification-plus-repair. Independently re-evaluated all ten of CLTR-CUTOVER-001's PREREQ-1..10 items against this phase's own severity rubric and confirmed every one of 135W's classifications correct. Added two new, independently-derived prerequisites: PREREQUISITE-135X-1 (Section 15's concurrency contract assumes existing checkpoint-level serialization/CAS that this phase's own compare-and-swap analysis shows does not currently exist) and PREREQUISITE-135X-2 (Section 29's quarantine contract does not explicitly cross-reference Section 16 item 6's implicit-legacy-default rule for a post-publication quarantined generation). Recorded seven NON-BLOCKING findings. Independently investigated, read-only, the inherited delivery_recorded_bookkeeping_incomplete reconciliation finding for Phase 135V: confirmed 135V's notification dispatch genuinely succeeded (PFN-001 satisfied) and only a post-dispatch receipt-modeling step failed, self-disclosed via the checkpoint's own limitations field -- legacy operational debt, not a Stage 3 contract gap. Separately discovered that re-running the identical reconciliation command for 135V today returns a different result (not_delivered) than 135W originally reported, because the shared .last-notified.json marker is a mutable most-recent-dispatch record overwritten by every subsequent phase's own dispatch, not a per-phase historical log -- recorded as a non-blocking documentation finding, not a contradiction or data loss. Produced docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md. Final verdict: VERIFIED WITH PREREQUISITES -- READY FOR IMPLEMENTATION PLANNING. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed, maximum capability observe, execution availability unavailable. Recommended next phase: 135Y -- Stage 3 Authority-Cutover Implementation Plan.",
   "governance_results": [
     {
