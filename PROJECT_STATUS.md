@@ -2,6 +2,69 @@
 
 ## Current Phase
 
+Phase 136E — Stage 3 Companion Executable Schema Implementation Plan
+(completed, planning-only). Produced a complete, dependency-aware
+implementation plan for the Stage 3 companion executable-schema package
+in `docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`,
+translating `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` (frozen 136C,
+repaired by 136D) into an implementable sequence. **Disposed
+PREREQUISITE-136D-1**: independently compared `jsonschema` against
+`fastjsonschema`, a custom validator, and vendoring across Draft
+2020-12 support, offline resolution, registry API, dependency
+footprint, license, and network behavior; selected `jsonschema>=4.18,<5`
+as the sole Draft-2020-12-conformant validation engine, scheduled as a
+**separate bounded prerequisite phase (136F)** rather than folded into
+schema authoring, since dependency-introduction risk (this repository's
+first-ever runtime dependency) is material enough to warrant its own
+independent verification (136G) before any schema content is written.
+Planned: strict duplicate-key JSON parsing (stdlib `json.loads` with
+`object_pairs_hook`, no third-party parser needed); the frozen
+16-standalone + 7-shared + 1-embedded package layout with an exact
+24-file inventory, implementation-group, and fixture-set assignment per
+file; a non-network-resolved `$id` strategy and an acyclic `$ref` graph
+with a topological authoring order; shared-definition, enum, and
+envelope (`allOf`-without-`unevaluatedProperties`) composition plans;
+six dependency/blast-radius-ordered implementation groups (never
+bundling more than one unverified authority-adjacent family group per
+phase); a full fixture-category plan per schema; resolution of the
+136D-disclosed unbounded-free-text finding via a per-field length/
+newline/control-character/Unicode table; a required schema manifest
+(file-digest tamper detection) scheduled before the registry; an
+offline-only registry and a non-raising `validate_record_shape()` API
+with JSON-Pointer error locations; a closed Layer-1/Layer-2 error-
+reason-code vocabulary kept structurally distinct from future Layer
+3–6 outcomes; a full 62-item-matrix-to-layer handoff table proving no
+requirement is unowned; a test, security, and no-authority-proof plan;
+and a 12-phase roadmap (136F through 136U) plus a typed-model
+eligibility gate. **Independently discovered and disclosed one new
+finding beyond 136D's own findings**: `PREREQUISITE-136E-1` — this
+repository's current wheel/sdist packaging scope
+(`packages = ["src/pcae"]`, sdist include list) does not include
+`schemas/`, a gap that would block any future non-editable-install
+consumer of `schemas/cltr_cutover/**`; scheduled as an explicit decision
+point for 136F rather than silently left open. Re-ran the 136A/136B/
+136C/136D read-only reconciliations; classified the 136B discrepancy
+(136C claimed `reconciled`, both 136D and this phase's own re-check
+observe `not_delivered`) as **incomplete bookkeeping** in 136C's own
+freeze-time narrative, not a change in underlying evidence — disclosed,
+not repaired, per explicit instruction not to mutate or redispatch
+136B. Verdict: **IMPLEMENTATION PLAN COMPLETE WITH OPEN PREREQUISITES —
+READY FOR VALIDATION-ENGINE PREREQUISITE**. No dependency, executable
+schema, fixture, parser, loader, registry, validator, typed model,
+authority resolver, authority-state persistence, or authority pointer
+was added. No production behavior changed. Legacy lifecycle remains the
+sole production authority; CLTR remains derivative; runtime remains
+Observed / observe / execution unavailable.
+
+Recommended next phase: **136F — Draft 2020-12 Validation Engine and
+Strict JSON Parsing Prerequisite** — implementation, not planning; adds
+`jsonschema>=4.18,<5` to `pyproject.toml`, implements strict duplicate-
+key parsing, and resolves the `PREREQUISITE-136E-1` packaging-scope
+decision, all independently verified by 136G before Group 1 schema
+authoring (136H) begins.
+
+## Phase 136D Complete
+
 Phase 136D — Stage 3 Companion Executable Schema Contract Independent
 Verification (completed, verification-plus-documentation-only-repair).
 Independently re-verified **CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0**

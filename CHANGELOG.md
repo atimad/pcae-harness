@@ -1,5 +1,49 @@
 # Changelog
 
+- Phase 136E — Stage 3 Companion Executable Schema Implementation Plan
+  (`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`).
+  Verdict: **IMPLEMENTATION PLAN COMPLETE WITH OPEN PREREQUISITES —
+  READY FOR VALIDATION-ENGINE PREREQUISITE**. Planning-only phase.
+  Disposed `PREREQUISITE-136D-1` by independently comparing `jsonschema`,
+  `fastjsonschema`, a custom validator, and vendoring across Draft
+  2020-12 support, offline `Registry`/`Resource` resolution, dependency
+  footprint, license, network behavior, and error-reporting shape;
+  selected `jsonschema>=4.18,<5`, scheduled for a separate bounded
+  prerequisite phase (136F) rather than folded into schema authoring.
+  Planned: strict duplicate-key JSON parsing (stdlib `json.loads` +
+  `object_pairs_hook`, no dependency needed); the frozen 24-file package
+  layout with an exact per-file implementation-group and fixture-set
+  table; a non-network `$id` strategy and an independently reconfirmed
+  acyclic `$ref` graph with a topological authoring order; shared
+  definitions, all 21 enums, and `allOf`-without-`unevaluatedProperties`
+  envelope composition; six dependency/blast-radius-ordered
+  implementation groups, each with its own independent-verification
+  phase, never bundling more than one unverified authority-adjacent
+  group; a full per-family fixture-category plan; resolution of the
+  136D non-blocking unbounded-free-text finding via a per-field bound
+  table; a required schema manifest (file-digest tamper detection)
+  before the registry; an offline-only registry and a non-raising
+  `validate_record_shape()` API with JSON-Pointer error locations; a
+  closed Layer-1/Layer-2 error-reason-code vocabulary kept distinct
+  from future Layer 3–6 outcomes; a 62-item-matrix-to-layer handoff
+  table proving every requirement is owned; test, security, and
+  no-authority-proof plans; and a 12-phase roadmap (136F–136U) plus a
+  typed-model eligibility gate. Independently discovered and disclosed
+  a new finding, `PREREQUISITE-136E-1`: this repository's current
+  wheel/sdist packaging scope does not include `schemas/`, scheduled as
+  an explicit 136F decision point. Re-ran the 136A–136D read-only
+  reconciliations; classified the 136B discrepancy (136C claimed
+  `reconciled`, 136D and this phase both observe `not_delivered`) as
+  **incomplete bookkeeping**, disclosed not repaired, per explicit
+  instruction not to mutate or redispatch 136B. No dependency,
+  executable schema, fixture, parser, loader, registry, validator,
+  typed model, authority resolver, authority-state persistence, or
+  authority pointer was added. No production behavior changed. Legacy
+  lifecycle remains the sole production authority; CLTR remains
+  derivative; runtime remains Observed / observe / execution
+  unavailable. Recommended next phase: **136F — Draft 2020-12
+  Validation Engine and Strict JSON Parsing Prerequisite**.
+
 - Phase 136D — Stage 3 Companion Executable Schema Contract Independent
   Verification
   (`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_INDEPENDENT_VERIFICATION.md`).
