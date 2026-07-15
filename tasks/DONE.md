@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136F: Draft 2020-12 Validation Engine and Strict JSON Parsing Prerequisite (20260715-2256-phase-136f-draft-2020-12-validation-engine-and-strict-json-parsing-prerequisite)
 - Phase 136E: Stage 3 Companion Executable Schema Implementation Plan (20260715-2142-phase-136e-stage-3-companion-executable-schema-implementation-plan)
 
 - Idle: awaiting next governed phase (post-136D) (20260715-2129-idle-awaiting-next-governed-phase-post-136d)
