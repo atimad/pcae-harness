@@ -31,6 +31,7 @@ Produce a complete, dependency-aware implementation plan for the Stage 3 compani
 - tasks/DECISIONS.md
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
