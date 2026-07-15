@@ -163,6 +163,16 @@
       "name": "read_only_136e_reconciliation",
       "result": "pcae phase-report reconcile --phase-id 136E (read-only, mutation: none): status=reconciled, marker=already_dispatched, checkpoint=completed, receipt=finalized.",
       "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136F); no report/notification source was changed by this phase",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136F); no bootstrap/session-reporting source was changed by this phase",
+      "status": "passed"
     }
   ],
   "test_results": {
@@ -175,7 +185,7 @@
   },
   "notification_dispatch_result": "pending single governed terminal delivery",
   "report_notification_status": "pending governed finalization",
-  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136F implemented generic schema-validation infrastructure only. No Stage 3 companion executable schema was created. No Stage 3 fixture, typed record model, semantic validator, authority resolver, authority state, or authority pointer was implemented or changed. No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal was created. Schema validity does not establish lifecycle authority, cutover eligibility, authorization, publication success, or recovery truth. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136F implemented generic schema-validation infrastructure only. No Stage 3 companion executable schema was created. No Stage 3 record schema was created. No shared Stage 3 enum schema was created. No AuthorityEpoch schema, AuthorityState schema, CutoverRequest schema, or ReadinessPackage schema was created. No Stage 3 fixture, typed record model, semantic validator, authority resolver, authority state, or authority pointer was implemented or changed. No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal was created. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. Schema validity does not establish lifecycle authority, cutover eligibility, authorization, publication success, or recovery truth. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "no_go_confirmations": [
     "No Stage 3 record schema was created by Phase 136F.",
     "No shared Stage 3 enum schema was created by Phase 136F.",
