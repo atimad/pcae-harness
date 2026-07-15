@@ -30,6 +30,7 @@ Freeze CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0: the binding executable-schema c
 - tasks/done/**
 - .pcae/phase-completion-metadata.json
 - .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 - .pcae/canonical-reports/**
 - .pcae/phase-reports/**
 
