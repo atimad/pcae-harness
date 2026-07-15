@@ -29,13 +29,13 @@ Produce the complete, staged, dependency-aware implementation plan for Stage 3 a
 - tasks/done/**
 - tasks/DONE.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
 - .pcae/phase-reports/**
 
 ## Forbidden Files
 
 - src/**
 - tests/**
-
 
 ## Allowed Zones
 
