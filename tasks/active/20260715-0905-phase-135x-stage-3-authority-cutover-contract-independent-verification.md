@@ -22,14 +22,9 @@ Independently re-derive and verify CLTR-CUTOVER-001 v1.0 against primary archite
 
 ## Allowed Files
 
-- docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md
-- PROJECT_STATUS.md
-- CHANGELOG.md
-- tasks/active/**
-- tasks/done/**
-- tasks/DONE.md
-- tasks/TODO.md
-- tasks/DECISIONS.md
+- .pcae/phase-completion-metadata.json
+- .pcae/phase-completion-report.md
+- .pcae/phase-metadata-repairs.log
 
 ## Forbidden Files
 
