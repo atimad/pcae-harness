@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 135W — Stage 3 Authority-Cutover Contract Freeze (completed,
+CONTRACT FROZEN WITH PREREQUISITES — READY FOR INDEPENDENT
+VERIFICATION). Contract-only, per governed scope — no Stage 3
+implementation, no CLTR authority activation, no production pointer or
+authority-epoch change, no legacy demotion or retirement, no schema
+change. Froze **CLTR-CUTOVER-001 v1.0**, re-deriving 135V's readiness
+analysis (rather than copying its prose) into thirty-eight binding
+contract sections covering: relationship to CLTR-001, CLTR-SCHEMA-001
+v1.0.1, PFN-001, PFR-001, the 135M migration plan, and verified Stage
+1/2/rollback-rehearsal evidence; the authoritative object (one
+immutable, certified, manifest-bound generation — never a bare CLTR
+record); a single shared authority resolver; the single-authority
+invariant; a typed authority-epoch requirement (closing F-135V-1); the
+cutover request, human-authorization contract (resolving F-135V-8's
+deferred freshness-window parameter at 24 hours), and readiness-evidence
+package; the pre-cutover gate; candidate/certification distinctions; the
+authority-publication boundary; a genuine compare-and-swap / stale-writer
+contract (directly implementing F-135V-2, confirmed by source review that
+no writer in the codebase today — legacy or Stage 2 rehearsal — performs
+true CAS, only atomic-write or validate-then-write); concurrency;
+cross-epoch policy (resolving all four 135U-disclosed rollback gaps
+normatively — no-rehearsal rollback forbidden as a production state,
+cross-epoch rollback permanently forbidden, the concurrent
+rollback-vs-forward race deferred to CAS-backed implementation, no
+dedicated roll-forward command required); rollback/roll-forward policy;
+crash/recovery (an eighteen-state table); external-effect sequencing (a
+nine-step order preventing false lifecycle completion); report/metadata,
+Architecture Status, checkpoint/promotion, notification, marker, and
+receipt migration (all additive to PFN-001/PFR-001, none amending
+either); the all-four-entry-point contract (grounded in direct source
+citation: `run_phase_complete`, `run_task_finish`,
+`run_phase_report_create`, `run_notify_send_report`, all converging
+through `run_finalization_transaction`); split-brain prevention; security/
+containment; quarantine; a schema-readiness disposition table against
+CLTR-SCHEMA-001 v1.0.1 (implementing F-135V-4, classifying required
+additive fields without amending the schema); configuration,
+compatibility, and demotion/retirement contracts; a ten-item prerequisite
+register; acceptance/no-go criteria; and a thirty-two-row verification
+matrix governing 135X. No CONFIRMED-BLOCKING-for-contract-freeze finding
+was identified. Legacy lifecycle remains the sole production authority;
+CLTR remains derivative; Stage 1, Stage 2, and rollback evidence remain
+non-authoritative; runtime remains Observed / observe / execution
+unavailable.
+
+Full contract: `docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_FREEZE.md`.
+Recommended next phase: **135X — Stage 3 Authority-Cutover Contract
+Independent Verification**.
+
+## Phase 135V Complete
+
 Phase 135V — Stage 3 Authority-Cutover Readiness Architecture
 (completed, CONDITIONALLY READY — PREREQUISITES REQUIRED). Architecture
 and readiness-analysis only, per governed scope — no Stage 3

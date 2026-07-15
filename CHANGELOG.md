@@ -1,5 +1,82 @@
 # Changelog
 
+- Phase 135W — Stage 3 Authority-Cutover Contract Freeze
+  (`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_FREEZE.md`).
+  Verdict: CONTRACT FROZEN WITH PREREQUISITES — READY FOR INDEPENDENT
+  VERIFICATION. Froze **CLTR-CUTOVER-001 v1.0**, the binding contract
+  governing the one-time transfer of production lifecycle authority from
+  legacy to a CLTR-backed authoritative generation. Contract-only, per
+  governed scope; re-derived, rather than copied, 135V's readiness
+  analysis into thirty-eight normative sections, each traced to a prior
+  binding contract (CLTR-001 v1.0, CLTR-SCHEMA-001 v1.0.1, PFN-001,
+  PFR-001, 135M's migration plan), independently verified evidence
+  (Stage 1: 135O/135P; Stage 2: 135S/135T; rollback rehearsal: 135U), an
+  explicit safety requirement, or a clearly labelled new Stage 3
+  decision. Defines: the authoritative object (one immutable, certified,
+  manifest-bound generation, never a bare CLTR record); a single shared
+  authority resolver forbidden from inferring authority from titles,
+  filenames, Git history, or prose; the single-authority invariant
+  across nine externally visible boundaries; a typed authority-epoch
+  requirement closing F-135V-1's string-prefix insufficiency; the
+  cutover request, human-authorization contract (setting the
+  previously-deferred F-135V-8 freshness window at 24 hours), and
+  readiness-evidence package; the pre-cutover gate (four-outcome model:
+  eligible/ineligible/uncertain/conflict, only `eligible` may proceed);
+  candidate/certification distinctions (certification never itself
+  publishes authority); the sole authority-publication boundary; a
+  genuine compare-and-swap / stale-writer contract directly implementing
+  F-135V-2 — grounded in this phase's own source review confirming no
+  writer in the codebase today (`canonical_artifact_promotion.py`,
+  `phase_reports.py`'s canonical-report and marker writers, the Stage 2
+  rehearsal pointer) performs true CAS, only plain overwrite, atomic
+  replace without a prior-value precondition, or validate-then-write;
+  concurrency; cross-epoch policy resolving all four 135U-disclosed
+  rollback gaps normatively (rollback to no current authority forbidden
+  as a production state; cross-epoch rollback permanently forbidden;
+  the concurrent rollback-vs-forward race deferred to CAS-backed
+  implementation as PREREQ-2; no dedicated roll-forward command
+  required); rollback/roll-forward policy (roll-forward preferred over
+  rollback after any irreversible external effect); an eighteen-state
+  crash/recovery table; a nine-step external-effect sequencing order
+  preventing false lifecycle completion; report/metadata, Architecture
+  Status (closing F-135V-6's authority-as-narrative-parsing hazard by
+  contract, though migration itself remains a pre-activation
+  prerequisite), checkpoint/promotion, notification, marker, and receipt
+  migration — all additive extensions preserving PFN-001's and PFR-001's
+  binding text unchanged; the all-four-entry-point contract, grounded in
+  direct source citation (`run_phase_complete` at `phase.py:48`,
+  `run_task_finish` at `task.py:181`, `run_phase_report_create` at
+  `phase_reports.py:54`, `run_notify_send_report` at
+  `notifications.py:157`, all converging through
+  `run_finalization_transaction`); split-brain prevention across nine
+  named forms; security/containment (carrying forward Stage 2's
+  protections, including closing the class of hazard 135T's F-135T-1
+  found — a containment check defined but never wired into its call
+  path); quarantine triggers; a schema-readiness disposition table
+  against CLTR-SCHEMA-001 v1.0.1 implementing F-135V-4 (classifying
+  which Stage 3 concepts are already represented, covered by an existing
+  extension point, or require an additive minor schema revision — no
+  schema modified in this phase); configuration (ten independent
+  classes, no single Boolean combining readiness/authorization/
+  activation); compatibility and demotion/retirement contracts (135W
+  does not authorize code deletion); a ten-item prerequisite register
+  (four Blocking for implementation, one Blocking for activation, five
+  deferred or non-blocking, none labelled "Non-Blocking" without stating
+  the milestone it blocks); twenty-three acceptance criteria (all
+  satisfied as contract obligations) and sixteen no-go conditions (none
+  currently triggered); and a thirty-two-row verification matrix
+  governing 135X. No CONFIRMED-BLOCKING-for-contract-freeze finding was
+  identified. No production source changed; no test source changed; no
+  schema changed; no Stage 3 code added; no cutover request executed; no
+  CLTR authority created; no production pointer or authority epoch
+  changed; no legacy authority demoted or retired; no notification,
+  marker, receipt, report, metadata, Architecture Status, checkpoint, or
+  promotion behavior changed; no execution capability introduced.
+  Legacy lifecycle remains the sole production authority; CLTR remains
+  derivative; Stage 1, Stage 2, and rollback evidence remain
+  non-authoritative. Recommended next phase: 135X — Stage 3
+  Authority-Cutover Contract Independent Verification.
+
 - Phase 135V — Stage 3 Authority-Cutover Readiness Architecture
   (`docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_READINESS_ARCHITECTURE.md`).
   Verdict: CONDITIONALLY READY — PREREQUISITES REQUIRED. Architecture
