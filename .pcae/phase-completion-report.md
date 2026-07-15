@@ -1,207 +1,267 @@
-# Phase 136E Complete — Stage 3 Companion Executable Schema Implementation Plan
+# Phase 136F Complete — Draft 2020-12 Validation Engine and Strict JSON Parsing Prerequisite
 
 ## Phase identity
 
-- Phase ID: `136E`
+- Phase ID: `136F`
 - Status: completed
-- Classification: implementation planning, documentation-only
+- Classification: implementation, bounded prerequisite infrastructure
 - Report completeness: complete
 
 ## Summary
 
-Phase 136E produced a complete, dependency-aware implementation plan for
-the Stage 3 companion executable-schema package, translating
-**CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0** (frozen by Phase 136C,
-repaired by Phase 136D) into an implementable sequence. Documented in
-`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`.
+Phase 136F implemented and independently tested only the generic
+prerequisite infrastructure planned by Phase 136E, resolving
+`PREREQUISITE-136E-1`, before any Stage 3 executable companion-schema
+authoring begins. Full detail in
+`docs/PHASE_136_DRAFT_2020_12_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_PREREQUISITE.md`.
 
-**Disposed PREREQUISITE-136D-1** (no JSON-Schema-Draft-2020-12-conformant
-validation engine exists anywhere in this repository): independently
-compared `jsonschema`, `fastjsonschema`, a hand-rolled validator, and
-vendoring across Draft 2020-12 support, offline `Registry`/`Resource`
-resolution, dependency footprint, license, network behavior, and
-error-reporting shape; selected `jsonschema>=4.18,<5` as the sole
-Draft-2020-12-conformant validation engine. Scheduled dependency
-introduction as a **separate, bounded prerequisite phase (136F)** rather
-than folding it into schema authoring, since this repository's
-first-ever runtime dependency carries material enough risk to warrant
-its own independent verification (136G) before any schema content is
-written.
+Added `jsonschema>=4.18,<5` to `pyproject.toml` — this repository's
+first runtime (non-dev) dependency. Installed version: 4.25.1, within
+the frozen range. Transitive dependencies (`referencing` 0.36.2,
+`jsonschema-specifications` 2025.9.1, `rpds-py` 0.27.1, `attrs` 26.1.0)
+are all MIT-licensed and perform no network access at runtime
+(`jsonschema-specifications` bundles the Draft 2020-12 meta-schema
+locally).
 
-Planned: strict duplicate-key JSON parsing (stdlib `json.loads` with
-`object_pairs_hook`, no third-party parser needed); the frozen
-16-standalone + 7-shared + 1-embedded package layout with an exact
-24-file inventory, implementation-group, and fixture-set assignment per
-file; a non-network-resolved `$id` strategy and an independently
-reconfirmed acyclic `$ref` graph with a topological authoring order;
-shared-definition, enum (all 21), and envelope (`allOf`-without-
-`unevaluatedProperties`) composition plans; six dependency/blast-radius-
-ordered implementation groups, each with its own independent-
-verification phase, never bundling more than one unverified
-authority-adjacent family group per phase; a full fixture-category plan
-per schema; resolution of the 136D non-blocking unbounded-free-text
-finding via a per-field length/newline/control-character/Unicode bound
-table; a required schema manifest (file-digest tamper detection)
-scheduled before the registry; an offline-only registry design and a
-non-raising `validate_record_shape()` API design with JSON-Pointer
-error locations; a closed Layer-1/Layer-2 error-reason-code vocabulary
-kept structurally distinct from future Layer 3–6 outcomes; a full
-62-item-matrix-to-layer handoff table proving no requirement is
-unowned; test, security, and no-authority-proof plans; and a 12-phase
-roadmap (136F through 136U) plus a typed-model eligibility gate.
+New package `src/pcae/schema_runtime/`: a hand-written recursive-descent
+strict JSON parser (`json_parser.py`) rejecting duplicate object keys at
+every nesting level and non-finite numbers (`NaN`/`Infinity`/
+`-Infinity`) with JSON-Pointer instance paths — a hand-written parser
+was chosen over `json.loads(object_pairs_hook=...)` because that
+mechanism cannot report an ancestor path for a rejected duplicate key;
+a 13-code Layer-1/Layer-2 error vocabulary (`errors.py`); immutable
+`JsonParseResult`/`ShapeValidationResult`/`ValidationIssue`/
+`SchemaResourceInfo` models with an explicit three-way valid/invalid/
+infrastructure-failure outcome (`models.py`); an offline,
+containment-and-symlink-checked schema resource loader enforcing Draft
+2020-12 dialect, unique `$id`, and meta-schema conformance
+(`loader.py`); an offline-only `referencing.Registry`-backed registry
+whose `retrieve` hook unconditionally refuses any unregistered lookup —
+proven never to fetch even a URI-shaped `$id` over the network
+(`registry.py`); and a generic `validate_record_shape()` Layer-2
+shape-validation API with deterministic issue ordering, an
+issue-count cap, and no semantic or authority claim (`validation.py`).
 
-**Independently discovered and disclosed one new finding beyond 136D's
-own findings**: `PREREQUISITE-136E-1` — this repository's current
-wheel/sdist packaging scope (`packages = ["src/pcae"]`, sdist include
-list) does not include `schemas/`, a gap that would block any future
-non-editable-install consumer of `schemas/cltr_cutover/**`; scheduled
-as an explicit decision point for Phase 136F rather than silently left
-open.
+Resolved **PREREQUISITE-136E-1**: prior to this phase,
+`[tool.hatch.build.targets.wheel]` (`packages = ["src/pcae"]`) and
+`[tool.hatch.build.targets.sdist]` (`include = ["src/pcae", ...]`) never
+included the top-level `schemas/` directory in either build target.
+New package `src/pcae/schema_resources/` (Option A — schemas packaged
+inside `src/pcae`, chosen because the existing hatchling configuration
+already reliably includes non-`.py` files nested under `src/pcae/**`
+in both build targets with no further configuration) contains only a
+generic, explicitly non-Stage-3 smoke schema
+(`smoke/generic_smoke_record.schema.json`) and `smoke_schema_root()`, an
+`importlib.resources`-based accessor proven to work identically from an
+editable install, a built wheel (inspected via `zipfile`), a built
+source distribution (inspected via `tarfile`), and an installed wheel
+in a freshly created, isolated venv (no source checkout present). **No
+Stage 3 schema was moved or created in this phase.**
 
-Re-ran the 136A/136B/136C/136D read-only reconciliations. Classified
-the 136B discrepancy (136C's own freeze-time narrative claimed
-`reconciled`, while both 136D and this phase's fresh read observe
-`not_delivered`) as **incomplete bookkeeping** in 136C's own prose, not
-a change in underlying evidence — disclosed, not repaired, per explicit
-instruction not to mutate or redispatch 136B. 136A's disclosed
-`conflict` reconciliation status is unchanged and likewise not
-repaired.
+69 new focused tests across six files (JSON parser, loader, registry,
+Draft-2020-12-capability/shape-validation, no-network/no-authority/
+no-execution boundaries, packaging) — all passing. Fast Green unchanged
+at 4391/4391. Full unmarked suite freshly run: 20128 passed, 19 failed,
+20147 total; all 19 failures independently reproduced identically
+against an isolated pre-136F worktree (commit `7a62bb54`, clean venv),
+confirming they are **pre-existing and unrelated to Phase 136F** (see
+Evidence and validation below) — zero regressions introduced by this
+phase.
 
-This phase's own diff is limited to documentation, status, changelog,
-and task-lifecycle files. It added zero dependencies, zero executable
-schemas, zero fixtures, zero parsers, zero loaders, zero registries,
-zero validators, and zero typed models; it implemented no authority
-resolver, no authority-state persistence, and no authority pointer; it
-created no cutover request, readiness package, authorization,
-candidate, certification, publication attempt, conflict record, or
-recovery journal; it changed no authority epoch; it changed no
-production behavior.
+No Stage 3 record schema, shared enum schema, `AuthorityEpoch` schema,
+`AuthorityState` schema, `CutoverRequest` schema, `ReadinessPackage`
+schema, authorization schema, candidate or certification schema, CAS or
+publication schema, recovery or reconciliation schema, notification,
+marker, or receipt binding, Stage 3 typed record model, cross-record
+semantic validator, authority resolver, authority-state persistence, or
+current-authority pointer was created. No cutover request, readiness
+package, authorization, candidate, certification, publication attempt,
+conflict record, or recovery journal was created. Schema validity
+establishes no lifecycle authority, cutover eligibility, authorization,
+publication success, or recovery truth. No authority epoch changed. No
+CLTR authority was created. No legacy authority was demoted or retired.
+No production lifecycle behavior changed. No execution capability was
+introduced. Legacy lifecycle remains the sole production authority;
+CLTR remains derivative. Runtime remains Observed, maximum capability
+observe, execution availability unavailable throughout.
 
 ## Evidence and validation
 
-- Governed phase commits: `fb4c2156` (implementation plan document +
-  PROJECT_STATUS/CHANGELOG updates) and `eeaaec56` (task activation,
-  prior idle placeholder close, `tasks/DONE.md` update) — 7 net files
-  changed.
-- This is a documentation-only phase. No source, test, schema, or
-  fixture file was modified; governance and read-only inspection
-  commands actually run and their results:
+- Governed phase commit: `4d9c51f` (implementation content — 33 files
+  changed: `schema_runtime`/`schema_resources` source, six test files,
+  fixture schemas, `pyproject.toml`, `.pcae/policy.toml` (new
+  `schema_runtime` architecture zone), documentation, `PROJECT_STATUS.md`,
+  `CHANGELOG.md`, task-lifecycle files). A second governed commit closes
+  this phase's task contract and opens the next idle placeholder (hash
+  recorded after this report is committed, per the same two-commit
+  pattern used by 136E).
+- Governance and read-only inspection commands actually run and their
+  results:
   - `pcae health`: healthy.
   - `pcae check`: passed.
   - `pcae status coherence`: coherent.
-  - `pcae doctor task-memory`: clean.
-  - `pcae push check`: ready before, pushed via `git push origin main`
-    (see Safety and no-go confirmation for the one process deviation
-    this phase discloses), nothing to push after; `origin/main..HEAD`
+  - `pcae doctor task-memory`: clean (after this phase's task-closure
+    commit updates `tasks/DONE.md`; one pre-existing unrelated warning
+    about the prior idle placeholder's `tasks/DONE.md` listing was
+    resolved by that commit).
+  - `pcae push check`: ready before, pushed after, `origin/main..HEAD`
     is `0`.
   - `pcae runtime inspect`: Observed / observe / execution unavailable,
-    confirmed unchanged before and after this phase's changes.
+    unchanged before and after this phase's changes.
   - `pcae notify status`: Telegram configured, enabled, ready for
     outbound delivery.
-  - `pcae phase-report reconcile --phase-id 136A` (read-only, mutation:
-    none): `reconciliation_status: conflict`, `marker_state:
-    not_dispatched`, `checkpoint_state: completed`, `receipt_state:
-    finalized` — identical to every prior phase's own disclosure.
+  - Read-only reconciliation for 136A–136E, re-run at phase start:
+    136A `conflict`/`not_dispatched`; 136B `not_delivered`/
+    `not_dispatched`; 136C `not_delivered`/`not_dispatched`; 136D
+    `reconciled`/`already_dispatched`; 136E `reconciled`/
+    `already_dispatched`. Identical to prior phases' own disclosures.
     Carried forward as historical evidence only; not repaired, not
-    redispatched.
-  - `pcae phase-report reconcile --phase-id 136B` (read-only, mutation:
-    none): `status: not_delivered`, `marker: not_dispatched` —
-    reproduces 136D's own observation, differing from 136C's own
-    freeze-time narrative claim of `reconciled`. Classified incomplete
-    bookkeeping in 136C's own prose; disclosed, not repaired, not
-    redispatched.
-  - `pcae phase-report reconcile --phase-id 136C` (read-only, mutation:
-    none): `status: not_delivered`, `marker: not_dispatched`,
-    `checkpoint: completed`, `receipt: finalized`.
-  - `pcae phase-report reconcile --phase-id 136D` (read-only, mutation:
-    none): `status: reconciled`, `marker: already_dispatched`,
-    `checkpoint: completed`, `receipt: finalized`. Clean.
-  - `pyproject.toml`/dependency inspection: `dependencies = []`;
-    `pip show jsonschema` confirms not installed; wheel/sdist scope
-    (`packages = ["src/pcae"]`, sdist include list) does not include
-    `schemas/` — independently discovered, disclosed as
-    `PREREQUISITE-136E-1`.
-  - `fast_green` re-run: `4391 passed` — no source or test file was
-    touched by this documentation-only phase, so this re-run confirms
-    the existing baseline is unaffected; it is not claimed as evidence
-    of anything beyond "no source or test file was touched."
+    redispatched (per explicit instruction — read-only reconciliation
+    only).
+  - Dependency/packaging inspection: `pyproject.toml` had
+    `dependencies = []` before this phase; `jsonschema` confirmed not
+    installed in the active environment before this phase; wheel/sdist
+    scope did not include `schemas/` before this phase.
+- Focused `schema_runtime` test suite
+  (`tests/test_schema_runtime_*.py`): **69 passed, 0 failed** (22 JSON
+  parser, 14 loader, 5 registry, 12 Draft-2020-12-capability/
+  shape-validation, 12 boundary/no-network/no-authority/no-execution
+  proofs, 4 packaging — 3 of the 4 packaging tests are `slow`-marked
+  since they build a real wheel/sdist and, for one, provision an
+  isolated venv; all 4 were explicitly run and passed).
+- Fast Green (`python -m pytest -m fast_green -n auto`): **4391
+  passed**, identical to the 136E baseline — the new `schema_runtime`
+  test files are not in the `FAST_GREEN_MODULES` set (deliberately not
+  added, to keep this phase's boundary minimal), so this run confirms
+  zero regressions in the existing fast-green-tagged suite.
+- Full unmarked suite (`python -m pytest -n auto`): **20128 passed, 19
+  failed** (1085.34s). The 19 failures span
+  `test_advisory_runtime_contract.py`, `test_advisory_runtime_architecture.py`,
+  `test_phase_reports.py`, `test_rendering_134e5.py`,
+  `test_finalization_transaction_134e10.py` (5 tests),
+  `test_cltr_migration_135p_verification.py` (4 parametrized cases),
+  `test_bootstrap_todo_consistency.py` (2 tests), and
+  `test_cltr_135o_integration.py` (4 tests) — none touch
+  `schema_runtime`/`schema_resources`, none touch strict JSON parsing,
+  and none touch packaging. **Classified against an isolated pre-136F
+  worktree**, per this phase's explicit instruction not to rely on
+  `git stash` alone: `git worktree add /tmp/pcae-136f-baseline 7a62bb54`,
+  a clean Python 3.9 venv, `pip install -e ".[dev]"` (no `jsonschema`,
+  matching the pre-136F baseline exactly), then the identical 19 test
+  node IDs run in two batches. **All 19 reproduced with identical
+  failure output** on the clean pre-136F baseline (e.g.
+  `test_finalization_transaction_134e10.py`'s five failures all assert
+  `result.status == "completed"` against an actual status of
+  `completed_receipt_best_effort_incomplete` — a pre-existing
+  assertion/implementation mismatch unrelated to this phase). Confirmed
+  **pre-existing, not caused by Phase 136F**; the worktree was removed
+  (`git worktree remove /tmp/pcae-136f-baseline --force`) after
+  classification, no repository state left behind.
+- Wheel/sdist/editable-install packaging tests
+  (`tests/test_schema_runtime_packaging.py`), run explicitly (all
+  `slow`-marked tests included): editable install — passed; wheel build
+  (`python -m build --wheel`) inspected via `zipfile` — smoke schema
+  present at `pcae/schema_resources/smoke/generic_smoke_record.schema.json`,
+  no `cltr_cutover`/`.pcae/`/`session.json` entries — passed; source
+  distribution (`python -m build --sdist`) inspected via `tarfile` —
+  smoke schema present, no `cltr_cutover`/`.pcae/` entries — passed;
+  installed wheel in a fresh, isolated `venv` (no source checkout) —
+  `pip install --no-deps` the built wheel, subprocess probe imports
+  `pcae.schema_resources.smoke_schema_root()` and confirms the file
+  exists — passed.
+- No-network proof: `tests/test_schema_runtime_registry.py` and
+  `tests/test_schema_runtime_boundaries.py` monkeypatch `socket.socket`
+  to raise if called, then exercise registry lookup (including a
+  URI-shaped `$id`) and `validate_record_shape()` — all pass with
+  sockets forbidden.
+- No-authority/no-execution proof: `tests/test_schema_runtime_boundaries.py`
+  performs an AST-based import/call scan of every `.py` file under
+  `src/pcae/schema_runtime/` and `src/pcae/schema_resources/` for
+  `subprocess`, `socket`, `shlex`, HTTP-client modules, and
+  `subprocess.run`/`call`/`Popen`/`os.system`/`os.popen` call sites
+  (none found), a text scan for `pcae.cltr`/`current_authority`/
+  `authority_state`/`authority_epoch`/`cltr-authority` identifiers
+  (none found), and an on-disk assertion that `.pcae/cltr-authority/`
+  and `schemas/cltr_cutover/` do not exist.
 
-Full planning detail, per-section analysis, the file inventory, the
-implementation-group/roadmap breakdown, and the findings register are
-in
-`docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_IMPLEMENTATION_PLAN.md`.
+Full per-section detail, the dependency/license table, the Draft
+2020-12 capability-proof breakdown, the packaging-decision rationale,
+findings, limitations, and independent-verification requirements are in
+`docs/PHASE_136_DRAFT_2020_12_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_PREREQUISITE.md`.
 
-## Findings (full detail in the implementation plan's Findings section)
+## Findings
 
-- PREREQUISITE-136D-1 (disposed): resolved by selecting
-  `jsonschema>=4.18,<5` and scheduling a separate bounded
-  dependency-introduction phase (136F) plus its own independent
-  verification (136G).
-- CONFIRMED-136E-1: `jsonschema>=4.18,<5` independently confirmed as the
-  correct, sole validation-engine selection for this contract.
-- PREREQUISITE-136E-1 (new): current wheel/sdist packaging scope omits
-  `schemas/`; scheduled as an explicit 136F decision point.
-- NON-BLOCKING-136D-1: carried forward, unrepaired, out of this plan's
-  scope (family row-order presentation cosmetic in 136C's own §4
-  table).
-- DEFERRED-136E-1: 136B/136C's own historical reconciliation
-  discrepancy, classified incomplete bookkeeping, not repaired.
-- DEFERRED-136E-2: 136A's unchanged `conflict` reconciliation status,
-  disclosed historical evidence only, not repaired.
+- `PREREQUISITE-136E-1` (resolved): wheel/sdist packaging did not
+  include any schema-resource directory. Resolved by packaging schema
+  resources inside `src/pcae/schema_resources/` (Option A) and proving
+  inclusion across editable install, wheel, sdist, and an installed
+  wheel in an isolated venv.
+- `CONFIRMED-136F-1`: `jsonschema>=4.18,<5` (installed 4.25.1)
+  independently confirmed to support Draft 2020-12 via
+  `Draft202012Validator`, `$defs`, local and cross-file `$ref`,
+  `if`/`then`/`else`, `oneOf`, `allOf`, `additionalProperties: false`,
+  and `unevaluatedProperties: false` (including nested-unknown-property
+  rejection).
+- `CONFIRMED-136F-2`: the offline registry never performs network I/O,
+  including for URI-shaped `$id` values, proven under a monkeypatched
+  `socket.socket`.
+- `NON-BLOCKING-136F-1`: no explicit parser-level recursion-depth limit
+  is enforced; mitigated only by the 5 MiB input-size ceiling and the
+  CPython interpreter recursion limit. Disclosed as a limitation, not
+  silently assumed adequate; a future phase should add an explicit
+  depth counter before deeply nested Stage 3 records are anticipated.
+- `DEFERRED-136F-1`: the generic schema-manifest file format selected
+  by 136E is deferred to the first schema-core implementation phase,
+  since the per-resource metadata (`SchemaResourceInfo`, including
+  SHA-256 digest) a manifest would need is already computed and
+  available, keeping the design manifest-compatible without widening
+  this phase's boundary.
+- `NON-BLOCKING-136F-2` (historical, disclosed not repaired): the 19
+  full-unmarked-suite failures classified above are pre-existing
+  governance/finalization-transaction and integration-test defects
+  unrelated to `schema_runtime`, confirmed against an isolated pre-136F
+  worktree. Not owned or repaired by this phase; carried forward for a
+  future phase's attention.
 
-Zero unresolved Blocking planning ambiguity. No upstream contract
-(`CLTR-001`, `CLTR-SCHEMA-001`, `CLTR-CUTOVER-001`,
-`CLTR-CUTOVER-SCHEMAS-001`, `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001`,
-PFN-001, PFR-001) was modified.
+Zero unresolved Blocking findings.
 
 ## Safety and no-go confirmation
 
-No dependency was added. No packaging file changed. No production
-source changed. No test source changed. No executable schema or
-fixture was added (`schemas/cltr_cutover/` does not exist on disk). No
-parser, loader, registry, or validator was implemented. No typed model
-was implemented. No authority resolver, authority-state persistence, or
-authority pointer was implemented or changed. No cutover request,
-readiness package, authorization, candidate, certification, publication
-attempt, conflict record, or recovery journal was created. No authority
-epoch changed; production authority remains legacy. No CLTR authority
-was created. No legacy authority was demoted or retired. No production
-behavior changed. No execution capability was introduced. 136A and 136B
-were not mutated or redispatched. Legacy lifecycle remains the sole
-production authority; CLTR remains derivative. CLTR-CUTOVER-001,
-CLTR-CUTOVER-SCHEMAS-001, and CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001
-remain future-behavior/future-data contracts only. Runtime remains
-Observed, maximum capability observe, execution availability
-unavailable throughout.
+Legacy lifecycle remains the sole production authority. CLTR remains
+derivative. 136F implemented generic schema-validation infrastructure
+only. No Stage 3 companion executable schema was created. No Stage 3
+fixture, typed record model, semantic validator, authority resolver,
+authority state, or authority pointer was implemented or changed. No
+cutover request, readiness package, authorization, candidate,
+certification, publication attempt, conflict record, or recovery
+journal was created. Schema validity does not establish lifecycle
+authority, cutover eligibility, authorization, publication success, or
+recovery truth. No authority epoch changed. No CLTR authority was
+created. No legacy authority was demoted. No legacy authority was
+retired. No production lifecycle behavior changed. No execution
+capability was introduced. Runtime remains Observed, maximum capability
+remains observe, and execution availability remains unavailable.
 
-**Disclosed process deviation**: the two governed content commits
-(`fb4c2156`, `eeaaec56`) were created with `pcae commit implementation`
-as required. Pushing them to `origin/main` was performed with a direct
-`git push origin main` rather than a `pcae push`-prefixed command,
-because at the time of pushing this phase had not yet located the
-`pcae push --staged-file-aware` invocation form. No `--no-verify` hook
-bypass and no force push were used; the push was an ordinary fast-forward
-push of exactly the two already-governed commits, and
-`git rev-list --count origin/main..HEAD` confirmed `0` immediately
-afterward. This is disclosed here rather than silently omitted.
+`schemas/cltr_cutover/` does not exist on disk. No Stage 3 record
+schema exists. No typed Stage 3 model exists. No semantic validator
+exists. No authority namespace exists. No authority pointer exists or
+changed. No production artifact changed because of this phase's
+validation infrastructure.
 
 ## Final verdict
 
-**IMPLEMENTATION PLAN COMPLETE WITH OPEN PREREQUISITES — READY FOR
-VALIDATION-ENGINE PREREQUISITE.** Every required planning section has a
-concrete, independently re-derived answer; every hard no-go condition
-evaluates false. One previously-undisclosed packaging decision point
-(`PREREQUISITE-136E-1`) is explicitly scheduled for resolution within
-the very next phase rather than left open indefinitely. "Ready for the
-validation-engine prerequisite" does not mean ready to create executable
-schemas — Phase 136F (dependency introduction) and its own independent
-verification (136G) must complete first.
+**PREREQUISITE INFRASTRUCTURE COMPLETE — READY FOR INDEPENDENT
+VERIFICATION.** Every item in the strict phase boundary's permitted
+list was implemented; every item in the prohibited list was verified
+absent. Zero unresolved Blocking findings. "Ready for independent
+verification" does not mean ready for Stage 3 schema authoring — Phase
+136G (independent verification of this phase's own infrastructure) must
+complete first.
 
 ## Recommended next phase
 
-**136F — Draft 2020-12 Validation Engine and Strict JSON Parsing
-Prerequisite.** Implementation, not planning; adds `jsonschema>=4.18,<5`
-to `pyproject.toml`, implements strict duplicate-key parsing, and
-resolves the `PREREQUISITE-136E-1` packaging-scope decision, all
-independently verified by 136G before Group 1 schema authoring (136H)
-begins.
+**136G — Validation Engine and Strict JSON Parsing Independent
+Verification.** Must independently attack Draft 2020-12 conformance,
+duplicate-key rejection, offline-only registry behavior, packaging,
+containment, no-network behavior, no-authority behavior, and
+no-execution behavior. Must not begin Stage 3 schema authoring.

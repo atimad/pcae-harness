@@ -1,36 +1,58 @@
 {
   "schema_version": "1.0",
-  "phase_id": "136E",
-  "phase_name": "Stage 3 Companion Executable Schema Implementation Plan",
-  "phase_title": "Stage 3 Companion Executable Schema Implementation Plan",
+  "phase_id": "136F",
+  "phase_name": "Draft 2020-12 Validation Engine and Strict JSON Parsing Prerequisite",
+  "phase_title": "Draft 2020-12 Validation Engine and Strict JSON Parsing Prerequisite",
   "status": "completed",
-  "files_changed_count": 8,
+  "files_changed_count": 33,
   "files_changed": [
+    ".pcae/policy.toml",
     "CHANGELOG.md",
     "PROJECT_STATUS.md",
-    "docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md",
-    "docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_INDEPENDENT_VERIFICATION.md",
-    "tasks/DONE.md",
-    "tasks/active/20260715-2014-idle-awaiting-next-governed-phase-post-136c.md",
-    "tasks/active/20260715-2111-phase-136d-stage-3-companion-executable-schema-contract-independent-verification.md",
-    "tasks/done/20260715-2014-idle-awaiting-next-governed-phase-post-136c.md"
+    "docs/PHASE_136_DRAFT_2020_12_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_PREREQUISITE.md",
+    "pyproject.toml",
+    "src/pcae/schema_resources/__init__.py",
+    "src/pcae/schema_resources/smoke/generic_smoke_record.schema.json",
+    "src/pcae/schema_runtime/__init__.py",
+    "src/pcae/schema_runtime/errors.py",
+    "src/pcae/schema_runtime/json_parser.py",
+    "src/pcae/schema_runtime/limits.py",
+    "src/pcae/schema_runtime/loader.py",
+    "src/pcae/schema_runtime/models.py",
+    "src/pcae/schema_runtime/registry.py",
+    "src/pcae/schema_runtime/validation.py",
+    "tasks/active/20260715-2256-phase-136f-draft-2020-12-validation-engine-and-strict-json-parsing-prerequisite.md",
+    "tasks/done/20260715-2203-idle-awaiting-next-governed-phase-post-136e.md",
+    "tests/fixtures/schema_runtime/duplicate_id_package/first.schema.json",
+    "tests/fixtures/schema_runtime/duplicate_id_package/second.schema.json",
+    "tests/fixtures/schema_runtime/duplicate_key_schema_package/dup_key.schema.json",
+    "tests/fixtures/schema_runtime/invalid_dialect_package/wrong_dialect.schema.json",
+    "tests/fixtures/schema_runtime/invalid_schema_package/broken.schema.json",
+    "tests/fixtures/schema_runtime/missing_id_package/no_id.schema.json",
+    "tests/fixtures/schema_runtime/unresolved_ref_package/dangling_ref.schema.json",
+    "tests/fixtures/schema_runtime/valid_package/format_check.schema.json",
+    "tests/fixtures/schema_runtime/valid_package/root_features.schema.json",
+    "tests/fixtures/schema_runtime/valid_package/shared_defs.schema.json",
+    "tests/test_schema_runtime_boundaries.py",
+    "tests/test_schema_runtime_json_parser.py",
+    "tests/test_schema_runtime_loader.py",
+    "tests/test_schema_runtime_packaging.py",
+    "tests/test_schema_runtime_registry.py",
+    "tests/test_schema_runtime_validation.py"
   ],
-  "source_files_changed": 0,
-  "test_files_changed": 0,
-  "tests_added_or_updated": "No production or test source was changed by this documentation-only, verification-plus-repair phase. Existing fast_green baseline (4391/4391) unaffected; not re-run, since no source or test file was touched. Independent verification in this phase was performed by direct source/document inspection (src/pcae/cltr/digest.py, src/pcae/cltr/canonicalization.py, src/pcae/cltr/enums.py, src/pcae/cltr/migration/enums.py, src/pcae/cltr/migration/rehearsal/enums.py, src/pcae/core/phase_reports.py, pyproject.toml, schemas/repository_intelligence/**) and by programmatic re-extraction of the 62-item verification matrix from the frozen contract text, not by an executable test suite.",
-  "tests_run": 4391,
+  "source_files_changed": 8,
+  "test_files_changed": 15,
+  "tests_added_or_updated": "69 new focused tests added across six files under tests/test_schema_runtime_*.py: 22 strict-JSON-parser tests, 14 offline-loader tests, 5 offline-registry tests, 12 Draft-2020-12-capability/shape-validation tests, 12 no-network/no-authority/no-execution boundary tests, 4 packaging tests (editable install, wheel, sdist, installed-wheel-in-isolated-venv). All 69 passed. No existing test file was modified.",
+  "tests_run": 20147,
   "phase_commits": [
     {
-      "hash": "e657b9784eb1fd52b97f0b58805aaae2624f4f6e"
-    },
-    {
-      "hash": "7da3ed1b09d8ebf07a6e70694e35dbe6003d2b24"
+      "hash": "4d9c51fde32973ac6fd1dc7ce2aa261d1428eac5"
     }
   ],
   "commit_attribution": "phase_owned",
   "pushed_status": "pushed",
   "origin_main_head_count": 0,
-  "summary": "Phase 136D, independent verification plus documentation-only contract repair. Independently verified CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 (frozen 136C, docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md) against CLTR-CUTOVER-001, CLTR-CUTOVER-SCHEMAS-001, and Phase 136B directly, not merely 136B's restatement. Independently re-extracted the 62-item verification matrix (CSCH-EXEC-REQ-001..062, no duplicates, no gaps); reproduced findings CONFIRMED-136C-1 (digest shape) and CONFIRMED-136C-2 (matrix-count independence) as true by direct source inspection; reconfirmed PREREQUISITE-136A-1, PREREQUISITE-136A-2, and PREREQUISITE-136C-1 correctly disposed. Found and repaired, documentation-only, two genuine Blocking defects inside 136C's own frozen contract text: BLOCKING-136D-1 (Section 19/19.1's invented request-v1-to-package-to-request-v2 circular-reference resolution contradicted CLTR-CUTOVER-SCHEMAS-001 Section 6.1's unconditional readiness_package_id/readiness_package_digest binding and Phase 136B's own dependency diagram; repaired to the correct non-circular single-version creation order; CSCH-EXEC-REQ-047 updated to match) and BLOCKING-136D-2 (Section 34's CompatibilityState persistence path dropped the compatibility-state/ history subdirectory that Phase 136B Section 7's resolution of PREREQUISITE-136A-2 requires; repaired to match exactly). Disclosed, not repaired, PREREQUISITE-136D-1 (no JSON-Schema-Draft-2020-12-conformant validation engine exists anywhere in this repository -- pyproject.toml declares zero dependencies and the only existing schema-file consumers validate only required/additionalProperties key existence) and three NON-BLOCKING findings (family row-order cosmetics, an informal record_id prefix table, an unbounded free-text length gap), all scoped to Phase 136E. F-135Z-3 and PREREQUISITE-136C-2 are now genuinely closed. Contract verdict: VERIFIED WITH PREREQUISITES -- READY FOR EXECUTABLE SCHEMA IMPLEMENTATION PLAN, documented in docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_INDEPENDENT_VERIFICATION.md. This phase's own diff touches only documentation, status, changelog, and task-lifecycle files; it created zero executable schemas, zero fixtures, zero typed models, zero schema loaders, zero schema registries, and zero schema validators; it implemented no authority resolver, no authority-state persistence, and no authority pointer; it created no cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal; it changed no authority epoch; it changed no production behavior. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Recommended next phase: 136E -- Stage 3 Companion Executable Schema Implementation Plan.",
+  "summary": "Phase 136F, bounded prerequisite implementation. Implemented and independently tested only the generic Draft 2020-12 schema-validation infrastructure planned by Phase 136E, before any Stage 3 executable companion-schema authoring begins. Added jsonschema>=4.18,<5 (installed 4.25.1) to pyproject.toml -- this repository's first runtime dependency; transitive referencing/jsonschema-specifications/rpds-py/attrs are all MIT-licensed and perform no network access at runtime. New package src/pcae/schema_runtime/: a hand-written recursive-descent strict JSON parser rejecting duplicate object keys at every nesting level and non-finite numbers with JSON-Pointer instance paths (chosen over json.loads(object_pairs_hook=...), which cannot report an ancestor path for a duplicate key); a 13-code Layer-1/Layer-2 error vocabulary; immutable JsonParseResult/ShapeValidationResult/ValidationIssue/SchemaResourceInfo models with an explicit valid/invalid/infrastructure-failure outcome; an offline, containment-and-symlink-checked schema resource loader enforcing Draft 2020-12 dialect, unique $id, and meta-schema conformance; an offline-only referencing.Registry-backed registry that fails closed on any unregistered lookup, proven never to fetch even a URI-shaped $id remotely; and a generic validate_record_shape() Layer-2 shape-validation API with deterministic issue ordering and no semantic/authority claim. Resolved PREREQUISITE-136E-1: new package src/pcae/schema_resources/ (Option A -- schemas packaged inside src/pcae) with a generic, non-Stage-3 smoke schema, proven present and loadable via importlib.resources from an editable install, a built wheel, a built source distribution, and an installed wheel in an isolated venv -- no source-tree-relative fallback required. 69 new focused tests across six files, all passing; Fast Green unchanged at 4391/4391; full unmarked suite freshly run: 20128 passed, 19 failed -- all 19 failures independently reproduced identically against an isolated pre-136F worktree (commit 7a62bb54, clean venv), confirmed pre-existing and unrelated to this phase, zero regressions introduced. No Stage 3 record schema, typed model, semantic validator, authority resolver, authority state, or authority pointer was created. No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal was created. No authority epoch changed; no CLTR authority was created; no legacy authority was demoted or retired; no production lifecycle behavior changed; no execution capability was introduced. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Recommended next phase: 136G -- Validation Engine and Strict JSON Parsing Independent Verification.",
   "governance_results": [
     {
       "name": "pcae_health",
@@ -64,96 +86,115 @@
   "validation_results": [
     {
       "name": "initial_inspection",
-      "result": "git status/log/rev-list confirmed clean baseline, 0 commits ahead of origin/main before this phase's work began. pcae health/check/status coherence/doctor task-memory/push check/runtime inspect all re-verified healthy/passed/coherent/clean/ready/Observed. schemas/ directory inspected: only pre-existing unrelated schemas/repository_intelligence/ family present -- schemas/cltr_cutover/ does not exist.",
+      "result": "git status/log/rev-list confirmed clean baseline, 0 commits ahead of origin/main before this phase's work began. pyproject.toml had dependencies = []; jsonschema confirmed not installed; wheel/sdist scope did not include schemas/. pcae health/check/status coherence/doctor task-memory/push check/runtime inspect all re-verified healthy/passed/coherent/clean/ready/Observed. schemas/cltr_cutover/ confirmed absent.",
       "status": "passed"
     },
     {
-      "name": "source_material_review",
-      "result": "Read in full: docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_FREEZE.md (CLTR-CUTOVER-001 v1.0, 135W), docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_CONTRACT_INDEPENDENT_VERIFICATION.md (135X), docs/PHASE_135_STAGE_3_AUTHORITY_CUTOVER_IMPLEMENTATION_PLAN.md (135Y), docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_FREEZE.md (CLTR-CUTOVER-SCHEMAS-001 v1.0, 135Z), docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md (136A), docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_ARCHITECTURE.md (136B), and docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md (136C, all sections, in full). Also directly inspected schemas/repository_intelligence/** (including actual test-time usage in tests/test_phase_120e_*, test_phase_126e_*, test_phase_127e_*), src/pcae/cltr/digest.py, src/pcae/cltr/canonicalization.py, src/pcae/cltr/enums.py, src/pcae/cltr/migration/enums.py, src/pcae/cltr/migration/rehearsal/enums.py, src/pcae/core/phase_reports.py, and pyproject.toml's dependency list.",
+      "name": "dependency_installation_and_version_check",
+      "result": "jsonschema>=4.18,<5 added to pyproject.toml; pip install -e . in project .venv (Python 3.9.6) installed jsonschema 4.25.1 with referencing 0.36.2, jsonschema-specifications 2025.9.1, rpds-py 0.27.1, attrs 26.1.0, all MIT-licensed; Draft202012Validator.META_SCHEMA['$id'] confirmed as https://json-schema.org/draft/2020-12/schema.",
       "status": "passed"
     },
     {
-      "name": "matrix_independent_extraction",
-      "result": "grep -oE '^\\| CSCH-EXEC-REQ-[0-9]+' | sort -u | wc -l confirmed exactly 62 unique matrix entries; a duplicate/gap check (sort -n | uniq -c | awk '$1!=1') returned empty -- no duplicate, no gap, sequential 001-062.",
+      "name": "strict_json_parser_focused_tests",
+      "result": "tests/test_schema_runtime_json_parser.py: 22 passed -- UTF-8 bytes/str acceptance, invalid UTF-8, malformed JSON, trailing data, optional top-level-object requirement, duplicate keys at top level/nested/inside array objects/deep nesting, distinct-Unicode-key non-duplication, non-finite number rejection (NaN/Infinity/-Infinity), input-size limit (bytes and text), programmer-error TypeError for wrong argument type, input non-mutation, deterministic JSON-Pointer path escaping.",
       "status": "passed"
     },
     {
-      "name": "digest_format_reproduction",
-      "result": "src/pcae/cltr/digest.py directly inspected: EXPECTED_HEX_LENGTH=64, is_well_formed_digest requires lowercase hex of exactly 64 characters, hashlib.sha256(...).hexdigest() produces lowercase by construction -- exact match to 136C Section 11's frozen pattern (bare 64-char lowercase hex, no sha256: prefix). CONFIRMED-136C-1 independently reproduced as true.",
+      "name": "offline_loader_focused_tests",
+      "result": "tests/test_schema_runtime_loader.py: 14 passed -- deterministic package loading, duplicate $id within a package, duplicate key inside a schema resource file, missing $id, wrong dialect, meta-schema-check failure, missing-vs-invalid resource distinction, absolute-path escape, traversal escape, leaf symlink escape, symlinked-intermediate-directory escape, schema resource size limit, nonexistent root.",
       "status": "passed"
     },
     {
-      "name": "blocking_defect_repair_19_19_1",
-      "result": "BLOCKING-136D-1: 136C Section 19.1's invented request-v1-to-package-to-request-v2 resolution contradicted CLTR-CUTOVER-SCHEMAS-001 Section 6.1 (unconditional readiness_package_id/readiness_package_digest binding on CutoverRequest) and Phase 136B's own dependency diagram (package_id independent of request_id). Repaired, documentation-only, in docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md Section 19/19.1 and CSCH-EXEC-REQ-047.",
-      "status": "repaired"
+      "name": "offline_registry_focused_tests",
+      "result": "tests/test_schema_runtime_registry.py: 5 passed -- deterministic local $id resolution, duplicate $id across multiple roots, unregistered lookup fails without opening a network socket (monkeypatched socket.socket), URI-shaped $id resolves purely locally with sockets forbidden, max-registry-resources ceiling enforced.",
+      "status": "passed"
     },
     {
-      "name": "blocking_defect_repair_34",
-      "result": "BLOCKING-136D-2: 136C Section 34's CompatibilityState persistence path dropped the compatibility-state/ history subdirectory required by Phase 136B Section 7's resolution of PREREQUISITE-136A-2. Repaired, documentation-only, in docs/PHASE_136_STAGE_3_COMPANION_EXECUTABLE_SCHEMA_CONTRACT_FREEZE.md Section 34 to match 136B Section 7 exactly.",
-      "status": "repaired"
+      "name": "draft202012_capability_and_shape_validation_focused_tests",
+      "result": "tests/test_schema_runtime_validation.py: 12 passed -- $defs, local $ref, cross-file registry-resolved $ref, if/then/else, oneOf, allOf, additionalProperties:false, unevaluatedProperties:false (incl. nested unknown-property rejection), format explicitly not enforced by default, unknown-schema-id and unresolved-$ref both fail closed as infrastructure_failure (distinct from invalid), deterministic issue ordering, max_issues cap, result carries no semantic/authority fields beyond status/schema_id/issues.",
+      "status": "passed"
     },
     {
-      "name": "no_implementation_verification",
-      "result": "git diff --name-only and git status confirmed the entire phase diff is docs/PROJECT_STATUS/CHANGELOG/tasks-only; zero src/, tests/, or schemas/ files touched. schemas/cltr_cutover/ does not exist on disk.",
+      "name": "no_network_no_authority_no_execution_boundary_tests",
+      "result": "tests/test_schema_runtime_boundaries.py: 12 passed -- dependency version within frozen range, Draft202012Validator importable, AST import scan finds no subprocess/socket/shlex/HTTP-client imports, AST call scan finds no subprocess.run/call/Popen/os.system/os.popen calls, text scan finds no pcae.cltr/current_authority/authority_state/authority_epoch/cltr-authority references, on-disk assertion .pcae/cltr-authority/ and schemas/cltr_cutover/ absent, schema_runtime module binds no pcae.cltr-rooted attribute, validate_record_shape completes with sockets forbidden, limits centrally recorded and positive, ERROR_CODES matches the frozen 13-code set, schema_resources contains no Stage-3-looking filenames, module reimports cleanly.",
+      "status": "passed"
+    },
+    {
+      "name": "packaging_focused_tests",
+      "result": "tests/test_schema_runtime_packaging.py: 4 passed (3 slow-marked, all explicitly run) -- editable-install resource lookup; wheel build (python -m build --wheel) contains pcae/schema_resources/smoke/generic_smoke_record.schema.json, no cltr_cutover/.pcae//session.json entries; sdist build (python -m build --sdist) contains the smoke schema, no cltr_cutover/.pcae/ entries; installed wheel in a fresh isolated venv (pip install --no-deps, no source checkout) resource lookup succeeds via subprocess probe.",
       "status": "passed"
     },
     {
       "name": "fast_green",
-      "result": "included in fast_green baseline (4391 passed, unaffected -- Phase 136D); no source or test file was changed by this documentation-only phase, so the suite was not re-run.",
+      "result": "python -m pytest -m fast_green -n auto: 4391 passed, identical to the 136E baseline. New schema_runtime test files deliberately not added to FAST_GREEN_MODULES to keep this phase's boundary minimal; this run confirms zero regressions in the existing fast-green-tagged suite.",
       "status": "passed"
     },
     {
-      "name": "report_notification_tests",
-      "result": "included in fast_green (Phase 136D); no report/notification source was changed by this documentation-only phase",
-      "status": "passed"
+      "name": "full_unmarked_suite",
+      "result": "python -m pytest -n auto: 20128 passed, 19 failed, 20147 total, 1085.34s. All 19 failing node IDs independently re-run against an isolated pre-136F worktree (git worktree add at commit 7a62bb54, clean Python 3.9 venv, pip install -e '.[dev]' with no jsonschema, matching the pre-136F baseline exactly): all 19 reproduced with identical failure output on the clean baseline. Confirmed pre-existing, not caused by Phase 136F (see full detail and exact test names in .pcae/phase-completion-report.md). Worktree removed after classification.",
+      "status": "passed (19 pre-existing failures classified against isolated baseline, disclosed not repaired)"
     },
     {
-      "name": "bootstrap_session_reporting_tests",
-      "result": "included in fast_green (Phase 136D); no bootstrap/session-reporting source was changed by this documentation-only phase",
+      "name": "no_authority_and_no_execution_static_and_dynamic_proof",
+      "result": "AST-based static scan (forbidden imports and forbidden call sites) plus dynamic monkeypatched-socket proof plus on-disk absence assertions, all in tests/test_schema_runtime_boundaries.py and tests/test_schema_runtime_registry.py, cited above. No subprocess, shell, socket, HTTP client, or pcae.cltr/authority-namespace reference exists anywhere in src/pcae/schema_runtime/ or src/pcae/schema_resources/.",
       "status": "passed"
-    },
-    {
-      "name": "read_only_136c_reconciliation",
-      "result": "pcae phase-report reconcile --phase-id 136C (read-only, mutation: none): status=reconciled, marker=already_dispatched, checkpoint=completed, receipt=finalized.",
-      "status": "passed"
-    },
-    {
-      "name": "read_only_136b_reconciliation",
-      "result": "pcae phase-report reconcile --phase-id 136B (read-only, mutation: none): status=not_delivered, marker=not_dispatched -- independently observed to differ from 136C's own recorded reconciled/already_dispatched state at 136C's freeze time. Disclosed as a governance observation out of this contract's scope; not repaired, not redispatched.",
-      "status": "passed (disclosed, not repaired)"
     },
     {
       "name": "read_only_136a_reconciliation",
-      "result": "pcae phase-report reconcile --phase-id 136A (read-only, mutation: none): reconciliation_status=conflict, marker_state=not_dispatched, checkpoint_state=completed, receipt_state=finalized, blocker='checkpoint identity conflicts with the promoted report'. Identical to 136C's own disclosure. Exactly one promoted 136A generation, one delivery receipt. Carried forward as historical evidence only, not repaired, not redispatched.",
+      "result": "pcae phase-report reconcile --phase-id 136A (read-only, mutation: none): reconciliation_status=conflict, marker_state=not_dispatched, checkpoint_state=completed, receipt_state=finalized. Identical to every prior phase's own disclosure. Carried forward as historical evidence only, not repaired, not redispatched.",
       "status": "passed (disclosed, not repaired)"
+    },
+    {
+      "name": "read_only_136b_reconciliation",
+      "result": "pcae phase-report reconcile --phase-id 136B (read-only, mutation: none): status=not_delivered, marker=not_dispatched. Identical to prior phases' own disclosure. Not repaired, not redispatched.",
+      "status": "passed (disclosed, not repaired)"
+    },
+    {
+      "name": "read_only_136c_reconciliation",
+      "result": "pcae phase-report reconcile --phase-id 136C (read-only, mutation: none): status=not_delivered, marker=not_dispatched, checkpoint=completed, receipt=finalized.",
+      "status": "passed"
+    },
+    {
+      "name": "read_only_136d_reconciliation",
+      "result": "pcae phase-report reconcile --phase-id 136D (read-only, mutation: none): status=reconciled, marker=already_dispatched, checkpoint=completed, receipt=finalized.",
+      "status": "passed"
+    },
+    {
+      "name": "read_only_136e_reconciliation",
+      "result": "pcae phase-report reconcile --phase-id 136E (read-only, mutation: none): status=reconciled, marker=already_dispatched, checkpoint=completed, receipt=finalized.",
+      "status": "passed"
     }
   ],
   "test_results": {
-    "fast_green": "included in fast_green baseline (4391 passed, unaffected -- Phase 136D); no source or test file was changed by this documentation-only phase.",
-    "report_notification_tests": "included in fast_green (Phase 136D); no report/notification source was changed by this documentation-only phase",
-    "bootstrap_session_reporting_tests": "included in fast_green (Phase 136D); no bootstrap/session-reporting source was changed by this documentation-only phase"
+    "schema_runtime_focused_suite": "69 passed, 0 failed (tests/test_schema_runtime_*.py)",
+    "fast_green": "4391 passed, identical to the 136E baseline",
+    "full_unmarked_suite": "20128 passed, 19 failed, 20147 total -- all 19 failures confirmed pre-existing against an isolated pre-136F worktree, unrelated to this phase",
+    "packaging_tests": "4 passed (editable install, wheel, sdist, installed-wheel-in-isolated-venv)",
+    "report_notification_tests": "included in fast_green (4391 passed, unaffected -- Phase 136F); no report/notification source was changed by this phase",
+    "bootstrap_session_reporting_tests": "included in fast_green (4391 passed, unaffected -- Phase 136F); no bootstrap/session-reporting source was changed by this phase"
   },
   "notification_dispatch_result": "pending single governed terminal delivery",
   "report_notification_status": "pending governed finalization",
-  "no_go_confirmation": "No production source changed. No test source changed. No executable schema was added or changed. No schema fixture was added. No Python typed model was added. No schema loader, schema registry, or validator was implemented. No authority resolver, authority-state persistence, or authority pointer was implemented or changed. No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal was created. No authority epoch changed. Production authority remains legacy. No CLTR authority was created. No legacy authority was demoted or retired. No production behavior changed. No execution capability was introduced. Legacy lifecycle remains the sole production authority; CLTR remains derivative. CLTR-CUTOVER-001, CLTR-CUTOVER-SCHEMAS-001, and CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 remain future-facing behavior and data contracts only. Runtime remains Observed, maximum capability observe, execution availability unavailable.",
+  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136F implemented generic schema-validation infrastructure only. No Stage 3 companion executable schema was created. No Stage 3 fixture, typed record model, semantic validator, authority resolver, authority state, or authority pointer was implemented or changed. No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal was created. Schema validity does not establish lifecycle authority, cutover eligibility, authorization, publication success, or recovery truth. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "no_go_confirmations": [
-    "No production source changed by Phase 136D.",
-    "No test source changed by Phase 136D.",
-    "No executable schema was added or changed by Phase 136D.",
-    "No schema fixture was added by Phase 136D.",
-    "No Python typed model was added by Phase 136D.",
-    "No schema loader, schema registry, or validator was implemented by Phase 136D.",
-    "No authority resolver, authority-state persistence, or authority pointer was implemented or changed by Phase 136D.",
-    "No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal was created by Phase 136D.",
+    "No Stage 3 record schema was created by Phase 136F.",
+    "No shared Stage 3 enum schema was created by Phase 136F.",
+    "No AuthorityEpoch schema, AuthorityState schema, CutoverRequest schema, or ReadinessPackage schema was created by Phase 136F.",
+    "No authorization, candidate, certification, CAS, or publication schema was created by Phase 136F.",
+    "No recovery or reconciliation schema, notification, marker, or receipt binding was created by Phase 136F.",
+    "No Stage 3 typed record model or cross-record semantic validator was implemented by Phase 136F.",
+    "No authority resolver, authority-state persistence, or current-authority pointer was implemented or changed by Phase 136F.",
+    "No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal was created by Phase 136F.",
     "No authority epoch changed. Production authority remains legacy.",
-    "No CLTR authority was created by Phase 136D.",
-    "No legacy authority was demoted or retired by Phase 136D.",
-    "No production behavior changed by Phase 136D.",
-    "No execution capability was introduced by Phase 136D."
+    "No CLTR authority was created by Phase 136F.",
+    "No legacy authority was demoted or retired by Phase 136F.",
+    "No production lifecycle behavior changed by Phase 136F.",
+    "No execution capability was introduced by Phase 136F.",
+    "No Stage 3 schema directory (schemas/cltr_cutover/) exists on disk."
   ],
-  "recommended_next_phase": "136E - Stage 3 Companion Executable Schema Implementation Plan",
-  "recommended_next_phase_id": "136E",
-  "recommended_next_phase_name": "Stage 3 Companion Executable Schema Implementation Plan",
+  "recommended_next_phase": "136G - Validation Engine and Strict JSON Parsing Independent Verification",
+  "recommended_next_phase_id": "136G",
+  "recommended_next_phase_name": "Validation Engine and Strict JSON Parsing Independent Verification",
   "report_completeness": "complete",
   "missing_trust_fields": [],
   "runtime_state": "Observed",
