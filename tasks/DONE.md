@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136C) (20260715-2014-idle-awaiting-next-governed-phase-post-136c)
 - Phase 136C: Stage 3 Companion Executable Schema Contract Freeze (20260715-1956-phase-136c-stage-3-companion-executable-schema-contract-freeze)
 - Idle: awaiting next governed phase (post-136B) (20260715-1910-idle-awaiting-next-governed-phase-post-136b)
 - Phase 136B: Stage 3 Companion Executable Schema Architecture (20260715-1832-phase-136b-stage-3-companion-executable-schema-architecture)
