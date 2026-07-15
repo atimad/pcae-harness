@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 136A — Stage 3 Companion Schemas and Typed Authority Model Contract
+Independent Verification (completed, **VERIFIED WITH PREREQUISITES**).
+Documentation-only, per governed scope — no Stage 3 implementation, no
+executable schema, no typed-model authoring, no authority activation, no
+production/test/schema source change. Independently re-derived (not
+copied) the twenty-item record-family inventory, the seven typed authority
+enums and their fail-closed behavior, the epoch/state model, the request-
+through-publication-evidence chain, the concurrency/recovery/
+reconciliation/quarantine group, the receipt/binding/compatibility/
+historical group, the shared envelope/identity/canonicalization/digest/
+temporal model, and the invariant/versioning/sequencing group in
+**CLTR-CUTOVER-SCHEMAS-001 v1.0** (135Z) against CLTR-001, CLTR-SCHEMA-001
+v1.0.1, CLTR-CUTOVER-001 v1.0 (135W) and its independent verification
+(135X), the non-binding Stage 3 implementation plan (135Y), PFN-001, and
+PFR-001. Documented in
+`docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Found every substantive safety property (exact-match authority
+classification, CAS no-wildcard closure, publication-uncertainty
+non-collapse, structural non-reactivation of legacy, exactly-one
+authority-bearing pointer, mandatory recovery-journal tamper evidence)
+independently sound under adversarial construction — no BLOCKING finding.
+Discovered two new PREREQUISITE findings not present in 135Z's own
+Findings table: **PREREQUISITE-136A-1** (135Z's choice of a separate
+companion contract, rather than the CLTR-SCHEMA-001 1.1.0 minor revision
+135Y's own schema plan assumed, as the vehicle closing PREREQ-4 for 13 of
+16 companion-schema families, is sound on the merits but never explicitly
+reconciled against PREREQ-4's register wording or 135Y's differently-
+vehicled plan) and **PREREQUISITE-136A-2** (§36's claim that every "atomic
+current pointer" family has a history-preserving sibling is not reflected
+in §38.2's frozen namespace for `CompatibilityState`, unlike the parallel
+path given to `AuthorityState`). Also found six NON-BLOCKING findings,
+including a documentation error (135Z §0.5 says PFR-001 has twelve
+mandatory sections; PFR-001 itself, 135W, and 135X all confirm thirteen)
+and a citation that does not exist in its cited source (135Z §0.7's
+"135Y §11, 'do not automatically create schemas ahead of need'" — 135Y
+§11 is titled "Recovery-journal plan" and contains no such phrase; the
+substantive point it supports still holds on other grounds). This verdict
+does not authorize executable-schema or typed-model implementation.
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable.
+
+Full verification:
+`docs/PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_INDEPENDENT_VERIFICATION.md`.
+Recommended next phase: a future executable-schema implementation phase
+(CLTR-CUTOVER-SCHEMAS-001 §43 Layer 1: shared envelope and enums) that
+folds in this phase's two new prerequisite findings, 135Z's own five
+findings, and 135X's still-open PREREQUISITE-135X-1 — not yet activated.
+
+## Phase 135Z Complete
+
 Phase 135Z — Stage 3 Companion Schemas and Typed Authority Model Contract
 Freeze (completed, **COMPANION SCHEMA CONTRACT FROZEN — READY FOR
 INDEPENDENT VERIFICATION**). Contract-only, per governed scope — no

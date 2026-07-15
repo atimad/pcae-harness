@@ -13,12 +13,18 @@ disagree. See the full source-of-truth precedence order and the stale
 
 ## Current Roadmap
 
-`PROJECT_STATUS.md` remains authoritative. Phase 135H.2 is complete; the
-recommended next governed phase is 135I. It is not activated.
+`PROJECT_STATUS.md` remains authoritative. Phase 136A (Stage 3 Companion
+Schemas and Typed Authority Model Contract Independent Verification) is
+complete (VERIFIED WITH PREREQUISITES). The recommended next governed
+phase (candidate ID 136B, not yet activated) is Layer 1 of the
+executable-schema implementation sequence per CLTR-CUTOVER-SCHEMAS-001
+§43 (shared envelope and enums), folding in 136A's two new prerequisite
+findings, 135Z's own five findings, and 135X's still-open
+PREREQUISITE-135X-1.
 
 | Phase | Name | Status |
 |-------|------|--------|
-| 135I | Production CLTR Schema, Canonicalization, and Versioning Contract Freeze | 🔜 Next |
+| 136B | Stage 3 Executable-Schema Implementation, Layer 1 (shared envelope and enums) | 🔜 Next |
 
 ## Historical: Track 133 — Engineering Evidence
 
