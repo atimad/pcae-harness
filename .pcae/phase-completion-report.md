@@ -1,150 +1,110 @@
-# Phase 136J Complete — Authority Core Schema Implementation
+# Phase 136K Complete — Authority Core Schema Independent Verification
 
 ## Phase identity
 
-- Phase ID: `136J`
+- Phase ID: `136K`
 - Status: completed
-- Classification: implementation (Stage 3 Companion Executable Schema, Implementation Group 2: `AuthorityEpoch`, `AuthorityState`)
+- Classification: verification (Stage 3 Companion Executable Schema, Implementation Group 2: `AuthorityEpoch`, `AuthorityState`)
 - Report completeness: complete
 
-## Scope correction
+## Scope
 
-The originating prompt named this phase "Authority and Request Schema
-Implementation" and scoped it to four record schemas: `AuthorityEpoch`,
-`AuthorityState`, `CutoverRequest`, `ReadinessPackage`. Before authoring
-any schema, re-read the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`
-Sec.46 implementation-group boundary and the Phase 136 implementation
-plan's phase-sequencing table, and found that `AuthorityEpoch`/
-`AuthorityState` are Implementation Group 2 while `CutoverRequest`/
-`ReadinessPackage` are Implementation Group 3, with `CSCH-EXEC-REQ-062`
-binding each group to its own independent-verification phase before the
-next group may begin. This conflicted with the prompt's stated 4-schema
-scope. Surfaced the conflict to the user rather than silently resolving
-it either way; the user chose to follow the frozen grouping. **Phase 136J
-therefore implements only `AuthorityEpoch` and `AuthorityState`**;
-`CutoverRequest`/`ReadinessPackage` are deferred to Phase 136L, gated
-behind Phase 136K's independent verification of this phase's output.
-
-A second question was surfaced and resolved before implementation: the
-tension between Sec.9 (which structurally permits `authority_role:
-"authoritative"` on `authority_state.schema.json`) and the as-built
-shared `authority_disclosure` `$def` (which hard-codes `is_authoritative:
-const false` with no override). The user chose to leave `is_authoritative`
-`const false` unconditionally and disclose the gap (`NON-BLOCKING-136J-1`)
-rather than define a local override in this phase.
+Independently verify and adversarially attack the two Implementation
+Group 2 executable schemas produced by Phase 136J:
+`records/authority_epoch.schema.json` and
+`records/authority_state.schema.json`. Re-derive the field tables, state
+machines, and local conditionals directly from
+`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` Sec.9, Sec.16, Sec.17, Sec.18,
+and Sec.46 -- not from 136J's own implementation document or its 89
+focused tests. Independently disposition both of 136J's disclosed
+`NON-BLOCKING` findings, and repair any genuine bounded defect found
+within the Group 2 schemas, bounded shared-core definitions those schemas
+depend on, the manifest, or manifest/registry/package integration. Do not
+implement `CutoverRequest`, `ReadinessPackage`, or any Group 3+ schema,
+typed model, semantic validator, or authority resolver/state/pointer.
 
 ## Summary
 
-Phase 136J implements `records/authority_epoch.schema.json` and
-`records/authority_state.schema.json` (Draft 2020-12, Tier 1 strict,
-`additionalProperties: false`), composing the 136H shared core unchanged
--- no shared `$def` was added, modified, or duplicated. Full detail in
-`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_IMPLEMENTATION.md`.
+Independently re-derived the `AuthorityEpoch`/`AuthorityState` field
+tables and every local conditional from primary contract sources. Wrote
+102 new independent adversarial tests
+(`tests/test_cltr_cutover_136k_authority_core_independent_verification.py`),
+built from fresh fixtures rather than 136J's own `_valid_epoch`/
+`_valid_state` helpers, attacking the state machine, reference-family
+separation (exhaustive over all 15 wrong-family values per reference
+field, not spot-checks), `authority_kind`/`compatibility_mode` exactness,
+requiredness/null/empty combinations, manifest tamper shapes, Unicode
+confusables, oversized fields, a cyclic-input misuse case, `PYTHONHASHSEED`
+determinism across 3 fresh subprocesses, and an installed-wheel probe run
+from a venv and `cwd` both outside the repository. Full detail in
+`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_INDEPENDENT_VERIFICATION.md`.
 
-`AuthorityEpoch` shape-binds `migration_epoch`, `authority_kind`,
-`activation_state` (local enum: `proposed`/`active`/`superseded`),
-`predecessor_epoch` (required key, nullable, family-restricted to
-`authority_epoch`), `generation_binding` (conditional on
-`activation_state`), `limitations`, and `authority_disclosure` (locally
-forbidding `authority_role: "authoritative"`). Local conditionals:
-`activation_state == "active"` requires `generation_binding`;
-`"proposed"` forbids it.
+Independently re-derived `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` Sec.9's
+authority-role file list from its own prose (13 explicitly forbidden + 2
+explicitly permitted = 15 of the 16 total record families) and
+**confirmed** `NON-BLOCKING-136J-2`'s own reading: `authority_epoch` is
+genuinely omitted from Sec.9's explicit classification -- a real gap in
+the frozen contract text, not a 136J miscount. 136J's conservative choice
+(forbid `authority_role: "authoritative"` on `AuthorityEpoch`) is
+independently confirmed correct and remains schema-enforced. Also
+independently confirmed Sec.16 row 1's literal wording
+(`authority_state.publication_state == "cltr_authoritative"`) refers to a
+field/value pair that does not exist anywhere on `AuthorityState` -- a
+pre-existing contract-text imprecision already reviewed at design level
+by Phase 136D ("PASS, no repair needed"); 136J's actual implementation
+(`authority_kind == "cltr"` requires `authoritative_generation`) is
+confirmed a faithful interpretation of that intent. Reproduced and
+confirmed `NON-BLOCKING-136J-1` unchanged and correctly disclosed --
+`is_authoritative` remains `const false` unconditionally and no
+downstream code path treats `authority_role: "authoritative"` plus
+schema validity as a live-authority signal.
 
-`AuthorityState` shape-binds `migration_epoch`, `transition_id`,
-`active_authority_epoch` (family-restricted to `authority_epoch`),
-`authority_kind`, `authoritative_generation` (conditional),
-`publication_evidence_reference` (family-restricted to
-`publication_evidence`, a forward reference -- that family's schema does
-not exist until Group 5), `pointer_digest`, `verification_state` (local
-enum: `unverified`/`verified`/`verification_failed`), `uncertainty`
-(conditional), `compatibility_mode`, `limitations`, and
-`authority_disclosure`. Local conditionals: `authority_kind == "cltr"`
-requires `authoritative_generation`; `verification_state == "unverified"`
-requires `uncertainty`, `"verified"` forbids it.
+**Repaired** the manifest-status integrity gap Phase 136I disclosed but
+did not fix (`NON-BLOCKING-136I-2`): `load_and_verify_manifest`
+(`src/pcae/schema_runtime/manifest.py`) previously verified a manifest's
+shape, per-entry digest, and two-way completeness, but never checked the
+`status` field, so a manifest entry with `status: "draft"` (schema-legal)
+loaded and verified successfully despite the manifest schema's own field
+description stating a `"draft"` entry "must never appear in a committed
+manifest." Independently reproduced against a Group 2 entry specifically
+(`records/authority_state.schema.json`) before repairing. The repair adds
+a `status_key`/`frozen_status_value` parameter pair (default
+`"status"`/`"frozen"`) and rejects any non-frozen entry as a
+`ManifestIntegrityError`. Updated Phase 136I's own pre-existing test in
+place to assert the corrected, fail-closed behavior instead of the
+previously-disclosed gap -- this closes the finding rather than
+re-disclosing it a third time. Disclosed (not repaired, no security
+impact) two further documentation-accuracy findings:
+`load_and_verify_manifest`'s docstring overclaims that an orphaned
+manifest entry always raises `ManifestIntegrityError` (it actually raises
+a sibling `SchemaResourceNotFoundError`, still fail-closed); and
+`manifest.schema.json`'s `file_path` field description overclaims that
+its regex charset alone forbids path traversal (it does not -- the real
+defense is the loader's independent containment check, independently
+confirmed to hold end-to-end).
 
-Reference-family separation is enforced on all 5 reference fields via
-local `record_family`/shape restriction, preventing wrong-family
-substitution (e.g. a `cutover_request` reference where `authority_epoch`
-is required, or a `readiness_package` reference where
-`publication_evidence` is required) -- independently tested and confirmed
-to fail closed. `generation_binding`/`authoritative_generation` use the
-structurally distinct `generation_reference` shape
-(`generation_id`+`generation_digest`), never satisfiable by a
-`record_reference` tuple.
+Combined `test_cltr_cutover_136h_shared_core.py` +
+`test_cltr_cutover_136i_shared_core_independent_verification.py` +
+`test_cltr_cutover_136j_authority_core.py` +
+`test_cltr_cutover_136k_authority_core_independent_verification.py` +
+`test_schema_runtime_*.py`: **706 passed, 0 failed** (604 baseline + 102
+new; the one repaired 136I test replaces its predecessor 1:1, preserving
+the baseline count exactly). Fast Green: **4391 passed**, identical to
+the 136H/136I/136J baseline, zero regressions. Full unmarked suite
+freshly run: **20765 passed, 19 failed, 20784 total, 1191.48s** -- all 19
+failures byte-identical to the previously classified inherited failure
+set, zero new regressions (20784 is exactly 20682 plus this phase's 102
+new tests).
 
-Added 2 manifest entries (`implementation_group: 2`, `status: "frozen"`,
-digests freshly recomputed via `hashlib.sha256` over the new files' raw
-bytes). Registry grows from 8 to 10 resources, all unique `$id`s, all
-`Draft202012Validator.check_schema`-clean. `load_and_verify_manifest`
-returns 9 entries cleanly.
-
-89 new focused tests
-(`tests/test_cltr_cutover_136j_authority_core.py`): **89 passed, 0
-failed**, covering every valid state branch, every local conditional in
-both directions, unknown-field strictness at every nesting level,
-reference-family separation, ID/digest boundary attacks, no-network,
-no-authority, no-execution proof, and exact scope guard.
-
-19 pre-existing scope-guard assertions across 4 test files
-(`test_cltr_cutover_136h_shared_core.py`,
-`test_cltr_cutover_136i_shared_core_independent_verification.py`,
-`test_schema_runtime_boundaries.py`, `test_schema_runtime_packaging.py`)
-hard-coded "no `records/` directory exists at all" / exact
-manifest-entry-count / forbidden-token lists including
-`authority_epoch`/`authority_state` as scope guards for the
-136F/136H/136I-era boundary. Repaired -- not weakened -- to: continue
-asserting each earlier phase's own file set remains present and
-byte-identical (`issubset` checks replacing exact-set checks where
-appropriate); continue forbidding every Group 3+ record schema and the
-`bindings/`/`views/` directories unconditionally; and allow exactly
-`authority_epoch.schema.json`/`authority_state.schema.json` where the old
-assertion forbade all record schemas.
-
-Combined `tests/test_schema_runtime_*.py` + `test_cltr_cutover_136h_shared_core.py`
-+ `test_cltr_cutover_136i_shared_core_independent_verification.py` + the
-new 136J module: **604 passed, 0 failed**. Fast Green: **4391 passed**,
-identical to the 136H/136I baseline, zero regressions. Full unmarked
-suite freshly run: **20663 passed, 19 failed, 20682 total, 1168.59s**
--- all 19 failures byte-identical to 136H's/136I's own already-classified
-pre-existing failure set, zero new regressions.
-
-A fresh wheel was independently rebuilt via `python -m build` and
-installed into an isolated venv **outside the repository**; with
-`cwd=/tmp`, registry construction returned 10 schema ids, manifest
-verification returned 9 entries, and shape validation of a
-minimum-valid `AuthorityEpoch` fixture returned `VALID` -- genuine
-installed-wheel operation, not source-tree fallback. Registry
-`schema_ids` ordering was confirmed stable across `PYTHONHASHSEED=0/1/42`
-fresh subprocesses. No-network, no-authority, and no-execution boundaries
-were verified via AST-based source scans (zero `subprocess`/`eval`/
-`exec`/`socket`/`pcae.cltr` references) and monkeypatched sockets (zero
-calls across registry construction, manifest verification, and shape
-validation).
-
-Found 2 new `NON-BLOCKING` findings (the `AuthorityState`
-`is_authoritative`-stays-`const false` disclosed gap, and the
-`AuthorityEpoch` `authority_role: "authoritative"` local-forbid judgment
-call -- see Findings below). Zero `BLOCKING` findings.
-
-No `CutoverRequest`, `ReadinessPackage`, `HumanAuthorization`,
-`CutoverCandidate`, `Certification`, `CASExpectation`,
-`PublicationAttempt`, `PublicationEvidence`, `ConcurrencyConflict`,
-`RecoveryJournal`, `ReconciliationResult`, `Quarantine`, notification
-binding, marker binding, receipt binding, `CompatibilityState`, or
-`HistoricalAuthorityReference` schema was created. No Stage 3 typed
-record model or cross-record semantic validator was implemented. No
-authority resolver, authority-state persistence, or authority pointer was
-implemented or changed. No production lifecycle behavior changed. No
-execution capability was introduced. Legacy lifecycle remains the sole
-production authority; CLTR remains derivative. Runtime remains Observed,
-maximum capability observe, execution availability unavailable
-throughout.
+Zero `BLOCKING` findings. Legacy lifecycle remains the sole production
+authority; CLTR remains derivative. Runtime remains Observed, maximum
+capability observe, execution availability unavailable throughout.
 
 ## Evidence and validation
 
 - Governed phase commits: implementation commit
-  `2f3ea9c789a0f3f63d967ecf91b4a9069d4f9c75` and stale-file-removal
-  commit `4d90f167adc273ae330b31ba2cb01816dbad6275`, both phase-owned.
+  `8b36de9f5fcfe53060fd6d07bae3cf1a4fa12ed4` and stale-file-removal
+  commit `3195419bb8b1586485de0ba515ae975f9ecf492e`, both phase-owned.
 - Governance and read-only inspection commands actually run and their
   results:
   - `pcae health`: healthy.
@@ -157,76 +117,83 @@ throughout.
     unchanged before and after this phase's changes.
   - `pcae notify status`: Telegram configured, enabled, ready for
     outbound delivery.
-- This phase's focused suite: **89 passed, 0 failed**
-  (`tests/test_cltr_cutover_136j_authority_core.py`).
-- Combined `tests/test_schema_runtime_*.py` + 136H + 136I + 136J: **604
-  passed, 0 failed**.
+- This phase's independent adversarial suite: **102 passed, 0 failed**
+  (`tests/test_cltr_cutover_136k_authority_core_independent_verification.py`).
+- Combined 136H+136I+136J+136K + schema-runtime suite: **706 passed, 0
+  failed**.
 - Fast Green (`python -m pytest -m fast_green -n auto`): **4391
-  passed**, identical to the 136H/136I baseline.
-- Full unmarked suite (`python -m pytest -n auto`): **20663 passed, 19
-  failed, 20682 total, 1168.59s (0:19:28)**. All 19 failing node IDs
+  passed**, identical to the 136H/136I/136J baseline.
+- Full unmarked suite (`python -m pytest -n auto`): **20765 passed, 19
+  failed, 20784 total, 1191.48s (0:19:51)**. All 19 failing node IDs
   (`test_advisory_runtime_contract.py`,
   `test_advisory_runtime_architecture.py`, `test_phase_reports.py`,
   `test_rendering_134e5.py`, `test_finalization_transaction_134e10.py`
   (5), `test_cltr_migration_135p_verification.py` (4 parametrized),
   `test_bootstrap_todo_consistency.py` (2), `test_cltr_135o_integration.py`
-  (4)) byte-identical to 136H's/136I's own already-classified pre-existing
-  failure set; none touch `schema_runtime`/`schema_resources`.
-- Independent packaging verification: fresh wheel built via
+  (4)) byte-identical to the previously classified inherited-failure set;
+  none touch `schema_runtime`/`schema_resources`.
+- Independent packaging verification: fresh wheel rebuilt via
   `python -m build`; installed into an isolated venv outside the
-  repository and exercised with `cwd=/tmp`, proving genuine
-  installed-wheel operation (10 schema ids, 9 manifest entries, valid
-  shape validation).
-- Manifest integrity: both new files' SHA-256 freshly recomputed from
-  raw bytes; `load_and_verify_manifest` verifies all 9 entries cleanly.
-- No-network/no-authority/no-execution proof: fresh `socket.socket`/
-  `socket.create_connection` monkeypatches; AST-walk of every `.py` file
-  under `schema_resources/` for `subprocess`/`eval`/`exec`/`socket`
-  usage (zero) and `pcae.cltr`-rooted imports (zero); `pcae runtime
-  inspect` reconfirmed Observed/observe/unavailable after every
-  operation this phase performed.
+  repository and exercised from a `cwd` outside the repository, proving
+  genuine installed-wheel operation (10 schema ids, a valid
+  `AuthorityEpoch` fixture returning `VALID`, a mutated fixture returning
+  `INVALID`).
+- Manifest integrity: all 9 entries' `file_digest` values independently
+  recomputed from raw bytes and confirmed exact; manifest tamper attacks
+  (swapped ids/digests, duplicate entries, orphaned entries, unindexed
+  files, traversal paths, `status: "draft"`) all independently confirmed
+  to fail closed.
+- No-network/no-authority/no-execution proof: monkeypatched
+  `socket.socket`/`socket.create_connection`/`urllib.request.urlopen`;
+  AST-walk of every `.py` file under both `schema_resources/` and
+  `schema_runtime/` for `subprocess`/`socket`/`urllib`/`http`/`requests`/
+  `eval`/`exec`/`__import__` usage (zero) and `pcae.cltr`-rooted
+  references (zero); `pcae runtime inspect` reconfirmed
+  Observed/observe/unavailable after every operation this phase
+  performed.
 
-Full per-section detail (exact schema inventory, dependency graph, every
-local conditional, reference-family separation, manifest/registry/
-packaging/determinism/security detail, and both disclosed findings) is in
-`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_IMPLEMENTATION.md`.
+Full per-section detail (independent inventory re-derivation, field-table
+re-derivation, state-machine attacks, reference-family separation,
+shared-definition audit, manifest/packaging/determinism/security detail,
+scope-guard repair audit, and every prior-finding disposition) is in
+`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_INDEPENDENT_VERIFICATION.md`.
 
 ## Findings
 
-- `NON-BLOCKING-136J-1`: `AuthorityState`'s `authority_disclosure` field
-  composes the shared `authority_disclosure` `$def` unmodified. Sec.9
-  structurally permits `authority_role: "authoritative"` on this record
-  family, but the shared `$def`'s `is_authoritative` field is hard-coded
-  `const false` with no override mechanism. Per the user's explicit
-  choice, this phase does not attempt to express Sec.9's conditional
-  exception in schema form -- `is_authoritative` remains `const false`
-  unconditionally on every `AuthorityState` record. Disclosed, not
-  repaired, in this phase. Residual risk: low -- the load-bearing
-  guarantee is strictly *more* conservative than the contract technically
-  permits, never less.
-- `NON-BLOCKING-136J-2`: `AuthorityEpoch`'s local forbidding of
-  `authority_role: "authoritative"` is a 136J-authored conservative
-  judgment call, not a verbatim quote from Sec.9's file list (which
-  neither explicitly names nor excludes `AuthorityEpoch`, and whose own
-  count is internally ambiguous between 12 and 13 files depending on how
-  "all three binding schemas" is counted). Implemented as the
-  conservative default; disclosed as a judgment call, not a verified
-  contract fact.
-- `PREREQUISITE-136J-1`: Group 3 (`CutoverRequest`, `ReadinessPackage`)
-  depends on Group 2 (this phase) plus Group 2's own independent
-  verification (Phase 136K) before it may begin, per `CSCH-EXEC-REQ-062`.
-  Expected sequencing, not a defect.
-- `DEFERRED-136J-1`: evidence-reference structures, bounded finding
-  arrays, and the `CutoverRequest`/`ReadinessPackage` non-circular
-  ordering repaired by 136D are all Group 3 concerns, deferred to Phase
-  136L.
+- `CONFIRMED-136K-1` (repaired): `load_and_verify_manifest` did not
+  enforce manifest entry `status == "frozen"`, allowing a committed
+  `status: "draft"` entry to load and verify cleanly. Repaired; closes
+  `NON-BLOCKING-136I-2`.
+- `CONFIRMED-136K-2` (disclosed, not repaired, no security impact):
+  `load_and_verify_manifest`'s docstring overclaims that an orphaned
+  manifest entry is always raised as `ManifestIntegrityError`; it
+  actually raises a sibling `SchemaResourceNotFoundError`. Both fail
+  closed.
+- `CONFIRMED-136K-3` (disclosed, not repaired, no security impact):
+  `manifest.schema.json`'s `file_path` description overclaims that its
+  regex charset alone forbids path traversal; the real defense (the
+  loader's independent containment check) independently confirmed to
+  hold end-to-end.
+- `NON-BLOCKING-136J-1`: reproduced and confirmed unchanged, correctly
+  disclosed.
+- `NON-BLOCKING-136J-2`: independently confirmed correct via Sec.9
+  file-list re-derivation; schema-level disposition unchanged.
+- `NON-BLOCKING-136I-2`: **closed** by `CONFIRMED-136K-1`'s repair.
+- `PREREQUISITE-136K-1`: Group 3 (`CutoverRequest`, `ReadinessPackage`)
+  depends on this phase's independent verification completing with zero
+  unresolved Blocking findings, per `CSCH-EXEC-REQ-062`. Satisfied.
+- `DEFERRED-136K-1`: the Sec.9 contract-text omission and the two
+  disclosed documentation-accuracy findings are text/docstring
+  corrections, deferred to a future phase that substantively touches
+  those files.
 
-Zero unresolved Blocking findings. Zero `CONFIRMED` correctness defects.
+Zero unresolved Blocking findings. Zero new `CONFIRMED` correctness
+defects beyond the one repaired and two disclosed above.
 
 ## Safety and no-go confirmation
 
 Legacy lifecycle remains the sole production authority. CLTR remains
-derivative. 136J implemented only the `AuthorityEpoch` and
+derivative. 136K independently verified only the `AuthorityEpoch` and
 `AuthorityState` executable schemas. No `CutoverRequest`,
 `ReadinessPackage`, `HumanAuthorization`, `CutoverCandidate`,
 `Certification`, `CASExpectation`, `PublicationAttempt`,
@@ -236,43 +203,41 @@ binding, receipt binding, `CompatibilityState`, `HistoricalAuthorityReference`,
 or derived record-view schema was created. No Stage 3 typed record model
 or cross-record semantic validator was implemented. No authority
 resolver, authority-state persistence, or authority pointer was
-implemented or changed. No runtime `AuthorityEpoch`, `AuthorityState`,
-`CutoverRequest`, `ReadinessPackage`, authorization, candidate,
-certification, publication attempt, conflict record, or recovery journal
-object was created. Schema validity does not establish lifecycle
-authority, cutover eligibility, authorization, publication success, or
-recovery truth. No authority epoch changed. No CLTR authority was
-created. No legacy authority was demoted. No legacy authority was
-retired. No production lifecycle behavior changed. No execution
-capability was introduced. Runtime remains Observed, maximum capability
-remains observe, and execution availability remains unavailable.
+implemented or changed. No runtime `AuthorityEpoch` or `AuthorityState`
+record was created. Schema validity does not establish lifecycle
+authority, activate an authority epoch, identify current authority,
+authorize cutover, prove publication, or prove recovery. No authority
+epoch changed. No CLTR authority was created. No legacy authority was
+demoted. No legacy authority was retired. No production lifecycle
+behavior changed. No execution capability was introduced. Runtime remains
+Observed, maximum capability remains observe, and execution availability
+remains unavailable.
 
 No `bindings/` or `views/` directory exists under `cltr_cutover`.
 `records/` contains exactly the 2 Group 2 files and no Group 3+ record
-schema. `.pcae/cltr-authority/` does not exist. The repository-root
-`schemas/cltr_cutover/` path does not exist. No production artifact
-changed as a result of this phase's schema-authoring or validation work.
+schema. `.pcae/cltr-authority/` does not exist. No production artifact
+changed as a result of this phase's verification or manifest-loader
+repair work.
 
 ## Final verdict
 
-**COMPLETE, ZERO BLOCKING FINDINGS — READY FOR AUTHORITY CORE SCHEMA
-INDEPENDENT VERIFICATION.** Both Group 2 record schemas shape-bind their
+**VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR REQUEST AND READINESS
+SCHEMA IMPLEMENTATION.** Both Group 2 record schemas were independently
+re-derived, adversarially attacked, and confirmed to shape-bind their
 frozen wire contracts, enforce every local conditional in both
 directions, enforce reference-family separation on all 5 reference
-fields, fail closed on unknown fields at every nesting level, and
-disclose their non-authoritative status. Zero unresolved Blocking
-findings remain. "Ready for authority core schema independent
-verification" applies only to the next bounded phase (136K) and does not
-authorize `CutoverRequest`/`ReadinessPackage` implementation, typed
+fields exhaustively, fail closed on unknown fields at every nesting
+level, and never establish authority through validation. Zero unresolved
+Blocking findings remain. Readiness applies only to the next bounded
+executable-schema group (`CutoverRequest`, `ReadinessPackage`) and does
+not authorize authorization, certification, publication, recovery, typed
 models, semantic validation, authority resolution, or cutover behavior.
 
 ## Recommended next phase
 
-**136K — Authority Core Schema Independent Verification.** Must
-independently attack the `AuthorityEpoch`/`AuthorityState` schemas
-produced by 136J, in particular re-deriving Sec.9's file list to confirm
-or correct the two disclosed findings. Do not begin `CutoverRequest`,
-`ReadinessPackage`, `HumanAuthorization`, `CutoverCandidate`,
-`Certification`, publication, recovery, terminal-binding, compatibility,
-or historical schema implementation until 136K completes with zero
-unresolved Blocking defects.
+**136L — Request and Readiness Schema Implementation.** May implement
+only `CutoverRequest` and `ReadinessPackage`, plus fixtures, manifest
+entries, packaging, and focused tests. Must not implement authorization,
+candidate, certification, CAS, publication, recovery, terminal bindings,
+compatibility, historical references, typed models, semantic validation,
+authority resolution, or cutover behavior.

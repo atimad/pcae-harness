@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 136K: Authority Core Schema Independent Verification (20260716-1655-phase-136k-authority-core-schema-independent-verification)
+
 - Phase 136J: Authority Core Schema Implementation (20260716-1601-phase-136j-authority-core-schema-implementation)
 - Idle: awaiting next governed phase (post-136I) (20260716-1503-idle-awaiting-next-governed-phase-post-136i)
 - Phase 136I: Companion Executable Schema Shared Core Independent Verification (20260716-1444-phase-136i-companion-executable-schema-shared-core-independent-verification)
