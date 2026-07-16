@@ -30,6 +30,12 @@ from .loader import (
     load_schema_package,
     load_schema_resource,
 )
+from .manifest import (
+    ManifestIntegrityError,
+    VerifiedManifest,
+    VerifiedManifestEntry,
+    load_and_verify_manifest,
+)
 from .models import (
     JsonParseResult,
     OutcomeStatus,
@@ -57,6 +63,10 @@ __all__ = [
     "discover_schema_files",
     "load_schema_package",
     "load_schema_resource",
+    "ManifestIntegrityError",
+    "VerifiedManifest",
+    "VerifiedManifestEntry",
+    "load_and_verify_manifest",
     "JsonParseResult",
     "OutcomeStatus",
     "SchemaResourceInfo",

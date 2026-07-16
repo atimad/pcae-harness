@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+  "title": "CLTR Cutover shared envelope definitions",
+  "description": "The universal companion_envelope fields every records/*.schema.json file composes via allOf (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.7.1), plus the shared timestamp shape. No records/*.schema.json file exists yet in this repository; this file defines the reusable shapes only. companion_envelope carries no additionalProperties:false of its own (Sec.12 of the Phase 136H implementation plan) -- the outer, file-specific schema of a future record supplies the single additionalProperties closure, re-listing every envelope field alongside its own family-local fields, so that allOf never requires unevaluatedProperties.",
+  "$defs": {
+    "timestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,6})?Z$",
+      "description": "RFC 3339 / ISO 8601 UTC timestamp, explicit 'Z' suffix only (no numeric offset form), seconds required, optional 1-6 fractional digits. Validates shape only -- never freshness, expiry, monotonicity, causal order, or clock skew (Layer 4/5)."
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$",
+      "description": "This schema file's own MAJOR.MINOR version string (Sec.15). A validator implementing schema_version '1.x' must accept any '1.y' document and must reject any '2.x' document without an explicit upgrade path -- not itself enforced by this pattern, which validates shape only."
+    },
+    "companion_envelope": {
+      "type": "object",
+      "properties": {
+        "schema_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Always present. Const per owning file once a records/*.schema.json file exists; identifies which record family the document is."
+        },
+        "schema_version": {
+          "$ref": "#/$defs/schema_version",
+          "description": "Always present. This file's own version."
+        },
+        "contract_version": {
+          "const": "1.0",
+          "description": "Always present. Identifies which version of CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 the schema was generated against; const \"1.0\" at freeze time."
+        },
+        "record_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "description": "Always present. Const per owning file once a records/*.schema.json file exists; one of the 16 standalone family names (shared/enums.schema.json#/$defs/record_family)."
+        },
+        "record_id": {
+          "$ref": "identity.schema.json#/$defs/record_identity",
+          "description": "Always present."
+        },
+        "record_digest": {
+          "$ref": "digest.schema.json#/$defs/record_digest",
+          "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp",
+          "description": "Always present."
+        }
+      },
+      "required": [
+        "schema_id",
+        "schema_version",
+        "contract_version",
+        "record_type",
+        "record_id",
+        "record_digest",
+        "created_at"
+      ],
+      "description": "The 7 universal envelope fields (Sec.7.1). Carries no additionalProperties restriction of its own; the future owning records/*.schema.json file supplies the single, file-level additionalProperties closure over the union of these fields and its own family-local fields."
+    }
+  }
+}

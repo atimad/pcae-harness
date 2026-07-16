@@ -3,8 +3,14 @@
 Verifies that the packaged generic schema resource
 (``src/pcae/schema_resources/smoke/generic_smoke_record.schema.json``)
 is present and loadable from an editable install, a built wheel, and a
-built source distribution -- and that no Stage 3 schema directory is
-present in any of them.
+built source distribution.
+
+Phase 136H updates the wheel/sdist assertions: the Stage 3 shared-core
+package (``cltr_cutover/shared/*``, Implementation Group 1 only) is now
+packaged and present, so the prior "no cltr_cutover in the archive"
+assertion is replaced with the still-true, narrower guarantee that no
+``records/`` directory and no authority-bearing record schema filename
+is present in either archive.
 """
 from __future__ import annotations
 
@@ -29,8 +35,28 @@ def test_136f_editable_install_resource_lookup():
         assert '"$id"' in target.read_text(encoding="utf-8")
 
 
+_FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
+    "authority_epoch.schema.json",
+    "authority_state.schema.json",
+    "cutover_request.schema.json",
+    "readiness_package.schema.json",
+    "human_authorization.schema.json",
+    "cutover_candidate.schema.json",
+    "certification.schema.json",
+    "publication_attempt.schema.json",
+    "publication_evidence.schema.json",
+    "concurrency_conflict.schema.json",
+    "recovery_journal_entry.schema.json",
+    "quarantine_record.schema.json",
+    "notification_authority_binding.schema.json",
+    "marker_authority_binding.schema.json",
+    "receipt_authority_binding.schema.json",
+    "compatibility_state.schema.json",
+)
+
+
 @pytest.mark.slow
-def test_136f_wheel_contains_smoke_schema_and_no_stage3_directory(tmp_path: Path):
+def test_136f_wheel_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: Path):
     dist_dir = tmp_path / "dist"
     subprocess.run(
         [sys.executable, "-m", "build", "--wheel", "--outdir", str(dist_dir), str(REPO_ROOT)],
@@ -46,13 +72,17 @@ def test_136f_wheel_contains_smoke_schema_and_no_stage3_directory(tmp_path: Path
 
     smoke_path = "pcae/schema_resources/smoke/generic_smoke_record.schema.json"
     assert smoke_path in names, f"{smoke_path} missing from wheel; names sample: {names[:20]}"
-    assert not any("cltr_cutover" in name for name in names)
+    shared_envelope_path = "pcae/schema_resources/cltr_cutover/shared/envelope.schema.json"
+    assert shared_envelope_path in names, f"{shared_envelope_path} missing from wheel (136H shared core)"
+    assert not any("cltr_cutover/records/" in name for name in names)
+    for forbidden in _FORBIDDEN_RECORD_SCHEMA_FILENAMES:
+        assert not any(name.endswith(forbidden) for name in names)
     assert not any(name.startswith(".pcae/") for name in names)
     assert not any(name.endswith("session.json") for name in names)
 
 
 @pytest.mark.slow
-def test_136f_sdist_contains_smoke_schema_and_no_stage3_directory(tmp_path: Path):
+def test_136f_sdist_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: Path):
     dist_dir = tmp_path / "dist"
     subprocess.run(
         [sys.executable, "-m", "build", "--sdist", "--outdir", str(dist_dir), str(REPO_ROOT)],
@@ -67,7 +97,10 @@ def test_136f_sdist_contains_smoke_schema_and_no_stage3_directory(tmp_path: Path
         names = archive.getnames()
 
     assert any(name.endswith("schema_resources/smoke/generic_smoke_record.schema.json") for name in names)
-    assert not any("cltr_cutover" in name for name in names)
+    assert any(name.endswith("cltr_cutover/shared/envelope.schema.json") for name in names)
+    assert not any("cltr_cutover/records/" in name for name in names)
+    for forbidden in _FORBIDDEN_RECORD_SCHEMA_FILENAMES:
+        assert not any(name.endswith(forbidden) for name in names)
     assert not any("/.pcae/" in name or name.split("/", 1)[-1].startswith(".pcae/") for name in names)
 
 

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+  "title": "CLTR Cutover shared reference definitions",
+  "description": "Reference-tuple definitions (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.12, Sec.14). A valid reference proves shape only: it never implies the referenced record exists, is current, is authoritative, or that publication succeeded (Sec.40). The embedded cas_expectation component (row 10 of Sec.4) is deliberately NOT defined in this phase -- it is used only by cutover_candidate.schema.json and publication_attempt.schema.json, both out of the 136H Group 1 boundary, and is deferred to whichever future group first needs it (DEFERRED-136H-1).",
+  "$defs": {
+    "record_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_id", "record_digest", "record_family"],
+      "properties": {
+        "record_id": {
+          "$ref": "identity.schema.json#/$defs/record_identity",
+          "description": "Always present. The referenced record's own record_id."
+        },
+        "record_digest": {
+          "$ref": "digest.schema.json#/$defs/referenced_record_digest",
+          "description": "Always present. The referenced record's own record_digest, shape-checked only."
+        },
+        "record_family": {
+          "$ref": "enums.schema.json#/$defs/record_family",
+          "description": "Always present. Closed family tag preventing one family's record from silently masquerading as another (CSCH-EXEC-REQ-030)."
+        },
+        "schema_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Conditionally present: required only where a reference crosses a family boundary whose schema-version compatibility is not otherwise implied by context. Optional where the reference is always to the same family and version as the referencing document."
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "Conditionally present, alongside schema_id, for the same cross-family reason."
+        }
+      },
+      "description": "Stable id+digest+family reference tuple. Does not verify the referenced record actually exists or matches the claimed family (Layer 4)."
+    },
+    "epoch_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["migration_epoch"],
+      "properties": {
+        "migration_epoch": {
+          "$ref": "identity.schema.json#/$defs/migration_epoch",
+          "description": "Always present. Opaque migration-epoch token this reference is bound to."
+        },
+        "epoch_digest": {
+          "$ref": "digest.schema.json#/$defs/pointer_digest",
+          "description": "Conditionally present: an optional digest binding to a specific authority-epoch record's content, when the referencing family needs that stronger binding. A valid reference never implies the named epoch exists or is active -- that is an authority-resolver (Layer 6) responsibility, not implemented by this shared core."
+        }
+      },
+      "description": "A shared reference shape used to bind a companion record to a migration epoch and, optionally, a specific authority-epoch record's digest. This is a reference shape only; it does not define, and this phase does not implement, an AuthorityEpoch or AuthorityState record schema."
+    },
+    "generation_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generation_id", "generation_digest"],
+      "properties": {
+        "generation_id": {
+          "$ref": "identity.schema.json#/$defs/generation_identity",
+          "description": "Always present. Always paired with generation_digest -- no bare, unpaired generation ID field exists anywhere in this package."
+        },
+        "generation_digest": {
+          "$ref": "digest.schema.json#/$defs/generation_digest",
+          "description": "Always present."
+        }
+      },
+      "description": "Stable id+digest generation reference. A valid reference never implies the referenced generation is certified, authoritative, or that publication of it succeeded (Sec.40)."
+    },
+    "proof_reference": {
+      "$ref": "#/$defs/record_reference",
+      "description": "Opaque, non-secret proof/signature reference, reusing record_reference's exact shape rather than a new one -- a proof reference is never a raw signature blob or reusable credential, only a pointer to a proof artifact stored elsewhere. Shape alone cannot distinguish a genuinely opaque reference from an embedded secret; this remains a documentation/convention-level guarantee (Sec.44), not a schema-enforceable one."
+    }
+  }
+}

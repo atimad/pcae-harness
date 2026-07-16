@@ -28,35 +28,111 @@ def _json_pointer(parts) -> str:
     return "/" + "/".join(escaped)
 
 
-def _exceeds_max_depth(record: object, max_depth: int) -> bool:
-    """Iteratively (never recursively) determine whether ``record`` nests
-    dict/list containers deeper than ``max_depth``.
+class _RejectedInput(Exception):
+    """Internal signal: ``record`` cannot be safely materialized/validated."""
 
-    Phase 136G finding: ``Draft202012Validator.iter_errors`` recurses once
-    per nesting level of both the *schema* (for a self-referential ``$ref``,
-    e.g. ``{"type": "array", "items": {"$ref": "#"}}``) and the *record*
-    being validated. Independent adversarial testing showed a record only
-    ~300 levels deep -- well inside what ``parse_strict_json`` alone would
-    accept before this phase's separate nesting-depth repair -- could raise
-    an uncaught ``RecursionError`` from inside ``iter_errors`` itself, a
-    crash this function's own contract (no mutation, no exception on
-    ordinary invalid input; see module docstring) does not permit. This
-    check is walked with an explicit stack, not recursion, specifically so
-    that guarding against deep input cannot itself be defeated by the same
-    class of attack.
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self.message = message
+
+
+_PLAIN_SCALAR_TYPES = (str, int, float, bool)
+
+
+def _materialize_plain(root: object, *, max_depth: int) -> object:
+    """Iteratively (never recursively) rebuild ``root`` as an inert tree of
+    plain ``dict``/``list``/``str``/``int``/``float``/``bool``/``None``,
+    while also performing the Phase 136G nesting-depth check as a single
+    pass.
+
+    Phase 136H repair (``PREREQUISITE-136G-1``): ``validate_record_shape``'s
+    docstring already required an already-strictly-parsed ``record`` (i.e.
+    plain ``dict``/``list`` output of :func:`parse_strict_json`), but
+    nothing enforced that at runtime -- a hostile ``Mapping`` subclass's
+    ``__getitem__``/``.items()``/``__contains__`` could execute arbitrary
+    code once handed directly to ``jsonschema``'s own traversal. This
+    function accepts only exact ``dict``/``list`` containers (rejecting
+    every other ``Mapping``/``Sequence`` implementation, and rejecting
+    ``tuple`` as an unsupported container type, since ``parse_strict_json``
+    never produces one), requires every ``dict`` key to be an exact ``str``,
+    rejects any value whose exact type is not one of ``dict``/``list``/
+    ``str``/``int``/``float``/``bool``/``None``, and rejects a cycle (a
+    container that contains itself, directly or indirectly) using an
+    explicit per-path ancestor-id set -- never a global memo, since the same
+    sub-object legitimately appearing twice in unrelated branches is not a
+    cycle. It never mutates ``root``; every returned container is newly
+    built.
+
+    Walked with an explicit stack, not recursion (Phase 136G's own
+    established pattern): a genuinely deep or wide adversarial input must
+    fail closed quickly, never raise an uncaught ``RecursionError`` while
+    merely being measured.
     """
-    stack: list[tuple[object, int]] = [(record, 0)]
-    while stack:
-        value, depth = stack.pop()
+    if root is None or type(root) in _PLAIN_SCALAR_TYPES:
+        return root
+    if type(root) not in (dict, list):
+        raise _RejectedInput(f"Unsupported top-level record type: {type(root).__name__}")
+
+    def _new_frame(value: object, depth: int) -> dict:
         if depth > max_depth:
-            return True
-        if isinstance(value, dict):
-            for child in value.values():
-                stack.append((child, depth + 1))
-        elif isinstance(value, (list, tuple)):
-            for child in value:
-                stack.append((child, depth + 1))
-    return False
+            raise _RejectedInput(f"Record nesting exceeds maximum depth of {max_depth}; refusing to validate")
+        value_type = type(value)
+        if value_type is dict:
+            entries = []
+            for key, child in value.items():
+                if type(key) is not str:
+                    raise _RejectedInput(f"Record contains a non-string mapping key: {key!r}")
+                entries.append((key, child))
+            return {"kind": "dict", "entries": entries, "pos": 0, "out": {}, "id": id(value), "depth": depth}
+        if value_type is list:
+            return {"kind": "list", "entries": list(value), "pos": 0, "out": [], "id": id(value), "depth": depth}
+        raise _RejectedInput(f"Record contains an unsupported container type: {value_type.__name__}")
+
+    path_ids: set[int] = set()
+    root_frame = _new_frame(root, 0)
+    path_ids.add(root_frame["id"])
+    stack: list[dict] = [root_frame]
+
+    while True:
+        top = stack[-1]
+        if top["pos"] >= len(top["entries"]):
+            path_ids.discard(top["id"])
+            stack.pop()
+            finished = top["out"]
+            if not stack:
+                return finished
+            parent = stack[-1]
+            if parent["kind"] == "dict":
+                parent_key = parent["entries"][parent["pos"] - 1][0]
+                parent["out"][parent_key] = finished
+            else:
+                parent["out"].append(finished)
+            continue
+
+        if top["kind"] == "dict":
+            _, value = top["entries"][top["pos"]]
+        else:
+            value = top["entries"][top["pos"]]
+        top["pos"] += 1
+
+        if value is None or type(value) in _PLAIN_SCALAR_TYPES:
+            if top["kind"] == "dict":
+                key = top["entries"][top["pos"] - 1][0]
+                top["out"][key] = value
+            else:
+                top["out"].append(value)
+            continue
+
+        value_type = type(value)
+        if value_type in (dict, list):
+            if id(value) in path_ids:
+                raise _RejectedInput("Record contains a cyclic (self-referential) structure")
+            child_frame = _new_frame(value, top["depth"] + 1)
+            path_ids.add(child_frame["id"])
+            stack.append(child_frame)
+            continue
+
+        raise _RejectedInput(f"Record contains an unsupported value type: {value_type.__name__}")
 
 
 def validate_record_shape(
@@ -78,18 +154,29 @@ def validate_record_shape(
     ``internal_validation_error``) *before* the underlying validator is
     invoked, rather than risking an uncaught ``RecursionError`` from a
     self-referential schema traversing deep data (Phase 136G repair).
+
+    ``record`` is also rejected, with the same
+    :attr:`OutcomeStatus.INFRASTRUCTURE_FAILURE` status and
+    ``internal_validation_error`` code, if it is not already an inert,
+    plain-``dict``/``list``-rooted JSON-compatible structure: a hostile
+    ``Mapping`` subclass, a non-``str`` mapping key, a cyclic (self-
+    referential) container, or any container/scalar type other than
+    ``dict``/``list``/``str``/``int``/``float``/``bool``/``None`` is
+    rejected *before* the underlying validator ever sees it, rather than
+    risking an untrusted object's dunder methods executing during
+    ``jsonschema``'s own traversal (Phase 136H repair,
+    ``PREREQUISITE-136G-1``). A plain, already-strictly-parsed ``dict``/
+    ``list`` input is unaffected: it is rebuilt as an equal, freshly
+    constructed plain structure and validated exactly as before; ``record``
+    itself is never mutated.
     """
-    if _exceeds_max_depth(record, max_record_depth):
+    try:
+        plain_record = _materialize_plain(record, max_depth=max_record_depth)
+    except _RejectedInput as exc:
         return ShapeValidationResult(
             status=OutcomeStatus.INFRASTRUCTURE_FAILURE,
             schema_id=schema_id,
-            issues=(
-                ValidationIssue(
-                    code="internal_validation_error",
-                    message=f"Record nesting exceeds maximum depth of {max_record_depth}; refusing to validate",
-                    schema_id=schema_id,
-                ),
-            ),
+            issues=(ValidationIssue(code="internal_validation_error", message=exc.message, schema_id=schema_id),),
         )
 
     try:
@@ -112,7 +199,7 @@ def validate_record_shape(
 
     try:
         errors = sorted(
-            validator.iter_errors(record),
+            validator.iter_errors(plain_record),
             key=lambda err: ([str(p) for p in err.absolute_path], str(err.validator)),
         )
     except (_Unresolvable, SchemaRegistryError) as exc:

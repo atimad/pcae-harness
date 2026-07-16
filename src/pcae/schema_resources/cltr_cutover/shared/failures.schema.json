@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/shared/failures.schema.json",
+  "title": "CLTR Cutover shared reason-code vocabulary",
+  "description": "The shared, closed reason_code enum frozen by PHASE_135_STAGE_3_COMPANION_SCHEMAS_AND_TYPED_AUTHORITY_MODEL_CONTRACT_FREEZE.md Sec.31 ('Error and failure vocabulary'). Informational only; a reason_code never itself establishes authority, and this shared core does not verify that a code was correctly assigned for the failure that actually occurred (Layer 4). Family-local conflict_type-style enums (e.g. concurrency_conflict.schema.json's ConflictType) are deliberately NOT defined here -- each is scoped to its own owning family's future schema file.",
+  "$defs": {
+    "reason_code": {
+      "type": "string",
+      "enum": [
+        "invalid_schema",
+        "unsupported_version",
+        "identity_mismatch",
+        "phase_mismatch",
+        "transition_mismatch",
+        "migration_epoch_mismatch",
+        "authority_epoch_mismatch",
+        "revision_mismatch",
+        "digest_mismatch",
+        "stale_authorization",
+        "stale_certification",
+        "stale_writer",
+        "cas_rejected",
+        "publication_uncertain",
+        "concurrency_conflict",
+        "quarantine_required",
+        "recovery_required",
+        "authority_ambiguous",
+        "authority_missing",
+        "wrong_generation",
+        "incompatible_legacy_state",
+        "notification_uncertain",
+        "marker_conflict",
+        "receipt_conflict"
+      ],
+      "description": "24-value shared machine-stable reason code vocabulary. Unknown-value behavior: reject. Codes are never renamed once frozen; human explanations may be clarified in a future minor contract revision without changing the code itself."
+    }
+  }
+}

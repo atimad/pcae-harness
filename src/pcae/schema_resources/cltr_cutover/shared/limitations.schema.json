@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json",
+  "title": "CLTR Cutover shared limitations and authority-disclosure definitions",
+  "description": "Bounded free-text limitations array and the authority_disclosure struct every companion record's envelope carries (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.6, Sec.9; free-text bounds per the Phase 136 implementation plan Sec.15). Limitations are disclosures only and never alter authority or lifecycle outcome.",
+  "$defs": {
+    "limitation_entry": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000,
+      "allOf": [
+        {
+          "pattern": "^[^\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F\\x7F]*$",
+          "description": "Forbids every C0/C1 control character except tab (\\t) and newline (\\n)."
+        },
+        {
+          "pattern": "^(?:[^\\n]*\\n){0,8}[^\\n]*$",
+          "description": "At most 8 newline characters per entry."
+        }
+      ],
+      "description": "A single free-text limitation string. Non-empty, at most 2000 characters, at most 8 newlines, no control characters other than tab/newline. Rejected outright at the bound (never silently truncated)."
+    },
+    "limitations_array": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/limitation_entry" },
+      "maxItems": 32,
+      "description": "The limitations array present on every records/*.schema.json file (once authored). An empty array is permitted (no limitations to disclose); duplicate entries are not locally rejected by this shared definition (duplicate-content review is a Layer 4/authoring-review concern, not a schema-shape concern)."
+    },
+    "disclosure_text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "pattern": "^[\\x20-\\x7E]*$",
+      "description": "Single-line printable-ASCII-only disclosure sentence (no newlines, no control characters). At most 500 characters. Rejected outright at the bound."
+    },
+    "authority_disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority_role", "is_authoritative", "disclosure_text"],
+      "properties": {
+        "authority_role": {
+          "$ref": "enums.schema.json#/$defs/authority_role",
+          "description": "Always present. The record's own claimed authority role."
+        },
+        "is_authoritative": {
+          "const": false,
+          "description": "Always present. Load-bearing const false: no schema in this shared core may declare a record authoritative unconditionally (Sec.9). A future family schema that needs a conditionally-true value defines that conditional logic itself, on its own authority_role field, never by loosening this shared const."
+        },
+        "disclosure_text": {
+          "$ref": "#/$defs/disclosure_text",
+          "description": "Always present. Short, fixed-purpose disclosure sentence; not free-form operator prose."
+        }
+      },
+      "description": "The authority_disclosure struct. Schema validity of this struct never establishes lifecycle authority, cutover eligibility, authorization, publication success, or recovery truth (Sec.1, Sec.40)."
+    }
+  }
+}

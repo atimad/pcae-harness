@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/manifest.schema.json",
+  "title": "CLTR Cutover schema-package manifest",
+  "description": "Governs manifest.json, the deterministic tamper-evidence and completeness manifest over schemas/cltr_cutover's own schema resource files (Phase 136H, CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.41's manifest-integrity requirement, deferred from 136F Sec.13 to this phase). Sits at the package root, outside shared/, since it describes the package itself rather than a reusable $def any record schema references. Scoped, in this phase, to the 7 shared-core resources only -- it carries no entry for any records/*.schema.json file, none of which exists yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "contract_version", "package", "entries"],
+  "properties": {
+    "manifest_version": {
+      "const": "1.0",
+      "description": "This manifest format's own version."
+    },
+    "contract_version": {
+      "const": "CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001/1.0",
+      "description": "The governing contract and version this manifest was generated against."
+    },
+    "package": {
+      "const": "cltr_cutover",
+      "description": "The schema package this manifest indexes."
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/manifest_entry" },
+      "description": "One entry per schema resource file in the package, in deterministic canonical order (sorted by file_path, ascending, ASCII byte order)."
+    }
+  },
+  "$defs": {
+    "manifest_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_id",
+        "schema_version",
+        "file_path",
+        "file_digest",
+        "family",
+        "implementation_group",
+        "dependencies",
+        "status"
+      ],
+      "properties": {
+        "schema_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "description": "Must match the entry's own schema file's declared $id exactly."
+        },
+        "schema_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "Must match the entry's own schema file's declared schema_version (once a records/*.schema.json file carries one in its own content; shared/ files record their intended version here directly, since shared/ files carry no in-document schema_version field of their own)."
+        },
+        "file_path": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_./-]{1,512}$",
+          "description": "Path relative to the cltr_cutover package root. Forbids '..' and leading '/' by construction (neither character sequence needed nor permitted by the pattern's charset for a traversal to succeed, and the loader additionally verifies containment independent of this pattern)."
+        },
+        "file_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "SHA-256 of the entry's own schema file's raw bytes -- a tamper-evidence mechanism over the schema files themselves, distinct from any future record's own record_digest."
+        },
+        "family": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "description": "The record_type value the file governs, or 'shared' for shared/ files."
+        },
+        "implementation_group": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 11,
+          "description": "Implementation group per CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.46. Every entry in this phase's manifest is group 1."
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "description": "The entry's own $ref targets, by $id. Empty array permitted for a file with no local dependency."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["frozen", "draft"],
+          "description": "'frozen' marks authoring-complete content committed for the registry to load; 'draft' is reserved for uncommitted, in-progress content and must never appear in a committed manifest. 'frozen' does not itself assert independent verification has occurred -- 136H's own entries are 'frozen' at authoring completion, and their independent verification is 136I's separate responsibility."
+        }
+      }
+    }
+  }
+}

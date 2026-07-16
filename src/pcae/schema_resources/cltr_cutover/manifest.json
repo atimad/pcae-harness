@@ -1,0 +1,86 @@
+{
+  "manifest_version": "1.0",
+  "contract_version": "CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001/1.0",
+  "package": "cltr_cutover",
+  "entries": [
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/digest.schema.json",
+      "file_digest": "54b731735a8892cf2f76ed786a87117f97401a58e8f6b82c7d99443d6b48e27f",
+      "family": "shared",
+      "implementation_group": 1,
+      "dependencies": [],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/enums.schema.json",
+      "file_digest": "261561f6d2dcea46e3041bc07a227272d00a8d724ed7182cf813333873a3d024",
+      "family": "shared",
+      "implementation_group": 1,
+      "dependencies": [],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/envelope.schema.json",
+      "file_digest": "12ee4814d018b5382e6dce191ff11e5d611cee090ca145c31e7c57d59a4bcf7e",
+      "family": "shared",
+      "implementation_group": 1,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/failures.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/failures.schema.json",
+      "file_digest": "7bfb02b953bfdd9f45b4c92d7010bb08c40a093fa1eacf6a0dd264b67133a203",
+      "family": "shared",
+      "implementation_group": 1,
+      "dependencies": [],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/identity.schema.json",
+      "file_digest": "1a84248152f76369d1ba509d666d09fc05d58e806f90c603c15b38cebad1101c",
+      "family": "shared",
+      "implementation_group": 1,
+      "dependencies": [],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/limitations.schema.json",
+      "file_digest": "1266203cde5f3f1c8a085f92dfa16e724fc982b3910d2bc57807b4fce6106720",
+      "family": "shared",
+      "implementation_group": 1,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+      "schema_version": "1.0",
+      "file_path": "shared/references.schema.json",
+      "file_digest": "88ed5c4350e2904109a8e6c410cc55f013c26b81a1d607ca835ddbee37991aea",
+      "family": "shared",
+      "implementation_group": 1,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json"
+      ],
+      "status": "frozen"
+    }
+  ]
+}

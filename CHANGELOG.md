@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 136H — Companion Executable Schema Shared Core Implementation
+  (`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_IMPLEMENTATION.md`).
+  Implemented Implementation Group 1 (shared core) of the Stage 3
+  Companion Executable Schema package, per
+  `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`. New package
+  `src/pcae/schema_resources/cltr_cutover/` (packaged inside `src/pcae`,
+  per Phase 136F's own binding packaging decision): 7 `shared/*.schema.json`
+  files (`envelope`, `enums`, `identity`, `digest`, `references`,
+  `failures`, `limitations`; 33 exported `$defs`), a deterministic,
+  digest-verified `manifest.json`/`manifest.schema.json`, and no
+  `records/`/`bindings/`/`views/` directory. All 7 shared typed
+  authority enums plus `record_family` and the 24-value shared
+  `reason_code` vocabulary implemented with exact frozen values,
+  reject-on-unknown, no aliasing. Added `src/pcae/schema_runtime/manifest.py`
+  (`load_and_verify_manifest`), generic infrastructure reusing the
+  existing loader/registry to shape-validate a manifest and independently
+  recompute every entry's SHA-256 digest from disk. Resolved the
+  carried-forward `PREREQUISITE-136G-1` finding: `validate_record_shape`
+  (`src/pcae/schema_runtime/validation.py`) now rebuilds every input as
+  an inert, exactly-typed plain tree (iterative, never recursive) before
+  validation, rejecting hostile `Mapping` subclasses, non-`str` keys,
+  cyclic structures, and unsupported types, provably without invoking
+  any dunder method on hostile input, while preserving 136G's existing
+  `internal_validation_error` code and all 68 of its own unmodified
+  regression tests. Added 157 new focused tests
+  (`tests/test_cltr_cutover_136h_shared_core.py`); updated 2 Phase 136F
+  packaging tests to reflect that `cltr_cutover` shared-core content is
+  now legitimately packaged (`PREREQUISITE-136H-1`). Fast Green:
+  4391/4391, identical to the 136G baseline, zero regressions. No
+  authority-bearing record schema, typed model, semantic validator, or
+  authority resolver/state/pointer was created. Legacy lifecycle remains
+  the sole production authority; CLTR remains derivative; runtime
+  remains Observed / observe / execution unavailable.
+
 - Phase 136G — Validation Engine and Strict JSON Parsing Independent
   Verification
   (`docs/PHASE_136_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_INDEPENDENT_VERIFICATION.md`).

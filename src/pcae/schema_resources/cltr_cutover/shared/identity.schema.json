@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+  "title": "CLTR Cutover shared identifier definitions",
+  "description": "Layer 2 shape-only identifier definitions (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.10). None of these definitions verifies that an identifier was actually derived from its owning record's bound-field tuple (identity recomputation is Layer 4). ASCII-only anchored patterns are the sole mechanism forbidding path separators, traversal tokens, whitespace, and Unicode confusables.",
+  "$defs": {
+    "record_identity": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{7,127}$",
+      "description": "Generic record_id shape: lowercase-only, family-prefixed (e.g. 'authstate-...'), 8-128 characters total, charset [a-z0-9-] after the leading letter. Forbids '/', '\\\\', '..', and whitespace by construction (none of those characters are in the permitted class). Always present on every companion record's envelope; never conditionally absent."
+    },
+    "migration_epoch": {
+      "type": "string",
+      "pattern": "^(?!.*\\.\\.)[a-z0-9._-]{1,64}$",
+      "description": "Opaque migration-epoch token, 1-64 characters, lowercase-only, charset [a-z0-9._-]. The leading negative lookahead explicitly forbids the literal '..' substring, since the permitted charset alone (which includes '.') would not otherwise exclude it (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.10: 'must not contain / or ..'). Required on all 16 standalone companion families (Sec.7.2). Does not verify the epoch value corresponds to a real, currently active migration epoch."
+    },
+    "phase_identity": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9.]{1,16}$",
+      "description": "Repository phase-ID token (e.g. '136C'), 1-16 characters, mixed case permitted, charset [A-Za-z0-9.]. Conditionally present only on families that require phase_id (cutover_request, readiness_package, human_authorization, certification); this shape definition itself does not encode that conditionality."
+    },
+    "transition_identity": {
+      "type": "string",
+      "pattern": "^trans-[a-z0-9-]{2,122}$",
+      "description": "Deterministic digest-derived transition ID, 'trans-' prefix, lowercase-only, 8-128 characters total, never a raw UUID (CLTR-CUTOVER-001 Sec.7). Conditionally present only on families that require transition_id (authority_state, publication_attempt, publication_evidence, recovery_journal_entry)."
+    },
+    "principal_identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._@-]{1,256}$",
+      "description": "Non-secret principal identifier, 1-256 characters, mixed case permitted (may be email-shaped), ASCII-only charset [A-Za-z0-9._@-]. Used only on human_authorization.schema.json (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.6.1) -- not part of the universal envelope. Does not verify the principal against any identity provider or authentication system."
+    },
+    "generation_identity": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{7,127}$",
+      "description": "Opaque generation-id shape, same charset/length discipline as record_identity but kept as a distinct named definition so a generation identifier can never silently masquerade as a generic record_id in a schema that composes both. Always paired with a generation digest via shared/references.schema.json#/$defs/generation_reference; never used bare."
+    }
+  }
+}

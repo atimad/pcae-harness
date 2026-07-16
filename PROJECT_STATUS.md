@@ -2,6 +2,60 @@
 
 ## Current Phase
 
+Phase 136H — Companion Executable Schema Shared Core Implementation
+(completed, implementation). Implemented the first bounded Stage 3
+Companion Executable Schema group — Implementation Group 1, the shared
+core — per `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`, documented in
+`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_IMPLEMENTATION.md`.
+New package `src/pcae/schema_resources/cltr_cutover/` (packaged inside
+`src/pcae`, per Phase 136F's own binding packaging decision, not the
+repository-root `schemas/` path named by the contract's summary prose):
+7 `shared/*.schema.json` files (`envelope`, `enums`, `identity`,
+`digest`, `references`, `failures`, `limitations`; 33 exported `$defs`
+total), a deterministic `manifest.json` governed by `manifest.schema.json`
+and cross-checked against every file's independently recomputed SHA-256
+digest (`src/pcae/schema_runtime/manifest.py`'s new, generic
+`load_and_verify_manifest`), and no `records/`/`bindings/`/`views/`
+directory. All 7 shared typed authority enums (`AuthorityKind`,
+`AuthorityRole`, `MigrationStage`, `GenerationRole`, `PublicationState`,
+`RecoveryState`, `CompatibilityMode`) plus a `record_family` nomenclature
+enum and the 24-value shared `reason_code` vocabulary (135Z Sec.31)
+implemented with exact frozen values and reject-on-unknown. Also
+resolved the carried-forward `PREREQUISITE-136G-1` finding:
+`validate_record_shape`'s "already-strictly-parsed" `Mapping` contract
+was documentation-only; `src/pcae/schema_runtime/validation.py` now
+rebuilds every input as an inert, exactly-typed plain
+`dict`/`list`/`str`/`int`/`float`/`bool`/`None` tree (iteratively, never
+recursively) before any validator sees it, rejecting hostile `Mapping`
+subclasses, non-`str` mapping keys, cyclic Python structures, and
+unsupported container/scalar types — provably without ever invoking a
+single dunder method on a hostile input
+(`test_136h_hostile_mapping_rejected_without_invoking_any_dunder`).
+136G's own 68 adversarial tests remain unmodified and pass unchanged
+(same `internal_validation_error` code preserved for every
+infrastructure-failure case, old and new). 157 new focused tests added
+(`tests/test_cltr_cutover_136h_shared_core.py`); two 136F packaging
+tests updated to reflect that `cltr_cutover` content is now legitimately
+packaged (`PREREQUISITE-136H-1`). Fast Green: 4391/4391, identical to
+the 136G baseline, zero regressions. No authority-bearing record schema
+(`AuthorityEpoch`, `AuthorityState`, `CutoverRequest`, etc.), typed
+model, semantic validator, or authority resolver/state/pointer was
+created. Legacy lifecycle remains the sole production authority; CLTR
+remains derivative; runtime remains Observed / observe / execution
+unavailable.
+
+Recommended next phase: **136I — Companion Executable Schema Shared
+Core Independent Verification** — must independently attack the exact
+schema inventory, `$id` uniqueness, manifest integrity, package
+inclusion in a fresh wheel/sdist build, shared-definition strictness,
+enum completeness, identifier/digest/timestamp bounds, reference-family
+separation, composition behavior, the Mapping-contract repair, and
+registry/no-network/no-authority/no-execution boundaries, using
+independently authored attacks rather than trusting this phase's own
+157 tests.
+
+## Phase 136G Complete
+
 Phase 136G — Validation Engine and Strict JSON Parsing Independent
 Verification (completed, verification-plus-repair). Independently
 re-derived, reproduced, mutated, and adversarially attacked the generic

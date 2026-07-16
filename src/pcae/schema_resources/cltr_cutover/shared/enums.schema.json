@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+  "title": "CLTR Cutover shared typed authority enums",
+  "description": "The 7 shared cross-family enums frozen by CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.8.1-8.7, plus one additional shared nomenclature enum (record_family) needed for reference-family tagging (Sec.12). Unknown-value behavior is reject (fail closed) for every enum here; no alias, case-fold, or substring match is ever permitted. Defining record_family does not create, instantiate, or authorize any of the 16 named record schemas -- it only names the closed vocabulary a future record_reference.record_family field may claim (CSCH-EXEC-REQ-030). The 14 family-local enums (RequestState, ReadinessState, AuthorizationState, CandidateState, CertificationState, GateResult, PublicationOutcome, ConflictType, JournalState, ReconciliationState, QuarantineState, DeliveryState, MarkerState, ReceiptState) are deliberately NOT centralized here; each is scoped to its own owning family's future schema file (Sec.8.8).",
+  "$defs": {
+    "authority_kind": {
+      "type": "string",
+      "enum": ["legacy", "cltr"],
+      "description": "AuthorityKind (Sec.8.1). Unknown-value behavior: reject. No version-extension behavior in v1.0."
+    },
+    "authority_role": {
+      "type": "string",
+      "enum": [
+        "authoritative",
+        "derivative",
+        "operational",
+        "evidence",
+        "compatibility",
+        "historical",
+        "quarantined"
+      ],
+      "description": "AuthorityRole (Sec.8.2), the Stage-3 companion 7-value vocabulary. Shares zero code points with CLTR-SCHEMA-001's 5-code (S/R/D/E/V) authority_role field. The 'authoritative' value is restricted at the record-schema level (Sec.9) to authority_state.schema.json and publication_evidence.schema.json only -- this shared enum definition alone does not enforce that restriction; no record schema exists yet in this phase to carry it."
+    },
+    "migration_stage": {
+      "type": "string",
+      "enum": [
+        "shadow",
+        "dual_derivation",
+        "atomic_rehearsal",
+        "rollback_rehearsal",
+        "cutover_readiness",
+        "cutover_candidate",
+        "certified",
+        "publication_pending",
+        "cltr_authoritative",
+        "legacy_compatibility",
+        "legacy_retired"
+      ],
+      "description": "MigrationStage (Sec.8.3), the Stage-3 typed 11-value migration stage. Distinct from src/pcae/cltr/migration/enums.py's existing 6-value MigrationStage class; the two must never be conflated."
+    },
+    "generation_role": {
+      "type": "string",
+      "enum": [
+        "rehearsal_candidate",
+        "rehearsal_generation",
+        "cutover_candidate",
+        "certified_generation",
+        "authoritative_generation",
+        "historical_generation",
+        "superseded_generation",
+        "quarantined_generation"
+      ],
+      "description": "GenerationRole (Sec.8.4), 8 values."
+    },
+    "publication_state": {
+      "type": "string",
+      "enum": [
+        "not_requested",
+        "requested",
+        "gate_rejected",
+        "gate_uncertain",
+        "certified",
+        "publication_prepared",
+        "publication_attempted",
+        "publication_uncertain",
+        "published",
+        "verified",
+        "conflict",
+        "quarantined"
+      ],
+      "description": "PublicationState (Sec.8.5), 12 values."
+    },
+    "recovery_state": {
+      "type": "string",
+      "enum": [
+        "none_required",
+        "resume_safe",
+        "retry_required",
+        "operator_review_required",
+        "reconciliation_required",
+        "quarantine_required",
+        "conflict_unresolved",
+        "publication_uncertain_unresolved",
+        "terminal_recovered",
+        "terminal_unrecoverable"
+      ],
+      "description": "RecoveryState (Sec.8.6), the Stage-3 typed 10-value recovery state -- a superset, not a synonym, of the existing 4-value RecoveryClassification in src/pcae/cltr/enums.py, and entirely distinct from the already-implemented 11-value RecoveryState in src/pcae/cltr/migration/rehearsal/enums.py (Stage 2). All three enums are real and simultaneously valid in this codebase; no code may substitute one for another."
+    },
+    "compatibility_mode": {
+      "type": "string",
+      "enum": [
+        "legacy_authoritative",
+        "legacy_adapter",
+        "legacy_read_only",
+        "legacy_historical",
+        "legacy_disabled",
+        "legacy_retired"
+      ],
+      "description": "CompatibilityMode (Sec.8.7), 6 values, forward-only documented ordering: legacy_authoritative -> legacy_adapter -> legacy_read_only -> legacy_historical -> legacy_disabled -> legacy_retired. This ordering is advisory documentation only; JSON Schema cannot enforce state-machine transition ordering across documents (Layer 4)."
+    },
+    "record_family": {
+      "type": "string",
+      "enum": [
+        "authority_epoch",
+        "authority_state",
+        "cutover_request",
+        "readiness_package",
+        "human_authorization",
+        "cutover_candidate",
+        "certification",
+        "publication_attempt",
+        "publication_evidence",
+        "concurrency_conflict",
+        "recovery_journal_entry",
+        "quarantine_record",
+        "notification_authority_binding",
+        "marker_authority_binding",
+        "receipt_authority_binding",
+        "compatibility_state"
+      ],
+      "description": "Closed nomenclature for the record_family tag on shared/references.schema.json#/$defs/record_reference (CSCH-EXEC-REQ-030). Exactly the 16 standalone companion family slugs frozen by CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.4. Naming a family here does not create, instantiate, or authorize its schema file -- none of the 16 named record schemas exists yet; this phase implements shared-core definitions only."
+    }
+  }
+}

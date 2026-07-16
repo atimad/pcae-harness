@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+  "title": "CLTR Cutover shared digest definitions",
+  "description": "Layer 2 shape-only digest definitions. A well-formed digest string proves nothing about whether it matches any actual record's recomputed bytes (Layer 3, src/pcae/cltr/digest.py) -- see CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.11.",
+  "$defs": {
+    "sha256_hex": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "Bare 64-character lowercase hexadecimal SHA-256 digest, matching src/pcae/cltr/digest.py's is_well_formed_digest exactly. No 'sha256:' prefix (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.11, CONFIRMED-136C-1). Always present when the owning field is present; conditional presence, if any, is governed by the owning schema, not this definition."
+    },
+    "record_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The digest of the companion record document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "referenced_record_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The digest of a record referenced by a record_reference tuple (shared/references.schema.json#/$defs/record_reference). Shape-checked only; whether it actually matches the referenced record is a Layer 4 responsibility."
+    },
+    "generation_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The digest of a lifecycle generation referenced by a generation_reference tuple. Shape-checked only; does not imply the generation exists, is certified, or is authoritative."
+    },
+    "manifest_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The SHA-256 digest of a schema resource file's own raw bytes, as recorded in the shared-core schema manifest. Distinct from record_digest: this digests a schema *definition* file, never a record instance."
+    },
+    "pointer_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The digest carried by an authority-pointer-shaped reference. Shape-checked only; this package defines no authority pointer record and does not resolve or create one."
+    },
+    "journal_entry_digest": {
+      "$ref": "#/$defs/sha256_hex",
+      "description": "The digest of a prior recovery-journal entry in a hash chain. Shape-checked only; chain-integrity verification is a Layer 4 responsibility, deferred beyond this phase."
+    }
+  }
+}
