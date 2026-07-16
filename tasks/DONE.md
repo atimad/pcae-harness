@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136G: Validation Engine and Strict JSON Parsing Independent Verification (20260716-0036-phase-136g-validation-engine-and-strict-json-parsing-independent-verification)
 - Idle: awaiting next governed phase (post-136F) (20260715-2336-idle-awaiting-next-governed-phase-post-136f)
 - Phase 136F: Draft 2020-12 Validation Engine and Strict JSON Parsing Prerequisite (20260715-2256-phase-136f-draft-2020-12-validation-engine-and-strict-json-parsing-prerequisite)
 - Idle: awaiting next governed phase (post-136E) (20260715-2203-idle-awaiting-next-governed-phase-post-136e)
