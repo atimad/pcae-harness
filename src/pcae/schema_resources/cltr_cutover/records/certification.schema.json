@@ -1,0 +1,230 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/certification.schema.json",
+  "title": "CLTR Cutover Certification record",
+  "description": "Phase 136N, Implementation Group 4. Shape-only wire contract for a Certification companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.23). A Certification document is evidence-based verification of a specific CutoverCandidate; it never itself proves certification authenticity, publishes authority, activates cutover, or establishes current authority (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 1 (strict): additionalProperties: false, no _extensions escape hatch (Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes certification). Separation from HumanAuthorization (Sec.13 of the phase objective): this record deliberately carries no named certifier-principal field the way human_authorization.schema.json carries 'principal' -- Sec.23's frozen field table names no such field; certification is evidence-based verification (verifier_evidence, an array of record_reference) rather than a single named human decision, a documented design distinction from human_authorization's principal-centric shape (disclosed as NON-BLOCKING-136N-8; a prompt-suggested 'certifier_principal' field is not present in the frozen contract and is not invented here).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "phase_id",
+    "migration_epoch",
+    "candidate_reference",
+    "request_reference",
+    "readiness_reference",
+    "authorization_reference",
+    "source_authority_reference",
+    "target_epoch_reference",
+    "cas_expectation",
+    "verifier_evidence",
+    "state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/certification.schema.json",
+      "description": "Always present. Identifies this document as validated against the Certification schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "certification",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "phase_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/phase_identity",
+      "description": "Always present. certification is one of the families requiring phase_id (Sec.7.2)."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1)."
+    },
+    "candidate_reference": {
+      "$ref": "#/$defs/candidate_reference",
+      "description": "Always present. Family-tagged reference to the CutoverCandidate this certification verifies. A valid reference never implies the referenced candidate exists or matches (Layer 4)."
+    },
+    "request_reference": {
+      "$ref": "#/$defs/request_reference",
+      "description": "Always present. Family-tagged reference to the originating CutoverRequest."
+    },
+    "readiness_reference": {
+      "$ref": "#/$defs/readiness_reference",
+      "description": "Always present. Family-tagged reference to the originating ReadinessPackage."
+    },
+    "authorization_reference": {
+      "$ref": "#/$defs/authorization_reference",
+      "description": "Always present. Family-tagged reference to the governing HumanAuthorization. Certification does not itself authorize -- it verifies a candidate that was already authorized (Sec.13 of the phase objective's separation requirement)."
+    },
+    "source_authority_reference": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present. Family-tagged reference to the source (legacy) AuthorityEpoch."
+    },
+    "target_epoch_reference": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present. Family-tagged reference to the proposed target AuthorityEpoch. Sec.23 does not forbid source_authority_reference and target_epoch_reference from referencing an identical epoch record; no such restriction is invented here."
+    },
+    "cas_expectation": {
+      "$ref": "../shared/references.schema.json#/$defs/cas_expectation",
+      "description": "Always present (Sec.23). Every expected-state field within this embedded component is itself unconditionally required (Sec.24)."
+    },
+    "verifier_evidence": {
+      "type": "array",
+      "items": { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+      "maxItems": 64,
+      "description": "Always present as a key; may be empty. Array of record_reference evidence entries this certification's verification result is based on. No family restriction is applied, matching the readiness_package.evidence_references precedent (Sec.20) -- an evidence entry may point at any of the 16 companion record_family values."
+    },
+    "state": {
+      "enum": ["pending", "certified", "stale", "invalidated"],
+      "description": "Always present. Record-local CertificationState (Sec.8.8, 4 values). 'stale' requires staleness; 'invalidated' requires invalidation (both enforced below). A 'certified' value here never itself proves certification authenticity (Layer 4)."
+    },
+    "staleness": {
+      "$ref": "#/$defs/staleness",
+      "description": "Conditionally present: required iff state is 'stale', forbidden otherwise."
+    },
+    "invalidation": {
+      "$ref": "#/$defs/invalidation",
+      "description": "Conditionally present: required iff state is 'invalidated', forbidden otherwise."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless. A valid Certification record never itself publishes or activates authority."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "stale" } }
+      },
+      "then": { "required": ["staleness"] },
+      "else": { "not": { "required": ["staleness"] } }
+    },
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "invalidated" } }
+      },
+      "then": { "required": ["invalidation"] },
+      "else": { "not": { "required": ["invalidation"] } }
+    }
+  ],
+  "$defs": {
+    "candidate_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "cutover_candidate" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'cutover_candidate', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "request_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "cutover_request" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'cutover_request', with schema_id/schema_version unconditionally required."
+    },
+    "readiness_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "readiness_package" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'readiness_package', with schema_id/schema_version unconditionally required."
+    },
+    "authorization_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "human_authorization" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'human_authorization', with schema_id/schema_version unconditionally required. Preventing a candidate, certification, or any other family from being substituted for the authorization binding (Sec.13 family-substitution requirement)."
+    },
+    "epoch_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": { "record_family": { "const": "authority_epoch" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'authority_epoch', used for both source_authority_reference and target_epoch_reference."
+    },
+    "staleness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["detected_at", "reason_code"],
+      "properties": {
+        "detected_at": {
+          "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+          "description": "Always present when this object is present."
+        },
+        "reason_code": {
+          "$ref": "../shared/failures.schema.json#/$defs/reason_code",
+          "description": "Always present when this object is present."
+        }
+      },
+      "description": "Bounded local staleness-disclosure object. Present only when state is 'stale'."
+    },
+    "invalidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["invalidated_at", "reason_code"],
+      "properties": {
+        "invalidated_at": {
+          "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+          "description": "Always present when this object is present."
+        },
+        "reason_code": {
+          "$ref": "../shared/failures.schema.json#/$defs/reason_code",
+          "description": "Always present when this object is present."
+        }
+      },
+      "description": "Bounded local invalidation-disclosure object. Present only when state is 'invalidated'."
+    }
+  }
+}

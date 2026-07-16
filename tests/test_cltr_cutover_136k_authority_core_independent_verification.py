@@ -48,8 +48,10 @@ AUTHORITY_STATE_ID = BASE_ID + "records/authority_state.schema.json"
 # is a current-repository-state assertion, not a frozen historical
 # snapshot of 136K's own completion moment -- mirroring 136K's own
 # in-place repair of 136I's manifest-status test.
-EXPECTED_MANIFEST_ENTRY_COUNT = 11
-EXPECTED_REGISTRY_RESOURCE_COUNT = 12
+# Updated by Phase 136L (11/12) and Phase 136N: manifest/registry counts now
+# legitimately include Group 4 (3 new record schemas).
+EXPECTED_MANIFEST_ENTRY_COUNT = 14
+EXPECTED_REGISTRY_RESOURCE_COUNT = 15
 EXPECTED_GROUP1_SHARED_FILES = (
     "shared/digest.schema.json",
     "shared/enums.schema.json",
@@ -66,6 +68,11 @@ EXPECTED_GROUP2_RECORD_FILES = (
 EXPECTED_GROUP3_RECORD_FILES = (
     "records/cutover_request.schema.json",
     "records/readiness_package.schema.json",
+)
+EXPECTED_GROUP4_RECORD_FILES = (
+    "records/human_authorization.schema.json",
+    "records/cutover_candidate.schema.json",
+    "records/certification.schema.json",
 )
 
 # The frozen contract's Sec.9 explicit 12/13-file "authoritative forbidden"
@@ -1178,11 +1185,11 @@ def test_136k_repaired_scope_guards_still_forbid_every_group3plus_filename(test_
 
 def test_136k_no_group4plus_schema_file_introduced_since_136l_baseline():
     # Renamed and updated by Phase 136L (was
-    # test_136k_no_group3plus_schema_file_introduced_since_136j_baseline):
-    # Group 3 is now the legitimate current baseline; this test's role
-    # (confirm no *further* group has been introduced) is preserved by
-    # widening the expected set to include Group 3 and renaming the test
-    # to describe the new boundary it actually checks.
+    # test_136k_no_group3plus_schema_file_introduced_since_136j_baseline)
+    # and again by Phase 136N: Group 4 is now the legitimate current
+    # baseline; this test's role (confirm no *further* group has been
+    # introduced) is preserved by widening the expected set to include
+    # Group 4.
     with cltr_cutover_root() as root:
         all_files = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.schema.json"))
     expected = sorted(
@@ -1190,6 +1197,7 @@ def test_136k_no_group4plus_schema_file_introduced_since_136l_baseline():
         + EXPECTED_GROUP1_SHARED_FILES
         + EXPECTED_GROUP2_RECORD_FILES
         + EXPECTED_GROUP3_RECORD_FILES
+        + EXPECTED_GROUP4_RECORD_FILES
     )
     assert all_files == expected
 
@@ -1232,7 +1240,7 @@ def test_136k_installed_wheel_validates_group2_fixtures_outside_repository(tmp_p
         "from pcae.schema_runtime import build_offline_registry, validate_record_shape, OutcomeStatus\n"
         "with cltr_cutover_root() as root:\n"
         "    reg = build_offline_registry(root)\n"
-        "assert len(reg.schema_ids) == 12, reg.schema_ids\n"
+        "assert len(reg.schema_ids) == 15, reg.schema_ids\n"
         "valid = {\n"
         "    'schema_id': 'https://pcae.local/schemas/cltr_cutover/records/authority_epoch.schema.json',\n"
         "    'schema_version': '1.0', 'contract_version': '1.0', 'record_type': 'authority_epoch',\n"
@@ -1273,8 +1281,12 @@ def test_136k_sdist_and_wheel_still_exclude_group3plus_and_authority_namespace(t
     sdist = next(dist_dir.glob("*.tar.gz"))
 
     # cutover_request and readiness_package are no longer forbidden stems:
-    # Phase 136L legitimately packages them as Group 3.
-    forbidden_stems = ("human_authorization", "compatibility_state")
+    # Phase 136L legitimately packages them as Group 3. human_authorization
+    # is no longer a forbidden stem: Phase 136N legitimately packages it as
+    # Group 4 (cutover_candidate/certification substrings overlap with no
+    # forbidden Group 5+ stem, so only compatibility_state remains checked
+    # here for this particular assertion).
+    forbidden_stems = ("compatibility_state",)
 
     with zipfile.ZipFile(wheel) as zf:
         names = zf.namelist()

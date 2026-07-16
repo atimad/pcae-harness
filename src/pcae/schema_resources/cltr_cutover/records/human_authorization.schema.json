@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/human_authorization.schema.json",
+  "title": "CLTR Cutover HumanAuthorization record",
+  "description": "Phase 136N, Implementation Group 4. Shape-only wire contract for a HumanAuthorization companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.21). A HumanAuthorization document represents a principal's decision to permit a specific, scoped cutover attempt to proceed; it never itself proves a real human actually made that decision, proves signer identity, proves proof/signature validity, establishes replay/freshness truth, certifies anything, publishes authority, executes cutover, or establishes current authority (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 1 (strict): additionalProperties: false, no _extensions escape hatch (Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes human_authorization). Scope is bound structurally by request_reference + readiness_reference + target_reference (all three required, all family-restricted, cross-family schema_id/schema_version required per Sec.12) -- no separate wildcard-capable 'scope' string/enum field exists anywhere in Sec.21's frozen field table, and none is invented here (disclosed as NON-BLOCKING-136N-4, since the Phase 136 implementation plan Sec.13 Group 4 test list uses the word 'scope' informally to describe this same three-reference binding, not a distinct field).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "phase_id",
+    "migration_epoch",
+    "principal",
+    "method",
+    "request_reference",
+    "readiness_reference",
+    "target_reference",
+    "issued_at",
+    "expires_at",
+    "state",
+    "replay_binding",
+    "risk_acknowledgement",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/human_authorization.schema.json",
+      "description": "Always present. Identifies this document as validated against the HumanAuthorization schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "human_authorization",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "phase_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/phase_identity",
+      "description": "Always present. human_authorization is one of the families requiring phase_id (Sec.7.2)."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1)."
+    },
+    "principal": {
+      "$ref": "../shared/identity.schema.json#/$defs/principal_identifier",
+      "description": "Always present. Non-secret principal identifier; used only on this family (Sec.6.1). Does not verify the principal against any identity provider or authentication system (Layer 4/6)."
+    },
+    "method": {
+      "enum": ["manual_review", "signed_attestation"],
+      "description": "Always present. AuthorizationMethod (Sec.21). proof_reference is required when this is 'signed_attestation' and forbidden when this is 'manual_review' (enforced below) -- a locally-decided conditional filling a Sec.21/Sec.16 cross-reference gap Sec.16's own table does not spell out, disclosed as NON-BLOCKING-136N-5 (same category as 136L's NON-BLOCKING-136L-1/2 disclosed field-gap fills)."
+    },
+    "request_reference": {
+      "$ref": "#/$defs/request_reference",
+      "description": "Always present. Family-tagged reference, with schema_id/schema_version required per Sec.12's cross-family-reference rule, to the CutoverRequest this authorization scopes to. A valid reference never implies the referenced request exists or matches (Layer 4)."
+    },
+    "readiness_reference": {
+      "$ref": "#/$defs/readiness_reference",
+      "description": "Always present. Family-tagged reference, with schema_id/schema_version required, to the ReadinessPackage this authorization scopes to. A valid reference never implies the referenced package exists, matches, or is itself ready (Layer 4)."
+    },
+    "target_reference": {
+      "$ref": "#/$defs/target_reference",
+      "description": "Always present. Family-tagged reference, with schema_id/schema_version required, to the proposed target AuthorityEpoch this authorization scopes to. A valid reference never implies the referenced epoch exists or is active (Layer 4/6)."
+    },
+    "issued_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Shape-checked only; never compared against expires_at or wall-clock 'now' at Layer 2 (Layer 4/5)."
+    },
+    "expires_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present, not optional -- restates CLTR-CUTOVER-001 Sec.8's 24-hour freshness window as a mandatory field (Sec.21). The actual freshness comparison against wall-clock 'now' is Layer 4/5; this schema only requires the field exist and be shape-valid."
+    },
+    "state": {
+      "enum": ["issued", "used", "revoked", "expired"],
+      "description": "Always present. Record-local AuthorizationState (Sec.8.8, 4 values). 'used' requires use_binding; 'revoked' requires revocation_metadata (both enforced below, Sec.16). A schema-valid state here never itself proves current freshness, actual revocation truth, or actual prior use (Layer 4/5)."
+    },
+    "revocation_metadata": {
+      "$ref": "#/$defs/revocation_metadata",
+      "description": "Conditionally present: required when state is 'revoked', forbidden otherwise (Sec.16 row 4)."
+    },
+    "use_binding": {
+      "$ref": "#/$defs/use_binding",
+      "description": "Conditionally present: required when state is 'used', forbidden otherwise (Sec.16 row 5). A forward-shaped reference to the publication_attempt record that consumed this authorization -- publication_attempt.schema.json is not implemented in this phase (Group 5); this field is a shape-only forward reference and does not require the referenced document to already exist for schema validity (matching the 136J authority_state.publication_evidence_reference precedent)."
+    },
+    "replay_binding": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[A-Za-z0-9._-]{1,256}$",
+      "description": "Always present. Opaque one-time-use token *reference* only (Sec.21, Sec.25, Sec.26) -- never the secret/token value itself. Shape alone cannot prove the referenced token has not been replayed; that is Layer 4/5 (Sec.25 replay/freshness boundary)."
+    },
+    "risk_acknowledgement": {
+      "const": true,
+      "description": "Always present. const true (Sec.21) -- an authorization document that does not acknowledge risk is not schema-valid. Does not itself prove the principal actually reviewed or understood the risk (Layer 4)."
+    },
+    "proof_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/proof_reference",
+      "description": "Conditionally present: required when method is 'signed_attestation', forbidden when method is 'manual_review' (enforced below). Opaque, hashed, non-reusable pointer to a proof artifact stored elsewhere -- never a raw signature blob, bearer token, password, or private key (Sec.26). Schema validity of a well-formed reference never itself proves cryptographic validity or signer authenticity (Sec.1, Sec.25)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless. A valid HumanAuthorization record never itself authorizes or executes anything -- it is governance evidence of a recorded decision only."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "revoked" } }
+      },
+      "then": { "required": ["revocation_metadata"] },
+      "else": { "not": { "required": ["revocation_metadata"] } }
+    },
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "used" } }
+      },
+      "then": { "required": ["use_binding"] },
+      "else": { "not": { "required": ["use_binding"] } }
+    },
+    {
+      "if": {
+        "required": ["method"],
+        "properties": { "method": { "const": "signed_attestation" } }
+      },
+      "then": { "required": ["proof_reference"] },
+      "else": { "not": { "required": ["proof_reference"] } }
+    }
+  ],
+  "$defs": {
+    "request_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "cutover_request" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'cutover_request', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "readiness_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "readiness_package" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'readiness_package', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "target_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "authority_epoch" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'authority_epoch', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "use_binding": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": { "record_family": { "const": "publication_attempt" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'publication_attempt' -- a forward reference to a family whose own schema file is not implemented until Group 5."
+    },
+    "revocation_metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revoked_at", "revoked_by", "reason_code"],
+      "properties": {
+        "revoked_at": {
+          "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+          "description": "Always present when this object is present."
+        },
+        "revoked_by": {
+          "$ref": "../shared/identity.schema.json#/$defs/principal_identifier",
+          "description": "Always present when this object is present. The principal who revoked this authorization; may differ from the original issuing principal."
+        },
+        "reason_code": {
+          "$ref": "../shared/failures.schema.json#/$defs/reason_code",
+          "description": "Always present when this object is present."
+        }
+      },
+      "description": "Bounded local revocation-disclosure object (Sec.16 row 4). Present only when state is 'revoked'."
+    }
+  }
+}

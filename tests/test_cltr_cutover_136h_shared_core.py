@@ -760,10 +760,13 @@ def test_136h_storage_locator_field_absent_from_shared_references():
     assert "storage_locator" not in json.dumps(document)
 
 
-def test_136h_cas_expectation_not_defined_in_136h():
+def test_136h_cas_expectation_now_defined_by_136n():
+    # Updated by Phase 136N: cas_expectation is legitimately added to
+    # shared/references.schema.json as the first Group 4 embedding site
+    # (cutover_candidate, certification) needs it (resolving DEFERRED-136H-1).
     with cltr_cutover_root() as root:
         document = json.loads((root / "shared" / "references.schema.json").read_bytes())
-    assert "cas_expectation" not in document["$defs"]
+    assert "cas_expectation" in document["$defs"]
 
 
 # ---------------------------------------------------------------------------
@@ -1127,11 +1130,11 @@ FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
     # longer forbidden: Phase 136J legitimately implements them as
     # Implementation Group 2. cutover_request.schema.json and
     # readiness_package.schema.json are no longer forbidden: Phase 136L
-    # legitimately implements them as Implementation Group 3. Every
-    # later-group (4+) record schema remains forbidden until its own phase.
-    "human_authorization.schema.json",
-    "cutover_candidate.schema.json",
-    "certification.schema.json",
+    # legitimately implements them as Implementation Group 3.
+    # human_authorization.schema.json, cutover_candidate.schema.json, and
+    # certification.schema.json are no longer forbidden: Phase 136N
+    # legitimately implements them as Implementation Group 4. Every
+    # later-group (5+) record schema remains forbidden until its own phase.
     "publication_attempt.schema.json",
     "publication_evidence.schema.json",
     "concurrency_conflict.schema.json",

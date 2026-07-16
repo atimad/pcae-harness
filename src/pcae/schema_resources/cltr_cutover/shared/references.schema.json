@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
   "title": "CLTR Cutover shared reference definitions",
-  "description": "Reference-tuple definitions (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.12, Sec.14). A valid reference proves shape only: it never implies the referenced record exists, is current, is authoritative, or that publication succeeded (Sec.40). The embedded cas_expectation component (row 10 of Sec.4) is deliberately NOT defined in this phase -- it is used only by cutover_candidate.schema.json and publication_attempt.schema.json, both out of the 136H Group 1 boundary, and is deferred to whichever future group first needs it (DEFERRED-136H-1).",
+  "description": "Reference-tuple definitions (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.12, Sec.14). A valid reference proves shape only: it never implies the referenced record exists, is current, is authoritative, or that publication succeeded (Sec.40). The embedded cas_expectation component (row 10 of Sec.4, Sec.24) is added in Phase 136N (Implementation Group 4), the first group to need it (resolving DEFERRED-136H-1): it is embedded at exactly two sites in this phase, cutover_candidate.schema.json and certification.schema.json (both Sec.22/Sec.23 field tables carry a cas_expectation field), disclosed as NON-BLOCKING-136N-1 against Sec.4's own row-10 text naming cutover_candidate/publication_attempt as the two sites -- Sec.23's field table independently and unambiguously also lists cas_expectation on certification, so this phase follows the more specific per-family field tables over Sec.4's summary row, consistent with prior groups' precedent of favoring specific per-family tables over summary text (e.g. 136L's NON-BLOCKING-136L-2). A third embedding site, publication_attempt.schema.json, remains out of this phase's Group 4 boundary and is deferred to Group 5 (136P).",
   "$defs": {
     "record_reference": {
       "type": "object",
@@ -70,6 +70,94 @@
     "proof_reference": {
       "$ref": "#/$defs/record_reference",
       "description": "Opaque, non-secret proof/signature reference, reusing record_reference's exact shape rather than a new one -- a proof reference is never a raw signature blob or reusable credential, only a pointer to a proof artifact stored elsewhere. Shape alone cannot distinguish a genuinely opaque reference from an embedded secret; this remains a documentation/convention-level guarantee (Sec.44), not a schema-enforceable one."
+    },
+    "cas_expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expected_authority_kind",
+        "expected_authority_epoch",
+        "expected_authoritative_generation",
+        "expected_authority_pointer_digest",
+        "expected_authority_state_digest",
+        "expected_migration_epoch",
+        "expected_source_lifecycle_state",
+        "expected_compatibility_mode",
+        "expected_journal_lock_state",
+        "expected_request_reference",
+        "expected_certification_reference"
+      ],
+      "properties": {
+        "expected_authority_kind": {
+          "$ref": "enums.schema.json#/$defs/authority_kind",
+          "description": "Always present (Sec.24). Every expected-state field in this $def is required -- missing values are never wildcards."
+        },
+        "expected_authority_epoch": {
+          "allOf": [
+            { "$ref": "#/$defs/record_reference" },
+            { "properties": { "record_family": { "const": "authority_epoch" } } }
+          ],
+          "description": "Always present (Sec.24). Family-tagged reference restricted to authority_epoch, preventing a wrong-family substitution."
+        },
+        "expected_authoritative_generation": {
+          "$ref": "#/$defs/generation_reference",
+          "description": "Always present (Sec.24). Sec.24's field table types this 'record_reference', but this package's existing precedent (authority_state.schema.json's authoritative_generation field, Phase 136J) types a generation binding as the dedicated id+digest-only generation_reference shape rather than the id+digest+family record_reference shape, since 'generation' is not itself one of the 16 record_family enum values (shared/enums.schema.json) and so cannot be family-restricted the way other record_reference fields are. Disclosed as NON-BLOCKING-136N-2: a documented, precedent-consistent typing choice, not an invented field."
+        },
+        "expected_authority_pointer_digest": {
+          "$ref": "digest.schema.json#/$defs/pointer_digest",
+          "description": "Always present (Sec.24). Shape-checked only; this package defines no authority pointer record and does not resolve or create one."
+        },
+        "expected_authority_state_digest": {
+          "$ref": "digest.schema.json#/$defs/sha256_hex",
+          "description": "Always present (Sec.24). The expected digest of an AuthorityState record's own content. Shape-checked only; never recomputed or compared against a live AuthorityState document at Layer 2."
+        },
+        "expected_migration_epoch": {
+          "$ref": "identity.schema.json#/$defs/migration_epoch",
+          "description": "Always present (Sec.24)."
+        },
+        "expected_source_lifecycle_state": {
+          "type": "string",
+          "enum": [
+            "PROPOSED",
+            "CERTIFYING",
+            "CERTIFIED",
+            "PROMOTING",
+            "PROMOTED",
+            "NOTIFYING",
+            "NOTIFIED",
+            "NOTIFIED_UNCONFIRMED",
+            "TERMINAL_SUCCESS",
+            "TERMINAL_PARTIAL_EXTERNAL",
+            "FAILED_PRE_CERT",
+            "FAILED_POST_CERT"
+          ],
+          "description": "Always present (Sec.24). Restates, by wire value only, the 12-value legacy LifecycleState enum already implemented at src/pcae/cltr/enums.py (CLTR-SCHEMA-001) -- this package does not import that Python enum or depend on it; it independently re-declares the exact same closed vocabulary as plain JSON Schema string values. Unknown-value behavior: reject."
+        },
+        "expected_compatibility_mode": {
+          "$ref": "enums.schema.json#/$defs/compatibility_mode",
+          "description": "Always present (Sec.24)."
+        },
+        "expected_journal_lock_state": {
+          "type": "string",
+          "enum": ["unlocked", "locked"],
+          "description": "Always present (Sec.24)."
+        },
+        "expected_request_reference": {
+          "allOf": [
+            { "$ref": "#/$defs/record_reference" },
+            { "properties": { "record_family": { "const": "cutover_request" } } }
+          ],
+          "description": "Always present (Sec.24). Family-tagged reference restricted to cutover_request."
+        },
+        "expected_certification_reference": {
+          "allOf": [
+            { "$ref": "#/$defs/record_reference" },
+            { "properties": { "record_family": { "const": "certification" } } }
+          ],
+          "description": "Always present (Sec.24). Family-tagged reference restricted to certification. When this $def is embedded inside certification.schema.json itself (Sec.23), a schema-valid document may structurally reference any certification record_id/digest, including in principle its own -- JSON Schema validates one document's shape only and cannot compare a nested reference's id/digest against its own envelope's record_id/record_digest (Layer 4). Disclosed as NON-BLOCKING-136N-3: self-reference exclusion for this embedding site is a semantic-validator responsibility, not a Layer 2 schema-shape responsibility."
+        }
+      },
+      "description": "The embedded CASExpectation component (row 10 of Sec.4, Sec.24). Never a standalone document with its own record_id; created together with, and digested as part of, its owning document (cutover_candidate or certification, this phase; publication_attempt, a future Group 5 site). No optional fields -- every expected-state field is mandatory, which is precisely the mechanism preventing a missing value from being treated as an unbound wildcard (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.24, restated by the Phase 136 implementation plan Sec.13 Group 4 no-go criteria)."
     }
   }
 }

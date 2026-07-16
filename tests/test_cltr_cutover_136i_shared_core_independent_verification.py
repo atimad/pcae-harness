@@ -55,11 +55,11 @@ FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
     # longer forbidden: Phase 136J legitimately implements them as
     # Implementation Group 2. cutover_request.schema.json and
     # readiness_package.schema.json are no longer forbidden: Phase 136L
-    # legitimately implements them as Implementation Group 3. Every
-    # later-group (4+) record schema remains forbidden until its own phase.
-    "human_authorization.schema.json",
-    "cutover_candidate.schema.json",
-    "certification.schema.json",
+    # legitimately implements them as Implementation Group 3.
+    # human_authorization.schema.json, cutover_candidate.schema.json, and
+    # certification.schema.json are no longer forbidden: Phase 136N
+    # legitimately implements them as Implementation Group 4. Every
+    # later-group (5+) record schema remains forbidden until its own phase.
     "publication_attempt.schema.json",
     "publication_evidence.schema.json",
     "concurrency_conflict.schema.json",
@@ -114,7 +114,11 @@ def test_136i_independent_shared_file_count_is_exactly_seven():
     assert len(found) == 7
 
 
-def test_136i_independent_defs_count_is_exactly_33():
+def test_136i_independent_defs_count_is_exactly_34():
+    # Updated by Phase 136N: shared/references.schema.json legitimately
+    # grows from 4 to 5 $defs (the new embedded cas_expectation component,
+    # resolving DEFERRED-136H-1), so the shared-core total grows from 33
+    # to 34.
     total = 0
     per_file = {}
     for relative_path in SHARED_FILES:
@@ -128,10 +132,10 @@ def test_136i_independent_defs_count_is_exactly_33():
         "shared/enums.schema.json": 8,
         "shared/failures.schema.json": 1,
         "shared/limitations.schema.json": 4,
-        "shared/references.schema.json": 4,
+        "shared/references.schema.json": 5,
         "shared/envelope.schema.json": 3,
     }
-    assert total == 33
+    assert total == 34
 
 
 def test_136i_independent_shared_enum_count_is_exactly_eight():

@@ -1,5 +1,41 @@
 # Changelog
 
+- Phase 136N — Authorization and Candidate Schema Implementation
+  (`docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md`).
+  Implemented exactly `records/human_authorization.schema.json`,
+  `records/cutover_candidate.schema.json`, and
+  `records/certification.schema.json` (Implementation Group 4), plus the
+  embedded `cas_expectation` component in
+  `shared/references.schema.json` (resolving DEFERRED-136H-1). Followed
+  `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §21/§22/§23/§24's literal field
+  tables over this task's own more expansive suggested field list wherever
+  the two diverged, documenting each discrepancy (no literal `scope` field
+  on `HumanAuthorization`; no direct readiness/authorization binding fields
+  on `CutoverCandidate`; no certifier-principal field on `Certification`).
+  Independently confirmed the dependency/`$ref`/identity/digest graphs are
+  acyclic; no candidate-v2 or certification-v2 mechanism was needed.
+  Disclosed 8 new `NON-BLOCKING`/`DEFERRED` findings, none repaired within
+  Group 4's bounded scope. Zero `BLOCKING` findings. Added 136 new focused
+  tests (`tests/test_cltr_cutover_136n_authorization_and_candidate.py`) and
+  forward-migrated the prior-phase scope-guard tests in
+  `test_cltr_cutover_136h/i/j/k/l/m` and
+  `test_schema_runtime_boundaries/packaging` to recognize Group 4 as
+  now-legitimate (mirroring the update pattern 136L applied to
+  136H/136I/136J/136K in its own phase). Combined Group 1–4 +
+  `test_schema_runtime_*` suite: 1059/1059 passed (923 baseline + 136 new).
+  Fast Green: 4391/4391 passed, identical to the 136H–136M baseline, zero
+  regressions. Full unmarked suite: 21114/21137 passed; all 23 failures
+  independently confirmed inherited and unrelated to this phase (verified
+  both by stashing this phase's full diff at the exact pre-136N commit and
+  by an isolated, dependency-version-matched worktree check).
+  Legacy lifecycle remains the sole production authority; CLTR remains
+  derivative; runtime remains Observed / observe / execution unavailable.
+  No `PublicationAttempt`, `PublicationEvidence`, `ConcurrencyConflict`,
+  `RecoveryJournal`, `Quarantine`, notification/marker/receipt binding,
+  `CompatibilityState`, `HistoricalAuthorityReference`, typed model,
+  semantic validator, or authority resolver/state/pointer was created or
+  changed. Recommended next phase: 136O — Authorization and Candidate
+  Schema Independent Verification.
 - Phase 136M — Request and Readiness Schema Independent Verification
   (`docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_INDEPENDENT_VERIFICATION.md`).
   Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR AUTHORIZATION

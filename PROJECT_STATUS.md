@@ -2,6 +2,59 @@
 
 ## Current Phase
 
+Phase 136N — Authorization and Candidate Schema Implementation (completed,
+implementation, Implementation Group 4 only). Independently re-read the
+frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §21/§22/§23/§24 field
+tables and the 136E implementation plan's own "Group 4" section directly
+(not from this task's own illustrative field lists) and implemented exactly
+`records/human_authorization.schema.json`, `records/cutover_candidate.schema.json`,
+and `records/certification.schema.json`, plus the embedded `cas_expectation`
+component in `shared/references.schema.json` (resolving DEFERRED-136H-1).
+Disclosed and documented three discrepancies between the frozen contract's
+literal field tables and this task's own more expansive suggested field
+list (no literal `scope` field on `HumanAuthorization`; no direct
+readiness/authorization binding fields on `CutoverCandidate`; no
+certifier-principal field on `Certification`) and followed the frozen
+contract in every case, per explicit governing instruction. Independently
+confirmed the dependency/`$ref`/identity/digest graphs are acyclic; no
+candidate-v2 or certification-v2 mechanism was needed. Disclosed 8 new
+`NON-BLOCKING`/`DEFERRED` findings, none repaired within Group 4's bounded
+scope (see `docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md`
+§13). Zero `BLOCKING` findings.
+
+Wrote 136 fresh focused tests
+(`tests/test_cltr_cutover_136n_authorization_and_candidate.py`). Forward-
+migrated the prior-phase scope-guard tests in `test_cltr_cutover_136h/i/j/
+k/l/m` and `test_schema_runtime_boundaries/packaging` to recognize Group 4
+as now-legitimate (exactly mirroring the update pattern 136L applied to
+136H/136I/136J/136K in its own phase). Combined Group 1–4 +
+`test_schema_runtime_*` suite: 1059/1059 passed (923 baseline + 136 new).
+Fast Green: 4391/4391 passed, identical to the 136H–136M baseline, zero
+regressions. Full unmarked suite: 21114/21137 passed; the 23 failures were
+independently confirmed inherited (pre-existing, unrelated to this phase —
+none reference `schema_resources`/`schema_runtime`/`cltr_cutover`; 4 were
+reproduced with this phase's entire diff stashed away at the exact
+pre-136N commit, and 6 were reproduced in an isolated, dependency-version-
+matched worktree at the same commit). See
+`docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md`.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+`PublicationAttempt`, `PublicationEvidence`, `ConcurrencyConflict`,
+`RecoveryJournal`, `Quarantine`, notification/marker/receipt binding,
+`CompatibilityState`, `HistoricalAuthorityReference`, typed model, semantic
+validator, or authority resolver/state/pointer was created or changed.
+
+Verdict: **COMPLETED — READY FOR AUTHORIZATION AND CANDIDATE SCHEMA
+INDEPENDENT VERIFICATION**. Recommended next phase: **136O — Authorization
+and Candidate Schema Independent Verification**. Must independently attack
+the exact Group 4 schema set. Must not begin CAS (beyond the embedded
+`cas_expectation`), publication, recovery, bindings, compatibility,
+historical-reference, typed-model, semantic-validator, authority-resolver,
+persistence, or cutover-runtime work.
+
+## Phase 136M Complete
+
 Phase 136M — Request and Readiness Schema Independent Verification
 (completed, independent verification, Implementation Group 3 only).
 Independently re-derived the `CutoverRequest`/`ReadinessPackage` contract

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/cutover_candidate.schema.json",
+  "title": "CLTR Cutover CutoverCandidate record",
+  "description": "Phase 136N, Implementation Group 4. Shape-only wire contract for a CutoverCandidate companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.22). A CutoverCandidate document proposes a specific, bounded cutover attempt; it never itself proves eligibility, human authorization, certification, CAS success, publication success, cutover completion, or current authority (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes cutover_candidate) at every state, including 'certified' (Sec.22). IMPORTANT DISCREPANCY DISCLOSURE (documented, not silently resolved): Sec.22's frozen field table lists exactly three record-specific fields -- stage2_generation_reference, cas_expectation, state -- and does NOT include direct top-level request_reference / readiness_reference / authorization_reference / source_authority_reference / target_epoch_reference fields of the kind an earlier, more expansive phase-prompt draft anticipated. Per governing instruction to follow the primary frozen contract over prompt-suggested fields, this schema implements exactly Sec.22's three fields plus the universal envelope; it does NOT add the extra binding fields. Binding-chain evidence is instead carried indirectly through cas_expectation's own required sub-fields (expected_request_reference, expected_authority_epoch, expected_authoritative_generation, expected_certification_reference) -- readiness_reference and authorization_reference binding is NOT present anywhere on this record family in v1.0 (disclosed as NON-BLOCKING-136N-6, DEFERRED: a possible future minor-version field, not added here to avoid inventing an unfrozen requirement).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "stage2_generation_reference",
+    "cas_expectation",
+    "state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/cutover_candidate.schema.json",
+      "description": "Always present. Identifies this document as validated against the CutoverCandidate schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "cutover_candidate",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1). cutover_candidate is not in the phase_id-required or transition_id-required family lists (Sec.7.2), so neither field is declared here."
+    },
+    "stage2_generation_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Always present (Sec.22). Points at the existing, already-implemented Stage 2 rehearsal generation -- not redefined by this contract. Sec.22's field table types this 'record_reference' literally; 'generation' is not itself one of the 16 record_family enum values (shared/enums.schema.json), so no record_family const restriction is applied here -- this reference's family cannot be locally closed the way in-package references are (disclosed as NON-BLOCKING-136N-7: cross-family substitution protection for this one field is a Layer 4 responsibility, not locally enforceable given the frozen record_family vocabulary's scope)."
+    },
+    "cas_expectation": {
+      "$ref": "../shared/references.schema.json#/$defs/cas_expectation",
+      "description": "Always present (Sec.22). Every expected-state field within this embedded component is itself unconditionally required (Sec.24) -- no wildcard-on-missing-value hazard is structurally possible."
+    },
+    "state": {
+      "enum": ["proposed", "verified", "certifying", "certified", "superseded", "quarantined"],
+      "description": "Always present. Record-local CandidateState (Sec.8.8, 6 values). No Sec.16 conditional row exists for cutover_candidate state branches; reaching 'certified' here is a local status label only and never itself proves certification, publication, or cutover occurred (Layer 4/6)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record at every state including 'certified' (Sec.9's 12-file list, Sec.22); is_authoritative remains const false per the shared definition regardless."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as candidate eligibility."
+    }
+  }
+}
