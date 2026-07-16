@@ -10,7 +10,7 @@ Phase 136I: Companion Executable Schema Shared Core Independent Verification
 
 ## Status
 
-active
+done
 
 ## Mode
 

@@ -1,82 +1,90 @@
-# Phase 136H Complete — Companion Executable Schema Shared Core Implementation
+# Phase 136I Complete — Companion Executable Schema Shared Core Independent Verification
 
 ## Phase identity
 
-- Phase ID: `136H`
+- Phase ID: `136I`
 - Status: completed
-- Classification: implementation (Stage 3 Companion Executable Schema, Implementation Group 1: shared core only)
+- Classification: verification (Stage 3 Companion Executable Schema, Implementation Group 1: independent verification of the shared core)
 - Report completeness: complete
 
 ## Summary
 
-Phase 136H implements the first bounded Stage 3 Companion Executable
-Schema group -- Implementation Group 1, the shared core -- per
-`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`, and resolves the
-carried-forward `PREREQUISITE-136G-1` finding. Full detail in
-`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_IMPLEMENTATION.md`.
+Phase 136I independently re-derives, reproduces, mutates, and
+adversarially attacks Phase 136H's Stage 3 Companion Executable Schema
+shared core (`src/pcae/schema_resources/cltr_cutover`), trusting none of
+136H's own 157 tests or report prose. Full detail in
+`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_INDEPENDENT_VERIFICATION.md`.
 
-Before implementation, ran the two required read-only reconciliations:
-`pcae phase-report reconcile --phase-id 136G` (`reconciled`,
-`already_dispatched`, mutation: none) and `--phase-id 136F`
-(`not_delivered`, `not_dispatched`, mutation: none, a pre-existing,
-unrelated historical fact that does not block 136H startup). Neither
-command mutated state; 136G was not redispatched.
+Before verification work, ran the two required read-only
+reconciliations: `pcae phase-report reconcile --phase-id 136H`
+(`delivery_recorded_bookkeeping_incomplete`, `already_dispatched`,
+receipt absent, mutation: none -- a notification-delivery bookkeeping
+gap, not a schema-content defect, recorded as `NON-BLOCKING-136I-3`) and
+`--phase-id 136G` (`not_delivered`, `not_dispatched`, mutation: none, the
+same pre-existing, unrelated historical fact already disclosed by 136H).
+Neither command mutated state; neither phase was redispatched.
 
-New package `src/pcae/schema_resources/cltr_cutover/` (packaged inside
-`src/pcae/schema_resources/`, per Phase 136F's own binding packaging
-decision, Option A -- not the repository-root `schemas/` path named by
-the contract's summary prose, a disclosed and justified deviation): 7
-`shared/*.schema.json` files (`envelope`, `enums`, `identity`, `digest`,
-`references`, `failures`, `limitations`; 33 exported `$defs` total), a
-deterministic `manifest.json` governed by `manifest.schema.json` and
-cross-checked against every file's independently recomputed SHA-256
-digest, and no `records/`/`bindings/`/`views/` directory. All 7 shared
-typed authority enums (`AuthorityKind`, `AuthorityRole`,
-`MigrationStage`, `GenerationRole`, `PublicationState`, `RecoveryState`,
-`CompatibilityMode`) plus a `record_family` nomenclature enum and the
-24-value shared `reason_code` vocabulary (135Z Sec.31) implemented with
-exact frozen values, reject-on-unknown, no aliasing.
+A fresh, independently authored adversarial test module
+(`tests/test_cltr_cutover_136i_shared_core_independent_verification.py`,
+221 test cases) independently re-derives the exact Group 1 inventory (7
+shared files, 33 exported `$defs`, 8 shared enums, 24 reason codes, 7
+manifest entries -- all confirmed exact, zero mismatch) directly from the
+on-disk schemas and the frozen contract (`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001
+v1.0` Sec.4/6/8/10-16/46, the 136E implementation plan Sec.7/13), never
+from 136H's own report tables. Every identifier/digest/timestamp/version/
+enum/reason-code/reference/limitation definition was attacked with
+independently authored boundary and adversarial values not present in
+136H's own fixtures.
 
-Added `src/pcae/schema_runtime/manifest.py`
-(`load_and_verify_manifest`), generic infrastructure reusing the
-existing loader/registry (Phase 136F/136G, unchanged) to shape-validate
-a manifest and independently recompute every entry's SHA-256 digest from
-disk -- no new bespoke `cltr_cutover`-specific registry module was built.
+Manifest and registry integrity was independently attacked by mutating
+temporary copies: digest substitution, path substitution, path
+traversal, absolute path, duplicate entry, missing file, unindexed extra
+file, and wrong `implementation_group` all fail closed. The
+`_materialize_plain` Mapping-contract repair (`PREREQUISITE-136G-1`) was
+independently re-attacked with a second, independently authored hostile
+`Mapping` (never invoked, empty call log) plus tuples, subclassed
+dict/list, direct self-reference cycles, non-`str` nested keys, and
+5000-deep nesting -- all fail closed, while a shared substructure
+appearing twice and dict-insertion-order independence are correctly not
+misclassified as cyclic.
 
-**Resolved `PREREQUISITE-136G-1`** (exact finding located in
-`docs/PHASE_136_VALIDATION_ENGINE_AND_STRICT_JSON_PARSING_INDEPENDENT_VERIFICATION.md`,
-finding `PREREQUISITE-136G-1`): `validate_record_shape`'s
-"already-strictly-parsed" `Mapping` contract was documentation-only, not
-runtime-enforced. `src/pcae/schema_runtime/validation.py`'s
-`_exceeds_max_depth` is replaced by `_materialize_plain`, which performs
-the same iterative (never recursive) nesting-depth guard as a single
-pass while rebuilding `record` as an inert tree of exactly-typed plain
-`dict`/`list`/`str`/`int`/`float`/`bool`/`None` values -- rejecting
-hostile `Mapping` subclasses, non-`str` keys, cyclic structures, and
-unsupported container/scalar types, provably without ever invoking a
-single dunder method on hostile input
-(`test_136h_hostile_mapping_rejected_without_invoking_any_dunder`). Every
-rejection reuses 136G's own `internal_validation_error` code (not a new
-code), preserving all 68 of 136G's own regression tests byte-for-byte
-unmodified.
+A fresh wheel and sdist were independently built via `python -m build`;
+both contain exactly the 7 shared schemas plus manifest/manifest-schema/
+README (10 entries), no `records/`/`bindings/`/`views/` content. The
+built wheel was installed into an isolated venv **outside the
+repository** and, with `cwd=/tmp`, registry construction (8 schema ids)
+and manifest load/verify (7 entries) both succeeded -- genuine
+installed-wheel operation, not source-tree fallback. Determinism was
+independently reconfirmed across `PYTHONHASHSEED=0/1/42` fresh
+subprocesses. No-network, no-authority, and no-execution boundaries were
+independently re-verified via fresh socket monkeypatches and AST-based
+source scans (not substring search, which produced one false positive
+during authoring, corrected).
 
-157 new focused tests added
-(`tests/test_cltr_cutover_136h_shared_core.py`), covering every exported
-`$def`, every enum value (valid and invalid), identifier/digest/timestamp
-bounds, limitations bounds, reference structures, composition safety,
-determinism, security, no-authority/no-execution proof, and the Mapping
-repair. Two Phase 136F packaging tests updated
-(`tests/test_schema_runtime_packaging.py`) to reflect that
-`cltr_cutover` shared-core content is now legitimately packaged
-(`PREREQUISITE-136H-1`, resolved).
+Combined `tests/test_schema_runtime_*.py` + `test_cltr_cutover_136h_shared_core.py`
++ the new 136I module: **515 passed, 0 failed** (294 + 221, no
+cross-contamination). Fast Green: **4391 passed**, identical to the 136H
+baseline, zero regressions. Full unmarked suite freshly run: **20573
+passed, 19 failed, 20592 total, 1182.26s** -- all 19 failures
+independently diffed line-by-line and confirmed byte-for-byte identical
+to 136H's own already-classified pre-existing failure set. A 20th failure
+on the first run was this phase's own new test's parallel-execution
+false positive (a whole-`.pcae/`-tree non-mutation assertion that
+false-failed only under `-n auto` due to unrelated concurrently running
+tests legitimately writing elsewhere under `.pcae/`); corrected to scope
+the assertion to `.pcae/cltr-authority/` specifically (the actual
+boundary this package must never touch) and re-verified clean -- not a
+product regression.
 
-Combined `tests/test_schema_runtime_*.py` + the new module: **294
-passed, 0 failed**. Fast Green: **4391 passed**, identical to the 136G
-baseline, zero regressions. Full unmarked suite freshly run: **20353
-passed, 19 failed, 20372 total, 1126.83s** -- 20353 is exactly 136G's
-20196 plus this phase's 157 new tests; all 19 failures byte-for-byte
-identical to 136F's and 136G's own already-classified pre-existing
-failure set, zero new regressions.
+Found 4 new `NON-BLOCKING` findings (bounded enum-value overlap across
+dimensions; manifest schema permits `status: "draft"` though documented
+as forbidden when committed; the 136H notification-bookkeeping
+reconciliation gap noted above; a `validate_record_shape`-misuse-footgun
+observation about calling it with a shared `$defs`-only file's own `$id`
+as `schema_id`). Zero `BLOCKING` findings. No repair was required or
+made -- 136H's shared core and the carried-forward
+`PREREQUISITE-136G-1` Mapping-contract repair both withstood independent
+adversarial attack unchanged.
 
 No `AuthorityEpoch`, `AuthorityState`, `CutoverRequest`,
 `ReadinessPackage`, `HumanAuthorization`, `CutoverCandidate`,
@@ -90,14 +98,14 @@ authority resolver, authority-state persistence, or authority pointer
 was implemented or changed. No production lifecycle behavior changed.
 No execution capability was introduced. Legacy lifecycle remains the
 sole production authority; CLTR remains derivative. Runtime remains
-Observed, maximum capability observe, execution availability
-unavailable throughout.
+Observed, maximum capability observe, execution availability unavailable
+throughout.
 
 ## Evidence and validation
 
 - Governed phase commits: implementation commit and finalization
   commit(s) (hashes recorded after this report is committed, per the
-  same multi-commit pattern used by 136E/136F/136G).
+  same multi-commit pattern used by 136E/136F/136G/136H).
 - Governance and read-only inspection commands actually run and their
   results:
   - `pcae health`: healthy.
@@ -110,133 +118,142 @@ unavailable throughout.
     unchanged before and after this phase's changes.
   - `pcae notify status`: Telegram configured, enabled, ready for
     outbound delivery.
-  - Read-only reconciliation for 136G/136F (mutation: none, inspection
-    only): 136G `reconciled`/`already_dispatched`; 136F
+  - Read-only reconciliation for 136H/136G (mutation: none, inspection
+    only): 136H `delivery_recorded_bookkeeping_incomplete`/
+    `already_dispatched`/receipt absent (`NON-BLOCKING-136I-3`); 136G
     `not_delivered`/`not_dispatched` (pre-existing, unrelated). Neither
     redispatched.
-- Shared-core focused tests: **157 passed, 0 failed**
-  (`tests/test_cltr_cutover_136h_shared_core.py`).
-- Combined `tests/test_schema_runtime_*.py` + 136H module: **294
+- This phase's independent adversarial suite: **221 passed, 0 failed**
+  (`tests/test_cltr_cutover_136i_shared_core_independent_verification.py`).
+- 136H's own focused suite, re-run fresh, unmodified: **157 passed, 0
+  failed** (`tests/test_cltr_cutover_136h_shared_core.py`).
+- Combined `tests/test_schema_runtime_*.py` + 136H + 136I: **515
   passed, 0 failed**.
-- 136G's own 68 independent adversarial tests
-  (`tests/test_schema_runtime_136g_independent_verification.py`):
-  unmodified, **68 passed, 0 failed**.
-- Packaging tests (`tests/test_schema_runtime_packaging.py`, 2 updated
-  per `PREREQUISITE-136H-1`): **4 passed, 0 failed**.
+- Packaging tests (`tests/test_schema_runtime_packaging.py`, unmodified):
+  **4 passed, 0 failed**.
 - Fast Green (`python -m pytest -m fast_green -n auto`): **4391
-  passed**, identical to the 136G baseline.
-- Full unmarked suite (`python -m pytest -n auto`): **20353 passed, 19
-  failed, 20372 total, 1126.83s (0:18:46)**. All 19 failing node IDs
+  passed**, identical to the 136H baseline.
+- Full unmarked suite (`python -m pytest -n auto`): **20573 passed, 19
+  failed, 20592 total, 1182.26s (0:19:42)**. All 19 failing node IDs
   (`test_advisory_runtime_contract.py`,
   `test_advisory_runtime_architecture.py`, `test_phase_reports.py`,
   `test_rendering_134e5.py`, `test_finalization_transaction_134e10.py`
   (5), `test_cltr_migration_135p_verification.py` (4 parametrized),
   `test_bootstrap_todo_consistency.py` (2), `test_cltr_135o_integration.py`
-  (4)) are byte-for-byte identical to 136F's and 136G's own
-  already-classified pre-existing failure set; none touch
-  `schema_runtime`/`schema_resources`.
-- No-network proof: `test_136h_shared_core_load_and_manifest_verify_perform_no_network`
-  monkeypatches `socket.socket` to raise if called; registry
-  construction, manifest verification, and record validation all
-  exercised together with zero socket calls.
-- No-authority/no-execution proof: source-scanned every `.py` file under
-  `schema_resources/` for `pcae.cltr`/`current_authority`/
-  `authority_state`/`authority_epoch`/`cltr-authority` substrings (zero
-  matches); AST-walked the new `manifest.py` module for any
-  `pcae.cltr`-rooted import (zero matches); scanned for
-  `subprocess`/`os.system`/`shell=True` in both new/extended modules
-  (zero matches).
-- Manifest integrity proof: independently recomputed SHA-256 of every
-  packaged shared-core file and confirmed byte-for-byte match against
-  `manifest.json`'s recorded digests; adversarial mutation tests confirm
-  content tamper, digest substitution, path traversal, missing files,
-  and unindexed extra files are all detected and rejected.
+  (4)) independently diffed line-by-line and confirmed byte-for-byte
+  identical to 136H's own already-classified pre-existing failure set;
+  none touch `schema_runtime`/`schema_resources`.
+- Independent packaging verification: fresh wheel and sdist built via
+  `python -m build`; both independently inspected to contain exactly 10
+  entries (7 shared schemas + manifest.json + manifest.schema.json +
+  README.md), no `records/`/`bindings/`/`views/` content; built wheel
+  installed into an isolated venv outside the repository and exercised
+  with `cwd=/tmp`, proving genuine installed-wheel operation.
+- Independent manifest integrity proof: every packaged shared-core
+  file's SHA-256 independently recomputed from raw bytes and confirmed
+  byte-for-byte match against `manifest.json`'s recorded digests;
+  adversarial mutation tests (digest substitution, path substitution,
+  traversal, absolute path, duplicate entry, missing file, unindexed
+  extra file, wrong `implementation_group`) all fail closed.
+- Independent Mapping-contract attack: a second, independently authored
+  hostile `Mapping` proven never invoked; tuple/dict-subclass/list-subclass/
+  custom-scalar/cycle/deep-nesting attacks all fail closed; shared
+  substructure and dict-order independence correctly not misclassified
+  as cyclic; caller input never mutated.
+- Independent no-network/no-authority/no-execution proof: fresh
+  `socket.socket` monkeypatches; AST-walk of every `.py` file under
+  `schema_resources/` and `schema_runtime/` for `pcae.cltr`-rooted
+  imports (zero) and `subprocess`/`eval`/`exec`/`shell=True` usage
+  (zero); `pcae runtime inspect` reconfirmed Observed/observe/unavailable
+  after every operation this phase performed.
 
-Full per-section detail (exact inventory, package layout, `$id`
-strategy, shared-definition patterns, Mapping-contract repair mechanics,
-manifest/registry design, fixture categories, security, determinism, and
-residual findings) is in
-`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_IMPLEMENTATION.md`.
+Full per-section detail (independent inventory derivation, every attack
+category, the nine disclosed test-authoring corrections, all four new
+findings, and the final verdict) is in
+`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_INDEPENDENT_VERIFICATION.md`.
 
 ## Findings
 
-- `PREREQUISITE-136G-1` (resolved): `validate_record_shape`'s `Mapping`
-  contract was documentation-only; repaired via `_materialize_plain`,
-  covered by 12 new focused regression tests.
-- `NON-BLOCKING-136H-1`: `phase_identity`/`transition_identity`
-  implemented in `identity.schema.json` rather than
-  `envelope.schema.json` as Sec.6's summary table names them; disclosed
-  interpretation, all field patterns/bounds fully frozen and correctly
-  `$ref`-reachable regardless of housing file. Deferred to 136I.
-- `NON-BLOCKING-136H-2` (deliberate scope narrowing): `CASExpectation`'s
-  embedded `$def`, assigned to Group 1 by the 136E implementation plan,
-  is deferred to whichever future group first needs it, since the
-  explicit 136H phase-boundary instruction forbids authoring it now.
-  `shared/references.schema.json` contains no `cas_expectation` `$def`.
-- `NON-BLOCKING-136H-3` (inherited, re-verified, not repaired): leap-second
-  gap (`:60` accepted under the frozen `\d{2}` pattern), restated from
-  `NON-BLOCKING-136C-1`. The frozen pattern text is implemented exactly
-  as specified; not repaired here since 136C's own disclosure already
-  dispositioned it non-blocking.
-- `PREREQUISITE-136H-1` (resolved): two Phase 136F packaging tests
-  asserted no `cltr_cutover` content in the wheel/sdist archives -- now
-  stale by this phase's own design; renamed and rewritten to assert the
-  still-true, narrower guarantee (no `records/` directory, no
-  authority-bearing record-schema filename).
+- `NON-BLOCKING-136I-1`: four enum values (`certified`, `quarantined`,
+  `legacy_retired`, `cutover_candidate`) recur across more than one of
+  the 8 shared enum dimensions. Not a defect -- each value is scoped to
+  its own field, never cross-validated. Pinned by a new regression test.
+- `NON-BLOCKING-136I-2`: `manifest.schema.json`'s own `status` enum
+  permits `"draft"` as schema-valid, though its `description` field
+  documents `"draft"` as forbidden in a committed manifest; no schema or
+  loader-level gate enforces that documentation-only rule. Not repaired
+  within this phase's boundary; disclosed for a future hardening phase.
+- `NON-BLOCKING-136I-3`: `pcae phase-report reconcile --phase-id 136H`
+  reports `delivery_recorded_bookkeeping_incomplete` with an absent
+  receipt -- a notification-delivery bookkeeping gap for 136H's own
+  completion, not previously disclosed in 136H's own report. Outside
+  this phase's schema-verification scope; disclosed for governance
+  completeness.
+- `NON-BLOCKING-136I-4`: `validate_record_shape` called with a
+  `shared/*.schema.json` file's own `$id` as `schema_id` (rather than
+  composing that file's `$defs` via `$ref` from a real record schema)
+  applies no root-level shape constraint and always returns `VALID` for
+  any legal plain-JSON input. Not a defect in current production usage
+  (no caller does this today); recorded as a caller-footgun observation
+  for whichever future group first authors a `records/*.schema.json`
+  file.
+- `NON-BLOCKING-136H-1`, `NON-BLOCKING-136H-2`, `NON-BLOCKING-136H-3`
+  (restated, independently re-verified, not newly repaired): all three
+  remain correctly disclosed and non-blocking; no new information.
+- `PREREQUISITE-136G-1` (independently re-attacked, remains resolved):
+  the `_materialize_plain` Mapping-contract repair withstood a second,
+  independently authored hostile `Mapping` and additional adversarial
+  input types without regression.
 
-Zero unresolved Blocking findings.
+Zero unresolved Blocking findings. Zero repairs required or made.
 
 ## Safety and no-go confirmation
 
 Legacy lifecycle remains the sole production authority. CLTR remains
-derivative. 136H implemented only the executable-schema shared core. No
-`AuthorityEpoch`, `AuthorityState`, `CutoverRequest`, `ReadinessPackage`,
-`HumanAuthorization`, `CutoverCandidate`, `Certification`,
-`CASExpectation`, `PublicationAttempt`, `PublicationEvidence`,
-`ConcurrencyConflict`, `RecoveryJournal`, `ReconciliationResult`,
-`Quarantine`, notification binding, marker binding, receipt binding,
-`CompatibilityState`, `HistoricalAuthorityReference`, or derived
-record-view schema was created. No Stage 3 typed record model or
-cross-record semantic validator was implemented. No authority resolver,
-authority-state persistence, or authority pointer was implemented or
-changed. No cutover request, readiness package, authorization,
-candidate, certification, publication attempt, conflict record, or
-recovery journal runtime object was created. Schema validity does not
-establish lifecycle authority, cutover eligibility, authorization,
-publication success, or recovery truth. No authority epoch changed. No
-CLTR authority was created. No legacy authority was demoted. No legacy
-authority was retired. No production lifecycle behavior changed. No
-execution capability was introduced. Runtime remains Observed, maximum
-capability remains observe, and execution availability remains
-unavailable.
+derivative. 136I independently verified only the executable-schema
+shared core. No `AuthorityEpoch`, `AuthorityState`, `CutoverRequest`,
+`ReadinessPackage`, `HumanAuthorization`, `CutoverCandidate`,
+`Certification`, `CASExpectation`, `PublicationAttempt`,
+`PublicationEvidence`, `ConcurrencyConflict`, `RecoveryJournal`,
+`ReconciliationResult`, `Quarantine`, notification binding, marker
+binding, receipt binding, `CompatibilityState`, `HistoricalAuthorityReference`,
+or derived record-view schema was created. No Stage 3 typed record model
+or cross-record semantic validator was implemented. No authority
+resolver, authority-state persistence, or authority pointer was
+implemented or changed. No cutover request, readiness package,
+authorization, candidate, certification, publication attempt, conflict
+record, or recovery journal runtime object was created. Schema validity
+does not establish lifecycle authority, cutover eligibility,
+authorization, publication success, or recovery truth. No authority
+epoch changed. No CLTR authority was created. No legacy authority was
+demoted. No legacy authority was retired. No production lifecycle
+behavior changed. No execution capability was introduced. Runtime
+remains Observed, maximum capability remains observe, and execution
+availability remains unavailable.
 
 No `records/`, `bindings/`, or `views/` directory exists under
 `cltr_cutover`. `.pcae/cltr-authority/` does not exist. The
-repository-root `schemas/cltr_cutover/` path does not exist (the
-shared core is packaged under `src/pcae/schema_resources/cltr_cutover/`
-instead, per 136F's own binding packaging decision). No production
-artifact changed as a result of this phase's schema-authoring or
-validation work.
+repository-root `schemas/cltr_cutover/` path does not exist. No
+production artifact changed as a result of this phase's verification
+work. No repair was made to 136H's shared-core schemas, manifest, or
+`schema_runtime` code.
 
 ## Final verdict
 
-**COMPLETE — SHARED CORE IMPLEMENTED, READY FOR INDEPENDENT
-VERIFICATION.** Every item in the strict phase boundary's permitted list
-was exercised; every item in the prohibited list was verified absent.
-The carried-forward `PREREQUISITE-136G-1` Mapping-contract finding is
-resolved. Zero unresolved Blocking findings remain. "Ready for
-independent verification" applies only to the next bounded phase (136I)
-and does not authorize authority-bearing record-schema implementation.
+**VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR AUTHORITY AND REQUEST
+SCHEMA IMPLEMENTATION.** Every attack category in the phase brief was
+independently exercised; the exact Group 1 inventory, manifest
+integrity, packaging, Mapping-contract repair, and no-network/no-
+authority/no-execution boundaries all withstood independent adversarial
+attack. Zero unresolved Blocking findings remain. "Ready for authority
+and request schema implementation" applies only to the next bounded
+record-schema group (136J) and does not authorize typed models, semantic
+validation, authority resolution, or cutover behavior.
 
 ## Recommended next phase
 
-**136I — Companion Executable Schema Shared Core Independent
-Verification.** Must independently attack the exact schema inventory,
-`$id` uniqueness, manifest integrity, package inclusion in a fresh
-wheel/sdist build, shared-definition strictness, enum completeness,
-identifier/digest/timestamp bounds, reference-family separation,
-composition behavior, the Mapping-contract repair, and
-registry/no-network/no-authority/no-execution boundaries, using
-independently authored attacks rather than trusting this phase's own
-157 tests. Must not begin authority-bearing record-schema
-implementation.
+**136J — Authority and Request Schema Implementation.** Group 2 per the
+frozen plan: `AuthorityEpoch`, `AuthorityState`, `CutoverRequest`,
+`ReadinessPackage`, plus fixtures and focused tests. Must not implement
+authorization, certification, publication, recovery, terminal bindings,
+typed models, semantic validation, or authority runtime behavior.
