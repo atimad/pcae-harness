@@ -2,6 +2,67 @@
 
 ## Current Phase
 
+Phase 136M — Request and Readiness Schema Independent Verification
+(completed, independent verification, Implementation Group 3 only).
+Independently re-derived the `CutoverRequest`/`ReadinessPackage` contract
+from primary sources (`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §7, §9,
+§10, §12, §19, §19.1 (136D-repaired), §20, §46, and the 136E implementation
+plan's own "Group 3" section) rather than trusting 136L's own tests, prose,
+or findings. Cross-checked §46's original per-file grouping (which lists
+`cutover_request` alone as Group 3 and `readiness_package` alone as a
+separate Group 4) against the 136E implementation plan's coarser,
+explicitly reasoned re-grouping of both files under one "Group 3" label —
+confirmed this is a disclosed, non-contradictory renumbering, not a silent
+mismatch. Independently re-derived and re-attacked the `$ref` dependency
+graph and the record-identity/digest dependency graph, confirming no cycle
+and no versioned "request-v2" mechanism exists in actual schema behavior.
+Re-attacked Tier 1 strictness, the request state machine, source/target
+authority bindings, evidence-family separation (including all 16
+`record_family` values against `ReadinessPackage.evidence_references`), the
+authorization-requirement boundary, identity/digest honesty, Tier 2's
+`_extensions` boundary, the exact readiness-category/result vocabularies,
+and the `conflict`/`BLOCKING`-finding invariant — including two attack
+vectors 136L's suite did not exercise (a `ready` state carrying an open
+`BLOCKING` finding, and duplicate finding IDs/evidence references), both
+confirmed to be Layer 4 responsibilities, not Layer 2 defects.
+
+Disclosed four new `NON-BLOCKING`/`DEFERRED` findings, none repaired within
+136M's bounded scope: (1) `shared/identity.schema.json`'s generic
+`record_id` pattern does not enforce §10's documented per-family prefix
+convention (out of Group-3-bounded repair scope; no security impact, since
+`record_type`/`record_family` remain the actual, correctly-enforced family
+tags); (2) the manifest's declared `dependencies` array is not cross-checked
+against the actual `$ref` graph; (3) an in-range-but-semantically-wrong
+`implementation_group` value is not locally detected by manifest
+verification; (4) `ReadinessPackage`'s `ready`/`BLOCKING`-finding
+combination and duplicate finding IDs/evidence references are not locally
+rejected (matches this contract's existing shape-only philosophy). Zero
+`BLOCKING` findings.
+
+Wrote 98 fresh independent tests
+(`tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py`).
+Combined `test_cltr_cutover_136h/i/j/k/l/m` + `test_schema_runtime_*` suite:
+932/932 passed (834 baseline + 98 new). Fast Green: 4391/4391, identical to
+the 136H/136I/136J/136K/136L baseline, zero regressions. See
+`docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_INDEPENDENT_VERIFICATION.md`.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+`HumanAuthorization`, `CutoverCandidate`, `Certification`, or any later-group
+record schema, typed model, semantic validator, or authority
+resolver/state/pointer was created or changed.
+
+Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR AUTHORIZATION AND
+CANDIDATE SCHEMA IMPLEMENTATION**. Recommended next phase: **136N —
+Authorization and Candidate Schema Implementation**. Must implement only
+the exact Group 4 inventory (`HumanAuthorization`, `CutoverCandidate`,
+`Certification`, including the embedded `cas_expectation` component). Must
+not begin CAS beyond that embedded definition, publication, recovery,
+terminal bindings, compatibility, historical references, typed models,
+semantic validation, authority resolution, or cutover behavior.
+
+## Phase 136L Complete
+
 Phase 136L — Request and Readiness Schema Implementation (completed,
 implementation, Implementation Group 3 only). Independently re-read the
 frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §19/§19.1(repaired by

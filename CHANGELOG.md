@@ -1,5 +1,45 @@
 # Changelog
 
+- Phase 136M — Request and Readiness Schema Independent Verification
+  (`docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_INDEPENDENT_VERIFICATION.md`).
+  Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR AUTHORIZATION
+  AND CANDIDATE SCHEMA IMPLEMENTATION**. Independently re-derived the
+  `CutoverRequest`/`ReadinessPackage` contract from primary sources (§7, §9,
+  §10, §12, §19, §19.1 (136D-repaired), §20, §46, plus the 136E
+  implementation plan's own Group 3 section) rather than trusting 136L's
+  own tests, prose, or findings. Cross-checked §46's original per-file
+  grouping against the 136E plan's coarser re-grouping and confirmed it is
+  a disclosed, non-contradictory renumbering. Re-derived and re-attacked
+  the `$ref` dependency graph and the record-identity/digest dependency
+  graph fresh, confirming no cycle and no "request-v2" mechanism exists.
+  Re-attacked Tier 1 strictness, the request state machine, source/target
+  authority bindings, evidence-family separation (all 16 `record_family`
+  values against `evidence_references`), the authorization-requirement
+  boundary, identity/digest honesty, Tier 2's `_extensions` boundary, the
+  exact readiness-category/result vocabularies, and the
+  `conflict`/`BLOCKING`-finding invariant, including two new attack vectors
+  (a `ready` state carrying an open `BLOCKING` finding; duplicate finding
+  IDs/evidence references), both confirmed Layer 4 responsibilities.
+  Disclosed four new `NON-BLOCKING`/`DEFERRED` findings, none repaired
+  within Group 3's bounded scope: (1) `record_id`'s shared generic pattern
+  does not enforce §10's per-family prefix convention (no security impact —
+  `record_type`/`record_family` are the actual enforced tags); (2) the
+  manifest's declared `dependencies` array is not cross-checked against the
+  real `$ref` graph; (3) an in-range-but-semantically-wrong
+  `implementation_group` value is not locally detected; (4)
+  `ReadinessPackage`'s `ready`/`BLOCKING`-finding combination and duplicate
+  finding IDs/evidence references are not locally rejected. Zero `BLOCKING`
+  findings. Added 98 new independent tests
+  (`tests/test_cltr_cutover_136m_request_and_readiness_independent_verification.py`).
+  Combined `test_cltr_cutover_136h/i/j/k/l/m` + `test_schema_runtime_*`
+  suite: 932/932 passed (834 baseline + 98 new). Fast Green: 4391/4391,
+  identical to the 136H/136I/136J/136K/136L baseline, zero regressions.
+  Legacy lifecycle remains the sole production authority; CLTR remains
+  derivative; runtime remains Observed / observe / execution unavailable.
+  No `HumanAuthorization`, `CutoverCandidate`, `Certification`, or any
+  later-group record schema, typed model, semantic validator, or authority
+  resolver/state/pointer was created or changed. Recommended next phase:
+  136N — Authorization and Candidate Schema Implementation.
 - Phase 136L — Request and Readiness Schema Implementation
   (`docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_IMPLEMENTATION.md`).
   Implemented exactly `records/cutover_request.schema.json` and
