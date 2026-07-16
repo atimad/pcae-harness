@@ -40,8 +40,8 @@
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "pending",
-  "origin_main_head_count": 1,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "summary": "Phase 136H, implementation. Implemented the first bounded Stage 3 Companion Executable Schema group -- Implementation Group 1, the shared core -- per CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0. New package src/pcae/schema_resources/cltr_cutover/ (packaged inside src/pcae, per Phase 136F's own binding packaging decision, not the repository-root schemas/ path named by the contract's summary prose, a disclosed and justified deviation): 7 shared/*.schema.json files (envelope, enums, identity, digest, references, failures, limitations; 33 exported $defs), a deterministic manifest.json governed by manifest.schema.json and cross-checked against every file's independently recomputed SHA-256 digest, and no records/bindings/views directory. All 7 shared typed authority enums plus a record_family nomenclature enum and the 24-value shared reason_code vocabulary implemented with exact frozen values, reject-on-unknown, no aliasing. Added src/pcae/schema_runtime/manifest.py (load_and_verify_manifest), generic infrastructure reusing the existing loader/registry to shape-validate a manifest and independently recompute every entry's digest from disk -- no bespoke cltr_cutover-specific registry module was built. Resolved the carried-forward PREREQUISITE-136G-1 finding: validate_record_shape's Mapping contract was documentation-only, not runtime-enforced; validation.py now rebuilds every input as an inert, exactly-typed plain tree (iterative, never recursive) before validation, rejecting hostile Mapping subclasses, non-string keys, cyclic structures, and unsupported types, provably without invoking any dunder method on hostile input, while preserving 136G's own internal_validation_error code and all 68 of its unmodified regression tests. Added 157 new focused tests; updated 2 Phase 136F packaging tests. Fast Green: 4391 passed, identical to the 136G baseline, zero regressions. Full unmarked suite freshly run: 20353 passed, 19 failed, 20372 total, 1126.83s -- 20353 is exactly 136G's 20196 plus this phase's 157 new tests; all 19 failures byte-for-byte identical to 136F's and 136G's own already-classified pre-existing failure set, zero new regressions. No AuthorityEpoch, AuthorityState, CutoverRequest, ReadinessPackage, HumanAuthorization, CutoverCandidate, Certification, CASExpectation, PublicationAttempt, PublicationEvidence, ConcurrencyConflict, RecoveryJournal, ReconciliationResult, Quarantine, notification binding, marker binding, receipt binding, CompatibilityState, or HistoricalAuthorityReference schema was created. No Stage 3 typed record model or cross-record semantic validator was implemented. No authority resolver, authority-state persistence, or authority pointer was implemented or changed. No production lifecycle behavior changed. No execution capability was introduced. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. Verdict: COMPLETE -- SHARED CORE IMPLEMENTED, READY FOR INDEPENDENT VERIFICATION. Recommended next phase: 136I -- Companion Executable Schema Shared Core Independent Verification.",
   "governance_results": [
     {
@@ -58,11 +58,11 @@
     },
     {
       "name": "pcae_doctor_task_memory",
-      "status": "clean (post-close)"
+      "status": "clean"
     },
     {
       "name": "pcae_push_check",
-      "status": "ready (pending push)"
+      "status": "nothing_to_push"
     },
     {
       "name": "telegram_runtime",
@@ -147,11 +147,13 @@
   ],
   "test_results": {
     "shared_core_focused_tests": "157 passed, 0 failed (tests/test_cltr_cutover_136h_shared_core.py)",
-    "combined_schema_runtime_suite": "294 passed, 0 failed (136F's 69 + 136G's 68 + 136H's 157, tests/test_schema_runtime_*.py + new module)",
+    "schema_runtime_combined_suite": "294 passed, 0 failed (136F's 69 + 136G's 68 + 136H's 157, tests/test_schema_runtime_*.py + new module)",
     "independent_136g_test_module": "68 passed, 0 failed, unmodified (tests/test_schema_runtime_136g_independent_verification.py)",
     "packaging_tests": "4 passed, 0 failed (2 updated per PREREQUISITE-136H-1)",
     "fast_green": "4391 passed, identical to the 136G baseline, zero regressions",
-    "full_unmarked_suite": "20353 passed, 19 failed, 20372 total, 1126.83s -- all 19 failures byte-for-byte identical to 136F/136G's own already-classified pre-existing failure set; 20353 = 136G's 20196 + this phase's 157 new tests, zero new regressions"
+    "full_unmarked_suite": "20353 passed, 19 failed, 20372 total, 1126.83s -- all 19 failures byte-for-byte identical to 136F/136G's own already-classified pre-existing failure set; 20353 = 136G's 20196 + this phase's 157 new tests, zero new regressions",
+    "report_notification_tests": "included in fast_green (4391 passed, unaffected -- Phase 136H); no report/notification source was changed by this phase",
+    "bootstrap_session_reporting_tests": "included in fast_green (4391 passed, unaffected -- Phase 136H); no bootstrap/session-reporting source was changed by this phase"
   },
   "notification_dispatch_result": "pending single governed terminal delivery",
   "report_notification_status": "pending governed finalization",
@@ -168,7 +170,9 @@
     "No production lifecycle behavior changed by Phase 136H.",
     "No execution capability was introduced by Phase 136H.",
     "No records/, bindings/, or views/ directory exists under cltr_cutover.",
-    "The repository-root schemas/cltr_cutover/ path does not exist; the shared core is packaged under src/pcae/schema_resources/cltr_cutover/ instead, per Phase 136F's own binding packaging decision."
+    "No repository-root schemas/cltr_cutover/ path was created; the shared core is packaged under src/pcae/schema_resources/cltr_cutover/ instead, per Phase 136F's own binding packaging decision.",
+    "No authority namespace (.pcae/cltr-authority/) exists on disk.",
+    "No production artifact changed as a result of this phase's schema-authoring or validation work."
   ],
   "recommended_next_phase": "136I - Companion Executable Schema Shared Core Independent Verification",
   "recommended_next_phase_id": "136I",
