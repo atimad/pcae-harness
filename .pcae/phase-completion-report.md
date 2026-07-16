@@ -1,243 +1,217 @@
-# Phase 136K Complete — Authority Core Schema Independent Verification
+# Phase 136L Complete — Request and Readiness Schema Implementation
 
 ## Phase identity
 
-- Phase ID: `136K`
+- Phase ID: `136L`
 - Status: completed
-- Classification: verification (Stage 3 Companion Executable Schema, Implementation Group 2: `AuthorityEpoch`, `AuthorityState`)
+- Classification: implementation (Stage 3 Companion Executable Schema, Implementation Group 3: `CutoverRequest`, `ReadinessPackage`)
 - Report completeness: complete
 
 ## Scope
 
-Independently verify and adversarially attack the two Implementation
-Group 2 executable schemas produced by Phase 136J:
-`records/authority_epoch.schema.json` and
-`records/authority_state.schema.json`. Re-derive the field tables, state
-machines, and local conditionals directly from
-`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` Sec.9, Sec.16, Sec.17, Sec.18,
-and Sec.46 -- not from 136J's own implementation document or its 89
-focused tests. Independently disposition both of 136J's disclosed
-`NON-BLOCKING` findings, and repair any genuine bounded defect found
-within the Group 2 schemas, bounded shared-core definitions those schemas
-depend on, the manifest, or manifest/registry/package integration. Do not
-implement `CutoverRequest`, `ReadinessPackage`, or any Group 3+ schema,
-typed model, semantic validator, or authority resolver/state/pointer.
+Implement exactly the two Implementation Group 3 executable schemas:
+`records/cutover_request.schema.json` and
+`records/readiness_package.schema.json`, per
+`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` Sec.19, Sec.19.1 (repaired by
+Phase 136D), Sec.20, and Sec.46. Preserve the repaired non-circular
+creation order (`readiness_package` first, `cutover_request` second).
+Do not implement `HumanAuthorization`, `CutoverCandidate`,
+`Certification`, or any Group 4+ schema, typed model, semantic validator,
+or authority resolver/state/pointer.
 
 ## Summary
 
-Independently re-derived the `AuthorityEpoch`/`AuthorityState` field
-tables and every local conditional from primary contract sources. Wrote
-102 new independent adversarial tests
-(`tests/test_cltr_cutover_136k_authority_core_independent_verification.py`),
-built from fresh fixtures rather than 136J's own `_valid_epoch`/
-`_valid_state` helpers, attacking the state machine, reference-family
-separation (exhaustive over all 15 wrong-family values per reference
-field, not spot-checks), `authority_kind`/`compatibility_mode` exactness,
-requiredness/null/empty combinations, manifest tamper shapes, Unicode
-confusables, oversized fields, a cyclic-input misuse case, `PYTHONHASHSEED`
-determinism across 3 fresh subprocesses, and an installed-wheel probe run
-from a venv and `cwd` both outside the repository. Full detail in
-`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_INDEPENDENT_VERIFICATION.md`.
+Independently re-read the frozen field tables (Sec.19/Sec.20) and the
+136D-repaired creation-order resolution (Sec.19.1) directly from the
+primary contract, not from the originating prompt's own illustrative
+field lists. Implemented `records/cutover_request.schema.json` (Tier 1
+strict: `additionalProperties: false`, no `_extensions`) with `target`
+restricted to `const "cltr"`, `source_authority` restricted to
+`const "legacy"`, `authorization_requirement` restricted to `const true`,
+and the unconditionally required `readiness_package_reference` (family-
+restricted to `readiness_package`, `schema_id`/`schema_version` made
+required per Sec.12's cross-family-reference rule). Implemented
+`records/readiness_package.schema.json` (Tier 2: `_extensions` only) with
+`state == "conflict"` requiring at least one `BLOCKING`-verdict finding
+(Sec.20, `CSCH-EXEC-REQ-048`).
 
-Independently re-derived `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` Sec.9's
-authority-role file list from its own prose (13 explicitly forbidden + 2
-explicitly permitted = 15 of the 16 total record families) and
-**confirmed** `NON-BLOCKING-136J-2`'s own reading: `authority_epoch` is
-genuinely omitted from Sec.9's explicit classification -- a real gap in
-the frozen contract text, not a 136J miscount. 136J's conservative choice
-(forbid `authority_role: "authoritative"` on `AuthorityEpoch`) is
-independently confirmed correct and remains schema-enforced. Also
-independently confirmed Sec.16 row 1's literal wording
-(`authority_state.publication_state == "cltr_authoritative"`) refers to a
-field/value pair that does not exist anywhere on `AuthorityState` -- a
-pre-existing contract-text imprecision already reviewed at design level
-by Phase 136D ("PASS, no repair needed"); 136J's actual implementation
-(`authority_kind == "cltr"` requires `authoritative_generation`) is
-confirmed a faithful interpretation of that intent. Reproduced and
-confirmed `NON-BLOCKING-136J-1` unchanged and correctly disclosed --
-`is_authoritative` remains `const false` unconditionally and no
-downstream code path treats `authority_role: "authoritative"` plus
-schema validity as a live-authority signal.
+Proved the repaired non-circular creation order in actual schema
+behavior, not merely contract prose: a `readiness_package` fixture is
+validated entirely on its own, with no `cutover_request` in existence
+anywhere in the test, and that already-valid package's own
+`record_id`/`record_digest` are then used to populate a separately
+validated `cutover_request`'s `readiness_package_reference`. Confirmed
+`readiness_package.schema.json` carries no field referencing any
+`cutover_request` at all, and that `cutover_request`'s
+`readiness_package_reference` uses the generic, family-restricted
+`record_reference` shape rather than a live `$ref` into
+`readiness_package.schema.json` — no `$ref`, identity, or digest cycle
+exists, and no versioned "request-v2" mechanism exists anywhere in either
+file.
 
-**Repaired** the manifest-status integrity gap Phase 136I disclosed but
-did not fix (`NON-BLOCKING-136I-2`): `load_and_verify_manifest`
-(`src/pcae/schema_runtime/manifest.py`) previously verified a manifest's
-shape, per-entry digest, and two-way completeness, but never checked the
-`status` field, so a manifest entry with `status: "draft"` (schema-legal)
-loaded and verified successfully despite the manifest schema's own field
-description stating a `"draft"` entry "must never appear in a committed
-manifest." Independently reproduced against a Group 2 entry specifically
-(`records/authority_state.schema.json`) before repairing. The repair adds
-a `status_key`/`frozen_status_value` parameter pair (default
-`"status"`/`"frozen"`) and rejects any non-frozen entry as a
-`ManifestIntegrityError`. Updated Phase 136I's own pre-existing test in
-place to assert the corrected, fail-closed behavior instead of the
-previously-disclosed gap -- this closes the finding rather than
-re-disclosing it a third time. Disclosed (not repaired, no security
-impact) two further documentation-accuracy findings:
-`load_and_verify_manifest`'s docstring overclaims that an orphaned
-manifest entry always raises `ManifestIntegrityError` (it actually raises
-a sibling `SchemaResourceNotFoundError`, still fail-closed); and
-`manifest.schema.json`'s `file_path` field description overclaims that
-its regex charset alone forbids path traversal (it does not -- the real
-defense is the loader's independent containment check, independently
-confirmed to hold end-to-end).
+Disclosed and resolved three `NON-BLOCKING` findings, all on genuine
+frozen-contract-text gaps rather than authoring defects: (1) Sec.19/Sec.20
+do not literally name a `state`/`gate_result` field even though Sec.8.8
+assigns `RequestState`/`GateResult`'s home schemas to these exact files —
+resolved by including `state` (required, since the enum has no other
+legal home) on `CutoverRequest` and `gate_result` (optional, since
+Sec.20's own required-field list omits it) on `ReadinessPackage`; (2)
+Sec.7.2's general family-required-field table omits `readiness_package`
+from the `transition_id`-required list while Sec.20's own specific table
+requires it unconditionally — resolved in favor of the more specific
+Sec.20 table; (3) the originating prompt's illustrative
+reason-required-on-rejection and per-item-prerequisite structures are not
+grounded in Sec.16's frozen conditional table or Sec.19/Sec.20's field
+tables, and were deliberately left unimplemented rather than invented.
+Full detail in
+`docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_IMPLEMENTATION.md`.
 
-Combined `test_cltr_cutover_136h_shared_core.py` +
-`test_cltr_cutover_136i_shared_core_independent_verification.py` +
-`test_cltr_cutover_136j_authority_core.py` +
-`test_cltr_cutover_136k_authority_core_independent_verification.py` +
-`test_schema_runtime_*.py`: **706 passed, 0 failed** (604 baseline + 102
-new; the one repaired 136I test replaces its predecessor 1:1, preserving
-the baseline count exactly). Fast Green: **4391 passed**, identical to
-the 136H/136I/136J baseline, zero regressions. Full unmarked suite
-freshly run: **20765 passed, 19 failed, 20784 total, 1191.48s** -- all 19
-failures byte-identical to the previously classified inherited failure
-set, zero new regressions (20784 is exactly 20682 plus this phase's 102
-new tests).
-
-Zero `BLOCKING` findings. Legacy lifecycle remains the sole production
-authority; CLTR remains derivative. Runtime remains Observed, maximum
-capability observe, execution availability unavailable throughout.
+Added 130 new focused tests
+(`tests/test_cltr_cutover_136l_request_and_readiness.py`) covering both
+schemas' valid/invalid branches, every enum value, every local
+conditional, reference-family separation, unknown-field strictness at
+every nesting level, creation-order/non-circularity, manifest integrity,
+registry loading, no-network, no-authority, no-execution, determinism,
+and the exact 4-schema/11-entry scope guard. Repaired 24 stale
+scope-guard assertions across 6 pre-existing test files (136H, 136I,
+136J, 136K, `test_schema_runtime_boundaries.py`,
+`test_schema_runtime_packaging.py`) to reflect Group 3's now-legitimate
+existence, following the identical precedent 136J/136K established when
+Group 2 first appeared — including renaming
+`test_136k_group3_files_remain_absent_confirming_deferral` to assert
+presence rather than deleting live coverage of that exact boundary.
 
 ## Evidence and validation
 
-- Governed phase commits: implementation commit
-  `8b36de9f5fcfe53060fd6d07bae3cf1a4fa12ed4` and stale-file-removal
-  commit `3195419bb8b1586485de0ba515ae975f9ecf492e`, both phase-owned.
-- Governance and read-only inspection commands actually run and their
-  results:
-  - `pcae health`: healthy.
-  - `pcae check`: passed.
-  - `pcae status coherence`: coherent.
-  - `pcae doctor task-memory`: clean.
-  - `pcae push check`: ready before, pushed after, `origin/main..HEAD`
-    is `0`.
-  - `pcae runtime inspect`: Observed / observe / execution unavailable,
-    unchanged before and after this phase's changes.
-  - `pcae notify status`: Telegram configured, enabled, ready for
-    outbound delivery.
-- This phase's independent adversarial suite: **102 passed, 0 failed**
-  (`tests/test_cltr_cutover_136k_authority_core_independent_verification.py`).
-- Combined 136H+136I+136J+136K + schema-runtime suite: **706 passed, 0
-  failed**.
-- Fast Green (`python -m pytest -m fast_green -n auto`): **4391
-  passed**, identical to the 136H/136I/136J baseline.
-- Full unmarked suite (`python -m pytest -n auto`): **20765 passed, 19
-  failed, 20784 total, 1191.48s (0:19:51)**. All 19 failing node IDs
+- Focused test suite: 130 passed, 0 failed
+  (`tests/test_cltr_cutover_136l_request_and_readiness.py`).
+- Combined `test_cltr_cutover_136h/i/j/k/l` + `test_schema_runtime_*`
+  suite: 834 passed, 0 failed (704 baseline + 130 new).
+- Fast Green: 4391 passed, identical to the 136H/136I/136J/136K baseline,
+  zero regressions.
+- Full unmarked suite, freshly run: 20892 passed, 20 failed, 20912 total,
+  1228.27s. 19 of the 20 failing node IDs are byte-identical to the
+  previously classified inherited-failure baseline
   (`test_advisory_runtime_contract.py`,
   `test_advisory_runtime_architecture.py`, `test_phase_reports.py`,
-  `test_rendering_134e5.py`, `test_finalization_transaction_134e10.py`
-  (5), `test_cltr_migration_135p_verification.py` (4 parametrized),
-  `test_bootstrap_todo_consistency.py` (2), `test_cltr_135o_integration.py`
-  (4)) byte-identical to the previously classified inherited-failure set;
-  none touch `schema_runtime`/`schema_resources`.
-- Independent packaging verification: fresh wheel rebuilt via
-  `python -m build`; installed into an isolated venv outside the
-  repository and exercised from a `cwd` outside the repository, proving
-  genuine installed-wheel operation (10 schema ids, a valid
-  `AuthorityEpoch` fixture returning `VALID`, a mutated fixture returning
-  `INVALID`).
-- Manifest integrity: all 9 entries' `file_digest` values independently
-  recomputed from raw bytes and confirmed exact; manifest tamper attacks
-  (swapped ids/digests, duplicate entries, orphaned entries, unindexed
-  files, traversal paths, `status: "draft"`) all independently confirmed
-  to fail closed.
-- No-network/no-authority/no-execution proof: monkeypatched
-  `socket.socket`/`socket.create_connection`/`urllib.request.urlopen`;
-  AST-walk of every `.py` file under both `schema_resources/` and
-  `schema_runtime/` for `subprocess`/`socket`/`urllib`/`http`/`requests`/
-  `eval`/`exec`/`__import__` usage (zero) and `pcae.cltr`-rooted
-  references (zero); `pcae runtime inspect` reconfirmed
-  Observed/observe/unavailable after every operation this phase
-  performed.
-
-Full per-section detail (independent inventory re-derivation, field-table
-re-derivation, state-machine attacks, reference-family separation,
-shared-definition audit, manifest/packaging/determinism/security detail,
-scope-guard repair audit, and every prior-finding disposition) is in
-`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_INDEPENDENT_VERIFICATION.md`.
+  `test_rendering_134e5.py`, `test_finalization_transaction_134e10.py` x5,
+  `test_cltr_migration_135p_verification.py` x4,
+  `test_bootstrap_todo_consistency.py` x2,
+  `test_cltr_135o_integration.py` x4). One additional failure,
+  `test_commit_push_preflight.py::test_no_repo_mutation`, was root-caused
+  to this session's own concurrent, in-scope task-lifecycle writes
+  (closing a stale idle placeholder task, updating `tasks/DONE.md`)
+  racing that test's narrow git-status-comparison window during the
+  background full-suite run; reproduced clean (1 passed) in isolation on
+  a quiescent working tree immediately after. Disclosed as
+  `NON-BLOCKING-136L-4`, not a code regression.
+- Manifest: verifies cleanly, 11 entries (up from 9), 2 new entries both
+  `implementation_group: 3`, `status: "frozen"`.
+- Registry: 12 resources loaded (up from 10), all unique `$id`s, all
+  `Draft202012Validator.check_schema`-clean, zero unresolved `$ref`s.
+- Packaging: wheel/sdist rebuilt fresh; both contain exactly the 4
+  `records/*.schema.json` files (2 Group 2 + 2 Group 3) and no
+  `bindings/`, `views/`, or Group 4+ resource. Installed-wheel probe
+  (via 136K's own repaired test) confirmed genuine installed-wheel
+  operation from a venv and `cwd` outside the repository: registry
+  construction returns 12 schema ids.
+- No-network: `socket.socket`/`socket.create_connection` monkeypatched
+  to raise during registry construction, manifest verification, and
+  shape validation — zero calls recorded.
+- No-authority/no-execution: no `.pcae/cltr-authority/` directory
+  exists; no `resolve_authority`/`AuthorityResolver` symbol appears in
+  either new schema file; no new `.py` file was added; validating
+  records never mutates input or writes to disk; `pcae runtime inspect`
+  reconfirmed `Observed`/`observe`/`unavailable` throughout.
+- `pcae health`, `pcae check`, `pcae status coherence`,
+  `pcae doctor task-memory` all passed cleanly before and after this
+  phase's work.
 
 ## Findings
 
-- `CONFIRMED-136K-1` (repaired): `load_and_verify_manifest` did not
-  enforce manifest entry `status == "frozen"`, allowing a committed
-  `status: "draft"` entry to load and verify cleanly. Repaired; closes
-  `NON-BLOCKING-136I-2`.
-- `CONFIRMED-136K-2` (disclosed, not repaired, no security impact):
-  `load_and_verify_manifest`'s docstring overclaims that an orphaned
-  manifest entry is always raised as `ManifestIntegrityError`; it
-  actually raises a sibling `SchemaResourceNotFoundError`. Both fail
-  closed.
-- `CONFIRMED-136K-3` (disclosed, not repaired, no security impact):
-  `manifest.schema.json`'s `file_path` description overclaims that its
-  regex charset alone forbids path traversal; the real defense (the
-  loader's independent containment check) independently confirmed to
-  hold end-to-end.
-- `NON-BLOCKING-136J-1`: reproduced and confirmed unchanged, correctly
-  disclosed.
-- `NON-BLOCKING-136J-2`: independently confirmed correct via Sec.9
-  file-list re-derivation; schema-level disposition unchanged.
-- `NON-BLOCKING-136I-2`: **closed** by `CONFIRMED-136K-1`'s repair.
-- `PREREQUISITE-136K-1`: Group 3 (`CutoverRequest`, `ReadinessPackage`)
-  depends on this phase's independent verification completing with zero
-  unresolved Blocking findings, per `CSCH-EXEC-REQ-062`. Satisfied.
-- `DEFERRED-136K-1`: the Sec.9 contract-text omission and the two
-  disclosed documentation-accuracy findings are text/docstring
-  corrections, deferred to a future phase that substantively touches
-  those files.
+**NON-BLOCKING-136L-1**: Sec.19/Sec.20's field tables do not literally
+name a `state`/`gate_result` field despite Sec.8.8 assigning
+`RequestState`/`GateResult`'s home schemas there. Resolved by including
+both fields (required on `CutoverRequest`, optional on
+`ReadinessPackage`), disclosed inline in each field's own `description`.
 
-Zero unresolved Blocking findings. Zero new `CONFIRMED` correctness
-defects beyond the one repaired and two disclosed above.
+**NON-BLOCKING-136L-2**: Sec.7.2 vs. Sec.20 `transition_id`-requiredness
+contradiction for `readiness_package`. Resolved in favor of the more
+specific Sec.20 table, disclosed inline.
+
+**NON-BLOCKING-136L-3**: No enforced reason-required-on-rejection
+conditional on `CutoverRequest`, and no per-item prerequisite structure
+on `ReadinessPackage` (only the package-wide `prerequisite_status`
+summary enum Sec.20 actually freezes) — both left unimplemented as
+ungrounded in the frozen field tables, per the explicit
+"do not invent record fields... when the binding contracts are more
+precise" instruction.
+
+**NON-BLOCKING-136L-4**: One full-suite failure
+(`test_commit_push_preflight.py::test_no_repo_mutation`) not in the
+established inherited baseline, root-caused to this session's own
+concurrent task-lifecycle writes during the background full-suite run;
+reproduced clean (1 passed) in isolation. Disclosed as transient, not a
+code regression.
+
+**PREREQUISITE-136L-1**: Group 4 (`HumanAuthorization`,
+`CutoverCandidate`, `Certification`) depends on Group 3 (this phase) plus
+Group 3's own independent verification (Phase 136M) before it may begin.
+
+**DEFERRED-136L-1**: Per-category typed evidence-reference substitution
+prevention (Stage 1 vs. Stage 2 vs. rollback vs. finalization vs.
+publication vs. certification) is not implementable on
+`ReadinessPackage.evidence_references` as frozen — Sec.20 gives this
+record only a generic, family-unrestricted `record_reference` array.
+
+Zero `CONFIRMED` correctness defects. Zero `BLOCKING` findings.
 
 ## Safety and no-go confirmation
 
-Legacy lifecycle remains the sole production authority. CLTR remains
-derivative. 136K independently verified only the `AuthorityEpoch` and
-`AuthorityState` executable schemas. No `CutoverRequest`,
-`ReadinessPackage`, `HumanAuthorization`, `CutoverCandidate`,
-`Certification`, `CASExpectation`, `PublicationAttempt`,
-`PublicationEvidence`, `ConcurrencyConflict`, `RecoveryJournal`,
-`ReconciliationResult`, `Quarantine`, notification binding, marker
-binding, receipt binding, `CompatibilityState`, `HistoricalAuthorityReference`,
-or derived record-view schema was created. No Stage 3 typed record model
-or cross-record semantic validator was implemented. No authority
-resolver, authority-state persistence, or authority pointer was
-implemented or changed. No runtime `AuthorityEpoch` or `AuthorityState`
-record was created. Schema validity does not establish lifecycle
-authority, activate an authority epoch, identify current authority,
-authorize cutover, prove publication, or prove recovery. No authority
-epoch changed. No CLTR authority was created. No legacy authority was
-demoted. No legacy authority was retired. No production lifecycle
-behavior changed. No execution capability was introduced. Runtime remains
-Observed, maximum capability remains observe, and execution availability
-remains unavailable.
-
-No `bindings/` or `views/` directory exists under `cltr_cutover`.
-`records/` contains exactly the 2 Group 2 files and no Group 3+ record
-schema. `.pcae/cltr-authority/` does not exist. No production artifact
-changed as a result of this phase's verification or manifest-loader
-repair work.
+- No `HumanAuthorization`, `CutoverCandidate`, `Certification`,
+  `CASExpectation`, `PublicationAttempt`, `PublicationEvidence`,
+  `ConcurrencyConflict`, `RecoveryJournal`, `ReconciliationResult`,
+  `Quarantine`, notification binding, marker binding, receipt binding,
+  `CompatibilityState`, or `HistoricalAuthorityReference` schema was
+  created by Phase 136L.
+- No Stage 3 typed record model or cross-record semantic validator was
+  implemented by Phase 136L.
+- No authority resolver, authority-state persistence, or authority
+  pointer was implemented or changed by Phase 136L.
+- No runtime `CutoverRequest` or `ReadinessPackage` record was created by
+  Phase 136L.
+- No schema validation result was interpreted as cutover eligibility,
+  readiness truth, authorization, certification, publication success,
+  recovery truth, or current authority.
+- No authority epoch changed. Production authority remains legacy.
+- No CLTR authority was created by Phase 136L.
+- No legacy authority was demoted or retired by Phase 136L.
+- No production lifecycle behavior changed by Phase 136L.
+- No execution capability was introduced by Phase 136L.
+- No `bindings/` or `views/` directory exists under `cltr_cutover`;
+  `records/` contains exactly the 4 Group 2+3 files and no Group 4+
+  record schema.
+- No authority namespace (`.pcae/cltr-authority/`) exists on disk.
+- No production artifact changed as a result of this phase's
+  schema-authoring work beyond the disclosed test-repair scope.
 
 ## Final verdict
 
-**VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR REQUEST AND READINESS
-SCHEMA IMPLEMENTATION.** Both Group 2 record schemas were independently
-re-derived, adversarially attacked, and confirmed to shape-bind their
-frozen wire contracts, enforce every local conditional in both
-directions, enforce reference-family separation on all 5 reference
-fields exhaustively, fail closed on unknown fields at every nesting
-level, and never establish authority through validation. Zero unresolved
-Blocking findings remain. Readiness applies only to the next bounded
-executable-schema group (`CutoverRequest`, `ReadinessPackage`) and does
-not authorize authorization, certification, publication, recovery, typed
-models, semantic validation, authority resolution, or cutover behavior.
+**READY FOR REQUEST AND READINESS SCHEMA INDEPENDENT VERIFICATION.**
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable.
+No `HumanAuthorization`, `CutoverCandidate`, `Certification`, or any
+later-group record schema, typed model, semantic validator, or authority
+resolver/state/pointer was created or changed.
 
 ## Recommended next phase
 
-**136L — Request and Readiness Schema Implementation.** May implement
-only `CutoverRequest` and `ReadinessPackage`, plus fixtures, manifest
-entries, packaging, and focused tests. Must not implement authorization,
-candidate, certification, CAS, publication, recovery, terminal bindings,
-compatibility, historical references, typed models, semantic validation,
-authority resolution, or cutover behavior.
+**136M — Request and Readiness Schema Independent Verification.**
+
+136M must independently attack the `CutoverRequest` and
+`ReadinessPackage` record schemas produced by this phase. Do not begin
+`HumanAuthorization`, `CutoverCandidate`, `Certification`, CAS,
+publication, recovery, bindings, compatibility, historical-reference,
+typed-model, semantic-validator, authority-resolver, persistence, or
+cutover-runtime work until 136M completes with zero unresolved Blocking
+defects.
