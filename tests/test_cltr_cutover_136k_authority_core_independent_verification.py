@@ -43,8 +43,13 @@ MANIFEST_SCHEMA_ID = BASE_ID + "manifest.schema.json"
 AUTHORITY_EPOCH_ID = BASE_ID + "records/authority_epoch.schema.json"
 AUTHORITY_STATE_ID = BASE_ID + "records/authority_state.schema.json"
 
-EXPECTED_MANIFEST_ENTRY_COUNT = 9
-EXPECTED_REGISTRY_RESOURCE_COUNT = 10
+# Updated by Phase 136L: Group 3 (cutover_request, readiness_package) now
+# legitimately exists alongside Group 1+2, raising both counts by 2. This
+# is a current-repository-state assertion, not a frozen historical
+# snapshot of 136K's own completion moment -- mirroring 136K's own
+# in-place repair of 136I's manifest-status test.
+EXPECTED_MANIFEST_ENTRY_COUNT = 11
+EXPECTED_REGISTRY_RESOURCE_COUNT = 12
 EXPECTED_GROUP1_SHARED_FILES = (
     "shared/digest.schema.json",
     "shared/enums.schema.json",
@@ -57,6 +62,10 @@ EXPECTED_GROUP1_SHARED_FILES = (
 EXPECTED_GROUP2_RECORD_FILES = (
     "records/authority_epoch.schema.json",
     "records/authority_state.schema.json",
+)
+EXPECTED_GROUP3_RECORD_FILES = (
+    "records/cutover_request.schema.json",
+    "records/readiness_package.schema.json",
 )
 
 # The frozen contract's Sec.9 explicit 12/13-file "authoritative forbidden"
@@ -190,15 +199,23 @@ def _copy_package(dest: Path) -> Path:
 
 
 def test_136k_group2_inventory_is_exactly_authority_epoch_and_authority_state():
+    # Updated by Phase 136L: records/ now legitimately also contains the
+    # two Group 3 files; Group 2's own subset (authority_epoch,
+    # authority_state) is unchanged and still verified as a subset here.
     with cltr_cutover_root() as root:
         record_files = sorted(p.name for p in (root / "records").glob("*.schema.json"))
-    assert record_files == ["authority_epoch.schema.json", "authority_state.schema.json"]
+    assert {"authority_epoch.schema.json", "authority_state.schema.json"} <= set(record_files)
 
 
-def test_136k_group3_files_remain_absent_confirming_deferral():
+def test_136k_group3_files_now_present_confirming_136l_implementation():
+    # Renamed and updated by Phase 136L (was
+    # test_136k_group3_files_remain_absent_confirming_deferral): Group 3
+    # deferral ended with 136L's own implementation; this test now
+    # confirms presence rather than absence, preserving the original
+    # test's role as a live check of Group 3's file-inventory state.
     with cltr_cutover_root() as root:
-        assert not (root / "records" / "cutover_request.schema.json").exists()
-        assert not (root / "records" / "readiness_package.schema.json").exists()
+        assert (root / "records" / "cutover_request.schema.json").exists()
+        assert (root / "records" / "readiness_package.schema.json").exists()
 
 
 def test_136k_manifest_entry_count_is_exactly_nine(registry):
@@ -1159,11 +1176,20 @@ def test_136k_repaired_scope_guards_still_forbid_every_group3plus_filename(test_
     )
 
 
-def test_136k_no_group3plus_schema_file_introduced_since_136j_baseline():
+def test_136k_no_group4plus_schema_file_introduced_since_136l_baseline():
+    # Renamed and updated by Phase 136L (was
+    # test_136k_no_group3plus_schema_file_introduced_since_136j_baseline):
+    # Group 3 is now the legitimate current baseline; this test's role
+    # (confirm no *further* group has been introduced) is preserved by
+    # widening the expected set to include Group 3 and renaming the test
+    # to describe the new boundary it actually checks.
     with cltr_cutover_root() as root:
         all_files = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.schema.json"))
     expected = sorted(
-        ("manifest.schema.json",) + EXPECTED_GROUP1_SHARED_FILES + EXPECTED_GROUP2_RECORD_FILES
+        ("manifest.schema.json",)
+        + EXPECTED_GROUP1_SHARED_FILES
+        + EXPECTED_GROUP2_RECORD_FILES
+        + EXPECTED_GROUP3_RECORD_FILES
     )
     assert all_files == expected
 
@@ -1206,7 +1232,7 @@ def test_136k_installed_wheel_validates_group2_fixtures_outside_repository(tmp_p
         "from pcae.schema_runtime import build_offline_registry, validate_record_shape, OutcomeStatus\n"
         "with cltr_cutover_root() as root:\n"
         "    reg = build_offline_registry(root)\n"
-        "assert len(reg.schema_ids) == 10, reg.schema_ids\n"
+        "assert len(reg.schema_ids) == 12, reg.schema_ids\n"
         "valid = {\n"
         "    'schema_id': 'https://pcae.local/schemas/cltr_cutover/records/authority_epoch.schema.json',\n"
         "    'schema_version': '1.0', 'contract_version': '1.0', 'record_type': 'authority_epoch',\n"
@@ -1246,7 +1272,9 @@ def test_136k_sdist_and_wheel_still_exclude_group3plus_and_authority_namespace(t
     wheel = next(dist_dir.glob("*.whl"))
     sdist = next(dist_dir.glob("*.tar.gz"))
 
-    forbidden_stems = ("cutover_request", "readiness_package", "human_authorization", "compatibility_state")
+    # cutover_request and readiness_package are no longer forbidden stems:
+    # Phase 136L legitimately packages them as Group 3.
+    forbidden_stems = ("human_authorization", "compatibility_state")
 
     with zipfile.ZipFile(wheel) as zf:
         names = zf.namelist()
@@ -1255,6 +1283,8 @@ def test_136k_sdist_and_wheel_still_exclude_group3plus_and_authority_namespace(t
     assert not any(".pcae/cltr-authority" in n for n in names)
     assert any(n.endswith("records/authority_epoch.schema.json") for n in names)
     assert any(n.endswith("records/authority_state.schema.json") for n in names)
+    assert any(n.endswith("records/cutover_request.schema.json") for n in names)
+    assert any(n.endswith("records/readiness_package.schema.json") for n in names)
 
     with tarfile.open(sdist) as tf:
         tnames = tf.getnames()

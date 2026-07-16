@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/cutover_request.schema.json",
+  "title": "CLTR Cutover CutoverRequest record",
+  "description": "Phase 136L, Implementation Group 3. Shape-only wire contract for a CutoverRequest companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.19, field table repaired by Phase 136D Sec.19.1). A CutoverRequest document proposes a legacy-to-cltr authority transition; it never itself establishes readiness truth, human authorization, certification, CAS success, publication success, or current authority (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Per Sec.19.1 (repaired): readiness_package is created first, content-derived solely from its own bound fields (Sec.20), never depending on any cutover_request identity; this document is created second and binds to the already-existing readiness_package via readiness_package_reference (a stable id+digest+family reference, not a $ref into that schema file) -- no versioned 'request-v2' re-creation exists or is permitted, and no identity or $ref cycle exists. Tier 1 (strict): additionalProperties: false, no _extensions escape hatch (Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes cutover_request).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "phase_id",
+    "migration_epoch",
+    "target",
+    "source_authority",
+    "source_epoch",
+    "target_epoch",
+    "evidence_requirements",
+    "readiness_package_reference",
+    "authorization_requirement",
+    "final_revision",
+    "state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/cutover_request.schema.json",
+      "description": "Always present. Identifies this document as validated against the CutoverRequest schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "cutover_request",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "phase_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/phase_identity",
+      "description": "Always present. cutover_request is one of the families requiring phase_id (shared/envelope.schema.json family-required-field table, Sec.7.2)."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1)."
+    },
+    "target": {
+      "allOf": [
+        { "$ref": "../shared/enums.schema.json#/$defs/authority_kind" },
+        { "const": "cltr" }
+      ],
+      "description": "Always present. Must be 'cltr' -- a request targeting 'legacy' is not a cutover (Sec.19)."
+    },
+    "source_authority": {
+      "allOf": [
+        { "$ref": "../shared/enums.schema.json#/$defs/authority_kind" },
+        { "const": "legacy" }
+      ],
+      "description": "Always present. Must be 'legacy' at v1.0 (Sec.19)."
+    },
+    "source_epoch": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present. Family-tagged reference to the AuthorityEpoch record describing the current (legacy) authority lineage node. A valid reference never implies the referenced epoch record actually exists or is currently active (Layer 4/6)."
+    },
+    "target_epoch": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present. Family-tagged reference to the AuthorityEpoch record describing the proposed (cltr) authority lineage node. A valid reference never implies the referenced epoch record actually exists, or that the proposed target is already authoritative (Layer 4/6)."
+    },
+    "evidence_requirements": {
+      "type": "array",
+      "items": { "$ref": "../shared/failures.schema.json#/$defs/reason_code" },
+      "uniqueItems": true,
+      "maxItems": 24,
+      "description": "Always present as a key; may be empty. Closed vocabulary of reason_code-shaped strings naming which evidence categories this request declares are required before readiness may be claimed. Declaring a requirement here never itself proves the requirement was met -- that is the readiness_package's and Layer 4's responsibility."
+    },
+    "readiness_package_reference": {
+      "$ref": "#/$defs/readiness_package_reference",
+      "description": "Always present, unconditionally required (repaired by Phase 136D, Sec.19.1; CSCH-EXEC-REQ-047). Family-tagged reference, with schema_id/schema_version present per Sec.12's cross-family-reference rule, to the already-existing readiness_package this request binds to. A valid reference never implies the referenced package exists, matches, or is itself ready (Layer 4)."
+    },
+    "authorization_requirement": {
+      "const": true,
+      "description": "Always present. const true at v1.0 -- human authorization is always required for a cutover (Sec.19); no request may declare this false."
+    },
+    "final_revision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[\\x20-\\x7E]*$",
+      "description": "Always present. Opaque single-line printable-ASCII revision token this request derives from (Sec.6.1: source_revision/final_input_revision fields appear only on records that derive from a prior lifecycle revision -- cutover_request, readiness_package). Shape-checked only; never recomputed or compared against live lifecycle revision state at Layer 2."
+    },
+    "state": {
+      "enum": [
+        "pending",
+        "evidence_gathering",
+        "ready",
+        "authorized",
+        "certified",
+        "publication_pending",
+        "published",
+        "rejected",
+        "withdrawn",
+        "expired"
+      ],
+      "description": "Always present. Record-local RequestState (Sec.8.8, 10 values; this field's own name is not literally spelled out in Sec.19's field table, but Sec.8.8 unconditionally assigns RequestState's home schema as cutover_request.schema.json, so a carrying field must exist here -- disclosed as filling a genuine Sec.19/Sec.8.8 cross-reference gap, not an invented field; see phase documentation, finding NON-BLOCKING-136L-1). Reaching 'authorized', 'certified', 'publication_pending', or 'published' here is a local status label only -- it never itself proves human authorization, certification, or publication occurred; those remain the responsibility of the (not-yet-implemented) HumanAuthorization, Certification, and PublicationEvidence records (Layer 4/6)."
+    },
+    "reason_code": {
+      "$ref": "../shared/failures.schema.json#/$defs/reason_code",
+      "description": "Conditionally present: not enforced by any local if/then rule in this phase (no Sec.16 row exists for cutover_request). Typically populated when state is 'rejected', 'withdrawn', or 'expired', but this schema does not require or forbid its presence based on state -- disclosed as a documented, non-enforced convention rather than an overclaimed conditional (see phase documentation)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless."
+    }
+  },
+  "$defs": {
+    "epoch_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": {
+            "record_family": { "const": "authority_epoch" }
+          }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'authority_epoch', preventing a differently-typed record reference from being substituted as source_epoch or target_epoch."
+    },
+    "readiness_package_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": {
+            "record_family": { "const": "readiness_package" }
+          }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'readiness_package', with schema_id/schema_version made unconditionally required (Sec.12: required when a reference crosses a family boundary whose schema-version compatibility is not otherwise implied by context -- Sec.12 names cutover_request referencing readiness_package as exactly this case)."
+    }
+  }
+}

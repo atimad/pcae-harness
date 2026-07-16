@@ -38,6 +38,40 @@
       "status": "frozen"
     },
     {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/cutover_request.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/cutover_request.schema.json",
+      "file_digest": "6b0eba10b98002417a525d305778d7fb4b0b5b9584d9841e8d75aeb9a1a3c5c3",
+      "family": "cutover_request",
+      "implementation_group": 3,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/failures.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/readiness_package.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/readiness_package.schema.json",
+      "file_digest": "a53d10ba492c01e848103e54c3efe19ae8c157d6b87c7581550684c7e165f586",
+      "family": "readiness_package",
+      "implementation_group": 3,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
       "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
       "schema_version": "1.0",
       "file_path": "shared/digest.schema.json",

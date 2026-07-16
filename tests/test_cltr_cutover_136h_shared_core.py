@@ -1125,10 +1125,10 @@ def test_136h_manifest_file_digest_matches_recomputation():
 FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
     # authority_epoch.schema.json and authority_state.schema.json are no
     # longer forbidden: Phase 136J legitimately implements them as
-    # Implementation Group 2. Every later-group (3+) record schema remains
-    # forbidden until its own phase.
-    "cutover_request.schema.json",
-    "readiness_package.schema.json",
+    # Implementation Group 2. cutover_request.schema.json and
+    # readiness_package.schema.json are no longer forbidden: Phase 136L
+    # legitimately implements them as Implementation Group 3. Every
+    # later-group (4+) record schema remains forbidden until its own phase.
     "human_authorization.schema.json",
     "cutover_candidate.schema.json",
     "certification.schema.json",

@@ -178,11 +178,17 @@ def test_136f_error_vocabulary_matches_frozen_set():
 
 def test_136f_schema_resources_package_does_not_contain_later_group_stage3_files():
     # Phase 136J legitimately packages authority_epoch.schema.json and
-    # authority_state.schema.json (Implementation Group 2). Group 3+
-    # record schemas (cutover_request, readiness_package, and beyond)
-    # remain forbidden until their own phase.
-    allowed_stage3_files = {"authority_epoch.schema.json", "authority_state.schema.json"}
-    later_group_markers = ("cutover_request", "readiness_package")
+    # authority_state.schema.json (Implementation Group 2). Phase 136L
+    # legitimately packages cutover_request.schema.json and
+    # readiness_package.schema.json (Implementation Group 3). Group 4+
+    # record schemas remain forbidden until their own phase.
+    allowed_stage3_files = {
+        "authority_epoch.schema.json",
+        "authority_state.schema.json",
+        "cutover_request.schema.json",
+        "readiness_package.schema.json",
+    }
+    later_group_markers = ("human_authorization", "cutover_candidate", "compatibility_state")
     for path in SCHEMA_RESOURCES_SRC.rglob("*"):
         if path.is_file() and path.name not in allowed_stage3_files:
             lowered = path.name.lower()

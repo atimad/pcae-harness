@@ -38,10 +38,10 @@ def test_136f_editable_install_resource_lookup():
 _FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
     # authority_epoch.schema.json and authority_state.schema.json are no
     # longer forbidden: Phase 136J legitimately packages them as
-    # Implementation Group 2. Every later-group (3+) record schema remains
-    # forbidden until its own phase.
-    "cutover_request.schema.json",
-    "readiness_package.schema.json",
+    # Implementation Group 2. cutover_request.schema.json and
+    # readiness_package.schema.json are no longer forbidden: Phase 136L
+    # legitimately packages them as Implementation Group 3. Every
+    # later-group (4+) record schema remains forbidden until its own phase.
     "human_authorization.schema.json",
     "cutover_candidate.schema.json",
     "certification.schema.json",
@@ -76,12 +76,15 @@ def test_136f_wheel_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: 
     assert smoke_path in names, f"{smoke_path} missing from wheel; names sample: {names[:20]}"
     shared_envelope_path = "pcae/schema_resources/cltr_cutover/shared/envelope.schema.json"
     assert shared_envelope_path in names, f"{shared_envelope_path} missing from wheel (136H shared core)"
-    # Phase 136J packages exactly 2 Group 2 record schemas; no other
-    # records/ resource is permitted.
+    # Phase 136J packages 2 Group 2 record schemas; Phase 136L adds 2
+    # Group 3 record schemas (4 total); no other records/ resource is
+    # permitted.
     record_names = [name for name in names if "cltr_cutover/records/" in name]
     assert set(record_names) == {
         "pcae/schema_resources/cltr_cutover/records/authority_epoch.schema.json",
         "pcae/schema_resources/cltr_cutover/records/authority_state.schema.json",
+        "pcae/schema_resources/cltr_cutover/records/cutover_request.schema.json",
+        "pcae/schema_resources/cltr_cutover/records/readiness_package.schema.json",
     }
     for forbidden in _FORBIDDEN_RECORD_SCHEMA_FILENAMES:
         assert not any(name.endswith(forbidden) for name in names)
@@ -106,12 +109,15 @@ def test_136f_sdist_contains_smoke_schema_and_no_stage3_record_schema(tmp_path: 
 
     assert any(name.endswith("schema_resources/smoke/generic_smoke_record.schema.json") for name in names)
     assert any(name.endswith("cltr_cutover/shared/envelope.schema.json") for name in names)
-    # Phase 136J packages exactly 2 Group 2 record schemas; no other
-    # records/ resource is permitted.
+    # Phase 136J packages 2 Group 2 record schemas; Phase 136L adds 2
+    # Group 3 record schemas (4 total); no other records/ resource is
+    # permitted.
     record_names = {name for name in names if "cltr_cutover/records/" in name}
     assert {Path(name).name for name in record_names} == {
         "authority_epoch.schema.json",
         "authority_state.schema.json",
+        "cutover_request.schema.json",
+        "readiness_package.schema.json",
     }
     for forbidden in _FORBIDDEN_RECORD_SCHEMA_FILENAMES:
         assert not any(name.endswith(forbidden) for name in names)

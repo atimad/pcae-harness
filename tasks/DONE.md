@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136K) (20260716-1729-idle-awaiting-next-governed-phase-post-136k)
 - Phase 136K: Authority Core Schema Independent Verification (20260716-1655-phase-136k-authority-core-schema-independent-verification)
 
 - Phase 136J: Authority Core Schema Implementation (20260716-1601-phase-136j-authority-core-schema-implementation)

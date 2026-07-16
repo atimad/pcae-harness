@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/readiness_package.schema.json",
+  "title": "CLTR Cutover ReadinessPackage record",
+  "description": "Phase 136L, Implementation Group 3. Shape-only wire contract for a ReadinessEvidencePackage companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.20). A ReadinessPackage document reports evidence toward a proposed cutover; it never itself establishes readiness truth, cutover eligibility, human authorization, certification, CAS success, publication success, or current authority (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Per Sec.19.1 (repaired by Phase 136D): this record's identity is content-derived solely from its own bound fields and never depends on any cutover_request identity -- a readiness_package is created first, and a cutover_request is created second, binding to this already-existing package by record_reference; this record carries no back-reference to any cutover_request, closing the loop non-circularly. Tier 2 (_extensions only, Sec.14): additionalProperties permits exactly one reserved key, _extensions, string-valued map only. authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes readiness_package).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "phase_id",
+    "transition_id",
+    "migration_epoch",
+    "evidence_references",
+    "prerequisite_status",
+    "findings",
+    "state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/readiness_package.schema.json",
+      "description": "Always present. Identifies this document as validated against the ReadinessPackage schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "readiness_package",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2. Content-derived solely from this record's own bound fields (Sec.19.1 repair notice) -- never from any cutover_request identity."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "phase_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/phase_identity",
+      "description": "Always present. readiness_package is one of the families requiring phase_id (Sec.7.2)."
+    },
+    "transition_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/transition_identity",
+      "description": "Always present. Sec.20's own field table unconditionally requires phase_id/transition_id/migration_epoch 'all three'; this is disclosed as a textual inconsistency against Sec.7.2's family-required-field table, which does not list readiness_package among the transition_id-required families -- resolved in favor of the more specific, per-family Sec.20 table (finding NON-BLOCKING-136L-2; see phase documentation, mirroring the 136K precedent of confirming rather than silently patching contract text)."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1)."
+    },
+    "evidence_references": {
+      "type": "array",
+      "items": { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+      "maxItems": 64,
+      "description": "Always present as a key; may be empty. Deterministically ordered by record_id, lexicographic ASCII byte order (Sec.20; matching this repository's existing canonicalization sort convention) -- ordering itself is a Layer 3/canonicalization-time responsibility, not something this JSON Schema document can enforce (JSON Schema validates item shape only, never semantic array order). No family restriction is applied: an evidence reference may point at any of the 16 companion record_family values, or at Stage 1/Stage 2 lifecycle evidence outside this companion package's own record_family vocabulary, addressed opaquely by the generic record_reference shape."
+    },
+    "prerequisite_status": {
+      "enum": ["unknown", "unmet", "met"],
+      "description": "Always present. Record-local, package-wide summary of whether this package's own declared prerequisites are met (Sec.20). A schema-valid 'met' value never itself proves the underlying prerequisites were actually verified -- that is Layer 4."
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" },
+      "maxItems": 128,
+      "description": "Always present as a key; may be empty. Array of lightweight local finding objects (id, verdict, title) -- explicitly not the full findings-table format used in phase documentation (Sec.20)."
+    },
+    "state": {
+      "enum": ["unknown", "stale", "partial", "ready", "conflict"],
+      "description": "Always present. Record-local ReadinessState (Sec.8.8, 5 values). 'conflict' requires findings to contain at least one BLOCKING-verdict entry (Sec.20, enforced below); no other state-to-content conditional is locally enforced by this phase (no further Sec.16 row exists for readiness_package). A 'ready' value here never itself proves cutover eligibility, evidence freshness, or cross-record consistency (Layer 4)."
+    },
+    "gate_result": {
+      "enum": ["eligible", "ineligible", "uncertain", "conflict"],
+      "description": "Conditionally present: not listed in Sec.20's own required-field table, but Sec.8.8 assigns GateResult's home schema as readiness_package.schema.json, restating CLTR-CUTOVER-001 Sec.10's frozen four-value gate outcome -- included here as an optional field so the enum has a documented home, without overclaiming a requiredness Sec.20's table does not state (finding NON-BLOCKING-136L-1, same category as the 'state' field gap on cutover_request; see phase documentation). A schema-valid value here never itself resolves cutover eligibility (Layer 4/6)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as readiness truth."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "conflict" } }
+      },
+      "then": {
+        "required": ["findings"],
+        "properties": {
+          "findings": {
+            "type": "array",
+            "contains": { "$ref": "#/$defs/blocking_finding" }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "verdict", "title"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[A-Za-z0-9._-]{1,64}$",
+          "description": "Always present. Opaque finding identifier, ASCII-only, no path separators."
+        },
+        "verdict": {
+          "enum": ["CONFIRMED", "NON-BLOCKING", "BLOCKING", "PREREQUISITE", "DEFERRED"],
+          "description": "Always present. Closed finding-classification vocabulary matching this repository's existing phase-report finding taxonomy. A finding's verdict never itself makes an authority or lifecycle decision -- it is a disclosure only."
+        },
+        "title": {
+          "$ref": "../shared/limitations.schema.json#/$defs/disclosure_text",
+          "description": "Always present. Short, single-line printable-ASCII finding title."
+        }
+      },
+      "description": "A lightweight local finding object (Sec.20) -- not the full findings-table format used in phase documentation."
+    },
+    "blocking_finding": {
+      "allOf": [
+        { "$ref": "#/$defs/finding" },
+        {
+          "properties": {
+            "verdict": { "const": "BLOCKING" }
+          }
+        }
+      ],
+      "description": "A finding locally restricted to verdict 'BLOCKING', used by the state == 'conflict' conditional above."
+    }
+  }
+}

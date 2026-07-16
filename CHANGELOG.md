@@ -1,5 +1,43 @@
 # Changelog
 
+- Phase 136L — Request and Readiness Schema Implementation
+  (`docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_IMPLEMENTATION.md`).
+  Implemented exactly `records/cutover_request.schema.json` and
+  `records/readiness_package.schema.json` (Implementation Group 3),
+  independently re-read from `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`
+  §19/§19.1(repaired by 136D)/§20/§46. Confirmed the repaired non-circular
+  creation order (`readiness_package` first, `cutover_request` second,
+  bound via an opaque `record_reference`, never a `$ref` edge) end-to-end
+  in a fixture-level test proving no versioned "request-v2" mechanism or
+  identity/digest cycle exists. `CutoverRequest` is Tier 1 strict (`target`
+  const `"cltr"`, `source_authority` const `"legacy"`,
+  `authorization_requirement` const `true`); `ReadinessPackage` is Tier 2
+  (`_extensions` only), with `state == "conflict"` requiring at least one
+  `BLOCKING`-verdict finding. Disclosed and resolved three `NON-BLOCKING`
+  findings: (1) §19/§20's field tables omit an explicit `state`/
+  `gate_result` field name despite §8.8 assigning both enums' home schemas
+  there, resolved by including both (mirroring 136K's precedent for
+  genuine frozen-contract-text gaps); (2) §7.2 vs. §20's `transition_id`-
+  requiredness contradiction for `readiness_package`, resolved in favor of
+  the more specific §20 table; (3) the originating prompt's illustrative
+  reason-required-on-rejection and per-item-prerequisite structures were
+  left unimplemented as ungrounded in the frozen field tables. Zero
+  `BLOCKING` findings. Added 130 new focused tests
+  (`tests/test_cltr_cutover_136l_request_and_readiness.py`). Repaired 24
+  stale scope-guard assertions across 6 pre-existing test files (136H,
+  136I, 136J, 136K, `test_schema_runtime_boundaries.py`,
+  `test_schema_runtime_packaging.py`) to reflect Group 3's now-legitimate
+  existence, following the identical precedent 136J/136K established for
+  Group 2. Combined `test_cltr_cutover_136h/i/j/k/l` +
+  `test_schema_runtime_*` suite: 834/834 passed (704 baseline + 130 new).
+  Fast Green: 4391/4391, identical to the 136H/136I/136J/136K baseline,
+  zero regressions. Legacy lifecycle remains the sole production
+  authority; CLTR remains derivative; runtime remains Observed / observe /
+  execution unavailable. No `HumanAuthorization`, `CutoverCandidate`,
+  `Certification`, or any later-group record schema, typed model, semantic
+  validator, or authority resolver/state/pointer was created or changed.
+  Recommended next phase: 136M — Request and Readiness Schema Independent
+  Verification.
 - Phase 136K — Authority Core Schema Independent Verification
   (`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_INDEPENDENT_VERIFICATION.md`).
   Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR REQUEST AND

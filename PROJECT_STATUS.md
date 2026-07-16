@@ -2,6 +2,71 @@
 
 ## Current Phase
 
+Phase 136L — Request and Readiness Schema Implementation (completed,
+implementation, Implementation Group 3 only). Independently re-read the
+frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §19/§19.1(repaired by
+136D)/§20/§46 field tables and creation-order resolution directly (not from
+the originating prompt's own illustrative field lists) and implemented
+exactly `records/cutover_request.schema.json` and
+`records/readiness_package.schema.json`. Confirmed the repaired non-circular
+creation order end-to-end in a fixture-level test
+(`test_136l_request_binds_to_independently_fixtured_readiness_package`):
+`readiness_package` is fixtured and validated entirely on its own, with no
+`cutover_request` in existence, and that already-valid package's own
+`record_id`/`record_digest` are then used to populate a separately validated
+`cutover_request`'s unconditionally-required `readiness_package_reference`
+— proving no versioned "request-v2" mechanism or `$ref`/identity/digest
+cycle exists in actual schema behavior, not merely contract prose.
+`CutoverRequest` is Tier 1 strict (`target` const `"cltr"`,
+`source_authority` const `"legacy"`, `authorization_requirement` const
+`true`); `ReadinessPackage` is Tier 2 (`_extensions` only), with
+`state == "conflict"` requiring at least one `BLOCKING`-verdict finding.
+
+Disclosed three `NON-BLOCKING` findings, all repaired or resolved rather
+than merely noted: (1) §19/§20's field tables do not literally name a
+`state`/`gate_result` field even though §8.8 assigns `RequestState`/
+`GateResult`'s home schemas there — resolved by including `state` (required)
+on `CutoverRequest` and `gate_result` (optional) on `ReadinessPackage`,
+mirroring the 136K precedent of confirming rather than silently patching a
+genuine frozen-contract-text gap; (2) §7.2's general family-required-field
+table omits `readiness_package` from the `transition_id`-required list while
+§20's own specific table requires it unconditionally — resolved in favor of
+the more specific §20 table; (3) the originating prompt's illustrative
+"reason_code required on rejection" and per-item prerequisite structures are
+not grounded in §16's frozen conditional table or §19/§20's field tables —
+left unimplemented (disclosed, not silently added) per the explicit
+"do not invent record fields... when the binding contracts are more
+precise" instruction. Zero `BLOCKING` findings.
+
+Wrote 130 fresh focused tests
+(`tests/test_cltr_cutover_136l_request_and_readiness.py`). Repaired 24
+stale scope-guard assertions across 6 pre-existing test files (136H, 136I,
+136J, 136K, `test_schema_runtime_boundaries.py`,
+`test_schema_runtime_packaging.py`) to reflect Group 3's now-legitimate
+existence, following the identical precedent 136J/136K themselves
+established when Group 2 first appeared — including renaming
+`test_136k_group3_files_remain_absent_confirming_deferral` to assert
+presence rather than deleting live coverage of that boundary. Combined
+`test_cltr_cutover_136h/i/j/k/l` + `test_schema_runtime_*` suite: 834/834
+passed (704 baseline + 130 new). Fast Green: 4391/4391, identical to the
+136H/136I/136J/136K baseline, zero regressions. See
+`docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_IMPLEMENTATION.md`.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+`HumanAuthorization`, `CutoverCandidate`, `Certification`, or any later-group
+record schema, typed model, semantic validator, or authority
+resolver/state/pointer was created or changed.
+
+Recommended next phase: **136M — Request and Readiness Schema Independent
+Verification**. Must independently attack the `CutoverRequest` and
+`ReadinessPackage` schemas produced by 136L. Must not begin authorization,
+candidate, certification, CAS, publication, recovery, terminal bindings,
+compatibility, historical references, typed models, semantic validation,
+authority resolution, or cutover behavior.
+
+## Phase 136K Complete
+
 Phase 136K — Authority Core Schema Independent Verification (completed,
 verification, Implementation Group 2 only). Independently re-derived the
 `AuthorityEpoch`/`AuthorityState` field tables and local conditionals
