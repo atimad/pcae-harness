@@ -125,6 +125,21 @@
       "status": "passed"
     },
     {
+      "name": "fast_green",
+      "result": "python -m pytest -m fast_green -n auto: 4391 passed, identical to the 136G baseline -- confirms zero regressions.",
+      "status": "passed"
+    },
+    {
+      "name": "report_notification_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136H); no report/notification source was changed by this phase.",
+      "status": "passed"
+    },
+    {
+      "name": "bootstrap_session_reporting_tests",
+      "result": "included in fast_green (4391 passed, unaffected -- Phase 136H); no bootstrap/session-reporting source was changed by this phase.",
+      "status": "passed"
+    },
+    {
       "name": "full_unmarked_suite_fresh_run",
       "result": "python -m pytest -n auto: 20353 passed, 19 failed, 20372 total, 1126.83s. All 19 failing node IDs byte-for-byte identical to 136F's and 136G's own already-classified pre-existing failure set (test_advisory_runtime_contract.py, test_advisory_runtime_architecture.py, test_phase_reports.py, test_rendering_134e5.py, test_finalization_transaction_134e10.py x5, test_cltr_migration_135p_verification.py x4, test_bootstrap_todo_consistency.py x2, test_cltr_135o_integration.py x4). 20353 is exactly 136G's 20196 plus this phase's 157 new tests, confirming zero new regressions.",
       "status": "passed (19 pre-existing failures reconfirmed identical to 136F/136G's own classification, disclosed not repaired)"
@@ -157,7 +172,7 @@
   },
   "notification_dispatch_result": "pending single governed terminal delivery",
   "report_notification_status": "pending governed finalization",
-  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136H implemented only the executable-schema shared core. No AuthorityEpoch, AuthorityState, CutoverRequest, ReadinessPackage, HumanAuthorization, CutoverCandidate, Certification, CASExpectation, PublicationAttempt, PublicationEvidence, ConcurrencyConflict, RecoveryJournal, ReconciliationResult, Quarantine, notification binding, marker binding, receipt binding, CompatibilityState, HistoricalAuthorityReference, or derived record-view schema was created. No Stage 3 typed record model or cross-record semantic validator was implemented. No authority resolver, authority-state persistence, or authority pointer was implemented or changed. No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal runtime object was created. Schema validity does not establish lifecycle authority, cutover eligibility, authorization, publication success, or recovery truth. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
+  "no_go_confirmation": "Legacy lifecycle remains the sole production authority. CLTR remains derivative. 136H implemented only the executable-schema shared core. No AuthorityEpoch, AuthorityState, CutoverRequest, ReadinessPackage, HumanAuthorization, CutoverCandidate, Certification, CASExpectation, PublicationAttempt, PublicationEvidence, ConcurrencyConflict, RecoveryJournal, ReconciliationResult, Quarantine, notification binding, marker binding, receipt binding, CompatibilityState, HistoricalAuthorityReference, or derived record-view schema was created. No Stage 3 typed record model or cross-record semantic validator was implemented. No authority resolver, authority-state persistence, or authority pointer was implemented or changed. No cutover request, readiness package, authorization, candidate, certification, publication attempt, conflict record, or recovery journal runtime object was created. Schema validity does not establish lifecycle authority, cutover eligibility, authorization, publication success, or recovery truth. No authority epoch changed. No CLTR authority was created. No legacy authority was demoted. No legacy authority was retired. No production lifecycle behavior changed. No execution capability was introduced. No records/, bindings/, or views/ directory was created. No repository-root schemas/cltr_cutover/ path was created. No authority namespace (.pcae/cltr-authority/) exists on disk. Runtime remains Observed, maximum capability remains observe, and execution availability remains unavailable.",
   "no_go_confirmations": [
     "No AuthorityEpoch, AuthorityState, CutoverRequest, ReadinessPackage, HumanAuthorization, CutoverCandidate, Certification, CASExpectation, PublicationAttempt, PublicationEvidence, ConcurrencyConflict, RecoveryJournal, ReconciliationResult, Quarantine, notification binding, marker binding, receipt binding, CompatibilityState, or HistoricalAuthorityReference schema was created by Phase 136H.",
     "No Stage 3 typed record model or cross-record semantic validator was implemented by Phase 136H.",
