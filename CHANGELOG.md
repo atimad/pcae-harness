@@ -1,5 +1,36 @@
 # Changelog
 
+- Phase 136I — Companion Executable Schema Shared Core Independent
+  Verification
+  (`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_INDEPENDENT_VERIFICATION.md`).
+  Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR AUTHORITY AND
+  REQUEST SCHEMA IMPLEMENTATION**. Independently re-derived, reproduced,
+  mutated, and adversarially attacked Phase 136H's Stage 3 Companion
+  Executable Schema shared core, trusting none of 136H's own tests or
+  report prose. 221 new independent adversarial tests
+  (`tests/test_cltr_cutover_136i_shared_core_independent_verification.py`)
+  independently re-derived the exact inventory (7 shared files, 33
+  `$defs`, 8 shared enums, 24 reason codes, 7 manifest entries) directly
+  from the on-disk schemas and the frozen contract — all confirmed exact.
+  Attacked every identifier/digest/timestamp/version/enum/reason-code/
+  reference/limitation definition, mutated temporary manifest/schema
+  copies to prove fail-closed tamper detection, attacked the
+  `_materialize_plain` Mapping-contract repair with a second,
+  independently authored hostile `Mapping` plus tuples, subclassed
+  dict/list, cycles, non-`str` nested keys, and deep nesting (all fail
+  closed), independently built a fresh wheel/sdist and proved
+  installed-wheel operation from an isolated venv outside the repository,
+  and independently re-verified no-network/no-authority/no-execution/
+  non-mutation boundaries. Combined schema-runtime + 136H + 136I suite:
+  515/515 passed. Fast Green: 4391/4391, identical to the 136H baseline,
+  zero regressions. Found 4 new `NON-BLOCKING` findings (enum-value
+  overlap across dimensions, schema-permitted-but-documentation-forbidden
+  manifest `"draft"` status, a 136H notification-bookkeeping
+  reconciliation gap, and a `validate_record_shape`-misuse-footgun
+  observation); zero `BLOCKING` findings; no repair required. Legacy
+  lifecycle remains the sole production authority; CLTR remains
+  derivative; runtime remains Observed / observe / execution unavailable.
+
 - Phase 136H — Companion Executable Schema Shared Core Implementation
   (`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_IMPLEMENTATION.md`).
   Implemented Implementation Group 1 (shared core) of the Stage 3

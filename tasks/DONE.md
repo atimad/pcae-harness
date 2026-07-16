@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136H) (20260716-0834-idle-awaiting-next-governed-phase-post-136h)
 - Phase 136H: Companion Executable Schema Shared Core Implementation (20260716-0753-phase-136h-companion-executable-schema-shared-core-implementation)
 - Idle: awaiting next governed phase (post-136G) (20260716-0434-idle-awaiting-next-governed-phase-post-136g)
 - Phase 136G: Validation Engine and Strict JSON Parsing Independent Verification (20260716-0036-phase-136g-validation-engine-and-strict-json-parsing-independent-verification)
