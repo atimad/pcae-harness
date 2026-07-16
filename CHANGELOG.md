@@ -1031,6 +1031,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Phase 136H: Companion Executable Schema Shared Core Implementation to Idle: awaiting next governed phase (post-136H); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136G: Validation Engine and Strict JSON Parsing Independent Verification to Idle: awaiting next governed phase (post-136G); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136F: Draft 2020-12 Validation Engine and Strict JSON Parsing Prerequisite to Idle: awaiting next governed phase (post-136F); session refreshed and governance continuity revalidated.
 - Transitioned active task from Idle: awaiting next governed phase (post-136A) to Phase 136B: Stage 3 Companion Executable Schema Architecture; recorded human activation decision for 136B in `tasks/DECISIONS.md` after read-only reconciliation of 136A surfaced a disclosed, non-blocking `reconciliation_status: conflict` (notification marker/checkpoint predating 136A's own later corrective commits; no duplicate delivery, 136A not mutated or redispatched).
