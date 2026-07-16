@@ -2,6 +2,8 @@
 
 ## Completed
 
+- Phase 136N: Authorization and Candidate Schema Implementation (20260716-2011-phase-136n-authorization-and-candidate-schema-implementation)
+
 - Idle: awaiting next governed phase (post-136M) (20260716-1923-idle-awaiting-next-governed-phase-post-136m)
 - Phase 136M: Request and Readiness Schema Independent Verification (20260716-1842-phase-136m-request-and-readiness-schema-independent-verification)
 - Idle: awaiting next governed phase (post-136L) (20260716-1828-idle-awaiting-next-governed-phase-post-136l)
