@@ -48,6 +48,8 @@ Implement CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Implementation Group 4 (Human
 - docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md
 - .pcae/phase-completion-report.md
 - .pcae/phase-completion-metadata.json
+- .pcae/phase-metadata-repairs.log
+- .pcae/phase-reports/**
 
 ## Forbidden Files
 
