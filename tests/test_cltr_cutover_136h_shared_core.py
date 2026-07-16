@@ -48,15 +48,23 @@ SHARED_FILES = (
 # ---------------------------------------------------------------------------
 
 
-def test_136h_exact_shared_core_file_inventory():
+def test_136h_shared_core_file_inventory_subset_of_current_package():
+    # Phase 136H itself introduced only the 7 shared/* files plus
+    # manifest.schema.json. Phase 136J subsequently added Implementation
+    # Group 2 (records/authority_epoch.schema.json,
+    # records/authority_state.schema.json) -- a legitimate, later, disclosed
+    # addition, not a 136H regression. This test now asserts 136H's own
+    # files remain present and unchanged, rather than that no further
+    # schema was ever added after 136H.
     with cltr_cutover_root() as root:
-        schema_files = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.schema.json"))
-    assert schema_files == sorted(("manifest.schema.json",) + SHARED_FILES)
+        schema_files = set(p.relative_to(root).as_posix() for p in root.rglob("*.schema.json"))
+    assert set(("manifest.schema.json",) + SHARED_FILES).issubset(schema_files)
 
 
-def test_136h_no_records_bindings_or_views_directory_exists():
+def test_136h_no_bindings_or_views_directory_exists():
+    # records/ now legitimately exists (Phase 136J, Implementation Group 2).
+    # bindings/ and views/ remain unimplemented in every phase through 136J.
     with cltr_cutover_root() as root:
-        assert not (root / "records").exists()
         assert not (root / "bindings").exists()
         assert not (root / "views").exists()
 
@@ -80,11 +88,14 @@ def test_136h_every_resource_id_matches_frozen_namespace(relative_path):
     assert document["$id"] == BASE_ID + relative_path
 
 
-def test_136h_registry_loads_exactly_eight_resources_with_unique_ids():
+def test_136h_registry_loads_at_least_eight_shared_core_resources_with_unique_ids():
+    # 8 = manifest.schema.json + 7 shared/*.schema.json (136H's own scope).
+    # The live registry may contain more once later phases (136J+) add
+    # records/*.schema.json; uniqueness must still hold across all of them.
     with cltr_cutover_root() as root:
         registry = build_offline_registry(root)
-    assert len(registry.schema_ids) == 8
-    assert len(set(registry.schema_ids)) == 8
+    assert len(registry.schema_ids) >= 8
+    assert len(set(registry.schema_ids)) == len(registry.schema_ids)
 
 
 def test_136h_editable_install_lookup_resolves_shared_core():
@@ -107,8 +118,9 @@ def test_136h_manifest_verifies_cleanly():
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-    assert len(manifest.entries) == 7
-    assert {e.file_path for e in manifest.entries} == set(SHARED_FILES)
+    # 136H's own 7 shared entries must still verify and remain present;
+    # later phases (136J+) may add further entries alongside them.
+    assert set(SHARED_FILES).issubset({e.file_path for e in manifest.entries})
 
 
 def test_136h_manifest_detects_content_tamper(tmp_path):
@@ -170,13 +182,13 @@ def test_136h_manifest_detects_unindexed_extra_file(tmp_path):
         )
 
 
-def test_136h_manifest_entry_count_matches_shared_core_exactly():
+def test_136h_manifest_shared_entries_match_group_one_exactly():
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 7
-    assert all(e["implementation_group"] == 1 for e in manifest["entries"])
-    assert all(e["family"] == "shared" for e in manifest["entries"])
-    assert all(e["status"] == "frozen" for e in manifest["entries"])
+    shared_entries = [e for e in manifest["entries"] if e["family"] == "shared"]
+    assert len(shared_entries) == 7
+    assert all(e["implementation_group"] == 1 for e in shared_entries)
+    assert all(e["status"] == "frozen" for e in shared_entries)
 
 
 def test_136h_manifest_entries_in_deterministic_sorted_order():
@@ -1111,8 +1123,10 @@ def test_136h_manifest_file_digest_matches_recomputation():
 
 
 FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
-    "authority_epoch.schema.json",
-    "authority_state.schema.json",
+    # authority_epoch.schema.json and authority_state.schema.json are no
+    # longer forbidden: Phase 136J legitimately implements them as
+    # Implementation Group 2. Every later-group (3+) record schema remains
+    # forbidden until its own phase.
     "cutover_request.schema.json",
     "readiness_package.schema.json",
     "human_authorization.schema.json",
@@ -1144,9 +1158,15 @@ def test_136h_no_authority_namespace_created_on_disk():
 
 
 def test_136h_no_authority_module_references_in_schema_resources_source():
+    # "authority_state"/"authority_epoch" are no longer forbidden tokens:
+    # Phase 136J's schema_resources/__init__.py docstrings legitimately
+    # name the packaged Group 2 record schemas. "pcae.cltr" (the live
+    # authority-resolver module), "current_authority", and
+    # "cltr-authority" (the authority namespace directory) remain
+    # forbidden in every phase through 136J.
     repo_root = Path(__file__).resolve().parents[1]
     package_dir = repo_root / "src" / "pcae" / "schema_resources"
-    forbidden = ("pcae.cltr", "current_authority", "authority_state", "authority_epoch", "cltr-authority")
+    forbidden = ("pcae.cltr", "current_authority", "cltr-authority")
     for py_file in package_dir.rglob("*.py"):
         text = py_file.read_text(encoding="utf-8")
         for token in forbidden:

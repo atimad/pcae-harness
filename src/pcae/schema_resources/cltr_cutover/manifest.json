@@ -4,6 +4,40 @@
   "package": "cltr_cutover",
   "entries": [
     {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/authority_epoch.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/authority_epoch.schema.json",
+      "file_digest": "1cde6d6ce2306b51e5dd7e367a66e17fd607f6038e076f95e5f8ac4b82b9d78d",
+      "family": "authority_epoch",
+      "implementation_group": 2,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/authority_state.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/authority_state.schema.json",
+      "file_digest": "76739518bfd737d7cf8ea4e60edab59ab032e4ddcd9761b4c0b41bed17c11529",
+      "family": "authority_state",
+      "implementation_group": 2,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
       "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
       "schema_version": "1.0",
       "file_path": "shared/digest.schema.json",

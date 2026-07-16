@@ -2,6 +2,70 @@
 
 ## Current Phase
 
+Phase 136J — Authority Core Schema Implementation (completed,
+implementation, Implementation Group 2 only). Before authoring, re-read
+the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46 grouping and
+found the originating prompt's 4-schema scope ("Authority and Request
+Schema Implementation") conflicted with the frozen per-group independent-
+verification gate (`CSCH-EXEC-REQ-062`): `AuthorityEpoch`/`AuthorityState`
+are Implementation Group 2, while `CutoverRequest`/`ReadinessPackage` are
+Implementation Group 3, gated behind Group 2's own independent
+verification. Surfaced this conflict; the user chose to follow the frozen
+grouping. **136J therefore implements only `AuthorityEpoch` and
+`AuthorityState`**; `CutoverRequest`/`ReadinessPackage` are deferred to
+Phase 136L behind Phase 136K's independent verification of this phase.
+
+Implemented `records/authority_epoch.schema.json` and
+`records/authority_state.schema.json` (Draft 2020-12, Tier 1 strict,
+`additionalProperties: false`), composing the 136H shared core unchanged
+(no shared `$def` added, modified, or duplicated). Local conditionals:
+`activation_state == "active"` requires `generation_binding`,
+`"proposed"` forbids it; `authority_kind == "cltr"` requires
+`authoritative_generation`; `verification_state == "unverified"` requires
+`uncertainty`, `"verified"` forbids it. Reference-family separation
+enforced on all 5 reference fields (`predecessor_epoch`,
+`generation_binding`, `active_authority_epoch`, `authoritative_generation`,
+`publication_evidence_reference`) via local `record_family`/shape
+restriction. 2 new manifest entries (`implementation_group: 2`, both
+`"frozen"`); registry grows from 8 to 10 resources. 89 new focused tests
+(`tests/test_cltr_cutover_136j_authority_core.py`); combined
+schema-runtime + 136H + 136I + 136J suite: 604/604 passed. Fast Green:
+4391/4391, identical to the 136H/136I baseline, zero regressions.
+Repaired 19 pre-existing scope-guard assertions across 4 test files that
+hard-coded "no `records/` directory exists at all" as a 136F/136H/136I-era
+boundary — updated (not weakened) to allow exactly the 2 Group 2 files
+while continuing to forbid every Group 3+ record schema and `bindings/`/
+`views/` unconditionally. Independently rebuilt wheel/sdist and verified
+installed-wheel operation from an isolated venv outside the repository
+(`cwd=/tmp`): 10 schema ids, 9 manifest entries, valid-fixture shape
+validation succeeded. Found 2 new `NON-BLOCKING` findings: (1)
+`AuthorityState`'s `is_authoritative` remains `const false`
+unconditionally even though §9 structurally permits `authority_role:
+"authoritative"` on this family — a deliberate, user-chosen, disclosed
+gap, not a repair made in this phase; (2) `AuthorityEpoch`'s local
+forbidding of `authority_role: "authoritative"` is a conservative 136J
+judgment call, not a verbatim contract quote (§9's own file list neither
+explicitly names nor excludes `AuthorityEpoch`). Zero `BLOCKING` findings.
+See `docs/PHASE_136_AUTHORITY_CORE_SCHEMA_IMPLEMENTATION.md`.
+
+**Verdict: COMPLETE, ZERO BLOCKING FINDINGS — READY FOR AUTHORITY CORE
+SCHEMA INDEPENDENT VERIFICATION.** Legacy lifecycle remains the sole
+production authority; CLTR remains derivative; runtime remains Observed /
+observe / execution unavailable. No `CutoverRequest`, `ReadinessPackage`,
+or any later-group record schema, typed model, semantic validator, or
+authority resolver/state/pointer was created.
+
+Recommended next phase: **136K — Authority Core Schema Independent
+Verification**. Must independently attack the `AuthorityEpoch`/
+`AuthorityState` schemas produced by 136J, in particular re-deriving §9's
+file list to confirm or correct the two disclosed findings. Do not begin
+`CutoverRequest`, `ReadinessPackage`, `HumanAuthorization`,
+`CutoverCandidate`, `Certification`, publication, recovery,
+terminal-binding, compatibility, or historical schema implementation
+until 136K completes with zero unresolved Blocking defects.
+
+## Phase 136I Complete
+
 Phase 136I — Companion Executable Schema Shared Core Independent
 Verification (completed, verification). Independently re-derived,
 reproduced, mutated, and adversarially attacked Phase 136H's shared core

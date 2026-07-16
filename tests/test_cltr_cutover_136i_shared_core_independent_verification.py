@@ -51,8 +51,10 @@ SHARED_FILES = (
 )
 
 FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
-    "authority_epoch.schema.json",
-    "authority_state.schema.json",
+    # authority_epoch.schema.json and authority_state.schema.json are no
+    # longer forbidden: Phase 136J legitimately implements them as
+    # Implementation Group 2. Every later-group (3+) record schema remains
+    # forbidden until its own phase.
     "cutover_request.schema.json",
     "readiness_package.schema.json",
     "human_authorization.schema.json",
@@ -154,10 +156,14 @@ def test_136i_independent_reason_code_count_is_exactly_24():
     assert len(set(codes)) == 24  # no duplicate semantics
 
 
-def test_136i_independent_manifest_entry_count_is_exactly_seven():
+def test_136i_independent_manifest_shared_entries_still_number_seven():
+    # 136I's own boundary (Group 1, shared/* only). Phase 136J subsequently
+    # added 2 Group 2 entries alongside these 7 -- a legitimate, later,
+    # disclosed addition, not a 136I regression.
     manifest = _load("manifest.json")
-    assert len(manifest["entries"]) == 7
-    assert {e["file_path"] for e in manifest["entries"]} == set(SHARED_FILES)
+    shared_entries = [e for e in manifest["entries"] if e["file_path"] in SHARED_FILES]
+    assert len(shared_entries) == 7
+    assert {e["file_path"] for e in shared_entries} == set(SHARED_FILES)
 
 
 def test_136i_manifest_digests_independently_recomputed_from_bytes():
@@ -200,9 +206,9 @@ def test_136i_no_forbidden_authority_bearing_record_schema_file_exists():
         assert forbidden not in all_files
 
 
-def test_136i_no_records_bindings_views_directory_under_packaged_root():
+def test_136i_no_bindings_views_directory_under_packaged_root():
+    # records/ now legitimately exists (Phase 136J, Implementation Group 2).
     with cltr_cutover_root() as root:
-        assert not (root / "records").exists()
         assert not (root / "bindings").exists()
         assert not (root / "views").exists()
 
@@ -271,7 +277,7 @@ def test_136i_registry_construction_performs_no_network_call(monkeypatch):
     monkeypatch.setattr(socket, "socket", _raise)
     monkeypatch.setattr(socket, "create_connection", _raise)
     registry = _registry()
-    assert len(registry.schema_ids) == 8
+    assert len(registry.schema_ids) >= 8
 
 
 def test_136i_registry_rejects_duplicate_id_across_two_roots(tmp_path):
@@ -770,10 +776,13 @@ def test_136i_shape_valid_disclosure_never_implies_live_authority():
     module never calls any authority resolver, and none exists to call."""
     import pcae.schema_resources as sr
 
+    # "authority_state"/"authority_epoch" are no longer forbidden tokens:
+    # Phase 136J's schema_resources/__init__.py docstrings legitimately
+    # name the packaged Group 2 record schemas.
     source = Path(sr.__file__).parent
     for py_file in source.rglob("*.py"):
         text = py_file.read_text(encoding="utf-8")
-        for forbidden in ("current_authority", "authority_state", "authority_epoch", "pcae.cltr"):
+        for forbidden in ("current_authority", "pcae.cltr"):
             assert forbidden not in text, f"{py_file}: forbidden reference {forbidden!r}"
 
 
@@ -1374,6 +1383,7 @@ def test_136i_manifest_draft_status_is_schema_permitted_not_structurally_rejecte
     a defect requiring repair within the 136H/136I boundary."""
     root = _fresh_copy(tmp_path)
     manifest = json.loads((root / "manifest.json").read_bytes())
+    expected_count = len(manifest["entries"])
     manifest["entries"][0]["status"] = "draft"
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     registry = build_offline_registry(root)
@@ -1384,12 +1394,13 @@ def test_136i_manifest_draft_status_is_schema_permitted_not_structurally_rejecte
         manifest_schema_id=MANIFEST_SCHEMA_ID,
         excluded_relative_paths=frozenset({"manifest.schema.json"}),
     )
-    assert len(verified.entries) == 7  # loads cleanly despite draft status
+    assert len(verified.entries) == expected_count  # loads cleanly despite draft status
 
 
 def test_136i_manifest_reordered_entries_still_verify_pathwise_but_lose_sort_order(tmp_path):
     root = _fresh_copy(tmp_path)
     manifest = json.loads((root / "manifest.json").read_bytes())
+    expected_count = len(manifest["entries"])
     manifest["entries"] = list(reversed(manifest["entries"]))
     paths = [e["file_path"] for e in manifest["entries"]]
     assert paths != sorted(paths)  # deterministic-order contract is now violated
@@ -1402,7 +1413,7 @@ def test_136i_manifest_reordered_entries_still_verify_pathwise_but_lose_sort_ord
         manifest_schema_id=MANIFEST_SCHEMA_ID,
         excluded_relative_paths=frozenset({"manifest.schema.json"}),
     )
-    assert len(verified.entries) == 7  # digest/completeness verification does not depend on order
+    assert len(verified.entries) == expected_count  # digest/completeness verification does not depend on order
 
 
 def test_136i_manifest_dependency_substitution_not_structurally_verified():
@@ -1756,7 +1767,7 @@ def test_136i_manifest_verification_performs_no_network_call(monkeypatch):
 
     monkeypatch.setattr(socket, "socket", _raise)
     manifest = _manifest_verified()
-    assert len(manifest.entries) == 7
+    assert len(manifest.entries) >= 7
 
 
 def test_136i_shape_validation_of_invalid_record_performs_no_network(monkeypatch):
@@ -1947,7 +1958,7 @@ def test_136i_plain_materialization_output_stable_regardless_of_dict_insertion_o
 def test_136i_every_group_1_shared_file_maps_to_a_manifest_entry():
     manifest = _load("manifest.json")
     manifest_paths = {e["file_path"] for e in manifest["entries"]}
-    assert manifest_paths == set(SHARED_FILES)
+    assert set(SHARED_FILES).issubset(manifest_paths)
 
 
 def test_136i_no_group_2_plus_requirement_prematurely_implemented():

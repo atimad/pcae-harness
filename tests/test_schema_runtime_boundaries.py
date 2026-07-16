@@ -38,10 +38,11 @@ _FORBIDDEN_IMPORT_MODULES = {
 }
 
 _FORBIDDEN_AUTHORITY_SUBSTRINGS = (
+    # "authority_state"/"authority_epoch" are no longer forbidden tokens:
+    # Phase 136J's schema_resources/__init__.py docstrings legitimately
+    # name the packaged Implementation Group 2 record schemas.
     "pcae.cltr",
     "current_authority",
-    "authority_state",
-    "authority_epoch",
     "cltr-authority",
 )
 
@@ -175,13 +176,18 @@ def test_136f_error_vocabulary_matches_frozen_set():
     )
 
 
-def test_136f_schema_resources_package_does_not_contain_stage3_files():
-    stage3_markers = ("authority_epoch", "authority_state", "cutover_request", "readiness_package")
+def test_136f_schema_resources_package_does_not_contain_later_group_stage3_files():
+    # Phase 136J legitimately packages authority_epoch.schema.json and
+    # authority_state.schema.json (Implementation Group 2). Group 3+
+    # record schemas (cutover_request, readiness_package, and beyond)
+    # remain forbidden until their own phase.
+    allowed_stage3_files = {"authority_epoch.schema.json", "authority_state.schema.json"}
+    later_group_markers = ("cutover_request", "readiness_package")
     for path in SCHEMA_RESOURCES_SRC.rglob("*"):
-        if path.is_file():
+        if path.is_file() and path.name not in allowed_stage3_files:
             lowered = path.name.lower()
-            for marker in stage3_markers:
-                assert marker not in lowered, f"Unexpected Stage 3-looking resource: {path}"
+            for marker in later_group_markers:
+                assert marker not in lowered, f"Unexpected later-group Stage 3 resource: {path}"
 
 
 def test_136f_module_reimports_cleanly():

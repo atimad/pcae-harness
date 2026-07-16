@@ -1,5 +1,51 @@
 # Changelog
 
+- Phase 136J — Authority Core Schema Implementation
+  (`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_IMPLEMENTATION.md`). Before
+  authoring, re-read the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`
+  §46 implementation-group boundary and found the originating prompt's
+  4-schema scope conflicted with the frozen per-group independent-
+  verification gate (`CSCH-EXEC-REQ-062`) — `AuthorityEpoch`/
+  `AuthorityState` are Implementation Group 2, `CutoverRequest`/
+  `ReadinessPackage` are Implementation Group 3, gated behind Group 2's
+  own independent verification. Surfaced this to the user, who chose to
+  follow the frozen grouping; **136J implements only `AuthorityEpoch` and
+  `AuthorityState`**, deferring `CutoverRequest`/`ReadinessPackage` to
+  Phase 136L behind Phase 136K. Implemented
+  `src/pcae/schema_resources/cltr_cutover/records/authority_epoch.schema.json`
+  and `.../records/authority_state.schema.json` (Draft 2020-12, Tier 1
+  strict, `additionalProperties: false`), composing the 136H shared core
+  unchanged. Local conditionals: `activation_state`/`generation_binding`
+  consistency, `authority_kind`/`authoritative_generation` requirement,
+  `verification_state`/`uncertainty` mutual exclusivity. Reference-family
+  separation enforced on all 5 reference fields via local
+  `record_family`/shape restriction, preventing wrong-family reference
+  substitution. Added 2 manifest entries (`implementation_group: 2`);
+  registry grows from 8 to 10 resources. Added 89 new focused tests
+  (`tests/test_cltr_cutover_136j_authority_core.py`). Combined
+  schema-runtime + 136H + 136I + 136J suite: 604/604 passed. Fast Green:
+  4391/4391, identical to the 136H/136I baseline, zero regressions.
+  Repaired 19 pre-existing scope-guard assertions across
+  `test_cltr_cutover_136h_shared_core.py`,
+  `test_cltr_cutover_136i_shared_core_independent_verification.py`,
+  `test_schema_runtime_boundaries.py`, and `test_schema_runtime_packaging.py`
+  that had hard-coded "no `records/` directory exists at all" as a
+  136F/136H/136I-era boundary — updated (not weakened) to allow exactly
+  the 2 Group 2 files while continuing to forbid every Group 3+ record
+  schema and `bindings/`/`views/` unconditionally. Independently rebuilt
+  wheel/sdist and verified installed-wheel operation from an isolated venv
+  outside the repository (`cwd=/tmp`). Found 2 new `NON-BLOCKING` findings
+  (AuthorityState's `is_authoritative` stays `const false` unconditionally
+  despite §9's structurally-permitted `authority_role: "authoritative"`
+  exception — a deliberate, disclosed, user-chosen gap; and AuthorityEpoch's
+  local forbidding of `authority_role: "authoritative"` is a conservative
+  136J judgment call rather than a verbatim contract quote); zero
+  `BLOCKING` findings. Legacy lifecycle remains the sole production
+  authority; CLTR remains derivative; runtime remains Observed / observe /
+  execution unavailable. No `CutoverRequest`, `ReadinessPackage`, or any
+  later-group record schema, typed model, semantic validator, or authority
+  resolver/state/pointer was created. Recommended next phase: 136K —
+  Authority Core Schema Independent Verification.
 - Phase 136I — Companion Executable Schema Shared Core Independent
   Verification
   (`docs/PHASE_136_COMPANION_EXECUTABLE_SCHEMA_SHARED_CORE_INDEPENDENT_VERIFICATION.md`).
@@ -1062,6 +1108,7 @@
 
 ## Unreleased
 
+- Transitioned active task from Idle: awaiting next governed phase (post-136I) to Phase 136J: Authority Core Schema Implementation; session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136H: Companion Executable Schema Shared Core Implementation to Idle: awaiting next governed phase (post-136H); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136G: Validation Engine and Strict JSON Parsing Independent Verification to Idle: awaiting next governed phase (post-136G); session refreshed and governance continuity revalidated.
 - Transitioned active task from Phase 136F: Draft 2020-12 Validation Engine and Strict JSON Parsing Prerequisite to Idle: awaiting next governed phase (post-136F); session refreshed and governance continuity revalidated.

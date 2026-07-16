@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/authority_state.schema.json",
+  "title": "CLTR Cutover AuthorityState record",
+  "description": "Phase 136J, Implementation Group 2. Shape-only wire contract for an AuthorityState companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.18). An AuthorityState document is the companion evidence-adjacent record documenting a resolved-authority claim; the architectural relationship (production authority pointer -> AuthorityState record -> authoritative generation) is documentation only (Sec.7.1 note below) and is never established by schema validity alone (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. This is one of the two record families where authority_role \"authoritative\" is a structurally permitted enum value (Sec.9); is_authoritative nonetheless remains const false unconditionally per the shared authority_disclosure definition -- 136J deliberately does not attempt to express Sec.9's conditional exception in schema form (disclosed limitation NON-BLOCKING-136J-1; see phase documentation). Schema validity of this record never itself resolves, creates, or persists current authority.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "transition_id",
+    "active_authority_epoch",
+    "authority_kind",
+    "publication_evidence_reference",
+    "pointer_digest",
+    "verification_state",
+    "compatibility_mode",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/authority_state.schema.json",
+      "description": "Always present. Identifies this document as validated against the AuthorityState schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "authority_state",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present."
+    },
+    "transition_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/transition_identity",
+      "description": "Always present. authority_state is one of the families that requires transition_id (shared/identity.schema.json)."
+    },
+    "active_authority_epoch": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present. Family-tagged reference to the AuthorityEpoch record this state claims currency for. A valid reference never implies the referenced epoch record actually exists or is itself active (Layer 4/6)."
+    },
+    "authority_kind": {
+      "$ref": "../shared/enums.schema.json#/$defs/authority_kind",
+      "description": "Always present."
+    },
+    "authoritative_generation": {
+      "$ref": "../shared/references.schema.json#/$defs/generation_reference",
+      "description": "Conditionally present: required when authority_kind is \"cltr\". A valid reference never implies the referenced generation is certified, authoritative, or published (Layer 4/6)."
+    },
+    "publication_evidence_reference": {
+      "$ref": "#/$defs/publication_evidence_reference",
+      "description": "Always present. Family-tagged reference to the publication_evidence record supporting this state. publication_evidence.schema.json is not implemented in this phase (Group 5); this field is a shape-only forward reference and does not require the referenced document to already exist for schema validity."
+    },
+    "pointer_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/pointer_digest",
+      "description": "Always present. Digest carried by an authority-pointer-shaped reference. This package defines no authority pointer record and does not resolve or create one; shape-checked only."
+    },
+    "verification_state": {
+      "enum": ["unverified", "verified", "verification_failed"],
+      "description": "Always present. Record-local VerificationState. \"unverified\" requires an accompanying uncertainty disclosure; \"verified\" forbids one (mutually exclusive at the local shape level)."
+    },
+    "uncertainty": {
+      "$ref": "#/$defs/uncertainty",
+      "description": "Conditionally present: required when verification_state is \"unverified\", forbidden when verification_state is \"verified\"."
+    },
+    "compatibility_mode": {
+      "$ref": "../shared/enums.schema.json#/$defs/compatibility_mode",
+      "description": "Always present."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure",
+      "description": "Always present. authority_role \"authoritative\" is a structurally permitted value on this record family only (Sec.9), but is_authoritative remains const false unconditionally per the shared definition -- see file description and NON-BLOCKING-136J-1."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["authority_kind"],
+        "properties": { "authority_kind": { "const": "cltr" } }
+      },
+      "then": { "required": ["authoritative_generation"] }
+    },
+    {
+      "if": {
+        "required": ["verification_state"],
+        "properties": { "verification_state": { "const": "unverified" } }
+      },
+      "then": { "required": ["uncertainty"] }
+    },
+    {
+      "if": {
+        "required": ["verification_state"],
+        "properties": { "verification_state": { "const": "verified" } }
+      },
+      "then": { "not": { "required": ["uncertainty"] } }
+    }
+  ],
+  "$defs": {
+    "epoch_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": {
+            "record_family": { "const": "authority_epoch" }
+          }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family \"authority_epoch\"."
+    },
+    "publication_evidence_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": {
+            "record_family": { "const": "publication_evidence" }
+          }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family \"publication_evidence\", preventing a wrong-family reference (e.g. a cutover_request or rollback-evidence reference) from being substituted here."
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason"],
+      "properties": {
+        "reason": {
+          "$ref": "../shared/limitations.schema.json#/$defs/disclosure_text",
+          "description": "Always present when this object is present. Short, fixed-purpose uncertainty disclosure sentence."
+        }
+      },
+      "description": "Bounded local uncertainty-disclosure object. Present only when verification_state is \"unverified\"."
+    }
+  }
+}

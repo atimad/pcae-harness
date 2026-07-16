@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136I) (20260716-1503-idle-awaiting-next-governed-phase-post-136i)
 - Phase 136I: Companion Executable Schema Shared Core Independent Verification (20260716-1444-phase-136i-companion-executable-schema-shared-core-independent-verification)
 - Idle: awaiting next governed phase (post-136H) (20260716-0834-idle-awaiting-next-governed-phase-post-136h)
 - Phase 136H: Companion Executable Schema Shared Core Implementation (20260716-0753-phase-136h-companion-executable-schema-shared-core-implementation)
