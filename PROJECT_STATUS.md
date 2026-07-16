@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 136O — Authorization and Candidate Schema Independent Verification
+(completed, independent verification, Implementation Group 4 only).
+Independently re-read the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`
+§21/§22/§23/§24 field tables directly and re-derived every `HumanAuthorization`
+/ `CutoverCandidate` / `Certification` field requirement from the contract
+text and the actual `.schema.json` files on disk, rather than trusting
+136N's own tests, prose, or findings. Independently rebuilt the `$ref`
+graph, the manifest-declared dependency graph, and a wrong-family
+substitution matrix across all Group 1–4 record schemas; confirmed acyclic
+via fresh DFS toposorts. Re-confirmed all 8 of 136N's disclosed
+`NON-BLOCKING` findings and all 4 inherited 136M findings; none became
+`BLOCKING`. Found one new, independently reproduced instance of inherited
+finding `NON-BLOCKING-136M-2`: `human_authorization.schema.json` and
+`certification.schema.json` both declare a manifest dependency on
+`shared/enums.schema.json` that neither file's own `$ref` graph actually
+uses. Independently discovered — and disclosed, but did not repair, since
+it is outside this phase's schema/schema-runtime boundary — that 136N's
+own committed canonical `.pcae/phase-completion-report.md` retitled itself
+to "Phase 136N Complete" while its ~200-line body was left describing
+136M's own independent-verification work verbatim. Zero `BLOCKING`
+findings; no repair made to any Group 4 schema, shared core, or manifest
+(see `docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_INDEPENDENT_VERIFICATION.md`).
+
+Wrote 82 fresh, independently-authored adversarial tests
+(`tests/test_cltr_cutover_136o_authorization_and_candidate_independent_verification.py`)
+that do not import or reuse 136N's own fixtures/helpers. Combined
+Group 1–4 + `test_schema_runtime_*` suite: 938/938 passed. Fast Green:
+4391/4391 passed, identical to the 136H–136N baseline, zero regressions.
+Fresh wheel/sdist build, isolated-venv install, and no-network
+verification all passed from the installed wheel, not merely in-repo.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+`PublicationAttempt`, `PublicationEvidence`, `ConcurrencyConflict`,
+standalone `CASExpectation`, `RecoveryJournal`, `ReconciliationResult`,
+`Quarantine`, notification/marker/receipt binding, `CompatibilityState`,
+`HistoricalAuthorityReference`, typed model, semantic validator, or
+authority resolver/state/pointer was created or changed.
+
+Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR PUBLICATION
+SCHEMA IMPLEMENTATION**. Recommended next phase: **136P — Publication
+Schema Implementation**. Must independently re-derive the exact Group 5
+inventory (§25–§27: `PublicationAttempt`, `PublicationEvidence`,
+`ConcurrencyConflict`) from the latest frozen contract at phase start, not
+assume it from this handoff. Must not begin bindings, compatibility,
+historical-reference, typed-model, semantic-validator, authority-resolver,
+persistence, or cutover-runtime work.
+
+## Phase 136N Complete
+
 Phase 136N — Authorization and Candidate Schema Implementation (completed,
 implementation, Implementation Group 4 only). Independently re-read the
 frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §21/§22/§23/§24 field

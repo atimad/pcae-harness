@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Idle: awaiting next governed phase (post-136N) (20260716-2110-idle-awaiting-next-governed-phase-post-136n)
 - Phase 136N: Authorization and Candidate Schema Implementation (20260716-2011-phase-136n-authorization-and-candidate-schema-implementation)
 
 - Idle: awaiting next governed phase (post-136M) (20260716-1923-idle-awaiting-next-governed-phase-post-136m)

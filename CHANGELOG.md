@@ -1,5 +1,48 @@
 # Changelog
 
+- Phase 136O — Authorization and Candidate Schema Independent Verification
+  (`docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_INDEPENDENT_VERIFICATION.md`).
+  Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR PUBLICATION
+  SCHEMA IMPLEMENTATION.** Independently re-derived the `HumanAuthorization`
+  / `CutoverCandidate` / `Certification` field tables from
+  `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §21–§24 rather than trusting
+  136N's own tests, prose, or findings. Re-attacked every family-restricted
+  reference slot with wrong-family substitution, unknown-field/`_extensions`
+  strictness, absent-vs-null behavior, secret-shaped `replay_binding` probes,
+  and the embedded `cas_expectation` `$def`'s 11 unconditionally-required
+  fields (each independently confirmed non-optional). Independently rebuilt
+  the `$ref` graph, the manifest-declared dependency graph, and a
+  wrong-family substitution matrix across all Group 1–4 record schemas;
+  confirmed acyclic via fresh DFS toposorts, not reused from 136N.
+  Re-confirmed all 8 of 136N's disclosed `NON-BLOCKING` findings and all 4
+  inherited 136M findings; none became `BLOCKING`. Found and disclosed one
+  new, independently reproduced instance of inherited finding
+  `NON-BLOCKING-136M-2` (manifest `dependencies` not cross-checked against
+  the actual `$ref` graph): `human_authorization.schema.json` and
+  `certification.schema.json` both declare a manifest dependency on
+  `shared/enums.schema.json` that neither file's own `$ref` graph actually
+  uses. Independently discovered (not repaired, out of this phase's
+  schema/schema-runtime boundary) that 136N's own committed canonical
+  `.pcae/phase-completion-report.md` retitled itself to "Phase 136N
+  Complete" while its ~200-line body was left describing 136M's own
+  independent-verification work verbatim — disclosed as inherited
+  lifecycle/tooling debt, not a schema defect. Zero `BLOCKING` findings, no
+  repair made to any Group 4 schema, shared core, or manifest. Added 82 new,
+  independently-authored adversarial tests
+  (`tests/test_cltr_cutover_136o_authorization_and_candidate_independent_verification.py`)
+  that do not import or reuse 136N's own fixtures/helpers. Combined
+  Group 1–4 + `test_schema_runtime_*` suite: 938/938 passed. Fast Green:
+  4391/4391 passed, identical to the 136H–136N baseline, zero regressions.
+  Fresh wheel/sdist build, isolated-venv install, and no-network
+  verification all passed from the installed wheel, not merely in-repo.
+  Legacy lifecycle remains the sole production authority; CLTR remains
+  derivative; runtime remains Observed / observe / execution unavailable.
+  No `PublicationAttempt`, `PublicationEvidence`, `ConcurrencyConflict`,
+  standalone `CASExpectation`, `RecoveryJournal`, `ReconciliationResult`,
+  `Quarantine`, notification/marker/receipt binding, `CompatibilityState`,
+  `HistoricalAuthorityReference`, typed model, semantic validator, or
+  authority resolver/state/pointer was created or changed. Recommended
+  next phase: 136P — Publication Schema Implementation.
 - Phase 136N — Authorization and Candidate Schema Implementation
   (`docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md`).
   Implemented exactly `records/human_authorization.schema.json`,
