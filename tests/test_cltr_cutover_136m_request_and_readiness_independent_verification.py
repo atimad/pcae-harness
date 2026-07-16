@@ -72,9 +72,9 @@ GROUP3_RECORD_FILES = (
 LATER_GROUP_STEMS = (
     # human_authorization, cutover_candidate, and certification are no
     # longer forbidden: Phase 136N legitimately implements them as
-    # Implementation Group 4.
-    "publication_attempt",
-    "publication_evidence",
+    # Implementation Group 4. publication_attempt and publication_evidence
+    # are no longer forbidden: Phase 136P legitimately implements them as
+    # Implementation Group 5.
     "concurrency_conflict",
     "recovery_journal_entry",
     "quarantine_record",
@@ -198,8 +198,9 @@ def test_136m_independent_group3_inventory_is_exactly_request_and_readiness():
 
 
 def test_136m_exactly_four_production_record_schemas_exist():
-    # Updated by Phase 136N: seven production record schemas now legitimately
-    # exist (Group 2+3's four plus Group 4's three).
+    # Updated by Phase 136N (seven) and Phase 136P: nine production record
+    # schemas now legitimately exist (Group 2+3's four, Group 4's three,
+    # Group 5's two).
     with cltr_cutover_root() as root:
         files = sorted(p.name for p in (root / "records").glob("*.schema.json"))
     assert files == [
@@ -209,15 +210,18 @@ def test_136m_exactly_four_production_record_schemas_exist():
         "cutover_candidate.schema.json",
         "cutover_request.schema.json",
         "human_authorization.schema.json",
+        "publication_attempt.schema.json",
+        "publication_evidence.schema.json",
         "readiness_package.schema.json",
     ]
 
 
 def test_136m_manifest_has_exactly_eleven_entries():
-    # Updated by Phase 136N: manifest now legitimately carries 14 entries.
+    # Updated by Phase 136N (14) and Phase 136P: manifest now legitimately
+    # carries 16 entries.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 14
+    assert len(manifest["entries"]) == 16
 
 
 @pytest.mark.parametrize("stem", LATER_GROUP_STEMS)
@@ -845,8 +849,9 @@ def test_136m_manifest_declared_dependency_list_correctness_not_cross_checked(tm
         manifest_schema_id=MANIFEST_SCHEMA_ID,
         excluded_relative_paths=frozenset({"manifest.schema.json"}),
     )
-    # Updated by Phase 136N: manifest now legitimately carries 14 entries.
-    assert len(manifest_obj.entries) == 14
+    # Updated by Phase 136N (14) and Phase 136P: manifest now legitimately
+    # carries 16 entries.
+    assert len(manifest_obj.entries) == 16
 
 
 def test_136m_manifest_out_of_range_implementation_group_rejected(tmp_path):

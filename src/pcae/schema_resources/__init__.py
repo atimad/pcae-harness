@@ -1,4 +1,4 @@
-"""Packaged, non-authoritative schema resources (Phase 136F, extended 136H, 136J, 136L, 136N).
+"""Packaged, non-authoritative schema resources (Phase 136F, extended 136H, 136J, 136L, 136N, 136P).
 
 Resolves PREREQUISITE-136E-1: the previous wheel/sdist packaging did
 not include any schema-resource directory. Phase 136F proved the
@@ -8,14 +8,16 @@ Stage 3 Companion Executable Schema shared core
 (``cltr_cutover/shared/*``, Implementation Group 1); Phase 136J added
 Implementation Group 2, the AuthorityEpoch and AuthorityState record
 schemas; Phase 136L added Implementation Group 3, the CutoverRequest
-and ReadinessPackage record schemas; Phase 136N adds Implementation
+and ReadinessPackage record schemas; Phase 136N added Implementation
 Group 4, the HumanAuthorization, CutoverCandidate, and Certification
-record schemas (``cltr_cutover/records/*``), while still packaging the
-shared core and smoke schema unchanged.
+record schemas; Phase 136P adds Implementation Group 5, the
+PublicationAttempt and PublicationEvidence record schemas
+(``cltr_cutover/records/*``), while still packaging the shared core and
+smoke schema unchanged.
 
 No typed model, semantic validator, or authority resolver/state/pointer
-is packaged here, and no Implementation Group 5+ record schema
-(PublicationAttempt, PublicationEvidence, and beyond) exists yet. Schema
+is packaged here, and no Implementation Group 6+ record schema
+(ConcurrencyConflict, RecoveryJournalEntry, and beyond) exists yet. Schema
 validity of a packaged record never itself establishes lifecycle
 authority, cutover eligibility, authorization, certification
 authenticity, publication success, or recovery truth. See
@@ -24,6 +26,7 @@ authenticity, publication success, or recovery truth. See
 / ``docs/PHASE_136_AUTHORITY_CORE_SCHEMA_IMPLEMENTATION.md``
 / ``docs/PHASE_136_REQUEST_AND_READINESS_SCHEMA_IMPLEMENTATION.md``
 / ``docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_IMPLEMENTATION.md``
+/ ``docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md``
 for the full disposition.
 """
 from __future__ import annotations
@@ -56,12 +59,15 @@ def cltr_cutover_root() -> Iterator[Path]:
     136J): ``records/authority_epoch.schema.json``,
     ``records/authority_state.schema.json``; the Implementation Group 3
     record schemas (Phase 136L): ``records/cutover_request.schema.json``,
-    ``records/readiness_package.schema.json``; and the Implementation
+    ``records/readiness_package.schema.json``; the Implementation
     Group 4 record schemas (Phase 136N):
     ``records/human_authorization.schema.json``,
     ``records/cutover_candidate.schema.json``,
-    ``records/certification.schema.json``. No ``bindings/`` or
-    ``views/`` directory exists, and no Implementation Group 5+ record
+    ``records/certification.schema.json``; and the Implementation
+    Group 5 record schemas (Phase 136P):
+    ``records/publication_attempt.schema.json``,
+    ``records/publication_evidence.schema.json``. No ``bindings/`` or
+    ``views/`` directory exists, and no Implementation Group 6+ record
     schema exists yet. Works from an editable install, an installed
     wheel, or a source checkout. Performs no network access.
     """

@@ -2,6 +2,48 @@
 
 ## Current Phase
 
+Phase 136P — Publication Schema Implementation (completed, implementation,
+Implementation Group 5 only). Independently re-derived the exact Group 5
+inventory from `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46's own
+grouping table rather than the active task prompt's "expected" inventory:
+the task prompt suggested `{PublicationAttempt, PublicationEvidence,
+ConcurrencyConflict}`, but the frozen contract's §46 places
+`ConcurrencyConflict` in an atomic pair with `RecoveryJournalEntry`
+(contract-group 8), which the task's own "Strict 136P No-Go Boundary"
+explicitly forbids — so this phase implements exactly the frozen
+contract's Group 5 (contract-group 7): `records/publication_attempt.schema.json`
+and `records/publication_evidence.schema.json`, plus the third and final
+`cas_expectation` embedding site (in `publication_attempt`). Followed
+§25/§26's literal field tables; disclosed two new `NON-BLOCKING` findings
+(`temporary_pointer_reference`'s undisclosed §16 trigger condition;
+`PublicationEvidence`'s conditional-authoritative exception not locally
+schema-enforced, mirroring `NON-BLOCKING-136J-1`). Independently confirmed
+the `$ref`/identity/digest graphs are acyclic and that neither new schema
+depends on the other. Added 113 new focused tests
+(`tests/test_cltr_cutover_136p_publication_schema.py`). Migrated 8 earlier
+phases' scope-guard tests (136H, 136I, 136J, 136K, 136L, 136M, 136N, 136O,
+plus `test_schema_runtime_boundaries.py`/`test_schema_runtime_packaging.py`)
+to recognize Group 5 as newly legitimate, mirroring the bounded migration
+discipline used at 136L→136N. Combined `test_cltr_cutover_136*` +
+`test_schema_runtime_*` suite: 1121/1121 passed (1008 non-slow + 113 new
+136P + 4 slow packaging). Fast Green: 4391/4391 passed, identical to the
+136H–136O baseline, zero regressions.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+`ConcurrencyConflict`, `RecoveryJournal`, `ReconciliationResult`,
+`Quarantine`, notification/marker/receipt binding, `CompatibilityState`,
+`HistoricalAuthorityReference`, typed model, semantic validator, or
+authority resolver/state/pointer was created or changed. No publication,
+CAS operation, or authority activation occurred.
+
+Verdict: **COMPLETE — READY FOR PUBLICATION SCHEMA INDEPENDENT
+VERIFICATION**. Recommended next phase: **136Q — Publication Schema
+Independent Verification** (see
+`docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md` §22).
+
+## Phase 136O Complete
+
 Phase 136O — Authorization and Candidate Schema Independent Verification
 (completed, independent verification, Implementation Group 4 only).
 Independently re-read the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0`

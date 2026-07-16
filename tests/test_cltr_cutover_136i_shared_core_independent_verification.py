@@ -58,10 +58,11 @@ FORBIDDEN_RECORD_SCHEMA_FILENAMES = (
     # legitimately implements them as Implementation Group 3.
     # human_authorization.schema.json, cutover_candidate.schema.json, and
     # certification.schema.json are no longer forbidden: Phase 136N
-    # legitimately implements them as Implementation Group 4. Every
-    # later-group (5+) record schema remains forbidden until its own phase.
-    "publication_attempt.schema.json",
-    "publication_evidence.schema.json",
+    # legitimately implements them as Implementation Group 4.
+    # publication_attempt.schema.json and publication_evidence.schema.json
+    # are no longer forbidden: Phase 136P legitimately implements them as
+    # Implementation Group 5. Every later-group (6+) record schema remains
+    # forbidden until its own phase.
     "concurrency_conflict.schema.json",
     "recovery_journal_entry.schema.json",
     "quarantine_record.schema.json",

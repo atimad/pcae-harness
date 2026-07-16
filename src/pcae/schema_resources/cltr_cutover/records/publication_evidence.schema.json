@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/publication_evidence.schema.json",
+  "title": "CLTR Cutover PublicationEvidence record",
+  "description": "Phase 136P, Implementation Group 5. Shape-only wire contract for a PublicationEvidence companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.26). A PublicationEvidence document describes a claimed publication outcome for a specific PublicationAttempt; it never itself publishes, activates authority, establishes that an external system is truthful, establishes current authority, cryptographically verifies evidence, replaces semantic verification, replaces recovery evidence, replaces lifecycle authority, dispatches notifications, or creates authoritative markers or receipts (Sec.1, Sec.40). Schema validity does not prove publication success. Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 1 (strict): additionalProperties: false, no _extensions escape hatch (Sec.14). This is one of exactly two families where authority_role 'authoritative' is a structurally permitted enum value (Sec.9), and only in the terminal 'published_and_verified' PublicationOutcome, alongside a non-null authoritative_generation reference (enforced via if/then below); is_authoritative nonetheless remains const false unconditionally per the shared authority_disclosure definition, mirroring authority_state.schema.json's own disclosed limitation (NON-BLOCKING-136J-1) rather than attempting to express Sec.9's full conditional exception in schema form -- disclosed here as NON-BLOCKING-136P-2.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "transition_id",
+    "attempt_reference",
+    "outcome",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/publication_evidence.schema.json",
+      "description": "Always present. Identifies this document as validated against the PublicationEvidence schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "publication_evidence",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1)."
+    },
+    "transition_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/transition_identity",
+      "description": "Always present. publication_evidence is one of the families requiring transition_id (Sec.7.2)."
+    },
+    "attempt_reference": {
+      "$ref": "#/$defs/attempt_reference",
+      "description": "Always present. Family-tagged reference, with schema_id/schema_version required per Sec.12's cross-family-reference rule, to the PublicationAttempt this evidence describes. A valid reference never implies the referenced attempt exists or matches (Layer 4)."
+    },
+    "outcome": {
+      "enum": [
+        "not_attempted",
+        "cas_rejected",
+        "failed_before_replacement",
+        "publication_uncertain",
+        "published_and_verified",
+        "post_publication_verification_failed",
+        "conflict",
+        "quarantined"
+      ],
+      "description": "Always present. Record-local PublicationOutcome (Sec.8.8, 8 values, home schema publication_evidence.schema.json). 'publication_uncertain' requires uncertainty_detail; 'published_and_verified' requires target_readback and authoritative_generation (both enforced below). Uncertainty and failure are structurally distinct const values -- one never collapses into the other. A schema-valid outcome here never itself proves the claimed publication result is true (Layer 4/5/6)."
+    },
+    "uncertainty_detail": {
+      "$ref": "#/$defs/uncertainty_detail",
+      "description": "Conditionally present: required when outcome is 'publication_uncertain', forbidden otherwise (Sec.16, Sec.26)."
+    },
+    "target_readback": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Conditionally present: required when outcome is 'published_and_verified', forbidden otherwise (Sec.16, Sec.26). A record_reference proving the post-publication read matched -- no single family restriction is applied, matching the readiness_package.evidence_references precedent (Sec.20). Schema validity of a well-formed reference never itself proves the readback actually occurred or matched (Layer 5)."
+    },
+    "authoritative_generation": {
+      "$ref": "../shared/references.schema.json#/$defs/generation_reference",
+      "description": "Conditionally present: required when outcome is 'published_and_verified', forbidden otherwise (Sec.16, Sec.26). Enables authority_role 'authoritative' per Sec.9's conditional exception -- typed as the dedicated id+digest-only generation_reference shape, matching authority_state.schema.json's authoritative_generation field precedent (Phase 136J), since 'generation' is not itself one of the 16 record_family enum values and so cannot be family-restricted the way other record_reference fields are."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure",
+      "description": "Always present. authority_role 'authoritative' is a structurally permitted value on this record family only, alongside authority_state (Sec.9), but is_authoritative remains const false unconditionally per the shared definition -- see file description and NON-BLOCKING-136P-2 (mirrors NON-BLOCKING-136J-1)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": { "outcome": { "const": "publication_uncertain" } }
+      },
+      "then": { "required": ["uncertainty_detail"] },
+      "else": { "not": { "required": ["uncertainty_detail"] } }
+    },
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": { "outcome": { "const": "published_and_verified" } }
+      },
+      "then": { "required": ["target_readback"] },
+      "else": { "not": { "required": ["target_readback"] } }
+    },
+    {
+      "if": {
+        "required": ["outcome"],
+        "properties": { "outcome": { "const": "published_and_verified" } }
+      },
+      "then": { "required": ["authoritative_generation"] },
+      "else": { "not": { "required": ["authoritative_generation"] } }
+    }
+  ],
+  "$defs": {
+    "attempt_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "publication_attempt" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'publication_attempt', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule). Preventing a candidate, certification, or any other family from being substituted for the attempt binding."
+    },
+    "uncertainty_detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["last_known_state", "retry_recommended"],
+      "properties": {
+        "last_known_state": {
+          "$ref": "../shared/enums.schema.json#/$defs/publication_state",
+          "description": "Always present when this object is present. The last known PublicationState before uncertainty arose. Shape-checked only; never itself proves that state was actually last-observed truthfully (Layer 4/5)."
+        },
+        "retry_recommended": {
+          "type": "boolean",
+          "description": "Always present when this object is present. A structural recommendation flag only -- never itself authorizes, schedules, or performs a retry (Layer 6)."
+        }
+      },
+      "description": "Bounded local uncertainty-disclosure object (Sec.16 row 2). Present only when outcome is 'publication_uncertain'."
+    }
+  }
+}

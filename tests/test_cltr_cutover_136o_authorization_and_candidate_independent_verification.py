@@ -52,8 +52,8 @@ GROUP2_3_RECORD_FILES = {
 }
 
 LATER_GROUP_FAMILY_NAMES = (
-    "publication_attempt",
-    "publication_evidence",
+    # publication_attempt and publication_evidence are no longer later-group:
+    # Phase 136P legitimately implements them as Implementation Group 5.
     "concurrency_conflict",
     "recovery_journal_entry",
     "reconciliation_result",
@@ -217,8 +217,10 @@ def _certification(**overrides) -> dict:
 
 
 def test_manifest_contains_exactly_seven_record_schemas(manifest):
+    # Updated by Phase 136P: nine record schemas now legitimately exist
+    # (the seven Group 2+3+4 schemas plus the two new Group 5 schemas).
     record_entries = [e for e in manifest.entries if e.file_path.startswith("records/")]
-    assert len(record_entries) == 7, sorted(e.file_path for e in record_entries)
+    assert len(record_entries) == 9, sorted(e.file_path for e in record_entries)
 
 
 def test_manifest_contains_exactly_three_group4_record_schemas(manifest):

@@ -108,6 +108,41 @@
       "status": "frozen"
     },
     {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/publication_attempt.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/publication_attempt.schema.json",
+      "file_digest": "fb443948d3b6d8bfb49b581c8f43b93fa2f970bd9480d2dcab8242918da7d70b",
+      "family": "publication_attempt",
+      "implementation_group": 5,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/failures.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/publication_evidence.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/publication_evidence.schema.json",
+      "file_digest": "56302d1e56adf4d7b11fb28fa78dbb7a1b74901716caac3163957df70b88c25d",
+      "family": "publication_evidence",
+      "implementation_group": 5,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/enums.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
       "schema_id": "https://pcae.local/schemas/cltr_cutover/records/readiness_package.schema.json",
       "schema_version": "1.0",
       "file_path": "records/readiness_package.schema.json",
@@ -192,7 +227,7 @@
       "schema_id": "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
       "schema_version": "1.0",
       "file_path": "shared/references.schema.json",
-      "file_digest": "2af5208ae2f21a2448eb6dae8737c8926dbc84a0bba71d6428036b94ab9ad320",
+      "file_digest": "d2f6b9c97eef24214cefaae9bc6ad53b88d206e8e1d08524e9959c43ebe2abd2",
       "family": "shared",
       "implementation_group": 1,
       "dependencies": [

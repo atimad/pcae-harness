@@ -1,5 +1,64 @@
 # Changelog
 
+- Phase 136P — Publication Schema Implementation
+  (`docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md`). Implemented
+  exactly `records/publication_attempt.schema.json` and
+  `records/publication_evidence.schema.json` (Implementation Group 5), plus
+  the third and final embedding site for the shared `cas_expectation`
+  `$def` in `shared/references.schema.json` (`publication_attempt` only).
+  Independently re-derived the exact Group 5 inventory from
+  `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46's own binding grouping
+  table rather than the active task prompt's "expected" inventory: the
+  task prompt suggested `{PublicationAttempt, PublicationEvidence,
+  ConcurrencyConflict}`, but §46 places `ConcurrencyConflict` in an atomic
+  pair with `RecoveryJournalEntry` (contract-group 8), and the task's own
+  Strict 136P No-Go Boundary explicitly forbids `RecoveryJournalEntry` —
+  splitting that pair to satisfy the task prompt's suggestion would have
+  violated `CSCH-EXEC-REQ-062`'s per-group atomicity requirement, so this
+  phase implements exactly the frozen contract's Group 5 (contract-group
+  7) and documents the discrepancy rather than silently broadening scope.
+  Followed §25/§26's literal field tables over any less-specific summary
+  text. Disclosed two new `NON-BLOCKING` findings:
+  `NON-BLOCKING-136P-1` (`temporary_pointer_reference`'s "present only
+  during in-flight publication" prose has no corresponding §16 if/then
+  trigger; left freely optional rather than inventing one) and
+  `NON-BLOCKING-136P-2` (`PublicationEvidence`'s §9 conditional-
+  authoritative exception is not locally schema-enforced as an if/then tied
+  to `outcome`; `is_authoritative` remains unconditionally `const false`,
+  mirroring `NON-BLOCKING-136J-1`'s identical disposition for
+  `AuthorityState`). Independently confirmed the `$ref`, record-identity,
+  and record-digest graphs are acyclic, and that neither new Group 5 schema
+  depends on the other. Every declared manifest dependency for the two new
+  entries was confirmed to be an actual `$ref` target (no new instance of
+  the inherited `NON-BLOCKING-136M-2` spurious-dependency finding was
+  introduced; the existing Group 4 instance on `human_authorization`/
+  `certification` was left unrepaired, per this phase's own scope
+  boundary). Added 113 new focused tests
+  (`tests/test_cltr_cutover_136p_publication_schema.py`) covering exact
+  inventory, manifest/registry counts, Tier 1 strictness, every local
+  conditional-validation branch, exhaustive wrong-family-reference attacks
+  across all 16 record families, the embedded `cas_expectation`'s 11
+  unconditionally-required fields, no-network/no-authority/no-persistence
+  boundaries, and installed-checkout fixture validation. Migrated 8 earlier
+  phases' scope-guard tests (`test_cltr_cutover_136h`–`136o`, plus
+  `test_schema_runtime_boundaries.py`/`test_schema_runtime_packaging.py`)
+  to recognize Group 5 as newly legitimate (manifest/registry counts
+  14→16 / 15→17; `publication_attempt`/`publication_evidence` removed from
+  every earlier phase's forbidden-filename lists), mirroring the bounded
+  migration discipline used at 136L→136N. Combined
+  `test_cltr_cutover_136*` + `test_schema_runtime_*` suite: 1121/1121
+  passed (1008 non-slow + 113 new 136P + 4 slow packaging). Fast Green:
+  4391/4391 passed, identical to the 136H–136O baseline, zero regressions.
+  Fresh wheel/sdist build and installed-wheel packaging verification
+  passed. Legacy lifecycle remains the sole production authority; CLTR
+  remains derivative; runtime remains Observed / observe / execution
+  unavailable. No `RecoveryJournal`, `ConcurrencyConflict`,
+  `ReconciliationResult`, `Quarantine`, notification/marker/receipt
+  binding, `CompatibilityState`, `HistoricalAuthorityReference`, typed
+  model, semantic validator, or authority resolver/state/pointer was
+  created or changed. No publication, CAS operation, pointer mutation, or
+  authority activation occurred. Recommended next phase: 136Q —
+  Publication Schema Independent Verification.
 - Phase 136O — Authorization and Candidate Schema Independent Verification
   (`docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_INDEPENDENT_VERIFICATION.md`).
   Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR PUBLICATION

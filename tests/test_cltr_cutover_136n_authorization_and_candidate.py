@@ -65,9 +65,14 @@ GROUP4_RECORD_FILES = (
     "records/human_authorization.schema.json",
 )
 
-LATER_GROUP_RECORD_FILES = (
+# Phase 136P legitimately implements Group 5 (publication_attempt,
+# publication_evidence); no longer part of LATER_GROUP_RECORD_FILES.
+GROUP5_RECORD_FILES = (
     "records/publication_attempt.schema.json",
     "records/publication_evidence.schema.json",
+)
+
+LATER_GROUP_RECORD_FILES = (
     "records/concurrency_conflict.schema.json",
     "records/recovery_journal_entry.schema.json",
     "records/quarantine_record.schema.json",
@@ -244,6 +249,7 @@ def test_136n_exact_group1_through_group4_file_inventory():
         + GROUP2_RECORD_FILES
         + GROUP3_RECORD_FILES
         + GROUP4_RECORD_FILES
+        + GROUP5_RECORD_FILES
     )
 
 
@@ -263,6 +269,8 @@ def test_136n_records_directory_contains_exactly_seven_files():
         "cutover_candidate.schema.json",
         "cutover_request.schema.json",
         "human_authorization.schema.json",
+        "publication_attempt.schema.json",
+        "publication_evidence.schema.json",
         "readiness_package.schema.json",
     ]
 
@@ -279,8 +287,8 @@ def test_136n_no_later_group_filename_tracked_anywhere_in_repository():
         ["git", "ls-files"], cwd=repo_root, capture_output=True, text=True, check=True
     ).stdout.splitlines()
     forbidden_stems = (
-        "publication_attempt.schema",
-        "publication_evidence.schema",
+        # publication_attempt.schema and publication_evidence.schema are no
+        # longer forbidden: Phase 136P legitimately tracks them as Group 5.
         "concurrency_conflict.schema",
         "recovery_journal_entry.schema",
         "quarantine_record.schema",
@@ -333,8 +341,10 @@ def test_136n_every_resource_id_matches_frozen_namespace(relative_path):
 
 
 def test_136n_registry_loads_exactly_fifteen_resources_with_unique_ids(registry):
-    assert len(registry.schema_ids) == 15
-    assert len(set(registry.schema_ids)) == 15
+    # Updated by Phase 136P: registry now legitimately loads 17 resources
+    # (the 15 Group 1+2+3+4 resources plus the 2 new Group 5 record schemas).
+    assert len(registry.schema_ids) == 17
+    assert len(set(registry.schema_ids)) == 17
     assert HUMAN_AUTH_ID in registry.schema_ids
     assert CANDIDATE_ID in registry.schema_ids
     assert CERT_ID in registry.schema_ids
@@ -376,10 +386,11 @@ def test_136n_manifest_verifies_cleanly():
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-    assert len(manifest.entries) == 14
+    # Updated by Phase 136P: manifest now legitimately carries 16 entries.
+    assert len(manifest.entries) == 16
     assert {e.file_path for e in manifest.entries} == set(SHARED_FILES) | set(
         GROUP2_RECORD_FILES
-    ) | set(GROUP3_RECORD_FILES) | set(GROUP4_RECORD_FILES)
+    ) | set(GROUP3_RECORD_FILES) | set(GROUP4_RECORD_FILES) | set(GROUP5_RECORD_FILES)
 
 
 def test_136n_manifest_new_entries_are_group_four():
@@ -420,9 +431,11 @@ def test_136n_manifest_entries_in_deterministic_sorted_order():
 
 
 def test_136n_manifest_entry_count_matches_group1_through_4_exactly():
+    # Updated by Phase 136P: manifest now legitimately carries 16 entries
+    # (Group 1: 7, Group 2: 2, Group 3: 2, Group 4: 3, Group 5: 2).
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 14
+    assert len(manifest["entries"]) == 16
 
 
 def test_136n_manifest_detects_content_tamper_on_new_record(tmp_path):

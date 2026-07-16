@@ -50,8 +50,10 @@ AUTHORITY_STATE_ID = BASE_ID + "records/authority_state.schema.json"
 # in-place repair of 136I's manifest-status test.
 # Updated by Phase 136L (11/12) and Phase 136N: manifest/registry counts now
 # legitimately include Group 4 (3 new record schemas).
-EXPECTED_MANIFEST_ENTRY_COUNT = 14
-EXPECTED_REGISTRY_RESOURCE_COUNT = 15
+# Updated by Phase 136N (14/15) and Phase 136P: these counts now reflect
+# Group 1+2+3+4+5's combined manifest/registry footprint.
+EXPECTED_MANIFEST_ENTRY_COUNT = 16
+EXPECTED_REGISTRY_RESOURCE_COUNT = 17
 EXPECTED_GROUP1_SHARED_FILES = (
     "shared/digest.schema.json",
     "shared/enums.schema.json",
@@ -1185,11 +1187,11 @@ def test_136k_repaired_scope_guards_still_forbid_every_group3plus_filename(test_
 
 def test_136k_no_group4plus_schema_file_introduced_since_136l_baseline():
     # Renamed and updated by Phase 136L (was
-    # test_136k_no_group3plus_schema_file_introduced_since_136j_baseline)
-    # and again by Phase 136N: Group 4 is now the legitimate current
-    # baseline; this test's role (confirm no *further* group has been
-    # introduced) is preserved by widening the expected set to include
-    # Group 4.
+    # test_136k_no_group3plus_schema_file_introduced_since_136j_baseline),
+    # again by Phase 136N (Group 4), and again by Phase 136P: Group 5 is
+    # now the legitimate current baseline; this test's role (confirm no
+    # *further* group has been introduced) is preserved by widening the
+    # expected set to include Group 5.
     with cltr_cutover_root() as root:
         all_files = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.schema.json"))
     expected = sorted(
@@ -1198,6 +1200,7 @@ def test_136k_no_group4plus_schema_file_introduced_since_136l_baseline():
         + EXPECTED_GROUP2_RECORD_FILES
         + EXPECTED_GROUP3_RECORD_FILES
         + EXPECTED_GROUP4_RECORD_FILES
+        + ("records/publication_attempt.schema.json", "records/publication_evidence.schema.json")
     )
     assert all_files == expected
 
@@ -1240,7 +1243,7 @@ def test_136k_installed_wheel_validates_group2_fixtures_outside_repository(tmp_p
         "from pcae.schema_runtime import build_offline_registry, validate_record_shape, OutcomeStatus\n"
         "with cltr_cutover_root() as root:\n"
         "    reg = build_offline_registry(root)\n"
-        "assert len(reg.schema_ids) == 15, reg.schema_ids\n"
+        "assert len(reg.schema_ids) == 17, reg.schema_ids\n"
         "valid = {\n"
         "    'schema_id': 'https://pcae.local/schemas/cltr_cutover/records/authority_epoch.schema.json',\n"
         "    'schema_version': '1.0', 'contract_version': '1.0', 'record_type': 'authority_epoch',\n"

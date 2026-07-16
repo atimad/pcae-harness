@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/publication_attempt.schema.json",
+  "title": "CLTR Cutover PublicationAttempt record",
+  "description": "Phase 136P, Implementation Group 5. Shape-only wire contract for a PublicationAttempt companion record (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.25). A PublicationAttempt document describes an attempted publication operation bound to a specific candidate, certification, and CAS expectation; it never itself performs publication, invokes compare-and-swap, mutates an authority pointer, establishes current authority, proves a publication occurred, proves a CAS succeeded, activates CLTR authority, demotes or retires legacy authority, triggers notification, or creates production markers or receipts (Sec.1, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 1 (strict): additionalProperties: false, no _extensions escape hatch (Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes publication_attempt). This is the third and final embedding site for cas_expectation (Sec.4 row 10, Sec.24), deferred from Phase 136N per shared/references.schema.json's own disclosure. attempt_id is deterministic (digest of request_reference + candidate_reference + attempt_sequence), never timestamp-derived alone (Sec.25) -- this is precisely how a replay (identical bound fields, identical attempt_sequence, identical attempt_id) is distinguished structurally from a retry (new attempt_sequence, new attempt_id); created_at is documentation only, never an identity mechanism.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "transition_id",
+    "attempt_id",
+    "request_reference",
+    "candidate_reference",
+    "certification_reference",
+    "cas_expectation",
+    "source_authority_reference",
+    "target_authority_reference",
+    "attempt_sequence",
+    "state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/publication_attempt.schema.json",
+      "description": "Always present. Identifies this document as validated against the PublicationAttempt schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "publication_attempt",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Documentation only -- never the identity mechanism for this record (attempt_id is)."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1)."
+    },
+    "transition_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/transition_identity",
+      "description": "Always present. publication_attempt is one of the families requiring transition_id (Sec.7.2)."
+    },
+    "attempt_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present (Sec.25). Deterministic: digest of the bound-field tuple (request_reference, candidate_reference, attempt_sequence), never timestamp-derived alone. Distinct from record_id (the generic envelope identifier) -- this schema shape-checks attempt_id only; actual determinism (that it truly is the digest of those bound fields) is a Layer 4 responsibility."
+    },
+    "request_reference": {
+      "$ref": "#/$defs/request_reference",
+      "description": "Always present. Family-tagged reference, with schema_id/schema_version required per Sec.12's cross-family-reference rule, to the CutoverRequest this attempt scopes to. A valid reference never implies the referenced request exists or matches (Layer 4)."
+    },
+    "candidate_reference": {
+      "$ref": "#/$defs/candidate_reference",
+      "description": "Always present. Family-tagged reference, with schema_id/schema_version required, to the CutoverCandidate this attempt publishes. A valid reference never implies the referenced candidate exists, matches, or is eligible (Layer 4)."
+    },
+    "certification_reference": {
+      "$ref": "#/$defs/certification_reference",
+      "description": "Always present. Family-tagged reference, with schema_id/schema_version required, to the Certification backing this attempt. A valid reference never implies the referenced certification exists, matches, or is current (Layer 4)."
+    },
+    "cas_expectation": {
+      "$ref": "../shared/references.schema.json#/$defs/cas_expectation",
+      "description": "Always present (Sec.25). Every expected-state field within this embedded component is itself unconditionally required (Sec.24). This record's embedding is the third and deferred-since-136N site (shared/references.schema.json's own disclosure). Presence of a schema-valid cas_expectation never itself proves a CAS was attempted or would succeed (Sec.40)."
+    },
+    "source_authority_reference": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present. Family-tagged reference to the source (legacy) AuthorityEpoch. A valid reference never implies the referenced epoch exists or is currently active (Layer 4/6)."
+    },
+    "target_authority_reference": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present. Family-tagged reference to the proposed target AuthorityEpoch. Sec.25 does not forbid source_authority_reference and target_authority_reference from referencing an identical epoch record; no such restriction is invented here (mirrors certification.schema.json's Sec.23 precedent)."
+    },
+    "attempt_sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Always present. Monotonic per request_reference (Sec.25) -- monotonicity itself, across multiple documents, is a Layer 4 responsibility; this schema only requires a non-negative integer shape."
+    },
+    "temporary_pointer_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/record_reference",
+      "description": "Conditionally present: Sec.25 states this field is 'present only during in-flight publication' but Sec.16's local conditional-validation table does not name an enum value that structurally triggers its requirement or forbiddance -- disclosed as NON-BLOCKING-136P-1 (same category as 136N's disclosed field-gap fills, e.g. NON-BLOCKING-136N-4/5). This schema leaves the field freely optional (present-if-applicable) rather than inventing an unfrozen if/then condition; enforcing the actual in-flight-only constraint is deferred to a future semantic validator (Layer 4) once Sec.16 is amended or a later phase clarifies the trigger."
+    },
+    "state": {
+      "$ref": "../shared/enums.schema.json#/$defs/publication_state",
+      "description": "Always present. Shared PublicationState (Sec.8.5, 12 values). 'publication_uncertain' requires uncertainty; 'gate_rejected' or 'conflict' requires failure_classification (both enforced below). A schema-valid state here never itself proves publication, CAS success, or gate outcome truth (Layer 4/5/6)."
+    },
+    "uncertainty": {
+      "$ref": "#/$defs/uncertainty",
+      "description": "Conditionally present: required when state is 'publication_uncertain', forbidden otherwise (Sec.25)."
+    },
+    "failure_classification": {
+      "$ref": "../shared/failures.schema.json#/$defs/reason_code",
+      "description": "Conditionally present: required when state is one of 'gate_rejected', 'conflict', forbidden otherwise (Sec.25)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless. A valid PublicationAttempt record never itself proves a publication occurred, a CAS succeeded, or that authority changed -- it is a structural attempt record only."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "publication_uncertain" } }
+      },
+      "then": { "required": ["uncertainty"] },
+      "else": { "not": { "required": ["uncertainty"] } }
+    },
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "enum": ["gate_rejected", "conflict"] } }
+      },
+      "then": { "required": ["failure_classification"] },
+      "else": { "not": { "required": ["failure_classification"] } }
+    }
+  ],
+  "$defs": {
+    "request_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "cutover_request" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'cutover_request', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "candidate_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "cutover_candidate" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'cutover_candidate', with schema_id/schema_version unconditionally required."
+    },
+    "certification_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "certification" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'certification', with schema_id/schema_version unconditionally required. Preventing a candidate, authorization, or any other family from being substituted for the certification binding."
+    },
+    "epoch_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": { "record_family": { "const": "authority_epoch" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'authority_epoch', used for both source_authority_reference and target_authority_reference (mirrors certification.schema.json's epoch_reference precedent -- no schema_id/schema_version required)."
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason"],
+      "properties": {
+        "reason": {
+          "$ref": "../shared/limitations.schema.json#/$defs/disclosure_text",
+          "description": "Always present when this object is present. Short, fixed-purpose uncertainty disclosure sentence."
+        }
+      },
+      "description": "Bounded local uncertainty-disclosure object (mirrors authority_state.schema.json's uncertainty $def). Present only when state is 'publication_uncertain'."
+    }
+  }
+}

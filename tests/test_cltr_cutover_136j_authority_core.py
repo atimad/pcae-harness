@@ -70,9 +70,15 @@ GROUP4_RECORD_FILES = (
     "records/certification.schema.json",
 )
 
-LATER_GROUP_RECORD_FILES = (
+# Phase 136P legitimately implements Group 5 (publication_attempt,
+# publication_evidence) as standalone files; they are no longer part of
+# LATER_GROUP_RECORD_FILES.
+GROUP5_RECORD_FILES = (
     "records/publication_attempt.schema.json",
     "records/publication_evidence.schema.json",
+)
+
+LATER_GROUP_RECORD_FILES = (
     "records/concurrency_conflict.schema.json",
     "records/recovery_journal_entry.schema.json",
     "records/quarantine_record.schema.json",
@@ -174,7 +180,12 @@ def test_136j_exact_group1_plus_group2_file_inventory():
     with cltr_cutover_root() as root:
         schema_files = sorted(p.relative_to(root).as_posix() for p in root.rglob("*.schema.json"))
     assert schema_files == sorted(
-        ("manifest.schema.json",) + SHARED_FILES + RECORD_FILES + GROUP3_RECORD_FILES + GROUP4_RECORD_FILES
+        ("manifest.schema.json",)
+        + SHARED_FILES
+        + RECORD_FILES
+        + GROUP3_RECORD_FILES
+        + GROUP4_RECORD_FILES
+        + GROUP5_RECORD_FILES
     )
 
 
@@ -197,6 +208,8 @@ def test_136j_records_directory_contains_exactly_two_files():
         "cutover_candidate.schema.json",
         "cutover_request.schema.json",
         "human_authorization.schema.json",
+        "publication_attempt.schema.json",
+        "publication_evidence.schema.json",
         "readiness_package.schema.json",
     ]
 
@@ -220,8 +233,8 @@ def test_136j_no_later_group_filename_tracked_anywhere_in_repository():
         # human_authorization.schema, cutover_candidate.schema, and
         # certification.schema are no longer forbidden: Phase 136N
         # legitimately tracks them as Group 4.
-        "publication_attempt.schema",
-        "publication_evidence.schema",
+        # publication_attempt.schema and publication_evidence.schema are no
+        # longer forbidden: Phase 136P legitimately tracks them as Group 5.
         "concurrency_conflict.schema",
         "recovery_journal_entry.schema",
         "quarantine_record.schema",
@@ -267,11 +280,11 @@ def test_136j_every_resource_id_matches_frozen_namespace(relative_path):
 
 
 def test_136j_registry_loads_exactly_ten_resources_with_unique_ids(registry):
-    # Updated by Phase 136L (12) and Phase 136N: registry now legitimately
-    # loads 15 resources (the 12 Group 1+2+3 resources plus the 3 new
-    # Group 4 record schemas).
-    assert len(registry.schema_ids) == 15
-    assert len(set(registry.schema_ids)) == 15
+    # Updated by Phase 136L (12), Phase 136N (15), and Phase 136P: registry
+    # now legitimately loads 17 resources (the 15 Group 1+2+3+4 resources
+    # plus the 2 new Group 5 record schemas).
+    assert len(registry.schema_ids) == 17
+    assert len(set(registry.schema_ids)) == 17
     assert AUTHORITY_EPOCH_ID in registry.schema_ids
     assert AUTHORITY_STATE_ID in registry.schema_ids
 
@@ -291,11 +304,15 @@ def test_136j_manifest_verifies_cleanly():
             manifest_schema_id=MANIFEST_SCHEMA_ID,
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
-    # Updated by Phase 136L (11) and Phase 136N: manifest now legitimately
-    # carries 14 entries.
-    assert len(manifest.entries) == 14
+    # Updated by Phase 136L (11), Phase 136N (14), and Phase 136P: manifest
+    # now legitimately carries 16 entries.
+    assert len(manifest.entries) == 16
     assert {e.file_path for e in manifest.entries} == (
-        set(SHARED_FILES) | set(RECORD_FILES) | set(GROUP3_RECORD_FILES) | set(GROUP4_RECORD_FILES)
+        set(SHARED_FILES)
+        | set(RECORD_FILES)
+        | set(GROUP3_RECORD_FILES)
+        | set(GROUP4_RECORD_FILES)
+        | set(GROUP5_RECORD_FILES)
     )
 
 
@@ -331,11 +348,12 @@ def test_136j_manifest_entries_in_deterministic_sorted_order():
 
 
 def test_136j_manifest_entry_count_matches_group1_plus_group2_exactly():
-    # Updated by Phase 136L and Phase 136N: manifest now legitimately
-    # carries 14 entries (Group 1: 7, Group 2: 2, Group 3: 2, Group 4: 3).
+    # Updated by Phase 136L, Phase 136N, and Phase 136P: manifest now
+    # legitimately carries 16 entries (Group 1: 7, Group 2: 2, Group 3: 2,
+    # Group 4: 3, Group 5: 2).
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 14
+    assert len(manifest["entries"]) == 16
 
 
 def test_136j_manifest_detects_content_tamper_on_new_record(tmp_path):
