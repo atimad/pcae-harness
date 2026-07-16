@@ -1,212 +1,215 @@
-# Phase 136O Complete — Authorization and Candidate Schema Independent Verification
+# Phase 136P Complete — Publication Schema Implementation
 
 ## Phase identity
 
-- Phase ID: `136O`
+- Phase ID: `136P`
 - Status: completed
-- Classification: independent verification (Stage 3 Companion Executable Schema, Implementation Group 4: `HumanAuthorization`, `CutoverCandidate`, `Certification`)
+- Classification: implementation (Stage 3 Companion Executable Schema, Implementation Group 5: `PublicationAttempt`, `PublicationEvidence`)
 - Report completeness: complete
 
 ## Scope
 
-Independently verify and adversarially attack the three Implementation
-Group 4 executable schemas produced by Phase 136N:
-`records/human_authorization.schema.json`,
-`records/cutover_candidate.schema.json`, and
-`records/certification.schema.json`, plus the embedded `cas_expectation`
-shared `$def`, against primary sources
-(`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` Sec.21-24, the 136D
-contract-verification repairs, the 136E implementation plan, and the
-136N implementation document). Repair genuine bounded Blocking defects
-within Group 4's schemas, bounded shared definitions, or
-manifest/packaging integration. Do not implement `PublicationAttempt`,
-`PublicationEvidence`, `ConcurrencyConflict`, or any Group 5+ schema,
-typed model, semantic validator, or authority resolver/state/pointer.
+Implement the next bounded executable-schema Implementation Group covering
+publication-related data contracts, per
+`CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` Sec.25/26, Sec.46, and the 136E
+implementation plan. Independently derive the exact Group 5 inventory from
+the frozen contract before writing code, rather than assuming the active
+task prompt's own "expected" inventory. Do not begin independent
+verification, recovery-schema implementation, bindings, typed models,
+semantic validation, persistence, authority resolution, or authority
+cutover.
 
 ## Summary
 
-Independently re-derived the `HumanAuthorization`/`CutoverCandidate`/
-`Certification` contract from Sec.21-24's frozen field tables rather than
-trusting 136N's own tests, prose, or findings. Confirmed the manifest
-carries exactly 14 entries (7 shared + 7 records) with exactly 3 entries
-tagged `implementation_group: 4`, matching the frozen inventory exactly;
-confirmed no standalone `CASExpectation` record schema exists and
-`cas_expectation` is `$ref`'d only as an embedded `$def` from
-`cutover_candidate.schema.json` and `certification.schema.json`. All 14
-manifest `file_digest` values were independently recomputed and matched
-exactly.
+Independently re-derived the exact Group 5 inventory from the frozen
+contract's own Sec.46 "Schema implementation groups" table rather than
+trusting the active task prompt's "expected Group 5 inventory"
+(`PublicationAttempt`, `PublicationEvidence`, `ConcurrencyConflict`).
+Sec.46's own binding grouping places `ConcurrencyConflict` in an atomic
+pair with `RecoveryJournalEntry` (contract-group 8, "1-7" prerequisite
+group), not with `PublicationAttempt`/`PublicationEvidence` (contract-group
+7). The active task's own "Strict 136P No-Go Boundary" explicitly forbids
+`RecoveryJournal`; splitting `ConcurrencyConflict` out of its atomic pairing
+to satisfy the task prompt's suggestion would have violated
+`CSCH-EXEC-REQ-062`'s per-group atomicity requirement. Resolution:
+implemented exactly contract-group 7 — `records/publication_attempt.schema.json`
+and `records/publication_evidence.schema.json` — and documented the
+discrepancy in full
+(`docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md` Section 2) rather
+than silently broadening or narrowing scope.
 
-Independently reconstructed each Group 4 family's exact field table from
-Sec.21/22/23 and confirmed, by direct schema inspection and adversarial
-tests: `HumanAuthorization` has no literal `scope` field (scope is bound
-via `request_reference`/`readiness_reference`/`target_reference`);
-`CutoverCandidate` has no direct readiness/authorization binding field,
-and its `cas_expectation` embed does not reach one indirectly either
-(only `expected_request_reference`/`expected_certification_reference`
-exist in the embedded `$def`); `Certification` has no
-certifier-principal field, carrying provenance instead via a
-`verifier_evidence` reference array. All three are contract-correct
-implementations of the frozen v1.0 text, not implementation defects.
+Implemented `PublicationAttempt` (Tier 1 strict) with deterministic
+`attempt_id` (digest of `request_reference` + `candidate_reference` +
+`attempt_sequence`, never timestamp-derived alone), family-restricted
+references to `cutover_request`, `cutover_candidate`, `certification`, and
+`authority_epoch` (source/target), the embedded `cas_expectation`
+component (its third and final embedding site, resolving the deferral
+`shared/references.schema.json` itself disclosed since Phase 136N), shared
+`PublicationState` (already defined at Phase 136H), and conditional
+`uncertainty`/`failure_classification` fields. Implemented
+`PublicationEvidence` (Tier 1 strict) with a local 8-value
+`PublicationOutcome` enum (home schema per Sec.8.8), family-restricted
+`attempt_reference`, and conditional `uncertainty_detail`/`target_readback`/
+`authoritative_generation` fields gated to the `published_and_verified`
+terminal outcome. Followed Sec.25/26's literal field tables over any less
+specific summary text.
 
-Re-attacked every family-restricted reference slot across all three
-families (12 distinct slots, including the two `Certification` epoch
-slots and `cas_expectation`'s own `expected_authority_epoch`) with
-wrong-family substitution; every substitution was rejected. Re-attacked
-Tier 1 (`HumanAuthorization`, `Certification`) unknown-field strictness
-and Tier 2 (`CutoverCandidate`) `_extensions` boundary (string-valued map
-only). Independently rebuilt the `$ref` graph and the manifest-declared
-dependency graph across all Group 1-4 files via fresh DFS toposorts;
-both are acyclic. Probed 8 secret-shaped values against
-`HumanAuthorization.replay_binding`; confirmed the field's opaque-token
-pattern incidentally rejects most (space/colon/`=`/`@`/newline-bearing)
-but is not semantic secret detection — a pattern-conforming opaque
-string that superficially resembles a key is accepted, exactly as
-disclosed. Independently confirmed no-network (socket patched to raise
-during registry build and shape validation, in-repo and from a fresh
-isolated-venv wheel install), no-authority (no
-`.pcae/cltr-authority/` namespace, no resolver/persistence/pointer code),
-and no-execution (`schema_runtime/*.py` AST-walked for
-`subprocess`/`socket` call sites — zero found).
+Independently rebuilt the `$ref` dependency graph, the record-identity
+graph, and the record-digest graph fresh for both new schemas; confirmed
+acyclic (`CutoverRequest`/`ReadinessPackage` → `HumanAuthorization` →
+`CutoverCandidate`/`Certification` → `PublicationAttempt` →
+`PublicationEvidence`, with no cycle back into an earlier or sibling
+Group 5 file). Confirmed every declared Group 5 manifest dependency is an
+actual `$ref` target in the corresponding file's text — no new instance of
+inherited finding `NON-BLOCKING-136M-2` (spurious manifest dependency,
+reproduced again at Group 4 in 136N/136O) was introduced. The existing
+Group 4 instance on `human_authorization.schema.json`/
+`certification.schema.json` was left unrepaired, per this phase's own
+scope boundary (no Blocking interaction found).
 
-Found and disclosed one new, independently reproduced instance of
-inherited finding `NON-BLOCKING-136M-2`: `human_authorization.schema.json`
-and `certification.schema.json` both declare a manifest `dependencies`
-entry on `shared/enums.schema.json` that neither file's own `$ref` graph
-actually uses (both use only inline string enums for their local `enum`
-keywords). Informational manifest-authoring drift only — the registry
-loads every file in the package root regardless of declared
-dependencies, and this phase's own from-scratch `$ref` graph
-independently proves the true dependency structure is acyclic regardless.
-Not repaired, per 136M's own established precedent for this class of
-finding.
+Disclosed two new `NON-BLOCKING` findings: `NON-BLOCKING-136P-1`
+(`temporary_pointer_reference`'s Sec.25 prose — "present only during
+in-flight publication" — has no corresponding Sec.16 if/then trigger
+condition; left freely optional rather than inventing one) and
+`NON-BLOCKING-136P-2` (`PublicationEvidence`'s Sec.9 conditional-
+authoritative exception is not locally schema-enforced as an if/then tied
+to `outcome`; `is_authoritative` remains unconditionally `const false`,
+mirroring `NON-BLOCKING-136J-1`'s identical disposition for
+`AuthorityState`).
 
-Independently discovered (not repaired, outside this phase's
-schema/schema-runtime boundary) that 136N's own committed canonical
-`.pcae/phase-completion-report.md` (`git show 0a13ccf2`) changed only its
-title line to "Phase 136N Complete" while leaving its entire ~200-line
-body describing 136M's own independent-verification work verbatim — a
-genuine lifecycle-reporting/finalization-tooling defect, not a schema
-defect. `phase-completion-metadata.json`'s `phase_id` field was correctly
-`136N`, so only the human-readable canonical report was affected.
-Disclosed as inherited lifecycle/tooling debt; this phase's own report
-and metadata are freshly authored in full to avoid repeating it.
-
-All 8 of 136N's disclosed findings (`NON-BLOCKING-136N-1` through `-8`)
-and all 4 inherited 136M findings were independently re-derived and
-re-confirmed; none became `BLOCKING`. Zero `CONFIRMED` correctness
-defects were found in any Group 4 schema. Zero repairs were made to any
-Group 4 schema file, the shared core, or the manifest.
-
-Added 82 new independent tests
-(`tests/test_cltr_cutover_136o_authorization_and_candidate_independent_verification.py`),
-built from fresh fixtures with no import of 136N's own test helpers.
+Added 113 new focused tests
+(`tests/test_cltr_cutover_136p_publication_schema.py`) covering exact
+Group 5 inventory, manifest/registry counts, Tier 1 strictness, every
+local conditional-validation branch, exhaustive wrong-family-reference
+attacks across all 16 record families, the embedded `cas_expectation`'s
+11 unconditionally-required fields, no-network/no-authority/no-persistence
+boundaries, and installed-checkout fixture validation. Migrated 8 earlier
+phases' scope-guard tests (`test_cltr_cutover_136h` through `136o`, plus
+`test_schema_runtime_boundaries.py`/`test_schema_runtime_packaging.py`) to
+recognize Group 5 as newly legitimate — manifest/registry counts updated
+14→16 / 15→17, `publication_attempt`/`publication_evidence` removed from
+every earlier phase's forbidden-filename lists — mirroring the bounded
+migration discipline used at 136L→136N.
 
 ## Evidence and validation
 
-- Focused test suite: 82 passed, 0 failed
-  (`tests/test_cltr_cutover_136o_authorization_and_candidate_independent_verification.py`).
-- Combined `test_cltr_cutover_136h/i/j/k/l/m/n` +
-  `test_schema_runtime_boundaries/packaging` suite: 938 passed, 0 failed.
-- Fast Green: 4391 passed, identical to the 136H-136N baseline, zero
+- Focused test suite: 113 passed, 0 failed
+  (`tests/test_cltr_cutover_136p_publication_schema.py`).
+- Combined `test_cltr_cutover_136h` through `136p` +
+  `test_schema_runtime_boundaries/packaging` suite: 1121 passed, 0 failed
+  (1008 non-slow + 113 new 136P + 4 slow packaging).
+- Fast Green: 4391 passed, identical to the 136H-136O baseline, zero
   regressions.
-- Full unmarked suite, freshly run on a quiescent working tree: 21196
-  passed, 23 failed, 21219 total (1298.12s). The 23 failures are the
-  identical inherited set 136N reported (none reference
-  schema_resources/schema_runtime/cltr_cutover); the 21219 total is
-  exactly 136N's own 21137 plus this phase's 82 new tests. Zero new
+- Full unmarked suite, freshly run on a quiescent working tree: 20536
+  passed, 21 failed, 20557 total (711.62s). All 21 failing node IDs match
+  the established inherited-failure baseline reported by 136M/136N/136O
+  (`test_advisory_runtime_contract.py`,
+  `test_advisory_runtime_architecture.py`, `test_phase_reports.py`,
+  `test_rendering_134e5.py`,
+  `test_architecture_status_generation_independent_verification_134e8v.py`,
+  `test_finalization_transaction_134e10.py` x5,
+  `test_cltr_migration_135p_verification.py` x4,
+  `test_bootstrap_todo_consistency.py` x2,
+  `test_cltr_migration_coordinator.py`,
+  `test_cltr_135o_integration.py` x4) — none reference
+  schema_resources/schema_runtime/cltr_cutover. Zero new Phase 136P
   regressions.
-- Manifest: independently re-verified, exactly 14 entries, exactly 3
-  `implementation_group: 4` entries, all 14 `file_digest` values
-  recomputed and matched.
-- Registry: 15 resources loaded, all unique `$id`s, deterministically
-  sorted, stable across repeated `build_offline_registry` calls.
-- Packaging: fresh wheel and sdist built via `python -m build` in a
-  clean temp directory; both contain exactly the 7 `records/*` files
-  (Groups 2-4) and no Group 5+ file, no `bindings/`, no `views/`. Wheel
-  installed into a fresh isolated venv and exercised end-to-end
-  (manifest load, valid/invalid record validation) with zero repository
-  working-tree path dependency.
+- Manifest: independently re-verified, exactly 16 entries, exactly 2
+  `implementation_group: 5` entries, all 16 `file_digest` values
+  recomputed and matched (including the updated `shared/references.schema.json`
+  entry, whose description-only content change was digest-recomputed).
+- Registry: 17 resources loaded, all unique `$id`s, deterministically
+  sorted, stable across repeated `build_offline_registry` calls and
+  across a subprocess invocation.
+- Packaging: fresh wheel and sdist built via `python -m build`; both
+  contain exactly the 9 `records/*` files (Groups 2-5) and no Group 6+
+  file, no `bindings/`, no `views/`.
 - No-network: `socket.socket`/`socket.create_connection` monkeypatched to
-  raise during registry construction and shape validation, both in-repo
-  and from the isolated installed wheel — zero calls recorded.
+  raise during registry construction and shape validation — zero calls
+  recorded.
 - No-authority/no-execution: no `.pcae/cltr-authority/` directory exists;
-  `schema_runtime/*.py` AST-walked for `subprocess`/`socket` call sites —
-  zero found (one docstring mention, not a call); `pcae runtime inspect`
-  reconfirmed `Observed`/`observe`/`unavailable`.
+  no `resolve_authority`/`AuthorityResolver`/subprocess/socket symbol
+  appears in either new schema file; `pcae runtime inspect` reconfirmed
+  `Observed`/`observe`/`unavailable`.
 - `pcae health`, `pcae check`, `pcae status coherence`,
   `pcae doctor task-memory`, `pcae push check` all passed/clean before
   and after this phase's work.
 
 ## Findings
 
-All 8 of 136N's disclosed findings (`NON-BLOCKING-136N-1` through `-8`)
-were independently re-derived and re-confirmed correctly disposed — see
-`docs/PHASE_136_AUTHORIZATION_AND_CANDIDATE_SCHEMA_INDEPENDENT_VERIFICATION.md`
-Section 13 for the full re-derivation of each.
+`NON-BLOCKING-136P-1` (new, this phase): `publication_attempt.temporary_pointer_reference`'s
+"present only during in-flight publication" prose (Sec.25) has no
+corresponding Sec.16 if/then trigger condition naming an enum value; left
+freely optional rather than inventing an unfrozen conditional.
 
-All 4 inherited 136M findings (`NON-BLOCKING-136M-1` through `-4`) were
-independently re-evaluated against Group 4 — see Section 14 of the same
-document. `NON-BLOCKING-136M-2` gained two new, independently reproduced
-instances in Group 4 (Section 7 of the same document); the other three
-are unchanged.
+`NON-BLOCKING-136P-2` (new, this phase): `PublicationEvidence`'s Sec.9
+conditional-authoritative exception (permitted only in the terminal
+`published_and_verified` outcome alongside `authoritative_generation`) is
+not expressed as a local schema-level `if`/`then` tying `authority_role`
+to `outcome`; `is_authoritative` remains unconditionally `const false`
+regardless, mirroring `NON-BLOCKING-136J-1`'s identical disposition for
+`AuthorityState`.
 
-**NON-BLOCKING-136O-1** (new, this phase): 136N's own committed
-`.pcae/phase-completion-report.md` retitled itself to reference 136N
-while its body still describes 136M's work verbatim — a lifecycle-
-reporting/finalization-tooling defect, not a schema defect. Disclosed,
-not repaired (outside this phase's bounded scope).
+All inherited findings from 136H through 136O (4 inherited-from-136M
+findings, 8 disclosed at 136N, `NON-BLOCKING-136O-1`) remain unchanged by
+Group 5's introduction; none interact with the two new schemas' fields.
+See `docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md` Section 18 for
+the full per-finding disposition table.
 
 Zero `CONFIRMED` correctness defects. Zero `BLOCKING` findings.
 
 ## Safety and no-go confirmation
 
-- No `PublicationAttempt`, `PublicationEvidence`, `ConcurrencyConflict`,
-  standalone `CASExpectation`, `RecoveryJournal`, `ReconciliationResult`,
+- No `RecoveryJournal`, `ConcurrencyConflict`, `ReconciliationResult`,
   `Quarantine`, notification binding, marker binding, receipt binding,
   `CompatibilityState`, or `HistoricalAuthorityReference` schema was
-  created by Phase 136O.
-- No Stage 3 typed record model or cross-record semantic validator was
-  implemented by Phase 136O.
+  created by Phase 136P.
+- No Stage 3 typed record model or broad cross-record semantic validator
+  was implemented by Phase 136P.
 - No cryptographic verification, authorization evaluator, certification
-  evaluator, authority resolver, authority-state persistence, or
-  authority pointer was implemented or changed by Phase 136O.
-- No runtime `HumanAuthorization`, `CutoverCandidate`, or `Certification`
-  record was created or persisted by Phase 136O.
-- No schema validation result was interpreted as real human
-  authorization, proof validity, authorization currency, one-time-use
-  consumption, certification authenticity, cutover eligibility, CAS
-  correctness, publication success, recovery truth, or current
-  authority.
+  evaluator, publication evaluator, concurrency resolver, authority
+  resolver, authority-state persistence, or authority pointer was
+  implemented or changed by Phase 136P.
+- No runtime `PublicationAttempt` or `PublicationEvidence` object was
+  created or persisted by Phase 136P.
+- No schema validation result was interpreted as real publication
+  success, CAS success, authorization truth, certification authenticity,
+  concurrency truth, recovery truth, or current authority.
 - No authority epoch changed. Production authority remains legacy.
-- No CLTR authority was created by Phase 136O.
-- No legacy authority was demoted or retired by Phase 136O.
-- No production lifecycle behavior changed by Phase 136O.
-- No execution capability was introduced by Phase 136O.
+- No CLTR authority was created by Phase 136P.
+- No legacy authority was demoted or retired by Phase 136P.
+- No production lifecycle behavior changed by Phase 136P.
+- No execution capability was introduced by Phase 136P.
 - No `bindings/` or `views/` directory exists under `cltr_cutover`;
-  `records/` contains exactly the 7 Group 2+3+4 files and no Group 5+
+  `records/` contains exactly the 9 Group 2+3+4+5 files and no Group 6+
   record schema.
 - No authority namespace (`.pcae/cltr-authority/`) exists on disk.
 - No production schema, manifest, or source file was modified by Phase
-  136O; this phase produced verification tests and documentation only.
+  136P outside the exact Group 5 scope; this phase implemented exactly
+  the two Group 5 record schemas and the third `cas_expectation`
+  embedding site.
 
 ## Final verdict
 
-**VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR PUBLICATION SCHEMA
-IMPLEMENTATION.** Legacy lifecycle remains the sole production authority;
-CLTR remains derivative; runtime remains Observed / observe / execution
-unavailable. No `PublicationAttempt`, `PublicationEvidence`,
-`ConcurrencyConflict`, or any later-group record schema, typed model,
-semantic validator, or authority resolver/state/pointer was created or
-changed.
+**COMPLETED — READY FOR PUBLICATION SCHEMA INDEPENDENT VERIFICATION.**
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable.
+No `ConcurrencyConflict`, `RecoveryJournal`, or any later-group record
+schema, typed model, semantic validator, or authority resolver/state/
+pointer was created or changed.
 
 ## Recommended next phase
 
-**136P — Publication Schema Implementation.**
+**136Q — Publication Schema Independent Verification.**
 
-The exact title and Group 5 inventory must be independently derived from
-the latest frozen contract (Sec.25-27) and roadmap at the start of 136P,
-not assumed from this handoff. 136P may implement only the exact Group 5
-inventory it independently re-confirms from the frozen contract. Do not
-begin bindings, compatibility, historical-reference, typed-model,
-semantic-validator, authority-resolver, persistence, or cutover-runtime
-work until 136P completes with zero unresolved Blocking defects.
+The exact title and scope must be independently derived from the latest
+frozen contract and roadmap at the start of 136Q, not assumed from this
+handoff. 136Q must independently attack the exact Group 5 inventory (as
+corrected in this phase's own discrepancy disclosure, not the original
+task-prompt suggestion), all publication field tables, CAS expectation
+reuse, publication-attempt/evidence separation, graph acyclicity, family
+restrictions, manifest correctness, packaging, and offline/no-authority/
+no-publication/no-execution behavior. Do not begin bindings,
+compatibility, historical-reference, typed-model, semantic-validator,
+authority-resolver, persistence, or cutover-runtime work until 136Q
+completes with zero unresolved Blocking defects.

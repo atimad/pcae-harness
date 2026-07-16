@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136P: Publication Schema Implementation (20260716-2315-phase-136p-publication-schema-implementation)
 - Idle: awaiting next governed phase (post-136O) (20260716-2239-idle-awaiting-next-governed-phase-post-136o)
 - Phase 136O: Authorization and Candidate Schema Independent Verification (20260716-2151-phase-136o-authorization-and-candidate-schema-independent-verification)
 - Idle: awaiting next governed phase (post-136N) (20260716-2110-idle-awaiting-next-governed-phase-post-136n)
