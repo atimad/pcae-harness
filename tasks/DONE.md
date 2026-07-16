@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136L: Request and Readiness Schema Implementation (20260716-1742-phase-136l-request-and-readiness-schema-implementation)
 - Idle: awaiting next governed phase (post-136K) (20260716-1729-idle-awaiting-next-governed-phase-post-136k)
 - Phase 136K: Authority Core Schema Independent Verification (20260716-1655-phase-136k-authority-core-schema-independent-verification)
 
