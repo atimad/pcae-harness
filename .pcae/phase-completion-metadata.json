@@ -25,8 +25,8 @@
     }
   ],
   "commit_attribution": "phase_owned",
-  "pushed_status": "not_pushed",
-  "origin_main_head_count": 3,
+  "pushed_status": "pushed",
+  "origin_main_head_count": 0,
   "summary": "Phase 136O, independent verification of Implementation Group 4. Independently re-derived the HumanAuthorization/CutoverCandidate/Certification field tables from CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.21-24 rather than trusting 136N's own tests, prose, or findings. Confirmed the manifest carries exactly 14 entries (7 shared + 7 records) with exactly 3 tagged implementation_group 4; confirmed no standalone CASExpectation record schema exists and cas_expectation is embedded only in cutover_candidate/certification. Independently rebuilt the $ref graph and the manifest-declared dependency graph across Groups 1-4 via fresh DFS toposorts, both acyclic. Re-attacked every family-restricted reference slot with wrong-family substitution; all rejected. Re-confirmed all 8 of 136N's disclosed NON-BLOCKING findings and all 4 inherited 136M findings; none became BLOCKING. Found and disclosed one new, independently reproduced instance of inherited finding NON-BLOCKING-136M-2 (human_authorization.schema.json and certification.schema.json both declare a spurious manifest dependency on shared/enums.schema.json that neither file's own $ref graph actually uses). Independently discovered, but did not repair (outside this phase's schema/schema-runtime boundary), that 136N's own committed .pcae/phase-completion-report.md retitled itself to reference 136N while its body was left describing 136M's work verbatim -- disclosed as inherited lifecycle/tooling debt. Zero BLOCKING findings; no repair made to any Group 4 schema, shared core, or manifest. Added 82 new independently-authored adversarial tests. Combined test_cltr_cutover_136h/i/j/k/l/m/n + test_schema_runtime_* suite: 938 passed, 0 failed. Fast Green: 4391 passed, identical to the 136H-136N baseline, zero regressions. Full unmarked suite freshly re-run: 21196 passed, 23 failed, 21219 total -- the 23 failures are byte-identical to 136N's own reported inherited-failure set (none reference schema_resources/schema_runtime/cltr_cutover); the 21219 total is exactly 136N's own 21137 plus this phase's 82 new tests -- zero new regressions. Fresh wheel/sdist build and isolated-venv install verification passed, including no-network verification from the installed wheel. Legacy lifecycle remains the sole production authority; CLTR remains derivative; runtime remains Observed / observe / execution unavailable. No PublicationAttempt, PublicationEvidence, ConcurrencyConflict, standalone CASExpectation, RecoveryJournal, ReconciliationResult, Quarantine, notification/marker/receipt binding, CompatibilityState, HistoricalAuthorityReference, typed model, semantic validator, or authority resolver/state/pointer was created or changed by Phase 136O. Verdict: VERIFIED WITH NON-BLOCKING FINDINGS -- READY FOR PUBLICATION SCHEMA IMPLEMENTATION. Recommended next phase: 136P -- Publication Schema Implementation.",
   "governance_results": [
     {
@@ -47,7 +47,7 @@
     },
     {
       "name": "pcae_push_check",
-      "status": "nothing_to_push_before_commit"
+      "status": "nothing_to_push"
     },
     {
       "name": "telegram_runtime",
