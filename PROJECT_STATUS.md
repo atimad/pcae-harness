@@ -2,6 +2,56 @@
 
 ## Current Phase
 
+Phase 136Q — Publication Schema Independent Verification (completed,
+independent verification, Implementation Group 5 only). Independently
+re-derived the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46 group
+assignment directly from the contract text (not from 136P's own summary),
+confirming Group 5 (the contract's own group 7) is exactly
+`{PublicationAttempt, PublicationEvidence}` and that `ConcurrencyConflict`
+belongs to the contract's own group 8, atomically paired with
+`RecoveryJournalEntry` — 136P's disclosed contract/task-prompt discrepancy
+is confirmed CONTRACT-CONFORMANT, not a defect. Independently diffed both
+new schema files' field tables against §25/§26, re-confirmed the three
+`cas_expectation` embedding sites and all 11 required fields against §24,
+rebuilt the `$ref` dependency graph from scratch (no cycle found), and
+independently verified manifest counts (16 entries: 7 shared + 9 records;
+exactly 2 tagged `implementation_group: 5`). Built a fresh wheel/sdist,
+installed into a clean isolated virtualenv, and ran 13 independently
+authored adversarial validation checks there (offline, no-network-blocked
+registry construction). Authored a fresh, independently-derived test
+module, `tests/test_cltr_cutover_136q_publication_schema_independent_verification.py`
+(70 tests, no fixtures imported from 136P's own suite): 70/70 passed.
+Combined Groups 1–5 + schema-runtime suite (incl. the new 136Q module):
+1316/1316 passed. Fast Green: 4391/4391 passed, matching 136P's own count
+exactly. Full unmarked suite: 21303 passed, 21 failed — independently
+confirmed via `grep` that none of the 21 touch `cltr_cutover`,
+`schema_runtime`, `publication`, `136p`, or `136q`. Built an isolated `git
+worktree` at the pre-136P commit (136O's close) and found only 6 of the
+same 21 failures present there, disclosing a new finding
+(`NON-BLOCKING-136Q-1`): the "21 inherited failures" composition is not a
+stable frozen node-ID set across phases — it shifts with live
+governed-lifecycle state (`tasks/TODO.md`, phase-completion metadata) while
+happening to total 21 at this point; no Group 5 code is implicated. Two
+prior `NON-BLOCKING` findings (136P-1, 136P-2) and the inherited manifest
+authoring-metadata finding (136M-2) were re-confirmed, unchanged. Zero
+Blocking findings; no repair was necessary.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+`ConcurrencyConflict`, `RecoveryJournalEntry`, `ReconciliationResult`,
+`Quarantine`, notification/marker/receipt binding, `CompatibilityState`,
+`HistoricalAuthorityReference`, typed model, semantic validator, or
+authority resolver/state/pointer was created or changed. No publication,
+CAS operation, or authority activation occurred.
+
+Verdict: **VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR RECOVERY SCHEMA
+IMPLEMENTATION**. Recommended next phase: **136R — Recovery Schema
+Implementation** (contract group 8: `ConcurrencyConflict`,
+`RecoveryJournalEntry`; see
+`docs/PHASE_136_PUBLICATION_SCHEMA_INDEPENDENT_VERIFICATION.md` §18).
+
+## Phase 136P Complete
+
 Phase 136P — Publication Schema Implementation (completed, implementation,
 Implementation Group 5 only). Independently re-derived the exact Group 5
 inventory from `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46's own

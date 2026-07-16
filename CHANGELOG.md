@@ -1,5 +1,39 @@
 # Changelog
 
+- Phase 136Q — Publication Schema Independent Verification
+  (`docs/PHASE_136_PUBLICATION_SCHEMA_INDEPENDENT_VERIFICATION.md`).
+  Independently re-derived Section 46's group assignment directly from the
+  frozen contract text (not from 136P's own summary), confirming Group 5
+  (the contract's own group 7) is exactly `{PublicationAttempt,
+  PublicationEvidence}` and that `ConcurrencyConflict` belongs to the
+  contract's own group 8 alongside `RecoveryJournalEntry` — confirming
+  136P's disclosed contract/task-prompt discrepancy as CONTRACT-CONFORMANT,
+  not a defect. Independently diffed both new schemas' field tables against
+  §25/§26, re-confirmed the three `cas_expectation` embedding sites and all
+  11 required fields against §24, rebuilt the `$ref` dependency graph from
+  scratch (no cycle found), and independently verified manifest counts (16
+  entries: 7 shared + 9 records; exactly 2 tagged `implementation_group:
+  5`). Built a fresh wheel/sdist, installed into a clean isolated
+  virtualenv, and ran 13 independently authored adversarial validation
+  checks there (offline, no-network-blocked registry construction). Added a
+  fresh, independently-derived test module,
+  `tests/test_cltr_cutover_136q_publication_schema_independent_verification.py`
+  (70 tests, no fixtures imported from 136P's own suite): 70/70 passed.
+  Combined Groups 1–5 + schema-runtime suite: 1316/1316 passed. Fast Green:
+  4391/4391 passed, matching 136P's own count exactly. Full unmarked suite:
+  21303 passed, 21 failed, independently confirmed unrelated to Group 5;
+  disclosed a new finding (`NON-BLOCKING-136Q-1`) via isolated-worktree
+  baseline comparison that the "21 inherited failures" composition shifts
+  with live governed-lifecycle state rather than being a fixed node-ID set.
+  Re-confirmed two prior `NON-BLOCKING` findings (136P-1, 136P-2) and the
+  inherited manifest authoring-metadata finding (136M-2), unchanged. Zero
+  Blocking findings; no repair was necessary. Legacy lifecycle remains the
+  sole production authority; CLTR remains derivative; runtime remains
+  Observed / observe / execution unavailable. Verdict: VERIFIED WITH
+  NON-BLOCKING FINDINGS — READY FOR RECOVERY SCHEMA IMPLEMENTATION.
+  Recommended next phase: 136R — Recovery Schema Implementation (contract
+  group 8: `ConcurrencyConflict`, `RecoveryJournalEntry`).
+
 - Phase 136P — Publication Schema Implementation
   (`docs/PHASE_136_PUBLICATION_SCHEMA_IMPLEMENTATION.md`). Implemented
   exactly `records/publication_attempt.schema.json` and
