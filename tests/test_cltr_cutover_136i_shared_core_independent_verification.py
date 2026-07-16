@@ -1370,31 +1370,31 @@ def test_136i_manifest_wrong_implementation_group_rejected_by_manifest_schema(tm
         )
 
 
-def test_136i_manifest_draft_status_is_schema_permitted_not_structurally_rejected(tmp_path):
-    """FINDING NON-BLOCKING-136I-2: manifest.schema.json's own status enum
-    is ``["frozen", "draft"]`` -- "draft" is schema-VALID. The rule that
-    "draft" "must never appear in a committed manifest" (manifest.schema.json's
-    own description text) is a documentation/process convention, not a
-    schema-enforced or load_and_verify_manifest-enforced constraint: this
-    independently proves a manifest entry with status="draft" loads and
-    verifies successfully (digest still matches, since only the ``status``
-    field changed). No CI or loader-level gate currently rejects a
-    committed "draft" entry; this is a disclosed, non-blocking gap, not
-    a defect requiring repair within the 136H/136I boundary."""
+def test_136i_manifest_draft_status_is_rejected_by_verification(tmp_path):
+    """Originally FINDING NON-BLOCKING-136I-2: manifest.schema.json's own
+    status enum is ``["frozen", "draft"]`` -- "draft" is schema-VALID, and
+    at 136H/136I time ``load_and_verify_manifest`` did not itself enforce
+    the "must never appear in a committed manifest" convention, so a
+    manifest entry with status="draft" loaded and verified successfully
+    despite the digest still matching. Repaired by Phase 136K
+    (CONFIRMED-136K-1): ``load_and_verify_manifest`` now rejects any entry
+    whose status is not "frozen" as a :class:`ManifestIntegrityError`,
+    independently of schema-shape validation. This closes the gap for
+    every package that calls this shared, generic verifier -- including
+    both Group 2 record schemas -- not only ``cltr_cutover``."""
     root = _fresh_copy(tmp_path)
     manifest = json.loads((root / "manifest.json").read_bytes())
-    expected_count = len(manifest["entries"])
     manifest["entries"][0]["status"] = "draft"
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     registry = build_offline_registry(root)
-    verified = load_and_verify_manifest(
-        root / "manifest.json",
-        package_root=root,
-        registry=registry,
-        manifest_schema_id=MANIFEST_SCHEMA_ID,
-        excluded_relative_paths=frozenset({"manifest.schema.json"}),
-    )
-    assert len(verified.entries) == expected_count  # loads cleanly despite draft status
+    with pytest.raises(ManifestIntegrityError, match="draft"):
+        load_and_verify_manifest(
+            root / "manifest.json",
+            package_root=root,
+            registry=registry,
+            manifest_schema_id=MANIFEST_SCHEMA_ID,
+            excluded_relative_paths=frozenset({"manifest.schema.json"}),
+        )
 
 
 def test_136i_manifest_reordered_entries_still_verify_pathwise_but_lose_sort_order(tmp_path):

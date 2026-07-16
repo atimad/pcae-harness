@@ -61,6 +61,8 @@ def load_and_verify_manifest(
     file_path_key: str = "file_path",
     schema_id_key: str = "schema_id",
     file_digest_key: str = "file_digest",
+    status_key: str = "status",
+    frozen_status_value: str = "frozen",
     excluded_relative_paths: frozenset[str] = frozenset(),
     max_bytes: int = DEFAULT_MAX_SCHEMA_RESOURCE_BYTES,
 ) -> VerifiedManifest:
@@ -76,6 +78,18 @@ def load_and_verify_manifest(
     file) must appear in the manifest, and every manifest entry must
     correspond to a real, discovered file -- an orphaned entry or an
     unindexed file are both raised as :class:`ManifestIntegrityError`.
+
+    Every entry's ``status`` field (when present -- callers indexing a
+    manifest schema that does not define a ``status`` field at all are
+    unaffected) must equal ``frozen_status_value`` (``"frozen"`` by
+    default). A manifest's own schema may structurally permit a ``"draft"``
+    status value (reserved for uncommitted, in-progress authoring content),
+    but a *verified* manifest -- one this function returns successfully --
+    only ever indexes authoring-complete, committed content; loading a
+    manifest with a non-frozen entry is therefore itself an integrity
+    failure, not merely a documentation convention (repaired by Phase 136K,
+    finding CONFIRMED-136K-1; previously disclosed but not enforced here as
+    NON-BLOCKING-136I-2).
 
     Performs no network access, no mutation, and no authority resolution.
     """
@@ -105,6 +119,12 @@ def load_and_verify_manifest(
         file_path = raw_entry[file_path_key]
         schema_id = raw_entry[schema_id_key]
         claimed_digest = raw_entry[file_digest_key]
+
+        if status_key in raw_entry and raw_entry[status_key] != frozen_status_value:
+            raise ManifestIntegrityError(
+                f"Manifest entry {file_path} has {status_key} {raw_entry[status_key]!r}; "
+                f"only {frozen_status_value!r} entries may be loaded by a verified manifest"
+            )
 
         if file_path in manifest_paths:
             raise ManifestIntegrityError(f"Duplicate manifest {file_path_key} entry: {file_path}")

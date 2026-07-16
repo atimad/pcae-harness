@@ -2,6 +2,79 @@
 
 ## Current Phase
 
+Phase 136K — Authority Core Schema Independent Verification (completed,
+verification, Implementation Group 2 only). Independently re-derived the
+`AuthorityEpoch`/`AuthorityState` field tables and local conditionals
+directly from `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §9/§16/§17/§18/§46
+(not from 136J's own doc or tests); wrote 102 fresh adversarial tests
+(`tests/test_cltr_cutover_136k_authority_core_independent_verification.py`)
+attacking the state machine, reference-family separation (exhaustive over
+all 15 wrong-family values per reference field, not just spot-checks),
+`authority_kind`/`compatibility_mode` exactness, requiredness/null/empty
+combinations, manifest tamper shapes (swapped ids/digests, duplicate
+entries, orphaned entries, unindexed files, traversal paths), Unicode
+confusables, oversized fields, a cyclic-input misuse case (fails closed as
+`INFRASTRUCTURE_FAILURE`), determinism across 3 fresh `PYTHONHASHSEED`
+subprocesses, and an installed-wheel probe run from a venv and `cwd`
+outside the repository.
+
+Independently re-derived §9's authority-role file list (13 forbidden +
+2 permitted = 15 of 16 families) and **confirmed** `NON-BLOCKING-136J-2`'s
+own reading: `authority_epoch` is genuinely omitted from §9's explicit
+classification — a real frozen-contract-text gap, not a 136J miscount.
+136J's conservative choice (forbid `authoritative` on `authority_epoch`)
+is independently confirmed correct and remains schema-enforced. Also
+independently confirmed §16 row 1's literal wording
+(`authority_state.publication_state == "cltr_authoritative"`) refers to a
+field/value pair that does not exist on `AuthorityState` at all — a
+pre-existing contract-text imprecision already reviewed at design level by
+136D ("PASS, no repair needed"); 136J's actual implementation
+(`authority_kind == "cltr"` requires `authoritative_generation`) is
+independently confirmed as the correct interpretation of that intent.
+Reproduced and confirmed `NON-BLOCKING-136J-1` (is_authoritative
+unconditionally `const false`) unchanged and correctly disclosed.
+
+**Repaired** the manifest-status integrity gap previously disclosed but
+not fixed by 136I (`NON-BLOCKING-136I-2`): `load_and_verify_manifest`
+(`src/pcae/schema_runtime/manifest.py`) now rejects any manifest entry
+whose `status` is not `"frozen"` as a `ManifestIntegrityError`, closing a
+real fail-open path where a committed `status: "draft"` entry (schema-
+legal, but documented as forbidden in committed manifests) previously
+loaded and verified cleanly. Independently reproduced against a Group 2
+entry specifically before repairing. Updated 136I's own pre-existing test
+in place to assert the corrected, fail-closed behavior. Disclosed (not
+repaired, no security impact) two further documentation-accuracy findings:
+`load_and_verify_manifest`'s docstring overclaims that an orphaned
+manifest entry always raises `ManifestIntegrityError` (it actually raises
+a sibling `SchemaResourceNotFoundError`, still fail-closed); and
+`manifest.schema.json`'s `file_path` description overclaims that its regex
+charset alone forbids path traversal (it does not — the real defense is
+the loader's independent containment check, independently confirmed to
+hold end-to-end). Zero `BLOCKING` findings.
+
+Combined `test_cltr_cutover_136h/i/j/k` + `test_schema_runtime_*` suite:
+706/706 passed (604 baseline + 102 new; the one repaired 136I test
+replaces its predecessor 1:1). Fast Green: 4391/4391, identical to the
+136H/136I/136J baseline, zero regressions. See
+`docs/PHASE_136_AUTHORITY_CORE_SCHEMA_INDEPENDENT_VERIFICATION.md`.
+
+**Verdict: VERIFIED WITH NON-BLOCKING FINDINGS — READY FOR REQUEST AND
+READINESS SCHEMA IMPLEMENTATION.** Legacy lifecycle remains the sole
+production authority; CLTR remains derivative; runtime remains Observed /
+observe / execution unavailable. No `CutoverRequest`, `ReadinessPackage`,
+or any later-group record schema, typed model, semantic validator, or
+authority resolver/state/pointer was created or changed.
+
+Recommended next phase: **136L — Request and Readiness Schema
+Implementation**. May implement only `CutoverRequest` and
+`ReadinessPackage`, plus fixtures, manifest entries, packaging, and
+focused tests. Must not implement authorization, candidate, certification,
+CAS, publication, recovery, terminal bindings, compatibility, historical
+references, typed models, semantic validation, authority resolution, or
+cutover behavior.
+
+## Phase 136J Complete
+
 Phase 136J — Authority Core Schema Implementation (completed,
 implementation, Implementation Group 2 only). Before authoring, re-read
 the frozen `CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0` §46 grouping and
