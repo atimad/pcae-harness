@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/receipt_authority_binding.schema.json",
+  "title": "CLTR Cutover FinalizationReceiptAuthorityBinding record",
+  "description": "Phase 136T, Implementation Group 10 (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.33, Sec.46). A FinalizationReceiptAuthorityBinding document describes a claimed finalization-receipt association for a specific generation; it never itself creates, writes, or verifies a receipt, proves external delivery, proves publication verification, resolves staleness, or authorizes a second authority (Sec.1, Sec.33, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes all three binding schemas; 'receipt as second authority' is the specific prevention named for authority_role in Sec.33). Not in the phase_id-required or transition_id-required family lists (Sec.7.2), so neither field is declared here. Sec.33's field table lists 'authority_role' and 'digest' as bare top-level fields, and lists no 'limitations' field at all; consistent with notification_authority_binding.schema.json's NON-BLOCKING-136T-1 and marker_authority_binding.schema.json's NON-BLOCKING-136T-2/136T-3 disclosures, this schema applies the uniform envelope + authority_disclosure struct and the universal limitations array rather than a structurally inconsistent, family-unique representation -- disclosed as NON-BLOCKING-136T-5. Sec.33's field table marks generation_reference, publication_evidence_reference, and marker_reference all 'yes' (unconditionally required), but its own descriptive text ties publication_evidence_reference and marker_reference to the 'finalized-state bundle', and Sec.16's local conditional-validation table separately and explicitly states 'receipt_state == finalized' requires all three together (implying non-finalized states need not carry publication_evidence_reference/marker_reference). This schema resolves the internal inconsistency by keeping generation_reference unconditionally required (its 'wrong-generation receipt' prevention purpose applies regardless of receipt_state) and making publication_evidence_reference and marker_reference conditionally required together only when receipt_state is 'finalized', per Sec.16's explicit if/then and per the field table's own prose -- disclosed as NON-BLOCKING-136T-6. staleness_check's field table is entirely unspecified anywhere in the frozen contract (only its trigger condition -- 'required iff a recovery journal entry references this receipt', a cross-record condition not checkable within a single document, hence left freely optional here rather than enforced via an invented if/then -- and its bare type, 'object', are given); this schema pins it to an empty-shape placeholder object (additionalProperties: false, no properties) pending a future contract amendment defining its actual fields -- recorded as DEFERRED-136T-1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "generation_reference",
+    "receipt_state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/receipt_authority_binding.schema.json",
+      "description": "Always present. Identifies this document as validated against the FinalizationReceiptAuthorityBinding schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "receipt_authority_binding",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2. Restates Sec.33's 'digest' field (NON-BLOCKING-136T-5)."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1). receipt_authority_binding is not in the phase_id-required or transition_id-required family lists (Sec.7.2)."
+    },
+    "generation_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/generation_reference",
+      "description": "Always present (Sec.33). Pins this receipt to exactly one generation (prevents a wrong-generation receipt), unconditionally, regardless of receipt_state (NON-BLOCKING-136T-6). See NON-BLOCKING-136T-1/NON-BLOCKING-136N-2 disclosure for the generation_reference-versus-record_reference typing choice."
+    },
+    "publication_evidence_reference": {
+      "$ref": "#/$defs/publication_evidence_reference",
+      "description": "Conditionally present: required, together with marker_reference, only when receipt_state is 'finalized' (NON-BLOCKING-136T-6, Sec.16); forbidden otherwise. Family-tagged reference restricted to publication_evidence. A schema-valid reference never itself proves the referenced evidence resolves to a published_and_verified outcome (Layer 4) -- that co-occurrence is the semantic meaning this field's presence-with-finalized encodes, not something this shape alone enforces."
+    },
+    "marker_reference": {
+      "$ref": "#/$defs/marker_reference",
+      "description": "Conditionally present: required, together with publication_evidence_reference, only when receipt_state is 'finalized' (NON-BLOCKING-136T-6, Sec.16); forbidden otherwise. Family-tagged reference restricted to marker_authority_binding. Prevents a receipt from finalizing before its required notification state exists structurally, though this schema cannot confirm the referenced marker's actual state (Layer 4)."
+    },
+    "receipt_state": {
+      "$ref": "#/$defs/receipt_state",
+      "description": "Always present (Sec.33). Record-local ReceiptState (Sec.8.8, 4 values), home schema this file per Sec.8.8's specific per-family table. 'finalized' requires marker_reference and publication_evidence_reference (enforced below). A schema-valid receipt_state value never itself proves the receipt's actual production state (Layer 4/5)."
+    },
+    "staleness_check": {
+      "$ref": "#/$defs/staleness_check",
+      "description": "Conditionally present (Sec.33): the contract states this is required when a recovery journal entry references this receipt -- a cross-record condition this single-document schema cannot check (Layer 4), so this schema leaves the field freely optional rather than inventing an unenforceable if/then. DEFERRED-136T-1: no field table for this object's internal shape exists anywhere in the frozen contract; pinned here to an empty-shape placeholder pending future contract amendment."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present (NON-BLOCKING-136T-5). May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list, 'receipt as second authority' prevention per Sec.33); is_authoritative remains const false per the shared definition regardless. A valid FinalizationReceiptAuthorityBinding record never itself proves a receipt was actually finalized, delivered, or that publication was verified."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as receipt creation or finalization."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["receipt_state"],
+        "properties": { "receipt_state": { "const": "finalized" } }
+      },
+      "then": { "required": ["marker_reference", "publication_evidence_reference"] },
+      "else": {
+        "not": {
+          "anyOf": [
+            { "required": ["marker_reference"] },
+            { "required": ["publication_evidence_reference"] }
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "receipt_state": {
+      "type": "string",
+      "enum": ["absent", "finalized", "stale", "conflict"],
+      "description": "ReceiptState (Sec.8.8, 4 values). Unknown-value behavior: reject."
+    },
+    "publication_evidence_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "publication_evidence" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'publication_evidence', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "marker_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "marker_authority_binding" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'marker_authority_binding', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "staleness_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "DEFERRED-136T-1: empty-shape placeholder object. No field table for staleness_check exists anywhere in the frozen contract; only its bare type ('object') and trigger condition are specified. Pinned to accept exactly {} pending a future contract amendment that defines its actual fields."
+    }
+  }
+}

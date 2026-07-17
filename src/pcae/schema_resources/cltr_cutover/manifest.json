@@ -125,6 +125,38 @@
       "status": "frozen"
     },
     {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/marker_authority_binding.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/marker_authority_binding.schema.json",
+      "file_digest": "36b92aaadd576bdb71adf39c10a388a98f512865c797cc831f7009d462d29204",
+      "family": "marker_authority_binding",
+      "implementation_group": 10,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/notification_authority_binding.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/notification_authority_binding.schema.json",
+      "file_digest": "0633d77407697cd016d696cb8815902aa99f27fced6bd912f12e231a49d41a2b",
+      "family": "notification_authority_binding",
+      "implementation_group": 10,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
       "schema_id": "https://pcae.local/schemas/cltr_cutover/records/publication_attempt.schema.json",
       "schema_version": "1.0",
       "file_path": "records/publication_attempt.schema.json",
@@ -166,6 +198,22 @@
       "file_digest": "a53d10ba492c01e848103e54c3efe19ae8c157d6b87c7581550684c7e165f586",
       "family": "readiness_package",
       "implementation_group": 3,
+      "dependencies": [
+        "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/digest.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/references.schema.json",
+        "https://pcae.local/schemas/cltr_cutover/shared/limitations.schema.json"
+      ],
+      "status": "frozen"
+    },
+    {
+      "schema_id": "https://pcae.local/schemas/cltr_cutover/records/receipt_authority_binding.schema.json",
+      "schema_version": "1.0",
+      "file_path": "records/receipt_authority_binding.schema.json",
+      "file_digest": "d1c4fd5081f6e36cb24d9f697561f6902990ca712808833fc2d75ac37afbb7fd",
+      "family": "receipt_authority_binding",
+      "implementation_group": 10,
       "dependencies": [
         "https://pcae.local/schemas/cltr_cutover/shared/envelope.schema.json",
         "https://pcae.local/schemas/cltr_cutover/shared/identity.schema.json",

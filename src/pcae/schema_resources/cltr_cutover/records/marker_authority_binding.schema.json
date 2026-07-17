@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/marker_authority_binding.schema.json",
+  "title": "CLTR Cutover MarkerAuthorityBinding record",
+  "description": "Phase 136T, Implementation Group 10 (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.32, Sec.46). A MarkerAuthorityBinding document describes a claimed production marker's association with a specific generation; it never itself creates, writes, or verifies a marker, proves marker freshness, resolves a duplicate-delivery conflict, or authorizes a compatibility fallback (Sec.1, Sec.32, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes all three binding schemas). Not in the phase_id-required or transition_id-required family lists (Sec.7.2), so neither field is declared here. Sec.32's field table lists 'created_at', 'authority_role', and 'digest' as bare top-level fields rather than as part of the uniform envelope/authority_disclosure struct used by every other of the 11 already-implemented families; consistent with those families and with notification_authority_binding.schema.json's own NON-BLOCKING-136T-1 disclosure, this schema applies the uniform envelope + authority_disclosure struct (created_at is the standard envelope field; authority_role is the authority_disclosure.authority_role field; 'digest' is the standard record_digest field) rather than inventing a second, structurally inconsistent representation -- disclosed as NON-BLOCKING-136T-2. generation_reference is typed using the dedicated shared/references.schema.json#/$defs/generation_reference shape (id+digest only), consistent with NON-BLOCKING-136N-2/NON-BLOCKING-136T-1 precedent. Sec.32's table does not list a 'limitations' field for this family; this schema nonetheless includes it, since every one of the 11 already-implemented families (including the other two Tier 2 binding-adjacent families, concurrency_conflict and recovery_journal_entry) carries the universal limitations array, and Sec.14 itself groups all three binding schemas into the same Tier 2 policy as those families -- treated as a table omission, not an intentional exclusion, disclosed as NON-BLOCKING-136T-3.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "generation_reference",
+    "state",
+    "compatibility_fallback_forbidden",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/marker_authority_binding.schema.json",
+      "description": "Always present. Identifies this document as validated against the MarkerAuthorityBinding schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "marker_authority_binding",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2. Restates Sec.32's 'digest' field (NON-BLOCKING-136T-2)."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present (Sec.32). Documentation only; Layer 4 compares against authority-state freshness to detect a stale marker -- this schema validates shape only."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1). marker_authority_binding is not in the phase_id-required or transition_id-required family lists (Sec.7.2)."
+    },
+    "generation_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/generation_reference",
+      "description": "Always present (Sec.32). Pins this marker to exactly one generation (prevents a wrong-generation marker). See NON-BLOCKING-136T-1/NON-BLOCKING-136N-2 disclosure for the generation_reference-versus-record_reference typing choice."
+    },
+    "state": {
+      "$ref": "#/$defs/marker_state",
+      "description": "Always present (Sec.32). Record-local MarkerState (Sec.8.8, 4 values), home schema this file per Sec.8.8's specific per-family table. 'conflict' requires duplicate_of (enforced below). A schema-valid state value never itself proves the marker's actual production state (Layer 4/5)."
+    },
+    "duplicate_of": {
+      "$ref": "#/$defs/duplicate_of",
+      "description": "Conditionally present: the key is required when state is 'conflict', omitted otherwise (Sec.32). When present, nullable -- null when the first (duplicated) marker is not yet known, a record_reference to it otherwise. Prevents an unacknowledged second marker for the same generation from silently coexisting rather than referencing the first."
+    },
+    "compatibility_fallback_forbidden": {
+      "const": true,
+      "description": "Always present (Sec.32). Schema-pinned to true, documenting the prohibition on compatibility fallback even though enforcing it operationally is a Layer 6 concern."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present (NON-BLOCKING-136T-3). May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless (marker-as-authority is structurally prevented). A valid MarkerAuthorityBinding record never itself proves a marker was actually written, is fresh, or resolves a duplicate-delivery conflict."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as marker creation."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["state"],
+        "properties": { "state": { "const": "conflict" } }
+      },
+      "then": { "required": ["duplicate_of"] },
+      "else": { "not": { "required": ["duplicate_of"] } }
+    }
+  ],
+  "$defs": {
+    "marker_state": {
+      "type": "string",
+      "enum": ["absent", "written", "stale", "conflict"],
+      "description": "MarkerState (Sec.8.8, 4 values). Unknown-value behavior: reject."
+    },
+    "duplicate_of": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/self_family_reference" }
+      ],
+      "description": "Nullable record_reference locally restricted to record_family 'marker_authority_binding' (this record's own family -- a duplicate marker always references another marker), with schema_id/schema_version unconditionally required (Sec.12 cross-family rule, applied here even though the family is identical, since this is a distinct-document cross-reference, not a same-document embedding)."
+    },
+    "self_family_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "marker_authority_binding" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'marker_authority_binding'."
+    }
+  }
+}

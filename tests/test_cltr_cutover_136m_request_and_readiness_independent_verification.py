@@ -76,11 +76,11 @@ LATER_GROUP_STEMS = (
     # are no longer forbidden: Phase 136P legitimately implements them as
     # Implementation Group 5. concurrency_conflict and recovery_journal_entry
     # are no longer forbidden: Phase 136R legitimately implements them as
-    # contract Group 8.
+    # contract Group 8. notification_authority_binding,
+    # marker_authority_binding, and receipt_authority_binding are no longer
+    # forbidden: Phase 136T legitimately implements them as contract
+    # Group 10.
     "quarantine_record",
-    "notification_authority_binding",
-    "marker_authority_binding",
-    "receipt_authority_binding",
     "compatibility_state",
 )
 
@@ -211,9 +211,12 @@ def test_136m_exactly_four_production_record_schemas_exist():
         "cutover_candidate.schema.json",
         "cutover_request.schema.json",
         "human_authorization.schema.json",
+        "marker_authority_binding.schema.json",
+        "notification_authority_binding.schema.json",
         "publication_attempt.schema.json",
         "publication_evidence.schema.json",
         "readiness_package.schema.json",
+        "receipt_authority_binding.schema.json",
         "recovery_journal_entry.schema.json",
     ]
 
@@ -223,7 +226,7 @@ def test_136m_manifest_has_exactly_eleven_entries():
     # now legitimately carries 18 entries.
     with cltr_cutover_root() as root:
         manifest = json.loads((root / "manifest.json").read_bytes())
-    assert len(manifest["entries"]) == 18
+    assert len(manifest["entries"]) == 21
 
 
 @pytest.mark.parametrize("stem", LATER_GROUP_STEMS)
@@ -853,7 +856,7 @@ def test_136m_manifest_declared_dependency_list_correctness_not_cross_checked(tm
     )
     # Updated by Phase 136N (14), Phase 136P (16), and Phase 136R: manifest
     # now legitimately carries 18 entries.
-    assert len(manifest_obj.entries) == 18
+    assert len(manifest_obj.entries) == 21
 
 
 def test_136m_manifest_out_of_range_implementation_group_rejected(tmp_path):

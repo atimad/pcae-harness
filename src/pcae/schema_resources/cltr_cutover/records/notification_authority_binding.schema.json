@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pcae.local/schemas/cltr_cutover/records/notification_authority_binding.schema.json",
+  "title": "CLTR Cutover NotificationAuthorityBinding record",
+  "description": "Phase 136T, Implementation Group 10 (CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 v1.0 Sec.31, Sec.46). A NotificationAuthorityBinding document describes a claimed PFN-001 notification-dispatch association for a specific authoritative generation; it never itself dispatches a notification, proves external delivery, proves exactly-once behavior, creates a marker, creates a receipt, mutates lifecycle state, publishes authority, or triggers execution (Sec.1, Sec.31, Sec.40). Legacy lifecycle remains the sole production authority; CLTR remains derivative. Tier 2 (_extensions only, Sec.14). authority_role 'authoritative' is locally forbidden (Sec.9's 12-file list includes all three binding schemas). Not in the phase_id-required or transition_id-required family lists (Sec.7.2), so neither field is declared here. Sec.31's field table omits the universal envelope fields (schema_id, schema_version, contract_version, record_type, record_id, created_at, migration_epoch) and authority_disclosure, and names the record's own digest field 'digest' rather than 'record_digest'; consistent with every other of the 11 already-implemented families and with the field-naming precedent established by those families, this schema applies the uniform envelope + authority_disclosure struct and treats the table's 'digest' entry as the standard record_digest envelope field, not a second distinct field -- disclosed as NON-BLOCKING-136T-1 (a discrepancy resolution, not an invented field). authoritative_generation_reference is typed using the dedicated shared/references.schema.json#/$defs/generation_reference shape (id+digest only) rather than the field table's literal 'record_reference' typing, since 'generation' is not itself a record_family enum value and so cannot be family-restricted the way a record_reference is -- this mirrors the precedent already established and disclosed at NON-BLOCKING-136N-2 for cas_expectation's expected_authoritative_generation field.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_id",
+    "schema_version",
+    "contract_version",
+    "record_type",
+    "record_id",
+    "record_digest",
+    "created_at",
+    "migration_epoch",
+    "authoritative_generation_reference",
+    "authority_epoch_reference",
+    "payload_digest",
+    "attempt_identity",
+    "pfn001_classification",
+    "delivery_state",
+    "limitations",
+    "authority_disclosure"
+  ],
+  "properties": {
+    "schema_id": {
+      "const": "https://pcae.local/schemas/cltr_cutover/records/notification_authority_binding.schema.json",
+      "description": "Always present. Identifies this document as validated against the NotificationAuthorityBinding schema."
+    },
+    "schema_version": {
+      "$ref": "../shared/envelope.schema.json#/$defs/schema_version",
+      "description": "Always present. This file's own MAJOR.MINOR version."
+    },
+    "contract_version": {
+      "const": "1.0",
+      "description": "Always present. CLTR-CUTOVER-EXECUTABLE-SCHEMAS-001 version this schema was generated against."
+    },
+    "record_type": {
+      "const": "notification_authority_binding",
+      "description": "Always present. Fixed family tag for this record type."
+    },
+    "record_id": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present. Shape-checked only; never recomputed at Layer 2."
+    },
+    "record_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/record_digest",
+      "description": "Always present. Digest of this document itself. Shape-checked only; never recomputed at Layer 2. Restates Sec.31's 'digest' field (NON-BLOCKING-136T-1)."
+    },
+    "created_at": {
+      "$ref": "../shared/envelope.schema.json#/$defs/timestamp",
+      "description": "Always present. Never used to establish record identity or ordering across documents."
+    },
+    "migration_epoch": {
+      "$ref": "../shared/identity.schema.json#/$defs/migration_epoch",
+      "description": "Always present. Every companion record binds to exactly one migration epoch (Sec.7.2, CSCH-INV-1). notification_authority_binding is not in the phase_id-required or transition_id-required family lists (Sec.7.2)."
+    },
+    "authoritative_generation_reference": {
+      "$ref": "../shared/references.schema.json#/$defs/generation_reference",
+      "description": "Always present (Sec.31). See NON-BLOCKING-136T-1/NON-BLOCKING-136N-2 disclosure above for the generation_reference-versus-record_reference typing choice. A schema-valid reference never itself proves that generation is currently authoritative (Layer 4/6)."
+    },
+    "authority_epoch_reference": {
+      "$ref": "#/$defs/epoch_reference",
+      "description": "Always present (Sec.31). Family-tagged reference to the governing AuthorityEpoch. A valid reference never implies the referenced epoch exists or is currently active (Layer 4/6)."
+    },
+    "payload_digest": {
+      "$ref": "../shared/digest.schema.json#/$defs/sha256_hex",
+      "description": "Always present (Sec.31). Shape-checked only; never recomputed against actual notification payload bytes at Layer 2 (Layer 3)."
+    },
+    "attempt_identity": {
+      "$ref": "../shared/identity.schema.json#/$defs/record_identity",
+      "description": "Always present (Sec.31). Opaque dispatch-attempt identity string, Sec.10 generic identifier shape. Not itself a companion record_id and not a record_reference -- a bare identity token binding this document to one dispatch attempt. Never recomputed or verified for determinism at Layer 2 (Layer 4)."
+    },
+    "pfn001_classification": {
+      "$ref": "#/$defs/pfn001_classification",
+      "description": "Always present (Sec.31). Restates the existing PFN-001 classification vocabulary; not redefined by this schema (Sec.31 explicit instruction). Shape-checked as a bounded printable-ASCII string only -- this schema does not enumerate or validate against PFN-001's actual closed vocabulary."
+    },
+    "delivery_state": {
+      "$ref": "#/$defs/delivery_state",
+      "description": "Always present (Sec.31). Record-local DeliveryState (Sec.8.8, 3 values), home schema this file per Sec.8.8's specific per-family table. 'payload_conflict' requires uncertainty; any value other than 'not_dispatched' requires marker_reference; 'already_dispatched' requires receipt_reference (all enforced below). A schema-valid delivery_state value never itself proves external delivery occurred (Layer 4/40)."
+    },
+    "uncertainty": {
+      "$ref": "#/$defs/uncertainty",
+      "description": "Conditionally present: required when delivery_state is 'payload_conflict', forbidden otherwise (Sec.31)."
+    },
+    "marker_reference": {
+      "$ref": "#/$defs/marker_reference",
+      "description": "Conditionally present: required when delivery_state is not 'not_dispatched' (i.e. 'already_dispatched' or 'payload_conflict'), forbidden when delivery_state is 'not_dispatched' (Sec.31). Family-tagged reference restricted to marker_authority_binding; a valid reference never implies the referenced marker exists or matches (Layer 4)."
+    },
+    "receipt_reference": {
+      "$ref": "#/$defs/receipt_reference",
+      "description": "Conditionally present: required when delivery_state is 'already_dispatched', forbidden otherwise (Sec.31). Family-tagged reference restricted to receipt_authority_binding; a valid reference never implies the referenced receipt exists, matches, or is finalized (Layer 4)."
+    },
+    "limitations": {
+      "$ref": "../shared/limitations.schema.json#/$defs/limitations_array",
+      "description": "Always present. May be empty."
+    },
+    "authority_disclosure": {
+      "allOf": [
+        { "$ref": "../shared/limitations.schema.json#/$defs/authority_disclosure" },
+        {
+          "properties": {
+            "authority_role": { "not": { "const": "authoritative" } }
+          }
+        }
+      ],
+      "description": "Always present. authority_role 'authoritative' is locally forbidden on this record (Sec.9's 12-file list); is_authoritative remains const false per the shared definition regardless. A valid NotificationAuthorityBinding record never itself proves a notification was dispatched, delivered exactly once, or that its claimed marker/receipt bindings are correct."
+    },
+    "_extensions": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 32,
+      "description": "Conditionally present: the single reserved Tier 2 extension key (Sec.14). String-valued map only, no nested arbitrary structure. Forward-compatible annotation only; never authority-bearing, never interpreted as notification dispatch."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["delivery_state"],
+        "properties": { "delivery_state": { "const": "payload_conflict" } }
+      },
+      "then": { "required": ["uncertainty"] },
+      "else": { "not": { "required": ["uncertainty"] } }
+    },
+    {
+      "if": {
+        "required": ["delivery_state"],
+        "properties": { "delivery_state": { "const": "not_dispatched" } }
+      },
+      "then": { "not": { "required": ["marker_reference"] } },
+      "else": { "required": ["marker_reference"] }
+    },
+    {
+      "if": {
+        "required": ["delivery_state"],
+        "properties": { "delivery_state": { "const": "already_dispatched" } }
+      },
+      "then": { "required": ["receipt_reference"] },
+      "else": { "not": { "required": ["receipt_reference"] } }
+    }
+  ],
+  "$defs": {
+    "delivery_state": {
+      "type": "string",
+      "enum": ["not_dispatched", "already_dispatched", "payload_conflict"],
+      "description": "DeliveryState (Sec.8.8, 3 values). Unknown-value behavior: reject."
+    },
+    "pfn001_classification": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256,
+      "pattern": "^[\\x20-\\x7E]*$",
+      "description": "Bounded single-line printable-ASCII-only string. Restates the existing PFN-001 classification vocabulary as shape only (Sec.31); no closed enum is imposed here."
+    },
+    "uncertainty": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason"],
+      "properties": {
+        "reason": {
+          "$ref": "../shared/limitations.schema.json#/$defs/disclosure_text",
+          "description": "Always present when this object is present. Short, fixed-purpose uncertainty disclosure sentence."
+        }
+      },
+      "description": "Bounded local uncertainty-disclosure object (mirrors publication_attempt.schema.json's uncertainty $def). Present only when delivery_state is 'payload_conflict'."
+    },
+    "epoch_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "properties": { "record_family": { "const": "authority_epoch" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'authority_epoch' (mirrors publication_attempt.schema.json's epoch_reference precedent -- no schema_id/schema_version required)."
+    },
+    "marker_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "marker_authority_binding" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'marker_authority_binding', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    },
+    "receipt_reference": {
+      "allOf": [
+        { "$ref": "../shared/references.schema.json#/$defs/record_reference" },
+        {
+          "required": ["schema_id", "schema_version"],
+          "properties": { "record_family": { "const": "receipt_authority_binding" } }
+        }
+      ],
+      "description": "A record_reference locally restricted to record_family 'receipt_authority_binding', with schema_id/schema_version unconditionally required (Sec.12 cross-family rule)."
+    }
+  }
+}

@@ -56,12 +56,11 @@ LATER_GROUP_FAMILY_NAMES = (
     # Phase 136P legitimately implements them as Implementation Group 5.
     # concurrency_conflict and recovery_journal_entry are no longer
     # later-group: Phase 136R legitimately implements them as contract
-    # Group 8.
+    # Group 8. notification_authority_binding, marker_authority_binding,
+    # and receipt_authority_binding are no longer later-group: Phase 136T
+    # legitimately implements them as contract Group 10.
     "reconciliation_result",
     "quarantine_record",
-    "notification_authority_binding",
-    "marker_authority_binding",
-    "receipt_authority_binding",
     "compatibility_state",
     "historical_authority_reference",
 )
@@ -218,11 +217,12 @@ def _certification(**overrides) -> dict:
 
 
 def test_manifest_contains_exactly_seven_record_schemas(manifest):
-    # Updated by Phase 136P (nine) and Phase 136R: eleven record schemas
-    # now legitimately exist (the seven Group 2+3+4 schemas plus the two
-    # Group 5 schemas plus the two new Group 8 schemas).
+    # Updated by Phase 136P (nine), Phase 136R (eleven), and Phase 136T:
+    # fourteen record schemas now legitimately exist (the seven Group
+    # 2+3+4 schemas plus the two Group 5 schemas plus the two Group 8
+    # schemas plus the three new Group 10 schemas).
     record_entries = [e for e in manifest.entries if e.file_path.startswith("records/")]
-    assert len(record_entries) == 11, sorted(e.file_path for e in record_entries)
+    assert len(record_entries) == 14, sorted(e.file_path for e in record_entries)
 
 
 def test_manifest_contains_exactly_three_group4_record_schemas(manifest):

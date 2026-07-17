@@ -1,5 +1,21 @@
 # Changelog
 
+- Phase 136T — Notification/Marker/Receipt Authority Binding Schema
+  Implementation
+  (`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`).
+  Independently derived the next executable-schema group from the frozen
+  contract's §46 table: Group 9 has no schema file at all, so Group 10
+  (`NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
+  `FinalizationReceiptAuthorityBinding`) is the next contract-conformant
+  deliverable. Implemented all three binding schemas (Tier 2, `_extensions`
+  only; `authority_role: "authoritative"` locally forbidden), disclosing
+  six field-table discrepancies against §31/§32/§33 resolved in favor of
+  the uniform envelope pattern already used by every prior family, plus
+  one deferred field-shape gap for `staleness_check`. Added 3 manifest
+  entries (21 total), migrated 12 earlier-phase scope-guard test files
+  plus the packaging test, and authored a fresh 109-test focused module.
+  Combined Groups 1-10 suite: 1609/1609 passed. Fast Green: 4391/4391,
+  matching 136S's own count. Zero Blocking findings.
 - Phase 136S — Recovery Schema Independent Verification
   (`docs/PHASE_136_RECOVERY_SCHEMA_INDEPENDENT_VERIFICATION.md`).
   Independently re-derived §27, §28, §46, and `CSCH-EXEC-REQ-062` directly

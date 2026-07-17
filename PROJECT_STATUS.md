@@ -2,6 +2,64 @@
 
 ## Current Phase
 
+Phase 136T — Notification/Marker/Receipt Authority Binding Schema
+Implementation (completed, implementation, contract Group 10 only:
+`NotificationAuthorityBinding`, `MarkerAuthorityBinding`,
+`FinalizationReceiptAuthorityBinding`). Independently re-derived the frozen
+contract's own §46 group table before coding: Group 9 (`ReconciliationResult`
+reconciliation function / `HistoricalAuthorityReference` typed model) has no
+schema file at all (§46's own text), so it cannot be an executable-schema
+implementation target; Group 10 is the next contract-conformant deliverable,
+prerequisite groups "1, 2, plus existing PFN-001 identities" (not "1-9").
+This disposition matches the one 136R/136S had already reached but deferred
+deriving in full. Implemented `records/notification_authority_binding.
+schema.json`, `records/marker_authority_binding.schema.json`, and
+`records/receipt_authority_binding.schema.json` (all Tier 2, `_extensions`
+only; `authority_role: "authoritative"` locally forbidden on all three per
+§9's explicit "all three binding schemas" listing), field-by-field against
+§31/§32/§33, disclosing six field-table discrepancies (`NON-BLOCKING-136T-1`
+through `-6`, each resolved in favor of the uniform envelope/authority_
+disclosure pattern used by all 11 prior families and, for the receipt
+schema's conditional fields, in favor of §16's explicit `if`/`then` over an
+internally-inconsistent field-table "yes" tag) and one deferred field-shape
+gap (`DEFERRED-136T-1`, `staleness_check`'s wholly unspecified internal
+shape). Added 3 manifest entries (21 total, all three tagged
+`implementation_group: 10`), migrated 12 earlier-phase test files' scope
+guards plus `test_schema_runtime_packaging.py` to recognize the three new
+families/schemas as legitimate, and authored a fresh 109-test focused
+module (`tests/test_cltr_cutover_136t_notification_marker_receipt_binding_
+schema.py`; 107 fast + 2 slow packaging tests). Combined Groups 1–10 +
+schema-runtime suite: 1609/1609 passed. Fast Green: 4391/4391 passed,
+exactly matching 136S's own count (the new module carries no `fast_green`
+marker). Full unmarked suite: 21665 passed, 22 failed — 20 exactly
+reproduce 136S's own disclosed baseline node-ID list; 2 new
+(`test_backend_gate.py`/`test_scope_gate.py`
+`test_no_repository_mutation`) both pass in isolation and are unrelated
+to `cltr_cutover`/`schema_runtime`, disclosed as `NON-BLOCKING-136T-7` (a
+narrower instance of the pre-existing `-136Q-1`/`-136S-2` baseline-
+instability category). Full detail in
+`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`.
+Zero Blocking findings.
+
+Legacy lifecycle remains the sole production authority; CLTR remains
+derivative; runtime remains Observed / observe / execution unavailable. No
+Group 9 (schema-less) or Group 11+ schema, `CompatibilityState`,
+`HistoricalAuthorityReference`, typed model, semantic validator, or
+authority resolver/state/pointer was created or changed. No notification
+dispatch, marker creation, receipt creation, compatibility resolution,
+historical-authority resolution, publication, CAS operation, conflict
+resolution, recovery, reconciliation, quarantine, or authority activation
+occurred.
+
+Verdict: **IMPLEMENTATION COMPLETE, ZERO BLOCKING FINDINGS — READY FOR
+NOTIFICATION/MARKER/RECEIPT AUTHORITY BINDING SCHEMA INDEPENDENT
+VERIFICATION**. Recommended next phase: **136U — Notification/Marker/
+Receipt Authority Binding Schema Independent Verification** (see
+`docs/PHASE_136_NOTIFICATION_MARKER_RECEIPT_BINDING_SCHEMA_IMPLEMENTATION.md`
+§22).
+
+## Phase 136S Complete
+
 Phase 136S — Recovery Schema Independent Verification (completed,
 independent verification, contract Group 8 only: `ConcurrencyConflict`,
 `RecoveryJournalEntry`). Independently re-derived the frozen contract's own

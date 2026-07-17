@@ -70,12 +70,12 @@ FORBIDDEN_FAMILIES = (
     # concurrency_conflict and recovery_journal_entry are no longer
     # forbidden: Phase 136R legitimately implements them as contract
     # Group 8 (Sec.46), paired atomically per CSCH-EXEC-REQ-062.
+    # notification_authority_binding, marker_authority_binding, and
+    # receipt_authority_binding are no longer forbidden: Phase 136T
+    # legitimately implements them as contract Group 10 (Sec.46).
     "reconciliation_result",
     "quarantine_record",
     "compatibility_state",
-    "notification_authority_binding",
-    "marker_authority_binding",
-    "receipt_authority_binding",
 )
 
 
@@ -240,16 +240,17 @@ class TestSection46GroupAssignment:
 class TestManifestCounts:
     def test_exactly_sixteen_manifest_entries(self, manifest):
         # Updated by Phase 136R: manifest now legitimately carries 18 entries.
-        assert len(manifest["entries"]) == 18
+        assert len(manifest["entries"]) == 21
 
     def test_exactly_seven_shared_and_nine_record_entries(self, manifest):
-        # Updated by Phase 136R: 11 record entries now legitimately exist.
+        # Updated by Phase 136R (11) and Phase 136T: 14 record entries now
+        # legitimately exist.
         by_family = {}
         for e in manifest["entries"]:
             by_family.setdefault(e["family"], []).append(e)
         assert len(by_family["shared"]) == 7
         record_entries = [e for e in manifest["entries"] if e["family"] != "shared"]
-        assert len(record_entries) == 11
+        assert len(record_entries) == 14
 
     def test_exactly_two_group5_tagged_entries(self, manifest):
         group5 = [e for e in manifest["entries"] if e.get("implementation_group") == 5]
@@ -589,7 +590,7 @@ class TestManifestIntegrity:
             excluded_relative_paths=frozenset({"manifest.schema.json"}),
         )
         # Updated by Phase 136R: manifest now legitimately carries 18 entries.
-        assert len(verified.entries) == 18
+        assert len(verified.entries) == 21
 
     def test_verified_manifest_contains_group5_entries(self, root, registry):
         verified = load_and_verify_manifest(

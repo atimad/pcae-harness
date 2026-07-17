@@ -54,8 +54,8 @@ AUTHORITY_STATE_ID = BASE_ID + "records/authority_state.schema.json"
 # reflect Group 1+2+3+4+5's combined manifest/registry footprint.
 # Updated by Phase 136R: contract Group 8 (concurrency_conflict,
 # recovery_journal_entry) now legitimately exists, raising both counts by 2.
-EXPECTED_MANIFEST_ENTRY_COUNT = 18
-EXPECTED_REGISTRY_RESOURCE_COUNT = 19
+EXPECTED_MANIFEST_ENTRY_COUNT = 21
+EXPECTED_REGISTRY_RESOURCE_COUNT = 22
 EXPECTED_GROUP1_SHARED_FILES = (
     "shared/digest.schema.json",
     "shared/enums.schema.json",
@@ -1205,6 +1205,11 @@ def test_136k_no_group4plus_schema_file_introduced_since_136l_baseline():
         + EXPECTED_GROUP4_RECORD_FILES
         + ("records/publication_attempt.schema.json", "records/publication_evidence.schema.json")
         + ("records/concurrency_conflict.schema.json", "records/recovery_journal_entry.schema.json")
+        + (
+            "records/notification_authority_binding.schema.json",
+            "records/marker_authority_binding.schema.json",
+            "records/receipt_authority_binding.schema.json",
+        )
     )
     assert all_files == expected
 
@@ -1247,7 +1252,7 @@ def test_136k_installed_wheel_validates_group2_fixtures_outside_repository(tmp_p
         "from pcae.schema_runtime import build_offline_registry, validate_record_shape, OutcomeStatus\n"
         "with cltr_cutover_root() as root:\n"
         "    reg = build_offline_registry(root)\n"
-        "assert len(reg.schema_ids) == 19, reg.schema_ids\n"
+        "assert len(reg.schema_ids) == 22, reg.schema_ids\n"
         "valid = {\n"
         "    'schema_id': 'https://pcae.local/schemas/cltr_cutover/records/authority_epoch.schema.json',\n"
         "    'schema_version': '1.0', 'contract_version': '1.0', 'record_type': 'authority_epoch',\n"
