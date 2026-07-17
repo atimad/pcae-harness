@@ -10,7 +10,7 @@ Phase 136T: Notification/Marker/Receipt Authority Binding Schema Implementation
 
 ## Status
 
-active
+done
 
 ## Mode
 
