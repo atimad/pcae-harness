@@ -2,6 +2,7 @@
 
 ## Completed
 
+- Phase 136AA: correct notification dispatch disclosure (20260717-1812-phase-136aa-correct-notification-dispatch-disclosure)
 - Phase 136AA: close task; open idle placeholder (20260717-1804-phase-136aa-close-task-open-idle-placeholder)
 - Phase 136AA: repair task-memory DONE.md entries (20260717-1804-phase-136aa-repair-task-memory-done-md-entries)
 - Phase 136AA: canonical phase-completion metadata and report (20260717-1803-phase-136aa-canonical-phase-completion-metadata-and-report)
